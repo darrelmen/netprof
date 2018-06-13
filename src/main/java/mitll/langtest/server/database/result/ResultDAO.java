@@ -476,6 +476,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return null;
   }
 
+  @Override
+  public boolean updateProjectAndEx(int rid, int newprojid, int newEXID) {
+    return false;
+  }
+
   /**
    * Get a list of Results for this Query.
    *

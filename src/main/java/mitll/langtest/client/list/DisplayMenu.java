@@ -34,12 +34,12 @@ public class DisplayMenu {
   /**
    * @see DisplayMenu#storePhoneChoices
    */
-  private static final String SHOW_PHONES = "showPhones";
+  public static final String SHOW_PHONES = "showPhones";
 
   private static final IconType CHECK = IconType.CHECK;
 
-  private static final String SHOWFL = "showStorageFL";
-  private static final String SHOWALT = "showStorageALTFL";
+  public static final String SHOWFL = "showStorageFL";
+  public static final String SHOWALT = "showStorageALTFL";
   private final boolean isMandarin;
 
   private final KeyStorage storage;

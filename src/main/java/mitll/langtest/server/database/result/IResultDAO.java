@@ -142,4 +142,6 @@ public interface IResultDAO extends IDAO {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises(int, Collection)
    */
   <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises);
+
+  boolean updateProjectAndEx(int rid, int newprojid, int newEXID);
 }

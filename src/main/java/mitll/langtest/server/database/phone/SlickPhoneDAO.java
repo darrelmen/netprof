@@ -349,4 +349,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   public void deleteForProject(int projID) {
     dao.deleteForProject(projID);
   }
+
+  public boolean updateProjectForRID(int rid, int newprojid) {
+    return dao.updateProjectForRID(rid, newprojid) > 0;
+  }
 }

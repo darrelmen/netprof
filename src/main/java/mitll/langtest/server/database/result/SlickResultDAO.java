@@ -82,6 +82,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return dao.updateProject(old, newprojid) > 0;
   }
 
+  public boolean updateProjectAndEx(int rid, int newprojid, int newEXID) {
+    return dao.updateProjectAndEx(rid, newprojid, newEXID) > 0;
+  }
 
   public int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID) {
     List<SlickResult> defResult = dao.getAllByProject(projid);

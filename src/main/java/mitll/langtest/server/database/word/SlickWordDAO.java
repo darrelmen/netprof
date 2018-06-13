@@ -67,6 +67,9 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO {
     return dao.updateProject(old, newprojid) > 0;
   }
 
+  public boolean updateProjectForRID(int rid, int newprojid) {
+    return dao.updateProjectForRID(rid, newprojid) > 0;
+  }
 
   /**
    * @param shared
@@ -113,6 +116,7 @@ public class SlickWordDAO extends BaseUserExerciseDAO implements IWordDAO {
 
   /**
    * TODO : gah - will get slower every time...?
+   *
    * @return
    */
   public Map<Integer, Integer> getOldToNew() {

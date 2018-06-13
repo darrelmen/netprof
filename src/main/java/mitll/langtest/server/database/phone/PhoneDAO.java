@@ -45,7 +45,11 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   @Override
   public void deleteForProject(int projID) {
+  }
 
+  @Override
+  public boolean updateProjectForRID(int rid, int newprojid) {
+    return false;
   }
 
   private void initialSetup(Database database) {
