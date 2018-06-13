@@ -10,11 +10,13 @@ import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.result.MonitorResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 import static mitll.langtest.server.ServerProperties.H2_HOST;
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
@@ -83,7 +85,7 @@ public class CreateProject {
     return byName;
   }
 
-   int getExisting(DatabaseImpl db, String optName) {
+  int getExisting(DatabaseImpl db, String optName) {
     String oldLanguage = getOldLanguage(db);
     String name = optName != null ? optName : oldLanguage;
     return db.getProjectDAO().getByName(name);
@@ -330,9 +332,31 @@ public class CreateProject {
     Project project = db.getProject(projectID);
     // long createdTime = project.getProject().created().getTime();
     long netprofUpdate = project.getProject().lastnetprof().getTime();
-    db.close();
+  //  db.close();
 
     return netprofUpdate;//createdTime > netprofUpdate ? createdTime : netprofUpdate;
+  }
+
+  long getSinceWhenResults(DatabaseImpl db, int projectID) {
+    List<Long> latest = new ArrayList<>();
+    db.getResultDAO().getMonitorResults(projectID).stream().max(new Comparator<MonitorResult>() {
+      @Override
+      public int compare(MonitorResult o1, MonitorResult o2) {
+        return Long.compare(o1.getTimestamp(), o2.getTimestamp());
+      }
+    }).ifPresent(new Consumer<MonitorResult>() {
+      @Override
+      public void accept(MonitorResult monitorResult) {
+        latest.add(monitorResult.getTimestamp());
+      }
+    });
+    // long createdTime = project.getProject().created().getTime();
+    long netprofUpdate = latest.isEmpty() ? 0 : latest.iterator().next();
+
+    logger.info("\n\n\n latest result is at " + new Date(netprofUpdate));
+   // db.close();
+
+    return netprofUpdate;
   }
 
   void updateNetprof(DatabaseImpl db, int projectID, long sinceWhen) {

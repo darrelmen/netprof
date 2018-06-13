@@ -112,6 +112,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     UPDATEUSER("u"),
     UPDATE("x"),
+    LATEST("l"),
     IMPORT("i"),
     MERGE("m"),
     RECORDINGS("r"),
@@ -154,7 +155,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String OPT_NETPROF = OPT_NETPROF_ROOT + File.separator + "import";
 
   private long getImportDate(String config, String optionalProperties) {
-    return getSinceWhen(config, optionalProperties);
+    return getSinceWhen(config, optionalProperties, true);
   }
 
   /**
@@ -165,6 +166,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param isEval
    * @param skipRefResult
    * @param doUpdate
+   * @param doLatest
    * @see #main
    */
   private boolean copyOneConfigCommand(String config,
@@ -173,13 +175,13 @@ public class CopyToPostgres<T extends CommonShell> {
                                        int displayOrder,
                                        boolean isEval,
                                        boolean skipRefResult,
-                                       boolean doUpdate) {
+                                       boolean doUpdate, boolean doLatest) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     long sinceWhen = 0;
 
     if (doUpdate) {
-      sinceWhen = getSinceWhen(config, optionalProperties);
+      sinceWhen = getSinceWhen(config, optionalProperties,false);
     }
 
     try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, CONFIG)) {
@@ -205,7 +207,7 @@ public class CopyToPostgres<T extends CommonShell> {
           getProjectStatus(isEval, hasModel),
           skipRefResult,
           doUpdate,
-          sinceWhen);
+          sinceWhen, doLatest);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -220,7 +222,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param optionalProperties
    * @return
    */
-  private long getSinceWhen(String config, String optionalProperties) {
+  private long getSinceWhen(String config, String optionalProperties, boolean closeDB) {
     long sinceWhen = 0;
 
     DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, "oldConfig");
@@ -251,7 +253,7 @@ public class CopyToPostgres<T extends CommonShell> {
       }
 
     }
-    databaseLight.close();
+    if (closeDB) databaseLight.close();
     logger.info("UPDATE : Since when " + new Date(sinceWhen));
     return sinceWhen;
   }
@@ -467,6 +469,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param skipRefResult
    * @param doUpdate
    * @param oldSinceWhen
+   * @param doLatest
    * @see #copyOneConfigCommand
    */
   public void copyOneConfig(DatabaseImpl db,
@@ -477,7 +480,7 @@ public class CopyToPostgres<T extends CommonShell> {
                             ProjectStatus status,
                             boolean skipRefResult,
                             boolean doUpdate,
-                            long oldSinceWhen) throws Exception {
+                            long oldSinceWhen, boolean doLatest) throws Exception {
     long then = System.currentTimeMillis();
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
@@ -488,8 +491,6 @@ public class CopyToPostgres<T extends CommonShell> {
         "\n\tdoUpdate            " + doUpdate +
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
-
-    // TODO if update - sinceWhen is from creation of existing project
     long sinceWhen = 0;
 
     CreateProject createProject = getCreateProject(db);
@@ -506,6 +507,9 @@ public class CopyToPostgres<T extends CommonShell> {
       if (projectID == -1) {
         logger.error("no project found for " + createProject.getOldLanguage(db) + " or " + optName);
       } else {
+        if (doLatest) {
+          oldSinceWhen = createProject.getSinceWhenResults(db, projectID);
+        }
         sinceWhen = Math.max(createProject.getSinceWhen(db, projectID), oldSinceWhen);
         logger.info("UPDATE : sinceWhen is " + new Date(sinceWhen));
         long maxTime = copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
@@ -1319,7 +1323,11 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.info("1 action " + action + " config " + config);
       config = cmd.getOptionValue(UPDATE.toLower());
       logger.info("2 action " + action + " config " + config);
-
+    } else if (cmd.hasOption(LATEST.toLower())) {
+      action = LATEST;
+      logger.info("1 action " + action + " config " + config);
+      config = cmd.getOptionValue(LATEST.toLower());
+      logger.info("2 action " + action + " config " + config);
     } else if (cmd.hasOption(IMPORT.toLower())) {
       action = IMPORT;
       config = cmd.getOptionValue(IMPORT.toLower());
@@ -1399,7 +1407,7 @@ public class CopyToPostgres<T extends CommonShell> {
             "\neval      " + isEval
         );
         try {
-          boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, false);
+          boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, false, false);
           //  if (!b) {
           doExit(b);  // ?
           // }
@@ -1425,14 +1433,23 @@ public class CopyToPostgres<T extends CommonShell> {
         break;
       case UPDATE:
         logger.info("import netprof 1 content into existing netprof project");
-        boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true);
+        boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false);
         // if (!b) {
         doExit(b);  // ?
+        // }
+        break;
+      case LATEST:
+        logger.info("import netprof 1 content into existing netprof project given latest target project date");
+        boolean c = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, true);
+        // if (!b) {
+        doExit(c);  // ?
         // }
         break;
       case IMPORT:
         logger.info("get import date from old config");
         long importDate = copyToPostgres.getImportDate(config, optConfigValue);
+
+
         logger.info("import date for '" + config + "'/ '" + optConfigValue + "' is " + new Date(importDate));
         doExit(true);  // ?
         break;
@@ -1535,6 +1552,12 @@ public class CopyToPostgres<T extends CommonShell> {
       Option mapFile = new Option(UPDATE.getValue(), UPDATE.toLower(), true, "update existing config");
       options.addOption(mapFile);
     }
+
+    {
+      Option mapFile = new Option(LATEST.getValue(), LATEST.toLower(), true, "update existing config since latest of target project");
+      options.addOption(mapFile);
+    }
+
     {
       Option mapFile = new Option(MERGE.getValue(), MERGE.toLower(), true, "from project id");
       options.addOption(mapFile);

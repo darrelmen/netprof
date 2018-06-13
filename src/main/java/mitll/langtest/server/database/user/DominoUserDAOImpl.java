@@ -331,7 +331,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @Override
   public void close() {
     if (!usedDominoResources) {
-      logger.info("closing connection to " + pool);
+//      logger.info("closing connection to " + pool, new Exception());
       pool.closeConnection();
     }
     if (!usedDominoResources && ignite != null) {

@@ -146,10 +146,12 @@ public class H2Connection implements DatabaseConnection {
     try {
       Connection connection = getConnection(this.getClass().toString());
       if (connection != null) {
-        Statement stat = connection.createStatement();
-        stat.execute("SHUTDOWN");
-        stat.close();
-        connection.close();
+        if (!connection.isClosed()) {
+          Statement stat = connection.createStatement();
+          stat.execute("SHUTDOWN");
+          stat.close();
+          connection.close();
+        }
       }
     } catch (Exception e) {
       logger.error("got " + e, e);
