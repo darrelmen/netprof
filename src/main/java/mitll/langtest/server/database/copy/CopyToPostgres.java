@@ -110,7 +110,7 @@ public class CopyToPostgres<T extends CommonShell> {
     DROPALLBUT("b"),
 
     UPDATEUSER("u"),
-    UPDATE("p"),
+    UPDATE("x"),
     IMPORT("i"),
     UNKNOWN("k");
 
@@ -1263,7 +1263,10 @@ public class CopyToPostgres<T extends CommonShell> {
       updateUsersFile = cmd.getOptionValue(UPDATEUSER.toLower());
     } else if (cmd.hasOption(UPDATE.toLower())) {
       action = UPDATE;
+      logger.info("1 action " + action + " config " + config);
       config = cmd.getOptionValue(UPDATE.toLower());
+      logger.info("2 action " + action + " config " + config);
+
     } else if (cmd.hasOption(IMPORT.toLower())) {
       action = IMPORT;
       config = cmd.getOptionValue(IMPORT.toLower());
