@@ -42,65 +42,64 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.result.MonitorResult;
-import mitll.langtest.shared.scoring.ImageOptions;
 
-import java.text.CollationKey;
 import java.text.Collator;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 public interface IResultDAO extends IDAO {
   /**
-   * @see mitll.langtest.server.database.Report#getEarliest
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.Report#getEarliest
    */
   long getFirstTime(int projid);
 
   /**
    * Just for export
+   *
    * @return
    */
   List<Result> getResults();
 
   /**
-   * @see mitll.langtest.server.database.Report#getReportForProject(ReportStats, StringBuilder, boolean)
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.Report#getReportForProject(ReportStats, StringBuilder, boolean)
    */
   Collection<MonitorResult> getResultsDevices(int projid);
 
   /**
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
    * @param id
    * @return
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
    */
   Result getResultByID(int id);
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResults
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResults
    */
   List<MonitorResult> getMonitorResults(int projid);
 
   List<MonitorResult> getMonitorResultsKnownExercises(int projid);
 
   List<MonitorResult> getMonitorResultsByExerciseID(int id);
+
   MonitorResult getMonitorResultByID(int id);
 
   Collection<UserAndTime> getUserAndTimes();
 
   UserToCount getUserToNumAnswers();
 
-  SessionsAndScores getSessionsForUserIn2(Collection<Integer> ids,
+ /* SessionsAndScores getSessionsForUserIn2(Collection<Integer> ids,
                                           int latestResultID,
                                           int userid,
                                           Collection<Integer> allIds,
                                           Map<Integer, CollationKey> idToKey,
-                                          String language);
+                                          String language);*/
 
   <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises,
                                                                    int userid,
@@ -113,16 +112,15 @@ public interface IResultDAO extends IDAO {
                                                                           ExerciseSorter sorter,
                                                                           String language);
 
-  void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest, String language);
+  void attachScoreHistory(int userID, CommonExercise firstExercise, String language);
 
   Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, String language);
 
   List<CorrectAndScore> getResultsForExIDInForUser(int userID,
                                                    int id,
-                                                   boolean isFlashcardRequest,
                                                    String language);
 
-  List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session, String language);
+  List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, String language);
 
   int getNumResults(int projid);
 
@@ -130,12 +128,11 @@ public interface IResultDAO extends IDAO {
 
   int getDefaultResult();
 
-  Map<String,Integer> getStudentAnswers(int projid);
+  Map<String, Integer> getStudentAnswers(int projid);
 
   Collection<Integer> getPracticedByUser(int userid, int projid);
 
   /**
-   *
    * @param userid
    * @param exercises
    * @param <T>
@@ -145,6 +142,4 @@ public interface IResultDAO extends IDAO {
   <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises);
 
   boolean updateProjectAndEx(int rid, int newprojid, int newEXID);
-
- // boolean updateProjectOnDay(int oldid, int newid, Date day);
 }

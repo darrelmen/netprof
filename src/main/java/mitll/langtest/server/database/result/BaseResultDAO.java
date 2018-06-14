@@ -34,7 +34,6 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -82,7 +81,7 @@ public abstract class BaseResultDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete()
    */
-  public SessionsAndScores getSessionsForUserIn2(Collection<Integer> ids,
+/*  public SessionsAndScores getSessionsForUserIn2(Collection<Integer> ids,
                                                  int latestResultID,
                                                  int userid,
                                                  Collection<Integer> allIds,
@@ -105,7 +104,7 @@ public abstract class BaseResultDAO extends DAO {
     if (DEBUG) logger.debug("getSessionsForUserIn2 found " + sessions.size() + " sessions for " + ids);
 
     return new SessionsAndScores(sessions, sortedResults);
-  }
+  }*/
 
   /**
    * @param results
@@ -230,7 +229,7 @@ public abstract class BaseResultDAO extends DAO {
                                                                     List<Integer> allIds,
                                                                     Map<Integer, CollationKey> idToKey,
                                                                     String language) {
-    List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid, language);
+    List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, userid, language);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistory(results, allIds, idToKey);
   }
@@ -249,13 +248,10 @@ public abstract class BaseResultDAO extends DAO {
                                                                     final ExerciseSorter sorter
   ) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
-    Collections.sort(sortedResults, new Comparator<ExerciseCorrectAndScore>() {
-      @Override
-      public int compare(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2) {
-        CommonExercise o1Ex = idToEx.get(o1.getId());
-        CommonExercise o2Ex = idToEx.get(o2.getId());
-        return compareUsingPhones(o1, o2, o1Ex, o2Ex, sorter);
-      }
+    Collections.sort(sortedResults, (o1, o2) -> {
+      CommonExercise o1Ex = idToEx.get(o1.getId());
+      CommonExercise o2Ex = idToEx.get(o2.getId());
+      return compareUsingPhones(o1, o2, o1Ex, o2Ex, sorter);
     });
     return sortedResults;
   }
@@ -309,7 +305,7 @@ public abstract class BaseResultDAO extends DAO {
                                                                                  Map<Integer, CommonExercise> idToEx,
                                                                                  ExerciseSorter sorter,
                                                                                  String language) {
-    List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, true, userid, language);
+    List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, userid, language);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistoryByPhones(results, allIds, idToEx, sorter);
   }
@@ -406,12 +402,11 @@ public abstract class BaseResultDAO extends DAO {
   /**
    * @param userID
    * @param firstExercise
-   * @param isFlashcardRequest
    * @param language
    * @see mitll.langtest.server.services.ExerciseServiceImpl#addAnnotationsAndAudio
    */
-  public void attachScoreHistory(int userID, CommonExercise firstExercise, boolean isFlashcardRequest, String language) {
-    List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, isFlashcardRequest, language);
+  public void attachScoreHistory(int userID, CommonExercise firstExercise, String language) {
+    List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, language);
 
     if (resultsForExercise == null)
       logger.warn("huh? no score history for " + firstExercise.getID() + " for " + userID);
@@ -421,40 +416,40 @@ public abstract class BaseResultDAO extends DAO {
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getScoreHistories
    * @param userid
    * @param exercises
    * @param language
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getScoreHistories
    */
-  public abstract  Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, String language);
+  public abstract Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, String language);
 
   /**
    * @param userID
    * @param firstExercise
-   * @param isFlashcardRequest
    * @param language
    * @return
    * @see #attachScoreHistory
    */
   private List<CorrectAndScore> getCorrectAndScores(int userID,
                                                     HasID firstExercise,
-                                                    boolean isFlashcardRequest,
                                                     String language) {
-    return getResultsForExIDInForUser(userID, firstExercise.getID(), isFlashcardRequest, language);
+    return getResultsForExIDInForUser(userID, firstExercise.getID(), language);
   }
 
+/*
   abstract List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language);
+*/
 
   public List<CorrectAndScore> getResultsForExIDInForUser(int userID,
                                                            int id,
-                                                           boolean isFlashcardRequest,
                                                            String language) {
-    return getResultsForExIDInForUser(Collections.singleton(id), isFlashcardRequest, userID, language);
+    return getResultsForExIDInForUser(Collections.singleton(id), userID, language);
   }
 
-  abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid, String language);
+  abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String language);
 
+/*
   private Map<Integer, List<CorrectAndScore>> populateUserToAnswers(List<CorrectAndScore> results) {
     Map<Integer, List<CorrectAndScore>> userToAnswers = new HashMap<>();
     for (CorrectAndScore r : results) {
@@ -465,6 +460,7 @@ public abstract class BaseResultDAO extends DAO {
     }
     return userToAnswers;
   }
+*/
 
 /*
   private List<Session> partitionIntoSessions(Map<Integer, List<Session>> userToSessions,
@@ -498,7 +494,7 @@ public abstract class BaseResultDAO extends DAO {
    * @return
    * @see #getSessionsForUserIn2
    */
-  private List<Session> partitionIntoSessions2(List<CorrectAndScore> answersForUser, Collection<Integer> ids, long latestResultID) {
+/*  private List<Session> partitionIntoSessions2(List<CorrectAndScore> answersForUser, Collection<Integer> ids, long latestResultID) {
     Session s = null;
     long lastTimestamp = 0;
 
@@ -541,7 +537,7 @@ public abstract class BaseResultDAO extends DAO {
 //    logger.debug("\tpartitionIntoSessions2 made " +sessions.size() + " from " + answersForUser.size() + " answers");
 
     return sessions;
-  }
+  }*/
 
   /**
    * Determine sessions per user.  If two consecutive items are more than {@link #SESSION_GAP} seconds

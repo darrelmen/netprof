@@ -772,7 +772,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     then = now;
 
-    db.getResultDAO().attachScoreHistory(userID, firstExercise, isFlashcardReq, getLanguage(firstExercise));
+    db.getResultDAO().attachScoreHistory(userID, firstExercise, getLanguage(firstExercise));
 
     now = System.currentTimeMillis();
     if (now - then > SLOW_MILLIS) {
@@ -1485,7 +1485,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                          int exid) {
 
     return db.getResultDAO()
-        .getResultsForExIDInForUser(userID, exid, false, getLanguage(projectIDFromUser));
+        .getResultsForExIDInForUser(userID, exid, getLanguage(projectIDFromUser));
   }
 
   /**

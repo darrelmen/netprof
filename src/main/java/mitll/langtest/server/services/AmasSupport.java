@@ -156,7 +156,7 @@ class AmasSupport {
     String session = getLatestSession(typeToSection, userID);
     //  logger.info("exercises " +allIDs.size() + " for session " + session);
 
-    Collection<CorrectAndScore> resultsForExIDInForUser = resultDAO.getResultsForExIDInForUser(allIDs, userID, session, "");
+    Collection<CorrectAndScore> resultsForExIDInForUser = resultDAO.getResultsForExIDInForUserEasy(allIDs, userID, "");
     //  for (CorrectAndScore cs:resultsForExIDInForUser) logger.info("found " +cs );
     Collection<CorrectAndScore> copy = getFirstCorrectAndScore(resultsForExIDInForUser);
 

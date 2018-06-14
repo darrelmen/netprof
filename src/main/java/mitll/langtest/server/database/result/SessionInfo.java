@@ -37,7 +37,7 @@ import mitll.langtest.shared.monitoring.Session;
 import java.util.List;
 import java.util.Map;
 
-public class SessionInfo {
+class SessionInfo {
   private final List<Session> sessions;
   private final Map<Integer, Float> userToRate;
 
@@ -55,7 +55,7 @@ public class SessionInfo {
     return sessions;
   }
 
-  public Map<Integer, Float> getUserToRate() {
+  private Map<Integer, Float> getUserToRate() {
     return userToRate;
   }
 

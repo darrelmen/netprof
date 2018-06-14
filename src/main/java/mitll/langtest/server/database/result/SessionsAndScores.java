@@ -37,7 +37,7 @@ import mitll.langtest.shared.monitoring.Session;
 
 import java.util.List;
 
-public class SessionsAndScores {
+class SessionsAndScores {
   private final List<Session> sessions;
   private final List<ExerciseCorrectAndScore> sortedResults;
 

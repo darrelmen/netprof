@@ -60,7 +60,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   public static final String SCORE_JSON = "scoreJson";
   public static final String WITH_FLASH = "withFlash";
   private static final String VALID = "valid";
-  public static final String LEARN = "learn";
+  private static final String LEARN = "learn";
 
   @Override
   public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
@@ -274,7 +274,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param ids
    * @param language
    * @return
-   * @see #getSessionsForUserIn2
+   * @seex #getSessionsForUserIn2
    */
 
   public List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language) {
@@ -311,11 +311,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String session, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, String language) {
     try {
       String list = getInList(ids);
 
-      String sessionClause = session != null && !session.isEmpty() ? SESSION + "='" + session + "' AND " : "";
+      String sessionClause ="";// session != null && !session.isEmpty() ? SESSION + "='" + session + "' AND " : "";
       String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
           USERID + "=? AND " +
           sessionClause +
@@ -350,22 +350,22 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * Long story here on h2 support (or lack of) for efficient in query...
    *
    * @param ids
-   * @param matchAVP
    * @param userid
    * @param language
    * @return
-   * @see #getSessionsForUserIn2
+   * @seex #getSessionsForUserIn2
    * @see #attachScoreHistory
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String language) {
     try {
       String list = getInList(ids);
 
       String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
           USERID + "=? AND " +
-          VALID + "=true" + " AND " +
-          getAVPClause(matchAVP) +
+          VALID + "=true" +
+          //" AND " +
+          //getAVPClause(matchAVP) +
           " AND " +
           EXID + " in (" + list + ")";
 
@@ -677,7 +677,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param statement
    * @return
    * @throws SQLException
-   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, boolean, int, String)
+   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, int, String)
    */
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();

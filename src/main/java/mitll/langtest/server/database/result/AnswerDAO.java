@@ -52,7 +52,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
   private static final Logger logger = LogManager.getLogger(AnswerDAO.class);
   private static final String PLAN = "plan";
 
-  public AnswerDAO(Database database) { super(database);  }
+  private AnswerDAO(Database database) { super(database);  }
 
   @Override
   public void deleteForProject(int projID) {

@@ -6,8 +6,8 @@ import mitll.npdata.dao.SlickRefResult;
  * Created by go22670 on 4/13/17.
  */
 public class SlimResult implements ISlimResult {
-  protected final boolean valid;
-  protected final float pronScore;
+  private final boolean valid;
+  private final float pronScore;
   private transient String jsonScore;
   private final int exID;
   private final int audioID;

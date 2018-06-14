@@ -40,7 +40,7 @@ import java.text.CollationKey;
 import java.util.Collection;
 import java.util.Map;
 
-public class UserSessionHistory {
+class UserSessionHistory {
   private static final Logger logger = LogManager.getLogger(UserSessionHistory.class);
 
   /**
@@ -51,6 +51,7 @@ public class UserSessionHistory {
    * @see mitll.langtest.server.LangTestDatabaseImpl#getUserHistoryForList
    * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
    */
+/*
   public AVPScoreReport getUserHistoryForList(int userid,
                                               Collection<Integer> ids,
                                               int latestResultID,
@@ -61,7 +62,8 @@ public class UserSessionHistory {
 //    logger.debug("getUserHistoryForList " + userid + " and " + ids.size() + " ids, latest " + latestResultID);
 
     SessionsAndScores sessionsAndScores = resultDAO.getSessionsForUserIn2(ids, latestResultID, userid, allIDs, idToKey, language);
-    /*List<Session> sessionsForUserIn2 = sessionsAndScores.getSessions();
+    */
+/*List<Session> sessionsForUserIn2 = sessionsAndScores.getSessions();
 
     //Map<Integer, User> userMap = userDAO.getUserMap();
   // User byID = userDAO.getByID(userid);
@@ -116,17 +118,21 @@ public class UserSessionHistory {
       scores.remove(9);
     }
 
-    sessionAVPHistoryForList2.setScores(scores);*/
+    sessionAVPHistoryForList2.setScores(scores);*//*
 
+
+*/
 /*    List<AVPHistoryForList> historyForLists = new ArrayList<>();
     historyForLists.add(sessionAVPHistoryForList);
-    historyForLists.add(sessionAVPHistoryForList2);*/
+    historyForLists.add(sessionAVPHistoryForList2);*//*
+
 
 //    logger.debug("returning " + historyForLists);
 //    logger.debug("correct/incorrect history " + sessionsAndScores.sortedResults);
     return new AVPScoreReport(//historyForLists,
         sessionsAndScores.getSortedResults());
   }
+*/
 
 /*  private int compareTimestamps(Session o1, Session o2) {
     return o1.getTimestamp() < o2.getTimestamp() ? +1 : o1.getTimestamp() > o2.getTimestamp() ? -1 : 0;

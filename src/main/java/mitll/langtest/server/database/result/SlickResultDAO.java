@@ -64,7 +64,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   private final ResultDAOWrapper dao;
   private SlickResult defaultResult;
-  private ServerProperties serverProps;
+  private final ServerProperties serverProps;
 
   /**
    * @param database
@@ -320,21 +320,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 */
   }
 
-  /**
-   * @param ids
-   * @param matchAVP
-   * @param userid
-   * @param language
-   * @return
-   */
-  @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, boolean matchAVP, int userid, String language) {
-    if (matchAVP) {
-      return getCorrectAndScores(dao.correctAndScoreMatchAVPUser(ids, matchAVP, userid), language);
-    } else {
-      return getResultsForExIDInForUser(ids, userid, "", language);
-    }
-  }
 
   /**
    * @param ids
@@ -351,7 +336,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return collect;
   }*/
 
-
   /**
    * Highest scoring attempt a student has ever recorded.
    *
@@ -363,7 +347,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> ids, String language) {
     Map<Integer, CorrectAndScore> exidToMaxScoreEver = new HashMap<>(ids.size());
 
-    getResultsForExIDInForUser(ids, userid, "", language)
+    getResultsForExIDInForUserEasy(ids, userid, language)
         .stream()
         .collect(Collectors.groupingBy(CorrectAndScore::getExid))
         .forEach((k, v) -> exidToMaxScoreEver.put(k,
@@ -383,19 +367,35 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * @param ids
    * @param userid
-   * @param ignoredSession
    * @param language
    * @return
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String ignoredSession, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String language) {
+    return getResultsForExIDInForUserEasy(ids, userid, language);
+  }
+
+  /**
+   * @paramx ignoredSession
+   * @param ids
+   * @param userid
+   * @param language
+   * @return
+   */
+  @Override
+  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, String language) {
     return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids), language);
   }
 
+
+/*
+
   @Override
   List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language) {
-    return getCorrectAndScores(dao.correctAndScoreMatchAVP(ids, true), language);
+    return getCorrectAndScores(dao.correctAndScoreWhere(ids, true), language);
   }
+
+*/
 
   @Override
   public int getNumResults(int projid) {

@@ -107,7 +107,7 @@ public class QuizCorrect {
     String session = "";//getLatestSession(typeToSection, userID);
     //  logger.info("exercises " +allIDs.size() + " for session " + session);
 
-    Collection<CorrectAndScore> resultsForExIDInForUser = db.getResultDAO().getResultsForExIDInForUser(allIDs, userID, session, language);
+    Collection<CorrectAndScore> resultsForExIDInForUser = db.getResultDAO().getResultsForExIDInForUserEasy(allIDs, userID, language);
     //  for (CorrectAndScore cs:resultsForExIDInForUser) logger.info("found " +cs );
     Collection<CorrectAndScore> copy = getFirstCorrectAndScore(resultsForExIDInForUser);
 

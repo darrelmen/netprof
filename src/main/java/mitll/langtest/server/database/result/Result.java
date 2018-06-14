@@ -43,7 +43,7 @@ import java.util.Date;
  * Only server side.
  */
 public class Result extends SlimResult implements UserAndTime {
-  protected final int uniqueID;
+  private final int uniqueID;
   private int userid;
 
   private int exid;
@@ -52,7 +52,7 @@ public class Result extends SlimResult implements UserAndTime {
   private final String answer;
   private final long timestamp;
 
-  private AudioType audioType;
+  private final AudioType audioType;
   private final long durationInMillis;
   private final boolean correct;
 

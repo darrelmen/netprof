@@ -1596,7 +1596,7 @@ public class AudioFileHelper implements AlignDecode {
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
-      if (now - then > 0) {
+      if (now - then > 4000) {
         logger.info("makeDict for " + getLanguage() + " read" +
             "\n\tdict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
       }
