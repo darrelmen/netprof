@@ -18,28 +18,6 @@ public class DecoderOptions implements IsSerializable {
   public DecoderOptions() {
   }
 
-  /**
-   * @paramx isRefRecording
-   * @paramx recordInResults
-   * @paramx doDecode
-   * @paramx canUseCache
-   * @paramx allowAlternates
-   * @paramx usePhoneToDisplay
-   */
-/*  public DecoderOptions(boolean isRefRecording,
-                        boolean recordInResults,
-                        boolean doDecode,
-                        boolean canUseCache,
-                        boolean allowAlternates,
-                        boolean usePhoneToDisplay) {
-    this.isRefRecording = isRefRecording;
-    this.recordInResults = recordInResults;
-    this.doDecode = doDecode;
-    this.canUseCache = canUseCache;
-    this.allowAlternates = allowAlternates;
-    this.usePhoneToDisplay = usePhoneToDisplay;
-  }*/
-
   public boolean isRefRecording() {
     return isRefRecording;
   }

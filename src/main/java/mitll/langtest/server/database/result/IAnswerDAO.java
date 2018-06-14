@@ -32,8 +32,14 @@
 
 package mitll.langtest.server.database.result;
 
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AnswerInfo;
+import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.DecoderOptions;
+
+import java.io.File;
 
 public interface IAnswerDAO {
   int addTextAnswer(AudioContext audioContext,
@@ -44,6 +50,12 @@ public interface IAnswerDAO {
                     float classifierScore,
                     String session, long timeSpent);
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#rememberAnswer
+   * @param answerInfo
+   * @param timestamp
+   * @return
+   */
   int addAnswer(AnswerInfo answerInfo, long timestamp);
 
   void addRoundTrip(int resultID, int roundTrip);

@@ -197,9 +197,9 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * @param pretestScore
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getAlignment
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
-   * @see mitll.langtest.server.ScoreServlet#getAudioAnswer
+   * @see mitll.langtest.server.scoring.JsonScoring#getAudioAnswer
    */
   public void setPretestScore(PretestScore pretestScore) {
     this.pretestScore = pretestScore;

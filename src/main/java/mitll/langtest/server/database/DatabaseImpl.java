@@ -1928,7 +1928,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param answerID
    * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
    */
-
   @Override
   public void recordWordAndPhoneInfo(int projID, AudioAnswer answer, int answerID) {
     long then = System.currentTimeMillis();

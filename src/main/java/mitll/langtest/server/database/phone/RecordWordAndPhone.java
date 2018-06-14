@@ -53,7 +53,7 @@ import java.util.Map;
 
 public class RecordWordAndPhone {
   private static final Logger logger = LogManager.getLogger(RecordWordAndPhone.class);
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
 
   private static final String SIL = "sil";
@@ -71,21 +71,20 @@ public class RecordWordAndPhone {
   }
 
   /**
-   *
    * @param projID
    * @param answer
    * @param answerID
    * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
-   * @see DatabaseServices#recordWordAndPhoneInfo(int, AudioAnswer, long)
+   * @see DatabaseImpl#recordWordAndPhoneInfo
    */
   public void recordWordAndPhoneInfo(int projID, AudioAnswer answer, int answerID) {
     PretestScore pretestScore = answer.getPretestScore();
 
     if (DEBUG) {
       if (pretestScore == null) {
-        logger.debug(" : recordWordAndPhoneInfo pretest score is null for " + answer + " and result id " + answerID);
+        logger.warn(" : recordWordAndPhoneInfo pretest score is null for " + answer + " and result id " + answerID);
       } else {
-        logger.debug(" : recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and result id " + answerID);
+        logger.info(" : recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and result id " + answerID);
       }
     }
 
@@ -93,21 +92,22 @@ public class RecordWordAndPhone {
   }
 
   /**
-   *
    * @param projID
    * @param answerID
    * @param pretestScore
-   * @see DatabaseServices#rememberScore
+   * @see DatabaseImpl#rememberScore
    */
   public void recordWordAndPhoneInfo(int projID,
                                      int answerID,
                                      PretestScore pretestScore) {
     if (pretestScore != null) {
-      recordWordAndPhoneInfo(projID, answerID, pretestScore.getTypeToSegments());
+      Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = pretestScore.getTypeToSegments();
+      recordWordAndPhoneInfo(projID, answerID, typeToSegments);
     }
   }
 
   /**
+   * TODO : bulk add of words...
    *
    * @param projID
    * @param answerID
@@ -118,12 +118,14 @@ public class RecordWordAndPhone {
                                       int answerID,
                                       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
-    List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (words != null) {
       int windex = 0;
       int pindex = 0;
 
       List<Phone> toAdd = new ArrayList<>();
+     // logger.info("recordWordAndPhoneInfo : " + words.size() + " words for answer " + answerID + " in project " + projID);
+
+      List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
 
       for (TranscriptSegment segment : words) {
         String event = segment.getEvent();
@@ -138,8 +140,8 @@ public class RecordWordAndPhone {
                 if (duration == 0) {
                   logger.warn("zero duration for " + answerID + " wid " + wid + " event " + pevent);
                 }
-                Phone phone = new Phone(projID, answerID, wid, pevent, pindex++, pseg.getScore(), duration);
-                toAdd.add(phone);
+                //Phone phone = new Phone(projID, answerID, wid, pevent, pindex++, pseg.getScore(), duration);
+                toAdd.add(new Phone(projID, answerID, wid, pevent, pindex++, pseg.getScore(), duration));
               }
             }
           }
@@ -148,6 +150,9 @@ public class RecordWordAndPhone {
 
 //      logger.info("recordWordAndPhoneInfo for " + answerID+ " adding " + windex + " words and " + toAdd.size() + " phones");
       phoneDAO.addBulkPhones(toAdd, projID);
+    } else {
+      logger.warn("recordWordAndPhoneInfo : (?) no word info for answer " + answerID +
+          " in project " + projID + " with map " + netPronImageTypeListMap);
     }
   }
 

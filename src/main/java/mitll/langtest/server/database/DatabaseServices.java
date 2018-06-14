@@ -107,6 +107,12 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   void rememberScore(int projID, int resultID, PretestScore asrScoreForAudio, boolean isCorrect);
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#rememberAnswer
+   * @param projID
+   * @param answer
+   * @param answerID
+   */
   void recordWordAndPhoneInfo(int projID, AudioAnswer answer, int answerID);
 
   ServerProperties getServerProps();

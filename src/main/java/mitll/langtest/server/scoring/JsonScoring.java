@@ -100,12 +100,17 @@ public class JsonScoring {
     PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
     float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
 
-    logger.debug("getJsonForAudioForUser" +
-        "\n\tflashcard   " + doFlashcard +
-        "\n\texercise id " + exerciseID +
-        "\n\ttook        " + (now - then) + " millis " +
-        "\n\tfor         " + saveFile.getName() +
-        "\n\tscore       " + hydecScore);
+    if (logger.isInfoEnabled()) {
+      logger.info("getJsonForAudioForUser" +
+          "\n\tflashcard   " + doFlashcard +
+          "\n\texercise id " + exerciseID +
+          "\n\ttook        " + (now - then) + " millis " +
+          "\n\tfor         " + saveFile.getName() +
+          "\n\tscore       " + hydecScore
+          //+
+          //"\n\tpretestScore " + pretestScore
+      );
+    }
 
     if (answer != null && answer.isValid() && pretestScore != null) {
       boolean usePhoneToDisplay = options.isUsePhoneToDisplay();
@@ -122,9 +127,8 @@ public class JsonScoring {
         jsonForScore.put(IS_CORRECT, answer.isCorrect());
         jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
         jsonForScore.put(RESULT_ID, answer.getResultID());
-      }
-      else {
-        jsonForScore.put(IS_CORRECT, hydecScore> MIN_HYDRA_ALIGN);
+      } else {
+        jsonForScore.put(IS_CORRECT, hydecScore > MIN_HYDRA_ALIGN);
       }
     }
     addValidity(exerciseID, jsonForScore, answer);
@@ -167,10 +171,12 @@ public class JsonScoring {
     if (options.shouldDoDecoding()) {
       options.setDoDecode(true);
       answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, -1, deviceType, device,
-          options
-      );
+          options,
+          null);
     } else {
-      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid, exerciseID, wavPath,
+      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
+          exerciseID,
+          wavPath,
           exercise.getForeignLanguage(),
           exercise.getTransliteration(),
           options.isUsePhoneToDisplay(),
@@ -178,11 +184,11 @@ public class JsonScoring {
 
       options.setDoDecode(false);
 
-      answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, asrScoreForAudio.getHydecScore(),
+      answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile,
+          asrScoreForAudio.getHydecScore(),
           deviceType, device,
-          options
-      );
-      answer.setPretestScore(asrScoreForAudio);
+          options,
+          asrScoreForAudio);
     }
     return answer;
   }
@@ -206,14 +212,13 @@ public class JsonScoring {
                                            String transliteration,
                                            boolean usePhoneToDisplay,
                                            int projid) {
-    AudioFileHelper audioFileHelper = getAudioFileHelper(projid);
-
-    return audioFileHelper.getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, "" + exerciseID,
-        null,
-        new DecoderOptions()
-            .setDoDecode(false)
-            .setCanUseCache(db.getServerProps().useScoreCache())
-            .setUsePhoneToDisplay(usePhoneToDisplay));
+    return getAudioFileHelper(projid)
+        .getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, "" + exerciseID,
+            null,
+            new DecoderOptions()
+                .setDoDecode(false)
+                .setCanUseCache(db.getServerProps().useScoreCache())
+                .setUsePhoneToDisplay(usePhoneToDisplay));
   }
 
   private AudioFileHelper getAudioFileHelper(int projectid) {
@@ -230,6 +235,7 @@ public class JsonScoring {
    * @param file
    * @param deviceType
    * @param device
+   * @param pretestScore
    * @return
    * @see #getJsonForAudioForUser
    */
@@ -241,19 +247,20 @@ public class JsonScoring {
                                 float score,
                                 String deviceType,
                                 String device,
-                                DecoderOptions options) {
+                                DecoderOptions options,
+                                PretestScore pretestScore) {
     CommonExercise exercise = db.getCustomOrPredefExercise(getMostRecentProjectByUser(user), exerciseID);  // allow custom items to mask out non-custom items
 
     int projectID = exercise.getProjectID();
     AudioContext audioContext =
         new AudioContext(reqid, user, projectID, getLanguage(projectID), exerciseID,
             0, options.shouldDoDecoding() ? AudioType.PRACTICE : AudioType.LEARN);
-
-    AudioFileHelper audioFileHelper = getAudioFileHelper(projectID);
-    AudioAnswer answer = audioFileHelper.getAnswer(exercise,
-        audioContext,
-        wavPath, file, deviceType, device, score,
-        options);
+ //   logger.info("getAnswer  for " + exerciseID + " for " + user + " and file " + wavPath);
+    AudioAnswer answer = getAudioFileHelper(projectID)
+        .getAnswer(exercise,
+            audioContext,
+            wavPath, file, deviceType, device, score,
+            options, pretestScore);
 
     final String path = answer.getPath();
     final String foreignLanguage = exercise.getForeignLanguage();
