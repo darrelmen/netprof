@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.phone;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.Project;
@@ -40,37 +39,35 @@ import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.util.*;
 
 public class BasePhoneDAO extends DAO {
-  //private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
+  private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
 
   static final String PHONE = "phone";
   static final String SEQ = "seq";
   static final String SCORE = "score";
   static final String DURATION = "duration";
-  //private static final boolean DEBUG = false;
   static final String RID1 = "RID";
-  //  private final ParseResultJson parseResultJson;
+
   private Map<String, Long> sessionToLong = new HashMap<>();
 
-  BasePhoneDAO(Database database) {
-    super(database);
-    //  parseResultJson = new ParseResultJson(database.getServerProps(), language);
-  }
+  BasePhoneDAO(Database database) {    super(database);  }
 
   /**
    * @param jsonToTranscript
    * @param scoreJson
    * @param wordAndScore
    * @param language
-   * @see SlickPhoneDAO#getPhoneReport(Collection, boolean, boolean, String, int, Project)
+   * @see SlickPhoneDAO#getPhoneReport
    */
   void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript,
                      String scoreJson,
-                     WordAndScore wordAndScore, String language) {
+                     WordAndScore wordAndScore,
+                     String language) {
     ParseResultJson parseResultJson = new ParseResultJson(database.getServerProps(), language);
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
         jsonToTranscript.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
@@ -116,13 +113,22 @@ public class BasePhoneDAO extends DAO {
 
     List<WordAndScore> wordAndScores = phoneToWordAndScore.computeIfAbsent(phone, k -> new ArrayList<>());
 
+    String webPageAudioRef = database.getWebPageAudioRef(language, audioAnswer);
+
+/*
+    logger.info("getAndRememberWordAndScore : " +
+        "\n\tfrom " + audioAnswer +
+        "\n\tto   " + webPageAudioRef +
+        "\n\tfor  " + language);
+*/
+
     WordAndScore wordAndScore = new WordAndScore(exid,
         word,
         phoneScore,
         rid,
         wseq,
         seq,
-        database.getWebPageAudioRef(audioAnswer, language),
+        webPageAudioRef,
         refAudioForExercise,
         scoreJson,
         resultTime);
@@ -139,7 +145,7 @@ public class BasePhoneDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSessionTime
    */
-  Long getSessionTime(Map<String, Long> sessionToLong, String device) {
+  private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
     Long parsedTime = sessionToLong.get(device);
 
     if (parsedTime == null) {
@@ -154,13 +160,6 @@ public class BasePhoneDAO extends DAO {
     }
     return parsedTime;
   }
-
-/*  private String getFilePath(String audioAnswer, String language) {
-    boolean isLegacy = audioAnswer.startsWith("answers");
-    return isLegacy ?
-        getRelPrefix(language) + audioAnswer :
-        trimPathForWebPage(audioAnswer);
-  }*/
 
   /**
    * @param phoneToScores
@@ -190,35 +189,4 @@ public class BasePhoneDAO extends DAO {
     wordAndScore.setFullTranscript(netPronImageTypeListMap);
     wordAndScore.clearJSON();
   }
-
-/*
-  private String trimPathForWebPage(String path) {
-    int answer = path.indexOf(PathHelper.ANSWERS);
-    return (answer == -1) ? path : path.substring(answer);
-  }
-*/
-
-
-  /**
-   * Fix the path -  on hydra it's at:
-   * <p>
-   * /opt/netprof/answers/english/answers/plan/1039/1/subject-130
-   * <p>
-   * rel path:
-   * <p>
-   * answers/english/answers/plan/1039/1/subject-130
-   *
-   * @param language
-   * @return
-   * @see mitll.langtest.server.database.result.SlickResultDAO#getRelPrefix
-   */
-/*  private String getRelPrefix(String language) {
-    String installPath = database.getServerProps().getAnswerDir();
-
-    String s = language.toLowerCase();
-    String prefix = installPath + File.separator + s;
-    int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
-
-    return prefix.substring(netProfDurLength) + File.separator;
-  }*/
 }

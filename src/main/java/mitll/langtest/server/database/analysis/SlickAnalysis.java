@@ -532,20 +532,10 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         }
       }
 
-//      boolean isLegacy = path.startsWith(ANSWERS);
-//      String filePath = isLegacy ?
-//          database.getRelPrefix(language) + path :
-//          trimPathForWebPage(path);
-
-      String filePath = database.getWebPageAudioRef(language, path);
-
-      //   logger.info("isLegacy " + isLegacy + " " + path + " : " + filePath);
-
       BestScore e = new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard,
-          filePath,
+          database.getWebPageAudioRef(language, path),
           nativeAudio,
           sessionTime, sessionSize);
-
 //      if (e.getSessionStart()> 0) {
 //        logger.info("id " + id + " = " + e.getSessionStart());
 //      }
@@ -635,27 +625,4 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     audioDAO.attachAudioToExercises(exercises, language);
   }
-
-  /**
-   * Fix the path -  on hydra it's at:
-   * <p>
-   * /opt/netprof/answers/english/answers/plan/1039/1/subject-130
-   * <p>
-   * rel path:
-   * <p>
-   * answers/english/answers/plan/1039/1/subject-130
-   *
-   * @param language
-   * @return
-   * @see
-   */
-/*  private String getRelPrefix(String language) {
-    String installPath = database.getServerProps().getAnswerDir();
-
-    String s = language.toLowerCase();
-    String prefix = installPath + File.separator + s;
-    int netProfDurLength = database.getServerProps().getAudioBaseDir().length();
-
-    return prefix.substring(netProfDurLength) + File.separator;
-  }*/
 }

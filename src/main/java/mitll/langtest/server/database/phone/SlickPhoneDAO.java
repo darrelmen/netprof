@@ -230,7 +230,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
     Map<String, List<WordAndScore>> phoneToWordAndScore = new HashMap<>();
     boolean useSessionGran = project.getKind() == ProjectType.POLYGLOT;
-    String language = project.getLanguage();
+    String language = project.getLanguage().toLowerCase();
 
     if (DEBUG) {
       logger.info("getPhoneReport" +
@@ -264,7 +264,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     for (SlickPhoneReport report : phoneReportByResult) {  // for every phone the user has uttered
       // int i = 1;
       c++;
-     // logger.info("getPhoneReport #"+ c + " : " + report);
+      // logger.info("getPhoneReport #"+ c + " : " + report);
       // info from result table
       int exid = report.exid();
       float pronScore = report.pronScore();
@@ -283,7 +283,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       String refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
       String scoreJson = report.scorejson();
       if (scoreJson.isEmpty() || scoreJson.equalsIgnoreCase("{}")) {
-        logger.warn("no score json for " + report.exid()+ " " + report.word());
+        logger.warn("no score json for " + report.exid() + " " + report.word());
       }
       WordAndScore wordAndScore = getAndRememberWordAndScore(refAudioForExercise,
           phoneToScores,
@@ -301,7 +301,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           report.pscore(),
           language);
 
-     if (DEBUG) logger.info("getPhoneReport adding " +new Date(wordAndScore.getTimestamp()));
+      if (DEBUG) {
+        logger.info("getPhoneReport adding " +
+            "\n\tanswer " + report.answer() +
+            "\n\tdate   " + new Date(wordAndScore.getTimestamp()));
+      }
 
       if (addTranscript) {
         addTranscript(jsonToTranscript, scoreJson, wordAndScore, language);
@@ -349,7 +353,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   public void deleteForProject(int projID) {
     dao.deleteForProject(projID);
   }
-
   public boolean updateProjectForRID(int rid, int newprojid) {
     return dao.updateProjectForRID(rid, newprojid) > 0;
   }

@@ -16,8 +16,9 @@ import java.util.Map;
  * Created by go22670 on 3/29/16.
  */
 public class PhoneJSON {
-  private static final int MAX_EXAMPLES = 30;
   private static final Logger logger = LogManager.getLogger(PhoneJSON.class);
+
+  private static final int MAX_EXAMPLES = 30;
 
   private static final String WID = "wid";
 
@@ -58,21 +59,23 @@ public class PhoneJSON {
       Map<Long, String> resToResult = new HashMap<>();
       if (DEBUG) logger.debug("worstPhones phones are " + worstPhones.keySet());
 
-      JSONObject phones = new JSONObject();
+      {
+        JSONObject phones = new JSONObject();
 
-      for (Map.Entry<String, List<WordAndScore>> pair : worstPhones.entrySet()) {
-        List<WordAndScore> value = pair.getValue();
-        phones.put(pair.getKey(), getWordsJsonArray(resToAnswer, resToRef, resToResult, value));
+        for (Map.Entry<String, List<WordAndScore>> pair : worstPhones.entrySet()) {
+          phones.put(pair.getKey(), getWordsJsonArray(resToAnswer, resToRef, resToResult, pair.getValue()));
+        }
+
+        jsonObject.put(PHONES, phones);
       }
 
+      {
+        JSONArray order = new JSONArray();
+        order.addAll(worstPhones.keySet());
+        jsonObject.put(ORDER, order);
 
-      jsonObject.put(PHONES, phones);
-
-      JSONArray order = new JSONArray();
-      order.addAll(worstPhones.keySet());
-//      for (String phone : worstPhones.keySet()) order.add(phone);
-      jsonObject.put(ORDER, order);
-      if (DEBUG) logger.debug("order phones are " + order);
+        if (DEBUG) logger.debug("order phones are " + order);
+      }
 
       {
         JSONObject results = new JSONObject();

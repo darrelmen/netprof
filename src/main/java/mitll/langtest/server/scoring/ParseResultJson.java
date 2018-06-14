@@ -66,7 +66,7 @@ public class ParseResultJson {
   private static final String W = "w";
   private final ServerProperties props;
   private final String language;
-  Map<String, String> phoneToDisplay;
+  private Map<String, String> phoneToDisplay;
 
   /**
    * @param properties
@@ -301,6 +301,7 @@ public class ParseResultJson {
     double pscore = phone.get(S).getAsDouble();
     double pstart = phone.has(STR) ? phone.get(STR).getAsDouble() : 0d;
     double pend = phone.has(END) ? phone.get(END).getAsDouble() : 0d;
+
     if (usePhone) {
       token = props.getDisplayPhoneme(language, token);
     }

@@ -1938,9 +1938,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.database.phone.BasePhoneDAO#getAndRememberWordAndScore(String, Map, Map, int, String, String, long, String, int, String, int, String, int, float, String)
+   * @param language
+   * @param path
+   * @return
+   */
   @Override
   public String getWebPageAudioRef(String language, String path) {
-    return getWebPageAudioRefWithPrefix(getRelPrefix(language), path);
+    String relPrefix = getRelPrefix(language);
+    return getWebPageAudioRefWithPrefix(relPrefix, path);
   }
 
   @Override

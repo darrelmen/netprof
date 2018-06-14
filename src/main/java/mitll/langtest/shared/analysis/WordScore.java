@@ -78,7 +78,11 @@ public class WordScore implements Serializable, Comparable<WordScore> {
    * @see mitll.langtest.server.database.analysis.Analysis#getWordScore
    */
   public WordScore(BestScore bs, Map<NetPronImageType, List<SlimSegment>> transcript) {
-    this(bs.getExId(), bs.getScore(), bs.getTimestamp(), bs.getResultID(), bs.getFileRef(),
+    this(bs.getExId(),
+        bs.getScore(),
+        bs.getTimestamp(),
+        bs.getResultID(),
+        bs.getFileRef(),
         bs.getNativeAudio(), transcript);
   }
 
