@@ -80,6 +80,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final boolean WARN_ABOUT_MISSING_PHONES = false;
   private static final String QUOT = "&quot;";
   private static final int MAX_LENGTH = 250;
+  private static final String UNKNOWN1 = "unknown";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -734,21 +735,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return new Pair(first, value);
   }
 
-  public int insert(SlickExercise UserExercise) {
-    return dao.insert(UserExercise);
-  }
 
   public void addBulk(List<SlickExercise> bulk) {
     dao.addBulk(bulk);
   }
-
-/*  public int getNumRows() {
-    return dao.getNumRows();
-  }*/
-
-/*  public boolean isEmpty() {
-    return dao.getNumRows() == 0;
-  }*/
 
   /**
    * TODO : All overkill...?  why not just look them back up from exercise dao?
@@ -878,6 +868,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     int insert = insert(toSlick(userExercise, isOverride, isContext, typeOrder));
     ((Exercise) userExercise).setID(insert);
     return insert;
+  }
+
+  public int insert(SlickExercise UserExercise) {
+    return dao.insert(UserExercise);
   }
 
   /**
@@ -1344,11 +1338,20 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     allPredefByProject.forEach(exercise -> {
       String exid = exercise.exid();
 
-      if (!exid.isEmpty()) {
-        Integer before = oldToNew.put(exid, exercise.id());
-        if (before != null) {
-          logger.warn("addToLegacyIdToIdMap : huh? corruption : already saw an exercise with id before " + before +
-              " '" + exid + "' replace with " + exercise);
+      if (!exid.isEmpty() && !exid.equalsIgnoreCase(UNKNOWN1)) {
+        if (oldToNew.containsKey(exid)) {
+          logger.warn("addToLegacyIdToIdMap : huh? avoid corruption : already saw an exercise with id " +
+              "\n\tbefore '" + exid +
+              "'," +
+              "\n\twas     " + oldToNew.get(exid) + "' would have replaced with" +
+              "\n\tex      " + exercise);
+        }
+        else {
+          Integer before = oldToNew.put(exid, exercise.id());
+          if (before != null) {
+            logger.warn("addToLegacyIdToIdMap : huh? corruption : already saw an exercise with id before " + before +
+                " '" + exid + "' replace with " + exercise);
+          }
         }
       }
     });
@@ -1469,5 +1472,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   @Override
   public int deleteRelated(int related) {
     return relatedExerciseDAOWrapper.deleteRelated(related);
+  }
+
+  @Override
+  public SlickExercise getByDominoID(int docID) {
+    Collection<SlickExercise> byExid = dao.byDominoID(docID);
+    return byExid.isEmpty() ? null : byExid.iterator().next();
   }
 }

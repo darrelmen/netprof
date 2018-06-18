@@ -21,6 +21,7 @@ import mitll.hlt.domino.shared.model.project.ProjectWorkflow;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.exercise.DominoExerciseDAO;
 import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
@@ -54,20 +55,24 @@ public class DominoImport implements IDominoImport {
   private final DocumentServiceDelegate documentDelegate;
   private final IProjectWorkflowDAO workflowDelegate;
   private final Mongo pool;
+  private IUserExerciseDAO userExerciseDAO;
 
   /**
    * @param projectDelegate
    * @param workflowDelegate
    * @param documentDelegate
+   * @param userExerciseDAO
    * @see ProjectManagement#setupDominoProjectImport
    */
-  public DominoImport(ProjectServiceDelegate projectDelegate, IProjectWorkflowDAO workflowDelegate,
+  public DominoImport(ProjectServiceDelegate projectDelegate,
+                      IProjectWorkflowDAO workflowDelegate,
                       DocumentServiceDelegate documentDelegate,
-                      Mongo pool) {
+                      Mongo pool, IUserExerciseDAO userExerciseDAO) {
     this.projectDelegate = projectDelegate;
     this.workflowDelegate = workflowDelegate;
     this.documentDelegate = documentDelegate;
     this.pool = pool;
+    this.userExerciseDAO = userExerciseDAO;
   }
 
   /**
@@ -88,7 +93,7 @@ public class DominoImport implements IDominoImport {
     if (matches.isEmpty()) {
       return null;
     } else {
-      return new DominoExerciseDAO()
+      return new DominoExerciseDAO(userExerciseDAO)
           .readExercises(projID,
               matches.iterator().next(),
               getChangedDocs(

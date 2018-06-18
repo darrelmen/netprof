@@ -1,9 +1,9 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.hlt.domino.shared.model.document.*;
-import mitll.hlt.json.JSONSerializer;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.ImportDoc;
 import mitll.langtest.server.domino.ImportInfo;
@@ -11,6 +11,7 @@ import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.npdata.dao.SlickExercise;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,8 +39,10 @@ public class DominoExerciseDAO {
   public static final String EDIT = "edit";
   public static final String UNKNOWN = "unknown";
   private boolean shouldSwap;
+  private IUserExerciseDAO userExerciseDAO;
 
-  public DominoExerciseDAO() {
+  public DominoExerciseDAO(IUserExerciseDAO userExerciseDAO) {
+    this.userExerciseDAO = userExerciseDAO;
   }
 
   /**
@@ -136,8 +139,14 @@ public class DominoExerciseDAO {
                                         long time,
                                         VocabularyItem vocabularyItem) {
     logger.info("getExerciseFromVocab ex for doc " + docID + " term " + vocabularyItem.getTerm());
+    SlickExercise byDominoID = userExerciseDAO.getByDominoID(docID);
+    int exID = -1;
+    if (byDominoID != null) {
+      exID = byDominoID.id();
+
+    }
     String npID = getNPId(vocabularyItem);
-    Exercise ex = getExerciseFromVocabularyItem(projid, docID, npID, vocabularyItem, creator, time);
+    Exercise ex = getExerciseFromVocabularyItem(projid, docID, npID, vocabularyItem, creator, time, exID);
     addAttributes(unitName, chapterName, vocabularyItem, ex);
 //        logger.info("Got " + ex.getUnitToValue());
     addContextSentences(projid, creator, docID, npID, vocabularyItem.getSamples(), ex, shouldSwap);
@@ -216,10 +225,11 @@ public class DominoExerciseDAO {
                                    int docID,
                                    String npID,
                                    IDocumentComposite samples,
-                                   Exercise parentExercise, boolean shouldSwap) {
+                                   Exercise parentExercise,
+                                   boolean shouldSwap) {
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
-      String contextNPID = (npID + "_" + sample.getNum());
+      String contextNPID = npID.equalsIgnoreCase(UNKNOWN) ? UNKNOWN : npID + "_" + sample.getNum();
 
       String sentenceVal = sample.getSentenceVal();
       logger.info("addContextSentences : context" +
@@ -232,7 +242,7 @@ public class DominoExerciseDAO {
         Map<String, String> unitToValue = parentExercise.getUnitToValue();
 
         Exercise context =
-            getContextExercise(projid, creator, docID, sample, contextNPID, sentenceVal, parentDominoID, unitToValue);
+            getContextExercise(projid, -1, creator, docID, sample, contextNPID, sentenceVal, parentDominoID, unitToValue);
 
         logger.info("addContextSentences : parent ex id " + parentExercise.getID() + " dom " + parentDominoID);
 
@@ -243,7 +253,9 @@ public class DominoExerciseDAO {
 
   /**
    * So at the moment of import - we know the parent domino id and it's sample num, but nothing else about it.
+   *
    * @param projid
+   * @param exID
    * @param creator
    * @param docID
    * @param sample
@@ -254,10 +266,11 @@ public class DominoExerciseDAO {
    * @return
    */
   @NotNull
-  private Exercise getContextExercise(int projid, int creator, int docID, SampleSentence sample, String contextNPID,
+  private Exercise getContextExercise(int projid, int exID, int creator, int docID, SampleSentence sample, String contextNPID,
                                       String sentenceVal, int parentDominoID, Map<String, String> unitToValue) {
     Exercise context = getExerciseFromVocabularyItem(
         projid,
+        exID,
         contextNPID,
         docID, // parent domino id
         creator,
@@ -285,6 +298,7 @@ public class DominoExerciseDAO {
    * @param vocabularyItem
    * @param creatorID
    * @param createTime
+   * @param exID
    * @return
    */
   @NotNull
@@ -293,7 +307,7 @@ public class DominoExerciseDAO {
                                                  String npID,
                                                  VocabularyItem vocabularyItem,
                                                  int creatorID,
-                                                 long createTime) {
+                                                 long createTime, int exID) {
     String termVal = vocabularyItem.getTermVal();
     String alternateFormVal = vocabularyItem.getAlternateFormVal();
     String transliterationVal = vocabularyItem.getTransliterationVal();
@@ -301,6 +315,7 @@ public class DominoExerciseDAO {
 
     Exercise exerciseFromVocabularyItem = getExerciseFromVocabularyItem(
         projid,
+        exID,
         npID,
         oldid,
         creatorID,
@@ -319,6 +334,7 @@ public class DominoExerciseDAO {
 
   /**
    * @param projid
+   * @param exID
    * @param npID
    * @param dominoID
    * @param creatorID
@@ -333,6 +349,7 @@ public class DominoExerciseDAO {
    */
   @NotNull
   private Exercise getExerciseFromVocabularyItem(int projid,
+                                                 int exID,
                                                  String npID,
                                                  int dominoID,
                                                  int creatorID,
@@ -340,9 +357,11 @@ public class DominoExerciseDAO {
                                                  String alternateFormVal,
                                                  String transliterationVal,
                                                  String meaning,
-                                                 boolean isContext, boolean shouldSwap) {
+                                                 boolean isContext,
+                                                 boolean shouldSwap) {
     String trim = termVal.trim();
-    Exercise exercise = new Exercise(-1,
+
+    Exercise exercise = new Exercise(exID,
         npID,
         creatorID,
         meaning.trim(),

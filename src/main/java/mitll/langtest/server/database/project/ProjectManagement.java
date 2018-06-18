@@ -183,7 +183,8 @@ public class ProjectManagement implements IProjectManagement {
         projectDelegate,
         workflowDelegate,
         documentDelegate,
-        (Mongo) servletContext.getAttribute(MONGO_ATT_NAME));
+        (Mongo) servletContext.getAttribute(MONGO_ATT_NAME),
+        db.getUserExerciseDAO());
   }
 
 

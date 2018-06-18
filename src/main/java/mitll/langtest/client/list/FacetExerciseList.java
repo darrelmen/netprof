@@ -1288,6 +1288,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
         if (DEBUG) logger.info("restoreListBoxState t->sel " + selectionState + " typeOrder " + typeOrder);
         Map<String, String> newTypeToSelection = getNewTypeToSelection(selectionState, typeOrder);
         if (typeToSelection.equals(newTypeToSelection) &&
+            typeOrderContainer != null &&
             typeOrderContainer.iterator().hasNext()) {
 //          logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);
         } else {

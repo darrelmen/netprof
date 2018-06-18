@@ -170,7 +170,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param skipRefResult
    * @param doUpdate
    * @param doLatest
-   * @param sinceCreated
+   * @param doSinceCreated
    * @see #main
    */
   private boolean copyOneConfigCommand(String config,

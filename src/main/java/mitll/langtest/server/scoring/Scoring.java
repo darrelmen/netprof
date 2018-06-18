@@ -37,9 +37,7 @@ import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.image.TranscriptReader;
 import com.google.gson.JsonObject;
-import corpus.EmptyLTS;
-import corpus.HTKDictionary;
-import corpus.LTS;
+
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.SLFFile;
@@ -47,6 +45,9 @@ import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.audio.imagewriter.TranscriptWriter;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.npdata.dao.lts.EmptyLTS;
+import mitll.npdata.dao.lts.HTKDictionary;
+import mitll.npdata.dao.lts.LTS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

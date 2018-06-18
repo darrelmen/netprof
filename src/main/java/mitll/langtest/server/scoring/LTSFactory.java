@@ -32,20 +32,16 @@
 
 package mitll.langtest.server.scoring;
 
-import corpus.EmptyLTS;
-import corpus.LTS;
-import corpus.ModernStandardArabicLTS;
 import mitll.langtest.server.audio.AudioExport;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.lts.EmptyLTS;
+import mitll.npdata.dao.lts.LTS;
+import mitll.npdata.dao.lts.ModernStandardArabicLTS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.text.CollationKey;
 import java.text.Collator;
-import java.util.*;
+import java.util.Locale;
 
 /**
  * Created with IntelliJ IDEA.
@@ -58,6 +54,7 @@ import java.util.*;
  */
 public class LTSFactory {
   private static final Logger logger = LogManager.getLogger(LTSFactory.class);
+  private static final String CORPUS = "mitll.npdata.dao.lts.";
 
   private final Language thisLanguage;
 
@@ -82,7 +79,7 @@ public class LTSFactory {
     // logger.info("got " +thisLanguage + " " + thisLanguage.name());
     String name = thisLanguage.name();
     String classPrefix = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
-    String className = "corpus." + classPrefix + "LTS";
+    String className = CORPUS + classPrefix + "LTS";
 
     try {
       switch (thisLanguage) {
@@ -110,7 +107,7 @@ public class LTSFactory {
 
   /**
    * @return
-   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
+   * @seex mitll.langtest.server.scoring.ASRScoring#ASRScoring
    */
   LTS getLTSClass() {
     return ltsForLanguage;
@@ -118,7 +115,7 @@ public class LTSFactory {
 
   /**
    * @param thisLanguage
-   * @see mitll.langtest.server.scoring.ASRScoring#ASRScoring
+   * @seex mitll.langtest.server.scoring.ASRScoring#ASRScoring
    */
   LTSFactory(String thisLanguage) {
     this(Language.valueOf(thisLanguage.toUpperCase()));
@@ -126,8 +123,8 @@ public class LTSFactory {
 
   /**
    * @return
-   * @see mitll.langtest.server.scoring.ASRScoring#getCollator
-   * @see #sort(List)
+   * @seex mitll.langtest.server.scoring.ASRScoring#getCollator
+   * @seex #sort(List)
    */
   public Collator getCollator() {
     return Collator.getInstance(getLocale(thisLanguage));

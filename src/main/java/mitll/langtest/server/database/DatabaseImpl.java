@@ -407,7 +407,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
 
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
-    dominoExerciseDAO = new DominoExerciseDAO();
+    dominoExerciseDAO = new DominoExerciseDAO(userExerciseDAO);
 
     logger.debug("initializeDAOs : tables = " + getTables());
   }

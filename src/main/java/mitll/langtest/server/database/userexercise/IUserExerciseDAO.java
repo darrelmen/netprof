@@ -126,4 +126,6 @@ public interface IUserExerciseDAO extends IDAO {
   void deleteForProject(int projID);
 
   int deleteRelated(int related);
+
+  SlickExercise getByDominoID(int docID);
 }

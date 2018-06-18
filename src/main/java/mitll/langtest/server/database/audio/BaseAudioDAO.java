@@ -182,11 +182,12 @@ public abstract class BaseAudioDAO extends DAO {
     if (now - then > 10) {
       logger.info("attachAudioToExercises took " + (now - then) + " millis to get audio attributes for " + exerciseIDs.size());
     }
+    boolean doDEBUG = DEBUG_ATTACH;// || exercises.size() < 6;// || (id == 125524) || (id == 126304);
+
     for (CommonExercise exercise : exercises) {
       int id = exercise.getID();
 
       List<AudioAttribute> audioAttributes = audioAttributesForExercises.get(id);
-      boolean doDEBUG = DEBUG_ATTACH;// || (id == 125524) || (id == 126304);
 
       if (audioAttributes == null) {
         if (doDEBUG) logger.info("attachAudioToExercises no audio for " + id);

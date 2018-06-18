@@ -27,6 +27,9 @@ public class DominoUpdateItem implements HasID {
   public DominoUpdateItem() {
   }
 
+  public DominoUpdateItem(CommonExercise commonExercise,   ITEM_STATUS status) {
+    this(commonExercise.getID(), commonExercise.getDominoID(), commonExercise.getOldID(), commonExercise.getEnglish(), commonExercise.getForeignLanguage(), new ArrayList<>(), status);
+  }
   /**
    * @param commonExercise
    * @param changedFields

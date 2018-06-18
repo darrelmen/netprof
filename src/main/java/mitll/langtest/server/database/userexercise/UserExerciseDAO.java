@@ -61,6 +61,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String LESSON = "lesson";
 
   @Override
+  public SlickExercise getByDominoID(int docID) {
+    return null;
+  }
+
+  @Override
   public boolean updateProject(int oldID, int newprojid) {
     return false;
   }

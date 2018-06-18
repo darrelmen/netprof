@@ -161,8 +161,8 @@ dependencies {
 
     // TODO : get these as artifactory dependencies
 
-    compile name: 'hydec_2.12-1.1'
-    compile name: 'utils_2.12-1.1'
+   // compile name: 'hydec_2.12-1.1'
+//    compile name: 'utils_2.12-1.1'
 
     // the only way I can get war to accept my explicit command to include these jars
     compile name: 'commons-codec-1.10'

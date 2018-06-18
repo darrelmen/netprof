@@ -251,7 +251,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    */
   Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids, Map<Integer, MiniUser> idToMini) {
     long then = System.currentTimeMillis();
-    Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDs(exids);
+    Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDsThatExist(exids);
     long now = System.currentTimeMillis();
 
     if (now - then > 30) {
@@ -746,6 +746,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param language
    * @param validateAll
    * @see mitll.langtest.server.services.AudioServiceImpl#checkAudio
+   * @see mitll.langtest.server.database.exercise.BaseExerciseDAO#setAudioDAO
    */
   public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
     if (hasMediaDir) {

@@ -56,6 +56,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   public static final String UPDATING_PROJECT_INFO = "updating project info";
   private static final String CREATING_PROJECT = "Creating project";
   private static final String DELETING_A_PROJECT = "deleting a project";
+  public static final String ADDING_PENDING_EXERCISES = "adding pending exercises";
 
   private IProjectDAO getProjectDAO() {
     return db.getProjectDAO();
@@ -167,11 +168,11 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   /**
-   * @see mitll.langtest.client.project.ProjectChoices#showDeleteDialog
    * @param id
    * @return
    * @throws DominoSessionException
    * @throws RestrictedOperationException
+   * @see mitll.langtest.client.project.ProjectChoices#showDeleteDialog
    */
   @Override
   public boolean delete(int id) throws DominoSessionException, RestrictedOperationException {
@@ -220,21 +221,17 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
    */
   @Override
   public DominoUpdateResponse addPending(int projectid, boolean doChange) throws DominoSessionException, RestrictedOperationException {
-    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+    if (hasAdminOrCDPerm(getUserIDFromSessionOrDB())) {
       return db.getProjectSync().addPending(projectid, getImportUser(), doChange);
     } else {
-      throw getRestricted("adding pending exercises");
+      throw getRestricted(ADDING_PENDING_EXERCISES);
     }
   }
 
   @Override
   public List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    //if (hasAdminPerm(userIDFromSessionOrDB)) {
+    getUserIDFromSessionOrDB();
     return db.getProjectSync().getDominoForLanguage(lang);
-    // } else {
-    //  throw getRestricted("getting domino projects");
-    // }
   }
 
 /*

@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.audio;
 
-import corpus.HTKDictionary;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.server.*;
 import mitll.langtest.server.autocrt.AutoCRT;
@@ -54,6 +53,7 @@ import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.npdata.dao.lts.HTKDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;

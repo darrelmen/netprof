@@ -32,8 +32,9 @@
 
 package mitll.langtest.server.scoring;
 
-import corpus.HTKDictionary;
-import corpus.LTS;
+
+import mitll.npdata.dao.lts.HTKDictionary;
+import mitll.npdata.dao.lts.LTS;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
