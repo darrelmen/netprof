@@ -67,6 +67,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  */
 public class ProjectEditForm extends UserDialog {
   public static final String GVIDAVER = "gvidaver";
+  public static final String CHECKING_AUDIO = "Checking audio and making mp3's...";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   public static final String IN_PROGRESS = "In progress...";
@@ -735,7 +736,6 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private void checkAudio(ProjectInfo info, Button w) {
-    //  feedback.setText("Checking audio and making mp3's...");
     services
         .getAudioServiceAsyncForHost(info.getHost())
         .checkAudio(info.getID(), new AsyncCallback<Void>() {
@@ -748,7 +748,7 @@ public class ProjectEditForm extends UserDialog {
           @Override
           public void onSuccess(Void result) {
             w.setEnabled(true);
-            feedback.setText("Checking audio and making mp3's...");
+            feedback.setText(CHECKING_AUDIO);
           }
         });
   }

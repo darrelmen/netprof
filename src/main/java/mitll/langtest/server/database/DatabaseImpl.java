@@ -365,8 +365,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     answerDAO = new SlickAnswerDAO(this, dbConnection);
 
     refresultDAO = new SlickRefResultDAO(this, dbConnection);
-    projectDAO = new ProjectDAO(this, dbConnection);
     userExerciseDAO = new SlickUserExerciseDAO(this, dbConnection);
+    projectDAO = new ProjectDAO(this, dbConnection, userExerciseDAO, this);
     wordDAO = new SlickWordDAO(this, dbConnection);
     phoneDAO = new SlickPhoneDAO(this, dbConnection);
 
@@ -944,6 +944,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   public Collection<Project> getProjects() {
     return projectManagement.getProjects();
+  }
+
+  public Map<String, Integer> getNpToDomino(int dominoProjectID) {
+    return projectManagement.getNpToDomino(dominoProjectID);
   }
 
   /**
@@ -1939,10 +1943,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see mitll.langtest.server.database.phone.BasePhoneDAO#getAndRememberWordAndScore(String, Map, Map, int, String, String, long, String, int, String, int, String, int, float, String)
    * @param language
    * @param path
    * @return
+   * @see mitll.langtest.server.database.phone.BasePhoneDAO#getAndRememberWordAndScore(String, Map, Map, int, String, String, long, String, int, String, int, String, int, float, String)
    */
   @Override
   public String getWebPageAudioRef(String language, String path) {

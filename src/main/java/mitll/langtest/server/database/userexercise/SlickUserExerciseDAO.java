@@ -1002,9 +1002,16 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return getUserExercises(dao.getAllUserEx(projid), shouldSwap);
   }
 
+  /**
+   * Niche feature for alt chinese to swap primary and alternate...
+   * @param projid
+   * @return
+   */
+
   private boolean getShouldSwap(int projid) {
-    String defPropValue = projectDAO.getDefPropValue(projid, ProjectProperty.SWAP_PRIMARY_AND_ALT);
-    return defPropValue.equalsIgnoreCase("TRUE");
+    return false;
+//    String defPropValue = projectDAO.getDefPropValue(projid, ProjectProperty.SWAP_PRIMARY_AND_ALT);
+ //   return defPropValue.equalsIgnoreCase("TRUE");
   }
 
   /**
@@ -1345,8 +1352,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
               "'," +
               "\n\twas     " + oldToNew.get(exid) + "' would have replaced with" +
               "\n\tex      " + exercise);
-        }
-        else {
+        } else {
           Integer before = oldToNew.put(exid, exercise.id());
           if (before != null) {
             logger.warn("addToLegacyIdToIdMap : huh? corruption : already saw an exercise with id before " + before +
@@ -1444,16 +1450,21 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    * @see ProjectSync#addPending
    */
-  public Map<Integer, SlickExercise> getLegacyToEx(int projectid) {
+  public Map<Integer, SlickExercise> getDominoToSlickEx(int projectid) {
     return dao.getLegacyToExercise(projectid);
   }
 
-/*  public Map<Integer, SlickExercise> getLegacyContextToEx(int projectid) {
-    return dao.getAllContextPredefByProject(projectid);
+  public boolean areThereAnyUnmatched(int projid) {
+    return dao.getUnknownDomino(projid).size() > 0;
   }
 
-  List<SlickExercise> allContextPredefByProject = dao.getAllContextPredefByProject(projectid);*/
+  public Map<String, Integer> getNpToExID(int projid) {
+    return dao.getUnknownDomino(projid);
+  }
 
+  public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
+    return exerciseDAO.updateDominoBulk(pairs);
+  }
   public Map<Integer, SlickExercise> getLegacyToDeletedEx(int projectid) {
     return dao.getLegacyToDeletedExercise(projectid);
   }

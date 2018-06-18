@@ -190,6 +190,7 @@ public class CreateProject {
       if (creator == -1) {
         creator = daoContainer.getUserDAO().getBeforeLoginUser();
       }
+      int dominoID = info.getDominoID();
       int projectID = addProject(projectDAO,
           creator,
           info.getName(),
@@ -201,7 +202,7 @@ public class CreateProject {
           info.getDisplayOrder(),
           info.getFirstType(),
           info.getSecondType(),
-          info.getDominoID());
+          dominoID);
 
       String host = info.getHost();
       if (host.isEmpty()) {
@@ -217,6 +218,11 @@ public class CreateProject {
       info.getPropertyValue().forEach((k, v) -> addProperty(projectDAO, projectID, k, v));
 
       projectServices.rememberProject(projectID);
+
+      if (dominoID != -1) {
+        logger.info("sync with domino project " +dominoID);
+
+      }
       return projectID;
     } else {
       logger.info("createProject : PROJECT EXISTS with name " + info.getName() + " : create new " + info);

@@ -10,10 +10,7 @@ import mitll.hlt.domino.shared.common.FilterDetail;
 import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.model.HeadDocumentRevision;
 import mitll.hlt.domino.shared.model.document.DocumentColumn;
-import mitll.hlt.domino.shared.model.document.IMetadataField;
-import mitll.hlt.domino.shared.model.document.MetadataComponentBase;
 import mitll.hlt.domino.shared.model.document.VocabularyItem;
-import mitll.hlt.domino.shared.model.metadata.MetadataTypes;
 import mitll.hlt.domino.shared.model.project.ClientPMProject;
 import mitll.hlt.domino.shared.model.project.ProjectColumn;
 import mitll.hlt.domino.shared.model.project.ProjectDescriptor;
@@ -50,6 +47,7 @@ public class DominoImport implements IDominoImport {
   private static final String METADATA = "metadata";
   private static final String DOC_CONTENT = "docContent";
   private static final String VALUE = "value";
+  private static final String DOCUMENT_HEADS = "document_heads";
 
   private final ProjectServiceDelegate projectDelegate;
   private final DocumentServiceDelegate documentDelegate;
@@ -93,13 +91,22 @@ public class DominoImport implements IDominoImport {
     if (matches.isEmpty()) {
       return null;
     } else {
+      boolean checkForDominoIDs = userExerciseDAO.areThereAnyUnmatched(projID);
+
+      if (checkForDominoIDs) {
+        logger.info("need to match up domino IDs");
+        Map<String, Integer> npidToDominoID = getNPIDToDominoID(dominoID);
+      }
+
       return new DominoExerciseDAO(userExerciseDAO)
           .readExercises(projID,
               matches.iterator().next(),
               getChangedDocs(
                   sinceInUTC,
                   dominoAdminUser,
-                  getClientPMProject(dominoID, dominoAdminUser)),
+                  getClientPMProject(dominoID, dominoAdminUser),
+                  checkForDominoIDs
+              ),
               shouldSwap);
     }
   }
@@ -206,7 +213,7 @@ public class DominoImport implements IDominoImport {
     }
   }
 
-  private String getNPId(MetadataComponentBase vocabularyItem) {
+/*  private String getNPId(MetadataComponentBase vocabularyItem) {
     List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
     for (IMetadataField field : metadataFields) {
       String name = field.getName();
@@ -220,7 +227,7 @@ public class DominoImport implements IDominoImport {
       }
     }
     return "unknown";
-  }
+  }*/
 
   private List<ProjectDescriptor> getProjectDescriptors(FindOptions<ProjectColumn> options, DBUser dominoAdminUser) {
     return projectDelegate.getProjects(dominoAdminUser,
@@ -247,22 +254,27 @@ public class DominoImport implements IDominoImport {
    * @param sinceInUTC
    * @param dominoAdminUser
    * @param dominoProject
+   * @param checkForDominoIDs
    * @return
    * @see #getImportFromDomino
    */
   @NotNull
-  private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject dominoProject) {
+  private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject dominoProject, boolean checkForDominoIDs) {
     Set<Integer> added = new HashSet<>();
+    long then = System.currentTimeMillis();
     List<ImportDoc> addedImports = getAddedImports(sinceInUTC, dominoAdminUser, dominoProject, added);
-
+    long now = System.currentTimeMillis();
+    if (now - then > 100)
+      logger.info("getChangedDocs took " + (now - then) + " to get " + addedImports.size() + " added imports");
     List<ImportDoc> changedImports = getChangedImports(sinceInUTC, dominoAdminUser, dominoProject, added);
 
     Set<String> deletedNPIDs = new TreeSet<>();
 
     Collection<Integer> deletedDocsSince = getDeletedDocsSince(sinceInUTC, dominoProject.getId(), deletedNPIDs);
 
+    Map<String, Integer> npidToDominoID = checkForDominoIDs ? getNPIDToDominoID(dominoProject.getId()) : new HashMap<>();
     logger.info("getChangedDocs : added " + addedImports.size() + " change " + changedImports.size() + " deleted " + deletedNPIDs.size());
-    return new ChangedAndDeleted(changedImports, new ArrayList<>(), deletedDocsSince, deletedNPIDs, addedImports);
+    return new ChangedAndDeleted(changedImports, new ArrayList<>(), deletedDocsSince, deletedNPIDs, addedImports, npidToDominoID);
   }
 
   @NotNull
@@ -308,7 +320,7 @@ public class DominoImport implements IDominoImport {
    * @param next
    * @param deletedDocsSince
    * @return
-   * @see #getChangedDocs(String, DBUser, ClientPMProject)
+   * @see #getChangedDocs(String, DBUser, ClientPMProject, boolean)
    */
 /*
   @NotNull
@@ -341,43 +353,50 @@ public class DominoImport implements IDominoImport {
   /**
    *
    */
-  public class ChangedAndDeleted {
+  public static class ChangedAndDeleted {
     private final List<ImportDoc> added;
     private final List<ImportDoc> changed;
-    private final List<ImportDoc> deleted;
+    // private final List<ImportDoc> deleted;
     private final Collection<Integer> deleted2;
     private final Set<String> deletedNPIDs;
+    private Map<String, Integer> npidToDominoID;
 
     /**
      * @param changed
      * @param deleted
      * @param deleted2
+     * @param npidToDominoID
      * @see DominoImport#getChangedDocs
      */
     ChangedAndDeleted(List<ImportDoc> changed,
                       List<ImportDoc> deleted,
                       Collection<Integer> deleted2,
                       Set<String> deletedNPIDs,
-                      List<ImportDoc> added) {
+                      List<ImportDoc> added, Map<String, Integer> npidToDominoID) {
       this.added = added;
       this.changed = changed;
-      this.deleted = deleted;
+      //  this.deleted = deleted;
       this.deleted2 = deleted2;
       this.deletedNPIDs = deletedNPIDs;
+      this.npidToDominoID = npidToDominoID;
     }
 
     /**
      * @return
-     * @seex DominoExerciseDAO#getCommonExercises
+     * @see DominoExerciseDAO#getChangedCommonExercises
      */
     public List<ImportDoc> getChanged() {
       return changed;
     }
-
+/*
     public List<ImportDoc> getDeleted() {
       return deleted;
-    }
+    }*/
 
+    /**
+     * @return
+     * @see DominoExerciseDAO#readExercises
+     */
     public Collection<Integer> getDeleted2() {
       return deleted2;
     }
@@ -390,8 +409,16 @@ public class DominoImport implements IDominoImport {
       return deletedNPIDs;
     }
 
+    /**
+     * @return
+     * @see DominoExerciseDAO#getAddedCommonExercises(int, int, String, String, ChangedAndDeleted)
+     */
     public List<ImportDoc> getAdded() {
       return added;
+    }
+
+    public Map<String, Integer> getNpidToDominoID() {
+      return npidToDominoID;
     }
   }
 
@@ -409,13 +436,60 @@ public class DominoImport implements IDominoImport {
     return options1;
   }
 
+  public Map<String, Integer> getNPIDToDominoID(int projid) {
+    Map<String, Integer> npToDomino = new HashMap<>();
+    Bson query = and(
+        eq(PROJ_ID, projid),
+        eq(ACTIVE, true)
+    );
+    FindIterable<Document> projection = pool
+        .getMongoCollection(DOCUMENT_HEADS)
+        .find(query)
+        .projection(include(ID, DOC_CONTENT));
+
+
+    try (MongoCursor<Document> cursor = projection.iterator()) {
+      while (cursor.hasNext()) {
+        Document doc = cursor.next();
+        Integer id = doc.getInteger(ID);
+
+        Object docContent = doc.get(DOC_CONTENT);
+
+        if (docContent instanceof Document) {
+          Document dd = (Document) docContent;
+          Object metadata = dd.get(METADATA);
+
+          //logger.info("\tmeta " + metadata);
+          if (metadata != null && metadata instanceof List) {
+            //logger.info("\tmeta " + metadata.getClass());
+            List<Document> collect = getNPMetadata(metadata);
+            if (collect.isEmpty()) {
+              logger.warn("getNPIDToDominoID no metadata on " + metadata);
+            } else {
+              Document matchingMeta = collect.iterator().next();
+              // logger.info("\tgetNPIDToDominoID got " + matchingMeta);
+              String npID = matchingMeta.getString(VALUE);
+              if (npID != null) {
+                npToDomino.put(npID, id);
+              }
+            }
+          }
+        } else {
+          logger.warn("getNPIDToDominoID docContent not a document " + docContent);
+        }
+      }
+    }
+
+    return npToDomino;
+  }
+
   /**
    * TODO : try with normal query again...
    *
    * @param sinceInUTC
    * @param projid
    * @return
-   * @see #getChangedDocs(String, DBUser, ClientPMProject)
+   * @see #getChangedDocs(String, DBUser, ClientPMProject, boolean)
    */
   private Collection<Integer> getDeletedDocsSince(String sinceInUTC, int projid, Set<String> npIDs) {
     LocalDateTime sinceThen = getModifiedTime(sinceInUTC);
@@ -428,9 +502,9 @@ public class DominoImport implements IDominoImport {
     );
 
     FindIterable<Document> projection = pool
-        .getMongoCollection("document_heads")
+        .getMongoCollection(DOCUMENT_HEADS)
         .find(query)
-        .projection(include(ID, DELETE_TIME, /*ACTIVE,*/ DOC_CONTENT));
+        .projection(include(ID, DELETE_TIME, DOC_CONTENT));
 
     List<Integer> ids = new ArrayList<>();
 
@@ -440,11 +514,9 @@ public class DominoImport implements IDominoImport {
       while (cursor.hasNext()) {
         Document doc = cursor.next();
         Integer id = doc.getInteger(ID);
-        // Boolean active = doc.getBoolean(ACTIVE);
-        //  if (!active) {
-        String updateTime = doc.getString(DELETE_TIME);
-        logger.info("getDeletedDocsSince for " + id + " = " + updateTime);
 
+//        String updateTime = doc.getString(DELETE_TIME);
+//        logger.info("getDeletedDocsSince for " + id + " = " + updateTime);
         ids.add(id);
 
         Object docContent = doc.get(DOC_CONTENT);
@@ -483,9 +555,16 @@ public class DominoImport implements IDominoImport {
     return ids;
   }
 
+  /**
+   * @param metadataObj
+   * @return
+   * @see #getDeletedDocsSince
+   */
   private List<Document> getNPMetadata(Object metadataObj) {
     List<Document> metadata = (List<Document>) metadataObj;
-    return metadata.stream().filter(document -> document.values().contains(V_NP_ID)).collect(Collectors.toList());
+    return metadata
+        .stream()
+        .filter(document -> document.values().contains(V_NP_ID)).collect(Collectors.toList());
   }
 
   @NotNull

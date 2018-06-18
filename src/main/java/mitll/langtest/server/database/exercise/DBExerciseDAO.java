@@ -38,14 +38,12 @@ import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.npdata.dao.SlickExerciseAttributeJoin;
-import mitll.npdata.dao.SlickExercisePhone;
-import mitll.npdata.dao.SlickProject;
-import mitll.npdata.dao.SlickRelatedExercise;
+import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import scala.collection.Iterable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -389,8 +387,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   @Override
-  public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
-    getDao().updatePhonesBulk(pairs);
+  public void updatePhonesBulk(List<SlickExercisePhone> pairs) { getDao().updatePhonesBulk(pairs);  }
+  public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
+    Iterable<Object> objectIterable = getDao().updateDominoBulk(pairs);
+    return objectIterable.toSeq().size();
   }
 
   private ExerciseDAOWrapper getDao() {

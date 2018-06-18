@@ -41,6 +41,7 @@ import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.SlickExercise;
+import mitll.npdata.dao.SlickUpdateDominoPair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -63,6 +64,21 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   @Override
   public SlickExercise getByDominoID(int docID) {
     return null;
+  }
+
+  @Override
+  public boolean areThereAnyUnmatched(int projID) {
+    return false;
+  }
+
+  @Override
+  public Map<String, Integer> getNpToExID(int projid) {
+    return null;
+  }
+
+  @Override
+  public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
+    return 0;
   }
 
   @Override

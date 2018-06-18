@@ -82,7 +82,10 @@ public class DominoExerciseDAO {
         addedCommonExercises,
         changedCommonExercises,
         importDocs.getDeleted2(),
-        importDocs.getDeletedNPIDs());
+        importDocs.getDeletedNPIDs()
+        /*,
+        importDocs.getNpidToDominoID()*/
+        );
   }
 
   @NotNull

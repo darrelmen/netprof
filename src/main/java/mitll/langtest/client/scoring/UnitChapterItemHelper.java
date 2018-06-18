@@ -143,21 +143,23 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
 
     int dominoID = exercise.getDominoID();
     String oldID = exercise.getOldID();
-    if (showDominoID(dominoID, oldID)) {
+
+    boolean showDomino = dominoID > 0;
+    if (showDomino) {
       addProminentLabel(flow, DOMINO_ID, "" + exercise.getDominoID());
     }
 
-    if (!oldID.isEmpty()) {
+    if (!showDomino && !oldID.isEmpty()) {
       addProminentLabel(flow, NP_ID, oldID);
     }
 
     return flow;
   }
 
-  private boolean showDominoID(int dominoID, String oldID) {
+/*  private boolean showDominoID(int dominoID, String oldID) {
     return dominoID > 0 &&
         !("" + dominoID).equals(oldID);
-  }
+  }*/
 
   private void addProminentLabel(Panel flow, String npId, String oldID) {
     Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);
@@ -230,10 +232,13 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     if (id > 0) {
       builder.append(getTypeAndValue(ID, "" + id));
     }
-    if (showDominoID(dominoID, oldID)) {
+
+    boolean showDomino = dominoID > 0;
+
+    if (showDomino) {
       builder.append(getTypeAndValue(DOMINO_ID, "" + dominoID));
     }
-    if (!oldID.isEmpty()) {
+    if (!showDomino && !oldID.isEmpty()) {
       builder.append(getTypeAndValue(NP_ID, oldID));
     }
 

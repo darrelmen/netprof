@@ -44,6 +44,7 @@ import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.Pair;
 import mitll.npdata.dao.SlickExercisePhone;
+import mitll.npdata.dao.SlickUpdateDominoPair;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,6 +88,12 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private static final int REASONABLE_PROPERTY_SPACE_LIMIT = 50;
 
   private static final String UNIT = "unit";
+
+  @Override
+  public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
+    return 0;
+  }
+
   private static final String BOOK = "book";
 
   private static final String CHAPTER = "chapter";

@@ -44,9 +44,11 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.SlickExercise;
+import mitll.npdata.dao.SlickUpdateDominoPair;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @see
@@ -55,12 +57,12 @@ public interface IUserExerciseDAO extends IDAO {
   SlickExercise getUnknownExercise();
 
   /**
-   * @see IUserListManager#newExercise(int, CommonExercise, String)
    * @param userExercise
    * @param isOverride
    * @param isContext
    * @param typeOrder
    * @return
+   * @see IUserListManager#newExercise(int, CommonExercise, String)
    */
   int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder);
 
@@ -69,6 +71,7 @@ public interface IUserExerciseDAO extends IDAO {
   List<CommonShell> getOnList(int listID, boolean shouldSwap);
 
   List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap);
+
   /**
    * @param exid
    * @param shouldSwap
@@ -76,13 +79,14 @@ public interface IUserExerciseDAO extends IDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID
    */
   CommonExercise getByExID(int exid, boolean shouldSwap);
+
   SlickExercise getByID(int exid);
 
   /**
-   * @see BaseExerciseDAO#addNewExercises
    * @param oldid
    * @param projID
    * @return
+   * @see BaseExerciseDAO#addNewExercises
    */
   CommonExercise getByExOldID(String oldid, int projID);
 
@@ -103,19 +107,20 @@ public interface IUserExerciseDAO extends IDAO {
   void deleteByExID(Collection<Integer> exids);
 
   /**
-   * @see mitll.langtest.server.domino.ProjectSync#doUpdate
    * @param userExercise
    * @param isContext
    * @param typeOrder
    * @return
+   * @see mitll.langtest.server.domino.ProjectSync#doUpdate
    */
   boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder);
+
   boolean updateModified(int exid);
 
   /**
+   * @param exerciseDAO
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
    * @see ProjectManagement#populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl)
-   * @param exerciseDAO
    */
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
 
@@ -128,4 +133,8 @@ public interface IUserExerciseDAO extends IDAO {
   int deleteRelated(int related);
 
   SlickExercise getByDominoID(int docID);
+
+  boolean areThereAnyUnmatched(int projID);
+  Map<String, Integer> getNpToExID(int projid);
+  int updateDominoBulk(List<SlickUpdateDominoPair> pairs);
 }

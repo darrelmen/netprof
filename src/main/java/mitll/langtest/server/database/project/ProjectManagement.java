@@ -1091,4 +1091,8 @@ public class ProjectManagement implements IProjectManagement {
   public String getDominoProjectName(int dominoProjectID) {
     return dominoImport == null ? "" : dominoImport.getDominoProjectName(dominoProjectID);
   }
+
+  public Map<String,Integer> getNpToDomino(int dominoProjectID) {
+    return dominoImport == null ? Collections.emptyMap() : dominoImport.getNPIDToDominoID(dominoProjectID);
+  }
 }

@@ -47,6 +47,7 @@ import mitll.langtest.shared.user.User;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface IProjectManagement {
   /**
@@ -138,4 +139,6 @@ public interface IProjectManagement {
   List<ImportProjectInfo> getVocabProjects();
 
   String getDominoProjectName(int dominoProjectID);
+
+  Map<String,Integer> getNpToDomino(int dominoProjectID);
 }

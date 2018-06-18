@@ -13,6 +13,7 @@ public class ImportInfo {
   private final List<CommonExercise> changedExercises;
   private final List<CommonExercise> addedExercises;
   private final Collection<Integer> deletedDominoIDs;
+ // private final Map<String, Integer> npToDomino;
   private Set<String> deletedNPIDs;
 
   private final String language;
@@ -27,16 +28,19 @@ public class ImportInfo {
    * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#readExercises(int, ImportProjectInfo, DominoImport.ChangedAndDeleted, boolean)
    */
   public ImportInfo(ImportProjectInfo importProjectInfo,
-                    List<CommonExercise> addedExercises, List<CommonExercise> changedExercises,
+                    List<CommonExercise> addedExercises,
+                    List<CommonExercise> changedExercises,
                     Collection<Integer> deletedDominoIDs,
-                    Set<String> deletedNPIDs) {
+                    Set<String> deletedNPIDs ) {
     this(
         importProjectInfo.getDominoProjectID(),
         importProjectInfo.getLanguage(),
         importProjectInfo.getCreateDate(),
 
         addedExercises, changedExercises,
-        deletedDominoIDs);
+        deletedDominoIDs//,
+    //    npToDomino
+    );
 
     this.deletedNPIDs = deletedNPIDs;
   }
@@ -52,7 +56,9 @@ public class ImportInfo {
                      Date exportTime,
                      List<CommonExercise> addedExercises,
                      List<CommonExercise> changed,
-                     Collection<Integer> deletedDominoIDs) {
+                     Collection<Integer> deletedDominoIDs
+  //    , Map<String, Integer> npToDomino
+  ) {
     this.createTime = exportTime;
     this.addedExercises = addedExercises;
     this.changedExercises = changed;
@@ -60,6 +66,7 @@ public class ImportInfo {
     this.lang = getLanguage(language);
     this.dominoID = dominoID;
     this.deletedDominoIDs = deletedDominoIDs;
+   // this.npToDomino = npToDomino;
   }
 
   @NotNull
@@ -99,6 +106,10 @@ public class ImportInfo {
     return deletedDominoIDs;
   }
 
+  /**
+   * @see ProjectSync#doDelete
+   * @return
+   */
   public Set<String> getDeletedNPIDs() {
     return deletedNPIDs;
   }
@@ -115,6 +126,14 @@ public class ImportInfo {
         "\n\tchanged " + getChangedExercises().size() +
         "\n\tdeleted " + getDeletedDominoIDs().size() +
         "\n\tdeleted np " + getDeletedNPIDs().size()
+        //+
+        //"\n\tnp->domino " + getNpToDomino().size()
         ;
   }
+
+/*
+  public Map<String, Integer> getNpToDomino() {
+    return npToDomino;
+  }
+*/
 }

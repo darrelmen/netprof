@@ -34,8 +34,10 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
@@ -43,6 +45,7 @@ import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
+import mitll.npdata.dao.SlickUpdateDominoPair;
 import mitll.npdata.dao.project.ProjectDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,7 +54,6 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Timestamp;
 import java.util.*;
 
-import static java.util.Calendar.YEAR;
 import static mitll.langtest.shared.project.ProjectProperty.*;
 
 public class ProjectDAO extends DAO implements IProjectDAO {
@@ -64,16 +66,21 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
+  private final IUserExerciseDAO userExerciseDAO;
+  DatabaseImpl databaseImpl;
 
   /**
    * @param database
    * @param dbConnection
+   * @param userExerciseDAO
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
-  public ProjectDAO(Database database, DBConnection dbConnection) {
+  public ProjectDAO(Database database, DBConnection dbConnection, IUserExerciseDAO userExerciseDAO, DatabaseImpl databaseImpl) {
     super(database);
     propertyDAO = new ProjectPropertyDAO(database, dbConnection);
     dao = new ProjectDAOWrapper(dbConnection);
+    this.userExerciseDAO = userExerciseDAO;
+    this.databaseImpl = databaseImpl;
   }
 
   public int ensureDefaultProject(int defaultUser) {
@@ -137,6 +144,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     int projid = projectInfo.getID();
     Project currentProject = database.getProject(projid);
 
+    int dominoID = projectInfo.getDominoID();
     SlickProject changed = new SlickProject(
         projid,
         userid,
@@ -153,9 +161,36 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         projectInfo.getSecondType(),
         getCountryCode(projectInfo),
         currentProject.getProject().ltsClass(),
-        projectInfo.getDominoID(),
+        dominoID,
         projectInfo.getDisplayOrder()
     );
+
+    boolean differentDomino = dominoID != currentProject.getProject().dominoid();
+    if (differentDomino) {
+      logger.info("changed domino project to " + dominoID);
+    }
+    boolean checkForDominoIDs = differentDomino || userExerciseDAO.areThereAnyUnmatched(projid);
+
+    if (checkForDominoIDs) {
+      logger.info("need to match up domino IDs");
+      Map<String, Integer> oldToID = userExerciseDAO.getNpToExID(projid);
+      logger.info("need to match up domino IDs - found " + oldToID.size());
+
+      Map<String, Integer> npToDomino = databaseImpl.getProjectManagement().getNpToDomino(dominoID);
+      List<SlickUpdateDominoPair> updateDominoPairs = new ArrayList<>();
+      npToDomino.forEach((npid, v) -> {
+        Integer exIDForNPID = oldToID.get(npid);
+        if (exIDForNPID == null) logger.warn("missing exercise for " + npid);
+        else {
+          updateDominoPairs.add(new SlickUpdateDominoPair(exIDForNPID, v));
+        }
+      });
+      logger.info("updateDominoPairs - found " + updateDominoPairs.size());
+      int i = userExerciseDAO.updateDominoBulk(updateDominoPairs);
+      if (i != updateDominoPairs.size()) {
+        logger.warn("only did " + i + " not " + updateDominoPairs.size());
+      }
+    }
 
     boolean didUpdate = easyUpdate(changed);
     if (!didUpdate) logger.error("update : couldn't update " + changed);

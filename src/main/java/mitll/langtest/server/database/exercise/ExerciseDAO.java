@@ -41,6 +41,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExercisePhone;
+import mitll.npdata.dao.SlickUpdateDominoPair;
 
 import java.util.Collection;
 import java.util.List;
@@ -86,4 +87,6 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
    * @param pairs
    */
   void updatePhonesBulk(List<SlickExercisePhone> pairs);
+
+  int updateDominoBulk(List<SlickUpdateDominoPair> pairs);
 }
