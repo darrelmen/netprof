@@ -118,6 +118,7 @@ public class ExerciseCopy {
    * @param typeOrder
    * @param idToCandidateOverride
    * @param dominoToExID
+   * @return  parent->child map - NOT USED IN SYNC
    * @see #copyUserAndPredefExercises
    * @see mitll.langtest.server.domino.ProjectSync#getDominoUpdateResponse
    */
@@ -288,10 +289,16 @@ public class ExerciseCopy {
 
           SlickRelatedExercise relation = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder, now, parentID, context);
           pairs.add(relation);
-          parentToChild.put(oldID, relation.contextexid());
+          int newContextExID = relation.contextexid();
+        //  logger.info("\taddContextExercises context id is "+ context.getID());
+          if (context.getID() == -1) {
+            logger.info("---> addContextExercises set context id to "+ newContextExID);
+            context.getMutable().setID(newContextExID);
+          }
+          parentToChild.put(oldID, newContextExID);
 
           if (DEBUG) {
-            logger.info("addContextExercises map parent ex " + parentID + " -> child ex " + relation.contextexid() +
+            logger.info("addContextExercises map parent ex " + parentID + " -> child ex " + newContextExID +
                 " ( " + ex.getDirectlyRelated().size());
           }
 

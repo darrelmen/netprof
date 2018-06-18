@@ -96,6 +96,8 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   @Deprecated
   protected AudioFileHelper audioFileHelper;
 
+  private static final boolean DEBUG = false;
+
   public MyRemoteServiceServlet() {
     super(XSRF_COOKIE_NAME);
   }
@@ -119,14 +121,14 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
     boolean hasPerm = permissions
         .contains(User.Permission.PROJECT_ADMIN) || permissions.contains(User.Permission.DEVELOP_CONTENT);
-    logger.info("hasAdminOrCDPerm for " +userIDFromSessionOrDB + " are " + permissions + " has perm "+ hasPerm);
+    logger.info("hasAdminOrCDPerm for " + userIDFromSessionOrDB + " are " + permissions + " has perm " + hasPerm);
     return hasPerm;
   }
 
   protected boolean hasCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
     boolean hasPerm = permissions.contains(User.Permission.DEVELOP_CONTENT);
-    logger.info("hasCDPerm for " +userIDFromSessionOrDB + " are " + permissions + " has perm "+ hasPerm);
+    logger.info("hasCDPerm for " + userIDFromSessionOrDB + " are " + permissions + " has perm " + hasPerm);
     return hasPerm;
   }
 
@@ -154,7 +156,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     if (!enabled) logger.info("getPermissions user " + userIDFromSessionOrDB + " not enabled");
     if (!isApprovedForNetprof) logger.info("getPermissions user " + userIDFromSessionOrDB + " not approved to use net");
 
-   logger.info("getPermissions for" +
+    if (DEBUG) logger.info("getPermissions for" +
         "\nuser  " + userFromSession +
         "\nperms " + userFromSession.getPermissions());
 
@@ -333,7 +335,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
       logger.warn("logAndNotifyServerException : about to send message with" +
           "\n\tsubject   : " + subject +
-          "\n\tmessage   : " + info+
+          "\n\tmessage   : " + info +
           "\n\texception : " + e
       );
 
