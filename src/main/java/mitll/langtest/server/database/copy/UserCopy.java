@@ -30,7 +30,7 @@ public class UserCopy {
 
   private static final boolean DEBUG = false;
   private static final boolean MAKE_COLLISION_ACCOUNT = false;
-  private static final boolean WARN_ON_COLLISION = true;
+  private static final boolean WARN_ON_COLLISION = false;
   private static final String D_ADMIN = "d.admin";
   private static final String UNALLOWED_REGEX = "[^a-zA-Z0-9_\\-.]";
   private static final String UNKNOWN = "unknown";

@@ -50,7 +50,7 @@ public class ClickableWords<T extends CommonExercise> {
   private int fontSize;
 
   private static final boolean DEBUG = false;
-  private boolean showPhones = true;
+  //private boolean showPhones = true;
 
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
@@ -71,7 +71,7 @@ public class ClickableWords<T extends CommonExercise> {
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
     this.fontSize = fontSize;
-    this.showPhones = showPhones;
+    //  this.showPhones = showPhones;
   }
 
   /**
@@ -80,7 +80,6 @@ public class ClickableWords<T extends CommonExercise> {
    * @param value
    * @param clickables
    * @param isSimple
-   * @param addRightMargin
    * @param isRTL
    * @see TwoColumnExercisePanel#getEntry
    */
@@ -88,7 +87,6 @@ public class ClickableWords<T extends CommonExercise> {
                               TwoColumnExercisePanel.FieldType fieldType,
                               List<IHighlightSegment> clickables,
                               boolean isSimple,
-                              boolean addRightMargin,
                               boolean isRTL) {
     boolean isFL = fieldType == TwoColumnExercisePanel.FieldType.FL;
     boolean flLine = isFL || (isJapanese && fieldType == TwoColumnExercisePanel.FieldType.TRANSLIT);
@@ -96,10 +94,10 @@ public class ClickableWords<T extends CommonExercise> {
     HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL :
         WordCountDirectionEstimator.get().estimateDirection(value);
 
-    boolean addRight = (isSimple && !isChineseCharacter) || addRightMargin;
+    // boolean addRight = (isSimple && !isChineseCharacter) || addRightMargin;
     return getClickableDiv(
         getTokens(value, isChineseCharacter),
-        getSearchTokens(isChineseCharacter), isSimple, addRight, dir, clickables, fieldType);
+        getSearchTokens(isChineseCharacter), isSimple, dir, clickables, fieldType);
   }
 
   @NotNull
@@ -111,7 +109,6 @@ public class ClickableWords<T extends CommonExercise> {
    * @param tokens
    * @param searchTokens
    * @param isSimple
-   * @param addRightMargin
    * @param dir
    * @param clickables
    * @param fieldType
@@ -122,7 +119,6 @@ public class ClickableWords<T extends CommonExercise> {
   private DivWidget getClickableDiv(List<String> tokens,
                                     List<String> searchTokens,
                                     boolean isSimple,
-                                    boolean addRightMargin,
                                     HasDirection.Direction dir,
                                     List<IHighlightSegment> clickables,
                                     TwoColumnExercisePanel.FieldType fieldType
@@ -156,7 +152,7 @@ public class ClickableWords<T extends CommonExercise> {
     for (String token : tokens) {
       boolean searchMatch = isSearchMatch(token, searchToken);
 
-      segments.add(makeClickableText(dir, token, searchMatch ? searchToken : null, false, id++, isSimple, fieldType));
+      segments.add(makeClickableText(dir, token, searchMatch ? searchToken : null, false, id++, fieldType));
 
       if (searchMatch) {
         if (searchIterator.hasNext()) {
@@ -176,28 +172,59 @@ public class ClickableWords<T extends CommonExercise> {
    * @param segmentsForTokens
    * @param isRTL
    * @return a clickable row
-   * @see #getClickableDiv(List, List, boolean, boolean, HasDirection.Direction, List, TwoColumnExercisePanel.FieldType)
+   * @see #getClickableDiv(List, List, boolean, HasDirection.Direction, List, TwoColumnExercisePanel.FieldType)
    */
   @NotNull
   private DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean isRTL) {
     DivWidget horizontal = getClickableDiv(isRTL);
-    horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+   // horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
     horizontal.getElement().setId(CLICKABLE_ROW);
 
-    for (IHighlightSegment segment : segmentsForTokens) {
+/*
+    if (!didIt) {
+      didIt = true;
+      intercept();
+    }
+*/
+
+    segmentsForTokens.forEach(segment -> {
       horizontal.add(segment.asWidget());
       if (isRTL) {
         segment.getClickable().addStyleName("floatRight");
       }
-    }
+    });
 
     return horizontal;
   }
 
-  public DivWidget getClickableDiv(boolean isRTL) {
+/*
+  private static boolean didIt = false;
+
+  public native boolean intercept() */
+/*-{
+      var clipboard =
+          {
+              data: '',
+              intercept: false,
+              hook: function (evt) {
+                  if (clipboard.intercept) {
+                      evt.preventDefault();
+                      evt.clipboardData.setData('text/plain', clipboard.data);
+                      clipboard.intercept = false;
+                      console.log("got data " + clipboard.data);
+                      clipboard.data = '';
+                  }
+              }
+          };
+      window.addEventListener('copy', clipboard.hook);
+  }-*//*
+;
+*/
+
+
+  DivWidget getClickableDiv(boolean isRTL) {
     DivWidget horizontal = new DivWidget();
     horizontal.addStyleName("leftFiveMargin");
-
     if (isRTL) {
       setDirection(horizontal);
     }
@@ -288,7 +315,7 @@ public class ClickableWords<T extends CommonExercise> {
           searchMatch ? searchToken : null,
           isHighlightMatch,
           id++,
-          isSimple, fieldType);
+          fieldType);
       clickables.add(clickable);
       Widget w = clickable.asWidget();
       horizontal.add(w);
@@ -320,37 +347,6 @@ public class ClickableWords<T extends CommonExercise> {
   public void setDirection(DivWidget horizontal) {
     horizontal.getElement().getStyle().setProperty("direction", "rtl");
   }
-
-  /**
-   * @param tokens
-   * @param highlightTokens
-   * @return
-   * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
-   */
-/*  @NotNull
-  private List<String> getMatchingHighlight(List<String> tokens, List<String> highlightTokens) {
-    List<String> realHighlight = new ArrayList<>();
-    Iterator<String> hIter = highlightTokens.iterator();
-
-    int index = 0;
-
-    int numToFind = highlightTokens.size();
-
-    for (; hIter.hasNext(); ) {
-      String toFind = hIter.next();
-
-      for (int i = index; i < tokens.size(); i++) {
-        String next = tokens.get(i);
-        if (isMatch(next, toFind)) {
-          index = i;
-//          realHighlight.add(toFind);
-          //logger.info("- found '" + toFind + "' = '" +next+ "' at " + index);
-          break;
-        }
-      }
-    }
-    return realHighlight;
-  }*/
 
   /**
    * Korean feedback said no partial matches
@@ -441,7 +437,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param value
    * @param isChineseCharacter
    * @return
-   * @see #getClickableWords(String, TwoColumnExercisePanel.FieldType, List, boolean, boolean, boolean)
+   * @see #getClickableWords(String, TwoColumnExercisePanel.FieldType, List, boolean, boolean)
    * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
    */
   @NotNull
@@ -473,7 +469,6 @@ public class ClickableWords<T extends CommonExercise> {
    * @param html           a token that can be clicked on to search on it
    * @param isContextMatch
    * @param id
-   * @param isSimple
    * @return
    * @see #getClickableWords
    * @see #getClickableWordsHighlight
@@ -484,7 +479,6 @@ public class ClickableWords<T extends CommonExercise> {
       String searchToken,
       boolean isContextMatch,
       int id,
-      boolean isSimple,
       TwoColumnExercisePanel.FieldType fieldType) {
     final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir,
         //!isSimple,

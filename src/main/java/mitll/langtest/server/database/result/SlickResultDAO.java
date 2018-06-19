@@ -131,40 +131,40 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * NOTE : WE can't add any more columns to this table.
    *
-   * @param shared
+   * @param toImport
    * @param projid
    * @param transcript
    * @return
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyResult
    */
-  public SlickResult toSlick(Result shared,
+  public SlickResult toSlick(Result toImport,
                              int projid,
                              Integer realExID,
                              String transcript) {
 
-    String model = shared.getModel();
+    String model = toImport.getModel();
     if (model == null) model = "";
     return new SlickResult(-1,
-        shared.getUserid(),
+        toImport.getUserid(),
         realExID,
-        new Timestamp(shared.getTimestamp()),
+        new Timestamp(toImport.getTimestamp()),
 
-        shared.getAudioType().toString(),
-        shared.getAnswer(),
-        shared.isValid(),
-        shared.getValidity(),
-        shared.getDurationInMillis(),
-        shared.getProcessDur(),
-        shared.getRoundTrip(),
-        shared.isCorrect(),
-        shared.getPronScore(),
-        checkNull(shared.getDeviceType()),
-        checkNull(shared.getDevice()),
-        checkNull(shared.getJsonScore()),
-        shared.isWithFlash(),
-        shared.getDynamicRange(),
+        toImport.getAudioType().toString(),
+        toImport.getAnswer(),
+        toImport.isValid(),
+        toImport.getValidity(),
+        toImport.getDurationInMillis(),
+        toImport.getProcessDur(),
+        toImport.getRoundTrip(),
+        toImport.isCorrect(),
+        toImport.getPronScore(),
+        checkNull(toImport.getDeviceType()),
+        checkNull(toImport.getDevice()),
+        checkNull(toImport.getJsonScore()),
+        toImport.isWithFlash(),
+        toImport.getDynamicRange(),
         transcript,
-        shared.getUniqueID(),
+        toImport.getUniqueID(),
         projid,
         model
     );

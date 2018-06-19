@@ -953,7 +953,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     DivWidget contentWidget = clickableWords.getClickableWords(getFL(e),
         FieldType.FL,
-        flclickables, false, true, isRTL);
+        flclickables, false, isRTL);
 
     flClickableRow = contentWidget;
 
@@ -1143,7 +1143,6 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
           altflClickables,
           false,
           //true,
-          !shouldShowPhones(),
           isRTL);
 
       altFLClickableRow = contentWidget;
@@ -1396,7 +1395,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                              CommentAnnotator annotationHelper,
                              boolean isRTL, int exid) {
     DivWidget contentWidget = clickableWords.getClickableWords(value, fieldType, clickables,
-        fieldType != FieldType.FL, addRightMargin, isRTL);
+        fieldType != FieldType.FL, isRTL);
     // logger.info("value " + value + " translit " + isTranslit + " is fl " + isFL);
     return getCommentEntry(field, annotation, fieldType == FieldType.TRANSLIT, showInitially,
         annotationHelper, isRTL, contentWidget, exid);

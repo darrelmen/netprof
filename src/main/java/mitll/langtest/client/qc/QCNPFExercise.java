@@ -38,7 +38,9 @@ import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
@@ -258,7 +260,6 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
 
   @Override
   protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
-    //System.out.println("nextWasPressed : load next exercise " + completedExercise.getOldID() + " instance " +instance);
     super.nextWasPressed(listContainer, completedExercise);
     markReviewed(listContainer, completedExercise);
   }

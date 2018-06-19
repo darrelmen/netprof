@@ -116,7 +116,7 @@ public class InitialUI implements UILifecycle {
   /**
    * Critical - don't mess with this.
    */
-  protected static final String LOGIN = "Login";
+  private static final String LOGIN = "Login";
   private static final int NO_USER_INITIAL = -2;
 
   private final UserManager userManager;
@@ -128,21 +128,21 @@ public class InitialUI implements UILifecycle {
    * @see #resetState
    * @see #showUserPermissions
    */
-  protected long lastUser = NO_USER_INITIAL;
+  private long lastUser = NO_USER_INITIAL;
 
-  protected final LifecycleSupport lifecycleSupport;
-  protected final ExerciseController controller;
-  protected final PropertyHandler props;
+  private final LifecycleSupport lifecycleSupport;
+  private final ExerciseController controller;
+  private final PropertyHandler props;
 
   private final IBanner banner;
 
-  protected Widget headerRow;
+  private Widget headerRow;
 
   /**
    * TODO : move breadcrumbs up into banner
    */
   private final Breadcrumbs breadcrumbs;
-  protected DivWidget contentRow;
+  private DivWidget contentRow;
   private INavigation navigation;
   private DivWidget verticalContainer;
   private final ProjectChoices choices;
@@ -179,7 +179,7 @@ public class InitialUI implements UILifecycle {
    * @see UILifecycle#gotUser
    * @see #configureUIGivenUser(long) (long)
    */
-  protected void populateRootPanelIfLogin() {
+  private void populateRootPanelIfLogin() {
     int childCount = contentRow.getElement().getChildCount();
 
     if (DEBUG)
@@ -247,7 +247,7 @@ public class InitialUI implements UILifecycle {
    * @return
    * @see #populateRootPanel
    */
-  protected DivWidget makeFirstTwoRows(DivWidget verticalContainer) {
+  private DivWidget makeFirstTwoRows(DivWidget verticalContainer) {
     // add header row
     RootPanel rootPanel = RootPanel.get();
     rootPanel.add(headerRow = makeHeaderRow());
@@ -353,7 +353,7 @@ public class InitialUI implements UILifecycle {
    * @return
    * @see #populateRootPanel
    */
-  protected DivWidget getRootContainer() {
+  private DivWidget getRootContainer() {
     RootPanel.get().clear();   // necessary?
 
     DivWidget verticalContainer = new FluidContainer();
@@ -470,7 +470,7 @@ public class InitialUI implements UILifecycle {
    * @see #populateRootPanel
    * @see #showLogin()
    */
-  protected void populateBelowHeader(DivWidget verticalContainer) {
+  private void populateBelowHeader(DivWidget verticalContainer) {
     RootPanel.get().add(verticalContainer);
 
     /**
@@ -595,9 +595,10 @@ public class InitialUI implements UILifecycle {
         //  logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         addProjectCrumb(crumbs, project);
         break;
-      } else {
-        // logger.info("addBreadcrumbLevels skipping project " + project);
       }
+      //else {
+        // logger.info("addBreadcrumbLevels skipping project " + project);
+      //}
     }
   }
 
@@ -709,7 +710,7 @@ public class InitialUI implements UILifecycle {
   /**
    * @see #addResizeHandler
    */
-  protected void onResize() {
+  private void onResize() {
     if (navigation != null) navigation.onResize();
   }
 
@@ -720,7 +721,7 @@ public class InitialUI implements UILifecycle {
    * @return false if we didn't do either of the special pages and should do the normal navigation view
    * @see #populateRootPanel()
    */
-  protected boolean showLogin() {
+  private boolean showLogin() {
     final EventRegistration eventRegistration = lifecycleSupport;
 
 
@@ -738,11 +739,11 @@ public class InitialUI implements UILifecycle {
     // are we here to show the login screen?
     boolean show = userManager.getUserID() == null;
     if (show) {
-      logger.info("showLogin user is not valid : user expired " + userManager.getUserID());
+     // logger.info("showLogin user is not valid : user expired " + userManager.getUserID());
       showLogin(eventRegistration);
       return true;
     }
-    logger.info("user is valid...");
+   // logger.info("user is valid...");
 
     showCogMenu();
     return false;
@@ -858,7 +859,7 @@ public class InitialUI implements UILifecycle {
    * @return
    * @see UILifecycle#gotUser
    */
-  protected void configureUIGivenUser(long userID) {
+  private void configureUIGivenUser(long userID) {
     // logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     boolean hasStartupInfo = lifecycleSupport.getProjectStartupInfo() != null;
     if (hasStartupInfo) {
@@ -895,11 +896,11 @@ public class InitialUI implements UILifecycle {
     //}
     choices.showProjectChoices(parent, level);
   }
-
+/*
   @Override
   public int hashCode() {
     return super.hashCode();
-  }
+  }*/
 
   /**
    * @see #addProjectChoices
@@ -954,7 +955,7 @@ public class InitialUI implements UILifecycle {
     //logger.info("removeUntilCrumb crumbs " + widgetCount + " remove to " + count + " initial " + initial);
 
     for (int i = initial; i >= count; i--) {
-      boolean remove = breadcrumbs.remove(i);
+      /*boolean remove =*/ breadcrumbs.remove(i);
       // logger.info("removeUntilCrumb remove at " + i + "  " + remove);
     }
 //    logger.info("removeUntilCrumb now " + breadcrumbs.getWidgetCount());
@@ -964,7 +965,7 @@ public class InitialUI implements UILifecycle {
    * @param userID
    * @see #configureUIGivenUser(long)
    */
-  protected void showUserPermissions(long userID) {
+  private void showUserPermissions(long userID) {
     lastUser = userID;
     banner.reflectPermissions(lifecycleSupport.getPermissions());
   }
