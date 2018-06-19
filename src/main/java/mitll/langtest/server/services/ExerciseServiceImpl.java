@@ -110,8 +110,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       User userFromSession = getUserFromSession();
 
       if (userFromSession != null) {
-        logger.info("getTypeToValues got " + userFromSession);
-        logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
+//        logger.info("getTypeToValues got " + userFromSession);
+ //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
         int userFromSessionID = userFromSession.getID();
         int projectID = getProjectIDFromUser(userFromSessionID);
 

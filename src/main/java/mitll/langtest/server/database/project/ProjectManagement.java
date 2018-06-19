@@ -806,7 +806,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
-    logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
+   // logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
       clearStartupInfo(userWhere);
@@ -846,11 +846,11 @@ public class ProjectManagement implements IProjectManagement {
     SlickProject project1 = project.getProject();
     List<String> typeOrder = project.getTypeOrder();
 
-    logger.info("project   " + project1);
-    logger.info("typeOrder " + typeOrder);
+//    logger.info("project   " + project1);
+//    logger.info("typeOrder " + typeOrder);
 
     ISection<CommonExercise> sectionHelper = project.getSectionHelper();
-    logger.info("sectionHelper typeOrder " + typeOrder);
+//    logger.info("sectionHelper typeOrder " + typeOrder);
 
     String language = project1.language();
 

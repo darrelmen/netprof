@@ -507,7 +507,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.id = uniqueID;
   }
 
-  @Override
+/*  @Override
   public boolean equals(Object other) {
     boolean checkOld = !getOldID().isEmpty();
     return other instanceof Exercise &&
@@ -515,7 +515,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
             (getID() != -1 && ((ExerciseShell) other).getID() != -1 &&
                 (getID() == ((ExerciseShell) other).getID()))
         );
-  }
+  }*/
 
   @Deprecated
   public String getOldID() {

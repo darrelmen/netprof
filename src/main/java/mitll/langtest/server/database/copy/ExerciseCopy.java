@@ -3,6 +3,7 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
+import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -118,7 +119,7 @@ public class ExerciseCopy {
    * @param typeOrder
    * @param idToCandidateOverride
    * @param dominoToExID
-   * @return  parent->child map - NOT USED IN SYNC
+   * @return parent->child map - NOT USED IN SYNC
    * @see #copyUserAndPredefExercises
    * @see mitll.langtest.server.domino.ProjectSync#getDominoUpdateResponse
    */
@@ -146,6 +147,14 @@ public class ExerciseCopy {
     return addContextExercises(projectid, slickUEDAO, exToInt, importUser, exercises, typeOrder);
   }
 
+  /**
+   * @param importUser
+   * @param projectid
+   * @param slickUEDAO
+   * @param exercises
+   * @param typeOrder
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoUpdateResponse
+   */
   public void addContextExercises(int importUser,
                                   int projectid,
                                   SlickUserExerciseDAO slickUEDAO,
@@ -155,17 +164,20 @@ public class ExerciseCopy {
 
     Timestamp now = new Timestamp(System.currentTimeMillis());
 
+    logger.info("addContextExercises adding " + exercises.size() + " context exercises ");
     for (CommonExercise context : exercises) {
-//      logger.info("addContextExercises adding context " + context);
-      //     logger.info("addContextExercises context id " + context.getID() + " with parent " + context.getParentExerciseID());
+      logger.info("addContextExercises adding context " + context);
+      logger.info("addContextExercises context id     " + context.getID() + " with parent " + context.getParentExerciseID());
       if (context.getParentExerciseID() > 0) {
         SlickRelatedExercise e = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder,
             now, context.getParentExerciseID(), context);
+        context.getMutable().setID(e.contextexid());
         pairs.add(e);
       } else {
         logger.warn("addContextExercises ex " + context.getID() + " " + context.getEnglish() + " has no parent id set?");
       }
     }
+    logger.info("addContextExercises adding " + pairs.size() + " pairs exercises ");
 
     slickUEDAO.addBulkRelated(pairs);
   }
@@ -290,9 +302,9 @@ public class ExerciseCopy {
           SlickRelatedExercise relation = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder, now, parentID, context);
           pairs.add(relation);
           int newContextExID = relation.contextexid();
-        //  logger.info("\taddContextExercises context id is "+ context.getID());
+          //  logger.info("\taddContextExercises context id is "+ context.getID());
           if (context.getID() == -1) {
-            logger.info("---> addContextExercises set context id to "+ newContextExID);
+            logger.info("---> addContextExercises set context id to " + newContextExID);
             context.getMutable().setID(newContextExID);
           }
           parentToChild.put(oldID, newContextExID);
