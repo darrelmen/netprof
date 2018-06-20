@@ -497,23 +497,41 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * This is how we merge pashto projects...
    *
-   * @see CopyToPostgres#merge
+   * so only copy over the audio for the imported exercises...
+   *
+   * only copy over ref result for the import exercises
+   *
    * @param oldID
    * @param newprojid
+   * @param isChinese
+   * @see CopyToPostgres#merge
    */
-  public void updateProject(int oldID, int newprojid) {
-    if (!getUserExerciseDAO().updateProject(oldID, newprojid)) {
-      logger.error("couldn't update exercise dao to " + newprojid);
+  public void updateProject(int oldID, int newprojid, boolean isChinese) {
+    List<Integer> justTheseIDs = new ArrayList<>();
+
+    if (isChinese) {
+      SlickUserExerciseDAO userExerciseDAO = (SlickUserExerciseDAO) getUserExerciseDAO();
+      if (!userExerciseDAO.updateProjectChinese(oldID, newprojid, justTheseIDs)) {
+        logger.error("couldn't update chinese exercises dao to " + newprojid);
+      } else {
+        logger.info("updated exercises");
+      }
     } else {
-      logger.info("updated exercises");
+      if (!getUserExerciseDAO().updateProject(oldID, newprojid)) {
+        logger.error("couldn't update exercise dao to " + newprojid);
+      } else {
+        logger.info("updated exercises");
+      }
     }
 
+    // TODO : remap exercise references from old to new for the non-custom ids
     if (!resultDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update result dao to " + newprojid);
     } else {
       logger.info("updated results");
     }
 
+    // TODO : only copy over the audio for the custom items...
     if (!audioDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update audio dao to " + newprojid);
     } else {
@@ -538,10 +556,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("updated user lists.");
     }
 
-    if (!refresultDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update ref result dao to " + newprojid);
-    } else {
-      logger.info("updated ref results");
+    if (!isChinese) {
+      if (!refresultDAO.updateProject(oldID, newprojid)) {
+        logger.error("couldn't update ref result dao to " + newprojid);
+      } else {
+        logger.info("updated ref results");
+      }
     }
 
     if (!userProjectDAO.updateProject(oldID, newprojid)) {
@@ -989,7 +1009,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param userExercise
    * @param keepAudio
-   * @see mitll.langtest.server.services.ListServiceImpl#editItem
+   * @seex mitll.langtest.server.services.ListServiceImpl#editItem
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   @Override

@@ -158,6 +158,35 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return b && b1 && b2;
   }
 
+  public boolean updateProjectChinese(int old, int newprojid, List<Integer> justTheseIDs) {
+    List<SlickExercise> toImport =
+        dao.getAllByProject(old).stream().filter(slickExercise -> slickExercise.exid().startsWith("Custom_")).collect(Collectors.toList());
+
+    logger.info("updateProject altering " + toImport.size() + " exercises...");
+    toImport.forEach(slickExercise -> dao.updateOldEx(slickExercise.id(), old + "-" + slickExercise.exid()));
+    logger.info("updateProject found    " + toImport.size() + " exercises...");
+
+    justTheseIDs.addAll(toImport.stream().map(SlickExercise::id).collect(Collectors.toList()));
+    logger.info("updateProject found    " + justTheseIDs.size() + " ids...");
+
+    boolean b = dao.updateProjectIn(old, newprojid, justTheseIDs) > 0;
+    if (b) {
+      logger.info("updated exercises to            " + newprojid);
+    }
+
+    boolean b1 = attributeDAOWrapper.updateProject(old, newprojid) > 0;
+    if (b1) {
+      logger.info("updated exercise attributes to " + newprojid);
+    }
+
+/*
+    boolean b2 = relatedExerciseDAOWrapper.updateProject(old, newprojid) > 0;
+    if (b2) logger.info("updated related exercises  to  " + newprojid);
+*/
+
+    return b && b1;// && b2;
+  }
+
   /**
    * @param shared
    * @param projectID
@@ -1215,9 +1244,15 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         return attributeJoinDAOWrapper.getName();
       }
 
+      /**
+       * Exercise attribute join table is independent of project - makes no reference to project - nothing to update
+       * @param oldID
+       * @param newprojid
+       * @return
+       */
       @Override
       public boolean updateProject(int oldID, int newprojid) {
-        return true;//attributeJoinDAOWrapper.updateProject(oldID, newprojid) > 0;
+        return true;
       }
     };
   }

@@ -60,14 +60,13 @@ import mitll.langtest.server.database.userlist.*;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.database.word.WordDAO;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.*;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
@@ -330,7 +329,7 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.error("nope - not same language " + fProject.getLanguage() + " vs " + tProject.getLanguage());
       return;
     }
-    database.updateProject(from, to);
+    database.updateProject(from, to, fProject.getLanguageEnum() == Language.MANDARIN && tProject.getLanguageEnum() == Language.MANDARIN);
     database.close();
   }
 

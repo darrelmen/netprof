@@ -734,7 +734,7 @@ public class ProjectManagement implements IProjectManagement {
       }
 
       if (project == null && !idToProject.isEmpty()) {
-        logger.error("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+        logger.warn("getProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
             ") ");
         return null;
       }
