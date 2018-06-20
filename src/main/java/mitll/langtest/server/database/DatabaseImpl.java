@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
 import mitll.langtest.server.audio.AudioCheck;
@@ -895,7 +896,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param project
    * @param forceReload
    * @return number of exercises in the project
+   * @see ProjectEditForm#updateProject
    * @see mitll.langtest.server.services.ProjectServiceImpl#update
+   * @see mitll.langtest.server.services.ProjectServiceImpl#configureAndRefresh
    */
   @Override
   public int configureProject(Project project, boolean forceReload) {

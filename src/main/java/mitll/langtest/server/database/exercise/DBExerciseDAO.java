@@ -43,12 +43,11 @@ import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.collection.Iterable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SEMESTER;
+import static mitll.langtest.server.database.exercise.Facet.SEMESTER;
 import static mitll.langtest.server.database.exercise.SectionHelper.SUBTOPIC_LC;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
@@ -316,7 +315,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       parentToChild.put(firstProjectType, second);
     }
 
-    String topic = SectionHelper.Facet.TOPIC.toString();
+    String topic = Facet.TOPIC.toString();
     if (rootTypes.contains(topic)) {
       setParentChild(attributeTypes, parentToChild, topic);
     } else {
@@ -336,7 +335,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   private void setParentChild(Collection<String> rootTypes, Map<String, String> parentToChild, String lowerTopic) {
-    String subtopic = SectionHelper.Facet.SUB_TOPIC.toString();
+    String subtopic = Facet.SUB_TOPIC.toString();
     if (rootTypes.contains(SUBTOPIC_LC)) {
       parentToChild.put(lowerTopic, SUBTOPIC_LC);
     } else if (rootTypes.contains(subtopic)) {
@@ -388,9 +387,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   @Override
   public void updatePhonesBulk(List<SlickExercisePhone> pairs) { getDao().updatePhonesBulk(pairs);  }
+
+  /**
+   * @see SlickUserExerciseDAO#updateDominoBulk
+   * @param pairs
+   * @return
+   */
   public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
-    Iterable<Object> objectIterable = getDao().updateDominoBulk(pairs);
-    return objectIterable.toSeq().size();
+    return getDao().updateDominoBulk(pairs).toSeq().size();
   }
 
   private ExerciseDAOWrapper getDao() {

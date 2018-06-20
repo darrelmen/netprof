@@ -39,8 +39,11 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+
+import static mitll.langtest.server.database.exercise.Facet.SUB_TOPIC;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -69,10 +72,8 @@ public class JsonExport {
   private static final String EN = "en";
   private static final String CT = "ct";
   private static final String CTR = "ctr";
-  private static final String MN = "mn";
-//  private static final String COUNT = "Count";
-//  private static final String UNIT_ORDER = "UnitOrder";
-//  private static final String UNIT_CHAPTER_NESTING = "UnitChapterNesting";
+//  private static final String MN = "mn";
+
   private static final int MAX_DEPTH = 2;
 
   private final Map<String, Integer> phoneToCount;
@@ -97,126 +98,6 @@ public class JsonExport {
     this.isEnglish = isEnglish;
   }
 
-  /**
-   * @return
-   * @paramx json
-   * @seex JSONExerciseDAO#readExercises
-   */
-/*  public List<CommonExercise> getExercises(String json) {
-    JSONObject object = JSONObject.fromObject(json);
-    Collection<String> types = getTypes(object);
-
-    JSONArray content = object.getJSONArray(ScoreServlet.CONTENT);
-    List<CommonExercise> exercises = new ArrayList<>();
-    for (int i = 0; i < content.size(); i++) {
-      exercises.add(toExercise(content.getJSONObject(i), types));
-    }
-
-    for (CommonExercise ex : exercises.subList(0, 10)) {
-      logger.info("got " + ex);
-    }
-    return exercises;
-  }*/
-
-/*
-  private List<String> getTypes(JSONObject object) {
-    List<String> types = new ArrayList<>();
-    JSONArray jsonArray = object.getJSONArray(UNIT_ORDER);
-    for (int i = 0; i < jsonArray.size(); i++) {
-      types.add(jsonArray.getString(i));
-    }
-    if (types.size() > MAX_DEPTH) types = types.subList(0, MAX_DEPTH);
-    return types;
-  }
-*/
-
-  /**
-   * @paramx xjsonObject
-   * @paramx exercises
-   * @paramx <T>
-   * @seex ScoreServlet#getJSONExerciseExport
-   */
-/*  public <T extends CommonExercise> void addJSONExerciseExport(JSONObject jsonObject, Collection<T> exercises) {
-    jsonObject.put(COUNT, exercises.size());
-    jsonObject.put(UNIT_ORDER, addUnitsInOrder());
-    jsonObject.put(UNIT_CHAPTER_NESTING, addSections(sectionHelper.getSectionNodesForTypes()));
-    jsonObject.put(ScoreServlet.CONTENT, getExercisesAsJson(exercises));
-  }*/
-/*
-
-  private JSONArray addUnitsInOrder() {
-    JSONArray value = new JSONArray();
-    getTypeOrder().forEach(value::add);
-    return value;
-  }
-*/
-
-/*  private List<String> getTypeOrder() {
-    List<String> typeOrder = sectionHelper.getTypeOrder();
-    if (typeOrder.size() > MAX_DEPTH) typeOrder = typeOrder.subList(0, MAX_DEPTH);
-    logger.info("type order " + typeOrder);
-    return typeOrder;
-  }*/
-
-/*
-  private JSONArray addSections(Collection<SectionNode> sectionNodes) {
-    JSONArray nesting = new JSONArray();
-
-    List<SectionNode> sorted = new ArrayList<>(sectionNodes);
-    Collections.sort(sorted);
-    for (SectionNode node : sorted) {
-      JSONObject forNode = new JSONObject();
-      forNode.put(TYPE, node.getType());
-      forNode.put(NAME, node.getName());
-      Collection<SectionNode> children1 = node.getChildren();
-      JSONArray children = children1.isEmpty() ? new JSONArray() : addSections(children1);
-
-      forNode.put(CHILDREN, children);
-      nesting.add(forNode);
-    }
-    return nesting;
-  }
-*/
-
-  /**
-   * @param exercises
-   * @param <T>
-   * @return
-   * @seex #addJSONExerciseExport(JSONObject, Collection)
-   */
-/*  private <T extends CommonExercise> JSONArray getExercisesAsJson(Collection<T> exercises) {
-    JSONArray jsonArray = new JSONArray();
-    Collection<T> sortedByID = getSortedByID(exercises);
-
-    // int c = 0;
-    for (T exercise : sortedByID) {
-      JSONObject jsonForCommonExercise = getJsonForCommonExercise(exercise, true);
-      addUnitAndChapter(exercise, jsonForCommonExercise);
-      jsonArray.add(jsonForCommonExercise);
-      //  if (c++ > 10)break;
-    }
-    return jsonArray;
-  }*/
-
-/*  private <T extends CommonShell> Collection<T> getSortedByID(Collection<T> exercises) {
-    List<T> copy = new ArrayList<>(exercises);
-    copy.sort(Comparator.comparingInt(HasID::getID));
-    return copy;
-  }*/
-
-//  private int c = 0;
-
-/*  private <T extends CommonShell & HasUnitChapter> void addUnitAndChapter(T exercise, JSONObject jsonForCommonExercise) {
-    for (String type : getTypeOrder()) {
-      String value = exercise.getUnitToValue().get(type);
-      if (value == null) {
-        if (c++ < 10)
-          logger.warn("huh? no value for " + type + " for " + exercise.getID() + " : " + exercise.getUnitToValue());
-        value = "";
-      }
-      jsonForCommonExercise.put(type, value);
-    }
-  }*/
 
   /**
    * @param removeExercisesWithMissingAudio
@@ -231,12 +112,19 @@ public class JsonExport {
 
     //logger.info("getContentAsJson : section nodes " + sectionNodesForTypes);
     List<String> typeOrder = sectionHelper.getTypeOrder();
-    typeOrder = typeOrder.size() > MAX_DEPTH ? typeOrder.subList(0, MAX_DEPTH) : typeOrder;
+    boolean semester = typeOrder.iterator().next().startsWith("Semester");
+    if (semester) {
+      logger.info("getContentAsJson first is semester - pashto???");
+    }
+
+    int maxDepthToUse = semester ? MAX_DEPTH + 1 : MAX_DEPTH;
+    List<String> minimalTypeOrder = typeOrder.size() > maxDepthToUse ? typeOrder.subList(0, maxDepthToUse) : typeOrder;
+
     for (SectionNode node : sectionNodesForTypes) {
       String type = node.getType();
       //logger.info("\tgetContentAsJson type " + type + " : " + node.getName());
       typeToValues.put(type, Collections.singletonList(node.getName()));
-      JSONObject jsonForNode = getJsonForNode(node, typeToValues, removeExercisesWithMissingAudio, typeOrder);
+      JSONObject jsonForNode = getJsonForNode(node, typeToValues, removeExercisesWithMissingAudio, minimalTypeOrder);
       typeToValues.remove(type);
 
       jsonArray.add(jsonForNode);
@@ -267,7 +155,7 @@ public class JsonExport {
 
       if (node.isLeaf() || !firstTypes.iterator().next().equalsIgnoreCase(type)) { // stop when get below first types, e.g. unit,chapter
         // logger.info("getJsonForNode leaf " + typeToValues.keySet() + " types");
-        jsonForNode.put(ITEMS, getJsonForSelection(typeToValues, removeExercisesWithMissingAudio, true));
+        jsonForNode.put(ITEMS, getJsonForSelection(typeToValues, removeExercisesWithMissingAudio, true, firstTypes));
       } else {
         List<SectionNode> children = node.getChildren();
         //     logger.info("getJsonForNode node " + node.getType() + " = " + node.getName() + " with " + children.size() + " children");
@@ -287,13 +175,26 @@ public class JsonExport {
   /**
    * @param typeToValues                    for this unit and chapter
    * @param removeExercisesWithMissingAudio
+   * @param firstTypes
    * @return
    * @see #getJsonForNode
    */
   private JSONArray getJsonForSelection(
       Map<String, Collection<String>> typeToValues,
       boolean removeExercisesWithMissingAudio,
-      boolean removeCantDecode) {
+      boolean removeCantDecode,
+      Collection<String> firstTypes) {
+    return getJsonArray(getFilteredExercises(typeToValues, removeExercisesWithMissingAudio, removeCantDecode), firstTypes);
+  }
+
+  /**
+   * @param typeToValues
+   * @param removeExercisesWithMissingAudio
+   * @param removeCantDecode
+   * @return
+   */
+  @NotNull
+  private List<CommonExercise> getFilteredExercises(Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio, boolean removeCantDecode) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
 
     if (exercisesForState.isEmpty()) {
@@ -305,8 +206,7 @@ public class JsonExport {
     if (removeExercisesWithMissingAudio) {
       Iterator<CommonExercise> iterator = copy.iterator();
       for (; iterator.hasNext(); ) {
-        CommonExercise next = iterator.next();
-        if (!next.hasRefAudio()) iterator.remove();
+        if (!iterator.next().hasRefAudio()) iterator.remove();
       }
     }
 
@@ -317,10 +217,10 @@ public class JsonExport {
         CommonExercise next = iterator.next();
         if (!next.isSafeToDecode()) iterator.remove();
       }
-  //    logger.info("getJsonForSelection after  had " + exercisesForState.size());
+      //    logger.info("getJsonForSelection after  had " + exercisesForState.size());
     }
     getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);
-    return getJsonArray(copy);
+    return copy;
   }
 
   private ExerciseSorter getExerciseSorter() {
@@ -336,12 +236,13 @@ public class JsonExport {
    * exercises with new reference audio).
    *
    * @param copy
+   * @param firstTypes
    * @return
-   * @seex #getJsonForSelection(Map, boolean)
+   * @see #getJsonForSelection
    */
-  private JSONArray getJsonArray(Collection<CommonExercise> copy) {
+  private JSONArray getJsonArray(Collection<CommonExercise> copy, Collection<String> firstTypes) {
     JSONArray exercises = new JSONArray();
-    copy.forEach(commonExercise -> exercises.add(getJsonForExercise(commonExercise)));
+    copy.forEach(commonExercise -> exercises.add(getJsonForExercise(commonExercise, firstTypes)));
     return exercises;
   }
 
@@ -351,10 +252,12 @@ public class JsonExport {
    * Prefer recordings by voices on the preferred list.
    *
    * @param exercise
+   * @param firstTypes
    * @return
+   * @see #getJsonArray(Collection, Collection)
    */
-  private <T extends CommonExercise> JSONObject getJsonForExercise(T exercise) {
-    JSONObject ex = getJsonForCommonExercise(exercise);
+  private <T extends CommonExercise> JSONObject getJsonForExercise(T exercise, Collection<String> firstTypes) {
+    JSONObject ex = getJsonForCommonExercise(exercise, firstTypes);
 
     addContextAudioRefs(exercise, ex, exercise.getDirectlyRelated());
     addLatestRefs(preferredVoices, exercise, ex);
@@ -371,7 +274,7 @@ public class JsonExport {
    * @param exercise
    * @param ex
    * @param directlyRelated
-   * @see #getJsonForExercise(CommonExercise)
+   * @see #getJsonForExercise(CommonExercise, Collection)
    */
   private <T extends AudioAttributeExercise> void addContextAudioRefs(T exercise, JSONObject ex, Collection<CommonExercise> directlyRelated) {
     AudioAttribute latestContext = exercise.getLatestContext(true);
@@ -410,64 +313,45 @@ public class JsonExport {
   /**
    * TODO : add json array of context sentences - be careful to maintain backward compatibility
    *
+   * Only adds first context sentence if it's there.
+   *
+   * Don't redundantly include the unit and chapter markings - we know those from it's position in the nested chapters
+   *
+   * Darrel doesn't like Sub-topic for some reason.
+   *
    * @param exercise
+   * @param firstTypes
    * @return
+   * @see #getJsonForExercise
    */
-  private JSONObject getJsonForCommonExercise(CommonExercise exercise) {
+  private JSONObject getJsonForCommonExercise(CommonExercise exercise, Collection<String> firstTypes) {
     JSONObject ex = new JSONObject();
     ex.put(ID, exercise.getID());
     ex.put(FL, exercise.getForeignLanguage());
     ex.put(TL, exercise.getTransliteration() == null ? "" : exercise.getTransliteration());
     ex.put(EN, isEnglish && !exercise.getMeaning().isEmpty() ? exercise.getMeaning() : exercise.getEnglish());
 
-    exercise.getUnitToValue().forEach(ex::put);
-  //  if (addMeaning) ex.put(MN, exercise.getMeaning());
+    Map<String, String> unitToValue = exercise.getUnitToValue();
+    unitToValue.forEach((k, v) -> {
+      if (!firstTypes.contains(k)) {
+        String keyToUse = k.equalsIgnoreCase(SUB_TOPIC.getName()) ? SUB_TOPIC.getAlt() : k;
+        ex.put(keyToUse, v);
+      }
+    });
+    //  if (addMeaning) ex.put(MN, exercise.getMeaning());
 
-    boolean hasContext = !exercise.getDirectlyRelated().isEmpty();
-    if (hasContext) {
-      CommonExercise next = exercise.getDirectlyRelated().iterator().next();
-      ex.put(CT, next.getForeignLanguage());
-      ex.put(CTR, next.getEnglish());
-    } else {
+    if (exercise.getDirectlyRelated().isEmpty()) {
       ex.put(CT, "");
       ex.put(CTR, "");
+    } else {
+      CommonExercise next = exercise.getDirectlyRelated().iterator().next();
+      ex.put(CT,  next.getForeignLanguage());
+      ex.put(CTR, next.getEnglish());
     }
 
     return ex;
   }
 
-  /**
-   * TODO : consider making context sentences a subobject analogous to domino export json
-   *
-   * @param jsonObject
-   * @param types
-   * @return
-   */
-/*  private CommonExercise toExercise(JSONObject jsonObject, Collection<String> types) {
-    String id = jsonObject.getString(ID);
-    CommonExercise exercise = new Exercise(
-        id,
-        jsonObject.getString(EN),
-        jsonObject.getString(FL),
-        jsonObject.getString(MN),
-        jsonObject.getString(TL),
-        -1, -1, "");
-
-    try {
-      for (String type : types) {
-        if (jsonObject.has(type)) {
-          String value = jsonObject.getString(type);
-          if (value == null) logger.error("toExercise : missing " + type + " on " + exercise.getID());
-          else exercise.addUnitToValue(type, value);
-        } else {
-          exercise.addUnitToValue(type, "");
-        }
-      }
-    } catch (Exception e) {
-      logger.warn("toExercise : got " + e + " for " + exercise.getID());
-    }
-    return exercise;
-  }*/
 
   /**
    * Male/female reg/slow speed

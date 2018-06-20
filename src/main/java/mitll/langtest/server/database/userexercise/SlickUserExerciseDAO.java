@@ -43,9 +43,11 @@ import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
@@ -1004,6 +1006,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   /**
    * Niche feature for alt chinese to swap primary and alternate...
+   *
    * @param projid
    * @return
    */
@@ -1011,7 +1014,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private boolean getShouldSwap(int projid) {
     return false;
 //    String defPropValue = projectDAO.getDefPropValue(projid, ProjectProperty.SWAP_PRIMARY_AND_ALT);
- //   return defPropValue.equalsIgnoreCase("TRUE");
+    //   return defPropValue.equalsIgnoreCase("TRUE");
   }
 
   /**
@@ -1454,17 +1457,29 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return dao.getLegacyToExercise(projectid);
   }
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectDAO#update
+   * @see DominoImport#getImportFromDomino
+   * @param projid
+   * @return
+   */
   public boolean areThereAnyUnmatched(int projid) {
-    return dao.getUnknownDomino(projid).size() > 0;
+    return dao.getUnknownDomino(projid).size() > 0 || dao.getUnknownDominoTriplet(projid).size() > 0 ;
   }
 
   public Map<String, Integer> getNpToExID(int projid) {
     return dao.getUnknownDomino(projid);
   }
 
+  /**
+   * @param pairs
+   * @return
+   * @see mitll.langtest.server.database.project.ProjectDAO#update
+   */
   public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
     return exerciseDAO.updateDominoBulk(pairs);
   }
+
   public Map<Integer, SlickExercise> getLegacyToDeletedEx(int projectid) {
     return dao.getLegacyToDeletedExercise(projectid);
   }

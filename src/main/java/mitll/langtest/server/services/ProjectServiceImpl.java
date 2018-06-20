@@ -53,10 +53,10 @@ import java.util.stream.Collectors;
 public class ProjectServiceImpl extends MyRemoteServiceServlet implements ProjectService {
   private static final Logger logger = LogManager.getLogger(ProjectServiceImpl.class);
 
-  public static final String UPDATING_PROJECT_INFO = "updating project info";
+  private static final String UPDATING_PROJECT_INFO = "updating project info";
   private static final String CREATING_PROJECT = "Creating project";
   private static final String DELETING_A_PROJECT = "deleting a project";
-  public static final String ADDING_PENDING_EXERCISES = "adding pending exercises";
+  private static final String ADDING_PENDING_EXERCISES = "adding pending exercises";
 
   private IProjectDAO getProjectDAO() {
     return db.getProjectDAO();
@@ -97,16 +97,12 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
   }
 
-  /*
-    public void configureAndRefresh(boolean update, int projID) throws DominoSessionException, RestrictedOperationException {
-      int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-      if (hasAdminPerm(userIDFromSessionOrDB)) {
-        configureAndRefresh(userIDFromSessionOrDB, projID, update);
-      } else {
-        throw getRestricted(UPDATING_PROJECT_INFO);
-      }
-    }
-  */
+  /**
+   * @see #update
+   * @param userIDFromSessionOrDB
+   * @param projID
+   * @param update
+   */
   private void configureAndRefresh(int userIDFromSessionOrDB, int projID, boolean update) {
     if (update) {
 /*

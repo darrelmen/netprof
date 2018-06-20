@@ -294,6 +294,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param forceReload
    * @return number of exercises in the project
    * @see #configureProjects
+   * @see DatabaseImpl#configureProject
    */
   public int configureProject(Project project, boolean configureEvenRetired, boolean forceReload) {
     long then = System.currentTimeMillis();
@@ -330,6 +331,10 @@ public class ProjectManagement implements IProjectManagement {
 
     if (forceReload) {
       project.getExerciseDAO().reload();
+
+      if (projectDAO.maybeSetDominoIDs(project)) {
+        logger.info("configureProject : updated domino ids on " + project);
+      }
     }
 
     if (project.getExerciseDAO() == null) {
@@ -806,7 +811,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
-   // logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
+    // logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
       clearStartupInfo(userWhere);
@@ -1092,7 +1097,7 @@ public class ProjectManagement implements IProjectManagement {
     return dominoImport == null ? "" : dominoImport.getDominoProjectName(dominoProjectID);
   }
 
-  public Map<String,Integer> getNpToDomino(int dominoProjectID) {
+  public Map<String, Integer> getNpToDomino(int dominoProjectID) {
     return dominoImport == null ? Collections.emptyMap() : dominoImport.getNPIDToDominoID(dominoProjectID);
   }
 }

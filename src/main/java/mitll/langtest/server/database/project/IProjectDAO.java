@@ -186,4 +186,5 @@ public interface IProjectDAO extends IDAO {
    */
   Map<String, String> getProps(int projid);
 
+  boolean maybeSetDominoIDs(Project project);
 }

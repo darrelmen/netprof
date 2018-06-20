@@ -1282,9 +1282,9 @@ public class ExerciseCopy {
       "L20\n" +
       "L20";
 
-  List<String> specialIDs = Arrays.asList(mandarinSpecial.split("\n"));
-  List<String> altMandarin = Arrays.asList(mandarinAlt.split("\n"));
-  List<String> altLessonList = Arrays.asList(altLesson.split("\n"));
+  private List<String> specialIDs = Arrays.asList(mandarinSpecial.split("\n"));
+  private List<String> altMandarin = Arrays.asList(mandarinAlt.split("\n"));
+  private List<String> altLessonList = Arrays.asList(altLesson.split("\n"));
 
 
   private boolean isConvertable(Exercise exercise) {

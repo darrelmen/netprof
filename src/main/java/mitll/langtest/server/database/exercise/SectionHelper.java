@@ -43,8 +43,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.InputStream;
 import java.util.*;
 
-import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SEMESTER;
-import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SUB_TOPIC;
+import static mitll.langtest.server.database.exercise.Facet.SEMESTER;
+import static mitll.langtest.server.database.exercise.Facet.SUB_TOPIC;
 
 /**
  * Created with IntelliJ IDEA.
@@ -58,47 +58,7 @@ import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SUB_TO
 public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection<T>, ITestSection<T> {
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
 
-  /**
-   * These are fixed!
-   *
-   * @see DBExerciseDAO#setRootTypes
-   * @see #reorderTypes
-   */
-  enum Facet implements Comparator<Facet> {
-    SEMESTER("Semester", 0),
-    TOPIC("Topic", 1),
-    SUB_TOPIC("Sub-topic", 2),
-    GRAMMAR("Grammar", 3),
-    DIALECT("Dialect", 4),
-    DIFFICULTY("Difficulty", 5);
-
-    private String name;
-    private int order;
-
-    Facet(String name, int order) {
-      this.name = name;
-      this.order = order;
-    }
-
-    public String toString() {
-      return name;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public int getOrder() {
-      return order;
-    }
-
-    @Override
-    public int compare(Facet o1, Facet o2) {
-      return Integer.compare(o1.order, o2.order);
-    }
-  }
-
-  static final String SUBTOPIC_LC = "subtopic";
+  static final String SUBTOPIC_LC = SUB_TOPIC.getAlt();//"subtopic";
   /**
    * @see DBExerciseDAO#removeSubtopic
    */

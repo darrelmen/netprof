@@ -172,24 +172,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     boolean checkForDominoIDs = differentDomino || userExerciseDAO.areThereAnyUnmatched(projid);
 
     if (checkForDominoIDs) {
-      logger.info("need to match up domino IDs");
-      Map<String, Integer> oldToID = userExerciseDAO.getNpToExID(projid);
-      logger.info("need to match up domino IDs - found " + oldToID.size());
-
-      Map<String, Integer> npToDomino = databaseImpl.getProjectManagement().getNpToDomino(dominoID);
-      List<SlickUpdateDominoPair> updateDominoPairs = new ArrayList<>();
-      npToDomino.forEach((npid, v) -> {
-        Integer exIDForNPID = oldToID.get(npid);
-        if (exIDForNPID == null) logger.warn("missing exercise for " + npid);
-        else {
-          updateDominoPairs.add(new SlickUpdateDominoPair(exIDForNPID, v));
-        }
-      });
-      logger.info("updateDominoPairs - found " + updateDominoPairs.size());
-      int i = userExerciseDAO.updateDominoBulk(updateDominoPairs);
-      if (i != updateDominoPairs.size()) {
-        logger.warn("only did " + i + " not " + updateDominoPairs.size());
-      }
+      setDominoIDOnExercises(projid, dominoID);
     }
 
     boolean didUpdate = easyUpdate(changed);
@@ -205,6 +188,56 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     }
 
     return didChange;
+  }
+
+  /**
+   * @param project
+   * @return true if it changed domino ids
+   */
+  @Override
+  public boolean maybeSetDominoIDs(Project project) {
+    int projectID = project.getID();
+    int dominoID = project.getProject().dominoid();
+    long then = System.currentTimeMillis();
+    if (dominoID == -1) {
+      logger.info("no domino id yet on " + project);
+      return false;
+    } else if (userExerciseDAO.areThereAnyUnmatched(projectID)) {
+      setDominoIDOnExercises(projectID, dominoID);
+      long now = System.currentTimeMillis();
+      logger.info("maybeSetDominoIDs on " + project.getName() + " took " + (now - then) + " millis");
+
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Set the domino id on each exercise. Might change if we change the matching domino project.
+   *
+   * @param projid
+   * @param dominoProjectID
+   */
+  private void setDominoIDOnExercises(int projid, int dominoProjectID) {
+    Map<String, Integer> oldToID = userExerciseDAO.getNpToExID(projid);
+    logger.info("setDominoIDOnExercises : need to match up domino IDs - found " + oldToID.size());
+
+    Map<String, Integer> npToDomino = databaseImpl.getProjectManagement().getNpToDomino(dominoProjectID);
+    List<SlickUpdateDominoPair> updateDominoPairs = new ArrayList<>();
+    npToDomino.forEach((npid, dominoID) -> {
+      Integer exIDForNPID = oldToID.get(npid);
+      if (exIDForNPID == null) {
+        logger.warn("missing exercise for " + npid + " and domino " + dominoID);
+      } else {
+        updateDominoPairs.add(new SlickUpdateDominoPair(exIDForNPID, dominoID));
+      }
+    });
+    logger.info("updateDominoPairs - found " + updateDominoPairs.size());
+    int i = userExerciseDAO.updateDominoBulk(updateDominoPairs);
+    if (i != updateDominoPairs.size()) {
+      logger.warn("only did " + i + " not " + updateDominoPairs.size());
+    }
   }
 
   /**
