@@ -96,13 +96,20 @@ public class ExerciseCopy {
   private void convertChinese(List<Exercise> converted, Exercise exercise, String oldID) {
     logger.info("converting " + exercise);
     exercise.getMutable().setPredef(true);
-    String altFL = getAltFL(oldID);
-    exercise.setAltFL(altFL);
+
+// SWAP! alt is always traditional
+    String simplifiedChinese  = getAltFL(oldID);
+    String traditionalChinese = exercise.getForeignLanguage();
+
+    exercise.setForeignLanguage(simplifiedChinese);
+    exercise.setAltFL(traditionalChinese);
+
     Map<String, String> uv = new HashMap<>();
     uv.put(UNIT, INTEGRATED_CHINESE_2);
     uv.put(LESSON, getLesson(oldID));
+
     logger.info("converting " + oldID + " : " + uv);
-    logger.info("converting " + oldID + " " + exercise.getForeignLanguage() + " : " + altFL);
+    logger.info("converting " + oldID + " trad " + traditionalChinese + " to " + simplifiedChinese);
 
     exercise.setUnitToValue(uv);
     converted.add(exercise);
@@ -1430,11 +1437,9 @@ public class ExerciseCopy {
     Map<CommonExercise, Integer> exToInt = new HashMap<>();
     Map<Integer, List<Integer>> exToJoins =
         addPredefExercises(projectid, slickUEDAO, importUser, exercises, typeOrder, idToCandidateOverride, exToInt);
-//    SlickUserExerciseDAO.BothMaps oldToNew = slickUEDAO.getOldToNew(projectid);
-//    exToInt = oldToNew.getOldToNew();
     exToInt.forEach((commonExercise, exid) -> dominoToExID.put(commonExercise.getDominoID(), exid));
 
-    List<SlickExerciseAttributeJoin> joins = getSlickExerciseAttributeJoins(/*exToInt,*/ importUser, exToJoins);
+    List<SlickExerciseAttributeJoin> joins = getSlickExerciseAttributeJoins( importUser, exToJoins);
 
     logger.info("copyUserAndPredefExercises adding " + joins.size() + " attribute joins");
     slickUEDAO.addBulkAttributeJoins(joins);

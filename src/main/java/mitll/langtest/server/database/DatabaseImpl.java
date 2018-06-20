@@ -497,6 +497,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * This is how we merge pashto projects...
    *
+   * @see CopyToPostgres#merge
    * @param oldID
    * @param newprojid
    */
@@ -506,36 +507,43 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } else {
       logger.info("updated exercises");
     }
+
     if (!resultDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update result dao to " + newprojid);
     } else {
       logger.info("updated results");
     }
+
     if (!audioDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update audio dao to " + newprojid);
     } else {
       logger.info("updated audio");
     }
+
     if (!wordDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update word dao to " + newprojid);
     } else {
       logger.info("updated word");
     }
+
     if (!phoneDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update phone dao to " + newprojid);
     } else {
       logger.info("updated phones");
     }
+
     if (!getUserListManager().updateProject(oldID, newprojid)) {
       logger.error("couldn't update user list dao to " + newprojid);
     } else {
       logger.info("updated user lists.");
     }
+
     if (!refresultDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update ref result dao to " + newprojid);
     } else {
       logger.info("updated ref results");
     }
+
     if (!userProjectDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update user->project dao to " + newprojid);
     } else {
@@ -543,7 +551,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  public void updateProjectOnDay(int oldID, int newprojid, Date onDay) {
+/*  public void updateProjectOnDay(int oldID, int newprojid, Date onDay) {
     if (!resultDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update result dao to " + newprojid);
     } else {
@@ -560,7 +568,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("updated phones");
     }
 
-  }
+  }*/
 
 
   private void setPostgresDBConnection() {

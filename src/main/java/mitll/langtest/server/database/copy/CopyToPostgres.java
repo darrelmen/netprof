@@ -99,7 +99,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
 
   private static final int WARN_RID_MISSING_THRESHOLD = 10;
-  private static final int WARN_MISSING_THRESHOLD = 10;
+  private static final int WARN_MISSING_THRESHOLD = 50;
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
   private static final String CONFIG = "config";
@@ -579,16 +579,16 @@ public class CopyToPostgres<T extends CommonShell> {
 
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
 
-    Set<AudioAttribute> toConvertToAudio = new HashSet<>();
+    // Set<AudioAttribute> toConvertToAudio = new HashSet<>();
 
     long maxTime = copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(),
-        db.getUserDAO().getDefaultUser(), sinceWhen, checkConvert, toConvertToAudio);
+        db.getUserDAO().getDefaultUser(), sinceWhen);//, checkConvert, toConvertToAudio);
 
     logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
 
     Set<Long> maxTimeAudio = new HashSet<>();
     // add the audio table
-    Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, sinceWhen, maxTimeAudio, toConvertToAudio);
+    Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, sinceWhen, maxTimeAudio, checkConvert, idToFL);//, toConvertToAudio);
     // logger.info("pathToAudioID num = " + pathToAudioID.size());
 
     // copy ref results
@@ -735,8 +735,13 @@ public class CopyToPostgres<T extends CommonShell> {
                                          Map<String, Integer> exToID,
                                          Map<String, Integer> parentExToChild,
                                          int projid,
-                                         long sinceWhen, Set<Long> maxTime,
-                                         Set<AudioAttribute> toConvertToAudio) {
+                                         long sinceWhen,
+                                         Set<Long> maxTime,
+                                         boolean fixTranscript,
+                                         Map<Integer, String> idToFL
+                                         //,
+//                                         Set<AudioAttribute> toConvertToAudio
+  ) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
     List<SlickAudio> bulk = new ArrayList<>();
@@ -744,24 +749,43 @@ public class CopyToPostgres<T extends CommonShell> {
         .getAudioAttributesByProjectThatHaveBeenChecked(projid, false)
         .stream().filter(audioAttribute -> audioAttribute.getTimestamp() > sinceWhen).collect(Collectors.toList());
 
-    audioAttributes.addAll(toConvertToAudio);
-    logger.info("copyAudio h2 audio  " + audioAttributes.size() + " added " + toConvertToAudio.size());
+    //  audioAttributes.addAll(toConvertToAudio);
+    logger.info("copyAudio h2 audio  " + audioAttributes.size());// + " added " + toConvertToAudio.size());
     int missing = 0;
     int skippedMissingUser = 0;
     Set<String> missingExIDs = new TreeSet<>();
     long max = 0;
     for (AudioAttribute att : audioAttributes) {
       String oldexid = att.getOldexid();
-      if (att.getTimestamp() > max) max = att.getTimestamp();
+
+      if (att.getTimestamp() > max) {
+        max = att.getTimestamp();
+      }
+
       Integer id = getModernIDForExercise(exToID, parentExToChild, att, oldexid);
       if (id != null) {
         att.setExid(id); // set the exercise id reference - either to a normal exercise or to a context exercise
-        SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNewUser, projid);
 
-        if (slickAudio != null) {
-          bulk.add(slickAudio);
-        } else {
-          skippedMissingUser++;
+        if (fixTranscript) {
+          String exTrans = idToFL.get(id);
+          String transcript = att.getTranscript();
+          if (!transcript.equalsIgnoreCase(exTrans)) {
+            logger.info("copyAudio change for " + id + " old " + oldexid +
+                "\n\tfrom " + transcript +
+                "\n\tto   " + exTrans);
+
+            att.setTranscript(exTrans);
+          }
+        }
+
+        {
+          SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNewUser, projid);
+
+          if (slickAudio != null) {
+            bulk.add(slickAudio);
+          } else {
+            skippedMissingUser++;
+          }
         }
       } else {
         missingExIDs.add(oldexid);
@@ -1080,9 +1104,10 @@ public class CopyToPostgres<T extends CommonShell> {
       Map<Integer, String> idToFL,
       int unknownExerciseID,
       int unknownUserID,
-      long sinceWhen,
-      boolean checkConvert,
-      Set<AudioAttribute> toConvertToAudio) {
+      long sinceWhen//,
+//      boolean checkConvert,
+      //    Set<AudioAttribute> toConvertToAudio
+  ) {
     List<SlickResult> bulk = new ArrayList<>();
 
     List<Result> results = resultDAO.getResults();
@@ -1098,19 +1123,19 @@ public class CopyToPostgres<T extends CommonShell> {
 
     Set<Integer> missingUserIDs = new HashSet<>();
 
-    Map<String, Result> oldToResultID = new HashMap<>();
+    // Map<String, Result> oldToResultID = new HashMap<>();
     for (Result result : filtered) {
       int oldUserID = result.getUserid();
-      boolean isPasuya = oldUserID == PASUYA_ID;
+      // boolean isPasuya = oldUserID == PASUYA_ID;
 
       String oldExID = result.getOldExID();
-      if (checkConvert && isPasuya) {
+/*      if (checkConvert && isPasuya) {
       //  logger.info("found candidate " + result);
         Result prevRecording = oldToResultID.get(oldExID);
         if (prevRecording == null || result.getPronScore() > prevRecording.getPronScore()) {
           oldToResultID.put(oldExID, result);
         }
-      }
+      }*/
       if (maxTime < result.getTimestamp()) maxTime = result.getTimestamp();
       Integer userID = oldToNewUser.get(oldUserID);
       if (userID == null) {
@@ -1138,15 +1163,18 @@ public class CopyToPostgres<T extends CommonShell> {
       if (bulk.size() % 50000 == 0) logger.info("copyResult : made " + bulk.size() + " results...");
     }
 
+/*
     oldToResultID.values().forEach(result -> {
       Integer realExID = exToID.get(result.getOldExID());
       if (realExID == null) logger.warn("no ex for " + result.getOldExID());
       else {
         String transcript = idToFL.get(realExID);
         String answer = result.getAnswer();
+        logger.info("making audio attr for " +result.getOldExID() + " id "+ realExID + " fl '" +
+            "'");
         if (answer.startsWith("answers")) {
           answer = "bestAudio" + answer.substring("Answers".length());
-          logger.info("now " + answer);
+         // logger.info("now " + answer);
         }
         AudioAttribute e = new AudioAttribute(-1,
             PASUYA_ID,
@@ -1160,6 +1188,7 @@ public class CopyToPostgres<T extends CommonShell> {
         toConvertToAudio.add(e);
       }
     });
+*/
 
     //    if (missing > 0) {
 //      logger.warn("skipped " + missing + "/" + results.size() +
