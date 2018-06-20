@@ -134,7 +134,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;
     addStyleName("twoColumnStyle");
-    isMandarin = getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
+    isMandarin = getProjectStartupInfo() != null && getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
     annotationHelper = controller.getCommentAnnotator();
     this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
         controller, listContainer,

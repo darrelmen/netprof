@@ -62,7 +62,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String LESSON = "lesson";
 
   @Override
-  public SlickExercise getByDominoID(int docID) {
+  public SlickExercise getByDominoID(int projID, int docID) {
     return null;
   }
 
@@ -484,10 +484,18 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return null;
   }
 
+/*
   @Override
   public Collection<CommonExercise> getAllUserExercises(int projid) {
     return getCommonExercises(GET_ALL_SQL);
   }
+*/
+
+  @Override
+  public int getParentForContextID(int contextID) {
+    return 0;
+  }
+
 
   /**
    * @return

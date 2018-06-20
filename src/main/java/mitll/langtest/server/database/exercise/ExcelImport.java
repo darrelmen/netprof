@@ -94,6 +94,16 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return 0;
   }
 
+  @Override
+  public int getExIDForDominoID(int projID, int dominoID) {
+    return 0;
+  }
+
+  @Override
+  public int getParentFor(int exid) {
+    return 0;
+  }
+
   private static final String BOOK = "book";
 
   private static final String CHAPTER = "chapter";

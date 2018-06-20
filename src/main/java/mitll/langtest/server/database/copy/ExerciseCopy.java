@@ -27,6 +27,7 @@ public class ExerciseCopy {
   public static final String INTEGRATED_CHINESE_2 = "Integrated Chinese 2";
   public static final String UNIT = "Unit";
   public static final String LESSON = "Lesson";
+  public static final String CUSTOM = "Custom";
 
   /**
    * TODO :  How to make sure we don't add duplicates?
@@ -61,19 +62,8 @@ public class ExerciseCopy {
       customExercises.forEach(exercise -> {
         String oldID = exercise.getOldID();
         if (isConvertable(exercise)) {
-          logger.info("converting " + exercise);
-          exercise.getMutable().setPredef(true);
-          String altFL = getAltFL(oldID);
-          exercise.setAltFL(altFL);
-          Map<String, String> uv = new HashMap<>();
-          uv.put(UNIT, INTEGRATED_CHINESE_2);
-          uv.put(LESSON, getLesson(oldID));
-          logger.info("converting " + oldID + " : " + uv);
-          logger.info("converting " + oldID + " " + exercise.getForeignLanguage() + " : " + altFL);
-
-          exercise.setUnitToValue(uv);
-          converted.add(exercise);
-        } else if (oldID.startsWith("Custom")) {
+          convertChinese(converted, exercise, oldID);
+        } else if (oldID.startsWith(CUSTOM)) {
           logger.warn("hmm not a convertable " + oldID);
         }
       });
@@ -101,6 +91,21 @@ public class ExerciseCopy {
 
     logger.info("copyUserAndPredefExercises : finished copying customExercises - found " + exToInt.size());
     return exToInt;
+  }
+
+  private void convertChinese(List<Exercise> converted, Exercise exercise, String oldID) {
+    logger.info("converting " + exercise);
+    exercise.getMutable().setPredef(true);
+    String altFL = getAltFL(oldID);
+    exercise.setAltFL(altFL);
+    Map<String, String> uv = new HashMap<>();
+    uv.put(UNIT, INTEGRATED_CHINESE_2);
+    uv.put(LESSON, getLesson(oldID));
+    logger.info("converting " + oldID + " : " + uv);
+    logger.info("converting " + oldID + " " + exercise.getForeignLanguage() + " : " + altFL);
+
+    exercise.setUnitToValue(uv);
+    converted.add(exercise);
   }
 
   private String getAltFL(String oldID) {
@@ -1302,6 +1307,7 @@ public class ExerciseCopy {
    * @param slickUEDAO
    * @param exToInt
    * @param exercises
+   * @see #copyUserAndPredefExercises
    */
   private void reallyAddingUserExercises(int projectid,
                                          Collection<String> typeOrder,

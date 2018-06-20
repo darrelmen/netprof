@@ -33,12 +33,10 @@
 package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
@@ -51,7 +49,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 
-import java.util.Map;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -63,6 +61,10 @@ import java.util.logging.Logger;
  * @since 3/28/2014.
  */
 class EditableExerciseDialog extends NewUserExercise {
+  public static final String FOREIGN_LANGUAGE = "foreignLanguage";
+  public static final String TRANSLITERATION = "transliteration";
+  public static final String MEANING = "meaning";
+  public static final String ENGLISH = "english";
   private final Logger logger = Logger.getLogger("EditableExerciseDialog");
 
   private static final String ITEM = "Item";
@@ -316,22 +318,38 @@ class EditableExerciseDialog extends NewUserExercise {
       box.setPlaceholder("optional");
     }
     setMarginBottom(translit);
-    useAnnotation(newUserExercise, "transliteration", translitAnno);
+    useAnnotation(newUserExercise, TRANSLITERATION, translitAnno);
   }
 
   private void setFL(CommonExercise newUserExercise) {
     foreignLang.box.setText(originalForeign = newUserExercise.getForeignLanguage().trim());
-    useAnnotation(newUserExercise, "foreignLanguage", foreignAnno);
+    useAnnotation(newUserExercise, FOREIGN_LANGUAGE, foreignAnno);
   }
 
+  /**
+   * Only the first context sentence...
+   * @param newUserExercise
+   */
   private void setContext(CommonExercise newUserExercise) {
     context.box.setText(originalContext = newUserExercise.getContext().trim());
-    useAnnotation(newUserExercise, CONTEXT, contextAnno);
+    if (!useAnnotation(newUserExercise, CONTEXT, contextAnno)) {
+      List<CommonExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+
+      if (!directlyRelated.isEmpty()) {
+        useAnnotation(directlyRelated.get(0), FOREIGN_LANGUAGE, contextAnno);
+      }
+    }
   }
 
   private void setContextTrans(CommonExercise newUserExercise) {
     contextTrans.box.setText(originalContextTrans = newUserExercise.getContextTranslation().trim());
-    useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno);
+    if (!useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno)){
+      List<CommonExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+
+      if (!directlyRelated.isEmpty()) {
+        useAnnotation(directlyRelated.get(0), ENGLISH, contextTransAnno);
+      }
+    }
   }
 
   private void setEnglish(CommonExercise newUserExercise) {
@@ -341,7 +359,7 @@ class EditableExerciseDialog extends NewUserExercise {
     if (english.length() > 20) {
       this.english.box.setWidth("500px");
     }
-    String field = isEnglish() ? "meaning" : "english";
+    String field = isEnglish() ? MEANING : ENGLISH;
     useAnnotation(newUserExercise, field, englishAnno);
   }
 
@@ -351,22 +369,34 @@ class EditableExerciseDialog extends NewUserExercise {
    * @param annoField
    * @see #setFields
    */
-  void useAnnotation(AnnotationExercise userExercise, String field, HTML annoField) {
-    useAnnotation(userExercise.getAnnotation(field), annoField);
+  @Override
+  boolean useAnnotation(AnnotationExercise userExercise, String field, HTML annoField) {
+  //  logger.info("useAnnotation " + userExercise.getID() + " : " + field);
+    ExerciseAnnotation annotation = userExercise.getAnnotation(field);
+  //   logger.info("useAnnotation annotation " + annotation);
+    return useAnnotation(annotation, annoField);
   }
 
-  private void useAnnotation(ExerciseAnnotation anno, final HTML annoField) {
+  /**
+   *
+   * @param anno
+   * @param annoField
+   * @return
+   */
+  private boolean useAnnotation(ExerciseAnnotation anno, final HTML annoField) {
     final boolean isIncorrect = anno != null && !anno.isCorrect();
     if (DEBUG) logger.info("useAnnotation anno for " + anno + " = " + isIncorrect + " : " + annoField);
 
     if (isIncorrect) {
-      if (anno.getComment().isEmpty()) {
+      String comment = anno.getComment();
+      if (comment.isEmpty()) {
         annoField.setHTML("<i>Empty Comment</i>");
       } else {
-        annoField.setHTML("<i>\"" + anno.getComment() + "\"</i>");
+        annoField.setHTML("<i>\"" + comment + "\"</i>");
       }
     }
 
     annoField.setVisible(isIncorrect);
+    return isIncorrect;
   }
 }

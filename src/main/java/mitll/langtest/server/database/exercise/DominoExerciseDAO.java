@@ -85,7 +85,7 @@ public class DominoExerciseDAO {
         importDocs.getDeletedNPIDs()
         /*,
         importDocs.getNpidToDominoID()*/
-        );
+    );
   }
 
   @NotNull
@@ -142,19 +142,24 @@ public class DominoExerciseDAO {
                                         long time,
                                         VocabularyItem vocabularyItem) {
     logger.info("getExerciseFromVocab ex for doc " + docID + " term " + vocabularyItem.getTerm());
-    SlickExercise byDominoID = userExerciseDAO.getByDominoID(docID);
-    int exID = -1;
-    if (byDominoID != null) {
-      exID = byDominoID.id();
-
-    }
     String npID = getNPId(vocabularyItem);
-    Exercise ex = getExerciseFromVocabularyItem(projid, docID, npID, vocabularyItem, creator, time, exID);
+
+    Exercise ex = getExerciseFromVocabularyItem(projid, docID, npID, vocabularyItem, creator, time, lookupExerciseID(projid, docID));
+
     addAttributes(unitName, chapterName, vocabularyItem, ex);
 //        logger.info("Got " + ex.getUnitToValue());
     addContextSentences(projid, creator, docID, npID, vocabularyItem.getSamples(), ex, shouldSwap);
 
     return ex;
+  }
+
+  private int lookupExerciseID(int projid, int docID) {
+    SlickExercise byDominoID = userExerciseDAO.getByDominoID(projid, docID);
+    int exID = -1;
+    if (byDominoID != null) {
+      exID = byDominoID.id();
+    }
+    return exID;
   }
 
 

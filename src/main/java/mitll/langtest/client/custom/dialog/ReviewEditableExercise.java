@@ -71,7 +71,7 @@ import static mitll.langtest.shared.answer.AudioType.SLOW;
  * @since 3/28/2014.
  */
 public class ReviewEditableExercise extends EditableExerciseDialog {
-  public static final String MARKING_AUDIO_DEFECT = "marking audio defect";
+  private static final String MARKING_AUDIO_DEFECT = "marking audio defect";
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String YOUR_RECORDING = "Your Recording";

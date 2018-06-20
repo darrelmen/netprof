@@ -36,16 +36,12 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
-import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExercisePhone;
 import mitll.npdata.dao.SlickUpdateDominoPair;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -89,4 +85,8 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   void updatePhonesBulk(List<SlickExercisePhone> pairs);
 
   int updateDominoBulk(List<SlickUpdateDominoPair> pairs);
+
+  int getExIDForDominoID(int projID, int dominoID);
+
+  int getParentFor(int exid);
 }

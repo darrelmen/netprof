@@ -98,9 +98,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private String noAccentFL;
 
-  /*private List<VocabToken> tokens;
-*/
-  private int parentExerciseID;
+
+  private int parentExerciseID = -1;
   private int parentDominoID;
 
   // for serialization
@@ -262,7 +261,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.updateTime = modifiedTimestamp;
     this.safeToDecode = candecode;
     this.numPhones = numPhones;
-  //  this.tokens = tokens;
+    //  this.tokens = tokens;
   }
 
   /**
@@ -624,19 +623,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return isContext;
   }
 
-  /**
-   *
-   * @return
-   */
-/*  public List<VocabToken> getTokens() {
-    return tokens;
-  }*/
-
   @Override
   public int getParentExerciseID() {
     return parentExerciseID;
   }
 
+  /**
+   * @param parentExerciseID
+   */
   @Override
   public void setParentExerciseID(int parentExerciseID) {
     this.parentExerciseID = parentExerciseID;

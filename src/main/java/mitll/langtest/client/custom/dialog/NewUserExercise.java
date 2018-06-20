@@ -422,7 +422,7 @@ abstract class NewUserExercise extends BasicDialog {
     return newUserExercise.getMeaning().isEmpty() ? newUserExercise.getEnglish() : newUserExercise.getMeaning();
   }
 
-  abstract void useAnnotation(AnnotationExercise userExercise, String field, HTML annoField);
+  abstract boolean useAnnotation(AnnotationExercise userExercise, String field, HTML annoField);
 
   /**
    * @param pagingContainer

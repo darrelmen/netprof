@@ -115,7 +115,7 @@ public class Search<T extends CommonExercise> {
   }
 
 
-  public int getExid(String prefix) {
+  public int getID(String prefix) {
     int exid = -1;
     if (!prefix.isEmpty()) {
       try {

@@ -39,7 +39,6 @@ import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -47,8 +46,6 @@ import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectProperty;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
 import mitll.npdata.dao.userexercise.ExerciseAttributeJoinDAOWrapper;
@@ -96,7 +93,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private final String hostName;
-  private final IProjectDAO projectDAO;
+  //private final IProjectDAO projectDAO;
   private CommonExercise templateExercise;
   private int unknownExerciseID;
 
@@ -115,7 +112,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();
-    projectDAO = database.getProjectDAO();
+    //projectDAO = database.getProjectDAO();
 
     String mediaDir = database.getServerProps().getMediaDir();
     hasMediaDir = new File(mediaDir).exists();
@@ -737,7 +734,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return new Pair(first, value);
   }
 
-
+  /**
+   * @param bulk
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#reallyAddingUserExercises(int, Collection, SlickUserExerciseDAO, Map, List)
+   */
   public void addBulk(List<SlickExercise> bulk) {
     dao.addBulk(bulk);
   }
@@ -999,10 +999,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return id;
   }
 
+/*
   public List<CommonExercise> getAllUserExercises(int projid) {
     boolean shouldSwap = getShouldSwap(projid);
     return getUserExercises(dao.getAllUserEx(projid), shouldSwap);
   }
+*/
 
   /**
    * Niche feature for alt chinese to swap primary and alternate...
@@ -1221,6 +1223,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
   public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
     relatedExerciseDAOWrapper.addBulk(relatedExercises);
+  }
+
+  @Override
+  public int getParentForContextID(int contextID) {
+    return relatedExerciseDAOWrapper.parentForContextID(contextID);
   }
 
   public Collection<SlickRelatedExercise> getAllRelated(int projid) {
@@ -1458,13 +1465,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectDAO#update
-   * @see DominoImport#getImportFromDomino
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.project.ProjectDAO#update
+   * @see DominoImport#getImportFromDomino
    */
   public boolean areThereAnyUnmatched(int projid) {
-    return dao.getUnknownDomino(projid).size() > 0 || dao.getUnknownDominoTriplet(projid).size() > 0 ;
+    return dao.getUnknownDomino(projid).size() > 0 || dao.getUnknownDominoTriplet(projid).size() > 0;
   }
 
   public Map<String, Integer> getNpToExID(int projid) {
@@ -1489,6 +1496,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return unknownExerciseID;
   }
 
+  /**
+   * TODO : not advised - will lock up database, maybe forever.
+   *
+   * @param projID
+   * @see DatabaseImpl#dropProject
+   */
   @Override
   public void deleteForProject(int projID) {
     relatedExerciseDAOWrapper.deleteForProject(projID);
@@ -1501,8 +1514,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   @Override
-  public SlickExercise getByDominoID(int docID) {
-    Collection<SlickExercise> byExid = dao.byDominoID(docID);
+  public SlickExercise getByDominoID(int projID, int docID) {
+    Collection<SlickExercise> byExid = dao.byDominoID(projID, docID);
     return byExid.isEmpty() ? null : byExid.iterator().next();
   }
 }

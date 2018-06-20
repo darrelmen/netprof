@@ -106,6 +106,22 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
   }
 
+  private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
+
+  /**
+   * Make sure the parent is set on the context exercises.
+   */
+  protected void populateIdToExercise() {
+    super.populateIdToExercise();
+
+    getRawExercises()
+        .forEach(parent -> parent.getDirectlyRelated()
+            .forEach(commonExercise -> {
+              idToContextExercise.put(commonExercise.getID(), commonExercise);
+              commonExercise.getMutable().setParentExerciseID(parent.getID());
+            }));
+  }
+
   /**
    * TODO : remove duplicate
    *
@@ -123,16 +139,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       if (second != null && !second.isEmpty()) typeOrder.add(second);
     }
     return typeOrder;
-  }
-
-  private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
-
-  protected void populateIdToExercise() {
-    super.populateIdToExercise();
-
-    getRawExercises()
-        .forEach(e -> e.getDirectlyRelated()
-            .forEach(commonExercise -> idToContextExercise.put(commonExercise.getID(), commonExercise)));
   }
 
   /**
@@ -263,6 +269,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * Might want to allow this to be configurable.
    *
    * Added special code for putting semester at the top.
+   *
    * @return
    */
   @NotNull
@@ -271,7 +278,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     Collection<String> attributeTypes = getAttributeTypes();
 
     if (attributeTypes.contains(SEMESTER.toString())) {
-    //  logger.info("found semester ");
+      //  logger.info("found semester ");
       List<String> copy = new ArrayList<>();
       copy.add(SEMESTER.toString());
       copy.addAll(typeOrder);
@@ -326,7 +333,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
 
     sectionHelper.setParentToChildTypes(parentToChild);
-    if (DEBUG){
+    if (DEBUG) {
       logger.info("setRootTypes roots " + rootTypes);
 
     }
@@ -386,15 +393,28 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   @Override
-  public void updatePhonesBulk(List<SlickExercisePhone> pairs) { getDao().updatePhonesBulk(pairs);  }
+  public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
+    getDao().updatePhonesBulk(pairs);
+  }
 
   /**
-   * @see SlickUserExerciseDAO#updateDominoBulk
    * @param pairs
    * @return
+   * @see SlickUserExerciseDAO#updateDominoBulk
    */
   public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
     return getDao().updateDominoBulk(pairs).toSeq().size();
+  }
+
+  @Override
+  public int getExIDForDominoID(int projID, int dominoID) {
+    SlickExercise byDominoID = userExerciseDAO.getByDominoID(projID, dominoID);
+    return byDominoID == null ? -1 : byDominoID.id();
+  }
+
+  @Override
+  public int getParentFor(int exid) {
+    return userExerciseDAO.getParentForContextID(exid);
   }
 
   private ExerciseDAOWrapper getDao() {
