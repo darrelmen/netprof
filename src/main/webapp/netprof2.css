@@ -1491,7 +1491,7 @@ document sections.*/
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     font-size: 14px;
-    width: 204px;
+    width: 210px;
     margin-top: 2px;
 }
 
@@ -1511,7 +1511,7 @@ document sections.*/
 
 .leftBlock, .rightBlock {
     display: inline-block;
-    width: 204px;
+    width: 210px;
     margin-right: 6px;
     zoom: 1;
 }
@@ -1560,12 +1560,6 @@ document sections.*/
 .dimension {
 }
 
-/*
-.sidebar .dimension li, .sidebar nav li {
-    padding: 4px 10px;
-}
-*/
-
 .sidebar .dimension li, .sidebar nav li {
     padding: 2px 2px;
 }
@@ -1595,27 +1589,6 @@ document sections.*/
     text-transform: none;
     float: right;
 }
-
-/*.sidebar .menuItem a:after {
-    font-family: FontAwesome;
-    float: right;
-    font-size: 11px;
-    content: "\f077";
-}*/
-
-/*
-.sidebar .dimension > .menuItem > a::after {
-    font-family: FontAwesome;
-    float: right;
-    font-size: 11px;
-    content: "\f077";
-}
-
-.sidebar .dimension.collapsed > .menuItem > a::after {
-    content: "\f078";
-    font-weight: 400;
-}
-*/
 
 .sidebar .dimension > .menuItem > a {
     color: #292b2d;

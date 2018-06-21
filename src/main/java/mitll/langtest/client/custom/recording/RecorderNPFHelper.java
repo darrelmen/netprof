@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -68,11 +69,9 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/10/15.
  * <p>
- * <T extends CommonShell & AudioRefExercise>
  */
 public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
   // private final Logger logger = Logger.getLogger("RecorderNPFHelper");
-  // private static final String SHOW_ONLY_UNRECORDED = "Show Only Unrecorded";
   /**
    *
    */
@@ -118,91 +117,15 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
         return new RecordingFacetExerciseList(controller,
-            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.CONTEXT);
+            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.CONTEXT){
 
-        /*        return new NPExerciseList(currentExercisePanel,
-            outerLayout.getController(),
-            new ListOptions()
-                .setInstance(instanceName)
-                .setShowFirstNotCompleted(true)
-                .setActivityType(ActivityType.RECORDER),
-            //    .setContextOnly(!doNormalRecording)
-            -1) {
-          private CheckBox filterOnly;
-
-          @Override
-          protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
-            // row 1
-            Panel column = new FlowPanel();
-            add(column);
-            addTypeAhead(column);
-
-            // row 2
-            filterOnly = new CheckBox(SHOW_ONLY_UNRECORDED);
-            filterOnly.addClickHandler(event -> pushNewSectionHistoryToken());
-            filterOnly.addStyleName("leftFiveMargin");
-            add(filterOnly);
-
-            // row 3
-            add(pagingContainer.getTableWithPager(new ListOptions()));
-            setOnlyExamples(!doNormalRecording);
-
-            addEventHandler(instanceName);
-          }
-
-          @Override
-          protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
-                                                  String prefix,
-                                                  int exerciseID,
-                                                  boolean onlyWithAudioAnno,
-                                                  boolean onlyUnrecorded,
-                                                  boolean onlyDefaultUser,
-                                                  boolean onlyUninspected) {
-            super.loadExercisesUsingPrefix(typeToSection, prefix, exerciseID, onlyWithAudioAnno, onlyUnrecorded, onlyDefaultUser, onlyUninspected);
-            filterOnly.setText(setCheckboxTitle());
-          }
-
-          private String setCheckboxTitle() {
-            return SHOW_ONLY_UNRECORDED + (controller.getUserManager().isMale() ? " by Males" : " by Females");
-          }
-
-          *//**
-         * @see mitll.langtest.client.list.HistoryExerciseList#getHistoryToken
-         * @param search
-         * @param id
-         * @return
-         *//*
-          protected String getHistoryTokenFromUIState(String search, int id) {
-            String s = super.getHistoryTokenFromUIState(search, id) +
-                SelectionState.SECTION_SEPARATOR +
-                SelectionState.ONLY_UNRECORDED +
-                "=" + filterOnly.getValue();
-            //           logger.info("RecorderNPFHelper : history token now  " + s);
-            return s;
-          }
-
-          @Override
-          protected void restoreUIState(SelectionState selectionState) {
-            super.restoreUIState(selectionState);
-            filterOnly.setValue(selectionState.isOnlyUnrecorded());
-          }
-        };*/
+        };
       }
     };
   }
 
-/*  private void addEventHandler(final String instanceName) {
-    LangTest.EVENT_BUS.addHandler(AudioChangedEvent.TYPE, authenticationEvent -> {
-      if (!authenticationEvent.getSource().equals(instanceName)) {
-        // logger.info("this " + getClass() + " instance " + instanceName + " updating progress " + authenticationEvent.getSource());
-        getProgressInfo();
-      }
-    });
-  }*/
-
   private Widget doMaleFemale() {
     flex.addStyleName("topMargin");
-   // getProgressInfo();
     return flex;
   }
 
@@ -238,8 +161,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
      * @param instance
      * @see RecorderNPFHelper#getFactory
      */
-    RecordRefAudioPanel(CommonExercise e, ExerciseController controller1,
-                        ListInterface<CommonShell, CommonExercise> exerciseList1, String instance) {
+    RecordRefAudioPanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell, CommonExercise> exerciseList1, String instance) {
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
     }
 

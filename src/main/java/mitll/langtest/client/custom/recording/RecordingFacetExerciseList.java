@@ -2,6 +2,7 @@ package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
  * @see RecorderNPFHelper#getMyListLayout
  */
 class RecordingFacetExerciseList extends FacetExerciseList {
-  private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
+  //private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
 
   private static final String RECORD = "Record";
   private static final String UNRECORD = "Unrecord";

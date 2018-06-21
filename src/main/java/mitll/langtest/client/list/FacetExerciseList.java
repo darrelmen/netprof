@@ -127,7 +127,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(1, FIVE_PAGE_SIZE, 10, 25);
   private static final String ITEMS_PAGE = " items/page";
 
-  private static final int TOTAL = 28;
+  protected static final int TOTAL = 28;
   private static final int CLOSE_TO_END = 2;
 
   /**
@@ -472,6 +472,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   private Panel getWidgetsForTypes() {
     final UnorderedList container = new UnorderedList();
     container.getElement().setId("typeOrderContainer");
+    container.getElement().getStyle().setMarginBottom(50,Style.Unit.PX  );//"bottomFiveMargin");
     getTypeOrder();
     return container;
   }
@@ -829,12 +830,11 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
                                  Panel choices,
                                  Set<MatchInfo> keys) {
     int j = 0;
-    int size = rootNodesInOrder.size() + 1;
 
-    int toShow = TOTAL / size;
-    int diff = keys.size() - toShow;
+    int toShow = getToShow(rootNodesInOrder.size() + 1);
+    int keysSize = keys.size();
 
-    boolean hasMore = keys.size() > toShow && diff > CLOSE_TO_END;
+    boolean hasMore = shouldShowMore(keysSize, toShow);
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
 
 /*
@@ -853,13 +853,22 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
 
       // add final "View all" link if we're not supposed to show all
       if (hasMore && !showAll && ++j == toShow) {
-        addLIChoice(choices, getShowMoreAnchor(typeToValues, type));
+        addLIChoice(choices, getShowMoreAnchor(typeToValues, type, keysSize-j));
         break;
       }
     }
     if (hasMore && showAll) {
       addLIChoice(choices, getShowLess(typeToValues, type));
     }
+  }
+
+  protected int getToShow(int size) {
+    return TOTAL / size;
+  }
+
+  protected boolean shouldShowMore(int keysSize, int toShow) {
+    int diff = keysSize - toShow;
+    return keysSize > toShow && diff > CLOSE_TO_END;
   }
 
   @NotNull
@@ -876,12 +885,16 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   /**
    * @param typeToValues
    * @param type
+   * @param remaining
    * @return
+   * @see #addChoicesForType
    */
   @NotNull
-  private Anchor getShowMoreAnchor(final Map<String, Set<MatchInfo>> typeToValues, final String type) {
+  private Anchor getShowMoreAnchor(final Map<String, Set<MatchInfo>> typeToValues, final String type, int remaining) {
     Anchor anchor = new Anchor();
-    anchor.setHTML(SHOW_MORE);
+    String showMore ="<i>View all (" +remaining+
+        ")</i>";// SHOW_MORE;
+    anchor.setHTML(showMore);
     anchor.addClickHandler(event -> {
       typeToShowAll.put(type, true);
       addFacetsForReal(typeToValues, typeOrderContainer);
@@ -958,6 +971,9 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     ClickHandler choiceHandler = getChoiceHandler(type, choiceName, newUserListID);
     anchor.addClickHandler(choiceHandler);
     anchor.addStyleName("choice");
+
+    // seems better but topics are long
+//    anchor.getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NOWRAP);
 
     if (italic) anchor.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
 
@@ -1130,12 +1146,12 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   private void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
 
-    List<Pair> pairs = getPairs(typeToSelection);
+    //List<Pair> pairs = getPairs(typeToSelection);
     //  logger.info("getTypeToValues request " + pairs + " list " + userListID);
 
     final long then = System.currentTimeMillis();
 
-    service.getTypeToValues(getFilterRequest(userListID, pairs),
+    service.getTypeToValues(getFilterRequest(userListID, getPairs(typeToSelection)),
         new AsyncCallback<FilterResponse>() {
           @Override
           public void onFailure(Throwable caught) {
