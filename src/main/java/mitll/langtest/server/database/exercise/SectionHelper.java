@@ -73,6 +73,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    */
   private static final String ALL = "all";
   private static final String LISTS = "Lists";
+  public static final String RECORDED = "Recorded";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
@@ -404,7 +405,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
   private boolean isDynamicFacet(String type) {
-    return type.equals(LISTS) || type.equals("Recorded");
+    return type.equals(LISTS) || type.equals(RECORDED);
   }
 
   /**
@@ -414,9 +415,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    */
   private Map<String, Set<MatchInfo>> getTypeToMatches(Map<String, Map<String, MatchInfo>> typeToMatch) {
     Map<String, Set<MatchInfo>> typeToMatchRet = new HashMap<>();
-    for (Map.Entry<String, Map<String, MatchInfo>> pair : typeToMatch.entrySet()) {
-      typeToMatchRet.put(pair.getKey(), new TreeSet<>(pair.getValue().values()));
-    }
+    typeToMatch.forEach((k, v) -> typeToMatchRet.put(k, new TreeSet<>(v.values())));
+//    for (Map.Entry<String, Map<String, MatchInfo>> pair : typeToMatch.entrySet()) {
+//      typeToMatchRet.put(pair.getKey(), new TreeSet<>(pair.getValue().values()));
+//    }
     return typeToMatchRet;
   }
 
@@ -425,10 +427,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     if (childType != null) { // i.e. not leaf
       // logger.info("recurseAndCount on " + node.getName() + " child type " + childType);
-      Map<String, MatchInfo> members = typeToCount.get(childType);
-      if (members == null) {
-        typeToCount.put(childType, members = new HashMap<>());
-      }
+      Map<String, MatchInfo> members = typeToCount.computeIfAbsent(childType, k -> new HashMap<>());
 
       for (SectionNode child : node.getChildren()) {
         if (!child.getType().equals(childType)) {

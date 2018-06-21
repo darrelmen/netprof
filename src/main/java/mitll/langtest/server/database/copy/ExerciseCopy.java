@@ -98,7 +98,7 @@ public class ExerciseCopy {
     exercise.getMutable().setPredef(true);
 
 // SWAP! alt is always traditional
-    String simplifiedChinese  = getAltFL(oldID);
+    String simplifiedChinese = getAltFL(oldID);
     String traditionalChinese = exercise.getForeignLanguage();
 
     exercise.setForeignLanguage(simplifiedChinese);
@@ -1439,7 +1439,7 @@ public class ExerciseCopy {
         addPredefExercises(projectid, slickUEDAO, importUser, exercises, typeOrder, idToCandidateOverride, exToInt);
     exToInt.forEach((commonExercise, exid) -> dominoToExID.put(commonExercise.getDominoID(), exid));
 
-    List<SlickExerciseAttributeJoin> joins = getSlickExerciseAttributeJoins( importUser, exToJoins);
+    List<SlickExerciseAttributeJoin> joins = getSlickExerciseAttributeJoins(importUser, exToJoins);
 
     logger.info("copyUserAndPredefExercises adding " + joins.size() + " attribute joins");
     slickUEDAO.addBulkAttributeJoins(joins);
@@ -1454,14 +1454,13 @@ public class ExerciseCopy {
    * @see #addExercisesAndAttributes(int, int, SlickUserExerciseDAO, Collection, Collection, Map, Map)
    */
   @NotNull
-  private List<SlickExerciseAttributeJoin> getSlickExerciseAttributeJoins(//Map<Integer, Integer> exToInt,
-                                                                          int importUser,
+  private List<SlickExerciseAttributeJoin> getSlickExerciseAttributeJoins(int importUser,
                                                                           Map<Integer, List<Integer>> exToJoins) {
     Timestamp nowT = new Timestamp(System.currentTimeMillis());
     List<SlickExerciseAttributeJoin> joins = new ArrayList<>();
 
     for (Map.Entry<Integer, List<Integer>> pair : exToJoins.entrySet()) {
-      logger.info("getSlickExerciseAttributeJoins : ex->id  " + pair);
+//      logger.info("getSlickExerciseAttributeJoins : ex->id  " + pair);
       // String key = pair.getKey();
       Integer dbID = pair.getKey();
       //     Integer dbID = exToInt.get(key);
@@ -1479,7 +1478,7 @@ public class ExerciseCopy {
 
   /**
    * Assumes we don't have exercise ids on the exercises yet.
-   *
+   * <p>
    * NOTE : only can handle one exercise and one matching context exercise.
    *
    * @param projectid

@@ -2,6 +2,7 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
+import mitll.langtest.client.analysis.AudioExampleContainer;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -14,7 +15,7 @@ class NPExerciseListContainer extends PagingContainer<CommonShell> {
   private final PagingExerciseList<CommonShell, CommonExercise> outer;
 
   NPExerciseListContainer(NPExerciseList exerciseList, boolean isRecorder,
-                                 boolean showFirstNotCompleted, PagingExerciseList<CommonShell, CommonExercise> outer) {
+                          boolean showFirstNotCompleted, PagingExerciseList<CommonShell, CommonExercise> outer) {
     super(exerciseList.controller, exerciseList.getVerticalUnaccountedFor(), isRecorder, showFirstNotCompleted);
     this.exerciseList = exerciseList;
     this.outer = outer;
@@ -38,10 +39,14 @@ class NPExerciseListContainer extends PagingContainer<CommonShell> {
 
     CellTable.Resources o;
     if (isRTL) {   // so when we truncate long entries, the ... appears on the correct end
-     // logger.info("simplePaging : chooseResources RTL - content");
-      o = GWT.create(NPExerciseListContainer.RTLTableResources.class);
+      // logger.info("simplePaging : chooseResources RTL - content");
+      if (controller.getLanguage().equalsIgnoreCase("urdu")) {
+        o = GWT.create(AudioExampleContainer.UrduTableResources.class);
+      } else {
+        o = GWT.create(NPExerciseListContainer.RTLTableResources.class);
+      }
     } else {
-     // logger.info("simplePaging : chooseResources LTR - content");
+      // logger.info("simplePaging : chooseResources LTR - content");
       o = GWT.create(NPExerciseListContainer.TableResources.class);
     }
     return o;
@@ -68,6 +73,18 @@ class NPExerciseListContainer extends PagingContainer<CommonShell> {
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "RTLExerciseCellTableStyleSheet.css"})
+    NPExerciseListContainer.RTLTableResources.TableStyle cellTableStyle();
+  }
+
+  public interface UrduTableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    interface TableStyle extends CellTable.Style {
+    }
+
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "UrduExerciseCellTableStyleSheet.css"})
     NPExerciseListContainer.RTLTableResources.TableStyle cellTableStyle();
   }
 }

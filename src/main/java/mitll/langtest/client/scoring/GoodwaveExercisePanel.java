@@ -85,7 +85,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   public static final String DEFAULT_SPEAKER = "Default Speaker";
   private static final String MEANING = "Meaning";
 
- // public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";
+  // public static final String PUNCT_REGEX = "[\\?\\.,-\\/#!$%\\^&\\*;:{}=\\-_`~()]";
   /**
    * Removed dashes since broke French.
    */
@@ -109,10 +109,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   protected final T exercise;
   protected final ExerciseController controller;
 
-  private AudioPanel answerAudio;
+  // private AudioPanel answerAudio;
   protected final NavigationHelper navigationHelper;
   private boolean hasClickable = false;
   private boolean isJapanese = false;
+  private boolean isUrdu = false;
   protected final ExerciseOptions options;
 
   /**
@@ -135,10 +136,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     String language = controller.getLanguage();
 
     isJapanese = language.equalsIgnoreCase(JAPANESE);
+    isUrdu = language.equalsIgnoreCase("urdu");
     this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
     setWidth("100%");
     //   addStyleName("inlineBlockStyle");
-   // getElement().setId("GoodwaveExercisePanel");
+    // getElement().setId("GoodwaveExercisePanel");
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, options.isAddKeyHandler(), options.isIncludeListButtons());
     this.listContainer = listContainer;
@@ -176,8 +178,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   }
 
   protected abstract NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                              final ListInterface<CommonShell, T> listContainer,
-                                                              boolean addKeyHandler, boolean includeListButtons);
+                                                                       final ListInterface<CommonShell, T> listContainer,
+                                                                       boolean addKeyHandler, boolean includeListButtons);
+
   public void wasRevealed() {
   }
 
@@ -187,8 +190,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     listContainer.loadNextExercise(exercise.getID());
   }
 
-  protected void nextWasPressed(ListInterface listContainer, HasID completedExercise)
-  {
+  protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
     navigationHelper.enableNextButton(false);
     listContainer.loadNextExercise(completedExercise.getID());
   }
@@ -217,7 +219,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @see #GoodwaveExercisePanel
    */
   protected abstract void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
-                                 float screenPortion, T exercise);
+                                          float screenPortion, T exercise);
 /*
   {
     DivWidget div = new DivWidget();
@@ -243,23 +245,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 */
 
   protected abstract void addGroupingStyle(Widget div);
-/*
-  {
-    div.addStyleName("buttonGroupInset6");
-  }
-*/
 
-  public void onResize() {
-    // logger.info("got onResize for" + instance);
-//    if (contentAudio != null) {
-//      //  logger.info("got onResize  contentAudio for" + instance);
-//      contentAudio.onResize();
-//    }
-    if (answerAudio != null) {
-      //   logger.info("got onResize answerAudio for" + instance);
-      answerAudio.onResize();
-    }
-  }
+  public void onResize() {}
 
   /**
    * Three lines - the unit/chapter/item info, then the item content - vocab item, english, etc.
@@ -302,7 +289,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 
   /**
    * @param exid
-   * @param field  @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
+   * @param field         @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
    * @param commentToPost
    */
   @Override
@@ -320,7 +307,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("adding annotation",caught);
+            controller.handleNonFatalError("adding annotation", caught);
           }
 
           @Override
@@ -424,9 +411,8 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 
   private InlineHTML makeClickableText(String label, String value, final String html, boolean chineseCharacter) {
     final InlineHTML w = new InlineHTML(html, getDirection(value));
-
-    String s = removePunct(html);
-    if (!s.isEmpty()) {
+    w.getElement().setId(label + "_" + value + "_" + html);
+    if (!removePunct(html).isEmpty()) {
       w.getElement().getStyle().setCursor(Style.Cursor.POINTER);
       w.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> {
         String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
@@ -437,7 +423,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
       w.addMouseOutHandler(mouseOutEvent -> w.removeStyleName("underline"));
     }
 
-    w.addStyleName("Instruction-data-with-wrap-keep-word");
+    w.addStyleName(isUrdu ? "urdubigflfont" : "Instruction-data-with-wrap-keep-word");
     if (label.contains(MEANING)) {
       w.addStyleName("englishFont");
     }

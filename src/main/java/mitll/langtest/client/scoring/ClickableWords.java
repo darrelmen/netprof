@@ -39,6 +39,7 @@ public class ClickableWords<T extends CommonExercise> {
   private static final String START_STRONG = "<" + STRONG + ">";
 
   private boolean isJapanese = false;
+  private boolean isUrdu = false;
 
   private T exercise;
   private boolean hasClickableAsian = false;
@@ -69,6 +70,7 @@ public class ClickableWords<T extends CommonExercise> {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
+    isUrdu = language.equalsIgnoreCase("Urdu");
     this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
     this.fontSize = fontSize;
     //  this.showPhones = showPhones;
@@ -177,7 +179,7 @@ public class ClickableWords<T extends CommonExercise> {
   @NotNull
   private DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean isRTL) {
     DivWidget horizontal = getClickableDiv(isRTL);
-   // horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+    // horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
     horizontal.getElement().setId(CLICKABLE_ROW);
 
 /*
@@ -488,7 +490,9 @@ public class ClickableWords<T extends CommonExercise> {
     HTML highlightSegment = highlightSegmentDiv.getClickable();
     if (fieldType == TwoColumnExercisePanel.FieldType.FL) {
       if (dir == HasDirection.Direction.RTL) {
-        highlightSegment.addStyleName("bigflfont");
+        String bigflfont = "bigflfont";
+        if (isUrdu) bigflfont = "urdubigflfont";
+        highlightSegment.addStyleName(bigflfont);
       } else {
         highlightSegment.addStyleName("flfont");
         if (fontSize != 24) {
