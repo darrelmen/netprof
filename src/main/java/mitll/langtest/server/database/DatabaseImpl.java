@@ -496,9 +496,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * This is how we merge pashto projects...
-   *
+   * <p>
    * so only copy over the audio for the imported exercises...
-   *
+   * <p>
    * only copy over ref result for the import exercises
    *
    * @param oldID
@@ -1543,9 +1543,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
         " exercises for " + language +
         " selection " + typeToSection);
 
-    audioDAO.attachAudioToExercises(exercisesForSelectionState, language);
-    ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, language);
-    //  }
+    if (options.getIncludeAudio()) {
+      audioDAO.attachAudioToExercises(exercisesForSelectionState, language);
+      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, language);
+    }
 
     new AudioExport(getServerProps())
         .writeZip(out,
@@ -1734,8 +1735,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * Fire at Sunday midnight EST (or local)
+   * Fire at Saturday night, just before midnight EST (or local)
    * Smarter would be to figure out how long to wait until sunday...
+   *
+   *   fire at 11:59:30 PM Saturday, so the report ends this saturday and not next saturday...
+   *   i.e. if it's Sunday 12:01 AM, it rounds up and includes a line for the whole upcoming week
    */
   private void tryTomorrow() {
     ZoneId zone = ZoneId.systemDefault();
@@ -1744,7 +1748,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     LocalDate tomorrow = now.toLocalDate().plusDays(1);
     ZonedDateTime tomorrowStart = tomorrow.atStartOfDay(zone);
     Duration duration = Duration.between(now, tomorrowStart);
-    long toWait = duration.toMillis() + 1000;
+    long toWait = duration.toMillis() - 30*1000;
     new Thread(() -> {
       try {
         logger.info("tryTomorrow :" +

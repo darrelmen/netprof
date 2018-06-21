@@ -105,7 +105,7 @@ public class SpeedChoices {
     return onButton;
   }
 
-  public boolean isThereASpeedChoice() {
+   boolean isThereASpeedChoice() {
     return choiceMade;//!keyStorage.getValue(IS_REG_SPEED).isEmpty();
   }
 
