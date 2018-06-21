@@ -80,6 +80,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final String QUOT = "&quot;";
   private static final int MAX_LENGTH = 250;
   private static final String UNKNOWN1 = "unknown";
+  /**
+   * If we don't have a value for a facet, it's value is "Blank" as opposed to "Any"
+   * @see SlickUserExerciseDAO#addPhoneInfo
+   */
+  private static final String BLANK = "Blank";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -617,8 +622,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   //private int spew = 0;
 
   /**
-   * TODO : What is this doing???
-   * TODO : remove this???
+   * Adds exercise attributes to type hierarchy for facets.
    *
    * @param slick
    * @param sectionHelper
@@ -644,27 +648,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
           logger.warn("addPhoneInfo : no exercise attributes for " + exercise.getID());
         }
       } else {
-        Map<String, ExerciseAttribute> typeToAtrr = new HashMap<>();
-
-        for (ExerciseAttribute attribute : exercise.getAttributes()) {
-          typeToAtrr.put(attribute.getProperty(), attribute);
-        }
-
-        for (String attrType : attrTypes) {
-          ExerciseAttribute attribute = typeToAtrr.get(attrType);
-          if (attribute == null) {
-            // missing info for this type, so map it to Any
-            pairs.add(new ExerciseAttribute(attrType, ANY));
-          } else {
-            pairs.add(attribute);
-          }
-        }
-        //       pairs.addAll(exercise.getAttributes());
+        addBlanksForMissingInfo(exercise, attrTypes, pairs);
       }
 
-      //    addExerciseToSectionHelper(sectionHelper, unitToValue, exercise);
+    //  logger.info("pairs for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
       sectionHelper.addPairs(exercise, pairs);
-      // allPairs.add(pairs);
 
       if (true) {//phones == null) {
 //        logger.warn("no phones for " + id);
@@ -715,6 +703,21 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       exercise.setPairs(pairs);
     }
     return pairs;
+  }
+
+  private void addBlanksForMissingInfo(CommonExercise exercise, Collection<String> attrTypes, List<Pair> pairs) {
+    Map<String, ExerciseAttribute> typeToAtrr = new HashMap<>();
+    exercise.getAttributes().forEach(attribute -> typeToAtrr.put(attribute.getProperty(), attribute));
+
+    for (String attrType : attrTypes) {
+      ExerciseAttribute attribute = typeToAtrr.get(attrType);
+      if (attribute == null) {
+        // missing info for this type, so map it to BLANK
+        pairs.add(new ExerciseAttribute(attrType, BLANK));
+      } else {
+        pairs.add(attribute);
+      }
+    }
   }
 
   private int c = 0;

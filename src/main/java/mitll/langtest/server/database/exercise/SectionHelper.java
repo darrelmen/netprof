@@ -73,7 +73,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    */
   private static final String ALL = "all";
   private static final String LISTS = "Lists";
-  public static final String RECORDED = "Recorded";
+  private static final String RECORDED = "Recorded";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
@@ -298,8 +298,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    */
   @Override
   public Map<String, Set<MatchInfo>> getTypeToMatches(Collection<Pair> pairs) {
-    Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), this.root);
-    return getTypeToMatches(typeToMatchPairs);
+   // Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), this.root);
+    return getTypeToMatches(getTypeToMatchPairs(new ArrayList<>(pairs), this.root));
   }
 
   /**
@@ -324,8 +324,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String toMatch = next.getValue();
 
     boolean isAll = toMatch.equalsIgnoreCase(ANY) || toMatch.equalsIgnoreCase(ALL);
-    if (DEBUG)
+    if (DEBUG) {
       logger.info("getTypeToMatchPairs to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
+    }
     if (!node.isLeaf() && node.getChildType().equals(type)) {
       Map<String, MatchInfo> matches = new HashMap<>();
       typeToMatch.put(type, matches);
@@ -409,6 +410,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
   /**
+   * Get a map with sorted values.
    * @param typeToMatch
    * @return
    * @see #getTypeToMatches
@@ -416,9 +418,6 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   private Map<String, Set<MatchInfo>> getTypeToMatches(Map<String, Map<String, MatchInfo>> typeToMatch) {
     Map<String, Set<MatchInfo>> typeToMatchRet = new HashMap<>();
     typeToMatch.forEach((k, v) -> typeToMatchRet.put(k, new TreeSet<>(v.values())));
-//    for (Map.Entry<String, Map<String, MatchInfo>> pair : typeToMatch.entrySet()) {
-//      typeToMatchRet.put(pair.getKey(), new TreeSet<>(pair.getValue().values()));
-//    }
     return typeToMatchRet;
   }
 
