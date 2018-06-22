@@ -222,18 +222,22 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   private void setDominoIDOnExercises(int projid, int dominoProjectID) {
     Map<String, Integer> oldToID = userExerciseDAO.getNpToExID(projid);
     logger.info("setDominoIDOnExercises : need to match up domino IDs - found " + oldToID.size());
-
+    Set<String> missing = new HashSet<>();
     Map<String, Integer> npToDomino = databaseImpl.getProjectManagement().getNpToDomino(dominoProjectID);
     List<SlickUpdateDominoPair> updateDominoPairs = new ArrayList<>();
     npToDomino.forEach((npid, dominoID) -> {
       Integer exIDForNPID = oldToID.get(npid);
       if (exIDForNPID == null) {
-        logger.warn("missing exercise for " + npid + " and domino " + dominoID);
+        logger.warn("setDominoIDOnExercises missing exercise for " + npid + " and domino " + dominoID);
+        missing.add(npid);
       } else {
         updateDominoPairs.add(new SlickUpdateDominoPair(exIDForNPID, dominoID));
       }
     });
     logger.info("updateDominoPairs - found " + updateDominoPairs.size());
+    if (!missing.isEmpty()) {
+      logger.warn("\n\n\nupdateDominoPairs - missing " + missing.size());
+    }
     int i = userExerciseDAO.updateDominoBulk(updateDominoPairs);
     if (i != updateDominoPairs.size()) {
       logger.warn("only did " + i + " not " + updateDominoPairs.size());

@@ -85,7 +85,7 @@ public class RecordButton extends Button {
   private Timer recordTimer;
   private final int autoStopDelay;
   private final boolean doClickAndHold;
-  boolean mouseDown = false;
+  protected boolean mouseDown = false;
 
   private RecordingListener recordingListener;
   private final PropertyHandler propertyHandler;
@@ -122,12 +122,6 @@ public class RecordButton extends Button {
     setType(ButtonType.DANGER);
     setIcon(IconType.MICROPHONE);
     setupRecordButton();
-
-    /**
-     * <button type="button" class="btn btn-danger btn-circle btn-xl"><i class="fa fa-heart"></i>
-     </button>
-     */
-
     getElement().setId("record_button");
   }
 
@@ -176,14 +170,17 @@ public class RecordButton extends Button {
     if (doClickAndHold) {
       addMouseDownHandler(event -> {
         if (!mouseDown) {
+         // logger.info("gotMouseDown  " + mouseDown);
           mouseDown = true;
           doClick();
         } else {
           logger.info("setupRecordButton ignoring mouse down since mouse already down ");
         }
+        event.preventDefault();
       });
 
       addMouseUpHandler(event -> {
+       // logger.info("gotMouseUp  " + mouseDown);
         if (mouseDown) {
           mouseDown = false;
           doClick();
@@ -201,7 +198,6 @@ public class RecordButton extends Button {
   private void gotMouseOut() {
     if (mouseDown) {
       mouseDown = false;
-//      logger.info("got mouse out " + mouseDown);
       doClick();
     }
   }
@@ -209,7 +205,7 @@ public class RecordButton extends Button {
   /**
    * @see #setupRecordButton
    */
-  void doClick() {
+  private void doClick() {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }

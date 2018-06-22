@@ -535,7 +535,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
     }
 
-    if (isChinese) {
+    if (isChinese && false) {  // try to do some fancy setting of the result ids..?
       Map<String, Integer> tradOldToID = new HashMap<>();
       Map<String, Integer> simplifiedOldToID = new HashMap<>();
 

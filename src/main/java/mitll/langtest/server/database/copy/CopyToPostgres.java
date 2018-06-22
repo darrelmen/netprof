@@ -160,7 +160,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String OPT_NETPROF = OPT_NETPROF_ROOT + File.separator + "import";
 
   private long getImportDate(String config, String optionalProperties) {
-    return getSinceWhen(config, optionalProperties, true);
+    return getSinceWhenFromOldConfig(config, optionalProperties, true);
   }
 
   /**
@@ -186,10 +186,11 @@ public class CopyToPostgres<T extends CommonShell> {
                                        boolean doSinceCreated) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
+    // previous update from h2...
     long sinceWhen = 0;
 
     if (doUpdate) {
-      sinceWhen = getSinceWhen(config, optionalProperties, false);
+      sinceWhen = getSinceWhenFromOldConfig(config, optionalProperties, false);
     }
 
     try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, CONFIG)) {
@@ -231,7 +232,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param optionalProperties
    * @return
    */
-  private long getSinceWhen(String config, String optionalProperties, boolean closeDB) {
+  private long getSinceWhenFromOldConfig(String config, String optionalProperties, boolean closeDB) {
     long sinceWhen = 0;
 
     DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, "oldConfig");
@@ -528,7 +529,7 @@ public class CopyToPostgres<T extends CommonShell> {
         if (doSinceCreated) {
           oldSinceWhen = createProject.getSinceCreated(db, projectID);
         }
-        sinceWhen = Math.max(createProject.getSinceWhen(db, projectID), oldSinceWhen);
+        sinceWhen = Math.max(createProject.getSinceWhenLastNetprof(db, projectID), oldSinceWhen);
         logger.info("UPDATE : sinceWhen is " + new Date(sinceWhen));
         long maxTime = copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen, checkConvert);
         if (maxTime == 0) {
@@ -728,7 +729,6 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param exToID
    * @param projid
    * @param sinceWhen
-   * @param toConvertToAudio
    * @see #copyAllTables(DatabaseImpl, String, ProjectStatus, boolean, Collection, int, long, boolean)
    */
   private Map<String, Integer> copyAudio(DatabaseImpl db,
@@ -740,8 +740,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                          Set<Long> maxTime,
                                          boolean fixTranscript,
                                          Map<Integer, String> idToFL
-                                         //,
-//                                         Set<AudioAttribute> toConvertToAudio
+
   ) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
@@ -1108,7 +1107,7 @@ public class CopyToPostgres<T extends CommonShell> {
     List<SlickResult> bulk = new ArrayList<>();
 
     List<Result> results = resultDAO.getResults();
-    List<Result> filtered = getSinceWhen(results, sinceWhen);
+    List<Result> filtered = getSinceWhenFromOldConfig(results, sinceWhen);
     logger.info("copyResult " + projid + " : copying " + results.size() + " results, filtered to " + filtered.size() + " since " + new Date(sinceWhen));
 
     //  int missing = 0;
@@ -1267,7 +1266,7 @@ public class CopyToPostgres<T extends CommonShell> {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
     List<SlickRefResult> bulk = new ArrayList<>();
     Collection<Result> toImport = new RefResultDAO(db, false).getResults();
-    List<Result> sinceWhen1 = getSinceWhen(toImport, sinceWhen);
+    List<Result> sinceWhen1 = getSinceWhenFromOldConfig(toImport, sinceWhen);
     logger.info("copyRefResult for project " + projid + " found " + toImport.size() +
         " original ref results, " + sinceWhen1.size() + " since " + new Date(sinceWhen));
 
@@ -1311,7 +1310,7 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("copyRefResult END   : added " + bulk.size() + " and now has " + dao.getNumResults() + " took " + diff + " seconds");
   }
 
-  private List<Result> getSinceWhen(Collection<Result> toImport, long sinceWhen) {
+  private List<Result> getSinceWhenFromOldConfig(Collection<Result> toImport, long sinceWhen) {
     return toImport.stream().filter(result -> result.getTimestamp() > sinceWhen).collect(Collectors.toList());
   }
 

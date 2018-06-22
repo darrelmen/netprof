@@ -334,9 +334,8 @@ public class CreateProject {
    * @return
    * @see CopyToPostgres#copyOneConfig
    */
-  long getSinceWhen(DatabaseImpl db, int projectID) {
-    Project project = db.getProject(projectID);
-    return project.getProject().lastnetprof().getTime();
+  long getSinceWhenLastNetprof(DatabaseImpl db, int projectID) {
+    return db.getProject(projectID).getProject().lastnetprof().getTime();
   }
 
   long getSinceCreated(DatabaseImpl db, int projectID) {
@@ -346,6 +345,12 @@ public class CreateProject {
     return netprofUpdate;
   }
 
+  /**
+   * Assumes no change in target project...
+   * @param db
+   * @param projectID
+   * @return
+   */
   long getSinceWhenResults(DatabaseImpl db, int projectID) {
     List<Long> latest = new ArrayList<>();
     db.getResultDAO().getMonitorResults(projectID).stream().max(new Comparator<MonitorResult>() {

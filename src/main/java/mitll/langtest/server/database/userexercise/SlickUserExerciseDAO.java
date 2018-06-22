@@ -1517,8 +1517,19 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return dao.getUnknownDomino(projid).size() > 0 || dao.getUnknownDominoTriplet(projid).size() > 0;
   }
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectDAO#setDominoIDOnExercises(int, int)
+   * @param projid
+   * @return
+   */
   public Map<String, Integer> getNpToExID(int projid) {
-    return dao.getUnknownDomino(projid);
+    Map<String, Integer> unknownDomino = dao.getUnknownDomino(projid);
+    logger.info("getNpToExID got " + unknownDomino.size() + " for project " + projid);
+    Map<String, Integer> unknownDominoTriplet = dao.getUnknownDominoTriplet(projid);
+    logger.info("getNpToExID got all " + unknownDominoTriplet.size() + " for project " + projid);
+    unknownDomino.putAll(unknownDominoTriplet);
+    logger.info("getNpToExID now " + unknownDomino.size() + " for project " + projid);
+    return unknownDomino;
   }
 
   /**
