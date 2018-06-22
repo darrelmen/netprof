@@ -1523,7 +1523,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    */
   public Map<String, Integer> getNpToExID(int projid) {
-    Map<String, Integer> unknownDomino = dao.getUnknownDomino(projid);
+    Map<String, Integer> unknownDomino = new HashMap<>(dao.getUnknownDomino(projid));
     logger.info("getNpToExID got " + unknownDomino.size() + " for project " + projid);
     Map<String, Integer> unknownDominoTriplet = dao.getUnknownDominoTriplet(projid);
     logger.info("getNpToExID got all " + unknownDominoTriplet.size() + " for project " + projid);
