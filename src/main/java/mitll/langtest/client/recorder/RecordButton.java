@@ -203,9 +203,11 @@ public class RecordButton extends Button {
   }
 
   /**
+   * Can't be private - IDEA mistake...
    * @see #setupRecordButton
+   *
    */
-  private void doClick() {
+  protected void doClick() {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
