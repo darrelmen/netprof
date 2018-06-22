@@ -120,7 +120,7 @@ public class DatabaseServlet extends HttpServlet {
   }
 
   String getProjectName(int id) {
-    Project project = getDatabase().getProjectManagement().getProject(id);
+    Project project = getDatabase().getProjectManagement().getProject(id, false);
     return project == null ? "UNK" : project.getName();
   }
 

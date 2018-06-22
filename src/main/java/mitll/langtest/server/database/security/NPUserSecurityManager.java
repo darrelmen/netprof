@@ -660,7 +660,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
         ActiveUser e = new ActiveUser(firstLastUser, v.getVisited());
         since.add(e);
         if (v.getProjid() > 0) {
-          Project project = projectManagement.getProject(v.getProjid());
+          Project project = projectManagement.getProject(v.getProjid(), false);
           if (project != null) {
             e.setProjectName(project.getName());
             e.setLanguage(project.getLanguage());

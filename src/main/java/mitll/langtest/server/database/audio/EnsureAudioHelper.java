@@ -96,7 +96,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     long now = System.currentTimeMillis();
     long then;
     then = now;
-    List<CommonExercise> exercises = db.getExercises(projectid);
+    List<CommonExercise> exercises = db.getExercises(projectid, false);
     now = System.currentTimeMillis();
     if (now - then > WARN_THRESH)
       logger.info("ensureAudio for " + projectid + " - took " + (now - then) + " millis to get exercises");

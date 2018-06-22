@@ -425,7 +425,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   private List<CommonExercise> getExercises(int projectID) {
     long then = System.currentTimeMillis();
-    List<CommonExercise> exercises = db.getExercises(projectID);
+    List<CommonExercise> exercises = db.getExercises(projectID, false);
     long now = System.currentTimeMillis();
     if (now - then > 200) {
       logger.info("getExercises took " + (now - then) + " millis to get the raw exercise list for " + projectID);// getLanguage(projectID));

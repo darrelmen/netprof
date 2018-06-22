@@ -44,16 +44,16 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 
-import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public interface IProjectManagement {
   /**
-   * @see DatabaseImpl#populateProjects()
+   * @see DatabaseImpl#populateProjects(int)
+   * @param projID
    */
-  void populateProjects();
+  void populateProjects(int projID);
 
   void rememberProject(int id);
 
@@ -84,9 +84,9 @@ public interface IProjectManagement {
    */
   CommonExercise getExercise(int id);
 
-  List<CommonExercise> getExercises(int projectid);
+  List<CommonExercise> getExercises(int projectid, boolean onlyOne);
 
-  Project getProject(int projectid);
+  Project getProject(int projectid, boolean onlyOne);
   Project getProjectByName(String name);
   List<Project> getProjectByLangauge(Language name);
   List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly);

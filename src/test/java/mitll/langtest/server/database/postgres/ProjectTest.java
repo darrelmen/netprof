@@ -38,7 +38,6 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.IAnalysis;
-import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
@@ -306,7 +305,7 @@ public class ProjectTest extends BaseTest {
     IUserDAO userDAO = spanish.getUserDAO();
     logger.info("counts " + userDAO + " " + userDAO.getUsers().size());
 
-    spanish.populateProjects();
+    spanish.populateProjects(-1);
     spanish.setInstallPath("");
 
     Project project = spanish.getProject(2);
@@ -356,7 +355,7 @@ public class ProjectTest extends BaseTest {
     IUserDAO userDAO = spanish.getUserDAO();
     logger.info("counts " + userDAO + " " + userDAO.getUsers().size());
 
-    spanish.populateProjects();
+    spanish.populateProjects(-1);
     spanish.setInstallPath("");
 
     Project project = spanish.getProject(2);
@@ -409,7 +408,7 @@ public class ProjectTest extends BaseTest {
 
     logger.info("found " + english + " for " + english1);
 
-    spanish.populateProjects();
+    spanish.populateProjects(-1);
 
     spanish.setInstallPath("");
 

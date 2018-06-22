@@ -70,7 +70,7 @@ public class ExerciseCopy {
     }
 
     customExercises.removeAll(converted);
-    List<CommonExercise> toImport = db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID);
+    List<CommonExercise> toImport = db.getExercises(DatabaseImpl.IMPORT_PROJECT_ID, false);
     toImport.addAll(converted);
     logger.info("importing " + toImport.size() + " customExercises with " + converted.size());
 

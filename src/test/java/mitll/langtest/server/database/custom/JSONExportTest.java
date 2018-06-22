@@ -6,7 +6,6 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.exercise.CommonExercise;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,9 +13,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -56,7 +53,7 @@ public class JSONExportTest extends JsonExport {
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
     database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan(), null);
-    database.getExercises(-1);
+    database.getExercises(-1, false);
   }
 
   @Test
@@ -204,7 +201,7 @@ public class JSONExportTest extends JsonExport {
 
   @Test
   public void testExport5() {
-    Collection<CommonExercise> exercises = database.getExercises(-1);
+    Collection<CommonExercise> exercises = database.getExercises(-1, false);
     logger.info("Got " + exercises.size());
   }
 //

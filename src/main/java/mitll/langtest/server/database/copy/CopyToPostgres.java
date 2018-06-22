@@ -696,7 +696,8 @@ public class CopyToPostgres<T extends CommonShell> {
         new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL, typeOrder, parentToChild, checkConvert);
 
     if (isUpdate) {
-      List<CommonExercise> exercises = db.getExercises(projectID);
+      List<CommonExercise> exercises = db.getExercises(projectID, true);
+
       exercises.forEach(commonExercise -> idToFL.put(commonExercise.getID(), commonExercise.getForeignLanguage()));
       exercises.forEach(commonExercise -> commonExercise.getDirectlyRelated().forEach(context -> {
         parentToChild.put(commonExercise.getOldID(), context.getID());

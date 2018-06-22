@@ -149,6 +149,8 @@ public class ExcelExport {
       // evil thing where the meaning is empty for UserExercise overrides, but on the spreadsheet
       row.createCell(j++).setCellValue(meaning);
 
+      row.createCell(j++).setCellValue(exercise.getAltFL());
+
       for (String type : typeOrder) {
         row.createCell(j++).setCellValue(exercise.getUnitToValue().get(type));
       }
@@ -156,6 +158,7 @@ public class ExcelExport {
       if (!directlyRelated.isEmpty()) {
         CommonExercise next = directlyRelated.iterator().next();
         row.createCell(j++).setCellValue(next.getForeignLanguage());
+        row.createCell(j++).setCellValue(next.getAltFL());
         row.createCell(j++).setCellValue(next.getEnglish());
       }
       if (isDefectList) {
@@ -273,8 +276,10 @@ public class ExcelExport {
       columns.add(language);
     }
     columns.add(english ? MEANING : TRANSLITERATION);
+    columns.add("alt" + language);
     columns.addAll(typeOrder);
     columns.add(CONTEXT_SENTENCE);
+    columns.add("alt" + CONTEXT_SENTENCE);
     columns.add(CONTEXT_TRANSLATION);
 
     if (isDefectList) {

@@ -21,7 +21,7 @@ public interface ExerciseServices {
 
   CommonExercise getExercise(int projectid, int id);
 
-  List<CommonExercise> getExercises(int projectid);
+  List<CommonExercise> getExercises(int projectid, boolean onlyOne);
 
   ExerciseDAO<CommonExercise> getExerciseDAO(int projectid);
 

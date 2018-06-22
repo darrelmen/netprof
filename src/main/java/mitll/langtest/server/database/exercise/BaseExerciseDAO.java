@@ -118,7 +118,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   /**
    * @return
-   * @see DatabaseImpl#getExercises(int)
+   * @see ExerciseServices#getExercises(int, boolean)
    */
   public List<CommonExercise> getRawExercises() {
     synchronized (idToExercise) {

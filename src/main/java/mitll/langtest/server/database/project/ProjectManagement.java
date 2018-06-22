@@ -206,11 +206,12 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
+   * @param projID
    * @see DatabaseImpl#populateProjects
    */
   @Override
-  public void populateProjects() {
-    populateProjects(pathHelper, serverProps, logAndNotify, db);
+  public void populateProjects(int projID) {
+    populateProjects(pathHelper, serverProps, logAndNotify, db, projID);
   }
 
   /**
@@ -218,13 +219,19 @@ public class ProjectManagement implements IProjectManagement {
    * If a project is already configured, won't be configured again.
    * Fill in id->project map
    *
-   * @see #populateProjects()
+   * @see IProjectManagement#populateProjects(int)
    */
   private void populateProjects(PathHelper pathHelper,
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
-                                DatabaseImpl db) {
-    getAllSlickProjects().forEach(slickProject -> {
+                                DatabaseImpl db, int projID) {
+    Collection<SlickProject> allSlickProjects = getAllSlickProjects();
+    if (projID != -1) {
+      List<SlickProject> collect = allSlickProjects.stream().filter(slickProject -> slickProject.id() == projID).collect(Collectors.toList());
+      logger.info("just doing " + projID + ": " + collect);
+      allSlickProjects = collect;
+    }
+    allSlickProjects.forEach(slickProject -> {
       if (!idToProject.containsKey(slickProject.id())) {
         if (debugOne) {
           if (slickProject.id() == debugProjectID ||
@@ -267,7 +274,7 @@ public class ProjectManagement implements IProjectManagement {
    * Latchy - would be better to do this when the project is remembered...
    * // TODO : this seems like a bad idea --
    *
-   * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl)
+   * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl, int)
    */
   private void configureProjects() {
     long then = System.currentTimeMillis();
@@ -278,7 +285,7 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   public void configureProjectByID(int projid) {
-    Project project = getProject(projid);
+    Project project = getProject(projid, false);
     if (project != null) {
       configureProject(project, false, false);
     }
@@ -553,10 +560,10 @@ public class ProjectManagement implements IProjectManagement {
     return used / MB;
   }
 
-  private Project getProjectOrFirst(int projectid) {
+  private Project getProjectOrFirst(int projectid, boolean onlyOne) {
     boolean getFirst = projectid == -1;
     if (getFirst) logger.warn("getProjectOrFirst returning first project for " + projectid);
-    return getFirst ? getFirstProject() : getProject(projectid);
+    return getFirst ? getFirstProject() : getProject(projectid, onlyOne);
   }
 
   /**
@@ -567,7 +574,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public Project getProjectForUser(int userid) {
-    Project project = getProject(db.getUserProjectDAO().getCurrentProjectForUser(userid));
+    Project project = getProject(db.getUserProjectDAO().getCurrentProjectForUser(userid), false);
 
     if (project != null && !project.getStatus().shouldLoad()) {
       return null;
@@ -622,7 +629,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public CommonExercise getExercise(int projectid, int id) {
-    return getProjectOrFirst(projectid).getExerciseByID(id);
+    return getProjectOrFirst(projectid, false).getExerciseByID(id);
   }
 
   /**
@@ -637,7 +644,7 @@ public class ProjectManagement implements IProjectManagement {
       logger.error("getExercise : can't find project for exercise " + id);
       return null;
     } else {
-      Project project = getProject(projectForExercise);
+      Project project = getProject(projectForExercise, false);
       return project == null ? null : project.getExerciseByID(id);
     }
   }
@@ -648,16 +655,17 @@ public class ProjectManagement implements IProjectManagement {
    * deals with projects added while webapp is running -
    *
    * @param projectid
+   * @param onlyOne
    * @return
-   * @see #getExercises(int)
+   * @see IProjectManagement#getExercises(int, boolean)
    * @see Project#buildExerciseTrie
    */
   @Override
-  public List<CommonExercise> getExercises(int projectid) {
+  public List<CommonExercise> getExercises(int projectid, boolean onlyOne) {
     if (isAmas()) {
       return Collections.emptyList();
     }
-    Project project = getProjectOrFirst(projectid);
+    Project project = getProjectOrFirst(projectid, onlyOne);
     if (project == null) {
       logger.error("getExercises no project for " + projectid + " so returning empty exercises.");
       return Collections.emptyList();
@@ -718,10 +726,11 @@ public class ProjectManagement implements IProjectManagement {
    * Try to deal with project set changing out from underneath us...
    *
    * @param projectid
+   * @param onlyOne
    * @return
    */
   @Override
-  public Project getProject(int projectid) {
+  public Project getProject(int projectid, boolean onlyOne) {
     if (projectid == -1) {
       logger.warn("getProject called with -1 projectid?", new IllegalArgumentException("project id = -1"));
     }
@@ -730,7 +739,7 @@ public class ProjectManagement implements IProjectManagement {
 
     if (project == null) {
       if (anyNewProjectsAdded()) {
-        project = lazyGetProject(projectid);
+        project = lazyGetProject(projectid, onlyOne);
       }
 
       if (project == null && !idToProject.isEmpty()) {
@@ -750,10 +759,10 @@ public class ProjectManagement implements IProjectManagement {
     return !getNewProjects(idToProject.keySet()).isEmpty();
   }
 
-  private Project lazyGetProject(int projectid) {
+  private Project lazyGetProject(int projectid, boolean onlyOne) {
     logger.info("lazyGetProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
         ") - refreshing projects");
-    populateProjects();
+    populateProjects(onlyOne ? projectid : -1);
     Project project = idToProject.get(projectid);
 
     if (project == null) {
@@ -767,7 +776,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @param knownProjects
    * @return
-   * @see #getProject(int)
+   * @see IProjectManagement#getProject(int, boolean)
    */
   @NotNull
   private Set<Integer> getNewProjects(Set<Integer> knownProjects) {
@@ -795,9 +804,9 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * @return
-   * @see #getProject(int)
-   * @see #getProjectOrFirst(int)
-   * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl)
+   * @see IProjectManagement#getProject(int, boolean)
+   * @see #getProjectOrFirst(int, boolean)
+   * @see #populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl, int)
    */
   @Override
   public Project getFirstProject() {
@@ -818,10 +827,10 @@ public class ProjectManagement implements IProjectManagement {
     } else {
       if (!idToProject.containsKey(projid)) {
         logger.info("\tsetStartupInfo : populateProjects...");
-        populateProjects();
+        populateProjects(-1);
       }
 
-      Project project = getProject(projid);
+      Project project = getProject(projid, false);
 
       if (project != null) {
         if (!project.getStatus().shouldLoad() && !userWhere.isAdmin()) {
@@ -908,7 +917,7 @@ public class ProjectManagement implements IProjectManagement {
 
     if (numProjects != currentNumProjects) {
       logger.info("getNestedProjectInfo : project loaded? db projects " + numProjects + " current " + currentNumProjects);
-      populateProjects();
+      populateProjects(-1);
     }
 
     List<SlimProject> projectInfos = new ArrayList<>();
@@ -1001,7 +1010,7 @@ public class ProjectManagement implements IProjectManagement {
   private boolean addExerciseDerivedProperties(SlickProject project, Map<String, String> info) {
     boolean isRTL = false;
     if (getProjectStatus(project).shouldLoad()) {
-      List<CommonExercise> exercises = db.getExercises(project.id());
+      List<CommonExercise> exercises = db.getExercises(project.id(), false);
       isRTL = isRTL(exercises);
       info.put(NUM_ITEMS, "" + exercises.size());
 //      logger.info("got " + exercises.size() + " ex for project #" + project.id());
@@ -1032,7 +1041,7 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   public ImportInfo getImportFromDomino(int projID) {
-    Project project = getProject(projID);
+    Project project = getProject(projID, false);
 
     if (project != null) {
       Timestamp modified = project.getProject().lastimport();

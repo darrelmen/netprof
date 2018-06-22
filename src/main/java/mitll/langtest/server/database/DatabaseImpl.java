@@ -98,7 +98,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickAudio;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -324,12 +323,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see DatabaseImpl#makeDAO
    * @see DatabaseImpl#DatabaseImpl
    * @see LangTestDatabaseImpl#init
+   * @param projID
    */
-  public DatabaseImpl populateProjects() {
+  public DatabaseImpl populateProjects(int projID) {
     if (projectManagement == null) {
       logger.info("populateProjects no project management yet...");
     } else {
-      projectManagement.populateProjects();
+      projectManagement.populateProjects(projID);
       userDAO.setProjectManagement(getProjectManagement());
 
       if (TEST_SYNC) {  // right now I can't run the test since I need mongo.. etc.
@@ -758,7 +758,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         return new SectionHelper<>();
       }
 
-      getExercises(projectid);
+      getExercises(projectid, false);
       return getSectionHelperForProject(projectid);
     }
   }
@@ -811,7 +811,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see ScoreServlet#getJsonNestedChapters
    */
   public JsonExport getJSONExport(int projectid) {
-    getExercises(projectid);
+    getExercises(projectid, false);
 
     Map<String, Integer> stringIntegerMap = Collections.emptyMap();
     AudioFileHelper audioFileHelper = getProject(projectid).getAudioFileHelper();
@@ -834,19 +834,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Deprecated
   public Collection<CommonExercise> getExercises() {
-    return getExercises(-1);
+    return getExercises(-1, false);
   }
 
   /**
    * exercises are in the context of a project
    *
    * @param projectid
+   * @param onlyOne
    * @return
    * @see Project#buildExerciseTrie
    */
   @Override
-  public List<CommonExercise> getExercises(int projectid) {
-    return projectManagement.getExercises(projectid);
+  public List<CommonExercise> getExercises(int projectid, boolean onlyOne) {
+    return projectManagement.getExercises(projectid, onlyOne);
   }
 
   @Override
@@ -979,7 +980,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
           if (!serverProps.useH2()) {
             //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
-            populateProjects();
+            populateProjects(-1);
             //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
             if (projectManagement.getProjects().isEmpty()) {
               logger.warn("\nmakeDAO no projects loaded yet...?");
@@ -1047,7 +1048,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       if (projectManagement == null) {
         setInstallPath("", null);
       }
-      return projectManagement.getProject(projectid);
+      return projectManagement.getProject(projectid, false);
     }
   }
 
@@ -1452,7 +1453,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   private Map<Integer, CommonExercise> getIdToExerciseMap(int projectid) {
     Map<Integer, CommonExercise> join = new HashMap<>();
-    getExercises(projectid).forEach(exercise -> join.put(exercise.getID(), exercise));
+    getExercises(projectid, false).forEach(exercise -> join.put(exercise.getID(), exercise));
 
 /*    // TODO : why would we want to do this?
     if (userExerciseDAO != null && getExerciseDAO(projectid) != null) {
@@ -1604,7 +1605,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
                        AudioExportOptions options,
                        IEnsureAudioHelper ensureAudioHelper) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
-        getExercises(projectid) :
+        getExercises(projectid, false) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
 
     if (!options.getSearch().isEmpty()) {
@@ -1724,7 +1725,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private void attachAllAudio(int projectid) {
     long then = System.currentTimeMillis();
 
-    Collection<CommonExercise> exercises = getExercises(projectid);
+    Collection<CommonExercise> exercises = getExercises(projectid, false);
 
     Project project = getProject(projectid);
     String language = project.getLanguage();
@@ -2110,7 +2111,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public Map<String, Float> getMaleFemaleProgress(int projectid) {
-    return getAudioDAO().getMaleFemaleProgress(projectid, getExercises(projectid));
+    return getAudioDAO().getMaleFemaleProgress(projectid, getExercises(projectid, false));
   }
 
   @Override

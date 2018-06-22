@@ -387,7 +387,7 @@ public class AudioFileHelper implements AlignDecode {
     if (!match) {
       logger.error("huh? audio context proj id " + projid + " but this project is " + project.getID());
     }
-    Project project = match ? this.project : db.getProjectManagement().getProject(projid);
+    Project project = match ? this.project : db.getProjectManagement().getProject(projid, false);
     project.addAnswerToUser(relPath, userid);  //not needed
     project.addAnswerToUser(absolutePath, userid);
   }

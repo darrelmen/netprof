@@ -96,7 +96,7 @@ public interface IProjectDAO extends IDAO {
 
   /**
    * @return
-   * @see ProjectManagement#populateProjects
+   * @see IProjectManagement#populateProjects
    */
   Collection<SlickProject> getAll();
 
