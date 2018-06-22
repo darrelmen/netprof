@@ -109,7 +109,13 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   @Override
   public boolean exists(int projid) {
-    return !dao.byID(projid).isEmpty();
+    Collection<SlickProject> slickProjects = dao.byID(projid);
+    return !slickProjects.isEmpty();
+  }
+
+  public SlickProject getByID(int projid) {
+    Collection<SlickProject> slickProjects = dao.byID(projid);
+    return slickProjects.isEmpty()?null:slickProjects.iterator().next();
   }
 
   /**

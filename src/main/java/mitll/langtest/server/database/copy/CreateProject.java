@@ -11,6 +11,7 @@ import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.result.MonitorResult;
+import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -220,7 +221,7 @@ public class CreateProject {
       projectServices.rememberProject(projectID);
 
       if (dominoID != -1) {
-        logger.info("sync with domino project " +dominoID);
+        logger.info("sync with domino project " + dominoID);
 
       }
       return projectID;
@@ -327,7 +328,7 @@ public class CreateProject {
   }
 
   /**
-   *   netprof update
+   * netprof update
    *
    * @param db
    * @param projectID
@@ -335,18 +336,21 @@ public class CreateProject {
    * @see CopyToPostgres#copyOneConfig
    */
   long getSinceWhenLastNetprof(DatabaseImpl db, int projectID) {
-    return db.getProject(projectID).getProject().lastnetprof().getTime();
+    return getSlickProject(db, projectID).lastnetprof().getTime();
   }
 
   long getSinceCreated(DatabaseImpl db, int projectID) {
-    Project project = db.getProject(projectID);
-    long netprofUpdate = project.getProject().created().getTime();
+    SlickProject project1 = getSlickProject(db, projectID);
+    long netprofUpdate = project1.created().getTime();
     logger.info("\n\n\n getSinceCreated is at " + new Date(netprofUpdate));
     return netprofUpdate;
   }
 
+
+
   /**
    * Assumes no change in target project...
+   *
    * @param db
    * @param projectID
    * @return
@@ -364,21 +368,22 @@ public class CreateProject {
         latest.add(monitorResult.getTimestamp());
       }
     });
-    // long createdTime = project.getProject().created().getTime();
     long netprofUpdate = latest.isEmpty() ? 0 : latest.iterator().next();
 
     logger.info("\n\n\n latest result is at " + new Date(netprofUpdate));
-    // db.close();
-
     return netprofUpdate;
   }
 
   void updateNetprof(DatabaseImpl db, int projectID, long sinceWhen) {
-    Project project = db.getProject(projectID);
-    if (!db.getProjectDAO().easyUpdateNetprof(project.getProject(), sinceWhen)) {
+    SlickProject byID = getSlickProject(db, projectID);
+    if (!db.getProjectDAO().easyUpdateNetprof(byID, sinceWhen)) {
       logger.warn("couldn't update project " + projectID);
     }
     db.close();
+  }
+
+  private SlickProject getSlickProject(DatabaseImpl db, int projectID) {
+    return db.getProjectDAO().getByID(projectID);
   }
 
   private static class Pair {

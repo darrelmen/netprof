@@ -120,6 +120,7 @@ public interface IProjectDAO extends IDAO {
    * @return
    */
   boolean exists(int projid);
+  SlickProject getByID(int projid);
 
   /**
    * @see ProjectDAO#update
