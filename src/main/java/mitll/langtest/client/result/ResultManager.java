@@ -231,7 +231,8 @@ public class ResultManager extends PagerTable {
 
     addColumnsToTable(cellTable);
     cellTable.setRowCount(numResults, true);
-    cellTable.setVisibleRange(0, MAX_TO_SHOW);
+    int maxToShow = Window.getClientHeight() > 850 ? MAX_TO_SHOW : 5;
+    cellTable.setVisibleRange(0, maxToShow);
 
     createProvider(numResults, cellTable, resultTypeAhead);
 
@@ -661,6 +662,9 @@ public class ResultManager extends PagerTable {
   }
 
   private Panel getPagerAndTable(CellTable<MonitorResult> table, Widget rightOfPager) {
-    return getOldSchoolPagerAndTable(table, table, PAGE_SIZE, 1000, rightOfPager);
+
+    int pageSize = Window.getClientHeight() > 850 ? PAGE_SIZE : PAGE_SIZE - 2;
+
+    return getOldSchoolPagerAndTable(table, table, pageSize, 1000, rightOfPager);
   }
 }

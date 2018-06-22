@@ -44,6 +44,7 @@ import static mitll.langtest.shared.user.User.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
+  public static final String GVIDAVER = "gvidaver";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
   public static final String PLEASE_WAIT = "Please wait...";
@@ -126,7 +127,7 @@ public class ProjectChoices {
     this.lifecycleSupport = langTest;
     this.sessionUser = langTest.getUser();
     String userID = langTest.getUserManager().getUserID();
-    if (userID != null) isSuperUser = userID.equalsIgnoreCase("gvidaver");
+    if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
     //PropertyHandler props = langTest.getProps();
     this.controller = langTest;
     messageHelper = langTest.getMessageHelper();

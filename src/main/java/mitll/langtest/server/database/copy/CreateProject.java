@@ -327,7 +327,7 @@ public class CreateProject {
   }
 
   /**
-   * latest of netprof update and creation
+   *   netprof update
    *
    * @param db
    * @param projectID
@@ -336,11 +336,7 @@ public class CreateProject {
    */
   long getSinceWhen(DatabaseImpl db, int projectID) {
     Project project = db.getProject(projectID);
-    // long createdTime = project.getProject().created().getTime();
-    long netprofUpdate = project.getProject().lastnetprof().getTime();
-    //  db.close();
-
-    return netprofUpdate;//createdTime > netprofUpdate ? createdTime : netprofUpdate;
+    return project.getProject().lastnetprof().getTime();
   }
 
   long getSinceCreated(DatabaseImpl db, int projectID) {

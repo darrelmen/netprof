@@ -205,7 +205,8 @@ public class CopyToPostgres<T extends CommonShell> {
           "\n\tmodel    " + serverProps.getCurrentModel());
 
       String nameToUse = optionalName == null ? language : optionalName;
-      boolean checkConvert = config.equalsIgnoreCase("mandarinTraditional");
+      boolean checkConvert = config.toLowerCase().startsWith("mandarintrad");
+      if (checkConvert) logger.info("\n\n\n\n\ndoing special mandarin trad conversion\n\n\n\n\n");
       copyToPostgres.copyOneConfig(
           databaseLight,
           getCreateProject(serverProps).getCC(language),
@@ -295,7 +296,7 @@ public class CopyToPostgres<T extends CommonShell> {
     database.close();
   }
 
-  private void dropAllButOneConfig(Integer projid) {
+/*  private void dropAllButOneConfig(Integer projid) {
     DatabaseImpl database = getDatabase();
     IProjectDAO projectDAO = database.getProjectDAO();
     if (projectDAO.exists(projid)) {
@@ -308,7 +309,7 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     database.close();
-  }
+  }*/
 
   private void merge(int from, int to) {
     DatabaseImpl database = getDatabase();
@@ -329,7 +330,8 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.error("nope - not same language " + fProject.getLanguage() + " vs " + tProject.getLanguage());
       return;
     }
-    database.updateProject(from, to, fProject.getLanguageEnum() == Language.MANDARIN && tProject.getLanguageEnum() == Language.MANDARIN);
+    boolean isChinese = fProject.getLanguageEnum() == Language.MANDARIN && tProject.getLanguageEnum() == Language.MANDARIN;
+    database.updateProject(from, to, isChinese);
     database.close();
   }
 
@@ -561,7 +563,8 @@ public class CopyToPostgres<T extends CommonShell> {
 
   private long copyAllTables(DatabaseImpl db, String optName, ProjectStatus status, boolean skipRefResult,
                              Collection<String> typeOrder, int projectID,
-                             long sinceWhen, boolean checkConvert) throws Exception {
+                             long sinceWhen,
+                             boolean checkConvert) throws Exception {
     if (sinceWhen > 0) logger.info("\n\n\n only changes since " + (new Date(sinceWhen)));
 
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
@@ -574,14 +577,13 @@ public class CopyToPostgres<T extends CommonShell> {
 
     if (typeOrder.isEmpty()) logger.error("huh? type order is empty????\\n\n\n");
     Map<String, Integer> parentExToChild = new HashMap<>();
-    Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, typeOrder, sinceWhen, idToFL, parentExToChild, checkConvert);
+    Map<String, Integer> exToID =
+        copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, typeOrder, sinceWhen, idToFL, parentExToChild, checkConvert);
 
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
 
-    // Set<AudioAttribute> toConvertToAudio = new HashSet<>();
-
     long maxTime = copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(),
-        db.getUserDAO().getDefaultUser(), sinceWhen);//, checkConvert, toConvertToAudio);
+        db.getUserDAO().getDefaultUser(), sinceWhen);
 
     logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
 
@@ -1090,8 +1092,6 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param exToID
    * @param resultDAO
    * @param sinceWhen
-   * @param checkConvert
-   * @param toConvertToAudio
    * @see #copyAllTables
    */
   private long copyResult(
@@ -1103,9 +1103,7 @@ public class CopyToPostgres<T extends CommonShell> {
       Map<Integer, String> idToFL,
       int unknownExerciseID,
       int unknownUserID,
-      long sinceWhen//,
-//      boolean checkConvert,
-      //    Set<AudioAttribute> toConvertToAudio
+      long sinceWhen
   ) {
     List<SlickResult> bulk = new ArrayList<>();
 
@@ -1536,17 +1534,6 @@ public class CopyToPostgres<T extends CommonShell> {
           logger.error("couldn't copy config " + config, e);
         }
         break;
-/*      case COPYALL:
-        logger.info("copying '" + config + "' '" + optconfig + "' '" + optName + "' order " + displayOrder);
-        try {
-          List<String> configs = new ArrayList<>();
-          for (int i =1;i<arg.length; i++) configs.add(arg[i]);
-          copyToPostgres.copySeveral(configs);
-        } catch (Exception e) {
-          logger.error("couldn't copy config " + config, e);
-        }
-        break;*/
-
       case UPDATEUSER:
         logger.info("map old user ids to new user ids");
         doUpdateUser(updateUsersFile);
@@ -1576,8 +1563,6 @@ public class CopyToPostgres<T extends CommonShell> {
       case IMPORT:
         logger.info("get import date from old config");
         long importDate = copyToPostgres.getImportDate(config, optConfigValue);
-
-
         logger.info("import date for '" + config + "'/ '" + optConfigValue + "' is " + new Date(importDate));
         doExit(true);  // ?
         break;

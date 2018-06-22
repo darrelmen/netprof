@@ -98,6 +98,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickAudio;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -147,7 +148,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @see #tryTomorrow
    */
-  private static final long DAY = 24 * 60 * 60 * 1000L;
+  //private static final long DAY = 24 * 60 * 60 * 1000L;
   // private static final long DAY = 5 * 60 * 1000L;
 
   private static final boolean REPORT_ALL_PROJECTS = true;
@@ -159,7 +160,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final String DRY_RUN = "Dry Run";
   public static final int MAX_PHONES = 7;
   private static final boolean TEST_SYNC = false;
-  public static final int WARN_THRESH = 10;
+  private static final int WARN_THRESH = 10;
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -232,7 +233,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param servletContext
    * @see #DatabaseImpl
    */
-  void connectToDatabases(PathHelper pathHelper, ServletContext servletContext) {
+ protected void connectToDatabases(PathHelper pathHelper, ServletContext servletContext) {
     long then = System.currentTimeMillis();
     // first connect to postgres
 
@@ -474,24 +475,34 @@ public class DatabaseImpl implements Database, DatabaseServices {
         Integer idInTarget = oldToIDTo.get(oldNPID);
 
         if (idInTarget != null) {
-          results.forEach(rid -> {
-            if (resultDAO.updateProjectAndEx(rid, newprojid, idInTarget)) {
-              ridsUpdated.add(rid);
-              boolean b = wordDAO.updateProjectForRID(rid, newprojid);
-              boolean b1 = phoneDAO.updateProjectForRID(rid, newprojid);
-
-              if (!b) logger.warn("updateRecordings word :   didn't update rid " + rid + " and ex " + idInTarget);
-              if (!b1) logger.warn("updateRecordings phone : didn't update rid " + rid + " and ex " + idInTarget);
-
-            } else {
-              logger.warn("updateRecordings didn't update rid " + rid + " and ex " + idInTarget);
-            }
-          });
+          remapResultExerciseIDs(newprojid, results, idInTarget, ridsUpdated);
         }
       }
     });
 
     logger.info("updated " + ridsUpdated.size() + " results.");
+  }
+
+  private void remapResultExerciseIDs(int newprojid, List<Integer> results, Integer idInTarget, List<Integer> ridsUpdated) {
+    results.forEach(rid -> {
+      if (remapOneResult(newprojid, idInTarget, rid)) {
+        ridsUpdated.add(rid);
+      }
+    });
+  }
+
+  private boolean remapOneResult(int newprojid, Integer idInTarget, Integer rid) {
+    if (resultDAO.updateProjectAndEx(rid, newprojid, idInTarget)) {
+      boolean b = wordDAO.updateProjectForRID(rid, newprojid);
+      boolean b1 = phoneDAO.updateProjectForRID(rid, newprojid);
+
+      if (!b) logger.warn("updateRecordings word :   didn't update rid " + rid + " and ex " + idInTarget);
+      if (!b1) logger.warn("updateRecordings phone : didn't update rid " + rid + " and ex " + idInTarget);
+      return true;
+    } else {
+      logger.warn("updateRecordings didn't update rid " + rid + " and ex " + idInTarget);
+      return false;
+    }
   }
 
   /**
@@ -524,18 +535,77 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
     }
 
-    // TODO : remap exercise references from old to new for the non-custom ids
-    if (!resultDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update result dao to " + newprojid);
+    if (isChinese) {
+      Map<String, Integer> tradOldToID = new HashMap<>();
+      Map<String, Integer> simplifiedOldToID = new HashMap<>();
+
+      Map<Integer, Integer> tradToSimpl = new HashMap<>();
+
+      {
+        Project traditional = getProject(oldID);
+        traditional.getRawExercises().forEach(commonExercise -> tradOldToID.put(commonExercise.getOldID(), commonExercise.getID()));
+      }
+      {
+        Project simplified = getProject(newprojid);
+        simplified.getRawExercises().forEach(commonExercise -> simplifiedOldToID.put(commonExercise.getOldID(), commonExercise.getID()));
+      }
+      tradOldToID.forEach((k, v) -> {
+        Integer newID = simplifiedOldToID.get(k);
+        if (newID == null) {
+          logger.warn("no matching exercise for old id " + k);
+        } else {
+          tradToSimpl.put(v, newID);
+        }
+      });
+
+      // take all results for basic course items, and move them to point to simple exercise ids.
+      logger.info("trad->simpl size " + tradToSimpl.size());
+      List<MonitorResult> tradResults = resultDAO.getMonitorResults(oldID);
+      TreeSet<Integer> remapped = new TreeSet<>();
+      tradResults.forEach(monitorResult -> {
+        int exID = monitorResult.getExID();
+
+        if (justTheseIDs.contains(exID)) {
+          logger.info("keep id " + exID + " " + monitorResult.getForeignText() + " ");
+        } else {
+          Integer simpleID = tradToSimpl.get(exID);
+
+          if (simpleID == null) {
+            logger.warn("no ex " + exID + " in trad?");
+          } else {
+            remapOneResult(newprojid, simpleID, monitorResult.getUniqueID());
+            remapped.add(monitorResult.getUniqueID());
+          }
+        }
+      });
+      logger.info("trad->simpl remapped " + remapped.size());
+
     } else {
-      logger.info("updated results");
+      // TODO : remap exercise references from old to new for the non-custom ids
+      if (!resultDAO.updateProject(oldID, newprojid)) {
+        logger.error("couldn't update result dao to " + newprojid);
+      } else {
+        logger.info("updated results");
+      }
     }
 
-    // TODO : only copy over the audio for the custom items...
-    if (!audioDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update audio dao to " + newprojid);
+    if (isChinese) {
+      // only copy over the custom exercises for integrated chinese 2.
+
+      logger.error("update audio dao to " + newprojid + " for " + justTheseIDs.size() + " exercises");
+
+      if (!((SlickAudioDAO) audioDAO).updateProjectIn(oldID, newprojid, justTheseIDs)) {
+        logger.error("couldn't update audio dao to " + newprojid);
+      } else {
+        logger.info("updated audio");
+      }
     } else {
-      logger.info("updated audio");
+      // TODO : only copy over the audio for the custom items...
+      if (!audioDAO.updateProject(oldID, newprojid)) {
+        logger.error("couldn't update audio dao to " + newprojid);
+      } else {
+        logger.info("updated audio");
+      }
     }
 
     if (!wordDAO.updateProject(oldID, newprojid)) {
@@ -1737,9 +1807,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * Fire at Saturday night, just before midnight EST (or local)
    * Smarter would be to figure out how long to wait until sunday...
-   *
-   *   fire at 11:59:30 PM Saturday, so the report ends this saturday and not next saturday...
-   *   i.e. if it's Sunday 12:01 AM, it rounds up and includes a line for the whole upcoming week
+   * <p>
+   * fire at 11:59:30 PM Saturday, so the report ends this saturday and not next saturday...
+   * i.e. if it's Sunday 12:01 AM, it rounds up and includes a line for the whole upcoming week
    */
   private void tryTomorrow() {
     ZoneId zone = ZoneId.systemDefault();
@@ -1748,7 +1818,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     LocalDate tomorrow = now.toLocalDate().plusDays(1);
     ZonedDateTime tomorrowStart = tomorrow.atStartOfDay(zone);
     Duration duration = Duration.between(now, tomorrowStart);
-    long toWait = duration.toMillis() - 30*1000;
+    long toWait = duration.toMillis() - 30 * 1000;
     new Thread(() -> {
       try {
         logger.info("tryTomorrow :" +

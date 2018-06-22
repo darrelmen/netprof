@@ -82,6 +82,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return dao.updateProject(old, newprojid) > 0;
   }
 
+  /**
+   * @see DatabaseImpl#updateRecordings
+   * @param rid
+   * @param newprojid
+   * @param newEXID
+   * @return
+   */
   public boolean updateProjectAndEx(int rid, int newprojid, int newEXID) {
     return dao.updateProjectAndEx(rid, newprojid, newEXID) > 0;
   }
