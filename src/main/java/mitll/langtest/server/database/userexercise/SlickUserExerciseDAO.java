@@ -82,6 +82,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final String UNKNOWN1 = "unknown";
   /**
    * If we don't have a value for a facet, it's value is "Blank" as opposed to "Any"
+   *
    * @see SlickUserExerciseDAO#addPhoneInfo
    */
   private static final String BLANK = "Blank";
@@ -174,10 +175,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     justTheseIDs.addAll(toImport.stream().map(SlickExercise::id).collect(Collectors.toList()));
     logger.info("updateProject found    " + justTheseIDs.size() + " ids...");
 
-    boolean b = dao.updateProjectIn(old, newprojid, justTheseIDs) > 0;
+    int num = dao.updateProjectIn(old, newprojid, justTheseIDs);
+    boolean b = num > 0;
     if (b) {
       logger.info("updated exercises to            " + newprojid);
     }
+    logger.info("updated " + num +
+        "  exercises to            " + newprojid);
 
     boolean b1 = attributeDAOWrapper.updateProject(old, newprojid) > 0;
     if (b1) {
@@ -651,7 +655,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         addBlanksForMissingInfo(exercise, attrTypes, pairs);
       }
 
-    //  logger.info("pairs for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
+      //  logger.info("pairs for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
       sectionHelper.addPairs(exercise, pairs);
 
       if (true) {//phones == null) {
@@ -1518,9 +1522,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectDAO#setDominoIDOnExercises(int, int)
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.project.ProjectDAO#setDominoIDOnExercises(int, int)
    */
   public Map<String, Integer> getNpToExID(int projid) {
     Map<String, Integer> unknownDomino = new HashMap<>(dao.getUnknownDomino(projid));

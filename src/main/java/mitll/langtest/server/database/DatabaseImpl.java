@@ -233,7 +233,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param servletContext
    * @see #DatabaseImpl
    */
- protected void connectToDatabases(PathHelper pathHelper, ServletContext servletContext) {
+  protected void connectToDatabases(PathHelper pathHelper, ServletContext servletContext) {
     long then = System.currentTimeMillis();
     // first connect to postgres
 
@@ -523,7 +523,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (isChinese) {
       SlickUserExerciseDAO userExerciseDAO = (SlickUserExerciseDAO) getUserExerciseDAO();
       if (!userExerciseDAO.updateProjectChinese(oldID, newprojid, justTheseIDs)) {
-        logger.error("couldn't update chinese exercises dao to " + newprojid);
+        logger.warn("couldn't update chinese exercises dao to " + newprojid);
       } else {
         logger.info("updated exercises");
       }
@@ -535,7 +535,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
     }
 
-    if (isChinese && false) {  // try to do some fancy setting of the result ids..?
+    if (isChinese) {  // try to do some fancy setting of the result ids..?
       Map<String, Integer> tradOldToID = new HashMap<>();
       Map<String, Integer> simplifiedOldToID = new HashMap<>();
 
@@ -544,15 +544,24 @@ public class DatabaseImpl implements Database, DatabaseServices {
       {
         Project traditional = getProject(oldID);
         traditional.getRawExercises().forEach(commonExercise -> tradOldToID.put(commonExercise.getOldID(), commonExercise.getID()));
+        logger.info("traditional " + traditional);
+        logger.info("trad " + tradOldToID.size());
       }
       {
         Project simplified = getProject(newprojid);
-        simplified.getRawExercises().forEach(commonExercise -> simplifiedOldToID.put(commonExercise.getOldID(), commonExercise.getID()));
+        simplified.getRawExercises().forEach(commonExercise -> {
+          String oldID1 = commonExercise.getOldID();
+          String[] split = oldID1.split("-");
+          if (split.length == 2) oldID1 = split[1];
+          simplifiedOldToID.put(oldID1, commonExercise.getID());
+        });
+        logger.info("simplified " + simplified);
+        logger.info("simplified " + simplifiedOldToID.size());
       }
       tradOldToID.forEach((k, v) -> {
         Integer newID = simplifiedOldToID.get(k);
         if (newID == null) {
-          logger.warn("no matching exercise for old id " + k);
+          logger.warn("updateProject no matching exercise for old id " + k);
         } else {
           tradToSimpl.put(v, newID);
         }
@@ -561,24 +570,28 @@ public class DatabaseImpl implements Database, DatabaseServices {
       // take all results for basic course items, and move them to point to simple exercise ids.
       logger.info("trad->simpl size " + tradToSimpl.size());
       List<MonitorResult> tradResults = resultDAO.getMonitorResults(oldID);
+      logger.info("found " + tradResults.size() + " in project " + oldID);
       TreeSet<Integer> remapped = new TreeSet<>();
+      TreeSet<Integer> unmapped = new TreeSet<>();
       tradResults.forEach(monitorResult -> {
         int exID = monitorResult.getExID();
 
-        if (justTheseIDs.contains(exID)) {
-          logger.info("keep id " + exID + " " + monitorResult.getForeignText() + " ");
-        } else {
-          Integer simpleID = tradToSimpl.get(exID);
+//        if (justTheseIDs.contains(exID)) {
+//          logger.info("keep id " + exID + " " + monitorResult.getForeignText() + " ");
+//        } else {
+        Integer simpleID = tradToSimpl.get(exID);
 
-          if (simpleID == null) {
-            logger.warn("no ex " + exID + " in trad?");
-          } else {
-            remapOneResult(newprojid, simpleID, monitorResult.getUniqueID());
-            remapped.add(monitorResult.getUniqueID());
-          }
+        if (simpleID == null) {
+          logger.warn("updateProject no ex " + exID + " in trad for " +monitorResult+ "?");
+          unmapped.add(exID);
+        } else {
+          remapOneResult(newprojid, simpleID, monitorResult.getUniqueID());
+          remapped.add(monitorResult.getUniqueID());
         }
+        //    }
       });
       logger.info("trad->simpl remapped " + remapped.size());
+      logger.info("trad->simpl unmapped " + unmapped.size());
 
     } else {
       // TODO : remap exercise references from old to new for the non-custom ids
@@ -591,8 +604,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     if (isChinese) {
       // only copy over the custom exercises for integrated chinese 2.
-
-      logger.error("update audio dao to " + newprojid + " for " + justTheseIDs.size() + " exercises");
+      logger.info("update audio dao to " + newprojid + " for " + justTheseIDs.size() + " exercises");
 
       if (!((SlickAudioDAO) audioDAO).updateProjectIn(oldID, newprojid, justTheseIDs)) {
         logger.error("couldn't update audio dao to " + newprojid);
