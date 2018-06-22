@@ -38,6 +38,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectStatus;
@@ -115,7 +116,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   public SlickProject getByID(int projid) {
     Collection<SlickProject> slickProjects = dao.byID(projid);
-    return slickProjects.isEmpty()?null:slickProjects.iterator().next();
+    return slickProjects.isEmpty() ? null : slickProjects.iterator().next();
   }
 
   /**
@@ -222,6 +223,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   /**
    * Set the domino id on each exercise. Might change if we change the matching domino project.
    *
+   * So it could be we populated domino directly from a netprof excel dump.  Then the netprof ids are from the database.
+   *
    * @param projid
    * @param dominoProjectID
    */
@@ -231,22 +234,42 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     Set<String> missing = new HashSet<>();
     Map<String, Integer> npToDomino = databaseImpl.getProjectManagement().getNpToDomino(dominoProjectID);
     List<SlickUpdateDominoPair> updateDominoPairs = new ArrayList<>();
+    Project project = databaseImpl.getProject(projid);
+
+    List<Integer> foundByNativeExID=new ArrayList<>();
     npToDomino.forEach((npid, dominoID) -> {
       Integer exIDForNPID = oldToID.get(npid);
       if (exIDForNPID == null) {
-        logger.warn("setDominoIDOnExercises missing exercise for " + npid + " and domino " + dominoID);
-        missing.add(npid);
+        boolean foundByEXID = false;
+        try {
+          int netprofExID = Integer.parseInt(npid);
+
+          CommonExercise exerciseByID = project.getExerciseByID(netprofExID);
+          if (exerciseByID != null) {
+            updateDominoPairs.add(new SlickUpdateDominoPair(netprofExID, dominoID));
+            foundByEXID = true;
+            foundByNativeExID.add(netprofExID);
+          }
+        } catch (NumberFormatException e) {
+          // logger.info("couldn't parse it")
+        }
+
+        if (!foundByEXID) {
+          logger.warn("setDominoIDOnExercises missing exercise for " + npid + " and domino " + dominoID);
+          missing.add(npid);
+        }
       } else {
         updateDominoPairs.add(new SlickUpdateDominoPair(exIDForNPID, dominoID));
       }
     });
-    logger.info("updateDominoPairs - found " + updateDominoPairs.size());
+    logger.info("setDominoIDOnExercises updateDominoPairs - found          " + updateDominoPairs.size());
+    logger.info("setDominoIDOnExercises updateDominoPairs - native match = " + foundByNativeExID.size());
     if (!missing.isEmpty()) {
-      logger.warn("\n\n\nupdateDominoPairs - missing " + missing.size());
+      logger.warn("\n\n\nsetDominoIDOnExercises - missing " + missing.size());
     }
     int i = userExerciseDAO.updateDominoBulk(updateDominoPairs);
     if (i != updateDominoPairs.size()) {
-      logger.warn("only did " + i + " not " + updateDominoPairs.size());
+      logger.warn("setDominoIDOnExercises only did " + i + " not " + updateDominoPairs.size());
     }
   }
 
