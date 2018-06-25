@@ -121,6 +121,7 @@ public class CopyToPostgres<T extends CommonShell> {
     MERGE("m"),
     //MERGEDAY("y"),
     RECORDINGS("r"),
+    SEND("s"),
     UNKNOWN("k");
 
     private String value;
@@ -1572,6 +1573,12 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.info("merge project '" + from + "' into '" + to);
         doExit(true);  // ?
         break;
+      case SEND:
+        logger.info("send reports");
+        copyToPostgres.sendReports();
+        logger.info("sent reports");
+        doExit(true);  // ?
+        break;
  /*       case MERGEDAY:
         logger.info("merge project from into project to");
         copyToPostgres.merge(from, to, onDay);
@@ -1588,6 +1595,8 @@ public class CopyToPostgres<T extends CommonShell> {
         formatter.printHelp("copy", options);
     }
   }
+
+  private void sendReports() {   getDatabase().sendReports();  }
 
   private static void doExit(boolean b) {
     System.exit(b ? 0 : 1);
@@ -1681,10 +1690,6 @@ public class CopyToPostgres<T extends CommonShell> {
       Option mapFile = new Option(CREATED.getValue(), CREATED.toLower(), true, "update existing config since creation date of target project");
       options.addOption(mapFile);
     }
-//    {
-//      Option mapFile = new Option(MERGEDAY.getValue(), MERGEDAY.toLower(), true, "from project id to project id on day");
-//      options.addOption(mapFile);
-//    }
 
     {
       Option mapFile = new Option(MERGE.getValue(), MERGE.toLower(), true, "from project id");
@@ -1699,10 +1704,10 @@ public class CopyToPostgres<T extends CommonShell> {
       options.addOption(mapFile);
     }
 
-//    {
-//      Option mapFile = new Option(UPDATE.getValue(), UPDATE.toLower(), true, "import netprof 1 data into existing netprof 2 project");
-//      options.addOption(mapFile);
-//    }
+    {
+      Option mapFile = new Option(SEND.getValue(), SEND.toLower(), false, "send reports now");
+      options.addOption(mapFile);
+    }
 
     return options;
   }

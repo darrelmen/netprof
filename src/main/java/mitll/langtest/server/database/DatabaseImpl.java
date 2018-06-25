@@ -121,6 +121,7 @@ import java.util.stream.Collectors;
 import static mitll.langtest.server.PathHelper.ANSWERS;
 import static mitll.langtest.server.database.Report.DAY_TO_SEND_REPORT;
 import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAGIC_ID;
+import static mitll.langtest.server.database.project.ProjectDAO.DAY;
 
 /**
  * Note with H2 that :  <br></br>
@@ -320,10 +321,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   * @param projID
    * @see DatabaseImpl#makeDAO
    * @see DatabaseImpl#DatabaseImpl
    * @see LangTestDatabaseImpl#init
-   * @param projID
    */
   public DatabaseImpl populateProjects(int projID) {
     if (projectManagement == null) {
@@ -582,7 +583,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         Integer simpleID = tradToSimpl.get(exID);
 
         if (simpleID == null) {
-          logger.warn("updateProject no ex " + exID + " in trad for " +monitorResult+ "?");
+          logger.warn("updateProject no ex " + exID + " in trad for " + monitorResult + "?");
           unmapped.add(exID);
         } else {
           remapOneResult(newprojid, simpleID, monitorResult.getUniqueID());
@@ -1807,7 +1808,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public void doReport() {
     if (serverProps.isFirstHydra()) {
       if (isTodayAGoodDay()) {
-        sendReports(getReport(), false, -1);
+        sendReports();
       } else {
         logger.info("doReport : not sending email report since this is not Sunday...");
       }
@@ -1815,6 +1816,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } else {
       logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
     }
+  }
+
+  public void sendReports() {
+    sendReports(getReport(), false, -1);
   }
 
   /**
@@ -1831,7 +1836,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     LocalDate tomorrow = now.toLocalDate().plusDays(1);
     ZonedDateTime tomorrowStart = tomorrow.atStartOfDay(zone);
     Duration duration = Duration.between(now, tomorrowStart);
-    long toWait = duration.toMillis() - 30 * 1000;
+    long candidate = duration.toMillis() - 30 * 1000;
+    long toWait = candidate > 0 ? candidate : candidate + DAY;
     new Thread(() -> {
       try {
         logger.info("tryTomorrow :" +
