@@ -129,7 +129,7 @@ public class ServerProperties {
   private static final String IOS_VERSION = "1.0.1";
   private static final String I_OS_VERSION = "iOSVersion";
   private static final String IMPL_VERSION = Attributes.Name.IMPLEMENTATION_VERSION.toString();
-  public static final String DEFAULT_MAIL_FROM = "noreply@ll.mit.edu";
+  public static final String DEFAULT_MAIL_FROM = "netprof-admin@ll.mit.edu";
   private static final String MAIL_REPLYTO = "mail.replyto";
   private static final String HEARTBEAT_REC = "gordon.vidaver@ll.mit.edu,zebin.xia@dliflc.edu";
   public static final int DEFAULT_PERIOD = 5 * 60 * 1000;

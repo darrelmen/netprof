@@ -44,8 +44,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseAnnotation implements IsSerializable {
-  private String status;
-  private String comment;
+  private String status = "";
+  private String comment = "";
 
   public enum TYPICAL {
     CORRECT, INCORRECT;
@@ -79,15 +79,19 @@ public class ExerciseAnnotation implements IsSerializable {
     return comment;
   }
 
+/*
   public void setComment(String comment) {
     this.comment = comment;
   }
+*/
 
   public String toString() {
     return "[" + getStatus() + " : '" + getComment() + "']";
   }
 
+/*
   public void setStatus(String status) {
     this.status = status;
   }
+*/
 }

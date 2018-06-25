@@ -87,7 +87,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String OGG = "ogg";
 
   public static final boolean DEBUG = false;
-  public static final String FRENCH = "french";
+  private static final String FRENCH = "french";
   private static final double MIN_SCORE_FOR_CORRECT_ALIGN = 0.35;
   private static final String TEST_USER = "demo_";
   private static final String TEST_PASSWORD = "domino22";//"demo";
