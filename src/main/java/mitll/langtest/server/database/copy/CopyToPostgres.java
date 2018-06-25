@@ -1423,6 +1423,8 @@ public class CopyToPostgres<T extends CommonShell> {
     } else if (cmd.hasOption(IMPORT.toLower())) {
       action = IMPORT;
       config = cmd.getOptionValue(IMPORT.toLower());
+    } else if (cmd.hasOption(SEND.toLower())) {
+      action = SEND;
     } else if (cmd.hasOption(MERGE.toLower())) {
       action = MERGE;
       from = Integer.parseInt(cmd.getOptionValue(MERGE.toLower()));
@@ -1596,7 +1598,9 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
-  private void sendReports() {   getDatabase().sendReports();  }
+  private void sendReports() {
+    getDatabase().sendReports();
+  }
 
   private static void doExit(boolean b) {
     System.exit(b ? 0 : 1);
