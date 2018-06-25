@@ -1599,7 +1599,9 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private void sendReports() {
-    getDatabase().sendReports();
+    DatabaseImpl database = getDatabase();
+    database.getProject(2);
+    database.sendReports();
   }
 
   private static void doExit(boolean b) {

@@ -326,7 +326,8 @@ public class ScoreServlet extends DatabaseServlet {
       "Accept-Language",
       "accept",
       "connection",
-      "password"));
+      "password",
+      "pass"));
 
   private void reportOnHeaders(HttpServletRequest request) {
     Enumeration<String> headerNames = request.getHeaderNames();
