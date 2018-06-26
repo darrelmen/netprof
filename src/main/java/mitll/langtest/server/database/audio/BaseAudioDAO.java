@@ -843,36 +843,14 @@ public abstract class BaseAudioDAO extends DAO {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getRecordedByMatchingGender
    */
   public Set<Integer> getRecordedBySameGenderContext(int userid, int projid, Map<Integer, String> exToTranscript) {
-    //return getRecordedBySameGenderContext(userDAO.isMale(userid), projid);
     return getContextAudioExercises(projid, userDAO.isMale(userid), exToTranscript);
   }
 
-/*  private Set<Integer> getWithContext(boolean male, int projid) {
-    Set<Integer> audioExercisesForGender =
-        getAudioExercisesForGender(male, AudioType.CONTEXT_REGULAR.toString(), projid);
-
-    //  logger.info("context for " + projid + " " + male + " " + audioExercisesForGender.size());
-
-*//*    Set<Integer> audioExercisesForGenderBothSpeeds = new HashSet<>(getAudioExercisesForGenderBothSpeeds(
-        male,
-        AudioType.REGULAR.toString(),
-        AudioType.SLOW.toString(),
-        projid
-    ));
-
-    audioExercisesForGenderBothSpeeds.addAll(audioExercisesForGender);*//*
-
-    return audioExercisesForGender;
-  }*/
 
   abstract Set<Integer> getAudioExercisesForGender(boolean male,
                                                    String audioSpeed,
                                                    int projid);
 
-/*  abstract Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
-                                                             boolean isMale,
-                                                             String regSpeed,
-                                                             String slowSpeed);*/
 
   abstract Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
                                                              boolean isMale,

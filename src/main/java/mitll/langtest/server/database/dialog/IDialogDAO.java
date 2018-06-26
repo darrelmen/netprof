@@ -1,0 +1,108 @@
+/*
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
+ */
+
+package mitll.langtest.server.database.dialog;
+
+import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.ProjectDAO;
+import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.ProjectType;
+import mitll.npdata.dao.SlickDialog;
+
+import java.util.Collection;
+
+public interface IDialogDAO extends IDAO {
+  int add(int userid,
+          int projid,
+          int dominoID,
+          int imageID,
+
+          long modified,
+          long lastimport,
+          DialogType kind,
+          String status,
+          String fltitle,
+          String entitle,
+          String flpresentation,
+          String enpresentation,
+          int numSpeakers,
+
+          float ilr,
+          String orientation,
+          String audio,
+          String passage,
+          String translation);
+
+
+  /**
+   * Deprecated - this doesn't really work in practice - takes forever, locks database while it's running.
+   * It's like a suicide pill.
+   * @param id
+   * @return
+   */
+  boolean delete(int id);
+  boolean deleteAllBut(int id);
+
+  /**
+   * @return
+   * @see IProjectManagement#populateProjects
+   */
+  Collection<SlickDialog> getAll();
+
+  /**
+   * @see ProjectManagement#getNestedProjectInfo
+   * @return
+   */
+  int getNum();
+
+
+  int ensureDefault(int defaultUser);
+
+  int getDefault();
+
+  /**
+   * @seex mitll.langtest.server.services.ProjectServiceImpl#exists(int)
+   * @param dialogID
+   * @return
+   */
+  boolean exists(int dialogID);
+  SlickDialog getByID(int dialogID);
+
+  /**
+   * @see ProjectDAO#update
+   * @param changed
+   * @return
+   */
+  boolean easyUpdate(SlickDialog changed);
+}

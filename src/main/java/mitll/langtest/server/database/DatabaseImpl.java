@@ -51,11 +51,15 @@ import mitll.langtest.server.database.custom.IStateManager;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.StateManager;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.dialog.DialogDAO;
+import mitll.langtest.server.database.dialog.IDialogDAO;
 import mitll.langtest.server.database.dliclass.DLIClassDAO;
 import mitll.langtest.server.database.dliclass.DLIClassJoinDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassJoinDAO;
 import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.image.IImageDAO;
+import mitll.langtest.server.database.image.ImageDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.IPhoneDAO;
@@ -194,6 +198,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IUserSecurityManager userSecurityManager;
   private DominoExerciseDAO dominoExerciseDAO;
   private boolean hasValidDB = false;
+  private IDialogDAO dialogDAO;
+  private IImageDAO imageDAO;
 
   public DatabaseImpl() {
   }
@@ -393,9 +399,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
 
+    dialogDAO = new DialogDAO(this, dbConnection, userExerciseDAO, this);
+    imageDAO = new ImageDAO(this, dbConnection);
+
     createTables();
 
+    afterDAOSetup(slickAudioDAO);
 
+    logger.debug("initializeDAOs : tables = " + getTables());
+  }
+
+  private void afterDAOSetup(SlickAudioDAO slickAudioDAO) {
     userDAO.ensureDefaultUsers();
     int defaultProject = getDefaultProject();
     // make sure we have a template exercise
@@ -411,8 +425,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
     dominoExerciseDAO = new DominoExerciseDAO(userExerciseDAO);
-
-    logger.debug("initializeDAOs : tables = " + getTables());
   }
 
   private int getDefaultProject() {
@@ -1317,7 +1329,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     getLogAndNotify().logAndNotifyServerException(e);
   }
 
-
   /**
    * the User info lives in domino...
    * <p>
@@ -1346,7 +1357,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
         getUserProjectDAO(),
         userSessionDAO,
         dliClassDAO,
-        dliClassJoinDAO
+        dliClassJoinDAO,
+        dialogDAO,
+        imageDAO
     );
 
     List<String> created = new ArrayList<>();

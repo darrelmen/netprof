@@ -137,6 +137,7 @@ public class ServerProperties {
   public static final String LOG_MAILHOST = "log.mailhost";
   public static final String LOG_MAILFROM = "log.mailfrom";
   public static final String MAIL_FROM = "mail.from";
+  public static final String IMAGE = "image";
 
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
@@ -174,6 +175,7 @@ public class ServerProperties {
   private static final String LANGUAGE = "language";
 
   private static final String MEDIA_DIR = "mediaDir";
+  private static final String IMAGE_DIR = "imageDir";
   private static final String ANSWER_DIR = "answerDir";
   private static final String NETPROF_AUDIO_DIR = "audioDir";
   private static final String DCODR_DIR = "dcodrDir";
@@ -441,6 +443,10 @@ public class ServerProperties {
    */
   public String getMediaDir() {
     return props.getProperty(MEDIA_DIR, getAudioBaseDir() + BEST_AUDIO);
+  }
+
+  public String getImageDir() {
+    return props.getProperty(IMAGE_DIR, getAudioBaseDir() + IMAGE);
   }
 
   /**
@@ -893,6 +899,7 @@ public class ServerProperties {
   public String getHelpEmail() {
     return getProp(HELP_EMAIL, HELP_EMAIL_DEF);
   }
+
   public String getDominoServer() {
     return getProp("domino.server", DOMINO_LL_MIT_EDU);
   }
