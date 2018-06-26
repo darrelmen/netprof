@@ -377,9 +377,7 @@ public class PronunciationLookup implements IPronunciationLookup {
     candidates.add(new ArrayList<>());
 
     if (split.length > 1) {
-      List<String> parts = Arrays.asList(split);
-
-      for (String part : parts) {
+      for (String part : split) {
         boolean easyMatch;
         match &=
             (easyMatch = htkDictionary.contains(part)) ||
@@ -392,24 +390,24 @@ public class PronunciationLookup implements IPronunciationLookup {
 
           int size = prons.size();
           List<List<String>> possibleProns = new ArrayList<>(size);
-          logger.warn("hasParts for " + lookupToken + " found " + size + " possible prons.");
+          logger.info("hasParts for " + lookupToken + " found " + size + " possible prons.");
           for (int i = 0; i < size; i++) {
             String[] phoneSequence = prons.apply(i);
             List<String> e = Arrays.asList(phoneSequence);
-            logger.warn("hasParts adding " + lookupToken + " : " + e);
+           // logger.warn("hasParts adding " + lookupToken + " : " + e);
             possibleProns.add(e);
           }
 
           candidates = getPermutations(candidates, possibleProns);
 
         } else {
-          logger.warn("hasParts for '" + token + "' found no match.");
+          logger.info("hasParts for '" + token + "' found no match.");
           match = false;
           break;
         }
       }
     } else {
-      logger.warn("hasParts for '" + token + "' split " + split.length);
+      logger.info("hasParts for '" + token + "' split " + split.length);
       match = false;
     }
     return match ? candidates : Collections.emptyList();

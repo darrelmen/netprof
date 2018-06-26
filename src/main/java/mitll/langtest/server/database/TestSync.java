@@ -22,8 +22,9 @@ public class TestSync {
   private static final Logger logger = LogManager.getLogger(TestSync.class);
 
   DatabaseImpl db;
+
   public TestSync(DatabaseImpl db) {
-this.db=db;
+    this.db = db;
     try {
       syncTests();
 
@@ -35,8 +36,9 @@ this.db=db;
     }
 
   }
+
   private void stopNow() {
-   db.close();
+    db.close();
     System.exit(0);
   }
 

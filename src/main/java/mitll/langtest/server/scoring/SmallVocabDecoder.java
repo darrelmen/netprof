@@ -75,7 +75,10 @@ public class SmallVocabDecoder {
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char ZERO = '0';
   private static final String P_Z = "\\p{Z}+";
-  private static final String FRENCH_PUNCT = "[,.?]";
+  /**
+   * @see #getTrimmedLeaveAccents
+   */
+  private static final String FRENCH_PUNCT = "[,.?!]";
 
   private HTKDictionary htkDictionary;
   private boolean isAsianLanguage;

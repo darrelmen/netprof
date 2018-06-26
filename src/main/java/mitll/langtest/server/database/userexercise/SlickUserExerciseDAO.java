@@ -1042,11 +1042,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         exToAttrs,
         true);
   }
-
+/*
   @Override
   public List<SlickExercise> getDeletedFor(int projid) {
     return dao.getAllPredefDeletedByProject(projid);
-  }
+  }*/
 
   @NotNull
   private List<String> getBaseTypeOrder(Project project) {
@@ -1485,9 +1485,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return relatedExerciseDAOWrapper.deleteRelated(related);
   }
 
-  @Override
+/*  @Override
   public SlickExercise getByDominoID(int docID) {
     Collection<SlickExercise> byExid = dao.byDominoID(docID);
     return byExid.isEmpty() ? null : byExid.iterator().next();
+  }*/
+
+  @Override
+  public Map<Integer,Integer> getDominoIDToExID(int projID) {
+    return dao.allByDominoIDPairs(projID);
   }
 }

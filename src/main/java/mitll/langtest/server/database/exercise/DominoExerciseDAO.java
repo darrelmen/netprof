@@ -11,7 +11,6 @@ import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.npdata.dao.SlickExercise;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,13 +57,15 @@ public class DominoExerciseDAO {
                                   DominoImport.ChangedAndDeleted importDocs,
                                   boolean shouldSwap) {
     this.shouldSwap = shouldSwap;
+
+    Map<Integer, Integer> dominoIDToExID = userExerciseDAO.getDominoIDToExID(projid);
     List<CommonExercise> addedCommonExercises = getAddedCommonExercises(
         projid,
         projectInfo.getCreatorID(),
         projectInfo.getUnitName(),
         projectInfo.getChapterName(),
 
-        importDocs
+        importDocs, dominoIDToExID
     );
 
     List<CommonExercise> changedCommonExercises =
@@ -74,7 +75,7 @@ public class DominoExerciseDAO {
             projectInfo.getUnitName(),
             projectInfo.getChapterName(),
 
-            importDocs
+            importDocs, dominoIDToExID
         );
 
 
@@ -85,13 +86,13 @@ public class DominoExerciseDAO {
         importDocs.getDeletedNPIDs()
         /*,
         importDocs.getNpidToDominoID()*/
-        );
+    );
   }
 
   @NotNull
   private List<CommonExercise> getAddedCommonExercises(int projid, int creator, String unitName, String chapterName,
-                                                       DominoImport.ChangedAndDeleted changedAndDeleted) {
-    return getExerciseFromImport(projid, creator, unitName, chapterName, changedAndDeleted.getAdded());
+                                                       DominoImport.ChangedAndDeleted changedAndDeleted, Map<Integer, Integer> dominoToExID) {
+    return getExerciseFromImport(projid, creator, unitName, chapterName, changedAndDeleted.getAdded(), dominoToExID);
   }
 
   /**
@@ -105,20 +106,21 @@ public class DominoExerciseDAO {
    */
   @NotNull
   private List<CommonExercise> getChangedCommonExercises(int projid, int creator, String unitName, String chapterName,
-                                                         DominoImport.ChangedAndDeleted changedAndDeleted) {
-    return getExerciseFromImport(projid, creator, unitName, chapterName, changedAndDeleted.getChanged());
+                                                         DominoImport.ChangedAndDeleted changedAndDeleted, Map<Integer, Integer> dominoToExID) {
+    return getExerciseFromImport(projid, creator, unitName, chapterName, changedAndDeleted.getChanged(), dominoToExID);
   }
 
   @NotNull
   private List<CommonExercise> getExerciseFromImport(int projid, int creator, String unitName, String chapterName,
-                                                     List<ImportDoc> changed) {
+                                                     List<ImportDoc> changed, Map<Integer, Integer> dominoToExID) {
     List<CommonExercise> exercises = new ArrayList<>(changed.size());
 
     changed.forEach(docObj -> exercises.add(getExerciseFromVocab(projid,
         creator, unitName, chapterName,
         docObj.getDocID(),
         docObj.getTimestamp(),
-        docObj.getVocabularyItem()
+        docObj.getVocabularyItem(),
+        dominoToExID
     )));
     return exercises;
   }
@@ -131,6 +133,7 @@ public class DominoExerciseDAO {
    * @param docID
    * @param time
    * @param vocabularyItem
+   * @param dominoToExID
    * @return
    * @see #getChangedCommonExercises
    */
@@ -140,19 +143,20 @@ public class DominoExerciseDAO {
                                         String chapterName,
                                         int docID,
                                         long time,
-                                        VocabularyItem vocabularyItem) {
-    logger.info("getExerciseFromVocab ex for doc " + docID + " term " + vocabularyItem.getTerm());
-    SlickExercise byDominoID = userExerciseDAO.getByDominoID(docID);
+                                        VocabularyItem vocabularyItem,
+                                        Map<Integer, Integer> dominoToExID) {
+//    logger.info("getExerciseFromVocab ex for doc " + docID + " term " + vocabularyItem.getTerm());
+    //SlickExercise byDominoID = userExerciseDAO.getByDominoID(docID);
+    Integer byDominoID = dominoToExID.get(docID);
     int exID = -1;
     if (byDominoID != null) {
-      exID = byDominoID.id();
-
+      exID = byDominoID;
     }
     String npID = getNPId(vocabularyItem);
     Exercise ex = getExerciseFromVocabularyItem(projid, docID, npID, vocabularyItem, creator, time, exID);
     addAttributes(unitName, chapterName, vocabularyItem, ex);
 //        logger.info("Got " + ex.getUnitToValue());
-    addContextSentences(projid, creator, docID, npID, vocabularyItem.getSamples(), ex, shouldSwap);
+    addContextSentences(projid, creator, docID, npID, vocabularyItem.getSamples(), ex);
 
     return ex;
   }
@@ -220,25 +224,24 @@ public class DominoExerciseDAO {
    * @param docID
    * @param samples
    * @param parentExercise
-   * @param shouldSwap
-   * @see #getExerciseFromVocab(int, int, String, String, int, long, VocabularyItem)
+   * @see #getExerciseFromVocab(int, int, String, String, int, long, VocabularyItem, Map)
    */
   private void addContextSentences(int projid,
                                    int creator,
                                    int docID,
                                    String npID,
                                    IDocumentComposite samples,
-                                   Exercise parentExercise,
-                                   boolean shouldSwap) {
+                                   Exercise parentExercise) {
     for (IDocumentComponent comp : samples.getComponents()) {
       SampleSentence sample = (SampleSentence) comp;
       String contextNPID = npID.equalsIgnoreCase(UNKNOWN) ? UNKNOWN : npID + "_" + sample.getNum();
 
       String sentenceVal = sample.getSentenceVal();
-      logger.info("addContextSentences : context" +
+
+/*      logger.info("addContextSentences : context" +
           "\n\timport id " + docID +
           "\n\tnpID      " + contextNPID +
-          "\n\tsentence  " + sentenceVal);
+          "\n\tsentence  " + sentenceVal);*/
 
       if (!sentenceVal.trim().isEmpty()) {
         int parentDominoID = parentExercise.getDominoID();
@@ -247,7 +250,7 @@ public class DominoExerciseDAO {
         Exercise context =
             getContextExercise(projid, -1, creator, docID, sample, contextNPID, sentenceVal, parentDominoID, unitToValue);
 
-        logger.info("addContextSentences : parent ex id " + parentExercise.getID() + " dom " + parentDominoID);
+//        logger.info("addContextSentences : parent ex id " + parentExercise.getID() + " dom " + parentDominoID);
 
         parentExercise.getDirectlyRelated().add(context);
       }
@@ -379,6 +382,7 @@ public class DominoExerciseDAO {
         isContext,
         0,
         dominoID, shouldSwap);
+
 
     logger.info("getExerciseFromVocabularyItem : made ex" +
         "\n\tdominoID " + exercise.getDominoID() +

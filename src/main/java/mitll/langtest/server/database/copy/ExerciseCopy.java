@@ -304,7 +304,7 @@ public class ExerciseCopy {
           int newContextExID = relation.contextexid();
           //  logger.info("\taddContextExercises context id is "+ context.getID());
           if (context.getID() == -1) {
-            logger.info("---> addContextExercises set context id to " + newContextExID);
+            if (DEBUG) logger.info("---> addContextExercises set context id to " + newContextExID);
             context.getMutable().setID(newContextExID);
           }
           parentToChild.put(oldID, newContextExID);

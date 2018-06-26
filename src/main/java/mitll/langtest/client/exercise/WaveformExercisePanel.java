@@ -68,7 +68,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   /**
    * @see #addInstructions
    */
-  private static final String RECORD_PROMPT = "Record the word or phrase, first at normal speed, then again at slow speed.";
+  private static final String RECORD_PROMPT = "Record the word or phrase at normal speed.";//, first at normal speed, then again at slow speed.";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
 

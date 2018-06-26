@@ -136,7 +136,6 @@ public class ProjectSync implements IProjectSync {
       Map<CommonExercise, Integer> importToKnownID = new HashMap<>();
       Map<Integer, Integer> dominoToExID = new HashMap<>();
 
-      // Map<String, SlickExercise> oldIDToExer =
       getNewAndChangedExercises(projectid, importFromDomino, dominoToNonContextEx, newEx, importUpdateEx, importToKnownID);
 
       List<DominoUpdateItem> updates = new ArrayList<>();
@@ -211,13 +210,15 @@ public class ProjectSync implements IProjectSync {
       // todo : should we configure project if it didn't change?
       projectManagement.configureProject(project, false, doChange);
       int numExercises = project.getRawExercises().size();
-      Map<String, String> props = getProps(project.getProject(), numExercises);
+
       DominoUpdateResponse dominoUpdateResponse =
-          new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid, props, updates, timestamp);
+          new DominoUpdateResponse(SUCCESS, jsonDominoID, dominoid,
+              getProps(project.getProject(), numExercises), updates, timestamp);
       logger.info("addPending returning" +
-          "\n\tresp  " + dominoUpdateResponse +
-          "\n\tprops " + props);
-      dominoUpdateResponse.getUpdates().forEach(logger::info);
+          "\n\tresp      " + dominoUpdateResponse +
+          "\n\t# updates " + dominoUpdateResponse.getUpdates().size() +
+          "\n\tprops     " + dominoUpdateResponse.getProps());
+      //dominoUpdateResponse.getUpdates().forEach(logger::info);
       return dominoUpdateResponse;
     }
   }
@@ -338,15 +339,14 @@ public class ProjectSync implements IProjectSync {
                                List<CommonExercise> newEx,
                                Map<Integer, CommonExercise> dominoIDToAddedExercise) {
     dominoIDToAddedExercise.forEach((dominoID, importEx) -> {
-      //String npID = importEx.getOldID();
-
-      logger.info("addPending import ADDED" +
-          "\n\tcontext   " + importEx.isContext() +
-          "\n\tdomino id " + dominoID +
-          //  "\n\tnpID      '" + npID + "'" +
-          "\n\teng       " + importEx.getEnglish() +
-          "\n\tfl        " + importEx.getForeignLanguage()
-      );
+      if (DEBUG) {
+        logger.info("addPending import ADDED" +
+            "\n\tcontext   " + importEx.isContext() +
+            "\n\tdomino id " + dominoID +
+            "\n\teng       " + importEx.getEnglish() +
+            "\n\tfl        " + importEx.getForeignLanguage()
+        );
+      }
       // logger.info("addPending import importEx  '" + importEx.getEnglish() + "' = " + importEx.getForeignLanguage());
 
       // try to find it by domino or np id
@@ -354,18 +354,16 @@ public class ProjectSync implements IProjectSync {
       SlickExercise currentKnownExercise = dominoToNonContextEx.get(dominoID);
 
       if (currentKnownExercise == null) {
-        logger.info("addPending found new ADDED ex for domino id " + dominoID +
+        if (DEBUG) logger.info("addPending found new ADDED ex for domino id " + dominoID +
             " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
         newEx.add(importEx);
       } else {
         logger.warn("addPending huh? already know about " + currentKnownExercise);
       }
     });
+    logger.info("addPending import ADDED " +newEx.size() + " new exercises...");
   }
 
-  private static class ExerciseMapper {
-
-  }
 
   /**
    * change handling for context exercises

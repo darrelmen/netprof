@@ -98,7 +98,9 @@ public interface IUserExerciseDAO extends IDAO {
 
   Collection<CommonExercise> getAllUserExercises(int projid);
 
+/*
   List<SlickExercise> getDeletedFor(int projid);
+*/
 
   Collection<CommonExercise> getOverrides(boolean shouldSwap);
 
@@ -132,7 +134,8 @@ public interface IUserExerciseDAO extends IDAO {
 
   int deleteRelated(int related);
 
-  SlickExercise getByDominoID(int docID);
+ // SlickExercise getByDominoID(int docID);
+  Map<Integer,Integer> getDominoIDToExID(int docID);
 
   boolean areThereAnyUnmatched(int projID);
   Map<String, Integer> getNpToExID(int projid);

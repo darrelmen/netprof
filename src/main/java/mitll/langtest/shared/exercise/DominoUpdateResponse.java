@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.domino.ImportInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -82,6 +83,8 @@ public class DominoUpdateResponse implements HasID {
    * @param currentDominoID
    * @param props
    * @param updates
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoUpdateResponse(int, int, boolean, ImportInfo)
+   * @see mitll.langtest.server.domino.ProjectSync#getAnotherProjectResponse
    */
   public DominoUpdateResponse(UPLOAD_STATUS success,
                               int dominoID,

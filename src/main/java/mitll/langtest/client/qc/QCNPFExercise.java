@@ -94,7 +94,6 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   public static final String ENGLISH = "english";
   public static final String MEANING = "meaning";
 
-  @Deprecated
   public static final String CONTEXT = "context";
 
   public static final String ALTCONTEXT = "altcontext";
@@ -191,12 +190,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
                                                               final ListInterface<CommonShell, T> listContainer,
                                                               boolean addKeyHandler, boolean includeListButtons) {
     NavigationHelper<CommonShell> navHelper = new NavigationHelper<CommonShell>(exercise, controller,
-        new PostAnswerProvider() {
-          @Override
-          public void postAnswers(ExerciseController controller, HasID completedExercise) {
-            nextWasPressed(listContainer, completedExercise);
-          }
-        },
+        (controller1, completedExercise) -> nextWasPressed(listContainer, completedExercise),
         listContainer, addKeyHandler) {
       /**
        * So only allow next button when all audio has been played
@@ -273,7 +267,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     markReviewed(completedExercise);
     boolean allCorrect = incorrectFields.isEmpty();
     int id = completedExercise.getID();
-    logger.info("markReviewed : mark " + id + " = " + allCorrect + " incorrect fields " + incorrectFields.size() + " : " + incorrectFields);
+    // logger.info("markReviewed : mark " + id + " = " + allCorrect + " incorrect fields " + incorrectFields.size() + " : " + incorrectFields);
     listContainer.setState(id, allCorrect ? STATE.APPROVED : STATE.DEFECT);
     listContainer.redraw();
     navigationHelper.clickNext(controller, completedExercise);
@@ -344,6 +338,11 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
     column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
 
+    if (!e.getDirectlyRelated().isEmpty()) {
+      T context = (T) e.getDirectlyRelated().iterator().next();
+      column.add(getEntry(context, CONTEXT, ExerciseFormatter.CONTEXT, context.getForeignLanguage()));
+      column.add(getEntry(context, CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, context.getEnglish()));
+    }
     // TODO:  put this back!!!
 
 /*
