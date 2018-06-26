@@ -1403,7 +1403,7 @@ public class ExerciseCopy {
       logger.info("addContextExercises context id     " + context.getID() + " with parent " + context.getParentExerciseID());
       if (context.getParentExerciseID() > 0) {
         SlickRelatedExercise e = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder,
-            now, context.getParentExerciseID(), context);
+            now, context.getParentExerciseID(), context, 1);
         context.getMutable().setID(e.contextexid());
         pairs.add(e);
       } else {
@@ -1529,7 +1529,7 @@ public class ExerciseCopy {
         for (CommonExercise context : ex.getDirectlyRelated()) {
           context.getMutable().setOldID(parentID + "_" + (contextCount++));
 
-          SlickRelatedExercise relation = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder, now, parentID, context);
+          SlickRelatedExercise relation = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder, now, parentID, context, 1);
           pairs.add(relation);
           int newContextExID = relation.contextexid();
           //  logger.info("\taddContextExercises context id is "+ context.getID());
@@ -1559,17 +1559,29 @@ public class ExerciseCopy {
     return parentToChild;
   }
 
+  /**
+   *
+   * @param projectid
+   * @param slickUEDAO
+   * @param importUser
+   * @param typeOrder
+   * @param now
+   * @param parentExerciseID
+   * @param context
+   * @param dialogID
+   * @return
+   */
   private SlickRelatedExercise insertContextExercise(int projectid,
                                                      SlickUserExerciseDAO slickUEDAO,
                                                      int importUser,
                                                      Collection<String> typeOrder,
                                                      Timestamp now,
                                                      Integer parentExerciseID,
-                                                     CommonExercise context) {
+                                                     CommonExercise context, int dialogID) {
     int contextid =
         slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, importUser, true, typeOrder));
 
-    return new SlickRelatedExercise(-1, parentExerciseID, contextid, projectid, now);
+    return new SlickRelatedExercise(-1, parentExerciseID, contextid, projectid, dialogID, now);
   }
 
   /**

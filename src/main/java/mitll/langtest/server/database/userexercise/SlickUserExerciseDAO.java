@@ -1282,7 +1282,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   public void addContextToExercise(int exid, int contextExid, int projid) {
-    relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, exid, contextExid, projid, new Timestamp(System.currentTimeMillis())));
+    relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, exid, contextExid, projid, 1,
+        new Timestamp(System.currentTimeMillis())));
   }
 
   public int addAttribute(int projid,
