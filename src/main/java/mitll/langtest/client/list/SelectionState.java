@@ -56,7 +56,7 @@ public class SelectionState {
   public static final String SECTION_SEPARATOR = "~";
 
   public static final String ONLY_WITH_AUDIO_DEFECTS = "onlyWithAudioDefects";
-  public static final String ONLY_UNRECORDED = "onlyUnrecorded";
+  private static final String ONLY_UNRECORDED = "onlyUnrecorded";
   public static final String ONLY_DEFAULT = "onlyDefault";
   public static final String ONLY_UNINSPECTED = "onlyUninspected";
   private static final String ITEM_SEPARATOR = "&#44";

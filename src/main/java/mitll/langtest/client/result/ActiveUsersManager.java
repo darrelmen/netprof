@@ -111,7 +111,7 @@ public class ActiveUsersManager {
 
     void addUserID(List<ActiveUser> list) {
       Column<ActiveUser, SafeHtml> userCol = getClickable(this::getIDString);
-      table.setColumnWidth(userCol, 45 + "px");
+      table.setColumnWidth(userCol, 55 + "px");
       addColumn(userCol, new TextHeader("ID"));
       table.addColumnSortHandler(getIDSorter(userCol, list));
     }

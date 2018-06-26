@@ -62,7 +62,7 @@ public class AudioExercise extends ExerciseShell {
   private static final String CONTEXT = "context";
 
   private Map<String, AudioAttribute> audioAttributes = new HashMap<>();
-  private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<String, ExerciseAnnotation>();
+  private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<>();
   protected int projectid;
 
   public AudioExercise() {
@@ -110,6 +110,10 @@ public class AudioExercise extends ExerciseShell {
     return audio != null ? audio.getAudioRef() : null;
   }
 
+  /**
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#attachAudioAndFixPath
+   * @param audioAttribute
+   */
   public synchronized void addAudio(AudioAttribute audioAttribute) {
     if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
     else {

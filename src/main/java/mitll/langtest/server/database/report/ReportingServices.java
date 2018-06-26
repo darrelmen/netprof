@@ -11,15 +11,18 @@ import java.util.Map;
  */
 public interface ReportingServices {
   /**
-   * @see LangTestDatabaseImpl#sendReport
    * @param userID
+   * @see LangTestDatabaseImpl#sendReport
    */
   void sendReport(int userID);
 
   String getReport(int year, JSONObject jsonObject);
 
   Map<String, Float> getMaleFemaleProgress(int projectid);
+
   void doReport();
+
+  void sendReports();
 
   LogAndNotify getLogAndNotify();
 }

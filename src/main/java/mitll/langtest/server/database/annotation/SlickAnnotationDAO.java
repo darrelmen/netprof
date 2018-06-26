@@ -44,8 +44,7 @@ import scala.Tuple4;
 import java.sql.Timestamp;
 import java.util.*;
 
-public class SlickAnnotationDAO
-    extends BaseAnnotationDAO implements IAnnotationDAO {
+public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   private static final Logger logger = LogManager.getLogger(SlickAnnotationDAO.class);
 
   private final AnnotationDAOWrapper dao;
@@ -88,7 +87,7 @@ public class SlickAnnotationDAO
         slick.comment(),
         slick.userid(),
         slick.modified().getTime(),
-        ""+slick.exid()
+        "" + slick.exid()
     );
   }
 
@@ -103,7 +102,7 @@ public class SlickAnnotationDAO
 
   @Override
   List<UserAnnotation> getAll(int userid) {
- //   logger.info("getAllPredef - " + userid);
+    //   logger.info("getAllPredef - " + userid);
     Collection<SlickAnnotation> slickAnnotations = dao.byUser(userid);
     List<UserAnnotation> copy = new ArrayList<>();
     for (SlickAnnotation annotation : slickAnnotations) copy.add(fromSlick(annotation));
@@ -111,7 +110,9 @@ public class SlickAnnotationDAO
   }
 
   @Override
-  public Collection<Integer> getAudioAnnos() { return dao.getOnlyAudioAnnos(); }
+  public Collection<Integer> getAudioAnnos() {
+    return dao.getOnlyAudioAnnos();
+  }
 
   @Override
   public Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID) {
@@ -124,7 +125,7 @@ public class SlickAnnotationDAO
     }*/
     long now = System.currentTimeMillis();
 
-    if (now-then >20) {
+    if (now - then > 20) {
       logger.info("getLatestByExerciseID took " + (now - then) + " millis to get ex->anno map for " + exerciseID);
     }
 
@@ -147,6 +148,7 @@ public class SlickAnnotationDAO
       String field = tuple4._2();
       String status = tuple4._3();
 //      logger.info("getExercisesWithIncorrectAnnotations Got " + tuple4);
+//      logger.info("getExercisesWithIncorrectAnnotations " + exid + " : " + field +" : " + status);
       if (prevExid == -1) {
         prevExid = exid;
       } else if (!prevExid.equals(exid)) {

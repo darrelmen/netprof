@@ -44,7 +44,6 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * Created by go22670 on 4/10/17.
  */
 public class NewContentChooser implements INavigation {
-  //private static final String QUIZ = "Quiz";
   private final Logger logger = Logger.getLogger("NewContentChooser");
 
   private static final String CURRENT_VIEW = "CurrentView";
@@ -176,12 +175,12 @@ public class NewContentChooser implements INavigation {
           listView.showContent(divWidget, "listView", fromClick);
           break;
         case RECORD:
-          clear();
+          clearAndFixScroll();
           setInstanceHistory(RECORD);
           new RecorderNPFHelper(controller, true, this, RECORD).showNPF(divWidget, RECORD.toString());
           break;
         case CONTEXT:
-          clear();
+          clearAndFixScroll();
           setInstanceHistory(CONTEXT);
           new RecorderNPFHelper(controller, false, this, CONTEXT).showNPF(divWidget, CONTEXT.toString());
           break;

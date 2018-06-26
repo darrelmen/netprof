@@ -587,7 +587,7 @@ public class Project implements IPronunciationLookup {
   /**
    * @return
    * @see ProjectManagement#configureProjects
-   * @see ProjectManagement#getExercises
+   * @see IProjectManagement#getExercises
    */
   public boolean isConfigured() {
     return exerciseDAO != null && exerciseDAO.isConfigured();

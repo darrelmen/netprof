@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
 import mitll.langtest.server.audio.AudioCheck;
@@ -120,6 +121,7 @@ import java.util.stream.Collectors;
 import static mitll.langtest.server.PathHelper.ANSWERS;
 import static mitll.langtest.server.database.Report.DAY_TO_SEND_REPORT;
 import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAGIC_ID;
+import static mitll.langtest.server.database.project.ProjectDAO.DAY;
 
 /**
  * Note with H2 that :  <br></br>
@@ -146,7 +148,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @see #tryTomorrow
    */
-  private static final long DAY = 24 * 60 * 60 * 1000L;
+  //private static final long DAY = 24 * 60 * 60 * 1000L;
   // private static final long DAY = 5 * 60 * 1000L;
 
   private static final boolean REPORT_ALL_PROJECTS = true;
@@ -158,7 +160,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final String DRY_RUN = "Dry Run";
   public static final int MAX_PHONES = 7;
   private static final boolean TEST_SYNC = false;
-  public static final int WARN_THRESH = 10;
+  private static final int WARN_THRESH = 10;
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -231,7 +233,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param servletContext
    * @see #DatabaseImpl
    */
-  void connectToDatabases(PathHelper pathHelper, ServletContext servletContext) {
+  protected void connectToDatabases(PathHelper pathHelper, ServletContext servletContext) {
     long then = System.currentTimeMillis();
     // first connect to postgres
 
@@ -319,15 +321,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   * @param projID
    * @see DatabaseImpl#makeDAO
    * @see DatabaseImpl#DatabaseImpl
    * @see LangTestDatabaseImpl#init
    */
-  public DatabaseImpl populateProjects() {
+  public DatabaseImpl populateProjects(int projID) {
     if (projectManagement == null) {
       logger.info("populateProjects no project management yet...");
     } else {
-      projectManagement.populateProjects();
+      projectManagement.populateProjects(projID);
       userDAO.setProjectManagement(getProjectManagement());
 
       if (TEST_SYNC) {  // right now I can't run the test since I need mongo.. etc.
@@ -473,19 +476,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         Integer idInTarget = oldToIDTo.get(oldNPID);
 
         if (idInTarget != null) {
-          results.forEach(rid -> {
-            if (resultDAO.updateProjectAndEx(rid, newprojid, idInTarget)) {
-              ridsUpdated.add(rid);
-              boolean b = wordDAO.updateProjectForRID(rid, newprojid);
-              boolean b1 = phoneDAO.updateProjectForRID(rid, newprojid);
-
-              if (!b) logger.warn("updateRecordings word :   didn't update rid " + rid + " and ex " + idInTarget);
-              if (!b1) logger.warn("updateRecordings phone : didn't update rid " + rid + " and ex " + idInTarget);
-
-            } else {
-              logger.warn("updateRecordings didn't update rid " + rid + " and ex " + idInTarget);
-            }
-          });
+          remapResultExerciseIDs(newprojid, results, idInTarget, ridsUpdated);
         }
       }
     });
@@ -493,48 +484,169 @@ public class DatabaseImpl implements Database, DatabaseServices {
     logger.info("updated " + ridsUpdated.size() + " results.");
   }
 
+  private void remapResultExerciseIDs(int newprojid, List<Integer> results, Integer idInTarget, List<Integer> ridsUpdated) {
+    results.forEach(rid -> {
+      if (remapOneResult(newprojid, idInTarget, rid)) {
+        ridsUpdated.add(rid);
+      }
+    });
+  }
+
+  private boolean remapOneResult(int newprojid, Integer idInTarget, Integer rid) {
+    if (resultDAO.updateProjectAndEx(rid, newprojid, idInTarget)) {
+      boolean b = wordDAO.updateProjectForRID(rid, newprojid);
+      boolean b1 = phoneDAO.updateProjectForRID(rid, newprojid);
+
+      if (!b) logger.warn("updateRecordings word :   didn't update rid " + rid + " and ex " + idInTarget);
+      if (!b1) logger.warn("updateRecordings phone : didn't update rid " + rid + " and ex " + idInTarget);
+      return true;
+    } else {
+      logger.warn("updateRecordings didn't update rid " + rid + " and ex " + idInTarget);
+      return false;
+    }
+  }
+
   /**
    * This is how we merge pashto projects...
+   * <p>
+   * so only copy over the audio for the imported exercises...
+   * <p>
+   * only copy over ref result for the import exercises
    *
    * @param oldID
    * @param newprojid
+   * @param isChinese
+   * @see CopyToPostgres#merge
    */
-  public void updateProject(int oldID, int newprojid) {
-    if (!getUserExerciseDAO().updateProject(oldID, newprojid)) {
-      logger.error("couldn't update exercise dao to " + newprojid);
+  public void updateProject(int oldID, int newprojid, boolean isChinese) {
+    List<Integer> justTheseIDs = new ArrayList<>();
+
+    if (isChinese) {
+      SlickUserExerciseDAO userExerciseDAO = (SlickUserExerciseDAO) getUserExerciseDAO();
+      if (!userExerciseDAO.updateProjectChinese(oldID, newprojid, justTheseIDs)) {
+        logger.warn("couldn't update chinese exercises dao to " + newprojid);
+      } else {
+        logger.info("updated exercises");
+      }
     } else {
-      logger.info("updated exercises");
+      if (!getUserExerciseDAO().updateProject(oldID, newprojid)) {
+        logger.error("couldn't update exercise dao to " + newprojid);
+      } else {
+        logger.info("updated exercises");
+      }
     }
-    if (!resultDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update result dao to " + newprojid);
+
+    if (isChinese) {  // try to do some fancy setting of the result ids..?
+      Map<String, Integer> tradOldToID = new HashMap<>();
+      Map<String, Integer> simplifiedOldToID = new HashMap<>();
+
+      Map<Integer, Integer> tradToSimpl = new HashMap<>();
+
+      {
+        Project traditional = getProject(oldID);
+        traditional.getRawExercises().forEach(commonExercise -> tradOldToID.put(commonExercise.getOldID(), commonExercise.getID()));
+        logger.info("traditional " + traditional);
+        logger.info("trad " + tradOldToID.size());
+      }
+      {
+        Project simplified = getProject(newprojid);
+        simplified.getRawExercises().forEach(commonExercise -> {
+          String oldID1 = commonExercise.getOldID();
+          String[] split = oldID1.split("-");
+          if (split.length == 2) oldID1 = split[1];
+          simplifiedOldToID.put(oldID1, commonExercise.getID());
+        });
+        logger.info("simplified " + simplified);
+        logger.info("simplified " + simplifiedOldToID.size());
+      }
+      tradOldToID.forEach((k, v) -> {
+        Integer newID = simplifiedOldToID.get(k);
+        if (newID == null) {
+          logger.warn("updateProject no matching exercise for old id " + k);
+        } else {
+          tradToSimpl.put(v, newID);
+        }
+      });
+
+      // take all results for basic course items, and move them to point to simple exercise ids.
+      logger.info("trad->simpl size " + tradToSimpl.size());
+      List<MonitorResult> tradResults = resultDAO.getMonitorResults(oldID);
+      logger.info("found " + tradResults.size() + " in project " + oldID);
+      TreeSet<Integer> remapped = new TreeSet<>();
+      TreeSet<Integer> unmapped = new TreeSet<>();
+      tradResults.forEach(monitorResult -> {
+        int exID = monitorResult.getExID();
+
+//        if (justTheseIDs.contains(exID)) {
+//          logger.info("keep id " + exID + " " + monitorResult.getForeignText() + " ");
+//        } else {
+        Integer simpleID = tradToSimpl.get(exID);
+
+        if (simpleID == null) {
+          logger.warn("updateProject no ex " + exID + " in trad for " + monitorResult + "?");
+          unmapped.add(exID);
+        } else {
+          remapOneResult(newprojid, simpleID, monitorResult.getUniqueID());
+          remapped.add(monitorResult.getUniqueID());
+        }
+        //    }
+      });
+      logger.info("trad->simpl remapped " + remapped.size());
+      logger.info("trad->simpl unmapped " + unmapped.size());
+
     } else {
-      logger.info("updated results");
+      // TODO : remap exercise references from old to new for the non-custom ids
+      if (!resultDAO.updateProject(oldID, newprojid)) {
+        logger.error("couldn't update result dao to " + newprojid);
+      } else {
+        logger.info("updated results");
+      }
     }
-    if (!audioDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update audio dao to " + newprojid);
+
+    if (isChinese) {
+      // only copy over the custom exercises for integrated chinese 2.
+      logger.info("update audio dao to " + newprojid + " for " + justTheseIDs.size() + " exercises");
+
+      if (!((SlickAudioDAO) audioDAO).updateProjectIn(oldID, newprojid, justTheseIDs)) {
+        logger.error("couldn't update audio dao to " + newprojid);
+      } else {
+        logger.info("updated audio");
+      }
     } else {
-      logger.info("updated audio");
+      // TODO : only copy over the audio for the custom items...
+      if (!audioDAO.updateProject(oldID, newprojid)) {
+        logger.error("couldn't update audio dao to " + newprojid);
+      } else {
+        logger.info("updated audio");
+      }
     }
+
     if (!wordDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update word dao to " + newprojid);
     } else {
       logger.info("updated word");
     }
+
     if (!phoneDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update phone dao to " + newprojid);
     } else {
       logger.info("updated phones");
     }
+
     if (!getUserListManager().updateProject(oldID, newprojid)) {
       logger.error("couldn't update user list dao to " + newprojid);
     } else {
       logger.info("updated user lists.");
     }
-    if (!refresultDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update ref result dao to " + newprojid);
-    } else {
-      logger.info("updated ref results");
+
+    if (!isChinese) {
+      if (!refresultDAO.updateProject(oldID, newprojid)) {
+        logger.error("couldn't update ref result dao to " + newprojid);
+      } else {
+        logger.info("updated ref results");
+      }
     }
+
     if (!userProjectDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update user->project dao to " + newprojid);
     } else {
@@ -542,7 +654,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  public void updateProjectOnDay(int oldID, int newprojid, Date onDay) {
+/*  public void updateProjectOnDay(int oldID, int newprojid, Date onDay) {
     if (!resultDAO.updateProject(oldID, newprojid)) {
       logger.error("couldn't update result dao to " + newprojid);
     } else {
@@ -559,7 +671,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("updated phones");
     }
 
-  }
+  }*/
 
 
   private void setPostgresDBConnection() {
@@ -647,7 +759,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         return new SectionHelper<>();
       }
 
-      getExercises(projectid);
+      getExercises(projectid, false);
       return getSectionHelperForProject(projectid);
     }
   }
@@ -700,7 +812,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see ScoreServlet#getJsonNestedChapters
    */
   public JsonExport getJSONExport(int projectid) {
-    getExercises(projectid);
+    getExercises(projectid, false);
 
     Map<String, Integer> stringIntegerMap = Collections.emptyMap();
     AudioFileHelper audioFileHelper = getProject(projectid).getAudioFileHelper();
@@ -723,19 +835,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Deprecated
   public Collection<CommonExercise> getExercises() {
-    return getExercises(-1);
+    return getExercises(-1, false);
   }
 
   /**
    * exercises are in the context of a project
    *
    * @param projectid
+   * @param onlyOne
    * @return
    * @see Project#buildExerciseTrie
    */
   @Override
-  public List<CommonExercise> getExercises(int projectid) {
-    return projectManagement.getExercises(projectid);
+  public List<CommonExercise> getExercises(int projectid, boolean onlyOne) {
+    return projectManagement.getExercises(projectid, onlyOne);
   }
 
   @Override
@@ -868,7 +981,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
           if (!serverProps.useH2()) {
             //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
-            populateProjects();
+            populateProjects(-1);
             //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
             if (projectManagement.getProjects().isEmpty()) {
               logger.warn("\nmakeDAO no projects loaded yet...?");
@@ -895,7 +1008,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param project
    * @param forceReload
    * @return number of exercises in the project
+   * @see ProjectEditForm#updateProject
    * @see mitll.langtest.server.services.ProjectServiceImpl#update
+   * @see mitll.langtest.server.services.ProjectServiceImpl#configureAndRefresh
    */
   @Override
   public int configureProject(Project project, boolean forceReload) {
@@ -934,7 +1049,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       if (projectManagement == null) {
         setInstallPath("", null);
       }
-      return projectManagement.getProject(projectid);
+      return projectManagement.getProject(projectid, false);
     }
   }
 
@@ -978,7 +1093,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param userExercise
    * @param keepAudio
-   * @see mitll.langtest.server.services.ListServiceImpl#editItem
+   * @seex mitll.langtest.server.services.ListServiceImpl#editItem
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   @Override
@@ -1339,7 +1454,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   private Map<Integer, CommonExercise> getIdToExerciseMap(int projectid) {
     Map<Integer, CommonExercise> join = new HashMap<>();
-    getExercises(projectid).forEach(exercise -> join.put(exercise.getID(), exercise));
+    getExercises(projectid, false).forEach(exercise -> join.put(exercise.getID(), exercise));
 
 /*    // TODO : why would we want to do this?
     if (userExerciseDAO != null && getExerciseDAO(projectid) != null) {
@@ -1491,7 +1606,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
                        AudioExportOptions options,
                        IEnsureAudioHelper ensureAudioHelper) throws Exception {
     Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
-        getExercises(projectid) :
+        getExercises(projectid, false) :
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
 
     if (!options.getSearch().isEmpty()) {
@@ -1512,9 +1627,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
         " exercises for " + language +
         " selection " + typeToSection);
 
-    audioDAO.attachAudioToExercises(exercisesForSelectionState, language);
-    ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, language);
-    //  }
+    if (options.getIncludeAudio()) {
+      audioDAO.attachAudioToExercises(exercisesForSelectionState, language);
+      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, language);
+    }
 
     new AudioExport(getServerProps())
         .writeZip(out,
@@ -1610,7 +1726,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private void attachAllAudio(int projectid) {
     long then = System.currentTimeMillis();
 
-    Collection<CommonExercise> exercises = getExercises(projectid);
+    Collection<CommonExercise> exercises = getExercises(projectid, false);
 
     Project project = getProject(projectid);
     String language = project.getLanguage();
@@ -1692,7 +1808,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public void doReport() {
     if (serverProps.isFirstHydra()) {
       if (isTodayAGoodDay()) {
-        sendReports(getReport(), false, -1);
+        sendReports();
       } else {
         logger.info("doReport : not sending email report since this is not Sunday...");
       }
@@ -1702,9 +1818,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  public void sendReports() {
+    sendReports(getReport(), false, -1);
+  }
+
   /**
-   * Fire at Sunday midnight EST (or local)
+   * Fire at Saturday night, just before midnight EST (or local)
    * Smarter would be to figure out how long to wait until sunday...
+   * <p>
+   * fire at 11:59:30 PM Saturday, so the report ends this saturday and not next saturday...
+   * i.e. if it's Sunday 12:01 AM, it rounds up and includes a line for the whole upcoming week
    */
   private void tryTomorrow() {
     ZoneId zone = ZoneId.systemDefault();
@@ -1713,7 +1836,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     LocalDate tomorrow = now.toLocalDate().plusDays(1);
     ZonedDateTime tomorrowStart = tomorrow.atStartOfDay(zone);
     Duration duration = Duration.between(now, tomorrowStart);
-    long toWait = duration.toMillis() + 1000;
+    long candidate = duration.toMillis() - 30 * 1000;
+    long toWait = candidate > 0 ? candidate : candidate + DAY;
     new Thread(() -> {
       try {
         logger.info("tryTomorrow :" +
@@ -1993,7 +2117,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public Map<String, Float> getMaleFemaleProgress(int projectid) {
-    return getAudioDAO().getMaleFemaleProgress(projectid, getExercises(projectid));
+    return getAudioDAO().getMaleFemaleProgress(projectid, getExercises(projectid, false));
   }
 
   @Override

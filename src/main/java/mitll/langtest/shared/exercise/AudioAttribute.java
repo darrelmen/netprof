@@ -32,7 +32,9 @@
 
 package mitll.langtest.shared.exercise;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -80,7 +82,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   // DON'T send this to client
   private transient String actualPath; // where we found it on the hydra server - might be different from audioRef if it's been moved
   private int exid;
-  private String oldexid;
+  private transient String oldexid;
   private int userid;
   private long timestamp;
   private long durationInMillis;
@@ -154,25 +156,25 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   /**
-   * @param audioRef
-   * @see mitll.langtest.shared.exercise.AudioExercise#setRefAudio(String)
+   * @paramx audioRef
+   * @seex mitll.langtest.shared.exercise.AudioExercise#setRefAudio(String)
    */
-  protected AudioAttribute(String audioRef) {
+/*  protected AudioAttribute(String audioRef) {
     this.audioRef = audioRef;
     if (audioRef == null) throw new IllegalArgumentException("huh audio ref is null?");
     markRegular();
-  }
+  }*/
 
   /**
-   * @param audioRef
-   * @param miniUser
-   * @see AudioExercise#addAudioForUser
+   * @paramx audioRef
+   * @paramx miniUser
+   * @seex AudioExercise#addAudioForUser
    */
-  public AudioAttribute(String audioRef, MiniUser miniUser) {
+/*  public AudioAttribute(String audioRef, MiniUser miniUser) {
     this(audioRef);
     this.setUser(miniUser);
     this.userid = miniUser.getID();
-  }
+  }*/
 
   public String getAudioRef() {
     return audioRef;
@@ -198,12 +200,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.exid = exid;
   }
 
-//  @Deprecated
-//  @Override
-//  public String getID() {
-//    return exid + "/1";
-//  }
-
   public AudioAttribute markRegular() {
     addAttribute(SPEED, REGULAR);
     return this;
@@ -216,12 +212,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   public boolean isRegularSpeed() {
     return audioType == AudioType.REGULAR || matches(SPEED, REGULAR) || audioType.equals(AudioType.CONTEXT_REGULAR);
-/*
-    if (audioType == AudioType.REGULAR) return true;
-    else {
-      String speed = getSpeed();
-      return speed != null && speed.equalsIgnoreCase(REGULAR) || audioType == AudioType.CONTEXT_REGULAR;
-    }*/
   }
 
   public boolean isSlow() {
@@ -245,9 +235,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return s == null ? isRegularSpeed() ? REGULAR : SLOW : s;
   }
 
+/*
   private boolean hasOnlySpeed() {
     return attributes.size() == 1 && attributes.containsKey(SPEED);
   }
+*/
 
   public boolean matches(String name, String value) {
     return attributes.containsKey(name) && attributes.get(name).equals(value);
@@ -288,7 +280,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return "user=" + userid + ", " + getAttributes().toString();
   }
 
-  public String getDisplay() {
+/*  public String getDisplay() {
     if (hasOnlySpeed()) {
       String speed = attributes.values().iterator().next();
       return speed.substring(0, 1).toUpperCase() + speed.substring(1);
@@ -306,15 +298,17 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
       if (s.endsWith(", ")) s = s.substring(0, s.length() - 2);
       return s;
     }
-  }
+  }*/
 
   public MiniUser getUser() {
     return user;
   }
 
+/*
   public boolean isUnknownDefault() {
     return getUser() == null || getUser().isUnknownDefault();
   }
+*/
 
   /**
    * @param user
@@ -384,6 +378,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return transcript == null ? "" : transcript;
   }
 
+  /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyAudio
+   * @param transcript
+   */
   public void setTranscript(String transcript) {
     this.transcript = transcript;
   }
@@ -398,7 +396,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @param oldexid
-   * @seex mitll.langtest.server.database.audio.AudioDAO#getResultsForQuery(Connection, PreparedStatement)
+   * @see mitll.langtest.server.database.audio.AudioDAO#getResultsForQuery
    */
   public void setOldexid(String oldexid) {
     this.oldexid = oldexid;
@@ -423,7 +421,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @return
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addToRequest
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#makeFirstRow
    */
   public AlignmentOutput getAlignmentOutput() {
     return alignmentOutput;

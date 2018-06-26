@@ -581,21 +581,23 @@ public class ProjectSync implements IProjectSync {
     List<DominoUpdateItem> deletes = new ArrayList<>();
     Set<Integer> missing = new TreeSet<>();
 
-    deletedDominoIDs.forEach(id -> {
-      SlickExercise slickExercise = dominoToEx.get(id);
+    deletedDominoIDs.forEach(dominoID -> {
+      SlickExercise slickExercise = dominoToEx.get(dominoID);
       if (slickExercise == null) {
-        logger.info("doDelete couldn't find domino id " + id + " in " + dominoToEx.keySet().size() + " keys.");
-        missing.add(id);
+        logger.info("doDelete couldn't find domino dominoID " + dominoID + " in " + dominoToEx.keySet().size() + " keys.");
+        missing.add(dominoID);
       } else {
         int exid = slickExercise.id();
 
-        CommonExercise byExID = userExerciseDAO.getByExID(exid, false);
+        //  CommonExercise byExID = userExerciseDAO.getByExID(exid, false); // don't go to database - why would we?
+        CommonExercise byExID = exerciseServices.getExercise(projID, exid);
         if (byExID == null) {
-          logger.warn("doDelete : no ex by " + exid + " from domino #" + id);
+          logger.warn("doDelete : no ex by " + exid + " from domino #" + dominoID);
         } else {
-          boolean add = toDelete.add(byExID.getID());
-          if (add) {
+          if (toDelete.add(byExID.getID())) {
             deletes.add(new DominoUpdateItem(byExID, new ArrayList<>(), DELETE));
+          } else {
+            logger.warn("doDelete huh? we already added exercise " + byExID.getID() + " to deleted list?");
           }
         }
       }
@@ -1519,8 +1521,8 @@ public class ProjectSync implements IProjectSync {
                                           long now,
                                           List<ExerciseAttribute> newAttributes) {
     for (ExerciseAttribute newAttr : newAttributes) {
-      int i = slickUEDAO.addAttribute(projectid, now, importUser, newAttr);
-      attrToID.put(newAttr, i);
+      //  int i = slickUEDAO.addAttribute(projectid, now, importUser, newAttr);
+      attrToID.put(newAttr, slickUEDAO.addAttribute(projectid, now, importUser, newAttr));
       //   logger.info("doUpdate remember new import attribute " + i + " = " + newAttr);
     }
   }

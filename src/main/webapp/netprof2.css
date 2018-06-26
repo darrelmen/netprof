@@ -566,23 +566,8 @@ fieldset > legend {
     line-height: 100%;
 }
 
-.Instruction-data-with-wrap-black {
-    font-size: 28px;
-    word-wrap: break-word; /* Internet Explorer 5.5+ */
-    word-break: keep-all;
-    white-space: normal;
-    font-family: sans-serif;
-    line-height: 100%;
-}
-
 .Instruction-data-with-wrap-keep-word {
-    /*
-    color: #CC6600;
-    */
     font-size: 28px;
-    /*
-    font-weight: bold;
-    */
     word-wrap: normal;
     word-break: keep-all;
     white-space: normal;
@@ -592,39 +577,21 @@ fieldset > legend {
 }
 
 .flfont {
-    /*
-    color: #CC6600;
-    */
     font-size: 24px;
-    /*
-    font-weight: bold;
-    */
     word-wrap: normal; /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
     line-height: 100%;
-    /*
-    float: left;
-    */
 }
 
 .bigflfont {
-    /*
-    color: #CC6600;
-    */
     font-size: 32px;
-    /*
-    font-weight: bold;
-    */
     word-wrap: normal; /* Internet Explorer 5.5+ */
     word-break: keep-all;
     white-space: normal;
     font-family: sans-serif;
     line-height: 100%;
-    /*
-    float: left;
-    */
 }
 
 .blueColor {
@@ -677,6 +644,68 @@ fieldset > legend {
     color: #CC6600;
     font-family: 'Nafees Naskh', Nafees, sans-serif;
     font-size: 24px;
+}
+
+/*
+Where should this font live? under src?
+*/
+@font-face {
+    font-family: 'MyUrduWebFont';
+    src:  url('./langtest/Jameel Noori Nastaleeq.ttf') format('truetype')
+}
+
+.urdu {
+    font-family: 'MyUrduWebFont', sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.urdufont {
+    font-family: 'MyUrduWebFont', sans-serif;
+}
+
+.urduflfont {
+    font-size: 24px;
+    word-wrap: normal; /* Internet Explorer 5.5+ */
+    word-break: keep-all;
+    white-space: normal;
+    font-family: 'MyUrduWebFont', sans-serif;
+    line-height: 100%;
+}
+
+.urdubigflfont {
+    font-size: 36px;
+    word-wrap: normal; /* Internet Explorer 5.5+ */
+    word-break: keep-all;
+    white-space: normal;
+    font-family: 'MyUrduWebFont', sans-serif;
+    line-height: 100%;
+}
+
+.urdu h4 td {
+    font-family: 'MyUrduWebFont',sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.urdu td > table {
+    font-family: 'MyUrduWebFont',sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
+}
+
+.urdu table td {
+    font-family: 'MyUrduWebFont',  sans-serif;
+    font-size: 14pt;
+    font-weight: normal;
+    line-height: 125%;
+    direction: rtl;
 }
 
 .pashtofont {
@@ -1491,7 +1520,7 @@ document sections.*/
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     font-size: 14px;
-    width: 204px;
+    width: 210px;
     margin-top: 2px;
 }
 
@@ -1511,7 +1540,7 @@ document sections.*/
 
 .leftBlock, .rightBlock {
     display: inline-block;
-    width: 204px;
+    width: 210px;
     margin-right: 6px;
     zoom: 1;
 }
@@ -1560,12 +1589,6 @@ document sections.*/
 .dimension {
 }
 
-/*
-.sidebar .dimension li, .sidebar nav li {
-    padding: 4px 10px;
-}
-*/
-
 .sidebar .dimension li, .sidebar nav li {
     padding: 2px 2px;
 }
@@ -1595,27 +1618,6 @@ document sections.*/
     text-transform: none;
     float: right;
 }
-
-/*.sidebar .menuItem a:after {
-    font-family: FontAwesome;
-    float: right;
-    font-size: 11px;
-    content: "\f077";
-}*/
-
-/*
-.sidebar .dimension > .menuItem > a::after {
-    font-family: FontAwesome;
-    float: right;
-    font-size: 11px;
-    content: "\f077";
-}
-
-.sidebar .dimension.collapsed > .menuItem > a::after {
-    content: "\f078";
-    font-weight: 400;
-}
-*/
 
 .sidebar .dimension > .menuItem > a {
     color: #292b2d;

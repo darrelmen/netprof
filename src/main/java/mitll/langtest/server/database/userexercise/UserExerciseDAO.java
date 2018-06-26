@@ -62,14 +62,14 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String LESSON = "lesson";
 
   @Override
-  public Map<Integer, Integer> getDominoIDToExID(int docID) {
+  public SlickExercise getByDominoID(int projID, int docID) {
     return null;
   }
 
-/*  @Override
-  public SlickExercise getByDominoID(int docID) {
+  @Override
+  public Map<Integer, Integer> getDominoIDToExID(int docID) {
     return null;
-  }*/
+  }
 
   @Override
   public boolean areThereAnyUnmatched(int projID) {
@@ -484,10 +484,18 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return -1;
   }
 
+/*
   @Override
   public Collection<CommonExercise> getAllUserExercises(int projid) {
     return getCommonExercises(GET_ALL_SQL);
   }
+*/
+
+  @Override
+  public int getParentForContextID(int contextID) {
+    return 0;
+  }
+
 
   /**
    * @return

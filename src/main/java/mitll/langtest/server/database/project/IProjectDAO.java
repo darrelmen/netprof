@@ -96,7 +96,7 @@ public interface IProjectDAO extends IDAO {
 
   /**
    * @return
-   * @see ProjectManagement#populateProjects
+   * @see IProjectManagement#populateProjects
    */
   Collection<SlickProject> getAll();
 
@@ -120,6 +120,7 @@ public interface IProjectDAO extends IDAO {
    * @return
    */
   boolean exists(int projid);
+  SlickProject getByID(int projid);
 
   /**
    * @see ProjectDAO#update
@@ -186,4 +187,5 @@ public interface IProjectDAO extends IDAO {
    */
   Map<String, String> getProps(int projid);
 
+  boolean maybeSetDominoIDs(Project project);
 }

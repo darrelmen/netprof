@@ -43,8 +43,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.InputStream;
 import java.util.*;
 
-import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SEMESTER;
-import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SUB_TOPIC;
+import static mitll.langtest.server.database.exercise.Facet.SEMESTER;
+import static mitll.langtest.server.database.exercise.Facet.SUB_TOPIC;
 
 /**
  * Created with IntelliJ IDEA.
@@ -58,47 +58,7 @@ import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SUB_TO
 public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection<T>, ITestSection<T> {
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
 
-  /**
-   * These are fixed!
-   *
-   * @see DBExerciseDAO#setRootTypes
-   * @see #reorderTypes
-   */
-  enum Facet implements Comparator<Facet> {
-    SEMESTER("Semester", 0),
-    TOPIC("Topic", 1),
-    SUB_TOPIC("Sub-topic", 2),
-    GRAMMAR("Grammar", 3),
-    DIALECT("Dialect", 4),
-    DIFFICULTY("Difficulty", 5);
-
-    private String name;
-    private int order;
-
-    Facet(String name, int order) {
-      this.name = name;
-      this.order = order;
-    }
-
-    public String toString() {
-      return name;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public int getOrder() {
-      return order;
-    }
-
-    @Override
-    public int compare(Facet o1, Facet o2) {
-      return Integer.compare(o1.order, o2.order);
-    }
-  }
-
-  static final String SUBTOPIC_LC = "subtopic";
+  static final String SUBTOPIC_LC = SUB_TOPIC.getAlt();//"subtopic";
   /**
    * @see DBExerciseDAO#removeSubtopic
    */
@@ -113,6 +73,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    */
   private static final String ALL = "all";
   private static final String LISTS = "Lists";
+  private static final String RECORDED = "Recorded";
   private List<String> predefinedTypeOrder = new ArrayList<>();
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
@@ -337,8 +298,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    */
   @Override
   public Map<String, Set<MatchInfo>> getTypeToMatches(Collection<Pair> pairs) {
-    Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), this.root);
-    return getTypeToMatches(typeToMatchPairs);
+   // Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), this.root);
+    return getTypeToMatches(getTypeToMatchPairs(new ArrayList<>(pairs), this.root));
   }
 
   /**
@@ -363,8 +324,9 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String toMatch = next.getValue();
 
     boolean isAll = toMatch.equalsIgnoreCase(ANY) || toMatch.equalsIgnoreCase(ALL);
-    if (DEBUG)
+    if (DEBUG) {
       logger.info("getTypeToMatchPairs to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
+    }
     if (!node.isLeaf() && node.getChildType().equals(type)) {
       Map<String, MatchInfo> matches = new HashMap<>();
       typeToMatch.put(type, matches);
@@ -444,19 +406,18 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   }
 
   private boolean isDynamicFacet(String type) {
-    return type.equals(LISTS) || type.equals("Recorded");
+    return type.equals(LISTS) || type.equals(RECORDED);
   }
 
   /**
+   * Get a map with sorted values.
    * @param typeToMatch
    * @return
    * @see #getTypeToMatches
    */
   private Map<String, Set<MatchInfo>> getTypeToMatches(Map<String, Map<String, MatchInfo>> typeToMatch) {
     Map<String, Set<MatchInfo>> typeToMatchRet = new HashMap<>();
-    for (Map.Entry<String, Map<String, MatchInfo>> pair : typeToMatch.entrySet()) {
-      typeToMatchRet.put(pair.getKey(), new TreeSet<>(pair.getValue().values()));
-    }
+    typeToMatch.forEach((k, v) -> typeToMatchRet.put(k, new TreeSet<>(v.values())));
     return typeToMatchRet;
   }
 
@@ -465,10 +426,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
     if (childType != null) { // i.e. not leaf
       // logger.info("recurseAndCount on " + node.getName() + " child type " + childType);
-      Map<String, MatchInfo> members = typeToCount.get(childType);
-      if (members == null) {
-        typeToCount.put(childType, members = new HashMap<>());
-      }
+      Map<String, MatchInfo> members = typeToCount.computeIfAbsent(childType, k -> new HashMap<>());
 
       for (SectionNode child : node.getChildren()) {
         if (!child.getType().equals(childType)) {

@@ -39,14 +39,13 @@ import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.project.ProjectProperty;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
 import mitll.npdata.dao.userexercise.ExerciseAttributeJoinDAOWrapper;
@@ -81,6 +80,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final String QUOT = "&quot;";
   private static final int MAX_LENGTH = 250;
   private static final String UNKNOWN1 = "unknown";
+  /**
+   * If we don't have a value for a facet, it's value is "Blank" as opposed to "Any"
+   *
+   * @see SlickUserExerciseDAO#addPhoneInfo
+   */
+  private static final String BLANK = "Blank";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -94,7 +99,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private final String hostName;
-  private final IProjectDAO projectDAO;
+  //private final IProjectDAO projectDAO;
   private CommonExercise templateExercise;
   private int unknownExerciseID;
 
@@ -113,7 +118,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();
-    projectDAO = database.getProjectDAO();
+    //projectDAO = database.getProjectDAO();
 
     String mediaDir = database.getServerProps().getMediaDir();
     hasMediaDir = new File(mediaDir).exists();
@@ -140,18 +145,55 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    */
   public boolean updateProject(int old, int newprojid) {
-    List<SlickExercise> allUserEx = dao.getAllByProject(old);
-    logger.info("updateProject altering " + allUserEx.size() + " exercises...");
-    allUserEx.forEach(slickExercise -> dao.updateOldEx(slickExercise.id(), old + "-" + slickExercise.exid()));
-    logger.info("updateProject DONE altering " + allUserEx.size() + " exercises...");
+
+    List<SlickExercise> toImport = dao.getAllByProject(old);
+
+    logger.info("updateProject altering " + toImport.size() + " exercises...");
+    toImport.forEach(slickExercise -> dao.updateOldEx(slickExercise.id(), old + "-" + slickExercise.exid()));
+    logger.info("updateProject DONE altering " + toImport.size() + " exercises...");
 
     boolean b = dao.updateProject(old, newprojid) > 0;
     if (b) logger.info("updated exercises to            " + newprojid);
+
     boolean b1 = attributeDAOWrapper.updateProject(old, newprojid) > 0;
     if (b1) logger.info("updated exercise attributes to " + newprojid);
+
     boolean b2 = relatedExerciseDAOWrapper.updateProject(old, newprojid) > 0;
     if (b2) logger.info("updated related exercises  to  " + newprojid);
+
     return b && b1 && b2;
+  }
+
+  public boolean updateProjectChinese(int old, int newprojid, List<Integer> justTheseIDs) {
+    List<SlickExercise> toImport =
+        dao.getAllByProject(old).stream().filter(slickExercise -> slickExercise.exid().startsWith("Custom_")).collect(Collectors.toList());
+
+    logger.info("updateProject altering " + toImport.size() + " exercises...");
+    toImport.forEach(slickExercise -> dao.updateOldEx(slickExercise.id(), old + "-" + slickExercise.exid()));
+    logger.info("updateProject found    " + toImport.size() + " exercises...");
+
+    justTheseIDs.addAll(toImport.stream().map(SlickExercise::id).collect(Collectors.toList()));
+    logger.info("updateProject found    " + justTheseIDs.size() + " ids...");
+
+    int num = dao.updateProjectIn(old, newprojid, justTheseIDs);
+    boolean b = num > 0;
+    if (b) {
+      logger.info("updated exercises to            " + newprojid);
+    }
+    logger.info("updated " + num +
+        "  exercises to            " + newprojid);
+
+    boolean b1 = attributeDAOWrapper.updateProject(old, newprojid) > 0;
+    if (b1) {
+      logger.info("updated exercise attributes to " + newprojid);
+    }
+
+/*
+    boolean b2 = relatedExerciseDAOWrapper.updateProject(old, newprojid) > 0;
+    if (b2) logger.info("updated related exercises  to  " + newprojid);
+*/
+
+    return b && b1;// && b2;
   }
 
   /**
@@ -584,8 +626,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   //private int spew = 0;
 
   /**
-   * TODO : What is this doing???
-   * TODO : remove this???
+   * Adds exercise attributes to type hierarchy for facets.
    *
    * @param slick
    * @param sectionHelper
@@ -611,27 +652,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
           logger.warn("addPhoneInfo : no exercise attributes for " + exercise.getID());
         }
       } else {
-        Map<String, ExerciseAttribute> typeToAtrr = new HashMap<>();
-
-        for (ExerciseAttribute attribute : exercise.getAttributes()) {
-          typeToAtrr.put(attribute.getProperty(), attribute);
-        }
-
-        for (String attrType : attrTypes) {
-          ExerciseAttribute attribute = typeToAtrr.get(attrType);
-          if (attribute == null) {
-            // missing info for this type, so map it to Any
-            pairs.add(new ExerciseAttribute(attrType, ANY));
-          } else {
-            pairs.add(attribute);
-          }
-        }
-        //       pairs.addAll(exercise.getAttributes());
+        addBlanksForMissingInfo(exercise, attrTypes, pairs);
       }
 
-      //    addExerciseToSectionHelper(sectionHelper, unitToValue, exercise);
+      //  logger.info("pairs for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
       sectionHelper.addPairs(exercise, pairs);
-      // allPairs.add(pairs);
 
       if (true) {//phones == null) {
 //        logger.warn("no phones for " + id);
@@ -682,6 +707,21 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       exercise.setPairs(pairs);
     }
     return pairs;
+  }
+
+  private void addBlanksForMissingInfo(CommonExercise exercise, Collection<String> attrTypes, List<Pair> pairs) {
+    Map<String, ExerciseAttribute> typeToAtrr = new HashMap<>();
+    exercise.getAttributes().forEach(attribute -> typeToAtrr.put(attribute.getProperty(), attribute));
+
+    for (String attrType : attrTypes) {
+      ExerciseAttribute attribute = typeToAtrr.get(attrType);
+      if (attribute == null) {
+        // missing info for this type, so map it to BLANK
+        pairs.add(new ExerciseAttribute(attrType, BLANK));
+      } else {
+        pairs.add(attribute);
+      }
+    }
   }
 
   private int c = 0;
@@ -735,7 +775,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return new Pair(first, value);
   }
 
-
+  /**
+   * @param bulk
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#reallyAddingUserExercises(int, Collection, SlickUserExerciseDAO, Map, List)
+   */
   public void addBulk(List<SlickExercise> bulk) {
     dao.addBulk(bulk);
   }
@@ -997,13 +1040,16 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return id;
   }
 
+/*
   public List<CommonExercise> getAllUserExercises(int projid) {
     boolean shouldSwap = getShouldSwap(projid);
     return getUserExercises(dao.getAllUserEx(projid), shouldSwap);
   }
+*/
 
   /**
    * Niche feature for alt chinese to swap primary and alternate...
+   *
    * @param projid
    * @return
    */
@@ -1011,7 +1057,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private boolean getShouldSwap(int projid) {
     return false;
 //    String defPropValue = projectDAO.getDefPropValue(projid, ProjectProperty.SWAP_PRIMARY_AND_ALT);
- //   return defPropValue.equalsIgnoreCase("TRUE");
+    //   return defPropValue.equalsIgnoreCase("TRUE");
   }
 
   /**
@@ -1205,9 +1251,15 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         return attributeJoinDAOWrapper.getName();
       }
 
+      /**
+       * Exercise attribute join table is independent of project - makes no reference to project - nothing to update
+       * @param oldID
+       * @param newprojid
+       * @return
+       */
       @Override
       public boolean updateProject(int oldID, int newprojid) {
-        return true;//attributeJoinDAOWrapper.updateProject(oldID, newprojid) > 0;
+        return true;
       }
     };
   }
@@ -1218,6 +1270,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
   public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
     relatedExerciseDAOWrapper.addBulk(relatedExercises);
+  }
+
+  @Override
+  public int getParentForContextID(int contextID) {
+    return relatedExerciseDAOWrapper.parentForContextID(contextID);
   }
 
   public Collection<SlickRelatedExercise> getAllRelated(int projid) {
@@ -1454,17 +1511,40 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return dao.getLegacyToExercise(projectid);
   }
 
+  /**
+   * @param projid
+   * @return
+   * @see mitll.langtest.server.database.project.ProjectDAO#update
+   * @see DominoImport#getImportFromDomino
+   */
   public boolean areThereAnyUnmatched(int projid) {
-    return dao.getUnknownDomino(projid).size() > 0;
+    return dao.getUnknownDomino(projid).size() > 0 || dao.getUnknownDominoTriplet(projid).size() > 0;
   }
 
+  /**
+   * @param projid
+   * @return
+   * @see mitll.langtest.server.database.project.ProjectDAO#setDominoIDOnExercises(int, int)
+   */
   public Map<String, Integer> getNpToExID(int projid) {
-    return dao.getUnknownDomino(projid);
+    Map<String, Integer> unknownDomino = new HashMap<>(dao.getUnknownDomino(projid));
+    logger.info("getNpToExID got " + unknownDomino.size() + " for project " + projid);
+    Map<String, Integer> unknownDominoTriplet = dao.getUnknownDominoTriplet(projid);
+    logger.info("getNpToExID got all " + unknownDominoTriplet.size() + " for project " + projid);
+    unknownDomino.putAll(unknownDominoTriplet);
+    logger.info("getNpToExID now " + unknownDomino.size() + " for project " + projid);
+    return unknownDomino;
   }
 
+  /**
+   * @param pairs
+   * @return
+   * @see mitll.langtest.server.database.project.ProjectDAO#update
+   */
   public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
     return exerciseDAO.updateDominoBulk(pairs);
   }
+
   public Map<Integer, SlickExercise> getLegacyToDeletedEx(int projectid) {
     return dao.getLegacyToDeletedExercise(projectid);
   }
@@ -1474,6 +1554,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return unknownExerciseID;
   }
 
+  /**
+   * TODO : not advised - will lock up database, maybe forever.
+   *
+   * @param projID
+   * @see DatabaseImpl#dropProject
+   */
   @Override
   public void deleteForProject(int projID) {
     relatedExerciseDAOWrapper.deleteForProject(projID);
@@ -1485,11 +1571,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return relatedExerciseDAOWrapper.deleteRelated(related);
   }
 
-/*  @Override
-  public SlickExercise getByDominoID(int docID) {
-    Collection<SlickExercise> byExid = dao.byDominoID(docID);
+  @Override
+  public SlickExercise getByDominoID(int projID, int docID) {
+    Collection<SlickExercise> byExid = dao.byDominoID(projID, docID);
     return byExid.isEmpty() ? null : byExid.iterator().next();
-  }*/
+  }
 
   @Override
   public Map<Integer,Integer> getDominoIDToExID(int projID) {

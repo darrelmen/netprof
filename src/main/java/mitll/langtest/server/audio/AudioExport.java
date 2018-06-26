@@ -96,7 +96,7 @@ public class AudioExport {
         typeOrder,
         language,
         out,
-       // false,
+        // false,
         isDefectList,
         options);
   }
@@ -189,9 +189,9 @@ public class AudioExport {
    * @param typeOrder
    * @param language1
    * @param out
-   * @paramx skipAudio
    * @param isDefectList
    * @throws Exception
+   * @paramx skipAudio
    * @see #writeUserListAudio
    */
   private void writeToStream(Collection<CommonExercise> toWrite,
@@ -199,7 +199,6 @@ public class AudioExport {
                              Collection<String> typeOrder,
                              String language1,
                              OutputStream out,
-                            // boolean skipAudio,
                              boolean isDefectList,
                              AudioExportOptions options) throws Exception {
     ZipOutputStream zOut = new ZipOutputStream(out);
@@ -208,7 +207,7 @@ public class AudioExport {
     String overallName = baseName + options.getInfo();
 
     logger.info("writeToStream overall name " + overallName);
-    //if (!skipAudio) {
+    if (options.getIncludeAudio()) {
       writeFolderContents(zOut,
           toWrite,
           overallName,
@@ -216,9 +215,9 @@ public class AudioExport {
           getCountryCode(language1),
           options,
           language1);
-//    } else {
-//      logger.info("writeToStream skip audio export.");
-//    }
+    } else {
+      logger.info("writeToStream skip audio export.");
+    }
 
     addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, baseName, isDefectList);
   }
@@ -284,13 +283,13 @@ public class AudioExport {
     boolean justContext = options.isJustContext();// || options.isAllContext();
     MiniUser majorityUser = null;
     //if (justContext) {
-      //List<CommonExercise> contextEx = new ArrayList<>(toWrite.size());
-      //toWrite.forEach(exercise -> contextEx.addAll(exercise.getDirectlyRelated()));
-      //populateGenderToCount(contextEx, maleToCount, femaleToCount);
+    //List<CommonExercise> contextEx = new ArrayList<>(toWrite.size());
+    //toWrite.forEach(exercise -> contextEx.addAll(exercise.getDirectlyRelated()));
+    //populateGenderToCount(contextEx, maleToCount, femaleToCount);
     //} else {
-      populateGenderToCount(toWrite, maleToCount, femaleToCount);
-      majorityUser = options.isJustMale() ? getMaxUser(maleToCount) : getMaxUser(femaleToCount);
-   // }
+    populateGenderToCount(toWrite, maleToCount, femaleToCount);
+    majorityUser = options.isJustMale() ? getMaxUser(maleToCount) : getMaxUser(femaleToCount);
+    // }
     // find the pref Male and pref Female with most recordings for this exercise set
 //    MiniUser prefMale   = getMaxUser(maleToCount);
 //    MiniUser prefFemale = getMaxUser(femaleToCount);

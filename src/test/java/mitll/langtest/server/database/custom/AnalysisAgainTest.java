@@ -34,7 +34,7 @@ public class AnalysisAgainTest {
     database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null, null);
     logger.debug("made " + database);
     database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
-    database.getExercises(-1);
+    database.getExercises(-1, false);
   }
 
 /*

@@ -75,7 +75,7 @@ public class EasyReportTest extends BaseTest {
   public void testSegment() {
     DatabaseImpl andPopulate = getAndPopulate();
 
-    Project project = andPopulate.getProject(21);
+    Project project = andPopulate.getProject(28);
 
     String temp = "１";
     String sentence = "きのうの午後５時から７時まで黒い車が止まっていました";
@@ -86,10 +86,19 @@ public class EasyReportTest extends BaseTest {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    String res = project.getAudioFileHelper().getSegmented(sentence);
+    {
+      String res = project.getAudioFileHelper().getSegmented(sentence);
 
-    logger.info("\n\ntestSegment res " + res);
+      logger.info("\n\ntestSegment res " + res);
+    }
+    {
+      CommonExercise exerciseByID = project.getExerciseByID(214154);
 
+      String res = project.getAudioFileHelper().getSegmented(exerciseByID.getForeignLanguage());
+
+      logger.info("\n\ntestSegment " + exerciseByID.getForeignLanguage() +
+          " res " + res);
+    }
     andPopulate.close();
 
   }

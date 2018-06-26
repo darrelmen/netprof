@@ -33,7 +33,12 @@
 package mitll.langtest.client.download;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.ButtonGroup;
+import com.github.gwtbootstrap.client.ui.ButtonToolbar;
+import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Well;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -43,21 +48,32 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.list.SelectionState;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
-import static mitll.langtest.client.download.DownloadContainer.DOWNLOAD_AUDIO;
 import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
 /**
  *
  */
 public class DownloadHelper implements IShowStatus {
-  //  private final Logger logger = Logger.getLogger("DownloadHelper");
+  private static final String INCLUDE_AUDIO = "Include Audio?";
+ // private final Logger logger = Logger.getLogger("DownloadHelper");
   public static final String AMPERSAND = "___AMPERSAND___";
   public static final String COMMA = "___COMMA___";
 
@@ -68,12 +84,14 @@ public class DownloadHelper implements IShowStatus {
   private static final String CONTEXT_SENTENCES = "Context Sentences";
   private static final List<String> CONTENT_CHOICES = Arrays.asList(VOCABULARY, CONTEXT_SENTENCES);
   private static final String GENDER = "Gender";
-  public static final String DOWNLOAD = "Download";
-  public static final String CANCEL = "Cancel";
+  private static final String DOWNLOAD = "Download";
+  private static final String CANCEL = "Cancel";
+  private static final int TOP_TO_USE = 10;
 
   private SelectionState selectionState = null;
   private Collection<String> typeOrder;
   private final SpeedChoices speedChoices;
+  private boolean includeAudio = true;
 
   public DownloadHelper() {
     this.speedChoices = new SpeedChoices(this, false);
@@ -121,9 +139,9 @@ public class DownloadHelper implements IShowStatus {
     {
       FluidRow row = new FluidRow();
       String description = selectionState.getDescription(typeOrder, true);
+      includeAudio = !selectionState.isEmpty();
       if (!search.isEmpty()) {
-        description += " and searching '" + search +
-            "'";
+        description += " and searching '" + search + "'";
       }
       Heading w = new Heading(4, description);
       w.addStyleName("blueColor");
@@ -134,6 +152,7 @@ public class DownloadHelper implements IShowStatus {
     container.add(getContentRow());
     container.add(getGenderRow());
     container.add(getSpeedRow());
+    container.add(getIncludeAudio());
     container.add(getStatusArea());
 
     closeButton = new DialogHelper(true).show(
@@ -146,7 +165,7 @@ public class DownloadHelper implements IShowStatus {
           @Override
           public boolean gotYes() {
             String urlForDownload = toDominoUrl(getDownloadAudio(host)) +
-                getURL(DOWNLOAD_AUDIO, selectionState.getTypeToSection(), search);
+                getURL(selectionState.getTypeToSection(), search);
 
             new DownloadIFrame(urlForDownload);
             return true;
@@ -188,6 +207,17 @@ public class DownloadHelper implements IShowStatus {
     return row;
   }
 
+
+  private Widget getIncludeAudio() {
+    FluidRow row = new FluidRow();
+    CheckBox w = new CheckBox(INCLUDE_AUDIO);
+    w.setValue(includeAudio);
+    w.addClickHandler(event -> includeAudio = w.getValue());
+    row.add(w);
+    row.addStyleName("bottomFiveMargin");
+    return row;
+  }
+
   private Widget getSpeedRow() {
     FluidRow row = new FluidRow();
     row.add(new Heading(4, SPEED));
@@ -198,7 +228,7 @@ public class DownloadHelper implements IShowStatus {
   private FluidRow getContentRow() {
     FluidRow row = new FluidRow();
     row.add(new Heading(4, CONTENT));
-    row.add(getButtonBarChoices(CONTENT_CHOICES, "vocab", ButtonType.DEFAULT));
+    row.add(getButtonBarChoices(CONTENT_CHOICES, "vocab"));
     return row;
   }
 
@@ -221,13 +251,15 @@ public class DownloadHelper implements IShowStatus {
   public void showStatus() {
     status1.setText(isContextSet ? isContext ? "Context Sentences " : "Vocabulary Items " : "");
     status2.setText(isMaleSet ? isMale ? "Male Audio " : "Female Audio " : "");
-    status3.setText(speedChoices.getStatus());
+    boolean thereASpeedChoice = speedChoices.isThereASpeedChoice();
+   // logger.info("speed choice made = " + thereASpeedChoice);
+    status3.setText(thereASpeedChoice ? speedChoices.getStatus() : "");
     if (closeButton != null) {
-      closeButton.setEnabled(isMaleSet && isContextSet && speedChoices.isThereASpeedChoice());
+      closeButton.setEnabled(isMaleSet && isContextSet && thereASpeedChoice);
     }
   }
 
-  private Widget getButtonBarChoices(Collection<String> choices, final String type, ButtonType buttonType) {
+  private Widget getButtonBarChoices(Collection<String> choices, final String type) {
     ButtonToolbar toolbar = new ButtonToolbar();
     toolbar.getElement().setId("Choices_" + type);
     styleToolbar(toolbar);
@@ -241,7 +273,7 @@ public class DownloadHelper implements IShowStatus {
     for (String choice : choices) {
       if (!seen.contains(choice)) {
         Button choice1 = getChoice(buttonGroup, choice);
-        choice1.setType(buttonType);
+        choice1.setType(ButtonType.DEFAULT);
         buttonGroup.add(choice1);
         seen.add(choice);
       }
@@ -274,9 +306,8 @@ public class DownloadHelper implements IShowStatus {
 
   private void styleToolbar(ButtonToolbar toolbar) {
     Style style = toolbar.getElement().getStyle();
-    int topToUse = 10;
-    style.setMarginTop(topToUse, Style.Unit.PX);
-    style.setMarginBottom(topToUse, Style.Unit.PX);
+    style.setMarginTop(TOP_TO_USE, Style.Unit.PX);
+    style.setMarginBottom(TOP_TO_USE, Style.Unit.PX);
     //   style.setMarginLeft(5, Style.Unit.PX);
   }
 
@@ -359,13 +390,12 @@ public class DownloadHelper implements IShowStatus {
    * <p>
    * Probably better ways to do this...
    *
-   * @param request
    * @param typeToSection
    * @param search
    * @return
    * @see mitll.langtest.server.DownloadServlet#getTypeToSelectionFromRequest
    */
-  private String getURL(String request, Map<String, Collection<String>> typeToSection, String search) {
+  private String getURL(Map<String, Collection<String>> typeToSection, String search) {
     String encode = URL.encodeQueryString(getSelectionMap(typeToSection).toString());
 
 /*    logger.info("getURL " +
@@ -375,11 +405,12 @@ public class DownloadHelper implements IShowStatus {
         "'");*/
 
     return "?" +
-        "request=" + request +
+        "request=" + DownloadContainer.DOWNLOAD_AUDIO +
         "&unit=" + encode +
         "&male=" + isMale +
         "&regular=" + speedChoices.isRegular() +
         "&context=" + isContext +
+        "&audio=" + includeAudio +
         "&search=" + URL.encodeQueryString(search);
   }
 

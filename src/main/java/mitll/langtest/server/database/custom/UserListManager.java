@@ -722,17 +722,37 @@ public class UserListManager implements IUserListManager {
   }
 
   @NotNull
-  private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> incorrectAnnotations) {
+  private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> exerciseIDs) {
     List<CommonExercise> defectExercises = new ArrayList<>();
 
     IProjectManagement projectManagement = databaseServices.getProjectManagement();
     if (projectManagement == null) {
       logger.error("\n\n no projec management???");
     } else {
-      incorrectAnnotations.forEach(id -> {
+      exerciseIDs.forEach(id -> {
         CommonExercise byExID = projectManagement.getExercise(projID, id);
-        if (byExID == null) logger.warn("can't find exercise " + id + " in project " + projID);
-        else defectExercises.add(byExID);
+        if (byExID == null) {
+          logger.warn("can't find exercise " + id + " in project " + projID);
+        } else {
+          if (byExID.isContext()) {
+            int parentExerciseID = byExID.getParentExerciseID();
+            logger.warn("parentExerciseID for " + id + " = " + parentExerciseID);
+            if (parentExerciseID < 1) {  // super defensive
+              parentExerciseID = databaseServices.getExerciseDAO(projID).getParentFor(id);
+              logger.warn("\tparentExerciseID for " + id + " = " + parentExerciseID);
+            }
+            if (parentExerciseID > 0) {
+              CommonExercise parent = projectManagement.getExercise(projID, parentExerciseID);
+              if (parent == null) {
+                logger.warn("couldn't find parent " + parentExerciseID);
+              } else {
+                byExID = parent;
+              }
+            }
+          }
+
+          defectExercises.add(byExID);
+        }
       });
     }
     return defectExercises;
@@ -1148,14 +1168,22 @@ public class UserListManager implements IUserListManager {
   @Override
   public void addAnnotations(CommonExercise exercise) {
     if (exercise != null) {
-      MutableAnnotationExercise mutableAnnotation = exercise.getMutableAnnotation();
-      Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
-
+      {
+        MutableAnnotationExercise mutableAnnotation = exercise.getMutableAnnotation();
+        Map<String, ExerciseAnnotation> latestByExerciseID = annotationDAO.getLatestByExerciseID(exercise.getID());
 //      logger.info("addAnnotations to ex " +exercise.getID() + " got " + latestByExerciseID.size()+  " annos to fields " + latestByExerciseID.keySet());
 
-      for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
-        mutableAnnotation.addAnnotation(pair.getKey(), pair.getValue().getStatus(), pair.getValue().getComment());
+        latestByExerciseID.forEach((k, v) -> mutableAnnotation.addAnnotation(k, v.getStatus(), v.getComment()));
       }
+
+  /*    exercise.getDirectlyRelated().forEach(context -> {
+        MutableAnnotationExercise mutableAnnotationContext = context.getMutableAnnotation();
+        annotationDAO.getLatestByExerciseID(context.getID()).forEach((k, v) -> mutableAnnotationContext.addAnnotation(k, v.getStatus(), v.getComment()));
+      });*/
+
+//      for (Map.Entry<String, ExerciseAnnotation> pair : latestByExerciseID.entrySet()) {
+//        mutableAnnotation.addAnnotation(pair.getKey(), pair.getValue().getStatus(), pair.getValue().getComment());
+//      }
     } else {
       logger.warn("addAnnotations : on an empty exercise?");
     }

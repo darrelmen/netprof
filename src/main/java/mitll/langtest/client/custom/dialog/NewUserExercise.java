@@ -334,7 +334,10 @@ abstract class NewUserExercise extends BasicDialog {
 
     foreignAnno.getElement().setId("foreignLanguageAnnotation");
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
-    foreignLang = makeBoxAndAnno(row, controller.getLanguage(), "", foreignAnno);
+    foreignLang = makeBoxAndAnno(row, getLanguage(), "", foreignAnno);
+    if (getLanguage().equalsIgnoreCase("urdu")){
+      foreignLang.getWidget().getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
+    }
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
     setFontSize(foreignLang);
     setMarginBottom(foreignLang);
@@ -422,7 +425,7 @@ abstract class NewUserExercise extends BasicDialog {
     return newUserExercise.getMeaning().isEmpty() ? newUserExercise.getEnglish() : newUserExercise.getMeaning();
   }
 
-  abstract void useAnnotation(AnnotationExercise userExercise, String field, HTML annoField);
+  abstract boolean useAnnotation(AnnotationExercise userExercise, String field, HTML annoField);
 
   /**
    * @param pagingContainer

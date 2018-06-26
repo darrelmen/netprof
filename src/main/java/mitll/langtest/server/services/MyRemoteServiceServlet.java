@@ -33,7 +33,6 @@
 package mitll.langtest.server.services;
 
 import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
-import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
@@ -50,7 +49,6 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -64,7 +62,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implements LogAndNotify {
@@ -117,15 +114,15 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
         .contains(User.Permission.PROJECT_ADMIN);
   }
 
-  protected boolean hasAdminOrCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
+  boolean hasAdminOrCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
     boolean hasPerm = permissions
         .contains(User.Permission.PROJECT_ADMIN) || permissions.contains(User.Permission.DEVELOP_CONTENT);
-    logger.info("hasAdminOrCDPerm for " + userIDFromSessionOrDB + " are " + permissions + " has perm " + hasPerm);
+//    logger.info("hasAdminOrCDPerm for " + userIDFromSessionOrDB + " are " + permissions + " has perm " + hasPerm);
     return hasPerm;
   }
 
-  protected boolean hasCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
+  boolean hasCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
     boolean hasPerm = permissions.contains(User.Permission.DEVELOP_CONTENT);
     logger.info("hasCDPerm for " + userIDFromSessionOrDB + " are " + permissions + " has perm " + hasPerm);

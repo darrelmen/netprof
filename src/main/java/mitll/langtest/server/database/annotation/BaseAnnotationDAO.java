@@ -43,6 +43,7 @@ import java.util.*;
 
 public abstract class BaseAnnotationDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseAnnotationDAO.class);
+  public static final String CORRECT = "correct";
   int defectDetector;
 
   private Map<Integer, List<UserAnnotation>> exerciseToAnnos = null;
@@ -127,10 +128,9 @@ public abstract class BaseAnnotationDAO extends DAO {
   }
 
   boolean examineFields(boolean forDefects, Map<String, String> fieldToStatus) {
-    String statusToLookFor = "correct";
     boolean foundIncorrect = false;
     for (String latest : fieldToStatus.values()) {
-      if (!latest.equals(statusToLookFor)) {
+      if (!latest.equals(CORRECT)) {
         //lists.add(prevExid);
         foundIncorrect = true;
         break;

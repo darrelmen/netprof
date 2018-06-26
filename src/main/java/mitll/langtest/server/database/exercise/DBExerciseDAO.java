@@ -43,12 +43,11 @@ import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.collection.Iterable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.exercise.SectionHelper.Facet.SEMESTER;
+import static mitll.langtest.server.database.exercise.Facet.SEMESTER;
 import static mitll.langtest.server.database.exercise.SectionHelper.SUBTOPIC_LC;
 
 public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<CommonExercise> {
@@ -107,6 +106,22 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
   }
 
+  private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
+
+  /**
+   * Make sure the parent is set on the context exercises.
+   */
+  protected void populateIdToExercise() {
+    super.populateIdToExercise();
+
+    getRawExercises()
+        .forEach(parent -> parent.getDirectlyRelated()
+            .forEach(commonExercise -> {
+              idToContextExercise.put(commonExercise.getID(), commonExercise);
+              commonExercise.getMutable().setParentExerciseID(parent.getID());
+            }));
+  }
+
   /**
    * TODO : remove duplicate
    *
@@ -124,16 +139,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       if (second != null && !second.isEmpty()) typeOrder.add(second);
     }
     return typeOrder;
-  }
-
-  private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
-
-  protected void populateIdToExercise() {
-    super.populateIdToExercise();
-
-    getRawExercises()
-        .forEach(e -> e.getDirectlyRelated()
-            .forEach(commonExercise -> idToContextExercise.put(commonExercise.getID(), commonExercise)));
   }
 
   /**
@@ -264,6 +269,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * Might want to allow this to be configurable.
    *
    * Added special code for putting semester at the top.
+   *
    * @return
    */
   @NotNull
@@ -272,7 +278,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     Collection<String> attributeTypes = getAttributeTypes();
 
     if (attributeTypes.contains(SEMESTER.toString())) {
-    //  logger.info("found semester ");
+      //  logger.info("found semester ");
       List<String> copy = new ArrayList<>();
       copy.add(SEMESTER.toString());
       copy.addAll(typeOrder);
@@ -316,7 +322,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       parentToChild.put(firstProjectType, second);
     }
 
-    String topic = SectionHelper.Facet.TOPIC.toString();
+    String topic = Facet.TOPIC.toString();
     if (rootTypes.contains(topic)) {
       setParentChild(attributeTypes, parentToChild, topic);
     } else {
@@ -327,7 +333,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
 
     sectionHelper.setParentToChildTypes(parentToChild);
-    if (DEBUG){
+    if (DEBUG) {
       logger.info("setRootTypes roots " + rootTypes);
 
     }
@@ -336,7 +342,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   private void setParentChild(Collection<String> rootTypes, Map<String, String> parentToChild, String lowerTopic) {
-    String subtopic = SectionHelper.Facet.SUB_TOPIC.toString();
+    String subtopic = Facet.SUB_TOPIC.toString();
     if (rootTypes.contains(SUBTOPIC_LC)) {
       parentToChild.put(lowerTopic, SUBTOPIC_LC);
     } else if (rootTypes.contains(subtopic)) {
@@ -387,10 +393,28 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   @Override
-  public void updatePhonesBulk(List<SlickExercisePhone> pairs) { getDao().updatePhonesBulk(pairs);  }
+  public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
+    getDao().updatePhonesBulk(pairs);
+  }
+
+  /**
+   * @param pairs
+   * @return
+   * @see SlickUserExerciseDAO#updateDominoBulk
+   */
   public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
-    Iterable<Object> objectIterable = getDao().updateDominoBulk(pairs);
-    return objectIterable.toSeq().size();
+    return getDao().updateDominoBulk(pairs).toSeq().size();
+  }
+
+  @Override
+  public int getExIDForDominoID(int projID, int dominoID) {
+    SlickExercise byDominoID = userExerciseDAO.getByDominoID(projID, dominoID);
+    return byDominoID == null ? -1 : byDominoID.id();
+  }
+
+  @Override
+  public int getParentFor(int exid) {
+    return userExerciseDAO.getParentForContextID(exid);
   }
 
   private ExerciseDAOWrapper getDao() {

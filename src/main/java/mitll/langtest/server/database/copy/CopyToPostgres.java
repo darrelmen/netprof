@@ -64,6 +64,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.*;
@@ -97,12 +98,13 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final Logger logger = LogManager.getLogger(CopyToPostgres.class);
 
   private static final int WARN_RID_MISSING_THRESHOLD = 10;
-  private static final int WARN_MISSING_THRESHOLD = 10;
+  private static final int WARN_MISSING_THRESHOLD = 50;
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
   private static final String NETPROF_PROPERTIES = "netprof.properties";
   private static final String CONFIG = "config";
   private static final String NO_TRANSCRIPT_FOUND = "no transcript found";
   private static final boolean ALLOW_DELETE = false;
+  public static final int PASUYA_ID = 736;
 
   enum ACTION {
     COPY("c"),
@@ -119,6 +121,7 @@ public class CopyToPostgres<T extends CommonShell> {
     MERGE("m"),
     //MERGEDAY("y"),
     RECORDINGS("r"),
+    SEND("s"),
     UNKNOWN("k");
 
     private String value;
@@ -158,7 +161,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String OPT_NETPROF = OPT_NETPROF_ROOT + File.separator + "import";
 
   private long getImportDate(String config, String optionalProperties) {
-    return getSinceWhen(config, optionalProperties, true);
+    return getSinceWhenFromOldConfig(config, optionalProperties, true);
   }
 
   /**
@@ -184,10 +187,11 @@ public class CopyToPostgres<T extends CommonShell> {
                                        boolean doSinceCreated) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
+    // previous update from h2...
     long sinceWhen = 0;
 
     if (doUpdate) {
-      sinceWhen = getSinceWhen(config, optionalProperties, false);
+      sinceWhen = getSinceWhenFromOldConfig(config, optionalProperties, false);
     }
 
     try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, CONFIG)) {
@@ -203,7 +207,8 @@ public class CopyToPostgres<T extends CommonShell> {
           "\n\tmodel    " + serverProps.getCurrentModel());
 
       String nameToUse = optionalName == null ? language : optionalName;
-
+      boolean checkConvert = config.toLowerCase().startsWith("mandarintrad");
+      if (checkConvert) logger.info("\n\n\n\n\ndoing special mandarin trad conversion\n\n\n\n\n");
       copyToPostgres.copyOneConfig(
           databaseLight,
           getCreateProject(serverProps).getCC(language),
@@ -213,7 +218,7 @@ public class CopyToPostgres<T extends CommonShell> {
           getProjectStatus(isEval, hasModel),
           skipRefResult,
           doUpdate,
-          sinceWhen, doLatest, doSinceCreated);
+          sinceWhen, doLatest, doSinceCreated, checkConvert);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -228,7 +233,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param optionalProperties
    * @return
    */
-  private long getSinceWhen(String config, String optionalProperties, boolean closeDB) {
+  private long getSinceWhenFromOldConfig(String config, String optionalProperties, boolean closeDB) {
     long sinceWhen = 0;
 
     DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, "oldConfig");
@@ -293,7 +298,7 @@ public class CopyToPostgres<T extends CommonShell> {
     database.close();
   }
 
-  private void dropAllButOneConfig(Integer projid) {
+/*  private void dropAllButOneConfig(Integer projid) {
     DatabaseImpl database = getDatabase();
     IProjectDAO projectDAO = database.getProjectDAO();
     if (projectDAO.exists(projid)) {
@@ -306,7 +311,7 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     database.close();
-  }
+  }*/
 
   private void merge(int from, int to) {
     DatabaseImpl database = getDatabase();
@@ -327,7 +332,8 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.error("nope - not same language " + fProject.getLanguage() + " vs " + tProject.getLanguage());
       return;
     }
-    database.updateProject(from, to);
+    boolean isChinese = fProject.getLanguageEnum() == Language.MANDARIN && tProject.getLanguageEnum() == Language.MANDARIN;
+    database.updateProject(from, to, isChinese);
     database.close();
   }
 
@@ -487,7 +493,10 @@ public class CopyToPostgres<T extends CommonShell> {
                             ProjectStatus status,
                             boolean skipRefResult,
                             boolean doUpdate,
-                            long oldSinceWhen, boolean doLatest, boolean doSinceCreated) throws Exception {
+                            long oldSinceWhen,
+                            boolean doLatest,
+                            boolean doSinceCreated,
+                            boolean checkConvert) throws Exception {
     long then = System.currentTimeMillis();
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
@@ -499,6 +508,7 @@ public class CopyToPostgres<T extends CommonShell> {
         "\n\tfor import project id " + DatabaseImpl.IMPORT_PROJECT_ID);
 
     long sinceWhen = 0;
+
 
     CreateProject createProject = getCreateProject(db);
     int projectID = doUpdate ?
@@ -520,9 +530,9 @@ public class CopyToPostgres<T extends CommonShell> {
         if (doSinceCreated) {
           oldSinceWhen = createProject.getSinceCreated(db, projectID);
         }
-        sinceWhen = Math.max(createProject.getSinceWhen(db, projectID), oldSinceWhen);
+        sinceWhen = Math.max(createProject.getSinceWhenLastNetprof(db, projectID), oldSinceWhen);
         logger.info("UPDATE : sinceWhen is " + new Date(sinceWhen));
-        long maxTime = copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
+        long maxTime = copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen, checkConvert);
         if (maxTime == 0) {
           logger.info("UPDATE : no change - no updated results\n\n\n ");
         } else {
@@ -535,7 +545,7 @@ public class CopyToPostgres<T extends CommonShell> {
       // first add the user table
       // check once if we've added it before
       if (((SlickUserExerciseDAO) db.getUserExerciseDAO()).isProjectEmpty(projectID)) {
-        long maxTime = copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen);
+        long maxTime = copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen, checkConvert);
         logger.info("CREATE : latest result or audio is " + new Date(maxTime));
         createProject.updateNetprof(db, projectID, maxTime);
       } else {
@@ -555,7 +565,8 @@ public class CopyToPostgres<T extends CommonShell> {
 
   private long copyAllTables(DatabaseImpl db, String optName, ProjectStatus status, boolean skipRefResult,
                              Collection<String> typeOrder, int projectID,
-                             long sinceWhen) throws Exception {
+                             long sinceWhen,
+                             boolean checkConvert) throws Exception {
     if (sinceWhen > 0) logger.info("\n\n\n only changes since " + (new Date(sinceWhen)));
 
     SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
@@ -568,9 +579,11 @@ public class CopyToPostgres<T extends CommonShell> {
 
     if (typeOrder.isEmpty()) logger.error("huh? type order is empty????\\n\n\n");
     Map<String, Integer> parentExToChild = new HashMap<>();
-    Map<String, Integer> exToID = copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, typeOrder, sinceWhen, idToFL, parentExToChild);
+    Map<String, Integer> exToID =
+        copyUserAndPredefExercisesAndLists(db, projectID, oldToNewUser, typeOrder, sinceWhen, idToFL, parentExToChild, checkConvert);
 
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
+
     long maxTime = copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(),
         db.getUserDAO().getDefaultUser(), sinceWhen);
 
@@ -578,7 +591,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     Set<Long> maxTimeAudio = new HashSet<>();
     // add the audio table
-    Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, sinceWhen, maxTimeAudio);
+    Map<String, Integer> pathToAudioID = copyAudio(db, oldToNewUser, exToID, parentExToChild, projectID, sinceWhen, maxTimeAudio, checkConvert, idToFL);//, toConvertToAudio);
     // logger.info("pathToAudioID num = " + pathToAudioID.size());
 
     // copy ref results
@@ -664,25 +677,28 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param typeOrder
    * @param sinceWhen
    * @param idToFL
+   * @param checkConvert
    * @return map of parent exercise to context sentence
    * @see #copyOneConfig
    */
   private Map<String, Integer> copyUserAndPredefExercisesAndLists(DatabaseImpl db,
                                                                   int projectID,
                                                                   Map<Integer, Integer> oldToNewUser,
-                                                                  Collection<String> typeOrder, long sinceWhen,
+                                                                  Collection<String> typeOrder,
+                                                                  long sinceWhen,
 
 
                                                                   Map<Integer, String> idToFL,
-                                                                  Map<String, Integer> parentToChild) {
+                                                                  Map<String, Integer> parentToChild, boolean checkConvert) {
     boolean isUpdate = sinceWhen > 0;
 
     Map<String, Integer> exToID = isUpdate ?
         new ExerciseCopy().getOldToNewExIDs(db, projectID) :
-        new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL, typeOrder, parentToChild);
+        new ExerciseCopy().copyUserAndPredefExercises(db, oldToNewUser, projectID, idToFL, typeOrder, parentToChild, checkConvert);
 
     if (isUpdate) {
-      List<CommonExercise> exercises = db.getExercises(projectID);
+      List<CommonExercise> exercises = db.getExercises(projectID, true);
+
       exercises.forEach(commonExercise -> idToFL.put(commonExercise.getID(), commonExercise.getForeignLanguage()));
       exercises.forEach(commonExercise -> commonExercise.getDirectlyRelated().forEach(context -> {
         parentToChild.put(commonExercise.getOldID(), context.getID());
@@ -715,38 +731,63 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param exToID
    * @param projid
    * @param sinceWhen
-   * @see #copyOneConfig
+   * @see #copyAllTables(DatabaseImpl, String, ProjectStatus, boolean, Collection, int, long, boolean)
    */
   private Map<String, Integer> copyAudio(DatabaseImpl db,
                                          Map<Integer, Integer> oldToNewUser,
                                          Map<String, Integer> exToID,
                                          Map<String, Integer> parentExToChild,
                                          int projid,
-                                         long sinceWhen, Set<Long> maxTime) {
+                                         long sinceWhen,
+                                         Set<Long> maxTime,
+                                         boolean fixTranscript,
+                                         Map<Integer, String> idToFL
+
+  ) {
     SlickAudioDAO slickAudioDAO = (SlickAudioDAO) db.getAudioDAO();
 
     List<SlickAudio> bulk = new ArrayList<>();
-    Collection<AudioAttribute> audioAttributes = db.getH2AudioDAO()
+    List<AudioAttribute> audioAttributes = db.getH2AudioDAO()
         .getAudioAttributesByProjectThatHaveBeenChecked(projid, false)
         .stream().filter(audioAttribute -> audioAttribute.getTimestamp() > sinceWhen).collect(Collectors.toList());
 
-    logger.info("copyAudio h2 audio  " + audioAttributes.size());
+    //  audioAttributes.addAll(toConvertToAudio);
+    logger.info("copyAudio h2 audio  " + audioAttributes.size());// + " added " + toConvertToAudio.size());
     int missing = 0;
     int skippedMissingUser = 0;
     Set<String> missingExIDs = new TreeSet<>();
     long max = 0;
     for (AudioAttribute att : audioAttributes) {
       String oldexid = att.getOldexid();
-      if (att.getTimestamp() > max) max = att.getTimestamp();
+
+      if (att.getTimestamp() > max) {
+        max = att.getTimestamp();
+      }
+
       Integer id = getModernIDForExercise(exToID, parentExToChild, att, oldexid);
       if (id != null) {
         att.setExid(id); // set the exercise id reference - either to a normal exercise or to a context exercise
-        SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNewUser, projid);
 
-        if (slickAudio != null) {
-          bulk.add(slickAudio);
-        } else {
-          skippedMissingUser++;
+        if (fixTranscript) {
+          String exTrans = idToFL.get(id);
+          String transcript = att.getTranscript();
+          if (!transcript.equalsIgnoreCase(exTrans)) {
+            logger.info("copyAudio change for " + id + " old " + oldexid +
+                "\n\tfrom " + transcript +
+                "\n\tto   " + exTrans);
+
+            att.setTranscript(exTrans);
+          }
+        }
+
+        {
+          SlickAudio slickAudio = slickAudioDAO.getSlickAudio(att, oldToNewUser, projid);
+
+          if (slickAudio != null) {
+            bulk.add(slickAudio);
+          } else {
+            skippedMissingUser++;
+          }
         }
       } else {
         missingExIDs.add(oldexid);
@@ -894,7 +935,6 @@ public class CopyToPostgres<T extends CommonShell> {
                         SlickWordDAO slickWordDAO,
                         int projID) {
     long then = System.currentTimeMillis();
-    //int c = 0;
     List<SlickWord> bulk = new ArrayList<>();
     for (Word word : new WordDAO(db).getAll(projID)) {
       Integer rid = oldToNewResult.get((int) word.getRid());
@@ -1044,7 +1084,6 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
-
   /**
    * Make sure all results are copied, even when we have missing user id or exercise references.
    *
@@ -1065,11 +1104,12 @@ public class CopyToPostgres<T extends CommonShell> {
       Map<Integer, String> idToFL,
       int unknownExerciseID,
       int unknownUserID,
-      long sinceWhen) {
+      long sinceWhen
+  ) {
     List<SlickResult> bulk = new ArrayList<>();
 
     List<Result> results = resultDAO.getResults();
-    List<Result> filtered = getSinceWhen(results, sinceWhen);
+    List<Result> filtered = getSinceWhenFromOldConfig(results, sinceWhen);
     logger.info("copyResult " + projid + " : copying " + results.size() + " results, filtered to " + filtered.size() + " since " + new Date(sinceWhen));
 
     //  int missing = 0;
@@ -1081,8 +1121,19 @@ public class CopyToPostgres<T extends CommonShell> {
 
     Set<Integer> missingUserIDs = new HashSet<>();
 
+    // Map<String, Result> oldToResultID = new HashMap<>();
     for (Result result : filtered) {
       int oldUserID = result.getUserid();
+      // boolean isPasuya = oldUserID == PASUYA_ID;
+
+      String oldExID = result.getOldExID();
+/*      if (checkConvert && isPasuya) {
+      //  logger.info("found candidate " + result);
+        Result prevRecording = oldToResultID.get(oldExID);
+        if (prevRecording == null || result.getPronScore() > prevRecording.getPronScore()) {
+          oldToResultID.put(oldExID, result);
+        }
+      }*/
       if (maxTime < result.getTimestamp()) maxTime = result.getTimestamp();
       Integer userID = oldToNewUser.get(oldUserID);
       if (userID == null) {
@@ -1094,7 +1145,7 @@ public class CopyToPostgres<T extends CommonShell> {
       }
 
       result.setUserID(userID);
-      Integer realExID = exToID.get(result.getOldExID());
+      Integer realExID = exToID.get(oldExID);
 
       if (realExID == null) {
         missing2++;
@@ -1105,11 +1156,37 @@ public class CopyToPostgres<T extends CommonShell> {
       boolean noTrans = transcript == null;
       if (noTrans) noTransCount++;
       String transcript1 = noTrans ? NO_TRANSCRIPT_FOUND : transcript;
-      SlickResult e = slickResultDAO.toSlick(result, projid, realExID, transcript1);
-      bulk.add(e);
+//      SlickResult e = slickResultDAO.toSlick(result, projid, realExID, transcript1);
+      bulk.add(slickResultDAO.toSlick(result, projid, realExID, transcript1));
       if (bulk.size() % 50000 == 0) logger.info("copyResult : made " + bulk.size() + " results...");
     }
 
+/*
+    oldToResultID.values().forEach(result -> {
+      Integer realExID = exToID.get(result.getOldExID());
+      if (realExID == null) logger.warn("no ex for " + result.getOldExID());
+      else {
+        String transcript = idToFL.get(realExID);
+        String answer = result.getAnswer();
+        logger.info("making audio attr for " +result.getOldExID() + " id "+ realExID + " fl '" +
+            "'");
+        if (answer.startsWith("answers")) {
+          answer = "bestAudio" + answer.substring("Answers".length());
+         // logger.info("now " + answer);
+        }
+        AudioAttribute e = new AudioAttribute(-1,
+            PASUYA_ID,
+            realExID,
+            answer,
+            result.getTimestamp(),
+            result.getDurationInMillis(),
+            AudioType.REGULAR, null,
+            transcript, "", result.getDynamicRange(), 1, MiniUser.Gender.Male);
+        e.setOldexid(result.getOldExID());
+        toConvertToAudio.add(e);
+      }
+    });
+*/
 
     //    if (missing > 0) {
 //      logger.warn("skipped " + missing + "/" + results.size() +
@@ -1191,7 +1268,7 @@ public class CopyToPostgres<T extends CommonShell> {
     SlickRefResultDAO dao = (SlickRefResultDAO) db.getRefResultDAO();
     List<SlickRefResult> bulk = new ArrayList<>();
     Collection<Result> toImport = new RefResultDAO(db, false).getResults();
-    List<Result> sinceWhen1 = getSinceWhen(toImport, sinceWhen);
+    List<Result> sinceWhen1 = getSinceWhenFromOldConfig(toImport, sinceWhen);
     logger.info("copyRefResult for project " + projid + " found " + toImport.size() +
         " original ref results, " + sinceWhen1.size() + " since " + new Date(sinceWhen));
 
@@ -1235,7 +1312,7 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("copyRefResult END   : added " + bulk.size() + " and now has " + dao.getNumResults() + " took " + diff + " seconds");
   }
 
-  private List<Result> getSinceWhen(Collection<Result> toImport, long sinceWhen) {
+  private List<Result> getSinceWhenFromOldConfig(Collection<Result> toImport, long sinceWhen) {
     return toImport.stream().filter(result -> result.getTimestamp() > sinceWhen).collect(Collectors.toList());
   }
 
@@ -1346,6 +1423,8 @@ public class CopyToPostgres<T extends CommonShell> {
     } else if (cmd.hasOption(IMPORT.toLower())) {
       action = IMPORT;
       config = cmd.getOptionValue(IMPORT.toLower());
+    } else if (cmd.hasOption(SEND.toLower())) {
+      action = SEND;
     } else if (cmd.hasOption(MERGE.toLower())) {
       action = MERGE;
       from = Integer.parseInt(cmd.getOptionValue(MERGE.toLower()));
@@ -1458,17 +1537,6 @@ public class CopyToPostgres<T extends CommonShell> {
           logger.error("couldn't copy config " + config, e);
         }
         break;
-/*      case COPYALL:
-        logger.info("copying '" + config + "' '" + optconfig + "' '" + optName + "' order " + displayOrder);
-        try {
-          List<String> configs = new ArrayList<>();
-          for (int i =1;i<arg.length; i++) configs.add(arg[i]);
-          copyToPostgres.copySeveral(configs);
-        } catch (Exception e) {
-          logger.error("couldn't copy config " + config, e);
-        }
-        break;*/
-
       case UPDATEUSER:
         logger.info("map old user ids to new user ids");
         doUpdateUser(updateUsersFile);
@@ -1498,8 +1566,6 @@ public class CopyToPostgres<T extends CommonShell> {
       case IMPORT:
         logger.info("get import date from old config");
         long importDate = copyToPostgres.getImportDate(config, optConfigValue);
-
-
         logger.info("import date for '" + config + "'/ '" + optConfigValue + "' is " + new Date(importDate));
         doExit(true);  // ?
         break;
@@ -1507,6 +1573,12 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.info("merge project from into project to");
         copyToPostgres.merge(from, to);
         logger.info("merge project '" + from + "' into '" + to);
+        doExit(true);  // ?
+        break;
+      case SEND:
+        logger.info("send reports");
+        copyToPostgres.sendReports();
+        logger.info("sent reports");
         doExit(true);  // ?
         break;
  /*       case MERGEDAY:
@@ -1524,6 +1596,12 @@ public class CopyToPostgres<T extends CommonShell> {
       default:
         formatter.printHelp("copy", options);
     }
+  }
+
+  private void sendReports() {
+    DatabaseImpl database = getDatabase();
+    database.getProject(2);
+    database.sendReports();
   }
 
   private static void doExit(boolean b) {
@@ -1618,10 +1696,6 @@ public class CopyToPostgres<T extends CommonShell> {
       Option mapFile = new Option(CREATED.getValue(), CREATED.toLower(), true, "update existing config since creation date of target project");
       options.addOption(mapFile);
     }
-//    {
-//      Option mapFile = new Option(MERGEDAY.getValue(), MERGEDAY.toLower(), true, "from project id to project id on day");
-//      options.addOption(mapFile);
-//    }
 
     {
       Option mapFile = new Option(MERGE.getValue(), MERGE.toLower(), true, "from project id");
@@ -1636,10 +1710,10 @@ public class CopyToPostgres<T extends CommonShell> {
       options.addOption(mapFile);
     }
 
-//    {
-//      Option mapFile = new Option(UPDATE.getValue(), UPDATE.toLower(), true, "import netprof 1 data into existing netprof 2 project");
-//      options.addOption(mapFile);
-//    }
+    {
+      Option mapFile = new Option(SEND.getValue(), SEND.toLower(), false, "send reports now");
+      options.addOption(mapFile);
+    }
 
     return options;
   }

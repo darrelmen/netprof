@@ -148,7 +148,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 //    logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord());
 
     String context = isNormalRecord() ? e.getFLToShow() : hasContext(exercise) ? getFLToShow() : NO_AUDIO_TO_RECORD;
-    return ExerciseFormatter.getArabic(context);
+    return ExerciseFormatter.getArabic(context, controller.getLanguage());
   }
 
   private String getFLToShow() {

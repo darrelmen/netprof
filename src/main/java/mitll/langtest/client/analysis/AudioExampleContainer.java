@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/20/17.
  */
 public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T> {
-  private final Logger logger = Logger.getLogger("AudioExampleContainer");
+  //private final Logger logger = Logger.getLogger("AudioExampleContainer");
   private static final int PLAY_WIDTH = 42;
   private static final int NATIVE_WIDTH = PLAY_WIDTH;
   private static final String NATIVE = "Ref";
@@ -138,7 +138,11 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     CellTable.Resources o;
     if (isRTL) {   // so when we truncate long entries, the ... appears on the correct end
       // logger.info("simplePaging : chooseResources RTL - content");
-      o = GWT.create(RTLTableResources.class);
+      if (controller.getLanguage().equalsIgnoreCase("urdu")) {
+        o = GWT.create(UrduTableResources.class);
+      } else {
+        o = GWT.create(RTLTableResources.class);
+      }
     } else {
       // logger.info("simplePaging : chooseResources LTR - content");
       o = GWT.create(TableResources.class);
@@ -203,6 +207,18 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
     @Override
     @Source({CellTable.Style.DEFAULT_CSS, "RTLExerciseCellTableStyleSheet.css"})
+    AudioExampleContainer.RTLTableResources.TableStyle cellTableStyle();
+  }
+
+  public interface UrduTableResources extends CellTable.Resources {
+    /**
+     * The styles applied to the table.
+     */
+    interface TableStyle extends CellTable.Style {
+    }
+
+    @Override
+    @Source({CellTable.Style.DEFAULT_CSS, "UrduExerciseCellTableStyleSheet.css"})
     AudioExampleContainer.RTLTableResources.TableStyle cellTableStyle();
   }
 }

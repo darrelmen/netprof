@@ -89,6 +89,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return dao.updateProject(old, newprojid) > 0;
   }
 
+  public boolean updateProjectIn(int old, int newprojid, List<Integer> exids) {
+    return dao.updateProjectIn(old, newprojid, exids) > 0;
+  }
+
   public Map<String, Integer> getPairs(int projid) {
     return dao.getPairs(projid);
   }
@@ -207,7 +211,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    */
   private void validateFileExists(int projid, String installPath, String language, boolean checkAll) {
     long pastTime = doCheckOnStartup || checkAll ? now : before;
-    logger.debug("validateFileExists before " + new Date(pastTime));
+    logger.info("validateFileExists before " + new Date(pastTime));
     dao.validateFileExists(projid, pastTime, installPath, language.toLowerCase());
   }
 
@@ -643,7 +647,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
 
       MiniUser user = orig.getUser();
-      MiniUser.Gender realGender = user.getRealGender();
+      MiniUser.Gender realGender = user == null ? Male : user.getRealGender();
       int gender = realGender == Male ? 0 : realGender == MiniUser.Gender.Female ? 1 : 2;
 
       if (gender == 2) {
@@ -750,7 +754,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    */
   public void makeSureAudioIsThere(int projectID, String language, boolean validateAll) {
     if (hasMediaDir) {
-      logger.info("makeSureAudioIsThere " + projectID + " " + language + " " + validateAll);
+      logger.info("makeSureAudioIsThere " + projectID + " " + language + " validate all = " + validateAll);
       //logger.debug("makeSureAudioIsThere media dir " + file + " exists ");
       String mediaDir = serverProps.getMediaDir();
       File file = new File(mediaDir);
@@ -764,7 +768,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           if (validateAll ||
               (serverProps.doAudioChecksInProduction() &&
                   (serverProps.doAudioFileExistsCheck() || !foundFiles))) {
-            logger.debug("makeSureAudioIsThere validateFileExists ");
+            logger.info("makeSureAudioIsThere validateFileExists ");
             validateFileExists(projectID, mediaDir, language, validateAll);
           }
         }

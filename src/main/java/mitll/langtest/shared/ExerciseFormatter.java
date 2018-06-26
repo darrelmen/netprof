@@ -55,10 +55,11 @@ public class ExerciseFormatter {
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#getExerciseContent
    * @param arabic
+   * @param language
    * @return
    */
-  public static String getArabic(String arabic) {
-    return getArabic(arabic, false, false, false);
+  public static String getArabic(String arabic, String language) {
+    return getArabic(arabic, language.equalsIgnoreCase("urdu"), language.equalsIgnoreCase("pashto"), false);
   }
 
   private static String getArabic(String arabic, boolean isUrdu, boolean isPashto, boolean includePrompt) {
@@ -68,7 +69,7 @@ public class ExerciseFormatter {
     return "<div class=\"Instruction\">\n" +
       prompt +
       "<span class=\"" +
-      (isUrdu ? "urdufont" : isPashto ? "pashtofont" : "Instruction-data") +
+      (isUrdu ? "urdubigflfont" : isPashto ? "pashtofont" : "Instruction-data") +
       "\"> " + arabic +
       "</span>\n" +
       "</div>\n";

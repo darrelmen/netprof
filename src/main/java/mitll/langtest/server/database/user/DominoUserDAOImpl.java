@@ -874,7 +874,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 //      logger.warn("isMatchingPassword : took " + diff + " to check for password match.");
 //    }
     if (dominoPassword != null && (match || dominoPassword.equals(encodedPassword))) {//dominoPassword.equals(encodedPassword)) {//netProfDelegate.isPasswordMatch(user.getID(), encodedPassword) || magicMatch) {
-      if (diff > 100) {
+      if (diff > 200) {
         logger.warn("isMatchingPassword match in of " + dominoPassword + " vs encoded " + encodedPassword.length() +
             " match " + match + " took " + diff + " millis");
       }

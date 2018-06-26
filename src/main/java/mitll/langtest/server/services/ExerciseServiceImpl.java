@@ -81,11 +81,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final String LISTS = "Lists";
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_ID_LOOKUP = false;
+
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final boolean WARN_MISSING_REF_RESULT = false;
-  public static final String RECORDED1 = "Recorded";
-  public static final String RECORDED = RECORDED1;
-  public static final String ANY = "Any";
+  private static final String RECORDED1 = "Recorded";
+  private static final String RECORDED = RECORDED1;
+  private static final String ANY = "Any";
 
   /**
    * @param request
@@ -93,11 +95,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see mitll.langtest.client.list.FacetExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
-//    if (request.isQuiz()) {
-//      return getQuizTypeToValues(request);
-//    } else {
-    //List<Pair> typeToSelection = request.getTypeToSelection();
-//    logger.info("getTypeToValues \n\trequest" + request);// + "\n\ttype->selection" + typeToSelection);
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
@@ -111,7 +108,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
       if (userFromSession != null) {
 //        logger.info("getTypeToValues got " + userFromSession);
- //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
+        //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
         int userFromSessionID = userFromSession.getID();
         int projectID = getProjectIDFromUser(userFromSessionID);
 
@@ -257,19 +254,23 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     // now if there's a prefix, filter by prefix match
 
     TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<>().setByExercise(exercises);
-    String prefix = request.getPrefix();
-    if (!prefix.isEmpty()) {
-      logger.info("getExerciseWhenNoUnitChapter found prefix '" + prefix + "' for user list " + userListByID);
-      // now do a trie over matches
-      exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises, projectID, request.getUserID(),
-          !request.isPlainVocab());
-      if (request.getLimit() > 0) {
-        exercisesForSearch.setByExercise(getFirstFew(prefix, request, exercisesForSearch.getByExercise(), projectID));
+
+    {
+      String prefix = request.getPrefix();
+      if (!prefix.isEmpty()) {
+        logger.info("getExerciseWhenNoUnitChapter found prefix '" + prefix + "' for user list " + userListByID);
+        // now do a trie over matches
+        exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises, projectID, request.getUserID(),
+            !request.isPlainVocab());
+        if (request.getLimit() > 0) {
+          exercisesForSearch.setByExercise(getFirstFew(prefix, request, exercisesForSearch.getByExercise(), projectID));
+        }
       }
     }
-//    logger.info("triple resp " + exercisesForSearch);
+
+    if (DEBUG_ID_LOOKUP) logger.info("triple resp " + exercisesForSearch);
     exercisesForSearch.setByExercise(filterExercises(request, exercisesForSearch.getByExercise(), projectID));
-    //   logger.info("after triple resp " + exercisesForSearch);
+    if (DEBUG_ID_LOOKUP) logger.info("after triple resp " + exercisesForSearch);
 
     // TODO : I don't think we need this?
 /*        if (!isUserListReq) {
@@ -282,7 +283,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     long now = System.currentTimeMillis();
 
     long diff = now - then;
-    if (diff > 20) {
+    if (diff > 20 || DEBUG_ID_LOOKUP) {
       logger.info("getExerciseWhenNoUnitChapter took " + diff + " to get " + commonExercises.size());
     }
 
@@ -298,6 +299,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param predefExercises
    * @param userID
    * @return
+   * @see #getExerciseWhenNoUnitChapter
    */
   private List<CommonExercise> getSortedExercises(ExerciseListRequest request,
                                                   TripleExercises<CommonExercise> exercises,
@@ -307,10 +309,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     Project projectForUser = getProject(projID);
 
     List<CommonExercise> commonExercises = exercises.getByExercise();
+    if (commonExercises.isEmpty()) {
+      commonExercises = exercises.getByID();
+    }
     if (request.isIncorrectFirstOrder()) {
       if (DEBUG)
         logger.info("getSortedExercises adding isIncorrectFirstOrder " + exercises.getByExercise().size() + " basicExercises");
-      commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID, getAudioFileHelper(projID).getCollator(), getLanguage(projectForUser));
+      commonExercises =
+          db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID, getAudioFileHelper(projID).getCollator(), getLanguage(projectForUser));
     } else {
       if (predefExercises) {
         commonExercises = new ArrayList<>(exercises.getByID());
@@ -367,22 +373,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     return commonExercises;
   }
 
-  private boolean isSortByFL(List<CommonExercise> basicExercises, boolean sortByFL, String searchTerm) {
-    boolean hasSearch = !searchTerm.isEmpty();
-    if (!basicExercises.isEmpty() && hasSearch) {
-      int max = Math.min(basicExercises.size(), 10);
-
-      int inFL = 0;
-      for (int i = 0; i < max; i++) {
-        if (basicExercises.get(i).getForeignLanguage().contains(searchTerm)) inFL++;
-      }
-
-      // if the search term is in the fl, sort by fl
-      sortByFL = ((float) inFL / (float) max) > 0.5;//.iterator().next().getForeignLanguage().contains(searchTerm);
-      logger.info("getSortedExercises found search term " + searchTerm + " = " + sortByFL + " : " + inFL + "/" + max);
-    }
-    return sortByFL;
-  }
 
   /**
    * Return shortest matches first (on fl term).
@@ -435,7 +425,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    */
   private List<CommonExercise> getExercises(int projectID) {
     long then = System.currentTimeMillis();
-    List<CommonExercise> exercises = db.getExercises(projectID);
+    List<CommonExercise> exercises = db.getExercises(projectID, false);
     long now = System.currentTimeMillis();
     if (now - then > 200) {
       logger.info("getExercises took " + (now - then) + " millis to get the raw exercise list for " + projectID);// getLanguage(projectID));
@@ -651,7 +641,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     int userID = request.getUserID();
 
     if (firstExercise != null) {
-      addAnnotationsAndAudio(userID, firstExercise, request.isIncorrectFirstOrder(), request.isQC(), projID);
+      addAnnotationsAndAudio(userID, firstExercise, request.isQC(), projID);
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
       // ensureMP3s(firstExercise, pathHelper.getInstallPath());
       if (request.shouldAddContext()) { // add the context exercises
@@ -727,16 +717,15 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    *
    * @param userID
    * @param firstExercise
-   * @param isFlashcardReq if true, filter for only recordings made during avp
    * @param isQC
    * @param projID
    * @seex LoadTesting#getExercise(String, long, boolean)
    * @see #makeExerciseListWrapper
    */
-  private void addAnnotationsAndAudio(int userID, CommonExercise firstExercise, boolean isFlashcardReq, boolean isQC, int projID) {
+  private void addAnnotationsAndAudio(int userID, CommonExercise firstExercise, boolean isQC, int projID) {
     long then = System.currentTimeMillis();
 
-    logger.info("adding anno to " + firstExercise.getID() + " with " + firstExercise.getDirectlyRelated().size() + " context exercises");
+    logger.info("addAnnotationsAndAudio adding anno to " + firstExercise.getID() + " with " + firstExercise.getDirectlyRelated().size() + " context exercises");
     addAnnotations(firstExercise); // todo do this in a better way
 
     long now = System.currentTimeMillis();
@@ -791,7 +780,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * @param byID
-   * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean, int)
+   * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, int)
    */
   private void addAnnotations(CommonExercise byID) {
     IUserListManager userListManager = db.getUserListManager();
@@ -801,7 +790,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * @param firstExercise
-   * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean, int)
+   * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, int)
    */
   private int attachAudio(CommonExercise firstExercise) {
     return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise), new HashMap<>());
@@ -818,7 +807,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    *
    * @param userID
    * @param firstExercise
-   * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, boolean, int)
+   * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, int)
    */
   private void addPlayedMarkings(int userID, CommonExercise firstExercise) {
     db.getEventDAO().addPlayedMarkings(userID, firstExercise);
@@ -884,8 +873,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     new ExerciseSorter().getSorted(commonExercises, isRecorder, sortByFL, searchTerm);
   }
 
+
   /**
    * TODO : revisit the parameterized types here.
+   *
+   * Search should not return context - should get its parent...
+   *
+   * If you ask for a context exercise id, you get back the parent exercise.
+   * If you look up by domino id, you get the matching exercise.
    *
    * @param <T>
    * @param prefix
@@ -901,13 +896,41 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                               int projectID,
                                                                               int userID, boolean matchOnContext) {
     Search<T> search = new Search<T>(db);
-    TripleExercises<T> exercisesForSearch = search.getExercisesForSearch(prefix, exercises, predefExercises, projectID, matchOnContext);
+    TripleExercises<T> exercisesForSearch =
+        search.getExercisesForSearch(prefix, exercises, predefExercises, projectID, matchOnContext);
     exercisesForSearch.setByID(Collections.emptyList());
 
     {
-      int exid = search.getExid(prefix);
+      int exid = search.getID(prefix.trim());
       if (exid != -1 && exid != 1) {
-        T exercise = getAnnotatedExercise(userID, projectID, exid, false);
+        if (DEBUG_ID_LOOKUP) logger.info("getExercisesForSearch looking for exercise in " + projectID + " = " + exid);
+        T exercise = getAnnotatedExercise(userID, projectID, exid);
+
+        if (exercise != null && exercise.isContext()) {
+          if (DEBUG_ID_LOOKUP) logger.info("\tgetExercisesForSearch found context sentence in " + projectID + " = " + exid);
+          int parentExerciseID1 = exercise.getParentExerciseID();
+          int parentExerciseID = parentExerciseID1 > 0 ? parentExerciseID1 : db.getExerciseDAO(projectID).getParentFor(exid);
+
+          if (parentExerciseID > 0) {
+            exercise = getAnnotatedExercise(userID, projectID, parentExerciseID);
+            if (exercise != null) {
+              exid = parentExerciseID;
+              if (DEBUG_ID_LOOKUP)
+                logger.info("\tgetExercisesForSearch found parent for sentence in " + projectID + " = " + exid);
+            }
+          }
+        }
+        if (exercise == null) {
+          if (DEBUG_ID_LOOKUP)
+            logger.info("getExercisesForSearch looking for exercise in " + projectID + " with domino id " + exid);
+          exid = db.getExerciseDAO(projectID).getExIDForDominoID(projectID, exid);
+          if (exid > 0) {
+            if (DEBUG_ID_LOOKUP)
+              logger.info("getExercisesForSearch got match for domino - exercise in " + projectID + " = " + exid);
+            exercise = getAnnotatedExercise(userID, projectID, exid);
+          }
+        }
+
         if (exercise != null && exercise.getProjectID() == projectID) {
           exercisesForSearch.setByID(Collections.singletonList(exercise));
         } else {
@@ -915,6 +938,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         }
       }
     }
+
     return exercisesForSearch;
   }
 
@@ -1256,20 +1280,19 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (serverProps.isAMAS()) { // TODO : HOW TO AVOID CAST???
       return (T) db.getAMASExercise(exid);
     }
-    return getAnnotatedExercise(getUserIDFromSessionOrDB(), getProjectIDFromUser(), exid, isFlashcardReq);
+    return getAnnotatedExercise(getUserIDFromSessionOrDB(), getProjectIDFromUser(), exid);
   }
 
   /**
+   * @param <T>
    * @param userID
    * @param projectID
    * @param exid
-   * @param isFlashcardReq
-   * @param <T>
    * @return
    * @see #getExercise(int, boolean)
    */
   @Nullable
-  private <T extends Shell> T getAnnotatedExercise(int userID, int projectID, int exid, boolean isFlashcardReq) {
+  private <T extends Shell> T getAnnotatedExercise(int userID, int projectID, int exid) {
     long then2 = System.currentTimeMillis();
     CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
 
@@ -1301,7 +1324,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         //+"\n\tcontext" + byID.getDirectlyRelated()
     );
     then2 = System.currentTimeMillis();
-    addAnnotationsAndAudio(userID, byID, isFlashcardReq, false, projectID);
+    addAnnotationsAndAudio(userID, byID, false, projectID);
     now = System.currentTimeMillis();
     if (now - then2 > WARN_DUR) {
       logger.debug("getAnnotatedExercise : (" + language + ") took " + (now - then2) + " millis to add annotations to " +
@@ -1753,7 +1776,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     int exid1 = -1;
     try {
       exid1 = Integer.parseInt(exid);
-      return getAnnotatedExercise(userID, projectID, exid1, isFlashcardReq);
+      return getAnnotatedExercise(userID, projectID, exid1);
     } catch (NumberFormatException e) {
       logger.warn("getExercise can't parse '" + exid + "' as an exercise id.");
       return null;

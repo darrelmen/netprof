@@ -59,7 +59,7 @@ public class EventTest extends BaseTest {
     for (SlickSlimEvent event : spanish1.subList(0, getMin(spanish1))) logger.info("Got " + event);
    // List<SlickSlimEvent> allDevicesSlim = eventDAO.getAllDevicesSlim("spanish");
   //  for (SlickSlimEvent event : allDevicesSlim.subList(0, getMin(allDevicesSlim))) logger.info("Got " + event);
-    eventDAO.addPlayedMarkings(1, spanish.getExercises(-1).iterator().next());
+    eventDAO.addPlayedMarkings(1, spanish.getExercises(-1, false).iterator().next());
    // logger.info("Got " + eventDAO.getFirstSlim("spanish"));
     //  spanish.doReportForYear(new PathHelper("war"));
   }

@@ -113,7 +113,7 @@ public class Report implements IReport {
   private static final String ACTIVE_I_PAD = "Active iPad/iPhone Users";
   private static final int EVIL_LAST_WEEK = 54;
   private static final String SKIP_USER = "gvidaver";
-  static final int DAY_TO_SEND_REPORT = Calendar.SUNDAY;
+  static final int DAY_TO_SEND_REPORT = Calendar.SATURDAY;// Calendar.SUNDAY;
   private static final int MIN_DURATION = 250;
   private static final String WEEK1 = "week";
   private static final String YEAR = "year";

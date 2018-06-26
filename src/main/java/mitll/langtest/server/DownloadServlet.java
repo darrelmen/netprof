@@ -108,6 +108,8 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String WAV = ".wav";
   public static final String MP3 = ".mp3";
   private static final String UNIT = "unit";
+  public static final String SEARCH = "search";
+  public static final String AUDIO1 = "audio";
 
   /**
    * This is getting complicated.
@@ -250,7 +252,8 @@ public class DownloadServlet extends DatabaseServlet {
       if (arg.startsWith(MALE)) options.setJustMale(isTrue(arg));
       else if (arg.startsWith(REGULAR)) options.setJustRegularSpeed(isTrue(arg));
       else if (arg.startsWith(CONTEXT)) options.setJustContext(isTrue(arg));
-      else if (arg.startsWith("search")) {
+      else if (arg.startsWith(AUDIO1)) options.setIncludeAudio(isTrue(arg));
+      else if (arg.startsWith(SEARCH)) {
         String[] split = arg.split("=");
         String search = split.length > 1 ? split[1] : "";
         options.setSearch(search);

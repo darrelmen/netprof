@@ -87,7 +87,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String OGG = "ogg";
 
   public static final boolean DEBUG = false;
-  public static final String FRENCH = "french";
+  private static final String FRENCH = "french";
   private static final double MIN_SCORE_FOR_CORRECT_ALIGN = 0.35;
   private static final String TEST_USER = "demo_";
   private static final String TEST_PASSWORD = "domino22";//"demo";
@@ -387,7 +387,7 @@ public class AudioFileHelper implements AlignDecode {
     if (!match) {
       logger.error("huh? audio context proj id " + projid + " but this project is " + project.getID());
     }
-    Project project = match ? this.project : db.getProjectManagement().getProject(projid);
+    Project project = match ? this.project : db.getProjectManagement().getProject(projid, false);
     project.addAnswerToUser(relPath, userid);  //not needed
     project.addAnswerToUser(absolutePath, userid);
   }

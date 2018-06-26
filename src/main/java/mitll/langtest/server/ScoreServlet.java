@@ -182,14 +182,8 @@ public class ScoreServlet extends DatabaseServlet {
         checkUserAndLogin(request, toReturn);
         reply(response, toReturn);
         return;
-      }/* else if (realRequest == GetRequest.ADDUSER) {
-        logger.info("doGet got add user " + queryString);
-        JSONObject toReturn = new JSONObject();
-        checkUserAndLogin(request, toReturn);
-        reply(response, toReturn);
-        return;
       }
-*/
+
       int userID = checkSession(request);
       int projid = getProjectID(request);
 
@@ -261,9 +255,6 @@ public class ScoreServlet extends DatabaseServlet {
             }
             toReturn = nestedChapters;
           }
-//        } else if (matchesRequest(queryString, HAS_USER)) {
-//          logger.info("got doGet hasUser " + queryString);
-//          checkUserAndLogin(request, toReturn);
         } else if (userManagement.doGet(
             request,
             response,
@@ -335,7 +326,8 @@ public class ScoreServlet extends DatabaseServlet {
       "Accept-Language",
       "accept",
       "connection",
-      "password"));
+      "password",
+      "pass"));
 
   private void reportOnHeaders(HttpServletRequest request) {
     Enumeration<String> headerNames = request.getHeaderNames();
@@ -911,23 +903,6 @@ public class ScoreServlet extends DatabaseServlet {
     Project project = getProject(projectid);
     return project == null ? ("" + projectid) : project.getLanguage();
   }
-
-  /**
-   * @return
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
-   */
-/*
-  private JSONObject getJSONForExercises(int projectid) {
-    return getJSONExerciseExport(db.getJSONExport(projectid), projectid);
-  }
-*/
-
-/*  private JSONObject getJSONExerciseExport(JsonExport jsonExport, int projectid) {
-    JSONObject jsonObject = new JSONObject();
-    addVersion(jsonObject, projectid);
-    jsonExport.addJSONExerciseExport(jsonObject, db.getExercises(projectid));
-    return jsonObject;
-  }*/
 
   /**
    * REALLY IMPORTANT.

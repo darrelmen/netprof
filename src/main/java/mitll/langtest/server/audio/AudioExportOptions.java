@@ -1,5 +1,7 @@
 package mitll.langtest.server.audio;
 
+import mitll.langtest.server.DownloadServlet;
+
 /**
  * Created by go22670 on 6/5/17.
  */
@@ -8,13 +10,13 @@ public class AudioExportOptions {
   private boolean justRegularSpeed = true;
   private boolean justContext = false;
   private boolean isUserList = false;
-  //private boolean skip = false;
   private boolean hasProjectSpecificAudio = false;
   private String search = "";
+  private boolean includeAudio;
 
   /**
    * @param hasProjectSpecificAudio
-   * @see mitll.langtest.server.DownloadServlet#getAudioExportOptions
+   * @see DownloadServlet#getAudioExportOptions
    */
   public AudioExportOptions(boolean hasProjectSpecificAudio) {
     this.hasProjectSpecificAudio = hasProjectSpecificAudio;
@@ -35,10 +37,6 @@ public class AudioExportOptions {
   boolean isJustRegularSpeed() {
     return justRegularSpeed;
   }
-
-/*  public void setSkip(boolean skip) {
-    this.skip = skip;
-  }*/
 
   /**
    * @return
@@ -76,21 +74,23 @@ public class AudioExportOptions {
   }
 
   public String getInfo() {
-//    if (isAllContext()) {
-//      return "";
-//    } else {
     return
-        //skip || isUserList ?
-        // "" :
         "_" + (justMale ? "male" : "female") + "_" +
             (justRegularSpeed ? "regular" : "slow") + "_" +
             (justContext ? "context" : "vocab");
-//    }
   }
 
   public String toString() {
     return "options " +
         getInfo() + " " +
         (isUserList ? "user list" : "predef");
+  }
+
+  public void setIncludeAudio(boolean includeAudio) {
+    this.includeAudio = includeAudio;
+  }
+
+  public boolean getIncludeAudio() {
+    return includeAudio;
   }
 }

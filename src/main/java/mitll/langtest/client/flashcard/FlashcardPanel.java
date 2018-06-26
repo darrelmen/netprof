@@ -139,6 +139,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   boolean showOnlyEnglish = false;
 
   final FlashcardTimer timer;
+  private boolean isUrdu = false;
 
   /**
    * @see #setAutoPlay
@@ -171,6 +172,8 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     this.exerciseList = exerciseList;
     this.timer = new FlashcardTimer(this);
     this.soundFeedback = soundFeedback;
+    isUrdu = controller.getLanguage().equalsIgnoreCase("Urdu");
+
     controlState.setStorage(new KeyStorage(controller));
   }
 
@@ -1145,7 +1148,13 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     Heading foreignLanguageContent = new Heading(1, foreignSentence);
     Style style = foreignLanguageContent.getElement().getStyle();
     style.setTextAlign(Style.TextAlign.CENTER);
-    style.setProperty("fontFamily", "sans-serif");
+    if (isUrdu) {
+      foreignLanguageContent.addStyleName("urdubigflfont");
+    }
+    else {
+      style.setProperty("fontFamily", "sans-serif");
+    }
+
     return foreignLanguageContent;
   }
 

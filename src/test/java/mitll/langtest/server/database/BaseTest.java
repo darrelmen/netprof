@@ -133,7 +133,7 @@ public class BaseTest {
     ServerProperties serverProps = new ServerProperties(parent, file.getName());
     DatabaseImpl database = getDatabase(serverProps);
     database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
-    database.getExercises(-1);
+    database.getExercises(-1, false);
     return database;
   }
 
@@ -153,6 +153,6 @@ public class BaseTest {
   }
 
   protected DatabaseImpl getAndPopulate() {
-    return getDatabase().setInstallPath("").populateProjects();
+    return getDatabase().setInstallPath("").populateProjects(-1);
   }
 }
