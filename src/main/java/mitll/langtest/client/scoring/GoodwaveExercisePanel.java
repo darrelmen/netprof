@@ -38,7 +38,6 @@ import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -47,7 +46,6 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
-import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -109,7 +107,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   protected final T exercise;
   protected final ExerciseController controller;
 
-  // private AudioPanel answerAudio;
   protected final NavigationHelper navigationHelper;
   private boolean hasClickable = false;
   private boolean isJapanese = false;
@@ -139,8 +136,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     isUrdu = language.equalsIgnoreCase("urdu");
     this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
     setWidth("100%");
-    //   addStyleName("inlineBlockStyle");
-    // getElement().setId("GoodwaveExercisePanel");
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, options.isAddKeyHandler(), options.isIncludeListButtons());
     this.listContainer = listContainer;
@@ -220,30 +215,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    */
   protected abstract void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
                                           float screenPortion, T exercise);
-/*
-  {
-    DivWidget div = new DivWidget();
-    div.getElement().setId("GoodwaveExercisePanel_UserRecorder");
-    ScoringAudioPanel answerWidget = getAnswerWidget(controller, screenPortion);
-    showRecordingHistory(exercise, answerWidget);
-    div.add(answerWidget);
-
-    addGroupingStyle(div);
-    toAddTo.add(div);
-  }
-*/
-
-/*
-  private void showRecordingHistory(T exercise, ScoringAudioPanel answerWidget) {
-//    answerWidget.setRefAudio(refAudio);
-    //  for (CorrectAndScore score : exercise.getScores()) {
-    answerWidget.addScores(exercise.getScores());
-    // }
-//    answerWidget.setClassAvg(exercise.getAvgScore());
-    answerWidget.showChart();
-  }
-*/
-
   protected abstract void addGroupingStyle(Widget div);
 
   public void onResize() {}
@@ -294,16 +265,16 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    */
   @Override
   public void addIncorrectComment(int exid, final String field, final String commentToPost) {
-    addAnnotation(field, ExerciseAnnotation.TYPICAL.INCORRECT, commentToPost);
+    addAnnotation(field, ExerciseAnnotation.TYPICAL.INCORRECT, commentToPost, exid);
   }
 
   @Override
   public void addCorrectComment(int exid, final String field) {
-    addAnnotation(field, ExerciseAnnotation.TYPICAL.CORRECT, "");
+    addAnnotation(field, ExerciseAnnotation.TYPICAL.CORRECT, "", exid);
   }
 
-  private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost) {
-    controller.getQCService().addAnnotation(getLocalExercise().getID(), field, status.toString(), commentToPost,
+  private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost, int exid) {
+    controller.getQCService().addAnnotation(exid, field, status.toString(), commentToPost,
         new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -449,10 +420,6 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
 
   protected String removePunct(String t) {
     return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "");
-  }
-
-  private T getLocalExercise() {
-    return exercise;
   }
 
   @Deprecated

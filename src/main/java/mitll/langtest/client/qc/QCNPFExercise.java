@@ -38,15 +38,11 @@ import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
@@ -55,7 +51,6 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
-import mitll.langtest.client.exercise.PostAnswerProvider;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
@@ -96,12 +91,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   public static final String ENGLISH = "english";
   public static final String MEANING = "meaning";
 
-  public static final String CONTEXT = "context";
-
   public static final String ALTCONTEXT = "altcontext";
-
-  @Deprecated
-  public static final String CONTEXT_TRANSLATION = "context translation";
 
   private static final String REF_AUDIO = "refAudio";
   /**
@@ -235,22 +225,6 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     approvedTooltip = addTooltip(approved, APPROVED_BUTTON_TOOLTIP);
     return approved;
   }
-/*
-  private Button addAttnLLButton(final ListInterface listContainer, NavigationHelper widgets) {
-    Button attention = new Button(ATTENTION_LL);
-    attention.getElement().setId("attention");
-    attention.addStyleName("leftFiveMargin");
-    widgets.add(attention);
-    attention.setType(ButtonType.WARNING);
-    attention.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        markAttentionLL(listContainer, exercise);
-      }
-    });
-    addTooltip(attention, MARK_FOR_LL_REVIEW);
-    return attention;
-  }*/
 
   @Override
   protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
@@ -327,35 +301,15 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
 
     column.add(row);
 
-//    if (e.getModifiedDateTimestamp() != 0) {
-//      Heading widgets = new Heading(5, "Changed", new Date(e.getModifiedDateTimestamp()).toString());
-//    //  if (!e.getAudioAttributes().isEmpty()) {
-//    //    widgets.addStyleName("floatRight");
-//    //  }
-//      row.add(widgets);
-//    }
-
-    column.add(getEntry(e, FOREIGN_LANGUAGE, VOCABULARY, e.getFLToShow()));
-    column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration()));
-    column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
+    column.add(getEntry(e, FOREIGN_LANGUAGE, VOCABULARY, e.getFLToShow(), exercise.getID()));
+    column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration(), exercise.getID()));
+    column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish(), exercise.getID()));
 
     if (!e.getDirectlyRelated().isEmpty()) {
       T context = (T) e.getDirectlyRelated().iterator().next();
-      column.add(getEntry(context, CONTEXT, ExerciseFormatter.CONTEXT, context.getForeignLanguage()));
-      column.add(getEntry(context, CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, context.getEnglish()));
+      column.add(getEntry(context, FOREIGN_LANGUAGE, ExerciseFormatter.CONTEXT, context.getForeignLanguage(), context.getID()));
+      column.add(getEntry(context, ENGLISH, ExerciseFormatter.CONTEXT_TRANSLATION, context.getEnglish(), context.getID()));
     }
-    // TODO:  put this back!!!
-
-/*
-    if (controller.getLanguage().equalsIgnoreCase("English")) {
-      column.add(getEntry(e, MEANING, ExerciseFormatter.MEANING_PROMPT, e.getMeaning()));
-    }
-    else {
-      column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish()));
-    }
-    column.add(getEntry(e, CONTEXT, ExerciseFormatter.CONTEXT, e.getContext()));
-    column.add(getEntry(e, CONTEXT_TRANSLATION, ExerciseFormatter.CONTEXT_TRANSLATION, e.getContextTranslation()));
-*/
 
     return column;
   }
@@ -412,7 +366,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     ExerciseAnnotation refAudio = e.getAnnotation(REF_AUDIO);
     Panel column = new FlowPanel();
     column.addStyleName("blockStyle");
-    column.add(getCommentWidget(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio, false));
+    column.add(getCommentWidget(REF_AUDIO, new Label(NO_AUDIO_RECORDED), refAudio, e.getID()));
     return column;
   }
 
@@ -494,12 +448,9 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     next.setIcon(IconType.ARROW_RIGHT);
     next.addStyleName("leftFiveMargin");
     next.addStyleName("topMargin");
-    next.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        next.setEnabled(false);
-        loadNext();
-      }
+    next.addClickHandler(event -> {
+      next.setEnabled(false);
+      loadNext();
     });
     return next;
   }
@@ -529,21 +480,11 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     if (audio.getExid() == -1) {
       audio.setExid(exercise.getID());
     }
-    male.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        markGender(DEFAULT_MALE, male, audio, tabAndContent, allByUser, next, true);
-      }
-    });
+    male.addClickHandler(event -> markGender(DEFAULT_MALE, male, audio, tabAndContent, allByUser, next, true));
 
     final Button female = makeGroupButton(buttonGroup, "FEMALE");
 
-    female.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        markGender(DEFAULT_FEMALE, female, audio, tabAndContent, allByUser, next, false);
-      }
-    });
+    female.addClickHandler(event -> markGender(DEFAULT_FEMALE, female, audio, tabAndContent, allByUser, next, false));
 
     return w;
   }
@@ -700,10 +641,8 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
       public void playStopped() {
       }
     });
-    ExerciseAnnotation audioAnnotation = e.getAnnotation(audio.getAudioRef());
-
-    Widget entry = getCommentWidget(audio.getAudioRef(), audioPanel, audioAnnotation, false);
-    return new Pair(entry, audioPanel);
+    return
+        new Pair(getCommentWidget(audio.getAudioRef(), audioPanel, e.getAnnotation(audio.getAudioRef()), e.getID()), audioPanel);
   }
 
   private static class Pair {
@@ -721,23 +660,28 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
    * @param field
    * @param label
    * @param value
+   * @param exerciseID
    * @return
    */
-  private Widget getEntry(T e, final String field, final String label, String value) {
-    return getEntry(field, label, value, e.getAnnotation(field));
+  private Widget getEntry(T e, final String field, final String label, String value, int exerciseID) {
+    ExerciseAnnotation annotation = e.getAnnotation(field);
+  //  if (logger == null) logger = Logger.getLogger("QCNPFExercise");
+   // logger.info("getEntry exid " + exerciseID + " : " + e.getID() + " field " + field + " label " + label + " value " + value +  " anno " + annotation);
+    return getEntry(field, label, value, annotation, exerciseID);
   }
 
-  private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation) {
-    return getCommentWidget(field, getContentWidget(label, value, true), annotation, true);
+  private Widget getEntry(final String field, final String label, String value, ExerciseAnnotation annotation, int exerciseID) {
+    return getCommentWidget(field, getContentWidget(label, value, true), annotation, exerciseID);
   }
 
   /**
    * @param field
    * @param annotation
+   * @param exerciseID
    * @return
    */
-  private Widget getCommentWidget(final String field, Widget content, ExerciseAnnotation annotation, boolean addLeftMargin) {
-    final FocusWidget commentEntry = makeCommentEntry(field, annotation);
+  private Widget getCommentWidget(final String field, Widget content, ExerciseAnnotation annotation, int exerciseID) {
+    final FocusWidget commentEntry = makeCommentEntry(field, annotation, exerciseID);
 
     boolean alreadyMarkedCorrect = annotation == null || annotation.getStatus() == null || annotation.getStatus().equals("correct");
     if (!alreadyMarkedCorrect) {
@@ -794,10 +738,11 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   /**
    * @param field
    * @param annotation
+   * @param exerciseID
    * @return
    * @see #getCommentWidget
    */
-  private FocusWidget makeCommentEntry(final String field, ExerciseAnnotation annotation) {
+  private FocusWidget makeCommentEntry(final String field, ExerciseAnnotation annotation, int exerciseID) {
     final TextBox commentEntry = new TextBox();
     commentEntry.getElement().setId("QCNPFExercise_Comment_TextBox_" + field);
     commentEntry.addStyleName("topFiveMargin");
@@ -808,7 +753,10 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
     commentEntry.setWidth("400px");
 
     commentEntry.addStyleName("leftFiveMargin");
-    commentEntry.addBlurHandler(event -> addIncorrectComment(exercise.getID(), field, sanitize(commentEntry.getText())));
+    commentEntry.addBlurHandler(event -> {
+     //  logger.info("makeCommentEntry comment on " + exerciseID + " field " + field + " comment " + commentEntry.getText());
+      addIncorrectComment(exerciseID, field, sanitize(commentEntry.getText()));
+    });
     addTooltip(commentEntry, COMMENT_TOOLTIP);
     return commentEntry;
   }
@@ -858,17 +806,12 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
       addCorrectComment(exercise.getID(), field);
     }
 
-    //if (isCourseContent()) {
     STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
     exercise.setState(state);
     listContainer.setState(exercise.getID(), state);
     listContainer.redraw();
     setApproveButtonState();
     markReviewed(exercise);
-
-    String instance = getInstance();
-    //  LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
-    //}
   }
 
   /**

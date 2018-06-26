@@ -13,11 +13,13 @@ import mitll.langtest.client.LangTest;
 public class SpeedChoices {
   //private final Logger logger = Logger.getLogger("SpeedChoices");
 
-  private static final String IS_REG_SPEED = "isRegSpeed";
+ // private static final String IS_REG_SPEED = "isRegSpeed";
   private static final String REGULAR = "Regular";
   private static final String SLOW = "Slow";
   private static final String REGULAR_SPEED = "Regular Speed";
   private static final String SLOW_SPEED = "Slow Speed";
+  public static final int WH = 32;
+  public static final String WH_PX = WH + "px";
 
   private final Image turtle = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32.png"));
   private final Image turtleSelected = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "turtle_32_selected.png"));
@@ -66,7 +68,7 @@ public class SpeedChoices {
     return buttonToolbar;
   }
 
-  public void chooseReg() {
+  void chooseReg() {
     gotClickForSpeed(true);
   }
 
@@ -97,11 +99,13 @@ public class SpeedChoices {
 
   private ToggleButton getChoice2(String title, Image upImage, Image downImage, ClickHandler handler) {
     ToggleButton onButton = new ToggleButton(upImage, downImage);
+    onButton.getElement().getStyle().setPadding(0,Style.Unit.PX);
     onButton.getElement().setId("Choice_" + title);
     onButton.addClickHandler(handler);
     onButton.getElement().getStyle().setZIndex(0);
-    onButton.setWidth(50 + "px");
-    onButton.setHeight(32 + "px");
+  //  int i = 50;
+    onButton.setWidth(WH_PX);
+    onButton.setHeight(WH_PX);
     return onButton;
   }
 

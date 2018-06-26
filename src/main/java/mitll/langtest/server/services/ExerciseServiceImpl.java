@@ -191,9 +191,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       return new ExerciseListWrapper<>(request.getReqID(), ts, null);
     }
 
-    if (serverProps.isAMAS()) {
-      return (ExerciseListWrapper<T>) getAMASExerciseIds(request); // TODO : how to do this without forcing it.
-    }
     logger.debug("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
 
     try {
@@ -655,7 +652,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         exercises = withContext;
       }
     }
-    List<CommonShell> exerciseShells = getExerciseShells(exercises);
+    List<CommonShell> exerciseShells = getExerciseShells(exercises, request.isQC());
 
 //    logger.debug("makeExerciseListWrapper : userID " + userID + " Role is " + request.getActivityType());
     markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
@@ -907,7 +904,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         T exercise = getAnnotatedExercise(userID, projectID, exid);
 
         if (exercise != null && exercise.isContext()) {
-          if (DEBUG_ID_LOOKUP) logger.info("\tgetExercisesForSearch found context sentence in " + projectID + " = " + exid);
+          if (DEBUG_ID_LOOKUP)
+            logger.info("\tgetExercisesForSearch found context sentence in " + projectID + " = " + exid);
           int parentExerciseID1 = exercise.getParentExerciseID();
           int parentExerciseID = parentExerciseID1 > 0 ? parentExerciseID1 : db.getExerciseDAO(projectID).getParentFor(exid);
 
@@ -1192,77 +1190,26 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * Save transmission bandwidth - don't send a list of fully populated items - just send enough to populate a list
    *
    * @param exercises
+   * @param skipDups
    * @return
    * @see #makeExerciseListWrapper
    */
-  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises) {
+  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises, boolean skipDups) {
     List<CommonShell> ids = new ArrayList<>(exercises.size());
 
-
+    Set<Integer> checkDups = new HashSet<>();
     exercises.forEach(ex -> {
       if (ex.getNumPhones() == 0 && warn++ < 100) {
         logger.warn("getExerciseShells : no phones for exercise " + ex.getID());
       }
-      CommonShell shell = ex.getShell();
-      // if (shell.getNumPhones() == 0) logger.warn("no phones for shell " + ex.getID());
-      ids.add(shell);
+      if (skipDups && checkDups.contains(ex.getID())) {
+     //   logger.info("skip dup " + ex.getID());
+      } else {
+        checkDups.add(ex.getID());
+        ids.add(ex.getShell());
+      }
     });
     return ids;
-  }
-
-  /**
-   * @param request
-   * @return
-   * @deprecated
-   */
-  private ExerciseListWrapper<AmasExerciseImpl> getAMASExerciseIds(
-      ExerciseListRequest request
-  ) {
-    Collection<AmasExerciseImpl> exercises;
-    int reqID = request.getReqID();
-    Map<String, Collection<String>> typeToSelection = request.getTypeToSelection();
-
-    try {
-      if (typeToSelection.isEmpty()) {   // no unit-chapter filtering
-        // get initial exercise set, either from a user list or predefined
-        exercises = getAMASExercises();
-
-        // now if there's a prefix, filter by prefix match
-
-        // TODO : put this back if needed?
-
-        /*       if (!request.getPrefix().isEmpty()) {
-          // now do a trie over matches
-          exercises = getExercisesForSearchWithTrie(request.getPrefix(), exercises, true, amasFullTrie);
-        }*/
-        AmasSupport amasSupport = new AmasSupport();
-        exercises = amasSupport.filterByUnrecorded(request.getUserID(), exercises, typeToSelection, db.getResultDAO());
-        // exercises = filterByOnlyAudioAnno(onlyWithAudioAnno, exercises);
-        //    int i = markRecordedState(userID, role, exercises, onlyExamples);
-        //  logger.debug("marked " +i + " as recorded");
-
-        // now sort : everything gets sorted the same way
-        //    List<AmasExerciseImpl> commonExercises;
-//        if (incorrectFirstOrder) {
-//          commonExercises = db.getResultDAO().getExercisesSortedIncorrectFirst(exercises, userID, audioFileHelper.getCollator());
-//        } else {
-        //    commonExercises = new ArrayList<AmasExerciseImpl>(exercises);
-        //   sortExercises("", commonExercises);
-//        }
-
-        return new ExerciseListWrapper<>(reqID, new ArrayList<>(exercises), null);
-      } else { // sort by unit-chapter selection
-        // builds unit-lesson hierarchy if non-empty type->selection over user list
-        Collection<AmasExerciseImpl> exercisesForSelectionState1 =
-            new AmasSupport().getExercisesForSelectionState(typeToSelection, request.getPrefix(), request.getUserID(),
-                db.getAMASSectionHelper(), db.getResultDAO());
-        return new ExerciseListWrapper<>(reqID, new ArrayList<>(exercisesForSelectionState1), null);
-      }
-    } catch (Exception e) {
-      logger.warn("got " + e, e);
-      logAndNotifyServerException(e);
-      return new ExerciseListWrapper<>();
-    }
   }
 
   /**

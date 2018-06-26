@@ -69,6 +69,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
    * @see #addInstructions
    */
   private static final String RECORD_PROMPT = "Record the word or phrase at normal speed.";//, first at normal speed, then again at slow speed.";
+  private static final String RECORD_PROMPT2 = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
 
@@ -122,7 +123,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     if (flow != null) {
       flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
-    add(new Heading(4, RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
+    add(new Heading(4, doNormalRecording ? RECORD_PROMPT2 : RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
   /**
@@ -235,7 +236,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
     //completedExercise.setState(STATE.RECORDED);
     // TODO : gah = do we really need to do this???
-   // logger.info("postAnswers " + completedExercise.getID());
+    // logger.info("postAnswers " + completedExercise.getID());
     showRecordedState(completedExercise);
     exerciseList.loadNextExercise(completedExercise);
   }

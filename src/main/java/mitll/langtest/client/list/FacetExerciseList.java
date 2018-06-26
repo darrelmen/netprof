@@ -1986,8 +1986,11 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     return getters;
   }
 
+  /**
+   * Try to fix issue where sometimes somehoe basicMP3Player is null.
+   */
   private native void addPlayer() /*-{
-      $wnd.basicMP3Player.init();
+      $wnd.basicMP3Player && $wnd.basicMP3Player.init();
   }-*/;
 
   private CommonExercise getCachedExercise(Integer id) {
