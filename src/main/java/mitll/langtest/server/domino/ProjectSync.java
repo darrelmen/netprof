@@ -361,7 +361,7 @@ public class ProjectSync implements IProjectSync {
         logger.warn("addPending huh? already know about " + currentKnownExercise);
       }
     });
-    logger.info("addPending import ADDED " +newEx.size() + " new exercises...");
+    logger.info("addPending import ADDED " + newEx.size() + " new exercises...");
   }
 
 
@@ -530,8 +530,8 @@ public class ProjectSync implements IProjectSync {
   /**
    * Cheesy - just want it for it's id not the whole object...
    *
-   * @param dominoToNonContextEx
-   * @param dominoID
+   * @paramx dominoToNonContextEx
+   * @paramx dominoID
    * @return
    * @paramx oldIDToExer
    * @paramx npID
@@ -603,7 +603,9 @@ public class ProjectSync implements IProjectSync {
       }
     });
 
-
+/**
+ * TODO : NO don't do this.
+ */
     importFromDomino.getDeletedNPIDs().forEach(npExID -> {
       CommonExercise byExID = userExerciseDAO.getByExOldID(npExID, projID);
       if (byExID == null) {
@@ -1294,7 +1296,7 @@ public class ProjectSync implements IProjectSync {
   ) {
     int failed = 0;
 
-    Map<Integer, ExerciseAttribute> allByProject = slickUEDAO.getIDToPair(projectid);
+    Map<Integer, ExerciseAttribute> allByProject = slickUEDAO.getExerciseAttribute().getIDToPair(projectid);
     Map<ExerciseAttribute, Integer> attrToID = getAttributeToID(allByProject);
 
     Map<String, Map<String, ExerciseAttribute>> propToValueToAttr = populatePropToValue(allByProject.values());
@@ -1305,7 +1307,8 @@ public class ProjectSync implements IProjectSync {
         "\n\tprops      " + propToValueToAttr.keySet() +
         "\n\tdoUpdate for project " + projectid + " values " + propToValueToAttr.values());
 
-    Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = slickUEDAO.getAllJoinByProject(projectid);
+    Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs =
+        slickUEDAO.getExerciseAttributeJoin().getAllJoinByProject(projectid);
 
     long now = System.currentTimeMillis();
     Timestamp modified = new Timestamp(now);
@@ -1416,19 +1419,18 @@ public class ProjectSync implements IProjectSync {
     }
 
     logger.info("doUpdate now " + newJoins.size() + " attributes and remove " + removeJoins.size());
-    slickUEDAO.addBulkAttributeJoins(newJoins);
-    slickUEDAO.removeBulkAttributeJoins(removeJoins);
+    slickUEDAO.getExerciseAttributeJoin().addBulkAttributeJoins(newJoins);
+    slickUEDAO.getExerciseAttributeJoin().removeBulkAttributeJoins(removeJoins);
     if (failed > 0)
       logger.warn("\n\n\n\ndoUpdate somehow failed to update " + failed + " out of " + updateEx.size() + " exercises");
   }
 
   private Map<String, Map<String, ExerciseAttribute>> populatePropToValue(Collection<ExerciseAttribute> allKnownAttributes) {
-    Map<String, Map<String, ExerciseAttribute>> propToValueToAttr = new HashMap<>();
-
-    return rememberAttributes(allKnownAttributes, propToValueToAttr);
+    return rememberAttributes(allKnownAttributes, new HashMap<>());
   }
 
-  private Map<String, Map<String, ExerciseAttribute>> rememberAttributes(Collection<ExerciseAttribute> allKnownAttributes, Map<String, Map<String, ExerciseAttribute>> propToValueToAttr) {
+  private Map<String, Map<String, ExerciseAttribute>> rememberAttributes(Collection<ExerciseAttribute> allKnownAttributes,
+                                                                         Map<String, Map<String, ExerciseAttribute>> propToValueToAttr) {
     allKnownAttributes.forEach(exerciseAttribute -> {
       Map<String, ExerciseAttribute> valueToAttr = propToValueToAttr.computeIfAbsent(getNormProp(exerciseAttribute), k -> new HashMap<>());
       valueToAttr.putIfAbsent(getNormValue(exerciseAttribute), exerciseAttribute);
@@ -1522,7 +1524,7 @@ public class ProjectSync implements IProjectSync {
                                           List<ExerciseAttribute> newAttributes) {
     for (ExerciseAttribute newAttr : newAttributes) {
       //  int i = slickUEDAO.addAttribute(projectid, now, importUser, newAttr);
-      attrToID.put(newAttr, slickUEDAO.addAttribute(projectid, now, importUser, newAttr));
+      attrToID.put(newAttr, slickUEDAO.getExerciseAttribute().addAttribute(projectid, now, importUser, newAttr));
       //   logger.info("doUpdate remember new import attribute " + i + " = " + newAttr);
     }
   }

@@ -38,6 +38,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickDialog;
+import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
 import mitll.npdata.dao.dialog.DialogDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +59,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   //  private final ProjectPropertyDAO propertyDAO;
   // private final IUserExerciseDAO userExerciseDAO;
   private DatabaseImpl databaseImpl;
+  private DialogAttributeJoinHelper dialogAttributeJoinHelper;
 
   /**
    * @param database
@@ -75,6 +77,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 //    this.userExerciseDAO = userExerciseDAO;
     this.databaseImpl = databaseImpl;
     ensureDefault(databaseImpl.getUserDAO().getDefaultUser());
+    dialogAttributeJoinHelper = new DialogAttributeJoinHelper(new DialogAttributeJoinDAOWrapper(dbConnection));
   }
 
   public int ensureDefault(int defaultUser) {
@@ -88,7 +91,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
           System.currentTimeMillis(),
           DialogType.DEFAULT,
           "",
-          "", "", "", "", 2, 0, "", "", "", ""
+          "", "", "", "", 2, 0, "", "", ""
       );
       defaultProject = getDefaultDialog();
       return defaultProject == null ? -1 : defaultProject.id();
@@ -143,9 +146,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
   /**
    * Why some things are slots on SlickDialog and why some things are project properties is kinda arbitrary...
    *
+   * @return
    * @paramx userid
    * @paramx projectInfo
-   * @return
    * @see mitll.langtest.server.services.ProjectServiceImpl#update
    * @see mitll.langtest.client.project.ProjectEditForm#updateProject
    */
@@ -258,7 +261,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
                  float ilr,
                  String orientation,
-                 String audio,
+                 //  String audio,
                  String passage,
                  String translation
   ) {
@@ -279,7 +282,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         numSpeakers,
         ilr,
         orientation,
-        audio,
+        //audio,
         passage,
         translation
     ));

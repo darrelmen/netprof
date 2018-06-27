@@ -1442,7 +1442,7 @@ public class ExerciseCopy {
     List<SlickExerciseAttributeJoin> joins = getSlickExerciseAttributeJoins(importUser, exToJoins);
 
     logger.info("copyUserAndPredefExercises adding " + joins.size() + " attribute joins");
-    slickUEDAO.addBulkAttributeJoins(joins);
+    slickUEDAO.getExerciseAttributeJoin().addBulkAttributeJoins(joins);
     return exToInt;
   }
 
@@ -1736,7 +1736,7 @@ public class ExerciseCopy {
       if (attrToID.containsKey(attribute)) {
         id = attrToID.get(attribute);
       } else {
-        id = slickUEDAO.addAttribute(projectid, now, importUser, attribute);
+        id = slickUEDAO.getExerciseAttribute().addAttribute(projectid, now, importUser, attribute);
         attrToID.put(attribute, id);
 
         logger.info("addPredef " + attribute + " = " + id);

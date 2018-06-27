@@ -98,14 +98,6 @@ public interface IUserExerciseDAO extends IDAO {
 
   int ensureTemplateExercise(int projID);
 
-/*
-  Collection<CommonExercise> getAllUserExercises(int projid);
-*/
-
-/*
-  List<SlickExercise> getDeletedFor(int projid);
-*/
-
   Collection<CommonExercise> getOverrides(boolean shouldSwap);
 
   Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap);
@@ -130,7 +122,7 @@ public interface IUserExerciseDAO extends IDAO {
    */
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
 
-  int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute);
+  //int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute);
 
   int getUnknownExerciseID();
 
@@ -145,4 +137,6 @@ public interface IUserExerciseDAO extends IDAO {
   boolean areThereAnyUnmatched(int projID);
   Map<String, Integer> getNpToExID(int projid);
   int updateDominoBulk(List<SlickUpdateDominoPair> pairs);
+
+  IAttribute getExerciseAttribute();
 }

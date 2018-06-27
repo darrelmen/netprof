@@ -253,7 +253,8 @@ public class DominoImport implements IDominoImport {
    * @see #getImportFromDomino
    */
   @NotNull
-  private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject dominoProject, boolean checkForDominoIDs) {
+  private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser,
+                                           ClientPMProject dominoProject, boolean checkForDominoIDs) {
     Set<Integer> added = new HashSet<>();
     long then = System.currentTimeMillis();
 
@@ -297,7 +298,7 @@ public class DominoImport implements IDominoImport {
 
     Map<String, Integer> npidToDominoID = checkForDominoIDs ? getNPIDToDominoID(dominoProject.getId()) : new HashMap<>();
     logger.info("getChangedDocs : added " + addedImports.size() + " change " + changedImports.size() + " deleted " + deletedNPIDs.size());
-    return new ChangedAndDeleted(changedImports, new ArrayList<>(), deletedDocsSince, deletedNPIDs, addedImports, npidToDominoID);
+    return new ChangedAndDeleted(changedImports, deletedDocsSince, deletedNPIDs, addedImports, npidToDominoID);
   }
 
   @NotNull
@@ -386,16 +387,15 @@ public class DominoImport implements IDominoImport {
 
     /**
      * @param changed
-     * @param deleted
      * @param deleted2
      * @param npidToDominoID
      * @see DominoImport#getChangedDocs
      */
     ChangedAndDeleted(List<ImportDoc> changed,
-                      List<ImportDoc> deleted,
                       Collection<Integer> deleted2,
                       Set<String> deletedNPIDs,
-                      List<ImportDoc> added, Map<String, Integer> npidToDominoID) {
+                      List<ImportDoc> added,
+                      Map<String, Integer> npidToDominoID) {
       this.added = added;
       this.changed = changed;
       //  this.deleted = deleted;

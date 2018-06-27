@@ -102,6 +102,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -399,14 +400,18 @@ public class DatabaseImpl implements Database, DatabaseServices {
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
 
-    dialogDAO = new DialogDAO(this, dbConnection, userExerciseDAO, this);
-    imageDAO = new ImageDAO(this, dbConnection);
+    makeDialogDAOs();
 
     createTables();
 
     afterDAOSetup(slickAudioDAO);
 
     logger.debug("initializeDAOs : tables = " + getTables());
+  }
+
+  private void makeDialogDAOs() {
+    dialogDAO = new DialogDAO(this, dbConnection, userExerciseDAO, this);
+    imageDAO = new ImageDAO(this, dbConnection);
   }
 
   private void afterDAOSetup(SlickAudioDAO slickAudioDAO) {

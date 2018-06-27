@@ -60,7 +60,7 @@ public interface IDialogDAO extends IDAO {
 
           float ilr,
           String orientation,
-          String audio,
+      //    String audio,
           String passage,
           String translation);
 

@@ -59,6 +59,12 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String TRANSLITERATION = "transliteration";
   private static final String OVERRIDE = "override";
   private static final String UNIT = "unit";
+
+  @Override
+  public IAttribute getExerciseAttribute() {
+    return null;
+  }
+
   private static final String LESSON = "lesson";
 
   @Override
@@ -716,12 +722,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       logException(e);
       return false;
     }
-
-  }
-
-  @Override
-  public int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute) {
-    return 0;
   }
 
   @Override

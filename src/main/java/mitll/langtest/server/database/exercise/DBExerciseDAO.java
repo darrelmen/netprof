@@ -174,7 +174,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       });
       */
 
-      Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
+      Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getExerciseAttribute().getIDToPair(projid);
       logger.info("readExercises" +
           "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\ttype order     " + typeOrder +
@@ -182,7 +182,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       );
       //logger.info("readExercises found " + allByProject.size() + " attributes");
 
-      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
+      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs =
+          userExerciseDAO.getExerciseAttributeJoin().getAllJoinByProject(projid);
 
       // do we add attributes to context exercises?
       List<CommonExercise> allNonContextExercises =
@@ -363,7 +364,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   private Collection<String> getAttributeTypes() {
-    return userExerciseDAO.getAttributeTypes(project.id());
+    return userExerciseDAO.getExerciseAttribute().getAttributeTypes(project.id());
   }
 
   private Map<Integer, CommonExercise> getIDToExercise(Collection<CommonExercise> allExercises) {

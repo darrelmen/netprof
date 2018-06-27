@@ -1,0 +1,15 @@
+package mitll.langtest.server.database.userexercise;
+
+import mitll.langtest.server.database.IDAO;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
+
+import java.util.Collection;
+import java.util.Map;
+
+public interface IAttribute extends IDAO {
+  int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute);
+
+  Collection<String> getAttributeTypes(int projid);
+
+  Map<Integer, ExerciseAttribute> getIDToPair(int projid);
+}

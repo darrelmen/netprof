@@ -90,8 +90,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
   private final RelatedExerciseDAOWrapper relatedExerciseDAOWrapper;
-  private final ExerciseAttributeDAOWrapper attributeDAOWrapper;
-  private final ExerciseAttributeJoinDAOWrapper attributeJoinDAOWrapper;
+  //private final ExerciseAttributeDAOWrapper attributeDAOWrapper;
+  private final AttributeHelper attributeHelper;
+  private final AttributeJoinHelper attributeJoinHelper;
+  //private final ExerciseAttributeJoinDAOWrapper attributeJoinDAOWrapper;
   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
   private final IUserDAO userDAO;
   private final IRefResultDAO refResultDAO;
@@ -112,9 +114,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     super(database);
     dao = new ExerciseDAOWrapper(dbConnection);
     relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
-    attributeDAOWrapper = new ExerciseAttributeDAOWrapper(dbConnection);
-    attributeJoinDAOWrapper = new ExerciseAttributeJoinDAOWrapper(dbConnection);
-
+    //attributeDAOWrapper = new ExerciseAttributeDAOWrapper(dbConnection);
+    //attributeJoinDAOWrapper = new ExerciseAttributeJoinDAOWrapper(dbConnection);
+    attributeHelper = new AttributeHelper(new ExerciseAttributeDAOWrapper(dbConnection));
+    attributeJoinHelper = new AttributeJoinHelper(new ExerciseAttributeJoinDAOWrapper(dbConnection));
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();
@@ -155,7 +158,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     boolean b = dao.updateProject(old, newprojid) > 0;
     if (b) logger.info("updated exercises to            " + newprojid);
 
-    boolean b1 = attributeDAOWrapper.updateProject(old, newprojid) > 0;
+    boolean b1 = attributeHelper.updateProject(old, newprojid) ;
     if (b1) logger.info("updated exercise attributes to " + newprojid);
 
     boolean b2 = relatedExerciseDAOWrapper.updateProject(old, newprojid) > 0;
@@ -183,7 +186,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     logger.info("updated " + num +
         "  exercises to            " + newprojid);
 
-    boolean b1 = attributeDAOWrapper.updateProject(old, newprojid) > 0;
+    boolean b1 = attributeHelper.updateProject(old, newprojid);
     if (b1) {
       logger.info("updated exercise attributes to " + newprojid);
     }
@@ -889,11 +892,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     Collection<SlickExerciseAttributeJoin> slickExerciseAttributeJoins = exToAttrs.get(exercise.getID());
 
     if (slickExerciseAttributeJoins != null) {
-      List<ExerciseAttribute> attributes = new ArrayList<>();
-      for (SlickExerciseAttributeJoin join : slickExerciseAttributeJoins) {
-        attributes.add(allByProject.get(join.attrid()));
-      }
-
+      List<ExerciseAttribute> attributes = new ArrayList<>(slickExerciseAttributeJoins.size());
+      slickExerciseAttributeJoins
+          .forEach(slickExerciseAttributeJoin -> attributes.add(allByProject.get(slickExerciseAttributeJoin.attrid())));
       exercise.setAttributes(attributes);
       //   logger.info("now " + exercise.getID() + "  " + exercise.getAttributes());
     }
@@ -945,7 +946,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param listID
    * @param shouldSwap
    * @return
-   * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateList(UserList)
+   * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateList
    */
   @Override
   public List<CommonShell> getOnList(int listID, boolean shouldSwap) {
@@ -960,9 +961,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateListEx
    */
   public List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap) {
-    long then = System.currentTimeMillis();
+   // long then = System.currentTimeMillis();
     List<SlickExercise> onList = dao.getOnList(listID);
-    long now = System.currentTimeMillis();
+   // long now = System.currentTimeMillis();
 //    logger.info("getCommonExercises took "+ (now-then) + " to get " + onList.size() + " for list #" + listID );
     return getUserExercises(onList, shouldSwap);
   }
@@ -1040,13 +1041,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return id;
   }
 
-/*
-  public List<CommonExercise> getAllUserExercises(int projid) {
-    boolean shouldSwap = getShouldSwap(projid);
-    return getUserExercises(dao.getAllUserEx(projid), shouldSwap);
-  }
-*/
-
   /**
    * Niche feature for alt chinese to swap primary and alternate...
    *
@@ -1076,7 +1070,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
     // TODO? : consider getting exercise->phone from the ref result table again
 //    logger.info("getByProject type order " + typeOrder);
-//    Collection<String> attributeTypes = getAttributeTypes(projectid);
     List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(theProject.getID());
     logger.info("getByProject got " + allPredefByProject.size() + " from " + theProject);
     return getExercises(allPredefByProject,
@@ -1088,11 +1081,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         exToAttrs,
         true);
   }
-/*
-  @Override
-  public List<SlickExercise> getDeletedFor(int projid) {
-    return dao.getAllPredefDeletedByProject(projid);
-  }*/
 
   @NotNull
   private List<String> getBaseTypeOrder(Project project) {
@@ -1224,7 +1212,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     };
   }
 
-  public IDAO getExerciseAttribute() {
+/*  public IDAO getExerciseAttribute() {
     return new IDAO() {
       public void createTable() {
         attributeDAOWrapper.createTable();
@@ -1239,29 +1227,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         return attributeDAOWrapper.updateProject(oldID, newprojid) > 0;
       }
     };
+  }*/
+
+  public IAttributeJoin getExerciseAttributeJoin() {
+    return attributeJoinHelper;
   }
 
-  public IDAO getExerciseAttributeJoin() {
-    return new IDAO() {
-      public void createTable() {
-        attributeJoinDAOWrapper.createTable();
-      }
-
-      public String getName() {
-        return attributeJoinDAOWrapper.getName();
-      }
-
-      /**
-       * Exercise attribute join table is independent of project - makes no reference to project - nothing to update
-       * @param oldID
-       * @param newprojid
-       * @return
-       */
-      @Override
-      public boolean updateProject(int oldID, int newprojid) {
-        return true;
-      }
-    };
+  public IAttribute getExerciseAttribute() {
+    return attributeHelper;
   }
 
   /**
@@ -1286,77 +1259,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         new Timestamp(System.currentTimeMillis())));
   }
 
-  public int addAttribute(int projid,
-                          long now,
-                          int userid,
-                          ExerciseAttribute attribute) {
-    return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue());
-  }
-
-  private int insertAttribute(int projid,
-                              long now,
-                              int userid,
-                              String property, String value) {
-    return attributeDAOWrapper.insert(new SlickExerciseAttribute(-1,
-        projid,
-        userid,
-        new Timestamp(now),
-        property,
-        value));
-  }
-
-  /**
-   * @param projid
-   * @return
-   * @see SlickUserExerciseDAO#getIDToPair
-   */
-  private Collection<SlickExerciseAttribute> getAllByProject(int projid) {
-    return attributeDAOWrapper.allByProject(projid);
-  }
-
-  /**
-   * E.g. grammar or topic or sub-topic
-   *
-   * @param projid
-   * @return
-   * @see DBExerciseDAO#getAttributeTypes
-   */
-  public Collection<String> getAttributeTypes(int projid) {
-    Set<String> unique = new HashSet<>();
-    for (SlickExerciseAttribute attr : attributeDAOWrapper.allByProject(projid)) {
-      unique.add(attr.property());
-    }
-    return new TreeSet<>(unique);
-  }
-
-  public Map<Integer, Collection<SlickExerciseAttributeJoin>> getAllJoinByProject(int projid) {
-    return attributeJoinDAOWrapper.allByProject(projid);
-  }
-
-  /**
-   * @param projid
-   * @return
-   * @see DBExerciseDAO#readExercises
-   */
-  public Map<Integer, ExerciseAttribute> getIDToPair(int projid) {
-    Map<Integer, ExerciseAttribute> pairMap = new HashMap<>();
-    Map<String, ExerciseAttribute> known = new HashMap<>();
-    getAllByProject(projid).forEach(p -> pairMap.put(p.id(), makeOrGet(known, p)));
-    return pairMap;
-  }
-
-  @NotNull
-  private ExerciseAttribute makeOrGet(Map<String, ExerciseAttribute> known, SlickExerciseAttribute p) {
-    String key = p.property() + "-" + p.value();
-    ExerciseAttribute attribute;
-    if (known.containsKey(key)) {
-      attribute = known.get(key);
-    } else {
-      attribute = new ExerciseAttribute(p.property(), p.value());
-      known.put(key, attribute);
-    }
-    return attribute;
-  }
 
   /**
    * @param projectid
@@ -1495,14 +1397,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return dao;
   }
 
-  public void addBulkAttributeJoins(List<SlickExerciseAttributeJoin> joins) {
-    attributeJoinDAOWrapper.addBulk(joins);
-  }
-
-  public void removeBulkAttributeJoins(List<SlickExerciseAttributeJoin> joins) {
-    attributeJoinDAOWrapper.removeBulk(joins);
-  }
-
   /**
    * @param projectid
    * @return
@@ -1579,7 +1473,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   @Override
-  public Map<Integer,Integer> getDominoIDToExID(int projID) {
+  public Map<Integer, Integer> getDominoIDToExID(int projID) {
     return dao.allByDominoIDPairs(projID);
   }
 }
