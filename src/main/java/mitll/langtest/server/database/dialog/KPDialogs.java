@@ -1,15 +1,31 @@
 package mitll.langtest.server.database.dialog;
 
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.dialog.Dialog;
+import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.SlickDialog;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Dialog data from Paul - 6/20/18
  */
 public class KPDialogs {
+  private static final Logger logger = LogManager.getLogger(KPDialogs.class);
+
   String docIDS = "333815\n" +
       "333816\n" +
       "333817\n" +
@@ -82,19 +98,97 @@ public class KPDialogs {
       "8\n" +
       "8";
 
-  public List<SlickDialog> getDialogs(int defaultUser, int projID) {
+  public List<IDialog> getDialogs(int defaultUser, int projID) {
     String[] docs = docIDS.split("\n");
     String[] titles = title.split("\n");
+
     String[] units = unit.split("\n");
     String[] chapters = chapter.split("\n");
     String[] pages = page.split("\n");
     String[] topics = pres.split("\n");
     String[] dirs = dir.split("\n");
 
-    List<SlickDialog> dialogs = new ArrayList<>();
-    Timestamp modified = new Timestamp(System.currentTimeMillis());
+    List<IDialog> dialogs = new ArrayList<>();
+    long time = System.currentTimeMillis();
+    Timestamp modified = new Timestamp(time);
     for (int i = 0; i < docs.length; i++) {
-      dialogs.add(new SlickDialog(-1,
+      String dir = dirs[i];
+      String imageRef = "/opt/netprof/images/" + dir + File.separator + dir + ".jpg";
+      List<ExerciseAttribute> attributes = new ArrayList<>();
+      attributes.add(new ExerciseAttribute("unit", units[i]));
+      attributes.add(new ExerciseAttribute("chapter", chapters[i]));
+      attributes.add(new ExerciseAttribute("page", pages[i]));
+      attributes.add(new ExerciseAttribute("topic", topics[i]));
+
+      List<CommonExercise> exercises = new ArrayList<>();
+
+      String dirPath = "/opt/netprof/dialog/" + dir;
+      File loc = new File(dirPath);
+      boolean directory = loc.isDirectory();
+      if (!directory) logger.warn("huh? not a dir");
+
+      //   List<String> images=new ArrayList<>();
+      List<String> sentences = new ArrayList<>();
+      //List<Path> sentenceFiles = new ArrayList<>();
+      List<String> audio = new ArrayList<>();
+      Map<CommonExercise, String> exToAudio = new HashMap<>();
+      Map<String, Path> sentenceToFile = new HashMap<>();
+      try {
+        String absolutePath = loc.getAbsolutePath();
+        logger.info("looking in " + absolutePath);
+
+        List<String> audioFileNames=new ArrayList<>();
+        try (Stream<Path> paths = Files.walk(Paths.get(absolutePath))) {
+          paths
+              .filter(Files::isRegularFile)
+              .forEach(file -> {
+
+                logger.info("found " +file);
+                String fileName = file.getFileName().toString();
+                logger.info("fileName " +fileName);
+                if (fileName.endsWith("jpg")) {
+                  logger.info("skip " + fileName);
+                } else if (fileName.endsWith(".wav")) {
+               //   audio.add(fileName);
+                  audioFileNames.add(fileName);
+                } else if (fileName.endsWith(".txt")) {
+                  String e = fileName.toString();
+                  sentences.add(e);
+                  //    sentenceFiles.add(file);
+                  sentenceToFile.put(e, file);
+                }
+              });
+        }
+
+        audio.sort(Comparator.comparing(String::toString));
+        sentences.sort(Comparator.comparing(String::toString));
+
+        logger.info("found audio  " +audio);
+        logger.info("found sentences  " +sentences);
+
+        sentences.forEach(file -> {
+          Path path = sentenceToFile.get(file);
+          StringBuilder builder = new StringBuilder();
+
+          try (Stream<String> stream = Files.lines(path)) {
+            stream.forEach(builder::append);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+
+          {
+            Exercise exercise = new Exercise();
+            exercise.getMutable().setForeignLanguage(builder.toString());
+            String pathAudio = dirPath + File.separator + audio.get(exercises.size());
+            exToAudio.put(exercise, pathAudio);
+            exercises.add(exercise);
+          }
+        });
+      } catch (IOException e) {
+        logger.error("got " + e, e);
+      }
+
+      SlickDialog e = new SlickDialog(-1,
           defaultUser,
           projID,
           -1,
@@ -102,18 +196,20 @@ public class KPDialogs {
           modified,
           modified,
           DialogType.DIALOG.toString(),
-          "",
-          "",
+          DialogStatus.DEFAULT.toString(),
           titles[i],
-          "",
-          topics[i],
-          2,
-          0.5F,
-//          "",
-          "",
-          "",
           ""
-      ));
+      );
+      Dialog dialog = new Dialog(-1, defaultUser, projID, -1, time,
+          "", imageRef,
+          attributes,
+          exercises);
+      dialog.setSlickDialog(e);
+      dialogs.add(dialog);
+
+      logger.info("read " + dialog);
+      logger.info("\tex   " + dialog.getExercises());
+      logger.info("\tattr " + dialog.getAttributes());
     }
     return dialogs;
   }

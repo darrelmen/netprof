@@ -53,6 +53,7 @@ import mitll.langtest.server.database.custom.StateManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.dialog.DialogDAO;
 import mitll.langtest.server.database.dialog.IDialogDAO;
+import mitll.langtest.server.database.dialog.KPDialogs;
 import mitll.langtest.server.database.dliclass.DLIClassDAO;
 import mitll.langtest.server.database.dliclass.DLIClassJoinDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassDAO;
@@ -412,6 +413,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private void makeDialogDAOs() {
     dialogDAO = new DialogDAO(this, dbConnection, userExerciseDAO, this);
     imageDAO = new ImageDAO(this, dbConnection);
+    new KPDialogs().getDialogs(userDAO.getDefaultUser(),2);
+
+    System.exit(1);
   }
 
   private void afterDAOSetup(SlickAudioDAO slickAudioDAO) {

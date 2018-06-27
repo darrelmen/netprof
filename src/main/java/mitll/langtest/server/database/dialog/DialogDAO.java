@@ -36,6 +36,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickDialog;
 import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
@@ -91,7 +92,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
           System.currentTimeMillis(),
           DialogType.DEFAULT,
           "",
-          "", "", "", "", 2, 0, "", "", ""
+          "",
+          ""
       );
       defaultProject = getDefaultDialog();
       return defaultProject == null ? -1 : defaultProject.id();
@@ -123,6 +125,23 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public SlickDialog getByID(int projid) {
     Collection<SlickDialog> SlickDialogs = dao.byID(projid);
     return SlickDialogs.isEmpty() ? null : SlickDialogs.iterator().next();
+  }
+
+  /**
+   * join with attributes = meta data from domino
+   *
+   * join with exercises, in order
+   *
+   * join with aggregate score
+   *
+   * join with images
+   *
+   * @param projid
+   * @return
+   */
+  public  List<IDialog> getDialogs(int projid) {
+    List<IDialog> dialogs =new ArrayList();
+    return dialogs;
   }
 
   /**
@@ -253,17 +272,17 @@ public class DialogDAO extends DAO implements IDialogDAO {
                  long lastimport,
                  DialogType kind,
                  String status,
-                 String fltitle,
+//                 String fltitle,
                  String entitle,
-                 String flpresentation,
-                 String enpresentation,
-                 int numSpeakers,
+  //               String flpresentation,
+    //             String enpresentation,
+      //           int numSpeakers,
 
-                 float ilr,
-                 String orientation,
+        //         float ilr,
+                 String orientation
                  //  String audio,
-                 String passage,
-                 String translation
+          //       String passage,
+            //     String translation
   ) {
     return dao.insert(new SlickDialog(
         -1,
@@ -275,16 +294,16 @@ public class DialogDAO extends DAO implements IDialogDAO {
         new Timestamp(lastimport),
         kind.toString(),
         status,
-        fltitle,
+ //       fltitle,
         entitle,
-        flpresentation,
-        enpresentation,
-        numSpeakers,
-        ilr,
-        orientation,
+   //     flpresentation,
+     //   enpresentation,
+     //   numSpeakers,
+     //   ilr,
+        orientation
         //audio,
-        passage,
-        translation
+     //   passage,
+     //   translation
     ));
   }
 
@@ -292,10 +311,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @return
    * @see DatabaseImpl#getReport
    */
-  @Override
+/*  @Override
   public Collection<SlickDialog> getAll() {
     return dao.getAll();
-  }
+  }*/
 
   @Override
   public int getNum() {

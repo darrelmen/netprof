@@ -1,3 +1,4 @@
+package mitll.langtest.server.database.dialog;
 /*
  *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
@@ -30,71 +31,12 @@
  *
  */
 
-package mitll.langtest.server.database.dialog;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.project.IProjectManagement;
-import mitll.langtest.server.database.project.ProjectDAO;
-import mitll.langtest.server.database.project.ProjectManagement;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.project.ProjectType;
-import mitll.npdata.dao.SlickDialog;
-
-import java.util.Collection;
-
-public interface IDialogDAO extends IDAO {
-  int add(int userid,
-          int projid,
-          int dominoID,
-          int imageID,
-
-          long modified,
-          long lastimport,
-          DialogType kind,
-          String status,
-          String entitle,
-          String orientation
-  );
-
-
-  /**
-   * Deprecated - this doesn't really work in practice - takes forever, locks database while it's running.
-   * It's like a suicide pill.
-   * @param id
-   * @return
-   */
-  boolean delete(int id);
-  boolean deleteAllBut(int id);
-
-  /**
-   * @return
-   * @see IProjectManagement#populateProjects
-   */
- // Collection<SlickDialog> getAll();
-
-  /**
-   * @see ProjectManagement#getNestedProjectInfo
-   * @return
-   */
-  int getNum();
-
-
-  int ensureDefault(int defaultUser);
-
-  int getDefault();
-
-  /**
-   * @seex mitll.langtest.server.services.ProjectServiceImpl#exists(int)
-   * @param dialogID
-   * @return
-   */
-  boolean exists(int dialogID);
-  SlickDialog getByID(int dialogID);
-
-  /**
-   * @see ProjectDAO#update
-   * @param changed
-   * @return
-   */
-  boolean easyUpdate(SlickDialog changed);
+/**
+ * @seex mitll.langtest.server.database.project.ProjectDAO#add(int, long, String, String, String, mitll.langtest.server.database.project.ProjectType, ProjectStatus, String, String, String, int, int)
+ */
+public enum DialogStatus implements IsSerializable {
+  DELETED,
+  DEFAULT;
 }
