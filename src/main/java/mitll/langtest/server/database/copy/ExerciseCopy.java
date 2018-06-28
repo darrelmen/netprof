@@ -1412,7 +1412,7 @@ public class ExerciseCopy {
     }
     logger.info("addContextExercises adding " + pairs.size() + " pairs exercises ");
 
-    slickUEDAO.addBulkRelated(pairs);
+    slickUEDAO.getRelatedExercise().addBulkRelated(pairs);
   }
 
   /**
@@ -1553,7 +1553,7 @@ public class ExerciseCopy {
 
     if (!missing.isEmpty()) logger.error("huh? couldn't find " + missing.size() + " exercises : " + missing);
 
-    slickUEDAO.addBulkRelated(pairs);
+    slickUEDAO.getRelatedExercise().addBulkRelated(pairs);
     logger.info("addContextExercises imported " + n + " predef exercises and " + ct + " context exercises, parent->child size " + parentToChild.size());
 
     return parentToChild;
@@ -1577,7 +1577,8 @@ public class ExerciseCopy {
                                                      Collection<String> typeOrder,
                                                      Timestamp now,
                                                      Integer parentExerciseID,
-                                                     CommonExercise context, int dialogID) {
+                                                     CommonExercise context,
+                                                     int dialogID) {
     int contextid =
         slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, importUser, true, typeOrder));
 

@@ -7,6 +7,7 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.npdata.dao.SlickDialog;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Dialog implements IDialog {
@@ -22,7 +23,10 @@ public class Dialog implements IDialog {
   private DialogType kind = DialogType.DIALOG;
   private String orientation;
   private String imageRef;
-  private List<CommonExercise> exercises;
+  private List<ExerciseAttribute> attributes = new ArrayList<>();
+  private List<CommonExercise> exercises=new ArrayList<>();
+
+  float score;
 
   private transient SlickDialog slickDialog;
 
@@ -53,6 +57,18 @@ public class Dialog implements IDialog {
     this.exercises = exercises;
   }
 
+  public Dialog(SlickDialog slickDialog) {
+    this(slickDialog.id(),
+        slickDialog.userid(),
+        slickDialog.projid(),
+        slickDialog.dominoid(),
+        slickDialog.modified().getTime(),
+        slickDialog.orientation(),
+        "",
+        "",
+        slickDialog.entitle(),null,null);
+  }
+
   @Override
   public int getID() {
     return id;
@@ -64,7 +80,6 @@ public class Dialog implements IDialog {
   }
 
 
-  private List<ExerciseAttribute> attributes;// = new ArrayList<>();
 
   public List<ExerciseAttribute> getAttributes() {
     return attributes;
@@ -116,6 +131,18 @@ public class Dialog implements IDialog {
 
   public SlickDialog getSlickDialog() {
     return slickDialog;
+  }
+
+  public void setImageRef(String imageRef) {
+    this.imageRef = imageRef;
+  }
+
+  public void setAttributes(List<ExerciseAttribute> attributes) {
+    this.attributes = attributes;
+  }
+
+  public void setExercises(List<CommonExercise> exercises) {
+    this.exercises = exercises;
   }
 
   public String toString() {

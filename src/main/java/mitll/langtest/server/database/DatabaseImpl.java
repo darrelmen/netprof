@@ -413,8 +413,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private void makeDialogDAOs() {
     dialogDAO = new DialogDAO(this, dbConnection, userExerciseDAO, this);
     imageDAO = new ImageDAO(this, dbConnection);
-    new KPDialogs().getDialogs(userDAO.getDefaultUser(),2);
-
+    HashMap<CommonExercise, String> exToAudio = new HashMap<>();
+    new KPDialogs().getDialogs(userDAO.getDefaultUser(), 2, exToAudio);
+    //logger.info("exToAudio " + exToAudio);
+    exToAudio.forEach((k, v) -> logger.info(k + " : " + v));
     System.exit(1);
   }
 
@@ -875,9 +877,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
     Project project = getProject(projectid);
-    logger.debug("getExerciseDAO " + projectid + " found project " + project);
+    // logger.debug("getExerciseDAO " + projectid + " found project " + project);
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
-    logger.debug("getExerciseDAO " + projectid + " found exercise dao " + exerciseDAO);
+    // logger.debug("getExerciseDAO " + projectid + " found exercise dao " + exerciseDAO);
     return exerciseDAO;
   }
 
@@ -917,15 +919,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @param userid
-   * @see mitll.langtest.server.services.OpenUserServiceImpl#forgetProject
-   */
-  @Override
-  public void forgetProject(int userid) {
-    getUserProjectDAO().forget(userid);
-  }
-
-  /**
    * @param userWhere
    * @see IUserSecurityManager#setSessionUser
    * @see UserServiceImpl#getUserFromSession
@@ -941,8 +934,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #setStartupInfo(User)
    * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
    */
-  @Override
-  public void setStartupInfo(User userWhere, int projid) {
+  private void setStartupInfo(User userWhere, int projid) {
     projectManagement.setStartupInfo(userWhere, projid);
   }
 
@@ -956,7 +948,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @return
    */
-
   @Override
   public List<AmasExerciseImpl> getAMASExercises() {
     return null;
@@ -2186,6 +2177,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   public IAudioDAO getAudioDAO() {
     return audioDAO;
+  }
+
+  public IDialogDAO getDialogDAO() {
+    return dialogDAO;
+  }
+
+  @Override
+  public IImageDAO getImageDAO() {
+    return imageDAO;
   }
 
   @Override

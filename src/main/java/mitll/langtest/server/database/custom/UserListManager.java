@@ -876,7 +876,7 @@ public class UserListManager implements IUserListManager {
   private int makeContextExercise(CommonExercise userExercise, int newExerciseID, int projectID) {
     Exercise userExercise1 = new Exercise(-1, userExercise.getCreator(), "", projectID, false);
     int contextID = userExerciseDAO.add(userExercise1, false, true, getTypeOrder(projectID));
-    userExerciseDAO.addContextToExercise(newExerciseID, contextID, projectID);
+    userExerciseDAO.getRelatedExercise().addContextToExercise(newExerciseID, contextID, projectID);
     userExercise.getDirectlyRelated().add(userExercise1);
     return contextID;
   }

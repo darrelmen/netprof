@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,7 +23,7 @@ import java.util.stream.Stream;
 /**
  * Dialog data from Paul - 6/20/18
  */
-public class KPDialogs {
+public class KPDialogs implements IDialogReader {
   private static final Logger logger = LogManager.getLogger(KPDialogs.class);
 
   String docIDS = "333815\n" +
@@ -99,7 +98,15 @@ public class KPDialogs {
       "8\n" +
       "8";
 
-  public List<IDialog> getDialogs(int defaultUser, int projID,  Map<CommonExercise, String> exToAudio) {
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#doSpecialKorean(Project)
+   * @param defaultUser
+   * @param projID
+   * @param exToAudio
+   * @return
+   */
+  @Override
+  public List<Dialog> getDialogs(int defaultUser, int projID, Map<CommonExercise, String> exToAudio) {
     String[] docs = docIDS.split("\n");
     String[] titles = title.split("\n");
 
@@ -109,12 +116,12 @@ public class KPDialogs {
     String[] topics = pres.split("\n");
     String[] dirs = dir.split("\n");
 
-    List<IDialog> dialogs = new ArrayList<>();
+    List<Dialog> dialogs = new ArrayList<>();
     long time = System.currentTimeMillis();
     Timestamp modified = new Timestamp(time);
     for (int i = 0; i < docs.length; i++) {
       String dir = dirs[i];
-    //  logger.info("Dir " + dir);
+      //  logger.info("Dir " + dir);
       String imageRef = "/opt/netprof/images/" + dir + File.separator + dir + ".jpg";
       List<ExerciseAttribute> attributes = getExerciseAttributes(units[i], chapters[i], pages[i], topics[i]);
 
@@ -131,7 +138,7 @@ public class KPDialogs {
       List<Path> passageTextFiles = new ArrayList<>();
       //    Map<CommonExercise, String> exToAudio = new HashMap<>();
       Map<String, Path> sentenceToFile = new HashMap<>();
-      List<String> orientations=new ArrayList<>();
+      List<String> orientations = new ArrayList<>();
       try {
         String absolutePath = loc.getAbsolutePath();
         logger.info("looking in " + absolutePath);
@@ -145,16 +152,16 @@ public class KPDialogs {
                 String fileName = file.getFileName().toString();
                 String[] parts = fileName.split("_");
                 if (parts.length == 2) passageTextFiles.add(file);
-  //              logger.info("fileName " + fileName);
+                //              logger.info("fileName " + fileName);
                 if (fileName.endsWith("jpg")) {
                   logger.info("skip " + fileName);
                 } else if (fileName.endsWith(".wav")) {
-    //              logger.info("audio " + fileName);
+                  //              logger.info("audio " + fileName);
                   audio.add(fileName);
                   //    audioFileNames.add(fileName);
                 } else if (fileName.endsWith(".txt") && parts.length == 3) { // e.g. 010_C01_00.txt
                   String e = fileName;
-      //            logger.info("text " + fileName);
+                  //            logger.info("text " + fileName);
                   sentences.add(e);
                   sentenceToFile.put(e, file);
                 }
@@ -165,22 +172,20 @@ public class KPDialogs {
         sentences.sort(Comparator.comparingInt(this::getIndex));
 
         //logger.info("found audio      " + audio);
-       // logger.info("found sentences  " + sentences);
+        // logger.info("found sentences  " + sentences);
 
         sentences.forEach(file -> {
           Path path = sentenceToFile.get(file);
           int index = getIndex(path.toString());
-         // logger.info("sentence " + file);
-         // logger.info("path     " + path.toString());
-         // logger.info("index    " + index);
+          // logger.info("sentence " + file);
+          // logger.info("path     " + path.toString());
+          // logger.info("index    " + index);
 
           String fileText = getTextFromFile(path);
 
           if (index == 0) {
             orientations.add(fileText);
-          }
-          else
-          {
+          } else {
             Exercise exercise = new Exercise();
             attributes.forEach(exercise::addAttribute);
             exercise.getMutable().setForeignLanguage(fileText);
@@ -221,17 +226,17 @@ public class KPDialogs {
       dialog.setSlickDialog(e);
       dialogs.add(dialog);
 
-     // logger.info("read " + dialog);
+      // logger.info("read " + dialog);
       dialog.getExercises().forEach(logger::info);
       //logger.info("\tex   " + dialog.getExercises());
-     // logger.info("\tattr " + dialog.getAttributes());
+      // logger.info("\tattr " + dialog.getAttributes());
       dialog.getAttributes().forEach(logger::info);
     }
     return dialogs;
   }
 
   @NotNull
-  private String  getTextFromFile(Path path) {
+  private String getTextFromFile(Path path) {
     StringBuilder builder = new StringBuilder();
 
     try (Stream<String> stream = Files.lines(path)) {
@@ -254,13 +259,13 @@ public class KPDialogs {
 
   private int getIndex(String o1) {
     String[] split = o1.split("/");
-    String name =split[split.length-1];
-   // logger.info("index " + name );
+    String name = split[split.length - 1];
+    // logger.info("index " + name );
     String[] parts = name.split("_");
     String count = parts[2];
-  //  logger.info("count " + count );
+    //  logger.info("count " + count );
     String index = count.split("\\.")[0];
-  //  logger.info("index " + index );
+    //  logger.info("index " + index );
     return Integer.parseInt(index);
   }
 }

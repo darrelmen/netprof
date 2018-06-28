@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface IImageDAO extends IDAO {
 
+  int insert(SlickImage image);
+
   List<SlickImage> getAll(int projid);
 
   List<SlickImage> getAllNoExistsCheck(int projid);

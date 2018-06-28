@@ -46,6 +46,7 @@ import mitll.langtest.server.scoring.ASRWebserviceScoring;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.*;
@@ -53,6 +54,7 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickProject;
+import org.apache.commons.collections.list.AbstractLinkedList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -109,6 +111,7 @@ public class Project implements IPronunciationLookup {
   private final Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
 
   private Map<String, Integer> fileToRecorder = new HashMap<>();
+  private List<IDialog> dialogs =new ArrayList();
 
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
@@ -681,6 +684,14 @@ public class Project implements IPronunciationLookup {
 
   public String getName() {
     return project.name();
+  }
+
+  public List<IDialog> getDialogs() {
+    return dialogs;
+  }
+
+  public void setDialogs(List<IDialog> dialogs) {
+    this.dialogs = dialogs;
   }
 
   public String toString() {

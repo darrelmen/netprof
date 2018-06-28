@@ -33,6 +33,8 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.dialog.IDialogDAO;
+import mitll.langtest.server.database.image.IImageDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.phone.Phone;
@@ -70,6 +72,8 @@ public interface DAOContainer {
 
   IUserSessionDAO getUserSessionDAO();
 
+  IImageDAO getImageDAO();
+
   IWordDAO getWordDAO();
 
   IPhoneDAO<Phone> getPhoneDAO();
@@ -79,4 +83,6 @@ public interface DAOContainer {
   IEventDAO getEventDAO();
 
   IAudioDAO getAudioDAO();
+
+  IDialogDAO getDialogDAO();
 }

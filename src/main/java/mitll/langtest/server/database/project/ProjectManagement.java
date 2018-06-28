@@ -48,6 +48,8 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.dialog.IDialogDAO;
+import mitll.langtest.server.database.dialog.KPDialogs;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
@@ -59,10 +61,13 @@ import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
+import mitll.langtest.shared.dialog.Dialog;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickImage;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -114,11 +119,6 @@ public class ProjectManagement implements IProjectManagement {
    * @see mitll.langtest.server.domino.ProjectSync#getProps
    */
   public static final String NUM_ITEMS = "Num Items";
-
-  /**
-   * @see #addOtherProps
-   */
-  private static final String DOMINO_ID = "Domino ID";
 
   private static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
   private static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
@@ -284,6 +284,10 @@ public class ProjectManagement implements IProjectManagement {
     logMemory();
   }
 
+  /**
+   * @param projid
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
+   */
   public void configureProjectByID(int projid) {
     Project project = getProject(projid, false);
     if (project != null) {
@@ -359,7 +363,8 @@ public class ProjectManagement implements IProjectManagement {
       }
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(),
-        db.getResultDAO(), db.getAudioDAO(),
+        db.getResultDAO(),
+        db.getAudioDAO(),
         db.getPhoneDAO(),
         project));
 
@@ -397,20 +402,61 @@ public class ProjectManagement implements IProjectManagement {
       // side effect is to cache the users.
       new Thread(() -> rememberUsers(projectID)).start();
 
-      /**
-       * Cache it for later....?
-       */
- /*      new Thread(() -> {
-         db
-          .getAnalysis(projectID)
-          .getUserInfo(db.getUserDAO(), 1);
-       }).start();*/
-
+      if (project.getLanguageEnum() == Language.KOREAN) {
+        if (project.getKind() == ProjectType.DIALOG) {
+          addDialogInfo(project);
+        }
+      }
       return rawExercises.size();
     } else {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);
       return 0;
     }
+  }
+
+  /**
+   * Take our canned data and put it in the database.
+   *
+   * @param project
+   */
+  private void addDialogInfo(Project project) {
+    int projid = project.getID();
+    IDialogDAO dialogDAO = db.getDialogDAO();
+
+    List<IDialog> dialogs1 = dialogDAO.getDialogs(projid);
+    if (dialogs1.isEmpty()) {
+      Map<CommonExercise, String> exToAudio = new HashMap<>();
+      List<Dialog> dialogs = new KPDialogs().getDialogs(db.getUserDAO().getDefaultUser(), 2, exToAudio);
+
+      dialogs.forEach(dialog -> {
+        Timestamp modified = new Timestamp(System.currentTimeMillis());
+        Timestamp ago = new Timestamp(System.currentTimeMillis() - FIVE_YEARS);
+
+        SlickImage image = new SlickImage(
+            -1,
+            projid,
+            -1,
+
+            modified,
+            modified,
+
+            dialog.getImageRef(),
+            dialog.getImageRef(),
+
+            0,
+            0,
+
+            false,
+            false,
+            ago
+        );
+
+        db.getImageDAO().insert(image);
+      });
+    } else {
+      project.setDialogs(dialogs1);
+    }
+    // dialogDAO.getDialogs();
   }
 
   private boolean isProduction(Project project) {

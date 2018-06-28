@@ -3,6 +3,7 @@ package mitll.langtest.server.database.image;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickImage;
 import mitll.npdata.dao.image.ImageDAOWrapper;
@@ -25,9 +26,9 @@ public class ImageDAO extends DAO implements IImageDAO {
   private final ImageDAOWrapper dao;
 
   /**
-   *
    * @param database
    * @param dbConnection
+   * @see DatabaseImpl#makeDialogDAOs
    */
   public ImageDAO(Database database, DBConnection dbConnection) {
     super(database);
@@ -53,6 +54,10 @@ public class ImageDAO extends DAO implements IImageDAO {
     return false;
   }
 
+  @Override
+  public int insert(SlickImage image) {
+    return dao.insert(image);
+  }
 
   @Override
   public List<SlickImage> getAll(int projid) {

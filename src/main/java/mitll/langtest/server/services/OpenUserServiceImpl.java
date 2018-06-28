@@ -313,10 +313,10 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           logger.info("setProject set project (" + projectid + ") for '" + sessionUser + "' = " + id);
           db.getProjectManagement().configureProjectByID(projectid);
           db.rememberUsersCurrentProject(id, projectid);
-          db.setStartupInfo(sessionUser, projectid);
+          db.getProjectManagement().setStartupInfo(sessionUser, projectid);
         } else {
           logger.warn("setProject : project " + projectid + " is gone....");
-          db.forgetProject(id);
+          db.getUserProjectDAO().forget(id);
           db.getProjectManagement().clearStartupInfo(sessionUser);
         }
       }
@@ -335,7 +335,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     try {
       int sessionUserID = getSessionUserID();
       if (sessionUserID != -1) {
-        db.forgetProject(sessionUserID);
+        db.getUserProjectDAO().forget(sessionUserID);
       }
     } catch (DominoSessionException e) {
       logger.error("forgetProject got  " + e, e);

@@ -89,10 +89,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
-  private final RelatedExerciseDAOWrapper relatedExerciseDAOWrapper;
+ // private final RelatedExerciseDAOWrapper relatedExerciseDAOWrapper;
   //private final ExerciseAttributeDAOWrapper attributeDAOWrapper;
-  private final AttributeHelper attributeHelper;
-  private final AttributeJoinHelper attributeJoinHelper;
+  private final IAttribute attributeHelper;
+  private final IAttributeJoin attributeJoinHelper;
+  private final IRelatedExercise relatedExerciseHelper;
   //private final ExerciseAttributeJoinDAOWrapper attributeJoinDAOWrapper;
   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
   private final IUserDAO userDAO;
@@ -113,11 +114,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   public SlickUserExerciseDAO(DatabaseImpl database, DBConnection dbConnection) {
     super(database);
     dao = new ExerciseDAOWrapper(dbConnection);
-    relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
+   // relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
     //attributeDAOWrapper = new ExerciseAttributeDAOWrapper(dbConnection);
     //attributeJoinDAOWrapper = new ExerciseAttributeJoinDAOWrapper(dbConnection);
     attributeHelper = new AttributeHelper(new ExerciseAttributeDAOWrapper(dbConnection));
     attributeJoinHelper = new AttributeJoinHelper(new ExerciseAttributeJoinDAOWrapper(dbConnection));
+    relatedExerciseHelper = new RelatedExerciseHelper(new RelatedExerciseDAOWrapper(dbConnection));
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();
@@ -161,7 +163,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     boolean b1 = attributeHelper.updateProject(old, newprojid) ;
     if (b1) logger.info("updated exercise attributes to " + newprojid);
 
-    boolean b2 = relatedExerciseDAOWrapper.updateProject(old, newprojid) > 0;
+    boolean b2 = relatedExerciseHelper.updateProject(old, newprojid);
     if (b2) logger.info("updated related exercises  to  " + newprojid);
 
     return b && b1 && b2;
@@ -982,7 +984,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     if (exercise != null) {
       //   for (SlickExercise ex:relatedExerciseDAOWrapper.contextExercises(exid)) exercise.getDirectlyRelated().add(fromSlick(ex));
-      relatedExerciseDAOWrapper.contextExercises(exid)
+      relatedExerciseHelper.getContextExercises(exid)
           .forEach(ex -> exercise.getDirectlyRelated().add(fromSlick(ex, shouldSwap)));
     }
     return exercise;
@@ -1195,21 +1197,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    * @see DatabaseImpl#createTables
    */
-  public IDAO getRelatedExercise() {
-    return new IDAO() {
-      public void createTable() {
-        relatedExerciseDAOWrapper.createTable();
-      }
-
-      public String getName() {
-        return relatedExerciseDAOWrapper.getName();
-      }
-
-      @Override
-      public boolean updateProject(int oldID, int newprojid) {
-        return relatedExerciseDAOWrapper.updateProject(oldID, newprojid) > 0;
-      }
-    };
+  public IRelatedExercise getRelatedExercise() {
+    return relatedExerciseHelper;
   }
 
 /*  public IDAO getExerciseAttribute() {
@@ -1241,23 +1230,23 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param relatedExercises
    * @see mitll.langtest.server.database.copy.ExerciseCopy#addContextExercises
    */
-  public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
-    relatedExerciseDAOWrapper.addBulk(relatedExercises);
+/*  public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
+    relatedExerciseHelper.addBulkRelated(relatedExercises);
   }
 
   @Override
   public int getParentForContextID(int contextID) {
-    return relatedExerciseDAOWrapper.parentForContextID(contextID);
+    return relatedExerciseHelper.parentForContextID(contextID);
   }
 
   public Collection<SlickRelatedExercise> getAllRelated(int projid) {
-    return relatedExerciseDAOWrapper.allByProject(projid);
+    return relatedExerciseHelper.allByProject(projid);
   }
 
   public void addContextToExercise(int exid, int contextExid, int projid) {
-    relatedExerciseDAOWrapper.insert(new SlickRelatedExercise(-1, exid, contextExid, projid, 1,
+    relatedExerciseHelper.insert(new SlickRelatedExercise(-1, exid, contextExid, projid, 1,
         new Timestamp(System.currentTimeMillis())));
-  }
+  }*/
 
 
   /**
@@ -1457,14 +1446,16 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
   @Override
   public void deleteForProject(int projID) {
-    relatedExerciseDAOWrapper.deleteForProject(projID);
+    relatedExerciseHelper.deleteForProject(projID);
     dao.deleteForProject(projID);
   }
+/*
 
   @Override
   public int deleteRelated(int related) {
-    return relatedExerciseDAOWrapper.deleteRelated(related);
+    return relatedExerciseHelper.deleteRelated(related);
   }
+*/
 
   @Override
   public SlickExercise getByDominoID(int projID, int docID) {

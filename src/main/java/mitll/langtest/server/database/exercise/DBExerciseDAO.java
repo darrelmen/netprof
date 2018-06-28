@@ -214,7 +214,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           ));
 //      logger.info("readExercises project " + project + " idToContext " + idToContext.size());
 
-      attachContextExercises(allNonContextExercises, userExerciseDAO.getAllRelated(projid), idToContext);
+      attachContextExercises(allNonContextExercises, userExerciseDAO.getRelatedExercise().getAllRelated(projid), idToContext);
 
       return allNonContextExercises;
     } catch (Exception e) {
@@ -415,7 +415,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   @Override
   public int getParentFor(int exid) {
-    return userExerciseDAO.getParentForContextID(exid);
+    return userExerciseDAO.getRelatedExercise().getParentForContextID(exid);
   }
 
   private ExerciseDAOWrapper getDao() {

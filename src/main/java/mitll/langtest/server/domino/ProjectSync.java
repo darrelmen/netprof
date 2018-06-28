@@ -231,7 +231,7 @@ public class ProjectSync implements IProjectSync {
     userExerciseDAO.deleteByExID(contextDeletes);
 
     for (int id : contextDeletes) {
-      int i = userExerciseDAO.deleteRelated(id);
+      int i = userExerciseDAO.getRelatedExercise().deleteRelated(id);
       if (i == 1) {
         logger.info("doContextDeletes deleted relation for context " + id);
       } else if (i == 0) {

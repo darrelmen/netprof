@@ -58,6 +58,12 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String EXERCISEID = "exerciseid";
   private static final String TRANSLITERATION = "transliteration";
   private static final String OVERRIDE = "override";
+
+  @Override
+  public IRelatedExercise getRelatedExercise() {
+    return null;
+  }
+
   private static final String UNIT = "unit";
 
   @Override
@@ -273,11 +279,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return -1;
   }
 
-  @Override
-  public void addContextToExercise(int exid, int contextid, int projid) {
-
-  }
-
   private String fixSingleQuote(String s) {
     return s == null ? "" : s.replaceAll("'", "''");
   }
@@ -489,19 +490,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   public int ensureTemplateExercise(int projID) {
     return -1;
   }
-
-/*
-  @Override
-  public Collection<CommonExercise> getAllUserExercises(int projid) {
-    return getCommonExercises(GET_ALL_SQL);
-  }
-*/
-
-  @Override
-  public int getParentForContextID(int contextID) {
-    return 0;
-  }
-
 
   /**
    * @return
@@ -731,12 +719,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   @Override
   public void deleteForProject(int projID) {
-
-  }
-
-  @Override
-  public int deleteRelated(int related) {
-    return 0;
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {

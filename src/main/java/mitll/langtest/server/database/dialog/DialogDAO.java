@@ -35,10 +35,13 @@ package mitll.langtest.server.database.dialog;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.userexercise.IAttribute;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.SlickDialog;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.npdata.dao.*;
 import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
 import mitll.npdata.dao.dialog.DialogDAOWrapper;
 import org.apache.logging.log4j.LogManager;
@@ -46,6 +49,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DialogDAO extends DAO implements IDialogDAO {
   private static final Logger logger = LogManager.getLogger(DialogDAO.class);
@@ -79,6 +83,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
     this.databaseImpl = databaseImpl;
     ensureDefault(databaseImpl.getUserDAO().getDefaultUser());
     dialogAttributeJoinHelper = new DialogAttributeJoinHelper(new DialogAttributeJoinDAOWrapper(dbConnection));
+
+
   }
 
   public int ensureDefault(int defaultUser) {
@@ -127,21 +133,118 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return SlickDialogs.isEmpty() ? null : SlickDialogs.iterator().next();
   }
 
+  private Collection<SlickDialog> getByProjID(int projid) {
+    Collection<SlickDialog> slickDialogs = dao.byProjID(projid);
+    return slickDialogs;
+  }
+
   /**
    * join with attributes = meta data from domino
    *
    * join with exercises, in order
    *
-   * join with aggregate score
+   * TODO : join with aggregate score
    *
    * join with images
    *
    * @param projid
    * @return
    */
-  public  List<IDialog> getDialogs(int projid) {
-    List<IDialog> dialogs =new ArrayList();
+  @Override
+  public List<IDialog> getDialogs(int projid) {
+    Collection<SlickDialog> byProjID = getByProjID(projid);
+
+    List<IDialog> dialogs = new ArrayList<IDialog>();
+    Map<Integer, Dialog> idToDialog = new HashMap<>();
+
+    byProjID.forEach(slickDialog -> {
+      Dialog e = new Dialog(slickDialog);
+      dialogs.add(e);
+      idToDialog.put(slickDialog.id(), e);
+    });
+
+    Map<Integer, Collection<SlickDialogAttributeJoin>> allJoinByProject = dialogAttributeJoinHelper.getAllJoinByProject(projid);
+
+    // add dialog attributes
+    Map<Integer, ExerciseAttribute> idToPair = databaseImpl.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
+
+    Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated =
+        databaseImpl.getUserExerciseDAO().getRelatedExercise().getDialogIDToRelated(projid);
+
+    allJoinByProject.forEach((dialogID, slickDialogAttributeJoins) -> {
+      Dialog dialog = idToDialog.get(dialogID);
+      // add attributes
+      slickDialogAttributeJoins
+          .forEach(slickDialogAttributeJoin -> dialog.getAttributes()
+              .add(idToPair.get(slickDialogAttributeJoin.attrid())));
+
+      //add exercises
+      addExercises(projid, dialogIDToRelated, dialogID, dialog);
+
+      // add images
+
+      addImage(projid, dialog);
+    });
+
     return dialogs;
+  }
+
+  private void addImage(int projid, Dialog dialog) {
+    List<SlickImage> all = databaseImpl.getImageDAO().getAll(projid);
+    Map<Integer, String> idToImageRef = new HashMap<>();
+    all.forEach(slickImage -> idToImageRef.put(slickImage.id(), slickImage.filepath()));
+    int imageid = dialog.getSlickDialog().imageid();
+    if (imageid < 1) logger.warn("no image for dialog " + dialog);
+    else {
+      String s = idToImageRef.get(imageid);
+      if (s == null) {
+        logger.warn("no image by " + imageid +
+            "for dialog " + dialog);
+      } else {
+        dialog.setImageRef(s);
+      }
+    }
+  }
+
+  private void addExercises(int projid, Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated, Integer dialogID, Dialog dialog) {
+    List<SlickRelatedExercise> slickRelatedExercises = dialogIDToRelated.get(dialogID);
+
+    List<CommonExercise> exercises = new ArrayList<>();
+    Set<Integer> candidate = new HashSet<>();
+    slickRelatedExercises.forEach(slickRelatedExercise -> {
+      CommonExercise parent = databaseImpl.getExercise(projid, slickRelatedExercise.exid());
+      CommonExercise child = databaseImpl.getExercise(projid, slickRelatedExercise.contextexid());
+      parent.getDirectlyRelated().add(child);
+      child.getMutable().setParentExerciseID(parent.getParentExerciseID());
+
+      exercises.add(parent);
+
+      exercises.add(child);
+
+      int id = parent.getID();
+      candidate.add(id);
+      candidate.add(child.getID());
+    });
+
+
+    List<CommonExercise> firstEx = exercises
+        .stream()
+        .filter(commonExercise -> candidate.contains(commonExercise.getID()))
+        .collect(Collectors.toList());
+
+    int size = firstEx.size();
+    if (size == 0) {
+      logger.error("huh no first exercise");
+      // }
+//      else if (size == 1) {
+    } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
+
+    CommonExercise current = firstEx.iterator().next();
+    while (current != null) {
+      dialog.getExercises().add(current);
+      dialog.getExercises().addAll(current.getDirectlyRelated());
+      current = current.getDirectlyRelated().isEmpty() ? null : current.getDirectlyRelated().get(0);
+    }
   }
 
   /**
@@ -274,15 +377,15 @@ public class DialogDAO extends DAO implements IDialogDAO {
                  String status,
 //                 String fltitle,
                  String entitle,
-  //               String flpresentation,
-    //             String enpresentation,
-      //           int numSpeakers,
+                 //               String flpresentation,
+                 //             String enpresentation,
+                 //           int numSpeakers,
 
-        //         float ilr,
+                 //         float ilr,
                  String orientation
                  //  String audio,
-          //       String passage,
-            //     String translation
+                 //       String passage,
+                 //     String translation
   ) {
     return dao.insert(new SlickDialog(
         -1,
@@ -294,16 +397,16 @@ public class DialogDAO extends DAO implements IDialogDAO {
         new Timestamp(lastimport),
         kind.toString(),
         status,
- //       fltitle,
+        //       fltitle,
         entitle,
-   //     flpresentation,
-     //   enpresentation,
-     //   numSpeakers,
-     //   ilr,
+        //     flpresentation,
+        //   enpresentation,
+        //   numSpeakers,
+        //   ilr,
         orientation
         //audio,
-     //   passage,
-     //   translation
+        //   passage,
+        //   translation
     ));
   }
 
@@ -315,7 +418,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public Collection<SlickDialog> getAll() {
     return dao.getAll();
   }*/
-
   @Override
   public int getNum() {
     return dao.countAll();
