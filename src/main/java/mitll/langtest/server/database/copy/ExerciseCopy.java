@@ -84,7 +84,8 @@ public class ExerciseCopy {
         toImport,
         typeOrder,
         idToCandidateOverride,
-        dominoToExID));
+        dominoToExID,
+        -1));
 
     Map<String, Integer> exToInt = getOldToNewExIDs(db, projectid);
     reallyAddingUserExercises(projectid, typeOrder, slickUEDAO, exToInt, customExercises);
@@ -1352,6 +1353,7 @@ public class ExerciseCopy {
    * @param typeOrder
    * @param idToCandidateOverride
    * @param dominoToExID
+   * @param dialogID
    * @return parent->child map - NOT USED IN SYNC
    * @see #copyUserAndPredefExercises
    * @see mitll.langtest.server.domino.ProjectSync#getDominoUpdateResponse
@@ -1362,7 +1364,8 @@ public class ExerciseCopy {
                                            SlickUserExerciseDAO slickUEDAO,
                                            Collection<CommonExercise> exercises,
                                            Collection<String> typeOrder,
-                                           Map<String, List<Exercise>> idToCandidateOverride, Map<Integer, Integer> dominoToExID) {
+                                           Map<String, List<Exercise>> idToCandidateOverride,
+                                           Map<Integer, Integer> dominoToExID, int dialogID) {
 
     logger.info("copyUserAndPredefExercises for project " + projectid +
         "\n\tfound " + exercises.size() + " old exercises" +
@@ -1377,7 +1380,7 @@ public class ExerciseCopy {
     logger.info("copyUserAndPredefExercises old->new for project #" + projectid +
         " : " + exercises.size() + " exercises, " + exToInt.size());
 
-    return addContextExercises(projectid, slickUEDAO, exToInt, importUser, exercises, typeOrder);
+    return addContextExercises(projectid, slickUEDAO, exToInt, importUser, exercises, typeOrder, dialogID);
   }
 
   /**
@@ -1424,7 +1427,7 @@ public class ExerciseCopy {
    * @param idToCandidateOverride
    * @param dominoToExID
    * @return
-   * @see #addExercises(int, int, Map, SlickUserExerciseDAO, Collection, Collection, Map, Map)
+   * @see #addExercises(int, int, Map, SlickUserExerciseDAO, Collection, Collection, Map, Map, int)
    * @see #addPredefExercises
    */
   private Map<CommonExercise, Integer> addExercisesAndAttributes(int importUser,
@@ -1487,6 +1490,7 @@ public class ExerciseCopy {
    * @param importUser
    * @param exercises
    * @param typeOrder
+   * @param dialogID
    * @return parentToChild
    * @see #copyUserAndPredefExercises
    */
@@ -1495,7 +1499,7 @@ public class ExerciseCopy {
                                                    Map<CommonExercise, Integer> exToInt,
                                                    int importUser,
                                                    Collection<CommonExercise> exercises,
-                                                   Collection<String> typeOrder) {
+                                                   Collection<String> typeOrder, int dialogID) {
     int n = 0;
     int ct = 0;
     List<SlickRelatedExercise> pairs = new ArrayList<>();
@@ -1529,7 +1533,8 @@ public class ExerciseCopy {
         for (CommonExercise context : ex.getDirectlyRelated()) {
           context.getMutable().setOldID(parentID + "_" + (contextCount++));
 
-          SlickRelatedExercise relation = insertContextExercise(projectid, slickUEDAO, importUser, typeOrder, now, parentID, context, 1);
+          SlickRelatedExercise relation =
+              insertContextExercise(projectid, slickUEDAO, importUser, typeOrder, now, parentID, context, dialogID);
           pairs.add(relation);
           int newContextExID = relation.contextexid();
           //  logger.info("\taddContextExercises context id is "+ context.getID());

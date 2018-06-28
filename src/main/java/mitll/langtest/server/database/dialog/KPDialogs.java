@@ -99,11 +99,11 @@ public class KPDialogs implements IDialogReader {
       "8";
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#doSpecialKorean(Project)
    * @param defaultUser
    * @param projID
    * @param exToAudio
    * @return
+   * @see mitll.langtest.server.database.project.ProjectManagement#addDialogInfo
    */
   @Override
   public List<Dialog> getDialogs(int defaultUser, int projID, Map<CommonExercise, String> exToAudio) {
@@ -174,6 +174,8 @@ public class KPDialogs implements IDialogReader {
         //logger.info("found audio      " + audio);
         // logger.info("found sentences  " + sentences);
 
+        Set<String> speakers = new LinkedHashSet<>();
+
         sentences.forEach(file -> {
           Path path = sentenceToFile.get(file);
           int index = getIndex(path.toString());
@@ -188,7 +190,15 @@ public class KPDialogs implements IDialogReader {
           } else {
             Exercise exercise = new Exercise();
             attributes.forEach(exercise::addAttribute);
-            exercise.getMutable().setForeignLanguage(fileText);
+
+            int i1 = fileText.indexOf(":");
+            String speaker = fileText.substring(0, i1).trim();
+            speakers.add(speaker);
+            exercise.addAttribute(new ExerciseAttribute("Speaker", speaker));
+           // logger.info("speaker " + speaker);
+            String turn = fileText.substring(i1+1).trim();
+
+            exercise.getMutable().setForeignLanguage(turn);
 
             String pathAudio = dirPath + File.separator + audio.get(exercises.size());
             exToAudio.put(exercise, pathAudio);
@@ -196,6 +206,10 @@ public class KPDialogs implements IDialogReader {
             exercises.add(exercise);
           }
         });
+
+        List<String> speakersList = new ArrayList<>(speakers);
+        List<String> ids = Arrays.asList("A", "B", "C");
+        speakersList.forEach(s -> attributes.add(new ExerciseAttribute("Speaker " + ids.get(speakersList.indexOf(s)), s)));
       } catch (IOException e) {
         logger.error("got " + e, e);
       }
@@ -227,10 +241,10 @@ public class KPDialogs implements IDialogReader {
       dialogs.add(dialog);
 
       // logger.info("read " + dialog);
-      dialog.getExercises().forEach(logger::info);
+  //    dialog.getExercises().forEach(logger::info);
       //logger.info("\tex   " + dialog.getExercises());
       // logger.info("\tattr " + dialog.getAttributes());
-      dialog.getAttributes().forEach(logger::info);
+    //  dialog.getAttributes().forEach(logger::info);
     }
     return dialogs;
   }

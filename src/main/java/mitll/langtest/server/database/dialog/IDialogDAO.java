@@ -37,11 +37,8 @@ import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectDAO;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.SlickDialog;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface IDialogDAO extends IDAO {
@@ -53,7 +50,7 @@ public interface IDialogDAO extends IDAO {
           long modified,
           long lastimport,
           DialogType kind,
-          String status,
+          DialogStatus status,
           String entitle,
           String orientation
   );

@@ -48,6 +48,9 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.copy.ExerciseCopy;
+import mitll.langtest.server.database.dialog.DialogStatus;
+import mitll.langtest.server.database.dialog.DialogType;
 import mitll.langtest.server.database.dialog.IDialogDAO;
 import mitll.langtest.server.database.dialog.KPDialogs;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
@@ -426,11 +429,13 @@ public class ProjectManagement implements IProjectManagement {
     List<IDialog> dialogs1 = dialogDAO.getDialogs(projid);
     if (dialogs1.isEmpty()) {
       Map<CommonExercise, String> exToAudio = new HashMap<>();
-      List<Dialog> dialogs = new KPDialogs().getDialogs(db.getUserDAO().getDefaultUser(), 2, exToAudio);
+      int defaultUser = db.getUserDAO().getDefaultUser();
+      List<Dialog> dialogs = new KPDialogs().getDialogs(defaultUser, projid, exToAudio);
 
+      long now = System.currentTimeMillis();
       dialogs.forEach(dialog -> {
-        Timestamp modified = new Timestamp(System.currentTimeMillis());
-        Timestamp ago = new Timestamp(System.currentTimeMillis() - FIVE_YEARS);
+        Timestamp modified = new Timestamp(now);
+        Timestamp ago = new Timestamp(now - FIVE_YEARS);
 
         SlickImage image = new SlickImage(
             -1,
@@ -440,7 +445,7 @@ public class ProjectManagement implements IProjectManagement {
             modified,
             modified,
 
-            dialog.getImageRef(),
+            "",
             dialog.getImageRef(),
 
             0,
@@ -451,7 +456,24 @@ public class ProjectManagement implements IProjectManagement {
             ago
         );
 
-        db.getImageDAO().insert(image);
+        int imageID = db.getImageDAO().insert(image);
+
+        dialog.getSlickDialog().imageid_$eq(imageID);
+
+        int add = dialogDAO.add(defaultUser, projid, 1, imageID, now, now, DialogType.DIALOG, DialogStatus.DEFAULT,
+            dialog.getEntitle(), dialog.getOrientation());
+
+
+        new ExerciseCopy().addExercises(
+            defaultUser,
+            projid,
+            new HashMap<>(),
+            (SlickUserExerciseDAO) db.getUserExerciseDAO(),
+            dialog.getExercises(),
+            project.getTypeOrder(),
+            new HashMap<>(),
+            new HashMap<>(),
+            add);
       });
     } else {
       project.setDialogs(dialogs1);

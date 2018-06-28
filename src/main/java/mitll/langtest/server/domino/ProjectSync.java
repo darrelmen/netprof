@@ -19,7 +19,6 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -156,7 +155,7 @@ public class ProjectSync implements IProjectSync {
                 newEx,
                 typeOrder,
                 new HashMap<>(),
-                dominoToExID);
+                dominoToExID, -1);
           }
           newEx.forEach(commonExercise -> updates.add(new DominoUpdateItem(commonExercise, ADD)));
         }

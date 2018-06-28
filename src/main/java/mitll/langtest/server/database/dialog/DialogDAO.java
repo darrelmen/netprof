@@ -35,7 +35,6 @@ package mitll.langtest.server.database.dialog;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.userexercise.IAttribute;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.IDialog;
@@ -54,15 +53,14 @@ import java.util.stream.Collectors;
 public class DialogDAO extends DAO implements IDialogDAO {
   private static final Logger logger = LogManager.getLogger(DialogDAO.class);
 
-  private static final String DEFAULT_DIALOG = "DEFAULT_DIALOG";
+ // private static final String DEFAULT_DIALOG = "DEFAULT_DIALOG";
   public static final long MIN = 60 * 1000L;
   public static final long HOUR = 60 * MIN;
   public static final long DAY = 24 * HOUR;
   public static final long YEAR = 365 * DAY;
 
   private final DialogDAOWrapper dao;
-  //  private final ProjectPropertyDAO propertyDAO;
-  // private final IUserExerciseDAO userExerciseDAO;
+
   private DatabaseImpl databaseImpl;
   private DialogAttributeJoinHelper dialogAttributeJoinHelper;
 
@@ -97,7 +95,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
           System.currentTimeMillis(),
           System.currentTimeMillis(),
           DialogType.DEFAULT,
-          "",
+          DialogStatus.DEFAULT,
           "",
           ""
       );
@@ -360,8 +358,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * TODO : consider adding domino project id
    *
    * @param userid
-   * @param modified
    * @param dominoID
+   * @param modified
+   * @param status
    * @return
    * @see #ensureDefault
    */
@@ -374,7 +373,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
                  long modified,
                  long lastimport,
                  DialogType kind,
-                 String status,
+                 DialogStatus status,
 //                 String fltitle,
                  String entitle,
                  //               String flpresentation,
@@ -396,7 +395,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         new Timestamp(modified),
         new Timestamp(lastimport),
         kind.toString(),
-        status,
+        status.toString(),
         //       fltitle,
         entitle,
         //     flpresentation,

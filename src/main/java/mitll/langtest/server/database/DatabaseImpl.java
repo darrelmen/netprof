@@ -348,10 +348,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return this;
   }
 
-  private void stopNow() {
+/*  private void stopNow() {
     close();
     System.exit(0);
-  }
+  }*/
 
 
   /**
