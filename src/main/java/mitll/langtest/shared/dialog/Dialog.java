@@ -15,6 +15,10 @@ public class Dialog implements IDialog {
   private int projid;
   private int dominoid;
   private long modified;
+
+  private String fltitle;
+  private String entitle;
+
   private DialogType kind = DialogType.DIALOG;
   private String orientation;
   private String imageRef;
@@ -32,6 +36,8 @@ public class Dialog implements IDialog {
                 long modified,
                 String orientation,
                 String imageRef,
+                String fltitle,
+                String entitle,
                 List<ExerciseAttribute> attributes,
                 List<CommonExercise> exercises) {
     this.id = id;
@@ -40,6 +46,8 @@ public class Dialog implements IDialog {
     this.dominoid = dominoid;
     this.imageRef = imageRef;
     this.modified = modified;
+    this.entitle = entitle;
+    this.fltitle = fltitle;
     this.orientation = orientation;
     this.attributes = attributes;
     this.exercises = exercises;
@@ -55,8 +63,6 @@ public class Dialog implements IDialog {
     return Integer.compare(id, o.getID());
   }
 
-  private String fltitle;
-  private String entitle;
 
   private List<ExerciseAttribute> attributes;// = new ArrayList<>();
 
@@ -113,6 +119,11 @@ public class Dialog implements IDialog {
   }
 
   public String toString() {
-    return "Dialog #" + id + " " + attributes;
+    return "Dialog #" + id +
+        "\n\ttitle       " + entitle +
+        "\n\torientation " + orientation +
+        "\n\timage       " + imageRef +
+        "\n\t# ex        " + exercises.size() +
+        "\n\tattr        " + attributes;
   }
 }
