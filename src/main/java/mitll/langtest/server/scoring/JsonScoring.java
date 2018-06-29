@@ -171,7 +171,7 @@ public class JsonScoring {
    * @param saveFile
    * @param deviceType
    * @param device
-   * @param exercise
+   * @param foreignLanguage
    * @param options
    * @return
    * @see #getJsonForAudioForUser
@@ -266,7 +266,8 @@ public class JsonScoring {
   private AudioAnswer getAnswer(int reqid,
                                 int projectID,
                                 int exerciseID,
-                                String foreignLanguage, int user,
+                                String foreignLanguage,
+                                int user,
                                 String wavPath,
                                 File file,
                                 float score,
@@ -274,11 +275,12 @@ public class JsonScoring {
                                 String device,
                                 DecoderOptions options,
                                 PretestScore pretestScore) {
-    CommonShell exercise = db.getCustomOrPredefExercise(getMostRecentProjectByUser(user), exerciseID);  // allow custom items to mask out non-custom items
+    CommonShell exercise = db.getCustomOrPredefExercise(projectID, exerciseID);  // allow custom items to mask out non-custom items
 
     if (exerciseID == 0) {
+      exerciseID = db.getUserExerciseDAO().getUnknownExerciseID();
       // make one up
-      exercise = new ExerciseShell("", "", foreignLanguage, db.getUserExerciseDAO().getUnknownExerciseID(), 0);
+      exercise = new ExerciseShell("", "", foreignLanguage, exerciseID, 0);
     }
     //  int projectID = exercise.getProjectID();
     AudioContext audioContext =
