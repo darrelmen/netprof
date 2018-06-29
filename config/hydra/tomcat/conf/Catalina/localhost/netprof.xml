@@ -17,5 +17,9 @@
                        className="org.apache.catalina.webresources.DirResourceSet"
                        webAppMount="/answers"
                        readOnly="true"/>
+        <PostResources base="/opt/netprof/images"
+                       className="org.apache.catalina.webresources.DirResourceSet"
+                       webAppMount="/images"
+                       readOnly="true"/>
     </Resources>
 </Context>
