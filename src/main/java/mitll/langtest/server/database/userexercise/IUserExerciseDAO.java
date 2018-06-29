@@ -66,9 +66,6 @@ public interface IUserExerciseDAO extends IDAO {
    */
   int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder);
 
- // int getParentForContextID(int contextID);
-
- // void addContextToExercise(int exid, int contextid, int projid);
 
   List<CommonShell> getOnList(int listID, boolean shouldSwap);
 
@@ -102,6 +99,8 @@ public interface IUserExerciseDAO extends IDAO {
 
   Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap);
 
+  List<SlickExercise> getExercisesByIDs(Collection<Integer> exids);
+
   void deleteByExID(Collection<Integer> exids);
 
   /**
@@ -122,13 +121,9 @@ public interface IUserExerciseDAO extends IDAO {
    */
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
 
-  //int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute);
-
   int getUnknownExerciseID();
 
   void deleteForProject(int projID);
-
-  //int deleteRelated(int related);
 
   SlickExercise getByDominoID(int projID, int docID);
 

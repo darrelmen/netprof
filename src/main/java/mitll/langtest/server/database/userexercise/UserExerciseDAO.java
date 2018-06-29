@@ -545,6 +545,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
+  public List<SlickExercise> getExercisesByIDs(Collection<Integer> exids) {
+    return null;
+  }
+
+  @Override
   public void deleteByExID(Collection<Integer> exids) {
 
   }

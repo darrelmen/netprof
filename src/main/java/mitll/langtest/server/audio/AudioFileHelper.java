@@ -507,7 +507,7 @@ public class AudioFileHelper implements AlignDecode {
         decoderOptions, context.getUserid());
 
     if (decoderOptions.isRecordInResults()) {
-      double maxMinRange = validity.getMaxMinRange();
+      double maxMinRange = validity.getDynamicRange();
       answer.setDynamicRange(maxMinRange);
       //  logger.info("min max " + maxMinRange + " answer " + answer);
       if (exercise != null) {

@@ -98,4 +98,6 @@ public interface IDialogDAO extends IDAO {
    * @return
    */
   boolean easyUpdate(SlickDialog changed);
+
+  DialogAttributeJoinHelper getDialogAttributeJoinHelper();
 }

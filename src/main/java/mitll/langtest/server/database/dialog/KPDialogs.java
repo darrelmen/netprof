@@ -1,8 +1,6 @@
 package mitll.langtest.server.database.dialog;
 
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -25,6 +23,13 @@ import java.util.stream.Stream;
  */
 public class KPDialogs implements IDialogReader {
   private static final Logger logger = LogManager.getLogger(KPDialogs.class);
+  public static final String DIALOG = "dialog";
+  public static final List<String> SPEAKER_LABELS = Arrays.asList("A", "B", "C", "D", "E", "F");
+  public static final String UNIT = "unit";
+  public static final String CHAPTER = "chapter";
+  public static final String PAGE = "page";
+  public static final String TOPIC = "topic";
+  public static final String SPEAKER = "Speaker";
 
   String docIDS = "333815\n" +
       "333816\n" +
@@ -122,7 +127,8 @@ public class KPDialogs implements IDialogReader {
     for (int i = 0; i < docs.length; i++) {
       String dir = dirs[i];
       //  logger.info("Dir " + dir);
-      String imageRef = "/opt/netprof/images/" + dir + File.separator + dir + ".jpg";
+      String imageRef = //"/opt/netprof/" +
+          "images/" + dir + File.separator + dir + ".jpg";
       List<ExerciseAttribute> attributes = getExerciseAttributes(units[i], chapters[i], pages[i], topics[i]);
 
       List<CommonExercise> exercises = new ArrayList<>();
@@ -154,7 +160,7 @@ public class KPDialogs implements IDialogReader {
                 if (parts.length == 2) passageTextFiles.add(file);
                 //              logger.info("fileName " + fileName);
                 if (fileName.endsWith("jpg")) {
-                  logger.info("skip " + fileName);
+//                  logger.info("skip dialog image " + fileName);
                 } else if (fileName.endsWith(".wav")) {
                   //              logger.info("audio " + fileName);
                   audio.add(fileName);
@@ -188,28 +194,24 @@ public class KPDialogs implements IDialogReader {
           if (index == 0) {
             orientations.add(fileText);
           } else {
-            Exercise exercise = new Exercise();
-            attributes.forEach(exercise::addAttribute);
+            Exercise exercise = getExercise(attributes, speakers, path, fileText);
 
-            int i1 = fileText.indexOf(":");
-            String speaker = fileText.substring(0, i1).trim();
-            speakers.add(speaker);
-            exercise.addAttribute(new ExerciseAttribute("Speaker", speaker));
-           // logger.info("speaker " + speaker);
-            String turn = fileText.substring(i1+1).trim();
-
-            exercise.getMutable().setForeignLanguage(turn);
-
-            String pathAudio = dirPath + File.separator + audio.get(exercises.size());
-            exToAudio.put(exercise, pathAudio);
+            {
+              String pathAudio = DIALOG + File.separator + audio.get(exercises.size());
+              exToAudio.put(exercise, pathAudio);
+            }
 
             exercises.add(exercise);
           }
         });
 
-        List<String> speakersList = new ArrayList<>(speakers);
-        List<String> ids = Arrays.asList("A", "B", "C");
-        speakersList.forEach(s -> attributes.add(new ExerciseAttribute("Speaker " + ids.get(speakersList.indexOf(s)), s)));
+        // add speaker attributes
+        {
+          List<String> speakersList = new ArrayList<>(speakers);
+          speakersList
+              .forEach(s -> attributes
+                  .add(new ExerciseAttribute("Speaker " + SPEAKER_LABELS.get(speakersList.indexOf(s)), s)));
+        }
       } catch (IOException e) {
         logger.error("got " + e, e);
       }
@@ -246,7 +248,31 @@ public class KPDialogs implements IDialogReader {
       // logger.info("\tattr " + dialog.getAttributes());
     //  dialog.getAttributes().forEach(logger::info);
     }
+
+    logger.info("ex to audio now " + exToAudio.size());
     return dialogs;
+  }
+
+  @NotNull
+  private Exercise getExercise(List<ExerciseAttribute> attributes, Set<String> speakers,
+                               Path path, String fileText) {
+    Exercise exercise = new Exercise();
+    attributes.forEach(exercise::addAttribute);
+
+    int i1 = fileText.indexOf(":");
+    String speaker = fileText.substring(0, i1).trim();
+    speakers.add(speaker);
+    //  logger.info("file name " + path.getFileName());
+    String[] split = path.getFileName().toString().split("\\.");
+    String oldID = split[0];
+    //  logger.info("ex " + oldID);
+    exercise.getMutable().setOldID(oldID);
+    exercise.addAttribute(new ExerciseAttribute(SPEAKER, speaker));
+    // logger.info("speaker " + speaker);
+    String turn = fileText.substring(i1+1).trim();
+
+    exercise.getMutable().setForeignLanguage(turn);
+    return exercise;
   }
 
   @NotNull
@@ -264,10 +290,10 @@ public class KPDialogs implements IDialogReader {
   @NotNull
   private List<ExerciseAttribute> getExerciseAttributes(String unit, String chapter, String page, String topic) {
     List<ExerciseAttribute> attributes = new ArrayList<>();
-    attributes.add(new ExerciseAttribute("unit", unit));
-    attributes.add(new ExerciseAttribute("chapter", chapter));
-    attributes.add(new ExerciseAttribute("page", page));
-    attributes.add(new ExerciseAttribute("topic", topic));
+    attributes.add(new ExerciseAttribute(UNIT, unit));
+    attributes.add(new ExerciseAttribute(CHAPTER, chapter));
+    attributes.add(new ExerciseAttribute(PAGE, page));
+    attributes.add(new ExerciseAttribute(TOPIC, topic));
     return attributes;
   }
 

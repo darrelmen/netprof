@@ -222,7 +222,7 @@ public class Report implements IReport {
 
     StringBuilder builder = new StringBuilder();
     foundLincoln.forEach(reportUser -> builder.append(reportUser.getUserID()).append(", "));
-    logger.info("found lincoln users " + builder);
+  //  logger.info("found lincoln users " + builder);
 
     this.deviceUsers = deviceUsers;
     this.userToProject = userToProject;

@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared.exercise;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 
 /**
@@ -45,9 +47,13 @@ import java.util.Arrays;
  * Time: 7:47 PM
  * To change this template use File | Settings | File Templates.
  */
-public class ExerciseAttribute extends Pair {
-  public ExerciseAttribute() {}
-  public ExerciseAttribute(String status, String value) {   super(status, value);  }
+public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttribute> {
+  public ExerciseAttribute() {
+  }
+
+  public ExerciseAttribute(String status, String value) {
+    super(status, value);
+  }
 
   @Override
   public int hashCode() {
@@ -58,6 +64,7 @@ public class ExerciseAttribute extends Pair {
    * Don't worry about case...
    *
    * deals with dashes in topics
+   *
    * @param other
    * @return
    */
@@ -65,10 +72,16 @@ public class ExerciseAttribute extends Pair {
     if (!(other instanceof ExerciseAttribute)) return false;
     else {
       ExerciseAttribute ea = (ExerciseAttribute) other;
-      String propNoDash = property.replaceAll("-","");
-      String property = ea.property.replaceAll("-","");
+      String propNoDash = property.replaceAll("-", "");
+      String property = ea.property.replaceAll("-", "");
 
       return propNoDash.equalsIgnoreCase(property) && value.equalsIgnoreCase(ea.value);
     }
+  }
+
+  @Override
+  public int compareTo(@NotNull ExerciseAttribute o) {
+    int i = property.compareTo(o.property);
+    return i == 0 ? value.compareTo(o.value) : i;
   }
 }

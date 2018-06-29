@@ -1365,7 +1365,8 @@ public class ExerciseCopy {
                                            Collection<CommonExercise> exercises,
                                            Collection<String> typeOrder,
                                            Map<String, List<Exercise>> idToCandidateOverride,
-                                           Map<Integer, Integer> dominoToExID, int dialogID) {
+                                           Map<Integer, Integer> dominoToExID,
+                                           int dialogID) {
 
     logger.info("copyUserAndPredefExercises for project " + projectid +
         "\n\tfound " + exercises.size() + " old exercises" +
@@ -1704,7 +1705,7 @@ public class ExerciseCopy {
                                            Map<ExerciseAttribute, Integer> attrToID,
                                            Map<Integer, List<Integer>> exToJoins,
 
-                                           //String oldID,
+
                                            int newID,
                                            List<ExerciseAttribute> attributes) {
     if (attributes != null && !attributes.isEmpty()) {

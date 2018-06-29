@@ -43,10 +43,13 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.dialog.DialogStatus;
@@ -57,6 +60,7 @@ import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.domino.DominoImport;
@@ -64,11 +68,15 @@ import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
+import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.*;
+import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickImage;
 import mitll.npdata.dao.SlickProject;
@@ -77,6 +85,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
+import java.io.File;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -124,7 +133,7 @@ public class ProjectManagement implements IProjectManagement {
   public static final String NUM_ITEMS = "Num Items";
 
   private static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-  private static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
+  static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
   private static final ZoneId UTC = ZoneId.of("UTC");
 
   private final PathHelper pathHelper;
@@ -406,8 +415,8 @@ public class ProjectManagement implements IProjectManagement {
       new Thread(() -> rememberUsers(projectID)).start();
 
       if (project.getLanguageEnum() == Language.KOREAN) {
-        if (project.getKind() == ProjectType.DIALOG) {
-          addDialogInfo(project);
+        if (project.getKind() == ProjectType.DIALOG || true) {
+          new DialogPopulate(db).addDialogInfo(project);
         }
       }
       return rawExercises.size();
@@ -417,69 +426,7 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
-  /**
-   * Take our canned data and put it in the database.
-   *
-   * @param project
-   */
-  private void addDialogInfo(Project project) {
-    int projid = project.getID();
-    IDialogDAO dialogDAO = db.getDialogDAO();
 
-    List<IDialog> dialogs1 = dialogDAO.getDialogs(projid);
-    if (dialogs1.isEmpty()) {
-      Map<CommonExercise, String> exToAudio = new HashMap<>();
-      int defaultUser = db.getUserDAO().getDefaultUser();
-      List<Dialog> dialogs = new KPDialogs().getDialogs(defaultUser, projid, exToAudio);
-
-      long now = System.currentTimeMillis();
-      dialogs.forEach(dialog -> {
-        Timestamp modified = new Timestamp(now);
-        Timestamp ago = new Timestamp(now - FIVE_YEARS);
-
-        SlickImage image = new SlickImage(
-            -1,
-            projid,
-            -1,
-
-            modified,
-            modified,
-
-            "",
-            dialog.getImageRef(),
-
-            0,
-            0,
-
-            false,
-            false,
-            ago
-        );
-
-        int imageID = db.getImageDAO().insert(image);
-
-        dialog.getSlickDialog().imageid_$eq(imageID);
-
-        int add = dialogDAO.add(defaultUser, projid, 1, imageID, now, now, DialogType.DIALOG, DialogStatus.DEFAULT,
-            dialog.getEntitle(), dialog.getOrientation());
-
-
-        new ExerciseCopy().addExercises(
-            defaultUser,
-            projid,
-            new HashMap<>(),
-            (SlickUserExerciseDAO) db.getUserExerciseDAO(),
-            dialog.getExercises(),
-            project.getTypeOrder(),
-            new HashMap<>(),
-            new HashMap<>(),
-            add);
-      });
-    } else {
-      project.setDialogs(dialogs1);
-    }
-    // dialogDAO.getDialogs();
-  }
 
   private boolean isProduction(Project project) {
     return project.getStatus() == ProjectStatus.PRODUCTION;

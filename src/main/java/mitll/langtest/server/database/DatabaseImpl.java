@@ -73,7 +73,11 @@ import mitll.langtest.server.database.project.ProjectDAO;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
-import mitll.langtest.server.database.result.*;
+import mitll.langtest.server.database.report.ReportHelper;
+import mitll.langtest.server.database.result.IAnswerDAO;
+import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.result.SlickAnswerDAO;
+import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
 import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.security.IUserSecurityManager;
@@ -94,7 +98,10 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.MutableAudioExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.result.MonitorResult;
@@ -103,7 +110,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
-import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -151,15 +157,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final int IMPORT_PROJECT_ID = -100;
   private static final boolean ADD_DEFECTS = false;
 
-  /**
-   * @see #tryTomorrow
-   */
-  //private static final long DAY = 24 * 60 * 60 * 1000L;
-  // private static final long DAY = 5 * 60 * 1000L;
-
-  private static final boolean REPORT_ALL_PROJECTS = true;
-  private static final boolean SEND_ALL_YEARS = true;
-  private static final int REPORT_THIS_PROJECT = 9;
   public static final String QUIZ = "QUIZ";
   private static final String UNIT = "Unit";
   public static final List<String> QUIZ_TYPES = Arrays.asList(QUIZ, UNIT);
@@ -197,6 +194,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IProjectManagement projectManagement;
   private RecordWordAndPhone recordWordAndPhone;
 
+  private ReportHelper reportHelper;
   private IUserSecurityManager userSecurityManager;
   private DominoExerciseDAO dominoExerciseDAO;
   private boolean hasValidDB = false;
@@ -348,11 +346,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return this;
   }
 
-/*  private void stopNow() {
-    close();
-    System.exit(0);
-  }*/
-
 
   /**
    * Slick db connection.
@@ -413,11 +406,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private void makeDialogDAOs() {
     dialogDAO = new DialogDAO(this, dbConnection, userExerciseDAO, this);
     imageDAO = new ImageDAO(this, dbConnection);
-    HashMap<CommonExercise, String> exToAudio = new HashMap<>();
-    new KPDialogs().getDialogs(userDAO.getDefaultUser(), 2, exToAudio);
-    //logger.info("exToAudio " + exToAudio);
-    exToAudio.forEach((k, v) -> logger.info(k + " : " + v));
-    System.exit(1);
+//    HashMap<CommonExercise, String> exToAudio = new HashMap<>();
+//    new KPDialogs().getDialogs(userDAO.getDefaultUser(), 2, exToAudio);
+//    //logger.info("exToAudio " + exToAudio);
+////    exToAudio.forEach((k, v) -> logger.info(k + " : " + v));
+//    System.exit(1);
   }
 
   private void afterDAOSetup(SlickAudioDAO slickAudioDAO) {
@@ -436,6 +429,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
     dominoExerciseDAO = new DominoExerciseDAO(userExerciseDAO);
+
+    reportHelper = new ReportHelper(getServerProps(), getProjectManagement(), getProjectDAO(),
+        getUserDAO(), pathHelper, getMailSupport());
   }
 
   private int getDefaultProject() {
@@ -676,26 +672,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("updated user->project");
     }
   }
-
-/*  public void updateProjectOnDay(int oldID, int newprojid, Date onDay) {
-    if (!resultDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update result dao to " + newprojid);
-    } else {
-      logger.info("updated results");
-    }
-    if (!wordDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update word dao to " + newprojid);
-    } else {
-      logger.info("updated word");
-    }
-    if (!phoneDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update phone dao to " + newprojid);
-    } else {
-      logger.info("updated phones");
-    }
-
-  }*/
-
 
   private void setPostgresDBConnection() {
     dbConnection = getDbConnection();
@@ -1078,29 +1054,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * A little dusty...
-   *
-   * @paramx lessonPlanFile
-   * @paramx mediaDir
-   * @paramx installPath
-   * @paramx isURL
-   * @return
-   */
-/*  private int readAMASExercises(String lessonPlanFile, String mediaDir, String installPath, boolean isURL) {
-    int numExercises;
-//    if (isURL) {
-//      this.fileExerciseDAO = new AMASJSONURLExerciseDAO(getServerProps());
-//      numExercises = fileExerciseDAO.getNumExercises();
-//    } else {
-    fileExerciseDAO = new FileExerciseDAO<>(mediaDir, getOldLanguage(serverProps), absConfigDir,
-        lessonPlanFile, installPath);
-    numExercises = fileExerciseDAO.getNumExercises();
-//    }
-    return numExercises;
-  }*/
-
-
-  /**
    * TODO : why is this so confusing???
    *
    * @param userExercise
@@ -1146,8 +1099,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
 
     if (isPredef) {
-      clearDefects(
-          defectAudio, userExercise);
+      clearDefects(          defectAudio, userExercise);
 
       // why would this make sense to do???
 /*      String overlayID = exercise.getOldID();
@@ -1337,12 +1289,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   public void createTables() {
-    //  logger.info("createTables create slick tables - has " + dbConnection.getTables());
-    List<IDAO> idaos = Arrays.asList(
+    logger.info("createTables create slick tables - has " + dbConnection.getTables());
+
+    List<String> created = new ArrayList<>();
+
+    Arrays.asList(
         getProjectDAO(),
         userExerciseDAO,
-        ((SlickUserExerciseDAO) userExerciseDAO).getRelatedExercise(),
-        ((SlickUserExerciseDAO) userExerciseDAO).getExerciseAttribute(),
+        userExerciseDAO.getRelatedExercise(),
+        userExerciseDAO.getExerciseAttribute(),
         ((SlickUserExerciseDAO) userExerciseDAO).getExerciseAttributeJoin(),
         getEventDAO(),
         getResultDAO(),
@@ -1359,11 +1314,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
         dliClassDAO,
         dliClassJoinDAO,
         dialogDAO,
+        dialogDAO.getDialogAttributeJoinHelper(),
         imageDAO
-    );
+    ).forEach(idao -> createIfNotThere(idao, created));
 
-    List<String> created = new ArrayList<>();
-    for (IDAO dao : idaos) createIfNotThere(dao, created);
     userListManager.createTables(dbConnection, created);
 
     if (!created.isEmpty()) {
@@ -1819,53 +1773,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void doReport() {
-    if (serverProps.isFirstHydra()) {
-      if (isTodayAGoodDay()) {
-        sendReports();
-      } else {
-        logger.info("doReport : not sending email report since this is not Sunday...");
-      }
-      tryTomorrow();
-    } else {
-      logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
-    }
+    reportHelper.doReport();
   }
 
   public void sendReports() {
-    sendReports(getReport(), false, -1);
-  }
-
-  /**
-   * Fire at Saturday night, just before midnight EST (or local)
-   * Smarter would be to figure out how long to wait until sunday...
-   * <p>
-   * fire at 11:59:30 PM Saturday, so the report ends this saturday and not next saturday...
-   * i.e. if it's Sunday 12:01 AM, it rounds up and includes a line for the whole upcoming week
-   */
-  private void tryTomorrow() {
-    ZoneId zone = ZoneId.systemDefault();
-    ZonedDateTime now = ZonedDateTime.now(zone);
-
-    LocalDate tomorrow = now.toLocalDate().plusDays(1);
-    ZonedDateTime tomorrowStart = tomorrow.atStartOfDay(zone);
-    Duration duration = Duration.between(now, tomorrowStart);
-    long candidate = duration.toMillis() - 30 * 1000;
-    long toWait = candidate > 0 ? candidate : candidate + DAY;
-    new Thread(() -> {
-      try {
-        logger.info("tryTomorrow :" +
-            "\n\tWaiting for " + toWait + " or " + toWait / 1000 + " sec or " + toWait / (60 * 1000) + " min or " + toWait / (60 * 60 * 1000) + " hours" +
-            "\n\tto fire at " + tomorrowStart);
-        Thread.sleep(toWait);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      doReport(); // try again later
-    }).start();
-  }
-
-  private boolean isTodayAGoodDay() {
-    return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;
+    reportHelper.sendReports(getReport());
   }
 
   /**
@@ -1874,114 +1786,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void sendReport(int userID) {
-    sendReports(getReport(), true, userID);
+    reportHelper.sendReport(getReport(),userID);
   }
 
-  /**
-   * @param report
-   * @param forceSend
-   * @param userID    if -1 uses report list property to determine recipients
-   * @see #doReport
-   * @see #sendReport
-   */
-  private void sendReports(IReport report, boolean forceSend, int userID) {
-    List<String> reportEmails = new ArrayList<>();
-    List<String> receiverNames = new ArrayList<>();
-
-    populateRecipients(userID, reportEmails, receiverNames);
-
-    logger.info("sendReports to" +
-        "\n\tat     : " + new Date() +
-        "\n\temails : " + reportEmails +
-        "\n\tnames  : " + receiverNames
-    );
-    report.sendExcelViaEmail(getMailSupport(),
-        reportEmails,
-        receiverNames,
-        getReportStats(report, forceSend), pathHelper);
-
-  }
-
-  private void populateRecipients(int userID, List<String> reportEmails, List<String> receiverNames) {
-    if (userID != -1) {
-      sendToRequester(userID, reportEmails, receiverNames);
-    } else {
-      reportEmails.addAll(projectDAO.getListProp(getDefaultProject(), ProjectProperty.REPORT_LIST));
-
-      for (String email : reportEmails) {
-        String trim = email.trim();
-        if (!trim.isEmpty()) {
-          String nameForEmail = userDAO.getNameForEmail(trim);
-          if (nameForEmail == null) nameForEmail = trim;
-          receiverNames.add(nameForEmail);
-        }
-      }
-    }
-  }
-
-  private void sendToRequester(int userID, List<String> reportEmails, List<String> receiverNames) {
-    User byID = userDAO.getByID(userID);
-    if (byID == null) {
-      logger.error("huh? can't find user " + userID + " in db?");
-    } else {
-//          logger.info("using user email " + byID.getEmail());
-      reportEmails.add(byID.getEmail());
-      receiverNames.add(byID.getFullName());
-    }
-  }
-
-  /**
-   * @param report
-   * @param forceSend
-   * @return
-   * @see #sendReports
-   */
-  @NotNull
-  private List<ReportStats> getReportStats(IReport report, boolean forceSend) {
-    return getReportStats(report, forceSend, getReportableProjects());
-  }
-
-  /**
-   * Don't want to report on deleted or demo projects.
-   *
-   * @return
-   */
-  @NotNull
-  private List<Project> getReportableProjects() {
-    List<Project> filtered = getProjects()
-        .stream()
-        .filter(project -> project.getStatus().shouldReportOn())
-        .collect(Collectors.toList());
-
-    StringBuilder names = new StringBuilder();
-    filtered.forEach(project -> names.append(project.getName()).append(", "));
-    logger.info("getReportStats : reporting on " + filtered.size() + " projects:" +
-        "\n\tnames " + names);
-    return filtered;
-  }
-
-  @NotNull
-  private List<ReportStats> getReportStats(IReport report, boolean forceSend, List<Project> filtered) {
-    List<ReportStats> stats = new ArrayList<>();
-    filtered
-        .forEach(project -> {
-
-          int id = project.getID();
-          if (REPORT_ALL_PROJECTS || id == REPORT_THIS_PROJECT) {
-            stats.addAll(report
-                .doReport(id,
-                    project.getLanguage(),
-                    project.getProject().name(),
-                    pathHelper,
-                    forceSend,
-                    SEND_ALL_YEARS));
-          }
-        });
-    return stats;
-  }
-
-  MailSupport mailSupport;
-  ;
+  private MailSupport mailSupport;
 
   private MailSupport getMailSupport() {
     if (mailSupport == null) {
@@ -1999,16 +1807,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public String getReport(int year, JSONObject jsonObject) {
-    List<ReportStats> reportStats = new ArrayList<>();
-    return getReport().getAllReports(getProjectDAO().getAll(), jsonObject, year, reportStats);
+    return getReport().getAllReports(getProjectDAO().getAll(), jsonObject, year, new ArrayList<>());
   }
 
   private IReport getReport() {
     IUserDAO.ReportUsers reportUsers = userDAO.getReportUsers();
     return new Report(resultDAO, eventDAO, audioDAO,
         reportUsers.getAllUsers(),
-        reportUsers.getDeviceUsers(), userProjectDAO.getUserToProject(),
-        serverProps.getNPServer(), this.getLogAndNotify());
+        reportUsers.getDeviceUsers(),
+        userProjectDAO.getUserToProject(),
+        serverProps.getNPServer(),
+        this.getLogAndNotify());
   }
 
   /**

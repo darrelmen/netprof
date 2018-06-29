@@ -66,12 +66,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * TODO : need to do something to allow this to scale well - maybe ajax style nested types, etc.
    */
   // private static final boolean ADD_PHONE_LENGTH = false;
+  //public static final boolean ADD_SOUNDS = false;
 
   private static final String NEW_USER_EXERCISE = "NEW_USER_EXERCISE";
   private static final String UNKNOWN = "UNKNOWN";
   private static final String ANY = "Any";
   private static final String DEFAULT_FOR_EMPTY = ANY;
-  //public static final boolean ADD_SOUNDS = false;
   private static final String HYDRA = "hydra";
   private static final int DEFAULT_PROJECT = 1;
   private static final boolean WARN_ABOUT_MISSING_PHONES = false;
@@ -87,20 +87,18 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
- // private final RelatedExerciseDAOWrapper relatedExerciseDAOWrapper;
-  //private final ExerciseAttributeDAOWrapper attributeDAOWrapper;
+
   private final IAttribute attributeHelper;
   private final IAttributeJoin attributeJoinHelper;
   private final IRelatedExercise relatedExerciseHelper;
-  //private final ExerciseAttributeJoinDAOWrapper attributeJoinDAOWrapper;
-  //  private Map<Integer, ExercisePhoneInfo> exToPhones;
+   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
   private final IUserDAO userDAO;
   private final IRefResultDAO refResultDAO;
   //public static final boolean ADD_PHONE_LENGTH = false;
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private final String hostName;
-  //private final IProjectDAO projectDAO;
+
   private CommonExercise templateExercise;
   private int unknownExerciseID;
 
@@ -1128,7 +1126,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   @Override
   public Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap) {
-    return getUserExercises(dao.byIDs(exids), shouldSwap);
+    return getUserExercises(getExercisesByIDs(exids), shouldSwap);
+  }
+
+  @Override
+  public List<SlickExercise> getExercisesByIDs(Collection<Integer> exids) {
+    return dao.byIDs(exids);
   }
 
   /**

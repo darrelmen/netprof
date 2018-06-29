@@ -115,7 +115,9 @@ public class AnswerInfo {
     }
 
     public String toString() {
-      return "RecordingInfo answer " + answer + " audioFile " + audioFile + " device " + deviceType + "/" + device +
+      return "RecordingInfo " +
+          "\n\tanswer    " + answer +
+          "\n\taudioFile " + audioFile + " device " + deviceType + "/" + device +
           " with flash " + withFlash + " transcript " + getTranscript();
     }
 
@@ -198,7 +200,7 @@ public class AnswerInfo {
     this.withFlash = withFlash;
     this.validity = validity.getValidity().name();
     this.roundTripDur = 0;//roundTripDur;
-    this.snr = validity.getMaxMinRange();
+    this.snr = validity.getDynamicRange();
     this.model = model;
   }
 

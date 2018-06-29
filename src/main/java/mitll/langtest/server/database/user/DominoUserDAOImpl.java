@@ -1472,7 +1472,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   public List<DBUser> getAll() {
     long then = System.currentTimeMillis();
-    logger.info("getAll calling get all users");
+    logger.info("getAll calling get all users", new Exception());
     FindOptions<UserColumn> opts = getUserColumnFindOptions();
     List<DBUser> users = delegate.getUsers(-1, opts);
     long now = System.currentTimeMillis();

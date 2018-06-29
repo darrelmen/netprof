@@ -72,6 +72,7 @@ public class AudioCheck {
   private static final float MAX_VALUE = 32768.0f;
   private static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
   public static final boolean DEBUG = false;
+  public static final int WAV_HEADER_LENGTH = 44;
   private final int MIN_DYNAMIC_RANGE;
 
   // TODO :make a server prop
@@ -95,6 +96,10 @@ public class AudioCheck {
    */
   public double getDurationInSeconds(String file) {
     return getDurationInSeconds(new File(file));
+  }
+
+  public long getDurationInMillis(String file) {
+    return (long) (1000D * getDurationInSeconds(file));
   }
 
   /**
@@ -126,6 +131,7 @@ public class AudioCheck {
     return Long.valueOf(frames).floatValue() / format.getFrameRate();
   }
 
+
   /**
    * @param file
    * @param useSensitiveTooLoudCheck
@@ -134,15 +140,13 @@ public class AudioCheck {
    */
   public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     try {
-      if (file.length() < 44) {
+      if (file.length() < WAV_HEADER_LENGTH) {
         logger.warn("isValid : audio file " + file.getAbsolutePath() + " length was " + file.length() + " bytes.");
         return new AudioCheck.ValidityAndDur(Validity.TOO_SHORT, 0, false);
       } else {
-        AudioCheck.ValidityAndDur validityAndDur =
-            useSensitiveTooLoudCheck ?
-                checkWavFileRejectAnyTooLoud(file, quietAudioOK) :
-                checkWavFile(file, quietAudioOK);
-        return validityAndDur;
+        return useSensitiveTooLoudCheck ?
+            checkWavFileRejectAnyTooLoud(file, quietAudioOK) :
+            checkWavFile(file, quietAudioOK);
       }
     } catch (Exception e) {
       logger.error("isValid got " + e, e);
@@ -188,12 +192,6 @@ public class AudioCheck {
     }
     validityAndDur.setMaxMinRange(dynamicRange.maxMin);
   }
-
-/*
-  public boolean hasValidDynamicRange(File file) {
-    return getDynamicRange(file).maxMin >= MIN_DYNAMIC_RANGE;
-  }
-*/
 
   /**
    * @param file
@@ -414,7 +412,9 @@ public class AudioCheck {
     /**
      * @param validity
      * @param dur
-     * @parma quietAudioOK - only useful for automated load testing where we aren't really making recordings
+     * @param quietAudioOK - only useful for automated load testing where we aren't really making recordings
+     * @see AudioCheck#isValid(File, boolean, boolean)
+     * @see AudioCheck#checkWavFileWithClipThreshold(File, boolean, boolean)
      */
     ValidityAndDur(Validity validity, double dur, boolean quietAudioOK) {
       this.validity = validity;
@@ -432,7 +432,7 @@ public class AudioCheck {
       return validity;
     }
 
-    public double getMaxMinRange() {
+    public double getDynamicRange() {
       return maxMinRange;
     }
 

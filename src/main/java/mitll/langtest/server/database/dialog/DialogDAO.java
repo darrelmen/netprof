@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
 public class DialogDAO extends DAO implements IDialogDAO {
   private static final Logger logger = LogManager.getLogger(DialogDAO.class);
 
- // private static final String DEFAULT_DIALOG = "DEFAULT_DIALOG";
   public static final long MIN = 60 * 1000L;
   public static final long HOUR = 60 * MIN;
   public static final long DAY = 24 * HOUR;
@@ -257,76 +256,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return dao.update(changed) > 0;
   }
 
-/*  @Override
-  public boolean easyUpdateNetprof(SlickDialog changed, long sinceWhen) {
-    changed.updateNetprof(sinceWhen);
-    return dao.update(changed) > 0;
-  }*/
-
-  /**
-   * Why some things are slots on SlickDialog and why some things are project properties is kinda arbitrary...
-   *
-   * @return
-   * @paramx userid
-   * @paramx projectInfo
-   * @see mitll.langtest.server.services.ProjectServiceImpl#update
-   * @see mitll.langtest.client.project.ProjectEditForm#updateProject
-   */
-/*
-  @Override
-  public boolean update(int userid, SlickDialog projectInfo) {
-    int projid = projectInfo.getID();
-    Project currentProject = database.getProject(projid);
-
-    int dominoID = projectInfo.getDominoID();
-    SlickDialog changed = new SlickDialog(
-        projid,
-        userid,
-        new Timestamp(projectInfo.getCreated()),   // created
-        new Timestamp(System.currentTimeMillis()), // modified - now!
-        new Timestamp(projectInfo.getLastImport()),// last import - maintain it
-        new Timestamp(projectInfo.getLastNetprof()),// last netprof 1 update - maintain it
-        projectInfo.getName(),
-        projectInfo.getLanguage(),
-        projectInfo.getCourse(),
-        projectInfo.getProjectType().toString(),
-        projectInfo.getStatus().toString(),
-        projectInfo.getFirstType(),
-        projectInfo.getSecondType(),
-        getCountryCode(projectInfo),
-        currentProject.getProject().ltsClass(),
-        dominoID,
-        projectInfo.getDisplayOrder()
-    );
-
-    boolean differentDomino = dominoID != currentProject.getProject().dominoid();
-    if (differentDomino) {
-      logger.info("changed domino project to " + dominoID);
-    }
-    boolean checkForDominoIDs = differentDomino || userExerciseDAO.areThereAnyUnmatched(projid);
-
-    if (checkForDominoIDs) {
-      setDominoIDOnExercises(projid, dominoID);
-    }
-
-    boolean didUpdate = easyUpdate(changed);
-    if (!didUpdate) logger.error("update : couldn't update " + changed);
-    boolean updateProps = updateProperties(projectInfo);
-    boolean didChange = didUpdate || updateProps;
-
-    if (didChange) {
-      currentProject.clearPropCache();
-//      logger.info("update for " + projid);
-    } else {
-      logger.warn("update : didn't update " + projectInfo + " for current " + currentProject);
-    }
-
-    return didChange;
-  }
-*/
-  public void createTable() {
-    dao.createTable();
-  }
+  public void createTable() {    dao.createTable();  }
 
   @Override
   public String getName() {
@@ -409,16 +339,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
     ));
   }
 
-  /**
-   * @return
-   * @see DatabaseImpl#getReport
-   */
-/*  @Override
-  public Collection<SlickDialog> getAll() {
-    return dao.getAll();
-  }*/
+
   @Override
   public int getNum() {
     return dao.countAll();
+  }
+
+  @Override
+  public DialogAttributeJoinHelper getDialogAttributeJoinHelper() {
+    return dialogAttributeJoinHelper;
   }
 }
