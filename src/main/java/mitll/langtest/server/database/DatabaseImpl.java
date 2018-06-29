@@ -1099,7 +1099,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
 
     if (isPredef) {
-      clearDefects(          defectAudio, userExercise);
+      clearDefects(defectAudio, userExercise);
 
       // why would this make sense to do???
 /*      String overlayID = exercise.getOldID();
@@ -1773,7 +1773,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void doReport() {
-    reportHelper.doReport(getReport());
+    if (serverProps.isFirstHydra()) {
+      if (reportHelper.isTodayAGoodDay()) {
+        reportHelper.sendReports(getReport());
+      } else {
+        logger.info("doReport : not sending email report since this is not Sunday...");
+      }
+      reportHelper.tryTomorrow(getReport());
+    } else {
+      logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
+    }
   }
 
   public void sendReports() {
@@ -1786,7 +1795,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void sendReport(int userID) {
-    reportHelper.sendReport(getReport(),userID);
+    reportHelper.sendReport(getReport(), userID);
   }
 
   private MailSupport mailSupport;

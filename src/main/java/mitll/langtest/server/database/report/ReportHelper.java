@@ -34,7 +34,7 @@ public class ReportHelper {
   private static final int REPORT_THIS_PROJECT = 9;
 
   private final ServerProperties serverProps;
- // private IReport report;
+  // private IReport report;
   private final IProjectManagement projectManagement;
 
   private final IProjectDAO projectDAO;
@@ -42,12 +42,12 @@ public class ReportHelper {
   private final PathHelper pathHelper;
   private final MailSupport mailSupport;
 
-  public ReportHelper(  ServerProperties serverProperties,
-                       IProjectManagement projectManagement,
-                       IProjectDAO projectDAO,
-                       IUserDAO userDAO,
-                       PathHelper pathHelper,
-                       MailSupport mailSupport) {
+  public ReportHelper(ServerProperties serverProperties,
+                      IProjectManagement projectManagement,
+                      IProjectDAO projectDAO,
+                      IUserDAO userDAO,
+                      PathHelper pathHelper,
+                      MailSupport mailSupport) {
 
     this.projectManagement = projectManagement;
     serverProps = serverProperties;
@@ -57,8 +57,7 @@ public class ReportHelper {
     this.mailSupport = mailSupport;
   }
 
-
-  public void doReport(IReport report) {
+  private void doReport(IReport report) {
     if (serverProps.isFirstHydra()) {
       if (isTodayAGoodDay()) {
         sendReports(report);
@@ -82,7 +81,7 @@ public class ReportHelper {
    * fire at 11:59:30 PM Saturday, so the report ends this saturday and not next saturday...
    * i.e. if it's Sunday 12:01 AM, it rounds up and includes a line for the whole upcoming week
    */
-  private void tryTomorrow(IReport report) {
+  public void tryTomorrow(IReport report) {
     ZoneId zone = ZoneId.systemDefault();
     ZonedDateTime now = ZonedDateTime.now(zone);
 
@@ -104,7 +103,7 @@ public class ReportHelper {
     }).start();
   }
 
-  private boolean isTodayAGoodDay() {
+  public boolean isTodayAGoodDay() {
     return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;
   }
 
@@ -113,7 +112,7 @@ public class ReportHelper {
    * @see LangTestDatabaseImpl#sendReport
    */
 
-  public void sendReport(IReport report,int userID) {
+  public void sendReport(IReport report, int userID) {
     sendReports(report, true, userID);
   }
 

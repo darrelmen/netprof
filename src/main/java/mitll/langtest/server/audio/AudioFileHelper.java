@@ -65,6 +65,7 @@ import java.text.Collator;
 import java.util.*;
 
 import static mitll.langtest.server.ScoreServlet.EXERCISE_TEXT;
+import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 
 /**
  * Created with IntelliJ IDEA.
@@ -513,7 +514,7 @@ public class AudioFileHelper implements AlignDecode {
       if (exercise != null) {
         answer.setTranscript(exercise.getForeignLanguage()); // TODO : necessary?
       }
-    //  logger.info("getAudioAnswerDecoding recordInResults answer " + answer);// + " " + answer.getTranscript());
+      //  logger.info("getAudioAnswerDecoding recordInResults answer " + answer);// + " " + answer.getTranscript());
       recordInResults(context, recordingInfo, validity, answer);
     } else {
       answer.setTranscript(recordingInfo.getTranscript());
@@ -838,11 +839,11 @@ public class AudioFileHelper implements AlignDecode {
             .setAllowAlternates(false),
         context.getUserid());
 
-  //  logger.info("getAudioAnswerAlignment 1 answer " + answer);
+    //  logger.info("getAudioAnswerAlignment 1 answer " + answer);
 
     if (options.isRecordInResults()) {
       if (answer.getPretestScore() == null) {
-       // logger.info("getAudioAnswerAlignment set score to " + pretestScore);
+        // logger.info("getAudioAnswerAlignment set score to " + pretestScore);
         answer.setPretestScore(pretestScore);
       }
 
@@ -1042,7 +1043,7 @@ public class AudioFileHelper implements AlignDecode {
     boolean available = isHydraAvailable();
     String hydraHost = serverProps.getHydraHost();
     if (!available) {
-      logger.debug("checkForWebservice local webservice not available" +
+      logger.info("checkForWebservice local webservice not available" +
           "\n\tfor     " + theFile.getName() +
           "\n\tproject " + projid +
           "\n\texid    " + exid +
@@ -1103,7 +1104,9 @@ public class AudioFileHelper implements AlignDecode {
     if (session == null) {
       session = getSession(hydraHost, project.getID());
     }
-    HTTPClient httpClient = getHttpClient(hydraHost);
+    boolean isDefault = project.getWebserviceHost().equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
+
+    HTTPClient httpClient = getHttpClient(hydraHost, isDefault ? "" : project.getWebserviceHost());
     ScoreServlet.PostRequest requestToServer = ScoreServlet.PostRequest.ALIGN;
     httpClient.addRequestProperty(ScoreServlet.REQUEST, requestToServer.toString());
     httpClient.addRequestProperty(ScoreServlet.ENGLISH, english);
@@ -1136,6 +1139,7 @@ public class AudioFileHelper implements AlignDecode {
 
       String json = httpClient.sendAndReceiveAndClose(theFile);
       logger.info("getProxyScore response " + json);
+
       return json.equals(MESSAGE_NO_SESSION) ? new PrecalcScores(serverProps, language) : new PrecalcScores(serverProps, json, language);
     } catch (IOException e) {
       logger.error("checkForWebservice got " + e);
@@ -1150,15 +1154,17 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   @NotNull
-  private HTTPClient getHttpClient(String hydraHost) {
-    return new HTTPClient(hydraHost + "scoreServlet");
+  private HTTPClient getHttpClient(String hydraHost, String actualHydraHost) {
+    String url = hydraHost + "scoreServlet";
+    if (!actualHydraHost.isEmpty()) url += File.separator + actualHydraHost;
+    return new HTTPClient(url);
   }
 
   private String session = null;
 
   private String getSession(String hydraHost, int projID) {
     try {
-      HTTPClient httpClient = getHttpClient(hydraHost);
+      HTTPClient httpClient = getHttpClient(hydraHost, "");
       httpClient.addRequestProperty(ScoreServlet.REQUEST, ScoreServlet.GetRequest.HASUSER.toString());
       httpClient.addRequestProperty(ScoreServlet.PROJID, "" + projID);
       httpClient.addRequestProperty(ScoreServlet.USERID, TEST_USER);
@@ -1408,7 +1414,7 @@ public class AudioFileHelper implements AlignDecode {
       audioAnswer.setCorrect(audioAnswer.getScore() > MIN_SCORE_FOR_CORRECT_ALIGN &&
           audioAnswer.getPretestScore().isFullMatch());
 
-    //  logger.info("align : validity " + audioAnswer.getValidity());
+      //  logger.info("align : validity " + audioAnswer.getValidity());
 
       return audioAnswer;
     } else if (decoderOptions.shouldDoDecoding()) {
@@ -1431,7 +1437,7 @@ public class AudioFileHelper implements AlignDecode {
 
       audioAnswer.setPretestScore(flashcardAnswer);
 
-    //  logger.info("decoding : validity " + audioAnswer.getValidity());
+      //  logger.info("decoding : validity " + audioAnswer.getValidity());
       return audioAnswer;
     }
 

@@ -458,7 +458,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   @NotNull
   private String getRawAudioPath(String filePath, long unique) {
-    return filePath.replaceAll("\\=", "") + "_" + unique + ".raw";
+
+    return filePath.
+        replaceAll("//","/").
+        replaceAll("=", "") + "_" + unique + ".raw";
   }
 
   private void cacheHydraResult(boolean decode, String key, HydraOutput hydraOutput) {
