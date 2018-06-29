@@ -8,6 +8,8 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseShell;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -189,7 +191,7 @@ public class JsonScoring {
 
     if (options.shouldDoDecoding()) {
       options.setDoDecode(true);
-      answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, -1, deviceType, device,
+      answer = getAnswer(reqid, projectID, exerciseID, foreignLanguage, user, wavPath, saveFile, -1, deviceType, device,
           options,
           null);
     } else {
@@ -204,7 +206,7 @@ public class JsonScoring {
 
       options.setDoDecode(false);
 
-      answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile,
+      answer = getAnswer(reqid, projectID, exerciseID, foreignLanguage, user, wavPath, saveFile,
           asrScoreForAudio.getHydecScore(),
           deviceType, device,
           options,
@@ -248,8 +250,10 @@ public class JsonScoring {
   /**
    * Don't wait for mp3 to write to return - can take 70 millis for a short file.
    *
+   * @param projectID
    * @param reqid
    * @param exerciseID
+   * @param foreignLanguage
    * @param user
    * @param wavPath
    * @param file
@@ -260,8 +264,9 @@ public class JsonScoring {
    * @see #getJsonForAudioForUser
    */
   private AudioAnswer getAnswer(int reqid,
+                                int projectID,
                                 int exerciseID,
-                                int user,
+                                String foreignLanguage, int user,
                                 String wavPath,
                                 File file,
                                 float score,
@@ -269,9 +274,13 @@ public class JsonScoring {
                                 String device,
                                 DecoderOptions options,
                                 PretestScore pretestScore) {
-    CommonExercise exercise = db.getCustomOrPredefExercise(getMostRecentProjectByUser(user), exerciseID);  // allow custom items to mask out non-custom items
+    CommonShell exercise = db.getCustomOrPredefExercise(getMostRecentProjectByUser(user), exerciseID);  // allow custom items to mask out non-custom items
 
-    int projectID = exercise.getProjectID();
+    if (exerciseID == 0) {
+      // make one up
+      exercise = new ExerciseShell("", "", foreignLanguage, db.getUserExerciseDAO().getUnknownExerciseID(), 0);
+    }
+    //  int projectID = exercise.getProjectID();
     AudioContext audioContext =
         new AudioContext(reqid, user, projectID, getLanguage(projectID), exerciseID,
             0, options.shouldDoDecoding() ? AudioType.PRACTICE : AudioType.LEARN);
@@ -282,10 +291,7 @@ public class JsonScoring {
             wavPath, file, deviceType, device, score,
             options, pretestScore);
 
-    final String path = answer.getPath();
-    final String foreignLanguage = exercise.getForeignLanguage();
-
-    ensureMP3Later(path, user, foreignLanguage, exercise.getEnglish(), getLanguage(exercise.getProjectID()));
+    ensureMP3Later(answer.getPath(), user, foreignLanguage, exercise.getEnglish(), getLanguage(projectID));
 
     return answer;
   }
