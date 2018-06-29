@@ -527,35 +527,6 @@ public class ProjectSync implements IProjectSync {
     contextEx.getMutable().setID(id);
   }
 
-  /**
-   * Cheesy - just want it for it's id not the whole object...
-   *
-   * @param dominoToNonContextEx
-   * @param dominoID
-   * @return
-   * @paramx oldIDToExer
-   * @paramx npID
-   */
-/*  @Nullable
-  private SlickExercise getKnownSlickExercise(Map<Integer, SlickExercise> dominoToNonContextEx,
-                                              //Map<String, SlickExercise> oldIDToExer,
-                                              Integer dominoID
-                                              //    ,
-                                              //                                          String npID
-  ) {
-    SlickExercise currentKnownExercise = dominoToNonContextEx.get(dominoID);
-    if (currentKnownExercise == null) {// && !npID.isEmpty() && !npID.equals(UNKNOWN)) {
-      logger.info("\tgetKnownSlickExercise can't find ex by domino id " + dominoID);
-
-      //currentKnownExercise = oldIDToExer.get(npID);
-//      if (currentKnownExercise != null) {
-//        logger.info("\tgetKnownSlickExercise found ex by netprof id " + npID);
-//      } else {
-//        logger.info("\tgetKnownSlickExercise can't found ex by netprof id '" + npID + "' in " + oldIDToExer.keySet().size() + " keys");
-//      }
-    }
-    return currentKnownExercise;
-  }*/
   private boolean didChange(CommonExercise importEx, CommonExercise exercise) {
     return
         !exercise.getForeignLanguage().equals(importEx.getForeignLanguage()) ||
@@ -599,19 +570,6 @@ public class ProjectSync implements IProjectSync {
           } else {
             logger.warn("doDelete huh? we already added exercise " + byExID.getID() + " to deleted list?");
           }
-        }
-      }
-    });
-
-
-    importFromDomino.getDeletedNPIDs().forEach(npExID -> {
-      CommonExercise byExID = userExerciseDAO.getByExOldID(npExID, projID);
-      if (byExID == null) {
-        logger.warn("doDelete : no ex by old np id " + npExID);
-      } else {
-        boolean add = toDelete.add(byExID.getID());
-        if (add) {
-          deletes.add(new DominoUpdateItem(byExID, new ArrayList<>(), DELETE));
         }
       }
     });

@@ -957,10 +957,13 @@ public class ScoreServlet extends DatabaseServlet {
       logger.debug("getJsonForAudio got projid from request " + projid);
     }
 
+    String postedWordOrPhrase = "";
     // language overrides user id mapping...
     {
       projid = getProjidFromLanguage(request, projid);
-      realExID = getExerciseIDFromText(request, realExID, projid);
+      ExAndText exerciseIDFromText = getExerciseIDFromText(request, realExID, projid);
+      realExID = exerciseIDFromText.exid;
+      postedWordOrPhrase = exerciseIDFromText.text;
     }
 
     String user = getUser(request);
@@ -992,6 +995,9 @@ public class ScoreServlet extends DatabaseServlet {
         reqid,
         projid,
         realExID,
+
+        postedWordOrPhrase,
+
         userid,
         requestType,
         saveFile.getAbsolutePath(),
@@ -1064,17 +1070,18 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #getJsonForAudio
    */
-  private int getExerciseIDFromText(HttpServletRequest request, int realExID, int projid) {
+  private ExAndText getExerciseIDFromText(HttpServletRequest request, int realExID, int projid) {
     String exerciseText = request.getHeader(ENGLISH);
+    String decoded = "";
     if (exerciseText == null) exerciseText = "";
     if (projid > 0) {
       Project project1 = getProject(projid);
       String flText = request.getHeader(EXERCISE_TEXT);
       if (flText == null) {
         logger.info("getExerciseIDFromText no optional header " + EXERCISE_TEXT);
-        return realExID;
+        return new ExAndText(realExID, decoded);
       } else {
-        String decoded = new String(Base64.getDecoder().decode(flText.getBytes()));
+        decoded = new String(Base64.getDecoder().decode(flText.getBytes()));
 
         logger.info("getExerciseIDFromText request to decode '" + exerciseText + "' = '" + decoded + "'");
 
@@ -1088,7 +1095,17 @@ public class ScoreServlet extends DatabaseServlet {
         }
       }
     }
-    return realExID;
+    return new ExAndText(realExID, decoded);
+  }
+
+  private static class ExAndText {
+    int exid;
+    String text;
+
+    public ExAndText(int exid, String text) {
+      this.exid = exid;
+      this.text = text;
+    }
   }
 
   /**

@@ -56,15 +56,16 @@ public class JsonScoring {
 
 
   /**
-   * @param reqid      label response with req id so the client can tell if it got a stale response
+   * @param reqid              label response with req id so the client can tell if it got a stale response
    * @param projid
-   * @param exerciseID for this exercise
-   * @param user       by this user
-   * @param request    mostly decode, could be record if doing appen corpora recording
-   * @param wavPath    relative path to posted audio file
-   * @param saveFile   File handle to file
-   * @param deviceType iPad,iPhone, or browser
-   * @param device     id for device - helpful for iPads, etc.
+   * @param exerciseID         for this exercise
+   * @param postedWordOrPhrase
+   * @param user               by this user
+   * @param request            mostly decode, could be record if doing appen corpora recording
+   * @param wavPath            relative path to posted audio file
+   * @param saveFile           File handle to file
+   * @param deviceType         iPad,iPhone, or browser
+   * @param device             id for device - helpful for iPads, etc.
    * @param options
    * @param fullJSON
    * @return score json
@@ -75,6 +76,8 @@ public class JsonScoring {
   public JSONObject getJsonForAudioForUser(int reqid,
                                            int projid,
                                            int exerciseID,
+                                           String postedWordOrPhrase,
+
                                            int user,
                                            ScoreServlet.PostRequest request,
                                            String wavPath,
@@ -88,13 +91,27 @@ public class JsonScoring {
     CommonExercise exercise = db.getCustomOrPredefExercise(mostRecentProjectByUser, exerciseID);  // allow custom items to mask out non-custom items
 
     JSONObject jsonForScore = new JSONObject();
-    if (exercise == null) {
+
+    // so allow an exercise id = 0 with some actual text
+    String foreignLanguage = postedWordOrPhrase;
+    String transliteration = "";
+
+    if (exercise == null && exerciseID > 1) {
+      logger.warn("getJsonForAudioForUser : can't find exercise " + exerciseID + " in " + projid + " giving up.");
       jsonForScore.put(VALID, BAD_EXERCISE_ID);
       return jsonForScore;
+    } else if (exercise != null) {
+      foreignLanguage = exercise.getForeignLanguage();
+      transliteration = exercise.getTransliteration();
     }
+
     boolean doFlashcard = request == ScoreServlet.PostRequest.DECODE;
     options.setDoDecode(doFlashcard);
-    AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise,
+
+    AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device,
+        foreignLanguage,
+        transliteration,
+        projid,
         options);
     long now = System.currentTimeMillis();
     PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
@@ -102,11 +119,11 @@ public class JsonScoring {
 
     if (logger.isInfoEnabled()) {
       logger.info("getJsonForAudioForUser" +
-          "\n\tflashcard   " + doFlashcard +
-          "\n\texercise id " + exerciseID +
-          "\n\ttook        " + (now - then) + " millis " +
-          "\n\tfor         " + saveFile.getName() +
-          "\n\tscore       " + hydecScore
+              "\n\tflashcard   " + doFlashcard +
+              "\n\texercise id " + exerciseID +
+              "\n\ttook        " + (now - then) + " millis " +
+              "\n\tfor         " + saveFile.getName() +
+              "\n\tscore       " + hydecScore
           //+
           //"\n\tpretestScore " + pretestScore
       );
@@ -164,7 +181,9 @@ public class JsonScoring {
                                      File saveFile,
                                      String deviceType,
                                      String device,
-                                     CommonExercise exercise,
+                                     String foreignLanguage,
+                                     String transliteration,
+                                     int projectID,
                                      DecoderOptions options) {
     AudioAnswer answer;
 
@@ -174,13 +193,14 @@ public class JsonScoring {
           options,
           null);
     } else {
+
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
           exerciseID,
           wavPath,
-          exercise.getForeignLanguage(),
-          exercise.getTransliteration(),
+          foreignLanguage,
+          transliteration,
           options.isUsePhoneToDisplay(),
-          exercise.getProjectID());
+          projectID);
 
       options.setDoDecode(false);
 
@@ -255,7 +275,7 @@ public class JsonScoring {
     AudioContext audioContext =
         new AudioContext(reqid, user, projectID, getLanguage(projectID), exerciseID,
             0, options.shouldDoDecoding() ? AudioType.PRACTICE : AudioType.LEARN);
- //   logger.info("getAnswer  for " + exerciseID + " for " + user + " and file " + wavPath);
+    //   logger.info("getAnswer  for " + exerciseID + " for " + user + " and file " + wavPath);
     AudioAnswer answer = getAudioFileHelper(projectID)
         .getAnswer(exercise,
             audioContext,
