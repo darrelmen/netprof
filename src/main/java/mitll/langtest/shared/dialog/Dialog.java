@@ -67,6 +67,7 @@ public class Dialog implements IDialog {
         "",
         "",
         slickDialog.entitle(), new ArrayList<>(), new ArrayList<>());
+    this.slickDialog = slickDialog;
   }
 
   @Override
