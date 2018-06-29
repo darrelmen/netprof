@@ -1773,7 +1773,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void doReport() {
-    reportHelper.doReport();
+    reportHelper.doReport(getReport());
   }
 
   public void sendReports() {

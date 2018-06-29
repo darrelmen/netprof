@@ -163,7 +163,7 @@ public class KPDialogs implements IDialogReader {
 //                  logger.info("skip dialog image " + fileName);
                 } else if (fileName.endsWith(".wav")) {
                   //              logger.info("audio " + fileName);
-                  audio.add(fileName);
+                  audio.add(dir + File.separator + fileName);
                   //    audioFileNames.add(fileName);
                 } else if (fileName.endsWith(".txt") && parts.length == 3) { // e.g. 010_C01_00.txt
                   String e = fileName;
@@ -243,10 +243,10 @@ public class KPDialogs implements IDialogReader {
       dialogs.add(dialog);
 
       // logger.info("read " + dialog);
-  //    dialog.getExercises().forEach(logger::info);
+      //    dialog.getExercises().forEach(logger::info);
       //logger.info("\tex   " + dialog.getExercises());
       // logger.info("\tattr " + dialog.getAttributes());
-    //  dialog.getAttributes().forEach(logger::info);
+      //  dialog.getAttributes().forEach(logger::info);
     }
 
     logger.info("ex to audio now " + exToAudio.size());
@@ -269,7 +269,7 @@ public class KPDialogs implements IDialogReader {
     exercise.getMutable().setOldID(oldID);
     exercise.addAttribute(new ExerciseAttribute(SPEAKER, speaker));
     // logger.info("speaker " + speaker);
-    String turn = fileText.substring(i1+1).trim();
+    String turn = fileText.substring(i1 + 1).trim();
 
     exercise.getMutable().setForeignLanguage(turn);
     return exercise;

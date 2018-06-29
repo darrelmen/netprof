@@ -65,7 +65,7 @@ public class ReportHelper {
       } else {
         logger.info("doReport : not sending email report since this is not Sunday...");
       }
-      tryTomorrow();
+      tryTomorrow(report);
     } else {
       logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
     }
@@ -82,7 +82,7 @@ public class ReportHelper {
    * fire at 11:59:30 PM Saturday, so the report ends this saturday and not next saturday...
    * i.e. if it's Sunday 12:01 AM, it rounds up and includes a line for the whole upcoming week
    */
-  private void tryTomorrow() {
+  private void tryTomorrow(IReport report) {
     ZoneId zone = ZoneId.systemDefault();
     ZonedDateTime now = ZonedDateTime.now(zone);
 
@@ -100,7 +100,7 @@ public class ReportHelper {
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
-      doReport(); // try again later
+      doReport(report); // try again later
     }).start();
   }
 

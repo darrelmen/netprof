@@ -171,9 +171,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
     allJoinByProject.forEach((dialogID, slickDialogAttributeJoins) -> {
       Dialog dialog = idToDialog.get(dialogID);
       // add attributes
-      slickDialogAttributeJoins
-          .forEach(slickDialogAttributeJoin -> dialog.getAttributes()
-              .add(idToPair.get(slickDialogAttributeJoin.attrid())));
+
+      addAttributes(idToPair, slickDialogAttributeJoins, dialog);
 
       //add exercises
       addExercises(projid, dialogIDToRelated, dialogID, dialog);
@@ -184,6 +183,29 @@ public class DialogDAO extends DAO implements IDialogDAO {
     });
 
     return dialogs;
+  }
+
+  private void addAttributes(Map<Integer, ExerciseAttribute> idToPair,
+                             Collection<SlickDialogAttributeJoin> slickDialogAttributeJoins,
+                             Dialog dialog) {
+    slickDialogAttributeJoins
+        .forEach(slickDialogAttributeJoin ->
+        {
+          int attrid = slickDialogAttributeJoin.attrid();
+          ExerciseAttribute e = idToPair.get(attrid);
+
+          logger.info("adding attribute #" + attrid + " = " + e);
+
+          if (e == null) {
+            logger.error("no attr for id #"+attrid);
+          }
+          else {
+            logger.info("adding attribute dialog " +dialog);
+            logger.info("adding attribute dialog attr " +dialog.getAttributes());
+
+            dialog.getAttributes().add(e);
+          }
+        });
   }
 
   private void addImage(int projid, Dialog dialog) {
@@ -210,7 +232,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     Set<Integer> candidate = new HashSet<>();
     slickRelatedExercises.forEach(slickRelatedExercise -> {
       CommonExercise parent = databaseImpl.getExercise(projid, slickRelatedExercise.exid());
-      CommonExercise child = databaseImpl.getExercise(projid, slickRelatedExercise.contextexid());
+      CommonExercise child  = databaseImpl.getExercise(projid, slickRelatedExercise.contextexid());
       parent.getDirectlyRelated().add(child);
       child.getMutable().setParentExerciseID(parent.getParentExerciseID());
 
@@ -256,7 +278,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return dao.update(changed) > 0;
   }
 
-  public void createTable() {    dao.createTable();  }
+  public void createTable() {
+    dao.createTable();
+  }
 
   @Override
   public String getName() {

@@ -32,14 +32,28 @@ public class AttributeHelper implements IAttribute {
   public int addAttribute(int projid,
                           long now,
                           int userid,
-                          ExerciseAttribute attribute) {
-    return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue());
+                          ExerciseAttribute attribute, boolean checkExists) {
+    if (checkExists) {
+      Collection<SlickExerciseAttribute> exists = attributeDAOWrapper.exists(new SlickExerciseAttribute(-1,
+          projid,
+          userid,
+          new Timestamp(now),
+          attribute.getProperty(), attribute.getValue()));
+      if (exists.isEmpty()) {
+        return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue());
+      } else {
+        return exists.iterator().next().id();
+      }
+    } else {
+      return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue());
+    }
   }
 
   private int insertAttribute(int projid,
                               long now,
                               int userid,
-                              String property, String value) {
+                              String property,
+                              String value) {
     return attributeDAOWrapper.insert(new SlickExerciseAttribute(-1,
         projid,
         userid,

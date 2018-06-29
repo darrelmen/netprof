@@ -24,7 +24,7 @@ public class Dialog implements IDialog {
   private String orientation;
   private String imageRef;
   private List<ExerciseAttribute> attributes = new ArrayList<>();
-  private List<CommonExercise> exercises=new ArrayList<>();
+  private List<CommonExercise> exercises = new ArrayList<>();
 
   float score;
 
@@ -66,7 +66,7 @@ public class Dialog implements IDialog {
         slickDialog.orientation(),
         "",
         "",
-        slickDialog.entitle(),null,null);
+        slickDialog.entitle(), new ArrayList<>(), new ArrayList<>());
   }
 
   @Override
@@ -78,7 +78,6 @@ public class Dialog implements IDialog {
   public int compareTo(@NotNull HasID o) {
     return Integer.compare(id, o.getID());
   }
-
 
 
   public List<ExerciseAttribute> getAttributes() {
@@ -137,13 +136,17 @@ public class Dialog implements IDialog {
     this.imageRef = imageRef;
   }
 
+/*
   public void setAttributes(List<ExerciseAttribute> attributes) {
     this.attributes = attributes;
   }
+*/
 
+/*
   public void setExercises(List<CommonExercise> exercises) {
     this.exercises = exercises;
   }
+*/
 
   public String toString() {
     return "Dialog #" + id +

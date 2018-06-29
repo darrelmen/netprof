@@ -75,7 +75,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private int creator = UNDEFINED_USER;
 
-  private boolean isPredef;
+  private boolean isPredef = true;
   /**
    *
    */
@@ -506,17 +506,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.id = uniqueID;
   }
 
-/*  @Override
-  public boolean equals(Object other) {
-    boolean checkOld = !getOldID().isEmpty();
-    return other instanceof Exercise &&
-        (checkOld && getOldID().equals(((Exercise) other).getOldID()) ||
-            (getID() != -1 && ((ExerciseShell) other).getID() != -1 &&
-                (getID() == ((ExerciseShell) other).getID()))
-        );
-  }*/
-
-  @Deprecated
+  /**
+   * I would love for this to be deprecated, but...
+   *
+   * @return
+   */
   public String getOldID() {
     return oldid;
   }

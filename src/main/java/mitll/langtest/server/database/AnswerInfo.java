@@ -57,7 +57,7 @@ public class AnswerInfo {
   private float pronScore;
   private final String deviceType;
   private final String device;
-  private String scoreJson;
+  private String scoreJson = "";
   private final boolean withFlash;
   private int processDur;
   private final int roundTripDur;

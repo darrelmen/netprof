@@ -19,8 +19,8 @@ import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickDialogAttributeJoin;
-import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickImage;
+import mitll.npdata.dao.SlickRelatedExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.project.ProjectManagement.FIVE_YEARS;
 
@@ -45,7 +46,7 @@ public class DialogPopulate {
    *
    * @param project
    */
-  public void addDialogInfo(Project project) {
+  void addDialogInfo(Project project) {
     int projid = project.getID();
     IDialogDAO dialogDAO = db.getDialogDAO();
 
@@ -59,30 +60,18 @@ public class DialogPopulate {
       Timestamp modified = new Timestamp(now);
       ExerciseCopy exerciseCopy = new ExerciseCopy();
       AudioCheck audioCheck = new AudioCheck(db.getServerProps().shouldTrimAudio(), db.getServerProps().getMinDynamicRange());
-    //  String dialogDir = db.getServerProps().getAudioBaseDir() + "dialog";
-
-      Map<String, CommonExercise> oldToEx = new HashMap<>();
 
       Map<Integer, ExerciseAttribute> idToPair = db.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
 
       Map<ExerciseAttribute, Integer> attrToInt = new HashMap<>();
 
-      {
-        HashSet<ExerciseAttribute> known = new HashSet<>(idToPair.values());
+      addNewAttributes(projid, defaultUser, dialogs, now, idToPair, attrToInt);
+      idToPair.forEach((k, v) -> attrToInt.put(v, k));
 
-        Set<ExerciseAttribute> allToAdd = new HashSet<>();
-        dialogs.forEach(dialog -> {
-          List<ExerciseAttribute> attributes = dialog.getAttributes();
-          HashSet<ExerciseAttribute> toAdd = new HashSet<>(attributes);
-          toAdd.removeAll(known);
-          allToAdd.addAll(toAdd);
-        });
+      Map<CommonExercise, Integer> allImportExToID = new HashMap<>();
+      List<String> typeOrder = project.getTypeOrder();
 
-        logger.info("adding " + allToAdd.size() + " attr");
-        allToAdd.forEach(exerciseAttribute -> attrToInt.put(exerciseAttribute, db.getUserExerciseDAO().getExerciseAttribute().addAttribute(projid,
-            now, defaultUser, exerciseAttribute)));
-      }
-
+      List<String> types = typeOrder.subList(0, Math.min(2, typeOrder.size()));
       dialogs.forEach(dialog -> {
         // add the image
         int imageID = db.getImageDAO().insert(getSlickImage(projid, now, dialog, modified));
@@ -95,43 +84,64 @@ public class DialogPopulate {
             dialog.getEntitle(), dialog.getOrientation());
 
         // add dialog attributes
-        {
-          List<SlickDialogAttributeJoin> joins = new ArrayList<>();
-          dialog.getAttributes().forEach(exerciseAttribute -> {
-            Integer attrid = attrToInt.get(exerciseAttribute);
-            if (attrid == null) logger.error("can't find id for " + exerciseAttribute);
-            else
-              joins.add(new SlickDialogAttributeJoin(-1, defaultUser, modified, dialogID, attrid));
+        addDialogAttributes(dialogDAO, defaultUser, modified, attrToInt, dialog, dialogID);
+
+        dialog.getExercises().forEach(commonExercise -> {
+          Map<String, String> unitToValue = new HashMap<>();
+          types.forEach(type -> {
+            List<ExerciseAttribute> collect = findMatchingAttr(commonExercise, type);
+
+            if (collect.isEmpty()) {
+              logger.warn("no atr for type " + type);
+            } else unitToValue.put(type, collect.iterator().next().getValue());
           });
 
-          dialogDAO.getDialogAttributeJoinHelper().addBulkAttributeJoins(joins);
-        }
+          logger.info("unit->value "+ unitToValue);
 
+          commonExercise.getMutable().setUnitToValue(unitToValue);
+
+        });
         // add the exercises
-        Map<String, Integer> parentToChild = exerciseCopy.addExercises(
+        Map<CommonExercise, Integer> importExToID = exerciseCopy.addExercisesAndAttributes(
             defaultUser,
             projid,
-            new HashMap<>(),
             (SlickUserExerciseDAO) db.getUserExerciseDAO(),
             dialog.getExercises(),
-            project.getTypeOrder(),
+            typeOrder,
             new HashMap<>(),
-            new HashMap<>(),
-            dialogID);
+            new HashMap<>(), true);
+
+        allImportExToID.putAll(importExToID);
+        {
+          CommonExercise prev = null;
+          List<SlickRelatedExercise> relatedExercises = new ArrayList<>();
+          for (CommonExercise ex : dialog.getExercises()) {
+            if (prev != null) {
+              int prevID = importExToID.get(prev);
+              int currID = importExToID.get(ex);
+
+              relatedExercises.add(new SlickRelatedExercise(-1, prevID, currID, projid, dialogID, modified));
+            }
+            prev = ex;
+          }
+          db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(relatedExercises);
+        }
+     /*
         dialog.getExercises().forEach(commonExercise -> {
           String oldID = commonExercise.getOldID();
-          logger.info("old ex " +oldID);
+          logger.info("old ex " + oldID);
           oldToEx.put(oldID, commonExercise);
         });
-
-        if (parentToChild.size() != dialog.getExercises().size())
-          logger.error("tried to add " + dialog.getExercises().size() + " but only did " + parentToChild.size());
+*/
+//        if (parentToChild.size() != dialog.getExercises().size())
+//          logger.error("tried to add " + dialog.getExercises().size() + " but only did " + parentToChild.size());
 
         // add the audio
         // add results so have fk ref
         // add the audio
       });
 
+/*
       Set<Integer> exids = new HashSet<>();
       db.getUserExerciseDAO().getRelatedExercise()
           .getDialogIDToRelated(projid)
@@ -145,6 +155,7 @@ public class DialogPopulate {
       logger.info("found " + exercisesByIDs.size() + " new exercises");
       exercisesByIDs.forEach(slickExercise -> oldToID.put(slickExercise.exid(), slickExercise.id()));
       logger.info("now " + oldToID.size() + " old->id entries");
+      logger.info("oldToEx " + oldToEx.size() + " old ex->exercise entries");
 
       // get old ex to db id
       Map<CommonExercise, Integer> exToID = new HashMap<>();
@@ -155,27 +166,86 @@ public class DialogPopulate {
         logger.info("key " + key);
         exToID.put(key, v);
       });
+*/
 
-      exToAudio.forEach((k, v) -> {
-        File file = new File(db.getServerProps().getAudioBaseDir(), v);
-        if (!file.exists()) logger.error("can't find audio file " + file.getAbsolutePath());
-        AudioCheck.ValidityAndDur valid = audioCheck.isValid(file, true, false);
-
-        Integer exid = exToID.get(k);
-        if (exid == null) logger.error("can't find ex by '" + k + "' in " + exToID.size());
-        else {
-     /*     Result result = new Result(-1, defaultUser,
-              exid,
-              0, v, true, now, AudioType.REGULAR, valid.durationInMillis,
-              true, 0.99F, "", "", 0, 0, false,
-              (float) valid.getDynamicRange(), valid.getValidity().toString(), "");*/
-          addResultAndAudio(project, projid, defaultUser, now, k, v, valid, exid);
-        }
-      });
+      addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
     } else {
       project.setDialogs(dialogs1);
     }
-    // dialogDAO.getDialogs();
+
+  }
+
+  private List<ExerciseAttribute> findMatchingAttr(CommonExercise commonExercise, String type) {
+    return commonExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(type)).collect(Collectors.toList());
+  }
+
+  private void addAudio(Project project,
+                        int projid,
+                        Map<CommonExercise, String> exToAudio,
+                        int defaultUser, long now,
+                        AudioCheck audioCheck, Map<CommonExercise, Integer> allImportExToID) {
+    exToAudio.forEach((k, v) -> {
+      File file = new File(db.getServerProps().getAudioBaseDir(), v);
+      if (!file.exists()) logger.error("can't find audio file " + file.getAbsolutePath());
+      AudioCheck.ValidityAndDur valid = audioCheck.isValid(file, true, false);
+
+      Integer exid = allImportExToID.get(k);
+      //  Integer exid = exToID.get(k);
+      if (exid == null) logger.error("can't find ex by '" + k + "' in " + allImportExToID.size());
+      else {
+   /*     Result result = new Result(-1, defaultUser,
+            exid,
+            0, v, true, now, AudioType.REGULAR, valid.durationInMillis,
+            true, 0.99F, "", "", 0, 0, false,
+            (float) valid.getDynamicRange(), valid.getValidity().toString(), "");*/
+        addResultAndAudio(project, projid, defaultUser, now, k, v, valid, exid);
+      }
+    });
+  }
+
+  private void addDialogAttributes(IDialogDAO dialogDAO, int defaultUser, Timestamp modified,
+                                   Map<ExerciseAttribute, Integer> attrToInt,
+                                   Dialog dialog, int dialogID) {
+    List<SlickDialogAttributeJoin> joins = new ArrayList<>();
+    dialog.getAttributes().forEach(exerciseAttribute -> {
+      Integer attrid = attrToInt.get(exerciseAttribute);
+      if (attrid == null) {
+        logger.error("addDialogAttributes can't find id for " + exerciseAttribute);
+      } else {
+        joins.add(new SlickDialogAttributeJoin(-1, defaultUser, modified, dialogID, attrid));
+      }
+    });
+    logger.info("addDialogAttributes dialog added " + joins.size());
+
+    dialogDAO.getDialogAttributeJoinHelper().addBulkAttributeJoins(joins);
+  }
+
+  private void addNewAttributes(int projid, int defaultUser, List<Dialog> dialogs, long now,
+                                Map<Integer, ExerciseAttribute> idToPair,
+                                Map<ExerciseAttribute, Integer> attrToInt) {
+    Set<ExerciseAttribute> known = new HashSet<>(idToPair.values());
+
+    Set<ExerciseAttribute> allToAdd = new HashSet<>();
+    dialogs.forEach(dialog -> {
+      List<ExerciseAttribute> attributes = dialog.getAttributes();
+      logger.info("dialog attr " + dialog.getEntitle() + " " + attributes.size());
+      Set<ExerciseAttribute> toAdd = new HashSet<>(attributes);
+      toAdd.removeAll(known);
+      allToAdd.addAll(toAdd);
+    });
+
+    int before = attrToInt.size();
+    logger.info("adding " + allToAdd.size() + " new attr");
+    allToAdd.forEach(exerciseAttribute -> {
+      logger.info("adding new exercise attribute " + exerciseAttribute);
+
+      attrToInt
+          .put(exerciseAttribute, db.getUserExerciseDAO().getExerciseAttribute()
+              .addAttribute(projid,
+                  now, defaultUser, exerciseAttribute, true));
+    });
+    int after = attrToInt.size();
+    logger.info("really added " + (after - before));
   }
 
   private void addResultAndAudio(Project project, int projid, int defaultUser, long now, CommonExercise k, String v, AudioCheck.ValidityAndDur valid, Integer exid) {
