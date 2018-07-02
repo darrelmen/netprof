@@ -33,7 +33,6 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.AudioService;
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
@@ -41,11 +40,9 @@ import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.imagewriter.SimpleImageWriter;
 import mitll.langtest.server.database.AnswerInfo;
-import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
-import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
@@ -174,12 +171,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.warn("writeAudioFile " + getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
     String audioTranscript = getAudioTranscript(audioContext.getAudioType(), commonExercise);
-    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash, audioTranscript);
+    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", "", deviceType, device, recordedWithFlash, audioTranscript, "");
 
 //    logger.info("writeAudioFile recording info " + recordingInfo);
     AudioAnswer audioAnswer =
-        //amas ?
-        //audioFileHelper.writeAMASAudioFile(base64EncodedString, db.getAMASExercise(exerciseID), audioContext, recordingInfo) :
         audioFileHelper.writeAudioFile(
             base64EncodedString,
             commonExercise,
@@ -229,13 +224,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     User byID = db.getUserDAO().getByID(user);
     return byID == null ? MiniUser.Gender.Unspecified : byID.getRealGender();
   }
-
-  /**
-   * Kick off a thread to do this... so we can return.
-   */
- /* public void ensureAllAudio() {
-    new Thread(() -> db.getProjects().forEach(project -> checkAudio(project.getID()))).start();
-  }*/
 
   /**
    * @param projectid

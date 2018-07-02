@@ -415,9 +415,7 @@ public class ProjectManagement implements IProjectManagement {
       new Thread(() -> rememberUsers(projectID)).start();
 
       if (project.getLanguageEnum() == Language.KOREAN) {
-        if (project.getKind() == ProjectType.DIALOG || true) {
-          new DialogPopulate(db).addDialogInfo(project);
-        }
+        addDialogInfo(project);
       }
       return rawExercises.size();
     } else {
@@ -426,6 +424,13 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
+  private void addDialogInfo(Project project) {
+    if (project.getKind() == ProjectType.DIALOG || true) {
+      if (new DialogPopulate(db).addDialogInfo(project)) {
+        configureProject(project, false, true);
+      }
+    }
+  }
 
 
   private boolean isProduction(Project project) {

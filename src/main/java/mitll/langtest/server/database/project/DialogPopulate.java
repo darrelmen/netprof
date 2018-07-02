@@ -46,7 +46,7 @@ public class DialogPopulate {
    *
    * @param project
    */
-  void addDialogInfo(Project project) {
+  boolean addDialogInfo(Project project) {
     int projid = project.getID();
     IDialogDAO dialogDAO = db.getDialogDAO();
 
@@ -80,13 +80,14 @@ public class DialogPopulate {
 
         // add the dialog to the database
         int dialogID = dialogDAO.add(defaultUser, projid, 1, imageID, now, now,
+            dialog.getUnit(), dialog.getChapter(),
             DialogType.DIALOG, DialogStatus.DEFAULT,
             dialog.getEntitle(), dialog.getOrientation());
 
         // add dialog attributes
         addDialogAttributes(dialogDAO, defaultUser, modified, attrToInt, dialog, dialogID);
 
-        dialog.getExercises().forEach(commonExercise -> {
+/*        dialog.getExercises().forEach(commonExercise -> {
           Map<String, String> unitToValue = new HashMap<>();
           types.forEach(type -> {
             List<ExerciseAttribute> collect = findMatchingAttr(commonExercise, type);
@@ -100,7 +101,7 @@ public class DialogPopulate {
 
           commonExercise.getMutable().setUnitToValue(unitToValue);
 
-        });
+        });*/
         // add the exercises
         Map<CommonExercise, Integer> importExToID = exerciseCopy.addExercisesAndAttributes(
             defaultUser,
@@ -169,15 +170,17 @@ public class DialogPopulate {
 */
 
       addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
+      return true;
     } else {
       project.setDialogs(dialogs1);
+      return false;
     }
-
   }
 
+/*
   private List<ExerciseAttribute> findMatchingAttr(CommonExercise commonExercise, String type) {
     return commonExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(type)).collect(Collectors.toList());
-  }
+  }*/
 
   private void addAudio(Project project,
                         int projid,
@@ -252,7 +255,9 @@ public class DialogPopulate {
     int resultID = db.getAnswerDAO()
         .addAnswer(new AnswerInfo(
             new AudioContext(0, defaultUser, projid, project.getLanguage(), exid, 0, AudioType.REGULAR),
-            new AnswerInfo.RecordingInfo(v, v, "", "", false, k.getForeignLanguage()), valid, ""), now);
+            new AnswerInfo.RecordingInfo(v, v, "", "", false, k.getForeignLanguage(), ""), valid, ""), now);
+
+
 
     db.getAudioDAO().addOrUpdate(new AudioInfo(
         defaultUser,

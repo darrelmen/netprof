@@ -683,6 +683,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   private DBConnection getDbConnection() {
     DBConnection dbConnection = new DBConnection(serverProps.getDBConfig());
+    dbConnection.addColumn();
 //    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
     return dbConnection;
   }
@@ -1291,6 +1292,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public void createTables() {
     logger.info("createTables create slick tables - has " + dbConnection.getTables());
 
+   // dbConnection.addColumn();
+
     List<String> created = new ArrayList<>();
 
     Arrays.asList(
@@ -1325,7 +1328,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("createTables after create slick tables - has " + getTables());
     }
 
-    dbConnection.addColumn();
   }
 
   private void createIfNotThere(IDAO slickUserDAO, List<String> created) {

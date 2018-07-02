@@ -163,11 +163,11 @@ public class AudioFileHelper implements AlignDecode {
    * @see Project#getPronunciationsFromDictOrLTS
    */
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, true, false, new ArrayList<>());
+    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, true, false, new ArrayList<>()).getDict();
   }
 
   public String getPronunciationsFromDictOrLTSFull(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, false, false, new ArrayList<>());
+    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, false, false, new ArrayList<>()).getDict();
   }
 
   public int getNumPhonesFromDictionary(String transcript, String transliteration) {
@@ -461,7 +461,7 @@ public class AudioFileHelper implements AlignDecode {
       PretestScore pretestScore) {
     AudioCheck.ValidityAndDur validity = audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
 
-    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, true, "");
+    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, true, "", "");
 
     return options.shouldDoDecoding() ?
         getAudioAnswerDecoding(exercise,
@@ -513,6 +513,7 @@ public class AudioFileHelper implements AlignDecode {
       //  logger.info("min max " + maxMinRange + " answer " + answer);
       if (exercise != null) {
         answer.setTranscript(exercise.getForeignLanguage()); // TODO : necessary?
+        //answer.setNormTranscript(answer.getNormTranscript());
       }
       //  logger.info("getAudioAnswerDecoding recordInResults answer " + answer);// + " " + answer.getTranscript());
       recordInResults(context, recordingInfo, validity, answer);
@@ -527,20 +528,23 @@ public class AudioFileHelper implements AlignDecode {
                                AnswerInfo.RecordingInfo recordingInfo,
                                AudioCheck.ValidityAndDur validity,
                                AudioAnswer answer) {
-    int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
-
-    AnswerInfo infoOrig = new AnswerInfo(
-        context,
-        recordingInfo,
-        validity,
-        getModelsDir());
+    PretestScore pretestScore = answer.getPretestScore();
+    boolean hasScore = pretestScore == null;
+    int processDur = hasScore ? 0 : pretestScore.getProcessDur();
 
     AnswerInfo info = new AnswerInfo(
-        infoOrig,
+        new AnswerInfo(
+            context,
+            recordingInfo,
+            validity,
+            getModelsDir()),
 
         new AnswerInfo.ScoreInfo(answer.isCorrect(), (float) answer.getScore(),
             new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur), getModelsDir());
 
+    if (hasScore) {
+      info.setNormTranscript(pretestScore.getRecoSentence());
+    }
     rememberAnswer(context.getProjid(), answer, info);
   }
 
@@ -859,6 +863,8 @@ public class AudioFileHelper implements AlignDecode {
               new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur), getModelsDir());
 
       answer.setTranscript(exercise.getForeignLanguage());
+      answer.setNormTranscript(answer.getPretestScore().getRecoSentence());
+
       rememberAnswer(info.getProjid(), answer, info);
     }
     //logger.info("getAudioAnswerAlignment 2 answer " + answer);
@@ -1002,22 +1008,12 @@ public class AudioFileHelper implements AlignDecode {
                                           String transliteration,
                                           DecoderOptions options,
                                           PrecalcScores precalcScores) {
-    /*
-        List<String> unk = new ArrayList<>();
-    if (isMacOrWin()) {  // i.e. NOT using cool new jcodr webservice
-      unk.add(ASR.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
-    }
-      String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
-    logger.info("getASRScoreForAudio from" +
-        "\n\tlm sentences '" + lmSentences + "'" +
-        "\n\tto vocab '" + vocab + "'");
-*/
     String prefix = options.isUsePhoneToDisplay() ? "phoneToDisplay" : "";
-    String path = testAudioFile.getPath();
+    //String path = testAudioFile.getPath();
 
     String firstSentence = lmSentences.iterator().next();
 //      logger.info("getASRScoreForAudio audio file path is " + path + " " + firstSentence);
-    return getASRScoreForAudio(reqid, path, firstSentence, lmSentences, transliteration,
+    return getASRScoreForAudio(reqid, testAudioFile.getPath(), firstSentence, lmSentences, transliteration,
         DEFAULT, prefix, precalcScores,
         options);
   }
@@ -1147,7 +1143,7 @@ public class AudioFileHelper implements AlignDecode {
     return null;
   }
 
-  private String getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
+  private TransNormDict getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
     String s = getSmallVocabDecoder().cleanToken(foreignLanguage, removeAccents);
     String cleaned = getSegmented(s); // segmentation method will filter out the UNK model
     return asrScoring.getHydraDict(cleaned.trim(), "", possibleProns);
@@ -1247,7 +1243,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param prefix
    * @param options
    * @return
-   * @see #getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions)
+   * @see #getASRScoreForAudio(int, String, String, String, ImageOptions, String, PrecalcScores, DecoderOptions)
    */
   private PretestScore getASRScoreForAudio(int reqid,
                                            String testAudioFile,

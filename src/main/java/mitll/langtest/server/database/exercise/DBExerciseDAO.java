@@ -224,6 +224,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   /**
+   * Don't attach context sentences for relations in dialogs.
+   *
    * @param allNonContextExercises
    * @param related
    * @param idToContext
@@ -249,7 +251,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       CommonExercise root = idToEx.get(relatedExercise.exid());
       if (root != null) {
         CommonExercise context = idToContext.get(relatedExercise.contextexid());
-        if (context != null) {
+        if (context != null && relatedExercise.dialogid() < 2) {
           root.getMutable().addContextExercise(context);
           //      attached++;
         } else if (c++ < 2) {

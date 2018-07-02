@@ -48,11 +48,18 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttribute> {
+  private boolean isFacet = true;
+
   public ExerciseAttribute() {
   }
 
   public ExerciseAttribute(String status, String value) {
     super(status, value);
+  }
+
+  public ExerciseAttribute(String status, String value, boolean isFacet) {
+    super(status, value);
+    this.isFacet = isFacet;
   }
 
   @Override
@@ -83,5 +90,14 @@ public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttrib
   public int compareTo(@NotNull ExerciseAttribute o) {
     int i = property.compareTo(o.property);
     return i == 0 ? value.compareTo(o.value) : i;
+  }
+
+  public boolean isFacet() {
+    return isFacet;
+  }
+
+  @Override
+  public String toString() {
+    return super.toString() + (isFacet? "": ("(not facet)"));
   }
 }

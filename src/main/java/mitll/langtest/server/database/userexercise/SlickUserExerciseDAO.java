@@ -91,7 +91,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private final IAttribute attributeHelper;
   private final IAttributeJoin attributeJoinHelper;
   private final IRelatedExercise relatedExerciseHelper;
-   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
+  //  private Map<Integer, ExercisePhoneInfo> exToPhones;
   private final IUserDAO userDAO;
   private final IRefResultDAO refResultDAO;
   //public static final boolean ADD_PHONE_LENGTH = false;
@@ -110,7 +110,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   public SlickUserExerciseDAO(DatabaseImpl database, DBConnection dbConnection) {
     super(database);
     dao = new ExerciseDAOWrapper(dbConnection);
-   // relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
+    // relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
     //attributeDAOWrapper = new ExerciseAttributeDAOWrapper(dbConnection);
     //attributeJoinDAOWrapper = new ExerciseAttributeJoinDAOWrapper(dbConnection);
     attributeHelper = new AttributeHelper(new ExerciseAttributeDAOWrapper(dbConnection));
@@ -156,7 +156,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     boolean b = dao.updateProject(old, newprojid) > 0;
     if (b) logger.info("updated exercises to            " + newprojid);
 
-    boolean b1 = attributeHelper.updateProject(old, newprojid) ;
+    boolean b1 = attributeHelper.updateProject(old, newprojid);
     if (b1) logger.info("updated exercise attributes to " + newprojid);
 
     boolean b2 = relatedExerciseHelper.updateProject(old, newprojid);
@@ -720,7 +720,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         // missing info for this type, so map it to BLANK
         pairs.add(new ExerciseAttribute(attrType, BLANK));
       } else {
-        pairs.add(attribute);
+        if (attribute.isFacet()) {
+          pairs.add(attribute);
+        } else {
+          logger.info("Skip attribute not a facet " + attribute);
+        }
       }
     }
   }
@@ -753,7 +757,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       pairs.add(getPair(first, slick.unit()));
     }
 
-    if (!second.isEmpty()/* && !second.equals(SOUND)*/) {
+    if (!second.isEmpty()) {
       if (slick.ispredef()) {
         boolean empty = slick.lesson().trim().isEmpty();
 
@@ -959,9 +963,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @see mitll.langtest.server.database.userlist.SlickUserListDAO#populateListEx
    */
   public List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap) {
-   // long then = System.currentTimeMillis();
+    // long then = System.currentTimeMillis();
     List<SlickExercise> onList = dao.getOnList(listID);
-   // long now = System.currentTimeMillis();
+    // long now = System.currentTimeMillis();
 //    logger.info("getCommonExercises took "+ (now-then) + " to get " + onList.size() + " for list #" + listID );
     return getUserExercises(onList, shouldSwap);
   }

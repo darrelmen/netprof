@@ -101,8 +101,9 @@ public interface ASR {
    * @param transliteration
    * @param possibleProns
    * @return
+   * @see AudioFileHelper#getHydraDict
    */
-  String getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns);
+  TransNormDict getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns);
 
   String getSegmented(String input);
 }

@@ -85,19 +85,20 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @param transcript
    * @param possibleProns
    * @return the dictionary for dcodr
-   * @see ASR#getHydraDict
+   * @see ASRWebserviceScoring#getHydraDict
    */
   @Override
-  public String createHydraDict(String transcript, String transliteration, List<WordAndProns> possibleProns) {
+  public TransNormDict createHydraDict(String transcript, String transliteration, List<WordAndProns> possibleProns) {
     if (lts == null) {
       logger.warn(this + " : createHydraDict : LTS is null???");
     }
 
     String dict = "[";
-    dict += getPronunciationsFromDictOrLTS(transcript, transliteration, false, true, possibleProns);
+    TransNormDict pronunciationsFromDictOrLTS = getPronunciationsFromDictOrLTS(transcript, transliteration, false, true, possibleProns);
+    dict += pronunciationsFromDictOrLTS.getDict();
     dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
     dict += "]";
-    return dict;
+    return new TransNormDict(transcript, pronunciationsFromDictOrLTS.getNormTranscript(), dict);
   }
 
   private final Set<String> seen = new HashSet<>();
@@ -171,11 +172,11 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciationsFromDictOrLTS
    */
   @Override
-  public String getPronunciationsFromDictOrLTS(String transcript,
-                                               String transliteration,
-                                               boolean justPhones,
-                                               boolean makeCandidates,
-                                               List<WordAndProns> possible) {
+  public TransNormDict getPronunciationsFromDictOrLTS(String transcript,
+                                                      String transliteration,
+                                                      boolean justPhones,
+                                                      boolean makeCandidates,
+                                                      List<WordAndProns> possible) {
     StringBuilder dict = new StringBuilder();
 
 //    logger.info("getPronunciationsFromDictOrLTS ask for pron for '" + transcript + "'");
@@ -187,6 +188,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 //      logger.info("getPronunciationsFromDictOrLTS : transcript '" + transcript + "' = " + builder.toString());
 //    }
 
+    String norm = String.join(" ", transcriptTokens);
     int numTokens = transcriptTokens.size();
     int index = 0;
 
@@ -230,7 +232,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       }
     }
     possible.addAll(candidates);
-    return dict.toString();
+    return new TransNormDict(transcript, norm, dict.toString());
   }
 
   /**
@@ -394,7 +396,7 @@ public class PronunciationLookup implements IPronunciationLookup {
           for (int i = 0; i < size; i++) {
             String[] phoneSequence = prons.apply(i);
             List<String> e = Arrays.asList(phoneSequence);
-           // logger.warn("hasParts adding " + lookupToken + " : " + e);
+            // logger.warn("hasParts adding " + lookupToken + " : " + e);
             possibleProns.add(e);
           }
 

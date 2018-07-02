@@ -35,8 +35,11 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonAudioExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
@@ -68,16 +71,16 @@ public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends Scoring
    * @param exercise
    * @param instance
    * @paramx audioType
-   * @see mitll.langtest.client.scoring.ASRRecordAudioPanel
+   * @seex xmitll.langtest.client.scoring.ASRRecordAudioPanel
    */
-  ASRScoringAudioPanel(String refSentence,
+/*  ASRScoringAudioPanel(String refSentence,
                        String transliteration,
                        ExerciseController controller,
                        String playButtonSuffix,
                        T exercise,
                        String instance) {
     super(refSentence, transliteration, controller, playButtonSuffix, exercise, instance);
-  }
+  }*/
 
   /**
    * @param path
@@ -89,7 +92,7 @@ public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends Scoring
    * @param exercise
    * @param instance
    * @paramx audioType
-   * @seex mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
    */
   public ASRScoringAudioPanel(String path, String refSentence, String transliteration,
                               ExerciseController controller, boolean showSpectrogram,

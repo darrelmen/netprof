@@ -43,7 +43,7 @@ import mitll.langtest.shared.scoring.AudioContext;
  * @since 2/24/16.
  */
 public class AnswerInfo {
-//  private static final Logger logger = LogManager.getLogger(AnswerInfo.class);
+  //  private static final Logger logger = LogManager.getLogger(AnswerInfo.class);
   private final int userid;
   private final int id;
   private final int projid;
@@ -63,6 +63,7 @@ public class AnswerInfo {
   private final int roundTripDur;
   private final String validity;
   private String transcript = "";
+  private String normtranscript = "";
   private final double snr;
   private String model = "";
   private int session = 0;
@@ -83,6 +84,10 @@ public class AnswerInfo {
     this.session = session;
   }
 
+  public void setNormTranscript(String recoSentence) {
+    this.normtranscript = recoSentence;
+  }
+
   public static class RecordingInfo {
     final String answer;
     final String audioFile;
@@ -90,6 +95,7 @@ public class AnswerInfo {
     final String device;
     final boolean withFlash;
     private String transcript = "";
+    private String normtranscript = "";
 
     public RecordingInfo(RecordingInfo other, String audioFile) {
       this.answer = other.answer;
@@ -98,6 +104,7 @@ public class AnswerInfo {
       this.device = other.device;
       this.withFlash = other.withFlash;
       this.transcript = other.transcript;
+      this.normtranscript = other.normtranscript;
     }
 
     public RecordingInfo(String answer,
@@ -105,24 +112,32 @@ public class AnswerInfo {
                          String deviceType,
                          String device,
                          boolean withFlash,
-                         String transcript) {
+                         String transcript,
+                         String normtranscript) {
       this.answer = answer;
       this.audioFile = audioFile;
       this.deviceType = deviceType;
       this.device = device;
       this.withFlash = withFlash;
       this.transcript = transcript;
+      this.normtranscript = normtranscript;
+    }
+
+    public String getTranscript() {
+      return transcript;
+    }
+
+    public String getNormtranscript() {
+      return normtranscript;
     }
 
     public String toString() {
       return "RecordingInfo " +
           "\n\tanswer    " + answer +
           "\n\taudioFile " + audioFile + " device " + deviceType + "/" + device +
-          " with flash " + withFlash + " transcript " + getTranscript();
-    }
-
-    public String getTranscript() {
-      return transcript;
+          " with flash    " + withFlash +
+          "\n\ttranscript " + getTranscript() +
+          "\n\tnorm       " + getNormtranscript();
     }
   }
 
@@ -144,7 +159,6 @@ public class AnswerInfo {
   }
 
   /**
-   *
    * @param audioContext
    * @param recordingInfo
    * @param validity
@@ -205,7 +219,8 @@ public class AnswerInfo {
   }
 
   public AnswerInfo(AnswerInfo other,
-                    ScoreInfo scoreInfo, String model) {
+                    ScoreInfo scoreInfo,
+                    String model) {
     this(other, scoreInfo.correct, scoreInfo.pronScore, scoreInfo.scoreJson, scoreInfo.processDur);
     this.model = model;
   }
@@ -270,7 +285,7 @@ public class AnswerInfo {
     this.roundTripDur = 0;//roundTripDur;
     this.snr = snr;
 
- //   if (answer.isEmpty()) logger.debug("answer is not set?");
+    //   if (answer.isEmpty()) logger.debug("answer is not set?");
   }
 
   public int getUserid() {
@@ -347,6 +362,10 @@ public class AnswerInfo {
 
   public String getTranscript() {
     return transcript;
+  }
+
+  public String getNormtTranscript() {
+    return normtranscript;
   }
 
   public void setTranscript(String transcript) {

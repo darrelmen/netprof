@@ -327,7 +327,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
       if (cached == null) {
         List<WordAndProns> possibleProns = new ArrayList<>();
-        String hydraDict = getHydraDict(sentence, "", possibleProns);
+        TransNormDict transNormDict = getHydraDict(sentence, "", possibleProns);
+        String hydraDict = transNormDict.getDict();
 
         logger.info("getProxyScore " +
             "\n\tdict          " + hydraDict +
@@ -336,7 +337,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
         if (DEBUG) possibleProns.forEach(p -> logger.info("\t" + p));
 
-        cached = new HydraOutput(scores, "", "", possibleProns);//getTrie(possibleProns));
+        cached = new HydraOutput(scores, "", "", possibleProns, transNormDict);//getTrie(possibleProns));
       } else {
         cached.setScores(scores);
       }
@@ -460,7 +461,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private String getRawAudioPath(String filePath, long unique) {
 
     return filePath.
-        replaceAll("//","/").
+        replaceAll("//", "/").
         replaceAll("=", "") + "_" + unique + ".raw";
   }
 
@@ -617,7 +618,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     List<WordAndProns> possibleProns = new ArrayList<>();
 
     // generate dictionary
-    String hydraDict = getHydraDict(cleaned, transliteration, possibleProns);
+    TransNormDict transNormDict = getHydraDict(cleaned, transliteration, possibleProns);
+    String hydraDict = transNormDict.getDict();
 
     if (DEBUG) {
       logger.info("runHydra : sending " + possibleProns.size());
@@ -686,7 +688,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       return new HydraOutput(scores,
           results[1].replaceAll("#", ""),
           results[2].replaceAll("#", ""),
-          possibleProns); // where are the # coming from?
+          possibleProns,
+          transNormDict); // where are the # coming from?
     }
   }
 
@@ -740,7 +743,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #runHydra(String, String, String, Collection, String, boolean, int)
    */
   @Override
-  public String getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns) {
+  public TransNormDict getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns) {
     return pronunciationLookup.createHydraDict(cleaned, transliteration, possibleProns);
   }
 
@@ -812,36 +815,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
     return pronunciationLookup.getUsedTokens(lmSentences, background);
   }
-
-  /**
-   * Get the unique set of tokens to use to filter against our full dictionary.
-   * We check all these words for existence in the dictionary.
-   * <p>
-   * Any OOV words have letter-to-sound called to create word->phoneme mappings.
-   * This happens in {@see pronz.speech.Audio#hscore}
-   *
-   * @param lmSentences
-   * @param backgroundVocab
-   * @return
-   * @see #getUsedTokens
-   */
-/*  private String getUniqueTokensInLM(Collection<String> lmSentences, List<String> backgroundVocab) {
-    String sentence;
-    Set<String> backSet = new HashSet<>(backgroundVocab);
-    List<String> mergedVocab = new ArrayList<>(backgroundVocab);
-    List<String> foregroundVocab = svDecoderHelper.getSimpleVocab(lmSentences, FOREGROUND_VOCAB_LIMIT);
-    for (String foregroundToken : foregroundVocab) {
-      if (!backSet.contains(foregroundToken)) {
-        mergedVocab.add(foregroundToken);
-      }
-    }
-    StringBuilder builder = new StringBuilder();
-
-    for (String token : mergedVocab) builder.append(token).append(" ");
-
-    sentence = builder.toString();
-    return sentence;
-  }*/
 
   /**
    * Make a map of event type to segment end times (so we can map clicks to which segment is clicked on).<br></br>

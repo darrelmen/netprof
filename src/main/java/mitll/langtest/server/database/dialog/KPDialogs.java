@@ -108,7 +108,7 @@ public class KPDialogs implements IDialogReader {
    * @param projID
    * @param exToAudio
    * @return
-   * @see mitll.langtest.server.database.project.ProjectManagement#addDialogInfo
+   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogInfo
    */
   @Override
   public List<Dialog> getDialogs(int defaultUser, int projID, Map<CommonExercise, String> exToAudio) {
@@ -129,7 +129,9 @@ public class KPDialogs implements IDialogReader {
       //  logger.info("Dir " + dir);
       String imageRef = //"/opt/netprof/" +
           "images/" + dir + File.separator + dir + ".jpg";
-      List<ExerciseAttribute> attributes = getExerciseAttributes(units[i], chapters[i], pages[i], topics[i]);
+      String unit = units[i];
+      String chapter = chapters[i];
+      List<ExerciseAttribute> attributes = getExerciseAttributes(pages[i], topics[i]);
 
       List<CommonExercise> exercises = new ArrayList<>();
 
@@ -194,7 +196,7 @@ public class KPDialogs implements IDialogReader {
           if (index == 0) {
             orientations.add(fileText);
           } else {
-            Exercise exercise = getExercise(attributes, speakers, path, fileText);
+            Exercise exercise = getExercise(attributes, speakers, path, fileText, unit, chapter);
 
             {
               String pathAudio = DIALOG + File.separator + audio.get(exercises.size());
@@ -210,7 +212,7 @@ public class KPDialogs implements IDialogReader {
           List<String> speakersList = new ArrayList<>(speakers);
           speakersList
               .forEach(s -> attributes
-                  .add(new ExerciseAttribute("Speaker " + SPEAKER_LABELS.get(speakersList.indexOf(s)), s)));
+                  .add(new ExerciseAttribute("Speaker " + SPEAKER_LABELS.get(speakersList.indexOf(s)), s,false)));
         }
       } catch (IOException e) {
         logger.error("got " + e, e);
@@ -225,6 +227,7 @@ public class KPDialogs implements IDialogReader {
           -1,
           modified,
           modified,
+          unit, chapter,
           DialogType.DIALOG.toString(),
           DialogStatus.DEFAULT.toString(),
           title,
@@ -232,6 +235,7 @@ public class KPDialogs implements IDialogReader {
       );
 
       Dialog dialog = new Dialog(-1, defaultUser, projID, -1, time,
+          unit, chapter,
           orientation,
           imageRef,
           "",
@@ -254,9 +258,15 @@ public class KPDialogs implements IDialogReader {
   }
 
   @NotNull
-  private Exercise getExercise(List<ExerciseAttribute> attributes, Set<String> speakers,
-                               Path path, String fileText) {
+  private Exercise getExercise(List<ExerciseAttribute> attributes,
+                               Set<String> speakers,
+                               Path path,
+                               String fileText, String unit, String chapter) {
     Exercise exercise = new Exercise();
+    Map<String, String> unitToValue = new HashMap<>();
+    unitToValue.put(UNIT, unit);
+    unitToValue.put(CHAPTER, chapter);
+    exercise.setUnitToValue(unitToValue);
     attributes.forEach(exercise::addAttribute);
 
     int i1 = fileText.indexOf(":");
@@ -267,11 +277,12 @@ public class KPDialogs implements IDialogReader {
     String oldID = split[0];
     //  logger.info("ex " + oldID);
     exercise.getMutable().setOldID(oldID);
-    exercise.addAttribute(new ExerciseAttribute(SPEAKER, speaker));
+    exercise.addAttribute(new ExerciseAttribute(SPEAKER, speaker, false));
     // logger.info("speaker " + speaker);
     String turn = fileText.substring(i1 + 1).trim();
 
     exercise.getMutable().setForeignLanguage(turn);
+
     return exercise;
   }
 
@@ -288,10 +299,10 @@ public class KPDialogs implements IDialogReader {
   }
 
   @NotNull
-  private List<ExerciseAttribute> getExerciseAttributes(String unit, String chapter, String page, String topic) {
+  private List<ExerciseAttribute> getExerciseAttributes(/*String unit, String chapter, */String page, String topic) {
     List<ExerciseAttribute> attributes = new ArrayList<>();
-    attributes.add(new ExerciseAttribute(UNIT, unit));
-    attributes.add(new ExerciseAttribute(CHAPTER, chapter));
+//    attributes.add(new ExerciseAttribute(UNIT, unit));
+//    attributes.add(new ExerciseAttribute(CHAPTER, chapter));
     attributes.add(new ExerciseAttribute(PAGE, page));
     attributes.add(new ExerciseAttribute(TOPIC, topic));
     return attributes;

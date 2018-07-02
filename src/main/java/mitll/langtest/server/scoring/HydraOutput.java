@@ -1,8 +1,10 @@
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.shared.scoring.ImageOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -13,19 +15,25 @@ public class HydraOutput {
   private String wordLab;
   private String phoneLab;
   private List<WordAndProns> wordAndProns;
+  private TransNormDict transNormDict;
 
   /**
    * @param scores
    * @param wordLab
    * @param phoneLab
    * @param wordAndProns
+   * @see ASRWebserviceScoring#scoreRepeatExercise
    */
   HydraOutput(Scores scores,
-              String wordLab, String phoneLab, List<WordAndProns> wordAndProns) {
+              String wordLab,
+              String phoneLab,
+              List<WordAndProns> wordAndProns,
+               TransNormDict transNormDict) {
     this.scores = scores;
     this.wordLab = wordLab;
     this.phoneLab = phoneLab;
     this.wordAndProns = wordAndProns;
+    this.transNormDict=transNormDict;
   }
 
   public Scores getScores() {
@@ -93,6 +101,10 @@ public class HydraOutput {
 
   List<WordAndProns> getWordAndProns() {
     return wordAndProns;
+  }
+
+  public TransNormDict getTransNormDict() {
+    return transNormDict;
   }
 
   public String toString() {

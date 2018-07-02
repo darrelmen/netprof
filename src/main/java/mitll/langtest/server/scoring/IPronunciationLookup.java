@@ -11,9 +11,9 @@ public interface IPronunciationLookup {
    * @return
    * @see ASR#getHydraDict(String, String, List)
    */
-  String createHydraDict(String transcript, String transliteration, List<WordAndProns> possibleProns);
+  TransNormDict createHydraDict(String transcript, String transliteration, List<WordAndProns> possibleProns);
 
-  String getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones, boolean makeCandidates, List<WordAndProns> possible);
+  TransNormDict getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones, boolean makeCandidates, List<WordAndProns> possible);
 
   int getNumPhonesFromDictionaryOrLTS(String transcript, String transliteration);
 

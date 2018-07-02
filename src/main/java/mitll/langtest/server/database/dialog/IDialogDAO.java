@@ -49,6 +49,8 @@ public interface IDialogDAO extends IDAO {
 
           long modified,
           long lastimport,
+          String unit,
+          String lesson,
           DialogType kind,
           DialogStatus status,
           String entitle,
@@ -65,30 +67,14 @@ public interface IDialogDAO extends IDAO {
   boolean delete(int id);
   boolean deleteAllBut(int id);
 
-  /**
-   * @return
-   * @see IProjectManagement#populateProjects
-   */
- // Collection<SlickDialog> getAll();
-
-  /**
-   * @see ProjectManagement#getNestedProjectInfo
-   * @return
-   */
-  int getNum();
-
-
   int ensureDefault(int defaultUser);
-
   int getDefault();
 
   /**
-   * @seex mitll.langtest.server.services.ProjectServiceImpl#exists(int)
-   * @param dialogID
+   * @paramx dialogID
    * @return
    */
-  boolean exists(int dialogID);
-  SlickDialog getByID(int dialogID);
+//  SlickDialog getByID(int dialogID);
 
   List<IDialog> getDialogs(int projid);
 

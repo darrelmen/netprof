@@ -33,9 +33,16 @@
 package mitll.langtest.shared.answer;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
+import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.PretestScore;
+
+import java.io.File;
 
 public class AudioAnswer implements IsSerializable {
   private int exid = -1;
@@ -44,6 +51,7 @@ public class AudioAnswer implements IsSerializable {
   private Validity validity = Validity.INVALID;
   private String decodeOutput = "";
   private String transcript = "";
+  private String normTranscript = "";
   private double score = -1;
   private boolean correct = false;
   private boolean saidAnswer = false;
@@ -133,6 +141,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * Not really used very much anymore ...
+   *
    * @return
    */
   public boolean isSaidAnswer() {
@@ -210,6 +219,10 @@ public class AudioAnswer implements IsSerializable {
     return transcript;
   }
 
+  /**
+   * @param transcript
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding(CommonShell, AudioContext, AnswerInfo.RecordingInfo, String, File, AudioCheck.ValidityAndDur, DecoderOptions)
+   */
   public void setTranscript(String transcript) {
     this.transcript = transcript;
   }
@@ -235,6 +248,14 @@ public class AudioAnswer implements IsSerializable {
     this.roundTripMillis = roundTripMillis;
   }
 
+  public String getNormTranscript() {
+    return normTranscript;
+  }
+
+  public void setNormTranscript(String normTranscript) {
+    this.normTranscript = normTranscript;
+  }
+
   public String toString() {
     return "Answer id " + getResultID() +
         " : audio attr " + audioAttribute +
@@ -246,6 +267,7 @@ public class AudioAnswer implements IsSerializable {
         "\n\tscore " + score +
         "\n\tsaid answer " + saidAnswer +
         "\n\tpretest " + pretestScore +
-        "\n\ttranscript " + transcript;
+        "\n\ttranscript " + transcript +
+        "\n\tnormTrans  " + normTranscript;
   }
 }

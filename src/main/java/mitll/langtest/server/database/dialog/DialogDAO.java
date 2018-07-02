@@ -53,15 +53,15 @@ import java.util.stream.Collectors;
 public class DialogDAO extends DAO implements IDialogDAO {
   private static final Logger logger = LogManager.getLogger(DialogDAO.class);
 
-  public static final long MIN = 60 * 1000L;
-  public static final long HOUR = 60 * MIN;
-  public static final long DAY = 24 * HOUR;
+  private static final long MIN = 60 * 1000L;
+  private static final long HOUR = 60 * MIN;
+  private static final long DAY = 24 * HOUR;
   public static final long YEAR = 365 * DAY;
 
   private final DialogDAOWrapper dao;
 
-  private DatabaseImpl databaseImpl;
-  private DialogAttributeJoinHelper dialogAttributeJoinHelper;
+  private final DatabaseImpl databaseImpl;
+  private final DialogAttributeJoinHelper dialogAttributeJoinHelper;
 
   /**
    * @param database
@@ -74,14 +74,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
                    IUserExerciseDAO userExerciseDAO,
                    DatabaseImpl databaseImpl) {
     super(database);
-    //  propertyDAO = new ProjectPropertyDAO(database, dbConnection);
     dao = new DialogDAOWrapper(dbConnection);
-//    this.userExerciseDAO = userExerciseDAO;
     this.databaseImpl = databaseImpl;
     ensureDefault(databaseImpl.getUserDAO().getDefaultUser());
     dialogAttributeJoinHelper = new DialogAttributeJoinHelper(new DialogAttributeJoinDAOWrapper(dbConnection));
-
-
   }
 
   public int ensureDefault(int defaultUser) {
@@ -90,9 +86,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
       add(defaultUser,
           databaseImpl.getProjectDAO().getDefault(),
           -1,
-          1,//databaseImpl.getImageDAO().getDefault(),
+          1,
+
           System.currentTimeMillis(),
           System.currentTimeMillis(),
+          "", "",
           DialogType.DEFAULT,
           DialogStatus.DEFAULT,
           "",
@@ -119,11 +117,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
     }
   }
 
+/*
   @Override
   public boolean exists(int projid) {
     Collection<SlickDialog> SlickDialogs = dao.byID(projid);
     return !SlickDialogs.isEmpty();
   }
+*/
 
   public SlickDialog getByID(int projid) {
     Collection<SlickDialog> SlickDialogs = dao.byID(projid);
@@ -151,7 +151,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public List<IDialog> getDialogs(int projid) {
     Collection<SlickDialog> byProjID = getByProjID(projid);
 
-    List<IDialog> dialogs = new ArrayList<IDialog>();
+    List<IDialog> dialogs = new ArrayList<>();
     Map<Integer, Dialog> idToDialog = new HashMap<>();
 
     byProjID.forEach(slickDialog -> {
@@ -178,7 +178,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
       addExercises(projid, dialogIDToRelated, dialogID, dialog);
 
       // add images
-
       addImage(projid, dialog);
     });
 
@@ -197,23 +196,32 @@ public class DialogDAO extends DAO implements IDialogDAO {
           logger.info("adding attribute #" + attrid + " = " + e);
 
           if (e == null) {
-            logger.error("no attr for id #"+attrid);
-          }
-          else {
-            logger.info("adding attribute dialog " +dialog);
-            logger.info("adding attribute dialog attr " +dialog.getAttributes());
+            logger.error("no attr for id #" + attrid);
+          } else {
+            logger.info("adding attribute dialog " + dialog);
+            logger.info("adding attribute dialog attr " + dialog.getAttributes());
 
             dialog.getAttributes().add(e);
           }
         });
   }
 
+  /**
+   * TODO: For now, don't do a check for existences for images
+   * @param projid
+   * @param dialog
+   */
   private void addImage(int projid, Dialog dialog) {
-    List<SlickImage> all = databaseImpl.getImageDAO().getAll(projid);
+    List<SlickImage> all = databaseImpl.getImageDAO().getAllNoExistsCheck(projid);
+    logger.warn("addImage got " + all.size());
+
     Map<Integer, String> idToImageRef = new HashMap<>();
     all.forEach(slickImage -> idToImageRef.put(slickImage.id(), slickImage.filepath()));
+    logger.warn("idToImageRef got " + idToImageRef.size());
     int imageid = dialog.getSlickDialog().imageid();
-    if (imageid < 1) logger.warn("no image for dialog " + dialog);
+    if (imageid < 1) {
+      logger.warn("no image for dialog " + dialog);
+    }
     else {
       String s = idToImageRef.get(imageid);
       if (s == null) {
@@ -230,14 +238,18 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     List<CommonExercise> exercises = new ArrayList<>();
     Set<Integer> candidate = new HashSet<>();
+
+
     slickRelatedExercises.forEach(slickRelatedExercise -> {
+//      logger.info("relation " + slickRelatedExercise);
+
       CommonExercise parent = databaseImpl.getExercise(projid, slickRelatedExercise.exid());
-      CommonExercise child  = databaseImpl.getExercise(projid, slickRelatedExercise.contextexid());
+      CommonExercise child = databaseImpl.getExercise(projid, slickRelatedExercise.contextexid());
+
       parent.getDirectlyRelated().add(child);
       child.getMutable().setParentExerciseID(parent.getParentExerciseID());
 
       exercises.add(parent);
-
       exercises.add(child);
 
       int id = parent.getID();
@@ -246,23 +258,25 @@ public class DialogDAO extends DAO implements IDialogDAO {
     });
 
 
-    List<CommonExercise> firstEx = exercises
-        .stream()
-        .filter(commonExercise -> candidate.contains(commonExercise.getID()))
-        .collect(Collectors.toList());
+    {
+      List<CommonExercise> firstEx = exercises
+          .stream()
+          .filter(commonExercise -> candidate.contains(commonExercise.getID()))
+          .collect(Collectors.toList());
 
-    int size = firstEx.size();
-    if (size == 0) {
-      logger.error("huh no first exercise");
-      // }
+      int size = firstEx.size();
+      if (size == 0) {
+        logger.error("huh no first exercise");
+        // }
 //      else if (size == 1) {
-    } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
+      } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
 
-    CommonExercise current = firstEx.iterator().next();
-    while (current != null) {
-      dialog.getExercises().add(current);
-      dialog.getExercises().addAll(current.getDirectlyRelated());
-      current = current.getDirectlyRelated().isEmpty() ? null : current.getDirectlyRelated().get(0);
+      CommonExercise current = firstEx.iterator().next();
+      while (current != null) {
+        dialog.getExercises().add(current);
+        //dialog.getExercises().addAll(current.getDirectlyRelated());
+        current = current.getDirectlyRelated().isEmpty() ? null : current.getDirectlyRelated().get(0);
+      }
     }
   }
 
@@ -326,8 +340,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
                  long modified,
                  long lastimport,
+                 String unit,
+                 String lesson,
                  DialogType kind,
                  DialogStatus status,
+
 //                 String fltitle,
                  String entitle,
                  //               String flpresentation,
@@ -348,8 +365,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
         imageID,
         new Timestamp(modified),
         new Timestamp(lastimport),
+        unit, lesson,
         kind.toString(),
         status.toString(),
+
         //       fltitle,
         entitle,
         //     flpresentation,
@@ -363,11 +382,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
     ));
   }
 
-
+/*
   @Override
   public int getNum() {
     return dao.countAll();
   }
+*/
 
   @Override
   public DialogAttributeJoinHelper getDialogAttributeJoinHelper() {

@@ -203,7 +203,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         slick.withflash(),
         slick.dynamicrange(),
         slick.validity(),
-        slick.model());
+        "");
   }
 
   private MonitorResult fromSlickToMonitorResult(SlickResult slick) {

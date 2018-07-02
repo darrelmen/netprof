@@ -19,6 +19,8 @@ public class Dialog implements IDialog {
 
   private String fltitle;
   private String entitle;
+  private String unit;
+  private String chapter;
 
   private DialogType kind = DialogType.DIALOG;
   private String orientation;
@@ -33,11 +35,29 @@ public class Dialog implements IDialog {
   public Dialog() {
   }
 
+  /**
+   *
+   * @param id
+   * @param userid
+   * @param projid
+   * @param dominoid
+   * @param modified
+   * @param unit
+   * @param chapter
+   * @param orientation
+   * @param imageRef
+   * @param fltitle
+   * @param entitle
+   * @param attributes
+   * @param exercises
+   */
   public Dialog(int id,
                 int userid,
                 int projid,
                 int dominoid,
                 long modified,
+                String unit,
+                String chapter,
                 String orientation,
                 String imageRef,
                 String fltitle,
@@ -52,6 +72,8 @@ public class Dialog implements IDialog {
     this.modified = modified;
     this.entitle = entitle;
     this.fltitle = fltitle;
+    this.unit = unit;
+    this.chapter = chapter;
     this.orientation = orientation;
     this.attributes = attributes;
     this.exercises = exercises;
@@ -63,6 +85,8 @@ public class Dialog implements IDialog {
         slickDialog.projid(),
         slickDialog.dominoid(),
         slickDialog.modified().getTime(),
+        slickDialog.unit(),
+        slickDialog.lesson(),
         slickDialog.orientation(),
         "",
         "",
@@ -81,46 +105,57 @@ public class Dialog implements IDialog {
   }
 
 
+  @Override
   public List<ExerciseAttribute> getAttributes() {
     return attributes;
   }
 
+  @Override
   public int getUserid() {
     return userid;
   }
 
+  @Override
   public int getProjid() {
     return projid;
   }
 
+  @Override
   public int getDominoid() {
     return dominoid;
   }
 
+  @Override
   public long getModified() {
     return modified;
   }
 
+  @Override
   public DialogType getKind() {
     return kind;
   }
 
+  @Override
   public String getOrientation() {
     return orientation;
   }
 
+  @Override
   public String getImageRef() {
     return imageRef;
   }
 
+  @Override
   public List<CommonExercise> getExercises() {
     return exercises;
   }
 
+  @Override
   public String getFltitle() {
     return fltitle;
   }
 
+  @Override
   public String getEntitle() {
     return entitle;
   }
@@ -149,8 +184,20 @@ public class Dialog implements IDialog {
   }
 */
 
+  @Override
+  public String getUnit() {
+    return unit;
+  }
+
+  @Override
+  public String getChapter() {
+    return chapter;
+  }
+
   public String toString() {
     return "Dialog #" + id +
+        "\n\tunit        " + unit +
+        "\n\tchapter     " + chapter +
         "\n\ttitle       " + entitle +
         "\n\torientation " + orientation +
         "\n\timage       " + imageRef +

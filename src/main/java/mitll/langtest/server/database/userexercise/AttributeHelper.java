@@ -19,15 +19,12 @@ public class AttributeHelper implements IAttribute {
   public void createTable() {
     attributeDAOWrapper.createTable();
   }
-
   public String getName() {
     return attributeDAOWrapper.getName();
   }
 
   @Override
-  public boolean updateProject(int oldID, int newprojid) {
-    return attributeDAOWrapper.updateProject(oldID, newprojid) > 0;
-  }
+  public boolean updateProject(int oldID, int newprojid) { return attributeDAOWrapper.updateProject(oldID, newprojid) > 0; }
 
   public int addAttribute(int projid,
                           long now,
@@ -38,14 +35,14 @@ public class AttributeHelper implements IAttribute {
           projid,
           userid,
           new Timestamp(now),
-          attribute.getProperty(), attribute.getValue()));
+          attribute.getProperty(), attribute.getValue(),true));
       if (exists.isEmpty()) {
-        return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue());
+        return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue(), attribute.isFacet());
       } else {
         return exists.iterator().next().id();
       }
     } else {
-      return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue());
+      return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue(), attribute.isFacet());
     }
   }
 
@@ -53,13 +50,14 @@ public class AttributeHelper implements IAttribute {
                               long now,
                               int userid,
                               String property,
-                              String value) {
+                              String value, boolean facet) {
     return attributeDAOWrapper.insert(new SlickExerciseAttribute(-1,
         projid,
         userid,
         new Timestamp(now),
         property,
-        value));
+        value,
+        facet));
   }
 
   /**
@@ -91,7 +89,7 @@ public class AttributeHelper implements IAttribute {
     if (known.containsKey(key)) {
       attribute = known.get(key);
     } else {
-      attribute = new ExerciseAttribute(p.property(), p.value());
+      attribute = new ExerciseAttribute(p.property(), p.value(), p.facet());
       known.put(key, attribute);
     }
     return attribute;

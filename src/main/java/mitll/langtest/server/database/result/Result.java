@@ -103,7 +103,8 @@ public class Result extends SlimResult implements UserAndTime {
                 long durationInMillis, boolean correct, float pronScore, String device,
                 String deviceType,
                 long processDur, long roundTripDur, boolean withFlash, float dynamicRange,
-                String validity, String model) {
+                String validity,
+                String model) {
     super(exid, -1, valid, "", pronScore);
     this.uniqueID = uniqueID;
     this.userid = userid;

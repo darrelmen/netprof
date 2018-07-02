@@ -1,12 +1,8 @@
 package mitll.langtest.server.database.dialog;
 
-import mitll.langtest.server.database.userexercise.IAttributeJoin;
 import mitll.langtest.server.domino.ProjectSync;
-import mitll.npdata.dao.SlickDialog;
 import mitll.npdata.dao.SlickDialogAttributeJoin;
-import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
-import mitll.npdata.dao.userexercise.ExerciseAttributeJoinDAOWrapper;
 
 import java.util.Collection;
 import java.util.List;
