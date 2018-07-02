@@ -290,10 +290,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     String secondType = unitToValue.getOrDefault(second, "");
     if (secondType.isEmpty()) secondType = unitToValue.getOrDefault(second.toLowerCase(), "");
 
-//    logger.info("toSlick for " + shared.getID() +
-//        " : " +first +
-//        " = '" + firstType + "' " +
-//        "" + second + " = '" + secondType + "'");
+/*    logger.info("toSlick for " + shared.getID() + " "+shared.getOldID()+
+        " : " +first +
+        " = '" + firstType + "' " +
+        "" + second + " = '" + secondType + "'");*/
 
     String english = shared.getEnglish();
     if (english.length() > MAX_LENGTH) {
@@ -723,7 +723,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         if (attribute.isFacet()) {
           pairs.add(attribute);
         } else {
-          logger.info("Skip attribute not a facet " + attribute);
+//          logger.info("Skip attribute not a facet " + attribute);
         }
       }
     }

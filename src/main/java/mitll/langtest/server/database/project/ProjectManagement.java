@@ -428,6 +428,7 @@ public class ProjectManagement implements IProjectManagement {
     if (project.getKind() == ProjectType.DIALOG || true) {
       if (new DialogPopulate(db).addDialogInfo(project)) {
         configureProject(project, false, true);
+        project.getSectionHelper().report();
       }
     }
   }

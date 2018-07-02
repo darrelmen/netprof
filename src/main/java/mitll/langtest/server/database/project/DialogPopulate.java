@@ -45,6 +45,7 @@ public class DialogPopulate {
    * Take our canned data and put it in the database.
    *
    * @param project
+   * @see ProjectManagement#addDialogInfo
    */
   boolean addDialogInfo(Project project) {
     int projid = project.getID();
@@ -71,7 +72,7 @@ public class DialogPopulate {
       Map<CommonExercise, Integer> allImportExToID = new HashMap<>();
       List<String> typeOrder = project.getTypeOrder();
 
-      List<String> types = typeOrder.subList(0, Math.min(2, typeOrder.size()));
+      //  List<String> types = typeOrder.subList(0, Math.min(2, typeOrder.size()));
       dialogs.forEach(dialog -> {
         // add the image
         int imageID = db.getImageDAO().insert(getSlickImage(projid, now, dialog, modified));
@@ -87,21 +88,9 @@ public class DialogPopulate {
         // add dialog attributes
         addDialogAttributes(dialogDAO, defaultUser, modified, attrToInt, dialog, dialogID);
 
-/*        dialog.getExercises().forEach(commonExercise -> {
-          Map<String, String> unitToValue = new HashMap<>();
-          types.forEach(type -> {
-            List<ExerciseAttribute> collect = findMatchingAttr(commonExercise, type);
-
-            if (collect.isEmpty()) {
-              logger.warn("no atr for type " + type);
-            } else unitToValue.put(type, collect.iterator().next().getValue());
-          });
-
-          logger.info("unit->value "+ unitToValue);
-
-          commonExercise.getMutable().setUnitToValue(unitToValue);
-
-        });*/
+        if (false) {
+          dialog.getExercises().forEach(commonExercise -> logger.info(commonExercise.getOldID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getUnitToValue()));
+        }
         // add the exercises
         Map<CommonExercise, Integer> importExToID = exerciseCopy.addExercisesAndAttributes(
             defaultUser,
@@ -127,13 +116,7 @@ public class DialogPopulate {
           }
           db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(relatedExercises);
         }
-     /*
-        dialog.getExercises().forEach(commonExercise -> {
-          String oldID = commonExercise.getOldID();
-          logger.info("old ex " + oldID);
-          oldToEx.put(oldID, commonExercise);
-        });
-*/
+
 //        if (parentToChild.size() != dialog.getExercises().size())
 //          logger.error("tried to add " + dialog.getExercises().size() + " but only did " + parentToChild.size());
 
@@ -142,32 +125,6 @@ public class DialogPopulate {
         // add the audio
       });
 
-/*
-      Set<Integer> exids = new HashSet<>();
-      db.getUserExerciseDAO().getRelatedExercise()
-          .getDialogIDToRelated(projid)
-          .forEach((k, v) -> v
-              .forEach(slickRelatedExercise -> exids
-                  .add(slickRelatedExercise.exid())));
-
-      // after adding to db get old -> db id
-      Map<String, Integer> oldToID = new HashMap<>();
-      List<SlickExercise> exercisesByIDs = db.getUserExerciseDAO().getExercisesByIDs(exids);
-      logger.info("found " + exercisesByIDs.size() + " new exercises");
-      exercisesByIDs.forEach(slickExercise -> oldToID.put(slickExercise.exid(), slickExercise.id()));
-      logger.info("now " + oldToID.size() + " old->id entries");
-      logger.info("oldToEx " + oldToEx.size() + " old ex->exercise entries");
-
-      // get old ex to db id
-      Map<CommonExercise, Integer> exToID = new HashMap<>();
-      oldToID.forEach((k, v) -> {
-        logger.info("k   " + k);
-        logger.info("v   " + v);
-        CommonExercise key = oldToEx.get(k);
-        logger.info("key " + key);
-        exToID.put(key, v);
-      });
-*/
 
       addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
       return true;
@@ -231,7 +188,7 @@ public class DialogPopulate {
     Set<ExerciseAttribute> allToAdd = new HashSet<>();
     dialogs.forEach(dialog -> {
       List<ExerciseAttribute> attributes = dialog.getAttributes();
-      logger.info("dialog attr " + dialog.getEntitle() + " " + attributes.size());
+//      logger.info("dialog attr " + dialog.getEntitle() + " " + attributes.size());
       Set<ExerciseAttribute> toAdd = new HashSet<>(attributes);
       toAdd.removeAll(known);
       allToAdd.addAll(toAdd);
@@ -256,7 +213,6 @@ public class DialogPopulate {
         .addAnswer(new AnswerInfo(
             new AudioContext(0, defaultUser, projid, project.getLanguage(), exid, 0, AudioType.REGULAR),
             new AnswerInfo.RecordingInfo(v, v, "", "", false, k.getForeignLanguage(), ""), valid, ""), now);
-
 
 
     db.getAudioDAO().addOrUpdate(new AudioInfo(

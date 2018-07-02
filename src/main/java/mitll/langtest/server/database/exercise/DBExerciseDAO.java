@@ -365,6 +365,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         .collect(Collectors.toSet());
   }
 
+  /**
+   * @see #getTypeOrderFromProject
+   * @see #setRootTypes
+   * @return
+   */
   private Collection<String> getAttributeTypes() {
     return userExerciseDAO.getExerciseAttribute().getAttributeTypes(project.id());
   }

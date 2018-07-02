@@ -193,13 +193,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
           int attrid = slickDialogAttributeJoin.attrid();
           ExerciseAttribute e = idToPair.get(attrid);
 
-          logger.info("adding attribute #" + attrid + " = " + e);
+//          logger.info("adding attribute #" + attrid + " = " + e);
 
           if (e == null) {
             logger.error("no attr for id #" + attrid);
           } else {
-            logger.info("adding attribute dialog " + dialog);
-            logger.info("adding attribute dialog attr " + dialog.getAttributes());
+ //           logger.info("adding attribute dialog " + dialog);
+  //          logger.info("adding attribute dialog attr " + dialog.getAttributes());
 
             dialog.getAttributes().add(e);
           }
@@ -213,11 +213,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
    */
   private void addImage(int projid, Dialog dialog) {
     List<SlickImage> all = databaseImpl.getImageDAO().getAllNoExistsCheck(projid);
-    logger.warn("addImage got " + all.size());
+//    logger.warn("addImage got " + all.size());
 
     Map<Integer, String> idToImageRef = new HashMap<>();
     all.forEach(slickImage -> idToImageRef.put(slickImage.id(), slickImage.filepath()));
-    logger.warn("idToImageRef got " + idToImageRef.size());
+  //  logger.warn("idToImageRef got " + idToImageRef.size());
     int imageid = dialog.getSlickDialog().imageid();
     if (imageid < 1) {
       logger.warn("no image for dialog " + dialog);

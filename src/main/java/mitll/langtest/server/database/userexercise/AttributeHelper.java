@@ -63,6 +63,7 @@ public class AttributeHelper implements IAttribute {
   /**
    * E.g. grammar or topic or sub-topic
    *
+   * Make sure the
    * @param projid
    * @return
    * @see DBExerciseDAO#getAttributeTypes
@@ -70,7 +71,9 @@ public class AttributeHelper implements IAttribute {
   @Override
   public Collection<String> getAttributeTypes(int projid) {
     Set<String> unique = new TreeSet<>();
-    attributeDAOWrapper.allByProject(projid).forEach(slickExerciseAttribute -> unique.add(slickExerciseAttribute.property()));
+    attributeDAOWrapper
+        .allByProjectCheckFacet(projid)
+        .forEach(slickExerciseAttribute -> unique.add(slickExerciseAttribute.property()));
     return unique;
   }
 

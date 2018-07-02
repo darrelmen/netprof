@@ -204,6 +204,7 @@ public class KPDialogs implements IDialogReader {
             }
 
             exercises.add(exercise);
+//            logger.info("Ex " + exercise.getOldID() + " " + exercise.getUnitToValue());
           }
         });
 

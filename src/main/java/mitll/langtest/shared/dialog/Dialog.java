@@ -7,10 +7,11 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.npdata.dao.SlickDialog;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Dialog implements IDialog {
+  public static final String SPEAKER = "Speaker".toLowerCase();
   private int id;
   private int userid;
   private int projid;
@@ -36,7 +37,6 @@ public class Dialog implements IDialog {
   }
 
   /**
-   *
    * @param id
    * @param userid
    * @param projid
@@ -192,6 +192,42 @@ public class Dialog implements IDialog {
   @Override
   public String getChapter() {
     return chapter;
+  }
+
+  @Override
+  public List<String> getSpeakers() {
+    Set<String> speakers = new LinkedHashSet<>();
+    attributes.forEach(exerciseAttribute -> {
+          if (exerciseAttribute.getProperty().toLowerCase().startsWith(SPEAKER)) {
+            speakers.add(exerciseAttribute.getValue());
+          }
+        }
+    );
+    return new ArrayList<>(speakers);
+  }
+
+  @Override
+  public Map<String, List<CommonExercise>> groupBySpeaker() {
+    Map<String, List<CommonExercise>> speakerToExercises = new HashMap<>();
+    exercises.forEach(commonExercise -> {
+          List<CommonExercise> exercises = speakerToExercises.computeIfAbsent(getSpeaker(commonExercise), k -> new ArrayList<>());
+          exercises.add(commonExercise);
+        }
+    );
+    return speakerToExercises;
+  }
+
+  private String getSpeaker(CommonExercise commonExercise) {
+    List<ExerciseAttribute> speakerAttr = getSpeakerAttr(commonExercise);
+    return speakerAttr.isEmpty() ? "UNKNOWN" : speakerAttr.stream().iterator().next().getValue();
+  }
+
+  private List<ExerciseAttribute> getSpeakerAttr(CommonExercise commonExercise) {
+    return commonExercise
+        .getAttributes()
+        .stream()
+        .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase("Speaker"))
+        .collect(Collectors.toList());
   }
 
   public String toString() {

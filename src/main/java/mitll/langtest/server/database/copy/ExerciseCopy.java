@@ -28,6 +28,7 @@ public class ExerciseCopy {
   public static final String UNIT = "Unit";
   public static final String LESSON = "Lesson";
   public static final String CUSTOM = "Custom";
+  public static final int DEFAULT_DIALOG_ID = 1;
 
   /**
    * TODO :  How to make sure we don't add duplicates?
@@ -75,7 +76,7 @@ public class ExerciseCopy {
         typeOrder,
         idToCandidateOverride,
         dominoToExID,
-        -1));
+        DEFAULT_DIALOG_ID));
 
     Map<String, Integer> exToInt = getOldToNewExIDs(db, projectid);
     reallyAddingUserExercises(projectid, typeOrder, slickUEDAO, exToInt, customExercises);
@@ -220,6 +221,7 @@ public class ExerciseCopy {
                                                                 Map<String, List<Exercise>> idToCandidateOverride,
                                                                 Map<Integer, Integer> dominoToExID, boolean checkExists) {
     Map<CommonExercise, Integer> exToInt = new HashMap<>();
+    logger.info("add " + typeOrder);
     Map<Integer, List<Integer>> exToJoins =
         addPredefExercises(projectid, slickUEDAO, importUser, exercises, typeOrder, idToCandidateOverride, exToInt, checkExists);
     exToInt.forEach((commonExercise, exid) -> dominoToExID.put(commonExercise.getDominoID(), exid));

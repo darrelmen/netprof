@@ -6,6 +6,7 @@ import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IDialog extends HasID {
   List<ExerciseAttribute> getAttributes();
@@ -33,4 +34,8 @@ public interface IDialog extends HasID {
   String getUnit();
 
   String getChapter();
+
+  List<String> getSpeakers();
+
+  Map<String, List<CommonExercise>> groupBySpeaker();
 }
