@@ -723,7 +723,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         if (attribute.isFacet()) {
           pairs.add(attribute);
         } else {
-//          logger.info("Skip attribute not a facet " + attribute);
+          logger.info("Skip attribute not a facet " + attribute);
         }
       }
     }
@@ -829,39 +829,50 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     List<CommonExercise> copy = new ArrayList<>();
 
-    Collection<String> attrTypes = allByProject
-        .values()
-        .stream()
-        .map(Pair::getProperty)
-        .collect(Collectors.toCollection(HashSet::new));
+    List<SlickExercisePhone> pairs = new ArrayList<>();
+
+    long then = System.currentTimeMillis();
+    {
+      Collection<String> allFacetTypes = allByProject
+          .values()
+          .stream()
+          .filter(ExerciseAttribute::isFacet)
+          .map(Pair::getProperty)
+          .collect(Collectors.toCollection(HashSet::new));
 
 //    logger.info("ExToPhones " + exToPhones.size());
-    long then = System.currentTimeMillis();
-    List<SlickExercisePhone> pairs = new ArrayList<>();
-    //  logger.info("examining  " + all.size() + " exercises...");
+      //  logger.info("examining  " + all.size() + " exercises...");
 
-    int n = 0;
-    boolean shouldSwap = getShouldSwap(lookup.getID());
-    for (SlickExercise slickExercise : all) {
-      Exercise exercise = makeExercise(slickExercise, shouldSwap);
+      int n = 0;
+      boolean shouldSwap = getShouldSwap(lookup.getID());
+      for (SlickExercise slickExercise : all) {
+        Exercise exercise = makeExercise(slickExercise, shouldSwap);
 
-      if (WARN_ABOUT_MISSING_PHONES) {
-        if (exercise.getNumPhones() == 0 && n++ < 10) {
-          logger.info("getExercises no phones for exercise " + exercise.getID());
+        if (WARN_ABOUT_MISSING_PHONES) {
+          if (exercise.getNumPhones() == 0 && n++ < 10) {
+            logger.info("getExercises no phones for exercise " + exercise.getID());
+          }
         }
+
+        addAttributeToExercise(allByProject, exToAttrs, exercise);
+//      logger.info("Attr for " + exercise.getID() + " " + exercise.getAttributes());
+        List<Pair> e = addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, exToPhones, lookup, exercise,
+            allFacetTypes, pairs);
+        e.forEach(pair -> {
+          if (pair.getProperty().startsWith("Speaker")) {
+            logger.info("got speaker attr " + pair);
+          }
+        });
+
+        allAttributes.add(e);
+        copy.add(exercise);
       }
 
-      addAttributeToExercise(allByProject, exToAttrs, exercise);
-//      logger.info("Attr for " + exercise.getID() + " " + exercise.getAttributes());
-      allAttributes.add(addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, exToPhones, lookup, exercise,
-          attrTypes, pairs));
-      copy.add(exercise);
+      if (!pairs.isEmpty()) {
+        logger.info("updating " + pairs.size() + " exercises for num phones.");
+      }
     }
-
     long then2 = System.currentTimeMillis();
-    if (!pairs.isEmpty()) {
-      logger.info("updating " + pairs.size() + " exercises for num phones.");
-    }
     exerciseDAO.updatePhonesBulk(pairs);
 
     long now = System.currentTimeMillis();
@@ -873,7 +884,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     }
 
     if (addTypesToSection) {
-      //  logger.info("getExercises type order " + typeOrder);
+      logger.info("getExercises type order " + typeOrder);
+
       sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
     }
     //  logger.info("getExercises created " + copy.size() + " exercises");

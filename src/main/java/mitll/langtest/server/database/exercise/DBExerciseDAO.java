@@ -174,13 +174,13 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       });
       */
 
-      Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getExerciseAttribute().getIDToPair(projid);
+      Map<Integer, ExerciseAttribute> allAttributesByProject = userExerciseDAO.getExerciseAttribute().getIDToPair(projid);
       logger.info("readExercises" +
           "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\ttype order     " + typeOrder +
-          "\n\tnum attributes " + allByProject.size()
+          "\n\tnum attributes " + allAttributesByProject.size()
       );
-      //logger.info("readExercises found " + allByProject.size() + " attributes");
+      //logger.info("readExercises found " + allAttributesByProject.size() + " attributes");
 
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs =
           userExerciseDAO.getExerciseAttributeJoin().getAllJoinByProject(projid);
@@ -193,7 +193,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
               exerciseToPhoneForProject,
               fullProject,
 
-              allByProject,
+              allAttributesByProject,
               exToAttrs
           );
 
@@ -210,7 +210,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           getIDToExercise(userExerciseDAO.getContextByProject(
               typeOrder,
               getSectionHelper(),
-              exerciseToPhoneForProject, fullProject, allByProject, exToAttrs
+              exerciseToPhoneForProject, fullProject, allAttributesByProject, exToAttrs
           ));
 //      logger.info("readExercises project " + project + " idToContext " + idToContext.size());
 

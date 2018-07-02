@@ -39,6 +39,7 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
@@ -239,12 +240,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
     List<CommonExercise> exercises = new ArrayList<>();
     Set<Integer> candidate = new HashSet<>();
 
+//    logger.info("got " + slickRelatedExercises.size() + " relations for " + dialogID);
 
     slickRelatedExercises.forEach(slickRelatedExercise -> {
 //      logger.info("relation " + slickRelatedExercise);
 
-      CommonExercise parent = databaseImpl.getExercise(projid, slickRelatedExercise.exid());
-      CommonExercise child = databaseImpl.getExercise(projid, slickRelatedExercise.contextexid());
+      CommonExercise parent = new Exercise(databaseImpl.getExercise(projid, slickRelatedExercise.exid()));
+      CommonExercise child = new Exercise(databaseImpl.getExercise(projid, slickRelatedExercise.contextexid()));
 
       parent.getDirectlyRelated().add(child);
       child.getMutable().setParentExerciseID(parent.getParentExerciseID());
@@ -252,11 +254,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
       exercises.add(parent);
       exercises.add(child);
 
-      int id = parent.getID();
-      candidate.add(id);
+      candidate.add(parent.getID());
       candidate.add(child.getID());
     });
 
+  //  logger.info("got exercises  " + exercises.size());
+  //  logger.info("got candidates " + candidate.size() + " relations for " + dialogID + " : " + candidate);
 
     {
       List<CommonExercise> firstEx = exercises
@@ -271,12 +274,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 //      else if (size == 1) {
       } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
 
-      CommonExercise current = firstEx.iterator().next();
-      while (current != null) {
-        dialog.getExercises().add(current);
-        //dialog.getExercises().addAll(current.getDirectlyRelated());
-        current = current.getDirectlyRelated().isEmpty() ? null : current.getDirectlyRelated().get(0);
-      }
+      firstEx.forEach(current->dialog.getExercises().add(current));
     }
   }
 
@@ -381,13 +379,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
         //   translation
     ));
   }
-
-/*
-  @Override
-  public int getNum() {
-    return dao.countAll();
-  }
-*/
 
   @Override
   public DialogAttributeJoinHelper getDialogAttributeJoinHelper() {

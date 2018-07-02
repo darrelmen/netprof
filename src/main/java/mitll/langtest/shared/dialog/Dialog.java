@@ -172,17 +172,6 @@ public class Dialog implements IDialog {
     this.imageRef = imageRef;
   }
 
-/*
-  public void setAttributes(List<ExerciseAttribute> attributes) {
-    this.attributes = attributes;
-  }
-*/
-
-/*
-  public void setExercises(List<CommonExercise> exercises) {
-    this.exercises = exercises;
-  }
-*/
 
   @Override
   public String getUnit() {

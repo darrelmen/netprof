@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface IDialog extends HasID {
-  List<ExerciseAttribute> getAttributes();
-
   int getUserid();
 
   int getProjid();
@@ -21,19 +19,22 @@ public interface IDialog extends HasID {
 
   DialogType getKind();
 
-  String getOrientation();
-
   String getImageRef();
 
-  List<CommonExercise> getExercises();
-
-  String getFltitle();
+  String getOrientation();
 
   String getEntitle();
+
+  String getFltitle();
 
   String getUnit();
 
   String getChapter();
+
+  List<ExerciseAttribute> getAttributes();
+
+  List<CommonExercise> getExercises();
+
 
   List<String> getSpeakers();
 

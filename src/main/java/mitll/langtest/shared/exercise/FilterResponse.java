@@ -88,6 +88,8 @@ public class FilterResponse implements IsSerializable {
   }
 
   public String toString() {
-    return "response " + reqid + " " + typesToInclude + " " + typeToValues;
+    return "response reqid #" + reqid +
+        "\n\ttypes      " + typesToInclude +
+        "\n\ttype-value " + typeToValues;
   }
 }

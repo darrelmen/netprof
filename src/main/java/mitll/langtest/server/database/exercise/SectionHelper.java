@@ -85,6 +85,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   private final boolean DEBUG = false;
   private final boolean DEBUG_TYPE_ORDER = false;
+  private final boolean  DEBUG_OR_MERGE=false;
 
   public SectionHelper() {
     makeRoot();
@@ -443,12 +444,12 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String name = child.getName();
     MatchInfo matchInfo = matches.get(name);
 
-    if (DEBUG) logger.info("addOrMerge " + name + " match info " + matchInfo);
+    if (DEBUG_OR_MERGE) logger.info("addOrMerge " + name + " match info " + matchInfo);
     if (matchInfo == null) {
       matches.put(name, new MatchInfo(child));
     } else {
       int count = child.getCount();
-      if (DEBUG)
+      if (DEBUG_OR_MERGE)
         logger.info("\taddOrMerge " + name + " add " + child.getName() + "=" + child.getCount() + " to " + matchInfo);
       matchInfo.incr(count);
     }
@@ -643,6 +644,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     pairs.forEach(pair -> addExerciseToLesson(exercise, pair));
   }
 
+  /**
+   * @see #addPairs(Shell, List)
+   * @param exercise
+   * @param pair
+   */
   private void addExerciseToLesson(T exercise, Pair pair) {
     addPairEntry(exercise, pair);
     exercise.addPair(pair);
