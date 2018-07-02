@@ -395,8 +395,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
 
     makeDialogDAOs();
-
     createTables();
+
+    dialogDAO.ensureDefault(getUserDAO().getDefaultUser());
 
     afterDAOSetup(slickAudioDAO);
 
@@ -1292,7 +1293,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public void createTables() {
     logger.info("createTables create slick tables - has " + dbConnection.getTables());
 
-   // dbConnection.addColumn();
+    // dbConnection.addColumn();
 
     List<String> created = new ArrayList<>();
 

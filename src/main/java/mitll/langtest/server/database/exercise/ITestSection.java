@@ -25,7 +25,7 @@ public interface ITestSection<T> {
    */
   Collection<T> getExercisesForSelectionState(String type, String value);
 
-  Map<String, Set<MatchInfo>> getTypeToMatches(Collection<Pair> pairs);
+  Map<String, Set<MatchInfo>> getTypeToMatches(Collection<Pair> pairs, boolean debug);
   SectionNode getRoot();
   SectionNode getFirstNode(String name);
   SectionNode getNode(SectionNode node, String type, String name);

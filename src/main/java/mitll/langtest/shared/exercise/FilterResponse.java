@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.exercise.ISection;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,7 +56,7 @@ public class FilterResponse implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.SectionHelper#getTypeToValues(FilterRequest)
+   * @see ISection#getTypeToValues(FilterRequest, boolean)
    * @param reqid
    * @param typeToValues
    * @param typesToInclude

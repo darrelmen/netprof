@@ -1,10 +1,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickExercise;
 
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +103,8 @@ public interface ISection<T> {
   /**
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
    * @param request
+   * @param debug
    * @return
    */
-  FilterResponse getTypeToValues(FilterRequest request);
+  FilterResponse getTypeToValues(FilterRequest request, boolean debug);
 }

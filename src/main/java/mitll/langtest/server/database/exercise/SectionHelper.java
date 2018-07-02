@@ -65,11 +65,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   static final Set<String> SUBTOPICS = new HashSet<>(Arrays.asList(SUB_TOPIC.toString(), SUBTOPIC_LC));
 
   /**
-   * @see #getTypeToMatchPairs(List, SectionNode)
+   * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
   private static final String ANY = "any";
   /**
-   * @see #getTypeToMatchPairs(List, SectionNode)
+   * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
   private static final String ALL = "all";
   private static final String LISTS = "Lists";
@@ -294,13 +294,14 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   /**
    * @param pairs
+   * @param debug
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
    */
   @Override
-  public Map<String, Set<MatchInfo>> getTypeToMatches(Collection<Pair> pairs) {
+  public Map<String, Set<MatchInfo>> getTypeToMatches(Collection<Pair> pairs, boolean debug) {
    // Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), this.root);
-    return getTypeToMatches(getTypeToMatchPairs(new ArrayList<>(pairs), this.root));
+    return getTypeToMatches(getTypeToMatchPairs(new ArrayList<>(pairs), this.root, debug));
   }
 
   /**
@@ -308,10 +309,11 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    *
    * @param pairs
    * @param node
+   * @param debug
    * @return
    */
   @NotNull
-  private Map<String, Map<String, MatchInfo>> getTypeToMatchPairs(List<Pair> pairs, SectionNode node) {
+  private Map<String, Map<String, MatchInfo>> getTypeToMatchPairs(List<Pair> pairs, SectionNode node, boolean debug) {
     Map<String, Map<String, MatchInfo>> typeToMatch = new HashMap<>();
 
     if (pairs.isEmpty()) {
@@ -325,7 +327,8 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String toMatch = next.getValue();
 
     boolean isAll = toMatch.equalsIgnoreCase(ANY) || toMatch.equalsIgnoreCase(ALL);
-    if (DEBUG) {
+    boolean b = DEBUG || debug;
+    if (b) {
       logger.info("getTypeToMatchPairs to match " + type + "=" + toMatch + " out of " + pairs + " is all " + isAll);
     }
     if (!node.isLeaf() && node.getChildType().equals(type)) {
@@ -355,7 +358,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         }
       }
 
-      if (DEBUG) {
+      if (b) {
         logger.info("getTypeToMatchPairs children of " + node.getName() + " match for " + next + " is " + (childMatches == null ? "none" : childMatches.size()));
       }
 
@@ -363,7 +366,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         return typeToMatch;
       } else {
         iterator.remove();
-        if (DEBUG) logger.info("getTypeToMatchPairs path now " + pairs);
+        if (b) logger.info("getTypeToMatchPairs path now " + pairs);
 
         if (pairs.isEmpty()) {
           for (SectionNode childMatch : childMatches) {
@@ -371,10 +374,10 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
           }
           return typeToMatch;
         } else {
-          if (DEBUG) logger.info("recurse on " + childMatches.size() + " with path " + pairs);
+          if (b) logger.info("recurse on " + childMatches.size() + " with path " + pairs);
 
           for (SectionNode childMatch : childMatches) {
-            Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), childMatch);
+            Map<String, Map<String, MatchInfo>> typeToMatchPairs = getTypeToMatchPairs(new ArrayList<>(pairs), childMatch, false);
             mergeMaps2(typeToMatch, typeToMatchPairs);
           }
         }
@@ -398,7 +401,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         }
       } else {
         for (SectionNode child : node.getChildren()) {
-          mergeMaps2(typeToMatch, getTypeToMatchPairs(pairs, child));
+          mergeMaps2(typeToMatch, getTypeToMatchPairs(pairs, child, false));
         }
       }
     }
@@ -828,7 +831,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
   public Collection<T> getFirst() {
     String first = getTypeOrder().iterator().next();
 
-    Map<String, Set<MatchInfo>> all = getTypeToMatches(Collections.singletonList(new Pair(first, ALL)));
+    Map<String, Set<MatchInfo>> all = getTypeToMatches(Collections.singletonList(new Pair(first, ALL)), false);
     Set<MatchInfo> matchInfos = all.get(first);
     //String firstUnit = matchInfos.iterator().next().getValue();
 
@@ -836,7 +839,7 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
     String firstUnit = getFirstMatchLargerThan(matchInfos, minFirstSize);
 
     //matchInfos.forEach(matchInfo -> logger.info("\tgot " + matchInfo.getValue() + " = " + matchInfo.getCount()));
-    Map<String, Set<MatchInfo>> childrenOfFirst = getTypeToMatches(Collections.singletonList(new Pair(first, firstUnit)));
+    Map<String, Set<MatchInfo>> childrenOfFirst = getTypeToMatches(Collections.singletonList(new Pair(first, firstUnit)), false);
     //  logger.warn("match to " + firstUnit + " = " + childrenOfFirst.keySet());
 
     Map<String, Collection<String>> typeToSection = new HashMap<>();
@@ -1014,28 +1017,31 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
 
   /**
    * @param request
+   * @param debug
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
    */
   @Override
-  public FilterResponse getTypeToValues(FilterRequest request) {
+  public FilterResponse getTypeToValues(FilterRequest request, boolean debug) {
     List<Pair> typeToSelection = request.getTypeToSelection();
     List<String> typesInOrder = getTypesFromRequest(typeToSelection);
     Set<String> typesToInclude1 = new HashSet<>(typesInOrder);
 
-    if (DEBUG) {
+    boolean b = DEBUG || debug;
+    if (b) {
+      logger.info("getTypeToValues typesInOrder    " + typesInOrder);
       logger.info("getTypeToValues typesToInclude1 " + typesToInclude1);
       logger.info("getTypeToValues request is      " + typeToSelection);
     }
-    Map<String, Set<MatchInfo>> typeToMatches = getTypeToMatches(typeToSelection);
-    if (DEBUG) logger.info("getTypeToValues typeToMatches is " + typeToMatches);
+    Map<String, Set<MatchInfo>> typeToMatches = getTypeToMatches(typeToSelection, b);
+    if (b) logger.info("getTypeToValues typeToMatches is " + typeToMatches);
 
     boolean someEmpty = checkIfAnyTypesAreEmpty(typesInOrder, typesToInclude1, typeToMatches);
 
     int userListID = request.getUserListID();
     if (someEmpty) {
       List<Pair> typeToSelection2 = new ArrayList<>();
-      if (DEBUG) logger.info("getTypeToValues back off including  " + typesToInclude1);
+      if (b) logger.info("getTypeToValues back off including  " + typesToInclude1);
       for (Pair pair : typeToSelection) {
         if (typesToInclude1.contains(pair.getProperty())) {
           typeToSelection2.add(pair);
@@ -1044,12 +1050,12 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
         }
       }
 
-      if (DEBUG) logger.info("getTypeToValues try search again with " + typeToSelection2);
+      if (b) logger.info("getTypeToValues try search again with " + typeToSelection2);
 
-      Map<String, Set<MatchInfo>> typeToMatches1 = getTypeToMatches(typeToSelection2);
+      Map<String, Set<MatchInfo>> typeToMatches1 = getTypeToMatches(typeToSelection2, b);
       return new FilterResponse(request.getReqID(), typeToMatches1, typesToInclude1, userListID);
     } else {
-      if (DEBUG) logger.info("getTypeToValues typeToMatches " + typeToMatches + " to include " + typesToInclude1);
+      if (b) logger.info("getTypeToValues typeToMatches " + typeToMatches + " to include " + typesToInclude1);
 
       return new FilterResponse(request.getReqID(), typeToMatches, typesToInclude1, userListID);
     }

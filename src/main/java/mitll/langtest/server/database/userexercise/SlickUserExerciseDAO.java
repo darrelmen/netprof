@@ -84,6 +84,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @see SlickUserExerciseDAO#addPhoneInfo
    */
   private static final String BLANK = "Blank";
+  public static final String UNIT = "Unit";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -642,6 +643,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
                                   Collection<String> attrTypes) {
     List<Pair> pairs = getUnitToValue(slick, baseTypeOrder);
 
+  //  logger.info("For " + slick.id() + " " + slick.exid() + " attr " + exercise.getAttributes());
     // Collection<String> phones = exercisePhoneInfo == null ? null : exercisePhoneInfo.getPhones();
     //if (phones == null || phones.isEmpty()) logger.warn("no phones for " + id);
     //  int max = 15;
@@ -653,10 +655,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
           logger.warn("addPhoneInfo : no exercise attributes for " + exercise.getID());
         }
       } else {
-        addBlanksForMissingInfo(exercise, attrTypes, pairs);
+       addBlanksForMissingInfo(exercise, attrTypes, pairs);
       }
 
-      //  logger.info("pairs for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
+      logger.info("pairs for " + exercise.getID() + " " + exercise.getOldID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
       sectionHelper.addPairs(exercise, pairs);
 
       if (true) {//phones == null) {
@@ -718,7 +720,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       ExerciseAttribute attribute = typeToAtrr.get(attrType);
       if (attribute == null) {
         // missing info for this type, so map it to BLANK
-        pairs.add(new ExerciseAttribute(attrType, BLANK));
+        //pairs.add(new ExerciseAttribute(attrType, BLANK));
       } else {
         if (attribute.isFacet()) {
           pairs.add(attribute);
@@ -743,7 +745,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     List<Pair> pairs = new ArrayList<>();
     Iterator<String> iterator = typeOrder.iterator();
 
-    String first = iterator.hasNext() ? iterator.next() : "Unit";
+    String first = iterator.hasNext() ? iterator.next() : UNIT;
     String second = iterator.hasNext() ? iterator.next() : "";
     boolean firstEmpty = slick.unit().isEmpty();
 
@@ -839,6 +841,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
           .filter(ExerciseAttribute::isFacet)
           .map(Pair::getProperty)
           .collect(Collectors.toCollection(HashSet::new));
+
+      logger.info("all facet types:");
+      allFacetTypes.forEach(type->logger.info("\t"+type));
+
 
 //    logger.info("ExToPhones " + exToPhones.size());
       //  logger.info("examining  " + all.size() + " exercises...");

@@ -77,7 +77,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
     super(database);
     dao = new DialogDAOWrapper(dbConnection);
     this.databaseImpl = databaseImpl;
-    ensureDefault(databaseImpl.getUserDAO().getDefaultUser());
+
+    //ensureDefault(databaseImpl.getUserDAO().getDefaultUser());
     dialogAttributeJoinHelper = new DialogAttributeJoinHelper(new DialogAttributeJoinDAOWrapper(dbConnection));
   }
 

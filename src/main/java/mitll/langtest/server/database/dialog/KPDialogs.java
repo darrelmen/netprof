@@ -28,7 +28,7 @@ public class KPDialogs implements IDialogReader {
   public static final String UNIT = "unit";
   public static final String CHAPTER = "chapter";
   public static final String PAGE = "page";
-  public static final String TOPIC = "topic";
+  public static final String TOPIC = "presentation";
   public static final String SPEAKER = "Speaker";
 
   String docIDS = "333815\n" +

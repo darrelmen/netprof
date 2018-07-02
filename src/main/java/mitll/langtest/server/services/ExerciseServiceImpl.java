@@ -100,7 +100,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
     } else {
-      FilterResponse response = sectionHelper.getTypeToValues(request);
+      FilterResponse response = sectionHelper.getTypeToValues(request, false);
       addUserListFacet(request, response);
 
 
