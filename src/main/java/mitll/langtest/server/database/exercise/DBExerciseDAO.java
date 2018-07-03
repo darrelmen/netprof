@@ -35,7 +35,7 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
-import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.*;
@@ -54,7 +54,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
 
   private static final int SPEW_THRESH = 5;
-  private final SlickUserExerciseDAO userExerciseDAO;
+  private final IUserExerciseDAO userExerciseDAO;
   private final SlickProject project;
   private final Project fullProject;
   private static final boolean DEBUG = false;
@@ -66,7 +66,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       ServerProperties serverProps,
       IUserListManager userListManager,
       boolean addDefects,
-      SlickUserExerciseDAO userExerciseDAO,
+      IUserExerciseDAO userExerciseDAO,
       Project fullProject
   ) {
     super(serverProps, userListManager, addDefects, fullProject.getProject().language());
@@ -165,14 +165,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
           userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
-
-/*
-      exerciseToPhoneForProject.forEach((k, v) -> {
-        if (v.getNumPhones() < 1) {
-          logger.warn("1 ex #" + k + " has no phones?");
-        }
-      });
-      */
 
       Map<Integer, ExerciseAttribute> allAttributesByProject = userExerciseDAO.getExerciseAttribute().getIDToPair(projid);
       logger.info("readExercises" +

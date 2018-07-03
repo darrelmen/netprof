@@ -72,6 +72,11 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
     return itemSorter.compare(value, o.getValue());
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    return value.equals(((MatchInfo)obj).value);
+  }
+
   public int getUserListID() {
     return userListID;
   }
@@ -83,6 +88,6 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
   }
 
   public String toString() {
-    return value + "=" + count;
+    return "'"+value + "'=" + count;
   }
 }

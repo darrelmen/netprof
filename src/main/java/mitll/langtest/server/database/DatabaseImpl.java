@@ -542,7 +542,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     List<Integer> justTheseIDs = new ArrayList<>();
 
     if (isChinese) {
-      SlickUserExerciseDAO userExerciseDAO = (SlickUserExerciseDAO) getUserExerciseDAO();
+      IUserExerciseDAO userExerciseDAO = getUserExerciseDAO();
       if (!userExerciseDAO.updateProjectChinese(oldID, newprojid, justTheseIDs)) {
         logger.warn("couldn't update chinese exercises dao to " + newprojid);
       } else {
@@ -1291,9 +1291,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   public void createTables() {
-    logger.info("createTables create slick tables - has " + dbConnection.getTables());
-
-    // dbConnection.addColumn();
+//    logger.info("createTables create slick tables - has " + dbConnection.getTables());
 
     List<String> created = new ArrayList<>();
 
@@ -1302,7 +1300,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         userExerciseDAO,
         userExerciseDAO.getRelatedExercise(),
         userExerciseDAO.getExerciseAttribute(),
-        ((SlickUserExerciseDAO) userExerciseDAO).getExerciseAttributeJoin(),
+        userExerciseDAO.getExerciseAttributeJoin(),
         getEventDAO(),
         getResultDAO(),
         getAudioDAO(),

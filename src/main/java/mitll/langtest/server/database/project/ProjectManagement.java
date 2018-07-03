@@ -43,49 +43,31 @@ import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioCheck;
-import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
-import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.copy.ExerciseCopy;
-import mitll.langtest.server.database.dialog.DialogStatus;
-import mitll.langtest.server.database.dialog.DialogType;
-import mitll.langtest.server.database.dialog.IDialogDAO;
-import mitll.langtest.server.database.dialog.KPDialogs;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.SlickResultDAO;
-import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
-import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.dialog.Dialog;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.*;
-import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickImage;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletContext;
-import java.io.File;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -636,7 +618,7 @@ public class ProjectManagement implements IProjectManagement {
         serverProps,
         db.getUserListManager(),
         ADD_DEFECTS,
-        (SlickUserExerciseDAO) db.getUserExerciseDAO(),
+        db.getUserExerciseDAO(),
         project);
   }
 

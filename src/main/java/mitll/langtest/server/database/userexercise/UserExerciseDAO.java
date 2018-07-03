@@ -37,11 +37,15 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.SlickExercise;
+import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickUpdateDominoPair;
+import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,6 +66,76 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   @Override
   public IRelatedExercise getRelatedExercise() {
     return null;
+  }
+
+  @Override
+  public BothMaps getOldToNew(int projectid) {
+    return null;
+  }
+
+  @Override
+  public Map<Integer, String> getIDToFL(int projid) {
+    return null;
+  }
+
+  @Override
+  public IRefResultDAO getRefResultDAO() {
+    return null;
+  }
+
+  @Override
+  public boolean updateProjectChinese(int old, int newprojid, List<Integer> justTheseIDs) {
+    return false;
+  }
+
+  @Override
+  public SlickExercise toSlick(Exercise shared, int projectID, Collection<String> typeOrder) {
+    return null;
+  }
+
+  @Override
+  public SlickExercise toSlick(CommonExercise shared, boolean isOverride, int projectID, int importUserIfNotSpecified, boolean isContext, Collection<String> typeOrder) {
+    return null;
+  }
+
+  @Override
+  public void addBulk(List<SlickExercise> bulk) {
+
+  }
+
+  @Override
+  public int insert(SlickExercise UserExercise) {
+    return 0;
+  }
+
+  @Override
+  public List<CommonExercise> getByProject(List<String> typeOrder, ISection<CommonExercise> sectionHelper, Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject, Project theProject, Map<Integer, ExerciseAttribute> allByProject, Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
+    return null;
+  }
+
+  @Override
+  public List<CommonExercise> getContextByProject(List<String> typeOrder, ISection<CommonExercise> sectionHelper, Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject, Project lookup, Map<Integer, ExerciseAttribute> allByProject, Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
+    return null;
+  }
+
+  @Override
+  public ExerciseDAOWrapper getDao() {
+    return null;
+  }
+
+  @Override
+  public Map<Integer, SlickExercise> getDominoToSlickEx(int projectid) {
+    return null;
+  }
+
+  @Override
+  public IAttributeJoin getExerciseAttributeJoin() {
+    return null;
+  }
+
+  @Override
+  public boolean isProjectEmpty(int projectid) {
+    return false;
   }
 
   private static final String UNIT = "unit";

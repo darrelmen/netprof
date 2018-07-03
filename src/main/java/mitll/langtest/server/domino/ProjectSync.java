@@ -7,7 +7,6 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.DominoProject;
@@ -52,7 +51,7 @@ public class ProjectSync implements IProjectSync {
   private IUserExerciseDAO userExerciseDAO;
   private final DAOContainer daoContainer;
   private ExerciseServices exerciseServices;
-  private SlickUserExerciseDAO slickUEDAO;
+  private IUserExerciseDAO slickUEDAO;
 
   /**
    * @param projectServices
@@ -71,7 +70,7 @@ public class ProjectSync implements IProjectSync {
     this.daoContainer = daoContainer;
     this.userExerciseDAO = userExerciseDAO;
     this.exerciseServices = exerciseServices;
-    slickUEDAO = (SlickUserExerciseDAO) daoContainer.getUserExerciseDAO();
+    slickUEDAO = daoContainer.getUserExerciseDAO();
   }
 
   /**
@@ -1288,7 +1287,7 @@ public class ProjectSync implements IProjectSync {
    */
   private void doUpdate(int projectid,
                         int importUser,
-                        SlickUserExerciseDAO slickUEDAO,
+                        IUserExerciseDAO slickUEDAO,
                         List<CommonExercise> updateEx,
                         Collection<String> typeOrder,
                         Map<Integer, SlickExercise> legacyToEx
@@ -1517,7 +1516,7 @@ public class ProjectSync implements IProjectSync {
 
   private void storeAndRememberAttributes(int projectid,
                                           int importUser,
-                                          SlickUserExerciseDAO slickUEDAO,
+                                          IUserExerciseDAO slickUEDAO,
                                           Map<ExerciseAttribute, Integer> attrToID,
                                           long now,
                                           List<ExerciseAttribute> newAttributes) {

@@ -34,18 +34,30 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.npdata.dao.SlickExercise;
+import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickUpdateDominoPair;
+import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +66,68 @@ import java.util.Map;
  * @see
  */
 public interface IUserExerciseDAO extends IDAO {
+  /**
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#getOldToNewExIDs(DatabaseImpl, int)
+   * @param projectid
+   * @return
+   */
+  BothMaps getOldToNew(int projectid);
+
+  /**
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addExercises(int, int, Map, IUserExerciseDAO, Collection, Collection, Map, Map, int)
+   * @param projid
+   * @return
+   */
+  Map<Integer, String> getIDToFL(int projid);
+
+  /**
+   * @see DBExerciseDAO#readExercises
+   * @return
+   */
+  IRefResultDAO getRefResultDAO();
+
+  /**
+   * @see mitll.langtest.server.ScoreServlet#getJsonForAudio(HttpServletRequest, ScoreServlet.PostRequest, String, String)
+   * @return
+   */
   SlickExercise getUnknownExercise();
+
+  /**
+   * @see DatabaseImpl#updateProject(int, int, boolean)
+   * @param old
+   * @param newprojid
+   * @param justTheseIDs
+   * @return
+   */
+  boolean updateProjectChinese(int old, int newprojid, List<Integer> justTheseIDs);
+
+  /**
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#reallyAddingUserExercises(int, Collection, IUserExerciseDAO, Map, List)
+   * @param shared
+   * @param projectID
+   * @param typeOrder
+   * @return
+   */
+  SlickExercise toSlick(Exercise shared, int projectID, Collection<String> typeOrder);
+
+  /**
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addPredefExercises(int, IUserExerciseDAO, int, Collection, Collection, Map, Map, boolean)
+   * @param shared
+   * @param isOverride
+   * @param projectID
+   * @param importUserIfNotSpecified
+   * @param isContext
+   * @param typeOrder
+   * @return
+   */
+  SlickExercise toSlick(CommonExercise shared,
+                        @Deprecated boolean isOverride,
+                        int projectID,
+                        int importUserIfNotSpecified,
+                        boolean isContext,
+                        Collection<String> typeOrder);
+
+  void addBulk(List<SlickExercise> bulk);
 
   /**
    * @param userExercise
@@ -66,6 +139,8 @@ public interface IUserExerciseDAO extends IDAO {
    */
   int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder);
 
+
+  int insert(SlickExercise UserExercise);
 
   List<CommonShell> getOnList(int listID, boolean shouldSwap);
 
@@ -89,11 +164,43 @@ public interface IUserExerciseDAO extends IDAO {
    */
   CommonExercise getByExOldID(String oldid, int projID);
 
+  /**
+   * @see ProjectManagement#getExercise
+   * @param exid
+   * @return
+   */
   int getProjectForExercise(int exid);
 
+  /**
+   * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile(String, AudioContext, boolean, String, String, DecoderOptions)
+   * @param projID
+   * @return
+   */
   CommonExercise getTemplateExercise(int projID);
 
+  /**
+   * @see DatabaseImpl#afterDAOSetup
+   * @param projID
+   * @return
+   */
   int ensureTemplateExercise(int projID);
+
+  List<CommonExercise> getByProject(
+      List<String> typeOrder,
+      ISection<CommonExercise> sectionHelper,
+      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject,
+      Project theProject,
+      Map<Integer, ExerciseAttribute> allByProject,
+      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs);
+
+  List<CommonExercise> getContextByProject(
+      List<String> typeOrder,
+      ISection<CommonExercise> sectionHelper,
+      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject,
+      Project lookup,
+      Map<Integer, ExerciseAttribute> allByProject,
+      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs
+  );
 
   Collection<CommonExercise> getOverrides(boolean shouldSwap);
 
@@ -129,10 +236,19 @@ public interface IUserExerciseDAO extends IDAO {
 
   Map<Integer,Integer> getDominoIDToExID(int docID);
 
+  ExerciseDAOWrapper getDao();
+
+  Map<Integer, SlickExercise> getDominoToSlickEx(int projectid);
+
   boolean areThereAnyUnmatched(int projID);
   Map<String, Integer> getNpToExID(int projid);
   int updateDominoBulk(List<SlickUpdateDominoPair> pairs);
 
+  IAttributeJoin getExerciseAttributeJoin();
+
   IAttribute getExerciseAttribute();
+
+  boolean isProjectEmpty(int projectid);
+
   IRelatedExercise getRelatedExercise();
 }

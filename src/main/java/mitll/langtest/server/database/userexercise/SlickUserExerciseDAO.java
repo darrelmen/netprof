@@ -84,7 +84,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @see SlickUserExerciseDAO#addPhoneInfo
    */
   private static final String BLANK = "Blank";
-  public static final String UNIT = "Unit";
+  private static final String UNIT = "Unit";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -166,6 +166,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return b && b1 && b2;
   }
 
+  @Override
   public boolean updateProjectChinese(int old, int newprojid, List<Integer> justTheseIDs) {
     List<SlickExercise> toImport =
         dao.getAllByProject(old).stream().filter(slickExercise -> slickExercise.exid().startsWith("Custom_")).collect(Collectors.toList());
@@ -205,6 +206,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    * @see mitll.langtest.server.database.copy.ExerciseCopy#addUserExercises
    */
+  @Override
   public SlickExercise toSlick(Exercise shared, int projectID, Collection<String> typeOrder) {
     Map<String, String> unitToValue = shared.getUnitToValue();
     Iterator<String> iterator = typeOrder.iterator();
@@ -264,6 +266,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @see #toSlick
    * @see mitll.langtest.server.database.copy.ExerciseCopy#addContextExercises
    */
+  @Override
   public SlickExercise toSlick(CommonExercise shared,
                                @Deprecated boolean isOverride,
                                int projectID,
@@ -535,7 +538,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         logger.info("getExercisePhoneInfo phone info is " + exercisePhoneInfo.getNumPhones() +
             " for  " + slick.id());
       }*/
-      exercisePhoneInfo = getExercisePhoneInfoFromDict(slick, lookup, pairs);
+      exercisePhoneInfo = getExercisePhoneInfoFromDict(slick, lookup);
     } else {
 //      logger.info("OK for " + slick.id() + " " + exercisePhoneInfo);
       // exerciseDAO.updatePhones(slick.id(), exercisePhoneInfo.getNumPhones());
@@ -563,9 +566,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @see #getExercisePhoneInfo(SlickExercise, Map, IPronunciationLookup, List)
    */
   @NotNull
-  private ExercisePhoneInfo getExercisePhoneInfoFromDict(SlickExercise slick,
-                                                         IPronunciationLookup lookup,
-                                                         List<SlickExercisePhone> pairs) {
+  private ExercisePhoneInfo getExercisePhoneInfoFromDict(SlickExercise slick, IPronunciationLookup lookup) {
     ExercisePhoneInfo exercisePhoneInfo;
 
     int numphones = slick.numphones();
@@ -643,75 +644,30 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
                                   Collection<String> attrTypes) {
     List<Pair> pairs = getUnitToValue(slick, baseTypeOrder);
 
-  //  logger.info("For " + slick.id() + " " + slick.exid() + " attr " + exercise.getAttributes());
-    // Collection<String> phones = exercisePhoneInfo == null ? null : exercisePhoneInfo.getPhones();
-    //if (phones == null || phones.isEmpty()) logger.warn("no phones for " + id);
-    //  int max = 15;
-    //  int i = 0;
-    // boolean addedPhones = false;
     if (slick.ispredef() && !slick.iscontext()) {
       if (exercise.getAttributes() == null) {
         if (spew++ < 10) {
           logger.warn("addPhoneInfo : no exercise attributes for " + exercise.getID());
         }
       } else {
-       addBlanksForMissingInfo(exercise, attrTypes, pairs);
+        addBlanksForMissingInfo(exercise, attrTypes, pairs);
       }
 
-      logger.info("pairs for " + exercise.getID() + " " + exercise.getOldID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
+      // logger.info("pairs for " + exercise.getID() + " " + exercise.getOldID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
       sectionHelper.addPairs(exercise, pairs);
-
-      if (true) {//phones == null) {
-//        logger.warn("no phones for " + id);
-      } else {
-        //  addedPhones = true;
-
-        // TODO : maybe put back phone length later ???
- /*       if (ADD_PHONE_LENGTH) {
-          int numPhones = exercisePhoneInfo.getNumPhones2();
-
-          int choice = range.get(0);
-          for (int r : range) {
-            i++;
-            if (numPhones <= r) {
-              choice = i;
-              break;
-            }
-          }
-
-          String label = "" + choice;
-
-     *//*     String label = "" + numPhones;
-          if (numPhones >= max) {
-            label = ">" + (max - 1);
-          }*//*
-          pairs.add(sectionHelper.getPairForExerciseAndLesson(exercise, DIFFICULTY, label));
-        }*/
-
-/*        if (ADD_SOUNDS) {
-          // need to make a copy
-          for (String phone : phones) {
-            List<Pair> copy = new ArrayList<>(pairs);
-            copy.add(sectionHelper.getPairForExerciseAndLesson(exercise, SOUND, phone));
-
-  *//*        if (slick.unit().equals("1") && slick.lesson().equals("1")) {
-            logger.info("for " + slick.id() + " " + slick.english() + " " + slick.foreignlanguage() + " (" +
-                exercisePhoneInfo.getNumPhonesFromDictionaryOrLTS() +
-                ") " + copy);
-          }*//*
-            allPairs.add(copy);
-          }
-        }*/
-      }
-
-      // sectionHelper.addAssociations(pairs);
-//      return addedPhones;
     } else {
       exercise.setPairs(pairs);
     }
     return pairs;
   }
 
+  /**
+   * SectionHelper gets confused if we don't have a complete tree - same number of nodes on path to root
+   *
+   * @param exercise
+   * @param attrTypes
+   * @param pairs
+   */
   private void addBlanksForMissingInfo(CommonExercise exercise, Collection<String> attrTypes, List<Pair> pairs) {
     Map<String, ExerciseAttribute> typeToAtrr = new HashMap<>();
     exercise.getAttributes().forEach(attribute -> typeToAtrr.put(attribute.getProperty(), attribute));
@@ -720,7 +676,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       ExerciseAttribute attribute = typeToAtrr.get(attrType);
       if (attribute == null) {
         // missing info for this type, so map it to BLANK
-        //pairs.add(new ExerciseAttribute(attrType, BLANK));
+        pairs.add(new ExerciseAttribute(attrType, BLANK));
       } else {
         if (attribute.isFacet()) {
           pairs.add(attribute);
@@ -784,8 +740,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   /**
    * @param bulk
-   * @see mitll.langtest.server.database.copy.ExerciseCopy#reallyAddingUserExercises(int, Collection, SlickUserExerciseDAO, Map, List)
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#reallyAddingUserExercises
    */
+  @Override
   public void addBulk(List<SlickExercise> bulk) {
     dao.addBulk(bulk);
   }
@@ -843,7 +800,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
           .collect(Collectors.toCollection(HashSet::new));
 
       logger.info("all facet types:");
-      allFacetTypes.forEach(type->logger.info("\t"+type));
+      allFacetTypes.forEach(type -> logger.info("\t" + type));
 
 
 //    logger.info("ExToPhones " + exToPhones.size());
@@ -934,6 +891,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return insert;
   }
 
+  @Override
   public int insert(SlickExercise UserExercise) {
     return dao.insert(UserExercise);
   }
@@ -1081,6 +1039,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    * @see DBExerciseDAO#readExercises
    */
+  @Override
   public List<CommonExercise> getByProject(
       List<String> typeOrder,
       ISection<CommonExercise> sectionHelper,
@@ -1091,7 +1050,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     // TODO? : consider getting exercise->phone from the ref result table again
 //    logger.info("getByProject type order " + typeOrder);
     List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(theProject.getID());
-    logger.info("getByProject got " + allPredefByProject.size() + " from " + theProject);
+
+    //allPredefByProject = allPredefByProject.stream().filter(ex -> ex.exid().startsWith("0")).collect(Collectors.toList());
+    // allPredefByProject = allPredefByProject.stream().filter(ex -> ex.unit().startsWith("5")).collect(Collectors.toList());
+
+//    logger.info("getByProject got " + allPredefByProject.size() + " from " + theProject);
+
     return getExercises(allPredefByProject,
         typeOrder,
         sectionHelper,
@@ -1126,6 +1090,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @paramx attributeTypes
    * @see DBExerciseDAO#readExercises
    */
+  @Override
   public List<CommonExercise> getContextByProject(
       List<String> typeOrder,
       ISection<CommonExercise> sectionHelper,
@@ -1212,6 +1177,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfig
    */
+  @Override
   public boolean isProjectEmpty(int projectid) {
     return dao.isProjectEmpty(projectid);
   }
@@ -1224,23 +1190,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return relatedExerciseHelper;
   }
 
-/*  public IDAO getExerciseAttribute() {
-    return new IDAO() {
-      public void createTable() {
-        attributeDAOWrapper.createTable();
-      }
-
-      public String getName() {
-        return attributeDAOWrapper.getName();
-      }
-
-      @Override
-      public boolean updateProject(int oldID, int newprojid) {
-        return attributeDAOWrapper.updateProject(oldID, newprojid) > 0;
-      }
-    };
-  }*/
-
+  @Override
   public IAttributeJoin getExerciseAttributeJoin() {
     return attributeJoinHelper;
   }
@@ -1250,33 +1200,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   /**
-   * @param relatedExercises
-   * @see mitll.langtest.server.database.copy.ExerciseCopy#addContextExercises
-   */
-/*  public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
-    relatedExerciseHelper.addBulkRelated(relatedExercises);
-  }
-
-  @Override
-  public int getParentForContextID(int contextID) {
-    return relatedExerciseHelper.parentForContextID(contextID);
-  }
-
-  public Collection<SlickRelatedExercise> getAllRelated(int projid) {
-    return relatedExerciseHelper.allByProject(projid);
-  }
-
-  public void addContextToExercise(int exid, int contextExid, int projid) {
-    relatedExerciseHelper.insert(new SlickRelatedExercise(-1, exid, contextExid, projid, 1,
-        new Timestamp(System.currentTimeMillis())));
-  }*/
-
-
-  /**
    * @param projectid
    * @return
    * @see mitll.langtest.server.database.copy.ExerciseCopy#addExercisesAndAttributes
    */
+  @Override
   public BothMaps getOldToNew(int projectid) {
     Map<String, Integer> oldToNew = new HashMap<>();
 
@@ -1293,24 +1221,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         "\n\t" + oldToNew.size() + " old->new mappings");
 //    logger.info("old->new for project #" + projectid + " has  " + oldToNew.size());
     return new BothMaps(oldToNew);
-  }
-
-  public class BothMaps {
-    private final Map<String, Integer> oldToNew;
-    //  private final Map<Integer, Integer> dominoToNew;
-
-    BothMaps(Map<String, Integer> oldToNew) {//}, Map<Integer, Integer> dominoToNew) {
-      this.oldToNew = oldToNew;
-      //  this.dominoToNew = dominoToNew;
-    }
-
-    public Map<String, Integer> getOldToNew() {
-      return oldToNew;
-    }
-
-/*    public Map<Integer, Integer> getDominoToNew() {
-      return dominoToNew;
-    }*/
   }
 
   private void addToLegacyIdToIdMap(List<SlickExercise> allPredefByProject, Map<String, Integer> oldToNew) {
@@ -1354,6 +1264,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    * @see mitll.langtest.server.database.copy.ExerciseCopy#addExercises
    */
+  @Override
   public Map<Integer, String> getIDToFL(int projid) {
     return dao.getIDToFL(projid);
   }
@@ -1397,6 +1308,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     if (!range.isEmpty()) range = range.subList(0, range.size() - 1);
     logger.info("useExToPhones got range " + range);
   }*/
+  @Override
   public IRefResultDAO getRefResultDAO() {
     return refResultDAO;
   }
@@ -1405,6 +1317,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return unknownExercise;
   }
 
+  @Override
   public ExerciseDAOWrapper getDao() {
     return dao;
   }
@@ -1414,6 +1327,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    * @see ProjectSync#addPending
    */
+  @Override
   public Map<Integer, SlickExercise> getDominoToSlickEx(int projectid) {
     return dao.getLegacyToExercise(projectid);
   }
@@ -1452,10 +1366,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return exerciseDAO.updateDominoBulk(pairs);
   }
 
-  public Map<Integer, SlickExercise> getLegacyToDeletedEx(int projectid) {
-    return dao.getLegacyToDeletedExercise(projectid);
-  }
-
   @Override
   public int getUnknownExerciseID() {
     return unknownExerciseID;
@@ -1472,13 +1382,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     relatedExerciseHelper.deleteForProject(projID);
     dao.deleteForProject(projID);
   }
-/*
-
-  @Override
-  public int deleteRelated(int related) {
-    return relatedExerciseHelper.deleteRelated(related);
-  }
-*/
 
   @Override
   public SlickExercise getByDominoID(int projID, int docID) {

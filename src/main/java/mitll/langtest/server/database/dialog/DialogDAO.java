@@ -235,6 +235,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
     }
   }
 
+  /**
+   * Add exercises to dialog.
+   *
+   * @param projid
+   * @param dialogIDToRelated
+   * @param dialogID
+   * @param dialog
+   */
   private void addExercises(int projid, Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated, Integer dialogID, Dialog dialog) {
     List<SlickRelatedExercise> slickRelatedExercises = dialogIDToRelated.get(dialogID);
 
@@ -246,17 +254,20 @@ public class DialogDAO extends DAO implements IDialogDAO {
     slickRelatedExercises.forEach(slickRelatedExercise -> {
 //      logger.info("relation " + slickRelatedExercise);
 
-      CommonExercise parent = new Exercise(databaseImpl.getExercise(projid, slickRelatedExercise.exid()));
-      CommonExercise child = new Exercise(databaseImpl.getExercise(projid, slickRelatedExercise.contextexid()));
+      CommonExercise exercise = databaseImpl.getExercise(projid, slickRelatedExercise.exid());
+      if (exercise != null) {
+        CommonExercise parent = new Exercise(exercise);
+        CommonExercise child = new Exercise(databaseImpl.getExercise(projid, slickRelatedExercise.contextexid()));
 
-      parent.getDirectlyRelated().add(child);
-      child.getMutable().setParentExerciseID(parent.getParentExerciseID());
+        parent.getDirectlyRelated().add(child);
+        child.getMutable().setParentExerciseID(parent.getParentExerciseID());
 
-      exercises.add(parent);
-      exercises.add(child);
+        exercises.add(parent);
+        exercises.add(child);
 
-      candidate.add(parent.getID());
-      candidate.add(child.getID());
+        candidate.add(parent.getID());
+        candidate.add(child.getID());
+      }
     });
 
   //  logger.info("got exercises  " + exercises.size());

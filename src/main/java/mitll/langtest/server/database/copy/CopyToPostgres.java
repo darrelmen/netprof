@@ -55,7 +55,6 @@ import mitll.langtest.server.database.reviewed.SlickReviewedDAO;
 import mitll.langtest.server.database.reviewed.StateCreator;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.UserDAO;
-import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.database.userlist.*;
 import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
@@ -544,7 +543,7 @@ public class CopyToPostgres<T extends CommonShell> {
     } else {
       // first add the user table
       // check once if we've added it before
-      if (((SlickUserExerciseDAO) db.getUserExerciseDAO()).isProjectEmpty(projectID)) {
+      if (db.getUserExerciseDAO().isProjectEmpty(projectID)) {
         long maxTime = copyAllTables(db, optName, status, skipRefResult, typeOrder, projectID, sinceWhen, checkConvert);
         logger.info("CREATE : latest result or audio is " + new Date(maxTime));
         createProject.updateNetprof(db, projectID, maxTime);
@@ -569,7 +568,6 @@ public class CopyToPostgres<T extends CommonShell> {
                              boolean checkConvert) throws Exception {
     if (sinceWhen > 0) logger.info("\n\n\n only changes since " + (new Date(sinceWhen)));
 
-    SlickUserExerciseDAO slickUEDAO = (SlickUserExerciseDAO) db.getUserExerciseDAO();
     ResultDAO resultDAO = new ResultDAO(db);
     Map<Integer, Integer> oldToNewUser = new UserCopy().copyUsers(db, projectID, resultDAO, optName, status);
 
@@ -584,7 +582,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
 
-    long maxTime = copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, slickUEDAO.getUnknownExerciseID(),
+    long maxTime = copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, db.getUserExerciseDAO().getUnknownExerciseID(),
         db.getUserDAO().getDefaultUser(), sinceWhen);
 
     logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());

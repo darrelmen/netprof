@@ -10,7 +10,6 @@ import mitll.langtest.server.database.dialog.DialogType;
 import mitll.langtest.server.database.dialog.IDialogDAO;
 import mitll.langtest.server.database.dialog.KPDialogs;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.IDialog;
@@ -28,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.project.ProjectManagement.FIVE_YEARS;
 
@@ -95,7 +93,7 @@ public class DialogPopulate {
         Map<CommonExercise, Integer> importExToID = exerciseCopy.addExercisesAndAttributes(
             defaultUser,
             projid,
-            (SlickUserExerciseDAO) db.getUserExerciseDAO(),
+            db.getUserExerciseDAO(),
             dialog.getExercises(),
             typeOrder,
             new HashMap<>(),
