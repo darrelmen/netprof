@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database;
 
+import com.sun.mail.imap.protocol.ID;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.custom.IStateManager;
@@ -45,6 +46,7 @@ import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.services.AmasServices;
 import mitll.langtest.server.database.userlist.UserListServices;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.result.MonitorResult;
@@ -91,6 +93,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext);
 
   ISection<CommonExercise> getSectionHelper(int projectid);
+  ISection<IDialog> getDialogSectionHelper(int projectid);
 
   void markAudioDefect(AudioAttribute audioAttribute);
 

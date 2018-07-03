@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
@@ -45,12 +46,12 @@ import java.util.*;
  * Time: 7:14 PM
  * To change this template use File | Settings | File Templates.
  */
-class Lesson<T extends Shell> {
+class Lesson<T extends HasID> {
   private final List<T> exerciseList = new ArrayList<>();
   private final String unit;
 
   /**
-   * @see SectionHelper#addUnitNameEntry(Shell, String, Map)
+   * @see SectionHelper#addUnitNameEntry
    * @param unit
    */
   Lesson(String unit) { this.unit = unit; }
@@ -60,10 +61,26 @@ class Lesson<T extends Shell> {
    * @param e
    */
   public void addExercise(T e) { exerciseList.add(e); }
+
+  /**
+   * @see SectionHelper#removeExerciseToLesson
+   * @param exercise
+   * @return
+   */
   public boolean remove(T exercise) {
     return exerciseList.remove(exercise);
   }
+
+  /**
+   * @see SectionHelper#getExercisesForSection(String, Collection)
+   * @return
+   */
   public Collection<T> getExercises() { return Collections.unmodifiableList(exerciseList); }
+
+  /**
+   * see SectionHelper#report
+   * @return
+   */
   public int size() { return exerciseList.size(); }
 
   public String toString() {

@@ -98,6 +98,7 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -765,6 +766,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  @Override
+  public ISection<IDialog> getDialogSectionHelper(int projectid) {
+    if (projectid == -1) {
+      return null;
+    } else {
+      return getDialogSectionHelperForProject(projectid);
+    }
+  }
+
   @Nullable
   private ISection<CommonExercise> getSectionHelperForProject(int projectid) {
     Project project = getProject(projectid);
@@ -776,6 +786,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  @Nullable
+  private ISection<IDialog> getDialogSectionHelperForProject(int projectid) {
+    Project project = getProject(projectid);
+    if (project == null) {
+      logger.error("getSectionHelper huh? couldn't find project with id " + projectid);
+      return null;
+    } else {
+      return project.getDialogSectionHelper();
+    }
+  }
 
   private boolean isAmas() {
     return serverProps.isAMAS();

@@ -39,18 +39,17 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 
 public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);
@@ -64,11 +63,67 @@ public class EasyReportTest extends BaseTest {
     andPopulate.close();
   }*/
 
+
+
   @Test
   public void test() {
     DatabaseImpl andPopulate = getAndPopulate();
     //  andPopulate.sendReport(-1);
     andPopulate.close();
+  }
+
+  @Test
+  public void test2() {
+    List<String> strings = Arrays.asList("au-dessus", "au -dessus", "abandonnée", "Appelez-moi.");
+    strings.forEach(token -> {
+      String[] split = token.split("['\\-]");
+      for (String s : split) {
+
+        logger.info(" " + token + " " + s);
+      }
+    });
+
+  }
+
+  @Test
+  public void testFrench() {
+    DatabaseImpl andPopulate = getAndPopulate();
+
+    Project project = andPopulate.getProject(13);
+
+
+    try {
+      Thread.sleep(10000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    List<String> strings = Arrays.asList("au-dessus", "au -dessus", "abandonnée", "Appelez-moi.");
+    {
+      String aberration = "aberration";
+      String res = project.getAudioFileHelper().getSegmented(aberration);
+      logger.info("\n\ntestSegment res " + res);
+      String res2 = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(aberration, "");
+      logger.info("\n\ntestSegment res2 " + res2);
+
+    }
+    {
+      String aberration = "aberrations";
+      String res = project.getAudioFileHelper().getSegmented(aberration);
+      logger.info("\n\ntestSegment res " + res);
+      String res2 = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(aberration, "");
+      logger.info("\n\ntestSegment res2 " + res2);
+
+    }
+    strings.forEach(s -> {
+      String res = project.getAudioFileHelper().getSegmented(s);
+      logger.info("\n\ntestSegment " + s +
+          " res " + res);
+      String res2 = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(s, "");
+      logger.info("\n\ntestSegment " + s +
+          " res2 " + res2);
+    });
+    andPopulate.close();
+
   }
 
   @Test

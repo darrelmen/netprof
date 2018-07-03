@@ -172,7 +172,7 @@ public class ProjectTest extends BaseTest {
     logger.info("1 got '" + test + "' = '" + segmented + "'");
 
     String pronunciationsFromDictOrLTS = audioFileHelper.getASR().getHydraDict(segmented, "",
-        new ArrayList<>());
+        new ArrayList<>()).getDict();
     logger.info("1 pronunciationsFromDictOrLTS '" + pronunciationsFromDictOrLTS + "' = '" + segmented + "'");
 
 

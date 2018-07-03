@@ -55,7 +55,7 @@ import static mitll.langtest.server.database.exercise.Facet.SUB_TOPIC;
  * Time: 4:34 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection<T>, ITestSection<T> {
+public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection<T>, ITestSection<T> {
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
 
   static final String SUBTOPIC_LC = SUB_TOPIC.getAlt();//"subtopic";

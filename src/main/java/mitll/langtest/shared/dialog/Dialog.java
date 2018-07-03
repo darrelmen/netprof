@@ -4,6 +4,7 @@ import mitll.langtest.server.database.dialog.DialogType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.npdata.dao.SlickDialog;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +12,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Dialog implements IDialog {
-  public static final String SPEAKER = "Speaker".toLowerCase();
+  private static final String SPEAKER = "Speaker".toLowerCase();
+  public static final String UNIT = "unit";
+  public static final String CHAPTER = "chapter";
   private int id;
   private int userid;
   private int projid;
@@ -172,6 +175,24 @@ public class Dialog implements IDialog {
     this.imageRef = imageRef;
   }
 
+  @Override
+  public Map<String, String> getUnitToValue() {
+    Map<String, String> pv = new HashMap<>();
+    pv.put(UNIT, unit);
+    pv.put(CHAPTER, chapter);
+    return pv;
+  }
+
+  @Override
+  public void addPair(Pair pair) {
+    addUnitToValue(pair.getProperty(), pair.getValue());
+  }
+
+  @Override
+  public void addUnitToValue(String unit, String value) {
+    if (unit.equalsIgnoreCase(UNIT)) this.unit = value;
+    else if (unit.equalsIgnoreCase(CHAPTER)) this.chapter = value;
+  }
 
   @Override
   public String getUnit() {

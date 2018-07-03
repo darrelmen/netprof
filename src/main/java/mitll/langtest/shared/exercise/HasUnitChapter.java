@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.google.gwt.user.client.ui.Panel;
 
 import java.util.Map;
 
@@ -43,6 +44,10 @@ import java.util.Map;
  * @since 2/2/16.
  */
 public interface HasUnitChapter extends IsSerializable {
+  /**
+   * @see mitll.langtest.client.scoring.UnitChapterItemHelper#addUnitChapterItem(CommonExercise, Panel)
+   * @return
+   */
   Map<String, String> getUnitToValue();
 
   /**
@@ -51,5 +56,10 @@ public interface HasUnitChapter extends IsSerializable {
    * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    */
   void addUnitToValue(String unit, String value);
+
+  /**
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson(HasID, String, String)
+   * @param pair
+   */
   void addPair(Pair pair);
 }

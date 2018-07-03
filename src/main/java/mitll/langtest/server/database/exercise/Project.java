@@ -49,6 +49,7 @@ import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -111,7 +112,8 @@ public class Project implements IPronunciationLookup {
   private final Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
 
   private Map<String, Integer> fileToRecorder = new HashMap<>();
-  private List<IDialog> dialogs =new ArrayList();
+  private List<IDialog> dialogs = new ArrayList();
+  private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
 
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
@@ -237,6 +239,10 @@ public class Project implements IPronunciationLookup {
 
   public ISection<CommonExercise> getSectionHelper() {
     return exerciseDAO == null ? null : exerciseDAO.getSectionHelper();
+  }
+
+  public ISection<IDialog> getDialogSectionHelper() {
+    return dialogSectionHelper;
   }
 
   public void setJsonSupport(JsonSupport jsonSupport) {
@@ -692,6 +698,18 @@ public class Project implements IPronunciationLookup {
 
   public void setDialogs(List<IDialog> dialogs) {
     this.dialogs = dialogs;
+    dialogs.forEach(dialog -> {
+      List<Pair> pair = new ArrayList<>();
+      String unit = dialog.getUnit();
+      if (!unit.isEmpty()) pair.add(new Pair(getTypeOrder().get(0), unit));
+
+      String chapter = dialog.getChapter();
+      if (!chapter.isEmpty()) pair.add(new Pair(getTypeOrder().get(1), chapter));
+
+      pair.addAll(dialog.getAttributes());
+      this.dialogSectionHelper.addPairs(dialog, pair);
+    });
+    dialogSectionHelper.report();
   }
 
   public String toString() {

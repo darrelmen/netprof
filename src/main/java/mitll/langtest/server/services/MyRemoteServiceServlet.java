@@ -47,6 +47,7 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.user.User;
@@ -409,6 +410,14 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   protected ISection<CommonExercise> getSectionHelper(int projectID) {
     return db.getSectionHelper(projectID);
+  }
+
+  protected ISection<IDialog> getDialogSectionHelper() throws DominoSessionException {
+    return getDialogSectionHelper(getProjectIDFromUser());
+  }
+
+  protected ISection<IDialog> getDialogSectionHelper(int projectID) {
+    return db.getDialogSectionHelper(projectID);
   }
 
   /**

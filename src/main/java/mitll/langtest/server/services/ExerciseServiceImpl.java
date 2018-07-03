@@ -1766,26 +1766,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         " millis, threads " + threadInfo + " on " + hostName);
   }
 
-  /**
-   * TODO : put back trie
-   *
-   * @return
-   * @deprecated
-   */
-  private List<AmasExerciseImpl> getAMASExercises() {
-    logger.info("get getAMASExercises -------");
-    long then = System.currentTimeMillis();
-    List<AmasExerciseImpl> exercises = db.getAMASExercises();
-/*    if (amasFullTrie == null) {
-      amasFullTrie = new ExerciseTrie<>(exercises, getOldLanguage(), getSmallVocabDecoder());
-    }*/
 
-    long now = System.currentTimeMillis();
-    if (now - then > 200) {
-      logger.info("took " + (now - then) + " millis to get the predef exercise list");// for " + getOldLanguage());
-    }
-    return exercises;
-  }
 
   private SmallVocabDecoder getSmallVocabDecoder(int projectID) {
     return getAudioFileHelper(projectID).getSmallVocabDecoder();

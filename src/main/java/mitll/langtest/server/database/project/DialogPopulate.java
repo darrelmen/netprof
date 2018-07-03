@@ -33,7 +33,7 @@ import static mitll.langtest.server.database.project.ProjectManagement.FIVE_YEAR
 public class DialogPopulate {
   private static final Logger logger = LogManager.getLogger(DialogPopulate.class);
 
-  DatabaseImpl db;
+  private final DatabaseImpl db;
 
   DialogPopulate(DatabaseImpl db) {
     this.db = db;

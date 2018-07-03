@@ -163,9 +163,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       super.service(request, response);
     }
   }*/
-  protected ISection<CommonExercise> getSectionHelper() throws DominoSessionException {
-    return super.getSectionHelper();
-  }
 
   /**
    * This report is for on demand sending the report to the current user.

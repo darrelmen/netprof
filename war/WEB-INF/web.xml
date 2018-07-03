@@ -115,11 +115,11 @@
         <url-pattern>/langtest/audio-manager</url-pattern>
     </servlet-mapping>
 
-    <servlet>
+<!--    <servlet>
         <servlet-name>amasService</servlet-name>
         <servlet-class>mitll.langtest.server.services.AmasServiceImpl</servlet-class>
         <load-on-startup>3</load-on-startup>
-    </servlet>
+    </servlet>-->
 
     <servlet-mapping>
         <servlet-name>amasService</servlet-name>

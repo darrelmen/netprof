@@ -33,20 +33,14 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.amas.Answer;
-import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
-import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
-import java.util.Map;
 
-public interface AmasServiceAsync {
-  void getScoreForAnswer(AudioContext audioContext, String answer,
-                         long timeSpent, Map<String, Collection<String>> typeToSection, AsyncCallback<Answer> async);
+public interface DialogServiceAsync {
 
-  void addStudentAnswer(long resultID, boolean correct, AsyncCallback<Void> async);
 
-  void getScoresForUser(Map<String, Collection<String>> typeToSection, Collection<Integer> exids,
-                        AsyncCallback<QuizCorrectAndScore> async);
+  void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
+
 
 }

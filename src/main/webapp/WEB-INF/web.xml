@@ -51,19 +51,6 @@
         <url-pattern>/langtest/open-user-manager</url-pattern>
     </servlet-mapping>
 
-
-    <!--
-        <servlet>
-            <servlet-name>monitoringService</servlet-name>
-            <servlet-class>mitll.langtest.server.services.MonitoringServiceImpl</servlet-class>
-            <load-on-startup>3</load-on-startup>
-        </servlet>
-
-        <servlet-mapping>
-            <servlet-name>monitoringService</servlet-name>
-            <url-pattern>/langtest/monitoring-manager</url-pattern>
-        </servlet-mapping>-->
-
     <servlet>
         <servlet-name>analysisService</servlet-name>
         <servlet-class>mitll.langtest.server.services.AnalysisServiceImpl</servlet-class>
@@ -124,16 +111,10 @@
         <url-pattern>/langtest/audio-manager/h2</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>amasService</servlet-name>
-        <servlet-class>mitll.langtest.server.services.AmasServiceImpl</servlet-class>
-        <load-on-startup>3</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
+<!--    <servlet-mapping>
         <servlet-name>amasService</servlet-name>
         <url-pattern>/langtest/amas-manager</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>-->
 
     <servlet>
         <servlet-name>qcService</servlet-name>
