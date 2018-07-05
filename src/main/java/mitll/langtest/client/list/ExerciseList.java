@@ -72,8 +72,9 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     extends VerticalPanel
     implements ListInterface<T, U>, ProvidesResize {
-  private static final String SERVER_ERROR = "Server error";
   private final Logger logger = Logger.getLogger("ExerciseList");
+
+  private static final String SERVER_ERROR = "Server error";
 
   private static final String GETTING_EXERCISE = "getting exercise";
 
@@ -603,6 +604,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
     return getFirst();
   }
 
+  /**
+   * @see #loadFirstExercise
+   * @return
+   */
   private int findFirstID() {
     return findFirstExercise().getID();
   }
@@ -707,29 +712,29 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @param commonExercise
+   * @param shell
    * @see #rememberAndLoadFirst
    * @see ExerciseAsyncCallback#onSuccess
    */
-  private void showExercise(final U commonExercise) {
+  private void showExercise(final U shell) {
     if (DEBUG) {
-      logger.info("ExerciseList.showExercise : commonExercise " + commonExercise.getID() + " " + commonExercise.getClass());
+      logger.info("ExerciseList.showExercise : shell " + shell.getID() + " " + shell.getClass());
     }
-    markCurrentExercise(commonExercise.getID());
+    markCurrentExercise(shell.getID());
 
     Scheduler.get().scheduleDeferred((Command) () -> {
-      logger.info("ExerciseList.showExercise : item id " + commonExercise.getID() + " currentExercise " + getCurrentExercise() +
+      logger.info("ExerciseList.showExercise : item id " + shell.getID() + " currentExercise " + getCurrentExercise() +
           " or " + getCurrentExerciseID());
-      addExerciseWidget(commonExercise);
+      addExerciseWidget(shell);
     });
   }
 
   /**
-   * @param commonExercise
+   * @param shell
    * @see FacetExerciseList#showExercises
    */
-  protected void addExerciseWidget(U commonExercise) {
-    createdPanel = factory.getExercisePanel(commonExercise);
+  protected void addExerciseWidget(U shell) {
+    createdPanel = factory.getExercisePanel(shell);
     //  logger.info("addExerciseWidget for "  + commonExercise.getID());
     innerContainer.setWidget(createdPanel);
   }

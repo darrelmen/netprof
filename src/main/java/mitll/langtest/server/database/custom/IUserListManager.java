@@ -99,6 +99,12 @@ public interface IUserListManager {
 
   UserList getUserListNoExercises(int userListID);
 
+  /**
+   * @see ListServiceImpl#newExercise(int, CommonExercise)
+   * @param userListID
+   * @param userExercise
+   * @param mediaDir
+   */
   void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
 
   void addItemToList(int userListID, String exerciseID, int exid);

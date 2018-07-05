@@ -5,13 +5,14 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.logging.Logger;
 
-class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L, T> {
+class HidePolyglotPanel<L extends CommonShell, T extends ClientExercise> extends PolyglotPracticePanel<L, T> {
   private final Logger logger = Logger.getLogger("HidePolyglotPanel");
 
   /**
@@ -23,13 +24,13 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
    * @param stickyState
    * @param exerciseListToUse
    * @param showAudio
-   * @see HidePolyglotFactory#getCurrentFlashcard
+   * @see HidePolyglotFactory#getFlashcard
    */
   HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
                     ControlState controlState,
                     ExerciseController controller,
                     MySoundFeedback soundFeedback,
-                    CommonAnnotatable e,
+                    T e,
                     StickyState stickyState,
                     ListInterface<L, T> exerciseListToUse,
                     int minPoly,

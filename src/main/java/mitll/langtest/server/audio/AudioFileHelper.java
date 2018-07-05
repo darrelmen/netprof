@@ -93,6 +93,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String TEST_USER = "demo_";
   private static final String TEST_PASSWORD = "domino22";//"demo";
   public static final long DAY = 24 * 60 * 60 * 1000L;
+  public static final String COOKIE = "Cookie";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -450,7 +451,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.scoring.JsonScoring#getAnswer
    */
   public AudioAnswer getAnswer(
-      CommonShell exercise,
+      CommonExercise exercise,
       AudioContext audioContext,
 
       String wavPath, File file,
@@ -488,7 +489,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #getAnswer
    * @see #writeAudioFile
    */
-  private AudioAnswer getAudioAnswerDecoding(CommonShell exercise,
+  private AudioAnswer getAudioAnswerDecoding(CommonExercise exercise,
 
                                              AudioContext context,
                                              AnswerInfo.RecordingInfo recordingInfo,
@@ -824,7 +825,7 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see #getAnswer
    */
-  private AudioAnswer getAudioAnswerAlignment(CommonShell exercise,
+  private AudioAnswer getAudioAnswerAlignment(CommonExercise exercise,
 
                                               AudioContext context,
                                               AnswerInfo.RecordingInfo recordingInfo,
@@ -953,7 +954,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #getAudioAnswerDecoding
    */
   private AudioAnswer getAudioAnswer(int reqid,
-                                     CommonShell commonShell,
+                                     CommonExercise commonShell,
                                      String wavPath,
                                      File file,
                                      AudioCheck.ValidityAndDur validity,
@@ -1100,20 +1101,13 @@ public class AudioFileHelper implements AlignDecode {
     if (session == null) {
       session = getSession(hydraHost, project.getID());
     }
-    boolean isDefault = project.getWebserviceHost().equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
-
-    HTTPClient httpClient = getHttpClient(hydraHost, isDefault ? "" : project.getWebserviceHost());
     ScoreServlet.PostRequest requestToServer = ScoreServlet.PostRequest.ALIGN;
-    httpClient.addRequestProperty(ScoreServlet.REQUEST, requestToServer.toString());
-    httpClient.addRequestProperty(ScoreServlet.ENGLISH, english);
-    httpClient.addRequestProperty(EXERCISE_TEXT, new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
-    httpClient.addRequestProperty(ScoreServlet.LANGUAGE, getLanguage());
-    httpClient.addRequestProperty(ScoreServlet.USER, "" + userid);
-    httpClient.addRequestProperty(ScoreServlet.FULL, ScoreServlet.FULL);  // full json returned
+
+    HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, requestToServer);
 
     if (session != null) {
 //      logger.info("getProxyScore adding session " + session);
-      httpClient.addRequestProperty("Cookie", session);
+      httpClient.addRequestProperty(COOKIE, session);
     }
 
     try {
@@ -1143,6 +1137,24 @@ public class AudioFileHelper implements AlignDecode {
     return null;
   }
 
+  @NotNull
+  private HTTPClient getHttpClientForNetprofServer(String english,
+                                                   String foreignLanguage,
+                                                   int userid,
+                                                   String hydraHost,
+                                                   ScoreServlet.PostRequest requestToServer) {
+    boolean isDefault = project.getWebserviceHost().equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
+
+    HTTPClient httpClient = getHttpClient(hydraHost, isDefault ? "" : project.getWebserviceHost());
+    httpClient.addRequestProperty(ScoreServlet.REQUEST, requestToServer.toString());
+    httpClient.addRequestProperty(ScoreServlet.ENGLISH, english);
+    httpClient.addRequestProperty(EXERCISE_TEXT, new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
+    httpClient.addRequestProperty(ScoreServlet.LANGUAGE, getLanguage());
+    httpClient.addRequestProperty(ScoreServlet.USER, "" + userid);
+    httpClient.addRequestProperty(ScoreServlet.FULL, ScoreServlet.FULL);  // full json returned
+    return httpClient;
+  }
+
   private TransNormDict getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
     String s = getSmallVocabDecoder().cleanToken(foreignLanguage, removeAccents);
     String cleaned = getSegmented(s); // segmentation method will filter out the UNK model
@@ -1158,6 +1170,12 @@ public class AudioFileHelper implements AlignDecode {
 
   private String session = null;
 
+  /**
+   * @see #getProxyScore
+   * @param hydraHost
+   * @param projID
+   * @return
+   */
   private String getSession(String hydraHost, int projID) {
     try {
       HTTPClient httpClient = getHttpClient(hydraHost, "");
@@ -1380,7 +1398,7 @@ public class AudioFileHelper implements AlignDecode {
    * @return AudioAnswer with decode info attached, if doFlashcard is true
    * @see #getAudioAnswer(int, CommonShell, String, File, AudioCheck.ValidityAndDur, DecoderOptions, int)
    */
-  private AudioAnswer getAudioAnswer(CommonShell exercise,
+  private AudioAnswer getAudioAnswer(CommonExercise exercise,
                                      int reqid,
                                      File file,
                                      AudioCheck.ValidityAndDur validity,

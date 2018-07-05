@@ -67,7 +67,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private ClickableWords<T> clickableWords;
   private static final boolean showInitially = false;
   private UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
-  private final ListInterface<CommonShell, T> listContainer;
+  private final ListInterface<?, ?> listContainer;
   private ChoicePlayAudioPanel playAudio, contextPlay;
   private List<IHighlightSegment> altflClickables = null;
   /**
@@ -126,7 +126,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
    */
   public TwoColumnExercisePanel(final T commonExercise,
                                 final ExerciseController controller,
-                                final ListInterface<CommonShell, T> listContainer,
+                                final ListInterface<?, ?> listContainer,
                                 Map<Integer, AlignmentOutput> alignments,
                                 boolean addPlayer) {
     this.exercise = commonExercise;
@@ -972,7 +972,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return flEntry;
   }
 
-  private String getFL(CommonExercise e) {
+  private String getFL(CommonShell e) {
     return e.getFLToShow();
   }
 
@@ -1031,7 +1031,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     String contextTranslation = contextEx.getEnglish();
 
-    boolean same = getFL((T) contextEx).equals(contextTranslation);
+    boolean same = getFL(contextEx).equals(contextTranslation);
     if (!same) {
       if (context != null && !contextTranslation.isEmpty()) {
         context.setWidth(LEFT_WIDTH);

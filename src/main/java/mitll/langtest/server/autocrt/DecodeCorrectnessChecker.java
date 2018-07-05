@@ -33,6 +33,7 @@
 package mitll.langtest.server.autocrt;
 
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.AlignDecode;
@@ -96,7 +97,7 @@ public class DecodeCorrectnessChecker {
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public PretestScore getDecodeScore(CommonShell commonExercise,
+  public PretestScore getDecodeScore(CommonExercise commonExercise,
                                      File audioFile,
                                      AudioAnswer answer,
                                      String language,
@@ -109,7 +110,7 @@ public class DecodeCorrectnessChecker {
 
     boolean b1 = language.equalsIgnoreCase(FRENCH);
     boolean removeAllPunct = !b1;
-    logger.info("getDecodeScore : " +language + " : is french " + b1 + " remove all punct " + removeAllPunct);
+    logger.info("getDecodeScore : " + language + " : is french " + b1 + " remove all punct " + removeAllPunct);
     PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores, b, removeAllPunct);
     // log what happened
     logDecodeOutput(answer, foregroundSentences, commonExercise.getID());
@@ -223,12 +224,12 @@ public class DecodeCorrectnessChecker {
       }
 
       List<String> answerTokens = svd.getTokensAllLanguages(isMandarinEtAl, converted, removeAllAccents);
-      List<String> recoTokens   = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence, removeAllAccents);
+      List<String> recoTokens = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence, removeAllAccents);
       if (answerTokens.size() == recoTokens.size()) {
         boolean same = true;
         for (int i = 0; i < answerTokens.size() && same; i++) {
           String expected = answerTokens.get(i);
-          String reco     = recoTokens.get(i);
+          String reco = recoTokens.get(i);
           if (DEBUG)
             logger.debug("isCorrect comparing '" + expected + "' " + expected.length() + " to '" + reco + "' " + reco.length());
           same = expected.equalsIgnoreCase(reco);
@@ -266,10 +267,10 @@ public class DecodeCorrectnessChecker {
    * @return possible paths for the decoder
    * @see #getDecodeScore
    */
-  private Collection<String> getRefSentences(CommonShell toDecode, String language, boolean allowAlternates) {
+  private Collection<String> getRefSentences(CommonExercise toDecode, String language, boolean allowAlternates) {
     if (allowAlternates) {
       Set<String> ret = new HashSet<>();
-      for (String alt : toDecode.getRefSentences()) ret.add(getPhraseToDecode(alt, language));
+      toDecode.getRefSentences().forEach(alt -> ret.add(getPhraseToDecode(alt, language)));
       return ret;
     } else {
       String phraseToDecode = getPhraseToDecode(toDecode.getForeignLanguage(), language);

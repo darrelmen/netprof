@@ -50,11 +50,8 @@ public interface MutableExercise extends CommonShell, MutableShell {
 
   void setTransliteration(String transliteration);
 
-  /**
-   * @see BaseResultDAO#attachScoreHistory
-   * @param scoreTotal
-   */
-  void setScores(List<CorrectAndScore> scoreTotal);
+
+//  void setScores(List<CorrectAndScore> scoreTotal);
 
   void setRefSentences(Collection<String> orDefault);
 

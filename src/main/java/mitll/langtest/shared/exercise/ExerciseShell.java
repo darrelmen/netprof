@@ -32,8 +32,12 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.langtest.shared.flashcard.CorrectAndScore;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 
@@ -58,6 +62,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    */
   String altfl = "";
   private int score = -1;//.0f;
+  private List<CorrectAndScore> scores = new ArrayList<>();
 
   public ExerciseShell() {
   }
@@ -131,17 +136,6 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
     return this;
   }
 
-  /**
-   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
-   * @return
-   */
-  @Override
-  public Collection<String> getRefSentences() {
-    return Collections.singleton(getForeignLanguage());
-  }
-
-
-
   @Override
   public void setEnglish(String english) {
     this.english = english;
@@ -211,6 +205,23 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
 
   public boolean shouldSwap() {
     return shouldSwap;
+  }
+
+  /**
+   * @return
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getFirstRow
+   */
+  public List<CorrectAndScore> getScores() {
+    return scores;
+  }
+
+  /**
+   * @param scores
+   * @see mitll.langtest.server.database.result.BaseResultDAO#attachScoreHistory(int, CommonExercise, String)
+   */
+  @Override
+  public void setScores(List<CorrectAndScore> scores) {
+    this.scores = scores;
   }
 
   public String toString() {

@@ -69,7 +69,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private ITypeAhead typeAhead;
   int userListID = -1;
   private int unaccountedForVertical = 160;
-  private boolean onlyExamples;
+  //private boolean onlyExamples;
 
   private static final boolean DEBUG = false;
 
@@ -144,14 +144,13 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
         .setUserListID(userListID)
         .setActivityType(getActivityType())
         .setOnlyUnrecordedByMe(false)
-        .setOnlyExamples(isOnlyExamples())
         .setOnlyDefaultAudio(false)
         .setOnlyUninspected(false);
   }
 
   /**
    * @return
-   * @see PagingExerciseList#loadExercises
+   * @see FacetExerciseList#noSectionsGetExercises
    */
   protected String getPrefix() {
     return typeAhead != null ? typeAhead.getText() : "";
@@ -192,6 +191,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     }
   }
 
+  /**
+   * @see #findFirstExercise
+   * @return
+   */
   private T getFirstNotCompleted() {
     for (T es : pagingContainer.getItems()) {
       STATE state = es.getState();
@@ -581,16 +584,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pagingContainer.flush();
     pagingContainer.redraw();
   }
-
-  protected boolean isOnlyExamples() {
-    return onlyExamples;
-  }
-
-/*
-  protected void setOnlyExamples(boolean onlyExamples) {
-    this.onlyExamples = onlyExamples;
-  }
-*/
 
   @Override
   ActivityType getActivityType() {

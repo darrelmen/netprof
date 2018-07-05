@@ -49,7 +49,6 @@ import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.HasID;
 
@@ -90,7 +89,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   public static final String PUNCT_REGEX = "[\\?\\.,\\/#!$%\\^&\\*;:{}=_`~()]";
   static final String SPACE_REGEX = " ";
 
-  private final ListInterface listContainer;
+  private final ListInterface<?, ?> listContainer;
 
   /**
    * TODO : remove me
@@ -124,7 +123,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    */
   protected GoodwaveExercisePanel(final T commonExercise,
                                   final ExerciseController controller,
-                                  final ListInterface<CommonShell, T> listContainer,
+                                  final ListInterface<?, ?> listContainer,
                                   ExerciseOptions options
   ) {
     this.options = options;
@@ -172,9 +171,9 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     //  }
   }
 
-  protected abstract NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                                       final ListInterface<CommonShell, T> listContainer,
-                                                                       boolean addKeyHandler, boolean includeListButtons);
+  protected abstract NavigationHelper getNavigationHelper(ExerciseController controller,
+                                                          final ListInterface<?, ?> listContainer,
+                                                          boolean addKeyHandler, boolean includeListButtons);
 
   public void wasRevealed() {
   }
@@ -185,7 +184,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     listContainer.loadNextExercise(exercise.getID());
   }
 
-  protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
+  protected void nextWasPressed(ListInterface<?,?> listContainer, HasID completedExercise) {
     navigationHelper.enableNextButton(false);
     listContainer.loadNextExercise(completedExercise.getID());
   }
@@ -215,9 +214,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    */
   protected abstract void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
                                           float screenPortion, T exercise);
+
   protected abstract void addGroupingStyle(Widget div);
 
-  public void onResize() {}
+  public void onResize() {
+  }
 
   /**
    * Three lines - the unit/chapter/item info, then the item content - vocab item, english, etc.

@@ -11,21 +11,20 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class PolyglotChart extends BasicTimeSeriesPlot {
+public class PolyglotChart  extends BasicTimeSeriesPlot {
   //private final Logger logger = Logger.getLogger("PolyglotChart");
   private static final String RECORDINGS = "Recordings";
   private static final String AVG_SCORE = "Avg. Score";
   private static final int HEIGHT = 100;
 
   protected Chart chart = null;
-  private ListInterface listInterface;
+  private ListInterface<?,?> listInterface;
 
   /**
    * @param exceptionSupport
    * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#getChart
    */
-  public PolyglotChart(ExceptionSupport exceptionSupport,
-                       ListInterface listInterface) {
+  public PolyglotChart(ExceptionSupport exceptionSupport, ListInterface<?,?> listInterface) {
     super(exceptionSupport);
     this.listInterface = listInterface;
   }
@@ -155,8 +154,6 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
   }
 
   /**
-   *
-   *
    * @return
    */
   @Override

@@ -167,7 +167,7 @@ public class ReviewItemHelper extends NPFHelper {
               onlyUninspected)
               .setQC(true)
               .setAddContext(false);
-          logger.info("making request "  + exerciseListRequest);
+      //    logger.info("making request "  + exerciseListRequest);
           return exerciseListRequest;
         }
 

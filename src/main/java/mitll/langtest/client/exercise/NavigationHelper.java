@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  * Time: 6:36 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NavigationHelper<T extends Shell> extends HorizontalPanel {
+public class NavigationHelper extends HorizontalPanel {
   private final Logger logger = Logger.getLogger("NavigationHelper");
 
 
@@ -66,7 +66,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
   protected Button next;
   private boolean enableNextOnlyWhenAllCompleted = true;
   private final PostAnswerProvider provider;
-  private final ListInterface<T, ?> listContainer;
+  private final ListInterface<?, ?> listContainer;
 
   /**
    * @param exercise
@@ -77,7 +77,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @see ExercisePanel#getNavigationHelper(ExerciseController)
    */
   protected NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
-                             ListInterface<T, ?> listContainer, boolean addKeyHandler) {
+                             ListInterface<?, ?> listContainer, boolean addKeyHandler) {
     this(exercise, controller, provider, listContainer, true, addKeyHandler, false, false);
   }
 
@@ -93,7 +93,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @see ExercisePanel#getNavigationHelper(ExerciseController)
    */
   NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
-                   ListInterface<T, ?> listContainer, boolean addButtons, boolean addKeyHandler,
+                   ListInterface<?, ?> listContainer, boolean addButtons, boolean addKeyHandler,
                    boolean enableNextOnlyWhenAllCompleted,
                    boolean addPrevButton) {
     this.provider = provider;

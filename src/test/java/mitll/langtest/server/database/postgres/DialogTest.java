@@ -34,6 +34,7 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
@@ -48,11 +49,61 @@ public class DialogTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(DialogTest.class);
   public static final int MAX = 200;
   public static final int KOREAN_ID = 46;
-  public static final String TOPIC_PRESENTATION_C = "Topic Presentation C";
-  public static final String TOPIC_PRESENTATION_A = "Topic Presentation A";
-  public static final String PRESENTATION = "presentation";
-  public static final String ANY = "Any";
-  public static final String CHAPTER = "Chapter";
+  private static final String TOPIC_PRESENTATION_C = "Topic Presentation C";
+  private static final String TOPIC_PRESENTATION_A = "Topic Presentation A";
+  public static final String PRESENTATION1 = "presentation";
+  private static final String PRESENTATION = PRESENTATION1;
+  private static final String ANY = "Any";
+  private static final String CHAPTER = "Chapter";
+  public static final String U5 = "" + 5;
+  public static final String UNIT = "Unit";
+  public static final String C17 = "" + 17;
+  public static final String PAGE = "page";
+
+  @Test
+  public void testSH() {
+    DatabaseImpl andPopulate = getDatabase().setInstallPath("");
+
+    Project project = andPopulate.getProjectByName("Korean");
+    ISection<IDialog> dialogSectionHelper = project.getDialogSectionHelper();
+
+    {
+      List<Pair> pairs = new ArrayList<>();
+      pairs.add(new Pair(UNIT, U5));
+      pairs.add(new Pair(CHAPTER, C17));
+      pairs.add(new Pair(PAGE, ANY));
+      pairs.add(new Pair(PRESENTATION1, ANY));
+      FilterRequest request = new FilterRequest(-1, pairs, -1);
+      FilterResponse typeToValues = dialogSectionHelper.getTypeToValues(request, false);
+      logger.info("got " + typeToValues);
+    }
+    {
+      List<Pair> pairs = new ArrayList<>();
+      pairs.add(new Pair(UNIT, U5));
+      pairs.add(new Pair(CHAPTER, C17));
+
+      FilterRequest request = new FilterRequest(-1, pairs, -1);
+      FilterResponse typeToValues = dialogSectionHelper.getTypeToValues(request, false);
+      logger.info("got " + typeToValues);
+    }
+
+
+    {
+      List<Pair> pairs = new ArrayList<>();
+      pairs.add(new Pair(UNIT, U5));
+      pairs.add(new Pair(CHAPTER, C17));
+
+      HashMap<String, Collection<String>> objectObjectHashMap = new HashMap<>();
+      objectObjectHashMap.put(UNIT, Collections.singletonList(U5));
+      objectObjectHashMap.put(CHAPTER, Collections.singletonList(C17));
+
+      Collection<IDialog> exercisesForSelectionState = dialogSectionHelper.getExercisesForSelectionState(objectObjectHashMap);
+      logger.info("got " + exercisesForSelectionState);
+    }
+
+
+
+  }
 
   @Test
   public void testKP() {
@@ -94,23 +145,23 @@ public class DialogTest extends BaseTest {
       }
     });
 
-    project.getSectionHelper().report();
+    //  project.getSectionHelper().report();
 
     {
       logger.info("OK - unit and chapter only\n\n\n\n");
       List<Pair> pairs = new ArrayList<>();
-      pairs.add(new Pair("Unit", "" + 5));
-      pairs.add(new Pair(CHAPTER, "" + 17));
-      pairs.add(new Pair("page", ANY));
-      pairs.add(new Pair("presentation", ANY));
+      pairs.add(new Pair(UNIT, U5));
+      pairs.add(new Pair(CHAPTER, C17));
+      pairs.add(new Pair(PAGE, ANY));
+      pairs.add(new Pair(PRESENTATION1, ANY));
       FilterRequest request = new FilterRequest(-1, pairs, -1);
-      FilterResponse typeToValues = project.getSectionHelper().getTypeToValues(request, true);
+      FilterResponse typeToValues = project.getSectionHelper().getTypeToValues(request, false);
       logger.info("got " + typeToValues);
 
       if (false) {
         HashMap<String, Collection<String>> typeToSection = new HashMap<>();
-        typeToSection.put("Unit", Collections.singletonList("" + 5));
-        typeToSection.put(CHAPTER, Collections.singletonList("" + 17));
+        typeToSection.put(UNIT, Collections.singletonList(U5));
+        typeToSection.put(CHAPTER, Collections.singletonList(C17));
         Collection<CommonExercise> exercisesForSelectionState = project.getSectionHelper().getExercisesForSelectionState(typeToSection);
 
         exercisesForSelectionState.stream().filter(ex -> ex.getEnglish().isEmpty()).forEach(commonExercise -> logger.info(getShort(commonExercise)));
@@ -122,17 +173,17 @@ public class DialogTest extends BaseTest {
 
       //   project.getSectionHelper().report();
       List<Pair> pairs = new ArrayList<>();
-      pairs.add(new Pair("Unit", "" + 5));
-      pairs.add(new Pair(CHAPTER, "" + 17));
-      pairs.add(new Pair("page", ANY));
+      pairs.add(new Pair(UNIT, U5));
+      pairs.add(new Pair(CHAPTER, C17));
+      pairs.add(new Pair(PAGE, ANY));
       pairs.add(new Pair(PRESENTATION, TOPIC_PRESENTATION_A));
       FilterRequest request = new FilterRequest(-1, pairs, -1);
       FilterResponse typeToValues = project.getSectionHelper().getTypeToValues(request, false);
       logger.info("got " + typeToValues);
 
       HashMap<String, Collection<String>> typeToSection = new HashMap<>();
-      typeToSection.put("Unit", Collections.singletonList("" + 5));
-      typeToSection.put(CHAPTER, Collections.singletonList("" + 17));
+      typeToSection.put(UNIT, Collections.singletonList(U5));
+      typeToSection.put(CHAPTER, Collections.singletonList(C17));
       typeToSection.put(PRESENTATION, Collections.singletonList(TOPIC_PRESENTATION_A));
       Collection<CommonExercise> exercisesForSelectionState = project.getSectionHelper().getExercisesForSelectionState(typeToSection);
 
@@ -143,17 +194,17 @@ public class DialogTest extends BaseTest {
 
       // project.getSectionHelper().report();
       List<Pair> pairs = new ArrayList<>();
-      pairs.add(new Pair("Unit", "" + 5));
-      pairs.add(new Pair(CHAPTER, "" + 17));
-      pairs.add(new Pair("page", ANY));
+      pairs.add(new Pair(UNIT, U5));
+      pairs.add(new Pair(CHAPTER, C17));
+      pairs.add(new Pair(PAGE, ANY));
       pairs.add(new Pair(PRESENTATION, TOPIC_PRESENTATION_C));
       FilterRequest request = new FilterRequest(-1, pairs, -1);
       FilterResponse typeToValues = project.getSectionHelper().getTypeToValues(request, false);
       logger.info("got " + typeToValues);
 
       HashMap<String, Collection<String>> typeToSection = new HashMap<>();
-      typeToSection.put("Unit", Collections.singletonList("" + 5));
-      typeToSection.put(CHAPTER, Collections.singletonList("" + 17));
+      typeToSection.put(UNIT, Collections.singletonList(U5));
+      typeToSection.put(CHAPTER, Collections.singletonList(C17));
       typeToSection.put(PRESENTATION, Collections.singletonList(TOPIC_PRESENTATION_C));
       Collection<CommonExercise> exercisesForSelectionState = project.getSectionHelper().getExercisesForSelectionState(typeToSection);
 
@@ -163,9 +214,9 @@ public class DialogTest extends BaseTest {
     if (false) {
       for (int unit = 1; unit < 9; unit++) {
         List<Pair> pairs = new ArrayList<>();
-        pairs.add(new Pair("Unit", "" + unit));
+        pairs.add(new Pair(UNIT, "" + unit));
         pairs.add(new Pair(CHAPTER, ANY));
-        pairs.add(new Pair("page", ANY));
+        pairs.add(new Pair(PAGE, ANY));
         pairs.add(new Pair(PRESENTATION, ANY));
 
         FilterRequest request = new FilterRequest(-1, pairs, -1);

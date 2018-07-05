@@ -46,7 +46,6 @@ import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
@@ -539,7 +538,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     if (exercisesForState.isEmpty() && !prefix.isEmpty()) { // allow lookup by id
-      CommonExercise exercise = getExercise(userID, projID, prefix, incorrectFirst);
+      CommonExercise exercise = getExercise(userID, projID, prefix);
       if (exercise != null) exercisesForState = Collections.singletonList(exercise);
     }
     // why copy???
@@ -1184,7 +1183,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
   }
 
-  int warn = 0;
+  private int warn = 0;
 
   /**
    * Save transmission bandwidth - don't send a list of fully populated items - just send enough to populate a list
@@ -1194,7 +1193,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    * @see #makeExerciseListWrapper
    */
-  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises, boolean skipDups) {
+  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<CommonExercise> exercises, boolean skipDups) {
     List<CommonShell> ids = new ArrayList<>(exercises.size());
 
     Set<Integer> checkDups = new HashSet<>();
@@ -1203,7 +1202,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         logger.warn("getExerciseShells : no phones for exercise " + ex.getID());
       }
       if (skipDups && checkDups.contains(ex.getID())) {
-     //   logger.info("skip dup " + ex.getID());
+        //   logger.info("skip dup " + ex.getID());
       } else {
         checkDups.add(ex.getID());
         ids.add(ex.getShell());
@@ -1765,7 +1764,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     sendEmail("slow exercise on " + language, "Getting ex " + id + " on " + language + " took " + diff +
         " millis, threads " + threadInfo + " on " + hostName);
   }
-
 
 
   private SmallVocabDecoder getSmallVocabDecoder(int projectID) {

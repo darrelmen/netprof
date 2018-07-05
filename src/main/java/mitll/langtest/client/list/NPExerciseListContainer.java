@@ -6,19 +6,21 @@ import mitll.langtest.client.analysis.AudioExampleContainer;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
-class NPExerciseListContainer extends PagingContainer<CommonShell> {
+class NPExerciseListContainer<T extends CommonShell, U extends Shell> extends PagingContainer<T> {
 //  private final Logger logger = Logger.getLogger("NPExerciseListContainer");
 
-  private final NPExerciseList exerciseList;
-  private final PagingExerciseList<CommonShell, CommonExercise> outer;
+  private final NPExerciseList<T, U> exerciseList;
+  //private final PagingExerciseList<?, ?> outer;
 
-  NPExerciseListContainer(NPExerciseList exerciseList, boolean isRecorder,
-                          boolean showFirstNotCompleted, PagingExerciseList<CommonShell, CommonExercise> outer) {
+  NPExerciseListContainer(NPExerciseList<T, U> exerciseList,
+                          boolean isRecorder,
+                          boolean showFirstNotCompleted) {
     super(exerciseList.controller, exerciseList.getVerticalUnaccountedFor(), isRecorder, showFirstNotCompleted);
     this.exerciseList = exerciseList;
-    this.outer = outer;
+    // this.outer = outer;
   }
 
   @Override
@@ -28,8 +30,8 @@ class NPExerciseListContainer extends PagingContainer<CommonShell> {
   }
 
   @Override
-  public void gotClickOnItem(CommonShell e) {
-    outer.gotClickOnItem(e);
+  public void gotClickOnItem(T e) {
+    exerciseList.gotClickOnItem(e);
   }
 
   @Override

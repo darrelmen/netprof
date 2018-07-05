@@ -77,7 +77,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
-public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> implements ShowEventListener {
+public abstract class FacetExerciseList<T extends CommonShell, U extends CommonShell> extends HistoryExerciseList<T, U> implements ShowEventListener {
   public static final String RECORDED = "Recorded";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
@@ -168,6 +168,10 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   private DivWidget sortBox;
   private DivWidget pageSizeContainer;
   private Panel typeOrderContainer;
+
+  private final Map<Integer, Float> exerciseToScore = new HashMap<>();
+  private final Map<Integer, U> fetched = new ConcurrentHashMap<>();
+
 
   /**
    * @param secondRow             add the section panel to this row
@@ -345,7 +349,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
 
   private final boolean finished;
   private ListBox sortBoxReally;
-  private ListSorting<CommonShell, CommonExercise> listSorting;
+  private ListSorting<T, U> listSorting;
 
   @NotNull
   private DivWidget addSortBox() {
@@ -378,10 +382,10 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @return
    * @see mitll.langtest.client.list.PagingExerciseList#addComponents
    */
-  protected ClickablePagingContainer<CommonShell> makePagingContainer() {
+  protected ClickablePagingContainer<T> makePagingContainer() {
     pagingContainer =
-        new ClickablePagingContainer<CommonShell>(controller) {
-          public void gotClickOnItem(CommonShell e) {
+        new ClickablePagingContainer<T>(controller) {
+          public void gotClickOnItem(T e) {
           }
 
           protected void addTable(Panel column) {
@@ -472,7 +476,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   private Panel getWidgetsForTypes() {
     final UnorderedList container = new UnorderedList();
     container.getElement().setId("typeOrderContainer");
-    container.getElement().getStyle().setMarginBottom(50,Style.Unit.PX  );//"bottomFiveMargin");
+    container.getElement().getStyle().setMarginBottom(50, Style.Unit.PX);//"bottomFiveMargin");
     getTypeOrder();
     return container;
   }
@@ -853,7 +857,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
 
       // add final "View all" link if we're not supposed to show all
       if (hasMore && !showAll && ++j == toShow) {
-        addLIChoice(choices, getShowMoreAnchor(typeToValues, type, keysSize-j));
+        addLIChoice(choices, getShowMoreAnchor(typeToValues, type, keysSize - j));
         break;
       }
     }
@@ -892,7 +896,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   @NotNull
   private Anchor getShowMoreAnchor(final Map<String, Set<MatchInfo>> typeToValues, final String type, int remaining) {
     Anchor anchor = new Anchor();
-    String showMore ="<i>View all (" +remaining+
+    String showMore = "<i>View all (" + remaining +
         ")</i>";// SHOW_MORE;
     anchor.setHTML(showMore);
     anchor.addClickHandler(event -> {
@@ -1103,7 +1107,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       Map<String, String> candidate = new HashMap<>(typeToSelection);
       String value = getChoiceHandlerValue(type, key, newUserListID);
       candidate.put(type, value);
-  //    logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
+      //    logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
       setHistory(candidate);
     };
   }
@@ -1436,7 +1440,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see ListSorting#sortBy
    */
   @Override
-  public void flushWith(Comparator<CommonShell> comparator) {
+  public void flushWith(Comparator<T> comparator) {
     // logger.info("flushWith ");
     super.flushWith(comparator);
     askServerForExercise(-1);
@@ -1594,7 +1598,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     }
 */
 
-    List<CommonExercise> alreadyFetched = new ArrayList<>();
+    List<U> alreadyFetched = new ArrayList<>();
     Set<Integer> requested = getRequested(visibleIDs, alreadyFetched);
 
     if (requested.isEmpty()) {
@@ -1614,10 +1618,10 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   }
 
   @NotNull
-  protected Set<Integer> getRequested(Collection<Integer> visibleIDs, List<CommonExercise> alreadyFetched) {
+  protected Set<Integer> getRequested(Collection<Integer> visibleIDs, List<U> alreadyFetched) {
     Set<Integer> requested = new HashSet<>();
     for (Integer id : visibleIDs) {
-      CommonExercise cachedExercise = getCachedExercise(id);
+      U cachedExercise = getCachedExercise(id);
       if (cachedExercise == null) {
         requested.add(id);
       } else {
@@ -1627,49 +1631,16 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     return requested;
   }
 
-  private void getFullExercises(Collection<Integer> visibleIDs,
-                                int currentReq,
-                                Collection<Integer> requested,
-                                List<CommonExercise> alreadyFetched) {
-    long then = System.currentTimeMillis();
+  protected abstract void getFullExercises(Collection<Integer> visibleIDs,
+                                           int currentReq,
+                                           Collection<Integer> requested,
+                                           List<U> alreadyFetched);
 
-    if (DEBUG) {
-      logger.info("getFullExercises" +
-          "\n\trequest   " + visibleIDs.size() + " visible ids : " + visibleIDs +
-          "\n\trequested " + requested +
-          "\n\talready   " + getIDs(alreadyFetched));
-    }
-
-    service.getFullExercises(currentReq,
-        requested,
-        new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            logger.warning("getFullExercises got exception : " + caught);
-            logger.warning("getFullExercises got " + getExceptionAsString(caught));
-            dealWithRPCError(caught);
-            hidePrevNext();
-          }
-
-          @Override
-          public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
-            if (DEBUG) {
-              logger.info("getFullExercises onSuccess " + visibleIDs.size() + " visible ids : " + visibleIDs);
-            }
-
-            if (result.getExercises() != null) {
-              long now = System.currentTimeMillis();
-              int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
-              if (now - then > 150 || DEBUG) {
-                logger.info("getFullExercises took " + (now - then) + " to get " + size + " exercises");
-              }
-
-              getFullExercisesSuccess(result, alreadyFetched, visibleIDs);
-            } else {
-              logger.warning("getFullExercises huh? no exercises from " + requested);
-            }
-          }
-        });
+  protected void fullExerciseFailure(Throwable caught) {
+    logger.warning("getFullExercises got exception : " + caught);
+    logger.warning("getFullExercises got " + getExceptionAsString(caught));
+    dealWithRPCError(caught);
+    hidePrevNext();
   }
 
   /**
@@ -1678,15 +1649,15 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @param visibleIDs
    * @see #reallyGetExercises
    */
-  private void getFullExercisesSuccess(ExerciseListWrapper<CommonExercise> result,
-                                       List<CommonExercise> alreadyFetched,
-                                       Collection<Integer> visibleIDs) {
+  protected void getFullExercisesSuccess(ExerciseListWrapper<U> result,
+                                         List<U> alreadyFetched,
+                                         Collection<Integer> visibleIDs) {
     // long now = System.currentTimeMillis();
 //    int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
     //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
     int reqID = result.getReqID();
 
-    Map<Integer, CommonExercise> idToEx = rememberFetched(result, alreadyFetched);
+    Map<Integer, U> idToEx = rememberFetched(result, alreadyFetched);
 
     if (DEBUG) logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs.size());
 
@@ -1699,20 +1670,19 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   }
 
   @NotNull
-  private Map<Integer, CommonExercise> rememberFetched(ExerciseListWrapper<CommonExercise> result,
-                                                       List<CommonExercise> alreadyFetched) {
-    Map<Integer, CommonExercise> idToEx = setScoreHistory(result);
+  private Map<Integer, U> rememberFetched(ExerciseListWrapper<U> result, List<U> alreadyFetched) {
+    Map<Integer, U> idToEx = setScoreHistory(result.getScoreHistoryPerExercise(), result.getExercises());
     alreadyFetched.forEach(exercise -> idToEx.put(exercise.getID(), exercise));
 
     result.getExercises().forEach(this::addExerciseToCached);
     return idToEx;
   }
 
-  private List<CommonExercise> getVisibleExercises(Collection<Integer> visibleIDs,
-                                                   Map<Integer, CommonExercise> idToEx) {
-    List<CommonExercise> toShow = new ArrayList<>();
+  private List<U> getVisibleExercises(Collection<Integer> visibleIDs,
+                                      Map<Integer, U> idToEx) {
+    List<U> toShow = new ArrayList<>();
     for (int id : visibleIDs) {
-      CommonExercise e = idToEx.get(id);
+      U e = idToEx.get(id);
       if (e == null) {
         logger.warning("\n\ngetVisibleExercises : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
       } else {
@@ -1726,14 +1696,20 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   /**
    * TODO : why? ?>
    *
-   * @param result
+   * @param scoreHistoryPerExercise
    * @return
+   * @see #rememberFetched(ExerciseListWrapper, List)
+   * @see #goGetNextPage
    */
   @NotNull
-  private Map<Integer, CommonExercise> setScoreHistory(ExerciseListWrapper<CommonExercise> result) {
-    Map<Integer, CommonExercise> idToEx = new HashMap<>();
-    Map<Integer, CorrectAndScore> scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
-    for (CommonExercise ex : result.getExercises()) {
+  protected Map<Integer, U> setScoreHistory(Map<Integer, CorrectAndScore> scoreHistoryPerExercise,
+                                            List<U> exercises
+
+                                            //                                    ExerciseListWrapper<U> result
+  ) {
+    Map<Integer, U> idToEx = new HashMap<>();
+    //  Map<Integer, CorrectAndScore> scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
+    for (U ex : exercises) {
       //   logger.info("setScoreHistory " + ex.getID() +  " " + ex);
       int id = ex.getID();
       idToEx.put(id, ex);
@@ -1746,7 +1722,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
         if (correctAndScore != null) scoreTotal.add(correctAndScore);
         // List<CorrectAndScore> scoreTotal = correctAndScores == null ? new ArrayList<>() : correctAndScores;
         //  logger.info("attach score history " + scoreTotal.size() + " to exercise "+ id);
-        ex.getMutable().setScores(scoreTotal);
+        ex.getMutableShell().setScores(scoreTotal);
       }
     }
     //logger.info("setScoreHistory now " + idToEx.size());
@@ -1760,7 +1736,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @see #reallyGetExercises
    * @see #getFullExercisesSuccess
    */
-  private void gotFullExercises(final int reqID, Collection<CommonExercise> toShow) {
+  private void gotFullExercises(final int reqID, Collection<U> toShow) {
     if (DEBUG) logger.info("gotFullExercises show req " + reqID + " exercises " + getIDs(toShow));
     if (isCurrentReq(reqID)) {
       if (toShow.isEmpty()) {
@@ -1787,15 +1763,12 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     }
   }
 
-  private final Map<Integer, Float> exerciseToScore = new HashMap<>();
-  private final Map<Integer, CommonExercise> fetched = new ConcurrentHashMap<>();
-
   /**
    * @param result
    * @param reqID
    * @see #gotFullExercises
    */
-  private void showExercises(final Collection<CommonExercise> result, final int reqID) {
+  private void showExercises(final Collection<U> result, final int reqID) {
     if (isDrillView()) { // drill/avp/flashcard
       showDrill(result);
       goGetNextPage();
@@ -1813,9 +1786,12 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   /**
    *
    */
-  private void goGetNextPage() {
+  protected abstract void goGetNextPage();
+
+  @NotNull
+  protected Set<Integer> getNextPageIDs() {
     CommonShell currentSelection = pagingContainer.getCurrentSelection();
-    List<CommonShell> items = pagingContainer.getItems();
+    List<T> items = pagingContainer.getItems();
     int i = items.indexOf(currentSelection);
 
     Set<Integer> toAskFor = getNextIDs(items, i, 10);
@@ -1824,56 +1800,25 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       toAskFor = getNextIDs(items, i, 20);
       //    logger.info("\tgoGetNextPage toAskFor " + toAskFor.size() + " : " + toAskFor);
     }
-    if (toAskFor.isEmpty()) {
-      //    logger.info("goGetNextPage already has cached total " + fetched.size());
-    } else {
-      long then = System.currentTimeMillis();
-      //     logger.info("goGetNextPage toAskFor " + toAskFor.size() + " exercises.");
-      service.getFullExercises(-1, toAskFor,
-          new AsyncCallback<ExerciseListWrapper<CommonExercise>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              logger.warning("getExercises got exception : " + caught);
-              logger.warning("getExercises got " + getExceptionAsString(caught));
-              dealWithRPCError(caught);
-              hidePrevNext();
-            }
-
-            @Override
-            public void onSuccess(final ExerciseListWrapper<CommonExercise> result) {
-              if (result.getExercises() != null) {
-                long now = System.currentTimeMillis();
-                int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
-                if (now - then > 150 || DEBUG) {
-                  logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
-                }
-                setScoreHistory(result);
-                result.getExercises().forEach(ex -> addExerciseToCached(ex));
-              } else {
-                logger.warning("getFullExercises huh? no exercises");
-              }
-            }
-          });
-
-    }
+    return toAskFor;
   }
 
   @NotNull
-  private Set<Integer> getNextIDs(List<CommonShell> items, int i, int n) {
-    List<CommonShell> commonShells = pagingContainer.getItems().subList(i + 1, Math.min(items.size(), i + 1 + n));
+  private Set<Integer> getNextIDs(List<T> items, int i, int n) {
+    List<T> commonShells = pagingContainer.getItems().subList(i + 1, Math.min(items.size(), i + 1 + n));
 
     Set<Integer> toAskFor = new HashSet<>();
-    commonShells.stream().forEach(commonShell -> toAskFor.add(commonShell.getID()));
+    commonShells.forEach(commonShell -> toAskFor.add(commonShell.getID()));
 
     toAskFor.removeAll(fetched.keySet());
     return toAskFor;
   }
 
-  private List<Integer> getIDs(Collection<CommonExercise> result) {
+  protected List<Integer> getIDs(Collection<U> result) {
     return result.stream().map(HasID::getID).collect(Collectors.toList());
   }
 
-  private void showExerciesForCurrentReq(Collection<CommonExercise> result, int reqID) {
+  private void showExerciesForCurrentReq(Collection<U> result, int reqID) {
     if (isCurrentReq(reqID)) {
       reallyShowExercises(result, reqID);
       if (isCurrentReq(reqID)) {
@@ -1898,7 +1843,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @param reqID
    * @see #showExercises
    */
-  private void reallyShowExercises(Collection<CommonExercise> result, int reqID) {
+  private void reallyShowExercises(Collection<U> result, int reqID) {
     //logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
     DivWidget exerciseContainer = new DivWidget();
     long then = System.currentTimeMillis();
@@ -1924,7 +1869,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
    * @param reqID
    * @return
    */
-  private List<RefAudioGetter> makeExercisePanels(Collection<CommonExercise> result,
+  private List<RefAudioGetter> makeExercisePanels(Collection<U> result,
                                                   DivWidget exerciseContainer,
                                                   final int reqID) {
     List<RefAudioGetter> getters = new ArrayList<>();
@@ -1941,7 +1886,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     boolean showALTFL = factory.getALTFLChoice();
 
     PhonesChoices phoneChoices = factory.getPhoneChoices();
-    for (CommonExercise exercise : result) {
+    for (U exercise : result) {
       if (isStale(reqID)) {
         if (DEBUG_STALE) {
           logger.info("makeExercisePanels stop stale req " + reqID + " vs current " + getCurrentExerciseReq());
@@ -1993,11 +1938,11 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
       $wnd.basicMP3Player && $wnd.basicMP3Player.init();
   }-*/;
 
-  private CommonExercise getCachedExercise(Integer id) {
+  private U getCachedExercise(Integer id) {
     return fetched.get(id);
   }
 
-  private void addExerciseToCached(CommonExercise exercise) {
+  protected void addExerciseToCached(U exercise) {
     if (!fetched.containsKey(exercise.getID())) {
       fetched.put(exercise.getID(), exercise);
     }
@@ -2007,8 +1952,8 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
    * @param result
    * @see #showExercises
    */
-  private void showDrill(Collection<CommonExercise> result) {
-    CommonExercise next = result.iterator().next();
+  private void showDrill(Collection<U> result) {
+    U next = result.iterator().next();
     //logger.info("showDrill " + next.getID());
     markCurrentExercise(next.getID());
     addExerciseWidget(next);
@@ -2056,7 +2001,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
    * @param displayed
    * @see #showExercises
    */
-  private void setProgressBarScore(Collection<CommonShell> displayed, final int reqid) {
+  private void setProgressBarScore(Collection<T> displayed, final int reqid) {
     //exercisesWithScores.clear();
     exerciseToScore.clear();
 
@@ -2064,7 +2009,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     int withScore = 0;
     // long then = System.currentTimeMillis();
     if (DEBUGSCORE) logger.info("setProgressBarScore checking " + displayed.size());
-    for (CommonShell exercise : displayed) {
+    for (T exercise : displayed) {
       if (exercise.hasScore()) {
         if (DEBUGSCORE) logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
         //    exercisesWithScores.add(exercise.getID());
@@ -2197,8 +2142,8 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
    * @param toRemember
    * @see #rememberExercises
    */
-  protected List<CommonShell> resort(List<CommonShell> toRemember) {
-    List<CommonShell> commonShells = new ArrayList<>(toRemember);
+  protected List<T> resort(List<T> toRemember) {
+    List<T> commonShells = new ArrayList<>(toRemember);
     listSorting.sortLater(commonShells, sortBoxReally);
     return commonShells;
   }

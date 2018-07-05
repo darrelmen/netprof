@@ -61,8 +61,7 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.MutableAnnotationExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
@@ -82,8 +81,8 @@ import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
  * Time: 3:07 PM
  * To change this template use File | Settings | File Templates.
  */
-public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotationExercise>
-    extends FlashcardPanel<T>
+public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExercise> //T extends CommonExercise & MutableAnnotationExercise>
+    extends FlashcardPanel<L,T>
     implements AudioAnswerListener {
   private final Logger logger = Logger.getLogger("BootstrapExercisePanel");
 

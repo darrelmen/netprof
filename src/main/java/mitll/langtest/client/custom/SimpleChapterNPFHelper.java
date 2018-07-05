@@ -62,7 +62,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonExercise>
+public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonShell>
     implements RequiresResize, ExerciseListContent {
   private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
 
@@ -184,8 +184,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
       final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
       PanelFactory panelFactory) {
     return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
-      private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
-
       @Override
       public Panel getExercisePanel(CommonExercise e) {
         return panelFactory.getExercisePanel(e);
@@ -207,7 +205,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     }
   }
 
-  protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonExercise> extends FlexListLayout<T, U> {
+  protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonShell> extends FlexListLayout<T, U> {
     private final SimpleChapterNPFHelper<T, U> outer;
     //private final Logger logger = Logger.getLogger("MyFlexListLayout");
 

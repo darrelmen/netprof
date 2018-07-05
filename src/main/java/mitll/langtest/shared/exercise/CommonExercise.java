@@ -32,6 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -46,6 +47,12 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
   int getDominoID();
 
   boolean shouldSwap();
+
+  /**
+   * @return
+   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
+   */
+  Collection<String> getRefSentences();
 
   /**
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addAltFL
@@ -91,6 +98,10 @@ public interface CommonExercise extends CommonAudioExercise, ScoredExercise, Has
   String getTransliteration();
 
   long getLastChecked();
+
+  CommonShell getShell();
+
+  CommonShell asShell();
 
   MutableExercise getMutable();
 

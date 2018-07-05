@@ -46,7 +46,7 @@ import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.exercise.CommonAudioExercise;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.image.ImageResponse;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,7 +71,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel implements RequiresResize {
+public class AudioPanel<T extends HasID> extends VerticalPanel implements RequiresResize {
   private final Logger logger = Logger.getLogger("AudioPanel");
 
   private static final String RECORD = "Record";
@@ -394,7 +394,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
    * @param path to audio on the server
    * @see #onLoad()
    * @see RecordButton.RecordingListener#stopRecording(long)
-   * @see mitll.langtest.client.scoring.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult
+   * @seex mitll.langtest.client.scoring.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable
    */
   public String getImagesForPath(String path) {
@@ -430,8 +430,9 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
    * @param start from here
    * @param end   to here
    * @paramx waveDurInSeconds
-   * @see ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
+   * @seex ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
+/*
   void playSegment(float start, float end) {
     if (start >= end) {
       logger.warning("bad segment " + start + "-" + end);
@@ -440,6 +441,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
       playAudio.repeatSegment(start, end);
     }
   }
+*/
 
   /**
    * Adds a listener to the audio panel - this way it can update its position as the audio plays
@@ -447,14 +449,14 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
    * @return PlayAudioPanel
    * @see #addWidgets(String, String)
    */
-  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String recordButtonTitle, CommonAudioExercise exercise) {
+  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String recordButtonTitle, HasID exercise) {
     PlayAudioPanel playAudio = makePlayAudioPanel(toTheRightWidget, playButtonSuffix, recordButtonTitle, exercise);
     playAudio.setListener(audioPositionPopup);
     return playAudio;
   }
 
   protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String buttonTitle,
-                                              String recordButtonTitle, CommonAudioExercise exercise) {
+                                              String recordButtonTitle, HasID exercise) {
     return new PlayAudioPanel(soundManager, buttonTitle, toTheRightWidget, false, controller, exercise, true);
   }
 

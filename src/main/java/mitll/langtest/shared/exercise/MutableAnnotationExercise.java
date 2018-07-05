@@ -38,7 +38,7 @@ package mitll.langtest.shared.exercise;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/1/16.
  */
-public interface MutableAnnotationExercise {
+public interface MutableAnnotationExercise extends AnnotationExercise {
   /**
    * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
    * @param field

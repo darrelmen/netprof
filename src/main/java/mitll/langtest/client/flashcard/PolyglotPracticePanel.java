@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.AnalysisTab;
@@ -15,20 +14,18 @@ import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.SpeedChoices;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonAnnotatable;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
+public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExercise> extends StatsPracticePanel<L, T> {
   private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
@@ -59,10 +56,23 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private int minPolyScore;
   boolean showAudio;
 
+  /**
+   * @see PolyglotFlashcardFactory#getFlashcard
+   * @param statsFlashcardFactory
+   * @param controlState
+   * @param controller
+   * @param soundFeedback
+   * @param e
+   * @param stickyState
+   * @param exerciseListToUse
+   * @param minPolyScore
+   * @param showAudio
+   */
   PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
                         ControlState controlState, ExerciseController controller,
                         MySoundFeedback soundFeedback,
-                        CommonAnnotatable e, StickyState stickyState,
+                        T e,
+                        StickyState stickyState,
                         ListInterface<L, T> exerciseListToUse,
                         int minPolyScore,
                         boolean showAudio) {
@@ -76,10 +86,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   @Override
-  void addWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
+  void addWidgets(T e, ExerciseController controller, ControlState controlState) {
   }
 
-  private void realAddWidgets(CommonAnnotatable e, ExerciseController controller, ControlState controlState) {
+  private void realAddWidgets(T e, ExerciseController controller, ControlState controlState) {
     super.addWidgets(e, controller, controlState);
     hideClickToFlip();
   }

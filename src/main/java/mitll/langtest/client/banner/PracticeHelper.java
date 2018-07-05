@@ -46,6 +46,7 @@ import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
@@ -56,12 +57,12 @@ import mitll.langtest.shared.project.ProjectType;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/4/16.
  */
-class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+class PracticeHelper<T extends CommonShell, U extends CommonExercise & ClientExercise> extends SimpleChapterNPFHelper<T, U> {
   // private final Logger logger = Logger.getLogger("PracticeHelper");
   private static final String PRACTICE = "practice";
 
-  StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
-  PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
+  StatsFlashcardFactory<T, U> statsFlashcardFactory;
+  PolyglotFlashcardFactory<T, U> polyglotFlashcardFactory = null;
   Widget outerBottomRow;
   private PolyglotDialog.MODE_CHOICE mode;
   private PolyglotDialog.PROMPT_CHOICE promptChoice;
@@ -83,7 +84,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
    * @see SimpleChapterNPFHelper.MyFlexListLayout#getFactory
    */
   @Override
-  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
+  protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
     if (controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT) {
       polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, PRACTICE);
       statsFlashcardFactory = polyglotFlashcardFactory;
@@ -100,12 +101,12 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
    * @return
    */
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
+  protected FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer) {
+    return new MyFlexListLayout<T, U>(controller, outer) {
       @Override
-      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
-                                                                                 Panel currentExercisePanel,
-                                                                                 String instanceName, DivWidget listHeader, DivWidget footer) {
+      protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
+                                                          Panel currentExercisePanel,
+                                                          String instanceName, DivWidget listHeader, DivWidget footer) {
         return new PracticeFacetExerciseList(controller, PracticeHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
       }
 
@@ -135,11 +136,11 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
     this.navigation = navigation;
   }
 
-  StatsFlashcardFactory<CommonShell, CommonExercise> getStatsFlashcardFactory() {
+  StatsFlashcardFactory<T, U> getStatsFlashcardFactory() {
     return statsFlashcardFactory;
   }
 
-  PolyglotFlashcardFactory<CommonShell, CommonExercise> getPolyglotFlashcardFactory() {
+  PolyglotFlashcardFactory<T, U> getPolyglotFlashcardFactory() {
     return polyglotFlashcardFactory;
   }
 

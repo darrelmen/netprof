@@ -293,16 +293,6 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   }
 
   @Override
-  public Collection<String> getRefSentences() {
-    return Collections.singleton(getForeignLanguage());
-  }
-
-  @Override
-  public CommonShell getShell() {
-    return null;
-  }
-
-  @Override
   public int getNumPhones() {
     return 0;
   }
@@ -321,18 +311,6 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   public boolean hasScore() {
     return false;
   }
-/*
-
-  @Override
-  public String getCforeignLanguage() {
-    return null;
-  }
-
-  @Override
-  public String getCenglish() {
-    return null;
-  }
-*/
 
   public String getOrient() {
     return orient;

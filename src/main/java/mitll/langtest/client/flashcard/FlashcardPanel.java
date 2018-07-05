@@ -61,9 +61,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
-import mitll.langtest.shared.exercise.MutableAnnotationExercise;
+import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -76,7 +74,8 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/26/2014.
  */
-public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise> extends DivWidget implements TimerListener {
+public class FlashcardPanel<L extends CommonShell, T extends CommonShell & MutableAnnotationExercise & AudioRefExercise> // CommonExercise & MutableAnnotationExercise>
+    extends DivWidget implements TimerListener {
   private static final String MEANING = "Meaning";
   private final Logger logger = Logger.getLogger("FlashcardPanel");
 
@@ -134,7 +133,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
   private Panel rightColumn;
   private final SoundFeedback.EndListener endListener;
   final String instance;
-  protected final ListInterface exerciseList;
+  protected final ListInterface<L,T> exerciseList;
   private DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
 
@@ -162,7 +161,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
                  MySoundFeedback soundFeedback,
                  SoundFeedback.EndListener endListener,
                  String instance,
-                 ListInterface exerciseList) {
+                 ListInterface<L,T> exerciseList) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
     this.controller = controller;
@@ -431,9 +430,9 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #FlashcardPanel
    */
   Panel getThreePartContent(ControlState controlState,
-                                    Panel contentMiddle,
-                                    DivWidget belowDiv,
-                                    DivWidget lowestRow) {
+                            Panel contentMiddle,
+                            DivWidget belowDiv,
+                            DivWidget lowestRow) {
     DivWidget horiz = new DivWidget();
     horiz.addStyleName("inlineFlex");
     horiz.getElement().setId("left-content-right_container");
@@ -1150,8 +1149,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     style.setTextAlign(Style.TextAlign.CENTER);
     if (isUrdu) {
       foreignLanguageContent.addStyleName("urdubigflfont");
-    }
-    else {
+    } else {
       style.setProperty("fontFamily", "sans-serif");
     }
 
@@ -1172,7 +1170,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @see #getQuestionContent
    */
   private void addAudioBindings(final FocusPanel focusPanel) {
-  //  logger.info("addAudioBindings : click on audio playback panel...");
+    //  logger.info("addAudioBindings : click on audio playback panel...");
     focusPanel.addClickHandler(this::onClickOnCard);
     focusPanel.addMouseOverHandler(event -> focusPanel.addStyleName("mouseOverHighlight"));
     focusPanel.addMouseOutHandler(event -> focusPanel.removeStyleName("mouseOverHighlight"));

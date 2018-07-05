@@ -45,7 +45,7 @@ public interface ExerciseService<T extends CommonShell> extends RemoteService {
    * @param request
    * @return
    * @paramx <T>
-   * @see mitll.langtest.client.list.PagingExerciseList#loadExercises
+   * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
    */
   ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) throws DominoSessionException;
 

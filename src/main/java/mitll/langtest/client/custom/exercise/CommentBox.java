@@ -90,7 +90,9 @@ public class CommentBox extends PopupContainerFactory {
    * @see GoodwaveExercisePanel#getQuestionContent
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
-  public CommentBox(int exerciseID, EventRegistration registration, CommentAnnotator commentAnnotator,
+  public CommentBox(int exerciseID,
+                    EventRegistration registration,
+                    CommentAnnotator commentAnnotator,
                     MutableAnnotationExercise annotationExercise, boolean tooltipOnRight) {
     this.exerciseID = exerciseID;
     this.registration = registration;

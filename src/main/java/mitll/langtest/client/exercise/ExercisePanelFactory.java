@@ -67,8 +67,7 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
    * @param exerciseList
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    */
-  public ExercisePanelFactory(final ExerciseController controller,
-                              ListInterface<T, U> exerciseList) {
+  public ExercisePanelFactory(final ExerciseController controller, ListInterface<T, U> exerciseList) {
     this.controller = controller;
     this.exerciseList = exerciseList;
   }

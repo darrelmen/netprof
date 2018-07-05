@@ -8,8 +8,8 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.WaitCursorHelper;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ScoredExercise;
+import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -24,7 +24,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
 /**
  * An ASR scoring panel with a record button.
  */
-public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
+public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends DivWidget implements RecordingAudioListener {
   // private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
   public static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
@@ -51,7 +51,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   private DivWidget scoreFeedback;
   private boolean hasScoreHistory;
-  private final ListInterface<CommonShell, T> listContainer;
+  private final ListInterface<?, ?> listContainer;
   private final boolean isRTL;
   private ScoreFeedbackDiv scoreFeedbackDiv;
   private boolean addPlayer;
@@ -66,7 +66,7 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
   SimpleRecordAudioPanel(ExerciseController controller,
                          T exercise,
 
-                         ListInterface<CommonShell, T> listContainer, boolean addPlayer) {
+                         ListInterface<?, ?> listContainer, boolean addPlayer) {
     this.controller = controller;
     // this.goodwaveExercisePanel = goodwaveExercisePanel;
     this.exercise = exercise;

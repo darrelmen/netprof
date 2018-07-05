@@ -32,8 +32,6 @@
 
 package mitll.langtest.shared.exercise;
 
-import java.util.Collection;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  * <p>
@@ -60,18 +58,24 @@ public interface CommonShell extends Shell {
    * @see mitll.langtest.client.list.ListSorting#compForeign
    */
   String getForeignLanguage();
-  String getFLToShow();
-
-  MutableShell getMutableShell();
 
   /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getFL
    * @return
-   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
    */
-  Collection<String> getRefSentences();
+  String getFLToShow();
 
-  CommonShell getShell();
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#setScore
+   * @return
+   */
+  MutableShell getMutableShell();
 
+
+  /**
+   * @see mitll.langtest.client.list.ListSorting#compPhones
+   * @return
+   */
   int getNumPhones();
 
   int getRawScore();

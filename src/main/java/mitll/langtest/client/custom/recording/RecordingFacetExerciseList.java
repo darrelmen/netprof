@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
+import mitll.langtest.client.list.LearnFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.answer.ActivityType;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
 /**
  * @see RecorderNPFHelper#getMyListLayout
  */
-class RecordingFacetExerciseList extends FacetExerciseList {
+class RecordingFacetExerciseList extends LearnFacetExerciseList {
   //private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
 
   private static final String RECORD = "Record";

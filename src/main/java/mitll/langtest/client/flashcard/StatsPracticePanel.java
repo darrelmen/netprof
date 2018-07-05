@@ -22,10 +22,7 @@ import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonAnnotatable;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -33,7 +30,7 @@ import java.util.logging.Logger;
 /**
  * @see ExercisePanelFactory#getExercisePanel(Shell)
  */
-class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extends BootstrapExercisePanel<CommonAnnotatable> {
+class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extends BootstrapExercisePanel<L, T> {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   /**
@@ -70,7 +67,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   private Label remain, incorrectBox, correctBox, pronScore;
 
   /**
-   * @see StatsFlashcardFactory#getFlashcard
    * @param statsFlashcardFactory
    * @param controlState
    * @param controller
@@ -78,12 +74,13 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
    * @param e
    * @param stickyState
    * @param exerciseListToUse
+   * @see StatsFlashcardFactory#getFlashcard
    */
   public StatsPracticePanel(FlashcardContainer statsFlashcardFactory,
                             ControlState controlState,
                             ExerciseController controller,
                             MySoundFeedback soundFeedback,
-                            CommonAnnotatable e,
+                            T e,
                             StickyState stickyState,
                             ListInterface<L, T> exerciseListToUse) {
     super(e,

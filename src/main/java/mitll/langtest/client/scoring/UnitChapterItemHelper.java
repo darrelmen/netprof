@@ -44,6 +44,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasUnitChapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -146,7 +148,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
 
     boolean showDomino = dominoID > 0;
     if (showDomino) {
-      addProminentLabel(flow, DOMINO_ID, "" + exercise.getDominoID());
+      addProminentLabel(flow, DOMINO_ID, "" + dominoID);
     }
 
     if (!showDomino && !oldID.isEmpty()) {
@@ -156,10 +158,6 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     return flow;
   }
 
-/*  private boolean showDominoID(int dominoID, String oldID) {
-    return dominoID > 0 &&
-        !("" + dominoID).equals(oldID);
-  }*/
 
   private void addProminentLabel(Panel flow, String npId, String oldID) {
     Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);

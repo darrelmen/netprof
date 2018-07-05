@@ -16,7 +16,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -50,7 +50,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @param exercise
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  RecorderPlayAudioPanel(SoundManagerAPI soundManager, final Button postAudioRecordButton1, ExerciseController controller, CommonExercise exercise) {
+  RecorderPlayAudioPanel(SoundManagerAPI soundManager, final Button postAudioRecordButton1, ExerciseController controller, HasID exercise) {
     super(soundManager, new PlayListener() {
           public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);

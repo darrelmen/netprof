@@ -68,7 +68,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   private final Set<Widget> completed = new HashSet<>();
   protected T exercise = null;
   final ExerciseController controller;
-  private final NavigationHelper<L> navigationHelper;
+  private final NavigationHelper navigationHelper;
   final ListInterface<L, T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
   protected final String instance;
@@ -132,8 +132,8 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     return hp;
   }
 
-  private NavigationHelper<L> getNavigationHelper(ExerciseController controller) {
-    return new NavigationHelper<>(exercise, controller, this, exerciseList,
+  private NavigationHelper getNavigationHelper(ExerciseController controller) {
+    return new NavigationHelper(exercise, controller, this, exerciseList,
         true,
         true,
         true,
@@ -236,7 +236,9 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * @param e
    * @param controller used in subclasses for audio control
    */
-  private void addQuestions(T e, ExerciseController controller) { add(getQuestionPanel(e, controller, 1));  }
+  private void addQuestions(T e, ExerciseController controller) {
+    add(getQuestionPanel(e, controller, 1));
+  }
 
   private Panel getQuestionPanel(T exercise, ExerciseController controller, int questionNumber) {
     Panel vp = new VerticalPanel();

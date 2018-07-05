@@ -63,7 +63,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private int dominoContextIndex = -1;
 
   private transient Collection<String> refSentences = new ArrayList<String>();
-  private List<CorrectAndScore> scores = new ArrayList<>();
 
   private transient List<String> firstPron = new ArrayList<>();
   private long updateTime = 0;
@@ -299,6 +298,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones);
   }
 
+  public CommonShell asShell() { return this; }
+
   private void copyAudio(AudioRefExercise exercise) {
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
       addAudio(audioAttribute);
@@ -399,22 +400,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.english = englishSentence;
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getFirstRow
-   */
-  public List<CorrectAndScore> getScores() {
-    return scores;
-  }
 
-  /**
-   * @param scores
-   * @see mitll.langtest.server.database.result.BaseResultDAO#attachScoreHistory(int, CommonExercise, String)
-   */
-  @Override
-  public void setScores(List<CorrectAndScore> scores) {
-    this.scores = scores;
-  }
 
   /**
    * @return

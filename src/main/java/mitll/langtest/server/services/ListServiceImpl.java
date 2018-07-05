@@ -50,7 +50,7 @@ import java.util.*;
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {
   private static final Logger logger = LogManager.getLogger(ListServiceImpl.class);
-  private static final boolean DEBUG = false;
+  //private static final boolean DEBUG = false;
 
   /**
    * @return
@@ -264,11 +264,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * <p>
    * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
    *
-   * @param userListID
-   * @param userExercise
+   * @paramx userListID
+   * @paramx userExercise
    * @return CommonExercise with id from database
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
+/*
   @Override
   public CommonExercise newExercise(int userListID, CommonExercise userExercise) throws DominoSessionException {
     if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
@@ -283,14 +284,17 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       return userExercise;
     }
   }
+*/
 
+/*
   private CommonExercise getExerciseIfKnown(CommonExercise userExercise) {
     return getExerciseByVocab(userExercise.getProjectID(), userExercise.getForeignLanguage());
   }
+*/
 
-  private CommonExercise getExerciseByVocab(int projectID, String foreignLanguage) {
+/*  private CommonExercise getExerciseByVocab(int projectID, String foreignLanguage) {
     return db.getProject(projectID).getExerciseBySearch(foreignLanguage.trim());
-  }
+  }*/
 
   /**
    * Create in bulk, e.g. as import from quizlet export format.

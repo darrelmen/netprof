@@ -50,13 +50,15 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.HasID;
 
 import java.util.Map;
 import java.util.logging.Logger;
 
-import static com.google.gwt.dom.client.Style.*;
-import static com.google.gwt.dom.client.Style.Unit.*;
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * A waveform record button and a play audio button.
@@ -66,7 +68,7 @@ import static com.google.gwt.dom.client.Style.Unit.*;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
-public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<CommonAudioExercise> {
+public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioPanel<T> {
  private final Logger logger = Logger.getLogger("RecordAudioPanel");
 
   /**
@@ -214,7 +216,7 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle, CommonAudioExercise exercise) {
+  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle, HasID exercise) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
     postAudioRecordButton = myPostAudioRecordButton;
 
@@ -283,7 +285,7 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel,
-                            String suffix, Widget toTheRightWidget, ExerciseController controller, CommonAudioExercise exercise) {
+                            String suffix, Widget toTheRightWidget, ExerciseController controller, HasID exercise) {
       super(RecordAudioPanel.this.soundManager,
           new PlayListener() {
             public void playStarted() {

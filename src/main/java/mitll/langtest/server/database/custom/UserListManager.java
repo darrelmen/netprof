@@ -838,10 +838,11 @@ public class UserListManager implements IUserListManager {
    * @param mediaDir
    * @seex mitll.langtest.server.services.AudioServiceImpl#newExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
+   * @see mitll.langtest.server.services.ListServiceImpl#newExercise
    */
   @Override
   public void newExercise(int userListID, CommonExercise userExercise, String mediaDir) {
-    newExerciseOnList(getUserListNoExercises(userListID), userExercise, mediaDir);
+    newExerciseOnList(getUserListNoExercises(userListID), userExercise);
   }
 
   public UserList getUserListNoExercises(int userListID) {
@@ -849,10 +850,15 @@ public class UserListManager implements IUserListManager {
     return userListDAO.getWhere(userListID, true);
   }
 
-  private void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir) {
+  /**
+   * @see #newExercise(int, CommonExercise, String)
+   * @param userList
+   * @param userExercise
+   */
+  private void newExerciseOnList(UserList userList, CommonExercise userExercise) {
     int projectID = userExercise.getProjectID();
     int newExerciseID = userExerciseDAO.add(userExercise, false, false, getTypeOrder(projectID));
-    logger.debug("newExercise added exercise " + newExerciseID + " from " + userExercise);
+    logger.warn("\n\n\n\n\nnewExercise added exercise " + newExerciseID + " from " + userExercise);
 
     int contextID = 0;
     try {
@@ -861,7 +867,7 @@ public class UserListManager implements IUserListManager {
       logger.error("Got " + e, e);
     }
 
-    logger.debug("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
+    logger.warn("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
 
     addItemToList(userList.getID(), userExercise.getOldID(), newExerciseID);
 
@@ -873,6 +879,13 @@ public class UserListManager implements IUserListManager {
     return userDAO.getDatabase().getTypeOrder(projectID);
   }
 
+  /**
+   * @see #newExerciseOnList(UserList, CommonExercise)
+   * @param userExercise
+   * @param newExerciseID
+   * @param projectID
+   * @return
+   */
   private int makeContextExercise(CommonExercise userExercise, int newExerciseID, int projectID) {
     Exercise userExercise1 = new Exercise(-1, userExercise.getCreator(), "", projectID, false);
     int contextID = userExerciseDAO.add(userExercise1, false, true, getTypeOrder(projectID));

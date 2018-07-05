@@ -38,6 +38,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -48,7 +49,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
+public class NPExerciseList<T extends CommonShell, U extends Shell> extends HistoryExerciseList<T, U> {
   private Logger logger = Logger.getLogger("NPExerciseList");
   private final int pageSize;
 
@@ -81,8 +82,8 @@ public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExerc
    * @return
    * @see mitll.langtest.client.list.PagingExerciseList#addComponents
    */
-  protected ClickablePagingContainer<CommonShell> makePagingContainer() {
-    final PagingExerciseList<CommonShell, CommonExercise> outer = this;
+  protected ClickablePagingContainer<T> makePagingContainer() {
+    final PagingExerciseList<?, ?> outer = this;
     if (logger == null) {
       logger = Logger.getLogger("NPExerciseList");
     }
@@ -96,7 +97,7 @@ public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExerc
     boolean isRecorder = getActivityType() == ActivityType.RECORDER;
     final boolean showFirstNotCompleted = listOptions.isShowFirstNotCompleted();
 
-    pagingContainer = new NPExerciseListContainer(this, isRecorder, showFirstNotCompleted, outer);
+    pagingContainer = new NPExerciseListContainer(this, isRecorder, showFirstNotCompleted);
     return pagingContainer;
   }
 

@@ -39,8 +39,4 @@ package mitll.langtest.shared.exercise;
  * @since 2/3/16.
  */
 public interface CommonAnnotatable extends CommonExercise, MutableAnnotationExercise {
-  /**
-   * @return
-   */
-  String getAltFL();
 }

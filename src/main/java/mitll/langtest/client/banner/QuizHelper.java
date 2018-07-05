@@ -51,6 +51,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
@@ -69,7 +70,7 @@ import static mitll.langtest.client.list.FacetExerciseList.LISTS;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/4/16.
  */
-public class QuizHelper extends PracticeHelper {
+public class QuizHelper<T extends CommonShell, U extends CommonExercise> extends PracticeHelper<T, U> {
   private final Logger logger = Logger.getLogger("QuizHelper");
 
   private static final String QUIZ = "Quiz";
@@ -97,8 +98,8 @@ public class QuizHelper extends PracticeHelper {
   }
 
   @Override
-  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-    polyglotFlashcardFactory = new HidePolyglotFactory<CommonShell, CommonExercise>(controller, exerciseList, QUIZ) {
+  protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
+    polyglotFlashcardFactory = new HidePolyglotFactory<T, U>(controller, exerciseList, QUIZ) {
 
       @Override
       public PolyglotDialog.MODE_CHOICE getMode() {
@@ -107,7 +108,7 @@ public class QuizHelper extends PracticeHelper {
 
       @Override
       public int getRoundTimeMinutes(boolean isDry) {
-        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
+        FacetExerciseList<T, ClientExercise> exerciseList = getExerciseListTyped();
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
         if (idToList == null) {
           logger.info("getRoundTimeMinutes no user lists yet ");
@@ -124,9 +125,13 @@ public class QuizHelper extends PracticeHelper {
         }
       }
 
+      private FacetExerciseList<T, ClientExercise> getExerciseListTyped() {
+        return (FacetExerciseList<T, ClientExercise>) this.getExerciseList();
+      }
+
       @Override
       public int getMinScore() {
-        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
+        FacetExerciseList<T, ClientExercise> exerciseList = getExerciseListTyped();
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
         if (idToList == null) {
           logger.info("getMinScore no user lists yet ");
@@ -142,7 +147,7 @@ public class QuizHelper extends PracticeHelper {
 
       @Override
       public boolean shouldShowAudio() {
-        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
+        FacetExerciseList<T, ClientExercise> exerciseList = getExerciseListTyped();
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
         if (idToList == null) {
           logger.info("shouldShowAudio no user lists yet ");
@@ -153,7 +158,7 @@ public class QuizHelper extends PracticeHelper {
           }
           IUserList iUserList = idToList.get(chosenList);
           if (iUserList == null) {
-            logger.warning("no user list for "+chosenList);
+            logger.warning("no user list for " + chosenList);
           }
     /*      else {
             logger.info("shouldShowAudio for list " + chosenList + " user list " + iUserList);
@@ -163,7 +168,7 @@ public class QuizHelper extends PracticeHelper {
         }
       }
 
-      private void setChosenList(FacetExerciseList exerciseList) {
+      private void setChosenList(FacetExerciseList<?, ?> exerciseList) {
         Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
         String s = candidate.get(LISTS);
         //   logger.info("getRoundTimeMinutes iUserList " + s);
@@ -202,12 +207,12 @@ public class QuizHelper extends PracticeHelper {
    * @return
    */
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
+  protected FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer) {
+    return new MyFlexListLayout<T, U>(controller, outer) {
       @Override
-      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
-                                                                                 Panel currentExercisePanel,
-                                                                                 String instanceName, DivWidget listHeader, DivWidget footer) {
+      protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
+                                                          Panel currentExercisePanel,
+                                                          String instanceName, DivWidget listHeader, DivWidget footer) {
         rememberedTopRow = topRow;
         return new MyPracticeFacetExerciseList(topRow, currentExercisePanel, instanceName, listHeader);
       }
@@ -241,7 +246,7 @@ public class QuizHelper extends PracticeHelper {
     exerciseList.clearListSelection();
   }
 
-  private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList {
+  private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList<T> {
     MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
       super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
     }
@@ -261,7 +266,7 @@ public class QuizHelper extends PracticeHelper {
         if (chosenList == -1) {
           String next = lists.iterator().next();
           try {
-            chosenList=  Integer.parseInt(next);
+            chosenList = Integer.parseInt(next);
             logger.info("chosen list now " + chosenList);
           } catch (NumberFormatException e) {
             logger.warning("couldn't parse " + next);
@@ -281,7 +286,7 @@ public class QuizHelper extends PracticeHelper {
       return new QuizIntro(getIdToList(), listid -> {
         polyglotFlashcardFactory.cancelRoundTimer();
         chosenList = listid;
-       // logger.info("got choice " + listid);
+        // logger.info("got choice " + listid);
         polyglotFlashcardFactory.removeItemFromHistory(chosenList);
         showQuizForReal();
         polyglotFlashcardFactory.startQuiz();

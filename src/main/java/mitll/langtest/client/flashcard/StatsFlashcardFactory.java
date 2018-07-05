@@ -41,8 +41,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -61,7 +60,7 @@ import java.util.logging.Logger;
  * TODOx : concept of rounds explicit?
  * TODO : review table...?
  */
-public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExercise>
+public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExercise>
     extends ExercisePanelFactory<L, T>
     implements FlashcardContainer {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
@@ -75,7 +74,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   private Widget contentPanel;
 
-  FlashcardPanel<?> currentFlashcard = null;
+  FlashcardPanel<L, T> currentFlashcard = null;
   private INavigation navigation;
   final KeyStorage storage;
 
@@ -132,7 +131,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
 
   protected void listChanged(List<L> items, String selectionID) {
     baseListChanged(items, selectionID);
-  //  logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
+    //  logger.info("StatsFlashcardFactory : " + selectionID + " got new set of items from list. " + items.size());
     reset();
   }
 
@@ -165,7 +164,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
         controlState,
         controller,
         soundFeedback,
-        e.getCommonAnnotatable(),
+        e,
         sticky,
         exerciseList);
   }
@@ -247,6 +246,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends CommonExerci
   public void showDrill() {
     navigation.showView(INavigation.VIEWS.DRILL);
   }
+
   public void showQuiz() {
     navigation.showView(INavigation.VIEWS.QUIZ);
   }

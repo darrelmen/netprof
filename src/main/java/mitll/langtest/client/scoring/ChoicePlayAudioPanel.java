@@ -17,11 +17,10 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +30,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 4/5/17.
  */
-class ChoicePlayAudioPanel extends PlayAudioPanel {
+class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudioPanel {
   private final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
 
   private static final String FAST = "Fast";
@@ -54,7 +53,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
    */
   ChoicePlayAudioPanel(
       SoundManagerAPI soundManager,
-      CommonExercise exercise,
+      T exercise,
       ExerciseController exerciseController,
       boolean includeContext,
       AudioChangeListener listener) {

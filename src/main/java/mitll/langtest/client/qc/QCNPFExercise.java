@@ -43,8 +43,6 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -121,7 +119,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   private Set<String> incorrectFields;
   private List<RequiresResize> toResize;
   private Set<Widget> audioWasPlayed;
-  private final ListInterface listContainer;
+  private final ListInterface<?,?> listContainer;
   private Button approvedButton;
   private Tooltip approvedTooltip;
   private Tooltip nextTooltip;
@@ -134,8 +132,9 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
    * @param instance
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
    */
-  public QCNPFExercise(T e, ExerciseController controller,
-                       ListInterface<CommonShell, T> listContainer,
+  public QCNPFExercise(T e,
+                       ExerciseController controller,
+                       ListInterface<?, ?> listContainer,
                        String instance) {
     super(e, controller, listContainer, new ExerciseOptions(instance));
     this.listContainer = listContainer;
@@ -178,10 +177,10 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
    * @return
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#GoodwaveExercisePanel
    */
-  protected NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                              final ListInterface<CommonShell, T> listContainer,
+  protected NavigationHelper getNavigationHelper(ExerciseController controller,
+                                                              final ListInterface<?, ?> listContainer,
                                                               boolean addKeyHandler, boolean includeListButtons) {
-    NavigationHelper<CommonShell> navHelper = new NavigationHelper<CommonShell>(exercise, controller,
+    NavigationHelper navHelper = new NavigationHelper(exercise, controller,
         (controller1, completedExercise) -> nextWasPressed(listContainer, completedExercise),
         listContainer, addKeyHandler) {
       /**
@@ -227,7 +226,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   }
 
   @Override
-  protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
+  protected void nextWasPressed(ListInterface<?,?> listContainer, HasID completedExercise) {
     super.nextWasPressed(listContainer, completedExercise);
     markReviewed(listContainer, completedExercise);
   }
@@ -238,7 +237,7 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
    * @see #addApprovedButton(mitll.langtest.client.list.ListInterface, mitll.langtest.client.exercise.NavigationHelper)
    * @see #nextWasPressed
    */
-  private void markReviewed(ListInterface listContainer, HasID completedExercise) {
+  private void markReviewed(ListInterface<?,?> listContainer, HasID completedExercise) {
     markReviewed(completedExercise);
     boolean allCorrect = incorrectFields.isEmpty();
     int id = completedExercise.getID();

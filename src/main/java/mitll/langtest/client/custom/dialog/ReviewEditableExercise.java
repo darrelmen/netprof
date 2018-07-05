@@ -429,14 +429,17 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return didChange;
   }
 
-  private <X extends CommonExercise & AnnotationExercise> Widget getPanelForAudio(final X exercise,
-                                                                                  final AudioAttribute audio,
-                                                                                  RememberTabAndContent tabAndContent) {
+  private <X extends CommonShell & AnnotationExercise> Widget getPanelForAudio(final X exercise,
+                                                          final AudioAttribute audio,
+                                                          RememberTabAndContent tabAndContent) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getFLToShow(), exercise.getTransliteration(), controller,
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getFLToShow(),
+        //exercise.getTransliteration(),
+        "",
+        controller,
         controller.getProps().showSpectrogram(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED,
         exercise, instance
     ) {
@@ -494,7 +497,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       });
     });
   }
- 
+
   private Button getDeleteButton(String tip, ClickHandler handler) {
     Button delete = new Button(DELETE_AUDIO);
     addTooltip(delete, tip);
@@ -620,7 +623,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     super.afterValidForeignPhrase(exerciseList, toAddTo, onClick);
     LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
   }
-
 
 /*  private Button getRemove() {
     Button remove = new Button(DELETE);

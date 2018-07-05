@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +20,7 @@ import java.util.logging.Logger;
  * @param <T>
  * @see mitll.langtest.client.banner.PracticeHelper
  */
-public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExercise>
+public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExercise>
     extends StatsFlashcardFactory<L, T> implements PolyglotFlashcardContainer {
   private final Logger logger = Logger.getLogger("PolyglotFlashcardFactory");
 
@@ -56,7 +57,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
         controlState,
         controller,
         soundFeedback,
-        e.getCommonAnnotatable(),
+        e,
         sticky,
         exerciseList,
         getMinScore(),

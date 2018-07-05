@@ -5,17 +5,17 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
-import mitll.langtest.client.list.FacetExerciseList;
+import mitll.langtest.client.list.LearnFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class PracticeFacetExerciseList extends FacetExerciseList {
+public class PracticeFacetExerciseList<T extends CommonShell> extends LearnFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
   private final PracticeHelper practiceHelper;
   private ControlState controlState;
@@ -85,7 +85,7 @@ public class PracticeFacetExerciseList extends FacetExerciseList {
     getStatsFlashcardFactory().setSelection(typeToSection);
   }
 
-  private StatsFlashcardFactory<CommonShell, CommonExercise> getStatsFlashcardFactory() {
+  private StatsFlashcardFactory<CommonShell, ClientExercise> getStatsFlashcardFactory() {
     return practiceHelper.getStatsFlashcardFactory();
   }
 

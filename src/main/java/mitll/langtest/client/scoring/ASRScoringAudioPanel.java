@@ -35,11 +35,8 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonAudioExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
@@ -56,31 +53,14 @@ import java.util.Set;
  * Time: 11:31 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends ScoringAudioPanel<T> {
+public class ASRScoringAudioPanel<T extends HasID> extends ScoringAudioPanel<T> {
   //private final Logger logger = Logger.getLogger("ASRScoringAudioPanel");
   private static final String ANIMATED_PROGRESS44_GIF = "animated_progress44.gif";
   private static final String WAIT_GIF = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS44_GIF;
   private static final String SCORE = "score";
   private static final int WAIT_GIF_DELAY = 150;
   private final Set<String> tested = new HashSet<>();
-  private boolean useScoreToColorBkg = true;
-
-  /**
-   * @param refSentence
-   * @param playButtonSuffix
-   * @param exercise
-   * @param instance
-   * @paramx audioType
-   * @seex xmitll.langtest.client.scoring.ASRRecordAudioPanel
-   */
-/*  ASRScoringAudioPanel(String refSentence,
-                       String transliteration,
-                       ExerciseController controller,
-                       String playButtonSuffix,
-                       T exercise,
-                       String instance) {
-    super(refSentence, transliteration, controller, playButtonSuffix, exercise, instance);
-  }*/
+  private boolean useScoreToColorBkg;
 
   /**
    * @param path

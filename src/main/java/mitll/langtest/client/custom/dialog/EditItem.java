@@ -52,7 +52,6 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Coordinates editing an item -
@@ -132,7 +131,7 @@ public class EditItem {
                                                                            String instanceName,
                                                                            UserList<CommonShell> originalList) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
-    EditableExerciseList exerciseList = new EditableExerciseList(controller, this, right, instanceName, originalList);
+    EditableExerciseList exerciseList = new EditableExerciseList(controller, right, instanceName, originalList);
     this.exerciseList = exerciseList;
     setFactory(this.exerciseList);
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here

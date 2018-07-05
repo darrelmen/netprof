@@ -56,7 +56,7 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends CommonExercise>  extends SimpleChapterNPFHelper<T, U> {
   //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
   private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
   private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
@@ -79,8 +79,8 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
    * @return
    */
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
+  protected FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer) {
+    return new MyFlexListLayout<T, U>(controller, outer) {
       protected void styleTopRow(Panel twoRows, Panel topRow) {
         twoRows.add(topRow);
       }
@@ -91,13 +91,13 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
       }
 
       @Override
-      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
+      protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName,
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
 
-        return new NPExerciseList(currentExercisePanel, controller,
+        return new NPExerciseList<T,U>(currentExercisePanel, controller,
             new ListOptions()
                 .setInstance(instanceName)
                 .setShowFirstNotCompleted(true)
@@ -116,7 +116,8 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
            * @return
            */
           @Override
-          protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyDefaultUser, boolean onlyUninspected) {
+          protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
+                                                               String prefix, boolean onlyWithAudioAnno, boolean onlyDefaultUser, boolean onlyUninspected) {
             ExerciseListRequest exerciseListRequest = super
                 .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected)
                 .setQC(true)
@@ -185,11 +186,12 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
     };
   }
 
-  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-    return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
+  protected ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList) {
+    final PagingExerciseList<T, U> outerExerciseList =exerciseList;
+    return new ExercisePanelFactory<T, U>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(CommonExercise e) {
-        return new QCNPFExercise<>(e, controller, exerciseList, ActivityType.MARK_DEFECTS.toString());
+      public Panel getExercisePanel(U e) {
+        return new QCNPFExercise<U>(e, controller, outerExerciseList, ActivityType.MARK_DEFECTS.toString());
       }
     };
   }

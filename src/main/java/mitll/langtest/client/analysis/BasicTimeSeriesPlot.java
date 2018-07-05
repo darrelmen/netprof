@@ -13,7 +13,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLookup {
+public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot implements ExerciseLookup<T> {
   private static final int HIDE_DELAY = 5000;
   private final Logger logger = Logger.getLogger("BasicTimeSeriesPlot");
 
@@ -34,7 +34,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   private static final int Y_OFFSET_FOR_LEGEND = 25;
 
   private final Map<Long, Integer> timeToId = new TreeMap<>();
-  private Map<Integer, CommonShell> idToEx = new TreeMap<>();
+  private Map<Integer, T> idToEx = new TreeMap<>();
 
   final ExceptionSupport exceptionSupport;
 
@@ -228,21 +228,15 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     return toShowExercise.contains(seriesName);
   }
 
-/*
-  boolean showDate() {
-    return true;
-  }
-*/
-
   /**
    * @return
    * @seex #getShell
    */
-  Map<Integer, CommonShell> getIdToEx() {
+  Map<Integer, T> getIdToEx() {
     return idToEx;
   }
 
-  public void setIdToEx(Map<Integer, CommonShell> idToEx) {
+  public void setIdToEx(Map<Integer, T> idToEx) {
     this.idToEx = idToEx;
   }
 
@@ -258,11 +252,11 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
    * @param commonShell
    * @see AnalysisPlot#populateExerciseMap
    */
-  void rememberExercise(CommonShell commonShell) {
+  void rememberExercise(T commonShell) {
     idToEx.put(commonShell.getID(), commonShell);
   }
 
-  public CommonShell getShell(int id) {
+  public T getShell(int id) {
     return getIdToEx().get(id);
   }
 }

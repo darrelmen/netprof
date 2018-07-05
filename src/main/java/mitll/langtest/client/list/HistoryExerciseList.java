@@ -306,7 +306,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param historyToken
    * @see #pushNewItem
    */
-  public void setHistoryItem(String historyToken) {
+  void setHistoryItem(String historyToken) {
     if (DEBUG_PUSH) logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     History.newItem(historyToken);
   }
@@ -318,8 +318,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
     if (DEBUG) logger.info("loadFromSelectionState" +
-        " old state " + selectionState.getInfo() +
-        " new state " + newState.getInfo());
+        "\n\told state " + selectionState.getInfo() +
+        "\n\tnew state " + newState.getInfo());
 
 
     loadExercisesUsingPrefix(
@@ -488,7 +488,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param onlyWithAudioAnno
    * @param onlyDefaultUser
    * @param onlyUninspected
-   * @see PagingExerciseList#loadExercises
+   * @see HistoryExerciseList#loadExercises
    * @see ExerciseList.SetExercisesCallback#onSuccess
    */
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
@@ -591,7 +591,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #loadExercises
    * @see #onValueChange
    */
-  protected SelectionState getSelectionState(String token) {
+  SelectionState getSelectionState(String token) {
     return new SelectionState(token, !allowPlusInURL);
   }
 

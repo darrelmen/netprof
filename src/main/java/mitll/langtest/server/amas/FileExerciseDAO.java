@@ -200,7 +200,9 @@ public class FileExerciseDAO<T extends CommonShell & HasUnitChapter> implements 
             qid = 0;
           }
 
-          AmasExerciseImpl amasExerciseImpl = readTSVLine(installPath, configDir, line2, qid);
+          // TODO : maybe put this back some other time.
+
+/*          AmasExerciseImpl amasExerciseImpl = readTSVLine(installPath, configDir, line2, qid);
 
           if (amasExerciseImpl != null) {
             //   id++;
@@ -221,7 +223,7 @@ public class FileExerciseDAO<T extends CommonShell & HasUnitChapter> implements 
           } else {
             logger.warn("readExercises Skipping line " + line2);
             qid = 0;
-          }
+          }*/
 
         } catch (Exception e) {
           logger.error("Got " + e + ".Skipping line -- couldn't parse line #" + count + " : " + line2);

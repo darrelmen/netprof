@@ -45,12 +45,10 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.flashcard.MyCustomIconType;
-import mitll.langtest.shared.exercise.CommonAudioExercise;
+import mitll.langtest.shared.exercise.HasID;
 
 import java.util.*;
 import java.util.logging.Logger;
-
-import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 
 /**
  * A play button, and an interface with the SoundManagerAPI to call off into the soundmanager.js
@@ -68,7 +66,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
  * Time: 11:41 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PlayAudioPanel extends DivWidget implements AudioControl {
+public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioControl {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
   private static final boolean DEBUG = false;
@@ -98,7 +96,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   private final int id;
   private boolean playing = false;
   protected final ExerciseController controller;
-  protected final CommonAudioExercise exercise;
+  protected final HasID exercise;
 
   /**
    * @param soundManager
@@ -115,7 +113,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
                         Widget optionalToTheRight,
                         boolean doSlow,
                         ExerciseController controller,
-                        CommonAudioExercise exercise,
+                        HasID exercise,
                         boolean addButtonsNow) {
     this.soundManager = soundManager;
     addStyleName("playButton");
@@ -161,12 +159,12 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
    * @seex PressAndHoldExercisePanel#getPlayAudioPanel
    * @deprecated only for amas and dialog
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, String path, boolean doSlow, ExerciseController controller, CommonAudioExercise exercise) {
+  public PlayAudioPanel(SoundManagerAPI soundManager, String path, boolean doSlow, ExerciseController controller, HasID exercise) {
     this(soundManager, "", null, doSlow, controller, exercise, true);
     loadAudio(path);
   }
 
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, ExerciseController controller, CommonAudioExercise exercise) {
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, ExerciseController controller, HasID exercise) {
     this(soundManager, playListener, "", null, controller, exercise, true);
   }
 
@@ -186,7 +184,8 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
                         String buttonTitle,
                         Widget optionalToTheRight,
                         ExerciseController controller,
-                        CommonAudioExercise exercise, boolean addButtonsNow) {
+                        HasID exercise,
+                        boolean addButtonsNow) {
     this(soundManager, buttonTitle, optionalToTheRight, false, controller, exercise, addButtonsNow);
 
     if (playListener != null) {
@@ -401,7 +400,7 @@ public class PlayAudioPanel extends DivWidget implements AudioControl {
   /**
    * @param startInSeconds
    * @param endInSeconds
-   * @see mitll.langtest.client.scoring.AudioPanel#playSegment
+   * @see mitll.langtest.client.scoring.WordTable#addClickHandler
    */
   @Override
   public void repeatSegment(float startInSeconds, float endInSeconds) {

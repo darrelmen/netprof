@@ -35,6 +35,7 @@ package mitll.langtest.client.scoring;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.CommonAudioExercise;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -53,7 +54,7 @@ import java.util.Map;
  * Time: 11:17 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends AudioPanel<T> {
+public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
   //  private Logger logger = Logger.getLogger("ScoringAudioPanel");
   private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
@@ -88,7 +89,7 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
    * @param exercise
    * @param exerciseID
    * @param instance
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, ExerciseController, boolean, ScoreListener, int, String, Shell, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel
    */
   ScoringAudioPanel(String path, String refSentence,
                     String transliteration,
@@ -113,7 +114,7 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
 
   /**
    * @param resultID
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
+   * @seex mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
    */
   public void setResultID(int resultID) {
     this.resultID = resultID;

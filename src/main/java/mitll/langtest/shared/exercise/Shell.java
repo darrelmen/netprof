@@ -51,9 +51,13 @@ public interface Shell extends HasID {
 
   /**
    * @see PagingContainer#getEnglishColumn
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise(Button)
    * @return
    */
   STATE getSecondState();
+
+  /**
+   * @see mitll.langtest.server.database.custom.StateManager#setSecondState(Shell, STATE, long)
+   * @param state
+   */
   void setSecondState(STATE state);
 }
