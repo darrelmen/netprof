@@ -698,18 +698,35 @@ public class Project implements IPronunciationLookup {
 
   public void setDialogs(List<IDialog> dialogs) {
     this.dialogs = dialogs;
+
+    List<List<Pair>> seen = new ArrayList<>();
+    List<String> typeOrder = getTypeOrder();
+
+    String unitType    = typeOrder.size() > 0 ? typeOrder.get(0) : "";
+    boolean hasUnitType = !unitType.isEmpty();
+
+    String chapterType = typeOrder.size() > 1 ? typeOrder.get(1) : "";
+    boolean hasChapterType = !chapterType.isEmpty();
+
     dialogs.forEach(dialog -> {
-      List<Pair> pair = new ArrayList<>();
+      List<Pair> pairs = new ArrayList<>();
       String unit = dialog.getUnit();
-      if (!unit.isEmpty()) pair.add(new Pair(getTypeOrder().get(0), unit));
+      if (!unit.isEmpty() && hasUnitType) {
+        pairs.add(new Pair(unitType, unit));
+      }
 
       String chapter = dialog.getChapter();
-      if (!chapter.isEmpty()) pair.add(new Pair(getTypeOrder().get(1), chapter));
+      if (!chapter.isEmpty() && hasChapterType) {
+        pairs.add(new Pair(chapterType, chapter));
+      }
 
-      pair.addAll(dialog.getAttributes());
-      this.dialogSectionHelper.addPairs(dialog, pair);
+      pairs.addAll(dialog.getAttributes());
+      this.dialogSectionHelper.addPairs(dialog, pairs);
+
+      seen.add(pairs);
     });
-    dialogSectionHelper.report();
+
+    dialogSectionHelper.rememberTypesInOrder(typeOrder, seen);
   }
 
   public String toString() {

@@ -79,6 +79,14 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
 
+  private Map<String, Set<String>> typeToCount = new HashMap<>();
+  /**
+   * @see #getTypeToMatchPairs(List, SectionNode, boolean)
+   * @see #rememberTypesInOrder(List, List)
+   */
+  private Map<String, Map<String, MatchInfo>> typeToMatchInfo = new HashMap<>();
+  private Map<String, Set<MatchInfo>> typeToDistinct = new HashMap<>();
+
   private SectionNode root = null;
   private Set<String> rootTypes = new HashSet<>();
   private Map<String, String> parentToChildTypes = new HashMap<>();
@@ -465,9 +473,9 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     Map<String, Set<MatchInfo>> typeToMatchRet = new HashMap<>();
     typeToMatch.forEach((k, v) -> {
       Collection<MatchInfo> values = v.values();
-     // logger.info("before " + k + " = " + values);
+      // logger.info("before " + k + " = " + values);
       Set<MatchInfo> value = new TreeSet<>(values);
-     // logger.info("after  " + k + " = " + value);
+      // logger.info("after  " + k + " = " + value);
       typeToMatchRet.put(k, value);
     });
     return typeToMatchRet;
@@ -924,9 +932,6 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     return second;
   }
 
-  private Map<String, Set<String>> typeToCount = new HashMap<>();
-  private Map<String, Map<String, MatchInfo>> typeToMatchInfo = new HashMap<>();
-  private Map<String, Set<MatchInfo>> typeToDistinct = new HashMap<>();
 
   /**
    * @param predefinedTypeOrder
@@ -934,19 +939,21 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
    */
   public void rememberTypesInOrder(final List<String> predefinedTypeOrder, List<List<Pair>> seen) {
-    SectionNode child = root;
     //if (seen.isEmpty()) logger.error("huh? no types to remember?");
 
     if (DEBUG) {
       logger.info("rememberTypesInOrder" +
           "\n\ttype order " + predefinedTypeOrder +
-          "\n\troot " + root.getName() +
-          "\n\tchildren  " + root.getChildren().size() +
-          "\n\tnum seen " + seen.size());
+          "\n\troot       " + root.getName() +
+          "\n\tchildren   " + root.getChildren().size() +
+          "\n\tnum seen   " + seen.size());
     }
 
-    for (List<Pair> pairs : seen) {
-      child = rememberOne(predefinedTypeOrder, child, pairs);
+    {
+      SectionNode child = root;
+      for (List<Pair> pairs : seen) {
+        child = rememberOne(predefinedTypeOrder, child, pairs);
+      }
     }
 
     typeToCount = new HashMap<>();
@@ -956,9 +963,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     recurseAndCountMatchInfo(root, typeToMatchInfo);
 
     typeToDistinct = new HashMap<>();
-    for (Map.Entry<String, Map<String, MatchInfo>> p : typeToMatchInfo.entrySet()) {
-      typeToDistinct.put(p.getKey(), new TreeSet<>(p.getValue().values()));
-    }
+    typeToMatchInfo.forEach((k, v) -> typeToDistinct.put(k, new TreeSet<>(v.values())));
 
     if (DEBUG) logger.info("rememberTypesInOrder type->childCount " + typeToCount);
   }
@@ -967,7 +972,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     root = new SectionNode("root", "root");
   }
 
-  private int spew = 0;
+  //private int spew = 0;
 
   /**
    * @param predefinedTypeOrder
@@ -977,16 +982,13 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see #rememberTypesInOrder
    */
   private SectionNode rememberOne(final List<String> predefinedTypeOrder, SectionNode child, List<Pair> pairs) {
-    pairs.sort(new Comparator<Pair>() {
-      @Override
-      public int compare(Pair o1, Pair o2) {
-        int i = predefinedTypeOrder.indexOf(o1.getProperty());
-        int anotherInteger = predefinedTypeOrder.indexOf(o2.getProperty());
-        if (i > 0 && anotherInteger == -1) return -1;
-        else if (i == -1 && anotherInteger > 0) return +1;
-        else if (i == -1 && anotherInteger == -1) return o1.getProperty().compareTo(o2.getProperty());
-        else return Integer.compare(i, anotherInteger);
-      }
+    pairs.sort((o1, o2) -> {
+      int i = predefinedTypeOrder.indexOf(o1.getProperty());
+      int anotherInteger = predefinedTypeOrder.indexOf(o2.getProperty());
+      if (i > 0 && anotherInteger == -1) return -1;
+      else if (i == -1 && anotherInteger > 0) return +1;
+      else if (i == -1 && anotherInteger == -1) return o1.getProperty().compareTo(o2.getProperty());
+      else return Integer.compare(i, anotherInteger);
     });
 
 /*
