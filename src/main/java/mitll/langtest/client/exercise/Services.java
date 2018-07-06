@@ -42,6 +42,7 @@ public interface Services extends EventRegistration {
   OpenUserServiceAsync getOpenUserService();
 
   ExerciseServiceAsync getExerciseService();
+  DialogServiceAsync getDialogService();
 
   ListServiceAsync getListService();
 

@@ -95,6 +95,18 @@
         <url-pattern>/langtest/exercise-manager</url-pattern>
     </servlet-mapping>
 
+
+    <servlet>
+        <servlet-name>dialogService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.DialogServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>dialogService</servlet-name>
+        <url-pattern>/langtest/dialog-manager</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>audioService</servlet-name>
         <servlet-class>mitll.langtest.server.services.AudioServiceImpl</servlet-class>

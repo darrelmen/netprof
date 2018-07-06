@@ -8,20 +8,15 @@ import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.FacetExerciseList;
-import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 
-import java.util.Collection;
-import java.util.List;
-
 /**
  * Created by go22670 on 4/5/17.
  */
-class DialogViewHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, IDialog> {
+public class DialogViewHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, IDialog> {
   //  private final Logger logger = Logger.getLogger("NewLearnHelper");
 
   /**
@@ -52,7 +47,7 @@ class DialogViewHelper<T extends CommonShell & ScoredExercise> extends SimpleCha
                                                                 String instanceName,
                                                                 DivWidget listHeader,
                                                                 DivWidget footer) {
-        return new DialogExerciseList(topRow, currentExercisePanel, instanceName, listHeader);
+        return new DialogExerciseList<T>(DialogViewHelper.this, topRow, currentExercisePanel, instanceName, listHeader, controller);
       }
     };
   }
@@ -68,19 +63,4 @@ class DialogViewHelper<T extends CommonShell & ScoredExercise> extends SimpleCha
     };
   }
 
-  private class DialogExerciseList extends FacetExerciseList<T, IDialog> {
-    public DialogExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
-      super(topRow, currentExercisePanel, DialogViewHelper.this.controller, new ListOptions(instanceName), listHeader, false);
-    }
-
-    @Override
-    protected void getFullExercises(Collection<Integer> visibleIDs, int currentReq, Collection<Integer> requested, List<IDialog> alreadyFetched) {
-
-    }
-
-    @Override
-    protected void goGetNextPage() {
-
-    }
-  }
 }

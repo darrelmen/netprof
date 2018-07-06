@@ -259,6 +259,7 @@ public class LangTest implements
   private final UserServiceAsync userService = GWT.create(UserService.class);
   private final OpenUserServiceAsync openUserService = GWT.create(OpenUserService.class);
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+  private final DialogServiceAsync dialogServiceAsync = GWT.create(DialogService.class);
   private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
 
@@ -1125,6 +1126,11 @@ private boolean hasNetworkProblem;
 
   public ExerciseServiceAsync getExerciseService() {
     return exerciseServiceAsync;
+  }
+
+  @Override
+  public DialogServiceAsync getDialogService() {
+    return dialogServiceAsync;
   }
 
   public ListServiceAsync getListService() {

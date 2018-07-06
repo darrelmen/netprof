@@ -55,21 +55,8 @@ import java.util.Map;
 public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet implements DialogService  {
   private static final Logger logger = LogManager.getLogger(DialogServiceImpl.class);
 
-  private static final int SLOW_EXERCISE_EMAIL = 2000;
-  private static final int SLOW_MILLIS = 50;
-  private static final int WARN_DUR = 100;
 
-  private static final int MIN_DEBUG_DURATION = 30;
-  private static final int MIN_WARN_DURATION = 1000;
-  private static final String LISTS = "Lists";
 
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_ID_LOOKUP = false;
-
-  private static final boolean USE_PHONE_TO_DISPLAY = true;
-  private static final boolean WARN_MISSING_REF_RESULT = false;
-  private static final String RECORDED1 = "Recorded";
-  private static final String RECORDED = RECORDED1;
   private static final String ANY = "Any";
 
   /**
@@ -90,8 +77,8 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       if (userFromSession != null) {
 //        logger.info("getTypeToValues got " + userFromSession);
         //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
-        int userFromSessionID = userFromSession.getID();
-        int projectID = getProjectIDFromUser(userFromSessionID);
+      //  int userFromSessionID = userFromSession.getID();
+      //  int projectID = getProjectIDFromUser(userFromSessionID);
 
         Map<String, Collection<String>> typeToSelection = new HashMap<>();
         request.getTypeToSelection().forEach(pair -> {

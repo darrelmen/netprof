@@ -37,9 +37,5 @@ import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
 
 public interface DialogServiceAsync {
-
-
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
-
-
 }

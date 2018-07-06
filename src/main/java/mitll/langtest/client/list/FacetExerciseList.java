@@ -101,7 +101,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
 
   private static final String ADDING_VISITOR = "adding visitor";
   private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
-  private static final String GETTING_TYPE_VALUES = "getting type->values";
+  protected static final String GETTING_TYPE_VALUES = "getting type->values";
 
   private static final String NONE_PRACTICED_YET = "None practiced yet.";
   /**
@@ -1149,7 +1149,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
    * @see #getChoiceHandler
    * @see #getSectionWidgetContainer
    */
-  private void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
+  protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
 
     //List<Pair> pairs = getPairs(typeToSelection);
@@ -1185,7 +1185,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
    * @see #getTypeToValues
    */
   @NotNull
-  private List<Pair> getPairs(Map<String, String> typeToSelection) {
+  protected List<Pair> getPairs(Map<String, String> typeToSelection) {
     List<Pair> pairs = new ArrayList<>();
 
     for (String type : getTypeOrderSimple()) {
@@ -1207,7 +1207,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
     return reqid++;
   }
 
-  private void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
+  protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
     if (DEBUG) {
       logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
           "\n\ttype to selection " + typeToSelection +
@@ -1221,7 +1221,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
     gotSelection();
   }
 
-  private boolean isThereALoggedInUser() {
+  protected boolean isThereALoggedInUser() {
     return controller.getUser() > 0;
   }
 
