@@ -62,7 +62,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   static final String SEARCH = "Search";
-  final WaitCursorHelper waitCursorHelper;
+  protected final WaitCursorHelper waitCursorHelper;
 
   protected ClickablePagingContainer<T> pagingContainer;
 

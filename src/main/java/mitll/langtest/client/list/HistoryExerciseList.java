@@ -557,7 +557,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param request
    * @see #loadExercisesUsingPrefix(Map, String, int, boolean, boolean, boolean)
    */
-  private void getExerciseIDs(Map<String, Collection<String>> typeToSection,
+  protected void getExerciseIDs(Map<String, Collection<String>> typeToSection,
                               String prefix,
                               int exerciseID,
                               ExerciseListRequest request) {

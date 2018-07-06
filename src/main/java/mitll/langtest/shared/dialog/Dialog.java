@@ -1,7 +1,6 @@
 package mitll.langtest.shared.dialog;
 
 import mitll.langtest.shared.exercise.*;
-import mitll.npdata.dao.SlickDialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -9,13 +8,17 @@ import java.util.stream.Collectors;
 
 import static mitll.langtest.shared.exercise.STATE.UNSET;
 
+//import static mitll.langtest.shared.exercise.STATE.UNSET;
+
 public class Dialog implements IDialog {
   private static final String SPEAKER = "Speaker".toLowerCase();
   public static final String UNIT = "unit";
-  public static final String CHAPTER = "chapter";
+  private static final String CHAPTER = "chapter";
+
   private int id;
   private int userid;
   private int projid;
+  private int imageid;
   private int dominoid;
   private long modified;
 
@@ -28,11 +31,11 @@ public class Dialog implements IDialog {
   private String orientation;
   private String imageRef;
   private List<ExerciseAttribute> attributes = new ArrayList<>();
-  private List<CommonExercise> exercises = new ArrayList<>();
+  private List<ClientExercise> exercises = new ArrayList<>();
 
   float score;
 
-  private transient SlickDialog slickDialog;
+  // private transient SlickDialog slickDialog;
 
   public Dialog() {
   }
@@ -41,6 +44,7 @@ public class Dialog implements IDialog {
    * @param id
    * @param userid
    * @param projid
+   * @param imageid
    * @param dominoid
    * @param modified
    * @param unit
@@ -55,6 +59,7 @@ public class Dialog implements IDialog {
   public Dialog(int id,
                 int userid,
                 int projid,
+                int imageid,
                 int dominoid,
                 long modified,
                 String unit,
@@ -64,10 +69,11 @@ public class Dialog implements IDialog {
                 String fltitle,
                 String entitle,
                 List<ExerciseAttribute> attributes,
-                List<CommonExercise> exercises) {
+                List<ClientExercise> exercises) {
     this.id = id;
     this.userid = userid;
     this.projid = projid;
+    this.imageid = imageid;
     this.dominoid = dominoid;
     this.imageRef = imageRef;
     this.modified = modified;
@@ -80,6 +86,7 @@ public class Dialog implements IDialog {
     this.exercises = exercises;
   }
 
+/*
   public Dialog(SlickDialog slickDialog) {
     this(slickDialog.id(),
         slickDialog.userid(),
@@ -92,8 +99,9 @@ public class Dialog implements IDialog {
         "",
         "",
         slickDialog.entitle(), new ArrayList<>(), new ArrayList<>());
-    this.slickDialog = slickDialog;
+  //  this.slickDialog = slickDialog;
   }
+*/
 
   @Override
   public int getID() {
@@ -147,19 +155,21 @@ public class Dialog implements IDialog {
   }
 
   @Override
-  public List<CommonExercise> getExercises() {
+  public List<ClientExercise> getExercises() {
     return exercises;
   }
 
 
-
+/*
   public void setSlickDialog(SlickDialog e) {
     this.slickDialog = e;
-  }
+  }*/
 
+/*
   public SlickDialog getSlickDialog() {
     return slickDialog;
   }
+*/
 
   public void setImageRef(String imageRef) {
     this.imageRef = imageRef;
@@ -207,22 +217,22 @@ public class Dialog implements IDialog {
   }
 
   @Override
-  public Map<String, List<CommonExercise>> groupBySpeaker() {
-    Map<String, List<CommonExercise>> speakerToExercises = new HashMap<>();
+  public Map<String, List<ClientExercise>> groupBySpeaker() {
+    Map<String, List<ClientExercise>> speakerToExercises = new HashMap<>();
     exercises.forEach(commonExercise -> {
-          List<CommonExercise> exercises = speakerToExercises.computeIfAbsent(getSpeaker(commonExercise), k -> new ArrayList<>());
+          List<ClientExercise> exercises = speakerToExercises.computeIfAbsent(getSpeaker(commonExercise), k -> new ArrayList<>());
           exercises.add(commonExercise);
         }
     );
     return speakerToExercises;
   }
 
-  private String getSpeaker(CommonExercise commonExercise) {
+  private String getSpeaker(ClientExercise commonExercise) {
     List<ExerciseAttribute> speakerAttr = getSpeakerAttr(commonExercise);
     return speakerAttr.isEmpty() ? "UNKNOWN" : speakerAttr.stream().iterator().next().getValue();
   }
 
-  private List<ExerciseAttribute> getSpeakerAttr(CommonExercise commonExercise) {
+  private List<ExerciseAttribute> getSpeakerAttr(ClientExercise commonExercise) {
     return commonExercise
         .getAttributes()
         .stream()
@@ -279,6 +289,14 @@ public class Dialog implements IDialog {
   public void setSecondState(STATE state) {
 
   }
+
+  public int getImageid() {
+    return imageid;
+  }
+
+//  public void setImageid(int imageid) {
+//    this.imageid = imageid;
+//  }
 
   public String toString() {
     return "Dialog #" + id +

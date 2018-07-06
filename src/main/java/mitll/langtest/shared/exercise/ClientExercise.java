@@ -45,4 +45,10 @@ public interface ClientExercise extends CommonShell, MutableAnnotationExercise, 
   MutableAnnotationExercise getMutableAnnotation();
 
   CommonExercise asCommon();
+
+  /**
+   * SERVER?
+   * @return
+   */
+  List<ExerciseAttribute> getAttributes();
 }

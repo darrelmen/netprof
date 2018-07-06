@@ -1,9 +1,6 @@
 package mitll.langtest.shared.dialog;
 
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.List;
 import java.util.Map;
@@ -33,10 +30,10 @@ public interface IDialog extends CommonShell, HasUnitChapter  {
 
   List<ExerciseAttribute> getAttributes();
 
-  List<CommonExercise> getExercises();
+  List<ClientExercise> getExercises();
 
 
   List<String> getSpeakers();
 
-  Map<String, List<CommonExercise>> groupBySpeaker();
+  Map<String, List<ClientExercise>> groupBySpeaker();
 }

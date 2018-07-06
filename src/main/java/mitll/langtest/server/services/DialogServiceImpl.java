@@ -34,27 +34,27 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Probably going to need to parameterize by exercises?
+ *
  * @param <T>
  */
 @SuppressWarnings("serial")
-public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet implements DialogService  {
+public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet implements DialogService {
   private static final Logger logger = LogManager.getLogger(DialogServiceImpl.class);
-
 
 
   private static final String ANY = "Any";
@@ -77,8 +77,8 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       if (userFromSession != null) {
 //        logger.info("getTypeToValues got " + userFromSession);
         //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
-      //  int userFromSessionID = userFromSession.getID();
-      //  int projectID = getProjectIDFromUser(userFromSessionID);
+        //  int userFromSessionID = userFromSession.getID();
+        //  int projectID = getProjectIDFromUser(userFromSessionID);
 
         Map<String, Collection<String>> typeToSelection = new HashMap<>();
         request.getTypeToSelection().forEach(pair -> {
@@ -94,5 +94,46 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       return response;
     }
     //}
+  }
+
+  @Override
+  public ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException {
+    ISection<IDialog> sectionHelper = getDialogSectionHelper();
+    if (sectionHelper == null) {
+      logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
+      return new ExerciseListWrapper<>();
+    } else {
+
+      int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+
+
+      if (userIDFromSessionOrDB != -1) {
+        List<IDialog> dialogList = getDialogs(request, sectionHelper, userIDFromSessionOrDB);
+
+        return new ExerciseListWrapper<>(request.getReqID(),
+            dialogList,
+            null, new HashMap<>()
+        );
+
+      } else {
+        return new ExerciseListWrapper<>();
+      }
+
+    }
+  }
+
+  private List<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
+    List<IDialog> dialogList = new ArrayList<>();
+    if (request.getTypeToSelection().isEmpty()) {
+      int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+      if (projectIDFromUser != -1) {
+        Project project = getProject(projectIDFromUser);
+        dialogList = project.getDialogs();
+      }
+    } else {
+      Collection<IDialog> exercisesForSelectionState = sectionHelper.getExercisesForSelectionState(request.getTypeToSelection());
+      dialogList = new ArrayList<>(exercisesForSelectionState);
+    }
+    return dialogList;
   }
 }

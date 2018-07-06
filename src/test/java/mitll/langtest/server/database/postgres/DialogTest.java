@@ -37,10 +37,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
-import mitll.langtest.shared.exercise.Pair;
+import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -129,10 +126,10 @@ public class DialogTest extends BaseTest {
     iDialog.getAttributes().forEach(exerciseAttribute -> logger.info("\t" + exerciseAttribute));
 
     logger.info("Exercises : ");
-    List<CommonExercise> exercises = iDialog.getExercises();
+    List<ClientExercise> exercises = iDialog.getExercises();
     /*   exercises.forEach(exercise -> logger.info(getShort(exercise)));*/
 
-    Map<String, List<CommonExercise>> stringListMap = iDialog.groupBySpeaker();
+    Map<String, List<ClientExercise>> stringListMap = iDialog.groupBySpeaker();
     stringListMap.forEach((k, v) -> {
       logger.info(k + " : ");
       v.forEach(commonExercise -> logger.info(getShort(commonExercise)));
@@ -231,7 +228,7 @@ public class DialogTest extends BaseTest {
   }
 
   @NotNull
-  private String getShort(CommonExercise exercise) {
+  private String getShort(ClientExercise exercise) {
     return "\t" + exercise.getOldID() + " : " + exercise.getForeignLanguage() + " : " + exercise.getAttributes();
   }
 }

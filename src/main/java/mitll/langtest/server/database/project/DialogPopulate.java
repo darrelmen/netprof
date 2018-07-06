@@ -13,10 +13,12 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.npdata.dao.SlickDialog;
 import mitll.npdata.dao.SlickDialogAttributeJoin;
 import mitll.npdata.dao.SlickImage;
 import mitll.npdata.dao.SlickRelatedExercise;
@@ -53,7 +55,8 @@ public class DialogPopulate {
     if (dialogs1.isEmpty()) {
       Map<CommonExercise, String> exToAudio = new HashMap<>();
       int defaultUser = db.getUserDAO().getDefaultUser();
-      List<Dialog> dialogs = new KPDialogs().getDialogs(defaultUser, projid, exToAudio);
+      Map<Dialog, SlickDialog> dialogToSlick = new KPDialogs().getDialogs(defaultUser, projid, exToAudio);
+      Set<Dialog> dialogs = dialogToSlick.keySet();
 
       long now = System.currentTimeMillis();
       Timestamp modified = new Timestamp(now);
@@ -75,7 +78,8 @@ public class DialogPopulate {
         // add the image
         int imageID = db.getImageDAO().insert(getSlickImage(projid, now, dialog, modified));
 
-        dialog.getSlickDialog().imageid_$eq(imageID);
+        SlickDialog slickDialog = dialogToSlick.get(dialog);
+        slickDialog.imageid_$eq(imageID);
 
         // add the dialog to the database
         int dialogID = dialogDAO.add(defaultUser, projid, 1, imageID, now, now,
@@ -90,23 +94,27 @@ public class DialogPopulate {
           dialog.getExercises().forEach(commonExercise -> logger.info(commonExercise.getOldID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getUnitToValue()));
         }
         // add the exercises
+        List<ClientExercise> exercises = dialog.getExercises();
+
+        List<CommonExercise> commonExercises=new ArrayList<>();
+        exercises.forEach(clientExercise -> commonExercises.add(clientExercise.asCommon()));
         Map<CommonExercise, Integer> importExToID = exerciseCopy.addExercisesAndAttributes(
             defaultUser,
             projid,
             db.getUserExerciseDAO(),
-            dialog.getExercises(),
+            commonExercises,
             typeOrder,
             new HashMap<>(),
             new HashMap<>(), true);
 
         allImportExToID.putAll(importExToID);
         {
-          CommonExercise prev = null;
+          ClientExercise prev = null;
           List<SlickRelatedExercise> relatedExercises = new ArrayList<>();
-          for (CommonExercise ex : dialog.getExercises()) {
+          for (ClientExercise ex : dialog.getExercises()) {
             if (prev != null) {
-              int prevID = importExToID.get(prev);
-              int currID = importExToID.get(ex);
+              int prevID = importExToID.get(prev.asCommon());
+              int currID = importExToID.get(ex.asCommon());
 
               relatedExercises.add(new SlickRelatedExercise(-1, prevID, currID, projid, dialogID, modified));
             }
@@ -178,7 +186,7 @@ public class DialogPopulate {
     dialogDAO.getDialogAttributeJoinHelper().addBulkAttributeJoins(joins);
   }
 
-  private void addNewAttributes(int projid, int defaultUser, List<Dialog> dialogs, long now,
+  private void addNewAttributes(int projid, int defaultUser, Collection<Dialog> dialogs, long now,
                                 Map<Integer, ExerciseAttribute> idToPair,
                                 Map<ExerciseAttribute, Integer> attrToInt) {
     Set<ExerciseAttribute> known = new HashSet<>(idToPair.values());

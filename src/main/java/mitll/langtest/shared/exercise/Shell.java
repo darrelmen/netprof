@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.exercise;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import mitll.langtest.client.exercise.PagingContainer;
 
 /**

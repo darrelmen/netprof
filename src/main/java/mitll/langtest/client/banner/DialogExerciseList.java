@@ -9,9 +9,7 @@ import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.FilterResponse;
-import mitll.langtest.shared.exercise.ScoredExercise;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -28,6 +26,7 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false);
     //this.dialogViewHelper = dialogViewHelper;
   }
+
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
 
@@ -57,9 +56,56 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
         });
   }
 
+  protected void getExerciseIDs(Map<String, Collection<String>> typeToSection,
+                                String prefix,
+                                int exerciseID,
+                                ExerciseListRequest request) {
+    waitCursorHelper.scheduleWaitTimer();
+
+    logger.info("getExerciseIDs " +
+        "\n\trequest " + request +
+        "\n\t ex     " + exerciseID + " type " + typeToSection);
+
+    if (controller.getUser() > 0) {
+      controller.getDialogService().getDialogs(request,
+          new AsyncCallback<ExerciseListWrapper<IDialog>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              waitCursorHelper.showFinished();
+
+            }
+
+            @Override
+            public void onSuccess(ExerciseListWrapper<IDialog> result) {
+              waitCursorHelper.showFinished();
+              logger.info("got back "+ result.getExercises().size());
+            }
+          });
+    }
+
+//    if (controller.getUser() > 0) {
+//      // final long then = System.currentTimeMillis();
+//      service.getExerciseIds(
+//          request,
+//          new SetExercisesCallback(userListID + "_" + typeToSection.toString(), prefix, exerciseID, request));
+//    }
+  }
+
   @Override
   protected void getFullExercises(Collection<Integer> visibleIDs, int currentReq, Collection<Integer> requested, List<IDialog> alreadyFetched) {
+    logger.info("getFullExercises " + visibleIDs);
+    controller.getDialogService().getDialogs(new ExerciseListRequest(),
+        new AsyncCallback<ExerciseListWrapper<IDialog>>() {
+          @Override
+          public void onFailure(Throwable caught) {
 
+          }
+
+          @Override
+          public void onSuccess(ExerciseListWrapper<IDialog> result) {
+
+          }
+        });
   }
 
   @Override

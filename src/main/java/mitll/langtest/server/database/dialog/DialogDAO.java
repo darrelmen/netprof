@@ -158,7 +158,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     Map<Integer, Dialog> idToDialog = new HashMap<>();
 
     byProjID.forEach(slickDialog -> {
-      Dialog e = new Dialog(slickDialog);
+      Dialog e = makeDialog(slickDialog);
       dialogs.add(e);
       idToDialog.put(slickDialog.id(), e);
     });
@@ -187,6 +187,26 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return dialogs;
   }
 
+  private Dialog makeDialog(SlickDialog slickDialog) {
+    return new Dialog(
+        slickDialog.id(),
+        slickDialog.userid(),
+        slickDialog.projid(),
+        slickDialog.imageid(),
+        slickDialog.dominoid(),
+        slickDialog.modified().getTime(),
+        slickDialog.unit(),
+        slickDialog.lesson(),
+        slickDialog.orientation(),
+        "",
+        "",
+        slickDialog.entitle(),
+        new ArrayList<>(),
+        new ArrayList<>());
+    //  this.slickDialog = slickDialog;
+
+  }
+
   private void addAttributes(Map<Integer, ExerciseAttribute> idToPair,
                              Collection<SlickDialogAttributeJoin> slickDialogAttributeJoins,
                              Dialog dialog) {
@@ -201,8 +221,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
           if (e == null) {
             logger.error("no attr for id #" + attrid);
           } else {
- //           logger.info("adding attribute dialog " + dialog);
-  //          logger.info("adding attribute dialog attr " + dialog.getAttributes());
+            //           logger.info("adding attribute dialog " + dialog);
+            //          logger.info("adding attribute dialog attr " + dialog.getAttributes());
 
             dialog.getAttributes().add(e);
           }
@@ -211,6 +231,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
   /**
    * TODO: For now, don't do a check for existences for images
+   *
    * @param projid
    * @param dialog
    */
@@ -220,12 +241,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     Map<Integer, String> idToImageRef = new HashMap<>();
     all.forEach(slickImage -> idToImageRef.put(slickImage.id(), slickImage.filepath()));
-  //  logger.warn("idToImageRef got " + idToImageRef.size());
-    int imageid = dialog.getSlickDialog().imageid();
+    //  logger.warn("idToImageRef got " + idToImageRef.size());
+    int imageid = dialog.getImageid();//dialog.getSlickDialog().imageid();
     if (imageid < 1) {
       logger.warn("no image for dialog " + dialog);
-    }
-    else {
+    } else {
       String s = idToImageRef.get(imageid);
       if (s == null) {
         logger.warn("no image by " + imageid +
@@ -271,8 +291,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
       }
     });
 
-  //  logger.info("got exercises  " + exercises.size());
-  //  logger.info("got candidates " + candidate.size() + " relations for " + dialogID + " : " + candidate);
+    //  logger.info("got exercises  " + exercises.size());
+    //  logger.info("got candidates " + candidate.size() + " relations for " + dialogID + " : " + candidate);
 
     {
       List<CommonExercise> firstEx = exercises
@@ -287,7 +307,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 //      else if (size == 1) {
       } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
 
-      firstEx.forEach(current->dialog.getExercises().add(current));
+      firstEx.forEach(current -> dialog.getExercises().add(current));
     }
   }
 

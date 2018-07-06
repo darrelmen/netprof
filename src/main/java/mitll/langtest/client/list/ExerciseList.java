@@ -112,7 +112,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private final UserState userState;
   final ListOptions listOptions;
 
@@ -190,7 +190,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#doAfterEditComplete
+   * @seex mitll.langtest.client.custom.dialog.NewUserExercise#doAfterEditComplete
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#showNPF
    */
   @Override
@@ -316,7 +316,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
 
         if (exercises != null) {
           logger.info("\tExerciseList.SetExercisesCallback Got " + exercises.size() + " results ");
-          exercises.forEach(exercise -> logger.info("SetExercisesCallback.onSuccess: got " + exercise.getID() + " " + exercise.getEnglish()));
+      //    exercises.forEach(exercise -> logger.info("SetExercisesCallback.onSuccess: got " + exercise.getID() + " " + exercise.getEnglish()));
         }
       }
 

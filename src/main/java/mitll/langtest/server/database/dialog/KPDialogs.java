@@ -2,6 +2,7 @@ package mitll.langtest.server.database.dialog;
 
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogType;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -112,7 +113,7 @@ public class KPDialogs implements IDialogReader {
    * @see mitll.langtest.server.database.project.DialogPopulate#addDialogInfo
    */
   @Override
-  public List<Dialog> getDialogs(int defaultUser, int projID, Map<CommonExercise, String> exToAudio) {
+  public Map<Dialog, SlickDialog> getDialogs(int defaultUser, int projID, Map<CommonExercise, String> exToAudio) {
     String[] docs = docIDS.split("\n");
     String[] titles = title.split("\n");
 
@@ -122,9 +123,11 @@ public class KPDialogs implements IDialogReader {
     String[] topics = pres.split("\n");
     String[] dirs = dir.split("\n");
 
-    List<Dialog> dialogs = new ArrayList<>();
+    //List<Dialog> dialogs = new ArrayList<>();
     long time = System.currentTimeMillis();
     Timestamp modified = new Timestamp(time);
+
+    Map<Dialog, SlickDialog> dialogToSlick = new HashMap<>();
     for (int i = 0; i < docs.length; i++) {
       String dir = dirs[i];
       //  logger.info("Dir " + dir);
@@ -134,7 +137,7 @@ public class KPDialogs implements IDialogReader {
       String chapter = chapters[i];
       List<ExerciseAttribute> attributes = getExerciseAttributes(pages[i], topics[i]);
 
-      List<CommonExercise> exercises = new ArrayList<>();
+      List<ClientExercise> exercises = new ArrayList<>();
 
       String dirPath = "/opt/netprof/dialog/" + dir;
       File loc = new File(dirPath);
@@ -168,7 +171,7 @@ public class KPDialogs implements IDialogReader {
                   //              logger.info("audio " + fileName);
                   audio.add(dir + File.separator + fileName);
                   //    audioFileNames.add(fileName);
-                } else if (fileName.endsWith(".txt") && parts.length == 3) { // e.g. 010_C01_00.txt
+                } else if (fileName.endsWith(".txt") && parts.length == 3) { // slickDialog.g. 010_C01_00.txt
                   String e = fileName;
                   //            logger.info("text " + fileName);
                   sentences.add(e);
@@ -214,7 +217,7 @@ public class KPDialogs implements IDialogReader {
           List<String> speakersList = new ArrayList<>(speakers);
           speakersList
               .forEach(s -> attributes
-                  .add(new ExerciseAttribute("Speaker " + SPEAKER_LABELS.get(speakersList.indexOf(s)), s,false)));
+                  .add(new ExerciseAttribute("Speaker " + SPEAKER_LABELS.get(speakersList.indexOf(s)), s, false)));
         }
       } catch (IOException e) {
         logger.error("got " + e, e);
@@ -222,7 +225,7 @@ public class KPDialogs implements IDialogReader {
 
       String orientation = orientations.get(0);
       String title = titles[i];
-      SlickDialog e = new SlickDialog(-1,
+      SlickDialog slickDialog = new SlickDialog(-1,
           defaultUser,
           projID,
           -1,
@@ -236,7 +239,7 @@ public class KPDialogs implements IDialogReader {
           orientation
       );
 
-      Dialog dialog = new Dialog(-1, defaultUser, projID, -1, time,
+      Dialog dialog = new Dialog(-1, defaultUser, projID, -1, -1, time,
           unit, chapter,
           orientation,
           imageRef,
@@ -245,8 +248,10 @@ public class KPDialogs implements IDialogReader {
 
           attributes,
           exercises);
-      dialog.setSlickDialog(e);
-      dialogs.add(dialog);
+      //dialog.setSlickDialog(slickDialog);
+
+      dialogToSlick.put(dialog, slickDialog);
+      // dialogs.add(dialog);
 
       // logger.info("read " + dialog);
       //    dialog.getExercises().forEach(logger::info);
@@ -256,7 +261,7 @@ public class KPDialogs implements IDialogReader {
     }
 
     logger.info("ex to audio now " + exToAudio.size());
-    return dialogs;
+    return dialogToSlick;
   }
 
   @NotNull

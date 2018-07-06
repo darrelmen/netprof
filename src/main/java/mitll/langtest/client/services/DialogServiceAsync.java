@@ -33,9 +33,14 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
 
 public interface DialogServiceAsync {
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
+
+  void getDialogs(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<IDialog>> async);
 }

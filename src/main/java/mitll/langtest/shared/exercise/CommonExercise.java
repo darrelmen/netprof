@@ -122,12 +122,6 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    */
   void setAttributes(List<ExerciseAttribute> exerciseAttributes);
 
-  /**
-   * SERVER
-   * @return
-   */
-  List<ExerciseAttribute> getAttributes();
-
 
   /**
    * SERVER
