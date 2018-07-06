@@ -1,15 +1,13 @@
 package mitll.langtest.shared.dialog;
 
-import mitll.langtest.server.database.dialog.DialogType;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Pair;
+import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.SlickDialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static mitll.langtest.shared.exercise.STATE.UNSET;
 
 public class Dialog implements IDialog {
   private static final String SPEAKER = "Speaker".toLowerCase();
@@ -153,15 +151,7 @@ public class Dialog implements IDialog {
     return exercises;
   }
 
-  @Override
-  public String getFltitle() {
-    return fltitle;
-  }
 
-  @Override
-  public String getEntitle() {
-    return entitle;
-  }
 
   public void setSlickDialog(SlickDialog e) {
     this.slickDialog = e;
@@ -238,6 +228,56 @@ public class Dialog implements IDialog {
         .stream()
         .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase("Speaker"))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public String getEnglish() {
+    return entitle;
+  }
+
+  @Override
+  public String getMeaning() {
+    return "";
+  }
+
+  @Override
+  public String getForeignLanguage() {
+    return fltitle;
+  }
+
+  @Override
+  public String getFLToShow() {
+    return fltitle;
+  }
+
+  @Override
+  public MutableShell getMutableShell() {
+    return null;
+  }
+
+  @Override
+  public int getNumPhones() {
+    return 0;
+  }
+
+  @Override
+  public STATE getState() {
+    return UNSET;
+  }
+
+  @Override
+  public void setState(STATE state) {
+
+  }
+
+  @Override
+  public STATE getSecondState() {
+    return UNSET;
+  }
+
+  @Override
+  public void setSecondState(STATE state) {
+
   }
 
   public String toString() {

@@ -36,7 +36,6 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
@@ -83,7 +82,7 @@ public class NPExerciseList<T extends CommonShell, U extends Shell> extends Hist
    * @see mitll.langtest.client.list.PagingExerciseList#addComponents
    */
   protected ClickablePagingContainer<T> makePagingContainer() {
-    final PagingExerciseList<?, ?> outer = this;
+   // final PagingExerciseList<?, ?> outer = this;
     if (logger == null) {
       logger = Logger.getLogger("NPExerciseList");
     }
@@ -97,7 +96,7 @@ public class NPExerciseList<T extends CommonShell, U extends Shell> extends Hist
     boolean isRecorder = getActivityType() == ActivityType.RECORDER;
     final boolean showFirstNotCompleted = listOptions.isShowFirstNotCompleted();
 
-    pagingContainer = new NPExerciseListContainer(this, isRecorder, showFirstNotCompleted);
+    pagingContainer = new NPExerciseListContainer<T,U>(this, isRecorder, showFirstNotCompleted);
     return pagingContainer;
   }
 

@@ -40,7 +40,6 @@ import mitll.langtest.server.database.excel.ReportToExcel;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.result.MonitorResult;

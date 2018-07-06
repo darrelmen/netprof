@@ -61,7 +61,10 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.MutableAnnotationExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;

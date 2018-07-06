@@ -6,12 +6,12 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.dialog.DialogStatus;
-import mitll.langtest.server.database.dialog.DialogType;
 import mitll.langtest.server.database.dialog.IDialogDAO;
 import mitll.langtest.server.database.dialog.KPDialogs;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.Dialog;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -81,7 +81,7 @@ public class DialogPopulate {
         int dialogID = dialogDAO.add(defaultUser, projid, 1, imageID, now, now,
             dialog.getUnit(), dialog.getChapter(),
             DialogType.DIALOG, DialogStatus.DEFAULT,
-            dialog.getEntitle(), dialog.getOrientation());
+            dialog.getEnglish(), dialog.getOrientation());
 
         // add dialog attributes
         addDialogAttributes(dialogDAO, defaultUser, modified, attrToInt, dialog, dialogID);

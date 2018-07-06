@@ -36,8 +36,6 @@ import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
 
-import java.util.logging.Logger;
-
 /**
  * Tries to do initWebaudio, and if no response has been received in 5 seconds, tries again.
  *

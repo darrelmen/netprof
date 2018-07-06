@@ -68,7 +68,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
-public class ExerciseServiceImpl<T extends CommonShell>
+public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     extends MyRemoteServiceServlet
     implements ExerciseService<T> {
   private static final Logger logger = LogManager.getLogger(ExerciseServiceImpl.class);

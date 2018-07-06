@@ -36,7 +36,6 @@ import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.OpenUserService;
 import mitll.langtest.server.mail.EmailHelper;
-import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.LoginResult.ResultType;
@@ -47,7 +46,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import java.util.List;
 
 import static mitll.langtest.shared.user.ChoosePasswordResult.PasswordResultType.*;

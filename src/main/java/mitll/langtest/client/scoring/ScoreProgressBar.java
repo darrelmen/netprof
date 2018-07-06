@@ -6,10 +6,7 @@ import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.gauge.SimpleColumnChart;
-
-import java.util.logging.Logger;
 
 public class ScoreProgressBar {
   //private Logger logger = Logger.getLogger("ScoreProgressBar");

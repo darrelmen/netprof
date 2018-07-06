@@ -53,7 +53,6 @@ import mitll.langtest.server.database.custom.StateManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.dialog.DialogDAO;
 import mitll.langtest.server.database.dialog.IDialogDAO;
-import mitll.langtest.server.database.dialog.KPDialogs;
 import mitll.langtest.server.database.dliclass.DLIClassDAO;
 import mitll.langtest.server.database.dliclass.DLIClassJoinDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassDAO;
@@ -121,17 +120,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.server.PathHelper.ANSWERS;
-import static mitll.langtest.server.database.Report.DAY_TO_SEND_REPORT;
 import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAGIC_ID;
-import static mitll.langtest.server.database.project.ProjectDAO.DAY;
 
 /**
  * Note with H2 that :  <br></br>

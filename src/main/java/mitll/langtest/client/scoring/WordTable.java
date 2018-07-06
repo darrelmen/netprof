@@ -54,8 +54,6 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.client.table.PagerTable.WHITE_SPACE_NOWRAP;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

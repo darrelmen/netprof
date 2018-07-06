@@ -44,14 +44,12 @@ import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.user.Affiliation;
 import mitll.langtest.shared.user.FirstLastUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

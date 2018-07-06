@@ -34,14 +34,10 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Collection;
-import java.util.List;
 
 public class BaseUserExerciseDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseUserExerciseDAO.class);

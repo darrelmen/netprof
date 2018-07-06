@@ -2,7 +2,10 @@ package mitll.langtest.server.scoring;
 
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.*;
+import mitll.langtest.server.audio.AudioConversion;
+import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.ScoreToJSON;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.answer.AudioAnswer;

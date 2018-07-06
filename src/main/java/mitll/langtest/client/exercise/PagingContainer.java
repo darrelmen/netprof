@@ -45,10 +45,10 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.sorter.ExerciseComparator;
+import mitll.langtest.shared.sorter.IExerciseComparator;
+import mitll.langtest.shared.sorter.SimpleExerciseComparator;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -72,7 +72,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   private static final String TRUNCATED = "...";
 
   private final boolean isRecorder;
-  private final ExerciseComparator sorter;
+  private final IExerciseComparator sorter;
   private static final String ENGLISH = "English";
   private final boolean english;
   private final boolean showExerciseState;
@@ -94,7 +94,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     if (startupInfo == null) {
       logger.warning("PagingContainer huh? no startup info?");
     }
-    sorter = new ExerciseComparator();
+    sorter = getSorter();
 
     boolean japanese = controller.getLanguage().equalsIgnoreCase("Japanese");
     if (japanese) FLLength = JAPANESE_LENGTH;
@@ -105,6 +105,11 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
     this.showExerciseState = showExerciseState;
     //  logger.info("PagingContainer  show " + showExerciseState + " for recorder " + isRecorder);
+  }
+
+  @NotNull
+  protected IExerciseComparator getSorter() {
+    return new SimpleExerciseComparator();
   }
 
   /**

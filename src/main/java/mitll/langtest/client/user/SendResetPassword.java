@@ -34,7 +34,6 @@ package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -44,9 +43,6 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

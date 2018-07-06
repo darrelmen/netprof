@@ -33,10 +33,8 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
-import org.apache.poi.ss.usermodel.Sheet;
 
 import java.util.List;
 import java.util.Set;

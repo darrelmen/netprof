@@ -33,9 +33,11 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.

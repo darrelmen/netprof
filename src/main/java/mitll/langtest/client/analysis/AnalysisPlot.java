@@ -62,7 +62,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.analysis.AnalysisTab.*;
-import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.*;
+import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.ALL;
+import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.SESSION;
 
 /**
  * TODO : subclass for polyglot, no if's.

@@ -34,7 +34,9 @@ package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.WordsAndTotal;
-import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.analysis.AnalysisReport;
+import mitll.langtest.shared.analysis.UserInfo;
+import mitll.langtest.shared.analysis.WordAndScore;
 
 import java.util.List;
 

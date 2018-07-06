@@ -52,7 +52,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.exercise.HasID;

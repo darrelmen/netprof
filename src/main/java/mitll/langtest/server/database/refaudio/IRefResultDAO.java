@@ -38,7 +38,6 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
-import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.Collection;
 import java.util.List;

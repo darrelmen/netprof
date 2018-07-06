@@ -34,7 +34,8 @@ package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.services.OpenUserServiceImpl;

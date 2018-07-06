@@ -2012,6 +2012,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     // long then = System.currentTimeMillis();
     if (DEBUGSCORE) logger.info("setProgressBarScore checking " + displayed.size());
     for (T exercise : displayed) {
+    //  logger.info("ex " + exercise + " class " + exercise.getClass());
       if (exercise.hasScore()) {
         if (DEBUGSCORE) logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
         //    exercisesWithScores.add(exercise.getID());

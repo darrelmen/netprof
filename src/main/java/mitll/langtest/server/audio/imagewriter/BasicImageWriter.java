@@ -35,6 +35,8 @@ package mitll.langtest.server.audio.imagewriter;
 import mitll.langtest.server.audio.image.AudioImage;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.tools.AudioFile;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -49,8 +51,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

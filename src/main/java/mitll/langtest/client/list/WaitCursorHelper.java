@@ -6,8 +6,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 
-import java.util.logging.Logger;
-
 /**
  * Created by go22670 on 3/28/17.
  */

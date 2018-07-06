@@ -25,6 +25,13 @@ import java.util.Map;
  */
 class NewLearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
   //  private final Logger logger = Logger.getLogger("NewLearnHelper");
+
+  /**
+   * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner) 
+   * @param controller
+   * @param viewContaner
+   * @param myView
+   */
   NewLearnHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
     super(controller, viewContaner, myView);
   }

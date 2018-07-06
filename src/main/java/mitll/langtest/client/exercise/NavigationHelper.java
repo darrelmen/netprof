@@ -38,7 +38,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.logging.Logger;
 

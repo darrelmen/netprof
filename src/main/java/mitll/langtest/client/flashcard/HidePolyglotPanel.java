@@ -6,8 +6,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonAnnotatable;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.logging.Logger;

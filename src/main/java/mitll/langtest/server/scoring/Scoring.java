@@ -32,15 +32,14 @@
 
 package mitll.langtest.server.scoring;
 
+import com.google.gson.JsonObject;
+import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.image.TranscriptReader;
-import com.google.gson.JsonObject;
-
-import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.audio.imagewriter.TranscriptWriter;
 import mitll.langtest.server.database.exercise.Project;

@@ -33,14 +33,9 @@
 package mitll.langtest.server.sorter;
 
 import mitll.langtest.server.audio.AudioExport;
-import mitll.langtest.server.audio.AudioExportOptions;
-import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 

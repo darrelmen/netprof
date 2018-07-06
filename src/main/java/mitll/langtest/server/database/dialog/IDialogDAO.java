@@ -33,9 +33,8 @@
 package mitll.langtest.server.database.dialog;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectDAO;
-import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.npdata.dao.SlickDialog;
 

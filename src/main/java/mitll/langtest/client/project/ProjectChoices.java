@@ -44,7 +44,7 @@ import static mitll.langtest.shared.user.User.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices {
-  public static final String GVIDAVER = "gvidaver";
+  private static final String GVIDAVER = "gvidaver";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
   public static final String PLEASE_WAIT = "Please wait...";
@@ -52,7 +52,6 @@ public class ProjectChoices {
   private static final String START_TO_DELETE_THIS_PROJECT = "Start to delete this project.";
   private static final String DELETE_PROJECT = "delete project";
 
-  //private static final String DO_YOU_WANT_TO_CONTINUE = "Do you want to continue?";
   /**
    * @see #getImportButton(SlimProject)
    */
@@ -594,7 +593,7 @@ public class ProjectChoices {
     DivWidget container = new DivWidget();
     Heading label;
 
-    container.add(label = getLabel(truncate(name, 23), projectForLang, hasChildren, numVisibleChildren));
+    container.add(label = getLabel(truncate(name, 23), projectForLang, numVisibleChildren));
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
@@ -656,13 +655,23 @@ public class ProjectChoices {
   /**
    * @param name
    * @param projectForLang
-   * @param hasChildren
    * @param numVisibleChildren
    * @return
+   * @paramx hasChildren
    * @see #getImageAnchor
    */
   @NotNull
-  private Heading getLabel(String name, SlimProject projectForLang, boolean hasChildren, int numVisibleChildren) {
+  private Heading getLabel(String name, SlimProject projectForLang, int numVisibleChildren) {
+    ProjectStatus status = projectForLang.getStatus();
+    boolean hasChildren = projectForLang.hasChildren();
+    String statusText = status == ProjectStatus.PRODUCTION ? "" : status.name();
+
+
+    return getLabel(name, hasChildren, numVisibleChildren, statusText);
+  }
+
+  @NotNull
+  private Heading getLabel(String name, boolean hasChildren, int numVisibleChildren, String statusText) {
     Heading label = new Heading(LANGUAGE_SIZE, name);
     label.addStyleName("floatLeft");
     label.setWidth("100%");
@@ -679,7 +688,8 @@ public class ProjectChoices {
       String suffix = (numVisibleChildren == 1) ? COURSE1 : COURSES;
       label.setSubtext(numVisibleChildren + suffix);
     } else {
-      showProjectStatus(projectForLang, label);
+      //showProjectStatus(status, label);
+      label.setSubtext(statusText);
     }
 
     label.addStyleName("floatLeft");
@@ -690,11 +700,11 @@ public class ProjectChoices {
     return getVisibleProjects(projectForLang.getChildren()).size();
   }
 
-  private void showProjectStatus(SlimProject projectForLang, Heading label) {
-    if (projectForLang.getStatus() == ProjectStatus.PRODUCTION) {
+  private void showProjectStatus(ProjectStatus status, Heading label) {
+    if (status == ProjectStatus.PRODUCTION) {
       label.setSubtext("");
     } else {
-      label.setSubtext(projectForLang.getStatus().name());
+      label.setSubtext(status.name());
     }
   }
 
@@ -809,7 +819,7 @@ public class ProjectChoices {
       @Override
       public boolean gotYes() {
         projectEditForm.updateProject();
-        showProjectStatus(projectForLang, label);
+        showProjectStatus(projectForLang.getStatus(), label);
         return true;
       }
 

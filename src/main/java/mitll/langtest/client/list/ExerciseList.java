@@ -45,14 +45,15 @@ import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;

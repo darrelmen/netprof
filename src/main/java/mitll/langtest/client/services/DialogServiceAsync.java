@@ -33,9 +33,8 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.exercise.*;
-
-import java.util.Collection;
+import mitll.langtest.shared.exercise.FilterRequest;
+import mitll.langtest.shared.exercise.FilterResponse;
 
 public interface DialogServiceAsync {
 

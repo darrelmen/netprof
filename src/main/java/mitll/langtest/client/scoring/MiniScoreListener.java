@@ -3,8 +3,6 @@ package mitll.langtest.client.scoring;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.List;
-
 /**
  * Created by go22670 on 1/27/17.
  */

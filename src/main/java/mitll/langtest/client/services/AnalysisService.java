@@ -34,10 +34,11 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.WordsAndTotal;
+import mitll.langtest.shared.analysis.AnalysisReport;
+import mitll.langtest.shared.analysis.UserInfo;
+import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonShell;
 

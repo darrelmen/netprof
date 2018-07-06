@@ -49,7 +49,6 @@ import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.HasID;
 

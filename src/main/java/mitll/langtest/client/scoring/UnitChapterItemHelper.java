@@ -43,7 +43,8 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.Details;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -124,7 +125,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
    * Show unit and chapter info for every item.
    *
    * @return
-   * @see #addUnitChapterItem(CommonExercise, Panel)
+   * @see #addUnitChapterItem
    */
   private Panel getUnitLessonForExercise(T exercise) {
     Panel flow = new HorizontalPanel();
@@ -203,7 +204,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
   /**
    * @param exercise
    * @return
-   * @see #showPopup(CommonExercise)
+   * @see #showPopup
    */
   private String getUnitLessonForExercise2(T exercise) {
     long update = exercise.getUpdateTime();

@@ -1,4 +1,4 @@
-package mitll.langtest.server.database.dialog;
+package mitll.langtest.shared.dialog;
 /*
  *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
@@ -32,7 +32,6 @@ package mitll.langtest.server.database.dialog;
  */
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.project.ProjectStatus;
 
 /**
  * @seex mitll.langtest.server.database.project.ProjectDAO#add(int, long, String, String, String, mitll.langtest.server.database.project.ProjectType, ProjectStatus, String, String, String, int, int)

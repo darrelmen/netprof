@@ -33,8 +33,10 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.custom.IUserList;
+import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.IUserListWithIDs;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;

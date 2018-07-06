@@ -1,7 +1,10 @@
 package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.analysis.PhoneAnalysis;
-import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.PhoneStats;
+import mitll.langtest.shared.analysis.TimeAndScore;
+import mitll.langtest.shared.analysis.WordAndScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;

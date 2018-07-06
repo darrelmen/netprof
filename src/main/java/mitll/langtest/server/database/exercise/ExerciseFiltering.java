@@ -1,22 +1,10 @@
 package mitll.langtest.server.database.exercise;
 
-import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.services.AmasServices;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.services.ExerciseServiceImpl;
-import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.server.trie.ExerciseTrie;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class ExerciseFiltering<T extends CommonShell> {
  /* private static final Logger logger = LogManager.getLogger(ExerciseFiltering.class);

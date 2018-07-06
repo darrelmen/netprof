@@ -461,6 +461,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   /**
+   * TODO : get rid of this
    * Update the exercise shell in the exercise list with the changes to it's english/fl fields.
    *
    * @param pagingContainer

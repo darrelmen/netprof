@@ -1,6 +1,7 @@
 package mitll.langtest.server.database.dialog;
 
 import mitll.langtest.shared.dialog.Dialog;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;

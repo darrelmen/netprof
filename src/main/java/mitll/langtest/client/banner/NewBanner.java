@@ -6,10 +6,7 @@ import com.github.gwtbootstrap.client.ui.constants.Alignment;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.constants.NavbarPosition;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -20,6 +17,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,11 +33,14 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
-  private static final List<INavigation.VIEWS> STANDARD_VIEWS =
-      Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, VIEWS.QUIZ, INavigation.VIEWS.PROGRESS, INavigation.VIEWS.LISTS);
+  private static final List<VIEWS> STANDARD_VIEWS =
+      Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
 
-  private static final List<INavigation.VIEWS> POLY_VIEWS =
-      Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, INavigation.VIEWS.PROGRESS);
+  private static final List<VIEWS> DIALOG_VIEWS =
+      Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS, VIEWS.DIALOG);
+
+  private static final List<VIEWS> POLY_VIEWS =
+      Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS);
 
   private static final String NETPROF = "netprof";
   private static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
@@ -49,9 +51,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
 
-//  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String MAILTO_SUBJECT = "Question%20about%20netprof";
- // private String MAIL_TO = getMailTo();
 
   @NotNull
   private String getMailTo() {
@@ -95,10 +95,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setPosition(NavbarPosition.TOP);
     this.controller = controller;
     this.lifecycle = lifecycle;
+    logger.info("--- addWidgets ---");
     addWidgets(userManager, userMenu, breadcrumbs);
   }
 
-  private void addWidgets(UserManager userManager, UserMenu userMenu, Breadcrumbs breadcrumbs) {
+  public void addWidgets(UserManager userManager, UserMenu userMenu, Breadcrumbs breadcrumbs) {
     add(getImage());
     add(getBrand());
     add(breadcrumbs);
@@ -133,7 +134,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
-   *
    * @return
    */
   @NotNull
@@ -141,8 +141,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Nav recnav = new Nav();
     recnav.getElement().setId("recnav");
     styleNav(recnav);
-    viewToLink.put(INavigation.VIEWS.RECORD, getChoice(recnav, INavigation.VIEWS.RECORD));
-    viewToLink.put(INavigation.VIEWS.CONTEXT, getChoice(recnav, INavigation.VIEWS.CONTEXT));
+    rememberViewAndLink(recnav, VIEWS.RECORD);
+    rememberViewAndLink(recnav, VIEWS.CONTEXT);
     return recnav;
   }
 
@@ -158,10 +158,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     nav.getElement().setId("defectnav");
     styleNav(nav);
 
-    viewToLink.put(INavigation.VIEWS.DEFECTS, getChoice(nav, INavigation.VIEWS.DEFECTS));
-    viewToLink.put(INavigation.VIEWS.FIX, getChoice(nav, INavigation.VIEWS.FIX));
+    rememberViewAndLink(nav, VIEWS.DEFECTS);
+    rememberViewAndLink(nav, VIEWS.FIX);
 
     return nav;
+  }
+
+  private void rememberViewAndLink(Nav recnav, VIEWS record) {
+    viewToLink.put(record, getChoice(recnav, record));
   }
 
   @NotNull
@@ -192,7 +196,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Nav rnav = new Nav();
     rnav.setAlignment(Alignment.RIGHT);
     addSubtitle(rnav);
-    rnav.getElement().getStyle().setMarginRight(-10, Style.Unit.PX );
+    rnav.getElement().getStyle().setMarginRight(-10, Style.Unit.PX);
 
     addUserMenu(userManager, userMenu, rnav);
 
@@ -236,12 +240,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     rnav.add(userDrop);
 
     userDrop.addClickHandler(event -> {
-     // logger.info("got click ");
+      // logger.info("got click ");
       userDrop.clear();
       userMenu.getStandardUserMenuChoices().forEach(linkAndTitle -> userDrop.add(linkAndTitle.makeNewLink()));
     });
 
-  //  Scheduler.get().scheduleDeferred(() -> userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink())));
+    //  Scheduler.get().scheduleDeferred(() -> userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink())));
 
 //    userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink()));
   }
@@ -251,8 +255,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   /**
    * Tell them we can't record.
    *
-   * @see UILifecycle#setSplash
    * @param subtitle
+   * @see UILifecycle#setSplash
    */
   @Override
   public void setSubtitle(String subtitle) {
@@ -271,13 +275,23 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
+   * @see #addWidgets
    * @param nav
    */
   private void addChoicesForUser(ComplexWidget nav) {
     boolean first = true;
     boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == User.Permission.POLYGLOT;
 
-    List<VIEWS> toShow = isPoly ? POLY_VIEWS : STANDARD_VIEWS;
+    List<VIEWS> toShow = isPoly ? POLY_VIEWS : DIALOG_VIEWS;
+
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+
+    logger.info("addChoicesForUser project startup " + projectStartupInfo);
+    if (projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.DIALOG) {
+      toShow = DIALOG_VIEWS;
+    }
+    logger.info("Show " + toShow);
+
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
       if (first) {
@@ -292,7 +306,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @NotNull
   private NavLink getChoice(ComplexWidget nav, VIEWS views) {
     String instanceName = views.toString();//(views.toString().equalsIgnoreCase("Drill")) ? PRACTICE :views.toString();
- //   if (instanceName.equalsIgnoreCase("Drill")) instanceName="Practice";
+    //   if (instanceName.equalsIgnoreCase("Drill")) instanceName="Practice";
 //    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + instanceName;
     NavLink learn = getLink(nav, instanceName);
     learn.addClickHandler(event -> {
@@ -304,12 +318,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     return learn;
   }
 
-  public void show(INavigation.VIEWS views) {
+  public void show(VIEWS views) {
     gotClickOnChoice(views.toString(), viewToLink.get(views), false);
   }
 
   /**
-   *
    * @param instanceName
    * @param learn
    * @param fromClick
@@ -320,9 +333,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private void showSection(String instance1, boolean fromClick) {
-    VIEWS choices = INavigation.VIEWS.NONE;
+    VIEWS choices = VIEWS.NONE;
     try {
-      choices = INavigation.VIEWS.valueOf(instance1.toUpperCase());
+      choices = VIEWS.valueOf(instance1.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.info("showSection can't parse " + instance1);
     }
@@ -452,7 +465,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       logger.warning("checkProjectSelected Current view is " + currentView);
       logger.warning("checkProjectSelected Current view link is null");
       logger.warning("checkProjectSelected huh? keys are " + viewToLink.keySet());
-      linkToShow = viewToLink.get(INavigation.VIEWS.LEARN);
+      linkToShow = viewToLink.get(VIEWS.LEARN);
     }
     showActive(linkToShow);
     recordMenuVisible();

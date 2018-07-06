@@ -44,7 +44,10 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.user.FormField;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AnnotationExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 
 import java.util.List;
 import java.util.logging.Logger;

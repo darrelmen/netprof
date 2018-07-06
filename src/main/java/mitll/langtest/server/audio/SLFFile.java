@@ -33,10 +33,8 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.scoring.ASR;
-import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

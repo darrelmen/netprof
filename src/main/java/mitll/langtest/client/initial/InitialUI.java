@@ -58,7 +58,10 @@ import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.project.ProjectChoices;
-import mitll.langtest.client.user.*;
+import mitll.langtest.client.user.ResetPassword;
+import mitll.langtest.client.user.SendResetPassword;
+import mitll.langtest.client.user.UserManager;
+import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
@@ -896,11 +899,6 @@ public class InitialUI implements UILifecycle {
     //}
     choices.showProjectChoices(parent, level);
   }
-/*
-  @Override
-  public int hashCode() {
-    return super.hashCode();
-  }*/
 
   /**
    * @see #addProjectChoices

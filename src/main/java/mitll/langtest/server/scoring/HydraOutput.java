@@ -1,10 +1,8 @@
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.shared.scoring.ImageOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 

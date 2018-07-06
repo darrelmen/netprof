@@ -22,8 +22,6 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.logging.Logger;
-
 /**
  * Created by go22670 on 1/20/17.
  */

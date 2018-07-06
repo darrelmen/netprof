@@ -2,10 +2,8 @@ package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.LearnFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
@@ -14,7 +12,6 @@ import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * @see RecorderNPFHelper#getMyListLayout
@@ -53,6 +50,8 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
         , listHeader, true);
     this.isContext = isContext;
   }
+
+
 
   @NotNull
   @Override

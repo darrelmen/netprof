@@ -11,9 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.ADD;
-import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.CHANGE;
-import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.DELETE;
+import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.*;
 
 public class TestSync {
   private static final Logger logger = LogManager.getLogger(TestSync.class);

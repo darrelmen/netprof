@@ -34,7 +34,6 @@ package mitll.langtest.server.database.userlist;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.userexercise.UserExerciseListJoinDAOWrapper;

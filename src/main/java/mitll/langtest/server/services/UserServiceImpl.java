@@ -39,7 +39,6 @@ import mitll.langtest.client.services.UserService;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.ActiveUser;
-import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

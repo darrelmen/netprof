@@ -43,26 +43,80 @@ import org.jetbrains.annotations.NotNull;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/9/15.
  */
-public class ExerciseComparator extends SimpleExerciseComparator {
+public class SimpleExerciseComparator implements IExerciseComparator {
   private static final String A_SPACE = "a ";
 
   public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean sortByFL, String searchTerm) {
-    if (recordedLast) {
-      Integer x = getRecordedOrder(o1, o2);
-      if (x != null) return x;
-    }
-
     return sortByFL ? compareByFL(o1, o2, searchTerm) : compareByEnglish(o1, o2, searchTerm);
   }
 
-  private Integer getRecordedOrder(CommonShell o1, CommonShell o2) {
-    if (o1.getState() != STATE.RECORDED && o2.getState() == STATE.RECORDED) {
-      return +1;
-    } else if (o1.getState() == STATE.RECORDED && o2.getState() != STATE.RECORDED) {
+  protected <T extends CommonShell> int compareByEnglish(T o1, T o2, String searchTerm) {
+    String english1 = o1.getEnglish();
+    String english2 = o2.getEnglish();
+    if (english1.isEmpty() && !english2.isEmpty()) {
       return -1;
+    } else if (!english1.isEmpty() && english2.isEmpty()) {
+      return +1;
+    } else if (english1.isEmpty()) {
+      return compareByFL(o1, o2, searchTerm);
+    } else if (!searchTerm.isEmpty() && english1.equalsIgnoreCase(searchTerm) && !english2.equalsIgnoreCase(searchTerm)) {
+      return -1;
+    } else if (!searchTerm.isEmpty() && !english1.equalsIgnoreCase(searchTerm) && english2.equalsIgnoreCase(searchTerm)) {
+      return +1;
+    } else {
+      int i = compareStrings(english1, english2);
+      if (i == 0) {
+        i = compareByFL(o1, o2, searchTerm);
+      }
+      return i;
     }
-    return null;
   }
 
+  /**
+   * Skip prefix of "a ".
+   *
+   * @param id1
+   * @param id2
+   * @return
+   */
+  public int compareStrings(String id1, String id2) {
+    String t = id1.toLowerCase();
+    if (ignoreFirst(t)) t = t.substring(2);
+    t = dropPunct(t);
 
+    String t1 = id2.toLowerCase();
+    if (ignoreFirst(t1)) t1 = t1.substring(2);
+    t1 = dropPunct(t1);
+
+    return removePunct(t).compareTo(removePunct(t1));
+  }
+
+  private boolean ignoreFirst(String t) {
+    return t.startsWith(A_SPACE);
+  }
+
+  protected String removePunct(String t) {
+    return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "");
+  }
+
+  protected  <T extends CommonShell> int compareByFL(T o1, T o2, String searchTerm) {
+    String fl1 = o1.getForeignLanguage();
+    String fl2 = o2.getForeignLanguage();
+    if (fl1.equalsIgnoreCase(searchTerm) && !fl2.equalsIgnoreCase(searchTerm)) {
+      return -1;
+    } else if (!fl1.equalsIgnoreCase(searchTerm) && fl2.equalsIgnoreCase(searchTerm)) {
+      return +1;
+    } else {
+      return dropPunct(fl1).compareTo(dropPunct(fl2));
+    }
+  }
+
+  @NotNull
+  private String dropPunct(String t) {
+    if (t.isEmpty()) {
+      return t;
+    } else {
+      return (t.startsWith("\"") || t.startsWith("\\'") || t.startsWith("-") || t.startsWith("\\u007E")) ? t.substring(1) : t;
+    }
+  }
 }

@@ -40,7 +40,7 @@ import mitll.langtest.shared.exercise.*;
 import java.util.Collection;
 
 @RemoteServiceRelativePath("exercise-manager")
-public interface ExerciseService<T extends CommonShell> extends RemoteService {
+public interface ExerciseService<T extends CommonShell & ScoredExercise> extends RemoteService {
   /**
    * @param request
    * @return

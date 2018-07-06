@@ -17,7 +17,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 5/19/17.

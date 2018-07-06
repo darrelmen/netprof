@@ -39,13 +39,16 @@ import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.custom.IUserList;
+import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.IUserListWithIDs;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {

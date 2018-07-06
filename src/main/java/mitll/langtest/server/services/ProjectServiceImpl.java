@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.services;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.server.database.copy.CreateProject;
@@ -41,7 +40,10 @@ import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.project.*;
+import mitll.langtest.shared.project.DominoProject;
+import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.project.ProjectProperty;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.audio;
 
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.scoring.ASRWebserviceScoring;
 import mitll.langtest.shared.amas.QAPair;
 import org.apache.logging.log4j.LogManager;

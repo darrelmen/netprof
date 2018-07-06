@@ -8,11 +8,7 @@ import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.StartupInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 class FlagsDisplay {
   private static final int FLAG_DIM = 32;

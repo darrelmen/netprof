@@ -43,7 +43,6 @@ import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Collection;

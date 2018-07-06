@@ -51,7 +51,7 @@ import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
  * To change this template use File | Settings | File Templates.
  * <p>
  */
-public class ExerciseShell extends BaseExercise implements CommonShell, MutableShell {
+public class ExerciseShell extends BaseExercise implements CommonShell, MutableShell, ScoredExercise {
   protected String english = "";
   protected String meaning = "";
   protected String foreignLanguage = "";

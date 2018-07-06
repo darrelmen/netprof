@@ -34,7 +34,6 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.HasID;

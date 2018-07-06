@@ -33,7 +33,6 @@
 package mitll.langtest.server;
 
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.report.ReportingServices;
@@ -44,6 +43,7 @@ import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;

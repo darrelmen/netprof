@@ -34,7 +34,6 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -42,7 +41,10 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BasePhoneDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);

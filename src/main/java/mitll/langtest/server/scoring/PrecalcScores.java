@@ -32,11 +32,11 @@
 
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.server.audio.image.ImageType;
-import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.database.result.ISlimResult;
 
 import java.util.HashMap;

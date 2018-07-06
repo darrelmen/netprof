@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.word;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickWord;

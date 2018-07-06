@@ -32,8 +32,6 @@
 
 package mitll.langtest.client.gauge;
 
-import java.util.logging.Logger;
-
 /**
  * Worris about black legibility on colored background.
  * Consistent with google's choice of black lettering vs white in

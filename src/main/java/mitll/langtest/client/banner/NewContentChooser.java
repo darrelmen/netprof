@@ -49,6 +49,7 @@ public class NewContentChooser implements INavigation {
   private static final String CURRENT_VIEW = "CurrentView";
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
+  private final DialogViewHelper dialogHelper;
   private final PracticeHelper practiceHelper;
   private final QuizHelper quizHelper;
   private final ExerciseController controller;
@@ -65,6 +66,11 @@ public class NewContentChooser implements INavigation {
     learnHelper = new NewLearnHelper(controller, this, LEARN);
     practiceHelper = new PracticeHelper(controller, this, DRILL);
     quizHelper = new QuizHelper(controller, this, VIEWS.QUIZ, this);
+
+
+    dialogHelper = new DialogViewHelper(controller, this, LEARN);
+
+
     this.controller = controller;
     this.listView = new ListView(controller);
     this.banner = banner;
@@ -173,6 +179,14 @@ public class NewContentChooser implements INavigation {
           clearAndFixScroll();
           setInstanceHistory(LISTS);
           listView.showContent(divWidget, "listView", fromClick);
+          break;
+        case DIALOG:
+          clearAndFixScroll();
+
+          if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
+
+          setInstanceHistory(DIALOG);
+          dialogHelper.showContent(divWidget, DIALOG.toString(), fromClick);
           break;
         case RECORD:
           clearAndFixScroll();

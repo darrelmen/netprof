@@ -34,8 +34,6 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.shared.analysis.WordAndScore;
 
-import java.util.Map;
-
 import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 
 /**

@@ -1,7 +1,5 @@
 package mitll.langtest.server.database.result;
 
-import mitll.npdata.dao.SlickRefResult;
-
 /**
  * Created by go22670 on 4/13/17.
  */

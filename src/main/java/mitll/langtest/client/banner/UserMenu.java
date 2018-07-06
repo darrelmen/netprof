@@ -1,11 +1,9 @@
 package mitll.langtest.client.banner;
 
-import cern.jet.random.StudentT;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -30,7 +28,6 @@ import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.project.StartupInfo;
-import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 

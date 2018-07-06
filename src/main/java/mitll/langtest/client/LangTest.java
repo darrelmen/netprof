@@ -54,7 +54,6 @@ import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
-import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -66,11 +65,7 @@ import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.project.ProjectEditForm;
-import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
-import mitll.langtest.client.recorder.MicPermission;
-import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.client.recorder.WebAudioRecorder;
+import mitll.langtest.client.recorder.*;
 import mitll.langtest.client.scoring.AnnotationHelper;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
@@ -819,6 +814,7 @@ private boolean hasNetworkProblem;
 //    if (projectStartupInfo == null) {
 //      logger.info("setProjectStartupInfo project startup null for " + user);
 //    }
+
     initialUI.showCogMenu();
   }
 

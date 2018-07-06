@@ -2,7 +2,6 @@ package mitll.langtest.server.database.user;
 
 import mitll.hlt.domino.server.user.UserServiceDelegateBase;
 import mitll.hlt.domino.server.util.LegacyMd5Hash;
-import mitll.langtest.server.database.security.NPUserSecurityManager;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;

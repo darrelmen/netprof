@@ -41,18 +41,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.user.ChoosePasswordResult;
 import mitll.langtest.shared.user.User;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static mitll.langtest.client.user.UserPassLogin.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

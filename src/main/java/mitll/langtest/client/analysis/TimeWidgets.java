@@ -36,9 +36,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.user.client.ui.HTML;
 
-import java.util.List;
-import java.util.logging.Logger;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

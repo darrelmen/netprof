@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.services;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.LangTest;
@@ -46,8 +45,6 @@ import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
-
-import java.util.Collection;
 
 /**
  * Might actually live on hydra1 or hydra2 - chosen in the client.

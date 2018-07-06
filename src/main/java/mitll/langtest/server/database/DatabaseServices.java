@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database;
 
-import com.sun.mail.imap.protocol.ID;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.custom.IStateManager;
