@@ -1475,7 +1475,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
    * @param itemID
    * @param visibleIDs
    * @param currentReq
-   * @see #getExercises(Collection, int)
+   * @see #askServerForExercise
    */
   private void askServerForVisibleExercises(int itemID, Collection<Integer> visibleIDs, final int currentReq) {
     // logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
@@ -1509,7 +1509,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
    * @see #askServerForExercise(int)
    * @see #makePagingContainer
    */
-  private int incrReq() {
+  protected int incrReq() {
     return ++freqid;
   }
 
@@ -1820,7 +1820,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
     return result.stream().map(HasID::getID).collect(Collectors.toList());
   }
 
-  private void showExerciesForCurrentReq(Collection<U> result, int reqID) {
+  protected void showExerciesForCurrentReq(Collection<U> result, int reqID) {
     if (isCurrentReq(reqID)) {
       reallyShowExercises(result, reqID);
       if (isCurrentReq(reqID)) {
@@ -1848,6 +1848,15 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
   private void reallyShowExercises(Collection<U> result, int reqID) {
     //logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
     DivWidget exerciseContainer = new DivWidget();
+    populatePanels(result, reqID, exerciseContainer);
+
+    innerContainer.setWidget(exerciseContainer);  // immediate feedback that something is happening...
+    showPrevNext();
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("here for " + reqID));
+//    logger.info("logException stack:\n" + exceptionAsString);
+  }
+
+  protected void populatePanels(Collection<U> result, int reqID, DivWidget exerciseContainer) {
     long then = System.currentTimeMillis();
     List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
     long now = System.currentTimeMillis();
@@ -1858,11 +1867,6 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
     if (!getters.isEmpty()) {
       getRefAudio(getters.iterator());
     }
-
-    innerContainer.setWidget(exerciseContainer);  // immediate feedback that something is happening...
-    showPrevNext();
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("here for " + reqID));
-//    logger.info("logException stack:\n" + exceptionAsString);
   }
 
   /**
@@ -2007,6 +2011,10 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     //exercisesWithScores.clear();
     exerciseToScore.clear();
 
+    if (displayed==null) {
+      logger.warning("huh? display is null?");
+      return;
+    }
     float total = 0f;
     int withScore = 0;
     // long then = System.currentTimeMillis();
