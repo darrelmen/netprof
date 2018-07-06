@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends FacetExerciseList<T, IDialog> {
-  public static final int MAX_LENGTH_ID = 35;// 23;
+  public static final int MAX_LENGTH_ID = 55;//35;// 23;
   //private DialogViewHelper dialogViewHelper;
   private final Logger logger = Logger.getLogger("DialogExerciseList");
   private static final int CHOICE_WIDTH = 170;//180;//190;//195;
@@ -144,8 +144,9 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
     //section.add(getHeader(result, nest));
 
     {
-      //final Container flags = new Container();
-      final DivWidget flags = new DivWidget();
+      final Container flags = new Container();
+      flags.setWidth("970px");
+      //final DivWidget flags = new DivWidget();
       flags.add(addFlags(result));
       section.add(flags);
     }
