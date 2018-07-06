@@ -276,7 +276,8 @@ public class JsonExport {
    * @param directlyRelated
    * @see #getJsonForExercise(CommonExercise, Collection)
    */
-  private <T extends AudioAttributeExercise> void addContextAudioRefs(T exercise, JSONObject ex, Collection<CommonExercise> directlyRelated) {
+  private <T extends AudioAttributeExercise> void addContextAudioRefs(T exercise, JSONObject ex,
+                                                                      Collection<ClientExercise> directlyRelated) {
     AudioAttribute latestContext = exercise.getLatestContext(true);
 
     if (latestContext == null) {
@@ -284,7 +285,7 @@ public class JsonExport {
       latestContext = directlyRelated
           .stream()
           .findFirst()
-          .map(contextSentence -> contextSentence.getLatestContext(true))
+          .map(contextSentence -> contextSentence.asCommon().getLatestContext(true))
           .orElse(latestContext);
     }
     //if (latestContext != null) {
@@ -298,7 +299,7 @@ public class JsonExport {
       latestContext = directlyRelated
           .stream()
           .findFirst()
-          .map(contextSentence -> contextSentence.getLatestContext(false))
+          .map(contextSentence -> contextSentence.asCommon().getLatestContext(false))
           .orElse(latestContext);
     }
 
@@ -324,7 +325,7 @@ public class JsonExport {
    * @return
    * @see #getJsonForExercise
    */
-  private JSONObject getJsonForCommonExercise(CommonExercise exercise, Collection<String> firstTypes) {
+  private JSONObject getJsonForCommonExercise(ClientExercise exercise, Collection<String> firstTypes) {
     JSONObject ex = new JSONObject();
     ex.put(ID, exercise.getID());
     ex.put(FL, exercise.getForeignLanguage());
@@ -344,7 +345,7 @@ public class JsonExport {
       ex.put(CT, "");
       ex.put(CTR, "");
     } else {
-      CommonExercise next = exercise.getDirectlyRelated().iterator().next();
+      CommonShell next = exercise.getDirectlyRelated().iterator().next();
       ex.put(CT,  next.getForeignLanguage());
       ex.put(CTR, next.getEnglish());
     }

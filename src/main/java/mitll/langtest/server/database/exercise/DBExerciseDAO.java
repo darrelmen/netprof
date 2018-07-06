@@ -117,8 +117,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     getRawExercises()
         .forEach(parent -> parent.getDirectlyRelated()
             .forEach(commonExercise -> {
-              idToContextExercise.put(commonExercise.getID(), commonExercise);
-              commonExercise.getMutable().setParentExerciseID(parent.getID());
+              idToContextExercise.put(commonExercise.getID(), commonExercise.asCommon());
+              commonExercise.asCommon().getMutable().setParentExerciseID(parent.getID());
             }));
   }
 
@@ -385,7 +385,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   /**
    * @param id
    * @param count
-   * @see SlickUserExerciseDAO#getExercisePhoneInfo
+   * @seex SlickUserExerciseDAO#getExercisePhoneInfo
    * @deprecated
    */
   public void updatePhones(int id, int count) {
@@ -400,7 +400,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   /**
    * @param pairs
    * @return
-   * @see SlickUserExerciseDAO#updateDominoBulk
+   * @sexe SlickUserExerciseDAO#updateDominoBulk
    */
   public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
     return getDao().updateDominoBulk(pairs).toSeq().size();

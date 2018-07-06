@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 4/5/17.
  */
-class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudioPanel {
+class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudioPanel<T> {
   private final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
 
   private static final String FAST = "Fast";

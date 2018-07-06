@@ -50,6 +50,7 @@ import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.SearchHelper;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
@@ -525,10 +526,10 @@ public class ProjectTest extends BaseTest {
       UserList<CommonExercise> userListByID = database.getUserListByIDExercises(3924, PROJECTID);
       List<CommonExercise> exercises = userListByID.getExercises();
       for (CommonExercise exercise : exercises) {
-        Collection<CommonExercise> directlyRelated = exercise.getDirectlyRelated();
+        Collection<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
 
         logger.info("User list " + userListByID + " : " + exercise.getID() + " '" + exercise.getForeignLanguage() + "'\t'" + exercise.getEnglish() + "'");
-        for (CommonExercise de : directlyRelated) {
+        for (ClientExercise de : directlyRelated) {
           logger.info("\tUser list " + userListByID + " : " + de.getID() + " '" + de.getForeignLanguage() + "'\t'" + de.getEnglish() + "'");
         }
       }

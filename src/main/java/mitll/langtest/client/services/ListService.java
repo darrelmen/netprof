@@ -40,7 +40,7 @@ import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;

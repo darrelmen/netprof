@@ -119,7 +119,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
             long xAsLong = toolTipData.getXAsLong();
             Integer exerciseID = timeToId.get(xAsLong);
            // if (exerciseID == null) logger.warning("getToolTip no ex at " + xAsLong);
-            CommonShell commonShell = getCommonShellAtTime(exerciseID, xAsLong);
+            T commonShell = getCommonShellAtTime(exerciseID, xAsLong);
             return getTooltip(toolTipData, exerciseID, commonShell);
           } catch (Exception e) {
             logger.warning("getToolTip " + e.getMessage());
@@ -132,8 +132,8 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
   protected int getHideDelay() {
     return HIDE_DELAY;
   }
-  protected CommonShell getCommonShellAtTime(Integer exerciseID, long xAsLong) {
-    CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
+  protected T getCommonShellAtTime(Integer exerciseID, long xAsLong) {
+    T commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
     if (commonShell == null) logger.warning("getCommonShellAtTime no ex found " + exerciseID);
     return commonShell;
   }
@@ -175,13 +175,13 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
    * @return
    * @see #getToolTip()
    */
-  protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
+  protected String getTooltip(ToolTipData toolTipData, Integer exid, T commonShell) {
 //    logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
     return getExerciseTooltip(toolTipData, commonShell, toolTipData.getSeriesName());
   }
 
   @NotNull
-  private String getExerciseTooltip(ToolTipData toolTipData, CommonShell commonShell, String seriesName) {
+  private String getExerciseTooltip(ToolTipData toolTipData, T commonShell, String seriesName) {
     boolean showEx = shouldShowExercise(seriesName);
 
     // logger.info("getExerciseTooltip for " + showEx + " series " + toolTipData.getSeriesName() + " shell " + commonShell);

@@ -43,9 +43,7 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -56,7 +54,7 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/11/16.
  */
-public class UnitChapterItemHelper<T extends CommonExercise> {
+public class UnitChapterItemHelper<T extends HasID & Details> {
   //private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
   private static final int MAXLEN = 10;
   /**
@@ -102,7 +100,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    * @return
    * @see GoodwaveExercisePanel#getQuestionContent
    */
-  private Widget getItemHeader(T e) {
+  private Widget getItemHeader(HasID e) {
     return new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + e.getID());
   }
 

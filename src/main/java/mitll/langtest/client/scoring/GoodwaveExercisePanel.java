@@ -48,7 +48,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.HasID;
 
@@ -65,7 +66,7 @@ import java.util.List;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class GoodwaveExercisePanel<T extends CommonExercise>
+public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
   //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
@@ -121,13 +122,13 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    * @param listContainer
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
-  protected GoodwaveExercisePanel(final T commonExercise,
+  protected GoodwaveExercisePanel(final T ClientExercise,
                                   final ExerciseController controller,
                                   final ListInterface<?, ?> listContainer,
                                   ExerciseOptions options
   ) {
     this.options = options;
-    this.exercise = commonExercise;
+    this.exercise = ClientExercise;
     this.controller = controller;
     String language = controller.getLanguage();
 

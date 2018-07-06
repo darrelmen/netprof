@@ -34,6 +34,7 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.server.audio.AudioExport;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 import org.jetbrains.annotations.NotNull;
@@ -71,10 +72,10 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @param id
    * @param projectid
-   * @param shouldSwap
+   * @paramx shouldSwap
    */
-  AudioExercise(int id, int projectid, boolean shouldSwap) {
-    super(id, shouldSwap);
+  AudioExercise(int id, int projectid ) {
+    super(id);
     this.projectid = projectid;
   }
 
@@ -613,7 +614,7 @@ public class AudioExercise extends ExerciseShell {
    * @param field
    * @param status
    * @param comment
-   * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
+   * @see IUserListManager#addAnnotations
    */
   public void addAnnotation(String field, String status, String comment) {
     fieldToAnnotation.put(field, new ExerciseAnnotation(status, comment));

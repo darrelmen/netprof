@@ -34,9 +34,7 @@ package mitll.langtest.server.database.excel;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioExport;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -154,9 +152,9 @@ public class ExcelExport {
       for (String type : typeOrder) {
         row.createCell(j++).setCellValue(exercise.getUnitToValue().get(type));
       }
-      Collection<CommonExercise> directlyRelated = exercise.getDirectlyRelated();
+      Collection<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
       if (!directlyRelated.isEmpty()) {
-        CommonExercise next = directlyRelated.iterator().next();
+        ClientExercise next = directlyRelated.iterator().next();
         row.createCell(j++).setCellValue(next.getForeignLanguage());
         row.createCell(j++).setCellValue(next.getAltFL());
         row.createCell(j++).setCellValue(next.getEnglish());

@@ -108,10 +108,10 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   public String getAltID() {
     return altID;
   }
-
+/*
   private void addQuestion(boolean isFL, String question, String answer) throws Exception {
     addQuestion(isFL ? FL : EN, question, answer);
-  }
+  }*/
 
 /*  public void addQuestion(boolean isFL, String question, String[] alternateAnswers) throws Exception {
     addQuestion(isFL ? FL : EN, question, alternateAnswers);
@@ -297,7 +297,7 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     return 0;
   }
 
-  @Override
+/*  @Override
   public int getRawScore() {
     return 0;
   }
@@ -310,7 +310,7 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   @Override
   public boolean hasScore() {
     return false;
-  }
+  }*/
 
   public String getOrient() {
     return orient;

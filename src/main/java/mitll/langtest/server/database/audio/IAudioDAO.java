@@ -37,10 +37,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.UserTimeBase;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.AudioAttributeExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickAudio;
 
@@ -86,7 +83,7 @@ public interface IAudioDAO extends IDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#writeZip
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
-  void attachAudioToExercises(Collection<CommonExercise> exercises, String language);
+ <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, String language);
 
   /**
    * @param firstExercise
@@ -95,7 +92,7 @@ public interface IAudioDAO extends IDAO {
    * @return
    * @see
    */
-  boolean attachAudio(CommonExercise firstExercise,
+  boolean attachAudio(ClientExercise firstExercise,
                       Collection<AudioAttribute> audioAttributes,
                       String language, boolean debug);
 

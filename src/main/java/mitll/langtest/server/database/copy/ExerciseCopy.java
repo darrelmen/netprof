@@ -3,6 +3,7 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -314,17 +315,18 @@ public class ExerciseCopy {
         missing.add(oldID);
       } else {
         int contextCount = 1;
-        for (CommonExercise context : ex.getDirectlyRelated()) {
-          context.getMutable().setOldID(parentID + "_" + (contextCount++));
+        for (ClientExercise context : ex.getDirectlyRelated()) {
+          CommonExercise serverContext = (CommonExercise) context;
+          serverContext.getMutable().setOldID(parentID + "_" + (contextCount++));
 
           SlickRelatedExercise relation =
-              insertContextExercise(projectid, slickUEDAO, importUser, typeOrder, now, parentID, context, dialogID);
+              insertContextExercise(projectid, slickUEDAO, importUser, typeOrder, now, parentID, serverContext, dialogID);
           pairs.add(relation);
           int newContextExID = relation.contextexid();
           //  logger.info("\taddContextExercises context id is "+ context.getID());
           if (context.getID() == -1) {
             if (DEBUG) logger.info("---> addContextExercises set context id to " + newContextExID);
-            context.getMutable().setID(newContextExID);
+            serverContext.getMutable().setID(newContextExID);
           }
           parentToChild.put(oldID, newContextExID);
 

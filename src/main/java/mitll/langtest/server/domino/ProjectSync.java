@@ -416,7 +416,7 @@ public class ProjectSync implements IProjectSync {
           logger.info("getNewAndChangedContextExercises import  " + importEx.getID() + "/" + importEx.getDominoID() +
               " has " + importCount + " but can't find it by " + id);
         } else {
-          List<CommonExercise> currentContextOnParent = new ArrayList<>(currentParent.getDirectlyRelated());
+          List<ClientExercise> currentContextOnParent = new ArrayList<>(currentParent.getDirectlyRelated());
 
           logger.info("getNewAndChangedContextExercises current " + currentParent.getID() + " has " + currentContextOnParent.size());
           logger.info("getNewAndChangedContextExercises import  " + importEx.getID() + "/" + importEx.getDominoID() + " has " + importCount + " context");
@@ -426,17 +426,19 @@ public class ProjectSync implements IProjectSync {
           List<CommonExercise> changedOrNew = new ArrayList<>();
 
 
-          for (CommonExercise importC : importEx.getDirectlyRelated()) {
-            CommonExercise knownContextMatch = null;
-            for (CommonExercise knownContext : currentContextOnParent) {
+          for (ClientExercise importC : importEx.getDirectlyRelated()) {
+            //CommonExercise commonImportC = importC.asCommon();
+            ClientExercise knownContextMatch = null;
+            for (ClientExercise knownContext : currentContextOnParent) {
               if (!didChange(importC, knownContext)) {
                 if (DEBUG) logger.info("\tgetNewAndChangedContextExercises no change for " + knownContext);
-                unchangedImport.add(importC);
+                unchangedImport.add(importC.asCommon());
                 if (DEBUG)
-                  logger.info("\tgetNewAndChangedContextExercises unchanged (" + unchangedImport.size() + ") import context ex " + importC.getID() + " " + importC.getEnglish() + " : " + importC.getForeignLanguage());
+                  logger.info("\tgetNewAndChangedContextExercises unchanged (" + unchangedImport.size() +
+                      ") import context ex " + importC.getID() + " " + importC.getEnglish() + " : " + importC.getForeignLanguage());
 
                 if (importC.getID() == -1) {
-                  importC.getMutable().setID(knownContext.getID());
+                  importC.asCommon().getMutable().setID(knownContext.getID());
                   logger.info("\tgetNewAndChangedContextExercises NOW : import context ex " + importC.getID() + " " + importC.getEnglish() + " : " + importC.getForeignLanguage());
                 }
                 knownContextMatch = knownContext;
@@ -445,7 +447,7 @@ public class ProjectSync implements IProjectSync {
             }
 
             if (knownContextMatch == null) {  // no match, must be changed or new
-              changedOrNew.add(importC);
+              changedOrNew.add(importC.asCommon());
             } else {
               if (!currentContextOnParent.remove(knownContextMatch)) {
                 logger.warn("huh? " + knownContextMatch);
@@ -456,7 +458,7 @@ public class ProjectSync implements IProjectSync {
           if (DEBUG)
             logger.info("getNewAndChangedContextExercises : comparing current num = " + currentContextOnParent.size() + " vs import " + importCount + "  vs " + unchangedImport.size());
 
-          Iterator<CommonExercise> currentSentences = currentContextOnParent.iterator();
+          Iterator<ClientExercise> currentSentences = currentContextOnParent.iterator();
           //importContext = new ArrayList<>(importContext);
           //importContext.forEach(ex -> logger.info("to        import " + ex.getID() + " / " + ex.getDominoID() + " " + ex.getEnglish()));
           if (DEBUG)
@@ -471,7 +473,7 @@ public class ProjectSync implements IProjectSync {
 
           // go one-by-one comparing them
           while (currentSentences.hasNext() && changedOrNewIter.hasNext()) {
-            CommonExercise currentSentence = currentSentences.next();
+            ClientExercise currentSentence = currentSentences.next();
             CommonExercise importSentence = changedOrNewIter.next();
 
             if (didChange(importSentence, currentSentence)) {   // how can this be false?
@@ -487,7 +489,7 @@ public class ProjectSync implements IProjectSync {
 
             // run to the end of imports -- rest of current are deletes.
             while (currentSentences.hasNext()) {
-              CommonExercise currentSentence = currentSentences.next();
+              ClientExercise currentSentence = currentSentences.next();
               toDelete.add(currentSentence.getID());
               updateItems.add(new DominoUpdateItem(currentSentence, changedField, DELETE).setParent(id));
               logger.info("\tgetNewAndChangedContextExercises delete " + currentSentence.getID() +
@@ -514,10 +516,10 @@ public class ProjectSync implements IProjectSync {
     return updateItems;
   }
 
-  private DominoUpdateItem getChanged(CommonExercise contextEx, CommonExercise updatedContext) {
+  private DominoUpdateItem getChanged(ClientExercise contextEx, ClientExercise updatedContext) {
     return new DominoUpdateItem(contextEx, new ArrayList<>(), CHANGE)
         .addChangedField(updatedContext.getDominoID() + " : " + updatedContext.getEnglish() + "/" + updatedContext.getForeignLanguage())
-        .setParent(contextEx);
+        .setParent(contextEx.asCommon());
   }
 
   private void rememberExID(List<CommonExercise> importUpdateEx, CommonExercise contextEx, int id) {
@@ -554,7 +556,7 @@ public class ProjectSync implements IProjectSync {
     }
     return currentKnownExercise;
   }*/
-  private boolean didChange(CommonExercise importEx, CommonExercise exercise) {
+  private boolean didChange(ClientExercise importEx, ClientExercise exercise) {
     return
         !exercise.getForeignLanguage().equals(importEx.getForeignLanguage()) ||
             !exercise.getEnglish().equals(importEx.getEnglish()) ||
@@ -779,12 +781,13 @@ public class ProjectSync implements IProjectSync {
         ex.getDirectlyRelated().forEach(contextSentence -> {
           int dominoID = contextSentence.getDominoID();
           if (dominoID > 0) {
-            dominoToEx.put(dominoID + "_" + contextSentence.getDominoContextIndex(), contextSentence);
+            CommonExercise commonExercise = contextSentence.asCommon();
+            dominoToEx.put(dominoID + "_" + commonExercise.getDominoContextIndex(), commonExercise);
           } else {
             logger.info("getDominoIDToContextExercise : no domino ID for " + contextSentence);
           }
 
-          childToParent.put(contextSentence, ex);
+          childToParent.put(contextSentence.asCommon(), ex);
         })
     );
     logger.info("getDominoIDToContextExercise importing " + toImport.size() + " vocab items + context exercises...");
@@ -1085,7 +1088,7 @@ public class ProjectSync implements IProjectSync {
           vocab.add(addAudioForVocab(projectid, transcriptToAudio, transcriptToMatches, ex, exid));
         }
         contextCounts.add(addAudioForContext(projectid, //oldIDToExID,
-            transcriptToAudio, transcriptToContextMatches, ex.getDirectlyRelated(), dominoToExID));
+            transcriptToAudio, transcriptToContextMatches, ex.getDirectlyRelated()));
       }
     }
     logger.info("getSlickAudio  : vocab " + vocab + " contextCounts " + contextCounts);
@@ -1138,7 +1141,6 @@ public class ProjectSync implements IProjectSync {
    * @param transcriptToAudio
    * @param transcriptToContextMatches
    * @param contextExercises
-   * @param dominoToExID
    * @return
    * @paramx exToInt
    * @see #getSlickAudios
@@ -1147,11 +1149,10 @@ public class ProjectSync implements IProjectSync {
                                        //   Map<String, Integer> exToInt,
                                        Map<String, List<SlickAudio>> transcriptToAudio,
                                        Collection<AudioMatches> transcriptToContextMatches,
-                                       Collection<CommonExercise> contextExercises,
-                                       Map<Integer, Integer> dominoToExID) {
+                                       Collection<ClientExercise> contextExercises) {
     int match = 0;
     int nomatch = 0;
-    for (CommonExercise context : contextExercises) {
+    for (ClientExercise context : contextExercises) {
       int cexid = context.getID();
       String prefix = cexid + "/" + context.getDominoID();
       if (context.getAudioAttributes().isEmpty()) {

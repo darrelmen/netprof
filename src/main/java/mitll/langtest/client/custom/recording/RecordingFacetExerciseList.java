@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 /**
  * @see RecorderNPFHelper#getMyListLayout
  */
-class RecordingFacetExerciseList extends LearnFacetExerciseList {
+class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends LearnFacetExerciseList<T> {
   //private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
 
   private static final String RECORD = "Record";
@@ -109,7 +109,7 @@ class RecordingFacetExerciseList extends LearnFacetExerciseList {
 
   @NotNull
   @Override
-  protected Set<Integer> getRequested(Collection<Integer> visibleIDs, List<CommonExercise> alreadyFetched) {
+  protected Set<Integer> getRequested(Collection<Integer> visibleIDs, List<ClientExercise> alreadyFetched) {
     return new HashSet<>(visibleIDs);
   }
 

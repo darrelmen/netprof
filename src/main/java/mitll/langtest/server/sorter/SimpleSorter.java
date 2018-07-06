@@ -33,9 +33,13 @@
 package mitll.langtest.server.sorter;
 
 import mitll.langtest.server.audio.AudioExport;
+import mitll.langtest.server.audio.AudioExportOptions;
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
+import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -47,7 +51,7 @@ import java.util.List;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/9/15.
  */
-public class SimpleSorter extends ExerciseComparator {
+public class SimpleSorter<T extends CommonShell> extends ExerciseComparator {
   private  boolean sortByEnglishOnly;
 
   SimpleSorter(boolean sortByEnglishOnly) {  this.sortByEnglishOnly = sortByEnglishOnly;  }
@@ -63,7 +67,7 @@ public class SimpleSorter extends ExerciseComparator {
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
    */
-  public void getSorted(List<? extends CommonShell> toSort, final boolean recordedLast, boolean sortByFL, String searchTerm) {
+  public void getSorted(List<T> toSort, final boolean recordedLast, boolean sortByFL, String searchTerm) {
     if (sortByEnglishOnly) {
       sortByEnglish(toSort, searchTerm);
     } else {
@@ -77,9 +81,9 @@ public class SimpleSorter extends ExerciseComparator {
    *
    * @param exerciseShells
    * @param searchTerm
-   * @see AudioExport#writeZipJustOneAudio
+   * @see AudioExport#writeUserListAudio
    */
-  public <T extends CommonShell> void sortByEnglish(List<T> exerciseShells, String searchTerm) {
+  public void sortByEnglish(List<T> exerciseShells, String searchTerm) {
     exerciseShells.sort((o1, o2) -> compareByEnglish(o1, o2, searchTerm));
   }
 }

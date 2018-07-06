@@ -33,11 +33,11 @@ import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
+public class TwoColumnExercisePanel<T extends ClientExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
 
-  private static final boolean HIDE_UNSAFE = false;
+//  private static final boolean HIDE_UNSAFE = false;
 
   enum FieldType {FL, TRANSLIT, MEANING, EN}
 
@@ -66,9 +66,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private final CommentAnnotator annotationHelper;
   private ClickableWords<T> clickableWords;
   private static final boolean showInitially = false;
-  private UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper;
+  private UnitChapterItemHelper<ClientExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<?, ?> listContainer;
-  private ChoicePlayAudioPanel playAudio, contextPlay;
+  private ChoicePlayAudioPanel<ClientExercise> playAudio, contextPlay;
   private List<IHighlightSegment> altflClickables = null;
   /**
    * @see #getFLEntry
@@ -798,7 +798,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     boolean hasEnglish = isValid(english);
     Widget recordPanel = makeFirstRow(e, rowWidget, hasEnglish);
     // logger.info("safe " + e.getID() + " " + e.isSafeToDecode());
-    if (HIDE_UNSAFE) recordPanel.setVisible(e.isSafeToDecode());
+   // if (HIDE_UNSAFE) recordPanel.setVisible(e.isSafeToDecode());
     card.add(rowWidget);
 
     //long now = System.currentTimeMillis();
@@ -861,7 +861,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       DivWidget recordButtonContainer = new DivWidget();
       recordButtonContainer.addStyleName("recordingRowStyle");
       recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
-      if (HIDE_UNSAFE) recordButtonContainer.setVisible(e.isSafeToDecode());
+    //  if (HIDE_UNSAFE) recordButtonContainer.setVisible(e.isSafeToDecode());
       flContainer.add(recordButtonContainer);
     }
 
@@ -976,7 +976,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return e.getFLToShow();
   }
 
-  private String getAltFL(CommonExercise exercise) {
+  private String getAltFL(ClientExercise exercise) {
     return exercise.getAltFLToShow();
   }
 
@@ -999,8 +999,8 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     //  int c = 0;
     String foreignLanguage = getFL(e);
     String altFL = getAltFL(e);
-    Collection<CommonExercise> directlyRelated = e.getDirectlyRelated();
-    for (CommonExercise contextEx : directlyRelated) {
+    Collection<ClientExercise> directlyRelated = e.getDirectlyRelated();
+    for (ClientExercise contextEx : directlyRelated) {
       DivWidget rowWidget = getRowWidget();
       card.add(rowWidget);
       addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
@@ -1021,7 +1021,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   private void addContextFields(DivWidget rowWidget,
                                 String foreignLanguage,
                                 String altFL,
-                                CommonExercise contextEx) {
+                                ClientExercise contextEx) {
     AnnotationHelper annotationHelper = new AnnotationHelper(controller, controller.getMessageHelper());
     Panel context = getContext(contextEx, foreignLanguage, altFL, annotationHelper);
     if (context != null) {
@@ -1188,9 +1188,9 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   /**
    * @param contextExercise
    * @return
-   * @see #addContextFields(DivWidget, String, String, CommonExercise)
+   * @see #addContextFields(DivWidget, String, String, ClientExercise)
    */
-  private Panel getContext(CommonExercise contextExercise,
+  private Panel getContext(ClientExercise contextExercise,
                            String itemText,
                            String altFL,
                            AnnotationHelper annotationHelper) {
@@ -1263,7 +1263,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return spacer;
   }
 
-  private ChoicePlayAudioPanel getContextPlay(CommonExercise contextExercise) {
+  private ChoicePlayAudioPanel getContextPlay(ClientExercise contextExercise) {
     AudioChangeListener contextAudioChanged = new AudioChangeListener() {
       @Override
       public void audioChanged(int id, long duration) {
@@ -1287,7 +1287,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       }
     };
     contextPlay
-        = new ChoicePlayAudioPanel(controller.getSoundManager(), contextExercise, controller, true, contextAudioChanged);
+        = new ChoicePlayAudioPanel<ClientExercise>(controller.getSoundManager(), contextExercise, controller, true, contextAudioChanged);
     AudioAttribute audioAttrPrefGender = contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
     contextPlay.setEnabled(audioAttrPrefGender != null);
     alignmentFetcher.setContextPlay(contextPlay);

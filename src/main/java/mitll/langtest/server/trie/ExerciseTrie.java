@@ -34,6 +34,7 @@ package mitll.langtest.server.trie;
 
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.commons.lang3.StringUtils;
@@ -136,13 +137,13 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private void addContextSentences(boolean isMandarin, boolean hasClickableCharacters, T exercise) {
-    for (CommonExercise ex : exercise.getDirectlyRelated()) {
+    for (ClientExercise ex : exercise.getDirectlyRelated()) {
       addEnglish(exercise, ex.getEnglish());
       includeForeign(isMandarin, hasClickableCharacters, exercise, ex);
     }
   }
 
-  private void includeForeign(boolean isMandarin, boolean hasClickableCharacters, T exercise, CommonExercise ex) {
+  private void includeForeign(boolean isMandarin, boolean hasClickableCharacters, T exercise, ClientExercise ex) {
     addForeign(isMandarin, hasClickableCharacters, exercise, ex.getForeignLanguage(), ex.getTransliteration());
     if (!exercise.getAltFL().isEmpty()) {
       addForeign(isMandarin, hasClickableCharacters, exercise, ex.getAltFL(), ex.getTransliteration());

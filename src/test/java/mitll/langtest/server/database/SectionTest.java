@@ -2,10 +2,10 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.ITestSection;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.project.IProjectDAO;
+import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;

@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
@@ -21,8 +22,8 @@ public class AlignmentFetcher {
   private final int exerciseID;
   private final ExerciseController controller;
   private final ListInterface<?, ?> listContainer;
-  private ChoicePlayAudioPanel playAudio;
-  private ChoicePlayAudioPanel contextPlay;
+  private ChoicePlayAudioPanel<ClientExercise> playAudio;
+  private ChoicePlayAudioPanel<ClientExercise> contextPlay;
   private int req;
   private AudioChangeListener audioChangeListener, contextChangeListener;
 
@@ -76,7 +77,8 @@ public class AlignmentFetcher {
       }
       if (addToRequest(currentAudioAttr)) req.add(currentAudioAttr.getUniqueID());
 
-      playAudio.getAllPossible().forEach(audioAttribute -> {
+      Set<AudioAttribute> allPossible = playAudio.getAllPossible();
+      allPossible.forEach(audioAttribute -> {
         if (addToRequest(audioAttribute)) req.add(audioAttribute.getUniqueID());
       });
     }

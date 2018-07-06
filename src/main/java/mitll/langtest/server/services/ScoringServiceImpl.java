@@ -49,6 +49,7 @@ import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -120,7 +121,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           if (exercise1 != null) {
             transliteration = exercise1.getTransliteration();
             exercise = exercise1;
-            Collection<CommonExercise> directlyRelated = exercise1.getDirectlyRelated();
+            Collection<ClientExercise> directlyRelated = exercise1.getDirectlyRelated();
             sentence =
                 result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
                     directlyRelated.iterator().next().getForeignLanguage() :
@@ -412,7 +413,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           customOrPredefExercise != null &&
           customOrPredefExercise.getDirectlyRelated() != null &&
           !customOrPredefExercise.getDirectlyRelated().isEmpty()) {
-        customOrPredefExercise = customOrPredefExercise.getDirectlyRelated().iterator().next();
+        customOrPredefExercise = customOrPredefExercise.getDirectlyRelated().iterator().next().asCommon();
 
         //logger.info("getAlignmentsFromDB using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }

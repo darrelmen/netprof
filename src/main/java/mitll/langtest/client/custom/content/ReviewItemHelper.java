@@ -46,10 +46,7 @@ import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -61,22 +58,22 @@ import static mitll.langtest.shared.answer.ActivityType.QUALITY_CONTROL;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @see ListManager#ListManager(ExerciseController, HasWidgets)
+ * @seex ListManager#ListManager
  * @since 3/26/2014.
  */
-public class ReviewItemHelper extends NPFHelper {
+public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> extends NPFHelper<T,U> {
   private final Logger logger = Logger.getLogger("ReviewItemHelper");
 
   /**
    *
    */
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
-  private FlexListLayout<CommonShell, CommonExercise> flexListLayout;
+  private FlexListLayout<T, U> flexListLayout;
 
   /**
    * @param controller
-   * @see mitll.langtest.client.custom.Navigation#Navigation
-   * @see ListManager#ListManager
+   * @seex mitll.langtest.client.custom.Navigation#Navigation
+   * @seex ListManager#ListManager
    */
   public ReviewItemHelper(final ExerciseController controller) {
     super(controller, true, false);
@@ -91,7 +88,7 @@ public class ReviewItemHelper extends NPFHelper {
    * @see #doNPF
    */
   @Override
-  protected Panel doInternalLayout(final UserList<CommonShell> ul, String instanceName) {
+  protected Panel doInternalLayout(final UserList<?> ul, String instanceName) {
     logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
     int id = ul.getID();
     this.flexListLayout = new ReviewFlexListLayout(id);
@@ -109,7 +106,7 @@ public class ReviewItemHelper extends NPFHelper {
     }
   }
 
-  private class ReviewFlexListLayout extends FlexListLayout<CommonShell, CommonExercise> {
+  private class ReviewFlexListLayout extends FlexListLayout<T, U> {
     private final int ulID;
 
     ReviewFlexListLayout(int ulID) {
@@ -127,14 +124,14 @@ public class ReviewItemHelper extends NPFHelper {
     }
 
     @Override
-    protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> pagingExerciseList) {
-      return new ExercisePanelFactory<CommonShell, CommonExercise>(getController(), pagingExerciseList) {
+    protected ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> pagingExerciseList) {
+      return new ExercisePanelFactory<T, U>(getController(), pagingExerciseList) {
         @Override
-        public Panel getExercisePanel(CommonExercise exercise) {
-          CommonExercise userExercise = new Exercise(exercise);
-          ReviewEditableExercise reviewEditableExercise =
-              new ReviewEditableExercise(controller,
-                  userExercise,
+        public Panel getExercisePanel(U exercise) {
+          //U userExercise = new Exercise(exercise);
+          ReviewEditableExercise<T,U> reviewEditableExercise =
+              new ReviewEditableExercise<>(controller,
+                  exercise,
                   ulID,
                   pagingExerciseList,
                   "ReviewEditableExercise"
@@ -151,10 +148,10 @@ public class ReviewItemHelper extends NPFHelper {
     }
 
     @Override
-    protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow, Panel currentExercisePanel,
+    protected PagingExerciseList<T, U> makeExerciseList(Panel topRow, Panel currentExercisePanel,
                                                                                String instanceName, DivWidget listHeader, DivWidget footer) {
       FlexListLayout outer = this;
-      return new NPExerciseList(currentExercisePanel, outer.getController(),
+      return new NPExerciseList<T, U>(currentExercisePanel, outer.getController(),
           new ListOptions(instanceName).setActivityType(QUALITY_CONTROL), -1) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 

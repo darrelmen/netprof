@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.audio;
 
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 
@@ -65,7 +66,7 @@ public interface IEnsureAudioHelper {
    * @return
    */
   String ensureCompressedAudio(int user,
-                               CommonExercise commonShell,
+                               ClientExercise commonShell,
                                String path,
                                AudioType audioType,
                                String language,

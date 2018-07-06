@@ -33,7 +33,10 @@
 package mitll.langtest.client.custom.content;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -43,7 +46,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -64,7 +67,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NPFHelper<T extends CommonShell, U extends CommonExercise> implements RequiresResize {
+public class NPFHelper<T extends CommonShell, U extends ClientExercise> implements RequiresResize {
   private final Logger logger = Logger.getLogger("NPFHelper");
 
   public static final String LIST_COMPLETE = "List complete!";

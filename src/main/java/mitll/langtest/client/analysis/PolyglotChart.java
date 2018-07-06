@@ -9,9 +9,8 @@ import org.moxieapps.gwt.highcharts.client.*;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
-public class PolyglotChart  extends BasicTimeSeriesPlot {
+public class PolyglotChart<T extends CommonShell>  extends BasicTimeSeriesPlot<T> {
   //private final Logger logger = Logger.getLogger("PolyglotChart");
   private static final String RECORDINGS = "Recordings";
   private static final String AVG_SCORE = "Avg. Score";
@@ -133,7 +132,7 @@ public class PolyglotChart  extends BasicTimeSeriesPlot {
 
 
   @Override
-  protected CommonShell getCommonShellAtTime(Integer exerciseID, long xAsLong) {
+  protected T getCommonShellAtTime(Integer exerciseID, long xAsLong) {
     if (exerciseID == null) {
       AudioAnswer audioAnswer = timeToAnswer.get(xAsLong);
       if (audioAnswer != null) exerciseID = audioAnswer.getExid();
@@ -149,7 +148,7 @@ public class PolyglotChart  extends BasicTimeSeriesPlot {
     return 2000;
   }
 
-  protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
+  protected String getTooltip(ToolTipData toolTipData, Integer exid, T commonShell) {
     return getFLTooltip(commonShell.getFLToShow()) + getTooltipHint();
   }
 

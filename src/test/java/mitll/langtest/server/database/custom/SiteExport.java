@@ -2,7 +2,8 @@ package mitll.langtest.server.database.custom;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.junit.Test;

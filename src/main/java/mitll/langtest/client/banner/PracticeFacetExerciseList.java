@@ -10,18 +10,19 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ScoredExercise;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class PracticeFacetExerciseList<T extends CommonShell> extends LearnFacetExerciseList<T> {
+public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise> extends LearnFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
-  private final PracticeHelper practiceHelper;
+  private final PracticeHelper<T, U> practiceHelper;
   private ControlState controlState;
 
   PracticeFacetExerciseList(ExerciseController controller,
-                            PracticeHelper practiceHelper,
+                            PracticeHelper<T, U> practiceHelper,
                             Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
     super(
         topRow,
@@ -85,7 +86,7 @@ public class PracticeFacetExerciseList<T extends CommonShell> extends LearnFacet
     getStatsFlashcardFactory().setSelection(typeToSection);
   }
 
-  private StatsFlashcardFactory<CommonShell, ClientExercise> getStatsFlashcardFactory() {
+  private StatsFlashcardFactory<T, U> getStatsFlashcardFactory() {
     return practiceHelper.getStatsFlashcardFactory();
   }
 

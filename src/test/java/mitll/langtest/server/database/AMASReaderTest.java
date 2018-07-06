@@ -1,18 +1,7 @@
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
-import mitll.langtest.shared.amas.QAPair;
-import org.apache.logging.log4j.*;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Stream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

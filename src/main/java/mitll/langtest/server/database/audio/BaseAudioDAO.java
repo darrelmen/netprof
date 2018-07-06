@@ -164,7 +164,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param language
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
-  public void attachAudioToExercises(Collection<CommonExercise> exercises, String language) {
+  public <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, String language) {
     Set<Integer> exerciseIDs = exercises.stream().map(HasID::getID).collect(Collectors.toSet());
     logger.info("attachAudioToExercises to " + exercises.size() + " exercises for " +
         language + " : " + exerciseIDs.size());
@@ -184,7 +184,7 @@ public abstract class BaseAudioDAO extends DAO {
     }
     boolean doDEBUG = DEBUG_ATTACH;// || exercises.size() < 6;// || (id == 125524) || (id == 126304);
 
-    for (CommonExercise exercise : exercises) {
+    for (ClientExercise exercise : exercises) {
       int id = exercise.getID();
 
       List<AudioAttribute> audioAttributes = audioAttributesForExercises.get(id);
@@ -221,7 +221,7 @@ public abstract class BaseAudioDAO extends DAO {
    */
   private void addContextAudio(String language,
                                Map<Integer, List<AudioAttribute>> audioAttributesForExercises,
-                               CommonExercise exercise) {
+                               ClientExercise exercise) {
     int id = exercise.getID();
     boolean doDEBUG = DEBUG_ATTACH;
 
@@ -230,7 +230,7 @@ public abstract class BaseAudioDAO extends DAO {
         .filter(AudioAttribute::isContextAudio)
         .collect(Collectors.toList());
 
-    for (CommonExercise contextSentence : exercise.getDirectlyRelated()) {
+    for (ClientExercise contextSentence : exercise.getDirectlyRelated()) {
       int contextID = contextSentence.getID();
       List<AudioAttribute> audioAttributes = audioAttributesForExercises.get(contextID);
 
@@ -327,7 +327,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @see mitll.langtest.server.json.JsonExport#getJsonArray
    * @see
    */
-  public boolean attachAudio(CommonExercise firstExercise,
+  public boolean attachAudio(ClientExercise firstExercise,
                              Collection<AudioAttribute> audioAttributes,
                              String language,
                              boolean debug) {
@@ -369,8 +369,14 @@ public abstract class BaseAudioDAO extends DAO {
     return allSucceeded;
   }
 
-  private Collection<Integer> getAudioIDs(CommonExercise firstExercise) {
-    return firstExercise.getAudioIDs();
+//  private Collection<Integer> getAudioIDs(CommonExercise firstExercise) {
+//    return firstExercise.getAudioIDs();
+//  }
+
+  private Collection<Integer> getAudioIDs(ClientExercise firstExercise) {
+    Collection<AudioAttribute> audioAttributes1 = firstExercise.getAudioAttributes();
+    Set<Integer> collect = audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
+    return collect;
   }
 
   /**
@@ -390,11 +396,11 @@ public abstract class BaseAudioDAO extends DAO {
    * @return false if the text of the exercise and the transcript on the audio don't match
    * @see #attachAudio
    */
-  private boolean attachAudioAndFixPath(CommonExercise firstExercise,
+  private boolean attachAudioAndFixPath(ClientExercise firstExercise,
                                         String mediaDir,
                                         AudioAttribute attr,
                                         String language, boolean debug) {
-    Collection<CommonExercise> directlyRelated = firstExercise.getDirectlyRelated();
+    Collection<ClientExercise> directlyRelated = firstExercise.getDirectlyRelated();
     boolean isContext = attr.isContextAudio();
     String exerciseText = isContext && !directlyRelated.isEmpty() ?
         directlyRelated.iterator().next().getForeignLanguage() :
@@ -405,7 +411,7 @@ public abstract class BaseAudioDAO extends DAO {
       firstExercise.getMutableAudio().addAudio(attr);
 
       if (isContext) {
-        for (CommonExercise dir : directlyRelated) {
+        for (ClientExercise dir : directlyRelated) {
           if (isMatchExToAudio(attr, dir)) {
             firstExercise.getMutableAudio().addAudio(attr);
             break;
@@ -460,7 +466,7 @@ public abstract class BaseAudioDAO extends DAO {
     }
   }
 
-  private boolean isMatchExToAudio(AudioAttribute attr, CommonExercise dir) {
+  private boolean isMatchExToAudio(AudioAttribute attr, CommonShell dir) {
     return isMatchExToAudio(attr, dir.getForeignLanguage());
   }
 
@@ -768,7 +774,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param userExercise
    * @param fieldToAnnotation
    * @return
-   * @see DatabaseImpl#editItem(CommonExercise, boolean)
+   * @see DatabaseImpl#editItem
    */
   public Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
                                                Map<String, ExerciseAnnotation> fieldToAnnotation) {

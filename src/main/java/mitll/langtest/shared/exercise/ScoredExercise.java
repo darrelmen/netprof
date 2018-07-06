@@ -44,4 +44,8 @@ import java.util.List;
  */
 public interface ScoredExercise {
   List<CorrectAndScore> getScores();
+
+  int getRawScore();
+  float getScore();
+  boolean hasScore();
 }

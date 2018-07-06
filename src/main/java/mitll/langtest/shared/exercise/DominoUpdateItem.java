@@ -1,13 +1,10 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.domino.ImportInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class DominoUpdateItem implements HasID {
   private int dominoID;
@@ -27,7 +24,7 @@ public class DominoUpdateItem implements HasID {
   public DominoUpdateItem() {
   }
 
-  public DominoUpdateItem(CommonExercise commonExercise,   ITEM_STATUS status) {
+  public DominoUpdateItem(ClientExercise commonExercise,   ITEM_STATUS status) {
     this(commonExercise.getID(), commonExercise.getDominoID(), commonExercise.getOldID(), commonExercise.getEnglish(), commonExercise.getForeignLanguage(), new ArrayList<>(), status);
   }
   /**
@@ -37,11 +34,11 @@ public class DominoUpdateItem implements HasID {
    * @see mitll.langtest.server.domino.ProjectSync#getDominoUpdateResponse
    * @see mitll.langtest.server.domino.ProjectSync#getNewAndChangedContextExercises
    */
-  public DominoUpdateItem(CommonExercise commonExercise, List<String> changedFields, ITEM_STATUS status) {
+  public DominoUpdateItem(ClientExercise commonExercise, List<String> changedFields, ITEM_STATUS status) {
     this(commonExercise.getID(), commonExercise.getDominoID(), commonExercise.getOldID(), commonExercise.getEnglish(), commonExercise.getForeignLanguage(), changedFields, status);
   }
 
-  public DominoUpdateItem(CommonExercise commonExercise, String changedField, ITEM_STATUS status) {
+  public DominoUpdateItem(ClientExercise commonExercise, String changedField, ITEM_STATUS status) {
     this(commonExercise.getID(), commonExercise.getDominoID(), commonExercise.getOldID(), commonExercise.getEnglish(), commonExercise.getForeignLanguage(), new ArrayList<>(), status);
     changedFields.add(changedField);
   }

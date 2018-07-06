@@ -276,7 +276,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       statement.setLong(i++, userExercise.getCreator());
 
       if (userExercise.hasContext()) {
-        CommonExercise next = userExercise.getDirectlyRelated().iterator().next();
+        CommonShell next = userExercise.getDirectlyRelated().iterator().next();
         statement.setString(i++, fixSingleQuote(next.getForeignLanguage()));
         statement.setString(i++, fixSingleQuote(next.getEnglish()));
       } else {

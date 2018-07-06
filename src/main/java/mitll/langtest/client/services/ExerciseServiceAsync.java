@@ -37,14 +37,14 @@ import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
 
-public interface ExerciseServiceAsync {
-  <T extends CommonShell> void getExerciseIds(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<T>> async);
+public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
+  void getExerciseIds(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<T>> async);
 
-  <T extends Shell> void getExercise(int exid, boolean isFlashcardReq, AsyncCallback<T> async);
+  void getExercise(int exid, boolean isFlashcardReq, AsyncCallback<T> async);
 
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
 
-  void getFullExercises(int reqid, Collection<Integer> ids, AsyncCallback<ExerciseListWrapper<CommonExercise>> async);
+  void getFullExercises(int reqid, Collection<Integer> ids, AsyncCallback<ExerciseListWrapper<ClientExercise>> async);
 
   void getLatestScoreAudioPath(int userID, int exid, long nearTime, AsyncCallback<Pair> async);
 }

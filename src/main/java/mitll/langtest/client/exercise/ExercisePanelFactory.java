@@ -79,7 +79,7 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
   /**
    * @param e
    * @return
-   * @seex mitll.langtest.client.list.ExerciseList#makeExercisePanel
+   * @see mitll.langtest.client.list.ExerciseList#addExerciseWidget
    */
   public abstract Panel getExercisePanel(U e);
 

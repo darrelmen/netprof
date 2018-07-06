@@ -36,7 +36,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Shell;
 
@@ -54,7 +54,7 @@ public class NPExerciseList<T extends CommonShell, U extends Shell> extends Hist
   private final int pageSize;
 
   public NPExerciseList(Panel currentExerciseVPanel, ExerciseController controller,
-                           ListOptions listOptions, int pageSize) {
+                        ListOptions listOptions, int pageSize) {
     super(currentExerciseVPanel, controller, listOptions);
     this.pageSize = pageSize;
   }

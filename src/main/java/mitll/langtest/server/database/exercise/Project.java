@@ -445,7 +445,7 @@ public class Project implements IPronunciationLookup {
    * @param prefix
    * @return
    * @see mitll.langtest.server.ScoreServlet#getExerciseIDFromText
-   * @see mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
+   * @seex mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
    */
   public CommonExercise getExerciseBySearch(String prefix) {
     return getMatchEither(prefix, fullTrie.getExercises(prefix));
@@ -495,7 +495,7 @@ public class Project implements IPronunciationLookup {
         List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(english);
         exercise = getFirstMatchingLength(english, fl, fullContextTrieExercises);
         if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
-          exercise = exercise.getDirectlyRelated().iterator().next();
+          exercise = getFirstContext(exercise);
         }
         logger.info("\tgetExerciseBySearchBoth context looking for '" + english + "' found " + exercise);
       }
@@ -511,14 +511,14 @@ public class Project implements IPronunciationLookup {
         logger.info("\tinitially context num = " + fullContextTrieExercises.size());
         exercise = getMatchEither(english, fl, fullContextTrieExercises);
         if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
-          exercise = exercise.getDirectlyRelated().iterator().next();
+          exercise = getFirstContext(exercise);
         }
         logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " or '" + fl +
             "' found " + exercise);
         if (exercise == null && !fullContextTrieExercises.isEmpty()) {
           exercise = fullContextTrieExercises.iterator().next();
           if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
-            exercise = exercise.getDirectlyRelated().iterator().next();
+            exercise = getFirstContext(exercise);
           }
           logger.info("\tnow returning " + exercise);
         }
@@ -526,6 +526,10 @@ public class Project implements IPronunciationLookup {
 
       return exercise;
     }
+  }
+
+  private CommonExercise getFirstContext(CommonExercise exercise) {
+    return exercise.getDirectlyRelated().iterator().next().asCommon();
   }
 
   private CommonExercise getFirstMatchingLength(String english, String fl, List<CommonExercise> exercises1) {
@@ -576,7 +580,7 @@ public class Project implements IPronunciationLookup {
    * @param transcript
    * @param transliteration
    * @return
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict(SlickExercise, IPronunciationLookup, List)
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict
    */
   @Override
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {

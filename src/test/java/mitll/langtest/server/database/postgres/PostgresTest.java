@@ -40,6 +40,7 @@ import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
@@ -48,7 +49,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class PostgresTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(PostgresTest.class);
@@ -424,7 +428,7 @@ public class PostgresTest extends BaseTest {
     for (CommonExercise ex : rawExercises.subList(0, 100)) {
       logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "' : " +
           ex.getDirectlyRelated().size() + " context sentences.");
-      for (CommonExercise cex : ex.getDirectlyRelated()) {
+      for (ClientExercise cex : ex.getDirectlyRelated()) {
         logger.info("\t context " + cex.getID() + " '" + cex.getEnglish() + "' '" + cex.getForeignLanguage() + "'");
       }
     }
@@ -449,7 +453,7 @@ public class PostgresTest extends BaseTest {
           logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "'" +
               " meaning '" + ex.getMeaning() +
               "' : " + ex.getDirectlyRelated().size() + " context sentences.");
-          for (CommonExercise cex : ex.getDirectlyRelated()) {
+          for (ClientExercise cex : ex.getDirectlyRelated()) {
             logger.info("\t context " + cex.getID() + " '" + cex.getEnglish() + "' '" + cex.getForeignLanguage() + "'");
           }
         }
@@ -534,7 +538,7 @@ public class PostgresTest extends BaseTest {
         logger.info("ex " + ex.getID() + " '" + ex.getEnglish() + "' '" + ex.getForeignLanguage() + "'" +
             " meaning '" + ex.getMeaning() +
             "' : " + ex.getDirectlyRelated().size() + " context sentences.");
-        for (CommonExercise cex : ex.getDirectlyRelated()) {
+        for (ClientExercise cex : ex.getDirectlyRelated()) {
           logger.info("\t context " + cex.getID() + " '" + cex.getEnglish() + "' '" + cex.getForeignLanguage() + "'");
         }
       }

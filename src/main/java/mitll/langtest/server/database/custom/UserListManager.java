@@ -33,10 +33,6 @@
 package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.PathWriter;
-import mitll.langtest.server.audio.TrackInfo;
-import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
@@ -60,7 +56,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -833,17 +828,17 @@ public class UserListManager implements IUserListManager {
    * Really create a new exercise and associated context exercise in database.
    * Add newly created exercise to the user list.
    *
-   * @param userListID
-   * @param userExercise notional until now!
-   * @param mediaDir
+   * @paramx userListID
+   * @paramx userExercise notional until now!
+   * @paramx mediaDir
    * @seex mitll.langtest.server.services.AudioServiceImpl#newExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    * @see mitll.langtest.server.services.ListServiceImpl#newExercise
    */
-  @Override
+/*  @Override
   public void newExercise(int userListID, CommonExercise userExercise, String mediaDir) {
     newExerciseOnList(getUserListNoExercises(userListID), userExercise);
-  }
+  }*/
 
   public UserList getUserListNoExercises(int userListID) {
     logger.info("getUserListNoExercises for " + userListID);
@@ -851,10 +846,11 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   * @see #newExercise(int, CommonExercise, String)
-   * @param userList
-   * @param userExercise
+   * @seex #newExercise(int, CommonExercise, String)
+   * @params userList
+   * @params userExercise
    */
+/*
   private void newExerciseOnList(UserList userList, CommonExercise userExercise) {
     int projectID = userExercise.getProjectID();
     int newExerciseID = userExerciseDAO.add(userExercise, false, false, getTypeOrder(projectID));
@@ -874,18 +870,20 @@ public class UserListManager implements IUserListManager {
     // TODOx : necessary?
 //    fixAudioPaths(userExercise, true, mediaDir);
   }
+*/
 
   private Collection<String> getTypeOrder(int projectID) {
     return userDAO.getDatabase().getTypeOrder(projectID);
   }
 
   /**
-   * @see #newExerciseOnList(UserList, CommonExercise)
-   * @param userExercise
-   * @param newExerciseID
-   * @param projectID
+   * @seex #newExerciseOnList(UserList, CommonExercise)
+   * @paramx userExercise
+   * @paramx newExerciseID
+   * @paramx projectID
    * @return
    */
+/*
   private int makeContextExercise(CommonExercise userExercise, int newExerciseID, int projectID) {
     Exercise userExercise1 = new Exercise(-1, userExercise.getCreator(), "", projectID, false);
     int contextID = userExerciseDAO.add(userExercise1, false, true, getTypeOrder(projectID));
@@ -893,6 +891,7 @@ public class UserListManager implements IUserListManager {
     userExercise.getDirectlyRelated().add(userExercise1);
     return contextID;
   }
+*/
 
 
   private void addItemToList(int userListID, int exid) {
@@ -978,7 +977,7 @@ public class UserListManager implements IUserListManager {
    * @seex IUserListManager#newExercise
    * @see UserListManager#editItem
    */
-  private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
+/*  private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
     AudioAttribute regularSpeed = userExercise.getRegularSpeed();
     if (regularSpeed == null) {
       logger.info("fixAudioPaths no audio yet for " + userExercise);
@@ -1001,7 +1000,7 @@ public class UserListManager implements IUserListManager {
         !slowSpeed.getAudioRef().contains(mediaDir)) {
       fixAudioPathOfAttribute(userExercise, overwrite, slowSpeed, now, id, projectID, SLOW);
     }
-  }
+  }*/
 
   /**
    * @param userExercise
@@ -1012,7 +1011,7 @@ public class UserListManager implements IUserListManager {
    * @param projectID
    * @param prefix
    */
-  private void fixAudioPathOfAttribute(CommonExercise userExercise,
+/*  private void fixAudioPathOfAttribute(CommonExercise userExercise,
                                        boolean overwrite,
                                        AudioAttribute regularSpeed,
                                        long now,
@@ -1031,7 +1030,7 @@ public class UserListManager implements IUserListManager {
         overwrite,
         new TrackInfo(userExercise.getForeignLanguage(), artist, userExercise.getEnglish(), ""));
     regularSpeed.setAudioRef(refAudio);
-  }
+  }*/
 
   /**
    * Copying audio from initial recording location to new location.
@@ -1047,7 +1046,7 @@ public class UserListManager implements IUserListManager {
    * @return new, permanent audio path
    * @see #fixAudioPaths
    */
-  private String getRefAudioPath(int projid,
+/*  private String getRefAudioPath(int projid,
                                  int id,
                                  File fileRef,
                                  String destFileName,
@@ -1064,7 +1063,7 @@ public class UserListManager implements IUserListManager {
         id,
         serverProps,
         trackInfo);
-  }
+  }*/
 
   /**
    * @param userExerciseDAO
@@ -1179,7 +1178,7 @@ public class UserListManager implements IUserListManager {
    * @see #markAllFieldsFixed
    */
   @Override
-  public void addAnnotations(CommonExercise exercise) {
+  public void addAnnotations(ClientExercise exercise) {
     if (exercise != null) {
       {
         MutableAnnotationExercise mutableAnnotation = exercise.getMutableAnnotation();

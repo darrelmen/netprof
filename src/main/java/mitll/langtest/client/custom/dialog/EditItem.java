@@ -43,7 +43,7 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.MutableExercise;
@@ -75,7 +75,7 @@ public class EditItem {
   private static final String EDIT_ITEM = "editItem";
 
   private final ExerciseController controller;
-  private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
+  private PagingExerciseList<CommonShell, ClientExercise> exerciseList;
 
   /**
    * @param controller
@@ -127,7 +127,7 @@ public class EditItem {
    * @paramz includeAddItem
    * @see #editItem
    */
-  private PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel right,
+  private PagingExerciseList<CommonShell, ClientExercise> makeExerciseList(Panel right,
                                                                            String instanceName,
                                                                            UserList<CommonShell> originalList) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
@@ -150,7 +150,7 @@ public class EditItem {
    * @return
    * @see #makeExerciseList
    */
-  public CommonExercise getNewItem() {
+  public ClientExercise getNewItem() {
     int user = controller.getUserManager().getUser();
     Exercise exercise = new Exercise(
         NEW_EXERCISE_ID,
@@ -179,14 +179,14 @@ public class EditItem {
     return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
   }
 
-  private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-    exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(
+  private void setFactory(final PagingExerciseList<CommonShell, ClientExercise> exerciseList) {
+    exerciseList.setFactory(new ExercisePanelFactory<CommonShell, ClientExercise>(
         controller, exerciseList) {
       private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
       @Override
-      public Panel getExercisePanel(CommonExercise exercise) {
-        TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(exercise,
+      public Panel getExercisePanel(ClientExercise exercise) {
+        TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
             controller,
             exerciseList,
             alignments, true);

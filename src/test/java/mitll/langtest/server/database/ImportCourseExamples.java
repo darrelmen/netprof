@@ -32,8 +32,8 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.ServerProperties;
-import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ImportCourseExamples {
   private static final Logger logger = LogManager.getLogger(ImportCourseExamples.class);

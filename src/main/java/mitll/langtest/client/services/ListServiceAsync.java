@@ -34,7 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -77,7 +77,7 @@ public interface ListServiceAsync {
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 
-  void newExercise(int userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
+ // void newExercise(int userListID, ClientExercise userExercise, AsyncCallback<ClientExercise> async);
 
 
   void deleteList(int id, AsyncCallback<Boolean> async);

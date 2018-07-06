@@ -44,10 +44,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.user.FormField;
-import mitll.langtest.shared.exercise.AnnotationExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -60,7 +57,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/28/2014.
  */
-class EditableExerciseDialog extends NewUserExercise {
+class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> extends NewUserExercise<T,U> {
   public static final String FOREIGN_LANGUAGE = "foreignLanguage";
   public static final String TRANSLITERATION = "transliteration";
   public static final String MEANING = "meaning";
@@ -72,7 +69,7 @@ class EditableExerciseDialog extends NewUserExercise {
   private final HTML fastAnno = new HTML();
   private final HTML slowAnno = new HTML();
 
-  private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
+  private final PagingExerciseList<T, U> exerciseList;
 
   private static final boolean DEBUG = false;
 
@@ -83,10 +80,10 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see EditItem#setFactory
    */
   public EditableExerciseDialog(ExerciseController controller,
-                                CommonExercise changedUserExercise,
+                                U changedUserExercise,
                                 int originalListID,
 
-                                PagingExerciseList<CommonShell, CommonExercise> exerciseList,
+                                PagingExerciseList<T, U> exerciseList,
                                 String instanceName) {
     super(controller, changedUserExercise, instanceName, originalListID);
     fastAnno.addStyleName("editComment");
@@ -106,9 +103,9 @@ class EditableExerciseDialog extends NewUserExercise {
   protected void gotBlur(FormField foreignLang,
                          RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording,
-                         ListInterface<CommonShell, CommonExercise> pagingContainer,
+                         ListInterface<T, U> pagingContainer,
                          Panel toAddTo) {
-    validateThenPost(foreignLang, rap, normalSpeedRecording, pagingContainer, toAddTo, false, foreignChanged());
+    validateThenPost(rap, normalSpeedRecording, pagingContainer, toAddTo, false);
   }
 
   /**
@@ -117,7 +114,7 @@ class EditableExerciseDialog extends NewUserExercise {
    */
   @Override
   protected void addItemsAtTop(Panel container) {
-    UnitChapterItemHelper<CommonExercise> unit = new UnitChapterItemHelper<>(controller.getProjectStartupInfo().getTypeOrder());
+    UnitChapterItemHelper<U> unit = new UnitChapterItemHelper<>(controller.getProjectStartupInfo().getTypeOrder());
     unit.addUnitChapterItem(newUserExercise, container);
   }
 
@@ -135,7 +132,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @see NewUserExercise#addFields
    */
   @Override
-  protected Panel getCreateButton(ListInterface<CommonShell, CommonExercise> pagingContainer,
+  protected Panel getCreateButton(ListInterface<T, U> pagingContainer,
                                   Panel toAddTo,
                                   ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
@@ -169,14 +166,14 @@ class EditableExerciseDialog extends NewUserExercise {
    * @param exerciseList
    * @param toAddTo
    * @param onClick
-   * @see #isValidForeignPhrase
+   * @see NewUserExercise#validateThenPost(RecordAudioPanel, ControlGroup, ListInterface, Panel, boolean)
    */
   @Override
-  void afterValidForeignPhrase(final ListInterface<CommonShell, CommonExercise> exerciseList,
+  void afterValidForeignPhrase(final ListInterface<T, U> exerciseList,
                                final Panel toAddTo,
                                boolean onClick) {
     //  if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
-    checkForForeignChange();
+   // checkForForeignChange();
     postChangeIfDirty(exerciseList, onClick);
   }
 
@@ -192,8 +189,8 @@ class EditableExerciseDialog extends NewUserExercise {
    * @return
    * @see NewUserExercise#afterValidForeignPhrase(ListInterface, Panel, boolean)
    */
-  boolean checkForForeignChange() {
-    boolean didChange = foreignChanged();
+/*  boolean checkForForeignChange() {
+    boolean didChange = false;//foreignChanged();
     if (DEBUG) logger.info("checkForForeignChange didChange " + didChange);
     if (didChange) {
       String header = getWarningHeader();
@@ -215,7 +212,7 @@ class EditableExerciseDialog extends NewUserExercise {
       }
     }
     return didChange;
-  }
+  }*/
 
   boolean hasAudio() {
     return (
@@ -227,8 +224,8 @@ class EditableExerciseDialog extends NewUserExercise {
 
   /**
    * @return
-   * @see #checkForForeignChange()
-   * @see ReviewEditableExercise#checkForForeignChange()
+   * @seex #checkForForeignChange()
+   * @seex ReviewEditableExercise#checkForForeignChange()
    */
   String getWarningHeader() {
     return "Consistent with " + controller.getLanguage() + "?";
@@ -236,7 +233,7 @@ class EditableExerciseDialog extends NewUserExercise {
 
   /**
    * @return
-   * @see ReviewEditableExercise#checkForForeignChange()
+   * @seex ReviewEditableExercise#checkForForeignChange()
    */
   String getWarningForFL() {
     return "Is the audio consistent with \"" + foreignLang.getSafeText() + "\" ?";
@@ -247,7 +244,7 @@ class EditableExerciseDialog extends NewUserExercise {
    * @seex EditItem#addEditOrAddPanel
    */
   @Override
-  public void setFields(CommonExercise newUserExercise) {
+  public void setFields(U newUserExercise) {
     if (DEBUG) logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
 
     // foreign lang
@@ -311,8 +308,9 @@ class EditableExerciseDialog extends NewUserExercise {
     };
   }
 
-  private void setTranslit(CommonExercise newUserExercise) {
+  private void setTranslit(U newUserExercise) {
     TextBoxBase box = translit.box;
+    String originalTransliteration;
     box.setText(originalTransliteration = newUserExercise.getTransliteration());
     if (originalTransliteration.isEmpty()) {
       box.setPlaceholder("optional");
@@ -321,7 +319,8 @@ class EditableExerciseDialog extends NewUserExercise {
     useAnnotation(newUserExercise, TRANSLITERATION, translitAnno);
   }
 
-  private void setFL(CommonExercise newUserExercise) {
+  private void setFL(U newUserExercise) {
+    String originalForeign;
     foreignLang.box.setText(originalForeign = newUserExercise.getForeignLanguage().trim());
     useAnnotation(newUserExercise, FOREIGN_LANGUAGE, foreignAnno);
   }
@@ -330,10 +329,11 @@ class EditableExerciseDialog extends NewUserExercise {
    * Only the first context sentence...
    * @param newUserExercise
    */
-  private void setContext(CommonExercise newUserExercise) {
+  private void setContext(U newUserExercise) {
+    String originalContext;
     context.box.setText(originalContext = newUserExercise.getContext().trim());
     if (!useAnnotation(newUserExercise, CONTEXT, contextAnno)) {
-      List<CommonExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+      List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
 
       if (!directlyRelated.isEmpty()) {
         useAnnotation(directlyRelated.get(0), FOREIGN_LANGUAGE, contextAnno);
@@ -341,10 +341,11 @@ class EditableExerciseDialog extends NewUserExercise {
     }
   }
 
-  private void setContextTrans(CommonExercise newUserExercise) {
+  private void setContextTrans(U newUserExercise) {
+    String originalContextTrans;
     contextTrans.box.setText(originalContextTrans = newUserExercise.getContextTranslation().trim());
     if (!useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno)){
-      List<CommonExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+      List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
 
       if (!directlyRelated.isEmpty()) {
         useAnnotation(directlyRelated.get(0), ENGLISH, contextTransAnno);
@@ -352,8 +353,9 @@ class EditableExerciseDialog extends NewUserExercise {
     }
   }
 
-  private void setEnglish(CommonExercise newUserExercise) {
+  private void setEnglish(U newUserExercise) {
     String english = isEnglish() ? getMeaning(newUserExercise) : newUserExercise.getEnglish();
+    String originalEnglish;
     this.english.box.setText(originalEnglish = english);
     ((TextBox) this.english.box).setVisibleLength(english.length() + 4);
     if (english.length() > 20) {

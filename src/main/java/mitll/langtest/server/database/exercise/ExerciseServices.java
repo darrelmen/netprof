@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public interface ExerciseServices {
    * @param keepAudio
    * @return
    */
-  CommonExercise editItem(CommonExercise userExercise, boolean keepAudio);
+  void editItem(ClientExercise userExercise, boolean keepAudio);
 
   Set<Integer> getIDs(int projectid);
 

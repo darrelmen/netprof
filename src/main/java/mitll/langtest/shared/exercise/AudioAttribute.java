@@ -32,9 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AlignmentOutput;

@@ -47,7 +47,6 @@ import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
 
@@ -57,7 +56,7 @@ import mitll.langtest.shared.project.ProjectType;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/4/16.
  */
-class PracticeHelper<T extends CommonShell, U extends CommonExercise & ClientExercise> extends SimpleChapterNPFHelper<T, U> {
+class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends SimpleChapterNPFHelper<T, U> {
   // private final Logger logger = Logger.getLogger("PracticeHelper");
   private static final String PRACTICE = "practice";
 

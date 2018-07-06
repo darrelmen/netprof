@@ -52,8 +52,8 @@ import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ScoredExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -70,7 +70,7 @@ import static mitll.langtest.client.list.FacetExerciseList.LISTS;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/4/16.
  */
-public class QuizHelper<T extends CommonShell, U extends CommonExercise> extends PracticeHelper<T, U> {
+public class QuizHelper<T extends CommonShell & ScoredExercise, U extends ClientExercise> extends PracticeHelper<T, U> {
   private final Logger logger = Logger.getLogger("QuizHelper");
 
   private static final String QUIZ = "Quiz";
@@ -108,7 +108,7 @@ public class QuizHelper<T extends CommonShell, U extends CommonExercise> extends
 
       @Override
       public int getRoundTimeMinutes(boolean isDry) {
-        FacetExerciseList<T, ClientExercise> exerciseList = getExerciseListTyped();
+        FacetExerciseList<T, U> exerciseList = getExerciseListTyped();
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
         if (idToList == null) {
           logger.info("getRoundTimeMinutes no user lists yet ");
@@ -125,13 +125,13 @@ public class QuizHelper<T extends CommonShell, U extends CommonExercise> extends
         }
       }
 
-      private FacetExerciseList<T, ClientExercise> getExerciseListTyped() {
-        return (FacetExerciseList<T, ClientExercise>) this.getExerciseList();
+      private FacetExerciseList<T, U> getExerciseListTyped() {
+        return (FacetExerciseList<T, U>) this.getExerciseList();
       }
 
       @Override
       public int getMinScore() {
-        FacetExerciseList<T, ClientExercise> exerciseList = getExerciseListTyped();
+        FacetExerciseList<T, U> exerciseList = getExerciseListTyped();
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
         if (idToList == null) {
           logger.info("getMinScore no user lists yet ");
@@ -147,7 +147,7 @@ public class QuizHelper<T extends CommonShell, U extends CommonExercise> extends
 
       @Override
       public boolean shouldShowAudio() {
-        FacetExerciseList<T, ClientExercise> exerciseList = getExerciseListTyped();
+        FacetExerciseList<T, U> exerciseList = getExerciseListTyped();
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
         if (idToList == null) {
           logger.info("shouldShowAudio no user lists yet ");
@@ -203,6 +203,8 @@ public class QuizHelper<T extends CommonShell, U extends CommonExercise> extends
   private Panel rememberedTopRow;
 
   /**
+   * TODO : why can't compiler figure this out????
+   * What am I doing wrong?
    * @param outer
    * @return
    */
@@ -214,7 +216,7 @@ public class QuizHelper<T extends CommonShell, U extends CommonExercise> extends
                                                           Panel currentExercisePanel,
                                                           String instanceName, DivWidget listHeader, DivWidget footer) {
         rememberedTopRow = topRow;
-        return new MyPracticeFacetExerciseList(topRow, currentExercisePanel, instanceName, listHeader);
+        return (PagingExerciseList<T, U>) new MyPracticeFacetExerciseList (topRow, currentExercisePanel, instanceName, listHeader);
       }
 
       @Override
@@ -246,7 +248,7 @@ public class QuizHelper<T extends CommonShell, U extends CommonExercise> extends
     exerciseList.clearListSelection();
   }
 
-  private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList<T> {
+  private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList<T,U> {
     MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
       super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
     }

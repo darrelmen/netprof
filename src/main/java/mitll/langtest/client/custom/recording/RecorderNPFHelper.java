@@ -54,10 +54,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
-import mitll.langtest.shared.exercise.AnnotationExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.Map;
 
@@ -70,7 +67,7 @@ import java.util.Map;
  * @since 2/10/15.
  * <p>
  */
-public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
   // private final Logger logger = Logger.getLogger("RecorderNPFHelper");
   /**
    *
@@ -97,13 +94,13 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   }
 
   @Override
-  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
+  protected ExercisePanelFactory<T, ClientExercise> getFactory(PagingExerciseList<T, ClientExercise> exerciseList) {
     return new RecordFactory(exerciseList);
   }
 
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
+  protected FlexListLayout<T, ClientExercise> getMyListLayout(SimpleChapterNPFHelper<T, ClientExercise> outer) {
+    return new MyFlexListLayout<T, ClientExercise>(controller, outer) {
       final FlexListLayout outerLayout = this;
 
       protected void styleBottomRow(Panel bottomRow) {
@@ -111,12 +108,12 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
       }
 
       @Override
-      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
+      protected PagingExerciseList<T, ClientExercise> makeExerciseList(Panel topRow,
                                                                                  Panel currentExercisePanel,
                                                                                  String instanceName,
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
-        return new RecordingFacetExerciseList(controller,
+        return new RecordingFacetExerciseList<T>(controller,
             topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.CONTEXT){
 
         };
@@ -151,7 +148,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   /**
    * @see #getFactory(PagingExerciseList)
    */
-  private class RecordRefAudioPanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
+  private class RecordRefAudioPanel extends WaveformExercisePanel<T, ClientExercise> implements CommentAnnotator {
     //    private final Logger logger = Logger.getLogger("RecordRefAudioPanel");
 
     /**
@@ -161,7 +158,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
      * @param instance
      * @see RecorderNPFHelper#getFactory
      */
-    RecordRefAudioPanel(CommonExercise e, ExerciseController controller1, ListInterface<CommonShell, CommonExercise> exerciseList1, String instance) {
+    RecordRefAudioPanel(ClientExercise e, ExerciseController controller1, ListInterface<T, ClientExercise> exerciseList1, String instance) {
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
     }
 
@@ -203,7 +200,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
      * @seex #ExercisePanel(T, LangTestDatabaseAsync, ExerciseController, ListInterface, String, String)
      */
     @Override
-    protected Widget getQuestionContent(CommonExercise e) {
+    protected Widget getQuestionContent(ClientExercise e) {
       String content = getExerciseContent(e);
 
       HTML maybeRTLContent = getMaybeRTLContent(content);
@@ -287,13 +284,13 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
     }
   }
 
-  private class RecordFactory extends ExercisePanelFactory<CommonShell, CommonExercise> {
-    RecordFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
+  private class RecordFactory extends ExercisePanelFactory<T, ClientExercise> {
+    RecordFactory(PagingExerciseList<T, ClientExercise> exerciseList) {
       super(RecorderNPFHelper.this.controller, exerciseList);
     }
 
     @Override
-    public Panel getExercisePanel(CommonExercise e) {
+    public Panel getExercisePanel(ClientExercise e) {
       Scheduler.get().scheduleDeferred(RecorderNPFHelper.this::getProgressInfo);
       return new RecordRefAudioPanel(e, controller, exerciseList, myView.toString());
     }

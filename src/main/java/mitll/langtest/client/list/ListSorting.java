@@ -2,6 +2,7 @@ package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.ListBox;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +16,7 @@ import java.util.logging.Logger;
  * TODO : don't do sorting here on text
  * Created by go22670 on 3/22/17.
  */
-class ListSorting<T extends CommonShell, U extends Shell> {
+class ListSorting<T extends CommonShell & ScoredExercise, U extends Shell> {
   private final Logger logger = Logger.getLogger("ListSorting");
 
   private static final String LANG_ASC = "langASC";

@@ -40,7 +40,9 @@ import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -197,7 +199,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    */
   @Override
   public String ensureCompressedAudio(int user,
-                                      CommonExercise commonShell,
+                                      ClientExercise commonShell,
                                       String path,
                                       AudioType audioType,
                                       String language, Map<Integer, User> idToUser) {
@@ -224,7 +226,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
 
     if (audioType.isContext() && !noExerciseYet) {
       if (commonShell.hasContext()) {
-        CommonExercise contextSentence = commonShell.getDirectlyRelated().iterator().next();
+        CommonShell contextSentence = commonShell.getDirectlyRelated().iterator().next();
         title = contextSentence.getForeignLanguage();
         comment = contextSentence.getEnglish();
       }
@@ -258,7 +260,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * @param trackInfo
    * @param language
    * @return file path of mp3 file
-   * @see IEnsureAudioHelper#ensureCompressedAudio(int, CommonExercise, String, AudioType, String, Map)
+   * @see IEnsureAudioHelper#ensureCompressedAudio(int, ClientExercise, String, AudioType, String, Map)
    */
   private String ensureMP3(String wavFile, TrackInfo trackInfo, String language) {
     String parent = serverProps.getAnswerDir();

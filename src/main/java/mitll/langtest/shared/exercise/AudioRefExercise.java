@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Client side
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -64,7 +65,7 @@ public interface AudioRefExercise {
 
   Collection<AudioAttribute> getAudioAttributes();
 
-  Collection<Integer> getAudioIDs();
+//  Collection<Integer> getAudioIDs();
 
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
 
@@ -76,4 +77,24 @@ public interface AudioRefExercise {
   List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap);
 
   Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale, boolean includeContext);
+
+  /**
+   * CLIENT
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay
+   * @param isMale
+   * @return
+   */
+  AudioAttribute getAudioAttrPrefGender(boolean isMale);
+
+  /**
+   * CLIENT
+   * @param isMale
+   * @param preferredUsers
+   * @param includeContext
+   * @return
+   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices
+   */
+  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Integer> preferredUsers, boolean includeContext);
+
+  List<AudioAttribute> getMostRecentAudioEasy(boolean isMale, boolean includeContext);
 }

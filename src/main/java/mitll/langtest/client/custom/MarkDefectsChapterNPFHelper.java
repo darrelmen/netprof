@@ -43,7 +43,7 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.*;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 
@@ -56,7 +56,7 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends CommonExercise>  extends SimpleChapterNPFHelper<T, U> {
+public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends ClientExercise>  extends SimpleChapterNPFHelper<T, U> {
   //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
   private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
   private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";

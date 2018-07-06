@@ -44,7 +44,10 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.STATE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,7 +62,7 @@ import java.util.logging.Logger;
  * Time: 6:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WaveformExercisePanel<L extends CommonShell, T extends CommonExercise> extends ExercisePanel<L, T> {
+public class WaveformExercisePanel<L extends CommonShell, T extends ClientExercise> extends ExercisePanel<L, T> {
   private Logger logger = Logger.getLogger("WaveformExercisePanel");
 
   private static final String NO_AUDIO_TO_RECORD = "No in-context sentence for this exercise.";
@@ -128,7 +131,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
 
   /**
    * @return
-   * @see #getAnswerWidget(CommonExercise, ExerciseController, int)
+   * @seex #getAnswerWidget(CommonExercise, ExerciseController, int)
    */
   private boolean isNormalRecord() {
     return doNormalRecording;

@@ -50,25 +50,24 @@ public interface ExerciseService<T extends CommonShell> extends RemoteService {
   ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) throws DominoSessionException;
 
   /**
-   * @param <T>
    * @param exid
    * @param isFlashcardReq
    * @return
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
    */
-  <T extends Shell> T getExercise(int exid, boolean isFlashcardReq) throws DominoSessionException;
+  T getExercise(int exid, boolean isFlashcardReq) throws DominoSessionException;
 
-  ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids) throws DominoSessionException;
+  ExerciseListWrapper<ClientExercise> getFullExercises(int reqid, Collection<Integer> ids) throws DominoSessionException;
 
   FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException;
 
   /**
-   * @see mitll.langtest.client.analysis.PlayAudio#playLast
    * @param userID
    * @param exid
    * @param nearTime
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.analysis.PlayAudio#playLast
    */
   Pair getLatestScoreAudioPath(int userID, int exid, long nearTime) throws DominoSessionException;
 }

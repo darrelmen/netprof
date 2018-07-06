@@ -39,7 +39,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.StartupInfo;
@@ -105,6 +105,6 @@ public interface AudioService extends RemoteService {
    * @param userExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
-  void editItem(CommonExercise userExercise, boolean keepAudio) throws DominoSessionException, RestrictedOperationException;
+  void editItem(ClientExercise userExercise, boolean keepAudio) throws DominoSessionException, RestrictedOperationException;
 
 }

@@ -32,9 +32,6 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.server.database.result.BaseResultDAO;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -61,9 +58,9 @@ public interface MutableExercise extends CommonShell, MutableShell {
    */
   void setSafeToDecode(boolean isSafeToDecode);
 
-  void addContextExercise(CommonExercise contextExercise);
+  void addContextExercise(ClientExercise contextExercise);
 
-  Collection<CommonExercise> getDirectlyRelated();
+//  Collection<CommonExercise> getDirectlyRelated();
 
   void setOldID(String id);
 

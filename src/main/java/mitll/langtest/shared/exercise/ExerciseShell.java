@@ -55,7 +55,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   protected String english = "";
   protected String meaning = "";
   protected String foreignLanguage = "";
-  protected boolean shouldSwap;
+  //protected boolean shouldSwap;
   int numPhones;
   /**
    *
@@ -70,9 +70,9 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   /**
    * @see AudioExercise#AudioExercise(int, int, boolean)
    */
-  ExerciseShell(int realID, boolean shouldSwap) {
+  ExerciseShell(int realID){//}, boolean shouldSwap) {
     this("", "", "", realID, 0);
-    this.shouldSwap = shouldSwap;
+    //this.shouldSwap = shouldSwap;
   }
 
   /**
@@ -188,24 +188,28 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   }
 
   /**
+   * @deprecated bad idea
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getAltFL
    * @return
    */
   public String getAltFLToShow() {
-    return shouldSwap ? foreignLanguage : altfl;
+    return /*shouldSwap ? foreignLanguage :*/ altfl;
   }
 
   /**
+   * @deprecated bad idea
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getFL
    * @return
    */
   public String getFLToShow() {
-    return shouldSwap ? altfl : foreignLanguage;
+    return /*shouldSwap ? altfl :*/ foreignLanguage;
   }
 
+/*
   public boolean shouldSwap() {
     return shouldSwap;
   }
+*/
 
   /**
    * @return

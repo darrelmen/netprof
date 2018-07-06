@@ -45,7 +45,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
@@ -180,19 +180,19 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
 
-  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactoryInject(
-      final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
+  protected ExercisePanelFactory<CommonShell, ClientExercise> getFactoryInject(
+      final PagingExerciseList<CommonShell, ClientExercise> exerciseList,
       PanelFactory panelFactory) {
-    return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
+    return new ExercisePanelFactory<CommonShell, ClientExercise>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(CommonExercise e) {
+      public Panel getExercisePanel(ClientExercise e) {
         return panelFactory.getExercisePanel(e);
       }
     };
   }
 
   public interface PanelFactory {
-    Panel getExercisePanel(CommonExercise e);
+    Panel getExercisePanel(ClientExercise e);
   }
 
 

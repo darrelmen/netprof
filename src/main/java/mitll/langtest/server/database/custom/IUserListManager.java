@@ -38,6 +38,7 @@ import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.services.ListServiceImpl;
 import mitll.langtest.shared.custom.*;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
@@ -100,12 +101,12 @@ public interface IUserListManager {
   UserList getUserListNoExercises(int userListID);
 
   /**
-   * @see ListServiceImpl#newExercise(int, CommonExercise)
+   * @seexx ListServiceImpl#newExercise(int, CommonExercise)
    * @param userListID
    * @param userExercise
    * @param mediaDir
    */
-  void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
+ // void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
 
   void addItemToList(int userListID, String exerciseID, int exid);
 
@@ -120,7 +121,7 @@ public interface IUserListManager {
   void addAnnotation(int exerciseID, String field, String status, String comment, int userid);
 
 
-  void addAnnotations(CommonExercise exercise);
+  void addAnnotations(ClientExercise exercise);
 
   void markState(CommonExercise exercise, STATE state, int creatorID);
 

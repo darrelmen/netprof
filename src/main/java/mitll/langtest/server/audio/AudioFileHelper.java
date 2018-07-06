@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.audio;
 
+import com.google.gwt.resources.client.ClientBundle;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.server.*;
 import mitll.langtest.server.autocrt.AutoCRT;
@@ -45,10 +46,7 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MutableExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -228,10 +226,11 @@ public class AudioFileHelper implements AlignDecode {
             }
 
             // check context sentences
-            for (CommonExercise context : exercise.getDirectlyRelated()) {
-              boolean validForeignPhrase2 = isValidForeignPhrase(now, safe, unsafe, context);
-              if (context.isSafeToDecode() != validForeignPhrase2) {
-                context.getMutable().setSafeToDecode(validForeignPhrase2);
+            for (ClientExercise context : exercise.getDirectlyRelated()) {
+              CommonExercise commonExercise = context.asCommon();
+              boolean validForeignPhrase2 = isValidForeignPhrase(now, safe, unsafe, commonExercise);
+              if (commonExercise.isSafeToDecode() != validForeignPhrase2) {
+                commonExercise.getMutable().setSafeToDecode(validForeignPhrase2);
               }
             }
           }
@@ -530,8 +529,8 @@ public class AudioFileHelper implements AlignDecode {
                                AudioCheck.ValidityAndDur validity,
                                AudioAnswer answer) {
     PretestScore pretestScore = answer.getPretestScore();
-    boolean hasScore = pretestScore == null;
-    int processDur = hasScore ? 0 : pretestScore.getProcessDur();
+    boolean hasScore = pretestScore != null;
+    int processDur = hasScore ? pretestScore.getProcessDur() : 0;
 
     AnswerInfo info = new AnswerInfo(
         new AnswerInfo(
@@ -578,7 +577,8 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper
    */
-  public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute, boolean doDecode, int userID, File absoluteFile) {
+  public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute,
+                                        boolean doDecode, int userID, File absoluteFile) {
     String audioRef = attribute.getAudioRef();
 
     if (DEBUG) logger.info("decodeAndRemember alignment -- " + exercise.getID() + " " + attribute);
@@ -1171,10 +1171,10 @@ public class AudioFileHelper implements AlignDecode {
   private String session = null;
 
   /**
-   * @see #getProxyScore
    * @param hydraHost
    * @param projID
    * @return
+   * @see #getProxyScore
    */
   private String getSession(String hydraHost, int projID) {
     try {
@@ -1396,7 +1396,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param url
    * @param userID
    * @return AudioAnswer with decode info attached, if doFlashcard is true
-   * @see #getAudioAnswer(int, CommonShell, String, File, AudioCheck.ValidityAndDur, DecoderOptions, int)
+   * @see #getAudioAnswer(int, CommonExercise, String, File, AudioCheck.ValidityAndDur, DecoderOptions, int)
    */
   private AudioAnswer getAudioAnswer(CommonExercise exercise,
                                      int reqid,

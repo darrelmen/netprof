@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.langtest.server.database.custom.IUserListManager;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -40,7 +42,7 @@ package mitll.langtest.shared.exercise;
  */
 public interface MutableAnnotationExercise extends AnnotationExercise {
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#addAnnotations
+   * @see IUserListManager#addAnnotations
    * @param field
    * @param status
    * @param comment

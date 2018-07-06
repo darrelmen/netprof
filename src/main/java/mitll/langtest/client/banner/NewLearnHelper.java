@@ -6,16 +6,15 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
-import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.LearnFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.HashMap;
@@ -24,15 +23,15 @@ import java.util.Map;
 /**
  * Created by go22670 on 4/5/17.
  */
-class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-//  private final Logger logger = Logger.getLogger("NewLearnHelper");
+class NewLearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
+  //  private final Logger logger = Logger.getLogger("NewLearnHelper");
   NewLearnHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
     super(controller, viewContaner, myView);
   }
 
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
+  protected FlexListLayout<T, ClientExercise> getMyListLayout(SimpleChapterNPFHelper<T, ClientExercise> outer) {
+    return new MyFlexListLayout<T, ClientExercise>(controller, outer) {
       /**
        * @see FlexListLayout#makeNPFExerciseList
        * @param topRow
@@ -43,12 +42,12 @@ class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
        * @return
        */
       @Override
-      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
-                                                                                 Panel currentExercisePanel,
-                                                                                 String instanceName,
-                                                                                 DivWidget listHeader,
-                                                                                 DivWidget footer) {
-        return new LearnFacetExerciseList(
+      protected PagingExerciseList<T, ClientExercise> makeExerciseList(Panel topRow,
+                                                          Panel currentExercisePanel,
+                                                          String instanceName,
+                                                          DivWidget listHeader,
+                                                          DivWidget footer) {
+        return new LearnFacetExerciseList<T>(
             topRow,
             currentExercisePanel,
             controller,
@@ -59,12 +58,12 @@ class NewLearnHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
     };
   }
 
-  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-    return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
+  protected ExercisePanelFactory<T, ClientExercise> getFactory(final PagingExerciseList<T, ClientExercise> exerciseList) {
+    return new ExercisePanelFactory<T, ClientExercise>(controller, exerciseList) {
       private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
       @Override
-      public Panel getExercisePanel(CommonExercise e) {
+      public Panel getExercisePanel(ClientExercise e) {
         return new TwoColumnExercisePanel<>(e, controller, exerciseList, alignments, false);
       }
     };

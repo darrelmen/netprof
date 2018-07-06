@@ -533,7 +533,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   @Override
-  public void editItem(CommonExercise userExercise, boolean keepAudio) throws DominoSessionException {
+  public void editItem(ClientExercise userExercise, boolean keepAudio) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     db.editItem(userExercise, keepAudio);
   }

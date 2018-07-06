@@ -27,7 +27,7 @@ import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
@@ -606,8 +606,8 @@ public class ProjectChoices {
 
   private void addPopoverUsual(SlimProject projectForLang, FocusWidget button) {
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
-    UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
-    button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
+    UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
+    button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
   }
 
   private final BasicDialog basicDialog = new BasicDialog();
@@ -615,27 +615,27 @@ public class ProjectChoices {
   private void showPopoverUsual(SlimProject projectForLang,
                                 Widget button,
                                 Set<String> typeOrder,
-                                UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper) {
+                                UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper) {
     Map<String, String> value = new HashMap<>();
     value.put(COURSE, projectForLang.getCourse());
 
     basicDialog.showPopover(
         button,
         null,
-        commonExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, value),
+        ClientExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, value),
         Placement.RIGHT);
   }
 
   private void addPopover(SlimProject projectForLang, FocusWidget button) {
     Set<String> typeOrder = getProps(projectForLang).keySet();
-    UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
-    button.addMouseOverHandler(event -> showPopover(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
+    UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
+    button.addMouseOverHandler(event -> showPopover(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
   }
 
   private void showPopover(SlimProject projectForLang,
                            Widget button,
                            Set<String> typeOrder,
-                           UnitChapterItemHelper<CommonExercise> unitChapterItemHelper) {
+                           UnitChapterItemHelper<ClientExercise> unitChapterItemHelper) {
     basicDialog.showPopover(
         button,
         null,

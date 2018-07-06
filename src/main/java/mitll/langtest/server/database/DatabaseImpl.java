@@ -99,10 +99,7 @@ import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MutableAudioExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.result.MonitorResult;
@@ -1084,12 +1081,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   @Override
-  public CommonExercise editItem(CommonExercise userExercise, boolean keepAudio) {
+  public void editItem(ClientExercise clientExercise, boolean keepAudio) {
+    CommonExercise userExercise = clientExercise.asCommon();
     int id = userExercise.getID();
     logger.debug("editItem exercise #" + id +
         " keep audio " + keepAudio +
         " mediaDir : " + getServerProps().getMediaDir() +
         " audio " + userExercise.getAudioAttributes());
+
     int projectID = userExercise.getProjectID();
     if (projectID < 0) {
       logger.warn("huh? no project id on user exer " + userExercise);
@@ -1141,7 +1140,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (isPredef) {
       getSectionHelper(projectID).refreshExercise(userExercise);
     }
-    return userExercise;
+    //return userExercise;
   }
 
   private void clearDefects(Set<AudioAttribute> defects, CommonExercise exercise) {

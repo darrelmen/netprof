@@ -96,7 +96,7 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
   private final int id;
   private boolean playing = false;
   protected final ExerciseController controller;
-  protected final HasID exercise;
+  protected final T exercise;
 
   /**
    * @param soundManager
@@ -113,7 +113,7 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
                         Widget optionalToTheRight,
                         boolean doSlow,
                         ExerciseController controller,
-                        HasID exercise,
+                        T exercise,
                         boolean addButtonsNow) {
     this.soundManager = soundManager;
     addStyleName("playButton");
@@ -159,12 +159,12 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
    * @seex PressAndHoldExercisePanel#getPlayAudioPanel
    * @deprecated only for amas and dialog
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, String path, boolean doSlow, ExerciseController controller, HasID exercise) {
+  public PlayAudioPanel(SoundManagerAPI soundManager, String path, boolean doSlow, ExerciseController controller, T exercise) {
     this(soundManager, "", null, doSlow, controller, exercise, true);
     loadAudio(path);
   }
 
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, ExerciseController controller, HasID exercise) {
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, ExerciseController controller, T exercise) {
     this(soundManager, playListener, "", null, controller, exercise, true);
   }
 
@@ -184,7 +184,7 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
                         String buttonTitle,
                         Widget optionalToTheRight,
                         ExerciseController controller,
-                        HasID exercise,
+                        T exercise,
                         boolean addButtonsNow) {
     this(soundManager, buttonTitle, optionalToTheRight, false, controller, exercise, addButtonsNow);
 

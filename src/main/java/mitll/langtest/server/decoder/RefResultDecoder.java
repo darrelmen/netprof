@@ -42,6 +42,7 @@ import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
@@ -816,7 +817,7 @@ public class RefResultDecoder {
     added += queueDecode(language, decodedFiles, exercise, audioAttributes);
     possible += audioAttributes.size();
 
-    for (CommonExercise direct : exercise.getDirectlyRelated()) {
+    for (ClientExercise direct : exercise.getDirectlyRelated()) {
       Collection<AudioAttribute> audioAttributes2 = direct.getAudioAttributes();
       added += queueDecode(language, decodedFiles, exercise, audioAttributes2);
       possible += audioAttributes2.size();
@@ -1034,11 +1035,11 @@ public class RefResultDecoder {
   }
 
   /**
-   * @param title
-   * @param exid
+   * @paramx title
+   * @paramx exid
    * @return
    * @paramx audioAttributes
-   * @see #trimRef
+   * @seex #trimRef
    */
 /*  private Info doTrim(Collection<AudioAttribute> audioAttributes, String title, int exid, String comment,
                       String language) {
