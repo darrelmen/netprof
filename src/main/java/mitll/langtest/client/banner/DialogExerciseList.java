@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.Widget;
@@ -21,12 +22,13 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends FacetExerciseList<T, IDialog> {
+  public static final int MAX_LENGTH_ID = 35;// 23;
   //private DialogViewHelper dialogViewHelper;
   private final Logger logger = Logger.getLogger("DialogExerciseList");
   private static final int CHOICE_WIDTH = 170;//180;//190;//195;
   private static final int MIN_HEIGHT = 125;//100;// 110;//115;//125;
   private static final int NORMAL_MIN_HEIGHT = 67;
-  private static final int LANGUAGE_SIZE = 5;
+  private static final int LANGUAGE_SIZE = 6;
 
   public DialogExerciseList(DialogViewHelper dialogViewHelper,
                             Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader,
@@ -142,7 +144,8 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
     //section.add(getHeader(result, nest));
 
     {
-      final Container flags = new Container();
+      //final Container flags = new Container();
+      final DivWidget flags = new DivWidget();
       flags.add(addFlags(result));
       section.add(flags);
     }
@@ -189,7 +192,10 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
 
   @NotNull
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {
-    return new com.google.gwt.user.client.ui.Image(cc);
+    Image image = new Image(cc);
+    image.setHeight("150px");
+    image.setWidth("150px");
+    return image;
   }
 
   @NotNull
@@ -197,7 +203,7 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
     DivWidget container = new DivWidget();
     Heading label;
 
-    container.add(label = getLabel(truncate(name, 23), ""));
+    container.add(label = getLabel(truncate(name, MAX_LENGTH_ID), ""));
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
