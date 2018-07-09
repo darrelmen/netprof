@@ -35,6 +35,7 @@ package mitll.langtest.server.database.dialog;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogType;
@@ -171,6 +172,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
     Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated =
         databaseImpl.getUserExerciseDAO().getRelatedExercise().getDialogIDToRelated(projid);
 
+    Map<Integer, List<SlickRelatedExercise>> dialogIDToCoreRelated =
+        databaseImpl.getUserExerciseDAO().getRelatedCoreExercise().getDialogIDToRelated(projid);
+
+    Project project = databaseImpl.getProject(projid);
+
     allJoinByProject.forEach((dialogID, slickDialogAttributeJoins) -> {
       Dialog dialog = idToDialog.get(dialogID);
       // add attributes
@@ -180,6 +186,15 @@ public class DialogDAO extends DAO implements IDialogDAO {
       //add exercises
       addExercises(projid, dialogIDToRelated, dialogID, dialog);
 
+      List<SlickRelatedExercise> relatedExercises = dialogIDToCoreRelated.get(dialogID);
+      if (relatedExercises != null) {
+        relatedExercises.forEach(slickRelatedExercise ->
+            dialog
+                .getCoreVocabulary()
+                .add(project
+                    .getExerciseByID(slickRelatedExercise.exid()))
+        );
+      }
       // add images
       addImage(projid, dialog);
     });
@@ -202,7 +217,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         "",
         slickDialog.entitle(),
         new ArrayList<>(),
-        new ArrayList<>());
+        new ArrayList<>(), new ArrayList<>());
     //  this.slickDialog = slickDialog;
 
   }
@@ -267,47 +282,50 @@ public class DialogDAO extends DAO implements IDialogDAO {
   private void addExercises(int projid, Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated, Integer dialogID, Dialog dialog) {
     List<SlickRelatedExercise> slickRelatedExercises = dialogIDToRelated.get(dialogID);
 
-    List<CommonExercise> exercises = new ArrayList<>();
-    Set<Integer> candidate = new HashSet<>();
+    if (slickRelatedExercises != null) {
+
+      List<CommonExercise> exercises = new ArrayList<>();
+      Set<Integer> candidate = new HashSet<>();
 
 //    logger.info("got " + slickRelatedExercises.size() + " relations for " + dialogID);
 
-    slickRelatedExercises.forEach(slickRelatedExercise -> {
+      slickRelatedExercises.forEach(slickRelatedExercise -> {
 //      logger.info("relation " + slickRelatedExercise);
 
-      CommonExercise exercise = databaseImpl.getExercise(projid, slickRelatedExercise.exid());
-      if (exercise != null) {
-        CommonExercise parent = new Exercise(exercise);
-        CommonExercise child = new Exercise(databaseImpl.getExercise(projid, slickRelatedExercise.contextexid()));
+        CommonExercise exercise = databaseImpl.getExercise(projid, slickRelatedExercise.exid());
+        if (exercise != null) {
+          CommonExercise parent = new Exercise(exercise);
+          CommonExercise child = new Exercise(databaseImpl.getExercise(projid, slickRelatedExercise.contextexid()));
 
-        parent.getDirectlyRelated().add(child);
-        child.getMutable().setParentExerciseID(parent.getParentExerciseID());
+          parent.getDirectlyRelated().add(child);
+          child.getMutable().setParentExerciseID(parent.getParentExerciseID());
 
-        exercises.add(parent);
-        exercises.add(child);
+          exercises.add(parent);
+          exercises.add(child);
 
-        candidate.add(parent.getID());
-        candidate.add(child.getID());
-      }
-    });
+          candidate.add(parent.getID());
+          candidate.add(child.getID());
+        }
+      });
 
-    //  logger.info("got exercises  " + exercises.size());
-    //  logger.info("got candidates " + candidate.size() + " relations for " + dialogID + " : " + candidate);
+      //  logger.info("got exercises  " + exercises.size());
+      //  logger.info("got candidates " + candidate.size() + " relations for " + dialogID + " : " + candidate);
 
-    {
-      List<CommonExercise> firstEx = exercises
-          .stream()
-          .filter(commonExercise -> candidate.contains(commonExercise.getID()))
-          .collect(Collectors.toList());
+      {
+        List<CommonExercise> firstEx = exercises
+            .stream()
+            .filter(commonExercise -> candidate.contains(commonExercise.getID()))
+            .collect(Collectors.toList());
 
-      int size = firstEx.size();
-      if (size == 0) {
-        logger.error("huh no first exercise");
-        // }
+        int size = firstEx.size();
+        if (size == 0) {
+          logger.error("huh no first exercise");
+          // }
 //      else if (size == 1) {
-      } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
+        } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
 
-      firstEx.forEach(current -> dialog.getExercises().add(current));
+        firstEx.forEach(current -> dialog.getExercises().add(current));
+      }
     }
   }
 

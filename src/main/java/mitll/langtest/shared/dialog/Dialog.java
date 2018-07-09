@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import static mitll.langtest.shared.exercise.STATE.UNSET;
 
-//import static mitll.langtest.shared.exercise.STATE.UNSET;
-
 public class Dialog implements IDialog {
   private static final String SPEAKER = "Speaker".toLowerCase();
   public static final String UNIT = "unit";
@@ -32,6 +30,7 @@ public class Dialog implements IDialog {
   private String imageRef;
   private List<ExerciseAttribute> attributes = new ArrayList<>();
   private List<ClientExercise> exercises = new ArrayList<>();
+  private List<ClientExercise> coreVocabulary = new ArrayList<>();
 
   float score;
 
@@ -55,6 +54,9 @@ public class Dialog implements IDialog {
    * @param entitle
    * @param attributes
    * @param exercises
+   * @param coreExercises
+   * @see mitll.langtest.server.database.dialog.DialogDAO#makeDialog
+   * @see mitll.langtest.server.database.dialog.KPDialogs#getDialogs
    */
   public Dialog(int id,
                 int userid,
@@ -69,7 +71,7 @@ public class Dialog implements IDialog {
                 String fltitle,
                 String entitle,
                 List<ExerciseAttribute> attributes,
-                List<ClientExercise> exercises) {
+                List<ClientExercise> exercises, List<ClientExercise> coreExercises) {
     this.id = id;
     this.userid = userid;
     this.projid = projid;
@@ -84,24 +86,8 @@ public class Dialog implements IDialog {
     this.orientation = orientation;
     this.attributes = attributes;
     this.exercises = exercises;
+    this.coreVocabulary = coreExercises;
   }
-
-/*
-  public Dialog(SlickDialog slickDialog) {
-    this(slickDialog.id(),
-        slickDialog.userid(),
-        slickDialog.projid(),
-        slickDialog.dominoid(),
-        slickDialog.modified().getTime(),
-        slickDialog.unit(),
-        slickDialog.lesson(),
-        slickDialog.orientation(),
-        "",
-        "",
-        slickDialog.entitle(), new ArrayList<>(), new ArrayList<>());
-  //  this.slickDialog = slickDialog;
-  }
-*/
 
   @Override
   public int getID() {
@@ -158,18 +144,6 @@ public class Dialog implements IDialog {
   public List<ClientExercise> getExercises() {
     return exercises;
   }
-
-
-/*
-  public void setSlickDialog(SlickDialog e) {
-    this.slickDialog = e;
-  }*/
-
-/*
-  public SlickDialog getSlickDialog() {
-    return slickDialog;
-  }
-*/
 
   public void setImageRef(String imageRef) {
     this.imageRef = imageRef;
@@ -277,7 +251,6 @@ public class Dialog implements IDialog {
 
   @Override
   public void setState(STATE state) {
-
   }
 
   @Override
@@ -287,16 +260,11 @@ public class Dialog implements IDialog {
 
   @Override
   public void setSecondState(STATE state) {
-
   }
 
   public int getImageid() {
     return imageid;
   }
-
-//  public void setImageid(int imageid) {
-//    this.imageid = imageid;
-//  }
 
   public String toString() {
     return "Dialog #" + id +
@@ -306,6 +274,12 @@ public class Dialog implements IDialog {
         "\n\torientation " + orientation +
         "\n\timage       " + imageRef +
         "\n\t# ex        " + exercises.size() +
+        "\n\t# core      " + coreVocabulary.size() +
         "\n\tattr        " + attributes;
+  }
+
+  @Override
+  public List<ClientExercise> getCoreVocabulary() {
+    return coreVocabulary;
   }
 }

@@ -69,12 +69,6 @@ public interface IDialogDAO extends IDAO {
   int ensureDefault(int defaultUser);
   int getDefault();
 
-  /**
-   * @paramx dialogID
-   * @return
-   */
-//  SlickDialog getByID(int dialogID);
-
   List<IDialog> getDialogs(int projid);
 
   /**

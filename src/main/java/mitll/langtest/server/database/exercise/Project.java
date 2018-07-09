@@ -100,6 +100,9 @@ public class Project implements IPronunciationLookup {
   private JsonSupport jsonSupport;
   private SlickAnalysis analysis;
   private AudioFileHelper audioFileHelper;
+  /**
+   * @see #makeItemTrie(List, SmallVocabDecoder)
+   */
   private ExerciseTrie<CommonExercise> fullTrie = null;
   private ExerciseTrie<CommonExercise> fullContextTrie = null;
   private RefResultDecoder refResultDecoder;
@@ -253,7 +256,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    * @param analysis
-   * @see IProjectManagement#configureProject
+   * @see ProjectManagement#configureProject
    */
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
@@ -263,7 +266,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    *
-   *
+   * @see #setAnalysis(SlickAnalysis)
    */
   private <T extends CommonShell> void buildExerciseTrie() {
     final List<CommonExercise> rawExercises = getRawExercises();
@@ -273,6 +276,11 @@ public class Project implements IPronunciationLookup {
     new Thread(() -> makeContextTrie(rawExercises, smallVocabDecoder)).start();
   }
 
+  /**
+   * @see #buildExerciseTrie
+   * @param rawExercises
+   * @param smallVocabDecoder
+   */
   private void makeItemTrie(List<CommonExercise> rawExercises, SmallVocabDecoder smallVocabDecoder) {
     logger.info("buildExerciseTrie : build trie from " + rawExercises.size() + " exercises for " + project);
     long then = System.currentTimeMillis();
@@ -321,6 +329,8 @@ public class Project implements IPronunciationLookup {
   public ExerciseTrie<CommonExercise> getFullTrie() {
     return fullTrie;
   }
+
+  public boolean isTrieBuilt() { return fullTrie != null; }
 
   public ExerciseTrie<CommonExercise> getFullContextTrie() {
     return fullContextTrie;

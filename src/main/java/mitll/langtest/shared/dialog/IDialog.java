@@ -32,6 +32,8 @@ public interface IDialog extends CommonShell, HasUnitChapter  {
 
   List<ClientExercise> getExercises();
 
+  List<ClientExercise> getCoreVocabulary();
+
 
   List<String> getSpeakers();
 

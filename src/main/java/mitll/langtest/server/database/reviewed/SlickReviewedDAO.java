@@ -32,8 +32,10 @@
 
 package mitll.langtest.server.database.reviewed;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.shared.exercise.STATE;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickReviewed;
@@ -53,6 +55,13 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
 
   private final ReviewedDAOWrapper dao;
 
+
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   * @param database
+   * @param dbConnection
+   * @param isReviewed
+   */
   public SlickReviewedDAO(Database database, DBConnection dbConnection, boolean isReviewed) {
     super(database);
     dao = isReviewed ? new ReviewedDAOWrapper(dbConnection) : new SecondStateDAOWrapper(dbConnection);
@@ -73,7 +82,6 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   public void insert(SlickReviewed word) {
     dao.insert(word);
   }
-
   public void addBulk(List<SlickReviewed> bulk) {
     dao.addBulk(bulk);
   }

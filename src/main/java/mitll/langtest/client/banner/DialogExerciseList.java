@@ -26,7 +26,7 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
   //private DialogViewHelper dialogViewHelper;
   private final Logger logger = Logger.getLogger("DialogExerciseList");
   private static final int CHOICE_WIDTH = 170;//180;//190;//195;
-  private static final int MIN_HEIGHT = 125;//100;// 110;//115;//125;
+ // private static final int MIN_HEIGHT = 125;//100;// 110;//115;//125;
   private static final int NORMAL_MIN_HEIGHT = 67;
   private static final int LANGUAGE_SIZE = 6;
 

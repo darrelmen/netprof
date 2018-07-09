@@ -64,6 +64,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String OVERRIDE = "override";
 
   @Override
+  public IRelatedExercise getRelatedCoreExercise() {
+    return null;
+  }
+
+  @Override
   public IRelatedExercise getRelatedExercise() {
     return null;
   }
@@ -231,9 +236,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   public SlickExercise getUnknownExercise() {
     return null;
   }
-
-  ;
-
 
   /**
    * TODO : Consider how to add multiple context sentences?

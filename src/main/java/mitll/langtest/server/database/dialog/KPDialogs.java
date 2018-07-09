@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.dialog;
 
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -113,7 +114,9 @@ public class KPDialogs implements IDialogReader {
    * @see mitll.langtest.server.database.project.DialogPopulate#addDialogInfo
    */
   @Override
-  public Map<Dialog, SlickDialog> getDialogs(int defaultUser, int projID, Map<CommonExercise, String> exToAudio) {
+  public Map<Dialog, SlickDialog> getDialogs(int defaultUser, int projID,
+                                             Map<ClientExercise, String> exToAudio,
+                                             Project project) {
     String[] docs = docIDS.split("\n");
     String[] titles = title.split("\n");
 
@@ -138,6 +141,7 @@ public class KPDialogs implements IDialogReader {
       List<ExerciseAttribute> attributes = getExerciseAttributes(pages[i], topics[i]);
 
       List<ClientExercise> exercises = new ArrayList<>();
+      List<ClientExercise> coreExercises = new ArrayList<>();
 
       String dirPath = "/opt/netprof/dialog/" + dir;
       File loc = new File(dirPath);
@@ -147,7 +151,7 @@ public class KPDialogs implements IDialogReader {
       List<String> sentences = new ArrayList<>();
       List<String> audio = new ArrayList<>();
 
-      List<Path> passageTextFiles = new ArrayList<>();
+      //List<Path> passageTextFiles = new ArrayList<>();
       //    Map<CommonExercise, String> exToAudio = new HashMap<>();
       Map<String, Path> sentenceToFile = new HashMap<>();
       List<String> orientations = new ArrayList<>();
@@ -163,7 +167,7 @@ public class KPDialogs implements IDialogReader {
 //                logger.info("found " + file);
                 String fileName = file.getFileName().toString();
                 String[] parts = fileName.split("_");
-                if (parts.length == 2) passageTextFiles.add(file);
+                //        if (parts.length == 2) passageTextFiles.add(file);
                 //              logger.info("fileName " + fileName);
                 if (fileName.endsWith("jpg")) {
 //                  logger.info("skip dialog image " + fileName);
@@ -200,13 +204,27 @@ public class KPDialogs implements IDialogReader {
           if (index == 0) {
             orientations.add(fileText);
           } else {
-            Exercise exercise = getExercise(attributes, speakers, path, fileText, unit, chapter);
+            ClientExercise exercise = getExercise(attributes, speakers, path, fileText, unit, chapter);
+            exToAudio.put(exercise, DIALOG + File.separator + audio.get(exercises.size()));
 
-            {
-              String pathAudio = DIALOG + File.separator + audio.get(exercises.size());
-              exToAudio.put(exercise, pathAudio);
+            while (!project.isTrieBuilt()) {
+              logger.info("wait for trie...");
+              try {
+                Thread.sleep(2000);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
             }
+         //   logger.info(" trie ready...");
 
+            String[] tokens = exercise.getForeignLanguage().split(" ");
+            Set<String> uniq = new HashSet<>(Arrays.asList(tokens));
+            uniq.forEach(token -> {
+              CommonExercise exerciseBySearch = project.getExerciseBySearch(token);
+              if (exerciseBySearch != null) {
+                coreExercises.add(exerciseBySearch);
+              }
+            });
             exercises.add(exercise);
 //            logger.info("Ex " + exercise.getOldID() + " " + exercise.getUnitToValue());
           }
@@ -247,7 +265,7 @@ public class KPDialogs implements IDialogReader {
           title,
 
           attributes,
-          exercises);
+          exercises, coreExercises);
       //dialog.setSlickDialog(slickDialog);
 
       dialogToSlick.put(dialog, slickDialog);
@@ -264,6 +282,16 @@ public class KPDialogs implements IDialogReader {
     return dialogToSlick;
   }
 
+  /**
+   * @param attributes
+   * @param speakers
+   * @param path
+   * @param fileText
+   * @param unit
+   * @param chapter
+   * @return
+   * @see #getDialogs
+   */
   @NotNull
   private Exercise getExercise(List<ExerciseAttribute> attributes,
                                Set<String> speakers,

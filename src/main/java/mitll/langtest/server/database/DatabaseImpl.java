@@ -1310,6 +1310,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         getProjectDAO(),
         userExerciseDAO,
         userExerciseDAO.getRelatedExercise(),
+        userExerciseDAO.getRelatedCoreExercise(),
         userExerciseDAO.getExerciseAttribute(),
         userExerciseDAO.getExerciseAttributeJoin(),
         getEventDAO(),

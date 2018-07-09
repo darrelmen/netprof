@@ -4,16 +4,18 @@ import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
 
-import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public class RelatedExerciseHelper implements IRelatedExercise {
-
   private RelatedExerciseDAOWrapper daoWrapper;
 
-  RelatedExerciseHelper(RelatedExerciseDAOWrapper daoWrapper) {
+  /**
+   *
+   * @param daoWrapper
+   */
+  RelatedExerciseHelper(RelatedExerciseDAOWrapper daoWrapper ) {
     this.daoWrapper = daoWrapper;
   }
 
@@ -51,17 +53,16 @@ public class RelatedExerciseHelper implements IRelatedExercise {
     return daoWrapper.allByProject(projid);
   }
 
+/*
   @Override
   public void addContextToExercise(int exid, int contextExid, int projid) {
     daoWrapper.insert(new SlickRelatedExercise(-1, exid, contextExid, projid, 1,
         new Timestamp(System.currentTimeMillis())));
   }
+*/
 
   @Override
-  public void deleteForProject(int projID) {
-    daoWrapper.deleteForProject(projID);
-
-  }
+  public void deleteForProject(int projID) {    daoWrapper.deleteForProject(projID);  }
 
   @Override
   public int deleteRelated(int related) {

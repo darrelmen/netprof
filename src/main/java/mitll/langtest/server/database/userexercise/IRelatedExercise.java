@@ -17,8 +17,6 @@ public interface IRelatedExercise  extends IDAO {
 
   Collection<SlickRelatedExercise> getAllRelated(int projid);
 
-  void addContextToExercise(int exid, int contextExid, int projid);
-
   void deleteForProject(int projID);
 
   int deleteRelated(int related);

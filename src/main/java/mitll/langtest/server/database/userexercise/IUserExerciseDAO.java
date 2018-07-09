@@ -250,4 +250,5 @@ public interface IUserExerciseDAO extends IDAO {
   boolean isProjectEmpty(int projectid);
 
   IRelatedExercise getRelatedExercise();
+  IRelatedExercise getRelatedCoreExercise();
 }

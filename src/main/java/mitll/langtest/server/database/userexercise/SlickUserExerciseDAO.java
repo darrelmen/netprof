@@ -45,10 +45,7 @@ import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.*;
-import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
-import mitll.npdata.dao.userexercise.ExerciseAttributeJoinDAOWrapper;
-import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
-import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
+import mitll.npdata.dao.userexercise.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -91,7 +88,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   private final IAttribute attributeHelper;
   private final IAttributeJoin attributeJoinHelper;
-  private final IRelatedExercise relatedExerciseHelper;
+  private final IRelatedExercise relatedExerciseHelper, relatedCoreExerciseHelper;
   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
   private final IUserDAO userDAO;
   private final IRefResultDAO refResultDAO;
@@ -111,12 +108,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   public SlickUserExerciseDAO(DatabaseImpl database, DBConnection dbConnection) {
     super(database);
     dao = new ExerciseDAOWrapper(dbConnection);
-    // relatedExerciseDAOWrapper = new RelatedExerciseDAOWrapper(dbConnection);
-    //attributeDAOWrapper = new ExerciseAttributeDAOWrapper(dbConnection);
-    //attributeJoinDAOWrapper = new ExerciseAttributeJoinDAOWrapper(dbConnection);
     attributeHelper = new AttributeHelper(new ExerciseAttributeDAOWrapper(dbConnection));
     attributeJoinHelper = new AttributeJoinHelper(new ExerciseAttributeJoinDAOWrapper(dbConnection));
     relatedExerciseHelper = new RelatedExerciseHelper(new RelatedExerciseDAOWrapper(dbConnection));
+    relatedCoreExerciseHelper = new RelatedExerciseHelper(new RelatedCoreExerciseDAOWrapper(dbConnection));
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();
@@ -1188,6 +1183,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
   public IRelatedExercise getRelatedExercise() {
     return relatedExerciseHelper;
+  }
+
+  /**
+   * @return
+   * @see DatabaseImpl#createTables
+   */
+  public IRelatedExercise getRelatedCoreExercise() {
+    return relatedCoreExerciseHelper;
   }
 
   @Override
