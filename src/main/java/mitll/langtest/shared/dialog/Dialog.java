@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 import static mitll.langtest.shared.exercise.STATE.UNSET;
 
 public class Dialog implements IDialog {
+  //private static final transient Logger logger = LogManager.getLogger(Dialog.class);
+
+
   private static final String SPEAKER = "Speaker".toLowerCase();
   public static final String UNIT = "unit";
   private static final String CHAPTER = "chapter";
@@ -71,7 +74,8 @@ public class Dialog implements IDialog {
                 String fltitle,
                 String entitle,
                 List<ExerciseAttribute> attributes,
-                List<ClientExercise> exercises, List<ClientExercise> coreExercises) {
+                List<ClientExercise> exercises,
+                List<ClientExercise> coreExercises) {
     this.id = id;
     this.userid = userid;
     this.projid = projid;
@@ -194,6 +198,12 @@ public class Dialog implements IDialog {
   public Map<String, List<ClientExercise>> groupBySpeaker() {
     Map<String, List<ClientExercise>> speakerToExercises = new HashMap<>();
     exercises.forEach(commonExercise -> {
+//          logger.info("For " +
+//              getID() +
+//              " ex " + commonExercise.getID() +
+//              commonExercise.getOldID() +
+//              " speaker " + getSpeaker(commonExercise) + " " + commonExercise.getForeignLanguage());
+
           List<ClientExercise> exercises = speakerToExercises.computeIfAbsent(getSpeaker(commonExercise), k -> new ArrayList<>());
           exercises.add(commonExercise);
         }

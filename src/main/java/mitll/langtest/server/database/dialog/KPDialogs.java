@@ -217,26 +217,14 @@ public class KPDialogs implements IDialogReader {
             }
          //   logger.info(" trie ready...");
 
-            String[] tokens = exercise.getForeignLanguage().split(" ");
-            Set<String> uniq = new HashSet<>(Arrays.asList(tokens));
-            uniq.forEach(token -> {
-              CommonExercise exerciseBySearch = project.getExerciseBySearch(token);
-              if (exerciseBySearch != null) {
-                coreExercises.add(exerciseBySearch);
-              }
-            });
+            addCoreWords(project, coreExercises, exercise);
             exercises.add(exercise);
 //            logger.info("Ex " + exercise.getOldID() + " " + exercise.getUnitToValue());
           }
         });
 
         // add speaker attributes
-        {
-          List<String> speakersList = new ArrayList<>(speakers);
-          speakersList
-              .forEach(s -> attributes
-                  .add(new ExerciseAttribute("Speaker " + SPEAKER_LABELS.get(speakersList.indexOf(s)), s, false)));
-        }
+        addSpeakerAttrbutes(attributes, speakers);
       } catch (IOException e) {
         logger.error("got " + e, e);
       }
@@ -265,7 +253,9 @@ public class KPDialogs implements IDialogReader {
           title,
 
           attributes,
-          exercises, coreExercises);
+          exercises,
+          coreExercises);
+
       //dialog.setSlickDialog(slickDialog);
 
       dialogToSlick.put(dialog, slickDialog);
@@ -280,6 +270,24 @@ public class KPDialogs implements IDialogReader {
 
     logger.info("ex to audio now " + exToAudio.size());
     return dialogToSlick;
+  }
+
+  private void addSpeakerAttrbutes(List<ExerciseAttribute> attributes, Set<String> speakers) {
+    List<String> speakersList = new ArrayList<>(speakers);
+    speakersList
+        .forEach(s -> attributes
+            .add(new ExerciseAttribute("Speaker " + SPEAKER_LABELS.get(speakersList.indexOf(s)), s, false)));
+  }
+
+  private void addCoreWords(Project project, List<ClientExercise> coreExercises, ClientExercise exercise) {
+    String[] tokens = exercise.getForeignLanguage().split(" ");
+    Set<String> uniq = new HashSet<>(Arrays.asList(tokens));
+    uniq.forEach(token -> {
+      CommonExercise exerciseBySearch = project.getExerciseBySearch(token);
+      if (exerciseBySearch != null) {
+        coreExercises.add(exerciseBySearch);
+      }
+    });
   }
 
   /**

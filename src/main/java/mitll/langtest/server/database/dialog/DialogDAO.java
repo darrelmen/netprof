@@ -40,6 +40,7 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -287,24 +288,48 @@ public class DialogDAO extends DAO implements IDialogDAO {
       List<CommonExercise> exercises = new ArrayList<>();
       Set<Integer> candidate = new HashSet<>();
 
-//    logger.info("got " + slickRelatedExercises.size() + " relations for " + dialogID);
+      logger.info("addExercises got " + slickRelatedExercises.size() + " relations for " + dialogID);
+      Map<Integer, CommonExercise> idToEx = new HashMap<>();
 
       slickRelatedExercises.forEach(slickRelatedExercise -> {
-//      logger.info("relation " + slickRelatedExercise);
+//        logger.info("addExercises relation " + slickRelatedExercise);
 
-        CommonExercise exercise = databaseImpl.getExercise(projid, slickRelatedExercise.exid());
+        int exid = slickRelatedExercise.exid();
+        CommonExercise exercise = idToEx.get(exid);
+
+        if (exercise == null) {
+          exercise = databaseImpl.getExercise(projid, exid);
+          if (exercise != null) {
+            idToEx.put(exid, exercise = new Exercise(exercise));
+          }
+        }
+
         if (exercise != null) {
-          CommonExercise parent = new Exercise(exercise);
-          CommonExercise child = new Exercise(databaseImpl.getExercise(projid, slickRelatedExercise.contextexid()));
+          int childid = slickRelatedExercise.contextexid();
+          CommonExercise childEx = idToEx.get(childid);
 
-          parent.getDirectlyRelated().add(child);
-          child.getMutable().setParentExerciseID(parent.getParentExerciseID());
+          if (childEx == null && childid != exid) {
+            CommonExercise childExOrig = databaseImpl.getExercise(projid, childid);
+            idToEx.put(childid, childEx = new Exercise(childExOrig));
+          }
 
-          exercises.add(parent);
-          exercises.add(child);
+          if (childEx == null || childid == exid) {
+            logger.info("Skip relation " + childid + " on " + exercise);
+          } else {
+            exercise.getDirectlyRelated().add(childEx);
+            childEx.getMutable().setParentExerciseID(exercise.getParentExerciseID());
 
-          candidate.add(parent.getID());
-          candidate.add(child.getID());
+            if (!candidate.contains(exercise.getID())) {
+              exercises.add(exercise);
+              candidate.add(exercise.getID());
+            }
+            if (!candidate.contains(childEx.getID())) {
+              exercises.add(childEx);
+              candidate.add(childEx.getID());
+            }
+          }
+        } else {
+          logger.warn("can't find related ex " + exid);
         }
       });
 
@@ -312,19 +337,19 @@ public class DialogDAO extends DAO implements IDialogDAO {
       //  logger.info("got candidates " + candidate.size() + " relations for " + dialogID + " : " + candidate);
 
       {
-        List<CommonExercise> firstEx = exercises
-            .stream()
-            .filter(commonExercise -> candidate.contains(commonExercise.getID()))
-            .collect(Collectors.toList());
+//        List<CommonExercise> firstEx = exercises
+//            .stream()
+//            .filter(commonExercise -> candidate.contains(commonExercise.getID()))
+//            .collect(Collectors.toList());
 
-        int size = firstEx.size();
+        int size = exercises.size();
         if (size == 0) {
-          logger.error("huh no first exercise");
-          // }
+          logger.error("huh no exercises?");
+        }
 //      else if (size == 1) {
-        } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
+        //   } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
 
-        firstEx.forEach(current -> dialog.getExercises().add(current));
+        exercises.forEach(current -> dialog.getExercises().add(current));
       }
     }
   }

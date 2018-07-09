@@ -111,7 +111,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     attributeHelper = new AttributeHelper(new ExerciseAttributeDAOWrapper(dbConnection));
     attributeJoinHelper = new AttributeJoinHelper(new ExerciseAttributeJoinDAOWrapper(dbConnection));
     relatedExerciseHelper = new RelatedExerciseHelper(new RelatedExerciseDAOWrapper(dbConnection));
-    relatedCoreExerciseHelper = new RelatedExerciseHelper(new RelatedCoreExerciseDAOWrapper(dbConnection));
+    relatedCoreExerciseHelper = new RelatedCoreExerciseHelper(new RelatedCoreExerciseDAOWrapper(dbConnection));
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();

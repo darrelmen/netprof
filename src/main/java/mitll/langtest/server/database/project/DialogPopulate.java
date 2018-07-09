@@ -228,9 +228,9 @@ public class DialogPopulate {
     });
 
     int before = attrToInt.size();
-    logger.info("adding " + allToAdd.size() + " new attr");
+    logger.info("addNewAttributes adding " + allToAdd.size() + " new attr");
     allToAdd.forEach(exerciseAttribute -> {
-      logger.info("adding new exercise attribute " + exerciseAttribute);
+      logger.info("addNewAttributes adding new exercise attribute " + exerciseAttribute);
 
       attrToInt
           .put(exerciseAttribute, db.getUserExerciseDAO().getExerciseAttribute()
@@ -238,7 +238,7 @@ public class DialogPopulate {
                   now, defaultUser, exerciseAttribute, true));
     });
     int after = attrToInt.size();
-    logger.info("really added " + (after - before));
+    logger.info("addNewAttributes really added " + (after - before));
   }
 
   private void addResultAndAudio(Project project, int projid, int defaultUser, long now,

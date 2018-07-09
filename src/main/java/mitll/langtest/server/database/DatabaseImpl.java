@@ -1302,7 +1302,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   public void createTables() {
-//    logger.info("createTables create slick tables - has " + dbConnection.getTables());
+    logger.info("createTables create slick tables - has " + dbConnection.getTables());
 
     List<String> created = new ArrayList<>();
 
@@ -1348,7 +1348,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       slickUserDAO.createTable();
       created.add(name);
     } else {
-      //   logger.debug("createIfNotThere has table " + name);
+    //  logger.info("createIfNotThere has table " + name);
     }
   }
 

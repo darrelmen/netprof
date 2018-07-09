@@ -2,20 +2,21 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickRelatedExercise;
+import mitll.npdata.dao.userexercise.RelatedCoreExerciseDAOWrapper;
 import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class RelatedExerciseHelper implements IRelatedExercise {
-  private RelatedExerciseDAOWrapper daoWrapper;
+public class RelatedCoreExerciseHelper implements IRelatedExercise {
+  private RelatedCoreExerciseDAOWrapper daoWrapper;
 
   /**
    *
    * @param daoWrapper
    */
-  RelatedExerciseHelper(RelatedExerciseDAOWrapper daoWrapper ) {
+  RelatedCoreExerciseHelper(RelatedCoreExerciseDAOWrapper daoWrapper ) {
     this.daoWrapper = daoWrapper;
   }
 
@@ -61,11 +62,6 @@ public class RelatedExerciseHelper implements IRelatedExercise {
     return daoWrapper.deleteRelated(related);
   }
 
-  /**
-   * @see mitll.langtest.server.database.dialog.DialogDAO#getDialogs
-   * @param projid
-   * @return
-   */
   @Override
   public Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid) {
     return daoWrapper.byProjectForDialog(projid);
