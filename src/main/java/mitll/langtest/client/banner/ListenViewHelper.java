@@ -1,10 +1,13 @@
 package mitll.langtest.client.banner;
 
+import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -34,6 +37,8 @@ import static mitll.langtest.shared.dialog.IDialog.METADATA.*;
  */
 public class ListenViewHelper implements ContentView {
   public static final int ROW_WIDTH = 97;
+  public static final String HEIGHT = 100 +
+      "px";
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   ExerciseController controller;
@@ -74,9 +79,8 @@ public class ListenViewHelper implements ContentView {
         DivWidget outer = getHeader(dialog, attributes);
         child.add(outer);
 
-        DivWidget rowOne = new DivWidget();
-        rowOne.setHeight("40px");
-        rowOne.setWidth(98 +            "%");
+        DivWidget rowOne = getSpeakerRow(dialog);
+
 
         child.add(rowOne);
 
@@ -96,6 +100,55 @@ public class ListenViewHelper implements ContentView {
         }*/
       }
     });
+  }
+
+  @NotNull
+  private DivWidget getSpeakerRow(IDialog dialog) {
+    DivWidget rowOne = new DivWidget();
+    rowOne.addStyleName("cardBorderShadow");
+
+    rowOne.setHeight("40px");
+    rowOne.setWidth(97 + "%");
+    rowOne.getElement().getStyle().setMarginTop(10, PX);
+
+    List<String> speakers = dialog.getSpeakers();
+    {
+      String label = "<b>" + speakers.get(0) + "</b>";
+      CheckBox checkBox = new CheckBox(label, true);
+      checkBox.setWidth("49%");
+      checkBox.addStyleName("floatLeft");
+      checkBox.addStyleName("leftFiveMargin");
+      checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
+
+      rowOne.add(checkBox);
+    }
+
+
+    {
+      String label = "<b>" + speakers.get(1) + "</b>";
+      CheckBox checkBox = new CheckBox(label, true);
+
+      checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
+      checkBox.addStyleName("rightAlign");
+      checkBox.addStyleName("floatRight");
+      checkBox.addStyleName("rightFiveMargin");
+      // checkBox.getElement().getStyle().setMarginTop(0, PX);
+
+      // checkBox.setWidth("49%");
+      rowOne.add(checkBox);
+    }
+
+    rowOne.getElement().getStyle().setMarginBottom(10, PX);
+    //  outer.add(rowOne);
+    return rowOne;
+  }
+
+  private void speakerOneCheck(Boolean value) {
+    logger.info("speaker one now " + value);
+  }
+
+  private void speakerTwoCheck(Boolean value) {
+    logger.info("speaker two now " + value);
   }
 
   @NotNull
@@ -128,6 +181,8 @@ public class ListenViewHelper implements ContentView {
         w1.addStyleName("rightAlign");
         w1.addStyleName("floatRight");
         w1.addStyleName("rightFiveMargin");
+
+
         w1.getElement().getStyle().setMarginTop(0, PX);
 
         w1.setWidth("49%");
@@ -156,7 +211,9 @@ public class ListenViewHelper implements ContentView {
         w1.addStyleName("rightAlign");
         w1.addStyleName("floatRight");
         w1.addStyleName("rightTenMargin");
+
         w1.addStyleName("wrapword");
+
         w1.setWidth("85%");
         //          w1.getElement().getStyle().setBackgroundColor("#dff4fc");
         row.add(w1);
@@ -170,14 +227,13 @@ public class ListenViewHelper implements ContentView {
   @NotNull
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {
     com.google.gwt.user.client.ui.Image image = new com.google.gwt.user.client.ui.Image(cc);
-    image.setHeight("100px");
-    image.setWidth("100px");
+    image.setHeight(HEIGHT);
+    image.setWidth(HEIGHT);
     return image;
   }
 
   private String getAttrValue(List<ExerciseAttribute> attributes, METADATA presentation) {
-    ExerciseAttribute attr = getAttr((List<ExerciseAttribute>) attributes, (METADATA) presentation);
-
+    ExerciseAttribute attr = getAttr(attributes, presentation);
     return attr == null ? "" : attr.getValue();
   }
 
@@ -188,7 +244,6 @@ public class ListenViewHelper implements ContentView {
           return exerciseAttribute.getProperty().toUpperCase().equals(presentation.toString());
         })
         .collect(Collectors.toList());
-    ExerciseAttribute attribute = collect.isEmpty() ? null : collect.iterator().next();
-    return attribute;
+    return collect.isEmpty() ? null : collect.iterator().next();
   }
 }
