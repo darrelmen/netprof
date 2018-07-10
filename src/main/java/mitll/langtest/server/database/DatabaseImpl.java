@@ -673,10 +673,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   private DBConnection getDbConnection() {
-    DBConnection dbConnection = new DBConnection(serverProps.getDBConfig());
+    DBConnection dbConnection = new DBConnection(getDbConfig());
     dbConnection.addColumn();
 //    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
     return dbConnection;
+  }
+
+  public String getDbConfig() {
+    return serverProps.getDBConfig();
   }
 
   public IAudioDAO getH2AudioDAO() {

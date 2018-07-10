@@ -38,7 +38,9 @@ import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
@@ -96,7 +98,7 @@ public class DecodeCorrectnessChecker {
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public PretestScore getDecodeScore(CommonExercise commonExercise,
+  public PretestScore getDecodeScore(ClientExercise commonExercise,
                                      File audioFile,
                                      AudioAnswer answer,
                                      String language,
@@ -266,10 +268,10 @@ public class DecodeCorrectnessChecker {
    * @return possible paths for the decoder
    * @see #getDecodeScore
    */
-  private Collection<String> getRefSentences(CommonExercise toDecode, String language, boolean allowAlternates) {
+  private Collection<String> getRefSentences(ClientExercise toDecode, String language, boolean allowAlternates) {
     if (allowAlternates) {
       Set<String> ret = new HashSet<>();
-      toDecode.getRefSentences().forEach(alt -> ret.add(getPhraseToDecode(alt, language)));
+      toDecode.asCommon().getRefSentences().forEach(alt -> ret.add(getPhraseToDecode(alt, language)));
       return ret;
     } else {
       String phraseToDecode = getPhraseToDecode(toDecode.getForeignLanguage(), language);

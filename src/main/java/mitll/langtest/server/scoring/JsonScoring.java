@@ -10,7 +10,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -59,15 +59,16 @@ public class JsonScoring {
 
 
   /**
-   * @param reqid      label response with req id so the client can tell if it got a stale response
+   * @param reqid              label response with req id so the client can tell if it got a stale response
    * @param projid
-   * @param exerciseID for this exercise
-   * @param user       by this user
-   * @param request    mostly decode, could be record if doing appen corpora recording
-   * @param wavPath    relative path to posted audio file
-   * @param saveFile   File handle to file
-   * @param deviceType iPad,iPhone, or browser
-   * @param device     id for device - helpful for iPads, etc.
+   * @param exerciseID         for this exercise
+   * @param postedWordOrPhrase
+   * @param user               by this user
+   * @param request            mostly decode, could be record if doing appen corpora recording
+   * @param wavPath            relative path to posted audio file
+   * @param saveFile           File handle to file
+   * @param deviceType         iPad,iPhone, or browser
+   * @param device             id for device - helpful for iPads, etc.
    * @param options
    * @param fullJSON
    * @return score json
@@ -78,6 +79,8 @@ public class JsonScoring {
   public JSONObject getJsonForAudioForUser(int reqid,
                                            int projid,
                                            int exerciseID,
+                                           String postedWordOrPhrase,
+
                                            int user,
                                            ScoreServlet.PostRequest request,
                                            String wavPath,
@@ -91,13 +94,27 @@ public class JsonScoring {
     CommonExercise exercise = db.getCustomOrPredefExercise(mostRecentProjectByUser, exerciseID);  // allow custom items to mask out non-custom items
 
     JSONObject jsonForScore = new JSONObject();
-    if (exercise == null) {
+
+    // so allow an exercise id = 0 with some actual text
+    String foreignLanguage = postedWordOrPhrase;
+    String transliteration = "";
+
+    if (exercise == null && exerciseID > 1) {
+      logger.warn("getJsonForAudioForUser : can't find exercise " + exerciseID + " in " + projid + " giving up.");
       jsonForScore.put(VALID, BAD_EXERCISE_ID);
       return jsonForScore;
+    } else if (exercise != null) {
+      foreignLanguage = exercise.getForeignLanguage();
+      transliteration = exercise.getTransliteration();
     }
+
     boolean doFlashcard = request == ScoreServlet.PostRequest.DECODE;
     options.setDoDecode(doFlashcard);
-    AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device, exercise,
+
+    AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device,
+        foreignLanguage,
+        transliteration,
+        projid,
         options);
     long now = System.currentTimeMillis();
     PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
@@ -105,11 +122,11 @@ public class JsonScoring {
 
     if (logger.isInfoEnabled()) {
       logger.info("getJsonForAudioForUser" +
-          "\n\tflashcard   " + doFlashcard +
-          "\n\texercise id " + exerciseID +
-          "\n\ttook        " + (now - then) + " millis " +
-          "\n\tfor         " + saveFile.getName() +
-          "\n\tscore       " + hydecScore
+              "\n\tflashcard   " + doFlashcard +
+              "\n\texercise id " + exerciseID +
+              "\n\ttook        " + (now - then) + " millis " +
+              "\n\tfor         " + saveFile.getName() +
+              "\n\tscore       " + hydecScore
           //+
           //"\n\tpretestScore " + pretestScore
       );
@@ -155,7 +172,7 @@ public class JsonScoring {
    * @param saveFile
    * @param deviceType
    * @param device
-   * @param exercise
+   * @param foreignLanguage
    * @param options
    * @return
    * @see #getJsonForAudioForUser
@@ -167,27 +184,30 @@ public class JsonScoring {
                                      File saveFile,
                                      String deviceType,
                                      String device,
-                                     CommonExercise exercise,
+                                     String foreignLanguage,
+                                     String transliteration,
+                                     int projectID,
                                      DecoderOptions options) {
     AudioAnswer answer;
 
     if (options.shouldDoDecoding()) {
       options.setDoDecode(true);
-      answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile, -1, deviceType, device,
+      answer = getAnswer(reqid, projectID, exerciseID, foreignLanguage, user, wavPath, saveFile, -1, deviceType, device,
           options,
           null);
     } else {
+
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
           exerciseID,
           wavPath,
-          exercise.getForeignLanguage(),
-          exercise.getTransliteration(),
+          foreignLanguage,
+          transliteration,
           options.isUsePhoneToDisplay(),
-          exercise.getProjectID());
+          projectID);
 
       options.setDoDecode(false);
 
-      answer = getAnswer(reqid, exerciseID, user, wavPath, saveFile,
+      answer = getAnswer(reqid, projectID, exerciseID, foreignLanguage, user, wavPath, saveFile,
           asrScoreForAudio.getHydecScore(),
           deviceType, device,
           options,
@@ -231,8 +251,10 @@ public class JsonScoring {
   /**
    * Don't wait for mp3 to write to return - can take 70 millis for a short file.
    *
+   * @param projectID
    * @param reqid
    * @param exerciseID
+   * @param foreignLanguage
    * @param user
    * @param wavPath
    * @param file
@@ -243,7 +265,9 @@ public class JsonScoring {
    * @see #getJsonForAudioForUser
    */
   private AudioAnswer getAnswer(int reqid,
+                                int projectID,
                                 int exerciseID,
+                                String foreignLanguage,
                                 int user,
                                 String wavPath,
                                 File file,
@@ -252,23 +276,28 @@ public class JsonScoring {
                                 String device,
                                 DecoderOptions options,
                                 PretestScore pretestScore) {
-    CommonExercise exercise = db.getCustomOrPredefExercise(getMostRecentProjectByUser(user), exerciseID);  // allow custom items to mask out non-custom items
+    ClientExercise exercise = db.getCustomOrPredefExercise(projectID, exerciseID);  // allow custom items to mask out non-custom items
 
-    int projectID = exercise.getProjectID();
-    AudioContext audioContext =
+    if (exerciseID == 0) {
+      exerciseID = db.getUserExerciseDAO().getUnknownExerciseID();
+      // make one up
+      exercise = new Exercise();
+      Exercise exercise1 = (Exercise) exercise;
+      exercise1.setForeignLanguage(foreignLanguage);
+      exercise1.setID(exerciseID);
+
+    }
+     AudioContext audioContext =
         new AudioContext(reqid, user, projectID, getLanguage(projectID), exerciseID,
             0, options.shouldDoDecoding() ? AudioType.PRACTICE : AudioType.LEARN);
- //   logger.info("getAnswer  for " + exerciseID + " for " + user + " and file " + wavPath);
+    //   logger.info("getAnswer  for " + exerciseID + " for " + user + " and file " + wavPath);
     AudioAnswer answer = getAudioFileHelper(projectID)
         .getAnswer(exercise,
             audioContext,
             wavPath, file, deviceType, device, score,
             options, pretestScore);
 
-    final String path = answer.getPath();
-    final String foreignLanguage = exercise.getForeignLanguage();
-
-    ensureMP3Later(path, user, foreignLanguage, exercise.getEnglish(), getLanguage(exercise.getProjectID()));
+    ensureMP3Later(answer.getPath(), user, foreignLanguage, exercise.getEnglish(), getLanguage(projectID));
 
     return answer;
   }

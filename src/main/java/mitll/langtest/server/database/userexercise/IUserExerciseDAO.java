@@ -129,14 +129,14 @@ public interface IUserExerciseDAO extends IDAO {
   void addBulk(List<SlickExercise> bulk);
 
   /**
-   * @param userExercise
-   * @param isOverride
-   * @param isContext
-   * @param typeOrder
+   * @paramx userExercise
+   * @paramx isOverride
+   * @paramx isContext
+   * @paramx typeOrder
    * @return
-   * @see IUserListManager#newExercise(int, CommonExercise, String)
+   * @seex IUserListManager#newExercise(int, CommonExercise, String)
    */
-  int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder);
+ // int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder);
 
 
   int insert(SlickExercise UserExercise);
@@ -159,7 +159,7 @@ public interface IUserExerciseDAO extends IDAO {
    * @param oldid
    * @param projID
    * @return
-   * @see BaseExerciseDAO#addNewExercises
+   * @see SlickUserExerciseDAO#getTemplateExercise
    */
   CommonExercise getByExOldID(String oldid, int projID);
 
@@ -223,7 +223,7 @@ public interface IUserExerciseDAO extends IDAO {
   /**
    * @param exerciseDAO
    * @see mitll.langtest.server.database.DatabaseImpl#makeDAO
-   * @see ProjectManagement#populateProjects(PathHelper, ServerProperties, LogAndNotify, DatabaseImpl)
+   * @see ProjectManagement#populateProjects
    */
   void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO);
 

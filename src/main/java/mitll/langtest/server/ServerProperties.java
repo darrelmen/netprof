@@ -292,7 +292,6 @@ public class ServerProperties {
 //    logger.info("now " + langToPhoneToDisplay);
   }
 
-
   /**
    * @param props
    * @param configDir

@@ -43,9 +43,6 @@ import java.util.Map;
  * @since 3/20/2014.
  */
 public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAttributeExercise {
-  //String getOldID();
-
-
   /**
    * SERVER
    * @return

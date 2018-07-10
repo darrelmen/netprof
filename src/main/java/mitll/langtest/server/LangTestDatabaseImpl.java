@@ -39,6 +39,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.ProjectHelper;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
@@ -74,7 +75,7 @@ import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
 public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements LangTestDatabase {
   private static final Logger logger = LogManager.getLogger(LangTestDatabaseImpl.class);
 
-  private static final String NO_POSTGRES = "Can't connect to postgres - please check the database configuration in application.conf or netprof.properties.";
+  private static final String NO_POSTGRES = "Can't connect to postgres.<br/>please check the database configuration in application.conf or netprof.properties.";
   private static final String GOT_BROWSER_EXCEPTION = "got browser exception";
 
   /**
@@ -101,10 +102,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       this.serverProps = readProperties(servletContext);
       pathHelper.setProperties(serverProps);
       setInstallPath(db, servletContext);
-
-      if (serverProps.isAMAS()) {
-        audioFileHelper = new AudioFileHelper(pathHelper, serverProps, db, this, null);
-      }
     } catch (Exception e) {
       startupMessage = e.getMessage();
       logger.error("Got " + e, e);
@@ -116,8 +113,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   private void optionalInit() {
     try {
-   //   logger.info("optionalInit -- ");
-      db.doReport();
+      //   logger.info("optionalInit -- ");
+      if (db != null) db.doReport();
     } catch (Exception e) {
       logger.error("optionalInit couldn't load database " + e, e);
     }
@@ -129,8 +126,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
   }
 
+
   /**
    * This allows us to upload an exercise file.
+   *
+   * This might be helpful if we want to stream audio in a simple way outside a GWT RPC call.
    *
    * @throws ServletException
    * @throws IOException
@@ -156,6 +156,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       super.service(request, response);
     }
   }*/
+
 
   /**
    * This report is for on demand sending the report to the current user.
@@ -189,25 +190,9 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    */
   @Override
   public StartupInfo getStartupInfo() {
-    List<SlimProject> projectInfos = new ArrayList<>();
-    if (db == null) {
-      logger.info("getStartupInfo no db yet...");
-    } else {
-      IProjectManagement projectManagement = db.getProjectManagement();
-      ((NPUserSecurityManager) securityManager).setProjectManagement(projectManagement);
-      if (projectManagement == null) {
-        logger.error("getStartupInfo : config error - didn't make project management");
-      } else {
-        long then = System.currentTimeMillis();
-        projectInfos = projectManagement.getNestedProjectInfo();
-        long now = System.currentTimeMillis();
-        if (now - then > 50L)
-          logger.info("getStartupInfo took " + (now - then) + " millis to get nested projects.");
-      }
-    }
-
+    List<SlimProject> projectInfos = new ProjectHelper().getProjectInfos(db, securityManager);
     if (db == null || !db.isHasValidDB()) {
-      startupMessage = NO_POSTGRES;
+      startupMessage = NO_POSTGRES + "<br/>Using : " + serverProps.getDBConfig();
     }
     //long then = System.currentTimeMillis();
     StartupInfo startupInfo =

@@ -302,7 +302,7 @@ public class AudioFileHelper implements AlignDecode {
     return asrScoring.validLTS(foreignLanguagePhrase, transliteration);
   }
 
-  private boolean isInDictOrLTS(CommonExercise exercise) {
+  private boolean isInDictOrLTS(ClientExercise exercise) {
     return asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
   }
 
@@ -327,7 +327,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    */
   public AudioAnswer writeAudioFile(String base64EncodedString,
-                                    CommonExercise exercise1,
+                                    ClientExercise exercise1,
                                     AudioContext audioContext,
                                     AnswerInfo.RecordingInfo recordingInfoInitial,
 
@@ -392,7 +392,7 @@ public class AudioFileHelper implements AlignDecode {
     project.addAnswerToUser(absolutePath, userid);
   }
 
-  private void ensureCompressed(CommonExercise exercise1, AudioContext audioContext, String wavPath) {
+  private void ensureCompressed(ClientExercise exercise1, AudioContext audioContext, String wavPath) {
     String actualPath =
         ensureAudioHelper.ensureCompressedAudio(audioContext.getUserid(), exercise1, wavPath,
             audioContext.getAudioType(), language, new HashMap<>());
@@ -449,7 +449,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.scoring.JsonScoring#getAnswer
    */
   public AudioAnswer getAnswer(
-      CommonExercise exercise,
+      ClientExercise exercise,
       AudioContext audioContext,
 
       String wavPath, File file,
@@ -487,7 +487,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #getAnswer
    * @see #writeAudioFile
    */
-  private AudioAnswer getAudioAnswerDecoding(CommonExercise exercise,
+  private AudioAnswer getAudioAnswerDecoding(ClientExercise exercise,
 
                                              AudioContext context,
                                              AnswerInfo.RecordingInfo recordingInfo,
@@ -786,7 +786,7 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
-  private AudioAnswer getDecodeAnswer(CommonExercise exercise1,
+  private AudioAnswer getDecodeAnswer(ClientExercise exercise1,
                                       String wavPath,
                                       File file,
                                       long duration) {
@@ -824,7 +824,7 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see #getAnswer
    */
-  private AudioAnswer getAudioAnswerAlignment(CommonExercise exercise,
+  private AudioAnswer getAudioAnswerAlignment(ClientExercise exercise,
 
                                               AudioContext context,
                                               AnswerInfo.RecordingInfo recordingInfo,
@@ -953,7 +953,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #getAudioAnswerDecoding
    */
   private AudioAnswer getAudioAnswer(int reqid,
-                                     CommonExercise commonShell,
+                                     ClientExercise commonShell,
                                      String wavPath,
                                      File file,
                                      AudioCheck.ValidityAndDur validity,
@@ -968,7 +968,7 @@ public class AudioFileHelper implements AlignDecode {
         new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, commonShell.getID());
   }
 
-  private PretestScore getEasyAlignment(CommonExercise exercise, String testAudioPath) {
+  private PretestScore getEasyAlignment(ClientExercise exercise, String testAudioPath) {
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
     return getAlignmentScore(exercise, testAudioPath, options);
   }
@@ -978,7 +978,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #decodeOneAttribute(CommonExercise, AudioAttribute, int, File)
    */
 
-  private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, DecoderOptions options) {
+  private PretestScore getAlignmentScore(ClientExercise exercise, String testAudioPath, DecoderOptions options) {
     return getASRScoreForAudio(0, testAudioPath,
         exercise.getForeignLanguage(),
         exercise.getTransliteration(),
@@ -1395,9 +1395,9 @@ public class AudioFileHelper implements AlignDecode {
    * @param url
    * @param userID
    * @return AudioAnswer with decode info attached, if doFlashcard is true
-   * @see #getAudioAnswer(int, CommonExercise, String, File, AudioCheck.ValidityAndDur, DecoderOptions, int)
+   * @see #getAudioAnswer(int, ClientExercise, String, File, AudioCheck.ValidityAndDur, DecoderOptions, int)
    */
-  private AudioAnswer getAudioAnswer(CommonExercise exercise,
+  private AudioAnswer getAudioAnswer(ClientExercise exercise,
                                      int reqid,
                                      File file,
                                      AudioCheck.ValidityAndDur validity,

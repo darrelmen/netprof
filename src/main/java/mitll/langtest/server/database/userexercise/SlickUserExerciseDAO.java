@@ -873,18 +873,20 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   /**
-   * @param userExercise
-   * @param isOverride
-   * @param isContext
-   * @param typeOrder
-   * @see IUserListManager#newExercise
+   * @paramx userExercise
+   * @paramxx isOverride
+   * @paramx isContext
+   * @paramx typeOrder
+   * @seex IUserListManager#newExercise
    */
+/*
   @Override
   public int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder) {
     int insert = insert(toSlick(userExercise, isOverride, isContext, typeOrder));
     ((Exercise) userExercise).setID(insert);
     return insert;
   }
+*/
 
   @Override
   public int insert(SlickExercise UserExercise) {

@@ -142,7 +142,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
-  public static final boolean SKIP_SIGNUP_EMAIL = false;
+  private static final boolean SKIP_SIGNUP_EMAIL = false;
 
   /**
    * If false, don't use email to set the initial user password via email.
@@ -176,13 +176,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private IProjectManagement projectManagement;
   private Group primaryGroup = null;
-
-  /**
-   * @see #getMiniUser(int)
-   */
-  //private Map<Integer, MiniUser> miniUserCache = null;
-  // private int lastCount = -1;
-  // private long lastCache = 0;
 
   private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
 
@@ -313,7 +306,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private void doAfterGetDelegate() {
     myDelegate = makeMyServiceDelegate();
     dominoAdminUser = delegate.getAdminUser();
-
   }
 
   public JSONSerializer getSerializer() {

@@ -372,6 +372,7 @@ public class PronunciationLookup implements IPronunciationLookup {
    */
   private List<List<String>> hasParts(String token) {
     String[] split = token.split("['\\-]");
+   // logger.info("hasParts for '" + token + "' found " + split.length + " parts.");
 
     boolean match = true;
 
@@ -380,6 +381,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
     if (split.length > 1) {
       for (String part : split) {
+   //     logger.info("hasParts for '" + token + "' found " + part);
         boolean easyMatch;
         match &=
             (easyMatch = htkDictionary.contains(part)) ||
@@ -392,7 +394,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
           int size = prons.size();
           List<List<String>> possibleProns = new ArrayList<>(size);
-          logger.info("hasParts for " + lookupToken + " found " + size + " possible prons.");
+          logger.info("hasParts for '" + lookupToken + "' found " + size + " possible prons.");
           for (int i = 0; i < size; i++) {
             String[] phoneSequence = prons.apply(i);
             List<String> e = Arrays.asList(phoneSequence);
