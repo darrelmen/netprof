@@ -30,8 +30,7 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
   private static final int NORMAL_MIN_HEIGHT = 67;
   private static final int LANGUAGE_SIZE = 6;
 
-  public DialogExerciseList(DialogViewHelper dialogViewHelper,
-                            Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader,
+  public DialogExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader,
                             ExerciseController controller) {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false);
     //this.dialogViewHelper = dialogViewHelper;
@@ -169,17 +168,17 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
     return current;
   }
 
-  private Panel getImageAnchor(final String name, IDialog projectForLang) {
+  private Panel getImageAnchor(final String name, IDialog dialog) {
     Thumbnail thumbnail = new Thumbnail();
     thumbnail.setWidth(CHOICE_WIDTH + "px");
     thumbnail.setSize(2);
 
-    String imageRef = projectForLang.getImageRef();
+    String imageRef = dialog.getImageRef();
 
    // logger.info("show image " + imageRef);
     PushButton button = new PushButton(getFlag(imageRef));
-    final int projid = projectForLang.getID();
-    button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));
+    final int projid = dialog.getID();
+    button.addClickHandler(clickEvent -> gotClickOnDialog(name, dialog, projid, 1));
     thumbnail.add(button);
 
     DivWidget horiz = new DivWidget();
@@ -239,7 +238,7 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
     return columnText;
   }
 
-  private void gotClickOnFlag(String name, IDialog projectForLang, int projid, int nest) {
+  private void gotClickOnDialog(String name, IDialog dialog, int projid, int nest) {
     logger.info("got click on " + name);
   }
 }

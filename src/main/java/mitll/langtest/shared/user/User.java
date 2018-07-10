@@ -33,9 +33,7 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.client.initial.UILifecycle;
-import mitll.langtest.client.user.SignUpForm;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;

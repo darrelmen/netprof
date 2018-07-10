@@ -33,8 +33,6 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.client.analysis.PhoneExampleContainer;
-import mitll.langtest.server.database.phone.PhoneDAO;
-import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 

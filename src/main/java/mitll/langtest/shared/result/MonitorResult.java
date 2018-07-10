@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.result;
 
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.UserAndTime;

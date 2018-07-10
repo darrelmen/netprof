@@ -1,6 +1,9 @@
 package mitll.langtest.shared.dialog;
 
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.exercise.HasUnitChapter;
 
 import java.util.List;
 import java.util.Map;

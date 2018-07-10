@@ -33,7 +33,6 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.google.gwt.user.client.ui.Panel;
 
 import java.util.Map;
 

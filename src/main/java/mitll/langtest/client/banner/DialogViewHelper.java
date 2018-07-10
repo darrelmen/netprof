@@ -18,7 +18,6 @@ import mitll.langtest.shared.exercise.ScoredExercise;
  */
 public class DialogViewHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, IDialog> {
   //  private final Logger logger = Logger.getLogger("NewLearnHelper");
-
   /**
    * @param controller
    * @param viewContaner
@@ -47,7 +46,7 @@ public class DialogViewHelper<T extends CommonShell & ScoredExercise> extends Si
                                                                 String instanceName,
                                                                 DivWidget listHeader,
                                                                 DivWidget footer) {
-        return new DialogExerciseList<T>(DialogViewHelper.this, topRow, currentExercisePanel, instanceName, listHeader, controller);
+        return new DialogExerciseList<T>(topRow, currentExercisePanel, instanceName, listHeader, controller);
       }
     };
   }

@@ -32,10 +32,8 @@
 
 package mitll.langtest.shared.sorter;
 
-import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

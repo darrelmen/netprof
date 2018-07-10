@@ -1,7 +1,6 @@
 package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.google.gwt.user.client.ui.Panel;
 
 /**
  * Created by go22670 on 11/15/16.

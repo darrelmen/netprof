@@ -3,7 +3,6 @@ package mitll.langtest.server.database.userexercise;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.userexercise.RelatedCoreExerciseDAOWrapper;
-import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
 
 import java.util.Collection;
 import java.util.List;

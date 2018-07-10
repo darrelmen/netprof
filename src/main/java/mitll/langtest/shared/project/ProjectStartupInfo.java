@@ -33,10 +33,8 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.SectionNode;
-import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;

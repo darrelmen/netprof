@@ -36,7 +36,6 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;

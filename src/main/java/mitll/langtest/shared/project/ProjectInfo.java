@@ -33,12 +33,10 @@
 package mitll.langtest.shared.project;
 
 import mitll.langtest.client.project.ProjectEditForm;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
