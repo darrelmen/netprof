@@ -45,7 +45,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.flashcard.MyCustomIconType;
-import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.AudioAttribute;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -66,7 +66,7 @@ import java.util.logging.Logger;
  * Time: 11:41 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioControl {
+public class PlayAudioPanel extends DivWidget implements AudioControl {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
   private static final boolean DEBUG = false;
@@ -78,7 +78,11 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
    */
   private static final String PAUSE_LABEL = "pause";
   private static final String FILE_MISSING = "FILE_MISSING";
+  /**
+   * @see #rememberAudio
+   */
   private String currentPath = null;
+  protected AudioAttribute currentAudioAttr = null;
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
 
@@ -96,7 +100,8 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
   private final int id;
   private boolean playing = false;
   protected final ExerciseController controller;
-  protected final T exercise;
+
+  protected final int exid ;
 
   /**
    * @param soundManager
@@ -104,7 +109,7 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
    * @param optionalToTheRight
    * @param doSlow
    * @param controller
-   * @param exercise
+   * @param exid
    * @param addButtonsNow
    * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
    */
@@ -113,7 +118,7 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
                         Widget optionalToTheRight,
                         boolean doSlow,
                         ExerciseController controller,
-                        T exercise,
+                        int exid,
                         boolean addButtonsNow) {
     this.soundManager = soundManager;
     addStyleName("playButton");
@@ -127,7 +132,7 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
     isSlow = doSlow;
 
     this.controller = controller;
-    this.exercise = exercise;
+    this.exid = exid;
 
     if (addButtonsNow) {
       addButtons(optionalToTheRight);
@@ -152,20 +157,14 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
 
   /**
    * @param soundManager
-   * @param path
-   * @param doSlow
+   * @param playListener
    * @param controller
-   * @param exercise
-   * @seex PressAndHoldExercisePanel#getPlayAudioPanel
-   * @deprecated only for amas and dialog
+   * @param exid
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, String path, boolean doSlow, ExerciseController controller, T exercise) {
-    this(soundManager, "", null, doSlow, controller, exercise, true);
-    loadAudio(path);
-  }
-
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, ExerciseController controller, T exercise) {
-    this(soundManager, playListener, "", null, controller, exercise, true);
+  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, ExerciseController controller,
+                        int exid) {
+    this(soundManager, playListener, "", null, controller, exid, true);
   }
 
   /**
@@ -184,7 +183,7 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
                         String buttonTitle,
                         Widget optionalToTheRight,
                         ExerciseController controller,
-                        T exercise,
+                        int exercise,
                         boolean addButtonsNow) {
     this(soundManager, buttonTitle, optionalToTheRight, false, controller, exercise, addButtonsNow);
 
@@ -255,8 +254,8 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
 
     playButton.addClickHandler(event -> {
       doClick();
-      int id = exercise == null ? -1 : exercise.getID();
-      controller.logEvent(playButton, "play audio", id, "");
+//      int id = exercise == null ? -1 : exercise.getID();
+      controller.logEvent(playButton, "play audio", exid, "");
     });
 
     showPlayIcon(playButton);
@@ -481,6 +480,25 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
     }
   }
 
+  protected void playAudio(AudioAttribute audioAttribute) {
+    this.currentAudioAttr = audioAttribute;
+    playAudio(audioAttribute.getAudioRef());
+  }
+
+  public AudioAttribute getCurrentAudioAttr() {
+    return currentAudioAttr;
+  }
+
+  public Collection<Integer> getAllAudioIDs() {
+    return currentAudioAttr == null ?
+        Collections.emptySet() : Collections.singleton(currentAudioAttr.getUniqueID());
+  }
+
+  public Set<AudioAttribute> getAllPossible() {
+    return currentAudioAttr == null ?
+        Collections.emptySet() : Collections.singleton(currentAudioAttr);
+  }
+
   /**
    * @param path
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#playAndRemember
@@ -494,14 +512,18 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
       addSimpleListener(new SimpleAudioListener() {
         @Override
         public void songLoaded(double duration) {
-          if (DEBUG) logger.info("playAudio - songLoaded " + path + " this " + this);
+          if (DEBUG) {
+            logger.info("playAudio - songLoaded " + path + " this " + this);
+          }
           Scheduler.get().scheduleDeferred(() -> doClick());
         }
 
         // if (DEBUG) logger.info("playAudio - songLoaded calling doClick  " + path);
         @Override
         public void songFinished() {
-          if (DEBUG) logger.info("playAudio - songFinished " + path + " this " + this);
+          if (DEBUG) {
+            logger.info("playAudio - songFinished " + path + " this " + this);
+          }
         }
       });
 
@@ -513,8 +535,10 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
    * Remember to convert the path (which might be .wav) to a browser dependent format - IE can't do ogg, only mp3.
    *
    * @param path
+   * @see #repeatSegment(float, float)
+   * @see #playAudio(String)
    */
-  public void loadAudio(String path) {
+  private void loadAudio(String path) {
     if (DEBUG) logger.info("playAudio - loadAudio " + path);
 
     doPause();
@@ -524,6 +548,12 @@ public class PlayAudioPanel<T extends HasID> extends DivWidget implements AudioC
     if (DEBUG) logger.info("playAudio - loadAudio finished " + fixedPath);
   }
 
+  /**
+   * @param path
+   * @return
+   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices
+   * @see #loadAudio
+   */
   protected String rememberAudio(String path) {
     if (DEBUG || path == null) logger.info("rememberAudio - path " + path);
     destroySound();

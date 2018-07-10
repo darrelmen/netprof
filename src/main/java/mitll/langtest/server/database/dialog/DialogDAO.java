@@ -120,22 +120,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
     }
   }
 
-/*
-  @Override
-  public boolean exists(int projid) {
-    Collection<SlickDialog> SlickDialogs = dao.byID(projid);
-    return !SlickDialogs.isEmpty();
-  }
-*/
-
   public SlickDialog getByID(int projid) {
     Collection<SlickDialog> SlickDialogs = dao.byID(projid);
     return SlickDialogs.isEmpty() ? null : SlickDialogs.iterator().next();
   }
 
   private Collection<SlickDialog> getByProjID(int projid) {
-    Collection<SlickDialog> slickDialogs = dao.byProjID(projid);
-    return slickDialogs;
+    return dao.byProjID(projid);
   }
 
   /**
@@ -282,11 +273,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
     List<SlickRelatedExercise> slickRelatedExercises = dialogIDToRelated.get(dialogID);
 
     if (slickRelatedExercises != null) {
-
       List<CommonExercise> exercises = new ArrayList<>();
       Set<Integer> candidate = new HashSet<>();
-
-      logger.info("addExercises got " + slickRelatedExercises.size() + " relations for " + dialogID);
+//      logger.info("addExercises got " + slickRelatedExercises.size() + " relations for " + dialogID);
       Map<Integer, CommonExercise> idToEx = new HashMap<>();
 
       slickRelatedExercises.forEach(slickRelatedExercise -> {
@@ -349,6 +338,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
         exercises.forEach(current -> dialog.getExercises().add(current));
       }
+    }
+
+    String message = "dialog " + dialog.getID() + " has " + dialog.getExercises().size() + " exercises.";
+
+    if (dialog.getExercises().isEmpty()) {
+      logger.warn(message);
+    } else {
+      logger.info(message);
     }
   }
 

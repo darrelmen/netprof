@@ -2011,7 +2011,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     //exercisesWithScores.clear();
     exerciseToScore.clear();
 
-    if (displayed==null) {
+    if (displayed == null) {
       logger.warning("huh? display is null?");
       return;
     }
@@ -2020,7 +2020,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     // long then = System.currentTimeMillis();
     if (DEBUGSCORE) logger.info("setProgressBarScore checking " + displayed.size());
     for (T exercise : displayed) {
-    //  logger.info("ex " + exercise + " class " + exercise.getClass());
+      //  logger.info("ex " + exercise + " class " + exercise.getClass());
       if (exercise.hasScore()) {
         if (DEBUGSCORE) logger.info("\tsetProgressBarScore got " + exercise.getRawScore());
         //    exercisesWithScores.add(exercise.getID());

@@ -11,10 +11,11 @@ import static mitll.langtest.shared.exercise.STATE.UNSET;
 public class Dialog implements IDialog {
   //private static final transient Logger logger = LogManager.getLogger(Dialog.class);
 
-
   private static final String SPEAKER = "Speaker".toLowerCase();
   public static final String UNIT = "unit";
   private static final String CHAPTER = "chapter";
+  public static final String SPEAKER1 = "Speaker";
+  public static final String UNKNOWN = "UNKNOWN";
 
   private int id;
   private int userid;
@@ -213,14 +214,14 @@ public class Dialog implements IDialog {
 
   private String getSpeaker(ClientExercise commonExercise) {
     List<ExerciseAttribute> speakerAttr = getSpeakerAttr(commonExercise);
-    return speakerAttr.isEmpty() ? "UNKNOWN" : speakerAttr.stream().iterator().next().getValue();
+    return speakerAttr.isEmpty() ? UNKNOWN : speakerAttr.stream().iterator().next().getValue();
   }
 
   private List<ExerciseAttribute> getSpeakerAttr(ClientExercise commonExercise) {
     return commonExercise
         .getAttributes()
         .stream()
-        .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase("Speaker"))
+        .filter(exerciseAttribute -> exerciseAttribute.getProperty().startsWith(SPEAKER1))
         .collect(Collectors.toList());
   }
 

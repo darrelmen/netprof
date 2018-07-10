@@ -79,13 +79,14 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
             @Override
             public void onFailure(Throwable caught) {
               waitCursorHelper.showFinished();
+              logger.info("getExerciseIDs got FAILURE " + caught);
 
             }
 
             @Override
             public void onSuccess(ExerciseListWrapper<IDialog> result) {
               waitCursorHelper.showFinished();
-              logger.info("got back " + result.getExercises().size());
+              logger.info("getExerciseIDs got back " + result.getExercises().size());
 
               //rememberExercises(result.getExercises());
 

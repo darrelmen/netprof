@@ -1,36 +1,39 @@
 package mitll.langtest.client.banner;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.Node;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.scoring.*;
 import mitll.langtest.client.services.DialogServiceAsync;
+import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.dialog.IDialog.METADATA;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
-import org.apache.xpath.operations.Div;
+import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static com.google.gwt.dom.client.Style.*;
-import static com.google.gwt.dom.client.Style.Unit.*;
-import static mitll.langtest.shared.dialog.IDialog.METADATA.*;
+import static com.google.gwt.dom.client.Style.Unit.PX;
+import static mitll.langtest.shared.dialog.IDialog.METADATA.FLPRESENTATION;
+import static mitll.langtest.shared.dialog.IDialog.METADATA.PRESENTATION;
 
 /**
  * Created by go22670 on 4/5/17.
@@ -42,6 +45,8 @@ public class ListenViewHelper implements ContentView {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   ExerciseController controller;
+  private boolean isRTL = false;
+  // private ClickableWords<ClientExercise> clickableWords;
 
   /**
    * @param controller
@@ -50,7 +55,8 @@ public class ListenViewHelper implements ContentView {
    */
   ListenViewHelper(ExerciseController controller, IViewContaner viewContainer, INavigation.VIEWS myView) {
     this.controller = controller;
-    // super(controller, viewContainer, myView);
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    isRTL = projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
   }
 
   @Override
@@ -76,13 +82,10 @@ public class ListenViewHelper implements ContentView {
       public void onSuccess(IDialog dialog) {
         List<ExerciseAttribute> attributes = dialog.getAttributes();
 
-        DivWidget outer = getHeader(dialog, attributes);
-        child.add(outer);
-
-        DivWidget rowOne = getSpeakerRow(dialog);
-
-
-        child.add(rowOne);
+        child.add(getControls());
+        child.add(getHeader(dialog, attributes));
+        child.add(getSpeakerRow(dialog));
+        child.add(getTurns(dialog));
 
      /*   {
           DivWidget row2 = new DivWidget();
@@ -115,6 +118,7 @@ public class ListenViewHelper implements ContentView {
     {
       String label = "<b>" + speakers.get(0) + "</b>";
       CheckBox checkBox = new CheckBox(label, true);
+      checkBox.setValue(true);
       checkBox.setWidth("49%");
       checkBox.addStyleName("floatLeft");
       checkBox.addStyleName("leftFiveMargin");
@@ -123,23 +127,19 @@ public class ListenViewHelper implements ContentView {
       rowOne.add(checkBox);
     }
 
-
     {
       String label = "<b>" + speakers.get(1) + "</b>";
       CheckBox checkBox = new CheckBox(label, true);
+      checkBox.setValue(true);
 
       checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
       checkBox.addStyleName("rightAlign");
       checkBox.addStyleName("floatRight");
       checkBox.addStyleName("rightFiveMargin");
-      // checkBox.getElement().getStyle().setMarginTop(0, PX);
-
-      // checkBox.setWidth("49%");
       rowOne.add(checkBox);
     }
 
     rowOne.getElement().getStyle().setMarginBottom(10, PX);
-    //  outer.add(rowOne);
     return rowOne;
   }
 
@@ -230,6 +230,106 @@ public class ListenViewHelper implements ContentView {
     image.setHeight(HEIGHT);
     image.setWidth(HEIGHT);
     return image;
+  }
+
+  private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
+
+  @NotNull
+  private DivWidget getTurns(IDialog dialog) {
+    DivWidget rowOne = new DivWidget();
+    rowOne.addStyleName("cardBorderShadow");
+
+    rowOne.setWidth(97 + "%");
+    rowOne.getElement().getStyle().setMarginTop(10, PX);
+
+    int size = dialog.getExercises().size();
+    logger.info("dialog " + dialog);
+    logger.info("size   " + size);
+
+    List<String> speakers = dialog.getSpeakers();
+
+    Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
+    String left = speakers.get(0);
+    String right = speakers.get(1);
+    List<ClientExercise> leftTurns = speakerToEx.get(left);
+    List<ClientExercise> rightTurns = speakerToEx.get(right);
+
+    logger.info("speakerToEx " + speakerToEx.keySet());
+    logger.info("right " + right + " rightTurns " + rightTurns);
+    dialog.getExercises().forEach(clientExercise -> {
+
+
+      List<ExerciseAttribute> attributes = clientExercise.getAttributes();
+      logger.info("id " +clientExercise.getID() + " has " + attributes.size());
+      attributes.forEach(exerciseAttribute -> logger.info("Got " + exerciseAttribute));
+      //rowOne.add(new Heading(3, clientExercise.getForeignLanguage()));
+//      int fontSize = controller.getProjectStartupInfo().getLanguageInfo().getFontSize();
+//      List<IHighlightSegment> flclickables = new ArrayList<>();
+//
+//
+//      ClickableWords<ClientExercise> clickableWords = new ClickableWords<>(null, clientExercise, controller.getLanguage(), fontSize, false);
+//      DivWidget contentWidget = clickableWords.getClickableWords(clientExercise.getForeignLanguage(),
+//          FieldType.FL,
+//          flclickables, false, isRTL);
+
+      DialogExercisePanel<ClientExercise> widgets = new DialogExercisePanel<>(clientExercise, controller, null, alignments);
+      widgets.addWidgets(true, false, PhonesChoices.HIDE);
+      if (rightTurns != null && rightTurns.contains(clientExercise)) widgets.getElement().getStyle().setFloat(Style.Float.RIGHT);
+      rowOne.add(widgets);
+    });
+
+    rowOne.getElement().getStyle().setMarginBottom(10, PX);
+    return rowOne;
+  }
+
+  @NotNull
+  private DivWidget getControls() {
+    DivWidget rowOne = new DivWidget();
+//    rowOne.addStyleName("cardBorderShadow");
+
+    rowOne.setWidth(97 + "%");
+    rowOne.getElement().getStyle().setMarginTop(10, PX);
+
+    {
+      Button widgets = new Button("", IconType.ARROW_LEFT, event -> gotGoBack());
+      widgets.addStyleName("leftFiveMargin");
+      widgets.addStyleName("rightTenMargin");
+      rowOne.add(widgets);
+    }
+
+    {
+      Button widgets = new Button("", IconType.BACKWARD, event -> gotBackward());
+      widgets.addStyleName("leftFiveMargin");
+      rowOne.add(widgets);
+    }
+    {
+      Button widgets1 = new Button("", IconType.PLAY, event -> gotPlay());
+      widgets1.addStyleName("leftFiveMargin");
+      rowOne.add(widgets1);
+    }
+    {
+      Button widgets2 = new Button("", IconType.FORWARD, event -> gotForward());
+      widgets2.addStyleName("leftFiveMargin");
+      rowOne.add(widgets2);
+    }
+    rowOne.getElement().getStyle().setMarginBottom(10, PX);
+    return rowOne;
+  }
+
+  private void gotGoBack() {
+    logger.info("got go back");
+  }
+
+  private void gotBackward() {
+    logger.info("got backward");
+  }
+
+  private void gotPlay() {
+    logger.info("got play");
+  }
+
+  private void gotForward() {
+    logger.info("got forward");
   }
 
   private String getAttrValue(List<ExerciseAttribute> attributes, METADATA presentation) {

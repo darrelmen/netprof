@@ -64,7 +64,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
           }
         },
         "",
-        null, controller, exercise, true);
+        null, controller, exercise.getID(), true);
 
     downloadContainer = new DownloadContainer();
     getElement().setId("RecorderPlayAudioPanel");

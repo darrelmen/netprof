@@ -98,7 +98,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
 
   private int parentExerciseID = -1;
-  private int parentDominoID;
+ // private int parentDominoID;
 
   // for serialization
   public Exercise() {
@@ -634,7 +634,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   @Override
   public void setParentDominoID(int parentDominoID) {
-    this.parentDominoID = parentDominoID;
+
+    //this.parentDominoID = parentDominoID;
   }
 
   /**

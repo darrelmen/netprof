@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 4/5/17.
  */
-class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudioPanel<T> {
+class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudioPanel {
   private final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
 
   private static final String FAST = "Fast";
@@ -42,10 +42,20 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   public static final String SLOW = "slow";
 
   private boolean includeContext;
-  private AudioAttribute currentAudioAttr = null;
+
+  /**
+   * TODO : Sorta redundant...
+   *
+   * @see #playAndRemember
+   * @see #addChoices(SplitDropdownButton, boolean, Button, boolean)
+   * @see AlignmentFetcher#getRefAudio
+   */
+  //private AudioAttribute currentAudioAttr = null;
   private final AudioChangeListener listener;
   private Set<AudioAttribute> allPossible;
   private int exid;
+  private Map<AudioAttribute, IconAnchor> attrToCheck = new HashMap<>();
+  protected final T exercise;
 
   /**
    * @see TwoColumnExercisePanel#getPlayAudioPanel
@@ -59,13 +69,16 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
       AudioChangeListener listener) {
     super(soundManager, null,
         "",
-        null, exerciseController, exercise, false);
+        null, exerciseController, exercise.getID(), false);
+    this.exercise = exercise;
     this.includeContext = includeContext;
     this.listener = listener;
     this.exid = exercise.getID();
     // getElement().setId("ChoicePlayAudioPanel");
     addButtons(null);
 
+
+    logger.info("made choice panel for " + exercise.getID());
 // TODO : don't do this - leaves pointers to dead components unless removed...
 
     LangTest.EVENT_BUS.addHandler(AudioSelectedEvent.TYPE, authenticationEvent -> {
@@ -84,7 +97,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
-      // logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
+      logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
       addChoices(null, includeContext, null, true);
     }
   }
@@ -228,13 +241,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
     splitDropdownButton.getTriggerWidget().setEnabled(hasAnyAudio);
     if (hasAnyAudio) {
-      if (currentAudioAttr != null) {
-        attrToWidget.get(currentAudioAttr).setVisible(false);
-      }
-
-      currentAudioAttr = toUse;
-
-      attrToWidget.get(currentAudioAttr).setVisible(true);
+      markCurrentAudio(toUse);
 
       // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
       if (tellListener) {
@@ -258,8 +265,13 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     return hasGender && storage.isTrue(IS_MALE) || (!hasGender && controller.getUserManager().isMale());
   }
 
-  private Map<AudioAttribute, IconAnchor> attrToWidget = new HashMap<>();
-
+  /**
+   *
+   * @param playButton
+   * @param isMale1
+   * @param isReg
+   * @param mr
+   */
   private void addAudioChoice(SplitDropdownButton playButton, boolean isMale1, boolean isReg, AudioAttribute mr) {
     NavLink widgets = addAudioChoice(isMale1, isReg, mr);
     playButton.add(widgets);
@@ -298,30 +310,34 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
       widget.add(check);
 
-      attrToWidget.put(attr, check);
+      attrToCheck.put(attr, check);
     }
 
     return widget;
   }
 
+  /**
+   *
+   * @param mr
+   * @param isMale
+   * @param isReg
+   * @return
+   */
   @NotNull
   private ClickHandler getChoiceHandler(AudioAttribute mr, boolean isMale, boolean isReg) {
-    return event -> playAndRemember(mr.getUniqueID(), mr.getAudioRef(), mr.getDurationInMillis(), isMale, isReg, mr);
+    return event -> playAndRemember(isMale, isReg, mr);
   }
 
-  private void playAndRemember(int audioID, String audioRef, long durationInMillis, boolean isMale, boolean isReg, AudioAttribute mr) {
-    //   logger.info("playAndRemember " + audioID + " " + audioRef + " isMale " + isMale + " isReg " + isReg + " durationInMillis " + durationInMillis);
-
-    if (currentAudioAttr != null) {
-      attrToWidget.get(currentAudioAttr).setVisible(false);
-    }
-    currentAudioAttr = mr;
-    attrToWidget.get(currentAudioAttr).setVisible(true);
+  private void playAndRemember(boolean isMale, boolean isReg, AudioAttribute mr) {
+    logger.info("playAndRemember " + mr.getUniqueID() +
+        "\n\tref " + mr.getAudioRef() +
+        " isMale " + isMale + " isReg " + isReg + " durationInMillis " + mr.getDurationInMillis());
+    markCurrentAudio(mr);
 
     doPause();
-    listener.audioChanged(audioID, durationInMillis);
+    listener.audioChanged(mr.getUniqueID(), mr.getDurationInMillis());
 
-    playAudio(audioRef);
+    playAudio(mr);
 
     rememberAudioChoice(isMale, isReg);
 
@@ -329,6 +345,16 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
     controller.logEvent("choicePlay", "Button", "" + exid,
         "choose " + (isMale ? "Male" : "Female") + (isReg ? " Reg" : " Slow"));
+  }
+
+  private void markCurrentAudio(AudioAttribute toUse) {
+    logger.info("markCurrentAudio " +toUse);
+    if (currentAudioAttr != null) {
+      attrToCheck.get(currentAudioAttr).setVisible(false);
+    }
+
+    currentAudioAttr = toUse;
+    attrToCheck.get(currentAudioAttr).setVisible(true);
   }
 
   private void rememberAudioChoice(boolean isMale, boolean isReg) {
@@ -376,17 +402,10 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
   /**
    * @return
-   * @see TwoColumnExercisePanel#getRefAudio
-   */
-  AudioAttribute getCurrentAudioAttr() {
-    return currentAudioAttr;
-  }
-
-  /**
-   * @return
    * @see TwoColumnExercisePanel#getReqAudio
    */
-  Set<Integer> getAllAudioIDs() {
+  @Override
+  public Collection<Integer> getAllAudioIDs() {
     Set<Integer> allIDs = new HashSet<>();
     allPossible.forEach(audioAttribute -> allIDs.add(audioAttribute.getUniqueID()));
     return allIDs;
@@ -396,7 +415,8 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
    * @return
    * @see TwoColumnExercisePanel#getRefAudio
    */
-  Set<AudioAttribute> getAllPossible() {
+  @Override
+  public Set<AudioAttribute> getAllPossible() {
     return allPossible;
   }
 }

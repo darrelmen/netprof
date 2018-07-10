@@ -724,8 +724,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     long then = System.currentTimeMillis();
     User sessUser = userDAO.getByID(id);
     long now = System.currentTimeMillis();
-    //if (now - then > 20)
-    log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
+    if (now - then > 20) {
+      log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
+    }
     return sessUser;
   }
 

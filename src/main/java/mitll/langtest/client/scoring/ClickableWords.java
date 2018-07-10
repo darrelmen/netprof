@@ -15,13 +15,11 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -66,7 +64,7 @@ public class ClickableWords<T extends CommonShell> {
    * @param fontSize
    * @see RefAudioGetter#addWidgets
    */
-  ClickableWords(ListInterface listContainer, T exercise, String language, int fontSize, boolean showPhones) {
+  public ClickableWords(ListInterface listContainer, T exercise, String language, int fontSize, boolean showPhones) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
@@ -83,15 +81,16 @@ public class ClickableWords<T extends CommonShell> {
    * @param clickables
    * @param isSimple
    * @param isRTL
-   * @see TwoColumnExercisePanel#getEntry
+   * @see TwoColumnExercisePanel#getFLEntry
+   * @seex TwoColumnExercisePanel#getEntry(String, String, ExerciseAnnotation, TwoColumnExercisePanel.FieldType, boolean, List, boolean, CommentAnnotator, boolean, int)
    */
-  DivWidget getClickableWords(String value,
-                              TwoColumnExercisePanel.FieldType fieldType,
-                              List<IHighlightSegment> clickables,
-                              boolean isSimple,
-                              boolean isRTL) {
-    boolean isFL = fieldType == TwoColumnExercisePanel.FieldType.FL;
-    boolean flLine = isFL || (isJapanese && fieldType == TwoColumnExercisePanel.FieldType.TRANSLIT);
+  public DivWidget getClickableWords(String value,
+                                     FieldType fieldType,
+                                     List<IHighlightSegment> clickables,
+                                     boolean isSimple,
+                                     boolean isRTL) {
+    boolean isFL = fieldType == FieldType.FL;
+    boolean flLine = isFL || (isJapanese && fieldType == FieldType.TRANSLIT);
     boolean isChineseCharacter = flLine && hasClickableAsian;
     HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL :
         WordCountDirectionEstimator.get().estimateDirection(value);
@@ -104,7 +103,7 @@ public class ClickableWords<T extends CommonShell> {
 
   @NotNull
   private List<String> getSearchTokens(boolean isChineseCharacter) {
-    return getTokens(listContainer.getTypeAheadText().toLowerCase(), isChineseCharacter);
+    return listContainer == null ? new ArrayList<>() : getTokens(listContainer.getTypeAheadText().toLowerCase(), isChineseCharacter);
   }
 
   /**
@@ -123,7 +122,7 @@ public class ClickableWords<T extends CommonShell> {
                                     boolean isSimple,
                                     HasDirection.Direction dir,
                                     List<IHighlightSegment> clickables,
-                                    TwoColumnExercisePanel.FieldType fieldType
+                                    FieldType fieldType
   ) {
     List<IHighlightSegment> segmentsForTokens = getSegmentsForTokens(isSimple, tokens, searchTokens, dir, fieldType);
     clickables.addAll(segmentsForTokens);
@@ -145,7 +144,7 @@ public class ClickableWords<T extends CommonShell> {
                                                        List<String> searchTokens,
 
                                                        HasDirection.Direction dir,
-                                                       TwoColumnExercisePanel.FieldType fieldType) {
+                                                       FieldType fieldType) {
     List<IHighlightSegment> segments = new ArrayList<>();
     int id = 0;
     Iterator<String> searchIterator = searchTokens.iterator();
@@ -174,12 +173,11 @@ public class ClickableWords<T extends CommonShell> {
    * @param segmentsForTokens
    * @param isRTL
    * @return a clickable row
-   * @see #getClickableDiv(List, List, boolean, HasDirection.Direction, List, TwoColumnExercisePanel.FieldType)
+   * @see #getClickableDiv(List, List, boolean, HasDirection.Direction, List, FieldType)
    */
   @NotNull
   private DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean isRTL) {
     DivWidget horizontal = getClickableDiv(isRTL);
-    // horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
     horizontal.getElement().setId(CLICKABLE_ROW);
 
 /*
@@ -248,7 +246,7 @@ public class ClickableWords<T extends CommonShell> {
    */
   DivWidget getClickableWordsHighlight(String contextSentence,
                                        String highlight,
-                                       TwoColumnExercisePanel.FieldType fieldType,
+                                       FieldType fieldType,
                                        List<IHighlightSegment> clickables,
                                        boolean isSimple) {
     DivWidget horizontal = new DivWidget();
@@ -256,8 +254,8 @@ public class ClickableWords<T extends CommonShell> {
     horizontal.getElement().setId("clickableWordsHighlightRow");
     horizontal.setWidth("100%");
 
-    boolean isFL = fieldType == TwoColumnExercisePanel.FieldType.FL;
-    boolean flLine = isFL || (isJapanese && fieldType == TwoColumnExercisePanel.FieldType.TRANSLIT);
+    boolean isFL = fieldType == FieldType.FL;
+    boolean flLine = isFL || (isJapanese && fieldType == FieldType.TRANSLIT);
     boolean isChineseCharacter = flLine && hasClickableAsian;
 
     List<String> tokens = getTokens(contextSentence, isChineseCharacter);
@@ -403,7 +401,7 @@ public class ClickableWords<T extends CommonShell> {
    * @param longer
    * @param shorter
    * @return
-   * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
+   * @see #getClickableWordsHighlight(String, String, FieldType, List, boolean)
    * @see #getMatchingHighlightAll
    * @see #makeClickableText
    */
@@ -439,8 +437,8 @@ public class ClickableWords<T extends CommonShell> {
    * @param value
    * @param isChineseCharacter
    * @return
-   * @see #getClickableWords(String, TwoColumnExercisePanel.FieldType, List, boolean, boolean)
-   * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
+   * @seex #getClickableWords(String, TwoColumnExercisePanel.FieldType, List, boolean, boolean)
+   * @seex #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
    */
   @NotNull
   private List<String> getTokens(String value, boolean isChineseCharacter) {
@@ -481,14 +479,14 @@ public class ClickableWords<T extends CommonShell> {
       String searchToken,
       boolean isContextMatch,
       int id,
-      TwoColumnExercisePanel.FieldType fieldType) {
+      FieldType fieldType) {
     final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir,
         //!isSimple,
         false,
         false);
 
     HTML highlightSegment = highlightSegmentDiv.getClickable();
-    if (fieldType == TwoColumnExercisePanel.FieldType.FL) {
+    if (fieldType == FieldType.FL) {
       if (dir == HasDirection.Direction.RTL) {
         String bigflfont = "bigflfont";
         if (isUrdu) bigflfont = "urdubigflfont";
@@ -504,7 +502,7 @@ public class ClickableWords<T extends CommonShell> {
     }
 
     if (isContextMatch) highlightSegment.addStyleName(CONTEXTMATCH);
-    if (fieldType == TwoColumnExercisePanel.FieldType.MEANING) highlightSegment.addStyleName("englishFont");
+    if (fieldType == FieldType.MEANING) highlightSegment.addStyleName("englishFont");
 
     if (searchToken != null) {
       showSearchMatch(dir, html, highlightSegment, searchToken);
@@ -567,7 +565,9 @@ public class ClickableWords<T extends CommonShell> {
     String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
     String s2 = s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
     // logger.info("putTextInSearchBox after    " + s2);
-    listContainer.searchBoxEntry(s2);
+    if (listContainer != null) {
+      listContainer.searchBoxEntry(s2);
+    }
   }
 
   /**

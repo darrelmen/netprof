@@ -3,6 +3,7 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -22,25 +23,33 @@ public class AlignmentFetcher {
   private final int exerciseID;
   private final ExerciseController controller;
   private final ListInterface<?, ?> listContainer;
-  private ChoicePlayAudioPanel<ClientExercise> playAudio;
-  private ChoicePlayAudioPanel<ClientExercise> contextPlay;
+  //private ChoicePlayAudioPanel<ClientExercise> playAudio;
+  // private ChoicePlayAudioPanel<ClientExercise> contextPlay;
+
+  private PlayAudioPanel playAudio;
+  private PlayAudioPanel contextPlay;
   private int req;
   private AudioChangeListener audioChangeListener, contextChangeListener;
 
+  /**
+   *
+   * @param exerciseID
+   * @param controller
+   * @param listContainer
+   * @param alignments
+   * @param audioChangeListener
+   * @param contextChangeListener
+   */
   AlignmentFetcher(final int exerciseID,
                    final ExerciseController controller,
                    final ListInterface<?, ?> listContainer,
                    Map<Integer, AlignmentOutput> alignments,
-//                   ChoicePlayAudioPanel playAudio,
-//                   ChoicePlayAudioPanel contextPlay,
                    AudioChangeListener audioChangeListener,
                    AudioChangeListener contextChangeListener) {
     this.exerciseID = exerciseID;
     this.controller = controller;
     this.listContainer = listContainer;
     this.alignments = alignments;
-//    this.playAudio = playAudio;
-//    this.contextPlay = contextPlay;
     this.audioChangeListener = audioChangeListener;
     this.contextChangeListener = contextChangeListener;
   }
@@ -143,7 +152,7 @@ public class AlignmentFetcher {
       ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
 
       // threre could be a race where we go to get this after we log out...
-      if (projectStartupInfo != null && listContainer.isCurrentReq(getReq())) {
+      if (projectStartupInfo != null && (listContainer == null || listContainer.isCurrentReq(getReq()))) {
         getAlignments(listener, currentAudioAttr, refID, contextAudioAttr, contextRefID, req, projectStartupInfo.getProjectid());
       }
     }
@@ -278,7 +287,7 @@ public class AlignmentFetcher {
     return controller.getProjectStartupInfo();
   }
 
-  public Set<Integer> getReqAudio() {
+  Set<Integer> getReqAudio() {
     Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
 
 //    logger.info("getRefAudio " + req.size() + " audio attrs");
@@ -292,11 +301,11 @@ public class AlignmentFetcher {
     return req;
   }
 
-  public void setPlayAudio(ChoicePlayAudioPanel playAudio) {
+  public void setPlayAudio(PlayAudioPanel playAudio) {
     this.playAudio = playAudio;
   }
 
-  public void setContextPlay(ChoicePlayAudioPanel contextPlay) {
+  void setContextPlay( PlayAudioPanel contextPlay) {
     this.contextPlay = contextPlay;
   }
 }

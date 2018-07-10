@@ -20,23 +20,22 @@ h1 {
     /*background: -moz-linear-gradient(top,  #ffffff,  #b4b4b4);*/ /* for firefox 3.6+ */
 }
 
-
-html, body{
-    height:100%;
+html, body {
+    height: 100%;
 }
 
 body {
     min-height: 100vh;
-/*    display: -ms-flexbox;
-    display: -webkit-flex;
-    display: flex;
-    -ms-flex-direction: column;
-    -webkit-flex-direction: column;
-    flex-direction: column;
+    /*    display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -ms-flex-direction: column;
+        -webkit-flex-direction: column;
+        flex-direction: column;
 
-    -ms-flex: 1;
-    -webkit-flex: 1;
-    flex: 1;*/
+        -ms-flex: 1;
+        -webkit-flex: 1;
+        flex: 1;*/
 }
 
 .headerBackground {
@@ -208,6 +207,18 @@ body {
 
 .bold {
     font-weight: bold;
+}
+
+.black {
+    color: black;
+}
+
+.blueRow {
+    color: black;
+}
+
+.blueRow > h3 > small {
+    color:black;
 }
 
 .bigLink {
@@ -487,9 +498,6 @@ fieldset > legend {
     font-family: Arial Unicode MS, Arial, sans-serif;
 }
 
-/*.clickable {
-  cursor                      :   pointer;
-}*/
 
 .gwt-Button {
     background: none repeat scroll 0 0 #DDDDDD;
@@ -651,7 +659,7 @@ Where should this font live? under src?
 */
 @font-face {
     font-family: 'MyUrduWebFont';
-    src:  url('./langtest/Jameel Noori Nastaleeq.ttf') format('truetype')
+    src: url('./langtest/Jameel Noori Nastaleeq.ttf') format('truetype')
 }
 
 .urdu {
@@ -685,7 +693,7 @@ Where should this font live? under src?
 }
 
 .urdu h4 td {
-    font-family: 'MyUrduWebFont',sans-serif;
+    font-family: 'MyUrduWebFont', sans-serif;
     font-size: 14pt;
     font-weight: normal;
     line-height: 125%;
@@ -693,7 +701,7 @@ Where should this font live? under src?
 }
 
 .urdu td > table {
-    font-family: 'MyUrduWebFont',sans-serif;
+    font-family: 'MyUrduWebFont', sans-serif;
     font-size: 14pt;
     font-weight: normal;
     line-height: 125%;
@@ -701,7 +709,7 @@ Where should this font live? under src?
 }
 
 .urdu table td {
-    font-family: 'MyUrduWebFont',  sans-serif;
+    font-family: 'MyUrduWebFont', sans-serif;
     font-size: 14pt;
     font-weight: normal;
     line-height: 125%;
@@ -2121,7 +2129,6 @@ h1, h2, h3, h4, h5, h6 {
     z-index: unset;
 }
 
-
 body .modal-body .bulk-update-modal-content .tabbable {
     position: absolute;
     top: 3.5em;
@@ -2130,9 +2137,11 @@ body .modal-body .bulk-update-modal-content .tabbable {
     right: 0;
     overflow: hidden;
 }
+
 .bulk-update-header-cell .bulk-update-modal-msg-label {
     text-align: center;
 }
+
 body .modal-body .bulk-update-result-detail TD.centered-col {
     text-align: center;
 }
@@ -2140,6 +2149,7 @@ body .modal-body .bulk-update-result-detail TD.centered-col {
 body .modal-body .bulk-update-result-pdiv.narrow {
     display: inline-block;
 }
+
 body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-detail TD:FIRST-CHILD {
     text-align: right;
 }

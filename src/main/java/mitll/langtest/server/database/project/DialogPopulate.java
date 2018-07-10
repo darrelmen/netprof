@@ -115,19 +115,11 @@ public class DialogPopulate {
 
           allImportExToID.putAll(importExToID);
           {
-            List<SlickRelatedExercise> relatedExercises =
-                getSlickRelatedExercises(projid, modified, dialog, dialogID, importExToID);
+            List<SlickRelatedExercise> relatedExercises = getSlickRelatedExercises(projid, modified, dialog, dialogID, importExToID);
             db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(relatedExercises);
           }
 
-          {
-            List<SlickRelatedExercise> relatedExercises = new ArrayList<>();
-            dialog.getCoreVocabulary().forEach(clientExercise ->
-                relatedExercises.add(new SlickRelatedExercise(-1, clientExercise.getID(),
-                    clientExercise.getID(), projid, dialogID, modified))
-            );
-            db.getUserExerciseDAO().getRelatedCoreExercise().addBulkRelated(relatedExercises);
-          }
+          addCoreVocab(projid, modified, dialog, dialogID);
         }
 //        if (parentToChild.size() != dialog.getExercises().size())
 //          logger.error("tried to add " + dialog.getExercises().size() + " but only did " + parentToChild.size());
@@ -144,6 +136,15 @@ public class DialogPopulate {
       project.setDialogs(dialogs1);
       return false;
     }
+  }
+
+  private void addCoreVocab(int projid, Timestamp modified, Dialog dialog, int dialogID) {
+    List<SlickRelatedExercise> relatedExercises = new ArrayList<>();
+    dialog.getCoreVocabulary().forEach(clientExercise ->
+        relatedExercises.add(new SlickRelatedExercise(-1, clientExercise.getID(),
+            clientExercise.getID(), projid, dialogID, modified))
+    );
+    db.getUserExerciseDAO().getRelatedCoreExercise().addBulkRelated(relatedExercises);
   }
 
   @NotNull

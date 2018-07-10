@@ -708,6 +708,10 @@ public class Project implements IPronunciationLookup {
     return dialogs;
   }
 
+  /**
+   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogInfo
+   * @param dialogs
+   */
   public void setDialogs(List<IDialog> dialogs) {
     this.dialogs = dialogs;
 

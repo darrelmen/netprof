@@ -301,7 +301,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
               postAudioRecordButton.setEnabled(true);
             }
 
-          }, suffix, toTheRightWidget, controller, exercise, true);
+          }, suffix, toTheRightWidget, controller, exercise.getID(), true);
 
       add(recordImage1);
       recordImage1.setVisible(false);
