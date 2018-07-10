@@ -76,6 +76,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   private Widget contentPanel;
 
   FlashcardPanel<L, T> currentFlashcard = null;
+  /**
+   * @see #setNavigation(INavigation)
+   */
   private INavigation navigation;
   final KeyStorage storage;
 

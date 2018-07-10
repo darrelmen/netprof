@@ -46,6 +46,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Probably going to need to parameterize by exercises?
@@ -122,17 +123,31 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     }
   }
 
+  @Override
+  public IDialog getDialog(int id) throws DominoSessionException {
+    List<IDialog> iDialogs = getiDialogs(getUserIDFromSessionOrDB());
+    List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == id).collect(Collectors.toList());
+    return collect.isEmpty() ? iDialogs.iterator().next() : collect.iterator().next();
+  }
+
   private List<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
-    List<IDialog> dialogList = new ArrayList<>();
+    List<IDialog> ret;
     if (request.getTypeToSelection().isEmpty()) {
-      int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
-      if (projectIDFromUser != -1) {
-        Project project = getProject(projectIDFromUser);
-        dialogList = project.getDialogs();
-      }
+      List<IDialog> dialogList = getiDialogs(userIDFromSessionOrDB);
+      ret = dialogList;
     } else {
       Collection<IDialog> exercisesForSelectionState = sectionHelper.getExercisesForSelectionState(request.getTypeToSelection());
-      dialogList = new ArrayList<>(exercisesForSelectionState);
+      ret = new ArrayList<>(exercisesForSelectionState);
+    }
+    return ret;
+  }
+
+  private List<IDialog> getiDialogs(int userIDFromSessionOrDB) {
+    List<IDialog> dialogList = new ArrayList<>();
+    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+    if (projectIDFromUser != -1) {
+      Project project = getProject(projectIDFromUser);
+      dialogList = project.getDialogs();
     }
     return dialogList;
   }

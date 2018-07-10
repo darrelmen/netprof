@@ -1252,17 +1252,21 @@ private boolean hasNetworkProblem;
 
   @Override
   public void showListIn(int listID, INavigation.VIEWS views) {
-    initialUI.getNavigation().showListIn(listID, views);
+    getNavigation().showListIn(listID, views);
   }
 
   @Override
   public ShowTab getShowTab() {
-    return initialUI.getNavigation().getShowTab();
+    return getNavigation().getShowTab();
   }
 
   @Override
   public void setBannerVisible(boolean visible) {
-    initialUI.getNavigation().setBannerVisible(visible);
+    getNavigation().setBannerVisible(visible);
+  }
+
+  public INavigation getNavigation() {
+    return initialUI.getNavigation();
   }
 
   @Override

@@ -43,4 +43,6 @@ public interface DialogServiceAsync {
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
 
   void getDialogs(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<IDialog>> async);
+
+  void getDialog(int id, AsyncCallback<IDialog> async);
 }

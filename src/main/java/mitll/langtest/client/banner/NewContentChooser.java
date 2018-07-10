@@ -50,6 +50,7 @@ public class NewContentChooser implements INavigation {
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
   private final DialogViewHelper dialogHelper;
+  private final ListenViewHelper listenHelper;
   private final PracticeHelper practiceHelper;
   private final QuizHelper quizHelper;
   private final ExerciseController controller;
@@ -68,7 +69,8 @@ public class NewContentChooser implements INavigation {
     quizHelper = new QuizHelper(controller, this, VIEWS.QUIZ, this);
 
 
-    dialogHelper = new DialogViewHelper(controller, this, LEARN);
+    dialogHelper = new DialogViewHelper(controller, this, DIALOG);
+    listenHelper = new ListenViewHelper(controller, this, LISTEN);
 
 
     this.controller = controller;
@@ -99,7 +101,7 @@ public class NewContentChooser implements INavigation {
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-   //    logger.info("getCurrentView currentView " + currentView);
+    //    logger.info("getCurrentView currentView " + currentView);
     VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
@@ -147,7 +149,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-   //  logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+    //  logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);
@@ -186,8 +188,20 @@ public class NewContentChooser implements INavigation {
           if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
 
           setInstanceHistory(DIALOG);
+
+
           dialogHelper.showContent(divWidget, DIALOG.toString(), fromClick);
           break;
+
+        case LISTEN:
+          clearAndFixScroll();
+
+          if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
+
+          setInstanceHistory(LISTEN);
+          listenHelper.showContent(divWidget, LISTEN.toString(), fromClick);
+          break;
+
         case RECORD:
           clearAndFixScroll();
           setInstanceHistory(RECORD);
@@ -396,7 +410,7 @@ public class NewContentChooser implements INavigation {
    */
   private String getCurrentStoredView() {
     String instance = getCurrentInstance();
-   // logger.info("getCurrentStoredView instance = " + instance);
+    // logger.info("getCurrentStoredView instance = " + instance);
 
     VIEWS views = null;
     try {
@@ -419,7 +433,6 @@ public class NewContentChooser implements INavigation {
 
 
   /**
-   *
    * @return
    */
   private String getCurrentInstance() {
@@ -507,6 +520,14 @@ public class NewContentChooser implements INavigation {
   public void showListIn(int listid, VIEWS view) {
     // logger.info("showListIn - " + listid + " " + view);
     setHistoryWithList(listid, view);
+    banner.show(view);
+  }
+  @Override
+  public void showDialogIn(int dialogid, VIEWS view) {
+    // logger.info("showListIn - " + listid + " " + view);
+    History.newItem(
+        SelectionState.DIALOG + "=" + dialogid + SelectionState.SECTION_SEPARATOR +
+            SelectionState.INSTANCE + "=" + view.toString());
     banner.show(view);
   }
 

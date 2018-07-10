@@ -126,6 +126,8 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   ShowTab getShowTab();
 
+  INavigation getNavigation();
+
   void setBannerVisible(boolean visible);
 
   CommentAnnotator getCommentAnnotator();

@@ -3,6 +3,7 @@ package mitll.langtest.server.database.dialog;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogType;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
@@ -26,15 +27,15 @@ import java.util.stream.Stream;
  */
 public class KPDialogs implements IDialogReader {
   private static final Logger logger = LogManager.getLogger(KPDialogs.class);
-  public static final String DIALOG = "dialog";
-  public static final List<String> SPEAKER_LABELS = Arrays.asList("A", "B", "C", "D", "E", "F");
-  public static final String UNIT = "unit";
-  public static final String CHAPTER = "chapter";
-  public static final String PAGE = "page";
-  public static final String TOPIC = "presentation";
-  public static final String SPEAKER = "Speaker";
+  private static final String DIALOG = "dialog";
+  private static final List<String> SPEAKER_LABELS = Arrays.asList("A", "B", "C", "D", "E", "F");
+  private static final String UNIT = IDialog.METADATA.UNIT.getLC();
+  private static final String CHAPTER =  IDialog.METADATA.CHAPTER.getLC();
+  private static final String PAGE =  IDialog.METADATA.PAGE.getLC();
+  private static final String PRESENTATION = IDialog.METADATA.PRESENTATION.getLC();
+  private static final String SPEAKER = IDialog.METADATA.SPEAKER.getCap();
 
-  String docIDS = "333815\n" +
+  private final String docIDS = "333815\n" +
       "333816\n" +
       "333817\n" +
       "333818\n" +
@@ -44,7 +45,7 @@ public class KPDialogs implements IDialogReader {
       "333823\n" +
       "333824\n" +
       "333825";
-  String title = "Meeting someone for the first time\n" +
+  private final String title = "Meeting someone for the first time\n" +
       "What time is it?\n" +
       "You dialed the wrong number.\n" +
       "What will you do during the coming school break?\n" +
@@ -54,7 +55,7 @@ public class KPDialogs implements IDialogReader {
       "Please exchange this for a blue tie.\n" +
       "Common Ailments and Symptoms\n" +
       "Medical Emergencies";
-  String dir = "010_C01\n" +
+  private final String dir = "010_C01\n" +
       "001_C05\n" +
       "003_C09\n" +
       "023_C09\n" +
@@ -64,7 +65,7 @@ public class KPDialogs implements IDialogReader {
       "001_C18\n" +
       "005_C29\n" +
       "010_C30";
-  String chapter = "1\n" +
+  private final String chapter = "1\n" +
       "5\n" +
       "9\n" +
       "9\n" +
@@ -74,7 +75,7 @@ public class KPDialogs implements IDialogReader {
       "18\n" +
       "29\n" +
       "30";
-  String page = "12\n" +
+  private final String page = "12\n" +
       "5\n" +
       "5\n" +
       "15\n" +
@@ -84,7 +85,7 @@ public class KPDialogs implements IDialogReader {
       "4\n" +
       "7\n" +
       "12";
-  String pres = "Topic Presentation B\n" +
+  private final String pres = "Topic Presentation B\n" +
       "Topic Presentation A\n" +
       "Topic Presentation A\n" +
       "Topic Presentation A\n" +
@@ -95,7 +96,7 @@ public class KPDialogs implements IDialogReader {
       "Topic Presentation A\n" +
       "Topic Presentation B";
 
-  String unit = "1\n" +
+  private final String unit = "1\n" +
       "2\n" +
       "3\n" +
       "3\n" +
@@ -215,7 +216,7 @@ public class KPDialogs implements IDialogReader {
                 e.printStackTrace();
               }
             }
-         //   logger.info(" trie ready...");
+            //   logger.info(" trie ready...");
 
             addCoreWords(project, coreExercises, exercise);
             exercises.add(exercise);
@@ -276,7 +277,8 @@ public class KPDialogs implements IDialogReader {
     List<String> speakersList = new ArrayList<>(speakers);
     speakersList
         .forEach(s -> attributes
-            .add(new ExerciseAttribute("Speaker " + SPEAKER_LABELS.get(speakersList.indexOf(s)), s, false)));
+            .add(new ExerciseAttribute(SPEAKER +
+                " " + SPEAKER_LABELS.get(speakersList.indexOf(s)), s, false)));
   }
 
   private void addCoreWords(Project project, List<ClientExercise> coreExercises, ClientExercise exercise) {
@@ -341,13 +343,16 @@ public class KPDialogs implements IDialogReader {
     return builder.toString();
   }
 
+  /**
+   * @param page
+   * @param topic
+   * @return
+   */
   @NotNull
-  private List<ExerciseAttribute> getExerciseAttributes(/*String unit, String chapter, */String page, String topic) {
+  private List<ExerciseAttribute> getExerciseAttributes(String page, String topic) {
     List<ExerciseAttribute> attributes = new ArrayList<>();
-//    attributes.add(new ExerciseAttribute(UNIT, unit));
-//    attributes.add(new ExerciseAttribute(CHAPTER, chapter));
     attributes.add(new ExerciseAttribute(PAGE, page));
-    attributes.add(new ExerciseAttribute(TOPIC, topic));
+    attributes.add(new ExerciseAttribute(PRESENTATION, topic));
     return attributes;
   }
 

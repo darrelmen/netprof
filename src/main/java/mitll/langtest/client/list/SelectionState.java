@@ -32,6 +32,8 @@
 
 package mitll.langtest.client.list;
 
+import com.google.gwt.user.client.History;
+
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -52,6 +54,7 @@ public class SelectionState {
   public static final String ITEM = "item";
   public static final String SEARCH = "search";
   public static final String PROJECT = "project";
+  public static final String DIALOG = "d";
 
   public static final String SECTION_SEPARATOR = "~";
 
@@ -71,6 +74,11 @@ public class SelectionState {
 
   private static final boolean DEBUG = false;
   private int project = -1;
+  private int dialog = -1;
+
+  public SelectionState() {
+    this(History.getToken(), false);
+  }
 
   /**
    * @param token
@@ -136,6 +144,12 @@ public class SelectionState {
             }
           } else if (isMatch(type, SEARCH)) {
             search = section;
+          } else if (isMatch(type, DIALOG)) {
+            try {
+              setDialog(Integer.parseInt(section));
+            } catch (NumberFormatException e) {
+              e.printStackTrace();
+            }
           } else if (isMatch(type, PROJECT)) {
             try {
               setProject(Integer.parseInt(section));
@@ -259,8 +273,16 @@ public class SelectionState {
     this.project = project;
   }
 
+  private void setDialog(int project) {
+    this.dialog = project;
+  }
+
   public int getProject() {
     return project;
+  }
+
+  public int getDialog() {
+    return dialog;
   }
 
   public String toString() {
@@ -273,11 +295,13 @@ public class SelectionState {
   }
 
   public String getInfo() {
-    return "parseToken : instance " + instance + " : " +
-        "search " + search + ", " +
-        "item " + item + ", " +
-        "project " + project + ", " +
-        "unit->chapter " + getTypeToSection() +
-        " onlyWithAudioDefects=" + isOnlyWithAudioDefects();
+    return "parseToken : " +
+        "\n\tinstance " + instance +
+        "\n\tsearch   " + search +
+        "\n\titem     " + item +
+        "\n\tproject  " + project +
+        "\n\tdialog   " + dialog +
+        "\n\tunit->chapter " + getTypeToSection() +
+        "\n\tonlyWithAudioDefects " + isOnlyWithAudioDefects();
   }
 }

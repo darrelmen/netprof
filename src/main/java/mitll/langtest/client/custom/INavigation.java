@@ -23,6 +23,7 @@ public interface INavigation extends IViewContaner {
     DRILL,
     QUIZ,
     DIALOG,
+    LISTEN,
     RECORD(Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     CONTEXT(Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     DEFECTS(Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
@@ -54,7 +55,7 @@ public interface INavigation extends IViewContaner {
   void showInitialState();
 
   void showListIn(int listid, VIEWS view);
-
+  void showDialogIn(int dialogid, VIEWS view);
   ShowTab getShowTab();
 
   Widget getNavigation();

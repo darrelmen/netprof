@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
@@ -23,17 +24,14 @@ import java.util.logging.Logger;
 
 public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends FacetExerciseList<T, IDialog> {
   public static final int MAX_LENGTH_ID = 55;//35;// 23;
-  //private DialogViewHelper dialogViewHelper;
   private final Logger logger = Logger.getLogger("DialogExerciseList");
   private static final int CHOICE_WIDTH = 170;//180;//190;//195;
- // private static final int MIN_HEIGHT = 125;//100;// 110;//115;//125;
   private static final int NORMAL_MIN_HEIGHT = 67;
   private static final int LANGUAGE_SIZE = 6;
 
   public DialogExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader,
                             ExerciseController controller) {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false);
-    //this.dialogViewHelper = dialogViewHelper;
   }
 
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
@@ -175,7 +173,7 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
 
     String imageRef = dialog.getImageRef();
 
-   // logger.info("show image " + imageRef);
+    // logger.info("show image " + imageRef);
     PushButton button = new PushButton(getFlag(imageRef));
     final int projid = dialog.getID();
     button.addClickHandler(clickEvent -> gotClickOnDialog(name, dialog, projid, 1));
@@ -238,7 +236,18 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
     return columnText;
   }
 
+  /**
+   * Will push be bad? Will other parts wake up?
+   * Maybe replace item?
+   *
+   * @param name
+   * @param dialog
+   * @param projid
+   * @param nest
+   */
   private void gotClickOnDialog(String name, IDialog dialog, int projid, int nest) {
     logger.info("got click on " + name);
+//    History.replaceItem(SelectionState.DIALOG + "=" + dialog.getID(), false);
+    controller.getNavigation().showDialogIn(dialog.getID(), INavigation.VIEWS.LISTEN);
   }
 }
