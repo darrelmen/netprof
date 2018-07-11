@@ -101,7 +101,7 @@ public class UserListManager implements IUserListManager {
   private final IUserExerciseListVisitorDAO visitorDAO;
   private final IUserListExerciseJoinDAO userListExerciseJoinDAO;
   private final IAnnotationDAO annotationDAO;
-  private final PathHelper pathHelper;
+  //private final PathHelper pathHelper;
   private final IStateManager stateManager;
   private final DatabaseServices databaseServices;
 
@@ -125,7 +125,7 @@ public class UserListManager implements IUserListManager {
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     this.annotationDAO = annotationDAO;
-    this.pathHelper = pathHelper;
+   // this.pathHelper = pathHelper;
     this.visitorDAO = visitorDAO;
     this.stateManager = stateManager;
     this.databaseServices = databaseServices;
@@ -836,7 +836,7 @@ public class UserListManager implements IUserListManager {
    * @paramx mediaDir
    * @seex mitll.langtest.server.services.AudioServiceImpl#newExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
-   * @see mitll.langtest.server.services.ListServiceImpl#newExercise
+   * @seex mitll.langtest.server.services.ListServiceImpl#newExercise
    */
 /*  @Override
   public void newExercise(int userListID, CommonExercise userExercise, String mediaDir) {

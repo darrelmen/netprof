@@ -122,6 +122,7 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.*;
 
+import static java.lang.Thread.sleep;
 import static mitll.langtest.server.PathHelper.ANSWERS;
 import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAGIC_ID;
 
@@ -235,7 +236,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     setPostgresDBConnection();
 //    logger.debug("initializeDAOs --- " + servletContext);
-
+    //makeDialogDAOs();
     // then connect to mongo
     DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);
 
@@ -347,7 +348,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @see #DatabaseImpl(ServerProperties, PathHelper, LogAndNotify, ServletContext)
    */
-  private void initializeDAOs(PathHelper pathHelper, DominoUserDAOImpl dominoUserDAO) {
+  private void initializeDAOs(PathHelper pathHelper, IUserDAO dominoUserDAO) {
     eventDAO = new SlickEventImpl(dbConnection);
 
     this.userDAO = dominoUserDAO;
@@ -366,7 +367,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     SlickUserListExerciseJoinDAO userListExerciseJoinDAO = new SlickUserListExerciseJoinDAO(this, dbConnection);
     IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO, projectDAO);
-    IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
+    IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO);
 
     IReviewedDAO reviewedDAO = new SlickReviewedDAO(this, dbConnection, true);
     IReviewedDAO secondStateDAO = new SlickReviewedDAO(this, dbConnection, false);
@@ -384,10 +385,25 @@ public class DatabaseImpl implements Database, DatabaseServices {
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
 
+    finalSetup(slickAudioDAO);
+  }
+
+  private void finalSetup(SlickAudioDAO slickAudioDAO) {
     makeDialogDAOs();
     createTables();
 
-    dialogDAO.ensureDefault(getUserDAO().getDefaultUser());
+    new Thread(() -> {
+      while (getUserDAO().getDefaultUser() <1) {
+        try {
+          sleep(1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+      logger.info("default user " + getUserDAO().getDefaultUser());
+      dialogDAO.ensureDefault(getUserDAO().getDefaultUser());
+    }).start();
+  //  dialogDAO.ensureDefault(getUserDAO().getDefaultUser());
 
     afterDAOSetup(slickAudioDAO);
 

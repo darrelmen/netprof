@@ -176,6 +176,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private IProjectManagement projectManagement;
   private Group primaryGroup = null;
+  Runnable runnable = null;
 
   private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
 
@@ -209,15 +210,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param database
    * @see mitll.langtest.server.database.DatabaseImpl#connectToDatabases(PathHelper, ServletContext)
    */
-  public DominoUserDAOImpl(Database database, ServletContext servletContext) {
+  public DominoUserDAOImpl(Database database, ServletContext servletContext ) {
     super(database);
+//    this.runnable = runnable;
+    long then = System.currentTimeMillis();
+    addUserViaEmail = database.getServerProps().addUserViaEmail();
 
     populateRoles();
 
     Object attribute = servletContext == null ? null : servletContext.getAttribute(USER_SVC);
     Properties props = database.getServerProps().getProps();
-
-    addUserViaEmail = database.getServerProps().addUserViaEmail();
 
     if (attribute != null) {
       delegate = (IUserServiceDelegate) attribute;
@@ -225,8 +227,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       serializer = (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER);
 
       makeUserService(database, props);
-
+      {
+        long now = System.currentTimeMillis();
+        logger.info("took " + (now - then) + " millis to make user service");
+      }
       doAfterGetDelegate();
+      {
+        long now = System.currentTimeMillis();
+        logger.info("took " + (now - then) + " millis to do after delegate");
+      }
     } else {
       if (servletContext != null) {
         Enumeration<String> attributeNames = servletContext.getAttributeNames();
@@ -236,13 +245,29 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       }
       usedDominoResources = false;
       try {
-        connectToMongo(database, props);
+        new Thread(() -> connectToMongo(database, props)).start();
+        //connectToMongo(database, props);
       } catch (Exception e) {
         logger.error("Couldn't connect to mongo - is it running and accessible? " + e, e);
         throw e;
       }
+      long now = System.currentTimeMillis();
+      if (now - then > 100) {
+        logger.info("took " + (now - then) + " millis to connect to mongo");
+      }
+    }
+
+    long now = System.currentTimeMillis();
+    if (now - then > 100) {
+      logger.info("took " + (now - then) + " millis to start user dao");
     }
   }
+
+//  @Override
+//  public void addRunnable(Runnable runnable) {
+//    this.runnable = runnable;
+//  }
+
 
   private void makeUserService(Database database, Properties props) {
     ServerProperties dominoProps = getDominoProps(database, props);
@@ -306,6 +331,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private void doAfterGetDelegate() {
     myDelegate = makeMyServiceDelegate();
     dominoAdminUser = delegate.getAdminUser();
+
+    if (runnable != null) {
+      runnable.run();
+    }
   }
 
   public JSONSerializer getSerializer() {

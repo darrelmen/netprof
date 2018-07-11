@@ -864,11 +864,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     Collection<SlickExerciseAttributeJoin> slickExerciseAttributeJoins = exToAttrs.get(exercise.getID());
 
     if (slickExerciseAttributeJoins != null) {
-      List<ExerciseAttribute> attributes = new ArrayList<>(slickExerciseAttributeJoins.size());
+      List<ExerciseAttribute> attributes = new ArrayList<>();//slickExerciseAttributeJoins.size());
       slickExerciseAttributeJoins
           .forEach(slickExerciseAttributeJoin -> attributes.add(allByProject.get(slickExerciseAttributeJoin.attrid())));
       exercise.setAttributes(attributes);
-      //   logger.info("now " + exercise.getID() + "  " + exercise.getAttributes());
+      logger.info("addAttributeToExercise ex " + exercise.getID() + " : " + exercise.getAttributes());
     }
   }
 
@@ -887,7 +887,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return insert;
   }
 */
-
   @Override
   public int insert(SlickExercise UserExercise) {
     return dao.insert(UserExercise);

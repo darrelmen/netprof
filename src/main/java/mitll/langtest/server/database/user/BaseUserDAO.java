@@ -64,13 +64,13 @@ public abstract class BaseUserDAO extends DAO {
   static final String ENABLED_REQ_KEY = "enabledReqKey";
   static final String NATIVE_LANG = "nativeLang";
   static final String UNKNOWN = "unknown";
-  public static final String DEFAULT_USER1 = "defaultUser";
-  public static final String DEFAULT_MALE_USER = "defaultMaleUser";
-  public static final String DEFAULT_FEMALE_USER = "defaultFemaleUser";
+  static final String DEFAULT_USER1 = "defaultUser";
+  static final String DEFAULT_MALE_USER = "defaultMaleUser";
+  static final String DEFAULT_FEMALE_USER = "defaultFemaleUser";
   private static final String UNSET_EMAIL = "unset@unset.com";
   @Deprecated
   final String language;
-  protected int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
+  int defectDetector, beforeLoginUser, importUser, defaultUser = -1, defaultMale, defaultFemale;
 
   static final String ID = "id";
   static final String AGE = "age";

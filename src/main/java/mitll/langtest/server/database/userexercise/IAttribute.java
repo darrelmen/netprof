@@ -11,5 +11,10 @@ public interface IAttribute extends IDAO {
 
   Collection<String> getAttributeTypes(int projid);
 
+  /**
+   *
+   * @param projid
+   * @return
+   */
   Map<Integer, ExerciseAttribute> getIDToPair(int projid);
 }

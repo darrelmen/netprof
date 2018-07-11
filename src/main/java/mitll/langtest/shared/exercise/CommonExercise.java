@@ -108,10 +108,6 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    */
   MutableExercise getMutable();
 
-/*
-  CommonAnnotatable getCommonAnnotatable();
-*/
-
   /**
    * SERVER
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addAttributeToExercise
@@ -125,10 +121,6 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    * @return
    */
   int getParentExerciseID();
-
-/*
-  int getParentDominoID();
-*/
 
   /**
    * SERVER

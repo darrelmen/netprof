@@ -77,8 +77,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     // getElement().setId("ChoicePlayAudioPanel");
     addButtons(null);
 
-
-    logger.info("made choice panel for " + exercise.getID());
+    //   logger.info("made choice panel for " + exercise.getID());
 // TODO : don't do this - leaves pointers to dead components unless removed...
 
     LangTest.EVENT_BUS.addHandler(AudioSelectedEvent.TYPE, authenticationEvent -> {
@@ -266,7 +265,6 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   }
 
   /**
-   *
    * @param playButton
    * @param isMale1
    * @param isReg
@@ -317,7 +315,6 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   }
 
   /**
-   *
    * @param mr
    * @param isMale
    * @param isReg
@@ -348,7 +345,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   }
 
   private void markCurrentAudio(AudioAttribute toUse) {
-    logger.info("markCurrentAudio " +toUse);
+    // logger.info("markCurrentAudio " +toUse);
     if (currentAudioAttr != null) {
       attrToCheck.get(currentAudioAttr).setVisible(false);
     }

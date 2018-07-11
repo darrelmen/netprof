@@ -152,13 +152,12 @@ public class ProjectManagement implements IProjectManagement {
     this.db = db;
     this.debugOne = properties.debugOneProject();
     this.debugProjectID = properties.debugProjectID();
-
-    logger.info("ProjectManagement debug one " + debugOne + " = " + debugProjectID);
+//    logger.info("ProjectManagement debug one " + debugOne + " = " + debugProjectID);
 
     this.projectDAO = db.getProjectDAO();
 
     if (servletContext == null) {
-      logger.warn("\n\n\nProjectManagement : no servlet context, no domino delegates");
+      logger.warn("\nProjectManagement : no servlet context, no domino delegates\n");
       dominoImport = null;
     } else {
       dominoImport = setupDominoProjectImport(servletContext);

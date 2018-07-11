@@ -56,86 +56,90 @@ public class DialogPopulate {
 
     List<IDialog> dialogs1 = dialogDAO.getDialogs(projid);
     if (dialogs1.isEmpty()) {
-      Map<ClientExercise, String> exToAudio = new HashMap<>();
-      int defaultUser = db.getUserDAO().getDefaultUser();
-      Map<Dialog, SlickDialog> dialogToSlick = new KPDialogs().getDialogs(defaultUser, projid, exToAudio, project);
-      Set<Dialog> dialogs = dialogToSlick.keySet();
-
-      long now = System.currentTimeMillis();
-      Timestamp modified = new Timestamp(now);
-      ExerciseCopy exerciseCopy = new ExerciseCopy();
-      AudioCheck audioCheck = new AudioCheck(db.getServerProps().shouldTrimAudio(), db.getServerProps().getMinDynamicRange());
-
-      Map<Integer, ExerciseAttribute> idToPair = db.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
-
-      Map<ExerciseAttribute, Integer> attrToInt = new HashMap<>();
-
-      addNewAttributes(projid, defaultUser, dialogs, now, idToPair, attrToInt);
-      idToPair.forEach((k, v) -> attrToInt.put(v, k));
-
-      Map<ClientExercise, Integer> allImportExToID = new HashMap<>();
-      List<String> typeOrder = project.getTypeOrder();
-
-      dialogs.forEach(dialog -> {
-        // add the image
-        int imageID = db.getImageDAO().insert(getSlickImage(projid, now, dialog, modified));
-
-        SlickDialog slickDialog = dialogToSlick.get(dialog);
-        slickDialog.imageid_$eq(imageID);
-
-        // add the dialog to the database
-        int dialogID = dialogDAO.add(defaultUser, projid, 1, imageID, now, now,
-            dialog.getUnit(), dialog.getChapter(),
-            DialogType.DIALOG, DialogStatus.DEFAULT,
-            dialog.getEnglish(), dialog.getOrientation());
-
-        // add dialog attributes
-        addDialogAttributes(dialogDAO, defaultUser, modified, attrToInt, dialog, dialogID);
-
-        if (false) {
-          dialog
-              .getExercises()
-              .forEach(commonExercise ->
-                  logger.info(commonExercise.getOldID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getUnitToValue()));
-        }
-
-        // add the exercises
-
-        {
-          List<CommonExercise> commonExercises = new ArrayList<>();
-          dialog.getExercises().forEach(clientExercise -> commonExercises.add(clientExercise.asCommon()));
-          Map<CommonExercise, Integer> importExToID = exerciseCopy.addExercisesAndAttributes(
-              defaultUser,
-              projid,
-              db.getUserExerciseDAO(),
-              commonExercises,
-              typeOrder,
-              new HashMap<>(),
-              new HashMap<>(), true);
-
-          allImportExToID.putAll(importExToID);
-          {
-            List<SlickRelatedExercise> relatedExercises = getSlickRelatedExercises(projid, modified, dialog, dialogID, importExToID);
-            db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(relatedExercises);
-          }
-
-          addCoreVocab(projid, modified, dialog, dialogID);
-        }
-//        if (parentToChild.size() != dialog.getExercises().size())
-//          logger.error("tried to add " + dialog.getExercises().size() + " but only did " + parentToChild.size());
-
-        // add the audio
-        // add results so have fk ref
-        // add the audio
-      });
-
-
-      addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
+      populateDatabase(project, projid, dialogDAO);
       return true;
     } else {
       project.setDialogs(dialogs1);
       return false;
     }
+  }
+
+  private void populateDatabase(Project project, int projid, IDialogDAO dialogDAO) {
+    Map<ClientExercise, String> exToAudio = new HashMap<>();
+    int defaultUser = db.getUserDAO().getDefaultUser();
+    Map<Dialog, SlickDialog> dialogToSlick = new KPDialogs().getDialogs(defaultUser, projid, exToAudio, project);
+    Set<Dialog> dialogs = dialogToSlick.keySet();
+
+    long now = System.currentTimeMillis();
+    Timestamp modified = new Timestamp(now);
+    ExerciseCopy exerciseCopy = new ExerciseCopy();
+    AudioCheck audioCheck = new AudioCheck(db.getServerProps().shouldTrimAudio(), db.getServerProps().getMinDynamicRange());
+
+    Map<Integer, ExerciseAttribute> idToPair = db.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
+
+    Map<ExerciseAttribute, Integer> attrToInt = new HashMap<>();
+
+    addNewAttributes(projid, defaultUser, dialogs, now, idToPair, attrToInt);
+    idToPair.forEach((k, v) -> attrToInt.put(v, k));
+
+    Map<ClientExercise, Integer> allImportExToID = new HashMap<>();
+    List<String> typeOrder = project.getTypeOrder();
+
+    dialogs.forEach(dialog -> {
+      // add the image
+      int imageID = db.getImageDAO().insert(getSlickImage(projid, now, dialog, modified));
+
+      SlickDialog slickDialog = dialogToSlick.get(dialog);
+      slickDialog.imageid_$eq(imageID);
+
+      // add the dialog to the database
+      int dialogID = dialogDAO.add(defaultUser, projid, 1, imageID, now, now,
+          dialog.getUnit(), dialog.getChapter(),
+          DialogType.DIALOG, DialogStatus.DEFAULT,
+          dialog.getEnglish(), dialog.getOrientation());
+
+      // add dialog attributes
+      addDialogAttributes(dialogDAO, defaultUser, modified, attrToInt, dialog, dialogID);
+
+      if (false) {
+        dialog
+            .getExercises()
+            .forEach(commonExercise ->
+                logger.info(commonExercise.getOldID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getUnitToValue()));
+      }
+
+      // add the exercises
+
+      {
+        List<CommonExercise> commonExercises = new ArrayList<>();
+        dialog.getExercises().forEach(clientExercise -> commonExercises.add(clientExercise.asCommon()));
+        Map<CommonExercise, Integer> importExToID = exerciseCopy.addExercisesAndAttributes(
+            defaultUser,
+            projid,
+            db.getUserExerciseDAO(),
+            commonExercises,
+            typeOrder,
+            new HashMap<>(),
+            new HashMap<>(), true);
+
+        allImportExToID.putAll(importExToID);
+        {
+          List<SlickRelatedExercise> relatedExercises = getSlickRelatedExercises(projid, modified, dialog, dialogID, importExToID);
+          db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(relatedExercises);
+        }
+
+        addCoreVocab(projid, modified, dialog, dialogID);
+      }
+//        if (parentToChild.size() != dialog.getExercises().size())
+//          logger.error("tried to add " + dialog.getExercises().size() + " but only did " + parentToChild.size());
+
+      // add the audio
+      // add results so have fk ref
+      // add the audio
+    });
+
+
+    addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
   }
 
   private void addCoreVocab(int projid, Timestamp modified, Dialog dialog, int dialogID) {

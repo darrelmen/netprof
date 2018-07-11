@@ -39,6 +39,7 @@ import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.npdata.dao.SlickExercise;
 
 import java.util.*;
@@ -91,14 +92,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   protected String transliteration = "";
 
-
-  private transient List<ExerciseAttribute> attributes = new ArrayList<>();
+  /**
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addAttributeToExercise(Map, Map, CommonExercise)
+   */
+  private List<ExerciseAttribute> attributes = new ArrayList<>();
 
   private String noAccentFL;
 
-
   private int parentExerciseID = -1;
- // private int parentDominoID;
 
   // for serialization
   public Exercise() {
@@ -301,11 +302,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return this;
   }
 
-  private void copyAudio(AudioRefExercise exercise) {
-    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-      addAudio(audioAttribute);
-    }
-  }
+  private void copyAudio(AudioRefExercise exercise) {    exercise.getAudioAttributes().forEach(this::addAudio);  }
 
   @Override
   public Collection<String> getRefSentences() {
@@ -355,10 +352,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return this;
   }
 
-/*  public CommonAnnotatable getCommonAnnotatable() {
-    return this;
-  }*/
-
   /**
    * @param exerciseAttributes
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addAttributeToExercise(Map, Map, CommonExercise)
@@ -368,6 +361,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.attributes = exerciseAttributes;
   }
 
+  /**
+   * @see mitll.langtest.client.banner.ListenViewHelper#getTurns
+   * @return
+   */
   @Override
   public List<ExerciseAttribute> getAttributes() {
     return attributes;

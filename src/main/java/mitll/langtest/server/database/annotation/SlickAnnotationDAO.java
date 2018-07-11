@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAnnotation;
@@ -49,8 +50,8 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
 
   private final AnnotationDAOWrapper dao;
 
-  public SlickAnnotationDAO(Database database, DBConnection dbConnection, int defectDetector) {
-    super(database, defectDetector);
+  public SlickAnnotationDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
+    super(database, userDAO);
     dao = new AnnotationDAOWrapper(dbConnection);
   }
 
@@ -259,7 +260,7 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
 
 */
 
-  public boolean isEmpty() {
+/*  public boolean isEmpty() {
     return dao.getNumRows() == 0;
-  }
+  }*/
 }

@@ -86,7 +86,8 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
             @Override
             public void onSuccess(ExerciseListWrapper<IDialog> result) {
               waitCursorHelper.showFinished();
-              logger.info("getExerciseIDs got back " + result.getExercises().size());
+              logger.info("getExerciseIDs got back " +
+                  result.getExercises().size());
 
               //rememberExercises(result.getExercises());
 
@@ -144,8 +145,7 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
     {
       final Container flags = new Container();
       flags.setWidth("970px");
-      //final DivWidget flags = new DivWidget();
-      flags.add(addFlags(result));
+       flags.add(addFlags(result));
       section.add(flags);
     }
 
@@ -158,6 +158,7 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
 
     result
         .forEach(project -> {
+          logger.info("Got " + project.getID() + " " +project.getEnglish() + " "+project.getAttributes());
           Panel langIcon = getImageAnchor(project.getEnglish(), project);
           if (langIcon != null) {
             current.add(langIcon);

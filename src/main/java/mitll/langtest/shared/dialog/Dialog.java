@@ -104,7 +104,10 @@ public class Dialog implements IDialog {
     return Integer.compare(id, o.getID());
   }
 
-
+  /**
+   *
+   * @return
+   */
   @Override
   public List<ExerciseAttribute> getAttributes() {
     return attributes;
@@ -221,7 +224,7 @@ public class Dialog implements IDialog {
     return commonExercise
         .getAttributes()
         .stream()
-        .filter(exerciseAttribute -> exerciseAttribute.getProperty().startsWith(SPEAKER1))
+        .filter(exerciseAttribute -> exerciseAttribute.getProperty().toUpperCase().startsWith(SPEAKER1.toUpperCase()))
         .collect(Collectors.toList());
   }
 

@@ -30,82 +30,89 @@ public class KPDialogs implements IDialogReader {
   private static final String DIALOG = "dialog";
   private static final List<String> SPEAKER_LABELS = Arrays.asList("A", "B", "C", "D", "E", "F");
   private static final String UNIT = IDialog.METADATA.UNIT.getLC();
-  private static final String CHAPTER =  IDialog.METADATA.CHAPTER.getLC();
-  private static final String PAGE =  IDialog.METADATA.PAGE.getLC();
+  private static final String CHAPTER = IDialog.METADATA.CHAPTER.getLC();
+  private static final String PAGE = IDialog.METADATA.PAGE.getLC();
   private static final String PRESENTATION = IDialog.METADATA.PRESENTATION.getLC();
   private static final String SPEAKER = IDialog.METADATA.SPEAKER.getCap();
 
-  private final String docIDS = "333815\n" +
-      "333816\n" +
-      "333817\n" +
-      "333818\n" +
-      "333819\n" +
-      "333821\n" +
-      "333822\n" +
-      "333823\n" +
-      "333824\n" +
-      "333825";
-  private final String title = "Meeting someone for the first time\n" +
-      "What time is it?\n" +
-      "You dialed the wrong number.\n" +
-      "What will you do during the coming school break?\n" +
-      "Where should I go to exchange currency?\n" +
-      "What do Koreans do in their spare time?\n" +
-      "Please give me two tickets for the 10:30 showing?\n" +
-      "Please exchange this for a blue tie.\n" +
-      "Common Ailments and Symptoms\n" +
-      "Medical Emergencies";
-  private final String dir = "010_C01\n" +
-      "001_C05\n" +
-      "003_C09\n" +
-      "023_C09\n" +
-      "036_C13\n" +
-      "001_C17\n" +
-      "019_C17\n" +
-      "001_C18\n" +
-      "005_C29\n" +
-      "010_C30";
-  private final String chapter = "1\n" +
-      "5\n" +
-      "9\n" +
-      "9\n" +
-      "13\n" +
-      "17\n" +
-      "17\n" +
-      "18\n" +
-      "29\n" +
-      "30";
-  private final String page = "12\n" +
-      "5\n" +
-      "5\n" +
-      "15\n" +
-      "25\n" +
-      "5\n" +
-      "26\n" +
-      "4\n" +
-      "7\n" +
-      "12";
-  private final String pres = "Topic Presentation B\n" +
-      "Topic Presentation A\n" +
-      "Topic Presentation A\n" +
-      "Topic Presentation A\n" +
-      "Topic Presentation C\n" +
-      "Topic Presentation A\n" +
-      "Topic Presentation C\n" +
-      "Topic Presentation A\n" +
-      "Topic Presentation A\n" +
-      "Topic Presentation B";
+  private final String docIDS =
+      "333815\n" +
+          "333816\n" +
+          "333817\n" +
+          "333818\n" +
+          "333819\n" +
+          "333821\n" +
+          "333822\n" +
+          "333823\n" +
+          "333824\n" +
+          "333825";
+  private final String title =
+      "Meeting someone for the first time\n" +
+          "What time is it?\n" +
+          "You dialed the wrong number.\n" +
+          "What will you do during the coming school break?\n" +
+          "Where should I go to exchange currency?\n" +
+          "What do Koreans do in their spare time?\n" +
+          "Please give me two tickets for the 10:30 showing?\n" +
+          "Please exchange this for a blue tie.\n" +
+          "Common Ailments and Symptoms\n" +
+          "Medical Emergencies";
+  private final String dir =
+      "010_C01\n" +
+          "001_C05\n" +
+          "003_C09\n" +
+          "023_C09\n" +
+          "036_C13\n" +
+          "001_C17\n" +
+          "019_C17\n" +
+          "001_C18\n" +
+          "005_C29\n" +
+          "010_C30";
+  private final String chapter =
+      "1\n" +
+          "5\n" +
+          "9\n" +
+          "9\n" +
+          "13\n" +
+          "17\n" +
+          "17\n" +
+          "18\n" +
+          "29\n" +
+          "30";
+  private final String page =
+      "12\n" +
+          "5\n" +
+          "5\n" +
+          "15\n" +
+          "25\n" +
+          "5\n" +
+          "26\n" +
+          "4\n" +
+          "7\n" +
+          "12";
+  private final String pres =
+      "Topic Presentation B\n" +
+          "Topic Presentation A\n" +
+          "Topic Presentation A\n" +
+          "Topic Presentation A\n" +
+          "Topic Presentation C\n" +
+          "Topic Presentation A\n" +
+          "Topic Presentation C\n" +
+          "Topic Presentation A\n" +
+          "Topic Presentation A\n" +
+          "Topic Presentation B";
 
-  private final String unit = "1\n" +
-      "2\n" +
-      "3\n" +
-      "3\n" +
-      "4\n" +
-      "5\n" +
-      "5\n" +
-      "5\n" +
-      "8\n" +
-      "8";
+  private final String unit =
+      "1\n" +
+          "2\n" +
+          "3\n" +
+          "3\n" +
+          "4\n" +
+          "5\n" +
+          "5\n" +
+          "5\n" +
+          "8\n" +
+          "8";
 
   /**
    * @param defaultUser
@@ -165,7 +172,7 @@ public class KPDialogs implements IDialogReader {
               .filter(Files::isRegularFile)
               .forEach(file -> {
 
-//                logger.info("found " + file);
+                logger.info(dir + " found " + file);
                 String fileName = file.getFileName().toString();
                 String[] parts = fileName.split("_");
                 //        if (parts.length == 2) passageTextFiles.add(file);
@@ -178,7 +185,7 @@ public class KPDialogs implements IDialogReader {
                   //    audioFileNames.add(fileName);
                 } else if (fileName.endsWith(".txt") && parts.length == 3) { // slickDialog.g. 010_C01_00.txt
                   String e = fileName;
-                  //            logger.info("text " + fileName);
+                  logger.info(dir + " text " + fileName);
                   sentences.add(e);
                   sentenceToFile.put(e, file);
                 }
@@ -188,8 +195,8 @@ public class KPDialogs implements IDialogReader {
         audio.sort(Comparator.comparingInt(this::getIndex));
         sentences.sort(Comparator.comparingInt(this::getIndex));
 
-        //logger.info("found audio      " + audio);
-        // logger.info("found sentences  " + sentences);
+        logger.info(dir + " found audio      " + audio.size());
+        logger.info(dir + " found sentences  " + sentences.size());
 
         Set<String> speakers = new LinkedHashSet<>();
 

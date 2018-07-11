@@ -34,6 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -163,8 +164,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       int projid = project.id();
 
+      IRefResultDAO refResultDAO = userExerciseDAO.getRefResultDAO();
+
+      logger.info("Ref result dao " + refResultDAO);
       Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
-          userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
+          refResultDAO.getExerciseToPhoneForProject(projid);
 
       Map<Integer, ExerciseAttribute> allAttributesByProject = userExerciseDAO.getExerciseAttribute().getIDToPair(projid);
       logger.info("readExercises" +

@@ -61,7 +61,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public AnnotationDAO(Database database, IUserDAO userDAO) {
-    super(database, userDAO.getDefectDetector());
+    super(database, userDAO);
     try {
       createTable(database);
 //      populate(userDAO.getDefectDetector());
@@ -77,6 +77,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    *
    * @throws SQLException
    */
+/*
   private void markCorrectForDefectAudio() throws SQLException {
     String sql = "select annotation.uniqueid from annotation, audio where status='incorrect' and annotation.field = audio.audioref and audio.defect=true";
     Connection connection = database.getConnection(this.getClass().toString());
@@ -105,6 +106,8 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       finish(connection, statement);
     }
   }
+*/
+/*
 
   private String getInClause(Set<Long> longs) {
     StringBuilder buffer = new StringBuilder();
@@ -116,6 +119,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     if (s.endsWith(",")) s = s.substring(0, s.length() - 1);
     return s;
   }
+*/
 
 
   /**
@@ -149,7 +153,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     index(database);
   }
 
-  void index(Database database) throws SQLException {
+  private void index(Database database) throws SQLException {
     createIndex(database, EXERCISEID, ANNOTATION);
     createIndex(database, FIELD1, ANNOTATION);
     createIndex(database, MODIFIED, ANNOTATION);
@@ -327,6 +331,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * @param lists
    * @return
    */
+/*
   private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(List<UserAnnotation> lists) {
     Map<String, UserAnnotation> fieldToAnno = new HashMap<>();
 
@@ -349,6 +354,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       return fieldToAnnotation;
     }
   }
+*/
 
   /**
    * @param sql

@@ -87,12 +87,15 @@ public class AttributeHelper implements IAttribute {
 
   @NotNull
   private ExerciseAttribute makeOrGet(Map<String, ExerciseAttribute> known, SlickExerciseAttribute p) {
-    String key = p.property() + "-" + p.value();
+    String property = p.property();
+    String value = p.value();
+
+    String key = property + "-" + value;
     ExerciseAttribute attribute;
     if (known.containsKey(key)) {
       attribute = known.get(key);
     } else {
-      attribute = new ExerciseAttribute(p.property(), p.value(), p.facet());
+      attribute = new ExerciseAttribute(property, value, p.facet());
       known.put(key, attribute);
     }
     return attribute;

@@ -86,24 +86,29 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public int ensureDefault(int defaultUser) {
     SlickDialog defaultProject = getDefaultDialog();
     if (defaultProject == null) {
-      add(defaultUser,
-          databaseImpl.getProjectDAO().getDefault(),
-          -1,
-          1,
-
-          System.currentTimeMillis(),
-          System.currentTimeMillis(),
-          "", "",
-          DialogType.DEFAULT,
-          DialogStatus.DEFAULT,
-          "",
-          ""
-      );
+      addDefault(defaultUser);
       defaultProject = getDefaultDialog();
       return defaultProject == null ? -1 : defaultProject.id();
     } else {
       return defaultProject.id();
     }
+  }
+
+  private void addDefault(int defaultUser) {
+    long now = System.currentTimeMillis();
+    add(defaultUser,
+        databaseImpl.getProjectDAO().getDefault(),
+        -1,
+        1,
+
+        now,
+        now,
+        "", "",
+        DialogType.DEFAULT,
+        DialogStatus.DEFAULT,
+        "",
+        ""
+    );
   }
 
   public int getDefault() {
@@ -212,6 +217,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
   }
 
+  /**
+   * @param idToPair
+   * @param slickDialogAttributeJoins
+   * @param dialog
+   * @see #getDialogs
+   */
   private void addAttributes(Map<Integer, ExerciseAttribute> idToPair,
                              Collection<SlickDialogAttributeJoin> slickDialogAttributeJoins,
                              Dialog dialog) {
@@ -340,7 +351,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
       }
     }
 
-    String message = "dialog " + dialog.getID() + " has " + dialog.getExercises().size() + " exercises.";
+    String message = "dialog " + dialog.getID() + " " + dialog.getUnit() + " " + dialog.getChapter() +
+        " has " + dialog.getExercises().size() + " exercises.";
 
     if (dialog.getExercises().isEmpty()) {
       logger.warn(message);

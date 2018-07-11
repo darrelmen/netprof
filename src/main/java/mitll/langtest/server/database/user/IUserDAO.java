@@ -55,6 +55,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   void ensureDefaultUsers();
 
+  //void addRunnable(Runnable runnable);
+
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */

@@ -255,22 +255,12 @@ public class ListenViewHelper implements ContentView {
     List<ClientExercise> rightTurns = speakerToEx.get(right);
 
     logger.info("speakerToEx " + speakerToEx.keySet());
-    logger.info("right " + right + " rightTurns " + rightTurns);
+    logger.info("right " + right + " rightTurns " + rightTurns.size());
     dialog.getExercises().forEach(clientExercise -> {
 
-
-      List<ExerciseAttribute> attributes = clientExercise.getAttributes();
-      logger.info("id " +clientExercise.getID() + " has " + attributes.size());
-      attributes.forEach(exerciseAttribute -> logger.info("Got " + exerciseAttribute));
-      //rowOne.add(new Heading(3, clientExercise.getForeignLanguage()));
-//      int fontSize = controller.getProjectStartupInfo().getLanguageInfo().getFontSize();
-//      List<IHighlightSegment> flclickables = new ArrayList<>();
-//
-//
-//      ClickableWords<ClientExercise> clickableWords = new ClickableWords<>(null, clientExercise, controller.getLanguage(), fontSize, false);
-//      DivWidget contentWidget = clickableWords.getClickableWords(clientExercise.getForeignLanguage(),
-//          FieldType.FL,
-//          flclickables, false, isRTL);
+     // List<ExerciseAttribute> attributes = clientExercise.getAttributes();
+     // logger.info("id " +clientExercise.getID() + " has " + attributes.size());
+     // attributes.forEach(exerciseAttribute -> logger.info("Got " + exerciseAttribute));
 
       DialogExercisePanel<ClientExercise> widgets = new DialogExercisePanel<>(clientExercise, controller, null, alignments);
       widgets.addWidgets(true, false, PhonesChoices.HIDE);
