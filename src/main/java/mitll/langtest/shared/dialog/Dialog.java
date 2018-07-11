@@ -105,7 +105,6 @@ public class Dialog implements IDialog {
   }
 
   /**
-   *
    * @return
    */
   @Override
@@ -188,14 +187,19 @@ public class Dialog implements IDialog {
 
   @Override
   public List<String> getSpeakers() {
-    Set<String> speakers = new LinkedHashSet<>();
-    attributes.forEach(exerciseAttribute -> {
-          if (exerciseAttribute.getProperty().toLowerCase().startsWith(SPEAKER)) {
-            speakers.add(exerciseAttribute.getValue());
-          }
-        }
-    );
-    return new ArrayList<>(speakers);
+ //   List<String> speakers = new ArrayList<>();
+    //Set<ExerciseAttribute> speakerAttr = new TreeSet<>();
+
+    List<ExerciseAttribute> speakers = attributes
+        .stream()
+        .filter(exerciseAttribute -> (exerciseAttribute.getProperty().toLowerCase().startsWith(SPEAKER)))
+        .sorted(Comparator.comparing(Pair::getProperty))
+        .collect(Collectors.toList());
+
+    return speakers.stream().map(Pair::getValue)
+        .collect(Collectors.toList());
+
+   // return speakers;
   }
 
   @Override

@@ -10,21 +10,14 @@ import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.client.sound.AllHighlight;
-import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.IHighlightSegment;
-import mitll.langtest.client.sound.SegmentHighlightAudioControl;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
-import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.client.qc.QCNPFExercise.ENGLISH;
 import static mitll.langtest.client.qc.QCNPFExercise.FOREIGN_LANGUAGE;
@@ -181,7 +174,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         if (DEBUG)
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
-        DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
+        DivWidget flClickableRow = this.getFlClickableRow() == null ? altFLClickableRow : this.getFlClickableRow();
         DivWidget flClickablePhoneRow = this.flClickableRowPhones == null ? altFLClickableRowPhones : this.flClickableRowPhones;
         matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickablePhoneRow);
       }

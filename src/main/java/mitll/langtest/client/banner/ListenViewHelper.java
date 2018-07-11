@@ -15,7 +15,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.*;
 import mitll.langtest.client.services.DialogServiceAsync;
-import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.dialog.IDialog.METADATA;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -40,12 +39,13 @@ import static mitll.langtest.shared.dialog.IDialog.METADATA.PRESENTATION;
  */
 public class ListenViewHelper implements ContentView {
   public static final int ROW_WIDTH = 97;
-  public static final String HEIGHT = 100 +
-      "px";
+  public static final String HEIGHT = 100 + "px";
+  public static final String RIGHT_BKG_COLOR = "#4aa8ee";
+  public static final String LEFT_COLOR = "#e7e6ec";
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   ExerciseController controller;
-  private boolean isRTL = false;
+//  private boolean isRTL = false;
   // private ClickableWords<ClientExercise> clickableWords;
 
   /**
@@ -56,7 +56,7 @@ public class ListenViewHelper implements ContentView {
   ListenViewHelper(ExerciseController controller, IViewContaner viewContainer, INavigation.VIEWS myView) {
     this.controller = controller;
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    isRTL = projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
+    // isRTL = projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
   }
 
   @Override
@@ -116,26 +116,43 @@ public class ListenViewHelper implements ContentView {
 
     List<String> speakers = dialog.getSpeakers();
     {
-      String label = "<b>" + speakers.get(0) + "</b>";
+      String label = speakers.get(0);
       CheckBox checkBox = new CheckBox(label, true);
       checkBox.setValue(true);
-      checkBox.setWidth("49%");
+      //checkBox.setWidth("49%");
       checkBox.addStyleName("floatLeft");
       checkBox.addStyleName("leftFiveMargin");
+      Style style = checkBox.getElement().getStyle();
+     // style.setMarginLeft(-40, PX);
+      //style.setFontSize(32, PX);
+      //checkBox.setHeight("30px");
+
+      checkBox.addStyleName("leftSpeaker");
+      checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+
       checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
 
       rowOne.add(checkBox);
     }
 
     {
-      String label = "<b>" + speakers.get(1) + "</b>";
+      String label = speakers.get(1);
       CheckBox checkBox = new CheckBox(label, true);
       checkBox.setValue(true);
+      Style style = checkBox.getElement().getStyle();
+      style.setBackgroundColor(RIGHT_BKG_COLOR);
+      style.setColor("white");
+      //checkBox.setHeight("30px");
+      checkBox.addStyleName("rightSpeaker");
 
       checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
+      //style.setMarginLeft(-40, PX);
+     // style.setFontSize(32, PX);
+      ;
       checkBox.addStyleName("rightAlign");
       checkBox.addStyleName("floatRight");
       checkBox.addStyleName("rightFiveMargin");
+
       rowOne.add(checkBox);
     }
 
@@ -237,7 +254,7 @@ public class ListenViewHelper implements ContentView {
   @NotNull
   private DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
-    rowOne.addStyleName("cardBorderShadow");
+//    rowOne.addStyleName("cardBorderShadow");
 
     rowOne.setWidth(97 + "%");
     rowOne.getElement().getStyle().setMarginTop(10, PX);
@@ -255,22 +272,53 @@ public class ListenViewHelper implements ContentView {
     List<ClientExercise> rightTurns = speakerToEx.get(right);
 
     logger.info("speakerToEx " + speakerToEx.keySet());
-    logger.info("right " + right + " rightTurns " + rightTurns.size());
-    dialog.getExercises().forEach(clientExercise -> {
+    logger.info("right " + right + " rightTurns " + rightTurns);
 
-     // List<ExerciseAttribute> attributes = clientExercise.getAttributes();
-     // logger.info("id " +clientExercise.getID() + " has " + attributes.size());
-     // attributes.forEach(exerciseAttribute -> logger.info("Got " + exerciseAttribute));
+
+    dialog.getExercises().forEach(clientExercise -> {
+      // List<ExerciseAttribute> attributes = clientExercise.getAttributes();
+      // logger.info("id " +clientExercise.getID() + " has " + attributes.size());
+      // attributes.forEach(exerciseAttribute -> logger.info("Got " + exerciseAttribute));
 
       DialogExercisePanel<ClientExercise> widgets = new DialogExercisePanel<>(clientExercise, controller, null, alignments);
       widgets.addWidgets(true, false, PhonesChoices.HIDE);
-      if (rightTurns != null && rightTurns.contains(clientExercise)) widgets.getElement().getStyle().setFloat(Style.Float.RIGHT);
+      Style style = widgets.getElement().getStyle();
+      if (rightTurns != null && rightTurns.contains(clientExercise)) {
+        style.setFloat(Style.Float.RIGHT);
+        style.setTextAlign(Style.TextAlign.RIGHT);
+        style.setBackgroundColor(RIGHT_BKG_COLOR);
+        style.setColor("white");
+      } else {
+        style.setFloat(Style.Float.LEFT);
+        style.setTextAlign(Style.TextAlign.LEFT);
+        style.setBackgroundColor(LEFT_COLOR);
+      }
+      style.setClear(Style.Clear.BOTH);
+
+      //else {
+      // widgets.addStyleName("leftspeech");
+      widgets.addStyleName("bubble");
+      {
+        Style style2 = widgets.getFlClickableRow().getElement().getStyle();
+        style2.setMarginLeft(15, Style.Unit.PX);
+        style2.setMarginTop(7, Style.Unit.PX);
+        //style2.setMarginBottom(7, Style.Unit.PX);
+      }
+      turns.add(widgets);
+      //}
       rowOne.add(widgets);
+//      widgets.setWidth("80%");
     });
+
+    if (!turns.isEmpty()) {
+      turns.get(0).getElement().getStyle().setBorderColor("green");
+    }
 
     rowOne.getElement().getStyle().setMarginBottom(10, PX);
     return rowOne;
   }
+
+  List<DialogExercisePanel> turns = new ArrayList<>();
 
   @NotNull
   private DivWidget getControls() {

@@ -32,7 +32,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
 
   protected final T exercise;
   protected final ExerciseController controller;
-  DivWidget flClickableRow;
+  protected DivWidget flClickableRow;
   ClickableWords<T> clickableWords;
 
   /**
@@ -74,7 +74,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
                              Map<Integer, AlignmentOutput> alignments) {
     this.exercise = commonExercise;
     this.controller = controller;
-    addStyleName("twoColumnStyle");
     isMandarin = getProjectStartupInfo() != null && getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
     this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
         controller, listContainer,
@@ -741,5 +740,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
 
   public void contextAudioChanged(int id, long duration) {
 
+  }
+
+  public DivWidget getFlClickableRow() {
+    return flClickableRow;
   }
 }

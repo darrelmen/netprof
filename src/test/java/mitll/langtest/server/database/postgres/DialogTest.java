@@ -61,11 +61,47 @@ public class DialogTest extends BaseTest {
   public static final String PAGE = "page";
 
   @Test
+  public void testEx() {
+    DatabaseImpl andPopulate = getDatabase().setInstallPath("");
+
+    Project project = andPopulate.getProjectByName("Korean");
+    List<ClientExercise> all = new ArrayList<>();
+
+    List<IDialog> dialogs = andPopulate.getDialogDAO().getDialogs(project.getID());
+    dialogs.forEach(iDialog -> {
+      logger.info("dialog " + iDialog);
+
+      logger.info("sp    " + iDialog.getSpeakers());
+      logger.info("by sp " + iDialog.groupBySpeaker());
+      logger.info("core  " + iDialog.getCoreVocabulary());
+      logger.info("\n\n\n");
+
+//      iDialog.getExercises().forEach(clientExercise -> clientExercise.getAttributes().forEach(exerciseAttribute -> logger.info("\t" + exerciseAttribute)));
+      all.addAll(iDialog.getExercises());
+    });
+    logger.info("total is " + all.size());
+//    assertEquals("onetwo", result);
+  }
+
+  @Test
   public void testSH() {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("");
 
     Project project = andPopulate.getProjectByName("Korean");
     ISection<IDialog> dialogSectionHelper = project.getDialogSectionHelper();
+
+
+    List<IDialog> dialogs = andPopulate.getDialogDAO().getDialogs(project.getID());
+
+    // dialogs.forEach(dialog -> logger.info("dialog " + dialog));
+
+    IDialog iDialog = dialogs.get(0);
+
+    List<ClientExercise> coreVocabulary = iDialog.getCoreVocabulary();
+    logger.info("\n\n\tgot " + coreVocabulary.size() + " core");
+    coreVocabulary.forEach(clientExercise -> logger.info("\t" + clientExercise.getID() +
+        " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage()));
+    //  project.getSectionHelper().report();
 
     {
       List<Pair> pairs = new ArrayList<>();
@@ -100,13 +136,13 @@ public class DialogTest extends BaseTest {
       Collection<IDialog> exercisesForSelectionState = dialogSectionHelper.getExercisesForSelectionState(objectObjectHashMap);
       logger.info("got " + exercisesForSelectionState);
     }
-
-
-
   }
 
+  /**
+   * Test adding the dialog data.
+   */
   @Test
-  public void testKP() {
+  public void testKPFromCannedData() {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("");
 
     Project project = andPopulate.getProjectByName("Korean");
@@ -145,6 +181,10 @@ public class DialogTest extends BaseTest {
       }
     });
 
+    List<ClientExercise> coreVocabulary = iDialog.getCoreVocabulary();
+    logger.info("\n\n\tgot " + coreVocabulary.size() + " core");
+    coreVocabulary.forEach(clientExercise -> logger.info("\t" + clientExercise.getID() +
+        " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage()));
     //  project.getSectionHelper().report();
 
     {
@@ -208,7 +248,12 @@ public class DialogTest extends BaseTest {
       typeToSection.put(PRESENTATION, Collections.singletonList(TOPIC_PRESENTATION_C));
       Collection<CommonExercise> exercisesForSelectionState = project.getSectionHelper().getExercisesForSelectionState(typeToSection);
 
-      exercisesForSelectionState.stream().filter(ex -> ex.getEnglish().isEmpty()).forEach(commonExercise -> logger.info(getShort(commonExercise)));
+      exercisesForSelectionState
+          .stream()
+          .filter(ex -> ex
+              .getEnglish()
+              .isEmpty())
+          .forEach(commonExercise -> logger.info(getShort(commonExercise)));
     }
 
     if (false) {

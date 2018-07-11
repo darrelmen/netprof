@@ -218,7 +218,7 @@ body {
 }
 
 .blueRow > h3 > small {
-    color:black;
+    color: black;
 }
 
 .bigLink {
@@ -497,7 +497,6 @@ fieldset > legend {
 .Button {
     font-family: Arial Unicode MS, Arial, sans-serif;
 }
-
 
 .gwt-Button {
     background: none repeat scroll 0 0 #DDDDDD;
@@ -2152,4 +2151,63 @@ body .modal-body .bulk-update-result-pdiv.narrow {
 
 body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-detail TD:FIRST-CHILD {
     text-align: right;
+}
+
+/*
+
+.leftspeech::after {
+    left: 19px;
+    top: 100px;
+    border: 15px solid;
+    border-color: #fff transparent transparent #fff;
+}
+.bubble::before, .bubble::after {
+    content: ' ';
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.leftspeech::before {
+    left: 11px;
+    top: 100px;
+    border: 25px solid;
+    border-color: #666 transparent transparent #666;
+}
+*/
+
+.rightSpeaker {
+    background-color: rgb(74, 168, 238);
+    font-size: 32px;
+    height: 36px;
+    /* margin-top: 0px; */
+    line-height: 36px;
+}
+
+.leftSpeaker {
+    font-size: 32px;
+    line-height: 36px;
+    background-color: rgb(231, 230, 236);
+}
+
+.bubble {
+    position: relative;
+    /*
+    height: 100px;
+    */
+    /*
+    text-align: left;
+    */
+    /*
+    line-height: 100px;
+    */
+    margin: 0px 10px 5px 10px;
+    background-color: #fff;
+    border: 3px solid #666;
+    -webkit-border-radius: 30px;
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+    -webkit-box-shadow: 2px 2px 4px #888;
+    -moz-box-shadow: 2px 2px 4px #888;
+    box-shadow: 2px 2px 4px #888;
 }
