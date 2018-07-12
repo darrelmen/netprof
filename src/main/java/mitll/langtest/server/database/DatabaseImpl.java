@@ -396,6 +396,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       while (getUserDAO().getDefaultUser() <1) {
         try {
           sleep(1000);
+          logger.info("---> no default user yet.....");
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
@@ -421,7 +422,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   private void afterDAOSetup(SlickAudioDAO slickAudioDAO) {
-    userDAO.ensureDefaultUsers();
+    if (userDAO instanceof UserDAO) {
+      userDAO.ensureDefaultUsers();
+    }
     int defaultProject = getDefaultProject();
     // make sure we have a template exercise
 

@@ -55,7 +55,7 @@ public class ListenViewHelper implements ContentView {
    */
   ListenViewHelper(ExerciseController controller, IViewContaner viewContainer, INavigation.VIEWS myView) {
     this.controller = controller;
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    // ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     // isRTL = projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
   }
 
@@ -80,10 +80,10 @@ public class ListenViewHelper implements ContentView {
 
       @Override
       public void onSuccess(IDialog dialog) {
-        List<ExerciseAttribute> attributes = dialog.getAttributes();
+        //List<ExerciseAttribute> attributes = dialog.getAttributes();
 
-        child.add(getControls());
-        child.add(getHeader(dialog, attributes));
+        //child.add(getControls());
+        child.add(getHeader(dialog));
         child.add(getSpeakerRow(dialog));
         child.add(getTurns(dialog));
 
@@ -109,6 +109,7 @@ public class ListenViewHelper implements ContentView {
   private DivWidget getSpeakerRow(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
     rowOne.addStyleName("cardBorderShadow");
+    //rowOne.addStyleName("inlineFlex");
 
     rowOne.setHeight("40px");
     rowOne.setWidth(97 + "%");
@@ -123,7 +124,7 @@ public class ListenViewHelper implements ContentView {
       checkBox.addStyleName("floatLeft");
       checkBox.addStyleName("leftFiveMargin");
       Style style = checkBox.getElement().getStyle();
-     // style.setMarginLeft(-40, PX);
+      // style.setMarginLeft(-40, PX);
       //style.setFontSize(32, PX);
       //checkBox.setHeight("30px");
 
@@ -135,9 +136,11 @@ public class ListenViewHelper implements ContentView {
       rowOne.add(checkBox);
     }
 
+    rowOne.add(getControls());
     {
       String label = speakers.get(1);
       CheckBox checkBox = new CheckBox(label, true);
+
       checkBox.setValue(true);
       Style style = checkBox.getElement().getStyle();
       style.setBackgroundColor(RIGHT_BKG_COLOR);
@@ -147,7 +150,7 @@ public class ListenViewHelper implements ContentView {
 
       checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
       //style.setMarginLeft(-40, PX);
-     // style.setFontSize(32, PX);
+      // style.setFontSize(32, PX);
       ;
       checkBox.addStyleName("rightAlign");
       checkBox.addStyleName("floatRight");
@@ -169,53 +172,29 @@ public class ListenViewHelper implements ContentView {
   }
 
   @NotNull
-  private DivWidget getHeader(IDialog dialog, List<ExerciseAttribute> attributes) {
+  private DivWidget getHeader(IDialog dialog) {
     DivWidget outer = new DivWidget();
 //        outer.getElement().getStyle().setBorderWidth(2,PX);
 //        outer.getElement().getStyle().setBorderColor("black");
 //        outer.getElement().getStyle().setBorderStyle(BorderStyle.SOLID);
-    {
+/*    {
       DivWidget rowOne = new DivWidget();
       rowOne.setHeight("40px");
-      rowOne.setWidth(98 +
-          "%");
+      rowOne.setWidth(98 + "%");
       rowOne.getElement().getStyle().setBackgroundColor("#dff4fc");
       rowOne.addStyleName("blueRow");
-      {
-        Heading w = new Heading(3, getAttrValue(attributes, FLPRESENTATION), getAttrValue(attributes, PRESENTATION));
-        w.setWidth("49%");
-        w.addStyleName("floatLeft");
-        w.addStyleName("leftFiveMargin");
-        // w.addStyleName("bottomFiveMargin");
-        w.getElement().getStyle().setMarginTop(0, PX);
+      //addPresentation(attributes, rowOne);
 
-        rowOne.add(w);
-      }
-
-      {
-        Heading w1 = new Heading(3, dialog.getForeignLanguage(), dialog.getEnglish());
-
-        w1.addStyleName("rightAlign");
-        w1.addStyleName("floatRight");
-        w1.addStyleName("rightFiveMargin");
-
-
-        w1.getElement().getStyle().setMarginTop(0, PX);
-
-        w1.setWidth("49%");
-        rowOne.add(w1);
-      }
-
+      rowOne.add(getTitle(dialog));
       rowOne.getElement().getStyle().setMarginBottom(10, PX);
       outer.add(rowOne);
-    }
+    }*/
 
     {
       DivWidget row = new DivWidget();
       row.addStyleName("cardBorderShadow");
       row.setHeight("100px");
-      row.setWidth(ROW_WIDTH +
-          "%");
+      row.setWidth(ROW_WIDTH + "%");
       row.addStyleName("inlineFlex");
       {
         com.google.gwt.user.client.ui.Image flag = getFlag(dialog.getImageRef());
@@ -223,21 +202,75 @@ public class ListenViewHelper implements ContentView {
         row.add(flag);
       }
 
-      {
-        Heading w1 = new Heading(5, dialog.getOrientation());
-        w1.addStyleName("rightAlign");
-        w1.addStyleName("floatRight");
-        w1.addStyleName("rightTenMargin");
+      DivWidget vert = new DivWidget();
+      vert.getElement().setId("vert");
+      row.add(vert);
+      vert.addStyleName("leftTenMargin");
 
+      {
+        DivWidget titleDiv = new DivWidget();
+        // Style style = titleDiv.getElement().getStyle();
+//        style.setBackgroundColor("#dff4fc");
+//        style.setMarginBottom(0,PX);
+//        style.setBorderColor("black");
+//        style.setBorderStyle(Style.BorderStyle.SOLID);
+//        style.setBorderWidth(1,PX);
+        titleDiv.addStyleName("titleBlue");
+
+        //  titleDiv.getElement().getStyle().setClear(Style.Clear.RIGHT);
+        titleDiv.add(getFLTitle(dialog));
+        vert.add(titleDiv);
+      }
+
+      {
+        DivWidget titleDiv = new DivWidget();
+        titleDiv.getElement().getStyle().setBackgroundColor("#dff4fc");
+        //titleDiv.getElement().getStyle().setClear(Style.Clear.RIGHT);
+        titleDiv.add(getHeading(5, dialog.getEnglish()));
+        vert.add(titleDiv);
+      }
+
+      // row.add(getHeader(dialog));
+      {
+        DivWidget oreintDiv = new DivWidget();
+        Heading w1 = new Heading(5, dialog.getOrientation());
+        //   w1.addStyleName("rightAlign");
+        //   w1.addStyleName("floatRight");
+        //  w1.addStyleName("rightTenMargin");
         w1.addStyleName("wrapword");
 
-        w1.setWidth("85%");
+        oreintDiv.add(w1);
+        //   w1.setWidth("85%");
         //          w1.getElement().getStyle().setBackgroundColor("#dff4fc");
-        row.add(w1);
+        vert.add(oreintDiv);
       }
       outer.add(row);
     }
     return outer;
+  }
+
+  @NotNull
+  private Heading getFLTitle(IDialog dialog) {
+    return getHeading(3, dialog.getForeignLanguage());
+  }
+
+  @NotNull
+  private Heading getHeading(int size, String foreignLanguage) {
+    Heading w1 = new Heading(size, foreignLanguage);//, dialog.getEnglish());
+    w1.getElement().getStyle().setMarginTop(0, PX);
+    w1.getElement().getStyle().setMarginBottom(5, PX);
+    return w1;
+  }
+
+  private void addPresentation(List<ExerciseAttribute> attributes, DivWidget rowOne) {
+    Heading w = new Heading(3, getAttrValue(attributes, FLPRESENTATION), getAttrValue(attributes, PRESENTATION));
+    w.setWidth("49%");
+    w.addStyleName("floatLeft");
+    w.addStyleName("leftFiveMargin");
+    // w.addStyleName("bottomFiveMargin");
+    w.getElement().getStyle().setMarginTop(0, PX);
+
+    rowOne.add(w);
   }
 
 
@@ -272,7 +305,7 @@ public class ListenViewHelper implements ContentView {
     List<ClientExercise> rightTurns = speakerToEx.get(right);
 
     logger.info("speakerToEx " + speakerToEx.keySet());
-    logger.info("right " + right + " rightTurns " + rightTurns);
+    //logger.info("right " + right + " rightTurns " + rightTurns);
 
 
     dialog.getExercises().forEach(clientExercise -> {
@@ -318,15 +351,16 @@ public class ListenViewHelper implements ContentView {
     return rowOne;
   }
 
-  List<DialogExercisePanel> turns = new ArrayList<>();
+  private List<DialogExercisePanel> turns = new ArrayList<>();
 
   @NotNull
   private DivWidget getControls() {
     DivWidget rowOne = new DivWidget();
 //    rowOne.addStyleName("cardBorderShadow");
 
-    rowOne.setWidth(97 + "%");
-    rowOne.getElement().getStyle().setMarginTop(10, PX);
+    rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+    //rowOne.setWidth(97 + "%");
+   // rowOne.getElement().getStyle().setMarginTop(10, PX);
 
     {
       Button widgets = new Button("", IconType.ARROW_LEFT, event -> gotGoBack());
@@ -350,7 +384,7 @@ public class ListenViewHelper implements ContentView {
       widgets2.addStyleName("leftFiveMargin");
       rowOne.add(widgets2);
     }
-    rowOne.getElement().getStyle().setMarginBottom(10, PX);
+  //  rowOne.getElement().getStyle().setMarginBottom(10, PX);
     return rowOne;
   }
 

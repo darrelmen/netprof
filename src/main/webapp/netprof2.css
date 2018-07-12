@@ -2181,12 +2181,20 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
     font-size: 32px;
     height: 36px;
     /* margin-top: 0px; */
+    /*
+    margin-left: 35px;
+    */
+    margin-left: 43px;
+    padding-left: 0px !important;
     line-height: 36px;
+    margin-top: -30px;
 }
 
 .leftSpeaker {
     font-size: 32px;
     line-height: 36px;
+    margin-left: 43px;
+    padding-left: 0px !important;
     background-color: rgb(231, 230, 236);
 }
 
@@ -2211,3 +2219,34 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
     -moz-box-shadow: 2px 2px 4px #888;
     box-shadow: 2px 2px 4px #888;
 }
+
+.label .input {
+    width: 30px;
+    height: 30px;
+}
+
+.leftSpeaker .radio input[type="radio"], .checkbox input[type="checkbox"] {
+    float: left;
+    width: 30px;
+    height: 30px;
+    margin-left: -43px !important;
+}
+
+.titleBlue {
+    background-color: rgb(223, 244, 252);
+    margin-bottom: 0px;
+    /* border-color: black; */
+    /* border-style: solid; */
+    border-bottom-color: black;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+/*
+.rightSpeaker .radio input[type="radio"], .checkbox input[type="checkbox"] {
+    float: left;
+    margin-left: -20px;
+    width: 30px;
+    height: 30px;
+    zoom: 101%;
+}*/

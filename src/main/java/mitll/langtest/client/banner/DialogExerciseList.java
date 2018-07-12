@@ -23,14 +23,15 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends FacetExerciseList<T, IDialog> {
-  public static final int MAX_LENGTH_ID = 55;//35;// 23;
   private final Logger logger = Logger.getLogger("DialogExerciseList");
+
+  private static final int MAX_LENGTH_ID = 19;//23;//45;//55;//35;// 23;
   private static final int CHOICE_WIDTH = 170;//180;//190;//195;
   private static final int NORMAL_MIN_HEIGHT = 67;
   private static final int LANGUAGE_SIZE = 6;
 
-  public DialogExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader,
-                            ExerciseController controller) {
+  DialogExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader,
+                     ExerciseController controller) {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false);
   }
 
@@ -145,21 +146,21 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
     {
       final Container flags = new Container();
       flags.setWidth("970px");
-       flags.add(addFlags(result));
+      flags.add(addFlags(result));
       section.add(flags);
     }
 
     return section;
   }
 
-  private Thumbnails addFlags(Collection<IDialog> result) {
+  private Thumbnails addFlags(Collection<IDialog> dialogs) {
     Thumbnails current = new Thumbnails();
     current.getElement().getStyle().setMarginBottom(70, Style.Unit.PX);
 
-    result
-        .forEach(project -> {
-          logger.info("Got " + project.getID() + " " +project.getEnglish() + " "+project.getAttributes());
-          Panel langIcon = getImageAnchor(project.getEnglish(), project);
+    dialogs
+        .forEach(dialog -> {
+//          logger.info("Got " + dialog.getID() + " " + dialog.getEnglish() + " " + dialog.getAttributes());
+          Panel langIcon = getImageAnchor(dialog);
           if (langIcon != null) {
             current.add(langIcon);
           }
@@ -168,7 +169,8 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
     return current;
   }
 
-  private Panel getImageAnchor(final String name, IDialog dialog) {
+  private Panel getImageAnchor(IDialog dialog) {
+    String name = dialog.getEnglish();
     Thumbnail thumbnail = new Thumbnail();
     thumbnail.setWidth(CHOICE_WIDTH + "px");
     thumbnail.setSize(2);
@@ -177,15 +179,15 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
 
     // logger.info("show image " + imageRef);
     PushButton button = new PushButton(getFlag(imageRef));
-    final int projid = dialog.getID();
-    button.addClickHandler(clickEvent -> gotClickOnDialog(name, dialog, projid, 1));
+    // final int projid = dialog.getID();
+    button.addClickHandler(clickEvent -> gotClickOnDialog(name, dialog));
     thumbnail.add(button);
 
     DivWidget horiz = new DivWidget();
     horiz.getElement().getStyle().setProperty("minHeight", NORMAL_MIN_HEIGHT + "px"); // so they wrap nicely
     thumbnail.add(horiz);
 
-    horiz.add(getContainerWithButtons(name));
+    horiz.add(getContainerWithButtons(dialog));
 
     return thumbnail;
   }
@@ -199,14 +201,13 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
   }
 
   @NotNull
-  private DivWidget getContainerWithButtons(String name) {
+  private DivWidget getContainerWithButtons(IDialog dialog) {
     DivWidget container = new DivWidget();
-    Heading label;
+    //String name = dialog.getEnglish();
 
-    container.add(label = getLabel(truncate(name, MAX_LENGTH_ID), ""));
+    container.add(getLabel(truncate(dialog.getForeignLanguage(), MAX_LENGTH_ID), dialog.getEnglish()));
     container.setWidth("100%");
     container.addStyleName("floatLeft");
-
 
     return container;
   }
@@ -244,10 +245,8 @@ public class DialogExerciseList<T extends CommonShell & ScoredExercise> extends 
    *
    * @param name
    * @param dialog
-   * @param projid
-   * @param nest
    */
-  private void gotClickOnDialog(String name, IDialog dialog, int projid, int nest) {
+  private void gotClickOnDialog(String name, IDialog dialog) {
     logger.info("got click on " + name);
 //    History.replaceItem(SelectionState.DIALOG + "=" + dialog.getID(), false);
     controller.getNavigation().showDialogIn(dialog.getID(), INavigation.VIEWS.LISTEN);

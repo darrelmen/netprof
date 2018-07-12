@@ -1,6 +1,7 @@
 package mitll.langtest.shared.dialog;
 
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -8,13 +9,12 @@ import java.util.stream.Collectors;
 
 import static mitll.langtest.shared.exercise.STATE.UNSET;
 
-public class Dialog implements IDialog {
+public class Dialog implements IDialog, MutableShell {
   //private static final transient Logger logger = LogManager.getLogger(Dialog.class);
-
   private static final String SPEAKER = "Speaker".toLowerCase();
   public static final String UNIT = "unit";
   private static final String CHAPTER = "chapter";
-  public static final String SPEAKER1 = "Speaker";
+  private static final String SPEAKER1 = "Speaker";
   public static final String UNKNOWN = "UNKNOWN";
 
   private int id;
@@ -187,7 +187,7 @@ public class Dialog implements IDialog {
 
   @Override
   public List<String> getSpeakers() {
- //   List<String> speakers = new ArrayList<>();
+    //   List<String> speakers = new ArrayList<>();
     //Set<ExerciseAttribute> speakerAttr = new TreeSet<>();
 
     List<ExerciseAttribute> speakers = attributes
@@ -199,7 +199,7 @@ public class Dialog implements IDialog {
     return speakers.stream().map(Pair::getValue)
         .collect(Collectors.toList());
 
-   // return speakers;
+    // return speakers;
   }
 
   @Override
@@ -248,13 +248,45 @@ public class Dialog implements IDialog {
   }
 
   @Override
+  public void setEnglish(String english) {
+    this.entitle=english;
+  }
+
+  public void setForeignLanguage(String foreignLanguage) {
+    this.fltitle = foreignLanguage;
+  }
+
+  @Override
+  public void setMeaning(String meaning) {
+
+  }
+
+  /**
+   * TODO : fill in
+   * @param score
+   */
+  @Override
+  public void setScore(float score) {
+
+  }
+  /**
+   * TODO : fill in
+   * @param scoreTotal
+   */
+  @Override
+  public void setScores(List<CorrectAndScore> scoreTotal) {
+
+  }
+
+
+  @Override
   public String getFLToShow() {
     return fltitle;
   }
 
   @Override
   public MutableShell getMutableShell() {
-    return null;
+    return this;
   }
 
   @Override
@@ -289,6 +321,7 @@ public class Dialog implements IDialog {
         "\n\tunit        " + unit +
         "\n\tchapter     " + chapter +
         "\n\ttitle       " + entitle +
+        "\n\tfltitle     " + fltitle +
         "\n\torientation " + orientation +
         "\n\timage       " + imageRef +
         "\n\t# ex        " + exercises.size() +

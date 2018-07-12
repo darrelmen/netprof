@@ -151,6 +151,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   private final boolean addUserViaEmail;
 
+  /**
+   *
+   */
   private IUserServiceDelegate delegate = null;
   private MyMongoUserServiceDelegate myDelegate;
 
@@ -176,7 +179,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private IProjectManagement projectManagement;
   private Group primaryGroup = null;
-  Runnable runnable = null;
+  //Runnable runnable = null;
 
   private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
 
@@ -210,7 +213,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param database
    * @see mitll.langtest.server.database.DatabaseImpl#connectToDatabases(PathHelper, ServletContext)
    */
-  public DominoUserDAOImpl(Database database, ServletContext servletContext ) {
+  public DominoUserDAOImpl(Database database, ServletContext servletContext) {
     super(database);
 //    this.runnable = runnable;
     long then = System.currentTimeMillis();
@@ -263,11 +266,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
   }
 
-//  @Override
-//  public void addRunnable(Runnable runnable) {
-//    this.runnable = runnable;
-//  }
-
 
   private void makeUserService(Database database, Properties props) {
     ServerProperties dominoProps = getDominoProps(database, props);
@@ -287,6 +285,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @throws MongoTimeoutException
    */
   private void connectToMongo(Database database, Properties props) throws MongoTimeoutException {
+    noServletContextSetup(database, props);
+    doAfterGetDelegate();
+  }
+
+  private void noServletContextSetup(Database database, Properties props) {
     pool = Mongo.createPool(new DBProperties(props));
     serializer = Mongo.makeSerializer();
 //      logger.info("OK made serializer " + serializer);
@@ -314,8 +317,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         "\ndelegate " + delegate.getClass() +
         "\nignite = " + ignite +
         "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
-
-    doAfterGetDelegate();
   }
 
   @NotNull
@@ -332,9 +333,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     myDelegate = makeMyServiceDelegate();
     dominoAdminUser = delegate.getAdminUser();
 
-    if (runnable != null) {
-      runnable.run();
-    }
+    ensureDefaultUsers();
   }
 
   public JSONSerializer getSerializer() {
@@ -409,7 +408,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @Override
   public void ensureDefaultUsers() {
     if (delegate == null) {
-      logger.error("no delegate - couldn't connect to Mongo!");
+      logger.error("ensureDefaultUsers : no delegate - couldn't connect to Mongo!");
     } else {
       ensureDefaultUsersLocal();
       String userId = dominoAdminUser.getUserId();
@@ -428,9 +427,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   /**
    * public for test access... for now
    *
+   * @see #ensureDefaultUsers
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   private void ensureDefaultUsersLocal() {
+    logger.info("ensureDefaultUsersLocal --- ");
+
     this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", Kind.QAQC);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", USER, Kind.CONTENT_DEVELOPER);
@@ -584,10 +586,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private MyUserService.LoginResult loginViaEmail(String url, ClientUserDetail updateUser) {
     SResult<ClientUserDetail> clientUserDetailSResultOrig = addUserToMongo(updateUser, url, true);
-    MyUserService.LoginResult loginResult1 = new MyUserService.LoginResult(clientUserDetailSResultOrig, "");
-    return loginResult1;
+    return new MyUserService.LoginResult(clientUserDetailSResultOrig, "");
   }
-
 
   /**
    * Need a group - just use the first one.

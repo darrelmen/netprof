@@ -70,6 +70,9 @@ public abstract class BaseUserDAO extends DAO {
   private static final String UNSET_EMAIL = "unset@unset.com";
   @Deprecated
   final String language;
+  /**
+   * @see DominoUserDAOImpl#ensureDefaultUsersLocal
+   */
   int defectDetector, beforeLoginUser, importUser, defaultUser = -1, defaultMale, defaultFemale;
 
   static final String ID = "id";
@@ -130,9 +133,7 @@ public abstract class BaseUserDAO extends DAO {
     return importUser;
   }
 
-  public int getDefaultUser() {
-    return defaultUser;
-  }
+  public int getDefaultUser() {    return defaultUser;  }
 
   public int getDefaultMale() {
     return defaultMale;

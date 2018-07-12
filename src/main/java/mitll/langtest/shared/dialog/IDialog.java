@@ -11,7 +11,7 @@ import java.util.Map;
 
 public interface IDialog extends CommonShell, HasUnitChapter {
   enum METADATA implements IsSerializable {
-    UNIT, CHAPTER, PAGE, PRESENTATION, FLPRESENTATION, SPEAKER;
+    UNIT, CHAPTER, PAGE, PRESENTATION, FLPRESENTATION, SPEAKER, FLTITLE;
 
     public String getLC() {
       return toString().toLowerCase();

@@ -22,6 +22,8 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static mitll.langtest.shared.dialog.IDialog.METADATA.FLTITLE;
+
 /**
  * Dialog data from Paul - 6/20/18
  */
@@ -34,6 +36,7 @@ public class KPDialogs implements IDialogReader {
   private static final String PAGE = IDialog.METADATA.PAGE.getLC();
   private static final String PRESENTATION = IDialog.METADATA.PRESENTATION.getLC();
   private static final String SPEAKER = IDialog.METADATA.SPEAKER.getCap();
+  //public static final String FLTITLE = "fltitle";
 
   private final String docIDS =
       "333815\n" +
@@ -57,6 +60,20 @@ public class KPDialogs implements IDialogReader {
           "Please exchange this for a blue tie.\n" +
           "Common Ailments and Symptoms\n" +
           "Medical Emergencies";
+  private final String ktitle =
+      "처음 만났을 때\n" +
+          "지금 몇 시예요?\n" +
+          "전화 잘못 거셨어요.\n" +
+
+          "이번 방학에 뭐 할 거야?\n" +
+          "환전하려면 어디로 가야 해요?\n" +
+          "한국 사람들은 시간이 날 때 뭐 해요?\n" +
+
+          "10시 반 표 두 장 주세요.\n" +
+          "파란색 넥타이로 바꿔 주세요.\n" +
+          "독감에 걸려서 고생했어.\n" +
+
+          "구급차 좀 빨리 보내주세요.";
   private final String dir =
       "010_C01\n" +
           "001_C05\n" +
@@ -127,6 +144,7 @@ public class KPDialogs implements IDialogReader {
                                              Project project) {
     String[] docs = docIDS.split("\n");
     String[] titles = title.split("\n");
+    String[] ktitles = ktitle.split("\n");
 
     String[] units = unit.split("\n");
     String[] chapters = chapter.split("\n");
@@ -239,6 +257,10 @@ public class KPDialogs implements IDialogReader {
 
       String orientation = orientations.get(0);
       String title = titles[i];
+
+      List<ExerciseAttribute> dialogAttr = new ArrayList<>(attributes);
+      dialogAttr.add(new ExerciseAttribute(FLTITLE.toString().toLowerCase(), ktitles[i], false));
+
       SlickDialog slickDialog = new SlickDialog(-1,
           defaultUser,
           projID,
@@ -260,7 +282,7 @@ public class KPDialogs implements IDialogReader {
           "",
           title,
 
-          attributes,
+          dialogAttr,
           exercises,
           coreExercises);
 

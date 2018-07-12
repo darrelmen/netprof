@@ -51,6 +51,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DialogDAO extends DAO implements IDialogDAO {
   private static final Logger logger = LogManager.getLogger(DialogDAO.class);
@@ -177,6 +178,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
       // add attributes
 
       addAttributes(idToPair, slickDialogAttributeJoins, dialog);
+
+      {
+        List<ExerciseAttribute> fltitle = dialog.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase("fltitle")).collect(Collectors.toList());
+        if (!fltitle.isEmpty()) dialog.getMutableShell().setForeignLanguage(fltitle.iterator().next().getValue());
+      }
 
       //add exercises
       addExercises(projid, dialogIDToRelated, dialogID, dialog);
@@ -357,7 +363,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     if (dialog.getExercises().isEmpty()) {
       logger.warn(message);
     } else {
-      logger.info(message);
+//      logger.info(message);
     }
   }
 
