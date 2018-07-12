@@ -17,7 +17,6 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
 import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.HasID;
@@ -61,13 +60,11 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
    * @see TwoColumnExercisePanel#getPlayAudioPanel
    * @see TwoColumnExercisePanel#getContext
    */
-  ChoicePlayAudioPanel(
-      SoundManagerAPI soundManager,
-      T exercise,
-      ExerciseController exerciseController,
-      boolean includeContext,
-      AudioChangeListener listener) {
-    super(soundManager, null,
+  ChoicePlayAudioPanel(T exercise,
+                       ExerciseController exerciseController,
+                       boolean includeContext,
+                       AudioChangeListener listener) {
+    super(null,
         "",
         null, exerciseController, exercise.getID(), false);
     this.exercise = exercise;
@@ -131,7 +128,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   private void configureButton2(SplitDropdownButton playButton) {
     playButton.addClickHandler(event ->
         {
-          playAudio();
+          doPlay();
           controller.logEvent(playButton, "playButton", exid, currentAudioAttr == null ? "unknown file?" : currentAudioAttr.getAudioRef());
         }
     );

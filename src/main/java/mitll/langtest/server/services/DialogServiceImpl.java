@@ -125,21 +125,28 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
   @Override
   public IDialog getDialog(int id) throws DominoSessionException {
-    List<IDialog> iDialogs = getiDialogs(getUserIDFromSessionOrDB());
+    List<IDialog> iDialogs = getDialogs(getUserIDFromSessionOrDB());
     List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == id).collect(Collectors.toList());
     IDialog iDialog = collect.isEmpty() ? iDialogs.iterator().next() : collect.iterator().next();
     logger.info("get dialog " + id +
         "\n\treturns " +iDialog);
+
+    String language = db.getProject(iDialog.getProjid()).getLanguage();
+
+    iDialog.getExercises().forEach(clientExercise ->
+        db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>())
+    );
+
     return iDialog;
   }
 
   private List<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
     return (request.getTypeToSelection().isEmpty()) ?
-        getiDialogs(userIDFromSessionOrDB) :
+        getDialogs(userIDFromSessionOrDB) :
         new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
   }
 
-  private List<IDialog> getiDialogs(int userIDFromSessionOrDB) {
+  private List<IDialog> getDialogs(int userIDFromSessionOrDB) {
     List<IDialog> dialogList = new ArrayList<>();
     {
       int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);

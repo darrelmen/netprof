@@ -95,7 +95,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setPosition(NavbarPosition.TOP);
     this.controller = controller;
     this.lifecycle = lifecycle;
-    logger.info("--- addWidgets ---");
+  //  logger.info("--- addWidgets ---");
     addWidgets(userManager, userMenu, breadcrumbs);
   }
 

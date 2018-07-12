@@ -65,8 +65,6 @@ public interface AudioRefExercise {
 
   Collection<AudioAttribute> getAudioAttributes();
 
-//  Collection<Integer> getAudioIDs();
-
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
 
   /**

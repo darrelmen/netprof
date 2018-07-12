@@ -5,48 +5,53 @@ import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.client.scoring.*;
-import mitll.langtest.client.services.DialogServiceAsync;
+import mitll.langtest.client.scoring.DialogExercisePanel;
+import mitll.langtest.client.scoring.PhonesChoices;
+import mitll.langtest.client.scoring.RefAudioGetter;
+import mitll.langtest.client.scoring.RefAudioListener;
+import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.dialog.IDialog.METADATA;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
-import static mitll.langtest.shared.dialog.IDialog.METADATA.FLPRESENTATION;
-import static mitll.langtest.shared.dialog.IDialog.METADATA.PRESENTATION;
 
 /**
  * Created by go22670 on 4/5/17.
  */
-public class ListenViewHelper implements ContentView {
-  public static final int ROW_WIDTH = 97;
-  public static final String HEIGHT = 100 + "px";
-  public static final String RIGHT_BKG_COLOR = "#4aa8ee";
-  public static final String LEFT_COLOR = "#e7e6ec";
+public class ListenViewHelper implements ContentView, PlayListener {
+  private static final int ROW_WIDTH = 97;
+  private static final String HEIGHT = 100 + "px";
+  private static final String RIGHT_BKG_COLOR = "#4aa8ee";
+  private static final String LEFT_COLOR = "#e7e6ec";
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
-  ExerciseController controller;
-//  private boolean isRTL = false;
-  // private ClickableWords<ClientExercise> clickableWords;
+  private final ExerciseController controller;
+
+
+  private final List<DialogExercisePanel> bothTurns = new ArrayList<>();
+  private List<DialogExercisePanel> leftTurnPanels = new ArrayList<>(), rightTurnPanels = new ArrayList<>();
+
+  private DialogExercisePanel currentTurn;
+  private Boolean leftSpeaker = true;
+  private Boolean rightSpeaker = true;
 
   /**
    * @param controller
@@ -55,54 +60,39 @@ public class ListenViewHelper implements ContentView {
    */
   ListenViewHelper(ExerciseController controller, IViewContaner viewContainer, INavigation.VIEWS myView) {
     this.controller = controller;
-    // ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    // isRTL = projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
   }
 
   @Override
   public void showContent(Panel listContent, String instanceName, boolean fromClick) {
-    SelectionState selectionState = new SelectionState();
-    int dialog = selectionState.getDialog();
     DivWidget child = new DivWidget();
     child.setWidth("100%");
     listContent.add(child);
     listContent.setWidth("90%");
 
-    DialogServiceAsync dialogService = controller.getDialogService();
-
-
-    dialogService.getDialog(dialog, new AsyncCallback<IDialog>() {
+    controller.getDialogService().getDialog(new SelectionState().getDialog(), new AsyncCallback<IDialog>() {
       @Override
       public void onFailure(Throwable caught) {
-
-
+        // TODO fill in
       }
 
       @Override
       public void onSuccess(IDialog dialog) {
-        //List<ExerciseAttribute> attributes = dialog.getAttributes();
+        showDialog(dialog, child);
+        bothTurns.forEach(dialogExercisePanel -> dialogExercisePanel.getRefAudio(new RefAudioListener() {
+          @Override
+          public void refAudioComplete() {
 
-        //child.add(getControls());
-        child.add(getHeader(dialog));
-        child.add(getSpeakerRow(dialog));
-        child.add(getTurns(dialog));
+          }
+        }));
 
-     /*   {
-          DivWidget row2 = new DivWidget();
-          row2.setWidth("100%");
-          row2.getElement().getStyle().setBackgroundColor("#dff4fc");
-          Heading w1 = new Heading(3, getAttrValue(attributes, PRESENTATION));
-          w1.setWidth("50%");
-          row2.add(w1);
-          Heading w = new Heading(3, result.getEnglish());
-          w.addStyleName("floatRight");
-          w.setWidth("50%");
-          row2.add(w);
-
-          child.add(row2);
-        }*/
       }
     });
+  }
+
+  private void showDialog(IDialog dialog, DivWidget child) {
+    child.add(getHeader(dialog));
+    child.add(getSpeakerRow(dialog));
+    child.add(getTurns(dialog));
   }
 
   @NotNull
@@ -123,7 +113,7 @@ public class ListenViewHelper implements ContentView {
       //checkBox.setWidth("49%");
       checkBox.addStyleName("floatLeft");
       checkBox.addStyleName("leftFiveMargin");
-      Style style = checkBox.getElement().getStyle();
+      //Style style = checkBox.getElement().getStyle();
       // style.setMarginLeft(-40, PX);
       //style.setFontSize(32, PX);
       //checkBox.setHeight("30px");
@@ -165,10 +155,12 @@ public class ListenViewHelper implements ContentView {
 
   private void speakerOneCheck(Boolean value) {
     logger.info("speaker one now " + value);
+    leftSpeaker = value;
   }
 
   private void speakerTwoCheck(Boolean value) {
     logger.info("speaker two now " + value);
+    rightSpeaker = value;
   }
 
   @NotNull
@@ -196,6 +188,9 @@ public class ListenViewHelper implements ContentView {
       row.setHeight("100px");
       row.setWidth(ROW_WIDTH + "%");
       row.addStyleName("inlineFlex");
+
+      row.add(getLeftArrow());
+
       {
         com.google.gwt.user.client.ui.Image flag = getFlag(dialog.getImageRef());
         flag.addStyleName("floatLeft");
@@ -209,15 +204,7 @@ public class ListenViewHelper implements ContentView {
 
       {
         DivWidget titleDiv = new DivWidget();
-        // Style style = titleDiv.getElement().getStyle();
-//        style.setBackgroundColor("#dff4fc");
-//        style.setMarginBottom(0,PX);
-//        style.setBorderColor("black");
-//        style.setBorderStyle(Style.BorderStyle.SOLID);
-//        style.setBorderWidth(1,PX);
         titleDiv.addStyleName("titleBlue");
-
-        //  titleDiv.getElement().getStyle().setClear(Style.Clear.RIGHT);
         titleDiv.add(getFLTitle(dialog));
         vert.add(titleDiv);
       }
@@ -225,23 +212,16 @@ public class ListenViewHelper implements ContentView {
       {
         DivWidget titleDiv = new DivWidget();
         titleDiv.getElement().getStyle().setBackgroundColor("#dff4fc");
-        //titleDiv.getElement().getStyle().setClear(Style.Clear.RIGHT);
         titleDiv.add(getHeading(5, dialog.getEnglish()));
         vert.add(titleDiv);
       }
 
-      // row.add(getHeader(dialog));
       {
         DivWidget oreintDiv = new DivWidget();
         Heading w1 = new Heading(5, dialog.getOrientation());
-        //   w1.addStyleName("rightAlign");
-        //   w1.addStyleName("floatRight");
-        //  w1.addStyleName("rightTenMargin");
         w1.addStyleName("wrapword");
 
         oreintDiv.add(w1);
-        //   w1.setWidth("85%");
-        //          w1.getElement().getStyle().setBackgroundColor("#dff4fc");
         vert.add(oreintDiv);
       }
       outer.add(row);
@@ -262,7 +242,7 @@ public class ListenViewHelper implements ContentView {
     return w1;
   }
 
-  private void addPresentation(List<ExerciseAttribute> attributes, DivWidget rowOne) {
+ /* private void addPresentation(List<ExerciseAttribute> attributes, DivWidget rowOne) {
     Heading w = new Heading(3, getAttrValue(attributes, FLPRESENTATION), getAttrValue(attributes, PRESENTATION));
     w.setWidth("49%");
     w.addStyleName("floatLeft");
@@ -272,7 +252,7 @@ public class ListenViewHelper implements ContentView {
 
     rowOne.add(w);
   }
-
+*/
 
   @NotNull
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {
@@ -284,6 +264,11 @@ public class ListenViewHelper implements ContentView {
 
   private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
+  /**
+   * @param dialog
+   * @return
+   * @see #showDialog
+   */
   @NotNull
   private DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
@@ -294,98 +279,144 @@ public class ListenViewHelper implements ContentView {
 
     int size = dialog.getExercises().size();
     logger.info("dialog " + dialog);
-    logger.info("size   " + size);
+    //logger.info("size   " + size);
 
     List<String> speakers = dialog.getSpeakers();
 
     Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
-    String left = speakers.get(0);
+    // String left = speakers.get(0);
     String right = speakers.get(1);
-    List<ClientExercise> leftTurns = speakerToEx.get(left);
+    // List<ClientExercise> leftTurns = speakerToEx.get(left);
     List<ClientExercise> rightTurns = speakerToEx.get(right);
 
-    logger.info("speakerToEx " + speakerToEx.keySet());
+//    logger.info("speakerToEx " + speakerToEx.keySet());
     //logger.info("right " + right + " rightTurns " + rightTurns);
 
-
     dialog.getExercises().forEach(clientExercise -> {
-      // List<ExerciseAttribute> attributes = clientExercise.getAttributes();
-      // logger.info("id " +clientExercise.getID() + " has " + attributes.size());
-      // attributes.forEach(exerciseAttribute -> logger.info("Got " + exerciseAttribute));
+      // logger.info("ex " + clientExercise.getID() + " audio " + clientExercise.getAudioAttributes());
+      boolean isRight = rightTurns != null && rightTurns.contains(clientExercise);
 
-      DialogExercisePanel<ClientExercise> widgets = new DialogExercisePanel<>(clientExercise, controller, null, alignments);
-      widgets.addWidgets(true, false, PhonesChoices.HIDE);
-      Style style = widgets.getElement().getStyle();
-      if (rightTurns != null && rightTurns.contains(clientExercise)) {
-        style.setFloat(Style.Float.RIGHT);
-        style.setTextAlign(Style.TextAlign.RIGHT);
-        style.setBackgroundColor(RIGHT_BKG_COLOR);
-        style.setColor("white");
-      } else {
-        style.setFloat(Style.Float.LEFT);
-        style.setTextAlign(Style.TextAlign.LEFT);
-        style.setBackgroundColor(LEFT_COLOR);
-      }
-      style.setClear(Style.Clear.BOTH);
+      DialogExercisePanel<ClientExercise> turn = getTurnPanel(clientExercise, isRight);
+      if (isRight) rightTurnPanels.add(turn);
+      else leftTurnPanels.add(turn);
+      bothTurns.add(turn);
+      rowOne.add(turn);
 
-      //else {
-      // widgets.addStyleName("leftspeech");
-      widgets.addStyleName("bubble");
-      {
-        Style style2 = widgets.getFlClickableRow().getElement().getStyle();
-        style2.setMarginLeft(15, Style.Unit.PX);
-        style2.setMarginTop(7, Style.Unit.PX);
-        //style2.setMarginBottom(7, Style.Unit.PX);
-      }
-      turns.add(widgets);
-      //}
-      rowOne.add(widgets);
-//      widgets.setWidth("80%");
+
     });
 
-    if (!turns.isEmpty()) {
-      turns.get(0).getElement().getStyle().setBorderColor("green");
+    if (!bothTurns.isEmpty()) {
+      currentTurn = bothTurns.get(0);
+      markCurrent();
     }
+
+    // List<RefAudioGetter> getters = new ArrayList<>();
+    //bothTurns.forEach(getters::add);
+    //  getRefAudio(getters.iterator());
 
     rowOne.getElement().getStyle().setMarginBottom(10, PX);
     return rowOne;
   }
 
-  private List<DialogExercisePanel> turns = new ArrayList<>();
+/*  private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
+    if (iterator.hasNext()) {
+      RefAudioGetter next = iterator.next();
+      //logger.info("getRefAudio asking next panel...");
+
+      if (false) {
+        logger.info("getRefAudio : skip stale req for panel...");
+      } else {
+        next.getRefAudio(() -> {
+          if (iterator.hasNext()) {
+            //     logger.info("\tgetRefAudio panel complete...");
+            final int reqid = next.getReq();
+            if (true) {
+              Scheduler.get().scheduleDeferred(() -> {
+                if (true) {
+                  getRefAudio(iterator);
+                } else {
+//              /
+                }
+              });
+            }
+          } else {
+            //   logger.info("\tgetRefAudio all panels complete...");
+          }
+        });
+      }
+    }
+  }*/
+
+  @NotNull
+  private DialogExercisePanel<ClientExercise> getTurnPanel(ClientExercise clientExercise, boolean isRight) {
+    DialogExercisePanel<ClientExercise> turn = new DialogExercisePanel<>(clientExercise, controller, null, alignments);
+    turn.addWidgets(true, false, PhonesChoices.HIDE);
+
+    Style style = turn.getElement().getStyle();
+    if (isRight) {
+      style.setFloat(Style.Float.RIGHT);
+      style.setTextAlign(Style.TextAlign.RIGHT);
+      style.setBackgroundColor(RIGHT_BKG_COLOR);
+      style.setColor("white");
+      //rightTurnPanels.add(turn);
+    } else {
+      style.setFloat(Style.Float.LEFT);
+      style.setTextAlign(Style.TextAlign.LEFT);
+      style.setBackgroundColor(LEFT_COLOR);
+      //leftTurnPanels.add(turn);
+    }
+    style.setClear(Style.Clear.BOTH);
+
+    turn.addStyleName("bubble");
+    {
+      Style style2 = turn.getFlClickableRow().getElement().getStyle();
+      style2.setMarginLeft(15, Style.Unit.PX);
+      style2.setMarginTop(7, Style.Unit.PX);
+    }
+
+    turn.addPlayListener(this);
+    return turn;
+  }
+
+  private Button backwardButton, playButton, forwardButton;
 
   @NotNull
   private DivWidget getControls() {
     DivWidget rowOne = new DivWidget();
-//    rowOne.addStyleName("cardBorderShadow");
-
     rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
-    //rowOne.setWidth(97 + "%");
-   // rowOne.getElement().getStyle().setMarginTop(10, PX);
-
-    {
-      Button widgets = new Button("", IconType.ARROW_LEFT, event -> gotGoBack());
-      widgets.addStyleName("leftFiveMargin");
-      widgets.addStyleName("rightTenMargin");
-      rowOne.add(widgets);
-    }
 
     {
       Button widgets = new Button("", IconType.BACKWARD, event -> gotBackward());
       widgets.addStyleName("leftFiveMargin");
       rowOne.add(widgets);
+      backwardButton = widgets;
     }
     {
       Button widgets1 = new Button("", IconType.PLAY, event -> gotPlay());
       widgets1.addStyleName("leftFiveMargin");
       rowOne.add(widgets1);
+      playButton = widgets1;
     }
+
     {
       Button widgets2 = new Button("", IconType.FORWARD, event -> gotForward());
       widgets2.addStyleName("leftFiveMargin");
       rowOne.add(widgets2);
+      forwardButton = widgets2;
     }
-  //  rowOne.getElement().getStyle().setMarginBottom(10, PX);
+
+    //  rowOne.getElement().getStyle().setMarginBottom(10, PX);
     return rowOne;
+  }
+
+  @NotNull
+  private Widget getLeftArrow() {
+    DivWidget buttonDiv = new DivWidget();
+    Button widgets = new Button("", IconType.ARROW_LEFT, event -> gotGoBack());
+    widgets.addStyleName("leftFiveMargin");
+    widgets.addStyleName("rightTenMargin");
+    buttonDiv.add(widgets);
+    return buttonDiv;
   }
 
   private void gotGoBack() {
@@ -398,16 +429,70 @@ public class ListenViewHelper implements ContentView {
 
   private void gotPlay() {
     logger.info("got play");
+    playCurrentTurn();
+  }
+
+  private void playCurrentTurn() {
+    if (currentTurn != null) {
+//      currentTurn.addPlayListener(new PlayListener() {
+//        @Override
+//        public void playStarted() {
+//          currentTurn.getElement().getStyle().setBorderColor("green");
+//        }
+//
+//        @Override
+//        public void playStopped() {
+//          currentTurn.getElement().getStyle().setBorderColor("black");
+//          currentTurnPlayEnded();
+//          playButton.setIcon(IconType.PLAY);
+//        }
+//      });
+      currentTurn.doPlayPauseToggle();
+    }
+  }
+
+  private void currentTurnPlayEnded() {
+    List<DialogExercisePanel> seq = getSeq();
+    int i = seq.indexOf(currentTurn);
+    int i1 = i + 1;
+    if (i1 > seq.size() - 1) {
+      logger.info("OK stop");
+      currentTurn = seq.get(0);
+    } else {
+      currentTurn = seq.get(i1);
+      playCurrentTurn();
+    }
+  }
+
+  private List<DialogExercisePanel> getSeq() {
+    return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
   }
 
   private void gotForward() {
     logger.info("got forward");
+    List<DialogExercisePanel> seq = getSeq();
+
+    int i = seq.indexOf(currentTurn);
+    int i1 = i + 1;
+
+    boolean isPlaying = currentTurn.doPause();
+
+currentTurn.clearHighlight();
+    removeMarkCurrent();
+    if (i1 > seq.size() - 1) {
+      currentTurn = seq.get(0);
+    } else {
+      currentTurn = seq.get(i1);
+    }
+    markCurrent();
+    if (isPlaying) playCurrentTurn();
   }
 
+/*
   private String getAttrValue(List<ExerciseAttribute> attributes, METADATA presentation) {
     ExerciseAttribute attr = getAttr(attributes, presentation);
     return attr == null ? "" : attr.getValue();
-  }
+  }*/
 
   private ExerciseAttribute getAttr(List<ExerciseAttribute> attributes, METADATA presentation) {
     List<ExerciseAttribute> collect = attributes
@@ -417,5 +502,30 @@ public class ListenViewHelper implements ContentView {
         })
         .collect(Collectors.toList());
     return collect.isEmpty() ? null : collect.iterator().next();
+  }
+
+  @Override
+  public void playStarted() {
+    if (currentTurn != null) {
+      playButton.setIcon(IconType.PAUSE);
+      markCurrent();
+    }
+  }
+
+  private void markCurrent() {
+    currentTurn.getElement().getStyle().setBorderColor("green");
+  }
+
+  @Override
+  public void playStopped() {
+    if (currentTurn != null) {
+      removeMarkCurrent();
+      currentTurnPlayEnded();
+      playButton.setIcon(IconType.PLAY);
+    }
+  }
+
+  private void removeMarkCurrent() {
+    currentTurn.getElement().getStyle().setBorderColor("black");
   }
 }

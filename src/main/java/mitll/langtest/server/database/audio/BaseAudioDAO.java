@@ -269,7 +269,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    * @see DatabaseImpl#writeUserListAudio(OutputStream, int, int, AudioExportOptions)
    */
-  public int attachAudioToExercise(CommonExercise firstExercise, String language, Map<Integer, MiniUser> idToMini) {
+  public int attachAudioToExercise(ClientExercise firstExercise, String language, Map<Integer, MiniUser> idToMini) {
     long then = System.currentTimeMillis();
     int id = firstExercise.getID();
     Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(id, idToMini);

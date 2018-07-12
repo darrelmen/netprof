@@ -64,7 +64,7 @@ public class ClickableWords<T extends CommonShell> {
    * @param fontSize
    * @see RefAudioGetter#addWidgets
    */
-  public ClickableWords(ListInterface listContainer, T exercise, String language, int fontSize, boolean showPhones) {
+  ClickableWords(ListInterface listContainer, T exercise, String language, int fontSize, boolean showPhones) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
@@ -81,14 +81,14 @@ public class ClickableWords<T extends CommonShell> {
    * @param clickables
    * @param isSimple
    * @param isRTL
-   * @see TwoColumnExercisePanel#getFLEntry
    * @seex TwoColumnExercisePanel#getEntry(String, String, ExerciseAnnotation, TwoColumnExercisePanel.FieldType, boolean, List, boolean, CommentAnnotator, boolean, int)
+   * @see TwoColumnExercisePanel#getFLEntry
    */
-  public DivWidget getClickableWords(String value,
-                                     FieldType fieldType,
-                                     List<IHighlightSegment> clickables,
-                                     boolean isSimple,
-                                     boolean isRTL) {
+  DivWidget getClickableWords(String value,
+                              FieldType fieldType,
+                              List<IHighlightSegment> clickables,
+                              boolean isSimple,
+                              boolean isRTL) {
     boolean isFL = fieldType == FieldType.FL;
     boolean flLine = isFL || (isJapanese && fieldType == FieldType.TRANSLIT);
     boolean isChineseCharacter = flLine && hasClickableAsian;
@@ -199,7 +199,6 @@ public class ClickableWords<T extends CommonShell> {
 
 /*
   private static boolean didIt = false;
-
   public native boolean intercept() */
 /*-{
       var clipboard =
@@ -517,7 +516,6 @@ public class ClickableWords<T extends CommonShell> {
     } else {
       highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
       highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
-      //highlightSegment.addClickHandler(clickEvent -> putTextInSearchBox(removePunct));
       highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
       highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
     }

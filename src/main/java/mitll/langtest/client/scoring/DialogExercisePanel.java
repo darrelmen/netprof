@@ -5,6 +5,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -21,7 +22,10 @@ import java.util.stream.Collectors;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class DialogExercisePanel<T extends ClientExercise> extends DivWidget implements AudioChangeListener, RefAudioGetter {
+public class DialogExercisePanel<T extends ClientExercise>
+    extends DivWidget
+    implements AudioChangeListener, RefAudioGetter, IPlayAudioControl {
+
   private Logger logger = Logger.getLogger("DialogExercisePanel");
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
@@ -32,7 +36,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
 
   protected final T exercise;
   protected final ExerciseController controller;
-  protected DivWidget flClickableRow;
+  DivWidget flClickableRow;
   ClickableWords<T> clickableWords;
 
   /**
@@ -40,11 +44,13 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
    */
   List<IHighlightSegment> flclickables = null;
 
+  /**
+   *
+   */
+  protected HeadlessPlayAudio playAudio;
 
-  protected PlayAudioPanel playAudio;
 
-
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
@@ -88,7 +94,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
 
       }
     });
+//    if (hasAudio(commonExercise)) {
+//      rememberAudio(commonExercise.getAudioAttributes().iterator().next());
+//    }
   }
+
+//  private void rememberAudio(AudioAttribute audioAttribute) {
+//    playAudio.rememberAudio(audioAttribute);
+//  }
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
@@ -99,6 +112,17 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
       this.isRTL = clickableWords.isRTL(exercise);
 
       add(getFLEntry(exercise));
+      makePlayAudio(exercise, null);
+    }
+  }
+
+  protected void makePlayAudio(T e, DivWidget flContainer) {
+    if (hasAudio(e)) {
+      playAudio = new HeadlessPlayAudio(controller.getSoundManager());
+      alignmentFetcher.setPlayAudio(playAudio);
+      playAudio.rememberAudio(e.getAudioAttributes().iterator().next());
+    } else {
+      logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
     }
   }
 
@@ -107,6 +131,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
     clickableWords = new ClickableWords<>(listContainer, exercise, controller.getLanguage(), fontSize, shouldShowPhones());
   }
 
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio
+   * @param listener
+   */
   @Override
   public void getRefAudio(RefAudioListener listener) {
     alignmentFetcher.getRefAudio(listener);
@@ -202,7 +230,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
                                            long duration,
                                            AlignmentOutput alignmentOutput,
                                            List<IHighlightSegment> flclickables,
-                                           PlayAudioPanel playAudio,
+                                           HeadlessPlayAudio playAudio,
                                            DivWidget clickableRow,
                                            DivWidget clickablePhones) {
     if (DEBUG) logger.info("matchSegmentsToClickables match seg to clicable " + id + " : " + alignmentOutput);
@@ -214,7 +242,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
   private void setPlayListener(int id,
                                long duration,
                                Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
-                               PlayAudioPanel playAudio) {
+                               HeadlessPlayAudio playAudio) {
     if (DEBUG) {
       logger.info("setPlayListener for ex " + exercise.getID() +
           " audio id " + id + " : " +
@@ -719,7 +747,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
   /**
    * @param e
    * @return
-   * @see #makeFirstRow
+   * @see #addWidgets(boolean, boolean, PhonesChoices)
+   * @see TwoColumnExercisePanel#makeFirstRow(ClientExercise, DivWidget, boolean)
    */
   @NotNull
   protected DivWidget getFLEntry(T e) {
@@ -738,11 +767,38 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget imp
     return e.getFLToShow();
   }
 
-  public void contextAudioChanged(int id, long duration) {
+  /**
+   * @param e
+   * @return
+   * @see #makePlayAudio(ClientExercise, DivWidget)
+   */
+  protected boolean hasAudio(T e) {
+    return e.hasAudioNonContext(true);
+  }
 
+  public void contextAudioChanged(int id, long duration) {
+    audioChanged(id,duration);
   }
 
   public DivWidget getFlClickableRow() {
     return flClickableRow;
+  }
+
+  @Override
+  public void doPlayPauseToggle() {
+    playAudio.doPlayPauseToggle();
+  }
+
+  public void addPlayListener(PlayListener playListener) {
+    playAudio.addPlayListener(playListener);
+  }
+
+  @Override
+  public boolean doPause() {
+    return playAudio.doPause();
+  }
+
+  public void clearHighlight() {
+
   }
 }

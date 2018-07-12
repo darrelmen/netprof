@@ -285,7 +285,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   private class MyPlayAudioPanel extends PlayAudioPanel {
     public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel,
                             String suffix, Widget toTheRightWidget, ExerciseController controller, HasID exercise) {
-      super(RecordAudioPanel.this.soundManager,
+      super(
           new PlayListener() {
             public void playStarted() {
               if (panel instanceof BusyPanel) {

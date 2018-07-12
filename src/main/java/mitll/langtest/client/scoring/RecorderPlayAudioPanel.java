@@ -51,7 +51,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
   RecorderPlayAudioPanel(SoundManagerAPI soundManager, final Button postAudioRecordButton1, ExerciseController controller, HasID exercise) {
-    super(soundManager, new PlayListener() {
+    super(new PlayListener() {
           public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
             // TODO put back busy thing?
@@ -71,7 +71,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   }
 
   private void configureButton(Button playButton) {
-    playButton.addClickHandler(event -> doClick());
+    playButton.addClickHandler(event -> doPlayPauseToggle());
 //    logger.info("configureButton " + playButton.getElement().getId());
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);

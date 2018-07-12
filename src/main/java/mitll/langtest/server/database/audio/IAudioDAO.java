@@ -74,7 +74,7 @@ public interface IAudioDAO extends IDAO {
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    */
-  int attachAudioToExercise(CommonExercise firstExercise, String language, Map<Integer, MiniUser> idToMini);
+  int attachAudioToExercise(ClientExercise firstExercise, String language, Map<Integer, MiniUser> idToMini);
 
   /**
    * @param exercises

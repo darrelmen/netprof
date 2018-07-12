@@ -51,7 +51,8 @@ import java.util.logging.Logger;
  * @since 11/20/15.
  */
 class PlayAudio {
-  private final Logger logger = Logger.getLogger("PlayAudio");
+  //private final Logger logger = Logger.getLogger("PlayAudio");
+
   private final SoundPlayer soundFeedback;
   private final UIObject playFeedback;
   private Timer t;

@@ -267,7 +267,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     SimpleRecordAudioPanel<T> recordPanel = getRecordPanel(e);
 
     DivWidget flContainer = getHorizDiv();
-    //flContainer.getElement().setId("flWidget");
 
     {
       DivWidget recordButtonContainer = new DivWidget();
@@ -277,16 +276,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       flContainer.add(recordButtonContainer);
     }
 
-    long now = System.currentTimeMillis();
+    //long now = System.currentTimeMillis();
     //  logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec");
 
-    if (hasAudio(e)) {
-      flContainer.add(playAudio = getPlayAudioPanel());
-      alignmentFetcher.setPlayAudio(playAudio);
-    }
-    else {
-     logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
-    }
+    makePlayAudio(e, flContainer);
 
     DivWidget fieldContainer = new DivWidget();
     fieldContainer.setWidth("100%");
@@ -294,7 +287,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     String trim = getAltFL(e).trim();
 
-    now = System.currentTimeMillis();
+//    long now = System.currentTimeMillis();
     // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec and play");
 
     if (showFL || getFL(e).trim().equals(trim) || trim.isEmpty()) {
@@ -350,6 +343,16 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return recordPanel;
   }
 
+  protected void makePlayAudio(T e, DivWidget flContainer) {
+    if (hasAudio(e)) {
+      flContainer.add(playAudio = getPlayAudioPanel());
+      alignmentFetcher.setPlayAudio(playAudio);
+    }
+    else {
+     logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+    }
+  }
+
   private void stylePhoneRow(UIObject phoneRow) {
     //  phoneRow.addStyleName("inlineFlex");
     if (isRTL) phoneRow.addStyleName("floatRight");
@@ -391,15 +394,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   private String getAltFL(ClientExercise exercise) {
     return exercise.getAltFLToShow();
-  }
-
-  /**
-   * @param e
-   * @return
-   * @see #makeFirstRow
-   */
-  private boolean hasAudio(T e) {
-    return e.hasAudioNonContext(true);
   }
 
   /**
@@ -477,8 +471,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    */
   @NotNull
   private ChoicePlayAudioPanel<T> getPlayAudioPanel() {
-    return new ChoicePlayAudioPanel<T>(controller.getSoundManager(),
-        exercise, controller, false, this);
+    return new ChoicePlayAudioPanel<T>(exercise, controller, false, this);
   }
 
   /**
@@ -701,7 +694,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       }
     };
     contextPlay
-        = new ChoicePlayAudioPanel<>(controller.getSoundManager(), contextExercise, controller, true, contextAudioChanged);
+        = new ChoicePlayAudioPanel<>(contextExercise, controller, true, contextAudioChanged);
     AudioAttribute audioAttrPrefGender = contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
     contextPlay.setEnabled(audioAttrPrefGender != null);
     alignmentFetcher.setContextPlay(contextPlay);
