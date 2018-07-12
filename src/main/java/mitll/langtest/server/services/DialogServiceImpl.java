@@ -35,6 +35,7 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
@@ -119,7 +120,6 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       } else {
         return new ExerciseListWrapper<>();
       }
-
     }
   }
 
@@ -128,14 +128,18 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     List<IDialog> iDialogs = getDialogs(getUserIDFromSessionOrDB());
     List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == id).collect(Collectors.toList());
     IDialog iDialog = collect.isEmpty() ? iDialogs.iterator().next() : collect.iterator().next();
-    logger.info("get dialog " + id +
-        "\n\treturns " +iDialog);
 
-    String language = db.getProject(iDialog.getProjid()).getLanguage();
+    logger.info("get dialog " + id + "\n\treturns " + iDialog);
+
+    int projid = iDialog.getProjid();
+    Project project = db.getProject(projid);
+    String language = project.getLanguage();
 
     iDialog.getExercises().forEach(clientExercise ->
         db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>())
     );
+
+    new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projid, project, iDialog.getExercises());
 
     return iDialog;
   }

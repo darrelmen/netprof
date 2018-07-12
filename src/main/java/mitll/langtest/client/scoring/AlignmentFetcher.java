@@ -146,7 +146,7 @@ public class AlignmentFetcher {
 
       //registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
       listener.refAudioComplete();
-      if (listContainer.isCurrentReq(getReq())) {
+      if (listContainer == null || listContainer.isCurrentReq(getReq())) {
         cacheOthers(listener);
       }
     } else {
@@ -228,7 +228,8 @@ public class AlignmentFetcher {
     if (projectStartupInfo != null && projectStartupInfo.isHasModel()) {
       controller.getScoringService().getAlignments(
           projectid,
-          req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+          req,
+          new AsyncCallback<Map<Integer, AlignmentOutput>>() {
             @Override
             public void onFailure(Throwable caught) {
               controller.handleNonFatalError("get alignments", caught);

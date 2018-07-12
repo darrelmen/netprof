@@ -589,6 +589,7 @@ public class ClickableWords<T extends CommonShell> {
         .replaceAll(GoodwaveExercisePanel.SPACE_REGEX, "")
         .replaceAll("\\u00ED", "i")
         // .replaceAll("\\u00E9", "\\u0435")
+
         .replaceAll("[\\u0301\\u0022\\u0027\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u300A\\u300B\\u003F\\u00BF\\u002E\\u002C\\u002D\\u0021\\u20260\\u005C\\u2013\\u2019]", "");
   }
 }

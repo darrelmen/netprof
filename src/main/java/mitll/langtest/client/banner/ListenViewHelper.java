@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -77,16 +78,15 @@ public class ListenViewHelper implements ContentView, PlayListener {
 
       @Override
       public void onSuccess(IDialog dialog) {
-        showDialog(dialog, child);
-        bothTurns.forEach(dialogExercisePanel -> dialogExercisePanel.getRefAudio(new RefAudioListener() {
-          @Override
-          public void refAudioComplete() {
-
-          }
-        }));
-
+        Scheduler.get().scheduleDeferred(() -> showDialogGetRef(dialog, child));
       }
     });
+  }
+
+  private void showDialogGetRef(IDialog dialog, DivWidget child) {
+    showDialog(dialog, child);
+    List<RefAudioGetter> getters = new ArrayList<>(bothTurns);
+    getRefAudio(getters.iterator());
   }
 
   private void showDialog(IDialog dialog, DivWidget child) {
@@ -94,6 +94,8 @@ public class ListenViewHelper implements ContentView, PlayListener {
     child.add(getSpeakerRow(dialog));
     child.add(getTurns(dialog));
   }
+
+  private CheckBox leftSpeakerBox, rightSpeakerBox;
 
   @NotNull
   private DivWidget getSpeakerRow(IDialog dialog) {
@@ -122,7 +124,7 @@ public class ListenViewHelper implements ContentView, PlayListener {
       checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
 
       checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
-
+      leftSpeakerBox = checkBox;
       rowOne.add(checkBox);
     }
 
@@ -139,12 +141,10 @@ public class ListenViewHelper implements ContentView, PlayListener {
       checkBox.addStyleName("rightSpeaker");
 
       checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
-      //style.setMarginLeft(-40, PX);
-      // style.setFontSize(32, PX);
-      ;
       checkBox.addStyleName("rightAlign");
       checkBox.addStyleName("floatRight");
       checkBox.addStyleName("rightFiveMargin");
+      rightSpeakerBox = checkBox;
 
       rowOne.add(checkBox);
     }
@@ -156,11 +156,24 @@ public class ListenViewHelper implements ContentView, PlayListener {
   private void speakerOneCheck(Boolean value) {
     logger.info("speaker one now " + value);
     leftSpeaker = value;
+    if (!rightSpeaker) {
+      rightSpeaker = true;
+      rightSpeakerBox.setValue(true);
+    }
+    //removeMarkCurrent();
+    playButton.setIcon(IconType.PLAY);
   }
 
   private void speakerTwoCheck(Boolean value) {
     logger.info("speaker two now " + value);
     rightSpeaker = value;
+
+    if (!leftSpeaker) {
+      leftSpeaker = true;
+      leftSpeakerBox.setValue(true);
+    }
+    // removeMarkCurrent();
+    playButton.setIcon(IconType.PLAY);
   }
 
   @NotNull
@@ -310,15 +323,12 @@ public class ListenViewHelper implements ContentView, PlayListener {
       markCurrent();
     }
 
-    // List<RefAudioGetter> getters = new ArrayList<>();
-    //bothTurns.forEach(getters::add);
-    //  getRefAudio(getters.iterator());
 
     rowOne.getElement().getStyle().setMarginBottom(10, PX);
     return rowOne;
   }
 
-/*  private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
+  private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {
       RefAudioGetter next = iterator.next();
       //logger.info("getRefAudio asking next panel...");
@@ -345,7 +355,7 @@ public class ListenViewHelper implements ContentView, PlayListener {
         });
       }
     }
-  }*/
+  }
 
   @NotNull
   private DialogExercisePanel<ClientExercise> getTurnPanel(ClientExercise clientExercise, boolean isRight) {
@@ -375,7 +385,17 @@ public class ListenViewHelper implements ContentView, PlayListener {
     }
 
     turn.addPlayListener(this);
+
+    turn.addDomHandler(event -> gotCardClick(turn), ClickEvent.getType());
+
     return turn;
+  }
+
+
+  private void gotCardClick(DialogExercisePanel<ClientExercise> turn) {
+    this.currentTurn = turn;
+    playCurrentTurn();
+    //playAudio.doPlayPauseToggle();
   }
 
   private Button backwardButton, playButton, forwardButton;
@@ -425,51 +445,35 @@ public class ListenViewHelper implements ContentView, PlayListener {
 
   private void gotBackward() {
     logger.info("got backward");
-  }
+    playButton.setIcon(IconType.PLAY);
 
-  private void gotPlay() {
-    logger.info("got play");
-    playCurrentTurn();
-  }
-
-  private void playCurrentTurn() {
-    if (currentTurn != null) {
-//      currentTurn.addPlayListener(new PlayListener() {
-//        @Override
-//        public void playStarted() {
-//          currentTurn.getElement().getStyle().setBorderColor("green");
-//        }
-//
-//        @Override
-//        public void playStopped() {
-//          currentTurn.getElement().getStyle().setBorderColor("black");
-//          currentTurnPlayEnded();
-//          playButton.setIcon(IconType.PLAY);
-//        }
-//      });
-      currentTurn.doPlayPauseToggle();
-    }
-  }
-
-  private void currentTurnPlayEnded() {
     List<DialogExercisePanel> seq = getSeq();
+
     int i = seq.indexOf(currentTurn);
-    int i1 = i + 1;
-    if (i1 > seq.size() - 1) {
-      logger.info("OK stop");
-      currentTurn = seq.get(0);
+    int i1 = i - 1;
+
+    boolean isPlaying = currentTurn.doPause();
+
+    currentTurn.clearHighlight();
+    removeMarkCurrent();
+    if (i1 < 0) {
+      currentTurn = seq.get(seq.size() - 1);
     } else {
       currentTurn = seq.get(i1);
-      playCurrentTurn();
     }
+    markCurrent();
+    if (isPlaying) playCurrentTurn();
   }
+
 
   private List<DialogExercisePanel> getSeq() {
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
   }
 
   private void gotForward() {
-    logger.info("got forward");
+    //s logger.info("got forward");
+    playButton.setIcon(IconType.PLAY);
+
     List<DialogExercisePanel> seq = getSeq();
 
     int i = seq.indexOf(currentTurn);
@@ -477,7 +481,7 @@ public class ListenViewHelper implements ContentView, PlayListener {
 
     boolean isPlaying = currentTurn.doPause();
 
-currentTurn.clearHighlight();
+    currentTurn.clearHighlight();
     removeMarkCurrent();
     if (i1 > seq.size() - 1) {
       currentTurn = seq.get(0);
@@ -488,13 +492,7 @@ currentTurn.clearHighlight();
     if (isPlaying) playCurrentTurn();
   }
 
-/*
-  private String getAttrValue(List<ExerciseAttribute> attributes, METADATA presentation) {
-    ExerciseAttribute attr = getAttr(attributes, presentation);
-    return attr == null ? "" : attr.getValue();
-  }*/
-
-  private ExerciseAttribute getAttr(List<ExerciseAttribute> attributes, METADATA presentation) {
+/*  private ExerciseAttribute getAttr(List<ExerciseAttribute> attributes, METADATA presentation) {
     List<ExerciseAttribute> collect = attributes
         .stream()
         .filter(exerciseAttribute -> {
@@ -502,30 +500,83 @@ currentTurn.clearHighlight();
         })
         .collect(Collectors.toList());
     return collect.isEmpty() ? null : collect.iterator().next();
+  }*/
+
+  private void gotPlay() {
+    logger.info("got play");
+
+    if (currentTurn.isPlaying()) {
+      playButton.setIcon(IconType.PAUSE);
+    }
+    else {
+      playButton.setIcon(IconType.PLAY);
+    }
+
+    if (leftSpeaker && rightSpeaker) {
+
+    } else if (leftSpeaker && !leftTurnPanels.contains(currentTurn) || rightSpeaker && !rightTurnPanels.contains(currentTurn)) {
+      removeMarkCurrent();
+
+      int i = bothTurns.indexOf(currentTurn); // must be on right
+      currentTurn = bothTurns.get(i + 1);
+    }
+
+    playCurrentTurn();
   }
+
+  private void playCurrentTurn() {
+    if (currentTurn != null) {
+      logger.info("playCurrentTurn - turn " + currentTurn.getExID());
+      currentTurn.doPlayPauseToggle();
+    }
+  }
+
 
   @Override
   public void playStarted() {
     if (currentTurn != null) {
+      logger.info("playStarted - turn " + currentTurn.getExID());
       playButton.setIcon(IconType.PAUSE);
       markCurrent();
     }
   }
 
-  private void markCurrent() {
-    currentTurn.getElement().getStyle().setBorderColor("green");
-  }
 
   @Override
   public void playStopped() {
     if (currentTurn != null) {
+      logger.info("playStopped - turn " + currentTurn.getExID());
       removeMarkCurrent();
       currentTurnPlayEnded();
       playButton.setIcon(IconType.PLAY);
     }
   }
 
+  /**
+   * @see #playStopped
+   */
+  private void currentTurnPlayEnded() {
+    logger.info("currentTurnPlayEnded - turn " + currentTurn.getExID());
+    List<DialogExercisePanel> seq = getSeq();
+    int i = seq.indexOf(currentTurn);
+    int i1 = i + 1;
+    if (i1 > seq.size() - 1) {
+      logger.info("OK stop");
+      removeMarkCurrent();
+      currentTurn = seq.get(0);
+      markCurrent();
+    } else {
+      currentTurn = seq.get(i1);
+      playCurrentTurn();
+    }
+  }
+
   private void removeMarkCurrent() {
     currentTurn.getElement().getStyle().setBorderColor("black");
   }
+
+  private void markCurrent() {
+    currentTurn.getElement().getStyle().setBorderColor("green");
+  }
+
 }

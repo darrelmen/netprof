@@ -1,6 +1,8 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
@@ -94,9 +96,15 @@ public class DialogExercisePanel<T extends ClientExercise>
 
       }
     });
+    getElement().getStyle().setCursor(Style.Cursor.POINTER);
+
 //    if (hasAudio(commonExercise)) {
 //      rememberAudio(commonExercise.getAudioAttributes().iterator().next());
 //    }
+  }
+
+  public int getExID() {
+    return exercise.getID();
   }
 
 //  private void rememberAudio(AudioAttribute audioAttribute) {
@@ -132,8 +140,8 @@ public class DialogExercisePanel<T extends ClientExercise>
   }
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio
    * @param listener
+   * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio
    */
   @Override
   public void getRefAudio(RefAudioListener listener) {
@@ -777,7 +785,7 @@ public class DialogExercisePanel<T extends ClientExercise>
   }
 
   public void contextAudioChanged(int id, long duration) {
-    audioChanged(id,duration);
+    audioChanged(id, duration);
   }
 
   public DivWidget getFlClickableRow() {
@@ -800,5 +808,9 @@ public class DialogExercisePanel<T extends ClientExercise>
 
   public void clearHighlight() {
 
+  }
+
+  public boolean isPlaying() {
+    return playAudio.isPlaying();
   }
 }

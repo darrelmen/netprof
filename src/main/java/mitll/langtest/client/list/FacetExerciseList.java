@@ -1638,7 +1638,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
                                            Collection<Integer> requested,
                                            List<U> alreadyFetched);
 
-  protected void fullExerciseFailure(Throwable caught) {
+  void fullExerciseFailure(Throwable caught) {
     logger.warning("getFullExercises got exception : " + caught);
     logger.warning("getFullExercises got " + getExceptionAsString(caught));
     dealWithRPCError(caught);
@@ -1651,7 +1651,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
    * @param visibleIDs
    * @see #reallyGetExercises
    */
-  protected void getFullExercisesSuccess(ExerciseListWrapper<U> result,
+  void getFullExercisesSuccess(ExerciseListWrapper<U> result,
                                          List<U> alreadyFetched,
                                          Collection<Integer> visibleIDs) {
     // long now = System.currentTimeMillis();
@@ -1791,7 +1791,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
   protected abstract void goGetNextPage();
 
   @NotNull
-  protected Set<Integer> getNextPageIDs() {
+  Set<Integer> getNextPageIDs() {
     CommonShell currentSelection = pagingContainer.getCurrentSelection();
     List<T> items = pagingContainer.getItems();
     int i = items.indexOf(currentSelection);
@@ -1816,7 +1816,7 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
     return toAskFor;
   }
 
-  protected List<Integer> getIDs(Collection<U> result) {
+   List<Integer> getIDs(Collection<U> result) {
     return result.stream().map(HasID::getID).collect(Collectors.toList());
   }
 

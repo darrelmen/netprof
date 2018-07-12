@@ -60,13 +60,9 @@ public interface ScoringServiceAsync {
 
   void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Boolean> async);
 
-  void getAlignments(int projid, Set<Integer> audioIDs,
-                     AsyncCallback<Map<Integer, AlignmentOutput>> async);
+  void getAlignments(int projid, Set<Integer> audioIDs, AsyncCallback<Map<Integer, AlignmentOutput>> async);
 
   void recalcAlignments(int projid, AsyncCallback<Void> async);
-/*
-  void recalcAllAlignments(AsyncCallback<Void> async);
-*/
 
   void configureAndRefresh(int projID, AsyncCallback<Void> async);
 
