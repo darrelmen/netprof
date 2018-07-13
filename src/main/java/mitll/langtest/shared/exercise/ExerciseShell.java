@@ -78,7 +78,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @see CommonShell#getShell()
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
-  ExerciseShell(String english,
+  public ExerciseShell(String english,
                 String meaning,
                 String foreignLanguage,
                 int realID,

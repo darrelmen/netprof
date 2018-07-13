@@ -98,14 +98,6 @@ public interface IUserExerciseDAO extends IDAO {
 
   int ensureTemplateExercise(int projID);
 
-/*
-  Collection<CommonExercise> getAllUserExercises(int projid);
-*/
-
-/*
-  List<SlickExercise> getDeletedFor(int projid);
-*/
-
   Collection<CommonExercise> getOverrides(boolean shouldSwap);
 
   Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap);

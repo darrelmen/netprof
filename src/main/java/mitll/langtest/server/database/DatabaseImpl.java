@@ -654,26 +654,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-/*  public void updateProjectOnDay(int oldID, int newprojid, Date onDay) {
-    if (!resultDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update result dao to " + newprojid);
-    } else {
-      logger.info("updated results");
-    }
-    if (!wordDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update word dao to " + newprojid);
-    } else {
-      logger.info("updated word");
-    }
-    if (!phoneDAO.updateProject(oldID, newprojid)) {
-      logger.error("couldn't update phone dao to " + newprojid);
-    } else {
-      logger.info("updated phones");
-    }
-
-  }*/
-
-
   private void setPostgresDBConnection() {
     dbConnection = getDbConnection();
   }
@@ -683,9 +663,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   private DBConnection getDbConnection() {
-    DBConnection dbConnection = new DBConnection(serverProps.getDBConfig());
+    DBConnection dbConnection = new DBConnection(getDbConfig());
 //    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
     return dbConnection;
+  }
+
+  public String getDbConfig() {
+    return serverProps.getDBConfig();
   }
 
   public IAudioDAO getH2AudioDAO() {

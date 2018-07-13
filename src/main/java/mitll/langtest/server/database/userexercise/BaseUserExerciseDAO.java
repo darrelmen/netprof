@@ -44,7 +44,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class BaseUserExerciseDAO extends DAO {
-  private static final Logger logger = LogManager.getLogger(BaseUserExerciseDAO.class);
+ // private static final Logger logger = LogManager.getLogger(BaseUserExerciseDAO.class);
 
   /**
    * @see #setExerciseDAO
@@ -59,6 +59,5 @@ public class BaseUserExerciseDAO extends DAO {
    */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
- //   logger.info("setExerciseDAO : exercise dao now " + exerciseDAO);
   }
 }

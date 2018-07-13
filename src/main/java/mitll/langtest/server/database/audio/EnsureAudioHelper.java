@@ -80,9 +80,11 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    */
   public EnsureAudioHelper(DatabaseServices db, PathHelper pathHelper) {
     this.db = db;
-    serverProps = db.getServerProps();
-    this.pathHelper = pathHelper;
-    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange());
+    if (db != null) {
+      serverProps = db.getServerProps();
+      this.pathHelper = pathHelper;
+      audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange());
+    }
   }
 
   /**

@@ -128,4 +128,6 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   IStateManager getStateManager();
 
   boolean isHasValidDB();
+
+  String getDbConfig();
 }
