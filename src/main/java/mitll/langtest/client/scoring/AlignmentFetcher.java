@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class AlignmentFetcher {
   private Logger logger = Logger.getLogger("AlignmentFetcher");
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private final Map<Integer, AlignmentOutput> alignments;
   private final int exerciseID;

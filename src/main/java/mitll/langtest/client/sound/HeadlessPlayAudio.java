@@ -185,7 +185,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   public void update(double position) {
-    logger.info("update " +listeners.size() + " with " + position);
+   // logger.info("update " +listeners.size() + " with " + position);
     listeners.forEach(audioControl -> audioControl.update(position));
   }
 

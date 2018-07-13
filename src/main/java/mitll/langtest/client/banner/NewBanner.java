@@ -286,7 +286,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
-    logger.info("addChoicesForUser project startup " + projectStartupInfo);
+  //  logger.info("addChoicesForUser project startup " + projectStartupInfo);
     if (projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.DIALOG) {
       toShow = DIALOG_VIEWS;
     }
@@ -479,7 +479,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void recordMenuVisible() {
     if (recnav != null) {
       boolean visible = isPermittedToRecord() && hasProjectChoice();
-      setRecNavVisible(visible);
+      boolean visible1 = visible;
+      setRecNavVisible(false);
     }
   }
 

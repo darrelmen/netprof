@@ -42,7 +42,7 @@ public class ListenViewHelper implements ContentView, PlayListener {
 
   private static final int ROW_WIDTH = 97;
   private static final String HEIGHT = 100 + "px";
-  private static final String RIGHT_BKG_COLOR = "#4aa8ee";
+  private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
   private static final String LEFT_COLOR = "#e7e6ec";
 
   private final ExerciseController controller;
@@ -71,6 +71,11 @@ public class ListenViewHelper implements ContentView, PlayListener {
     child.setWidth("100%");
     listContent.add(child);
     listContent.setWidth("90%");
+
+    bothTurns.clear();
+    leftTurnPanels.clear();
+    rightTurnPanels.clear();
+    currentTurn = null;
 
     controller.getDialogService().getDialog(new SelectionState().getDialog(), new AsyncCallback<IDialog>() {
       @Override
@@ -139,7 +144,7 @@ public class ListenViewHelper implements ContentView, PlayListener {
       checkBox.setValue(true);
       Style style = checkBox.getElement().getStyle();
       style.setBackgroundColor(RIGHT_BKG_COLOR);
-      style.setColor("white");
+      //  style.setColor("white");
       //checkBox.setHeight("30px");
       checkBox.addStyleName("rightSpeaker");
 
@@ -265,7 +270,6 @@ public class ListenViewHelper implements ContentView, PlayListener {
     w.addStyleName("leftFiveMargin");
     // w.addStyleName("bottomFiveMargin");
     w.getElement().getStyle().setMarginTop(0, PX);
-
     rowOne.add(w);
   }
 */
@@ -313,8 +317,10 @@ public class ListenViewHelper implements ContentView, PlayListener {
       boolean isRight = rightTurns != null && rightTurns.contains(clientExercise);
 
       DialogExercisePanel<ClientExercise> turn = getTurnPanel(clientExercise, isRight);
+
       if (isRight) rightTurnPanels.add(turn);
       else leftTurnPanels.add(turn);
+
       bothTurns.add(turn);
       rowOne.add(turn);
 
@@ -370,7 +376,7 @@ public class ListenViewHelper implements ContentView, PlayListener {
       style.setFloat(Style.Float.RIGHT);
       style.setTextAlign(Style.TextAlign.RIGHT);
       style.setBackgroundColor(RIGHT_BKG_COLOR);
-      style.setColor("white");
+      //   style.setColor("white");
       //rightTurnPanels.add(turn);
     } else {
       style.setFloat(Style.Float.LEFT);
@@ -384,7 +390,9 @@ public class ListenViewHelper implements ContentView, PlayListener {
     {
       Style style2 = turn.getFlClickableRow().getElement().getStyle();
       style2.setMarginLeft(15, Style.Unit.PX);
+      style2.setMarginRight(10, Style.Unit.PX);
       style2.setMarginTop(7, Style.Unit.PX);
+      style2.setMarginBottom(7, Style.Unit.PX);
     }
 
     turn.addPlayListener(this);
@@ -565,12 +573,12 @@ public class ListenViewHelper implements ContentView, PlayListener {
 
   private void removeMarkCurrent() {
     currentTurn.getElement().getStyle().setBorderColor("white");//"#666666");
-  //  currentTurn.getElement().getStyle().setBorderWidth(3, PX);
+    //  currentTurn.getElement().getStyle().setBorderWidth(3, PX);
   }
 
   private void markCurrent() {
     currentTurn.getElement().getStyle().setBorderColor("green");
-   // currentTurn.getElement().getStyle().setBorderWidth(8, PX);
+    // currentTurn.getElement().getStyle().setBorderWidth(8, PX);
   }
 
 }

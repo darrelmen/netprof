@@ -92,7 +92,8 @@ public class DialogExercisePanel<T extends ClientExercise>
       }
 
       @Override
-      public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {}
+      public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+      }
     });
     getElement().getStyle().setCursor(Style.Cursor.POINTER);
   }
@@ -121,10 +122,14 @@ public class DialogExercisePanel<T extends ClientExercise>
       if (!e.getAudioAttributes().isEmpty()) {
         AudioAttribute next = e.getAudioAttributes().iterator().next();
         playAudio.rememberAudio(next);
-        audioChanged(next.getUniqueID(), next.getDurationInMillis());
-      }
-      else {
-        logger.warning("makePlayAudio no audio for " +e.getID());
+        logger.info("makePlayAudio audio for " + e.getID() +  "  " + next);
+
+        if (next.getAlignmentOutput() != null) {
+          showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
+        }
+//        audioChanged(next.getUniqueID(), next.getDurationInMillis());
+      } else {
+        logger.warning("makePlayAudio no audio for " + e.getID());
       }
     } else {
       logger.warning("makePlayAudio no audio in " + e.getAudioAttributes());
@@ -212,7 +217,7 @@ public class DialogExercisePanel<T extends ClientExercise>
         matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, new DivWidget());
       }
     } else {
-      if (DEBUG|| true)
+      if (DEBUG || true)
         logger.warning("showAlignment no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
     }
   }
@@ -755,14 +760,8 @@ public class DialogExercisePanel<T extends ClientExercise>
   @NotNull
   protected DivWidget getFLEntry(T e) {
     flclickables = new ArrayList<>();
-
-    DivWidget contentWidget = clickableWords.getClickableWords(getFL(e),
-        FieldType.FL,
-        flclickables, isRTL);
-
-    flClickableRow = contentWidget;
-
-    return contentWidget;
+    flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL);
+    return flClickableRow;
   }
 
   private String getFL(CommonShell e) {
@@ -779,6 +778,7 @@ public class DialogExercisePanel<T extends ClientExercise>
   }
 
   public void contextAudioChanged(int id, long duration) {
+    logger.info("contextAudioChanged : audio changed for " + id + " - " + duration);
     audioChanged(id, duration);
   }
 
@@ -789,7 +789,7 @@ public class DialogExercisePanel<T extends ClientExercise>
   @Override
   public void doPlayPauseToggle() {
     //if (playAudio.isPlaying()) {
-      playAudio.doPlayPauseToggle();
+    playAudio.doPlayPauseToggle();
 //    }
 //    else {
 //      audioChanged(mr.getUniqueID(), mr.getDurationInMillis());
