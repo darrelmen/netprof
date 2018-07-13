@@ -286,7 +286,7 @@ public class AlignmentFetcher {
   Set<Integer> getReqAudio() {
     Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
 
-    logger.info("getRefAudio " + req.size() + " audio attrs : " +req);
+//    logger.info("getRefAudio " + req.size() + " audio attrs : " +req);
     if (contextPlay != null) {
       req.addAll(contextPlay.getAllAudioIDs());
       //    logger.info("getRefAudio with context  " + req.size() + " audio attrs");

@@ -60,6 +60,10 @@ class SoundManager {
       $wnd.soundManager.setVolume(title,volume);
   }-*/;
 
+  public static native void setVolume(int volume)/*-{
+        $wnd.soundManager.setVolume(volume);
+    }-*/;
+
   /**
    * @see SoundManagerAPI#createSound(Sound, String, String, boolean)
    * @param sound
@@ -110,9 +114,9 @@ class SoundManager {
 		sound.@mitll.langtest.client.sound.Sound::sound.play();
 	}-*/;
 
-	public static native void setPosition(Sound sound, double position) /*-{
-		sound.@mitll.langtest.client.sound.Sound::sound.setPosition(position);
-	}-*/;
+  public static native void setPosition(Sound sound, double position) /*-{
+      sound.@mitll.langtest.client.sound.Sound::sound.setPosition(position);
+  }-*/;
 
 /*	public static native void setPositionAndPlay(Sound sound, double position) *//*-{
 		sound.@mitll.langtest.client.sound.Sound::sound.setPosition(position);

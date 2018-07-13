@@ -98,6 +98,11 @@ public class SoundManagerStatic implements SoundManagerAPI {
     SoundManager.setVolume(title, vol);
   }
 
+  @Override
+  public void setVolume(int vol) {
+    SoundManager.setVolume(vol);
+  }
+
   /**
    * @param sound
    * @see mitll.langtest.client.sound.PlayAudioPanel#destroySound()

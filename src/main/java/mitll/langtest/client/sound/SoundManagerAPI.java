@@ -56,6 +56,7 @@ public interface SoundManagerAPI {
   void createSound(Sound sound, String title, String file, boolean doAutoload);
 
   void setVolume(String title, int vol);
+  void setVolume(  int vol);
 
   void destroySound(Sound sound);
 
