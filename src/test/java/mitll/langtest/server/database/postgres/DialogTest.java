@@ -59,12 +59,13 @@ public class DialogTest extends BaseTest {
   public static final String UNIT = "Unit";
   public static final String C17 = "" + 17;
   public static final String PAGE = "page";
+  public static final String KOREAN = "Korean";
 
   @Test
   public void testEx() {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("");
 
-    Project project = andPopulate.getProjectByName("Korean");
+    Project project = andPopulate.getProjectByName(KOREAN);
     List<ClientExercise> all = new ArrayList<>();
 
     List<IDialog> dialogs = andPopulate.getDialogDAO().getDialogs(project.getID());
@@ -72,6 +73,7 @@ public class DialogTest extends BaseTest {
       logger.info("dialog " + iDialog);
 
       logger.info("sp    " + iDialog.getSpeakers());
+      logger.info("attr  " + iDialog.getAttributes());
       logger.info("by sp " + iDialog.groupBySpeaker());
       logger.info("core  " + iDialog.getCoreVocabulary());
       logger.info("\n\n\n");
@@ -87,7 +89,7 @@ public class DialogTest extends BaseTest {
   public void testSH() {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("");
 
-    Project project = andPopulate.getProjectByName("Korean");
+    Project project = andPopulate.getProjectByName(KOREAN);
     ISection<IDialog> dialogSectionHelper = project.getDialogSectionHelper();
 
 
@@ -145,7 +147,7 @@ public class DialogTest extends BaseTest {
   public void testKPFromCannedData() {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("");
 
-    Project project = andPopulate.getProjectByName("Korean");
+    Project project = andPopulate.getProjectByName(KOREAN);
     logger.info("korean " + project);
     List<IDialog> dialogs = andPopulate.getDialogDAO().getDialogs(project.getID());
 
