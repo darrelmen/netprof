@@ -974,8 +974,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private String getFL(CommonExercise e) {
     String flToShow = e.getFLToShow();
-
-    logger.info("for " + e.getID() + " " + flToShow + " should swap " +e.shouldSwap());
+    //logger.info("for " + e.getID() + " " + flToShow + " should swap " +e.shouldSwap());
     return flToShow;
   }
 

@@ -250,15 +250,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     {
       // better name for primary and alternate choices
       boolean isMandarin = controller.getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
-
-//      Map<String, String> properties = controller.getProjectStartupInfo().getProperties();
-//
-//
-//      String s = properties.get(SWAP_PRIMARY_AND_ALT.toString());
-//      if (s == null) logger.info("keys " + properties.keySet());
-
-      boolean shouldSwap = controller.getProjectStartupInfo().isShouldSwap();// s != null && s.equalsIgnoreCase("TRUE");
-      logger.info("getPagerAndSort swap = "  +shouldSwap);
+      boolean shouldSwap = controller.getProjectStartupInfo().isShouldSwap();
       Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu();
       DivWidget widgets = new DivWidget();
       widgets.addStyleName("topFiveMargin");
