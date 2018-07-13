@@ -116,7 +116,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
 
   @Override
   public void setState(int id, STATE state) {
-    byID(id).setState(state);
+    T t = byID(id);
+    if (t == null) logger.warning("can't find ex " + id);
+    else {
+      t.setState(state);
+    }
   }
 
   @Override
