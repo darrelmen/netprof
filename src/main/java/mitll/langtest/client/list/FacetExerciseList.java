@@ -76,6 +76,7 @@ import java.util.stream.Collectors;
 import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
+import static mitll.langtest.shared.project.ProjectProperty.SWAP_PRIMARY_AND_ALT;
 
 public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> implements ShowEventListener {
   public static final String RECORDED = "Recorded";
@@ -249,7 +250,16 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     {
       // better name for primary and alternate choices
       boolean isMandarin = controller.getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
-      Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin).getRealViewMenu();
+
+//      Map<String, String> properties = controller.getProjectStartupInfo().getProperties();
+//
+//
+//      String s = properties.get(SWAP_PRIMARY_AND_ALT.toString());
+//      if (s == null) logger.info("keys " + properties.keySet());
+
+      boolean shouldSwap = controller.getProjectStartupInfo().isShouldSwap();// s != null && s.equalsIgnoreCase("TRUE");
+      logger.info("getPagerAndSort swap = "  +shouldSwap);
+      Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu();
       DivWidget widgets = new DivWidget();
       widgets.addStyleName("topFiveMargin");
       widgets.add(realViewMenu);
@@ -472,7 +482,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   private Panel getWidgetsForTypes() {
     final UnorderedList container = new UnorderedList();
     container.getElement().setId("typeOrderContainer");
-    container.getElement().getStyle().setMarginBottom(50,Style.Unit.PX  );//"bottomFiveMargin");
+    container.getElement().getStyle().setMarginBottom(50, Style.Unit.PX);//"bottomFiveMargin");
     getTypeOrder();
     return container;
   }
@@ -853,7 +863,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
 
       // add final "View all" link if we're not supposed to show all
       if (hasMore && !showAll && ++j == toShow) {
-        addLIChoice(choices, getShowMoreAnchor(typeToValues, type, keysSize-j));
+        addLIChoice(choices, getShowMoreAnchor(typeToValues, type, keysSize - j));
         break;
       }
     }
@@ -892,7 +902,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   @NotNull
   private Anchor getShowMoreAnchor(final Map<String, Set<MatchInfo>> typeToValues, final String type, int remaining) {
     Anchor anchor = new Anchor();
-    String showMore ="<i>View all (" +remaining+
+    String showMore = "<i>View all (" + remaining +
         ")</i>";// SHOW_MORE;
     anchor.setHTML(showMore);
     anchor.addClickHandler(event -> {
@@ -1103,7 +1113,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
       Map<String, String> candidate = new HashMap<>(typeToSelection);
       String value = getChoiceHandlerValue(type, key, newUserListID);
       candidate.put(type, value);
-  //    logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
+      //    logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
       setHistory(candidate);
     };
   }

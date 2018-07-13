@@ -39,6 +39,7 @@ import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -46,6 +47,7 @@ import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
 import mitll.npdata.dao.userexercise.ExerciseAttributeJoinDAOWrapper;
@@ -99,9 +101,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private final String hostName;
-  //private final IProjectDAO projectDAO;
+  // private final IProjectDAO projectDAO;
   private CommonExercise templateExercise;
   private int unknownExerciseID;
+  private DatabaseImpl database;
 
   /**
    * @param database
@@ -118,7 +121,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();
-    //projectDAO = database.getProjectDAO();
+    this.database = database;
+    // projectDAO = database.getProjectDAO();
 
     String mediaDir = database.getServerProps().getMediaDir();
     hasMediaDir = new File(mediaDir).exists();
@@ -1055,9 +1059,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
 
   private boolean getShouldSwap(int projid) {
-    return false;
-//    String defPropValue = projectDAO.getDefPropValue(projid, ProjectProperty.SWAP_PRIMARY_AND_ALT);
-    //   return defPropValue.equalsIgnoreCase("TRUE");
+    String defPropValue = database.getProjectDAO().getDefPropValue(projid, ProjectProperty.SWAP_PRIMARY_AND_ALT);
+    return defPropValue.equalsIgnoreCase("TRUE");
   }
 
   /**
@@ -1578,7 +1581,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   @Override
-  public Map<Integer,Integer> getDominoIDToExID(int projID) {
+  public Map<Integer, Integer> getDominoIDToExID(int projID) {
     return dao.allByDominoIDPairs(projID);
   }
 }

@@ -384,7 +384,7 @@ public class Project implements IPronunciationLookup {
     putAllProps();
   }
 
-  private String getProp(ProjectProperty projectProperty) {
+  public String getProp(ProjectProperty projectProperty) {
     return getProp(projectProperty.getName());
   }
 

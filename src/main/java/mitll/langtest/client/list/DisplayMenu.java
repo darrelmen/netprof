@@ -21,6 +21,9 @@ import java.util.logging.Logger;
 public class DisplayMenu {
   private final Logger logger = Logger.getLogger("DisplayMenu");
 
+  public static final String SHOW_CM_SIMPLIFIED = "Show CM Simplified";
+  public static final String SHOW_CM_TRADITIONAL = "Show CM Traditional";
+
   private static final String SHOW1 = "Options";
   private static final String DOWNLOAD = "Download Content";
   private static final String SHOW_ALTERNATE_TEXT = "Show Alternate text";
@@ -44,11 +47,13 @@ public class DisplayMenu {
 
   private final KeyStorage storage;
   private final ShowEventListener showEventListener;
+  private boolean shouldSwap;
 
-  DisplayMenu(KeyStorage storage, ShowEventListener showEventListener, boolean isMandarin) {
+  DisplayMenu(KeyStorage storage, ShowEventListener showEventListener, boolean isMandarin, boolean shouldSwap) {
     this.storage = storage;
     this.showEventListener = showEventListener;
     this.isMandarin = isMandarin;
+    this.shouldSwap = shouldSwap;
   }
 
   /**
@@ -65,7 +70,7 @@ public class DisplayMenu {
     view.setWidth(85 + "px");
 
     view.add(getShowSounds());
-    String toUse = isMandarin ? "Show CM Simplified" : SHOW_PRIMARY_TEXT;
+    String toUse = isMandarin ? getPrimaryMandarinChoice() : SHOW_PRIMARY_TEXT;
     NavLink primary = new NavLink(toUse);
     view.add(primary);
 
@@ -103,9 +108,7 @@ public class DisplayMenu {
   }
 
   private NavLink flTextChoices(NavLink primary) {
-    String toUse = isMandarin ? "Show CM Traditional" : SHOW_ALTERNATE_TEXT;
-
-    NavLink altflChoice = new NavLink(toUse);
+    NavLink altflChoice = new NavLink(isMandarin ? getAltMandarinChoice() : SHOW_ALTERNATE_TEXT);
     boolean choicesFL1 = getChoicesFL();
     primary.setIcon(choicesFL1 ? IconType.CHECK : null);
     boolean choicesALT1 = getChoicesALT();
@@ -150,6 +153,16 @@ public class DisplayMenu {
     });
 
     return altflChoice;
+  }
+
+  @NotNull
+  private String getPrimaryMandarinChoice() {
+    return shouldSwap ? SHOW_CM_TRADITIONAL : SHOW_CM_SIMPLIFIED;
+  }
+
+  @NotNull
+  private String getAltMandarinChoice() {
+    return shouldSwap ? SHOW_CM_SIMPLIFIED : SHOW_CM_TRADITIONAL;
   }
 
   @NotNull

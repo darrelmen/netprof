@@ -33,10 +33,8 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.SectionNode;
-import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -63,6 +61,7 @@ public class ProjectStartupInfo implements IsSerializable {
   private Map<String, String> parentToChild;
   private String locale;
   private ProjectType projectType;
+  private boolean shouldSwap;
 
   public ProjectStartupInfo() {
   } // for serialization
@@ -77,6 +76,7 @@ public class ProjectStartupInfo implements IsSerializable {
    * @param rootNodes
    * @param parentToChild
    * @param projectType
+   * @param shouldSwap
    * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfoOnUser
    */
   public ProjectStartupInfo(Map<String, String> properties,
@@ -89,7 +89,8 @@ public class ProjectStartupInfo implements IsSerializable {
                             boolean hasModel,
                             Map<String, Set<MatchInfo>> typeToDistinct,
                             Set<String> rootNodes,
-                            Map<String, String> parentToChild, ProjectType projectType) {
+                            Map<String, String> parentToChild,
+                            ProjectType projectType, boolean shouldSwap) {
     this.properties = properties;
     this.typeOrder = typeOrder;
     this.sectionNodes = sectionNodes;
@@ -102,6 +103,7 @@ public class ProjectStartupInfo implements IsSerializable {
     this.rootNodes = rootNodes;
     this.parentToChild = parentToChild;
     this.projectType = projectType;
+    this.shouldSwap = shouldSwap;
   }
 
   public Map<String, String> getProperties() {
@@ -156,11 +158,15 @@ public class ProjectStartupInfo implements IsSerializable {
     return projectType;
   }
 
+  public boolean isShouldSwap() {
+    return shouldSwap;
+  }
+
   public String toString() {
     Collection<SectionNode> sectionNodes = getSectionNodes();
 
     String sectionInfo = sectionNodes == null ? "missing section nodes???" : " num nodes " + sectionNodes.size();
-    return "Project  " + projectid + " " + getProjectType()+
+    return "Project  " + projectid + " " + getProjectType() +
         " Order " + getTypeOrder() +
         sectionInfo +
         " has model " + hasModel;
