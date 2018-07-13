@@ -6,7 +6,6 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
@@ -31,7 +30,6 @@ public class AlignmentFetcher {
   private AudioChangeListener audioChangeListener, contextChangeListener;
 
   /**
-   *
    * @param exerciseID
    * @param controller
    * @param listContainer
@@ -288,7 +286,7 @@ public class AlignmentFetcher {
   Set<Integer> getReqAudio() {
     Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
 
-//    logger.info("getRefAudio " + req.size() + " audio attrs");
+    logger.info("getRefAudio " + req.size() + " audio attrs : " +req);
     if (contextPlay != null) {
       req.addAll(contextPlay.getAllAudioIDs());
       //    logger.info("getRefAudio with context  " + req.size() + " audio attrs");
@@ -303,7 +301,7 @@ public class AlignmentFetcher {
     this.playAudio = playAudio;
   }
 
-  void setContextPlay( PlayAudioPanel contextPlay) {
+  void setContextPlay(PlayAudioPanel contextPlay) {
     this.contextPlay = contextPlay;
   }
 }

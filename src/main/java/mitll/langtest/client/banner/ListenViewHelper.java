@@ -495,16 +495,6 @@ public class ListenViewHelper implements ContentView, PlayListener {
     if (isPlaying) playCurrentTurn();
   }
 
-/*  private ExerciseAttribute getAttr(List<ExerciseAttribute> attributes, METADATA presentation) {
-    List<ExerciseAttribute> collect = attributes
-        .stream()
-        .filter(exerciseAttribute -> {
-          return exerciseAttribute.getProperty().toUpperCase().equals(presentation.toString());
-        })
-        .collect(Collectors.toList());
-    return collect.isEmpty() ? null : collect.iterator().next();
-  }*/
-
   private void gotPlay() {
     logger.info("got play");
 

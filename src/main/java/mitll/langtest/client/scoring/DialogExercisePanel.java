@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -25,7 +26,6 @@ import java.util.stream.Collectors;
 public class DialogExercisePanel<T extends ClientExercise>
     extends DivWidget
     implements AudioChangeListener, RefAudioGetter, IPlayAudioControl {
-
   private Logger logger = Logger.getLogger("DialogExercisePanel");
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
@@ -92,9 +92,7 @@ public class DialogExercisePanel<T extends ClientExercise>
       }
 
       @Override
-      public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
-
-      }
+      public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {}
     });
     getElement().getStyle().setCursor(Style.Cursor.POINTER);
   }
@@ -120,15 +118,21 @@ public class DialogExercisePanel<T extends ClientExercise>
     if (hasAudio(e)) {
       playAudio = new HeadlessPlayAudio(controller.getSoundManager());
       alignmentFetcher.setPlayAudio(playAudio);
-      playAudio.rememberAudio(e.getAudioAttributes().iterator().next());
+      if (!e.getAudioAttributes().isEmpty()) {
+        AudioAttribute next = e.getAudioAttributes().iterator().next();
+        playAudio.rememberAudio(next);
+        audioChanged(next.getUniqueID(), next.getDurationInMillis());
+      }
+      else {
+        logger.warning("makePlayAudio no audio for " +e.getID());
+      }
     } else {
-      logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+      logger.warning("makePlayAudio no audio in " + e.getAudioAttributes());
     }
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
-    int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
-    clickableWords = new ClickableWords(listContainer, exercise.getID(), controller.getLanguage(), fontSize, BLUE);
+    clickableWords = new ClickableWords(listContainer, exercise.getID(), controller.getLanguage(), projectStartupInfo.getLanguageInfo().getFontSize(), BLUE);
   }
 
   /**
@@ -139,7 +143,6 @@ public class DialogExercisePanel<T extends ClientExercise>
   public void getRefAudio(RefAudioListener listener) {
     alignmentFetcher.getRefAudio(listener);
   }
-
 
   protected ProjectStartupInfo getProjectStartupInfo() {
     return controller == null ? null : controller.getProjectStartupInfo();
@@ -209,8 +212,8 @@ public class DialogExercisePanel<T extends ClientExercise>
         matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, new DivWidget());
       }
     } else {
-      if (DEBUG)
-        logger.info("showAlignment no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
+      if (DEBUG|| true)
+        logger.warning("showAlignment no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
     }
   }
 
@@ -785,7 +788,13 @@ public class DialogExercisePanel<T extends ClientExercise>
 
   @Override
   public void doPlayPauseToggle() {
-    playAudio.doPlayPauseToggle();
+    //if (playAudio.isPlaying()) {
+      playAudio.doPlayPauseToggle();
+//    }
+//    else {
+//      audioChanged(mr.getUniqueID(), mr.getDurationInMillis());
+//      playAudio(mr);
+//    }
   }
 
   public void addPlayListener(PlayListener playListener) {

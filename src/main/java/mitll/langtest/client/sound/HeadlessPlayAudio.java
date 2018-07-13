@@ -34,7 +34,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 
   private static final String FILE_MISSING = "FILE_MISSING";
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   public HeadlessPlayAudio(SoundManagerAPI soundManager) {
     id = counter++;
@@ -48,7 +48,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   public void addPlayListener(PlayListener playListener) {
     this.playListeners.add(playListener);
   }
-
   public void removePlayListener(PlayListener playListener) {
     this.playListeners.remove(playListener);
   }
@@ -186,7 +185,14 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   public void update(double position) {
-    for (AudioControl listener : listeners) listener.update(position);
+    logger.info("update " +listeners.size() + " with " + position);
+    listeners.forEach(audioControl -> audioControl.update(position));
+  }
+
+  protected void playAudio(AudioAttribute audioAttribute) {
+    rememberAudio(audioAttribute);
+    doPlay();
+    // playAudio(audioAttribute.getAudioRef());
   }
 
   /**
@@ -198,12 +204,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     } else {
       playAudio(currentPath);
     }
-  }
-
-  protected void playAudio(AudioAttribute audioAttribute) {
-    rememberAudio(audioAttribute);
-    doPlay();
-    // playAudio(audioAttribute.getAudioRef());
   }
 
   public void rememberAudio(AudioAttribute audioAttribute) {
