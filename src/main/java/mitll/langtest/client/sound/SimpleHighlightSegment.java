@@ -11,8 +11,12 @@ import java.util.logging.Logger;
  */
 public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegment {
   protected final Logger logger = Logger.getLogger("HighlightSegment");
+  /**
+   * @see #setBlue
+   */
+ // private static final String BLUE = "#2196F3";
 
-  private static final String BLUE = "#2196F3";
+  private String highlightColor;
   private final int length;
   private String background = null;
   private boolean highlighted = false;
@@ -20,11 +24,13 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
 
   /**
    * @param content
+   * @param highlightColor
    * @seex mitll.langtest.client.scoring.ClickableWords#makeClickableText
    * @see mitll.langtest.client.scoring.WordTable#addPhonesBelowWord2
    */
-  public SimpleHighlightSegment(String content, int id) {
+  public SimpleHighlightSegment(String content, String highlightColor) {
     super(content);
+    this.highlightColor=highlightColor;
     //getElement().setId(content+"_s_"+id);
     this.length = content.length();
   }
@@ -47,7 +53,7 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   @Override
   public void setBlue() {
     highlighted = true;
-    getElement().getStyle().setBackgroundColor(BLUE);
+    getElement().getStyle().setBackgroundColor(highlightColor);
   }
 
   @Override
@@ -89,9 +95,7 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
 
   @Override
   public void setSouthScore(DivWidget widget) {
-    //setSouth(widget);
   }
-
 
   @Override
   public void clearSouth() {

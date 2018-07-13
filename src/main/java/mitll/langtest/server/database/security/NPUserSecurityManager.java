@@ -54,6 +54,8 @@ import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
 import java.util.*;
 
+import static mitll.langtest.server.services.MyRemoteServiceServlet.X_FORWARDED_FOR;
+
 /**
  * NPUserSecurityManager: Provide top level security management.
  *
@@ -473,7 +475,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @return
    */
   public String getRemoteAddr(HttpServletRequest request) {
-    String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+    String remoteAddr = request.getHeader(X_FORWARDED_FOR);
     if (remoteAddr == null || remoteAddr.isEmpty()) {
       remoteAddr = request.getRemoteAddr();
     }

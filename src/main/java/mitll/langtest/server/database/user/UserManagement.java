@@ -43,6 +43,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static mitll.langtest.server.services.MyRemoteServiceServlet.USER_AGENT;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -85,7 +87,7 @@ public class UserManagement {
    * @see #addUser(HttpServletRequest, SignUpUser)
    */
   private String getIPInfo(HttpServletRequest request) {
-    String header = request.getHeader("User-Agent");
+    String header = request.getHeader(USER_AGENT);
     SimpleDateFormat sdf = new SimpleDateFormat();
     String format = sdf.format(new Date());
     return request.getRemoteHost() +/*"/"+ request.getRemoteAddr()+*/(header != null ? "/" + header : "") +

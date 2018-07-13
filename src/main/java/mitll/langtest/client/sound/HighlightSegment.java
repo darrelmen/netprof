@@ -20,12 +20,17 @@ import java.util.logging.Logger;
  */
 public class HighlightSegment extends DivWidget implements IHighlightSegment {
   protected final Logger logger = Logger.getLogger("HighlightSegment");
-
+  /**
+   * @see #setBlue
+   */
   private static final String BLUE = "#2196F3";
+
+  private String highlightColor;
   private final int length;
   private String background = null;
   private boolean highlighted = false;
   private boolean clickable = true;
+
   private final DivWidget north;
   private DivWidget south;
   private final String content;
@@ -37,7 +42,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @see mitll.langtest.client.scoring.WordTable#getWordLabel
    */
   public HighlightSegment(int id, String content) {
-    this(id, content, HasDirection.Direction.LTR, true, true);
+    this(id, content, HasDirection.Direction.LTR, true, true, BLUE);
   }
 
   /**
@@ -46,9 +51,12 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @param dir
    * @param addSouth
    * @param showPhones
+   * @param highlightColor
    * @see mitll.langtest.client.scoring.ClickableWords#makeClickableText
    */
-  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir, boolean addSouth, boolean showPhones) {
+  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir, boolean addSouth,
+                          boolean showPhones, String highlightColor) {
+    this.highlightColor=highlightColor;
     DivWidget north;
     add(north = new DivWidget());
 
@@ -89,7 +97,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @param north
    * @param isLTR
    * @param span
-   * @see #HighlightSegment(int, String, HasDirection.Direction, boolean, boolean)
+   * @see #HighlightSegment(int, String, HasDirection.Direction, boolean, boolean, String)
    */
   private void configureNorth(int id, DivWidget north, boolean isLTR, Widget span) {
     north.add(span);
@@ -137,7 +145,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   @Override
   public void setBlue() {
     highlighted = true;
-    getSpanStyle().setBackgroundColor(BLUE);
+    getSpanStyle().setBackgroundColor(highlightColor);
   }
 
   @Override

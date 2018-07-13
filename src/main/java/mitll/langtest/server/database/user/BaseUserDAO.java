@@ -73,7 +73,9 @@ public abstract class BaseUserDAO extends DAO {
   /**
    * @see DominoUserDAOImpl#ensureDefaultUsersLocal
    */
-  int defectDetector, beforeLoginUser, importUser, defaultUser = -1, defaultMale, defaultFemale;
+  int defectDetector = DEFAULT_USER_ID,
+      beforeLoginUser = DEFAULT_USER_ID, importUser = DEFAULT_USER_ID, defaultUser = DEFAULT_USER_ID,
+      defaultMale = DEFAULT_USER_ID, defaultFemale = DEFAULT_USER_ID;
 
   static final String ID = "id";
   static final String AGE = "age";
@@ -246,17 +248,17 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   /**
-   * @param defectDetector
+   * @param userID
    * @param first
    * @param last
    * @param kind
    * @return
    * @see #getOrAdd
    */
-  private int addShellUser(String defectDetector, String first, String last, Kind kind) {
+  private int addShellUser(String userID, String first, String last, Kind kind) {
     return addUser(89,
         MiniUser.Gender.Unspecified,
-        0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
+        0, "", "", UNKNOWN, UNKNOWN, userID, false, EMPTY_PERMISSIONS,
         kind,
         "",
         UNSET_EMAIL,//"admin@dliflc.edu",

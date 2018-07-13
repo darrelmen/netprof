@@ -20,9 +20,9 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   private final DivWidget south;
 
   /**
+   * @param bulk
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchEventSegmentToClickable
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchSegmentToWidgetForAudio
-   * @param bulk
    */
   public AllHighlight(Collection<IHighlightSegment> bulk) {
     //logger.info("making all highlight for " + bulk);
@@ -36,12 +36,12 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
     north.addStyleName("floatLeft");
     north.getElement().setId("all_highlight_north_bulk_" + bulk.size());
 
-    for (IHighlightSegment seg : set) {
-      Widget w = seg.asWidget();
-      w.removeFromParent();
-      north.add(seg.getNorth());
-      seg.clearSouth();
-    }
+    set.forEach(iHighlightSegment -> {
+      iHighlightSegment.asWidget().removeFromParent();
+      north.add(iHighlightSegment.getNorth());
+      iHighlightSegment.clearSouth();
+    });
+
     add(south = new DivWidget());
     south.getElement().setId("all_highlight_south_bulk_" + bulk.size());
     south.addStyleName("floatLeft");
@@ -121,7 +121,9 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   }
 
 
-  public void setSouthScore(DivWidget widget) { setSouth(widget);}
+  public void setSouthScore(DivWidget widget) {
+    setSouth(widget);
+  }
 
   public void clearSouth() {
 //    logger.info("doing clear south");
@@ -132,6 +134,7 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   public DivWidget getNorth() {
     return north;
   }
+
   public String toString() {
     return set.size() + " segments " + getLength() + " long : " + getContent();
   }

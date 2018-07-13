@@ -24,8 +24,6 @@ public class AlignmentFetcher {
   private final int exerciseID;
   private final ExerciseController controller;
   private final ListInterface<?, ?> listContainer;
-  //private ChoicePlayAudioPanel<ClientExercise> playAudio;
-  // private ChoicePlayAudioPanel<ClientExercise> contextPlay;
 
   private HeadlessPlayAudio playAudio;
   private HeadlessPlayAudio contextPlay;
@@ -163,12 +161,10 @@ public class AlignmentFetcher {
    * @param req
    * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
    */
-  //@Override
   public void setReq(int req) {
     this.req = req;
   }
 
-  // @Override
   public int getReq() {
     return req;
   }

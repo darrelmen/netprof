@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+import static mitll.langtest.server.services.MyRemoteServiceServlet.USER_AGENT;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Success;
 
@@ -300,7 +301,7 @@ public class RestUserManagement {
                                 boolean strictValidity) {
     try {
       String remoteAddr = securityManager.getRemoteAddr(request);
-      String userAgent = request.getHeader("User-Agent");
+      String userAgent = request.getHeader(USER_AGENT);
       // ensure a session is created.
       HttpSession session = createSession(request);
       logger.info("loginUser :" +

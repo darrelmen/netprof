@@ -2,12 +2,10 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.*;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -31,6 +29,8 @@ public class DialogExercisePanel<T extends ClientExercise>
   private Logger logger = Logger.getLogger("DialogExercisePanel");
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
+  private static final String BLUE = "#2196F3";
+
 
   static final int CONTEXT_INDENT = 45;//50;
   private static final char FULL_WIDTH_ZERO = '\uFF10';
@@ -39,7 +39,7 @@ public class DialogExercisePanel<T extends ClientExercise>
   protected final T exercise;
   protected final ExerciseController controller;
   DivWidget flClickableRow;
-  ClickableWords<T> clickableWords;
+  ClickableWords clickableWords;
 
   /**
    * @see #getFLEntry
@@ -97,19 +97,11 @@ public class DialogExercisePanel<T extends ClientExercise>
       }
     });
     getElement().getStyle().setCursor(Style.Cursor.POINTER);
-
-//    if (hasAudio(commonExercise)) {
-//      rememberAudio(commonExercise.getAudioAttributes().iterator().next());
-//    }
   }
 
   public int getExID() {
     return exercise.getID();
   }
-
-//  private void rememberAudio(AudioAttribute audioAttribute) {
-//    playAudio.rememberAudio(audioAttribute);
-//  }
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
@@ -117,7 +109,7 @@ public class DialogExercisePanel<T extends ClientExercise>
 
     if (projectStartupInfo != null) {
       makeClickableWords(projectStartupInfo, null);
-      this.isRTL = clickableWords.isRTL(exercise);
+      this.isRTL = clickableWords.isRTL(exercise.getForeignLanguage());
 
       add(getFLEntry(exercise));
       makePlayAudio(exercise, null);
@@ -136,7 +128,7 @@ public class DialogExercisePanel<T extends ClientExercise>
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
     int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
-    clickableWords = new ClickableWords<>(listContainer, exercise, controller.getLanguage(), fontSize, shouldShowPhones());
+    clickableWords = new ClickableWords(listContainer, exercise.getID(), controller.getLanguage(), fontSize, BLUE);
   }
 
   /**
@@ -180,7 +172,6 @@ public class DialogExercisePanel<T extends ClientExercise>
   @Override
   public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
     if (alignmentOutputFromAudio != null) {
-//      alignments.put(id, alignmentOutputFromAudio);
       alignmentFetcher.rememberAlignment(id, alignmentOutputFromAudio);
     }
     if (DEBUG) logger.info("audioChangedWithAlignment " + id + " : " + alignmentOutputFromAudio);
@@ -764,7 +755,7 @@ public class DialogExercisePanel<T extends ClientExercise>
 
     DivWidget contentWidget = clickableWords.getClickableWords(getFL(e),
         FieldType.FL,
-        flclickables, false, isRTL);
+        flclickables, isRTL);
 
     flClickableRow = contentWidget;
 

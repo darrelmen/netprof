@@ -401,8 +401,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
           e.printStackTrace();
         }
       }
-      logger.info("default user " + getUserDAO().getDefaultUser());
-      dialogDAO.ensureDefault(getUserDAO().getDefaultUser());
+
+      {
+        int defaultUser = getUserDAO().getDefaultUser();
+        logger.info("finalSetup : default user " + defaultUser);
+        dialogDAO.ensureDefault(defaultUser);
+      }
     }).start();
   //  dialogDAO.ensureDefault(getUserDAO().getDefaultUser());
 

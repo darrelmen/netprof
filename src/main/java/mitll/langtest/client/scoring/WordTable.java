@@ -61,8 +61,9 @@ import java.util.stream.Collectors;
  * @since 10/21/15.
  */
 public class WordTable {
-  public static final String WHITE_SPACE_NOWRAP = PagerTable.WHITE_SPACE_NOWRAP;
   private final Logger logger = Logger.getLogger("WordTable");
+
+  private static final String WHITE_SPACE_NOWRAP = PagerTable.WHITE_SPACE_NOWRAP;
 
   private static final String TABLE = "<table>";
   private static final String TABLEEND = "</table>";
@@ -70,7 +71,7 @@ public class WordTable {
   private static final String UNKNOWNMODEL = "UNKNOWNMODEL";
   private static final String TEXT_ALIGN_CENTER = "text-align:center;";
   private static final String BACKGROUND_COLOR = "background-color";
-
+  private static final String BLUE = "#2196F3";
   /**
    * Fix for japanese word wrap issue.
    */
@@ -484,7 +485,7 @@ public class WordTable {
       if (!shouldSkipPhone(phoneLabel)) {
         float v = phoneSegment.getStart() * 100;
         int vi = (int) v;
-        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel, vi);
+        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel, BLUE);
         boolean hasAudioControl = audioControl != null;
         addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
         phoneMap.put(phoneSegment, h);

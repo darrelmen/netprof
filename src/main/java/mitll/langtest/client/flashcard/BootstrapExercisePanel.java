@@ -94,7 +94,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
    */
   private static final boolean DO_AUTOLOAD = false;
 
-  public static final String IN = "in";
+  private static final String IN = "in";
 
   private static final int FEEDBACK_LEFT_MARGIN = PROGRESS_LEFT_MARGIN;
   private Panel recoOutput;
@@ -569,7 +569,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     playAudioPanel = new PlayAudioPanel(controller.getSoundManager(), null, controller, exercise.getID());
     ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, downloadContainer);
     downloadContainer.getDownloadContainer().setVisible(true);
-    recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, new ClickableWords<>().isRTL(exercise)));
+    recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, new ClickableWords().isRTL(exercise.getForeignLanguage())));
   }
 
   PlayAudioPanel playAudioPanel;

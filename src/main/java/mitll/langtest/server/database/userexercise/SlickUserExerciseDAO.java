@@ -599,7 +599,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
               exerciseDAO.updatePhones(id, n2);
 //            pairs.add(new SlickExercisePhone(id, n2));
               updated++;
-              if (updated < 100 || updated % 1000 == 0) logger.info("getExercisePhoneInfo (project #" + slick.projid() +
+              if (updated < 10 || updated % 1000 == 0) logger.info("getExercisePhoneInfo (project #" + slick.projid() +
                   ") updated " + updated + " exercises with phone info (e.g. " + id + " = " + n2);
             }
           } else {

@@ -81,6 +81,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.Thread.sleep;
 import static mitll.langtest.server.ServerProperties.DEFAULT_NETPROF_AUDIO_DIR;
 import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.*;
 import static mitll.langtest.server.database.copy.CopyToPostgres.OPTIONS.*;
@@ -194,6 +195,19 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, CONFIG)) {
+
+
+      while (getDefaultUser(databaseLight) < 1) {
+        try {
+          sleep(1000);
+          logger.info("---> no default user yet.....");
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+      int defaultUser = getDefaultUser(databaseLight);
+      logger.info("default user = " +defaultUser);
+
       String language = databaseLight.getLanguage();
       ServerProperties serverProps = databaseLight.getServerProps();
       boolean hasModel = serverProps.hasModel();
@@ -582,8 +596,9 @@ public class CopyToPostgres<T extends CommonShell> {
 
     SlickResultDAO slickResultDAO = (SlickResultDAO) db.getResultDAO();
 
-    long maxTime = copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL, db.getUserExerciseDAO().getUnknownExerciseID(),
-        db.getUserDAO().getDefaultUser(), sinceWhen);
+    long maxTime = copyResult(slickResultDAO, oldToNewUser, projectID, exToID, resultDAO, idToFL,
+        db.getUserExerciseDAO().getUnknownExerciseID(),
+        getDefaultUser(db), sinceWhen);
 
     logger.info("oldToNewUser num = " + oldToNewUser.size() + " exToID num = " + exToID.size());
 
@@ -626,6 +641,10 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 //    if (maxTime == 0) maxTime = System.currentTimeMillis();
     return maxTime;
+  }
+
+  private int getDefaultUser(DatabaseImpl db) {
+    return db.getUserDAO().getDefaultUser();
   }
 
   /**

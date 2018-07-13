@@ -30,10 +30,12 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/5/17.
  */
 class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudioPanel {
+  public static final String REG = "Reg";
   private final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
 
   private static final String FAST = "Fast";
-  private static final String SLOW1 = "Slow";
+  public static final String SLOW2 = "Slow";
+  private static final String SLOW1 = SLOW2;
 
   private static final String IS_MALE = "isMale";
   private static final String IS_REG = "isReg";
@@ -293,7 +295,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
       speed.setBaseIcon(isReg ? MyCustomIconType.rabbit : MyCustomIconType.turtle);
       speed.addStyleName("leftFiveMargin");
       widget.add(speed);
-      speed.setText(isReg ? "Reg" : "Slow");
+      speed.setText(isReg ? REG : SLOW2);
     }
 
     {
@@ -324,8 +326,8 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
   private void playAndRemember(boolean isMale, boolean isReg, AudioAttribute mr) {
     logger.info("playAndRemember " + mr.getUniqueID() +
-        "\n\tref " + mr.getAudioRef() +
-        " isMale " + isMale + " isReg " + isReg + " durationInMillis " + mr.getDurationInMillis());
+        "\n\tref    " + mr.getAudioRef() +
+        "\n\tisMale " + isMale + " isReg " + isReg + " durationInMillis " + mr.getDurationInMillis());
     markCurrentAudio(mr);
 
     doPause();

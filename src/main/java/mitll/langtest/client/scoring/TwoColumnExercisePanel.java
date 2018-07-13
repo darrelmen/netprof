@@ -149,7 +149,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     if (projectStartupInfo != null) {
       makeClickableWords(projectStartupInfo, listContainer);
-      this.isRTL = clickableWords.isRTL(exercise);
+      this.isRTL = clickableWords.isRTL(exercise.getForeignLanguage());
 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
       add(getItemContent(exercise));
@@ -369,7 +369,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     DivWidget contentWidget = clickableWords.getClickableWords(getFL(e),
         FieldType.FL,
-        flclickables, false, isRTL);
+        flclickables, isRTL);
 
     flClickableRow = contentWidget;
 
@@ -457,7 +457,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   private Widget getAltContext(String flToHighlight, String altFL, AnnotationHelper annotationHelper, int exid) {
     Panel contentWidget = clickableWords.getClickableWordsHighlight(altFL, flToHighlight,
-        FieldType.FL, new ArrayList<>(), false);
+        FieldType.FL, new ArrayList<>());
 
     CommentBox commentBox = getCommentBox(annotationHelper, exid);
     return commentBox
@@ -548,7 +548,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       DivWidget contentWidget = clickableWords.getClickableWords(altFL,
           FieldType.FL,
           altflClickables,
-          false,
           //true,
           isRTL);
 
@@ -615,7 +614,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       hp.add(contextPlay);
 
       DivWidget contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
-          FieldType.FL, contextClickables = new ArrayList<>(), false);
+          FieldType.FL, contextClickables = new ArrayList<>());
 
       contextClickableRow = contentWidget;
       contextClickableRowPhones = clickableWords.getClickableDiv(isRTL);
@@ -807,7 +806,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                              CommentAnnotator annotationHelper,
                              boolean isRTL, int exid) {
     DivWidget contentWidget = clickableWords.getClickableWords(value, fieldType, clickables,
-        fieldType != FieldType.FL, isRTL);
+        isRTL);
     // logger.info("value " + value + " translit " + isTranslit + " is fl " + isFL);
     return getCommentEntry(field, annotation, fieldType == FieldType.TRANSLIT, showInitially,
         annotationHelper, isRTL, contentWidget, exid);

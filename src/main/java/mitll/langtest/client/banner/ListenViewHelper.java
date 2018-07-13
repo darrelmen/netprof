@@ -38,11 +38,12 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 4/5/17.
  */
 public class ListenViewHelper implements ContentView, PlayListener {
+  private final Logger logger = Logger.getLogger("ListenViewHelper");
+
   private static final int ROW_WIDTH = 97;
   private static final String HEIGHT = 100 + "px";
   private static final String RIGHT_BKG_COLOR = "#4aa8ee";
   private static final String LEFT_COLOR = "#e7e6ec";
-  private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private final ExerciseController controller;
 
@@ -53,6 +54,7 @@ public class ListenViewHelper implements ContentView, PlayListener {
   private DialogExercisePanel currentTurn;
   private Boolean leftSpeaker = true;
   private Boolean rightSpeaker = true;
+  private CheckBox leftSpeakerBox, rightSpeakerBox;
 
   /**
    * @param controller
@@ -78,7 +80,9 @@ public class ListenViewHelper implements ContentView, PlayListener {
 
       @Override
       public void onSuccess(IDialog dialog) {
-        Scheduler.get().scheduleDeferred(() -> showDialogGetRef(dialog, child));
+        //      Scheduler.get().scheduleDeferred(() -> showDialogGetRef(dialog, child));
+
+        showDialogGetRef(dialog, child);
       }
     });
   }
@@ -95,7 +99,6 @@ public class ListenViewHelper implements ContentView, PlayListener {
     child.add(getTurns(dialog));
   }
 
-  private CheckBox leftSpeakerBox, rightSpeakerBox;
 
   @NotNull
   private DivWidget getSpeakerRow(IDialog dialog) {
@@ -507,8 +510,7 @@ public class ListenViewHelper implements ContentView, PlayListener {
 
     if (currentTurn.isPlaying()) {
       playButton.setIcon(IconType.PAUSE);
-    }
-    else {
+    } else {
       playButton.setIcon(IconType.PLAY);
     }
 
@@ -572,11 +574,13 @@ public class ListenViewHelper implements ContentView, PlayListener {
   }
 
   private void removeMarkCurrent() {
-    currentTurn.getElement().getStyle().setBorderColor("black");
+    currentTurn.getElement().getStyle().setBorderColor("white");//"#666666");
+  //  currentTurn.getElement().getStyle().setBorderWidth(3, PX);
   }
 
   private void markCurrent() {
     currentTurn.getElement().getStyle().setBorderColor("green");
+   // currentTurn.getElement().getStyle().setBorderWidth(8, PX);
   }
 
 }

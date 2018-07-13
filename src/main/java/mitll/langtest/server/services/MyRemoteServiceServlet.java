@@ -366,10 +366,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   protected String getInfo(String message) {
     HttpServletRequest request = getThreadLocalRequest();
     if (request != null) {
-      String remoteAddr = request.getHeader(X_FORWARDED_FOR);
-      if (remoteAddr == null || remoteAddr.isEmpty()) {
-        remoteAddr = request.getRemoteAddr();
-      }
+      String remoteAddr = getRemoteAddr(request);
       String userAgent = request.getHeader(USER_AGENT);
 
       String strongName = getPermutationStrongName();
@@ -508,5 +505,13 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   @NotNull
   protected RestrictedOperationException getRestricted(String updating_project_info) {
     return new RestrictedOperationException(updating_project_info, true);
+  }
+
+  protected String getRemoteAddr(HttpServletRequest request) {
+    String remoteAddr = request.getHeader(X_FORWARDED_FOR);
+    if (remoteAddr == null || remoteAddr.isEmpty()) {
+      remoteAddr = request.getRemoteAddr();
+    }
+    return remoteAddr;
   }
 }
