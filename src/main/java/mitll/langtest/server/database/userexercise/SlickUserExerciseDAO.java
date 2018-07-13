@@ -38,12 +38,14 @@ import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.*;
 import org.apache.commons.lang3.StringUtils;
@@ -99,6 +101,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   private CommonExercise templateExercise;
   private int unknownExerciseID;
+  private DatabaseImpl database;
 
   /**
    * @param database
@@ -115,7 +118,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     userDAO = database.getUserDAO();
     refResultDAO = database.getRefResultDAO();
-    //projectDAO = database.getProjectDAO();
+    this.database = database;
 
     String mediaDir = database.getServerProps().getMediaDir();
     hasMediaDir = new File(mediaDir).exists();
@@ -1018,14 +1021,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   /**
    * Niche feature for alt chinese to swap primary and alternate...
    *
+   *  It's back on! 7/13/18 GWFV
+   *
    * @param projid
    * @return
    */
-
   private boolean getShouldSwap(int projid) {
-    return false;
-//    String defPropValue = projectDAO.getDefPropValue(projid, ProjectProperty.SWAP_PRIMARY_AND_ALT);
-    //   return defPropValue.equalsIgnoreCase("TRUE");
+    String defPropValue = database.getProjectDAO().getDefPropValue(projid, ProjectProperty.SWAP_PRIMARY_AND_ALT);
+    return defPropValue.equalsIgnoreCase("TRUE");
   }
 
   /**

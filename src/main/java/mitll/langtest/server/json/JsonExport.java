@@ -328,7 +328,7 @@ public class JsonExport {
   private JSONObject getJsonForCommonExercise(ClientExercise exercise, Collection<String> firstTypes) {
     JSONObject ex = new JSONObject();
     ex.put(ID, exercise.getID());
-    ex.put(FL, exercise.getForeignLanguage());
+    ex.put(FL, exercise.getFLToShow());
     ex.put(TL, exercise.getTransliteration() == null ? "" : exercise.getTransliteration());
     ex.put(EN, isEnglish && !exercise.getMeaning().isEmpty() ? exercise.getMeaning() : exercise.getEnglish());
 
@@ -345,8 +345,8 @@ public class JsonExport {
       ex.put(CT, "");
       ex.put(CTR, "");
     } else {
-      CommonShell next = exercise.getDirectlyRelated().iterator().next();
-      ex.put(CT,  next.getForeignLanguage());
+      ClientExercise next = exercise.getDirectlyRelated().iterator().next();
+      ex.put(CT,  next.getFLToShow());
       ex.put(CTR, next.getEnglish());
     }
 

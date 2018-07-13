@@ -535,6 +535,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
         " np id '" + getOldID() + "'" +
         " context index " + dominoContextIndex +
         " project " + projectid +
+        "\n\tshouldSwap = " + shouldSwap() +
+
         " english '" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
         (getAltFL().isEmpty() ? "" : getAltFL()) +

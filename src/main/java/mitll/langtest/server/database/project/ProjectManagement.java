@@ -870,11 +870,16 @@ public class ProjectManagement implements IProjectManagement {
 
     String language = project1.language();
 
-    for (String type : typeOrder) {
+    typeOrder.forEach(type -> {
       if (type.isEmpty()) logger.error("setStartupInfo huh? type order has blank?? " + type);
-    }
+    });
+//    for (String type : typeOrder) {
+//      if (type.isEmpty()) logger.error("setStartupInfo huh? type order has blank?? " + type);
+//    }
 
     boolean hasModel = project.hasModel();
+
+    boolean shouldSwap = project.getProp(ProjectProperty.SWAP_PRIMARY_AND_ALT).equalsIgnoreCase("true");
     ProjectStartupInfo startupInfo = new ProjectStartupInfo(
         serverProps.getProperties(),
         typeOrder,
@@ -887,7 +892,9 @@ public class ProjectManagement implements IProjectManagement {
         sectionHelper.getTypeToDistinct(),
         sectionHelper.getRootTypes(),
         sectionHelper.getParentToChildTypes(),
-        ProjectType.valueOf(project1.kind()));
+        ProjectType.valueOf(project1.kind()),
+        shouldSwap
+    );
 
     logger.info("setStartupInfo : For" +
         "\n\tUser      " + userWhere +

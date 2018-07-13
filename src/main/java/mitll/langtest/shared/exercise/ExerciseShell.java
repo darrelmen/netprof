@@ -54,6 +54,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   protected String english = "";
   protected String meaning = "";
   protected String foreignLanguage = "";
+  protected boolean shouldSwap;
   int numPhones;
   /**
    *
@@ -187,26 +188,23 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   /**
    * @return
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getAltFL
-   * @deprecated bad idea
+   *
    */
   public String getAltFLToShow() {
-    return /*shouldSwap ? foreignLanguage :*/ altfl;
+    return shouldSwap ? foreignLanguage : altfl;
   }
 
   /**
    * @return
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getFL
-   * @deprecated bad idea
    */
   public String getFLToShow() {
-    return /*shouldSwap ? altfl :*/ foreignLanguage;
+    return shouldSwap ? altfl : foreignLanguage;
   }
 
-/*
   public boolean shouldSwap() {
     return shouldSwap;
   }
-*/
 
   /**
    * @return
@@ -228,7 +226,8 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   public String toString() {
     return "ExerciseShell " +
         "id = " + getID() +
-        " : '" + getEnglish() + "'" +
+        "\n\tshouldSwap = " + shouldSwap() +
+        "\n\t: '" + getEnglish() + "'" +
         " states " + getState() + "/" + getSecondState();
   }
 }

@@ -1,19 +1,5 @@
 package mitll.langtest.server.database.custom;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.*;
-import org.junit.Test;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -21,8 +7,8 @@ import java.util.List;
  * @since 2/12/16.
  */
 public class SiteExport {
-  private static final Logger logger = LogManager.getLogger(SiteExport.class);
-
+  //private static final Logger logger = LogManager.getLogger(SiteExport.class);
+/*
   @Test
   public void testExport() {
     String file = "siteList.xlsx";
@@ -60,13 +46,13 @@ public class SiteExport {
           addField(jRow, cell, col);
 
         }
-  /*      for (Iterator<Cell> cellsIT = row.cellIterator(); cellsIT.hasNext(); ) {
+  *//*      for (Iterator<Cell> cellsIT = row.cellIterator(); cellsIT.hasNext(); ) {
           Cell cell = cellsIT.next();
       //    logger.debug("col " + i + " is a " + cellType);
           String key = header.get(i++);
           addField(jRow, cell, key);
 
-        }*/
+        }*//*
         rows.add(jRow);
       }
 
@@ -138,5 +124,5 @@ public class SiteExport {
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
-  }
+  }*/
 }

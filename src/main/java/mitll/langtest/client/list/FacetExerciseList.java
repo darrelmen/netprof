@@ -76,6 +76,7 @@ import java.util.stream.Collectors;
 import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
+import static mitll.langtest.shared.project.ProjectProperty.SWAP_PRIMARY_AND_ALT;
 
 public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, U extends CommonShell>
     extends HistoryExerciseList<T, U>
@@ -255,7 +256,8 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
     {
       // better name for primary and alternate choices
       boolean isMandarin = controller.getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
-      Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin).getRealViewMenu();
+      boolean shouldSwap = controller.getProjectStartupInfo().isShouldSwap();
+      Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu();
       DivWidget widgets = new DivWidget();
       widgets.addStyleName("topFiveMargin");
       widgets.add(realViewMenu);

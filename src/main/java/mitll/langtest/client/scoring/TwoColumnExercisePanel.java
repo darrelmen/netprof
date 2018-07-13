@@ -388,6 +388,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return flEntry;
   }
 
+
   private String getFL(CommonShell e) {
     return e.getFLToShow();
   }
