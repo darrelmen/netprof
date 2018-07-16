@@ -34,6 +34,7 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
@@ -64,8 +65,6 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   private long then;
 
   /**
-   * @see RecordAudioPanel#makePostAudioRecordButton(AudioType, String)
-   * @see RecordAudioPanel#makePostAudioRecordButton(AudioType, String)
    * @param exerciseID
    * @param controller
    * @param widgets
@@ -75,6 +74,8 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * @param playButtonSuffix
    * @param stopButtonText
    * @param audioType
+   * @see RecordAudioPanel#makePostAudioRecordButton(AudioType, String)
+   * @see RecordAudioPanel#makePostAudioRecordButton(AudioType, String)
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton
    */
   protected WaveformPostAudioRecordButton(int exerciseID,
@@ -89,9 +90,12 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     super(exerciseID, controller, index, recordInResults, playButtonSuffix, stopButtonText, 93, false);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
-    getElement().setId("WaveformPostAudioRecordButton_" + index);
+    getElement().setId("WaveformPostAudioRecordButton_" + exerciseID + "_" + index);
     this.audioType = audioType;
-    setEnabled(controller.isRecordingEnabled());
+
+    if (!controller.isRecordingEnabled()) {
+      setEnabled(controller.isRecordingEnabled());
+    }
     addStyleName("minWidthRecordButton");
   }
 
@@ -135,8 +139,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   public boolean stopRecording(long duration) {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
-    }
-    else {
+    } else {
       logger.info("stopRecording parent is not a busy panel - " + parentPanel.getElement().getId() + " " + parentPanel.getClass());
     }
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (System.currentTimeMillis() - then) + " millis");
@@ -174,7 +177,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   @Override
   protected void useInvalidResult(AudioAnswer result) {
     super.useInvalidResult(result);
-    logger.info("WaveformPostAudioRecordButton : got invalid result " +result);
+    //   logger.info("WaveformPostAudioRecordButton : got invalid result " + result);
     hideWaveform();
     recordAudioPanel.getSpectrogram().setVisible(false);
     if (parentPanel instanceof ExercisePanel) {

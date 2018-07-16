@@ -57,6 +57,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.Collator;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
@@ -74,12 +75,12 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final String LISTS = "Lists";
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_ID_LOOKUP = false;
+  private static final boolean DEBUG_ID_LOOKUP = true;
 
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final boolean WARN_MISSING_REF_RESULT = false;
   private static final String RECORDED1 = "Recorded";
-  private static final String RECORDED = RECORDED1;
+  //  private static final String RECORDED = RECORDED1;
   private static final String ANY = "Any";
 
   // private  AlignmentHelper alignmentHelper=new AlignmentHelper();
@@ -97,48 +98,66 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     } else {
       FilterResponse response = sectionHelper.getTypeToValues(request, false);
       addUserListFacet(request, response);
-
-
-      User userFromSession = getUserFromSession();
-
-      if (userFromSession != null) {
+      int userFromSessionID = getUserIDFromSessionOrDB();
+      if (userFromSessionID != -1) {
 //        logger.info("getTypeToValues got " + userFromSession);
         //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
-        int userFromSessionID = userFromSession.getID();
-        int projectID = getProjectIDFromUser(userFromSessionID);
-
-        Map<String, Collection<String>> typeToSelection = new HashMap<>();
-        request.getTypeToSelection().forEach(pair -> {
-          String value1 = pair.getValue();
-          if (!value1.equalsIgnoreCase(ANY)) {
-            typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
-          }
-        });
 
         if (request.isRecordRequest()) { //how no user???
-          List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
-
-          ExerciseListRequest request1 = new ExerciseListRequest()
-              .setOnlyUnrecordedByMe(true)
-              .setOnlyExamples(request.isExampleRequest())
-              .setUserID(userFromSessionID);
-          List<CommonExercise> unRec = filterByUnrecorded(request1, exercisesForState, projectID);
-          List<CommonExercise> rec = filterByUnrecorded(request1.setOnlyUnrecordedByMe(false).setOnlyRecordedByMatchingGender(true), exercisesForState, projectID);
-
-          response.getTypesToInclude().add(RECORDED);
-          Set<MatchInfo> value = new HashSet<>();
-          boolean isMale = userFromSession.isMale();
-          String s = isMale ? "Males" : "Females";
-          value.add(new MatchInfo("Unrecorded by " + s, unRec.size(), -1, false, ""));
-          value.add(new MatchInfo("Recorded by " + s, rec.size(), -1, false, ""));
-          response.getTypeToValues().put(RECORDED, value);
-          response.getTypesToInclude().add(RECORDED);
+          response = getFilterResponseForRecording(request, response, userFromSessionID);
         }
       }
 
       return response;
     }
-    //}
+  }
+
+  private FilterResponse getFilterResponseForRecording(FilterRequest request, FilterResponse response, int userFromSessionID) {
+    int projectID = getProjectIDFromUser(userFromSessionID);
+
+    Map<String, Collection<String>> typeToSelection = new HashMap<>();
+    request.getTypeToSelection().forEach(pair -> {
+      String value1 = pair.getValue();
+      if (!value1.equalsIgnoreCase(ANY)) {
+        typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
+      }
+    });
+
+
+    List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
+
+    ExerciseListRequest request1 = new ExerciseListRequest()
+        .setOnlyUnrecordedByMe(true)
+        .setOnlyExamples(request.isExampleRequest())
+        .setUserID(userFromSessionID);
+
+    List<String> typeOrder = getProject(projectID).getTypeOrder();
+    if (typeOrder.isEmpty()) {
+
+    } else {
+      String firstType = typeOrder.get(0);
+      //   List<CommonExercise> rec = filterByUnrecorded(request1.setOnlyUnrecordedByMe(false).setOnlyRecordedByMatchingGender(true), exercisesForState, projectID);
+      List<CommonExercise> unRec = filterByUnrecorded(request1, exercisesForState, projectID);
+
+      //   logger.info("found " + unRec.size() + " unrecorded");
+
+      Map<String, Long> collect = unRec.stream().collect(Collectors.groupingBy(ex -> ex.getUnitToValue().get(firstType), Collectors.counting()));
+
+      // logger.info("map is " + collect);
+
+      Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
+
+      Set<MatchInfo> matches = new TreeSet<>();
+      collect.forEach((k, v) -> matches.add(new MatchInfo(k, v.intValue())));
+      //    logger.info("matches is " + matches);
+      typeToValues.put(firstType, matches);
+
+      HashSet<String> typesToInclude = new HashSet<>();
+      typesToInclude.add(firstType);
+
+      response = new FilterResponse(request.getReqID(), typeToValues, typesToInclude, -1);
+    }
+    return response;
   }
 
   private void addUserListFacet(FilterRequest request, FilterResponse typeToValues) {
@@ -186,7 +205,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       return new ExerciseListWrapper<>(request.getReqID(), ts, null);
     }
 
-    logger.debug("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
+    logger.info("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
 
     try {
       boolean isUserListReq = request.getUserListID() != -1;
@@ -260,7 +279,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       }
     }
 
-    if (DEBUG_ID_LOOKUP) logger.info("triple resp " + exercisesForSearch);
+    if (DEBUG_ID_LOOKUP) logger.info("triple resp       " + exercisesForSearch);
     exercisesForSearch.setByExercise(filterExercises(request, exercisesForSearch.getByExercise(), projectID));
     if (DEBUG_ID_LOOKUP) logger.info("after triple resp " + exercisesForSearch);
 
@@ -816,6 +835,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private List<CommonExercise> filterExercises(ExerciseListRequest request,
                                                List<CommonExercise> exercises,
                                                int projid) {
+    logger.info("filter req " + request);
     exercises = filterByUnrecorded(request, exercises, projid);
 
     if (request.isOnlyWithAudioAnno()) {
@@ -983,7 +1003,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private List<CommonExercise> getRecordFilterExercisesMatchingGender(int userID,
                                                                       Collection<CommonExercise> exercises,
                                                                       int projid,
-                                                                      boolean onlyExamples, boolean onlyRecorded) {
+                                                                      boolean onlyExamples,
+                                                                      boolean onlyRecorded) {
 
     Set<Integer> unrecordedIDs = new HashSet<>(exercises.size());
 
@@ -1003,16 +1024,16 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       }
     }
 
-    logger.debug("getRecordFilterExercisesMatchingGender " + onlyExamples +
+    logger.info("getRecordFilterExercisesMatchingGender " + onlyExamples +
         "\n\texToTranscript " + exToTranscript.size());
     Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples, exToTranscript);
 
-    logger.debug("getRecordFilterExercisesMatchingGender" +
+    logger.info("getRecordFilterExercisesMatchingGender" +
         "\n\tall exercises " + unrecordedIDs.size() +
-        "\n\tfor project #" + projid +
-        "\n\tuserid # " + userID +
-        "\n\tremoving " + recordedBySameGender.size() +
-        "\n\tretain " + onlyRecorded
+        "\n\tfor project # " + projid +
+        "\n\tuserid #      " + userID +
+        "\n\tremoving      " + recordedBySameGender.size() +
+        "\n\tretain        " + onlyRecorded
     );
 
     if (onlyRecorded) {
@@ -1021,7 +1042,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       unrecordedIDs.removeAll(recordedBySameGender);
     }
 
-    logger.debug("getRecordFilterExercisesMatchingGender after removing recorded exercises " + unrecordedIDs.size());
+    logger.info("getRecordFilterExercisesMatchingGender after removing recorded exercises " + unrecordedIDs.size());
 
     List<CommonExercise> unrecordedExercises = new ArrayList<>();
 
@@ -1039,7 +1060,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       }
     }
 
-    logger.debug("getRecordFilterExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
+    logger.info("getRecordFilterExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
 
     return unrecordedExercises;
   }

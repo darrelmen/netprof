@@ -22,6 +22,12 @@ public interface IUserSecurityManager {
    */
   String USER_SESSION_ATT = "user-db-id";
 
+  /**
+   *
+   * @param threadLocalRequest
+   * @return -1 if no user session, else user id
+   * @throws DominoSessionException
+   */
   int getUserIDFromSessionLight(HttpServletRequest threadLocalRequest) throws DominoSessionException;
   int getUserIDFromRequest(HttpServletRequest request);
 

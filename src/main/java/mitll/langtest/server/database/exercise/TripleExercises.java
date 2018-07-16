@@ -50,6 +50,9 @@ public class TripleExercises<T extends CommonExercise> {
   }
 
   public String toString() {
-    return "by id " + byID.size() + "  by ex " + byExercise.size() + " by context " + byContext.size();
+    return
+            "\n\tby id      " + byID.size() +
+            "\n\tby ex      " + byExercise.size() +
+            "\n\tby context " + byContext.size();
   }
 }

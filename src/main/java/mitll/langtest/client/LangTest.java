@@ -551,6 +551,7 @@ private boolean hasNetworkProblem;
   public void getImage(int reqid, final String path, final String type, int toUse, int height, int exerciseID,
                        AsyncCallback<ImageResponse> client) {
     String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
+
     getImage(reqid, key, client);
   }
 

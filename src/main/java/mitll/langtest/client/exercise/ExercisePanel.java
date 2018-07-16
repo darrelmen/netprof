@@ -295,10 +295,10 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    */
   void recordIncomplete(Widget answer) {
     if (!completed.remove(answer) && !completed.isEmpty()) {
-      logger.warning("recordIncomplete : huh? answer " + answer.getElement().getId() +
+      logger.info("recordIncomplete : huh? answer " + answer.getElement().getId() +
           " is not on list of size " + completed.size());
       for (Widget widget : completed) {
-        logger.warning("recordIncomplete : known : " + widget.getElement().getId());
+        logger.info("recordIncomplete : known : " + widget.getElement().getId());
       }
     }
     // logger.info("recordIncomplete : completed " + completed.size() + " vs total " + answers.size());

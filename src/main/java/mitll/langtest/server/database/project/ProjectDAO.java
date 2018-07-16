@@ -60,15 +60,15 @@ import static mitll.langtest.shared.project.ProjectProperty.*;
 public class ProjectDAO extends DAO implements IProjectDAO {
   private static final Logger logger = LogManager.getLogger(ProjectDAO.class);
   private static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
-  public static final long MIN = 60 * 1000L;
-  public static final long HOUR = 60 * MIN;
+  private static final long MIN = 60 * 1000L;
+  private static final long HOUR = 60 * MIN;
   public static final long DAY = 24 * HOUR;
-  public static final long YEAR = 365 * DAY;
+  private static final long YEAR = 365 * DAY;
 
   private final ProjectDAOWrapper dao;
   private final ProjectPropertyDAO propertyDAO;
   private final IUserExerciseDAO userExerciseDAO;
-  DatabaseImpl databaseImpl;
+  private final DatabaseImpl databaseImpl;
 
   /**
    * @param database

@@ -1295,7 +1295,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (projID == -1) {
       projID = projectForUser(userid);
       if (projID == -1 && !getProjects().isEmpty()) {
-        projID = 1; // default project
+        projID = projectDAO.getDefault(); // default project
       }
     }
 
@@ -1312,6 +1312,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         //logger.warn("couldn't parse exid '" + exid + "'");
         //e.printStackTrace();
       }
+      if (!projectManagement.exists(projID)) projID = projectDAO.getDefault();
       Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, realExid);
       return eventDAO != null && eventDAO.addToProject(event, projID);
     }

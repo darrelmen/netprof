@@ -288,17 +288,11 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
       super(
           new PlayListener() {
             public void playStarted() {
-              if (panel instanceof BusyPanel) {
-                ((BusyPanel) panel).setBusy(true);
-              }
-              postAudioRecordButton.setEnabled(false);
+              checkAndSetBusy(panel, true);
             }
 
             public void playStopped() {
-              if (panel instanceof BusyPanel) {
-                ((BusyPanel) panel).setBusy(false);
-              }
-              postAudioRecordButton.setEnabled(true);
+              checkAndSetBusy(panel, false);
             }
 
           }, suffix, toTheRightWidget, controller, exercise.getID(), true);
@@ -327,6 +321,12 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
         add(postAudioRecordButton);
       }
       super.addButtons(optionalToTheRight);
+    }
+  }
+
+  private void checkAndSetBusy(Panel panel, boolean b) {
+    if (panel instanceof BusyPanel) {
+      ((BusyPanel) panel).setBusy(b);
     }
   }
 

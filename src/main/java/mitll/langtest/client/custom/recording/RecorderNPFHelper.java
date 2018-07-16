@@ -56,6 +56,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.
@@ -108,12 +109,12 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
 
       @Override
       protected PagingExerciseList<T, ClientExercise> makeExerciseList(Panel topRow,
-                                                                                 Panel currentExercisePanel,
-                                                                                 String instanceName,
-                                                                                 DivWidget listHeader,
-                                                                                 DivWidget footer) {
+                                                                       Panel currentExercisePanel,
+                                                                       String instanceName,
+                                                                       DivWidget listHeader,
+                                                                       DivWidget footer) {
         return new RecordingFacetExerciseList<T>(controller,
-            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.CONTEXT){
+            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.CONTEXT) {
 
         };
       }
@@ -130,7 +131,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
    * @see RecordRefAudioPanel#onLoad
    */
   private void getProgressInfo() {
-    //logger.info("Get progress info for " +getClass() + " instance " + instance);
+    logger.info("getProgressInfo Get progress info for " + getClass());
     controller.getService().getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -187,7 +188,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
         ((Panel) parent).add(c);
         added = true;
       } else {
-        getProgressInfo();
+        //getProgressInfo();
       }
     }
 

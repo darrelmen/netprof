@@ -106,7 +106,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.scoreAudioNow = scoreAudioNow;
 
     this.recordInResults = recordInResults;
-   // getElement().setId("PostAudioRecordButton");
+    // getElement().setId("PostAudioRecordButton");
     controller.register(this, exerciseID);
     Style style = getElement().getStyle();
     style.setMarginBottom(1, Style.Unit.PX);
@@ -130,7 +130,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    */
   public boolean stopRecording(long duration) {
     if (duration > MIN_DURATION) {
-    //  logger.info("stopRecording duration " + duration + " > " + MIN_DURATION);
+      //  logger.info("stopRecording duration " + duration + " > " + MIN_DURATION);
       controller.stopRecording(this::postAudioFile);
       return true;
     } else {
@@ -168,7 +168,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         index,
         getAudioType());
 
-//    logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
+    //  logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
 
     DecoderOptions decoderOptions = new DecoderOptions()
         .setDoDecode(scoreAudioNow)
@@ -187,17 +187,19 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         decoderOptions,
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
-            onPostFailure(then, user,getExceptionAsString(caught));
-            controller.handleNonFatalError("posting audio",caught);
+            onPostFailure(then, user, getExceptionAsString(caught));
+            controller.handleNonFatalError("posting audio", caught);
           }
 
-          public void onSuccess(AudioAnswer result) {            onPostSuccess(result, then);          }
+          public void onSuccess(AudioAnswer result) {
+            onPostSuccess(result, then);
+          }
         });
   }
 
-  private void onPostFailure(long then, int user,String exception) {
+  private void onPostFailure(long then, int user, String exception) {
     long now = System.currentTimeMillis();
-    logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis :\n"+exception);
+    logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis :\n" + exception);
     logMessage("failed to post audio for " + user + " exercise " + getExerciseID(), true);
     showPopup(Validity.INVALID.getPrompt());
   }
@@ -205,7 +207,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   private void onPostSuccess(AudioAnswer result, long then) {
     long now = System.currentTimeMillis();
     long roundtrip = now - then;
-    //logger.info("PostAudioRecordButton : onPostSuccess Got audio answer " + result);// + " platform is " + getPlatform());
+
+    //  logger.info("PostAudioRecordButton : onPostSuccess Got audio answer " + result);// + " platform is " + getPlatform());
 
     if (result.getReqid() != reqid) {
       logger.info("onPostSuccess ignoring old response " + result);
@@ -226,6 +229,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   /**
    * Just for load testing
+   *
    * @param result
    * @return
    */
@@ -241,7 +245,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     controller.getScoringService().addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("addRoundTrip",caught);
+        controller.handleNonFatalError("addRoundTrip", caught);
       }
 
       @Override
@@ -313,8 +317,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   /**
-   * @see #onPostSuccess
    * @param result
+   * @see #onPostSuccess
    */
   public abstract void useResult(AudioAnswer result);
 

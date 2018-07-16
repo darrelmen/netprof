@@ -51,12 +51,20 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     this.isContext = isContext;
   }
 
-
+  @Override
+  protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyDefaultUser, boolean onlyUninspected) {
+    ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected);
+    exerciseListRequest.setOnlyRecordedByMatchingGender(true);
+    exerciseListRequest.setOnlyUnrecordedByMe(true);
+    return exerciseListRequest;
+  }
 
   @NotNull
   @Override
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
-    return new FilterRequest(incrReqID(), pairs, userListID).setRecordRequest(true).setExampleRequest(isContext);
+    return new FilterRequest(incrReqID(), pairs, userListID)
+        .setRecordRequest(true)
+        .setExampleRequest(isContext);
   }
 
   @NotNull
@@ -89,7 +97,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     } else {
       //logger.info("getExerciseListRequest no recorded selection in " + getTypeToSelection().keySet());
     }
- //   logger.info("getExerciseListRequest req     " + request);
+    //   logger.info("getExerciseListRequest req     " + request);
     request.setOnlyExamples(isContext);
     return request;
   }
@@ -99,11 +107,14 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     return key;
   }
 
+  /**
+   * No list facet or special facet.
+   * @param typeToValues
+   * @return
+   */
   @Override
   protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
-    ListItem liForDimensionForType = getTypeContainer(RECORDED);
-    liForDimensionForType.add(addChoices(typeToValues, RECORDED));
-    return liForDimensionForType;
+    return null;
   }
 
   @NotNull
@@ -112,7 +123,8 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     return new HashSet<>(visibleIDs);
   }
 
-  @Override protected void goGetNextAndCacheIt(int itemID) {
+  @Override
+  protected void goGetNextAndCacheIt(int itemID) {
   }
 
   void restoreUI(SelectionState selectionState) {

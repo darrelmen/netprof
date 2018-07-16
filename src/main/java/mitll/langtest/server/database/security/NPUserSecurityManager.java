@@ -603,7 +603,12 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 */
 
-  //  @Override
+  /**
+   *
+   * @param threadLocalRequest
+   * @return -1 if no user session, else user id
+   * @throws DominoSessionException
+   */
   @Override
   public int getUserIDFromSessionLight(HttpServletRequest threadLocalRequest) throws DominoSessionException {
     int userIDFromSession = getUserIDFromRequest(threadLocalRequest);
@@ -631,7 +636,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * Get the userid from the session.
    *
    * @param request
-   * @return
+   * @return -1 if no user session, else user id
    * @see mitll.langtest.server.DatabaseServlet#getProjectID
    */
   public int getUserIDFromRequest(HttpServletRequest request) {

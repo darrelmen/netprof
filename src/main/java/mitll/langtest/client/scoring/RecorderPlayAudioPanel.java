@@ -19,12 +19,15 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.logging.Logger;
+
 /**
  * Created by go22670 on 4/5/17.
  *
  * @see SimpleRecordAudioPanel#makePlayAudioPanel
  */
 class RecorderPlayAudioPanel extends PlayAudioPanel {
+  protected final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final SafeUri firstRed = UriUtils.fromSafeConstant(FIRST_RED);
 

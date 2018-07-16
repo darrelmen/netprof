@@ -240,7 +240,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * 5) if log out, just one session info should be cleared - or all???
    * ? what if have two browsers open - logged in in one, logged out in other?
    *
-   * @return
+   * @return -1 if no user session, else user id
    */
   protected int getUserIDFromSessionOrDB() throws DominoSessionException {
     return securityManager.getUserIDFromSessionLight(getThreadLocalRequest());

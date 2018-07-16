@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
@@ -227,7 +228,6 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends Di
     playAudioPanel.setEnabled(false);
     scoreFeedbackDiv.hideScore();
 
-    //if (goodwaveExercisePanel != null) goodwaveExercisePanel.setBusy(true);
     playAudioPanel.showFirstRecord();
 
     waitCursorHelper.showFinished();
@@ -246,10 +246,8 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends Di
    */
   @Override
   public void stopRecording() {
-    //  logger.info("stopRecording...");
+    //    logger.info("stopRecording...");
     playAudioPanel.setEnabled(true);
-
-    //if (goodwaveExercisePanel != null) goodwaveExercisePanel.setBusy(false);
     playAudioPanel.hideRecord();
 
     scoreHistory.setVisible(true);

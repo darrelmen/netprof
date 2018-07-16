@@ -19,7 +19,7 @@ import java.util.*;
 public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/ {
   private static final Logger logger = LogManager.getLogger(SlickEventImpl.class);
   private static final int MAX_EVENTS_TO_SHOW = 20000;
-  private EventDAOWrapper eventDAOWrapper;
+  private final EventDAOWrapper eventDAOWrapper;
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
@@ -135,10 +135,10 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
     return true;
   }
 
-  private Set<String> missing = new TreeSet<>();
+  private final Set<String> missing = new TreeSet<>();
 
 
-  public SlickEvent toSlick(Event event, int projid, Map<String, Integer> exToInt, int userid) {
+  private SlickEvent toSlick(Event event, int projid, Map<String, Integer> exToInt, int userid) {
     String trim = event.getExerciseID().trim();
     Integer exid = exToInt.get(trim);
     if (exid == null) {
