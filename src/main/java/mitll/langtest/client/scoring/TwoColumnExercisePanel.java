@@ -116,7 +116,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                                 final ListInterface<?, ?> listContainer,
                                 Map<Integer, AlignmentOutput> alignments,
                                 boolean addPlayer) {
-    super(commonExercise, controller, listContainer, alignments);
+    super(commonExercise, controller, listContainer, alignments, null);
     //this.exercise = commonExercise;
     // this.controller = controller;
     this.listContainer = listContainer;

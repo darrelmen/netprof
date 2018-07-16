@@ -697,12 +697,12 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public Project getProjectByName(String name) {
-    return idToProject
+    Optional<Project> first = idToProject
         .values()
         .stream()
         .filter(project -> project.getProject().name().toLowerCase().equals(name.toLowerCase()))
-        .findFirst()
-        .orElseGet(null);
+        .findFirst();
+    return first.orElse(null);
   }
 
   @Override

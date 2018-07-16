@@ -82,14 +82,15 @@ public class SoundManagerStatic implements SoundManagerAPI {
    * @param title
    * @param file
    * @param doAutoload
+   * @param volume
    * @see mitll.langtest.client.sound.PlayAudioPanel#createSound
    * @see SoundFeedback#createSound(String, mitll.langtest.client.sound.SoundFeedback.EndListener, boolean)
    */
-  public void createSound(Sound sound, String title, String file, boolean doAutoload) {
+  public void createSound(Sound sound, String title, String file, boolean doAutoload, int volume) {
 //    if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
     if (SoundManager.isReady() && SoundManager.isOK()) {
       if (DEBUG) logger.info("SoundManagerStatic.createSound " + sound);
-      SoundManager.createSound(sound, title, file, doAutoload);
+      SoundManager.createSound(sound, title, file, doAutoload, volume);
     }
   }
 

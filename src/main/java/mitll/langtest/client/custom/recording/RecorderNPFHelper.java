@@ -131,7 +131,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
    * @see RecordRefAudioPanel#onLoad
    */
   private void getProgressInfo() {
-    logger.info("getProgressInfo Get progress info for " + getClass());
+//    logger.info("getProgressInfo Get progress info for " + getClass());
     controller.getService().getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
       public void onFailure(Throwable caught) {

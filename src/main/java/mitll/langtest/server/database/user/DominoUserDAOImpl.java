@@ -232,12 +232,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       makeUserService(database, props);
       {
         long now = System.currentTimeMillis();
-        logger.info("took " + (now - then) + " millis to make user service");
+        if (now - then > 30) {
+          logger.info("took " + (now - then) + " millis to make user service");
+        }
       }
       doAfterGetDelegate();
       {
         long now = System.currentTimeMillis();
-        logger.info("took " + (now - then) + " millis to do after delegate");
+        if (now - then > 100) {
+          logger.info("took " + (now - then) + " millis to do after delegate");
+        }
       }
     } else {
       if (servletContext != null) {
@@ -431,8 +435,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   private void ensureDefaultUsersLocal() {
-    logger.info("ensureDefaultUsersLocal --- ");
-
+//    logger.info("ensureDefaultUsersLocal --- ");
     this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", Kind.QAQC);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", USER, Kind.CONTENT_DEVELOPER);

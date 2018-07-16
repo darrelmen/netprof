@@ -56,7 +56,7 @@ public class ServerInitializationManagerNetProf {
 
   private static final String appName = "netprof";
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final String DEFAULT_PROPERTY_HOME =
       File.separator + "opt" +
           File.separator + appName +
@@ -221,7 +221,7 @@ public class ServerInitializationManagerNetProf {
       if (props.isEmpty()) {
         log.error("\n\n\ngetServerProperties : huh? server props is empty?\n\n\n");
       } else {
-        if (DEBUG) log.debug("getServerProperties : Loaded " + props.size() + " properties");
+        if (DEBUG) log.info("getServerProperties : Loaded " + props.size() + " properties");
       }
 
       Map<String, String> manifest = new HashMap<>();
@@ -281,7 +281,7 @@ public class ServerInitializationManagerNetProf {
       if (in != null) {
         Properties props = new Properties();
         props.load(in);
-        if (DEBUG) log.debug("readPropertiesStream " + props);
+        if (DEBUG) log.info("readPropertiesStream " + props);
         return props;
       } else {
         log.warn("Could not find " + appName + " config file! Initialization failure! " + in);

@@ -138,6 +138,7 @@ public class ServerProperties {
   public static final String LOG_MAILFROM = "log.mailfrom";
   public static final String MAIL_FROM = "mail.from";
   public static final String IMAGE = "image";
+  public static final String NETPROF = "netprof";
 
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
@@ -810,8 +811,15 @@ public class ServerProperties {
     return getIntPropertyDef("trimAfterMillis", TRIM_SILENCE_AFTER);
   }
 
+  /**
+   * Dialog branch specific config!
+   * Not read from config file!
+   * So we can share the netprof.properties config file.
+   * @return
+   */
   public String getDBConfig() {
-    return props.getProperty(DB_CONFIG, POSTGRES_HYDRA);
+    return "postgresData2Dialog";//
+    // props.getProperty(DB_CONFIG, POSTGRES_HYDRA);
   }
 
   /**
@@ -832,18 +840,7 @@ public class ServerProperties {
   }
 
   public String getAppTitle() {
-    return props.getProperty(APP_TITLE, "netprof");
-  }
-
-  /**
-   * Not what you want probably...
-   *
-   * @return
-   * @see mitll.langtest.server.rest.RestUserManagement#addUser
-   * @deprecated
-   */
-  public String getAppURL() {
-    return props.getProperty(APP_URL, "https://" + getNPServer() + "/" + "netProf");
+    return props.getProperty(APP_TITLE, NETPROF);
   }
 
   /**

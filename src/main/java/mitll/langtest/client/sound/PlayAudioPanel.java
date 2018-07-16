@@ -99,7 +99,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
                         ExerciseController controller,
                         int exid,
                         boolean addButtonsNow) {
-    super(controller.getSoundManager());
+    super(controller.getSoundManager(), 100);
     addStyleName("playButton");
     playLabel = buttonTitle;
     if (buttonTitle.isEmpty()) {

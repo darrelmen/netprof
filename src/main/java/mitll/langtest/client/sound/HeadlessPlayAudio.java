@@ -35,10 +35,12 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final boolean DEBUG = false;
+  private int volume;
 
-  public HeadlessPlayAudio(SoundManagerAPI soundManager) {
+  public HeadlessPlayAudio(SoundManagerAPI soundManager, int volume) {
     id = counter++;
     this.soundManager = soundManager;
+    this.volume = volume;
   }
 
   /**
@@ -48,6 +50,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   public void addPlayListener(PlayListener playListener) {
     this.playListeners.add(playListener);
   }
+
   public void removePlayListener(PlayListener playListener) {
     this.playListeners.remove(playListener);
   }
@@ -96,8 +99,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     if (isPlaying()) {
       pause();
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -185,7 +187,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   public void update(double position) {
-   // logger.info("update " +listeners.size() + " with " + position);
+    // logger.info("update " +listeners.size() + " with " + position);
     listeners.forEach(audioControl -> audioControl.update(position));
   }
 
@@ -298,7 +300,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   /**
-   *
    * TODO : add optional volume
    *
    *
@@ -346,7 +347,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     }
 
     String uniqueID = song + "_" + getElement().getId(); // fix bug where multiple npf panels might load the same audio file and not load the second one seemingly
-    soundManager.createSound(currentSound, uniqueID, song, doAutoload);
+    soundManager.createSound(currentSound, uniqueID, song, doAutoload, volume);
   }
 
   /**

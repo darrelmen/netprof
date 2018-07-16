@@ -304,7 +304,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     //åString configDir1 = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
-    //logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
+    logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 
     try {
       Object attribute = servletContext.getAttribute(USER_SVC);
@@ -316,16 +316,18 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       }
 
       db = makeDatabaseImpl(serverProps);
-      // logger.info("readProperties made database " + db);
+      logger.info("readProperties made database " + db);
+
       securityManager = new NPUserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
-      //  logger.info("readProperties made securityManager " + securityManager);
+      logger.info("readProperties made securityManager " + securityManager);
+
       db.setUserSecurityManager(securityManager);
     } catch (Exception e) {
       logger.error("readProperties got " + e, e);
     }
 
     shareDB(servletContext, db);
-    // logger.info("readProperties shareDB ");
+    logger.info("readProperties shareDB ");
 //    shareLoadTesting(servletContext);
 
     return serverProps;

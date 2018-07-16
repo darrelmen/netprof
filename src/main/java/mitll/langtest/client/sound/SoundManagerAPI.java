@@ -52,8 +52,9 @@ public interface SoundManagerAPI {
    * @param title
    * @param file
    * @param doAutoload
+   * @param volume
    */
-  void createSound(Sound sound, String title, String file, boolean doAutoload);
+  void createSound(Sound sound, String title, String file, boolean doAutoload, int volume);
 
   void setVolume(String title, int vol);
   void setVolume(  int vol);

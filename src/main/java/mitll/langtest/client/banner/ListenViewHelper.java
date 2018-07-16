@@ -35,7 +35,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class ListenViewHelper implements ContentView, PlayListener {
+public class ListenViewHelper implements ContentView, PlayListener, IListenView {
   private static final String HIGHLIHGT_COLOR = "green";
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
@@ -54,6 +54,7 @@ public class ListenViewHelper implements ContentView, PlayListener {
   private Boolean leftSpeaker = true;
   private Boolean rightSpeaker = true;
   private CheckBox leftSpeakerBox, rightSpeakerBox;
+  private ComplexWidget slider;
 
   /**
    * @param controller
@@ -318,7 +319,7 @@ public class ListenViewHelper implements ContentView, PlayListener {
 
   @NotNull
   private DialogExercisePanel<ClientExercise> getTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    DialogExercisePanel<ClientExercise> turn = new DialogExercisePanel<>(clientExercise, controller, null, alignments);
+    DialogExercisePanel<ClientExercise> turn = new DialogExercisePanel<>(clientExercise, controller, null, alignments, this);
     turn.addWidgets(true, false, PhonesChoices.HIDE);
 
     Style style = turn.getElement().getStyle();
@@ -398,12 +399,15 @@ public class ListenViewHelper implements ContentView, PlayListener {
   }
 
   private void gotSliderChange() {
-    int value = slider.getElement().getPropertyInt("value");
-  controller.getSoundManager().setVolume(value);
-    logger.info("got slider change " + value);
+    //   int value = getVolume();
+    controller.getSoundManager().setVolume(getVolume());
+    //  logger.info("got slider change " + value);
   }
 
-  private ComplexWidget slider;
+  @Override
+  public int getVolume() {
+    return slider.getElement().getPropertyInt("value");
+  }
 
 
   @NotNull

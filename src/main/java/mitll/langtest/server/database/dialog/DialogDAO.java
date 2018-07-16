@@ -35,8 +35,8 @@ package mitll.langtest.server.database.dialog;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
@@ -69,21 +69,23 @@ public class DialogDAO extends DAO implements IDialogDAO {
   /**
    * @param database
    * @param dbConnection
-   * @param userExerciseDAO
    * @see DatabaseImpl#initializeDAOs
    */
   public DialogDAO(Database database,
                    DBConnection dbConnection,
-                   IUserExerciseDAO userExerciseDAO,
                    DatabaseImpl databaseImpl) {
     super(database);
     dao = new DialogDAOWrapper(dbConnection);
     this.databaseImpl = databaseImpl;
 
-    //ensureDefault(databaseImpl.getUserDAO().getDefaultUser());
     dialogAttributeJoinHelper = new DialogAttributeJoinHelper(new DialogAttributeJoinDAOWrapper(dbConnection));
   }
 
+  /**
+   * @see DatabaseImpl#finalSetup(SlickAudioDAO)
+   * @param defaultUser
+   * @return
+   */
   public int ensureDefault(int defaultUser) {
     SlickDialog defaultProject = getDefaultDialog();
     if (defaultProject == null) {

@@ -13,6 +13,10 @@ public interface IImageDAO extends IDAO {
 
   List<SlickImage> getAllNoExistsCheck(int projid);
 
+  int ensureDefault(int defProjectID);
+
   void makeSureImagesAreThere(int projectID, String language, boolean validateAll);
+
+  int getDefault();
 
 }

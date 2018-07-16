@@ -235,8 +235,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     // first connect to postgres
 
     setPostgresDBConnection();
-//    logger.debug("initializeDAOs --- " + servletContext);
-    //makeDialogDAOs();
     // then connect to mongo
     DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);
 
@@ -393,10 +391,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     createTables();
 
     new Thread(() -> {
-      while (getUserDAO().getDefaultUser() <1) {
+      while (getUserDAO().getDefaultUser() < 1) {
         try {
           sleep(1000);
-          logger.info("---> no default user yet.....");
+          logger.info("finalSetup ---> no default user yet.....");
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
@@ -404,25 +402,23 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
       {
         int defaultUser = getUserDAO().getDefaultUser();
-        logger.info("finalSetup : default user " + defaultUser);
+        imageDAO.ensureDefault(projectDAO.getDefault());
+//        logger.info("finalSetup : default user " + defaultUser);
         dialogDAO.ensureDefault(defaultUser);
       }
     }).start();
-  //  dialogDAO.ensureDefault(getUserDAO().getDefaultUser());
 
     afterDAOSetup(slickAudioDAO);
 
-    logger.debug("initializeDAOs : tables = " + getTables());
+    logger.info("finalSetup : tables = " + getTables());
   }
 
+  /**
+   * Image DAO must go first - dialog default references it.
+   */
   private void makeDialogDAOs() {
-    dialogDAO = new DialogDAO(this, dbConnection, userExerciseDAO, this);
     imageDAO = new ImageDAO(this, dbConnection);
-//    HashMap<CommonExercise, String> exToAudio = new HashMap<>();
-//    new KPDialogs().getDialogs(userDAO.getDefaultUser(), 2, exToAudio);
-//    //logger.info("exToAudio " + exToAudio);
-////    exToAudio.forEach((k, v) -> logger.info(k + " : " + v));
-//    System.exit(1);
+    dialogDAO = new DialogDAO(this, dbConnection, this);
   }
 
   private void afterDAOSetup(SlickAudioDAO slickAudioDAO) {
@@ -696,8 +692,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   private DBConnection getDbConnection() {
-    DBConnection dbConnection = new DBConnection(getDbConfig());
-    dbConnection.addColumn();
+    String dbConfig = getDbConfig();
+    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
+
+    DBConnection dbConnection = new DBConnection(dbConfig);
+ //   dbConnection.addColumn();
 //    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
     return dbConnection;
   }
@@ -1094,7 +1093,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * TODO : why is this so confusing???
    *
-   * @param userExercise
+   * @param clientExercise
    * @param keepAudio
    * @seex mitll.langtest.server.services.ListServiceImpl#editItem
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
@@ -1330,35 +1329,41 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   public void createTables() {
-    logger.info("createTables create slick tables - has " + dbConnection.getTables());
-
+    logger.info("createTables create slick tables - has " + getTables());
     List<String> created = new ArrayList<>();
 
-    Arrays.asList(
-        getProjectDAO(),
-        userExerciseDAO,
-        userExerciseDAO.getRelatedExercise(),
-        userExerciseDAO.getRelatedCoreExercise(),
-        userExerciseDAO.getExerciseAttribute(),
-        userExerciseDAO.getExerciseAttributeJoin(),
-        getEventDAO(),
-        getResultDAO(),
-        getAudioDAO(),
-        getAnnotationDAO(),
-        getWordDAO(),
-        getPhoneDAO(),
-        getRefResultDAO(),
-        getReviewedDAO(),
-        getSecondStateDAO(),
-        ((ProjectDAO) getProjectDAO()).getProjectPropertyDAO(),
-        getUserProjectDAO(),
-        userSessionDAO,
-        dliClassDAO,
-        dliClassJoinDAO,
-        dialogDAO,
-        dialogDAO.getDialogAttributeJoinHelper(),
-        imageDAO
-    ).forEach(idao -> createIfNotThere(idao, created));
+    List<String> known = dbConnection.getJavaListOfTables();
+    {
+      Arrays.asList(
+          getProjectDAO(),
+          userExerciseDAO,
+          userExerciseDAO.getRelatedExercise(),
+          userExerciseDAO.getRelatedCoreExercise(),
+          userExerciseDAO.getExerciseAttribute(),
+          userExerciseDAO.getExerciseAttributeJoin(),
+          getEventDAO(),
+          getResultDAO(),
+          getAudioDAO(),
+          getAnnotationDAO(),
+          getWordDAO(),
+          getPhoneDAO(),
+          getRefResultDAO(),
+          getReviewedDAO(),
+          getSecondStateDAO(),
+          ((ProjectDAO) getProjectDAO()).getProjectPropertyDAO(),
+          getUserProjectDAO(),
+          userSessionDAO,
+          dliClassDAO,
+          dliClassJoinDAO,
+          dialogDAO,
+          dialogDAO.getDialogAttributeJoinHelper(),
+          imageDAO
+      ).forEach(idao -> {
+        if (createIfNotThere(idao, known)) {
+          created.add(idao.getName());
+        }
+      });
+    }
 
     userListManager.createTables(dbConnection, created);
 
@@ -1366,17 +1371,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("createTables created slick tables          : " + created);
       logger.info("createTables after create slick tables - has " + getTables());
     }
-
   }
 
-  private void createIfNotThere(IDAO slickUserDAO, List<String> created) {
+  private boolean createIfNotThere(IDAO slickUserDAO,  List<String> known) {
     String name = slickUserDAO.getName();
-    if (!dbConnection.hasTable(name)) {
+    if (!known.contains(name)) {
       logger.info("createIfNotThere create " + name);
       slickUserDAO.createTable();
-      created.add(name);
+      return true;
     } else {
-    //  logger.info("createIfNotThere has table " + name);
+//      logger.info("createIfNotThere has table " + name);
+      return false;
     }
   }
 

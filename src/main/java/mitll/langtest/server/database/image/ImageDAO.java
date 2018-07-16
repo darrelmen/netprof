@@ -4,7 +4,11 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.dialog.DialogStatus;
+import mitll.langtest.server.database.project.IProjectDAO;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickDialog;
 import mitll.npdata.dao.SlickImage;
 import mitll.npdata.dao.image.ImageDAOWrapper;
 import org.apache.logging.log4j.LogManager;
@@ -12,17 +16,19 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 public class ImageDAO extends DAO implements IImageDAO {
   private static final Logger logger = LogManager.getLogger(ImageDAO.class);
+  //public static final int DEFAULT_IMAGE_ID = 1;
   private final boolean doCheckOnStartup;
   private final ServerProperties serverProps;
   private final boolean hasMediaDir;
   private final long now = System.currentTimeMillis();
   private final long before = now - (24 * 60 * 60 * 1000);
-
+  private int defImageID = -1;
   private final ImageDAOWrapper dao;
 
   /**
@@ -68,6 +74,41 @@ public class ImageDAO extends DAO implements IImageDAO {
   public List<SlickImage> getAllNoExistsCheck(int projid) {
     return dao.getAllNoCheck(projid);
   }
+
+  @Override
+  public int getDefault() {
+    return defImageID;
+  }
+
+  @Override
+  public int ensureDefault(int defProjectID) {
+    if (defImageID > 0) return defImageID;
+    else {
+      Collection<SlickImage> byID = dao.getDefault();
+
+      if (byID.isEmpty()) {
+        return defImageID = addDefault(defProjectID);
+      } else {
+        return defImageID = byID.iterator().next().id();
+      }
+    }
+  }
+
+  private int addDefault(int defProjectID) {
+
+    logger.info("addDefault for " + defProjectID);
+    long now = System.currentTimeMillis();
+
+    Timestamp modified = new Timestamp(now);
+    return insert(new SlickImage(-1,
+        defProjectID,
+        -1,
+        modified,
+        modified,
+        "default", "/opt/netprof/image/default.jpg", 0, 0, false, false, modified
+    ));
+  }
+
 
   public void makeSureImagesAreThere(int projectID, String language, boolean validateAll) {
     if (hasMediaDir) {

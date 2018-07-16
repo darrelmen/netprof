@@ -3,6 +3,7 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.*;
@@ -47,7 +48,7 @@ public class DialogExercisePanel<T extends ClientExercise>
   List<IHighlightSegment> flclickables = null;
 
   /**
-   *
+   * @see #makePlayAudio
    */
   protected HeadlessPlayAudio playAudio;
 
@@ -63,6 +64,7 @@ public class DialogExercisePanel<T extends ClientExercise>
    * Mandarin has special rules for the moment so we can match simplified chinese characters to traditional ones...
    */
   private boolean isMandarin;
+  private final IListenView listenView;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -75,13 +77,16 @@ public class DialogExercisePanel<T extends ClientExercise>
    * @see mitll.langtest.client.banner.NewLearnHelper#getFactory
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
+   * @see mitll.langtest.client.banner.ListenViewHelper#getTurnPanel
    */
   public DialogExercisePanel(final T commonExercise,
                              final ExerciseController controller,
                              final ListInterface<?, ?> listContainer,
-                             Map<Integer, AlignmentOutput> alignments) {
+                             Map<Integer, AlignmentOutput> alignments,
+                             IListenView listenView) {
     this.exercise = commonExercise;
     this.controller = controller;
+    this.listenView = listenView;
     isMandarin = getProjectStartupInfo() != null && getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
     this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
         controller, listContainer,
@@ -117,12 +122,12 @@ public class DialogExercisePanel<T extends ClientExercise>
 
   protected void makePlayAudio(T e, DivWidget flContainer) {
     if (hasAudio(e)) {
-      playAudio = new HeadlessPlayAudio(controller.getSoundManager());
+      playAudio = new HeadlessPlayAudio(controller.getSoundManager(), getVolume());
       alignmentFetcher.setPlayAudio(playAudio);
       if (!e.getAudioAttributes().isEmpty()) {
         AudioAttribute next = e.getAudioAttributes().iterator().next();
         playAudio.rememberAudio(next);
-        logger.info("makePlayAudio audio for " + e.getID() +  "  " + next);
+        logger.info("makePlayAudio audio for " + e.getID() + "  " + next);
 
         if (next.getAlignmentOutput() != null) {
           showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
@@ -134,6 +139,10 @@ public class DialogExercisePanel<T extends ClientExercise>
     } else {
       logger.warning("makePlayAudio no audio in " + e.getAudioAttributes());
     }
+  }
+
+  private int getVolume() {
+    return listenView == null ? 100 : listenView.getVolume();
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
