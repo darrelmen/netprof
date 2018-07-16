@@ -60,6 +60,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.
@@ -71,7 +72,7 @@ import java.util.Map;
  * <p>
  */
 public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
-  // private final Logger logger = Logger.getLogger("RecorderNPFHelper");
+  private final Logger logger = Logger.getLogger("RecorderNPFHelper");
   /**
    *
    */
@@ -134,7 +135,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
    * @see RecordRefAudioPanel#onLoad
    */
   private void getProgressInfo() {
-    //logger.info("Get progress info for " +getClass() + " instance " + instance);
+    logger.info("getProgressInfo Get progress info for " +getClass());
     controller.getService().getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -191,7 +192,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
         ((Panel) parent).add(c);
         added = true;
       } else {
-        getProgressInfo();
+        //getProgressInfo();
       }
     }
 

@@ -488,7 +488,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param onlyWithAudioAnno
    * @param onlyDefaultUser
    * @param onlyUninspected
-   * @see PagingExerciseList#loadExercises
+   * @seex PagingExerciseList#loadExercises
    * @see ExerciseList.SetExercisesCallback#onSuccess
    */
   protected void loadExercisesUsingPrefix(Map<String, Collection<String>> typeToSection,
@@ -538,14 +538,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     return getSelectionState(getHistoryTokenFromUIState(getTypeAheadText(), -1));
   }
 
-  protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix,
+  protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
+                                                       String prefix,
                                                        boolean onlyWithAudioAnno,
                                                        boolean onlyDefaultUser,
                                                        boolean onlyUninspected) {
     return getExerciseListRequest(prefix)
         .setTypeToSelection(typeToSection)
         .setOnlyWithAudioAnno(onlyWithAudioAnno)
-       // .setOnlyUnrecordedByMe(onlyUnrecorded)
         .setOnlyDefaultAudio(onlyDefaultUser)
         .setOnlyUninspected(onlyUninspected);
   }
@@ -563,13 +563,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                               ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
     if (DEBUG) {
-      logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID + " for " + request);
+      logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID +
+          "\n\tfor " + request);
 
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
 //      logger.info("logException stack " + exceptionAsString);
     }
     if (controller.getUser() > 0) {
-     // final long then = System.currentTimeMillis();
+      // final long then = System.currentTimeMillis();
       service.getExerciseIds(
           request,
           new SetExercisesCallback(userListID + "_" + typeToSection.toString(), prefix, exerciseID, request));

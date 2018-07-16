@@ -22,21 +22,25 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.SectionHelper#addOrMerge
    * @param node
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addOrMerge
    */
   public MatchInfo(SectionNode node) {
     this.value = node.getName();
     this.count = node.getCount();
   }
 
+  public MatchInfo(String value, int count) {
+    this(value, count, -1, false, "");
+  }
+
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#getMatchInfoForEachList
    * @param value
    * @param count
    * @param userListID
    * @param italic
    * @param tooltip
+   * @see mitll.langtest.client.list.FacetExerciseList#getMatchInfoForEachList
    */
   public MatchInfo(String value, int count, int userListID, boolean italic, String tooltip) {
     this.value = value;
@@ -76,7 +80,9 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
     return userListID;
   }
 
-  public boolean isItalic() {   return italic;  }
+  public boolean isItalic() {
+    return italic;
+  }
 
   public String getTooltip() {
     return tooltip;

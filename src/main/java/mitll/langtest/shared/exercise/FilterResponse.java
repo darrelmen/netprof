@@ -71,10 +71,18 @@ public class FilterResponse implements IsSerializable {
     this.userListID = userListID;
   }
 
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#gotFilterResponse
+   * @return
+   */
   public Map<String, Set<MatchInfo>> getTypeToValues() {
     return typeToValues;
   }
 
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#gotFilterResponse
+   * @return
+   */
   public Set<String> getTypesToInclude() {
     return typesToInclude;
   }

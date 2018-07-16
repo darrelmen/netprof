@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
@@ -25,7 +26,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget implements RecordingAudioListener {
-  // private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
   public static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
@@ -227,7 +228,6 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
     playAudioPanel.setEnabled(false);
     scoreFeedbackDiv.hideScore();
 
-    //if (goodwaveExercisePanel != null) goodwaveExercisePanel.setBusy(true);
     playAudioPanel.showFirstRecord();
 
     waitCursorHelper.showFinished();
@@ -246,10 +246,8 @@ public class SimpleRecordAudioPanel<T extends CommonExercise> extends DivWidget 
    */
   @Override
   public void stopRecording() {
-    //  logger.info("stopRecording...");
+    //    logger.info("stopRecording...");
     playAudioPanel.setEnabled(true);
-
-    //if (goodwaveExercisePanel != null) goodwaveExercisePanel.setBusy(false);
     playAudioPanel.hideRecord();
 
     scoreHistory.setVisible(true);

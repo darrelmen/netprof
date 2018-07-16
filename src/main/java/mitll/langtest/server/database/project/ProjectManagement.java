@@ -751,6 +751,10 @@ public class ProjectManagement implements IProjectManagement {
     return project;
   }
 
+  public boolean exists(int projectid) {
+    return idToProject.containsKey(projectid);
+  }
+
   /**
    * @return
    * @see #getProject

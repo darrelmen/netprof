@@ -920,16 +920,13 @@ public class SectionHelper<T extends Shell & HasUnitChapter> implements ISection
    * @see #rememberTypesInOrder
    */
   private SectionNode rememberOne(final List<String> predefinedTypeOrder, SectionNode child, List<Pair> pairs) {
-    pairs.sort(new Comparator<Pair>() {
-      @Override
-      public int compare(Pair o1, Pair o2) {
-        int i = predefinedTypeOrder.indexOf(o1.getProperty());
-        int anotherInteger = predefinedTypeOrder.indexOf(o2.getProperty());
-        if (i > 0 && anotherInteger == -1) return -1;
-        else if (i == -1 && anotherInteger > 0) return +1;
-        else if (i == -1 && anotherInteger == -1) return o1.getProperty().compareTo(o2.getProperty());
-        else return Integer.compare(i, anotherInteger);
-      }
+    pairs.sort((o1, o2) -> {
+      int i = predefinedTypeOrder.indexOf(o1.getProperty());
+      int anotherInteger = predefinedTypeOrder.indexOf(o2.getProperty());
+      if (i > 0 && anotherInteger == -1) return -1;
+      else if (i == -1 && anotherInteger > 0) return +1;
+      else if (i == -1 && anotherInteger == -1) return o1.getProperty().compareTo(o2.getProperty());
+      else return Integer.compare(i, anotherInteger);
     });
 
 /*

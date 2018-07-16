@@ -96,6 +96,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
   /**
    * Make sure we disable the other companion panel.
    *
+   * Only change enabled state if it's not recording already.
    * @param v
    */
   public void setBusy(boolean v) {
@@ -105,8 +106,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends CommonExerci
     for (RecordAudioPanel ap : audioPanels) {
       if (!ap.isRecording()) {
         ap.setEnabled(!v);
-      } else {
-        ap.setEnabled(v);
       }
     }
   }
