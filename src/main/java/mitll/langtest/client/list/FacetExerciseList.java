@@ -76,7 +76,6 @@ import java.util.stream.Collectors;
 import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
-import static mitll.langtest.shared.project.ProjectProperty.SWAP_PRIMARY_AND_ALT;
 
 public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, U extends CommonShell>
     extends HistoryExerciseList<T, U>

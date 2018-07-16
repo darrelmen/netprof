@@ -32,18 +32,12 @@
 
 package mitll.langtest.server.services;
 
-import com.google.gson.JsonObject;
 import mitll.langtest.client.services.ExerciseService;
-import mitll.langtest.server.audio.image.ImageType;
-import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.*;
-import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.scoring.AlignmentHelper;
-import mitll.langtest.server.scoring.ParseResultJson;
-import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -52,9 +46,6 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.scoring.AlignmentOutput;
-import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;

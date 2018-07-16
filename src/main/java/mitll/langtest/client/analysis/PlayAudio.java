@@ -42,8 +42,6 @@ import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.exercise.Pair;
 
-import java.util.logging.Logger;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

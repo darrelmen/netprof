@@ -39,7 +39,6 @@ import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.npdata.dao.SlickExercise;
 
 import java.util.*;

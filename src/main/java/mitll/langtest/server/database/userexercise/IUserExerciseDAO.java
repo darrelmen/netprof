@@ -32,13 +32,9 @@
 
 package mitll.langtest.server.database.userexercise;
 
-import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ScoreServlet;
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;

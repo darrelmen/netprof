@@ -3,7 +3,6 @@ package mitll.langtest.client.sound;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
 import java.util.logging.Logger;
