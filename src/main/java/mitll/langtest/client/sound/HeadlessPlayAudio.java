@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.shared.exercise.AudioAttribute;
 
@@ -16,6 +17,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   protected final Collection<AudioControl> listeners = new HashSet<>();
   final List<PlayListener> playListeners = new ArrayList<>();
   protected final int id;
+  private IListenView listenView;
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
       "Please add this site to its whitelist.</font>");
   /**
@@ -35,14 +37,19 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final boolean DEBUG = false;
-  private int volume;
+  // private int volume;
 
-  public HeadlessPlayAudio(SoundManagerAPI soundManager, int volume) {
+  public HeadlessPlayAudio(SoundManagerAPI soundManager) {
     id = counter++;
     this.soundManager = soundManager;
-    this.volume = volume;
+    //this.volume = volume;
 
-    logger.info("play volume " + volume);
+    //   logger.info("HeadlessPlayAudio play volume " + volume);
+  }
+
+  public HeadlessPlayAudio(SoundManagerAPI soundManager, IListenView listenView) {
+    this(soundManager);
+    this.listenView = listenView;
   }
 
   /**
@@ -348,12 +355,12 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 
 
     if (DEBUG || true) {
-      logger.info("PlayAudioPanel.createSound  " +uniqueID +
+      logger.info("HeadlessPlayAudioPanel.createSound  " + uniqueID +
           "" +
           ": (" + getElement().getId() + ") for " + song + " : " + this + " created sound " + currentSound);
     }
 
-    soundManager.createSound(currentSound, uniqueID, song, doAutoload, volume);
+    soundManager.createSound(currentSound, uniqueID, song, doAutoload, listenView == null ? 100 : listenView.getVolume());
   }
 
   /**

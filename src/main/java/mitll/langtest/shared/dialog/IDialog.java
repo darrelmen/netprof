@@ -1,15 +1,12 @@
 package mitll.langtest.shared.dialog;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.List;
 import java.util.Map;
 
-public interface IDialog extends CommonShell, HasUnitChapter {
+public interface IDialog extends CommonShell, HasUnitChapter, Scored {
   enum METADATA implements IsSerializable {
     UNIT, CHAPTER, PAGE, PRESENTATION, FLPRESENTATION, SPEAKER, FLTITLE;
 
@@ -21,6 +18,8 @@ public interface IDialog extends CommonShell, HasUnitChapter {
       return toString().substring(0, 1).toUpperCase() + toString().substring(1);
     }
   }
+
+  String getAttributeValue(METADATA metadata);
 
   int getUserid();
 

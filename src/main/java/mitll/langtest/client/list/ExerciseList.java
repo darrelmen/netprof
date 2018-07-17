@@ -274,7 +274,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   /**
    * @see #getExercises
    */
-  class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
+  protected class SetExercisesCallback implements AsyncCallback<ExerciseListWrapper<T>> {
     private final String selectionID;
     private final String searchIfAny;
     private final int exerciseID;
@@ -287,7 +287,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
      * @param exerciseID
      * @see HistoryExerciseList#getExerciseIDs
      */
-    SetExercisesCallback(String selectionID, String searchIfAny, int exerciseID, ExerciseListRequest request) {
+    public SetExercisesCallback(String selectionID, String searchIfAny, int exerciseID, ExerciseListRequest request) {
       this.selectionID = selectionID;
       this.searchIfAny = searchIfAny;
       this.exerciseID = exerciseID;

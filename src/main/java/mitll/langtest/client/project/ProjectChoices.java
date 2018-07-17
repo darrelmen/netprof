@@ -24,7 +24,6 @@ import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.services.OpenUserServiceAsync;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
-import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -43,9 +42,11 @@ import static mitll.langtest.shared.user.User.Permission.*;
 /**
  * Created by go22670 on 1/12/17.
  */
-public class ProjectChoices {
-  private static final String GVIDAVER = "gvidaver";
+public class ProjectChoices extends ThumbnailChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
+
+
+  private static final String GVIDAVER = "gvidaver";
 
   public static final String PLEASE_WAIT = "Please wait...";
   private static final String SYNCHRONIZE_CONTENT_WITH_DOMINO = "Synchronize content with domino.";
@@ -79,7 +80,6 @@ public class ProjectChoices {
    */
   private static final String CREATE_NEW_PROJECT = "Create New Project";
 
-  private static final int CHOICE_WIDTH = 170;//180;//190;//195;
   /**
    * @see #getImageAnchor
    */
@@ -253,9 +253,7 @@ public class ProjectChoices {
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
     // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
-    final Section section = new Section("section");
-    section.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
-    section.setHeight("100%");
+    final Section section = getScrollingSection();
     section.add(getHeader(result, nest));
 
     {
@@ -543,9 +541,7 @@ public class ProjectChoices {
     if (projectForLang.hasChildren() && numVisibleChildren == 0) {
       return null;
     } else {
-      Thumbnail thumbnail = new Thumbnail();
-      thumbnail.setWidth(CHOICE_WIDTH + "px");
-      thumbnail.setSize(2);
+      Thumbnail thumbnail = getThumbnail();
 
       boolean isQC = isQC();
       {
@@ -557,13 +553,13 @@ public class ProjectChoices {
         boolean hasChildren = projectForLang.hasChildren();
         if (isQC) {
           if (!hasChildren) {
-            addPopover(projectForLang, button);
+            addPopover(button, projectForLang);
           }
         } else {
-          if (!projectForLang.getCourse().isEmpty()) {
-            addPopoverUsual(projectForLang, button);
+          if (projectForLang.getCourse().isEmpty()) {
+            addPopover(button, projectForLang);
           } else {
-            addPopover(projectForLang, button);
+            addPopoverUsual(button, projectForLang);
           }
         }
       }
@@ -603,13 +599,12 @@ public class ProjectChoices {
     return container;
   }
 
-  private void addPopoverUsual(SlimProject projectForLang, FocusWidget button) {
+  private void addPopoverUsual(FocusWidget button, SlimProject projectForLang) {
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
     UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
   }
 
-  private final BasicDialog basicDialog = new BasicDialog();
 
   private void showPopoverUsual(SlimProject projectForLang,
                                 Widget button,
@@ -617,39 +612,15 @@ public class ProjectChoices {
                                 UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper) {
     Map<String, String> value = new HashMap<>();
     value.put(COURSE, projectForLang.getCourse());
-
-    basicDialog.showPopover(
-        button,
-        null,
-        ClientExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, value),
-        Placement.RIGHT);
+    showPopover(value, button, typeOrder, ClientExerciseUnitChapterItemHelper);
   }
 
-  private void addPopover(SlimProject projectForLang, FocusWidget button) {
-    Set<String> typeOrder = getProps(projectForLang).keySet();
-    UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
-    button.addMouseOverHandler(event -> showPopover(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
-  }
-
-  private void showPopover(SlimProject projectForLang,
-                           Widget button,
-                           Set<String> typeOrder,
-                           UnitChapterItemHelper<ClientExercise> unitChapterItemHelper) {
-    basicDialog.showPopover(
-        button,
-        null,
-        unitChapterItemHelper.getTypeToValue(typeOrder, getProps(projectForLang)),
-        Placement.RIGHT);
+  private void addPopover(FocusWidget button, SlimProject projectForLang) {
+    addPopover(button, getProps(projectForLang));
   }
 
   private Map<String, String> getProps(SlimProject projectForLang) {
     return projectForLang.getProps();
-  }
-
-  @NotNull
-  private String truncate(String columnText, int maxLengthId) {
-    if (columnText.length() > maxLengthId) columnText = columnText.substring(0, maxLengthId - 3) + "...";
-    return columnText;
   }
 
   /**
@@ -663,36 +634,20 @@ public class ProjectChoices {
   @NotNull
   private Heading getLabel(String name, SlimProject projectForLang, int numVisibleChildren) {
     ProjectStatus status = projectForLang.getStatus();
-    boolean hasChildren = projectForLang.hasChildren();
     String statusText = status == ProjectStatus.PRODUCTION ? "" : status.name();
 
-
-    return getLabel(name, hasChildren, numVisibleChildren, statusText);
+    return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText);
   }
 
   @NotNull
   private Heading getLabel(String name, boolean hasChildren, int numVisibleChildren, String statusText) {
-    Heading label = new Heading(LANGUAGE_SIZE, name);
-    label.addStyleName("floatLeft");
-    label.setWidth("100%");
-    label.getElement().getStyle().setLineHeight(25, Style.Unit.PX);
+    Heading label = getChoiceLabel(LANGUAGE_SIZE, name);
 
-    {
-      Widget subtitle = label.getWidget(0);
-      subtitle.addStyleName("floatLeft");
-      subtitle.setWidth("100%");
-      subtitle.addStyleName("topFiveMargin");
-    }
+    String subtext = hasChildren ?
+        (numVisibleChildren + ((numVisibleChildren == 1) ? COURSE1 : COURSES)) : statusText;
 
-    if (hasChildren) {
-      String suffix = (numVisibleChildren == 1) ? COURSE1 : COURSES;
-      label.setSubtext(numVisibleChildren + suffix);
-    } else {
-      //showProjectStatus(status, label);
-      label.setSubtext(statusText);
-    }
+    label.setSubtext(subtext);
 
-    label.addStyleName("floatLeft");
     return label;
   }
 

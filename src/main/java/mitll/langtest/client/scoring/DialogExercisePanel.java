@@ -122,12 +122,12 @@ public class DialogExercisePanel<T extends ClientExercise>
 
   protected void makePlayAudio(T e, DivWidget flContainer) {
     if (hasAudio(e)) {
-      playAudio = new HeadlessPlayAudio(controller.getSoundManager(), getVolume());
+      playAudio = new HeadlessPlayAudio(controller.getSoundManager(),listenView);
       alignmentFetcher.setPlayAudio(playAudio);
       if (!e.getAudioAttributes().isEmpty()) {
         AudioAttribute next = e.getAudioAttributes().iterator().next();
         playAudio.rememberAudio(next);
-        logger.info("makePlayAudio audio for " + e.getID() + "  " + next);
+      //  logger.info("makePlayAudio audio for " + e.getID() + "  " + next);
 
         if (next.getAlignmentOutput() != null) {
           showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());

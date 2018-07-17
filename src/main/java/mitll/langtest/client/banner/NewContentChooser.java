@@ -2,6 +2,9 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -43,7 +46,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
 /**
  * Created by go22670 on 4/10/17.
  */
-public class NewContentChooser implements INavigation {
+public class NewContentChooser implements INavigation, ValueChangeHandler<String> {
   private final Logger logger = Logger.getLogger("NewContentChooser");
 
   private static final String CURRENT_VIEW = "CurrentView";
@@ -58,6 +61,7 @@ public class NewContentChooser implements INavigation {
   private final ListView listView;
 
   private VIEWS currentSection = VIEWS.NONE;
+  private HandlerRegistration handlerRegistration;
 
   /**
    * @param controller
@@ -78,6 +82,8 @@ public class NewContentChooser implements INavigation {
     this.banner = banner;
     divWidget.setId("NewContentChooser");
     divWidget.setHeight("100%");
+
+    addHistoryListener();
   }
 
   /**
@@ -522,6 +528,13 @@ public class NewContentChooser implements INavigation {
     setHistoryWithList(listid, view);
     banner.show(view);
   }
+  private void setHistoryWithList(int listid, VIEWS views) {
+    // logger.info("showListIn - " + listid + " " + views);
+    History.newItem(
+        FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
+            SelectionState.INSTANCE + "=" + views.toString());
+  }
+
   @Override
   public void showDialogIn(int dialogid, VIEWS view) {
     // logger.info("showListIn - " + listid + " " + view);
@@ -529,13 +542,6 @@ public class NewContentChooser implements INavigation {
         SelectionState.DIALOG + "=" + dialogid + SelectionState.SECTION_SEPARATOR +
             SelectionState.INSTANCE + "=" + view.toString());
     banner.show(view);
-  }
-
-  private void setHistoryWithList(int listid, VIEWS views) {
-    // logger.info("showListIn - " + listid + " " + views);
-    History.newItem(
-        FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
-            SelectionState.INSTANCE + "=" + views.toString());
   }
 
   @Override
@@ -555,5 +561,34 @@ public class NewContentChooser implements INavigation {
   @Override
   public void clearCurrent() {
     currentSection = NONE;
+  }
+  private void addHistoryListener() {
+    if (handlerRegistration == null) {
+      handlerRegistration = History.addValueChangeHandler(this);
+    }
+  }
+
+  private void removeHistoryListener() {
+    if (handlerRegistration != null) {
+      handlerRegistration.removeHandler();
+      handlerRegistration = null;
+    }
+  }
+  @Override
+  public void onValueChange(ValueChangeEvent<String> event) {
+    SelectionState selectionState=new SelectionState();
+    String instance = selectionState.getInstance();
+    if (!instance.isEmpty()) {
+      try {
+        VIEWS views = VIEWS.valueOf(instance.toUpperCase());
+        logger.info("url says " + views);
+        String currentStoredView = getCurrentStoredView();
+        logger.info("currentStoredView says " + currentStoredView);
+
+      } catch (IllegalArgumentException e) {
+        e.printStackTrace();
+      }
+    }
+
   }
 }

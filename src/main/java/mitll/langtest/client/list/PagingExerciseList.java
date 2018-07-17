@@ -454,8 +454,20 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     onResize();
   }
 
+  /**
+   *
+   * @param comparator if null use original order
+   */
   @Override
   public void flushWith(Comparator<T> comparator) {
+    if (comparator == null) {
+      logger.info("use in order comparator");
+      comparator = (o1, o2) -> {
+        int i = inOrderResult.indexOf(o1);
+        int j = inOrderResult.indexOf(o2);
+        return Integer.compare(i,j);
+      };
+    }
     pagingContainer.setComparator(comparator);
     flush();
   }

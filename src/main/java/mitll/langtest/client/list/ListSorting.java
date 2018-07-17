@@ -2,6 +2,7 @@ package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.ListBox;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Scored;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -16,7 +17,7 @@ import java.util.logging.Logger;
  * TODO : don't do sorting here on text
  * Created by go22670 on 3/22/17.
  */
-class ListSorting<T extends CommonShell & ScoredExercise, U extends Shell> {
+class ListSorting<T extends CommonShell & Scored, U extends Shell> {
   private final Logger logger = Logger.getLogger("ListSorting");
 
   private static final String LANG_ASC = "langASC";
@@ -29,6 +30,7 @@ class ListSorting<T extends CommonShell & ScoredExercise, U extends Shell> {
   private final PagingExerciseList<T, U> exerciseList;
   private final String locale;
 
+  private static final String NATURAL_ORDER = "Natural Order";
   private static final String ENGLISH_ASC = "English : A-Z";
   private static final String MEANING_ASC = "Meaning : A-Z";
   private static final String ENGLISH_DSC = "English : Z-A";
@@ -65,6 +67,7 @@ class ListSorting<T extends CommonShell & ScoredExercise, U extends Shell> {
 
     if (language != null) {
       boolean isEnglish = language.equalsIgnoreCase("English");
+      w1.addItem(NATURAL_ORDER);
       w1.addItem(isEnglish ? MEANING_ASC : ENGLISH_ASC);
       w1.addItem(isEnglish ? MEANING_DSC : ENGLISH_DSC);
       String langASC = getLangASC(language, ASCENDING);
@@ -167,6 +170,8 @@ class ListSorting<T extends CommonShell & ScoredExercise, U extends Shell> {
       sortBy(toSort, (o1, o2) -> compareShells(o1, o2, compPhones(o1, o2)));
     } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
       sortBy(toSort, (o1, o2) -> compareShells(o1, o2, -1 * compPhones(o1, o2)));
+    } else if (selectedValue.equals(NATURAL_ORDER)) {
+      sortBy(toSort, null);
     } else if (selectedValue.equals(ENGLISH_ASC)) {
       sortBy(toSort, this::compEnglish);
     } else if (selectedValue.equals(ENGLISH_DSC)) {

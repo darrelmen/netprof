@@ -731,8 +731,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
 
       List<Boolean> adjusted = new ArrayList<>();
       for (CorrectAndScore score : scores) {
-        boolean correct = isCorrect(score.isCorrect(), score.getScore());
-        adjusted.add(correct);
+        adjusted.add(isCorrect(score.isCorrect(), score.getScore()));
       }
       String history = SetCompleteDisplay.getScoreHistory(adjusted);
       String s = "<span style='float:right;'>" + history + "&nbsp;" + Math.round(getAvgScore(scores)) + "</span>";

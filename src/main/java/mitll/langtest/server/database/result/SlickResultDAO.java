@@ -539,7 +539,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
 
     String json = cs.json();
-    CorrectAndScore correctAndScore = new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
+    CorrectAndScore correctAndScore = new CorrectAndScore(cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
         trimPathForWebPage2(filePath), json);
 
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = new ParseResultJson(serverProps, language).readFromJSON(json);

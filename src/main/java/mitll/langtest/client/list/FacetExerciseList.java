@@ -77,7 +77,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
-public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, U extends CommonShell>
+public abstract class FacetExerciseList<T extends CommonShell & Scored, U extends CommonShell>
     extends HistoryExerciseList<T, U>
     implements ShowEventListener {
   public static final String RECORDED = "Recorded";
@@ -1707,7 +1707,6 @@ public abstract class FacetExerciseList<T extends CommonShell & ScoredExercise, 
   @NotNull
   protected Map<Integer, U> setScoreHistory(Map<Integer, CorrectAndScore> scoreHistoryPerExercise,
                                             List<U> exercises
-
                                             //                                    ExerciseListWrapper<U> result
   ) {
     Map<Integer, U> idToEx = new HashMap<>();

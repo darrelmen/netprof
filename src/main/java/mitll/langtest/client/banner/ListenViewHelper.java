@@ -37,6 +37,14 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  */
 public class ListenViewHelper implements ContentView, PlayListener, IListenView {
   private static final String HIGHLIHGT_COLOR = "green";
+  public static final String VALUE = "value";
+  public static final String SLIDER_MAX = "100";
+  public static final String MAX = "max";
+  public static final String MIN = "min";
+  public static final String SLIDER_MIN = "0";
+  public static final String TYPE = "type";
+  public static final String RANGE = "range";
+  public static final String INPUT = "input";
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final int ROW_WIDTH = 97;
@@ -55,6 +63,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   private Boolean rightSpeaker = true;
   private CheckBox leftSpeakerBox, rightSpeakerBox;
   private ComplexWidget slider;
+  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -358,6 +367,10 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   private Button backwardButton, playButton, forwardButton;
 
+  /**
+   * TODO add playback rate
+   * @return
+   */
   @NotNull
   private DivWidget getControls() {
     DivWidget rowOne = new DivWidget();
@@ -382,20 +395,27 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
       rowOne.add(widgets2);
       forwardButton = widgets2;
     }
-//    InputElement range = createInputElement(Document.get(), "range");
 
-    ComplexWidget input = new ComplexWidget("input");
-    input.getElement().setPropertyString("type", "range");
-    input.getElement().setPropertyString("min", "0");
-    input.getElement().setPropertyString("max", "100");
-    input.getElement().setPropertyString("value", "100");
+    rowOne.add(slider = getSlider());
+
+    return rowOne;
+  }
+
+  /**
+   * Gotta make one. Nothing in gwt bootstrap...
+   * @return
+   */
+  @NotNull
+  private ComplexWidget getSlider() {
+    ComplexWidget input = new ComplexWidget(INPUT);
+    input.getElement().setPropertyString(TYPE, RANGE);
+    input.getElement().setPropertyString(MIN, SLIDER_MIN);
+    input.getElement().setPropertyString(MAX, SLIDER_MAX);
+    input.getElement().setPropertyString(VALUE, SLIDER_MAX);
     input.addDomHandler(event -> gotSliderChange(), ChangeEvent.getType());
     input.setWidth("150px");
     input.addStyleName("leftFiveMargin");
-    slider = input;
-    rowOne.add(input);
-
-    return rowOne;
+    return input;
   }
 
   private void gotSliderChange() {
@@ -406,9 +426,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   @Override
   public int getVolume() {
-    int value = slider.getElement().getPropertyInt("value");
-
-    logger.info("getVolume " + value);
+    int value = slider.getElement().getPropertyInt(VALUE);
     return value;
   }
 
@@ -425,6 +443,8 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   private void gotGoBack() {
     logger.info("got go back");
+
+    controller.getNavigation().showView(INavigation.VIEWS.DIALOG);
   }
 
   private void gotBackward() {
@@ -494,7 +514,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   private void playCurrentTurn() {
     if (currentTurn != null) {
-      logger.info("playCurrentTurn - turn " + currentTurn.getExID());
+      if (DEBUG) logger.info("playCurrentTurn - turn " + currentTurn.getExID());
       currentTurn.doPlayPauseToggle();
     }
   }
@@ -503,7 +523,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   @Override
   public void playStarted() {
     if (currentTurn != null) {
-      logger.info("playStarted - turn " + currentTurn.getExID());
+      if (DEBUG) logger.info("playStarted - turn " + currentTurn.getExID());
       playButton.setIcon(IconType.PAUSE);
       markCurrent();
     }
@@ -513,7 +533,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   @Override
   public void playStopped() {
     if (currentTurn != null) {
-      logger.info("playStopped - turn " + currentTurn.getExID());
+      if (DEBUG) logger.info("playStopped - turn " + currentTurn.getExID());
       removeMarkCurrent();
       currentTurnPlayEnded();
       playButton.setIcon(IconType.PLAY);
@@ -524,12 +544,12 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
    * @see #playStopped
    */
   private void currentTurnPlayEnded() {
-    logger.info("currentTurnPlayEnded - turn " + currentTurn.getExID());
+    if (DEBUG) logger.info("currentTurnPlayEnded - turn " + currentTurn.getExID());
     List<DialogExercisePanel> seq = getSeq();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
     if (i1 > seq.size() - 1) {
-      logger.info("OK stop");
+      if (DEBUG) logger.info("OK stop");
       removeMarkCurrent();
       currentTurn = seq.get(0);
       markCurrent();

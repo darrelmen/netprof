@@ -38,10 +38,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -112,6 +109,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       if (userIDFromSessionOrDB != -1) {
         List<IDialog> dialogList = getDialogs(request, sectionHelper, userIDFromSessionOrDB);
 
+        dialogList.sort(this::getDialogComparator);
         return new ExerciseListWrapper<>(request.getReqID(),
             dialogList,
             null, new HashMap<>()
@@ -122,6 +120,28 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       }
     }
   }
+
+  private int getDialogComparator(IDialog o1, IDialog o2) {
+    int i = o1.getUnit().compareTo(o2.getUnit());
+
+    if (i == 0) {
+      i = o1.getChapter().compareTo(o2.getChapter());
+    }
+    if (i == 0) {
+      String page1 = o1.getAttributeValue(IDialog.METADATA.PAGE);
+      String page2 = o2.getAttributeValue(IDialog.METADATA.PAGE);
+      i = page1.compareTo(page2);
+    }
+    if (i == 0) i = o1.getForeignLanguage().compareTo(o2.getForeignLanguage());
+    return i;
+  }
+
+/*  private String getAttribute(IDialog o1) {
+    List<ExerciseAttribute> collect1 = o1.getAttributes().stream().filter(
+        exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(IDialog.METADATA.PAGE.toString())
+    ).collect(Collectors.toList());
+    return collect1.isEmpty() ? null : collect1.iterator().next().getValue();
+  }*/
 
   @Override
   public IDialog getDialog(int id) throws DominoSessionException {

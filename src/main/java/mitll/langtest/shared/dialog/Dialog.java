@@ -26,6 +26,9 @@ public class Dialog implements IDialog, MutableShell {
 
   private String fltitle;
   private String entitle;
+
+
+
   private String unit;
   private String chapter;
 
@@ -111,6 +114,20 @@ public class Dialog implements IDialog, MutableShell {
   public List<ExerciseAttribute> getAttributes() {
     return attributes;
   }
+
+  /**
+   *
+   * @param metadata
+   * @return empty if no attribute of that type
+   */
+  @Override
+  public String getAttributeValue(IDialog.METADATA metadata) {
+    List<ExerciseAttribute> collect1 = getAttributes().stream().filter(
+        exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(metadata.toString())
+    ).collect(Collectors.toList());
+    return collect1.isEmpty() ? "" : collect1.iterator().next().getValue();
+  }
+
 
   @Override
   public int getUserid() {
@@ -249,7 +266,7 @@ public class Dialog implements IDialog, MutableShell {
 
   @Override
   public void setEnglish(String english) {
-    this.entitle=english;
+    this.entitle = english;
   }
 
   public void setForeignLanguage(String foreignLanguage) {
@@ -263,14 +280,17 @@ public class Dialog implements IDialog, MutableShell {
 
   /**
    * TODO : fill in
+   *
    * @param score
    */
   @Override
   public void setScore(float score) {
 
   }
+
   /**
    * TODO : fill in
+   *
    * @param scoreTotal
    */
   @Override
@@ -278,6 +298,21 @@ public class Dialog implements IDialog, MutableShell {
 
   }
 
+
+  @Override
+  public int getRawScore() {
+    return 0;
+  }
+
+  @Override
+  public float getScore() {
+    return 0;
+  }
+
+  @Override
+  public boolean hasScore() {
+    return false;
+  }
 
   @Override
   public String getFLToShow() {

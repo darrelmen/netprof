@@ -16,7 +16,7 @@ import mitll.langtest.shared.exercise.ScoredExercise;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class DialogViewHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, IDialog> {
+public class DialogViewHelper  extends SimpleChapterNPFHelper<IDialog, IDialog> {
   //  private final Logger logger = Logger.getLogger("NewLearnHelper");
   /**
    * @param controller
@@ -29,8 +29,8 @@ public class DialogViewHelper<T extends CommonShell & ScoredExercise> extends Si
   }
 
   @Override
-  protected FlexListLayout<T, IDialog> getMyListLayout(SimpleChapterNPFHelper<T, IDialog> outer) {
-    return new MyFlexListLayout<T, IDialog>(controller, outer) {
+  protected FlexListLayout<IDialog, IDialog> getMyListLayout(SimpleChapterNPFHelper<IDialog, IDialog> outer) {
+    return new MyFlexListLayout<IDialog, IDialog>(controller, outer) {
       /**
        * @see FlexListLayout#makeNPFExerciseList
        * @param topRow
@@ -41,25 +41,20 @@ public class DialogViewHelper<T extends CommonShell & ScoredExercise> extends Si
        * @return
        */
       @Override
-      protected PagingExerciseList<T, IDialog> makeExerciseList(Panel topRow,
+      protected PagingExerciseList<IDialog, IDialog> makeExerciseList(Panel topRow,
                                                                 Panel currentExercisePanel,
                                                                 String instanceName,
                                                                 DivWidget listHeader,
                                                                 DivWidget footer) {
-        return new DialogExerciseList<T>(topRow, currentExercisePanel, instanceName, listHeader, controller);
+        return new DialogExerciseList(topRow, currentExercisePanel, instanceName, listHeader, controller);
       }
     };
   }
 
-  protected ExercisePanelFactory<T, IDialog> getFactory(final PagingExerciseList<T, IDialog> exerciseList) {
-    return new ExercisePanelFactory<T, IDialog>(controller, exerciseList) {
-
+  protected ExercisePanelFactory<IDialog, IDialog> getFactory(final PagingExerciseList<IDialog, IDialog> exerciseList) {
+    return new ExercisePanelFactory<IDialog, IDialog>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(IDialog e) {
-        return null;
-        //return new TwoColumnExercisePanel<>(e, controller, exerciseList, alignments, false);
-      }
+      public Panel getExercisePanel(IDialog e) {     return null;      }
     };
   }
-
 }

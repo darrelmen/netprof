@@ -693,7 +693,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       String path = rs.getString(ANSWER);
       String json = rs.getString(SCORE_JSON);
 
-      CorrectAndScore result = new CorrectAndScore(uniqueID, userid, -1, correct, pronScore, timestamp.getTime(),
+      CorrectAndScore result = new CorrectAndScore(-1, correct, pronScore, timestamp.getTime(),
           trimPathForWebPage2(path), json);
       results.add(result);
     }

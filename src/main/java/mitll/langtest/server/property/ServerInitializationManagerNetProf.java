@@ -54,13 +54,12 @@ import java.util.jar.Manifest;
 public class ServerInitializationManagerNetProf {
   private static final Logger log = LogManager.getLogger();
 
+  private static final boolean DEBUG = false;
+
   private static final String appName = "netprof";
 
-  private static final boolean DEBUG = true;
   private static final String DEFAULT_PROPERTY_HOME =
-      File.separator + "opt" +
-          File.separator + appName +
-          File.separator + "config";
+      File.separator + "opt" + File.separator + appName + File.separator + "config";
 
   /**
    * The name of the config file attribute optionally passed in as -D.
