@@ -56,7 +56,6 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.

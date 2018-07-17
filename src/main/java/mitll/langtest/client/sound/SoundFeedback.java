@@ -32,8 +32,6 @@
 
 package mitll.langtest.client.sound;
 
-import java.util.logging.Logger;
-
 /**
  * Does sound feedback - correct/incorrect to user.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

@@ -10,8 +10,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ScoredExercise;
 
 /**
  * Created by go22670 on 4/5/17.

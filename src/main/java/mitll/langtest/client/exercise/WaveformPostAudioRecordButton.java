@@ -34,7 +34,6 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;

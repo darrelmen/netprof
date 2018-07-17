@@ -3,7 +3,6 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Scored;
-import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;

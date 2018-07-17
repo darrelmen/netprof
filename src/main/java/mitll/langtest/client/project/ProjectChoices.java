@@ -612,11 +612,11 @@ public class ProjectChoices extends ThumbnailChoices {
                                 UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper) {
     Map<String, String> value = new HashMap<>();
     value.put(COURSE, projectForLang.getCourse());
-    showPopover(value, button, typeOrder, ClientExerciseUnitChapterItemHelper);
+    showPopover(value, button, typeOrder, ClientExerciseUnitChapterItemHelper, Placement.RIGHT);
   }
 
   private void addPopover(FocusWidget button, SlimProject projectForLang) {
-    addPopover(button, getProps(projectForLang));
+    addPopover(button, getProps(projectForLang), Placement.RIGHT);
   }
 
   private Map<String, String> getProps(SlimProject projectForLang) {

@@ -54,6 +54,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final ExerciseListContent learnHelper;
   private final DialogViewHelper dialogHelper;
   private final ListenViewHelper listenHelper;
+  private final ListenViewHelper rehearseHelper;
   private final PracticeHelper practiceHelper;
   private final QuizHelper quizHelper;
   private final ExerciseController controller;
@@ -75,6 +76,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
     dialogHelper = new DialogViewHelper(controller, this, DIALOG);
     listenHelper = new ListenViewHelper(controller, this, LISTEN);
+    rehearseHelper = new ListenViewHelper(controller, this, REHEARSE);
 
 
     this.controller = controller;
@@ -143,6 +145,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     return projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT;
   }
 
+
+  @Override
+  public void show(VIEWS views) {
+    banner.show(views);
+  }
+
   /**
    * @param view
    * @see StatsFlashcardFactory#showDrill
@@ -155,20 +163,16 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    //  logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+    logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
-      //  logger.info("showView - already showing " + view);
+      logger.info("showView - showing " + view);
       //} else {
       currentSection = view;
       storeValue(view);
       switch (view) {
         case LEARN:
-          clearAndFixScroll();
-
-          if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
-
-          setInstanceHistory(LEARN);
+          clearAndPush(isFirstTime, currentStoredView, LEARN);
           learnHelper.showContent(divWidget, LEARN.toString(), fromClick);
           break;
         case DRILL:
@@ -189,25 +193,17 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           listView.showContent(divWidget, "listView", fromClick);
           break;
         case DIALOG:
-          clearAndFixScroll();
-
-          if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
-
-          setInstanceHistory(DIALOG);
-
-
+          clearAndPush(isFirstTime, currentStoredView, DIALOG);
           dialogHelper.showContent(divWidget, DIALOG.toString(), fromClick);
           break;
-
         case LISTEN:
-          clearAndFixScroll();
-
-          if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
-
-          setInstanceHistory(LISTEN);
+          clearAndPush(isFirstTime, currentStoredView, LISTEN);
           listenHelper.showContent(divWidget, LISTEN.toString(), fromClick);
           break;
-
+        case REHEARSE:
+          clearAndPush(isFirstTime, currentStoredView, REHEARSE);
+          rehearseHelper.showContent(divWidget, REHEARSE.toString(), fromClick);
+          break;
         case RECORD:
           clearAndFixScroll();
           setInstanceHistory(RECORD);
@@ -235,6 +231,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           logger.warning("huh? unknown view " + view);
       }
     }
+  }
+
+  private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen) {
+    clearAndFixScroll();
+    if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
+    setInstanceHistory(listen);
   }
 
   private void setInstanceHistory(VIEWS views) {
@@ -429,20 +431,24 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 //    return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
 
     if (views == null) {
-      String value = controller.getStorage().getValue(CURRENT_VIEW);
-      if (value == null || value.isEmpty()) return "";
-      else return value.toUpperCase();
+      return getStoredView();
     } else {
       return views.toString().toUpperCase();
     }
   }
 
+  @NotNull
+  private String getStoredView() {
+    String value = controller.getStorage().getValue(CURRENT_VIEW);
+    if (value == null || value.isEmpty()) return "";
+    else return value.toUpperCase();
+  }
 
   /**
    * @return
    */
   private String getCurrentInstance() {
-    return new SelectionState(History.getToken(), false).getInstance();
+    return new SelectionState().getInstance();
   }
 
   private void storeValue(VIEWS view) {
@@ -528,6 +534,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     setHistoryWithList(listid, view);
     banner.show(view);
   }
+
   private void setHistoryWithList(int listid, VIEWS views) {
     // logger.info("showListIn - " + listid + " " + views);
     History.newItem(
@@ -562,33 +569,48 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   public void clearCurrent() {
     currentSection = NONE;
   }
+
   private void addHistoryListener() {
     if (handlerRegistration == null) {
       handlerRegistration = History.addValueChangeHandler(this);
     }
   }
 
-  private void removeHistoryListener() {
+/*  private void removeHistoryListener() {
     if (handlerRegistration != null) {
       handlerRegistration.removeHandler();
       handlerRegistration = null;
     }
-  }
+  }*/
+
+  /**
+   * Do forward/back between DIALOG and LISTEN.
+   *
+   * @param event
+   */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    SelectionState selectionState=new SelectionState();
+    SelectionState selectionState = new SelectionState();
     String instance = selectionState.getInstance();
     if (!instance.isEmpty()) {
       try {
-        VIEWS views = VIEWS.valueOf(instance.toUpperCase());
-        logger.info("url says " + views);
-        String currentStoredView = getCurrentStoredView();
-        logger.info("currentStoredView says " + currentStoredView);
+        VIEWS views = VIEWS.valueOf(getStoredView());
+        VIEWS currentStoredView = VIEWS.valueOf(getCurrentStoredView());
 
+
+        if (views != currentStoredView) {
+          logger.info("url says " + views);
+          logger.info("currentStoredView says " + currentStoredView);
+
+          if (currentStoredView == DIALOG) {
+            banner.show(DIALOG);
+          } else if (currentStoredView == LISTEN) {
+            banner.show(LISTEN);
+          }
+        }
       } catch (IllegalArgumentException e) {
         e.printStackTrace();
       }
     }
-
   }
 }

@@ -2,6 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Image;
@@ -14,7 +15,10 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.project.ThumbnailChoices;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.FilterResponse;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -81,7 +85,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   @Override
   protected void getFullExercises(Collection<Integer> visibleIDs, int currentReq, Collection<Integer> requested, List<IDialog> alreadyFetched) {
-  //  logger.info("getFullExercises " + visibleIDs);
+    //  logger.info("getFullExercises " + visibleIDs);
     controller.getDialogService().getDialogs(new ExerciseListRequest(),
         new AsyncCallback<ExerciseListWrapper<IDialog>>() {
           @Override
@@ -140,6 +144,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
     dialogs
         .forEach(dialog -> {
+
 //          logger.info("Got " + dialog.getID() + " " + dialog.getEnglish() + " " + dialog.getAttributes());
           Panel langIcon = getImageAnchor(dialog);
           if (langIcon != null) {
@@ -161,9 +166,14 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     {
       Map<String, String> props = new HashMap<>(dialog.getUnitToValue());
       dialog.getAttributes().forEach(attr ->
-          props.put(getProperty(attr),
-              isTitle(attr) ? attr.getValue() + "/" + dialog.getEnglish() : attr.getValue()));
-      thumbnailChoices.addPopover(button, props);
+      {
+        props.put(getProperty(attr), attr.getValue());
+        if (isTitle(attr)) {
+          props.put("english", dialog.getEnglish());
+        }
+      });
+
+      thumbnailChoices.addPopover(button, props, Placement.BOTTOM);
     }
 
     {

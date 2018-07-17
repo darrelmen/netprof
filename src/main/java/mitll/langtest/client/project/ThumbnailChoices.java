@@ -57,20 +57,20 @@ public class ThumbnailChoices {
     return columnText;
   }
 
-  public void addPopover(FocusWidget button, Map<String, String> props) {
+  public void addPopover(FocusWidget button, Map<String, String> props, Placement placement) {
     Set<String> typeOrder = props.keySet();
     UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
-    button.addMouseOverHandler(event -> showPopover(props, button, typeOrder, ClientExerciseUnitChapterItemHelper));
+    button.addMouseOverHandler(event -> showPopover(props, button, typeOrder, ClientExerciseUnitChapterItemHelper, placement));
   }
 
-  public void showPopover(Map<String, String> props,
-                           Widget button,
-                           Set<String> typeOrder,
-                           UnitChapterItemHelper<ClientExercise> unitChapterItemHelper) {
+  void showPopover(Map<String, String> props,
+                   Widget button,
+                   Set<String> typeOrder,
+                   UnitChapterItemHelper<ClientExercise> unitChapterItemHelper, Placement placement) {
     basicDialog.showPopover(
         button,
         null,
         unitChapterItemHelper.getTypeToValue(typeOrder, props),
-        Placement.RIGHT);
+        placement);
   }
 }

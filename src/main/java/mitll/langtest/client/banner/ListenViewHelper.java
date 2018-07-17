@@ -36,6 +36,9 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 4/5/17.
  */
 public class ListenViewHelper implements ContentView, PlayListener, IListenView {
+  private final Logger logger = Logger.getLogger("ListenViewHelper");
+
+
   private static final String HIGHLIHGT_COLOR = "green";
   public static final String VALUE = "value";
   public static final String SLIDER_MAX = "100";
@@ -45,7 +48,6 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   public static final String TYPE = "type";
   public static final String RANGE = "range";
   public static final String INPUT = "input";
-  private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final int ROW_WIDTH = 97;
   private static final String HEIGHT = 100 + "px";
@@ -194,6 +196,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
       row.addStyleName("inlineFlex");
 
       row.add(getLeftArrow());
+      row.add(getRightArrow());
 
       {
         com.google.gwt.user.client.ui.Image flag = getFlag(dialog.getImageRef());
@@ -426,10 +429,8 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   @Override
   public int getVolume() {
-    int value = slider.getElement().getPropertyInt(VALUE);
-    return value;
+    return slider.getElement().getPropertyInt(VALUE);
   }
-
 
   @NotNull
   private Widget getLeftArrow() {
@@ -441,10 +442,22 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
     return buttonDiv;
   }
 
-  private void gotGoBack() {
-    logger.info("got go back");
+  @NotNull
+  private Widget getRightArrow() {
+    DivWidget buttonDiv = new DivWidget();
+    Button widgets = new Button("", IconType.ARROW_RIGHT, event -> gotGoForward());
+    widgets.addStyleName("leftFiveMargin");
+    widgets.addStyleName("rightTenMargin");
+    buttonDiv.add(widgets);
+    return buttonDiv;
+  }
 
-    controller.getNavigation().showView(INavigation.VIEWS.DIALOG);
+  private void gotGoBack() {
+    controller.getNavigation().show(INavigation.VIEWS.DIALOG);
+  }
+
+  protected void gotGoForward() {
+    controller.getNavigation().show(INavigation.VIEWS.REHEARSE);
   }
 
   private void gotBackward() {
