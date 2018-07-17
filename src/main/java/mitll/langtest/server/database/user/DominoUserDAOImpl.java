@@ -188,7 +188,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             @Override
             public DBUser load(Integer key) {
               // logger.info("idToDBUser Load " + key);
-              return delegate.lookupDBUser(key);
+              DBUser dbUser = delegate.lookupDBUser(key);
+              if (dbUser == null) dbUser = delegate.lookupDBUser(getDefaultUser());
+              return dbUser;
             }
           });
 
