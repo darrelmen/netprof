@@ -41,6 +41,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     id = counter++;
     this.soundManager = soundManager;
     this.volume = volume;
+
+    logger.info("play volume " + volume);
   }
 
   /**
@@ -342,11 +344,15 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    */
   private void createSound(String song, boolean doAutoload) {
     currentSound = new Sound(this);
-    if (DEBUG) {
-      logger.info("PlayAudioPanel.createSound  : (" + getElement().getId() + ") for " + song + " : " + this + " created sound " + currentSound);
+    String uniqueID = song + "_" + getElement().getId(); // fix bug where multiple npf panels might load the same audio file and not load the second one seemingly
+
+
+    if (DEBUG || true) {
+      logger.info("PlayAudioPanel.createSound  " +uniqueID +
+          "" +
+          ": (" + getElement().getId() + ") for " + song + " : " + this + " created sound " + currentSound);
     }
 
-    String uniqueID = song + "_" + getElement().getId(); // fix bug where multiple npf panels might load the same audio file and not load the second one seemingly
     soundManager.createSound(currentSound, uniqueID, song, doAutoload, volume);
   }
 

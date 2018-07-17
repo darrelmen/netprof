@@ -53,7 +53,7 @@ public class DialogExercisePanel<T extends ClientExercise>
   protected HeadlessPlayAudio playAudio;
 
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;

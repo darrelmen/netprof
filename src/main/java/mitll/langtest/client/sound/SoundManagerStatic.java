@@ -89,7 +89,7 @@ public class SoundManagerStatic implements SoundManagerAPI {
   public void createSound(Sound sound, String title, String file, boolean doAutoload, int volume) {
 //    if (debug) System.out.println("SoundManagerStatic.createSound " + sound);
     if (SoundManager.isReady() && SoundManager.isOK()) {
-      if (DEBUG) logger.info("SoundManagerStatic.createSound " + sound);
+      if (DEBUG|| true) logger.info("SoundManagerStatic.createSound " + sound + " title " +title);
       SoundManager.createSound(sound, title, file, doAutoload, volume);
     }
   }

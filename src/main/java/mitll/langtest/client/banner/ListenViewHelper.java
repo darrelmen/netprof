@@ -406,7 +406,10 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   @Override
   public int getVolume() {
-    return slider.getElement().getPropertyInt("value");
+    int value = slider.getElement().getPropertyInt("value");
+
+    logger.info("getVolume " + value);
+    return value;
   }
 
 
