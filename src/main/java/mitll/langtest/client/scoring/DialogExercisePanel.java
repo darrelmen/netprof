@@ -31,6 +31,9 @@ public class DialogExercisePanel<T extends ClientExercise>
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
   private static final String BLUE = "#2196F3";
+//  private static final String HEIGHT = 100 + "px";
+  private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
+  private static final String LEFT_COLOR = "#e7e6ec";
 
 
   static final int CONTEXT_INDENT = 45;//50;
@@ -101,7 +104,14 @@ public class DialogExercisePanel<T extends ClientExercise>
       }
     });
     getElement().getStyle().setCursor(Style.Cursor.POINTER);
+
+    getElement().setId("DialogExercisePanel_"+getExID());
+
   }
+
+  boolean isRight;
+
+  public  void setIsRight(boolean isRight) {this.isRight=isRight;}
 
   public int getExID() {
     return exercise.getID();
@@ -115,19 +125,62 @@ public class DialogExercisePanel<T extends ClientExercise>
       makeClickableWords(projectStartupInfo, null);
       this.isRTL = clickableWords.isRTL(exercise.getForeignLanguage());
 
-      add(getFLEntry(exercise));
+      DivWidget flEntry = getFLEntry(exercise);
+    //  this.addStyleName("bubble");
+
+      DivWidget rightSide= new DivWidget();
+      rightSide.getElement().setId("rightSideBubble_"+getExID());
+      rightSide.addStyleName("bubble");
+      rightSide.add(flEntry);
+      styleMe(rightSide);
+
+
+
+      add(rightSide);
+
       makePlayAudio(exercise, null);
     }
   }
 
+  private void styleMe(DivWidget widget) {
+    Style style = widget.getElement().getStyle();
+    if (isRight) {
+      style.setFloat(Style.Float.RIGHT);
+      style.setTextAlign(Style.TextAlign.RIGHT);
+      style.setBackgroundColor(RIGHT_BKG_COLOR);
+    } else {
+      style.setFloat(Style.Float.LEFT);
+      style.setTextAlign(Style.TextAlign.LEFT);
+      style.setBackgroundColor(LEFT_COLOR);
+    }
+
+    //  widget.addStyleName("bubble");
+    {
+      Style style2 = getFlClickableRow().getElement().getStyle();
+      addMarginLeft(style2);
+      style2.setMarginRight(10, Style.Unit.PX);
+      style2.setMarginTop(7, Style.Unit.PX);
+      style2.setMarginBottom(7, Style.Unit.PX);
+    }
+
+  }
+
+  protected void addMarginLeft(Style style2) {
+    style2.setMarginLeft(15, Style.Unit.PX);
+  }
+
+  /**
+   * @param e
+   * @param flContainer ignored here
+   */
   protected void makePlayAudio(T e, DivWidget flContainer) {
     if (hasAudio(e)) {
-      playAudio = new HeadlessPlayAudio(controller.getSoundManager(),listenView);
+      playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
       alignmentFetcher.setPlayAudio(playAudio);
       if (!e.getAudioAttributes().isEmpty()) {
         AudioAttribute next = e.getAudioAttributes().iterator().next();
         playAudio.rememberAudio(next);
-      //  logger.info("makePlayAudio audio for " + e.getID() + "  " + next);
+        //  logger.info("makePlayAudio audio for " + e.getID() + "  " + next);
 
         if (next.getAlignmentOutput() != null) {
           showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
@@ -139,10 +192,6 @@ public class DialogExercisePanel<T extends ClientExercise>
     } else {
       logger.warning("makePlayAudio no audio in " + e.getAudioAttributes());
     }
-  }
-
-  private int getVolume() {
-    return listenView == null ? 100 : listenView.getVolume();
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
@@ -242,7 +291,7 @@ public class DialogExercisePanel<T extends ClientExercise>
    * @see #audioChanged
    * @see #contextAudioChanged
    */
-  protected void matchSegmentsToClickables(int id,
+   void matchSegmentsToClickables(int id,
                                            long duration,
                                            AlignmentOutput alignmentOutput,
                                            List<IHighlightSegment> flclickables,
@@ -816,7 +865,6 @@ public class DialogExercisePanel<T extends ClientExercise>
   }
 
   public void clearHighlight() {
-
   }
 
   public boolean isPlaying() {

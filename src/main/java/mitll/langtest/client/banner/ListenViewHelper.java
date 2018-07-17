@@ -54,16 +54,17 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
   private static final String LEFT_COLOR = "#e7e6ec";
 
-  private final ExerciseController controller;
+  protected final ExerciseController controller;
+  protected final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
 
-  private final List<DialogExercisePanel> bothTurns = new ArrayList<>();
+  protected final List<DialogExercisePanel> bothTurns = new ArrayList<>();
   private List<DialogExercisePanel> leftTurnPanels = new ArrayList<>(), rightTurnPanels = new ArrayList<>();
 
-  private DialogExercisePanel currentTurn;
-  private Boolean leftSpeaker = true;
-  private Boolean rightSpeaker = true;
-  private CheckBox leftSpeakerBox, rightSpeakerBox;
+  protected DialogExercisePanel currentTurn;
+  protected Boolean leftSpeaker = true;
+  protected Boolean rightSpeaker = true;
+  protected CheckBox leftSpeakerBox, rightSpeakerBox;
   private ComplexWidget slider;
   private static final boolean DEBUG = false;
 
@@ -127,7 +128,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
     {
       String label = speakers.get(0);
       CheckBox checkBox = new CheckBox(label, true);
-      checkBox.setValue(true);
+      setLeftTurnSpeakerInitial(checkBox);
       checkBox.addStyleName("floatLeft");
       checkBox.addStyleName("leftFiveMargin");
       checkBox.addStyleName("leftSpeaker");
@@ -143,7 +144,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
       String label = speakers.get(1);
       CheckBox checkBox = new CheckBox(label, true);
 
-      checkBox.setValue(true);
+      setRightTurnInitialValue(checkBox);
       Style style = checkBox.getElement().getStyle();
       style.setBackgroundColor(RIGHT_BKG_COLOR);
       checkBox.addStyleName("rightSpeaker");
@@ -161,18 +162,28 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
     return rowOne;
   }
 
-  private void speakerOneCheck(Boolean value) {
+  protected void setLeftTurnSpeakerInitial(CheckBox checkBox) {
+    checkBox.setValue(true);
+  }
+
+  protected void setRightTurnInitialValue(CheckBox checkBox) {
+    checkBox.setValue(true);
+  }
+
+  protected void speakerOneCheck(Boolean value) {
     logger.info("speaker one now " + value);
     leftSpeaker = value;
+
     if (!rightSpeaker) {
       rightSpeaker = true;
       rightSpeakerBox.setValue(true);
     }
-    //removeMarkCurrent();
-    playButton.setIcon(IconType.PLAY);
+
+    setPlayButtonToPlay();
   }
 
-  private void speakerTwoCheck(Boolean value) {
+
+  protected void speakerTwoCheck(Boolean value) {
     logger.info("speaker two now " + value);
     rightSpeaker = value;
 
@@ -180,8 +191,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
       leftSpeaker = true;
       leftSpeakerBox.setValue(true);
     }
-    // removeMarkCurrent();
-    playButton.setIcon(IconType.PLAY);
+    setPlayButtonToPlay();
   }
 
   @NotNull
@@ -257,7 +267,6 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
     return image;
   }
 
-  private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
   /**
    * @param dialog
@@ -331,29 +340,10 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   @NotNull
   private DialogExercisePanel<ClientExercise> getTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    DialogExercisePanel<ClientExercise> turn = new DialogExercisePanel<>(clientExercise, controller, null, alignments, this);
+    DialogExercisePanel<ClientExercise> turn = reallyGetTurnPanel(clientExercise, isRight);
     turn.addWidgets(true, false, PhonesChoices.HIDE);
-
-    Style style = turn.getElement().getStyle();
-    if (isRight) {
-      style.setFloat(Style.Float.RIGHT);
-      style.setTextAlign(Style.TextAlign.RIGHT);
-      style.setBackgroundColor(RIGHT_BKG_COLOR);
-    } else {
-      style.setFloat(Style.Float.LEFT);
-      style.setTextAlign(Style.TextAlign.LEFT);
-      style.setBackgroundColor(LEFT_COLOR);
-    }
-    style.setClear(Style.Clear.BOTH);
-
-    turn.addStyleName("bubble");
-    {
-      Style style2 = turn.getFlClickableRow().getElement().getStyle();
-      style2.setMarginLeft(15, Style.Unit.PX);
-      style2.setMarginRight(10, Style.Unit.PX);
-      style2.setMarginTop(7, Style.Unit.PX);
-      style2.setMarginBottom(7, Style.Unit.PX);
-    }
+    turn.getElement()
+        .getStyle().setClear(Style.Clear.BOTH);
 
     turn.addPlayListener(this);
 
@@ -362,8 +352,14 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
     return turn;
   }
 
+  @NotNull
+  protected DialogExercisePanel<ClientExercise> reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
+    DialogExercisePanel<ClientExercise> widgets = new DialogExercisePanel<>(clientExercise, controller, null, alignments, this);
+    widgets.setIsRight(isRight);
+    return widgets;
+  }
 
-  private void gotCardClick(DialogExercisePanel<ClientExercise> turn) {
+  protected void gotCardClick(DialogExercisePanel<ClientExercise> turn) {
     this.currentTurn = turn;
     playCurrentTurn();
   }
@@ -372,6 +368,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   /**
    * TODO add playback rate
+   *
    * @return
    */
   @NotNull
@@ -406,6 +403,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   /**
    * Gotta make one. Nothing in gwt bootstrap...
+   *
    * @return
    */
   @NotNull
@@ -461,7 +459,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   }
 
   private void gotBackward() {
-    playButton.setIcon(IconType.PLAY);
+    setPlayButtonToPlay();
 
     List<DialogExercisePanel> seq = getSeq();
 
@@ -481,12 +479,12 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
     if (isPlaying) playCurrentTurn();
   }
 
-  private List<DialogExercisePanel> getSeq() {
+  protected List<DialogExercisePanel> getSeq() {
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
   }
 
   private void gotForward() {
-    playButton.setIcon(IconType.PLAY);
+    setPlayButtonToPlay();
 
     List<DialogExercisePanel> seq = getSeq();
 
@@ -510,7 +508,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
     if (currentTurn.isPlaying()) {
       playButton.setIcon(IconType.PAUSE);
     } else {
-      playButton.setIcon(IconType.PLAY);
+      setPlayButtonToPlay();
     }
 
     if (leftSpeaker && rightSpeaker) {
@@ -549,14 +547,14 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
       if (DEBUG) logger.info("playStopped - turn " + currentTurn.getExID());
       removeMarkCurrent();
       currentTurnPlayEnded();
-      playButton.setIcon(IconType.PLAY);
+      setPlayButtonToPlay();
     }
   }
 
   /**
    * @see #playStopped
    */
-  private void currentTurnPlayEnded() {
+  protected void currentTurnPlayEnded() {
     if (DEBUG) logger.info("currentTurnPlayEnded - turn " + currentTurn.getExID());
     List<DialogExercisePanel> seq = getSeq();
     int i = seq.indexOf(currentTurn);
@@ -572,11 +570,15 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
     }
   }
 
-  private void removeMarkCurrent() {
+  protected void setPlayButtonToPlay() {
+    playButton.setIcon(IconType.PLAY);
+  }
+
+  protected void removeMarkCurrent() {
     currentTurn.getElement().getStyle().setBorderColor("white");
   }
 
-  private void markCurrent() {
+  protected void markCurrent() {
     currentTurn.getElement().getStyle().setBorderColor(HIGHLIHGT_COLOR);
   }
 }

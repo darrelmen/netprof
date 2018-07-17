@@ -114,6 +114,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     if (buttonWidth > 0) {
       setWidth(buttonWidth + "px");
     }
+
+    getElement().setId("PostAudioRecordButton"+ exerciseID);
+
   }
 
   public void setExerciseID(int exercise) {
@@ -124,6 +127,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     return exerciseID;
   }
 
+
+  public void startRecording() {
+    LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
+    controller.startRecording();
+  }
   /**
    * @param duration
    * @see RecordButton#stop
@@ -140,6 +148,30 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       //logger.info("stopRecording duration " + duration + " < " + MIN_DURATION);
       return false;
     }
+  }
+
+  /**
+   * @param result
+   * @see #onPostSuccess
+   */
+  public abstract void useResult(AudioAnswer result);
+
+  /**
+   * TODO : consider why we have to do this from the client.
+   *
+   * @param result
+   * @see PostAudioRecordButton#postAudioFile
+   */
+  protected void useInvalidResult(AudioAnswer result) {
+    controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + result.getValidity());
+    //  logger.info("useInvalidResult platform is " + getPlatform());
+    if (!checkAndShowTooLoud(result.getValidity())) {
+      showPopup(result.getValidity().getPrompt());
+    }
+  }
+
+  public boolean hasValidAudio() {
+    return validAudio;
   }
 
   protected void hideWaveform() {
@@ -288,24 +320,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     });
   }
 
-  public void startRecording() {
-    LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
-    controller.startRecording();
-  }
 
-  /**
-   * TODO : consider why we have to do this from the client.
-   *
-   * @param result
-   * @see PostAudioRecordButton#postAudioFile
-   */
-  protected void useInvalidResult(AudioAnswer result) {
-    controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + result.getValidity());
-    //  logger.info("useInvalidResult platform is " + getPlatform());
-    if (!checkAndShowTooLoud(result.getValidity())) {
-      showPopup(result.getValidity().getPrompt());
-    }
-  }
 
   /**
    * Feedback for when audio isn't valid for some reason.
@@ -314,15 +329,5 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    */
   private void showPopup(String toShow) {
     new PopupHelper().showPopup(toShow, getOuter(), 3000);
-  }
-
-  /**
-   * @param result
-   * @see #onPostSuccess
-   */
-  public abstract void useResult(AudioAnswer result);
-
-  public boolean hasValidAudio() {
-    return validAudio;
   }
 }

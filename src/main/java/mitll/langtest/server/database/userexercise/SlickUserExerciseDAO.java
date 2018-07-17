@@ -869,7 +869,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       slickExerciseAttributeJoins
           .forEach(slickExerciseAttributeJoin -> attributes.add(allByProject.get(slickExerciseAttributeJoin.attrid())));
       exercise.setAttributes(attributes);
-      logger.info("addAttributeToExercise ex " + exercise.getID() + " : " + exercise.getAttributes());
+//      logger.info("addAttributeToExercise ex " + exercise.getID() + " : " + exercise.getAttributes());
     }
   }
 

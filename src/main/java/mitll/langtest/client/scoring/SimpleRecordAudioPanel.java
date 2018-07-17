@@ -24,55 +24,44 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
 /**
  * An ASR scoring panel with a record button.
  */
-public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends DivWidget implements RecordingAudioListener {
+public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends NoFeedbackRecordAudioPanel<T> {
   // private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
   public static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
   private static final float HUNDRED = 100.0f;
+  protected WaitCursorHelper waitCursorHelper = null;
 
-  /**
-   * TODO : limit connection here...
-   */
-  //private final BusyPanel goodwaveExercisePanel;
-
-  private PostAudioRecordButton postAudioRecordButton;
-  private RecorderPlayAudioPanel playAudioPanel;
   private MiniScoreListener miniScoreListener;
-
-  private WaitCursorHelper waitCursorHelper = null;
 
   private String audioPath;
 
-  private final ExerciseController controller;
-  private final T exercise;
   /**
    *
    */
-  private DivWidget scoreFeedback;
+  //private DivWidget scoreFeedback;
   private boolean hasScoreHistory;
   private final ListInterface<?, ?> listContainer;
   private final boolean isRTL;
   private ScoreFeedbackDiv scoreFeedbackDiv;
   private boolean addPlayer;
+  private Widget scoreHistory;
 
   /**
    * @param controller
    * @param exercise
    * @param listContainer
    * @param addPlayer
-   * @see TwoColumnExercisePanel#getRecordPanel
+   * @see TwoColumnExercisePanel#makeFirstRow
    */
   SimpleRecordAudioPanel(ExerciseController controller,
                          T exercise,
 
                          ListInterface<?, ?> listContainer, boolean addPlayer) {
-    this.controller = controller;
-    // this.goodwaveExercisePanel = goodwaveExercisePanel;
-    this.exercise = exercise;
+    super(exercise, controller);
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;
-    getElement().setId("SimpleRecordAudioPanel");
+    getElement().setId("SimpleRecordAudioPanel_" +exercise.getID());
     this.isRTL = controller.isRightAlignContent();
     setWidth("100%");
     addWidgets();
@@ -84,9 +73,6 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends Di
     setVisible(hasScoreHistory);
   }
 
-  private DivWidget recordFeedback;
-  private Widget scoreHistory;
-
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
    *
@@ -94,86 +80,38 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends Di
    * @seex #AudioPanel
    * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel
    */
-  private void addWidgets() {
+  protected void addWidgets() {
     //long then = System.currentTimeMillis();
-
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
-    scoreFeedback.getElement().setId("scoreFeedback_" + exercise.getID());
+    getScoreFeedback().getElement().setId("scoreFeedback_" + exercise.getID());
 
     {
       DivWidget historyHoriz = new DivWidget();
       historyHoriz.addStyleName("inlineFlex");
       DivWidget spacer = new DivWidget();
-      //spacer.getElement().setId("simpleSpacer");
       spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
       historyHoriz.add(spacer);
       historyHoriz.add(scoreHistory = getScoreHistory());
       col.add(historyHoriz);
     }
-
+    makeWaitCursor();
     recordFeedback = makePlayAudioPanel().getRecordFeedback(makeWaitCursor().getWaitCursor(), controller.shouldRecord());
     recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
-    scoreFeedback.add(recordFeedback);
+    getScoreFeedback().add(recordFeedback);
 
     this.scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel.getRealDownloadContainer());
 
     add(col);
-
     // long now = System.currentTimeMillis();
     // logger.info("addWidgets "+ (now-then)+ " millis");
     //scoreFeedback.getElement().setId("scoreFeedbackRow");
   }
 
-
   private void addMiniScoreListener(MiniScoreListener l) {
     this.miniScoreListener = l;
-  }
-
-  /**
-   * So here we're trying to make the record and play buttons know about each other
-   * to the extent that when we're recording, we can't play audio, and when we're playing
-   * audio, we can't record. We also mark the widget as busy so we can't move on to a different exercise.
-   *
-   * @return
-   * @see AudioPanel#getPlayButtons
-   * @see #addWidgets
-   */
-  private RecorderPlayAudioPanel makePlayAudioPanel() {
-    //long then = System.currentTimeMillis();
-    makeWaitCursor();
-
-    postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller);
-    postAudioRecordButton.addStyleName("leftFiveMargin");
-    postAudioRecordButton.setVisible(controller.getProjectStartupInfo().isHasModel());
-
-    playAudioPanel = new RecorderPlayAudioPanel(
-        controller.getSoundManager(),
-        postAudioRecordButton,
-        controller, exercise);
-    playAudioPanel.hidePlayButton();
-
-//    long now = System.currentTimeMillis();
-    // logger.info("took " + (now-then) + " for makeAudioPanel");
-    return playAudioPanel;
-  }
-
-  private WaitCursorHelper makeWaitCursor() {
-    if (waitCursorHelper == null) {
-      waitCursorHelper = new WaitCursorHelper();
-      waitCursorHelper.showFinished();
-    }
-    return waitCursorHelper;
-  }
-
-  /**
-   * @return
-   * @see TwoColumnExercisePanel#makeFirstRow
-   */
-  PostAudioRecordButton getPostAudioRecordButton() {
-    return postAudioRecordButton;
   }
 
   /**
@@ -211,7 +149,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends Di
   private void scoreAudio(AudioAnswer result, boolean isRTL) {
     clearScoreFeedback();
     PretestScore pretestScore = result.getPretestScore();
-    scoreFeedback.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL));
+    getScoreFeedback().add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL));
     useScoredResult(pretestScore, false, result.getPath());
 
     // Gotta remember the score on the exercise now...
@@ -222,53 +160,45 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends Di
   @Override
   public void startRecording() {
     //logger.info("startRecording...");
-    setVisible(true);
+    super.startRecording();
 
-    playAudioPanel.setEnabled(false);
     scoreFeedbackDiv.hideScore();
 
-    playAudioPanel.showFirstRecord();
 
     waitCursorHelper.showFinished();
 
-    clearScoreFeedback();
     scoreHistory.setVisible(false);
   }
 
-  private void clearScoreFeedback() {
-    scoreFeedback.clear();
-    scoreFeedback.add(recordFeedback);
-  }
+//  private void clearScoreFeedback() {
+//    scoreFeedback.clear();
+//    scoreFeedback.add(recordFeedback);
+//  }
 
   /**
    * @see FeedbackPostAudioRecordButton#stopRecording
    */
   @Override
   public void stopRecording() {
-    //    logger.info("stopRecording...");
-    playAudioPanel.setEnabled(true);
-    playAudioPanel.hideRecord();
+
+    super.stopRecording();
 
     scoreHistory.setVisible(true);
-
     waitCursorHelper.scheduleWaitTimer();
   }
 
   public void gotShortDurationRecording() {
     waitCursorHelper.showFinished();
-    playAudioPanel.hideRecord();
-    setVisible(true);
+    super.gotShortDurationRecording();
     scoreHistory.setVisible(true);
   }
 
   @Override
   public void useResult(AudioAnswer result) {
+    super.useResult(result);
 //    logger.info("useScoredResult " + result);
     waitCursorHelper.showFinished();
-    setVisible(true);
     hasScoreHistory = true;
-
-    playAudioPanel.showPlayButton();
 
     audioPath = result.getPath();
     setDownloadHref();
@@ -278,20 +208,10 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends Di
   @Override
   public void useInvalidResult(boolean isValid) {
     //  logger.info("useInvalidResult " + isValid);
-
     waitCursorHelper.showFinished();
     setVisible(hasScoreHistory);
 
-
-    if (!isValid) playAudioPanel.hidePlayButton();
-    else playAudioPanel.showPlayButton();
-
-    playAudioPanel.setEnabled(isValid);
-  }
-
-  @Override
-  public void flip(boolean first) {
-    playAudioPanel.flip(first);
+    super.useInvalidResult(isValid);
   }
 
   /**
@@ -353,5 +273,13 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends Di
     }
 
     miniScoreListener.showChart(controller.getHost());
+  }
+
+  protected WaitCursorHelper makeWaitCursor() {
+    if (waitCursorHelper == null) {
+      waitCursorHelper = new WaitCursorHelper();
+      waitCursorHelper.showFinished();
+    }
+    return waitCursorHelper;
   }
 }

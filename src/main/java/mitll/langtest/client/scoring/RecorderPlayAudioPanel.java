@@ -15,7 +15,6 @@ import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +27,7 @@ import java.util.logging.Logger;
  */
 class RecorderPlayAudioPanel extends PlayAudioPanel {
   protected final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
+
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final SafeUri firstRed = UriUtils.fromSafeConstant(FIRST_RED);
 
@@ -47,13 +47,12 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   private boolean canRecord;
 
   /**
-   * @param soundManager
    * @param postAudioRecordButton1
    * @param controller
    * @param exercise
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  RecorderPlayAudioPanel(SoundManagerAPI soundManager, final Button postAudioRecordButton1, ExerciseController controller, HasID exercise) {
+  RecorderPlayAudioPanel(final Button postAudioRecordButton1, ExerciseController controller, HasID exercise) {
     super(new PlayListener() {
           public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -87,7 +86,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void showPlayButton() {
     playButton.setVisible(true);
   }
-
   void hidePlayButton() {
     playButton.setVisible(false);
   }
@@ -96,8 +94,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     if (canRecord) {
       recordImage1.setVisible(first);
       recordImage2.setVisible(!first);
-    } else {
-
     }
   }
 
@@ -108,8 +104,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
       redX.setVisible(true);
     }
     downloadContainer.getDownloadContainer().setVisible(false);
-
-
   }
 
   void hideRecord() {
@@ -141,16 +135,9 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     return playButton;
   }
 
-  /**
-   * @return
-   * @see SimpleRecordAudioPanel#scoreAudio
-   */
-  Panel getDownloadContainer() {
-    return downloadContainer.getDownloadContainer();
-  }
 
   /**
-   * @param waitCursor
+   * @param waitCursor null OK
    * @param canRecord
    * @return
    * @see SimpleRecordAudioPanel#addWidgets
@@ -173,7 +160,9 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     if (canRecord) {
       recordFeedback.add(recordImage1);
       recordFeedback.add(recordImage2);
-      recordFeedback.add(waitCursor);
+      if (waitCursor != null) {
+        recordFeedback.add(waitCursor);
+      }
     } else {
       recordFeedback.add(redX = getRedX());
     }
@@ -200,6 +189,13 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
                        int user,
                        String host) {
     downloadContainer.setDownloadHref(audioPathToUse, id, user, host);
+  }
+  /**
+   * @return
+   * @see SimpleRecordAudioPanel#scoreAudio
+   */
+  Panel getDownloadContainer() {
+    return downloadContainer.getDownloadContainer();
   }
 
   DownloadContainer getRealDownloadContainer() {

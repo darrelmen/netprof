@@ -88,11 +88,11 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private PhonesChoices phonesChoices;
 
   private static final boolean DEBUG = false;
- // private static final boolean DEBUG_DETAIL = false;
- // private static final boolean DEBUG_MATCH = false;
+  // private static final boolean DEBUG_DETAIL = false;
+  // private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
 
-//  private AlignmentFetcher alignmentFetcher;
+  //  private AlignmentFetcher alignmentFetcher;
   private ItemMenu itemMenu;
   private boolean addPlayer;
 
@@ -122,7 +122,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;
     addStyleName("twoColumnStyle");
-  //  isMandarin = getProjectStartupInfo() != null && getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
+    //  isMandarin = getProjectStartupInfo() != null && getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
     annotationHelper = controller.getCommentAnnotator();
 
     //    this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
@@ -196,6 +196,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * Row 5: context sentence fl - eng
    *
    * @return
+   * @see #addWidgets(boolean, boolean, PhonesChoices)
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent
    */
   private Widget getItemContent(final T e) {
@@ -267,7 +268,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget, boolean hasEnglish) {
     //  long then = System.currentTimeMillis();
-    SimpleRecordAudioPanel<T> recordPanel = getRecordPanel(e);
+    SimpleRecordAudioPanel<T> recordPanel = //getRecordPanel(e);
+        new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer);
 
     DivWidget flContainer = getHorizDiv();
 
@@ -275,7 +277,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       DivWidget recordButtonContainer = new DivWidget();
       recordButtonContainer.addStyleName("recordingRowStyle");
       recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
-      //  if (HIDE_UNSAFE) recordButtonContainer.setVisible(e.isSafeToDecode());
       flContainer.add(recordButtonContainer);
     }
 
@@ -350,9 +351,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     if (hasAudio(e)) {
       flContainer.add(playAudio = getPlayAudioPanel());
       alignmentFetcher.setPlayAudio(playAudio);
-    }
-    else {
-     logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+    } else {
+      logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
     }
   }
 
@@ -515,14 +515,14 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   /**
    * TODO: do we need this???
    *
-   * @param e
+   * @paramx e
    * @return
    * @see #getItemContent
    */
-  @NotNull
+/*  @NotNull
   private SimpleRecordAudioPanel<T> getRecordPanel(T e) {
     return new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer);
-  }
+  }*/
 
   @NotNull
   private DivWidget getHorizDiv() {
@@ -719,7 +719,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   public void contextAudioChanged(int id, long duration) {
     if (DEBUG) {
-      logger.info("contextAudioChanged  id " +id);
+      logger.info("contextAudioChanged  id " + id);
     }
 
     AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(id);

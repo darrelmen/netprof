@@ -76,7 +76,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
     dialogHelper = new DialogViewHelper(controller, this, DIALOG);
     listenHelper = new ListenViewHelper(controller, this, LISTEN);
-    rehearseHelper = new ListenViewHelper(controller, this, REHEARSE);
+    rehearseHelper = new RehearseViewHelper(controller, this, REHEARSE);
 
 
     this.controller = controller;

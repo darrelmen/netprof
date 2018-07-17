@@ -11,7 +11,7 @@ import mitll.langtest.shared.answer.AudioType;
 class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   //private final Logger logger = Logger.getLogger("FeedbackPostAudioRecordButton");
   private static final String STOP = "Stop";
-  public static final String RECORD_BUTTON = "RecordButton";
+  private static final String RECORD_BUTTON = "RecordButton";
 
   private final RecordingAudioListener simpleRecordAudioPanel;
 
@@ -34,6 +34,9 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
         true);
     this.simpleRecordAudioPanel = simpleRecordAudioPanel;
     setSize(ButtonSize.LARGE);
+
+    getElement().setId("FeedbackPostAudioRecordButton"+ exid);
+
   }
 
   @Override
