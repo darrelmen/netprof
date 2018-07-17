@@ -66,23 +66,28 @@ public class DialogTest extends BaseTest {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("");
 
     Project project = andPopulate.getProjectByName(KOREAN);
-    List<ClientExercise> all = new ArrayList<>();
 
-    List<IDialog> dialogs = andPopulate.getDialogDAO().getDialogs(project.getID());
-    dialogs.forEach(iDialog -> {
-      logger.info("dialog " + iDialog);
+    if (project == null) {
+      logger.warn("no korean");
+    } else {
+      List<ClientExercise> all = new ArrayList<>();
 
-      logger.info("sp    " + iDialog.getSpeakers());
-      logger.info("attr  " + iDialog.getAttributes());
-      logger.info("by sp " + iDialog.groupBySpeaker());
-      logger.info("core  " + iDialog.getCoreVocabulary());
-      logger.info("\n\n\n");
+      List<IDialog> dialogs = andPopulate.getDialogDAO().getDialogs(project.getID());
+      dialogs.forEach(iDialog -> {
+        logger.info("dialog " + iDialog);
+
+        logger.info("sp    " + iDialog.getSpeakers());
+        logger.info("attr  " + iDialog.getAttributes());
+        logger.info("by sp " + iDialog.groupBySpeaker());
+        logger.info("core  " + iDialog.getCoreVocabulary());
+        logger.info("\n\n\n");
 
 //      iDialog.getExercises().forEach(clientExercise -> clientExercise.getAttributes().forEach(exerciseAttribute -> logger.info("\t" + exerciseAttribute)));
-      all.addAll(iDialog.getExercises());
-    });
-    logger.info("total is " + all.size());
+        all.addAll(iDialog.getExercises());
+      });
+      logger.info("total is " + all.size());
 //    assertEquals("onetwo", result);
+    }
   }
 
   @Test
