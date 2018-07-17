@@ -119,7 +119,6 @@ public class CopyToPostgres<T extends CommonShell> {
     CREATED("z"),
     IMPORT("i"),
     MERGE("m"),
-    //MERGEDAY("y"),
     RECORDINGS("r"),
     SEND("s"),
     UNKNOWN("k");
@@ -140,11 +139,21 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   enum OPTIONS {
-    NAME("n"), OPTCONFIG("p"), EVAL("e"), ORDER("o"), SKIPREFRESULT("s"), TO("t"), ONDAY("w");
-    private String value;
+    NAME("n", "optional name for the project (different from config)"),
+    OPTCONFIG("p", "optional properties file within config directory (e.g. for pashto)"),
+    EVAL("e", "mark the imported project as at the eval step and use project specific audio"),
+    ORDER("o", "display order among projects of the same language"),
+    SKIPREFRESULT("s", "skip loading ref result table (if you want to recalculate reference audio alignment)"),
+    TO("t", "to project id"),
+    ONDAY("w", "on day"),
+    DATABASE("d", "into database");
 
-    OPTIONS(String value) {
+    private String value;
+    private String desc;
+
+    OPTIONS(String value, String desc) {
       this.value = value;
+      this.desc = desc;
     }
 
     String getValue() {
@@ -153,6 +162,10 @@ public class CopyToPostgres<T extends CommonShell> {
 
     public String toLower() {
       return name().toLowerCase();
+    }
+
+    public String getDesc() {
+      return desc;
     }
   }
 
@@ -184,7 +197,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                        boolean skipRefResult,
                                        boolean doUpdate,
                                        boolean doLatest,
-                                       boolean doSinceCreated) {
+                                       boolean doSinceCreated, String optDatabase) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     // previous update from h2...
@@ -194,9 +207,7 @@ public class CopyToPostgres<T extends CommonShell> {
       sinceWhen = getSinceWhenFromOldConfig(config, optionalProperties, false);
     }
 
-    try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, CONFIG)) {
-
-
+    try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, CONFIG, optDatabase)) {
       while (getDefaultUser(databaseLight) < 1) {
         try {
           sleep(1000);
@@ -206,7 +217,7 @@ public class CopyToPostgres<T extends CommonShell> {
         }
       }
       int defaultUser = getDefaultUser(databaseLight);
-      logger.info("default user = " +defaultUser);
+      logger.info("default user = " + defaultUser);
 
       String language = databaseLight.getLanguage();
       ServerProperties serverProps = databaseLight.getServerProps();
@@ -231,7 +242,10 @@ public class CopyToPostgres<T extends CommonShell> {
           getProjectStatus(isEval, hasModel),
           skipRefResult,
           doUpdate,
-          sinceWhen, doLatest, doSinceCreated, checkConvert);
+          sinceWhen,
+          doLatest,
+          doSinceCreated,
+          checkConvert);
       return true;
     } catch (Exception e) {
       logger.error("copyOneConfigCommand : got " + e, e);
@@ -249,7 +263,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private long getSinceWhenFromOldConfig(String config, String optionalProperties, boolean closeDB) {
     long sinceWhen = 0;
 
-    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, "oldConfig");
+    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, "oldConfig", null);
 
     if (databaseLight == null) logger.warn("no old config under " + OPT_NETPROF);
     else {
@@ -295,7 +309,7 @@ public class CopyToPostgres<T extends CommonShell> {
     return new CreateProject(serverProps.getHydra2Languages());
   }
 
-  private void dropOneConfig(Integer projid) {
+/*  private void dropOneConfig(Integer projid) {
     DatabaseImpl database = getDatabase();
     IProjectDAO projectDAO = database.getProjectDAO();
     if (projectDAO.exists(projid)) {
@@ -309,7 +323,7 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     database.close();
-  }
+  }*/
 
 /*  private void dropAllButOneConfig(Integer projid) {
     DatabaseImpl database = getDatabase();
@@ -403,6 +417,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param useH2
    * @param optPropsFile
    * @param installPath
+   * @param optDatabase
    * @return null if can't find the config file
    * @see #copyOneConfigCommand
    */
@@ -411,7 +426,8 @@ public class CopyToPostgres<T extends CommonShell> {
                                               boolean useLocal,
                                               String optPropsFile,
                                               String installPath,
-                                              String rootConfigDir) {
+                                              String rootConfigDir,
+                                              String optDatabase) {
     // logger.info("getDatabaseLight db " + config + " optional props " + optPropsFile);
     String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
 
@@ -434,6 +450,11 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     serverProps.setH2(useH2);
+
+    if (optDatabase != null) {
+      logger.info("\n\n\n\nusing " + optDatabase + " optional database\n\n\n");
+      serverProps.setDBConfig(optDatabase);
+    }
 
     String parent = configFile.getParentFile().getAbsolutePath();
     String name = configFile.getName();
@@ -1390,6 +1411,7 @@ public class CopyToPostgres<T extends CommonShell> {
     String updateUsersFile = null;
     String optName = null;
     String optConfigValue = null;
+    String optDatabase = null;
     int displayOrderValue = 0;
     boolean isEval, skipRefResult;
 
@@ -1397,6 +1419,7 @@ public class CopyToPostgres<T extends CommonShell> {
     if (cmd.hasOption(COPY.toLower())) {
       action = COPY;
       config = cmd.getOptionValue(COPY.toLower());
+
     } else if (ALLOW_DELETE) {
       if (cmd.hasOption(DROP.toLower())) {
         action = DROP;
@@ -1487,6 +1510,9 @@ public class CopyToPostgres<T extends CommonShell> {
     if (cmd.hasOption(NAME.toLower())) {
       optName = cmd.getOptionValue(NAME.toLower());
     }
+    if (cmd.hasOption(DATABASE.toLower())) {
+      optDatabase = cmd.getOptionValue(DATABASE.toLower());
+    }
     if (cmd.hasOption(OPTCONFIG.toLower())) {
       optConfigValue = cmd.getOptionValue(OPTCONFIG.toLower());
     }
@@ -1546,7 +1572,8 @@ public class CopyToPostgres<T extends CommonShell> {
             "\neval      " + isEval
         );
         try {
-          boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, false, false, false);
+          boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue,
+              isEval, skipRefResult, false, false, false,optDatabase);
           //  if (!b) {
           doExit(b);  // ?
           // }
@@ -1561,21 +1588,21 @@ public class CopyToPostgres<T extends CommonShell> {
         break;
       case UPDATE:
         logger.info("import netprof 1 content into existing netprof project");
-        boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, false);
+        boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, false,optDatabase);
         // if (!b) {
         doExit(b);  // ?
         // }
         break;
       case LATEST:
         logger.info("import netprof 1 content into existing netprof project given latest target project date");
-        boolean c = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, true, false);
+        boolean c = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, true, false,optDatabase);
         // if (!b) {
         doExit(c);  // ?
         // }
         break;
       case CREATED:
         logger.info("import netprof 1 content into existing netprof project given latest target project date");
-        boolean d = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, true);
+        boolean d = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, true,optDatabase);
         // if (!b) {
         doExit(d);  // ?
         // }
@@ -1665,34 +1692,12 @@ public class CopyToPostgres<T extends CommonShell> {
       }
     }
 
-    {
-      Option optConfig = new Option(OPTCONFIG.getValue(), OPTCONFIG.toLower(), true, "optional properties file within config directory (e.g. for pashto)");
-      optConfig.setRequired(false);
-      options.addOption(optConfig);
-    }
 
-    {
-      Option name = new Option(NAME.getValue(), NAME.toLower(), true, "optional name for the project (different from config)");
-      name.setRequired(false);
-      options.addOption(name);
-    }
-
-    {
-      Option eval = new Option(EVAL.getValue(), EVAL.toLower(), false, "mark the imported project as at the eval step and use project specific audio");
-      eval.setRequired(false);
-      options.addOption(eval);
-    }
-
-    {
-      Option displayOrder = new Option(ORDER.getValue(), ORDER.toLower(), true, "display order among projects of the same language");
-      displayOrder.setRequired(false);
-      options.addOption(displayOrder);
-    }
-    {
-      Option skip = new Option(SKIPREFRESULT.getValue(), SKIPREFRESULT.toLower(), false, "skip loading ref result table (if you want to recalculate reference audio alignment)");
-      skip.setRequired(false);
-      options.addOption(skip);
-    }
+    addNonRequiredArg(options, OPTCONFIG);
+    addNonRequiredArg(options, NAME);
+    addNonRequiredNoArg(options, EVAL);
+    addNonRequiredArg(options, ORDER);
+    addNonRequiredNoArg(options, SKIPREFRESULT);
 
     {
       Option mapFile = new Option(UPDATEUSER.getValue(), UPDATEUSER.toLower(), true, "user mapping file (two column csv)");
@@ -1718,13 +1723,13 @@ public class CopyToPostgres<T extends CommonShell> {
       Option mapFile = new Option(MERGE.getValue(), MERGE.toLower(), true, "from project id");
       options.addOption(mapFile);
 
-      mapFile = new Option(RECORDINGS.getValue(), RECORDINGS.toLower(), true, "from project id");
+      ACTION recordings = RECORDINGS;
+      mapFile = new Option(recordings.getValue(), recordings.toLower(), true, "from project id");
       options.addOption(mapFile);
 
-      mapFile = new Option(TO.getValue(), TO.toLower(), true, "to project id");
-      options.addOption(mapFile);
-      mapFile = new Option(ONDAY.getValue(), ONDAY.toLower(), true, "on day");
-      options.addOption(mapFile);
+      addOption(options, TO);
+      addOption(options, ONDAY);
+      addOption(options, DATABASE);
     }
 
     {
@@ -1733,6 +1738,22 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     return options;
+  }
+
+  private static void addNonRequiredNoArg(Options options, OPTIONS skiprefresult) {
+    Option skip = new Option(skiprefresult.getValue(), skiprefresult.toLower(), false, skiprefresult.getDesc());
+    skip.setRequired(false);
+    options.addOption(skip);
+  }
+
+  private static void addNonRequiredArg(Options options, OPTIONS skiprefresult) {
+    Option skip = new Option(skiprefresult.getValue(), skiprefresult.toLower(), true, skiprefresult.getDesc());
+    skip.setRequired(false);
+    options.addOption(skip);
+  }
+
+  private static void addOption(Options options, OPTIONS to) {
+    options.addOption(new Option(to.getValue(), to.toLower(), true, to.getDesc()));
   }
 
   /**

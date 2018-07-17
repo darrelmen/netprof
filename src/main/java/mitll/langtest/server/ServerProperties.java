@@ -139,7 +139,9 @@ public class ServerProperties {
   public static final String MAIL_FROM = "mail.from";
   public static final String IMAGE = "image";
   public static final String NETPROF = "netprof";
+  public static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
 
+  private String dbConfig = POSTGRES_DATA2_DIALOG;
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
   @Deprecated
@@ -815,11 +817,16 @@ public class ServerProperties {
    * Dialog branch specific config!
    * Not read from config file!
    * So we can share the netprof.properties config file.
+   *
    * @return
    */
   public String getDBConfig() {
-    return "postgresData2Dialog";//
+    return dbConfig;//
     // props.getProperty(DB_CONFIG, POSTGRES_HYDRA);
+  }
+
+  public void setDBConfig(String optDatabase) {
+    this.dbConfig = optDatabase;
   }
 
   /**
@@ -945,4 +952,6 @@ public class ServerProperties {
   public int getHeartbeatPeriod() {
     return getIntPropertyDef("heartbeatPeriod", DEFAULT_PERIOD);
   }
+
+
 }
