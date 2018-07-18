@@ -35,11 +35,11 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class ListenViewHelper implements ContentView, PlayListener, IListenView {
+public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> implements ContentView, PlayListener, IListenView {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
 
-  private static final String HIGHLIHGT_COLOR = "green";
+  private static final String HIGHLIGHT_COLOR = "green";
   public static final String VALUE = "value";
   public static final String SLIDER_MAX = "100";
   public static final String MAX = "max";
@@ -58,15 +58,15 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   protected final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
 
-  protected final List<DialogExercisePanel> bothTurns = new ArrayList<>();
-  private List<DialogExercisePanel> leftTurnPanels = new ArrayList<>(), rightTurnPanels = new ArrayList<>();
+  protected final List<T> bothTurns = new ArrayList<>();
+  private List<T> leftTurnPanels = new ArrayList<>(), rightTurnPanels = new ArrayList<>();
 
-  protected DialogExercisePanel currentTurn;
-  protected Boolean leftSpeaker = true;
-  protected Boolean rightSpeaker = true;
+  protected T currentTurn;
+  //  protected Boolean leftSpeaker = true;
+//  protected Boolean rightSpeaker = true;
   protected CheckBox leftSpeakerBox, rightSpeakerBox;
   private ComplexWidget slider;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * @param controller
@@ -172,12 +172,12 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   protected void speakerOneCheck(Boolean value) {
     logger.info("speaker one now " + value);
-    leftSpeaker = value;
+    //leftSpeaker = value;
 
-    if (!rightSpeaker) {
-      rightSpeaker = true;
-      rightSpeakerBox.setValue(true);
-    }
+//    if (!rightSpeaker) {
+//      rightSpeaker = true;
+//      rightSpeakerBox.setValue(true);
+//    }
 
     setPlayButtonToPlay();
   }
@@ -185,12 +185,12 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
   protected void speakerTwoCheck(Boolean value) {
     logger.info("speaker two now " + value);
-    rightSpeaker = value;
-
-    if (!leftSpeaker) {
-      leftSpeaker = true;
-      leftSpeakerBox.setValue(true);
-    }
+//    rightSpeaker = value;
+//
+//    if (!leftSpeaker) {
+//      leftSpeaker = true;
+//      leftSpeakerBox.setValue(true);
+//    }
     setPlayButtonToPlay();
   }
 
@@ -290,7 +290,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
       // logger.info("ex " + clientExercise.getID() + " audio " + clientExercise.getAudioAttributes());
       boolean isRight = rightTurns != null && rightTurns.contains(clientExercise);
 
-      DialogExercisePanel<ClientExercise> turn = getTurnPanel(clientExercise, isRight);
+      T turn = getTurnPanel(clientExercise, isRight);
 
       if (isRight) rightTurnPanels.add(turn);
       else leftTurnPanels.add(turn);
@@ -301,6 +301,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
 
     if (!bothTurns.isEmpty()) {
       currentTurn = bothTurns.get(0);
+      logger.info("getTurns : markCurrent ");
       markCurrent();
     }
 
@@ -339,8 +340,8 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   }
 
   @NotNull
-  private DialogExercisePanel<ClientExercise> getTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    DialogExercisePanel<ClientExercise> turn = reallyGetTurnPanel(clientExercise, isRight);
+  private T getTurnPanel(ClientExercise clientExercise, boolean isRight) {
+    T turn = reallyGetTurnPanel(clientExercise, isRight);
     turn.addWidgets(true, false, PhonesChoices.HIDE);
     turn.getElement()
         .getStyle().setClear(Style.Clear.BOTH);
@@ -353,13 +354,14 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   }
 
   @NotNull
-  protected DialogExercisePanel<ClientExercise> reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    DialogExercisePanel<ClientExercise> widgets = new DialogExercisePanel<>(clientExercise, controller, null, alignments, this);
+  protected T reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
+    T widgets = (T) new DialogExercisePanel<ClientExercise>(clientExercise, controller, null, alignments, this);
     widgets.setIsRight(isRight);
     return widgets;
   }
 
-  protected void gotCardClick(DialogExercisePanel<ClientExercise> turn) {
+  protected void gotCardClick(T turn) {
+    removeMarkCurrent();
     this.currentTurn = turn;
     playCurrentTurn();
   }
@@ -461,7 +463,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   private void gotBackward() {
     setPlayButtonToPlay();
 
-    List<DialogExercisePanel> seq = getSeq();
+    List<T> seq = getSeq();
 
     int i = seq.indexOf(currentTurn);
     int i1 = i - 1;
@@ -479,14 +481,24 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
     if (isPlaying) playCurrentTurn();
   }
 
-  protected List<DialogExercisePanel> getSeq() {
+  protected List<T> getSeq() {
+    boolean leftSpeaker = isLeftSpeakerSet();
+    boolean rightSpeaker = isRightSpeakerSet();
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
+  }
+
+  protected Boolean isRightSpeakerSet() {
+    return rightSpeakerBox.getValue();
+  }
+
+  protected Boolean isLeftSpeakerSet() {
+    return leftSpeakerBox.getValue();
   }
 
   private void gotForward() {
     setPlayButtonToPlay();
 
-    List<DialogExercisePanel> seq = getSeq();
+    List<T> seq = getSeq();
 
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
@@ -511,9 +523,11 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
       setPlayButtonToPlay();
     }
 
-    if (leftSpeaker && rightSpeaker) {
+    Boolean leftSpeakerSet = isLeftSpeakerSet();
+    Boolean rightSpeakerSet = isRightSpeakerSet();
+    if (leftSpeakerSet && rightSpeakerSet) {
 
-    } else if (leftSpeaker && !leftTurnPanels.contains(currentTurn) || rightSpeaker && !rightTurnPanels.contains(currentTurn)) {
+    } else if (leftSpeakerSet && !leftTurnPanels.contains(currentTurn) || rightSpeakerSet && !rightTurnPanels.contains(currentTurn)) {
       removeMarkCurrent();
 
       int i = bothTurns.indexOf(currentTurn); // must be on right
@@ -523,7 +537,7 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
     playCurrentTurn();
   }
 
-  private void playCurrentTurn() {
+  protected void playCurrentTurn() {
     if (currentTurn != null) {
       if (DEBUG) logger.info("playCurrentTurn - turn " + currentTurn.getExID());
       currentTurn.doPlayPauseToggle();
@@ -556,12 +570,12 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
    */
   protected void currentTurnPlayEnded() {
     if (DEBUG) logger.info("currentTurnPlayEnded - turn " + currentTurn.getExID());
-    List<DialogExercisePanel> seq = getSeq();
+    List<T> seq = getSeq();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
+    removeMarkCurrent();
     if (i1 > seq.size() - 1) {
       if (DEBUG) logger.info("OK stop");
-      removeMarkCurrent();
       currentTurn = seq.get(0);
       markCurrent();
     } else {
@@ -575,10 +589,15 @@ public class ListenViewHelper implements ContentView, PlayListener, IListenView 
   }
 
   protected void removeMarkCurrent() {
-    currentTurn.getElement().getStyle().setBorderColor("white");
+    //   logger.info("removeMarkCurrent on " + currentTurn.getExID());
+    currentTurn.removeMarkCurrent();
+//    currentTurn.getElement().getStyle().setBorderColor("white");
   }
 
   protected void markCurrent() {
-    currentTurn.getElement().getStyle().setBorderColor(HIGHLIHGT_COLOR);
+    //logger.info("markCurrent on " + currentTurn.getExID());
+    currentTurn.markCurrent();
+
+    //currentTurn.getElement().getStyle().setBorderColor(HIGHLIGHT_COLOR);
   }
 }

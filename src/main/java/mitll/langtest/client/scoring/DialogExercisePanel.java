@@ -31,9 +31,10 @@ public class DialogExercisePanel<T extends ClientExercise>
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
   private static final String BLUE = "#2196F3";
-//  private static final String HEIGHT = 100 + "px";
+  //  private static final String HEIGHT = 100 + "px";
   private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
   private static final String LEFT_COLOR = "#e7e6ec";
+  private static final String HIGHLIGHT_COLOR = "green";
 
 
   static final int CONTEXT_INDENT = 45;//50;
@@ -105,17 +106,21 @@ public class DialogExercisePanel<T extends ClientExercise>
     });
     getElement().getStyle().setCursor(Style.Cursor.POINTER);
 
-    getElement().setId("DialogExercisePanel_"+getExID());
+    getElement().setId("DialogExercisePanel_" + getExID());
 
   }
 
-  boolean isRight;
+  protected   boolean isRight;
 
-  public  void setIsRight(boolean isRight) {this.isRight=isRight;}
+  public void setIsRight(boolean isRight) {
+    this.isRight = isRight;
+  }
 
   public int getExID() {
     return exercise.getID();
   }
+
+  private  DivWidget bubble;
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
@@ -126,15 +131,14 @@ public class DialogExercisePanel<T extends ClientExercise>
       this.isRTL = clickableWords.isRTL(exercise.getForeignLanguage());
 
       DivWidget flEntry = getFLEntry(exercise);
-    //  this.addStyleName("bubble");
+      //  this.addStyleName("bubble");
 
-      DivWidget rightSide= new DivWidget();
-      rightSide.getElement().setId("rightSideBubble_"+getExID());
+      DivWidget rightSide = new DivWidget();
+      this.bubble = rightSide;
+      rightSide.getElement().setId("rightSideBubble_" + getExID());
       rightSide.addStyleName("bubble");
       rightSide.add(flEntry);
       styleMe(rightSide);
-
-
 
       add(rightSide);
 
@@ -291,13 +295,13 @@ public class DialogExercisePanel<T extends ClientExercise>
    * @see #audioChanged
    * @see #contextAudioChanged
    */
-   void matchSegmentsToClickables(int id,
-                                           long duration,
-                                           AlignmentOutput alignmentOutput,
-                                           List<IHighlightSegment> flclickables,
-                                           HeadlessPlayAudio playAudio,
-                                           DivWidget clickableRow,
-                                           DivWidget clickablePhones) {
+  void matchSegmentsToClickables(int id,
+                                 long duration,
+                                 AlignmentOutput alignmentOutput,
+                                 List<IHighlightSegment> flclickables,
+                                 HeadlessPlayAudio playAudio,
+                                 DivWidget clickableRow,
+                                 DivWidget clickablePhones) {
     if (DEBUG) logger.info("matchSegmentsToClickables match seg to clicable " + id + " : " + alignmentOutput);
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget =
         matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio, clickableRow, clickablePhones);
@@ -869,5 +873,16 @@ public class DialogExercisePanel<T extends ClientExercise>
 
   public boolean isPlaying() {
     return playAudio.isPlaying();
+  }
+
+  public void removeMarkCurrent() {
+    logger.info("removeMarkCurrent on " + getExID());
+    bubble.getElement().getStyle().setBorderColor("white");
+  }
+
+  public void markCurrent() {
+    logger.info("markCurrent on " + getExID());
+
+    bubble.getElement().getStyle().setBorderColor(HIGHLIGHT_COLOR);
   }
 }

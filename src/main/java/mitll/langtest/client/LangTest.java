@@ -292,7 +292,8 @@ public class LangTest implements
   private final long then = 0;
   private MessageHelper messageHelper;
   private AnnotationHelper annotationHelper;
-private boolean hasNetworkProblem;
+  private boolean hasNetworkProblem;
+
   /**
    * This gets called first.
    * <p>
@@ -360,6 +361,7 @@ private boolean hasNetworkProblem;
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
       }
+
       public void onSuccess(StartupInfo startupInfo) {
         rememberStartup(startupInfo, reloadWindow);
       }
@@ -773,6 +775,11 @@ private boolean hasNetworkProblem;
       public void noWebRTCAvailable() {
         flashRecordPanel.initFlash();
       }
+
+      @Override
+      public void silenceDetected() {
+        if (wavEndCallback != null) wavEndCallback.silenceDetected();
+      }
     };
     flashRecordPanel = new FlashRecordPanelHeadless(micPermission);
   }
@@ -1166,7 +1173,8 @@ private boolean hasNetworkProblem;
   /**
    * Recording interface
    *
-   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see RecordButtonPanel#stopRecording(long)
+   * @see PostAudioRecordButton#stopRecording(long)
    * @see RecordButton.RecordingListener#stopRecording(long)
    */
   public void stopRecording(WavCallback wavCallback) {
@@ -1174,9 +1182,14 @@ private boolean hasNetworkProblem;
     flashRecordPanel.stopRecording(wavCallback);
   }
 
+  private WavEndCallback wavEndCallback;
+
   /**
    * Recording interface
    */
+  public void registerStopDetected(WavEndCallback wavEndCallback) {
+    this.wavEndCallback = wavEndCallback;
+  }
 
   public SoundManagerAPI getSoundManager() {
     return soundManager;

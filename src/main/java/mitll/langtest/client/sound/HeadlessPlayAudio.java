@@ -455,7 +455,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * Called when the audio stops playing, also relays the message to the listener if there is one.
    */
   public void songFinished() {
-    if (DEBUG || true) logger.info("PlayAudioPanel :songFinished " + getElement().getId() + " to " + listeners.size());
+    if (DEBUG) logger.info("PlayAudioPanel :songFinished " + getElement().getId() + " to " + listeners.size());
 
     markNotPlaying();
     //setPlayLabel();

@@ -106,7 +106,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     this.scoreAudioNow = scoreAudioNow;
 
     this.recordInResults = recordInResults;
-    // getElement().setId("PostAudioRecordButton");
+    getElement().setId("PostAudioRecordButton");
+
     controller.register(this, exerciseID);
     Style style = getElement().getStyle();
     style.setMarginBottom(1, Style.Unit.PX);
@@ -115,8 +116,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       setWidth(buttonWidth + "px");
     }
 
-    getElement().setId("PostAudioRecordButton"+ exerciseID);
-
+    getElement().setId("PostAudioRecordButton" + exerciseID);
   }
 
   public void setExerciseID(int exercise) {
@@ -127,25 +127,25 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     return exerciseID;
   }
 
-
   public void startRecording() {
     LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
     controller.startRecording();
   }
+
   /**
    * @param duration
    * @see RecordButton#stop
    */
   public boolean stopRecording(long duration) {
     if (duration > MIN_DURATION) {
-      //  logger.info("stopRecording duration " + duration + " > " + MIN_DURATION);
+      logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
       controller.stopRecording(this::postAudioFile);
       return true;
     } else {
       showPopup(Validity.TOO_SHORT.getPrompt());
       hideWaveform();
       gotShortDurationRecording();
-      //logger.info("stopRecording duration " + duration + " < " + MIN_DURATION);
+      logger.info("stopRecording duration " + duration + " < min = " + MIN_DURATION);
       return false;
     }
   }
@@ -200,7 +200,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         index,
         getAudioType());
 
-    //  logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
+    logger.info("\n\n\nPostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext +
+        "\n\t bytes " + base64EncodedWavFile.length());
 
     DecoderOptions decoderOptions = new DecoderOptions()
         .setDoDecode(scoreAudioNow)
@@ -319,7 +320,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       }
     });
   }
-
 
 
   /**

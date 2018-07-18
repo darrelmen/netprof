@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
@@ -25,7 +26,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  * An ASR scoring panel with a record button.
  */
 public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends NoFeedbackRecordAudioPanel<T> {
-  // private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+   private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
   public static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
@@ -196,7 +197,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
   @Override
   public void useResult(AudioAnswer result) {
     super.useResult(result);
-//    logger.info("useScoredResult " + result);
+    logger.info("useScoredResult " + result);
     waitCursorHelper.showFinished();
     hasScoreHistory = true;
 

@@ -2,6 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 
@@ -16,13 +17,12 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   private final RecordingAudioListener simpleRecordAudioPanel;
 
   /**
-   * @see SimpleRecordAudioPanel#makePlayAudioPanel
    * @param exid
    * @param simpleRecordAudioPanel
    * @param controller
+   * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  FeedbackPostAudioRecordButton(int exid,
-                                RecordingAudioListener simpleRecordAudioPanel, ExerciseController controller) {
+  FeedbackPostAudioRecordButton(int exid, RecordingAudioListener simpleRecordAudioPanel, ExerciseController controller) {
     super(
         exid,
         controller,
@@ -35,8 +35,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     this.simpleRecordAudioPanel = simpleRecordAudioPanel;
     setSize(ButtonSize.LARGE);
 
-    getElement().setId("FeedbackPostAudioRecordButton"+ exid);
-
+    getElement().setId("FeedbackPostAudioRecordButton" + exid);
   }
 
   @Override
@@ -61,17 +60,23 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     return AudioType.LEARN;
   }
 
+  /**
+   * @see RecordButton#flipImage
+   * @param first
+   */
   @Override
   public void flip(boolean first) {
     simpleRecordAudioPanel.flip(first);
   }
 
   /**
-   * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
    * @param result
+   * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
    */
   @Override
-  public void useResult(AudioAnswer result) {  simpleRecordAudioPanel.useResult(result);  }
+  public void useResult(AudioAnswer result) {
+    simpleRecordAudioPanel.useResult(result);
+  }
 
   /**
    * @param result

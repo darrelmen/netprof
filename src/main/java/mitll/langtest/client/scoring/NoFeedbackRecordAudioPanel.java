@@ -1,7 +1,6 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.Style;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.ScoredExercise;
@@ -20,18 +19,20 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
   protected DivWidget recordFeedback;
   protected DivWidget scoreFeedback;
 
+  /**
+   * @see RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices)
+   * @param exercise
+   * @param controller
+   */
   public NoFeedbackRecordAudioPanel(T exercise, ExerciseController controller) {
     this.exercise = exercise;
     this.controller = controller;
 
-
     getElement().setId("NoFeedbackRecordAudioPanel_"+ exercise.getID());
   }
 
-
-
   protected void addWidgets() {
-    logger.info("addWidets");
+    //logger.info("addWidets");
 
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
@@ -79,7 +80,6 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     return playAudioPanel;
   }
 
-
   /**
    * @return
    * @see TwoColumnExercisePanel#makeFirstRow
@@ -104,7 +104,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
 
   @Override
   public void stopRecording() {
-    //    logger.info("stopRecording...");
+    logger.info("stopRecording...");
     playAudioPanel.setEnabled(true);
     playAudioPanel.hideRecord();
   }
@@ -122,7 +122,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
 
   @Override
   public void useResult(AudioAnswer result) {
-//    logger.info("useScoredResult " + result);
+   logger.info("useScoredResult " + result);
     setVisible(true);
     playAudioPanel.showPlayButton();
   }

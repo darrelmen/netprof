@@ -47,4 +47,5 @@ public interface MicPermission {
   void noMicAvailable();
   void noRecordingMethodAvailable();
   void noWebRTCAvailable();
+  void silenceDetected();
 }

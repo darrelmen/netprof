@@ -3,8 +3,10 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.banner.RehearseViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +16,9 @@ import java.util.logging.Logger;
 
 public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogExercisePanel<T> {
   private Logger logger = Logger.getLogger("RecordDialogExercisePanel");
-  NoFeedbackRecordAudioPanel<T> recordAudioPanel;
+  private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
+
+  long minDur;
 
   public RecordDialogExercisePanel(final T commonExercise,
                                    final ExerciseController controller,
@@ -22,11 +26,20 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
                                    Map<Integer, AlignmentOutput> alignments,
                                    IListenView listenView) {
     super(commonExercise, controller, listContainer, alignments, listenView);
+    minDur = commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
+    minDur = (long) (((float) minDur) * 1.2F);
+    logger.info("ex " + commonExercise.getID() + " min dur " + minDur);
   }
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
-    NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<>(exercise, controller);
+    NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<T>(exercise, controller){
+      @Override
+      public void useResult(AudioAnswer result) {
+        super.useResult(result);
+        logger.info("useResult got " + result);
+      }
+    };
     this.recordAudioPanel = recordPanel;
 
     recordPanel.addWidgets();
@@ -38,10 +51,13 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
 //    addStyleName(isRight?"floatRight":"floatLeft");
 
     {
-      DivWidget recordButtonContainer = new DivWidget();
-      recordButtonContainer.addStyleName("recordingRowStyle");
-      recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
-      flContainer.add(recordButtonContainer);
+      //DivWidget recordButtonContainer = new DivWidget();
+      //recordButtonContainer.addStyleName("recordingRowStyle");
+      PostAudioRecordButton postAudioRecordButton = recordPanel.getPostAudioRecordButton();
+      //recordButtonContainer.add(postAudioRecordButton);
+      postAudioRecordButton.setVisible(false);
+      flContainer.add(postAudioRecordButton);
+
     }
 
     flContainer.add(recordPanel.getScoreFeedback());
@@ -69,11 +85,42 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
     return flContainer;
   }
 
-
   protected void addMarginLeft(Style style2) {
     style2.setMarginLeft(15, Style.Unit.PX);
   }
+
+  long start = 0;
+
+  /**
+   * @see RehearseViewHelper#currentTurnPlayEnded
+   */
   public void startRecording() {
-    recordAudioPanel.startRecording();
+    start = System.currentTimeMillis();
+    recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
+  }
+
+  /**
+   * @return
+   * @see RehearseViewHelper#silenceDetected()
+   */
+  public boolean isRecording() {
+    return recordAudioPanel.getPostAudioRecordButton().isRecording();
+  }
+
+  /**
+   * @see RehearseViewHelper#silenceDetected()
+   */
+  public boolean stopRecording() {
+    long now = System.currentTimeMillis();
+
+    long diff = now - start;
+    if (diff > minDur) {
+      recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
+      return true;
+    }
+    else {
+      logger.info("stopRecording ignore too short " + diff + " vs " + minDur);
+      return false;
+    }
   }
 }

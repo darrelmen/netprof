@@ -43,6 +43,13 @@
         this.node = (this.context.createScriptProcessor ||
             this.context.createJavaScriptNode).call(this.context, bufferLen, 2, 2);
         var worker = new Worker(config.workerPath || WORKER_PATH);
+
+
+        var silenceDetectionConfig =  {};
+        silenceDetectionConfig.time =  1500;
+        silenceDetectionConfig.amplitude =  0.2;
+
+
         worker.postMessage({
             command: 'init',
             config: {
@@ -51,7 +58,7 @@
         });
 
         var recording = false,
-            currCallback;
+            currCallback, start, silenceCallback;
 
         this.node.onaudioprocess = function (e) {
             if (!recording) return;
@@ -62,6 +69,7 @@
                     e.inputBuffer.getChannelData(1)
                 ]
             });
+            analyse();
         };
 
         this.configure = function (cfg) {
@@ -77,6 +85,7 @@
             //  this.node.connect(this.context.destination);    //this should not be necessary
             //source.start();
             recording = true;
+            start=Date.now();
 //      console.log("record " + "  at " + new Date().getTime());
         };
 
@@ -129,7 +138,45 @@
             currCallback(blob);
         };
 
-        source.connect(this.node);
+        /**
+         * Checks the time domain data to see if the amplitude of the audio waveform is more than
+         * the silence threshold. If it is, "noise" has been detected and it resets the start time.
+         * If the elapsed time reaches the time threshold the silence callback is called. If there is a
+         * visualizationCallback it invokes the visualization callback with the time domain data.
+         */
+        var analyse = function () {
+            analyser.fftSize = 2048;
+            var bufferLength = analyser.fftSize;
+            var dataArray = new Uint8Array(bufferLength);
+            var amplitude = silenceDetectionConfig.amplitude;
+            var time = silenceDetectionConfig.time;
+
+            analyser.getByteTimeDomainData(dataArray);
+
+            for (var i = 0; i < bufferLength; i++) {
+                // Normalize between -1 and 1.
+                var curr_value_time = (dataArray[i] / 128) - 1.0;
+                if (curr_value_time > amplitude || curr_value_time < (-1 * amplitude)) {
+                    start = Date.now();
+                }
+            }
+            var newtime = Date.now();
+            var elapsedTime = newtime - start;
+            if (elapsedTime > time) {
+                silenceDetected();
+            }
+        };
+
+
+        var analyser = source.context.createAnalyser();
+        analyser.minDecibels = -90;
+        analyser.maxDecibels = -10;
+        analyser.smoothingTimeConstant = 0.85;
+
+        source.connect(analyser);
+        analyser.connect(this.node);
+
+//        source.connect(this.node);
         this.node.connect(this.context.destination);    //this should not be necessary
     };
 

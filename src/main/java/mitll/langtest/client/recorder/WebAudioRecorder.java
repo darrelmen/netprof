@@ -45,7 +45,7 @@ import mitll.langtest.client.initial.WavCallback;
  * @since 5/27/2014.
  */
 public class WebAudioRecorder {
- // private final Logger logger = Logger.getLogger("WebAudioRecorder");
+  // private final Logger logger = Logger.getLogger("WebAudioRecorder");
   private static final int DELAY_MILLIS = 4000;
 
   private static boolean webAudioMicAvailable;
@@ -54,7 +54,6 @@ public class WebAudioRecorder {
   private Timer theTimer = null;
 
   /**
-   *
    * The valid responses to this are : webAudioMicAvailable, webAudioMicNotAvailable, webAudioPermissionDenied
    * IF we get no response in 5 seconds, ask again!
    *
@@ -80,8 +79,7 @@ public class WebAudioRecorder {
       };
       theTimer.schedule(DELAY_MILLIS);
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -97,6 +95,7 @@ public class WebAudioRecorder {
   }-*/;
 
   public native void advertise() /*-{
+      $wnd.silenceDetected = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::silenceDetected());
       $wnd.webAudioMicAvailable = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioMicAvailable());
       $wnd.webAudioMicNotAvailable = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioMicNotAvailable());
       $wnd.webAudioPermissionDenied = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioPermissionDenied());
@@ -122,11 +121,18 @@ public class WebAudioRecorder {
     }
   }
 
-  private native static void consoleLog( String message) /*-{
-      console.log( "WebAudioRecorder:" + message );
+  private native static void consoleLog(String message) /*-{
+      console.log("WebAudioRecorder:" + message);
   }-*/;
 
-  public boolean isWebAudioMicAvailable() { return webAudioMicAvailable; }
+  public boolean isWebAudioMicAvailable() {
+    return webAudioMicAvailable;
+  }
+
+  public static void silenceDetected() {
+  //  console("silenceDetected -- now!");
+    FlashRecordPanelHeadless.micPermission.silenceDetected();
+  }
 
   public static void webAudioMicAvailable() {
     gotResponse = true;
@@ -161,8 +167,8 @@ public class WebAudioRecorder {
   }
 
   /**
-   * @see #advertise()
    * @param encoded
+   * @see #advertise()
    */
   public static void getBase64(String encoded) {
     if (encoded.length() < 100) {

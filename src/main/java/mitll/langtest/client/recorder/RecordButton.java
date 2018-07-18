@@ -207,7 +207,7 @@ public class RecordButton extends Button {
    * @see #setupRecordButton
    *
    */
-  protected void doClick() {
+  public void doClick() {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
@@ -223,7 +223,7 @@ public class RecordButton extends Button {
    *
    * @see #doClick
    */
-  private void startOrStopRecording() {
+  public void startOrStopRecording() {
     //long enter = System.currentTimeMillis();
 //    if (last  > 0) {
 //      logger.info("startOrStopRecording at " + enter + " millis after dur " +  (enter-last));
@@ -271,7 +271,7 @@ public class RecordButton extends Button {
     cancelTimer();
     long duration = now - started;
 
-    //logger.info("startOrStopRecording ui time between button clicks = " + duration + " millis, ");
+    logger.info("stopRecording : ui time between button clicks = " + duration + " millis, ");
 
     afterStopTimer = new Timer() {
       @Override
