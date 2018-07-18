@@ -1,12 +1,14 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -29,7 +31,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private static final boolean DEBUG = false;
 
-  private static final int DELAY_MILLIS = 500;
+  private static final int DELAY_MILLIS = 100;
 
   private ProgressBar scoreProgress;
 
@@ -53,11 +55,47 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     style.setMarginTop(60, Style.Unit.PX);
     style.setMarginLeft(135, Style.Unit.PX);
     style.setClear(Style.Clear.BOTH);
+
     breadRow.getElement().setId("breadRow");
-    breadRow.add(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
-    styleProgressBarContainer(scoreProgress);
-    scoreProgress.setVisible(false);
+    breadRow.add(showScoreFeedback());
+
     listContent.add(breadRow);
+  }
+
+  private Image smiley = new Image();
+
+  private DivWidget showScoreFeedback() {
+    DivWidget container = new DivWidget();
+
+    container.setId("feedbackContainerAndBar");
+
+    {
+      DivWidget iconContainer = new DivWidget();
+      iconContainer.addStyleName("floatLeft");
+
+      iconContainer.add(smiley);
+      setSmiley(smiley, 0.8);
+
+      container.add(iconContainer);
+    }
+
+    {
+      DivWidget scoreContainer = new DivWidget();
+      scoreContainer.addStyleName("floatLeft");
+
+      scoreContainer.addStyleName("topMargin");
+      scoreContainer.addStyleName("leftFiveMargin");
+      scoreContainer.add(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
+      styleProgressBarContainer(scoreProgress);
+
+      scoreContainer.setWidth("73%");
+
+      container.setWidth("78%");
+      container.getElement().getStyle().setMarginLeft(20, Style.Unit.PCT);
+      container.add(scoreContainer);
+    }
+
+    return container;
   }
 
   private void styleProgressBarContainer(ProgressBar progressBar) {
@@ -197,19 +235,41 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         total += score;
       }
 
-
       logger.info("showScore showing " + num);
       total /= (float) num;
       logger.info("showScore total   " + total);
 
       double percent = total * 100;
-      double round = Math.max(percent, 30);
+      double round = percent;// Math.max(percent, 30);
       if (percent == 0d) round = 100d;
       scoreProgress.setPercent(num == 0 ? 100 : percent);
       scoreProgress.setVisible(true);
+      scoreProgress.setText("Score " + Math.round(percent) + "%");
       new ScoreProgressBar(false).setColor(scoreProgress, total, round, false);
+      setSmiley(smiley, total);
     }
 
+  }
+
+  private void setSmiley(Image smiley, double total) {
+    String choice;
+
+    if (total < 0.3) {
+      choice = "frowning.png";
+    } else if (total < 0.4) {
+      choice = "confused.png";
+    } else if (total < 0.5) {
+      choice = "thinking.png";
+    } else if (total < 0.6) {
+      choice = "neutral.png";
+    } else if (total < 0.7) {
+      choice = "smiling.png";
+    } else {
+      choice = "grinning.png";
+    }
+
+    //   smiley = new Image(LangTest.LANGTEST_IMAGES + choice);
+    smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
   }
 
 }

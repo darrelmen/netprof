@@ -15,9 +15,10 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogExercisePanel<T> {
-  public static final float DELAY_SCALAR = 1.2F;
   private Logger logger = Logger.getLogger("RecordDialogExercisePanel");
+
   private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
+  private static final float DELAY_SCALAR = 1.1F;
 
   private long minDur;
 
@@ -29,7 +30,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
     super(commonExercise, controller, listContainer, alignments, listenView);
     minDur = commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
     minDur = (long) (((float) minDur) * DELAY_SCALAR);
-    logger.info("ex " + commonExercise.getID() + " min dur " + minDur);
+  //  logger.info("ex " + commonExercise.getID() + " min dur " + minDur);
   }
 
   @Override

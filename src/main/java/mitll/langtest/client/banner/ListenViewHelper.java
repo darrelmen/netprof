@@ -36,6 +36,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 4/5/17.
  */
 public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> implements ContentView, PlayListener, IListenView {
+  public static final int HEADER_HEIGHT = 120;
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
 
@@ -200,7 +201,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     {
       DivWidget row = new DivWidget();
       row.addStyleName("cardBorderShadow");
-      row.setHeight("100px");
+      row.setHeight(HEADER_HEIGHT + "px");
       row.setWidth(ROW_WIDTH + "%");
       row.addStyleName("inlineFlex");
 
