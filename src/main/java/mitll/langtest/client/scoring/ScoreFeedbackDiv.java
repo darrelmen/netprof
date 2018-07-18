@@ -39,7 +39,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
       "Wonderful!", "Terrific!", "Groovy!", "Adroit!", "First-rate!");
 
 
-  public static final int FIRST_STEP  = 35;
+  public static final int FIRST_STEP = 35;
   public static final int SECOND_STEP = 75;
 
   private final PlayAudioPanel playAudioPanel;
@@ -50,8 +50,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
    * @param downloadContainer
    * @see SimpleRecordAudioPanel#addWidgets
    */
-  public ScoreFeedbackDiv(PlayAudioPanel playAudioPanel,
-                          DownloadContainer downloadContainer) {
+  public ScoreFeedbackDiv(PlayAudioPanel playAudioPanel, DownloadContainer downloadContainer) {
     super();
     styleTheProgressBar(progressBar);
     addTooltip(progressBar, OVERALL_SCORE);

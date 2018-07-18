@@ -68,7 +68,7 @@ public class DialogExercisePanel<T extends ClientExercise>
    * Mandarin has special rules for the moment so we can match simplified chinese characters to traditional ones...
    */
   private boolean isMandarin;
-  private final IListenView listenView;
+  protected final IListenView listenView;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -876,13 +876,12 @@ public class DialogExercisePanel<T extends ClientExercise>
   }
 
   public void removeMarkCurrent() {
-    logger.info("removeMarkCurrent on " + getExID());
+ //   logger.info("removeMarkCurrent on " + getExID());
     bubble.getElement().getStyle().setBorderColor("white");
   }
 
   public void markCurrent() {
-    logger.info("markCurrent on " + getExID());
-
+   // logger.info("markCurrent on " + getExID());
     bubble.getElement().getStyle().setBorderColor(HIGHLIGHT_COLOR);
   }
 }

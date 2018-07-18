@@ -39,15 +39,15 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
 
-  private static final String HIGHLIGHT_COLOR = "green";
-  public static final String VALUE = "value";
-  public static final String SLIDER_MAX = "100";
-  public static final String MAX = "max";
-  public static final String MIN = "min";
-  public static final String SLIDER_MIN = "0";
-  public static final String TYPE = "type";
-  public static final String RANGE = "range";
-  public static final String INPUT = "input";
+  //private static final String HIGHLIGHT_COLOR = "green";
+  private static final String VALUE = "value";
+  private static final String SLIDER_MAX = "100";
+  private static final String MAX = "max";
+  private static final String MIN = "min";
+  private static final String SLIDER_MIN = "0";
+  private static final String TYPE = "type";
+  private static final String RANGE = "range";
+  private static final String INPUT = "input";
 
   private static final int ROW_WIDTH = 97;
   private static final String HEIGHT = 100 + "px";
@@ -59,14 +59,13 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
 
 
   protected final List<T> bothTurns = new ArrayList<>();
-  private List<T> leftTurnPanels = new ArrayList<>(), rightTurnPanels = new ArrayList<>();
+  protected final List<T> leftTurnPanels = new ArrayList<>();
+  protected final List<T> rightTurnPanels = new ArrayList<>();
 
   protected T currentTurn;
-  //  protected Boolean leftSpeaker = true;
-//  protected Boolean rightSpeaker = true;
   protected CheckBox leftSpeakerBox, rightSpeakerBox;
   private ComplexWidget slider;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -162,7 +161,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     return rowOne;
   }
 
-  protected void setLeftTurnSpeakerInitial(CheckBox checkBox) {
+  private void setLeftTurnSpeakerInitial(CheckBox checkBox) {
     checkBox.setValue(true);
   }
 
@@ -355,12 +354,12 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
 
   @NotNull
   protected T reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    T widgets = (T) new DialogExercisePanel<ClientExercise>(clientExercise, controller, null, alignments, this);
+    T widgets = (T) new DialogExercisePanel<>(clientExercise, controller, null, alignments, this);
     widgets.setIsRight(isRight);
     return widgets;
   }
 
-  protected void gotCardClick(T turn) {
+  private void gotCardClick(T turn) {
     removeMarkCurrent();
     this.currentTurn = turn;
     playCurrentTurn();
@@ -432,6 +431,11 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     return slider.getElement().getPropertyInt(VALUE);
   }
 
+  @Override
+  public void addScore(int exid, float score) {
+
+  }
+
   @NotNull
   private Widget getLeftArrow() {
     DivWidget buttonDiv = new DivWidget();
@@ -456,7 +460,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     controller.getNavigation().show(INavigation.VIEWS.DIALOG);
   }
 
-  protected void gotGoForward() {
+  private void gotGoForward() {
     controller.getNavigation().show(INavigation.VIEWS.REHEARSE);
   }
 

@@ -1,16 +1,23 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.initial.WavEndCallback;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
+import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -20,7 +27,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
+
+  private static final int DELAY_MILLIS = 500;
+
+  private ProgressBar scoreProgress;
 
   /**
    * @param controller
@@ -30,6 +41,35 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   RehearseViewHelper(ExerciseController controller, IViewContaner viewContainer, INavigation.VIEWS myView) {
     super(controller, viewContainer, myView);
     controller.registerStopDetected(this::silenceDetected);
+  }
+
+  @Override
+  public void showContent(Panel listContent, String instanceName, boolean fromClick) {
+    super.showContent(listContent, instanceName, fromClick);
+
+    DivWidget breadRow = new DivWidget();
+    breadRow.setWidth("100%");
+    Style style = breadRow.getElement().getStyle();
+    style.setMarginTop(60, Style.Unit.PX);
+    style.setMarginLeft(135, Style.Unit.PX);
+    style.setClear(Style.Clear.BOTH);
+    breadRow.getElement().setId("breadRow");
+    breadRow.add(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
+    styleProgressBarContainer(scoreProgress);
+    scoreProgress.setVisible(false);
+    listContent.add(breadRow);
+  }
+
+  private void styleProgressBarContainer(ProgressBar progressBar) {
+    Style style = progressBar.getElement().getStyle();
+    style.setMarginTop(5, Style.Unit.PX);
+    style.setMarginLeft(5, Style.Unit.PX);
+
+    style.setHeight(25, Style.Unit.PX);
+    style.setFontSize(16, Style.Unit.PX);
+
+    progressBar.setWidth("49%");
+    progressBar.setVisible(false);
   }
 
   private void silenceDetected() {
@@ -47,10 +87,18 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
               currentTurnPlayEnded();
             }
           };
-          timer.schedule(500);
+          timer.schedule(DELAY_MILLIS);
         }
       }
     }
+  }
+
+  private final Map<Integer, Float> exToScore = new HashMap<>();
+
+  @Override
+  public void addScore(int exid, float score) {
+    exToScore.put(exid, score);
+    showScore(isRightSpeakerSet() ? leftTurnPanels.size() : rightTurnPanels.size());
   }
 
   protected void setRightTurnInitialValue(CheckBox checkBox) {
@@ -124,6 +172,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       removeMarkCurrent();
       currentTurn = seq.get(0);
       markCurrent();
+      // showScore();
     }
 
   /*  int i = seq.indexOf(currentTurn);
@@ -137,6 +186,30 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       currentTurn = seq.get(i1);
       // playCurrentTurn();
     }*/
+  }
+
+  private void showScore(int expected) {
+    int num = exToScore.values().size();
+
+    if (num == expected) {
+      double total = 0D;
+      for (Float score : exToScore.values()) {
+        total += score;
+      }
+
+
+      logger.info("showScore showing " + num);
+      total /= (float) num;
+      logger.info("showScore total   " + total);
+
+      double percent = total * 100;
+      double round = Math.max(percent, 30);
+      if (percent == 0d) round = 100d;
+      scoreProgress.setPercent(num == 0 ? 100 : percent);
+      scoreProgress.setVisible(true);
+      new ScoreProgressBar(false).setColor(scoreProgress, total, round, false);
+    }
+
   }
 
 }

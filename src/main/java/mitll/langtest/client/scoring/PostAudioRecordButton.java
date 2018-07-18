@@ -200,8 +200,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         index,
         getAudioType());
 
+ /*
     logger.info("\n\n\nPostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext +
         "\n\t bytes " + base64EncodedWavFile.length());
+        */
 
     DecoderOptions decoderOptions = new DecoderOptions()
         .setDoDecode(scoreAudioNow)

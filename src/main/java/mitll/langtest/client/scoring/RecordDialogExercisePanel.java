@@ -15,10 +15,11 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogExercisePanel<T> {
+  public static final float DELAY_SCALAR = 1.2F;
   private Logger logger = Logger.getLogger("RecordDialogExercisePanel");
   private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
 
-  long minDur;
+  private long minDur;
 
   public RecordDialogExercisePanel(final T commonExercise,
                                    final ExerciseController controller,
@@ -27,17 +28,18 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
                                    IListenView listenView) {
     super(commonExercise, controller, listContainer, alignments, listenView);
     minDur = commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
-    minDur = (long) (((float) minDur) * 1.2F);
+    minDur = (long) (((float) minDur) * DELAY_SCALAR);
     logger.info("ex " + commonExercise.getID() + " min dur " + minDur);
   }
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
-    NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<T>(exercise, controller){
+    NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<T>(exercise, controller) {
       @Override
       public void useResult(AudioAnswer result) {
         super.useResult(result);
-        logger.info("useResult got " + result);
+        listenView.addScore(result.getExid(), (float) result.getScore());
+       // logger.info("useResult got " + result.getValidity() + " " + result.getScore());
       }
     };
     this.recordAudioPanel = recordPanel;
@@ -117,8 +119,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
     if (diff > minDur) {
       recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
       return true;
-    }
-    else {
+    } else {
       logger.info("stopRecording ignore too short " + diff + " vs " + minDur);
       return false;
     }

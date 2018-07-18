@@ -354,7 +354,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     String uniqueID = song + "_" + getElement().getId(); // fix bug where multiple npf panels might load the same audio file and not load the second one seemingly
 
 
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("HeadlessPlayAudioPanel.createSound  " + uniqueID +
           "" +
           ": (" + getElement().getId() + ") for " + song + " : " + this + " created sound " + currentSound);

@@ -122,7 +122,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
 
   @Override
   public void useResult(AudioAnswer result) {
-   logger.info("useScoredResult " + result);
+   //logger.info("useScoredResult " + result);
     setVisible(true);
     playAudioPanel.showPlayButton();
   }
