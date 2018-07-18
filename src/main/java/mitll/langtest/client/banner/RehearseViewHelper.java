@@ -74,7 +74,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       iconContainer.addStyleName("floatLeft");
 
       iconContainer.add(smiley);
-      setSmiley(smiley, 0.8);
+    //  setSmiley(smiley, 0.8);
 
       container.add(iconContainer);
     }
