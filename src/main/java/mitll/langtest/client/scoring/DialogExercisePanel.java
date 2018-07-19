@@ -24,14 +24,12 @@ import java.util.stream.Collectors;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class DialogExercisePanel<T extends ClientExercise>
-    extends DivWidget
+public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     implements AudioChangeListener, RefAudioGetter, IPlayAudioControl {
   private Logger logger = Logger.getLogger("DialogExercisePanel");
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
   private static final String BLUE = "#2196F3";
-  //  private static final String HEIGHT = 100 + "px";
   private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
   private static final String LEFT_COLOR = "#e7e6ec";
   private static final String HIGHLIGHT_COLOR = "green";
@@ -68,7 +66,7 @@ public class DialogExercisePanel<T extends ClientExercise>
    * Mandarin has special rules for the moment so we can match simplified chinese characters to traditional ones...
    */
   private boolean isMandarin;
-  protected final IListenView listenView;
+  final IListenView listenView;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -110,7 +108,7 @@ public class DialogExercisePanel<T extends ClientExercise>
 
   }
 
-  protected   boolean isRight;
+  boolean isRight;
 
   public void setIsRight(boolean isRight) {
     this.isRight = isRight;
@@ -120,7 +118,7 @@ public class DialogExercisePanel<T extends ClientExercise>
     return exercise.getID();
   }
 
-  private  DivWidget bubble;
+  private DivWidget bubble;
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
@@ -271,11 +269,9 @@ public class DialogExercisePanel<T extends ClientExercise>
     if (alignmentOutput != null) {
       if (currentAudioDisplayed != id) {
         currentAudioDisplayed = id;
-        if (DEBUG)
+        if (DEBUG) {
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
-        //List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
-        //DivWidget flClickableRow = this.flClickableRow == null ? altFLClickableRow : this.flClickableRow;
-        //DivWidget flClickablePhoneRow = this.flClickableRowPhones == null ? altFLClickableRowPhones : this.flClickableRowPhones;
+        }
         matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, new DivWidget());
       }
     } else {
@@ -329,8 +325,8 @@ public class DialogExercisePanel<T extends ClientExercise>
             "\n\twords: " + transcriptSegmentIHighlightSegmentTreeMap.keySet() +
             "\n\tphone: " + typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT).keySet()
         );
-
       }
+
       playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
     }
   }
@@ -353,10 +349,10 @@ public class DialogExercisePanel<T extends ClientExercise>
                                                                                                             AudioControl audioControl,
                                                                                                             DivWidget clickableRow,
                                                                                                             DivWidget clickablePhones) {
-    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> value = new HashMap<>();
+    Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToTranscriptToHighlight = new HashMap<>();
 
     TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord = new TreeMap<>();
-    value.put(NetPronImageType.WORD_TRANSCRIPT, segmentToWord);
+    typeToTranscriptToHighlight.put(NetPronImageType.WORD_TRANSCRIPT, segmentToWord);
 
     if (alignmentOutput == null) {
       logger.warning("matchSegmentToWidgetForAudio no alignment for " + audioID);
@@ -371,7 +367,7 @@ public class DialogExercisePanel<T extends ClientExercise>
         if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio no word segments in " + alignmentOutput);
       } else {
         TreeMap<TranscriptSegment, IHighlightSegment> phoneMap = new TreeMap<>();
-        value.put(NetPronImageType.PHONE_TRANSCRIPT, phoneMap);
+        typeToTranscriptToHighlight.put(NetPronImageType.PHONE_TRANSCRIPT, phoneMap);
         ListIterator<IHighlightSegment> iterator = flclickables.listIterator();
 
         List<TranscriptSegment> phones = alignmentOutput.getTypeToSegments().get(NetPronImageType.PHONE_TRANSCRIPT);
@@ -388,8 +384,9 @@ public class DialogExercisePanel<T extends ClientExercise>
         }
       }
     }
-    if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio value is " + value);
-    return value;
+    if (DEBUG_MATCH)
+      logger.info("matchSegmentToWidgetForAudio typeToTranscriptToHighlight is " + typeToTranscriptToHighlight);
+    return typeToTranscriptToHighlight;
   }
 
   private void doOneToManyMatch(List<TranscriptSegment> phones,
@@ -513,6 +510,8 @@ public class DialogExercisePanel<T extends ClientExercise>
   }
 
   /**
+   * TODO : could be faster
+   *
    * @param phones
    * @param audioControl
    * @param phoneMap
@@ -620,7 +619,6 @@ public class DialogExercisePanel<T extends ClientExercise>
         AllHighlight allHighlight = new AllHighlight(bulk);
         if (showPhones) {
           DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-
           addSouthClickable(clickablePhones, allHighlight, phoneDivBelowWord);
         }
 
@@ -632,9 +630,6 @@ public class DialogExercisePanel<T extends ClientExercise>
     }
   }
 
-  protected boolean shouldShowPhones() {
-    return false;
-  }
 
   private void addSouthClickable(DivWidget clickablePhones, IHighlightSegment clickable, DivWidget phoneDivBelowWord) {
     clickable.setSouth(phoneDivBelowWord);
@@ -812,7 +807,6 @@ public class DialogExercisePanel<T extends ClientExercise>
     return TO_IGNORE.contains(seg.getEvent());
   }
 
-
   /**
    * @param e
    * @return
@@ -844,19 +838,17 @@ public class DialogExercisePanel<T extends ClientExercise>
     audioChanged(id, duration);
   }
 
-  public DivWidget getFlClickableRow() {
+  DivWidget getFlClickableRow() {
     return flClickableRow;
+  }
+
+  protected boolean shouldShowPhones() {
+    return false;
   }
 
   @Override
   public void doPlayPauseToggle() {
-    //if (playAudio.isPlaying()) {
     playAudio.doPlayPauseToggle();
-//    }
-//    else {
-//      audioChanged(mr.getUniqueID(), mr.getDurationInMillis());
-//      playAudio(mr);
-//    }
   }
 
   public void addPlayListener(PlayListener playListener) {
@@ -876,12 +868,12 @@ public class DialogExercisePanel<T extends ClientExercise>
   }
 
   public void removeMarkCurrent() {
- //   logger.info("removeMarkCurrent on " + getExID());
+    //   logger.info("removeMarkCurrent on " + getExID());
     bubble.getElement().getStyle().setBorderColor("white");
   }
 
   public void markCurrent() {
-   // logger.info("markCurrent on " + getExID());
+    // logger.info("markCurrent on " + getExID());
     bubble.getElement().getStyle().setBorderColor(HIGHLIGHT_COLOR);
   }
 }

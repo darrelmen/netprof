@@ -39,8 +39,6 @@ public class AlignmentHelper {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
   public void addAlignmentOutput(int projectID, Project project, Collection<ClientExercise> toAddAudioTo) {
-    //Project project = db.getProject(projectID);
-
     if (project != null) {
       Map<Integer, AlignmentOutput> audioToAlignment = project.getAudioToAlignment();
       Map<Integer, AudioAttribute> idToAudio = new HashMap<>();

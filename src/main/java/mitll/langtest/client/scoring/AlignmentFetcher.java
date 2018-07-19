@@ -162,7 +162,6 @@ public class AlignmentFetcher {
   public void setReq(int req) {
     this.req = req;
   }
-
   public int getReq() {
     return req;
   }
@@ -196,10 +195,20 @@ public class AlignmentFetcher {
     }
   }
 
-  public void rememberAlignment(int refID, AlignmentOutput alignmentOutput) {
+  /**
+   * @see #addToRequest
+   * @param refID
+   * @param alignmentOutput
+   */
+  void rememberAlignment(int refID, AlignmentOutput alignmentOutput) {
     alignments.put(refID, alignmentOutput);
   }
 
+  /**
+   * @see DialogExercisePanel#audioChanged(int, long)
+   * @param refID
+   * @return
+   */
   public AlignmentOutput getAlignment(int refID) {
     return alignments.get(refID);
   }

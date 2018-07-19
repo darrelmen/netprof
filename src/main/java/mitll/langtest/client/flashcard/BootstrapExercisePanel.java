@@ -449,7 +449,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
 
   @NotNull
   private DivWidget getProgressBar(double score, boolean isFullMatch) {
-    DivWidget widgets = new ScoreProgressBar().showScore(score * 100, isFullMatch, true);
+    DivWidget widgets = new ScoreProgressBar().showScore(score * 100, isFullMatch);
     widgets.setHeight("25px");
     return widgets;
   }

@@ -3,9 +3,11 @@ package mitll.langtest.client.banner;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -19,6 +21,7 @@ import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.DialogExercisePanel;
+import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.sound.PlayListener;
@@ -45,6 +48,8 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   private static final String SLIDER_MAX = "100";
   private static final String MAX = "max";
   private static final String MIN = "min";
+
+
   private static final String SLIDER_MIN = "0";
   private static final String TYPE = "type";
   private static final String RANGE = "range";
@@ -366,7 +371,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     playCurrentTurn();
   }
 
-  private Button backwardButton, playButton, forwardButton;
+  private Button playButton;
 
   /**
    * TODO add playback rate
@@ -382,10 +387,11 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
       Button widgets = new Button("", IconType.BACKWARD, event -> gotBackward());
       widgets.addStyleName("leftFiveMargin");
       rowOne.add(widgets);
-      backwardButton = widgets;
+      //Button backwardButton = widgets;
     }
     {
       Button widgets1 = new Button("", IconType.PLAY, event -> gotPlay());
+      widgets1.setSize(ButtonSize.LARGE);
       widgets1.addStyleName("leftFiveMargin");
       rowOne.add(widgets1);
       playButton = widgets1;
@@ -395,7 +401,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
       Button widgets2 = new Button("", IconType.FORWARD, event -> gotForward());
       widgets2.addStyleName("leftFiveMargin");
       rowOne.add(widgets2);
-      forwardButton = widgets2;
+     // Button forwardButton = widgets2;
     }
 
     rowOne.add(slider = getSlider());
@@ -433,7 +439,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   }
 
   @Override
-  public void addScore(int exid, float score) {
+  public void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
 
   }
 
@@ -521,7 +527,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     if (isPlaying) playCurrentTurn();
   }
 
-  private void gotPlay() {
+  protected void gotPlay() {
     if (currentTurn.isPlaying()) {
       playButton.setIcon(IconType.PAUSE);
     } else {
@@ -540,6 +546,10 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     }
 
     playCurrentTurn();
+  }
+
+  boolean onFirstTurn() {
+    return getSeq().indexOf(currentTurn) == 0;
   }
 
   protected void playCurrentTurn() {
@@ -604,5 +614,10 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     currentTurn.markCurrent();
 
     //currentTurn.getElement().getStyle().setBorderColor(HIGHLIGHT_COLOR);
+  }
+
+  @Override
+  public void setSmiley(Image smiley, double total) {
+
   }
 }

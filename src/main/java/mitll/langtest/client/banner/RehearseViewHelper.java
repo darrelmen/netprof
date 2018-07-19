@@ -12,11 +12,13 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +30,15 @@ import java.util.logging.Logger;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExercise>> extends ListenViewHelper<T> {
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
-
   private static final boolean DEBUG = false;
 
   private static final int DELAY_MILLIS = 100;
 
   private ProgressBar scoreProgress;
+  private Image smiley = new Image();
+
+  private final Map<Integer, Float> exToScore = new HashMap<>();
+  private List<IRecordDialogTurn> recordDialogTurns = new ArrayList<>();
 
   /**
    * @param controller
@@ -62,8 +67,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     listContent.add(breadRow);
   }
 
-  private Image smiley = new Image();
-
+  /**
+   * @return
+   */
   private DivWidget showScoreFeedback() {
     DivWidget container = new DivWidget();
 
@@ -74,13 +80,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       iconContainer.addStyleName("floatLeft");
 
       iconContainer.add(smiley);
-    //  setSmiley(smiley, 0.8);
+      //  setSmiley(smiley, 0.8);
 
       container.add(iconContainer);
     }
 
     {
       DivWidget scoreContainer = new DivWidget();
+      scoreContainer.addStyleName("rehearseScoreContainer");
       scoreContainer.addStyleName("floatLeft");
 
       scoreContainer.addStyleName("topMargin");
@@ -97,6 +104,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     return container;
   }
+
+/*  @NotNull
+  private DivWidget getProgressBar(double score, boolean isFullMatch) {
+    DivWidget widgets = new ScoreProgressBar().showScore(score * 100, isFullMatch);
+    widgets.setHeight("25px");
+    return widgets;
+  }*/
 
   private void styleProgressBarContainer(ProgressBar progressBar) {
     Style style = progressBar.getElement().getStyle();
@@ -119,38 +133,45 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
           Timer timer = new Timer() {
             @Override
             public void run() {
-//            logger.warning("waited " + (System.currentTimeMillis() - then) + " for a response");
-              // setSplash(CHECK_NETWORK_WIFI);
-              //controller.setHasNetworkProblem(true);
               currentTurnPlayEnded();
             }
           };
           timer.schedule(DELAY_MILLIS);
         }
+        break;
       }
     }
   }
 
-  private final Map<Integer, Float> exToScore = new HashMap<>();
-
+  /**
+   * Forget about scores after showing them...
+   * @param exid
+   * @param score
+   * @param recordDialogTurn
+   */
   @Override
-  public void addScore(int exid, float score) {
+  public void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
     exToScore.put(exid, score);
-    showScore(isRightSpeakerSet() ? leftTurnPanels.size() : rightTurnPanels.size());
+    recordDialogTurns.add(recordDialogTurn);
+
+    if (showScore(isRightSpeakerSet() ? leftTurnPanels.size() : rightTurnPanels.size())) {
+      recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
+//      clearScores();
+    };
   }
 
   protected void setRightTurnInitialValue(CheckBox checkBox) {
   }
 
   protected void speakerOneCheck(Boolean value) {
-    logger.info("speaker one now " + value);
+    //  logger.info("speaker one now " + value);
 
     rightSpeakerBox.setValue(!value);
     setPlayButtonToPlay();
   }
 
   protected void speakerTwoCheck(Boolean value) {
-    logger.info("speaker two now " + value);
+    //  logger.info("speaker two now " + value);
 
     leftSpeakerBox.setValue(!value);
     setPlayButtonToPlay();
@@ -173,6 +194,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     widgets.setIsRight(isRight);
 
     return widgets;
+  }
+
+  @Override
+  protected void gotPlay() {
+    if (onFirstTurn()) {
+      clearScores();
+    }
+    super.gotPlay();
   }
 
   protected void currentTurnPlayEnded() {
@@ -226,14 +255,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }*/
   }
 
-  private void showScore(int expected) {
+  private boolean showScore(int expected) {
     int num = exToScore.values().size();
 
     if (num == expected) {
-      double total = 0D;
-      for (Float score : exToScore.values()) {
-        total += score;
-      }
+      double total = getTotal();
 
       logger.info("showScore showing " + num);
       total /= (float) num;
@@ -245,13 +271,29 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       scoreProgress.setPercent(num == 0 ? 100 : percent);
       scoreProgress.setVisible(true);
       scoreProgress.setText("Score " + Math.round(percent) + "%");
-      new ScoreProgressBar(false).setColor(scoreProgress, total, round, false);
+      new ScoreProgressBar(false).setColor(scoreProgress, total, round);
       setSmiley(smiley, total);
-    }
-
+      return true;
+    } else return false;
   }
 
-  private void setSmiley(Image smiley, double total) {
+  private void clearScores() {
+    exToScore.clear();
+
+    recordDialogTurns.forEach(IRecordDialogTurn::clearScoreInfo);
+    recordDialogTurns.clear();
+  }
+
+  private double getTotal() {
+    double total = 0D;
+    for (Float score : exToScore.values()) {
+      total += score;
+    }
+    return total;
+  }
+
+  @Override
+  public void setSmiley(Image smiley, double total) {
     String choice;
 
     if (total < 0.3) {
@@ -268,7 +310,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       choice = "grinning.png";
     }
 
-    //   smiley = new Image(LangTest.LANGTEST_IMAGES + choice);
     smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
   }
 

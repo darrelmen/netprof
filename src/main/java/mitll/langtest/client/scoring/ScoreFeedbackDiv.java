@@ -11,6 +11,7 @@ import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -89,6 +90,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
    * @param pretestScore
    * @param isRTL
    * @return
+   * @see SimpleRecordAudioPanel#scoreAudio
    */
   @NotNull
   public DivWidget getWordTableContainer(PretestScore pretestScore, boolean isRTL) {

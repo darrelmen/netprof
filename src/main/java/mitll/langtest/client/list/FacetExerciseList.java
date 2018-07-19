@@ -2134,7 +2134,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     if (useColorGradient && num > 0) {
       double round = Math.max(percent, 30);
       if (percent == 0d) round = 100d;
-      new ScoreProgressBar(false).setColor(practicedProgress, score, round, false);
+      new ScoreProgressBar(false).setColor(practicedProgress, score, round);
     } else {
       practicedProgress.setColor(
           allDone ? ProgressBarBase.Color.SUCCESS :

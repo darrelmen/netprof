@@ -20,10 +20,6 @@ import java.util.logging.Logger;
  */
 public class HighlightSegment extends DivWidget implements IHighlightSegment {
   protected final Logger logger = Logger.getLogger("HighlightSegment");
-  /**
-   * @see #setBlue
-   */
-  private static final String BLUE = "#2196F3";
 
   private String highlightColor;
   private final int length;
@@ -42,7 +38,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @see mitll.langtest.client.scoring.WordTable#getWordLabel
    */
   public HighlightSegment(int id, String content) {
-    this(id, content, HasDirection.Direction.LTR, true, true, BLUE);
+    this(id, content, HasDirection.Direction.LTR, true, true, DEFAULT_HIGHLIGHT);
   }
 
   /**
@@ -56,7 +52,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    */
   public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir, boolean addSouth,
                           boolean showPhones, String highlightColor) {
-    this.highlightColor=highlightColor;
+    this.highlightColor = highlightColor;
     DivWidget north;
     add(north = new DivWidget());
 
@@ -143,19 +139,24 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   }
 
   @Override
-  public void setBlue() {
+  public void showHighlight() {
     highlighted = true;
     getSpanStyle().setBackgroundColor(highlightColor);
   }
 
   @Override
-  public void clearBlue() {
+  public void clearHighlight() {
     highlighted = false;
     if (background == null) {
       getSpanStyle().clearBackgroundColor();
     } else {
       getSpanStyle().setBackgroundColor(background);
     }
+  }
+
+  @Override
+  public void checkClearHighlight() {
+    if (isHighlighted()) clearHighlight();
   }
 
   private Style getSpanStyle() {
@@ -211,6 +212,11 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   @Override
   public DivWidget getNorth() {
     return north;
+  }
+
+  @Override
+  public void setHighlightColor(String highlightColor) {
+    this.highlightColor = highlightColor;
   }
 
   public String toString() {

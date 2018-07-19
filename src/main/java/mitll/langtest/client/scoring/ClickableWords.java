@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class ClickableWords/*<T extends CommonShell> */ {
+public class ClickableWords  {
   private final Logger logger = Logger.getLogger("ClickableWords");
   private static final String SEARCHMATCH = "searchmatch";
 

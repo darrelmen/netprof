@@ -515,15 +515,14 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   /**
    * TODO: do we need this???
    *
-   * @paramx e
    * @return
+   * @paramx e
    * @see #getItemContent
    */
 /*  @NotNull
   private SimpleRecordAudioPanel<T> getRecordPanel(T e) {
     return new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer);
   }*/
-
   @NotNull
   private DivWidget getHorizDiv() {
     DivWidget flContainer = new DivWidget();
@@ -549,11 +548,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     if (!altFL.isEmpty() && !altFL.equals(N_A) && !getFL(e).trim().equals(altFL)) {
       altflClickables = new ArrayList<>();
 
-      DivWidget contentWidget = clickableWords.getClickableWords(altFL,
-          FieldType.FL,
-          altflClickables,
-          //true,
-          isRTL);
+      DivWidget contentWidget = clickableWords.getClickableWords(altFL, FieldType.FL, altflClickables, isRTL);
 
       altFLClickableRow = contentWidget;
 

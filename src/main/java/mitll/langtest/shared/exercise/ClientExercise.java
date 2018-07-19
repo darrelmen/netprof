@@ -13,7 +13,6 @@ public interface ClientExercise extends CommonShell, MutableAnnotationExercise, 
 
   /**
    * @return
-   * @deprecated
    */
   String getAltFLToShow();
 

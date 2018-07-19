@@ -57,13 +57,23 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   }
 
   @Override
-  public void setBlue() {
-    set.forEach(IHighlightSegment::setBlue);
+  public void showHighlight() {
+    set.forEach(IHighlightSegment::showHighlight);
   }
 
   @Override
-  public void clearBlue() {
-    set.forEach(IHighlightSegment::clearBlue);
+  public void clearHighlight() {
+    set.forEach(IHighlightSegment::clearHighlight);
+  }
+
+  @Override
+  public void checkClearHighlight() {
+    set.forEach(IHighlightSegment::checkClearHighlight);
+  }
+
+  @Override
+  public void setHighlightColor(String highlightColor) {
+    set.forEach(iHighlightSegment -> iHighlightSegment.setHighlightColor(highlightColor));
   }
 
   @Override

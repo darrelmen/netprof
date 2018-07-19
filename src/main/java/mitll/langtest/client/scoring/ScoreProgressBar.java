@@ -27,10 +27,9 @@ public class ScoreProgressBar {
    *
    * @param score
    * @param isFullMatch
-   * @param showNow
    * @see SimpleRecordAudioPanel#useScoredResult
    */
-  public DivWidget showScore(double score, boolean isFullMatch, boolean showNow) {
+  public DivWidget showScore(double score, boolean isFullMatch) {
     double percent = isFullMatch ? score / 100d : 0.41D;
     progressBar.setVisible(true);
     if (isFullMatch) {
@@ -43,11 +42,17 @@ public class ScoreProgressBar {
     String text = isFullMatch ? "" + round : AUDIO_CUT_OFF;
 
     progressBar.setText(text);
-    setColor(progressBar, percent, round, showNow);
+    setColor(progressBar, percent, round);
     return progressBar;
   }
 
-  public void setColor(ProgressBar progressBar, double percent, double round, boolean showNow) {
+  /**
+   *
+   * @param progressBar
+   * @param percent
+   * @param round
+   */
+  public void setColor(ProgressBar progressBar, double percent, double round) {
      String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
 
 //    if (showNow) {

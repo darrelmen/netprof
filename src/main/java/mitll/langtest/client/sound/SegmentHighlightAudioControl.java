@@ -11,31 +11,26 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/24/17.
  */
 public class SegmentHighlightAudioControl implements AudioControl {
-  private final Logger logger = Logger.getLogger("SegmentHighlightAudioControl");
+  // private final Logger logger = Logger.getLogger("SegmentHighlightAudioControl");
   private SegmentAudioControl wordSegments, phoneSegments = null;
 
+  /**
+   * @param typeToSegmentToWidget
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#setPlayListener(int, long, Map, HeadlessPlayAudio)
+   */
   public SegmentHighlightAudioControl(Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
-    setTypeToSegments(typeToSegmentToWidget);
-  }
-
-  private void setTypeToSegments(Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget) {
-    TreeMap<TranscriptSegment, IHighlightSegment> words = typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
-    wordSegments = new SegmentAudioControl(words);
+    wordSegments = new SegmentAudioControl(typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT));
     TreeMap<TranscriptSegment, IHighlightSegment> phones = typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (phones != null) {
       phoneSegments = new SegmentAudioControl(phones);
 /*      logger.info("phoneSegments now has " + phones.size());
-      logger.info("wordSegments  now has " + words.size());*/
+      logger.info("wordSegments  now has " + transcriptToHighlight.size());*/
     }
-  }
-
-  public String toString() {
-    return "SegmentHighlightAudioControl";
   }
 
   @Override
   public void reinitialize() {
-   // logger.info("reinitialize ");
+    // logger.info("reinitialize ");
     songFinished();
   }
 
@@ -67,24 +62,28 @@ public class SegmentHighlightAudioControl implements AudioControl {
     if (phoneSegments != null) phoneSegments.songFinished();
   }
 
-  public static class SegmentAudioControl implements AudioControl {
+  /**
+   * @see #SegmentHighlightAudioControl
+   */
+  private static class SegmentAudioControl implements AudioControl {
     private final Logger logger = Logger.getLogger("SegmentAudioControl");
     private TranscriptSegment currentSegment;
-    private final TreeMap<TranscriptSegment, IHighlightSegment> words;
+    private final TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight;
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_DETAIL = false;
+
     /**
      * @param words
      * @see SegmentHighlightAudioControl#SegmentHighlightAudioControl
      */
     SegmentAudioControl(TreeMap<TranscriptSegment, IHighlightSegment> words) {
-      this.words = words;
+      this.transcriptToHighlight = words;
       initialize();
     }
 
     private void initialize() {
-      if (words != null && !words.isEmpty()) {
-        currentSegment = words.keySet().iterator().next();
+      if (transcriptToHighlight != null && !transcriptToHighlight.isEmpty()) {
+        currentSegment = transcriptToHighlight.keySet().iterator().next();
         if (DEBUG) logger.info("initialize current word " + currentSegment);
       }
     }
@@ -117,11 +116,12 @@ public class SegmentHighlightAudioControl implements AudioControl {
         if (posInMillis < currentSegment.getStart()) { // before
           if (DEBUG) logger.info("before current word - update ignore : " + posInMillis);
         } else if (posInMillis >= currentSegment.getEnd()) { // after
-          if (DEBUG) logger.info( currentSegment + " remove highlight at " +posInMillis);
+          if (DEBUG) logger.info(currentSegment + " remove highlight at " + posInMillis);
           removeHighlight();
 
+          // get next segment
           while (currentSegment != null && posInMillis >= currentSegment.getEnd()) {
-            currentSegment = words.higherKey(currentSegment);  // next word
+            currentSegment = transcriptToHighlight.higherKey(currentSegment);  // next word
           }
 
           if (currentSegment != null) {
@@ -152,17 +152,17 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
     @Override
     public void songFinished() {
-      if (DEBUG_DETAIL) logger.info("songFinished..." + words.values().size() + " segments...");
-      for (IHighlightSegment segment : words.values()) {
-        if (segment.isHighlighted()) {
-          segment.clearBlue();
-        }
-      }
+      if (DEBUG_DETAIL) logger.info("songFinished..." + transcriptToHighlight.values().size() + " segments...");
+      clearHighlights();
       initialize();
     }
 
+    private void clearHighlights() {
+      transcriptToHighlight.values().forEach(IHighlightSegment::checkClearHighlight);
+    }
+
     private boolean isHighlighted() {
-      return currentSegment != null && words.get(currentSegment).isHighlighted();
+      return currentSegment != null && transcriptToHighlight.get(currentSegment).isHighlighted();
     }
 
     /**
@@ -171,15 +171,19 @@ public class SegmentHighlightAudioControl implements AudioControl {
      */
     private void removeHighlight() {
       if (currentSegment != null) {
-        IHighlightSegment segment = words.get(currentSegment);
-        segment.clearBlue();
+        transcriptToHighlight.get(currentSegment).clearHighlight();
       } else {
         logger.warning("removeHighlight no current word....");
       }
     }
 
     private void showHighlight() {
-      words.get(currentSegment).setBlue();
+      transcriptToHighlight.get(currentSegment).showHighlight();
     }
   }
+
+  public String toString() {
+    return "SegmentHighlightAudioControl";
+  }
+
 }

@@ -38,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
+import mitll.langtest.client.analysis.WordContainerAsync;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.AudioControl;
@@ -61,7 +62,7 @@ import java.util.stream.Collectors;
  * @since 10/21/15.
  */
 public class WordTable {
-  private final Logger logger = Logger.getLogger("WordTable");
+//  private final Logger logger = Logger.getLogger("WordTable");
 
   private static final String WHITE_SPACE_NOWRAP = PagerTable.WHITE_SPACE_NOWRAP;
 
@@ -128,8 +129,8 @@ public class WordTable {
 
   private void addWordColHeaders(StringBuilder builder, Collection<? extends SlimSegment> transcriptSegments) {
     transcriptSegments.forEach(word -> {
-      float score = word.getScore();
-      String color = getColor(score);
+      // float score = word.getScore();
+      String color = getColor(word.getScore());
       //   logger.warning("addWordColHeaders : word " + word.getEvent() + " score " + score + " = " + color);
       builder.append(HEADER).append(color).append("'>");
       builder.append(word.getEvent());
@@ -150,8 +151,7 @@ public class WordTable {
       if (!event.equals(SIL)) {
         String color = event.equals(filter) ? " " + BACKGROUND_COLOR + ":" + getColor(phone) : "";
         builder
-            .append("<th style='" + TEXT_ALIGN_CENTER
-            )
+            .append("<th style='" + TEXT_ALIGN_CENTER)
             .append(color)
             .append("'>");
         builder.append(event);
@@ -160,9 +160,18 @@ public class WordTable {
     }
   }
 
+  /**
+   * From words
+   * @param netPronImageTypeToEndTime
+   * @return
+   * @see WordContainerAsync#getItemColumn
+   */
   public String makeColoredTableReally(Map<NetPronImageType, List<SlimSegment>> netPronImageTypeToEndTime) {
-    List<SlimSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
-    List<SlimSegment> filtered = words.stream().filter(slimSegment -> !shouldSkipPhone(slimSegment.getEvent())).collect(Collectors.toList());
+    //List<SlimSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<SlimSegment> filtered = netPronImageTypeToEndTime
+        .get(NetPronImageType.WORD_TRANSCRIPT)
+        .stream()
+        .filter(slimSegment -> !shouldSkipPhone(slimSegment.getEvent())).collect(Collectors.toList());
     StringBuilder builder = new StringBuilder();
     builder.append(TABLE);
 
@@ -355,9 +364,7 @@ public class WordTable {
                                  TranscriptSegment wordSegment
   ) {
     DivWidget phones = new DivWidget();
-    //phones.addStyleName("inlineFlex");
     phones.addStyleName("phoneContainer");
-    //phones.setWidth("100%");
 
     addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment/*, isRTL*/);
     return phones;
@@ -510,7 +517,6 @@ public class WordTable {
     }
   }
 
-
   /**
    * When clicked, tell audioControl to play segment
    *
@@ -530,18 +536,16 @@ public class WordTable {
     header.addStyleName("handCursor");
   }
 
-  private void setColor(TranscriptSegment phone, UIObject h) {
+  private void setColor(SlimSegment phone, UIObject h) {
     h.getElement().getStyle().setBackgroundColor(getColor(phone));
   }
 
-  private String setColorClickable(TranscriptSegment phone, IHighlightSegment h) {
-    String color = getColor(phone);
-    h.setBackground(color);
-    return color;
+  private void setColorClickable(SlimSegment phone, IHighlightSegment h) {
+    h.setBackground(getColor(phone));
   }
 
   @NotNull
-  private String getColor(TranscriptSegment phone) {
+  private String getColor(SlimSegment phone) {
     return getColor(phone.getScore());
   }
 
@@ -555,7 +559,7 @@ public class WordTable {
   }
 
   @NotNull
-  private HTML getScore(TranscriptSegment word) {
+  private HTML getScore(SlimSegment word) {
     return new HTML("" + getPercent(word.getScore()));
   }
 
@@ -605,5 +609,4 @@ public class WordTable {
   private boolean shouldSkipWord(String wordLabel) {
     return wordLabel.equals("SIL");
   }
-
 }

@@ -397,6 +397,8 @@ public class ProjectManagement implements IProjectManagement {
 
       if (project.getLanguageEnum() == Language.KOREAN) {
         addDialogInfo(project);
+      }   if (project.getLanguageEnum() == Language.ENGLISH) {
+        addDialogInfo(project);
       }
       return rawExercises.size();
     } else {

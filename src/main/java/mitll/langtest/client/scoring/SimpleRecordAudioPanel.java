@@ -238,7 +238,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
         hydecScore = wordScore;
       }
 
-      scoreFeedbackDiv.showScore(Math.min(HUNDRED, hydecScore * HUNDRED), result.isFullMatch(), false);
+      scoreFeedbackDiv.showScore(Math.min(HUNDRED, hydecScore * HUNDRED), result.isFullMatch());
       listContainer.setScore(exercise.getID(), hydecScore);
     } else {
       scoreFeedbackDiv.hideScore();
