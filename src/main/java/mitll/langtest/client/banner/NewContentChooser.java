@@ -163,10 +163,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+    //   logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
-      logger.info("showView - showing " + view);
+      //   logger.info("showView - showing " + view);
       //} else {
       currentSection = view;
       storeValue(view);
@@ -197,11 +197,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           dialogHelper.showContent(divWidget, DIALOG.toString(), fromClick);
           break;
         case LISTEN:
-          clearAndPush(isFirstTime, currentStoredView, LISTEN);
+          clearAndPushKeep(isFirstTime, currentStoredView, LISTEN);
           listenHelper.showContent(divWidget, LISTEN.toString(), fromClick);
           break;
         case REHEARSE:
-          clearAndPush(isFirstTime, currentStoredView, REHEARSE);
+          clearAndPushKeep(isFirstTime, currentStoredView, REHEARSE);
           rehearseHelper.showContent(divWidget, REHEARSE.toString(), fromClick);
           break;
         case RECORD:
@@ -237,6 +237,21 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     clearAndFixScroll();
     if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
     setInstanceHistory(listen);
+  }
+
+  private void clearAndPushKeep(boolean isFirstTime, String currentStoredView, VIEWS views) {
+    clearAndFixScroll();
+
+    SelectionState selectionState = new SelectionState();
+    String instance = selectionState.getInstance();
+    if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
+      //   logger.info("setInstanceHistory clearing history for instance " + views);
+      int dialog = selectionState.getDialog();
+      History.newItem(SelectionState.INSTANCE + "=" + views.toString() + SelectionState.SECTION_SEPARATOR +
+          (dialog > 0 ? (SelectionState.DIALOG + "=" + dialog) : ""));
+    } else {
+      //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
+    }
   }
 
   private void setInstanceHistory(VIEWS views) {
@@ -590,13 +605,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    SelectionState selectionState = new SelectionState();
-    String instance = selectionState.getInstance();
+    String instance = new SelectionState().getInstance();
     if (!instance.isEmpty()) {
       try {
         VIEWS views = VIEWS.valueOf(getStoredView());
         VIEWS currentStoredView = VIEWS.valueOf(getCurrentStoredView());
-
 
         if (views != currentStoredView) {
           logger.info("url says " + views);
@@ -606,6 +619,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
             banner.show(DIALOG);
           } else if (currentStoredView == LISTEN) {
             banner.show(LISTEN);
+          } else if (currentStoredView == REHEARSE) {
+            banner.show(REHEARSE);
           }
         }
       } catch (IllegalArgumentException e) {

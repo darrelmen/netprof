@@ -39,9 +39,11 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
                                    Map<Integer, AlignmentOutput> alignments,
                                    IListenView listenView) {
     super(commonExercise, controller, listContainer, alignments, listenView);
-    minDur = commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
-    minDur = (long) (((float) minDur) * DELAY_SCALAR);
-    minDur -= END_DUR_SKEW;
+    if (commonExercise.hasRefAudio()) {
+      minDur = commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
+      minDur = (long) (((float) minDur) * DELAY_SCALAR);
+      minDur -= END_DUR_SKEW;
+    }
     //  logger.info("ex " + commonExercise.getID() + " min dur " + minDur);
   }
 

@@ -110,7 +110,7 @@ public class DialogReader {
           if (index == 0) {
             orientations.add(fileText);
           } else {
-            ClientExercise exercise = getExercise(attributes, speakers, path, fileText, unit, chapter);
+            ClientExercise exercise = getExercise(attributes, speakers, path, fileText, unit, chapter, project.getTypeOrder());
 
             int exindex = exercises.size();
             String audioFile = audio.size() > exindex ? audio.get(exindex) : null;
@@ -244,6 +244,7 @@ public class DialogReader {
    * @param fileText
    * @param unit
    * @param chapter
+   * @param typeOrder
    * @return
    * @seex #getDialogs
    */
@@ -251,12 +252,13 @@ public class DialogReader {
   protected Exercise getExercise(List<ExerciseAttribute> attributes,
                                  Set<String> speakers,
                                  Path path,
-                                 String fileText, String unit, String chapter) {
+                                 String fileText,
+                                 String unit, String chapter, List<String> typeOrder) {
     Exercise exercise = new Exercise();
     {
       Map<String, String> unitToValue = new HashMap<>();
-      unitToValue.put(IDialogReader.UNIT, unit);
-      unitToValue.put(IDialogReader.CHAPTER, chapter);
+      unitToValue.put(typeOrder.get(0), unit);
+      unitToValue.put(typeOrder.get(1), chapter);
       exercise.setUnitToValue(unitToValue);
     }
 

@@ -39,11 +39,10 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 4/5/17.
  */
 public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> implements ContentView, PlayListener, IListenView {
-  public static final int HEADER_HEIGHT = 120;
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
+  public static final int HEADER_HEIGHT = 120;
 
-  //private static final String HIGHLIGHT_COLOR = "green";
   private static final String VALUE = "value";
   private static final String SLIDER_MAX = "100";
   private static final String MAX = "max";
@@ -102,7 +101,6 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
 
       @Override
       public void onSuccess(IDialog dialog) {
-        //      Scheduler.get().scheduleDeferred(() -> showDialogGetRef(dialog, child));
         showDialogGetRef(dialog, child);
       }
     });
@@ -181,26 +179,10 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   }
 
   protected void speakerOneCheck(Boolean value) {
-    logger.info("speaker one now " + value);
-    //leftSpeaker = value;
-
-//    if (!rightSpeaker) {
-//      rightSpeaker = true;
-//      rightSpeakerBox.setValue(true);
-//    }
-
     setPlayButtonToPlay();
   }
 
-
   protected void speakerTwoCheck(Boolean value) {
-    logger.info("speaker two now " + value);
-//    rightSpeaker = value;
-//
-//    if (!leftSpeaker) {
-//      leftSpeaker = true;
-//      leftSpeakerBox.setValue(true);
-//    }
     setPlayButtonToPlay();
   }
 
@@ -370,7 +352,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     return widgets;
   }
 
-  private void gotCardClick(T turn) {
+  protected void gotCardClick(T turn) {
     removeMarkCurrent();
     this.currentTurn = turn;
     playCurrentTurn();
@@ -468,11 +450,11 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     return buttonDiv;
   }
 
-  private void gotGoBack() {
+  protected void gotGoBack() {
     controller.getNavigation().show(INavigation.VIEWS.DIALOG);
   }
 
-  private void gotGoForward() {
+  protected void gotGoForward() {
     controller.getNavigation().show(INavigation.VIEWS.REHEARSE);
   }
 
@@ -545,7 +527,6 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
 
     } else if (leftSpeakerSet && !leftTurnPanels.contains(currentTurn) || rightSpeakerSet && !rightTurnPanels.contains(currentTurn)) {
       removeMarkCurrent();
-
       int i = bothTurns.indexOf(currentTurn); // must be on right
       currentTurn = bothTurns.get(i + 1);
     }
@@ -563,7 +544,6 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
       currentTurn.doPlayPauseToggle();
     }
   }
-
 
   @Override
   public void playStarted() {
@@ -611,14 +591,11 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   protected void removeMarkCurrent() {
     //   logger.info("removeMarkCurrent on " + currentTurn.getExID());
     currentTurn.removeMarkCurrent();
-//    currentTurn.getElement().getStyle().setBorderColor("white");
   }
 
   protected void markCurrent() {
     //logger.info("markCurrent on " + currentTurn.getExID());
     currentTurn.markCurrent();
-
-    //currentTurn.getElement().getStyle().setBorderColor(HIGHLIGHT_COLOR);
   }
 
   @Override

@@ -70,6 +70,22 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     listContent.add(breadRow);
   }
 
+  protected void gotGoBack() {
+    controller.getNavigation().show(INavigation.VIEWS.LISTEN);
+  }
+
+  protected void gotGoForward() {
+    controller.getNavigation().show(INavigation.VIEWS.REHEARSE);
+  }
+
+  private boolean directClick = false;
+
+  @Override
+  protected void gotCardClick(T turn) {
+    directClick = true;
+    super.gotCardClick(turn);
+  }
+
   /**
    * @return
    */
@@ -147,6 +163,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   /**
    * Forget about scores after showing them...
+   *
    * @param exid
    * @param score
    * @param recordDialogTurn
@@ -158,7 +175,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     if (showScore(isRightSpeakerSet() ? leftTurnPanels.size() : rightTurnPanels.size())) {
       recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
-    };
+    }
+    ;
   }
 
   protected void setRightTurnInitialValue(CheckBox checkBox) {
@@ -195,68 +213,63 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   @Override
   protected void gotPlay() {
+    super.gotPlay();
+
     if (onFirstTurn()) {
       clearScores();
     }
-    super.gotPlay();
   }
+
   private void clearScores() {
     smiley.setVisible(false);
     scoreProgress.setVisible(false);
     exToScore.clear();
 
-    recordDialogTurns.forEach(IRecordDialogTurn::clearScoreInfo);
+    bothTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
   }
+
   protected void currentTurnPlayEnded() {
-    if (DEBUG) logger.info("currentTurnPlayEnded - turn " + currentTurn.getExID());
-    List<T> seq = getSeq();
-
-    boolean isCurrentPrompt = seq.contains(currentTurn);
-
-    int i2 = bothTurns.indexOf(currentTurn);
-    int nextOtherSide = i2 + 1;
-
-    logger.info("seq " + seq.size() +
-        "\n\tleft  " + isLeftSpeakerSet() +
-        "\n\tright " + isRightSpeakerSet() +
-        "\n\tboth " + bothTurns.size() +
-        "\n\t is current playing " + isCurrentPrompt +
-        "\n\ti2    " + i2 +
-        "\n\tnext " + nextOtherSide
-    );
-
-    if (nextOtherSide < bothTurns.size()) {
-      T nextTurn = bothTurns.get(nextOtherSide);
-      removeMarkCurrent();
-      currentTurn = nextTurn;
+    if (directClick) {
+      directClick = false;
       markCurrent();
+    } else {
+      if (DEBUG) logger.info("currentTurnPlayEnded - turn " + currentTurn.getExID());
+      List<T> seq = getSeq();
 
-      if (isCurrentPrompt) {
-        logger.info("currentTurnPlayEnded - startRecording " + currentTurn.getExID());
-        currentTurn.startRecording();
+      boolean isCurrentPrompt = seq.contains(currentTurn);
+
+      int i2 = bothTurns.indexOf(currentTurn);
+      int nextOtherSide = i2 + 1;
+
+      logger.info("seq " + seq.size() +
+          "\n\tleft  " + isLeftSpeakerSet() +
+          "\n\tright " + isRightSpeakerSet() +
+          "\n\tboth " + bothTurns.size() +
+          "\n\t is current playing " + isCurrentPrompt +
+          "\n\ti2    " + i2 +
+          "\n\tnext " + nextOtherSide
+      );
+
+      if (nextOtherSide < bothTurns.size()) {
+        T nextTurn = bothTurns.get(nextOtherSide);
+        removeMarkCurrent();
+        currentTurn = nextTurn;
+        markCurrent();
+
+        if (isCurrentPrompt) {
+          logger.info("currentTurnPlayEnded - startRecording " + currentTurn.getExID());
+          currentTurn.startRecording();
+        } else {
+          logger.info("currentTurnPlayEnded - play current " + currentTurn.getExID());
+          playCurrentTurn();
+        }
       } else {
-        logger.info("currentTurnPlayEnded - play current " + currentTurn.getExID());
-        playCurrentTurn();
+        removeMarkCurrent();
+        currentTurn = seq.get(0);
+        markCurrent();
       }
-    } else {
-      removeMarkCurrent();
-      currentTurn = seq.get(0);
-      markCurrent();
-      // showScore();
     }
-
-  /*  int i = seq.indexOf(currentTurn);
-    int i1 = i + 1;
-    if (i1 > seq.size() - 1) {
-      if (DEBUG) logger.info("OK stop");
-      removeMarkCurrent();
-      currentTurn = seq.get(0);
-      markCurrent();
-    } else {
-      currentTurn = seq.get(i1);
-      // playCurrentTurn();
-    }*/
   }
 
   private boolean showScore(int expected) {
@@ -264,10 +277,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     if (num == expected) {
       double total = getTotal();
-
-      logger.info("showScore showing " + num);
+     // logger.info("showScore showing " + num);
       total /= (float) num;
-      logger.info("showScore total   " + total);
+    //  logger.info("showScore total   " + total);
 
       double percent = total * 100;
       double round = percent;// Math.max(percent, 30);
@@ -284,7 +296,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       return true;
     } else return false;
   }
-
 
 
   private double getTotal() {
@@ -314,7 +325,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
 
     smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
-   // smiley.setVisible(true);
+    // smiley.setVisible(true);
   }
 
 }

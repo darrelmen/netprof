@@ -149,6 +149,41 @@ public class DialogTest extends BaseTest {
    * Test adding the dialog data.
    */
   @Test
+  public void testEnglishFromCannedData() {
+    DatabaseImpl andPopulate = getDatabase().setInstallPath("");
+
+    Project project = andPopulate.getProjectByName("English");
+
+    logger.info("english " + project);
+    List<IDialog> dialogs = andPopulate.getDialogDAO().getDialogs(project.getID());
+
+    dialogs.forEach(dialog -> logger.info("dialog " + dialog));
+
+    IDialog iDialog = dialogs.get(0);
+
+    logger.info("First " + iDialog);
+    List<String> speakers = iDialog.getSpeakers();
+
+    logger.info("Speakers " + speakers);
+    logger.info("Image    " + iDialog.getImageRef());
+
+    iDialog.getAttributes().forEach(exerciseAttribute -> logger.info("\t" + exerciseAttribute));
+
+    logger.info("Exercises : ");
+    List<ClientExercise> exercises = iDialog.getExercises();
+    /*   exercises.forEach(exercise -> logger.info(getShort(exercise)));*/
+
+    Map<String, List<ClientExercise>> stringListMap = iDialog.groupBySpeaker();
+    stringListMap.forEach((k, v) -> {
+      logger.info(k + " : ");
+      v.forEach(commonExercise -> logger.info(getShort(commonExercise)));
+    });
+  }
+
+  /**
+   * Test adding the dialog data.
+   */
+  @Test
   public void testKPFromCannedData() {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("");
 
