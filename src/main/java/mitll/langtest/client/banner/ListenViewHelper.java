@@ -141,7 +141,10 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
 
       checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
       leftSpeakerBox = checkBox;
-      rowOne.add(checkBox);
+
+      DivWidget rightDiv=new DivWidget();
+      rightDiv.add(checkBox);
+      rowOne.add(rightDiv);
     }
 
     rowOne.add(getControls());
@@ -160,7 +163,9 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
       checkBox.addStyleName("rightFiveMargin");
       rightSpeakerBox = checkBox;
 
-      rowOne.add(checkBox);
+      DivWidget rightDiv=new DivWidget();
+      rightDiv.add(checkBox);
+      rowOne.add(rightDiv);
     }
 
     rowOne.getElement().getStyle().setMarginBottom(10, PX);

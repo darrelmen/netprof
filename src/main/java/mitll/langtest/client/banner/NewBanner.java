@@ -479,8 +479,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void recordMenuVisible() {
     if (recnav != null) {
       boolean visible = isPermittedToRecord() && hasProjectChoice();
-      boolean visible1 = visible;
-      setRecNavVisible(false);
+    //  boolean visible1 = visible;
+      setRecNavVisible(visible);
     }
   }
 

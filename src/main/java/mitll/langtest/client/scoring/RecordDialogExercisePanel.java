@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogExercisePanel<T> implements IRecordDialogTurn {
+  public static final int DIM = 40;
   private Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
   private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
@@ -99,11 +100,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
     }
 
     flContainer.add(recordPanel.getScoreFeedback());
-    Image w = new Image();
+    Image w = getEmoticonPlaceholder();
     emoticon = w;
-    w.setVisible(false);
-    w.setHeight("32px");
-    w.setWidth("32px");
     flContainer.add(w);
 
     //long now = System.currentTimeMillis();
@@ -119,6 +117,16 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
 
     add(flContainer);
     super.addWidgets(showFL, showALTFL, phonesChoices);
+  }
+
+  @NotNull
+  private Image getEmoticonPlaceholder() {
+    Image w = new Image();
+    w.setVisible(false);
+    w.setHeight(DIM +        "px");
+    w.setWidth(DIM +        "px");
+    w.getElement().getStyle().setMarginTop(7, Style.Unit.PX);
+    return w;
   }
 
   @NotNull

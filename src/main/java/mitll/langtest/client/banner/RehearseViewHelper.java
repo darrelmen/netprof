@@ -80,6 +80,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       iconContainer.addStyleName("floatLeft");
 
       iconContainer.add(smiley);
+      smiley.setVisible(false);
       //  setSmiley(smiley, 0.8);
 
       container.add(iconContainer);
@@ -156,7 +157,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     if (showScore(isRightSpeakerSet() ? leftTurnPanels.size() : rightTurnPanels.size())) {
       recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
-//      clearScores();
     };
   }
 
@@ -164,15 +164,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   }
 
   protected void speakerOneCheck(Boolean value) {
-    //  logger.info("speaker one now " + value);
-
     rightSpeakerBox.setValue(!value);
     setPlayButtonToPlay();
   }
 
   protected void speakerTwoCheck(Boolean value) {
-    //  logger.info("speaker two now " + value);
-
     leftSpeakerBox.setValue(!value);
     setPlayButtonToPlay();
   }
@@ -297,17 +293,17 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     String choice;
 
     if (total < 0.3) {
-      choice = "frowning.png";
+      choice = "frowningEmoticon.png";
     } else if (total < 0.4) {
-      choice = "confused.png";
+      choice = "confusedEmoticon.png";
     } else if (total < 0.5) {
-      choice = "thinking.png";
+      choice = "thinkingEmoticon.png";
     } else if (total < 0.6) {
-      choice = "neutral.png";
+      choice = "neutralEmoticon.png";
     } else if (total < 0.7) {
-      choice = "smiling.png";
+      choice = "smilingEmoticon.png";
     } else {
-      choice = "grinning.png";
+      choice = "grinningEmoticon.png";
     }
 
     smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);

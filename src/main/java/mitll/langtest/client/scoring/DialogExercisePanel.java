@@ -180,7 +180,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
       alignmentFetcher.setPlayAudio(playAudio);
       if (!e.getAudioAttributes().isEmpty()) {
-        AudioAttribute next = e.getAudioAttributes().iterator().next();
+        AudioAttribute candidate = e.getRegularSpeed();
+        AudioAttribute next = candidate == null ? e.getAudioAttributes().iterator().next() : candidate;
         playAudio.rememberAudio(next);
         //  logger.info("makePlayAudio audio for " + e.getID() + "  " + next);
 
@@ -852,7 +853,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   public void addPlayListener(PlayListener playListener) {
-    playAudio.addPlayListener(playListener);
+    if (playAudio != null) {
+      playAudio.addPlayListener(playListener);
+    }
   }
 
   @Override
