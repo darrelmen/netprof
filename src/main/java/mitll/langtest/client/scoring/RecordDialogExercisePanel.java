@@ -22,10 +22,12 @@ import java.util.logging.Logger;
 
 public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogExercisePanel<T> implements IRecordDialogTurn {
   public static final int DIM = 40;
+  public static final long END_DUR_SKEW = 1500L;
+  private long start = 0;
   private Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
   private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
-  private static final float DELAY_SCALAR = 1.1F;
+  private static final float DELAY_SCALAR = 1.0F;
 
   private long minDur;
   private Image emoticon;
@@ -39,6 +41,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
     super(commonExercise, controller, listContainer, alignments, listenView);
     minDur = commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
     minDur = (long) (((float) minDur) * DELAY_SCALAR);
+    minDur -= END_DUR_SKEW;
     //  logger.info("ex " + commonExercise.getID() + " min dur " + minDur);
   }
 
@@ -85,35 +88,23 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
     DivWidget flContainer = getHorizDiv();
     if (isRight) {
       addStyleName("floatRight");
-    } else flContainer.addStyleName("floatLeft");
-//    addStyleName(isRight?"floatRight":"floatLeft");
+    } else {
+      flContainer.addStyleName("floatLeft");
+    }
 
     // add hidden button
     {
-      //DivWidget recordButtonContainer = new DivWidget();
-      //recordButtonContainer.addStyleName("recordingRowStyle");
       PostAudioRecordButton postAudioRecordButton = recordPanel.getPostAudioRecordButton();
-      //recordButtonContainer.add(postAudioRecordButton);
       postAudioRecordButton.setVisible(false);
       flContainer.add(postAudioRecordButton);
-
     }
 
     flContainer.add(recordPanel.getScoreFeedback());
-    Image w = getEmoticonPlaceholder();
-    emoticon = w;
-    flContainer.add(w);
-
-    //long now = System.currentTimeMillis();
-    //  logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec");
-
-    //   makePlayAudio(exercise, flContainer);
-
-//    logger.info("adding widgets ");
-//    recordAudioPanel = new NoFeedbackRecordAudioPanel<>(exercise, controller);
-//
-//    recordAudioPanel.addWidgets();
-    //add(recordAudioPanel);
+    {
+      Image w = getEmoticonPlaceholder();
+      emoticon = w;
+      flContainer.add(w);
+    }
 
     add(flContainer);
     super.addWidgets(showFL, showALTFL, phonesChoices);
@@ -123,8 +114,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
   private Image getEmoticonPlaceholder() {
     Image w = new Image();
     w.setVisible(false);
-    w.setHeight(DIM +        "px");
-    w.setWidth(DIM +        "px");
+    w.setHeight(DIM + "px");
+    w.setWidth(DIM + "px");
     w.getElement().getStyle().setMarginTop(7, Style.Unit.PX);
     return w;
   }
@@ -141,7 +132,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
     style2.setMarginLeft(15, Style.Unit.PX);
   }
 
-  long start = 0;
 
   /**
    * @see RehearseViewHelper#currentTurnPlayEnded

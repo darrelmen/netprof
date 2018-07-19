@@ -457,7 +457,16 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
   protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String buttonTitle,
                                               String recordButtonTitle, HasID exercise) {
-    return new PlayAudioPanel(buttonTitle, toTheRightWidget, false, controller, exercise.getID(), true);
+    int id = 0;
+    if (exercise == null) {
+      logger.warning("huh? exercise is null?");
+
+    }
+    else {
+      id = exercise.getID();
+    }
+
+    return new PlayAudioPanel(buttonTitle, toTheRightWidget, false, controller, id, true);
   }
 
   /**

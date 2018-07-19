@@ -32,9 +32,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private static final boolean DEBUG = false;
 
-  private static final int DELAY_MILLIS = 100;
+  private static final int DELAY_MILLIS = 20;
 
   private ProgressBar scoreProgress;
+  /**
+   *
+   */
   private Image smiley = new Image();
 
   private final Map<Integer, Float> exToScore = new HashMap<>();
@@ -81,8 +84,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
       iconContainer.add(smiley);
       smiley.setVisible(false);
-      //  setSmiley(smiley, 0.8);
-
       container.add(iconContainer);
     }
 
@@ -199,7 +200,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
     super.gotPlay();
   }
+  private void clearScores() {
+    smiley.setVisible(false);
+    scoreProgress.setVisible(false);
+    exToScore.clear();
 
+    recordDialogTurns.forEach(IRecordDialogTurn::clearScoreInfo);
+    recordDialogTurns.clear();
+  }
   protected void currentTurnPlayEnded() {
     if (DEBUG) logger.info("currentTurnPlayEnded - turn " + currentTurn.getExID());
     List<T> seq = getSeq();
@@ -268,17 +276,16 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       scoreProgress.setVisible(true);
       scoreProgress.setText("Score " + Math.round(percent) + "%");
       new ScoreProgressBar(false).setColor(scoreProgress, total, round);
+
       setSmiley(smiley, total);
+
+      smiley.setVisible(true);
+
       return true;
     } else return false;
   }
 
-  private void clearScores() {
-    exToScore.clear();
 
-    recordDialogTurns.forEach(IRecordDialogTurn::clearScoreInfo);
-    recordDialogTurns.clear();
-  }
 
   private double getTotal() {
     double total = 0D;
@@ -307,6 +314,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
 
     smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
+   // smiley.setVisible(true);
   }
 
 }
