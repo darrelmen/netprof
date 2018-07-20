@@ -340,10 +340,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return this;
   }
 
-  private void stopNow() {
+/*  private void stopNow() {
     close();
     System.exit(0);
-  }
+  }*/
 
 
   /**
@@ -1466,11 +1466,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.error("close got " + e, e);
     }
 
+    if (reportThread != null) reportThread.interrupt();
+
     if (mailSupport != null) {
       mailSupport.stopHeartbeat();
     }
     try {
-//      logger.info(this.getClass() + " : closing db connection : " + dbConnection);
+      logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();
     } catch (Exception e) {
       logger.error("close got " + e, e);
@@ -1812,6 +1814,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     sendReports(getReport(), false, -1);
   }
 
+  private Thread reportThread;
+
   /**
    * Fire at Saturday night, just before midnight EST (or local)
    * Smarter would be to figure out how long to wait until sunday...
@@ -1828,17 +1832,21 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Duration duration = Duration.between(now, tomorrowStart);
     long candidate = duration.toMillis() - 30 * 1000;
     long toWait = candidate > 0 ? candidate : candidate + DAY;
-    new Thread(() -> {
-      try {
-        logger.info("tryTomorrow :" +
-            "\n\tWaiting for " + toWait + " or " + toWait / 1000 + " sec or " + toWait / (60 * 1000) + " min or " + toWait / (60 * 60 * 1000) + " hours" +
-            "\n\tto fire at " + tomorrowStart);
-        Thread.sleep(toWait);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      doReport(); // try again later
-    }).start();
+
+
+    reportThread =
+        new Thread(() -> {
+          try {
+            logger.info("tryTomorrow :" +
+                "\n\tWaiting for " + toWait + " or " + toWait / 1000 + " sec or " + toWait / (60 * 1000) + " min or " + toWait / (60 * 60 * 1000) + " hours" +
+                "\n\tto fire at " + tomorrowStart);
+            Thread.sleep(toWait);
+          } catch (InterruptedException e) {
+            logger.info("Got interrupt...");
+          }
+          doReport(); // try again later
+        });
+    reportThread.start();
   }
 
   private boolean isTodayAGoodDay() {

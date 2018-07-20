@@ -268,7 +268,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private void connectToMongo(Database database, Properties props) throws MongoTimeoutException {
     pool = Mongo.createPool(new DBProperties(props));
     serializer = Mongo.makeSerializer();
-//      logger.info("OK made serializer " + serializer);
+    logger.info("connectToMongo : OK made serializer " + serializer);
     Mailer mailer = new Mailer(new MailerProperties(props));
     ServerProperties dominoProps = getDominoProps(database, props);
     //String appName = dominoProps.getAppName();
@@ -331,6 +331,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (!usedDominoResources && ignite != null) {
       ignite.close();
     }
+
+/*    if (pool != null) {
+      logger.info("close : closing connection to " + pool);
+      pool.closeConnection();
+      if (ignite != null) ignite.close();
+    }*/
   }
 
   @Override
