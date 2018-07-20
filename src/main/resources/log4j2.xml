@@ -34,7 +34,7 @@
 <configuration>
     <Properties>
         <Property name="log.mailhost">localhost</Property>
-        <Property name="log.mailfrom">noreply@dliflc.edu</Property>
+        <Property name="log.mailfrom">netprof-admin@ll.mit.edu</Property>
         <Property name="log.mailto">gordon.vidaver@ll.mit.edu</Property>
     </Properties>
 
@@ -42,13 +42,13 @@
         <!--
             The SMTP mailer appears to only work when smtp debug is true.
           -->
-                <SMTP name="Mail" subject="Web App netprof error on host ${hostName}" to="${sys:log.mailto}"
-                      from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
-                      bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
+        <SMTP name="Mail" subject="Web App netprof error on host ${hostName}" to="${sys:log.mailto}"
+              from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
+              bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
 
         <RollingFile name="LogFile"
-                     fileName="${sys:catalina.base}/logs/netprof-app.log"
-                     filePattern="${sys:catalina.base}/logs/netprof-app-%d{MM-dd-yyyy}-%i.log.gz">
+                     fileName="${sys:catalina.base}/logs/dialog-app.log"
+                     filePattern="${sys:catalina.base}/logs/dialog-app-%d{MM-dd-yyyy}-%i.log.gz">
 
             <PatternLayout
                     pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
@@ -67,9 +67,9 @@
             </Policies>
         </RollingFile>
 
- <!--       <Console name="STDOUT" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%-20.30c{1}:%-4L] - %m%n%throwable"/>
-        </Console>-->
+        <!--       <Console name="STDOUT" target="SYSTEM_OUT">
+                   <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%-20.30c{1}:%-4L] - %m%n%throwable"/>
+               </Console>-->
 
     </appenders>
     <loggers>
@@ -149,11 +149,15 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
+        <logger name="com.zaxxer.hikari" level="WARN">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
         <logger name="com.zaxxer.hikari.pool" level="INFO">
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="mitll.hlt.domino.server.util" level="WARN">
+        <logger name="mitll.hlt.domino.server.util" level="DEBUG">
             <appender-ref ref="LogFile"/>
         </logger>
 
@@ -161,7 +165,7 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="mitll.hlt.domino.server.user" level="INFO">
+        <logger name="mitll.hlt.domino.server" level="DEBUG">
             <appender-ref ref="LogFile"/>
         </logger>
 
@@ -181,9 +185,7 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="com.zaxxer.hikari" level="WARN">
-            <appender-ref ref="LogFile"/>
-        </logger>
+
 
         <!--        <logger name="mitll" level="debug" additivity="false">
                     <appender-ref ref="LogFile"/>
@@ -195,8 +197,8 @@
                </logger>
                -->
 
-        <root level="info">
-            <appender-ref ref="LogFile" level="info"/>
+        <root level="debug">
+            <appender-ref ref="LogFile" level="debug"/>
             <appender-ref ref="Mail" level="error"/>
         </root>
 

@@ -179,10 +179,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private IProjectManagement projectManagement;
   private Group primaryGroup = null;
-  //Runnable runnable = null;
 
   private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
-
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
@@ -196,7 +194,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
 
   private LoadingCache<Integer, User> idToUser = CacheBuilder.newBuilder()
-
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
@@ -253,7 +250,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       usedDominoResources = false;
       try {
         new Thread(() -> connectToMongo(database, props)).start();
-        //connectToMongo(database, props);
       } catch (Exception e) {
         logger.error("Couldn't connect to mongo - is it running and accessible? " + e, e);
         throw e;
@@ -468,12 +464,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   @Override
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass) {
-    //invalidateCache();
-/*    if (user.getGender() != UNSPECIFIED) {
-      logger.info("addAndGet going in " + user.getGender() + " for user '" + user.getUserId() + "'");
-    }*/
-
-    SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
+     SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
     boolean b = !clientUserDetailSResult1.isError();
     if (!b) {
       logger.error("\n\n\naddAndGet didn't set password for " + user.getUserId() + " : " +

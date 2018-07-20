@@ -34,42 +34,14 @@
 <!-- this can be used to turn on debug information -->
 <!--<configuration status="debug"> -->
 <configuration>
-    <Properties>
-        <Property name="log.mailhost">localhost</Property>
-        <Property name="log.mailfrom">noreply@dliflc.edu</Property>
-        <Property name="log.mailto">gordon.vidaver@ll.mit.edu</Property>
-    </Properties>
-
-    <appenders>
-        <!--
-           The SMTP mailer appears to only work when smtp debug is true.
-          -->
-  <!--      <SMTP name="Mail" subject="Web App ${web:contextPath} error on host ${hostName}" to="${sys:log.mailto}"
-              from="${sys:log.mailfrom}" smtpHost="${sys:log.mailhost}" smtpDebug="false"
-              bufferSize="1" ignoreExceptions="false" smtpPort="25"/>
-        <RollingFile name="STDOUT" fileName="${sys:catalina.base}/logs/${web:contextPath}-app.log"
-                     filePattern="${sys:catalina.base}/logs/${web:contextPath}-app-%d{MM-dd-yyyy}-%i.log.gz">
-            <PatternLayout
-                    pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
-            <Policies>
-                <SizeBasedTriggeringPolicy size="100 MB"/>
-            </Policies>
-        </RollingFile>
-        <RollingFile name="SecFile" fileName="${sys:catalina.base}/logs/${web:contextPath}-access.log"
-                     filePattern="${sys:catalina.base}/logs/${web:contextPath}-access-%d{MM-dd-yyyy}-%i.log.gz">
-            <PatternLayout
-                    pattern="%d{yyyy-MM-dd HH:mm:ss} | IP=%X{ipAddress}, UserID=%X{loginId}, REQID=%X{requestId}, SessID=%X{sessionId} |%-5p|%-30.30c{1}:%-4L|%notEmpty{%marker|} %m%n%throwable"/>
-            <Policies>
-                <SizeBasedTriggeringPolicy size="100 MB"/>
-            </Policies>
-        </RollingFile>-->
-        <Console name="STDOUT" target="SYSTEM_OUT">
+     <appenders>
+         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%-30.30c{1}:%-4L] - %m%n%throwable"/>
         </Console>
     </appenders>
 
     <loggers>
-        <logger name="org.apache.fop" level="WARN" additivity="true">
+<!--        <logger name="org.apache.fop" level="WARN" additivity="true">
             <appender-ref ref="STDOUT"/>
         </logger>
         <logger name="org.apache.fop.fonts.autodetect" level="debug" additivity="true">
@@ -101,7 +73,7 @@
 
         <logger name="org.mongodb.driver.cluster" level="info" additivity="true">
             <appender-ref ref="STDOUT"/>
-        </logger>
+        </logger>-->
 
         <logger name="slick.compiler.QueryCompiler" level="INFO"/>
         <logger name="slick.compiler.QueryCompilerBenchmark" level="INFO"/>
@@ -115,8 +87,8 @@
         <logger name="slick.relational" level="INFO"/>
         <logger name="slick.session" level="INFO"/>
 
-        <logger name="mitll.hlt.domino.server.util" level="INFO"/>
-        <logger name="mitll.hlt.domino.server.user" level="INFO"/>
+        <logger name="mitll.hlt.domino.server.util" level="WARN"/>
+        <logger name="mitll.hlt.domino.server.user" level="WARN"/>
         <logger name="com.zaxxer.hikari.pool" level="WARN"/>
 
 <!--
