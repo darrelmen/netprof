@@ -44,6 +44,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
+import mitll.langtest.server.database.project.DialogPopulate;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.RefResultDAO;
 import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
@@ -104,7 +105,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String CONFIG = "config";
   private static final String NO_TRANSCRIPT_FOUND = "no transcript found";
   private static final boolean ALLOW_DELETE = false;
-  public static final int PASUYA_ID = 736;
+  //public static final int PASUYA_ID = 736;
 
   enum ACTION {
     COPY("c"),
@@ -121,6 +122,8 @@ public class CopyToPostgres<T extends CommonShell> {
     MERGE("m"),
     RECORDINGS("r"),
     SEND("s"),
+    DIALOG("g"),
+    CLEANDIALOG("n"),
     UNKNOWN("k");
 
     private String value;
@@ -1419,7 +1422,6 @@ public class CopyToPostgres<T extends CommonShell> {
     if (cmd.hasOption(COPY.toLower())) {
       action = COPY;
       config = cmd.getOptionValue(COPY.toLower());
-
     } else if (ALLOW_DELETE) {
       if (cmd.hasOption(DROP.toLower())) {
         action = DROP;
@@ -1465,6 +1467,12 @@ public class CopyToPostgres<T extends CommonShell> {
       config = cmd.getOptionValue(IMPORT.toLower());
     } else if (cmd.hasOption(SEND.toLower())) {
       action = SEND;
+    } else if (cmd.hasOption(DIALOG.toLower())) {
+      action = DIALOG;
+      to = Integer.parseInt(cmd.getOptionValue(DIALOG.toLower()));
+    } else if (cmd.hasOption(CLEANDIALOG.toLower())) {
+      action = CLEANDIALOG;
+      to = Integer.parseInt(cmd.getOptionValue(CLEANDIALOG.toLower()));
     } else if (cmd.hasOption(MERGE.toLower())) {
       action = MERGE;
       from = Integer.parseInt(cmd.getOptionValue(MERGE.toLower()));
@@ -1573,7 +1581,7 @@ public class CopyToPostgres<T extends CommonShell> {
         );
         try {
           boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue,
-              isEval, skipRefResult, false, false, false,optDatabase);
+              isEval, skipRefResult, false, false, false, optDatabase);
           //  if (!b) {
           doExit(b);  // ?
           // }
@@ -1588,21 +1596,21 @@ public class CopyToPostgres<T extends CommonShell> {
         break;
       case UPDATE:
         logger.info("import netprof 1 content into existing netprof project");
-        boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, false,optDatabase);
+        boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, false, optDatabase);
         // if (!b) {
         doExit(b);  // ?
         // }
         break;
       case LATEST:
         logger.info("import netprof 1 content into existing netprof project given latest target project date");
-        boolean c = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, true, false,optDatabase);
+        boolean c = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, true, false, optDatabase);
         // if (!b) {
         doExit(c);  // ?
         // }
         break;
       case CREATED:
         logger.info("import netprof 1 content into existing netprof project given latest target project date");
-        boolean d = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, true,optDatabase);
+        boolean d = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, true, optDatabase);
         // if (!b) {
         doExit(d);  // ?
         // }
@@ -1625,6 +1633,14 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.info("sent reports");
         doExit(true);  // ?
         break;
+      case DIALOG:
+        copyDialog(to);
+        doExit(true);  // ?
+        break;
+      case CLEANDIALOG:
+        cleanDialog(to);
+        doExit(true);  // ?
+        break;
  /*       case MERGEDAY:
         logger.info("merge project from into project to");
         copyToPostgres.merge(from, to, onDay);
@@ -1639,6 +1655,32 @@ public class CopyToPostgres<T extends CommonShell> {
         break;
       default:
         formatter.printHelp("copy", options);
+    }
+  }
+
+  private static void copyDialog(int to) {
+    DatabaseImpl database = getDatabase();
+    if (to == -1) logger.error("remember to set the project id");
+    else {
+      Project project = database.getProject(to);
+      if (project == null) logger.error("no project with id " + to);
+      else {
+        boolean b = new DialogPopulate(database).addDialogInfo(project);
+        if (!b) logger.info("project " + project + " already has dialog data.");
+      }
+    }
+  }
+
+  private static void cleanDialog(int to) {
+    DatabaseImpl database = getDatabase();
+    if (to == -1) logger.error("remember to set the project id");
+    else {
+      Project project = database.getProject(to);
+      if (project == null) logger.error("no project with id " + to);
+      else {
+        boolean b = new DialogPopulate(database).cleanDialog(project);
+        if (!b) logger.info("project " + project + " already has dialog data.");
+      }
     }
   }
 
@@ -1672,26 +1714,7 @@ public class CopyToPostgres<T extends CommonShell> {
       options.addOption(copy);
     }
 
-    if (ALLOW_DELETE) {
-      {
-        Option drop = new Option(DROP.getValue(), DROP.toLower(), true, "drop this project from netprof database");
-        drop.setRequired(false);
-        options.addOption(drop);
-      }
-
-      {
-        Option drop = new Option(DROPALLBUT.getValue(), DROPALLBUT.toLower(), true, "drop all projects but this one from netprof database");
-        drop.setRequired(false);
-        options.addOption(drop);
-      }
-
-      {
-        Option dropAll = new Option(DROPALL.getValue(), DROPALL.toLower(), true, "drop all tables in the netprof database");
-        dropAll.setRequired(false);
-        options.addOption(dropAll);
-      }
-    }
-
+    addDeleteOptions(options);
 
     addNonRequiredArg(options, OPTCONFIG);
     addNonRequiredArg(options, NAME);
@@ -1727,6 +1750,15 @@ public class CopyToPostgres<T extends CommonShell> {
       mapFile = new Option(recordings.getValue(), recordings.toLower(), true, "from project id");
       options.addOption(mapFile);
 
+      ACTION act = DIALOG;
+      mapFile = new Option(act.getValue(), act.toLower(), true, "load dialog for project id");
+      options.addOption(mapFile);
+
+      ACTION act2 = CLEANDIALOG;
+      mapFile = new Option(act2.getValue(), act2.toLower(), true, "clean dialogs from project id");
+      options.addOption(mapFile);
+
+
       addOption(options, TO);
       addOption(options, ONDAY);
       addOption(options, DATABASE);
@@ -1738,6 +1770,28 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     return options;
+  }
+
+  private static void addDeleteOptions(Options options) {
+    if (ALLOW_DELETE) {
+      {
+        Option drop = new Option(DROP.getValue(), DROP.toLower(), true, "drop this project from netprof database");
+        drop.setRequired(false);
+        options.addOption(drop);
+      }
+
+      {
+        Option drop = new Option(DROPALLBUT.getValue(), DROPALLBUT.toLower(), true, "drop all projects but this one from netprof database");
+        drop.setRequired(false);
+        options.addOption(drop);
+      }
+
+      {
+        Option dropAll = new Option(DROPALL.getValue(), DROPALL.toLower(), true, "drop all tables in the netprof database");
+        dropAll.setRequired(false);
+        options.addOption(dropAll);
+      }
+    }
   }
 
   private static void addNonRequiredNoArg(Options options, OPTIONS skiprefresult) {

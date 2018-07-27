@@ -172,6 +172,7 @@ public class ProjectChoices extends ThumbnailChoices {
    * Developers can see development sites.
    * Polyglot users can only see polyglot sites.
    *
+   * TODO: rationalize this - check factor out
    * @param projects
    * @return
    * @see #getNumVisible
@@ -180,11 +181,8 @@ public class ProjectChoices extends ThumbnailChoices {
   private List<SlimProject> getVisibleProjects(List<SlimProject> projects) {
     List<SlimProject> filtered = new ArrayList<>();
     Collection<Permission> permissions = controller.getPermissions();
-//    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-
     boolean canRecord = isCanRecord(permissions);
     boolean isPoly = permissions.contains(POLYGLOT);
-
 //    logger.info("isPoly " + isPoly + " startup " + projectStartupInfo);
 
     /*    logger.info("getVisibleProjects : Examining  " + projects.size() + " projects," +

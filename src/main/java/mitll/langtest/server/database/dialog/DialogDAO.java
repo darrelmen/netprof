@@ -381,6 +381,15 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return dao.update(changed) > 0;
   }
 
+  /**
+   * TODO fill this in
+   * @param id
+   */
+  @Override
+  public void removeForProject(int id) {
+    dao.removeByProjid(id);
+  }
+
   public void createTable() {
     dao.createTable();
   }

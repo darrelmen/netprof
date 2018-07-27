@@ -39,7 +39,7 @@ public class DialogPopulate {
 
   private final DatabaseImpl db;
 
-  DialogPopulate(DatabaseImpl db) {
+  public DialogPopulate(DatabaseImpl db) {
     this.db = db;
   }
 
@@ -49,13 +49,13 @@ public class DialogPopulate {
    * @param project
    * @see ProjectManagement#addDialogInfo
    */
-  boolean addDialogInfo(Project project) {
+  public boolean addDialogInfo(Project project) {
     int projid = project.getID();
     IDialogDAO dialogDAO = db.getDialogDAO();
 
     List<IDialog> dialogs1 = dialogDAO.getDialogs(projid);
     if (dialogs1.isEmpty()) {
-      populateDatabase(project, projid, dialogDAO);
+      populateDatabase(project, dialogDAO);
       return true;
     } else {
       project.setDialogs(dialogs1);
@@ -63,7 +63,8 @@ public class DialogPopulate {
     }
   }
 
-  private void populateDatabase(Project project, int projid, IDialogDAO dialogDAO) {
+  private void populateDatabase(Project project, IDialogDAO dialogDAO) {
+    int projid= project.getID();
     Map<ClientExercise, String> exToAudio = new HashMap<>();
     int defaultUser = db.getUserDAO().getDefaultUser();
     Language languageEnum = project.getLanguageEnum();
@@ -77,12 +78,7 @@ public class DialogPopulate {
       ExerciseCopy exerciseCopy = new ExerciseCopy();
       AudioCheck audioCheck = new AudioCheck(db.getServerProps().shouldTrimAudio(), db.getServerProps().getMinDynamicRange());
 
-      Map<Integer, ExerciseAttribute> idToPair = db.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
-
-      Map<ExerciseAttribute, Integer> attrToInt = new HashMap<>();
-
-      addNewAttributes(projid, defaultUser, dialogs, now, idToPair, attrToInt);
-      idToPair.forEach((k, v) -> attrToInt.put(v, k));
+      Map<ExerciseAttribute, Integer> attrToInt = getExerciseAttributeToID(projid, defaultUser, dialogs, now);
 
       Map<ClientExercise, Integer> allImportExToID = new HashMap<>();
       List<String> typeOrder = project.getTypeOrder();
@@ -143,6 +139,17 @@ public class DialogPopulate {
 
       addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
     }
+  }
+
+  @NotNull
+  private Map<ExerciseAttribute, Integer> getExerciseAttributeToID(int projid, int defaultUser, Set<Dialog> dialogs, long now) {
+    Map<Integer, ExerciseAttribute> idToPair = db.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
+
+    Map<ExerciseAttribute, Integer> attrToInt = new HashMap<>();
+
+    addNewAttributes(projid, defaultUser, dialogs, now, idToPair, attrToInt);
+    idToPair.forEach((k, v) -> attrToInt.put(v, k));
+    return attrToInt;
   }
 
   @NotNull
@@ -300,4 +307,13 @@ public class DialogPopulate {
     );
   }
 
+  /**
+   * TODO : remove related exercise, related exercise entries, and dialogs
+   * @param project
+   * @return
+   */
+  public boolean cleanDialog(Project project) {
+    db.getDialogDAO().removeForProject(project.getID());
+    return true;
+  }
 }

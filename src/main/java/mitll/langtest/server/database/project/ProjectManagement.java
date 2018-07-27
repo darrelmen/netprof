@@ -940,10 +940,7 @@ public class ProjectManagement implements IProjectManagement {
 //    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
 
     langToProject.values().forEach(projects -> {
-      List<Project> production = getProductionProjects(projects);
-      Project firstProject = (production.isEmpty()) ? projects.iterator().next() : production.iterator().next();
-
-      SlimProject parent = getProjectInfo(firstProject);
+      SlimProject parent = getProjectInfo(getFirstProduction(projects));
       projectInfos.add(parent);
 
       if (projects.size() > 1) {
@@ -953,6 +950,11 @@ public class ProjectManagement implements IProjectManagement {
     });
 
     return projectInfos;
+  }
+
+  private Project getFirstProduction(List<Project> projects) {
+    List<Project> production = getProductionProjects(projects);
+    return (production.isEmpty()) ? projects.iterator().next() : production.iterator().next();
   }
 
   @NotNull
