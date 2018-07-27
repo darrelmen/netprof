@@ -25,6 +25,7 @@ import mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE;
 import mitll.langtest.client.flashcard.PolyglotDialog.PROMPT_CHOICE;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
@@ -34,6 +35,7 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -89,7 +91,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   /**
-   * @see InitialUI#showInitialState
+   * @see UILifecycle#showInitialState
    */
   @Override
   public void showInitialState() {
@@ -109,7 +111,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-    //    logger.info("getCurrentView currentView " + currentView);
+    logger.info("getCurrentView currentView " + currentView);
     VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
@@ -117,6 +119,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
     List<User.Permission> requiredPerms = currentStoredView.getPerms();
     userPerms.retainAll(requiredPerms);
+
 
     if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
       logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
@@ -163,10 +166,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    //   logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+    logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
-      //   logger.info("showView - showing " + view);
+      logger.info("showView - showing " + view);
       //} else {
       currentSection = view;
       storeValue(view);
@@ -432,15 +435,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    * @return
    */
   private String getCurrentStoredView() {
-    String instance = getCurrentInstance();
     // logger.info("getCurrentStoredView instance = " + instance);
 
-    VIEWS views = null;
-    try {
-      views = instance.isEmpty() ? null : VIEWS.valueOf(instance.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      logger.info("bad instance " + instance);
-    }
+    VIEWS views = getCurrentView2();
     //logger.info("getCurrentStoredView instance = " + instance + "/" + views);
 
 //    return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
@@ -450,6 +447,18 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     } else {
       return views.toString().toUpperCase();
     }
+  }
+
+  @Nullable
+  private VIEWS getCurrentView2() {
+    String instance = getCurrentInstance();
+    VIEWS views = null;
+    try {
+      views = instance.isEmpty() ? null : VIEWS.valueOf(instance.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.info("bad instance " + instance);
+    }
+    return views;
   }
 
   @NotNull

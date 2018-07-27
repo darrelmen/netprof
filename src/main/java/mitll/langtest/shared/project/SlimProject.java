@@ -45,6 +45,7 @@ public class SlimProject extends ProjectInfo {
   private boolean isRTL;
   private List<SlimProject> children = new ArrayList<>();
   private Map<String, String> props;
+  private ProjectMode mode = ProjectMode.VOCABULARY;
 
   public SlimProject() {
   }
@@ -98,8 +99,8 @@ public class SlimProject extends ProjectInfo {
   }
 
   /**
-   * @see ProjectManagement#getNestedProjectInfo
    * @param projectInfo
+   * @see ProjectManagement#getNestedProjectInfo
    */
   public void addChild(SlimProject projectInfo) {
     children.add(projectInfo);
@@ -143,5 +144,13 @@ public class SlimProject extends ProjectInfo {
 
   public String toString() {
     return "SlimProject " + super.toString() + "\n\tnum children " + children.size();
+  }
+
+  public ProjectMode getMode() {
+    return mode;
+  }
+
+  public void setMode(ProjectMode mode) {
+    this.mode = mode;
   }
 }

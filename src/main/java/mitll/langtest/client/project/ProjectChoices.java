@@ -59,11 +59,10 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
 
-
   private static final int DIALOG_HEIGHT = 550;
   private static final String COURSE1 = " course";
   /**
-   * @see #getLabel(String, boolean, int, String)
+   * @see #getLabel
    */
   private static final String COURSES = COURSE1 + "s";
 
@@ -87,7 +86,7 @@ public class ProjectChoices extends ThumbnailChoices {
   /**
    * @see #getImageAnchor
    */
-  private static final int MIN_HEIGHT = 125;//100;// 110;//115;//125;
+  private static final int MIN_HEIGHT = 125;
   private static final int NORMAL_MIN_HEIGHT = 67;
 
   private static final String NEW_PROJECT = "New Project";
@@ -132,7 +131,6 @@ public class ProjectChoices extends ThumbnailChoices {
     this.sessionUser = langTest.getUser();
     String userID = langTest.getUserManager().getUserID();
     if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
-    //PropertyHandler props = langTest.getProps();
     this.controller = langTest;
     messageHelper = langTest.getMessageHelper();
     this.userNotification = langTest;
@@ -648,7 +646,7 @@ public class ProjectChoices extends ThumbnailChoices {
     String statusText = status == ProjectStatus.PRODUCTION ? "" : status.name();
 
     List<SlimProject> collect = getDialogProjects(projectForLang);
-    boolean alldialog = (collect.size() == numVisibleChildren);
+    boolean alldialog = (collect.size() == numVisibleChildren) && collect.size() == 2;
     return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText, alldialog);
   }
 
@@ -661,7 +659,7 @@ public class ProjectChoices extends ThumbnailChoices {
                            String statusText, boolean alldialog) {
     Heading label = getChoiceLabel(LANGUAGE_SIZE, name);
 
-    String subtext = alldialog ? "modes" : hasChildren ?
+    String subtext = alldialog ? ("2 modes") : hasChildren ?
         (numVisibleChildren + ((numVisibleChildren == 1) ? COURSE1 : COURSES)) : statusText;
 
     label.setSubtext(subtext);
@@ -961,7 +959,7 @@ public class ProjectChoices extends ThumbnailChoices {
       logger.info("gotClickOnFlag onClick select leaf project " + projid +
           " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
 
-      setProjectForUser(projid);
+      setProjectForUser(projid, projectForLang.getMode());
     } else { // at this point, the breadcrumb should be empty?
       logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       breadcrumb.addClickHandler(clickEvent -> {
@@ -1006,15 +1004,15 @@ public class ProjectChoices extends ThumbnailChoices {
 
   /**
    * @param projectid
-   * @see #setProjectForUser
+   * @param mode
+   * @see #gotClickOnFlag
    */
-  private void setProjectForUser(int projectid) {
+  private void setProjectForUser(int projectid, ProjectMode mode) {
     // logger.info("setProjectForUser set project for " + projectid);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable throwable) {
-//        Window.alert("Can't contact server.");
         controller.handleNonFatalError("setting project", throwable);
       }
 
@@ -1029,7 +1027,7 @@ public class ProjectChoices extends ThumbnailChoices {
           } else {
             userNotification.setProjectStartupInfo(aUser);
             //     logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
-            uiLifecycle.showInitialState();
+            uiLifecycle.showInitialState(mode);
           }
         }
       }

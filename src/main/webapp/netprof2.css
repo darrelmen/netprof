@@ -2227,7 +2227,7 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
     height: 30px;
 }
 
-.leftSpeaker .radio input[type="radio"], .checkbox input[type="checkbox"] {
+.leftSpeaker .radio input[type="radio"], .leftSpeaker .checkbox input[type="checkbox"] {
     float: left;
     width: 30px;
     height: 30px;

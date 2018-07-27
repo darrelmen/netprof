@@ -1,3 +1,4 @@
+package mitll.langtest.shared.project;
 /*
  *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
@@ -30,69 +31,22 @@
  *
  */
 
-package mitll.langtest.client.initial;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-import com.github.gwtbootstrap.client.ui.NavLink;
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.project.ProjectMode;
-import mitll.langtest.shared.project.SlimProject;
-import org.jetbrains.annotations.NotNull;
+/**
+ * @see mitll.langtest.server.database.project.ProjectDAO#add
+ */
+public enum ProjectMode implements IsSerializable {
+  VOCABULARY(true),
+  DIALOG(true);
 
-public interface UILifecycle {
-  /**
-   * @see InitialUI#populateRootPanelIfLogin()
-   * @see LangTest#populateRootPanel()
-   * @see LangTest#showLogin()
-   */
-  void populateRootPanel();
+  private boolean show;
 
-  int getHeightOfTopRows();
+  ProjectMode(boolean show) {
+    this.show = show;
+  }
 
-  /**
-   * @see LangTest#gotUser
-   * @param user
-   */
-  void gotUser(HasID user);
-
-  void startOver();
-
-  void getUserPermissions();
-
-  void showInitialState(ProjectMode mode);
-
-  ProjectMode getMode();
-
-  void setMode(ProjectMode mode);
-
-  void addBreadcrumbs();
-
-  /**
-   * @see mitll.langtest.client.project.ProjectChoices#gotClickOnFlag
-   * @param name
-   * @return
-   */
-  @NotNull
-  NavLink makeBreadcrumb(String name);
-
-  void clickOnParentCrumb(SlimProject parent);
-  String getLastBreadcrumb();
-
-  /**
-   * @see LangTest#makeFlashContainer()
-   * @param message
-   */
-  void setSplash(String message);
-
-  void logout();
-
-  void clearContent();
-
-  void chooseProjectAgain();
-
-  INavigation getNavigation();
-
-  void showCogMenu();
-
+  public boolean shouldShow() {
+    return show;
+  }
 }

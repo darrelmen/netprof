@@ -63,6 +63,7 @@ import mitll.langtest.client.user.SendResetPassword;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.HeartbeatStatus;
@@ -127,7 +128,6 @@ public class InitialUI implements UILifecycle {
   /**
    * @see #configureUIGivenUser
    * @see #gotUser
-   * @see #lastUser
    * @see #resetState
    * @see #showUserPermissions
    */
@@ -229,7 +229,7 @@ public class InitialUI implements UILifecycle {
   }
 
   private void showIOSAd() {
-    logger.warning("showIOSAd ");
+    //logger.warning("showIOSAd ");
     List<String> messages = Arrays.asList(IPAD_LINE_1, IPAD_LINE_2);
     Modal modal = new ModalInfoDialog().getModal(
         INSTALL_APP,
@@ -600,7 +600,7 @@ public class InitialUI implements UILifecycle {
         break;
       }
       //else {
-        // logger.info("addBreadcrumbLevels skipping project " + project);
+      // logger.info("addBreadcrumbLevels skipping project " + project);
       //}
     }
   }
@@ -622,7 +622,6 @@ public class InitialUI implements UILifecycle {
     NavLink lang = new NavLink(project.getLanguage());
     lang.addClickHandler(clickEvent -> {
       // logger.info("getLangBreadcrumb got click on " + project.getName());
-
       resetLanguageSelection(2);
 
       choices.showProject(project);
@@ -742,11 +741,11 @@ public class InitialUI implements UILifecycle {
     // are we here to show the login screen?
     boolean show = userManager.getUserID() == null;
     if (show) {
-     // logger.info("showLogin user is not valid : user expired " + userManager.getUserID());
+      // logger.info("showLogin user is not valid : user expired " + userManager.getUserID());
       showLogin(eventRegistration);
       return true;
     }
-   // logger.info("user is valid...");
+    // logger.info("user is valid...");
 
     showCogMenu();
     return false;
@@ -868,7 +867,7 @@ public class InitialUI implements UILifecycle {
     if (hasStartupInfo) {
       // logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
-      showInitialState();
+      showInitialState(ProjectMode.VOCABULARY);
     } else {
       addProjectChoices(0, null);
     }
@@ -876,13 +875,40 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
+   * @param mode
    * @see #configureUIGivenUser
+   * @see LangTest#reallySetTheProject
+   * @see ProjectChoices#setProjectForUser
    */
   @Override
-  public void showInitialState() {
+  public void showInitialState(ProjectMode mode) {
+    setMode(mode);
     showNavigation();
     banner.checkProjectSelected();
+    banner.setVisibleChoicesByMode(mode);
     navigation.showInitialState();
+  }
+
+  @Override
+  public ProjectMode getMode() {
+    String mode = controller.getStorage().getValue("Mode");
+    ProjectMode modeEnum = ProjectMode.VOCABULARY;
+
+    if (mode == null) {
+
+    } else {
+      try {
+        modeEnum = ProjectMode.valueOf(mode);
+      } catch (IllegalArgumentException e) {
+      }
+    }
+    return modeEnum;
+  }
+
+  @Override
+  public void setMode(ProjectMode mode) {
+    controller.getStorage().storeValue("Mode",mode.toString());
+    logger.info("mode now "+ getMode());
   }
 
   /**
@@ -901,6 +927,8 @@ public class InitialUI implements UILifecycle {
   }
 
   /**
+   * TODO : move breadcrump stuff to another class!
+   *
    * @see #addProjectChoices
    */
   @Override
@@ -943,6 +971,14 @@ public class InitialUI implements UILifecycle {
     // logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
   }
 
+  public String getLastBreadcrumb() {
+    Widget widget = breadcrumbs.getWidget(breadcrumbs.getWidgetCount() - 1);
+    if (widget instanceof NavLink) {
+      NavLink link = (NavLink) widget;
+      return link.getTitle();
+    } else return "Unknown";
+  }
+
   /**
    * @param count
    * @see #getLangBreadcrumb
@@ -953,7 +989,8 @@ public class InitialUI implements UILifecycle {
     //logger.info("removeUntilCrumb crumbs " + widgetCount + " remove to " + count + " initial " + initial);
 
     for (int i = initial; i >= count; i--) {
-      /*boolean remove =*/ breadcrumbs.remove(i);
+      /*boolean remove =*/
+      breadcrumbs.remove(i);
       // logger.info("removeUntilCrumb remove at " + i + "  " + remove);
     }
 //    logger.info("removeUntilCrumb now " + breadcrumbs.getWidgetCount());

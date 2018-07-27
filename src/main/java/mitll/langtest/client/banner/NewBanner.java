@@ -17,8 +17,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +27,7 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 
 /**
+ * Holds nav links at top of page...
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
@@ -37,7 +37,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
 
   private static final List<VIEWS> DIALOG_VIEWS =
-      Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS, VIEWS.DIALOG, VIEWS.LISTEN, VIEWS.REHEARSE);
+      Arrays.asList(VIEWS.DIALOG, VIEWS.LISTEN, VIEWS.REHEARSE);
+
+  private static List<VIEWS> BOTH = new ArrayList<>(STANDARD_VIEWS);
+
+  static {
+    BOTH.addAll(DIALOG_VIEWS);
+  }
 
   private static final List<VIEWS> POLY_VIEWS =
       Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS);
@@ -95,7 +101,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setPosition(NavbarPosition.TOP);
     this.controller = controller;
     this.lifecycle = lifecycle;
-  //  logger.info("--- addWidgets ---");
+    //  logger.info("--- addWidgets ---");
     addWidgets(userManager, userMenu, breadcrumbs);
   }
 
@@ -240,13 +246,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     rnav.add(userDrop);
 
     userDrop.addClickHandler(event -> {
-      // logger.info("got click ");
       userDrop.clear();
       userMenu.getStandardUserMenuChoices().forEach(linkAndTitle -> userDrop.add(linkAndTitle.makeNewLink()));
     });
 
     //  Scheduler.get().scheduleDeferred(() -> userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink())));
-
 //    userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink()));
   }
 
@@ -275,22 +279,23 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
-   * @see #addWidgets
    * @param nav
+   * @see #addWidgets
    */
   private void addChoicesForUser(ComplexWidget nav) {
     boolean first = true;
     boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == User.Permission.POLYGLOT;
 
-    List<VIEWS> toShow = isPoly ? POLY_VIEWS : DIALOG_VIEWS;
+    List<VIEWS> toShow = isPoly ? POLY_VIEWS : BOTH;
 
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+//    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+//
+//    //  logger.info("addChoicesForUser project startup " + projectStartupInfo);
+//    if (projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.DIALOG) {
+//      toShow = DIALOG_VIEWS;
+//    }
 
-  //  logger.info("addChoicesForUser project startup " + projectStartupInfo);
-    if (projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.DIALOG) {
-      toShow = DIALOG_VIEWS;
-    }
-    logger.info("Show " + toShow);
+    logger.info("addChoicesForUser show " + toShow);
 
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
@@ -452,7 +457,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   /**
    * @see InitialUI#addCrumbs
-   * @see InitialUI#showInitialState
+   * @see UILifecycle#showInitialState
    */
   @Override
   public void checkProjectSelected() {
@@ -471,15 +476,31 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     recordMenuVisible();
   }
 
+  /**
+   * @param show
+   * @see NewBanner#checkProjectSelected
+   */
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
     reflectPermissions(controller.getPermissions());
   }
 
+  @Override
+  public void setVisibleChoicesByMode(ProjectMode mode) {
+    if (mode == ProjectMode.VOCABULARY) {
+      BOTH.forEach(views -> viewToLink.get(views).setVisible(STANDARD_VIEWS.contains(views)));
+    } else if (mode == ProjectMode.DIALOG) {
+      BOTH.forEach(views -> viewToLink.get(views).setVisible(DIALOG_VIEWS.contains(views)));
+    }
+  }
+
   private void recordMenuVisible() {
     if (recnav != null) {
       boolean visible = isPermittedToRecord() && hasProjectChoice();
-    //  boolean visible1 = visible;
+
+      boolean learnVisible = viewToLink.get(VIEWS.LEARN).isVisible();
+      logger.info("recordMenuVisible learn vis " + learnVisible);
+      visible &= learnVisible;
       setRecNavVisible(visible);
     }
   }

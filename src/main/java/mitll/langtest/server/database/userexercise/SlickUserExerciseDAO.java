@@ -795,9 +795,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
           .map(Pair::getProperty)
           .collect(Collectors.toCollection(HashSet::new));
 
+/*
       logger.info("all facet types:");
       allFacetTypes.forEach(type -> logger.info("\t" + type));
-
+*/
 
 //    logger.info("ExToPhones " + exToPhones.size());
       //  logger.info("examining  " + all.size() + " exercises...");

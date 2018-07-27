@@ -983,12 +983,13 @@ public class ProjectManagement implements IProjectManagement {
       projectInfo.addChild(vocab);
       vocab.setName(VOCABULARY);
       vocab.setProjectType(ProjectType.DIALOG);
+      vocab.setMode(ProjectMode.VOCABULARY);
 
       SlimProject dialog = getProjectInfo(project);
       projectInfo.addChild(dialog);
       dialog.setName(DIALOG);
       dialog.setProjectType(ProjectType.DIALOG);
-
+      dialog.setMode(ProjectMode.DIALOG);
     }
   }
 

@@ -66,17 +66,18 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
-  public static final String GVIDAVER = "gvidaver";
-  public static final String CHECKING_AUDIO = "Checking audio and making mp3's...";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
-  public static final String IN_PROGRESS = "In progress...";
+  private static final String GVIDAVER = "gvidaver";
+  private static final String CHECKING_AUDIO = "Checking audio and making mp3's...";
 
-  public static final String PROJECT_TYPE = "Project Type";
-  public static final boolean SHOW_PROJECT_TYPE = false;
+  private static final String IN_PROGRESS = "In progress...";
 
-  public static final String LANGUAGE = "Language";
-  public static final String LIFECYCLE = "Lifecycle";
+  private static final String PROJECT_TYPE = "Project Type";
+  private static final boolean SHOW_PROJECT_TYPE = true;
+
+  private static final String LANGUAGE = "Language";
+  private static final String LIFECYCLE = "Lifecycle";
 
   private static final int LEFT_MARGIN_FOR_DOMINO = 320;
 
@@ -130,6 +131,9 @@ public class ProjectEditForm extends UserDialog {
 
   private final LifecycleSupport lifecycleSupport;
   private final MessageHelper messageHelper;
+  /**
+   * @see #addProjectType
+   */
   private ListBox statusBox, typeBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
@@ -268,7 +272,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   @Nullable
-  private ProjectStatus checkHydraModelAndPort() {
+  private void checkHydraModelAndPort() {
     ProjectStatus status = ProjectStatus.valueOf(statusBox.getValue());
 
     if (status == ProjectStatus.EVALUATION || status == ProjectStatus.PRODUCTION) {
@@ -281,13 +285,11 @@ public class ProjectEditForm extends UserDialog {
 
       } catch (NumberFormatException e) {
         markError(hydraPort, PLEASE_ENTER_A_PORT_NUMBER_FOR_THE_SERVICE);
-        return null;
       }
     } else {
       clearError(model.getGroup());
       clearError(hydraPort.getGroup());
     }
-    return status;
   }
 
   boolean isValid() {
@@ -465,12 +467,19 @@ public class ProjectEditForm extends UserDialog {
     DivWidget lifecycle = getHDivLabel(fieldset, LIFECYCLE, false);
 
     lifecycle.add(statusBox = getStatusChoices());
+    statusBox.setWidth("150px");
     {
+      DivWidget ios=new DivWidget();
+
+      ios.addStyleName("leftThirtyMargin");
       showOniOSBox = new CheckBox(SHOW_ON_I_OS);
       showOniOSBox.setValue(info.isShowOniOS());
-      lifecycle.add(showOniOSBox);
       showOniOSBox.addStyleName("leftTenMargin");
       showOniOSBox.setEnabled(info.getStatus() == ProjectStatus.PRODUCTION);
+      ios.add(showOniOSBox);
+      ios.addStyleName("floatRight");
+      lifecycle.add(ios);
+
     }
 
     checkPortOnBlur(statusBox);
