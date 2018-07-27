@@ -1665,8 +1665,9 @@ public class CopyToPostgres<T extends CommonShell> {
       Project project = database.getProject(to);
       if (project == null) logger.error("no project with id " + to);
       else {
-        boolean b = new DialogPopulate(database).addDialogInfo(project);
-        if (!b) logger.info("project " + project + " already has dialog data.");
+        if (!new DialogPopulate(database).populateDatabase(project)) {
+          logger.info("project " + project + " already has dialog data.");
+        }
       }
     }
   }

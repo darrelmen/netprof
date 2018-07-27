@@ -77,6 +77,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Thread.sleep;
 import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
 
 public class ProjectManagement implements IProjectManagement {
@@ -90,6 +91,8 @@ public class ProjectManagement implements IProjectManagement {
    * @see #addOtherProps
    */
   private static final String DOMINO_NAME = "Domino Project";
+  public static final String VOCABULARY = "Vocabulary";
+  public static final String DIALOG = "Dialog";
   /**
    * JUST FOR TESTING
    */
@@ -106,6 +109,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see #addDateProps(SlickProject, Map)
    */
   private static final String CREATED = "Created";
+  public static final String CREATED_BY = CREATED + " by";
   public static final String MODIFIED = "Modified";
   /**
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
@@ -397,7 +401,8 @@ public class ProjectManagement implements IProjectManagement {
 
       if (project.getLanguageEnum() == Language.KOREAN) {
         addDialogInfo(project);
-      }   if (project.getLanguageEnum() == Language.ENGLISH) {
+      }
+      if (project.getLanguageEnum() == Language.ENGLISH) {
         addDialogInfo(project);
       }
       return rawExercises.size();
@@ -410,7 +415,7 @@ public class ProjectManagement implements IProjectManagement {
   private void addDialogInfo(Project project) {
     if (project.getKind() == ProjectType.DIALOG || true) {
       if (new DialogPopulate(db).addDialogInfo(project)) {
-        configureProject(project, false, true);
+        //configureProject(project, false, true);
 
         //project.getSectionHelper().report();
       }
@@ -426,7 +431,18 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private void rememberUsers(int projectID) {
-    db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
+    new Thread(() -> {
+      while (db.getUserDAO().getDefaultUser() < 1) {
+        try {
+          sleep(1000);
+          logger.info("rememberUsers ---> no default user yet.....");
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+
+      db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
+    }).start();
   }
 
   @Override
@@ -937,19 +953,43 @@ public class ProjectManagement implements IProjectManagement {
 
     List<SlimProject> projectInfos = new ArrayList<>();
     Map<String, List<Project>> langToProject = getLangToProjects();
-//    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
+
+    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
 
     langToProject.values().forEach(projects -> {
-      SlimProject parent = getProjectInfo(getFirstProduction(projects));
+      Project firstProduction = getFirstProduction(projects);
+      SlimProject parent = getProjectInfo(firstProduction);
       projectInfos.add(parent);
 
       if (projects.size() > 1) {
         // add child to self?
-        projects.forEach(project -> parent.addChild(getProjectInfo(project)));
+        projects.forEach(project -> {
+          SlimProject projectInfo = getProjectInfo(project);
+          parent.addChild(projectInfo);
+          addModeChoices(project, projectInfo);
+        });
+      }
+      else {
+        addModeChoices(firstProduction, parent);
       }
     });
 
     return projectInfos;
+  }
+
+  private void addModeChoices(Project project, SlimProject projectInfo) {
+    if (project.getKind() == ProjectType.DIALOG) {
+      SlimProject vocab = getProjectInfo(project);
+      projectInfo.addChild(vocab);
+      vocab.setName(VOCABULARY);
+      vocab.setProjectType(ProjectType.DIALOG);
+
+      SlimProject dialog = getProjectInfo(project);
+      projectInfo.addChild(dialog);
+      dialog.setName(DIALOG);
+      dialog.setProjectType(ProjectType.DIALOG);
+
+    }
   }
 
   private Project getFirstProduction(List<Project> projects) {
@@ -978,10 +1018,11 @@ public class ProjectManagement implements IProjectManagement {
     Map<String, String> info = new LinkedHashMap<>();
 
     SlickProject project = pproject.getProject();
-    User creator = db.getUserDAO().getByID(project.userid());
-    String userInfo = creator == null ? "" : " : " + creator.getUserID();
-    info.put(CREATED + " by", project.userid() + userInfo);
-
+    {
+      User creator = db.getUserDAO().getByID(project.userid());
+      String userInfo = creator == null ? "" : " : " + creator.getUserID();
+      info.put(CREATED_BY, project.userid() + userInfo);
+    }
     addDateProps(project, info);
 
     boolean isRTL = addOtherProps(project, info);

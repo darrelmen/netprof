@@ -411,9 +411,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.error("ensureDefaultUsers : no delegate - couldn't connect to Mongo!");
     } else {
       ensureDefaultUsersLocal();
-      String userId = dominoAdminUser.getUserId();
-      adminUser = delegate.getUser(userId);//BEFORE_LOGIN_USER);
-      // logger.info("ensureDefaultUsers got admin user " + adminUser + " has roles " + adminUser.getRoleAbbreviationsString());
+      adminUser = delegate.getUser(dominoAdminUser.getUserId());//BEFORE_LOGIN_USER);
+      logger.info("ensureDefaultUsers got admin user " + adminUser +
+          " has roles " + adminUser.getRoleAbbreviationsString());
 
       if (adminUser.getPrimaryGroup() == null) {
         logger.warn("ensureDefaultUsers no group for " + adminUser);
@@ -431,13 +431,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   private void ensureDefaultUsersLocal() {
-//    logger.info("ensureDefaultUsersLocal --- ");
+    logger.info("ensureDefaultUsersLocal --- ");
     this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", Kind.QAQC);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", USER, Kind.CONTENT_DEVELOPER);
     this.defaultUser = getOrAdd(DEFAULT_USER1, DEFAULT, USER, Kind.AUDIO_RECORDER);
     this.defaultMale = getOrAdd(DEFAULT_MALE_USER, DEFAULT, "Male", Kind.AUDIO_RECORDER);
     this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, DEFAULT, "Female", Kind.AUDIO_RECORDER);
+    logger.info("ensureDefaultUsersLocal defaultUser " + defaultUser);
 
     this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
   }
@@ -464,7 +465,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   @Override
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass) {
-     SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
+    SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
     boolean b = !clientUserDetailSResult1.isError();
     if (!b) {
       logger.error("\n\n\naddAndGet didn't set password for " + user.getUserId() + " : " +
