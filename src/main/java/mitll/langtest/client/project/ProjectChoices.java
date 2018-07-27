@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
 import static mitll.langtest.shared.user.User.Permission.*;
@@ -61,6 +62,9 @@ public class ProjectChoices extends ThumbnailChoices {
 
   private static final int DIALOG_HEIGHT = 550;
   private static final String COURSE1 = " course";
+  /**
+   * @see #getLabel(String, boolean, int, String)
+   */
   private static final String COURSES = COURSE1 + "s";
 
 
@@ -95,6 +99,7 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final String PLEASE_SELECT_A_LANGUAGE = "Select a language";
   private static final String PLEASE_SELECT_A_COURSE = "Select a course";
+  private static final String PLEASE_SELECT_A_MODE = "Select a mode";
   /**
    * @see #getHeader(List, int)
    */
@@ -144,10 +149,10 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   public void showProjectChoices(SlimProject parent, int level) {
     if (parent == null) {
-      // logger.info("show initial " + level);
+      logger.info("showProjectChoices show initial " + level);
       showInitialChoices(level);
     } else {
-      // logger.info("show choice for parent " + parent.getName() + " " + level);
+      logger.info("showProjectChoices show choice for parent " + parent.getName() + " " + level);
       addProjectChoices(level, parent.getChildren());
     }
   }
@@ -171,6 +176,8 @@ public class ProjectChoices extends ThumbnailChoices {
    * Admins can see retired sites.
    * Developers can see development sites.
    * Polyglot users can only see polyglot sites.
+   * <p>
+   * TODO: rationalize this - check factor out
    *
    * @param projects
    * @return
@@ -180,11 +187,8 @@ public class ProjectChoices extends ThumbnailChoices {
   private List<SlimProject> getVisibleProjects(List<SlimProject> projects) {
     List<SlimProject> filtered = new ArrayList<>();
     Collection<Permission> permissions = controller.getPermissions();
-//    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-
     boolean canRecord = isCanRecord(permissions);
     boolean isPoly = permissions.contains(POLYGLOT);
-
 //    logger.info("isPoly " + isPoly + " startup " + projectStartupInfo);
 
     /*    logger.info("getVisibleProjects : Examining  " + projects.size() + " projects," +
@@ -252,7 +256,8 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #showProject(SlimProject)
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
-    // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+    logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+
     final Section section = getScrollingSection();
     section.add(getHeader(result, nest));
 
@@ -322,7 +327,9 @@ public class ProjectChoices extends ThumbnailChoices {
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
-    String text = (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
+    List<SlimProject> dialogProjects = getDialogProjects(result);
+
+    String text = dialogProjects.size() == result.size() ? PLEASE_SELECT_A_MODE : (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
 
     if (result.isEmpty()) {
       text = NO_LANGUAGES_LOADED_YET;
@@ -357,6 +364,10 @@ public class ProjectChoices extends ThumbnailChoices {
     }
 
     return header;
+  }
+
+  private List<SlimProject> getDialogProjects(List<SlimProject> projects) {
+    return projects.stream().filter(slimProject -> slimProject.getProjectType() == ProjectType.DIALOG).collect(Collectors.toList());
   }
 
   /**
@@ -636,14 +647,21 @@ public class ProjectChoices extends ThumbnailChoices {
     ProjectStatus status = projectForLang.getStatus();
     String statusText = status == ProjectStatus.PRODUCTION ? "" : status.name();
 
-    return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText);
+    List<SlimProject> collect = getDialogProjects(projectForLang);
+    boolean alldialog = (collect.size() == numVisibleChildren);
+    return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText, alldialog);
+  }
+
+  private List<SlimProject> getDialogProjects(SlimProject projectForLang) {
+    return projectForLang.getChildren().stream().filter(slimProject -> slimProject.getProjectType() == ProjectType.DIALOG).collect(Collectors.toList());
   }
 
   @NotNull
-  private Heading getLabel(String name, boolean hasChildren, int numVisibleChildren, String statusText) {
+  private Heading getLabel(String name, boolean hasChildren, int numVisibleChildren,
+                           String statusText, boolean alldialog) {
     Heading label = getChoiceLabel(LANGUAGE_SIZE, name);
 
-    String subtext = hasChildren ?
+    String subtext = alldialog ? "modes" : hasChildren ?
         (numVisibleChildren + ((numVisibleChildren == 1) ? COURSE1 : COURSES)) : statusText;
 
     label.setSubtext(subtext);
@@ -937,16 +955,15 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     List<SlimProject> children = projectForLang.getChildren();
-//    logger.info("gotClickOnFlag project " + projid + " has " + children);
+    logger.info("gotClickOnFlag project " + projid + " has " + children);
     NavLink breadcrumb = makeBreadcrumb(name);
     if (children.size() < 2) {
-/*
       logger.info("gotClickOnFlag onClick select leaf project " + projid +
           " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
-          */
+
       setProjectForUser(projid);
     } else { // at this point, the breadcrumb should be empty?
-      //    logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
+      logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       breadcrumb.addClickHandler(clickEvent -> {
 //        SlimProject projectForLang1 = projectForLang;
 //        logger.info("gotClickOnFlag Click on crumb " + projectForLang1.getName() + " nest " + nest);

@@ -79,4 +79,6 @@ public interface IDialogDAO extends IDAO {
   boolean easyUpdate(SlickDialog changed);
 
   DialogAttributeJoinHelper getDialogAttributeJoinHelper();
+
+  void removeForProject(int id);
 }

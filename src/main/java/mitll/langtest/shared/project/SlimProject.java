@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared.project;
 
+import mitll.langtest.server.database.project.ProjectManagement;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -95,6 +97,10 @@ public class SlimProject extends ProjectInfo {
     this.props = props;
   }
 
+  /**
+   * @see ProjectManagement#getNestedProjectInfo
+   * @param projectInfo
+   */
   public void addChild(SlimProject projectInfo) {
     children.add(projectInfo);
   }
@@ -104,10 +110,7 @@ public class SlimProject extends ProjectInfo {
   }
 
   public boolean hasChild(int projectid) {
-    for (SlimProject child : children) {
-      if (child.getID() == projectid) return true;
-    }
-    return false;
+    return getChild(projectid) != null;
   }
 
   public SlimProject getChild(int projectid) {
@@ -125,6 +128,7 @@ public class SlimProject extends ProjectInfo {
   public boolean isHasModel() {
     return hasModel;
   }
+
   public boolean isRTL() {
     return isRTL;
   }
@@ -138,8 +142,6 @@ public class SlimProject extends ProjectInfo {
   }
 
   public String toString() {
-    return "SlimProject " + super.toString() +
-        // "\n\t#" + getID() +
-        "\n\tnum children " + children.size();
+    return "SlimProject " + super.toString() + "\n\tnum children " + children.size();
   }
 }
