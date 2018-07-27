@@ -89,16 +89,18 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     try {
       ServletContext servletContext = getServletContext();
       String property = System.getProperty(CONFIG_HOME_ATTR_NM);
-//      logger.info("\n\n\n\n--->prop for domino = '" + property + "'");
+      logger.info("\n--->prop for domino = '" + property + "'");
 
-      if (property == null) {
-        System.setProperty(CONFIG_HOME_ATTR_NM, "/opt/netprof/config/");
-        //logger.info("--->prop for domino now = '" + System.getProperty(CONFIG_HOME_ATTR_NM) + "'");
-      }
+//      if (property == null) {
+//        System.setProperty(CONFIG_HOME_ATTR_NM, "/opt/netprof/config/");
+//        logger.info("--->prop for domino now = '" + System.getProperty(CONFIG_HOME_ATTR_NM) + "'");
+//      }
       this.pathHelper = new PathHelper(servletContext);
       this.serverProps = readProperties(servletContext);
       pathHelper.setProperties(serverProps);
       setInstallPath(db, servletContext);
+      logger.info("finished init");
+
     } catch (Exception e) {
       startupMessage = e.getMessage();
       logger.error("Got " + e, e);
@@ -110,7 +112,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   private void optionalInit() {
     try {
-      //   logger.info("optionalInit -- ");
+        logger.info("optionalInit -- ");
       if (db != null) db.doReport();
     } catch (Exception e) {
       logger.error("optionalInit couldn't load database " + e, e);
@@ -277,6 +279,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.warn("DatabaseImpl was never made properly...");
     } else {
       try {
+        logger.info("DatabaseImpl.destroy");
         db.getDatabase().close(); // TODO : redundant with h2 shutdown hook?
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -310,7 +313,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       Object attribute = servletContext.getAttribute(USER_SVC);
 
       if (attribute != null) {
-//        logger.info("got " + attribute + " : " + attribute.getClass());
+        logger.info("got " + attribute + " : " + attribute.getClass());
       } else {
         logger.warn("readProperties : no " + USER_SVC + " attribute...? ");
       }
@@ -328,19 +331,8 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
     shareDB(servletContext, db);
     logger.info("readProperties shareDB ");
-//    shareLoadTesting(servletContext);
-
     return serverProps;
   }
-/*
-  private void shareLoadTesting(ServletContext servletContext) {
-    Object loadTesting = servletContext.getAttribute(ScoreServlet.LOAD_TESTING);
-    if (loadTesting != null) {
-      logger.debug("hmm... found existing load testing reference " + loadTesting);
-    }
-    servletContext.setAttribute(ScoreServlet.LOAD_TESTING, this);
-  }
-*/
 
   /**
    * @param serverProps

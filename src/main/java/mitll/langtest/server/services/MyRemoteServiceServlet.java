@@ -507,7 +507,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return new RestrictedOperationException(updating_project_info, true);
   }
 
-  protected String getRemoteAddr(HttpServletRequest request) {
+  String getRemoteAddr(HttpServletRequest request) {
     String remoteAddr = request.getHeader(X_FORWARDED_FOR);
     if (remoteAddr == null || remoteAddr.isEmpty()) {
       remoteAddr = request.getRemoteAddr();

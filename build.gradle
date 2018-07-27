@@ -67,7 +67,8 @@ description = 'NetProF pronunciation feedback'
 dependencies {
     // our modules
 //    def dominoVers = '2.7-SNAPSHOT'
-   def dominoVers = '2.7-topic-MFLTS'
+   // def dominoVers = '2.7-topic-MFLTS'
+    def dominoVers = '2.7.4'
 
    // compile(group: 'net.jthink', name: 'jaudiotagger', version: '2.2.6-20170905.193146-1')
 //    compile('mitll.hlt:domino-core:' + dcVers) { changing = true; }

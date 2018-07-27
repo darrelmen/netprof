@@ -120,7 +120,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * Should be consistent with DOMINO.
    * Actually it's all lower case.
    */
-  public static final String NETPROF = DLIApplication.NetProf;
+  public static final String NETPROF = "netprof";//DLIApplication.NetProf;
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
   private static final String LYDIA_01 = "Lydia01";
   private static final String PO_M = "PoM";
@@ -212,7 +212,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   public DominoUserDAOImpl(Database database, ServletContext servletContext) {
     super(database);
-//    this.runnable = runnable;
     long then = System.currentTimeMillis();
     addUserViaEmail = database.getServerProps().addUserViaEmail();
 
@@ -224,6 +223,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (attribute != null) {
       delegate = (IUserServiceDelegate) attribute;
       pool = (Mongo) servletContext.getAttribute(MONGO_ATT_NAME);
+      logger.info("DominoUserDAOImpl got pool reference " + pool);
       serializer = (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER);
 
       makeUserService(database, props);
@@ -355,6 +355,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (!usedDominoResources && ignite != null) {
       ignite.close();
     }
+
+    if (pool != null) {
+      logger.info("close : closing connection to " + pool, new Exception());
+      pool.closeConnection();
+    }
+
+    if (ignite != null) {
+      ignite.close();
+    }
   }
 
   @Override
@@ -464,7 +473,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   @Override
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass) {
-     SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
+    SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
     boolean b = !clientUserDetailSResult1.isError();
     if (!b) {
       logger.error("\n\n\naddAndGet didn't set password for " + user.getUserId() + " : " +
@@ -608,7 +617,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @NotNull
   private Group makePrimaryGroup(String name) {
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
-    return new Group(name, name + "Group", 365, 24 * 365, out, adminUser);
+    String description = name + "Group";
+    UserDescriptor adminUser = this.adminUser;
+    return new Group(
+        name,
+        description,
+        365,
+        24 * 365,
+        out,
+        adminUser,
+        "netprof");
   }
 
   @NotNull
@@ -645,7 +663,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
     SResult<ClientGroupDetail> name1 = groupDAO1.doAdd(adminUser,
-        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser));
+        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser, "netprof"));
 
     Group group = null;
     if (name1.isError()) {
