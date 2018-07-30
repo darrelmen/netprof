@@ -32,18 +32,20 @@
 
 package mitll.langtest.server.audio;
 
-import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.scoring.ASRWebserviceScoring;
-import mitll.langtest.shared.amas.QAPair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -51,12 +53,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.file.Files;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -74,21 +70,12 @@ public class HTTPClient {
 
   private HttpURLConnection httpConn;
 
-  static {
-    //for localhost testing only
-    javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier(
-        (hostname, sslSession) -> {
-          logger.warn("verify " + hostname);
-          return true;
-        });
-  }
-
   public HTTPClient() {
   }
 
   /**
    * @param webserviceIP
-   * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore(int, String, String, String, Collection, String, QAPair)
+   * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore
    */
   public HTTPClient(String webserviceIP, boolean secure) {
     this("http" + (secure ? "s" : "") + "://" + webserviceIP);
@@ -105,7 +92,7 @@ public class HTTPClient {
 
   /**
    * @param url
-   * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore(int, String, String, String, Collection, String, QAPair)
+   * @see mitll.langtest.server.autocrt.MiraClassifier#getMiraScore
    * @see AudioFileHelper#checkForWebservice
    */
   public HTTPClient(String url) {
@@ -184,36 +171,7 @@ public class HTTPClient {
   }
 
   private HttpURLConnection getHttpURLConnection(String url) throws IOException {
-    HttpURLConnection httpURLConnection = (HttpURLConnection) (new URL(url)).openConnection();
-
-    try {
-      SSLContext ctx = SSLContext.getInstance("TLS");
-      ctx.init(new KeyManager[0], new TrustManager[]{new DefaultTrustManager()}, new SecureRandom());
-      SSLContext.setDefault(ctx);
-    } catch (NoSuchAlgorithmException | KeyManagementException e) {
-      e.printStackTrace();
-    }
-
-    return httpURLConnection;
-  }
-
-  /**
-   * @deprecated can we avoid this?
-   */
-  private static class DefaultTrustManager implements X509TrustManager {
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-    }
-
-    @Override
-    public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-    }
-
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-      return null;
-    }
+    return (HttpURLConnection) (new URL(url)).openConnection();
   }
 
   private void setRequestProperties(HttpURLConnection httpConn) {
