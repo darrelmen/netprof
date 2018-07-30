@@ -87,7 +87,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final boolean WARN_MISSING_REF_RESULT = false;
   private static final String RECORDED1 = "Recorded";
-  //  private static final String RECORDED = RECORDED1;
+  private static final String RECORDED = RECORDED1;
   private static final String ANY = "Any";
 
   /**
@@ -120,13 +120,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private FilterResponse getFilterResponseForRecording(FilterRequest request, FilterResponse response, int userFromSessionID) {
     int projectID = getProjectIDFromUser(userFromSessionID);
 
-    Map<String, Collection<String>> typeToSelection = new HashMap<>();
-    request.getTypeToSelection().forEach(pair -> {
-      String value1 = pair.getValue();
-      if (!value1.equalsIgnoreCase(ANY)) {
-        typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
-      }
-    });
+    Map<String, Collection<String>> typeToSelection = getTypeToSelection(request);
 
 
     List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
@@ -163,6 +157,71 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       response = new FilterResponse(request.getReqID(), typeToValues, typesToInclude, -1);
     }
     return response;
+  }
+
+
+  private void getFacetsForRecording(FilterRequest request, FilterResponse response, int userFromSessionID) throws DominoSessionException {
+    User userFromSession = getUserFromSession();
+
+    Map<String, Collection<String>> typeToSelection = getTypeToSelection(request);
+    int projectID = getProjectIDFromUser(userFromSessionID);
+    List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
+
+    ExerciseListRequest request1 = new ExerciseListRequest()
+        .setOnlyUnrecordedByMe(true)
+        .setOnlyExamples(request.isExampleRequest())
+        .setUserID(userFromSessionID);
+    List<CommonExercise> unRec = filterByUnrecorded(request1, exercisesForState, projectID);
+    List<CommonExercise> rec = filterByUnrecorded(request1.setOnlyUnrecordedByMe(false).setOnlyRecordedByMatchingGender(true), exercisesForState, projectID);
+
+    response.getTypesToInclude().add(RECORDED);
+
+    {
+      Set<MatchInfo> value = new HashSet<>();
+      boolean isMale = userFromSession.isMale();
+      String s = isMale ? "Males" : "Females";
+      value.add(new MatchInfo("Unrecorded by " + s, unRec.size(), -1, false, ""));
+      value.add(new MatchInfo("Recorded by " + s, rec.size(), -1, false, ""));
+      response.getTypeToValues().put(RECORDED, value);
+    }
+  }
+
+/*
+  private void getFacetsForRecordingOld(FilterRequest request, FilterResponse response, int userFromSessionID) throws DominoSessionException {
+    User userFromSession = getUserFromSession();
+
+    Map<String, Collection<String>> typeToSelection = getTypeToSelection(request);
+    int projectID = getProjectIDFromUser(userFromSessionID);
+    List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
+
+    ExerciseListRequest request1 = new ExerciseListRequest()
+        .setOnlyUnrecordedByMe(true)
+        .setOnlyExamples(request.isExampleRequest())
+        .setUserID(userFromSessionID);
+    List<CommonExercise> unRec = filterByUnrecorded(request1, exercisesForState, projectID);
+    List<CommonExercise> rec = filterByUnrecorded(request1.setOnlyUnrecordedByMe(false).setOnlyRecordedByMatchingGender(true), exercisesForState, projectID);
+
+    response.getTypesToInclude().add(RECORDED);
+    Set<MatchInfo> value = new HashSet<>();
+    boolean isMale = userFromSession.isMale();
+    String s = isMale ? "Males" : "Females";
+    value.add(new MatchInfo("Unrecorded by " + s, unRec.size(), -1, false, ""));
+    value.add(new MatchInfo("Recorded by " + s, rec.size(), -1, false, ""));
+    response.getTypeToValues().put(RECORDED, value);
+    response.getTypesToInclude().add(RECORDED);
+  }
+*/
+
+  @NotNull
+  private Map<String, Collection<String>> getTypeToSelection(FilterRequest request) {
+    Map<String, Collection<String>> typeToSelection = new HashMap<>();
+    request.getTypeToSelection().forEach(pair -> {
+      String value1 = pair.getValue();
+      if (!value1.equalsIgnoreCase(ANY)) {
+        typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
+      }
+    });
+    return typeToSelection;
   }
 
   private void addUserListFacet(FilterRequest request, FilterResponse typeToValues) {
