@@ -43,7 +43,8 @@ public class DialogReader {
 
     Map<Dialog, SlickDialog> dialogToSlick = new HashMap<>();
     String dialogDataDir = getDialogDataDir(project);
-    String imageBaseDir = IDialogReader.IMAGES + project.getLanguage().toLowerCase() + File.separator;
+    String projectLanguage = project.getLanguage().toLowerCase();
+    String imageBaseDir = IDialogReader.IMAGES + projectLanguage + File.separator;
 
     for (int i = 0; i < docs.length; i++) {
       String dir = dirs[i];
@@ -81,7 +82,7 @@ public class DialogReader {
 //                  logger.info("skip dialog image " + fileName);
                 } else if (fileName.endsWith(".wav")) {
                   //              logger.info("audio " + fileName);
-                  audio.add(dir + File.separator + fileName);
+                  audio.add(dir + File.separator + projectLanguage + File.separator + fileName);
                 } else if (fileName.endsWith(".txt") && parts.length == 3) { // slickDialog.g. 010_C01_00.txt
                   logger.info(dir + " text " + fileName);
                   sentences.add(fileName);

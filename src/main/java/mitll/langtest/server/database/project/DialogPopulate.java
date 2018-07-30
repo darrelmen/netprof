@@ -212,7 +212,12 @@ public class DialogPopulate {
                         Map<ClientExercise, Integer> allImportExToID) {
     exToAudio.forEach((k, v) -> {
       File file = new File(db.getServerProps().getAudioBaseDir(), v);
-      if (!file.exists()) logger.error("can't find audio file " + file.getAbsolutePath());
+      if (!file.exists()) {
+        logger.error("can't find audio file " + file.getAbsolutePath());
+      }
+      else {
+        logger.info("found audio at " + file.getAbsolutePath());
+      }
       AudioCheck.ValidityAndDur valid = audioCheck.isValid(file, true, false);
 
       Integer exid = allImportExToID.get(k);
