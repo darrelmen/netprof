@@ -29,48 +29,52 @@ public class ExerciseOptions {
     this.allowRecording = allowRecording;
   }
 
-  public float getScreenPortion() {
+  float getScreenPortion() {
     return screenPortion;
   }
 
-  public ExerciseOptions setScreenPortion(float screenPortion) {
+/*  public ExerciseOptions setScreenPortion(float screenPortion) {
     this.screenPortion = screenPortion;
     return this;
-  }
+  }*/
 
   public boolean isAddKeyHandler() {
     return addKeyHandler;
   }
 
+/*
   public ExerciseOptions setAddKeyHandler(boolean addKeyHandler) {
     this.addKeyHandler = addKeyHandler;
     return this;
   }
+*/
 
   public String getInstance() {
     return instance;
   }
 
-  public ExerciseOptions setInstance(String instance) {
+/*  public ExerciseOptions setInstance(String instance) {
     this.instance = instance;
     return this;
-  }
+  }*/
 
-  public boolean isAllowRecording() {
+  boolean isAllowRecording() {
     return allowRecording;
   }
 
+/*
   public ExerciseOptions setAllowRecording(boolean allowRecording) {
     this.allowRecording = allowRecording;
     return this;
   }
+*/
 
-  public boolean isIncludeListButtons() {
+  boolean isIncludeListButtons() {
     return includeListButtons;
   }
-
+/*
   public ExerciseOptions setIncludeListButtons(boolean includeListButtons) {
     this.includeListButtons = includeListButtons;
     return this;
-  }
+  }*/
 }

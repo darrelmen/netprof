@@ -2,6 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.event.dom.client.ClickHandler;
+import mitll.langtest.client.user.UserManager;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -27,8 +28,8 @@ class LinkAndTitle {
   /**
    * @param title
    * @param linkURL
-   * @paramx isAdminChoice
    * @see UserMenu#getCogMenuChoicesForAdmin
+   * @see NewBanner#getRightSideChoices
    */
   LinkAndTitle(String title, String linkURL) {
     this.title = title;
@@ -36,14 +37,10 @@ class LinkAndTitle {
     this.clickHandler = null;
   }
 
-/*
-  public NavLink add(Dropdown dropdown) {
-    NavLink monitoringC = makeNewLink();
-    dropdown.add(monitoringC);
-    return monitoringC;
-  }
-*/
-
+  /**
+   *
+   * @return
+   */
   @NotNull
   NavLink makeNewLink() {
     NavLink monitoringC = new NavLink(title);
@@ -59,5 +56,10 @@ class LinkAndTitle {
 
   NavLink getMyLink() {
     return myLink;
+  }
+
+  @Override
+  public String toString() {
+    return "Nav " + title;
   }
 }

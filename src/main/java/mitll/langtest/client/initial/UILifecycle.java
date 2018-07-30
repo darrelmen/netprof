@@ -60,11 +60,13 @@ public interface UILifecycle {
 
   void getUserPermissions();
 
-  void showInitialState(ProjectMode mode);
+  void showInitialState();
 
-  ProjectMode getMode();
 
-  void setMode(ProjectMode mode);
+/*  ProjectMode getMode();
+
+  void setMode(ProjectMode mode);*/
+
 
   void addBreadcrumbs();
 
@@ -77,7 +79,7 @@ public interface UILifecycle {
   NavLink makeBreadcrumb(String name);
 
   void clickOnParentCrumb(SlimProject parent);
-  String getLastBreadcrumb();
+ // String getLastBreadcrumb();
 
   /**
    * @see LangTest#makeFlashContainer()

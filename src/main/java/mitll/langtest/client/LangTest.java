@@ -78,7 +78,6 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
-import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
@@ -852,7 +851,7 @@ public class LangTest implements
         } else {
           setProjectStartupInfo(aUser);
           logger.info("reallySetTheProject :  set project for " + aUser + " show initial state ");
-          initialUI.showInitialState(ProjectMode.VOCABULARY);
+          initialUI.showInitialState();
           initialUI.addBreadcrumbs();
         }
       }

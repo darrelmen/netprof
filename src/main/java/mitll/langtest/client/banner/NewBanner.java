@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.UILifecycle;
@@ -45,8 +46,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     BOTH.addAll(DIALOG_VIEWS);
   }
 
-  private static final List<VIEWS> POLY_VIEWS =
-      Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS);
+  private static final List<VIEWS> POLY_VIEWS = Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS);
 
   private static final String NETPROF = "netprof";
   private static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
@@ -68,7 +68,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String DOCUMENTATION = "User Manual";
 
   private final UILifecycle lifecycle;
-  private ComplexWidget recnav, defectnav;
+  private ComplexWidget recnav, defectnav, dialogNav;
 
   private Nav lnav;
   private Dropdown cog;
@@ -84,9 +84,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   /**
    * @see #addChoicesForUser
    */
-  private final List<Widget> choices = new ArrayList<>();
+  // private final List<Widget> choices = new ArrayList<>();
 
   private final ExerciseController controller;
+  private Label subtitle;
+
+  private static final boolean DEBUG = true;
 
   /**
    * @param userManager
@@ -120,6 +123,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       navCollapse.add(this.lnav = getLNav());
       addChoicesForUser(lnav);
     }
+
+   {
+      Nav recnav = getDialogNav();
+      this.dialogNav = recnav;
+      navCollapse.add(recnav);
+    }
+
     {
       Nav recnav = getRecNav();
       this.recnav = recnav;
@@ -138,6 +148,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     setCogVisible(userManager.hasUser());
   }
+
+  @NotNull
+  private Nav getDialogNav() {
+    Nav recnav = new Nav();
+    recnav.getElement().setId("dialogNav");
+    styleNav(recnav);
+    DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
+    return recnav;
+  }
+
 
   /**
    * @return
@@ -254,7 +274,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 //    userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink()));
   }
 
-  private Label subtitle;
 
   /**
    * Tell them we can't record.
@@ -286,38 +305,31 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean first = true;
     boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == User.Permission.POLYGLOT;
 
-    List<VIEWS> toShow = isPoly ? POLY_VIEWS : BOTH;
+    List<VIEWS> toShow = isPoly ? POLY_VIEWS : STANDARD_VIEWS;
 
-//    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-//
-//    //  logger.info("addChoicesForUser project startup " + projectStartupInfo);
-//    if (projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.DIALOG) {
-//      toShow = DIALOG_VIEWS;
-//    }
-
-    logger.info("addChoicesForUser show " + toShow);
-
+    logger.info("addChoicesForUser " + toShow.size());
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
+      choice1.getElement().setId("Link_" + choice.name());
       if (first) {
         choice1.addStyleName("leftTwentyMargin");
       }
       first = false;
-      choices.add(choice1);
+      //choices.add(choice1);
       viewToLink.put(choice, choice1);
     }
   }
 
   @NotNull
   private NavLink getChoice(ComplexWidget nav, VIEWS views) {
-    String instanceName = views.toString();//(views.toString().equalsIgnoreCase("Drill")) ? PRACTICE :views.toString();
-    //   if (instanceName.equalsIgnoreCase("Drill")) instanceName="Practice";
-//    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + instanceName;
-    NavLink learn = getLink(nav, instanceName);
+    String viewName = views.toString();//(views.toString().equalsIgnoreCase("Drill")) ? PRACTICE :views.toString();
+    //   if (viewName.equalsIgnoreCase("Drill")) viewName="Practice";
+//    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + viewName;
+    NavLink learn = getLink(nav, viewName);
     learn.addClickHandler(event -> {
-      //  logger.info("getChoice got click on " + instanceName + " = " + historyToken);
-      controller.logEvent("ViewLink", instanceName, "N/A", "click on view");
-      gotClickOnChoice(instanceName, learn, true);
+      //  logger.info("getChoice got click on " + viewName + " = " + historyToken);
+      controller.logEvent(viewName, "NavLink", "N/A", "click on view");
+      gotClickOnChoice(viewName, learn, true);
       // setHistoryItem(historyToken);
     });
     return learn;
@@ -400,12 +412,22 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @Override
   public void setCogVisible(boolean val) {
     userDrop.setVisible(val);
-    choices.forEach(choice -> choice.setVisible(val));
+
+    viewToLink.values().forEach(choice -> choice.setVisible(val));
+
+    if (val && navigation != null &&  navigation.getCurrentView() != null) {
+      setVisibleChoicesByMode(navigation.getCurrentView().getMode());
+    }
+
     cog.setVisible(isAdmin());
 
     boolean hasProject = controller.getProjectStartupInfo() != null;
-    //   logger.info("setCogVisible " + val + " has project " + hasProject + " is admin " + admin);
-    hasProjectChoices.forEach(linkAndTitle -> linkAndTitle.getMyLink().setVisible(hasProject));
+  //  if (DEBUG) logger.info("setCogVisible " + val + " has project " + hasProject + " for " + hasProjectChoices.size());
+
+    hasProjectChoices.forEach(linkAndTitle -> {
+      linkAndTitle.getMyLink().setVisible(hasProject);
+      // logger.info("setCogVisible " + hasProject + " for " + linkAndTitle);
+    });
   }
 
   @Override
@@ -456,7 +478,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
-   * @see InitialUI#addCrumbs
+   * @seex InitialUI#addCrumbs
    * @see UILifecycle#showInitialState
    */
   @Override
@@ -470,7 +492,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       logger.warning("checkProjectSelected Current view is " + currentView);
       logger.warning("checkProjectSelected Current view link is null");
       logger.warning("checkProjectSelected huh? keys are " + viewToLink.keySet());
-      linkToShow = viewToLink.get(VIEWS.LEARN);
+      linkToShow = viewToLink.get(VIEWS.LEARN);//lifecycle.getMode() == ProjectMode.VOCABULARY ? VIEWS.LEARN : VIEWS.DIALOG);
     }
     showActive(linkToShow);
     recordMenuVisible();
@@ -478,29 +500,71 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   /**
    * @param show
-   * @see NewBanner#checkProjectSelected
+   * @see #checkProjectSelected
    */
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
+    //setVisibleChoicesByMode(navigation.getCurrentView().getMode());
+
     reflectPermissions(controller.getPermissions());
   }
 
   @Override
   public void setVisibleChoicesByMode(ProjectMode mode) {
-    if (mode == ProjectMode.VOCABULARY) {
-      BOTH.forEach(views -> viewToLink.get(views).setVisible(STANDARD_VIEWS.contains(views)));
-    } else if (mode == ProjectMode.DIALOG) {
-      BOTH.forEach(views -> viewToLink.get(views).setVisible(DIALOG_VIEWS.contains(views)));
+    logger.info("setVisibleChoicesByMode set visible choices " + mode);
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+//    logger.info("logException stack " + exceptionAsString);
+
+    hideOrShowByMode((mode == ProjectMode.DIALOG) ? DIALOG_VIEWS : STANDARD_VIEWS);
+
+/*    if (mode == ProjectMode.DIALOG) {
+
     }
+    if (mode == ProjectMode.VOCABULARY) {
+      hideOrShowByMode(STANDARD_VIEWS);
+
+*//*
+      BOTH.forEach(views -> {
+        NavLink widgets = viewToLink.get(views);
+        logger.info("\tAFTER link " + views + " " +widgets.getElement().getId()+
+            " " + widgets.isVisible() + " '" + widgets.getTitle() + "'" +
+            " '" + widgets.getName() + "' display " + widgets.getElement().getStyle().getDisplay() );
+      });
+*//*
+    } else if (mode == ProjectMode.DIALOG) {
+     // BOTH.forEach(views -> viewToLink.get(views).setVisible(DIALOG_VIEWS.contains(views)));
+      hideOrShowByMode(DIALOG_VIEWS);
+    }*/
+  }
+
+  private void hideOrShowByMode(List<VIEWS> standardViews) {
+    BOTH.forEach(views -> {
+      NavLink widgets = viewToLink.get(views);
+      if (widgets == null) {
+        logger.warning("no widget for " + views);
+      }
+      else {
+        boolean contains = standardViews.contains(views);
+//        logger.info("\tlink " + views + " " +widgets.getElement().getId()+
+//            " " + widgets.isVisible() + " '" + widgets.getTitle() + "'" +
+//            " '" + widgets.getName() + "' display " + widgets.getElement().getStyle().getDisplay() +
+//            " now " + contains);
+        widgets.setVisible(contains);
+      }
+      // widgets.setVisible(contains);
+      //  Widget link = widgets.getWidget(0);
+//       widgets.getElement().getStyle().setDisplay(contains ? Style.Display.INITIAL : Style.Display.NONE);
+    });
   }
 
   private void recordMenuVisible() {
     if (recnav != null) {
       boolean visible = isPermittedToRecord() && hasProjectChoice();
 
-      boolean learnVisible = viewToLink.get(VIEWS.LEARN).isVisible();
-      logger.info("recordMenuVisible learn vis " + learnVisible);
-      visible &= learnVisible;
+//      boolean learnVisible = viewToLink.get(VIEWS.LEARN).isVisible();
+  //    logger.info("recordMenuVisible learn vis " + learnVisible);
+  //    visible &= learnVisible;
       setRecNavVisible(visible);
     }
   }

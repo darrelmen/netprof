@@ -29,8 +29,10 @@ import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MatchInfo;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.User;
@@ -200,10 +202,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           dialogHelper.showContent(divWidget, DIALOG.toString(), fromClick);
           break;
         case LISTEN:
+          logger.info(" \n\n\n showing " + LISTEN + " \n\n\n");
           clearAndPushKeep(isFirstTime, currentStoredView, LISTEN);
           listenHelper.showContent(divWidget, LISTEN.toString(), fromClick);
           break;
         case REHEARSE:
+          logger.info(" \n\n\n showing " + REHEARSE + " \n\n\n");
           clearAndPushKeep(isFirstTime, currentStoredView, REHEARSE);
           rehearseHelper.showContent(divWidget, REHEARSE.toString(), fromClick);
           break;
@@ -276,7 +280,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     divWidget.getElement().getStyle().setPosition(Style.Position.FIXED);
   }
 
-  //  @Override
+  /**
+   * @see #showView(VIEWS, boolean, boolean)
+   */
   private void showDrill() {
     clearAndFixScroll();
 
@@ -436,29 +442,45 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   private String getCurrentStoredView() {
     // logger.info("getCurrentStoredView instance = " + instance);
-
-    VIEWS views = getCurrentView2();
-    //logger.info("getCurrentStoredView instance = " + instance + "/" + views);
-
+    VIEWS views = getCurrentViewFromURL();
+    logger.info("getCurrentStoredView      view " + views);
 //    return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
 
     if (views == null) {
-      return getStoredView();
+      String storedView = getStoredView();
+      logger.info("getCurrentStoredView storedView " + storedView);
+      return storedView;
     } else {
       return views.toString().toUpperCase();
     }
   }
 
   @Nullable
-  private VIEWS getCurrentView2() {
+  private VIEWS getCurrentViewFromURL() {
     String instance = getCurrentInstance();
     VIEWS views = null;
     try {
       views = instance.isEmpty() ? null : VIEWS.valueOf(instance.toUpperCase());
     } catch (IllegalArgumentException e) {
-      logger.info("bad instance " + instance);
+      logger.warning("bad instance " + instance);
     }
     return views;
+  }
+
+  /**
+   * @return
+   */
+  private String getCurrentInstance() {
+    return new SelectionState().getInstance();
+  }
+
+  /**
+   * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
+   * @param mode
+   */
+  @Override
+  public void storeViewForMode(ProjectMode mode) {
+    storeValue(mode == ProjectMode.DIALOG ? DIALOG : LEARN);
   }
 
   @NotNull
@@ -469,22 +491,19 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   /**
-   * @return
+   * @param view
    */
-  private String getCurrentInstance() {
-    return new SelectionState().getInstance();
-  }
-
   private void storeValue(VIEWS view) {
     controller.getStorage().storeValue(CURRENT_VIEW, view.name());
   }
+
 
   private void showReviewItems(UserList<CommonShell> result) {
     List<CommonShell> exercises = result.getExercises();
     // logger.info("got back " + result.getNumItems() + " exercises");
     CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
-    Panel review = new ReviewItemHelper(controller)
-        .doNPF(result, "review", true, toSelect);
+    Panel review = new ReviewItemHelper<CommonShell, CommonExercise>(controller)
+        .doNPF(result, VIEWS.FIX.toString().toLowerCase(), true, toSelect);
     if (getCurrentView() == VIEWS.FIX) {
       divWidget.add(review);
     } else {
@@ -546,7 +565,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       //   logger.info("getShowTab history after - " + History.getToken());
 
       History.newItem(
-          SelectionState.INSTANCE + "=" + LEARN.toString() +
+          getInstanceParam(LEARN) +
               SelectionState.SECTION_SEPARATOR + SelectionState.ITEM + "=" + exid
       );
     };
@@ -563,7 +582,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     // logger.info("showListIn - " + listid + " " + views);
     History.newItem(
         FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
-            SelectionState.INSTANCE + "=" + views.toString());
+            getInstanceParam(views));
+  }
+
+  @NotNull
+  private String getInstanceParam(VIEWS view) {
+    return SelectionState.INSTANCE + "=" + view.toString();
   }
 
   @Override
@@ -571,7 +595,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     // logger.info("showListIn - " + listid + " " + view);
     History.newItem(
         SelectionState.DIALOG + "=" + dialogid + SelectionState.SECTION_SEPARATOR +
-            SelectionState.INSTANCE + "=" + view.toString());
+            getInstanceParam(view));
     banner.show(view);
   }
 
@@ -621,8 +645,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         VIEWS currentStoredView = VIEWS.valueOf(getCurrentStoredView());
 
         if (views != currentStoredView) {
-          logger.info("url says " + views);
-          logger.info("currentStoredView says " + currentStoredView);
+          logger.info("onValueChange url says               " + views);
+          logger.info("onValueChange currentStoredView says " + currentStoredView);
 
           if (currentStoredView == DIALOG) {
             banner.show(DIALOG);

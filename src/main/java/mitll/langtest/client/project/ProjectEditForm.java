@@ -55,6 +55,7 @@ import mitll.langtest.shared.project.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -152,6 +153,7 @@ public class ProjectEditForm extends UserDialog {
   private CheckBox showOniOSBox;
   private final Services services;
   private boolean isSuperUser = false;
+  private final Map<String, DominoProject> dominoToProject = new HashMap<>();
 
   /**
    * @param lifecycleSupport
@@ -495,7 +497,31 @@ public class ProjectEditForm extends UserDialog {
     return lifecycle;
   }
 
-  private final Map<String, DominoProject> dominoToProject = new HashMap<>();
+  private ListBox getTypeBox() {
+    ListBox affBox = new ListBox();
+    affBox.addStyleName("leftTenMargin");
+
+    Arrays.stream(ProjectType.values())
+        .filter(ProjectType::shouldShow)
+        .forEach(projectType->affBox.addItem(projectType.name()));
+
+    return affBox;
+  }
+
+  private void setBoxForType(ListBox statusBox, ProjectType projectType) {
+    int i = 0;
+    boolean found = false;
+
+    for (ProjectType projectType1 : ProjectType.values()) {
+      if (projectType1 == projectType) {
+        found = true;
+        break;
+      } else i++;
+    }
+
+    // first is please select.
+    statusBox.setSelectedIndex(found ? i : 0);
+  }
 
   /**
    * @param info
@@ -600,7 +626,6 @@ public class ProjectEditForm extends UserDialog {
 
       /*    if (dominoToProject.size() == 1) {
             if (info.getDominoID() == -1) {
-
             }
           }*/
         }
@@ -816,28 +841,13 @@ public class ProjectEditForm extends UserDialog {
     affBox.getElement().setId(STATUS_BOX);
     affBox.addStyleName("leftTenMargin");
 
-    for (ProjectStatus status : ProjectStatus.values()) {
-      if (status.shouldShow()) {
-        affBox.addItem(status.name());
-      }
-    }
+    Arrays.stream(ProjectStatus.values())
+        .filter(ProjectStatus::shouldShow)
+        .forEach(projectType->affBox.addItem(projectType.name()));
 
     affBox.addChangeHandler(event ->
         showOniOSBox.setEnabled(affBox.getValue().equalsIgnoreCase(ProjectStatus.PRODUCTION.toString()))
     );
-
-    return affBox;
-  }
-
-  private ListBox getTypeBox() {
-    ListBox affBox = new ListBox();
-    affBox.addStyleName("leftTenMargin");
-
-    for (ProjectType status : ProjectType.values()) {
-      if (status.shouldShow()) {
-        affBox.addItem(status.name());
-      }
-    }
 
     return affBox;
   }
@@ -848,21 +858,6 @@ public class ProjectEditForm extends UserDialog {
 
     for (ProjectStatus status : ProjectStatus.values()) {
       if (status == statusValue) {
-        found = true;
-        break;
-      } else i++;
-    }
-
-    // first is please select.
-    statusBox.setSelectedIndex(found ? i : 0);
-  }
-
-  private void setBoxForType(ListBox statusBox, ProjectType projectType) {
-    int i = 0;
-    boolean found = false;
-
-    for (ProjectType projectType1 : ProjectType.values()) {
-      if (projectType1 == projectType) {
         found = true;
         break;
       } else i++;

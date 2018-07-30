@@ -116,18 +116,18 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side -- the charts and gauges
    *
-   * @param commonExercise for this exercise
+   * @param clientExercise for this exercise
    * @param controller
    * @param listContainer
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
-  protected GoodwaveExercisePanel(final T ClientExercise,
+  protected GoodwaveExercisePanel(final T clientExercise,
                                   final ExerciseController controller,
                                   final ListInterface<?, ?> listContainer,
                                   ExerciseOptions options
   ) {
     this.options = options;
-    this.exercise = ClientExercise;
+    this.exercise = clientExercise;
     this.controller = controller;
     String language = controller.getLanguage();
 
@@ -428,7 +428,6 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     return isBusy;
   }
 
-  protected String getInstance() {
-    return options.getInstance();
+  protected String getInstance() {    return options.getInstance();
   }
 }

@@ -38,7 +38,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public enum ProjectMode implements IsSerializable {
   VOCABULARY(true),
-  DIALOG(true);
+  DIALOG(true),
+  EITHER(false);
 
   private boolean show;
 

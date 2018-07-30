@@ -121,6 +121,9 @@ public class ProjectChoices extends ThumbnailChoices {
   private int sessionUser = -1;
   private boolean isSuperUser = false;
 
+
+  private static final boolean DEBUG = true;
+
   /**
    * @param langTest
    * @param uiLifecycle
@@ -147,10 +150,10 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   public void showProjectChoices(SlimProject parent, int level) {
     if (parent == null) {
-      logger.info("showProjectChoices show initial " + level);
+      if (DEBUG) logger.info("showProjectChoices show initial " + level);
       showInitialChoices(level);
     } else {
-      logger.info("showProjectChoices show choice for parent " + parent.getName() + " " + level);
+      if (DEBUG) logger.info("showProjectChoices show choice for parent " + parent.getName() + " " + level);
       addProjectChoices(level, parent.getChildren());
     }
   }
@@ -250,11 +253,11 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param result
    * @param nest
    * @see InitialUI#addProjectChoices
-   * @see #gotClickOnFlag(String, SlimProject, int, int)
+   * @see #gotClickOnFlag
    * @see #showProject(SlimProject)
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
-    logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+    if (DEBUG) logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
 
     final Section section = getScrollingSection();
     section.add(getHeader(result, nest));
@@ -810,6 +813,13 @@ public class ProjectChoices extends ThumbnailChoices {
         DIALOG_HEIGHT, -1);
   }
 
+  /**
+   * TODO : fix number of items
+   *
+   * @param projectForLang
+   * @param button
+   * @param doChange
+   */
   private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
     //  logger.info("showImport " + doChange);
     String s = getProps(projectForLang).get(NUM_ITEMS);
@@ -953,15 +963,16 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     List<SlimProject> children = projectForLang.getChildren();
-    logger.info("gotClickOnFlag project " + projid + " has " + children);
+    if (DEBUG) logger.info("gotClickOnFlag project " + projid + " has " + children);
     NavLink breadcrumb = makeBreadcrumb(name);
     if (children.size() < 2) {
-      logger.info("gotClickOnFlag onClick select leaf project " + projid +
-          " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
+      if (DEBUG) logger.info("gotClickOnFlag onClick select leaf project " + projid + " "+ projectForLang.getMode()+
+          "\n\tcurrent user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
 
       setProjectForUser(projid, projectForLang.getMode());
     } else { // at this point, the breadcrumb should be empty?
-      logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
+      if (DEBUG)
+        logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       breadcrumb.addClickHandler(clickEvent -> {
 //        SlimProject projectForLang1 = projectForLang;
 //        logger.info("gotClickOnFlag Click on crumb " + projectForLang1.getName() + " nest " + nest);
@@ -988,7 +999,7 @@ public class ProjectChoices extends ThumbnailChoices {
     if (contentRow.getWidgetCount() == 1) {
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     } else {
-      logger.info("addProjectChoices not adding project choices again...");
+      if (DEBUG)     logger.info("addProjectChoices not adding project choices again...");
     }
   }
 
@@ -1025,9 +1036,11 @@ public class ProjectChoices extends ThumbnailChoices {
           if (aUser.getStartupInfo() == null) { // no project with that project id
             lifecycleSupport.getStartupInfo();
           } else {
+            //uiLifecycle.setMode(mode);
             userNotification.setProjectStartupInfo(aUser);
+          uiLifecycle.getNavigation().storeViewForMode(mode);
             //     logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
-            uiLifecycle.showInitialState(mode);
+            uiLifecycle.showInitialState();
           }
         }
       }
