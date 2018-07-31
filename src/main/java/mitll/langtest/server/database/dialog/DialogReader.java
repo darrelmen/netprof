@@ -82,7 +82,7 @@ public class DialogReader {
 //                  logger.info("skip dialog image " + fileName);
                 } else if (fileName.endsWith(".wav")) {
                   //              logger.info("audio " + fileName);
-                  audio.add(dir + File.separator + projectLanguage + File.separator + fileName);
+                  audio.add(projectLanguage + File.separator + dir + File.separator + fileName);
                 } else if (fileName.endsWith(".txt") && parts.length == 3) { // slickDialog.g. 010_C01_00.txt
                   logger.info(dir + " text " + fileName);
                   sentences.add(fileName);
