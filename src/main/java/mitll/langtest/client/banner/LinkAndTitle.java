@@ -1,6 +1,5 @@
 package mitll.langtest.client.banner;
 
-import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.event.dom.client.ClickHandler;
 import org.jetbrains.annotations.NotNull;

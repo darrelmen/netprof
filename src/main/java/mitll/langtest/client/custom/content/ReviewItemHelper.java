@@ -131,6 +131,11 @@ public class ReviewItemHelper extends NPFHelper {
       return new ExercisePanelFactory<CommonShell, CommonExercise>(getController(), pagingExerciseList) {
         @Override
         public Panel getExercisePanel(CommonExercise exercise) {
+
+//          exercise.getDirectlyRelated().forEach(commonExercise -> {
+//            logger.info("got " + commonExercise);
+//            logger.info("got " + commonExercise.getClass());
+//          });
           CommonExercise userExercise = new Exercise(exercise);
           ReviewEditableExercise reviewEditableExercise =
               new ReviewEditableExercise(controller,

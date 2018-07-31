@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -118,7 +117,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
         return new RecordingFacetExerciseList(controller,
-            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.CONTEXT){
+            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.RECORD_CONTEXT){
 
         };
       }

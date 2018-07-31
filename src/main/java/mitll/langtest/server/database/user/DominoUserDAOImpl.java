@@ -122,7 +122,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * Should be consistent with DOMINO.
    * Actually it's all lower case.
    */
-  public static final String NETPROF = DLIApplication.NetProf;
+  public static final String NETPROF = "netprof";
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
   private static final String LYDIA_01 = "Lydia01";
   private static final String PO_M = "PoM";
@@ -595,7 +595,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @NotNull
   private Group makePrimaryGroup(String name) {
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
-    return new Group(name, name + "Group", 365, 24 * 365, out, adminUser);
+    String description = name + "Group";
+    UserDescriptor adminUser = this.adminUser;
+    return new Group(
+        name,
+        description,
+        365,
+        24 * 365,
+        out,
+        adminUser,
+        "netprof");
   }
 
   @NotNull
@@ -632,7 +641,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
     SResult<ClientGroupDetail> name1 = groupDAO1.doAdd(adminUser,
-        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser));
+        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser, "netprof"));
 
     Group group = null;
     if (name1.isError()) {
@@ -772,7 +781,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           toUse = mostRecentUserID;
           byEmail = true;
         }
-        //return new LoginResult(LoginResult.PasswordResultType.Multiple);
       } else if (userCredentialsEmail1.size() == 1) {
         toUse = userCredentialsEmail1.get(0);
         byEmail = true;

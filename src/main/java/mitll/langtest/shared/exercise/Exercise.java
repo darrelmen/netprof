@@ -286,7 +286,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setState(exercise.getState());
     setSecondState(exercise.getSecondState());
 
-    exercise.getDirectlyRelated().forEach(this::addContextExercise);
+    List<CommonExercise> directlyRelated = exercise.getDirectlyRelated();
+
+    directlyRelated.forEach(this::addContextExercise);
 
     copyAudio(exercise);
     this.creator = exercise.getCreator();

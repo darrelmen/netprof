@@ -93,7 +93,7 @@ public class NewContentChooser implements INavigation {
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-   //    logger.info("getCurrentView currentView " + currentView);
+    //    logger.info("getCurrentView currentView " + currentView);
     VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
@@ -141,7 +141,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-   //  logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+    //  logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);
@@ -174,20 +174,20 @@ public class NewContentChooser implements INavigation {
           setInstanceHistory(LISTS);
           listView.showContent(divWidget, "listView", fromClick);
           break;
-        case RECORD:
+        case RECORD_ENTRIES:
           clearAndFixScroll();
-          setInstanceHistory(RECORD);
-          new RecorderNPFHelper(controller, true, this, RECORD).showNPF(divWidget, RECORD.toString());
+          setInstanceHistory(RECORD_ENTRIES);
+          new RecorderNPFHelper(controller, true, this, RECORD_ENTRIES).showNPF(divWidget, RECORD_ENTRIES.toString());
           break;
-        case CONTEXT:
+        case RECORD_CONTEXT:
           clearAndFixScroll();
-          setInstanceHistory(CONTEXT);
-          new RecorderNPFHelper(controller, false, this, CONTEXT).showNPF(divWidget, CONTEXT.toString());
+          setInstanceHistory(RECORD_CONTEXT);
+          new RecorderNPFHelper(controller, false, this, RECORD_CONTEXT).showNPF(divWidget, RECORD_CONTEXT.toString());
           break;
-        case DEFECTS:
+        case QC:
           clear();
-          setInstanceHistory(DEFECTS);
-          new MarkDefectsChapterNPFHelper(controller, this, DEFECTS).showNPF(divWidget, DEFECTS.toString());
+          setInstanceHistory(QC);
+          new MarkDefectsChapterNPFHelper(controller, this, QC).showNPF(divWidget, QC.toString());
           break;
         case FIX:
           clear();
@@ -382,13 +382,15 @@ public class NewContentChooser implements INavigation {
    */
   private String getCurrentStoredView() {
     String instance = getCurrentInstance();
-   // logger.info("getCurrentStoredView instance = " + instance);
+    // logger.info("getCurrentStoredView instance = " + instance);
 
     VIEWS views = null;
     try {
-      views = instance.isEmpty() ? null : VIEWS.valueOf(instance.toUpperCase());
+      String name = instance.toUpperCase();
+      name = name.replaceAll(" ", "_");
+      views = instance.isEmpty() ? null : VIEWS.valueOf(name);
     } catch (IllegalArgumentException e) {
-      logger.info("bad instance " + instance);
+      logger.warning("bad instance " + instance);
     }
     //logger.info("getCurrentStoredView instance = " + instance + "/" + views);
 
@@ -405,7 +407,6 @@ public class NewContentChooser implements INavigation {
 
 
   /**
-   *
    * @return
    */
   private String getCurrentInstance() {
@@ -421,11 +422,11 @@ public class NewContentChooser implements INavigation {
     // logger.info("got back " + result.getNumItems() + " exercises");
     CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
     Panel review = new ReviewItemHelper(controller)
-        .doNPF(result, "review", true, toSelect);
+        .doNPF(result, VIEWS.FIX.name().toLowerCase(), true, toSelect);
     if (getCurrentView() == VIEWS.FIX) {
       divWidget.add(review);
     } else {
-      logger.warning("not adding review since current is " + getCurrentView());
+      logger.warning("showReviewItems not adding since current is " + getCurrentView());
     }
   }
 

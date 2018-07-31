@@ -48,6 +48,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
@@ -80,7 +81,7 @@ import java.util.logging.Logger;
 public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePanel<T> {
   private Logger logger = Logger.getLogger("QCNPFExercise");
 
-  public static final String CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED = "Click to indicate item has been reviewed.";
+  private static final String CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED = "Click to indicate item has been reviewed.";
   private static final String UNINSPECTED_TOOLTIP = "Item has uninspected audio.";
   private static final String VOCABULARY = "Vocabulary:";
 
@@ -105,8 +106,6 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
   private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
-
-  private static final String REVIEW = "review";
 
   private static final int DEFAULT_MALE_ID = -2;
   private static final int DEFAULT_FEMALE_ID = -3;
@@ -202,7 +201,10 @@ public class QCNPFExercise<T extends CommonExercise> extends GoodwaveExercisePan
         CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED :
         UNINSPECTED_TOOLTIP);
 
-    if (!getInstance().contains(REVIEW) && !getInstance().toLowerCase().contains(COMMENT.toLowerCase())) {
+    if (!getInstance().toLowerCase().contains(INavigation.VIEWS.QC.toString().toLowerCase())
+    //    &&
+      //  !getInstance().toLowerCase().contains(COMMENT.toLowerCase())
+    ) {
       approvedButton = addApprovedButton(listContainer, navHelper);
     }
     setApproveButtonState();

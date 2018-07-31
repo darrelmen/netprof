@@ -6,10 +6,7 @@ import com.github.gwtbootstrap.client.ui.constants.Alignment;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.constants.NavbarPosition;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -32,6 +29,8 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
+  public static final String RECORD = "Record";
+  public static final String QC = "QC";
   private final Logger logger = Logger.getLogger("NewBanner");
 
   private static final List<INavigation.VIEWS> STANDARD_VIEWS =
@@ -49,9 +48,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
 
-//  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String MAILTO_SUBJECT = "Question%20about%20netprof";
- // private String MAIL_TO = getMailTo();
 
   @NotNull
   private String getMailTo() {
@@ -114,14 +111,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       addChoicesForUser(lnav);
     }
     {
-      Nav recnav = getRecNav();
+      ComplexWidget recnav = getRecNav();
       this.recnav = recnav;
       navCollapse.add(recnav);
     }
     recordMenuVisible();
 
     {
-      Nav defectnav = getDefectNav();
+      ComplexWidget defectnav = getDefectNav();
       this.defectnav = defectnav;
       navCollapse.add(defectnav);
     }
@@ -137,31 +134,42 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @return
    */
   @NotNull
-  private Nav getRecNav() {
-    Nav recnav = new Nav();
-    recnav.getElement().setId("recnav");
-    styleNav(recnav);
-    viewToLink.put(INavigation.VIEWS.RECORD, getChoice(recnav, INavigation.VIEWS.RECORD));
-    viewToLink.put(INavigation.VIEWS.CONTEXT, getChoice(recnav, INavigation.VIEWS.CONTEXT));
-    return recnav;
+  private ComplexWidget getRecNav() {
+    Nav rnav = new Nav();
+    rnav.getElement().setId("recnav");
+    zeroLeftRightMargins(rnav);
+    Dropdown nav = new Dropdown(RECORD);
+    rnav.add(nav);
+  //  nav.setIcon(IconType.MICROPHONE);
+
+    viewToLink.put(INavigation.VIEWS.RECORD_ENTRIES, getChoice(nav, INavigation.VIEWS.RECORD_ENTRIES));
+    viewToLink.put(INavigation.VIEWS.RECORD_CONTEXT, getChoice(nav, INavigation.VIEWS.RECORD_CONTEXT));
+    return rnav;
   }
 
-  private void styleNav(Nav recnav) {
+  private void styleNav(ComplexWidget recnav) {
     recnav.addStyleName("inlineFlex");
+    zeroLeftRightMargins(recnav);
+  }
+
+  private void zeroLeftRightMargins(ComplexWidget recnav) {
     recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
     recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
   }
 
   @NotNull
-  private Nav getDefectNav() {
-    Nav nav = new Nav();
-    nav.getElement().setId("defectnav");
-    styleNav(nav);
+  private ComplexWidget getDefectNav() {
+    Nav rnav = new Nav();
+    zeroLeftRightMargins(rnav);
 
-    viewToLink.put(INavigation.VIEWS.DEFECTS, getChoice(nav, INavigation.VIEWS.DEFECTS));
+    Dropdown nav = new Dropdown(QC);
+    rnav.add(nav);
+//    nav.setIcon(IconType.STETHOSCOPE);
+
+    viewToLink.put(INavigation.VIEWS.QC, getChoice(nav, INavigation.VIEWS.QC));
     viewToLink.put(INavigation.VIEWS.FIX, getChoice(nav, INavigation.VIEWS.FIX));
 
-    return nav;
+    return rnav;
   }
 
   @NotNull
@@ -236,14 +244,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     rnav.add(userDrop);
 
     userDrop.addClickHandler(event -> {
-     // logger.info("got click ");
       userDrop.clear();
       userMenu.getStandardUserMenuChoices().forEach(linkAndTitle -> userDrop.add(linkAndTitle.makeNewLink()));
     });
-
-  //  Scheduler.get().scheduleDeferred(() -> userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink())));
-
-//    userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink()));
   }
 
   private Label subtitle;
@@ -281,7 +284,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
       if (first) {
-        choice1.addStyleName("leftTwentyMargin");
+      //  choice1.addStyleName("leftTwentyMargin");
+        choice1.addStyleName("leftTenMargin");
       }
       first = false;
       choices.add(choice1);
@@ -322,9 +326,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void showSection(String instance1, boolean fromClick) {
     VIEWS choices = INavigation.VIEWS.NONE;
     try {
-      choices = INavigation.VIEWS.valueOf(instance1.toUpperCase());
+      String name = instance1.toUpperCase();
+      name = name.replaceAll(" ", "_");
+      choices = INavigation.VIEWS.valueOf(name);
     } catch (IllegalArgumentException e) {
-      logger.info("showSection can't parse " + instance1);
+      logger.warning("showSection can't parse " + instance1);
     }
     navigation.showView(choices, false, fromClick);
   }

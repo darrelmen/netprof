@@ -16,24 +16,27 @@ import static mitll.langtest.shared.user.User.Permission.*;
  */
 public interface INavigation extends IViewContaner {
   enum VIEWS {
-    NONE,
-    LISTS,
-    PROGRESS,
-    LEARN,
-    DRILL,
-    QUIZ,
-    RECORD(Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    CONTEXT(Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    DEFECTS(Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    FIX(Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN));
+    NONE(""),
+    LISTS("Lists"),
+    PROGRESS("Progress"),
+    LEARN("Learn"),
+    DRILL("Drill"),
+    QUIZ("Quiz"),
+    RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+    RECORD_CONTEXT("Record Context", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+    QC("QC", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+    FIX("Fix", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN));
 
     private List<User.Permission> perms;
+    String display;
 
-    VIEWS(List<User.Permission> perms) {
+    VIEWS(String display, List<User.Permission> perms) {
+      this.display = display;
       this.perms = perms;
     }
 
-    VIEWS() {
+    VIEWS(String display) {
+      this.display = display;
       this.perms = Collections.emptyList();
     }
 
@@ -42,7 +45,7 @@ public interface INavigation extends IViewContaner {
     }
 
     public String toString() {
-      return name().substring(0, 1) + name().substring(1).toLowerCase();
+      return display;
     }
   }
 
