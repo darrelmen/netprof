@@ -100,8 +100,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   public static final String CHECK_NETWORK_WIFI = "CHECK NETWORK/WIFI";
   private static final int WIFI_MAX_WAIT = 7000;
-  //private static final String DIVIDER = ">";
-  //private static final String HOME = "Home";
 
   /**
    *
@@ -755,7 +753,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     // logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     boolean hasStartupInfo = lifecycleSupport.getProjectStartupInfo() != null;
     if (hasStartupInfo) {
-      // logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+     logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     } else {

@@ -32,6 +32,7 @@
 
 package mitll.langtest.shared.project;
 
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 public class SlimProject extends ProjectInfo {
   private boolean hasModel;
@@ -119,6 +121,15 @@ public class SlimProject extends ProjectInfo {
       if (child.getID() == projectid) return child;
     }
     return null;
+  }
+
+  public SlimProject getChildByMode(int projectid, ProjectMode mode) {
+    List<SlimProject> collect = children.stream()
+        .filter(slimProject ->
+            slimProject.getID() == projectid &&
+                slimProject.getMode() == mode)
+        .collect(Collectors.toList());
+    return (collect.isEmpty()) ? getChild(projectid) : collect.iterator().next();
   }
 
   public List<SlimProject> getChildren() {

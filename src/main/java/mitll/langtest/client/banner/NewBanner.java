@@ -415,7 +415,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     viewToLink.values().forEach(choice -> choice.setVisible(val));
 
-    if (val && navigation != null &&  navigation.getCurrentView() != null) {
+    if (val && navigation != null) {
       setVisibleChoicesByMode(navigation.getCurrentView().getMode());
     }
 
@@ -478,8 +478,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
-   * @seex InitialUI#addCrumbs
-   * @see UILifecycle#showInitialState
+    * @see UILifecycle#showInitialState
    */
   @Override
   public void checkProjectSelected() {

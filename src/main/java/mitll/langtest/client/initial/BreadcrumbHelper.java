@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.project.ProjectChoices;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -79,7 +80,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
       if (startupInfo == null) {
         //  logger.info("addCrumbs no project startup info yet for " + current.getUserID());
         if (showOnlyHomeLink) {
-            logger.info("\taddCrumbs add all link");
+          logger.info("\taddCrumbs add all link");
           addHomeLink(crumbs);
         }
       } else {
@@ -114,7 +115,9 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
       if (project.hasChildren() && project.hasChild(currentProject)) {
         logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         crumbs.add(getLangBreadcrumb(project));
-        addProjectCrumb(crumbs, project.getChild(currentProject));
+        INavigation.VIEWS currentView = breadcrumbPartner.getNavigation().getCurrentView();
+
+        addProjectCrumb(crumbs, project.getChildByMode(currentProject, currentView.getMode()));
 /*        for (int i = 0; i < crumbs.getWidgetCount(); i++) {
           logger.info("breadcrumb has " + crumbs.getWidget(i));
         }*/
@@ -139,7 +142,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
   private void addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     NavLink lang = new NavLink(project.getName());
     lang.addClickHandler(clickEvent -> {
-       logger.info("addProjectCrumb choose project again for " + project.getName()+ " "+ project.getMode());
+      logger.info("addProjectCrumb choose project again for " + project.getName() + " " + project.getMode());
       breadcrumbPartner.chooseProjectAgain();
     });
     crumbs.add(lang);
@@ -157,7 +160,6 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
       // logger.info("getLangBreadcrumb got click on " + project.getName());
       removeUntilCrumb(2);
       breadcrumbPartner.resetLanguageSelection(2, project);
-
       //choices.showProject(project);
     });
     return lang;

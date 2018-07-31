@@ -183,7 +183,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
    */
   @Override
   protected void onUnload() {
-    if (DEBUG) logger.info("onUnload : doing unload of play ------------------> ");
+    if (DEBUG) logger.info("onUnload : doing unload of play ------------------> " + this.getId());
     super.onUnload();
 
     doPause();

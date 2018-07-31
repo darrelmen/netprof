@@ -60,6 +60,9 @@ public interface UILifecycle {
 
   void getUserPermissions();
 
+  /**
+   * @see
+   */
   void showInitialState();
 
 

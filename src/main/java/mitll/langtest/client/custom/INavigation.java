@@ -68,6 +68,8 @@ public interface INavigation extends IViewContaner {
     }
   }
 
+ // String getCurrentStoredView();
+
   void storeViewForMode(ProjectMode mode);
 
   void show(VIEWS views);

@@ -122,7 +122,7 @@ public class ProjectChoices extends ThumbnailChoices {
   private boolean isSuperUser = false;
 
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param langTest
@@ -966,7 +966,8 @@ public class ProjectChoices extends ThumbnailChoices {
     if (DEBUG) logger.info("gotClickOnFlag project " + projid + " has " + children);
     NavLink breadcrumb = makeBreadcrumb(name);
     if (children.size() < 2) {
-      if (DEBUG) logger.info("gotClickOnFlag onClick select leaf project " + projid + " "+ projectForLang.getMode()+
+      if (DEBUG) logger.info("gotClickOnFlag onClick select leaf project " + projid +
+          " "+ projectForLang.getMode()+
           "\n\tcurrent user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
 
       setProjectForUser(projid, projectForLang.getMode());

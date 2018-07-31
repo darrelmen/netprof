@@ -440,17 +440,16 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    *
    * @return
    */
+//  @Override
   private String getCurrentStoredView() {
     // logger.info("getCurrentStoredView instance = " + instance);
     VIEWS views = getCurrentViewFromURL();
-    logger.info("getCurrentStoredView      view " + views);
-//    return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
-
     if (views == null) {
       String storedView = getStoredView();
       logger.info("getCurrentStoredView storedView " + storedView);
       return storedView;
     } else {
+      logger.info("getCurrentStoredView url   view " + views);
       return views.toString().toUpperCase();
     }
   }
@@ -480,6 +479,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   @Override
   public void storeViewForMode(ProjectMode mode) {
+    logger.info("storeViewForMode " +mode);
     storeValue(mode == ProjectMode.DIALOG ? DIALOG : LEARN);
   }
 
@@ -657,7 +657,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           }
         }
       } catch (IllegalArgumentException e) {
-        e.printStackTrace();
+        logger.warning("got "+e);
       }
     }
   }

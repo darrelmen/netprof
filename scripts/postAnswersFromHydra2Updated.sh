@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for langlc in `ls /opt/netprof/answers | grep -v korean | grep -v levantine | grep -v msa | grep -v russian`;
+for langlc in `ls /opt/netprof/answers | grep -E 'korean|levantine|msa|russian'`;
 do
     #lang=${file:12}
     #langlc="${lang,,}"
@@ -37,10 +37,10 @@ do
         echo "before curl"
 
         #echo curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -T $file2 "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$langlc/answersAudio/$file2"
-        echo curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -T $file2 "https://kws-bugs.ll.mit.edu/artifactory/dli-archiving/NetProF-Audio-Hydra/$langlc/answersAudio/$file2"
+        echo curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -T $file2 "https://kws-bugs.ll.mit.edu/artifactory/dli-archiving/NetProF-Audio-Hydra2/$langlc/answersAudio/$file2"
 
         #curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -T $file2 "https://kws-bugs.ll.mit.edu/artifactory/dli-materials/NetProF-Audio/$langlc/answersAudio/$file2"
-        curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -T $file2 "https://kws-bugs.ll.mit.edu/artifactory/dli-archiving/NetProF-Audio-Hydra/$langlc/answersAudio/$file2"
+        curl -ugvidaver:AP7UBZfNhCphhouwNrWyL2WqWX -T $file2 "https://kws-bugs.ll.mit.edu/artifactory/dli-archiving/NetProF-Audio-Hydra2/$langlc/answersAudio/$file2"
 
         date
         echo "after  curl"
