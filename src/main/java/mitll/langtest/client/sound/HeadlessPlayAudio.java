@@ -394,7 +394,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see #onUnload()
    * @see #startSong(String, boolean)
    */
-  protected void destroySound() {
+  public void destroySound() {
     if (currentSound != null) {
       //if (DEBUG)
       //  logger.info("PlayAudioPanel.destroySound : (" + getElement().getId() + ") destroy sound " + currentSound);

@@ -200,7 +200,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   @Override
   protected void onUnload() {
-    playAudio.cleanUp();
+    playAudio.destroySound();
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {

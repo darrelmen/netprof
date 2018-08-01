@@ -292,11 +292,19 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
       rowOne.add(turn);
     });
 
+    rowOne.getElement().getStyle().setPaddingBottom(50, PX);
     if (!bothTurns.isEmpty()) {
       currentTurn = bothTurns.get(0);
       logger.info("getTurns : markCurrent ");
       markCurrent();
     }
+
+    DivWidget w = new DivWidget();
+    w.getElement().setId("spacer");
+    w.setWidth("100%");
+    w.setHeight("200px");
+    w.getElement().getStyle().setClear(Style.Clear.BOTH);
+    rowOne.add(w);
 
 
     rowOne.getElement().getStyle().setMarginBottom(10, PX);
@@ -601,6 +609,16 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   protected void markCurrent() {
     //logger.info("markCurrent on " + currentTurn.getExID());
     currentTurn.markCurrent();
+
+    List<T> seq = getSeq();
+    int i = seq.indexOf(currentTurn);
+    int i1 = i + 1;
+
+    if (i1 > seq.size() - 1) {
+     // currentTurn = seq.get(0);
+    } else {
+      seq.get(i1).getElement().scrollIntoView();
+    }
   }
 
   @Override
