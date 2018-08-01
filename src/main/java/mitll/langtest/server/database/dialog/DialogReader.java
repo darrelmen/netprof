@@ -85,7 +85,7 @@ public class DialogReader {
           paths
               .filter(Files::isRegularFile)
               .forEach(file -> {
-                if (file.endsWith("~")) {
+                if (file.getFileName().toString().endsWith("~")) {
                   logger.info("skip tilde - " +file);
                 }
                 else {
