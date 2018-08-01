@@ -414,7 +414,7 @@ public class ProjectManagement implements IProjectManagement {
 
   private void addDialogInfo(Project project) {
     if (project.getKind() == ProjectType.DIALOG || true) {
-      if (new DialogPopulate(db).addDialogInfo(project)) {
+      if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
         //configureProject(project, false, true);
 
         //project.getSectionHelper().report();

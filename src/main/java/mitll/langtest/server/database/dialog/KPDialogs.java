@@ -132,7 +132,7 @@ public class KPDialogs extends DialogReader implements IDialogReader {
    * @param projID
    * @param exToAudio
    * @return
-   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogInfo
+   * @see mitll.langtest.server.database.project.DialogPopulate#populateDatabase(Project)
    */
   @Override
   public Map<Dialog, SlickDialog> getDialogs(int defaultUser, int projID,

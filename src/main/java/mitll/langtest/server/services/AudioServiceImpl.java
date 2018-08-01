@@ -71,8 +71,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private static final int WARN_THRESH = 10;
   public static final String UNKNOWN = "unknown";
-  private static final String FAST = "regular";
-  private static final String SLOW = "slow";
 
   private PathWriter pathWriter;
   private IEnsureAudioHelper ensureAudioHelper;
@@ -292,7 +290,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             true,
             language,
             idToUse,
-            //audioTranscript,
             serverProps,
             new TrackInfo(audioTranscript, getArtist(user), context, language));
 

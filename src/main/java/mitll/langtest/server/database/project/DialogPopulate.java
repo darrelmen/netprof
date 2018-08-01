@@ -1,6 +1,9 @@
 package mitll.langtest.server.database.project;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.AudioInfo;
@@ -17,6 +20,7 @@ import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickDialog;
 import mitll.npdata.dao.SlickDialogAttributeJoin;
 import mitll.npdata.dao.SlickImage;
@@ -30,6 +34,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 import static mitll.langtest.server.database.project.ProjectManagement.FIVE_YEARS;
+import static mitll.langtest.shared.answer.AudioType.REGULAR;
 
 /**
  * Add dialog info to project.
@@ -38,9 +43,14 @@ public class DialogPopulate {
   private static final Logger logger = LogManager.getLogger(DialogPopulate.class);
 
   private final DatabaseImpl db;
+  private PathWriter pathWriter;
+  protected PathHelper pathHelper;
 
-  public DialogPopulate(DatabaseImpl db) {
+
+  public DialogPopulate(DatabaseImpl db, PathHelper pathHelper) {
     this.db = db;
+    pathWriter = new PathWriter(db.getServerProps());
+    this.pathHelper = pathHelper;
   }
 
   /**
@@ -73,8 +83,7 @@ public class DialogPopulate {
     IDialogDAO dialogDAO = db.getDialogDAO();
     if (!dialogDAO.getDialogs(projid).isEmpty()) {
       return false;
-    }
-    else {
+    } else {
       Map<ClientExercise, String> exToAudio = new HashMap<>();
       int defaultUser = db.getUserDAO().getDefaultUser();
       Language languageEnum = project.getLanguageEnum();
@@ -214,9 +223,8 @@ public class DialogPopulate {
       File file = new File(db.getServerProps().getAudioBaseDir(), v);
       if (!file.exists()) {
         logger.error("can't find audio file " + file.getAbsolutePath());
-      }
-      else {
-        logger.info("found audio at " + file.getAbsolutePath());
+      } else {
+        logger.info("addAudio : found audio at " + file.getAbsolutePath());
       }
       AudioCheck.ValidityAndDur valid = audioCheck.isValid(file, true, false);
 
@@ -280,25 +288,49 @@ public class DialogPopulate {
   }
 
   private void addResultAndAudio(Project project, int projid, int defaultUser, long now,
-                                 ClientExercise k, String v, AudioCheck.ValidityAndDur valid, Integer exid) {
+                                 ClientExercise k, String pathOnDisk, AudioCheck.ValidityAndDur valid,
+                                 Integer exid) {
+    String language = project.getLanguage();
     int resultID = db.getAnswerDAO()
         .addAnswer(new AnswerInfo(
-            new AudioContext(0, defaultUser, projid, project.getLanguage(), exid, 0, AudioType.REGULAR),
-            new AnswerInfo.RecordingInfo(v, v, "", "", false, k.getForeignLanguage(), ""), valid, ""), now);
+            new AudioContext(0, defaultUser, projid, language, exid, 0, REGULAR),
+            new AnswerInfo.RecordingInfo(pathOnDisk, pathOnDisk, "", "", false, k.getForeignLanguage(), ""), valid, ""), now);
+    logger.info("Remember path " + pathOnDisk);
+    File absoluteFile = pathHelper.getAbsoluteAudioFile(pathOnDisk);
+    logger.info("Remember absoluteFile " + absoluteFile.getAbsolutePath());
 
+    String permanentAudioPath = pathWriter.
+        getPermanentAudioPath(
+            absoluteFile,
+            getPermanentName(defaultUser, REGULAR),
+            true,
+            language,
+            exid,
+            db.getServerProps(),
+            new TrackInfo(k.getForeignLanguage(), getArtist(defaultUser), k.getEnglish(), language));
 
     db.getAudioDAO().addOrUpdate(new AudioInfo(
         defaultUser,
         exid,
         projid,
-        AudioType.REGULAR,
-        v,
+        REGULAR,
+        permanentAudioPath,
         now,
         valid.durationInMillis,
         k.getForeignLanguage(),
         (float) valid.getDynamicRange(),
         resultID,
-        MiniUser.Gender.Male, false));
+        MiniUser.Gender.Male,
+        false));
+  }
+
+  private String getPermanentName(int user, AudioType audioType) {
+    return audioType.toString() + "_" + System.currentTimeMillis() + "_by_" + user + ".wav";
+  }
+
+  private String getArtist(int user) {
+    User userWhere = db.getUserDAO().getUserWhere(user);
+    return userWhere == null ? "" + user : userWhere.getUserID();
   }
 
   @NotNull

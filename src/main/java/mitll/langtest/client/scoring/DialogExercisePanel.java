@@ -849,7 +849,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   @Override
   public void doPlayPauseToggle() {
-    playAudio.doPlayPauseToggle();
+    if (playAudio != null) {
+      playAudio.doPlayPauseToggle();
+    }
   }
 
   public void addPlayListener(PlayListener playListener) {
@@ -867,7 +869,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   public boolean isPlaying() {
-    return playAudio.isPlaying();
+    return (playAudio != null) && playAudio.isPlaying();
   }
 
   public void removeMarkCurrent() {

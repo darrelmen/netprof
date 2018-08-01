@@ -103,7 +103,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String localStorageKey = getLocalStorageKey(name);
 
-      logger.info("storeValue : (" + localStorageKey + ")" + " '" + name + "' = '" + toStore + "'");
+    if (DEBUG)  logger.info("storeValue : (" + localStorageKey + ")" + " '" + name + "' = '" + toStore + "'");
 
       try {
         localStorageIfSupported.setItem(localStorageKey, toStore);
@@ -133,7 +133,7 @@ public class KeyStorage {
     if (Storage.isLocalStorageSupported()) {
       String localStorageKey = getLocalStorageKey(name);
       String item = Storage.getLocalStorageIfSupported().getItem(localStorageKey);
-      logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
+      if (DEBUG)  logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
       if (item == null) item = "";
       return item;
     } else {

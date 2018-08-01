@@ -401,7 +401,13 @@ public class CopyToPostgres<T extends CommonShell> {
 
   private static DatabaseImpl getDatabase() {
     ServerProperties serverProps = getProps();
-    return new DatabaseImpl(getProps(), new PathHelper("war", serverProps), null, null);
+    String war = "war";
+    return new DatabaseImpl(getProps(), getPathHelper(war, serverProps), null, null);
+  }
+
+  @NotNull
+  private static PathHelper getPathHelper(String war, ServerProperties serverProps) {
+    return new PathHelper(war, serverProps);
   }
 
   public static DatabaseImpl getSimpleDatabase() {
@@ -467,7 +473,7 @@ public class CopyToPostgres<T extends CommonShell> {
         configFile.getParentFile().getAbsolutePath(),
         serverProps.getH2Database(),
         serverProps,
-        new PathHelper(installPath, serverProps), false, null, false);
+        getPathHelper(installPath, serverProps), false, null, false);
 
     database.setInstallPath(
         configFile.getParentFile().getAbsolutePath() + File.separator +
@@ -1665,11 +1671,16 @@ public class CopyToPostgres<T extends CommonShell> {
       Project project = database.getProject(to);
       if (project == null) logger.error("no project with id " + to);
       else {
-        if (!new DialogPopulate(database).populateDatabase(project)) {
+        if (!new DialogPopulate(database, getPathHelper(database)).populateDatabase(project)) {
           logger.info("project " + project + " already has dialog data.");
         }
       }
     }
+  }
+
+  @NotNull
+  private static PathHelper getPathHelper(DatabaseImpl database) {
+    return getPathHelper("war",database.getServerProps());
   }
 
   private static void cleanDialog(int to) {
@@ -1679,7 +1690,7 @@ public class CopyToPostgres<T extends CommonShell> {
       Project project = database.getProject(to);
       if (project == null) logger.error("no project with id " + to);
       else {
-        boolean b = new DialogPopulate(database).cleanDialog(project);
+        boolean b = new DialogPopulate(database, getPathHelper(database)).cleanDialog(project);
         if (!b) logger.info("project " + project + " already has dialog data.");
       }
     }

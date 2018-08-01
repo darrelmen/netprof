@@ -26,8 +26,18 @@ import static mitll.langtest.shared.dialog.IDialog.METADATA.FLTITLE;
 public class DialogReader {
   private static final Logger logger = LogManager.getLogger(DialogReader.class);
 
+  /**
+   *
+   * @param defaultUser
+   * @param projID
+   * @param exToAudio
+   * @param project
+   * @param dialogProps
+   * @return
+   */
   @NotNull
-  Map<Dialog, SlickDialog> getDialogsByProp(int defaultUser, int projID, Map<ClientExercise, String> exToAudio, Project project,
+  Map<Dialog, SlickDialog> getDialogsByProp(int defaultUser, int projID,
+                                            Map<ClientExercise, String> exToAudio, Project project,
                                             DialogProps dialogProps) {
     String[] docs = dialogProps.docIDS.split("\n");
     String[] titles = dialogProps.title.split("\n");
@@ -75,18 +85,26 @@ public class DialogReader {
           paths
               .filter(Files::isRegularFile)
               .forEach(file -> {
-                logger.info(dir + " found " + file);
-                String fileName = file.getFileName().toString();
-                String[] parts = fileName.split("_");
-                if (fileName.endsWith("jpg")) {
+                if (file.endsWith("~")) {
+                  logger.info("skip tilde - " +file);
+                }
+                else {
+                  logger.info(dir + " found " + file);
+                  String fileName = file.getFileName().toString();
+                  String[] parts = fileName.split("_");
+                  if (fileName.endsWith("jpg")) {
 //                  logger.info("skip dialog image " + fileName);
-                } else if (fileName.endsWith(".wav")) {
-                  //              logger.info("audio " + fileName);
-                  audio.add(projectLanguage + File.separator + dir + File.separator + fileName);
-                } else if (fileName.endsWith(".txt") && parts.length == 3) { // slickDialog.g. 010_C01_00.txt
-                  logger.info(dir + " text " + fileName);
-                  sentences.add(fileName);
-                  sentenceToFile.put(fileName, file);
+                  } else if (fileName.endsWith(".wav")) {
+                    //              logger.info("audio " + fileName);
+                    String relPath = projectLanguage + File.separator + dir + File.separator + fileName;
+                    logger.info("audio rel path " + relPath);
+
+                    audio.add(relPath);
+                  } else if (fileName.endsWith(".txt") && parts.length == 3) { // slickDialog.g. 010_C01_00.txt
+                    logger.info(dir + " text " + fileName);
+                    sentences.add(fileName);
+                    sentenceToFile.put(fileName, file);
+                  }
                 }
               });
         }
