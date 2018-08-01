@@ -1037,9 +1037,9 @@ public class ProjectChoices extends ThumbnailChoices {
           if (aUser.getStartupInfo() == null) { // no project with that project id
             lifecycleSupport.getStartupInfo();
           } else {
-            //uiLifecycle.setMode(mode);
+            uiLifecycle.getNavigation().storeViewForMode(mode);
+
             userNotification.setProjectStartupInfo(aUser);
-          uiLifecycle.getNavigation().storeViewForMode(mode);
             //     logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
             uiLifecycle.showInitialState();
           }

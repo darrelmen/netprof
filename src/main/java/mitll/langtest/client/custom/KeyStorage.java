@@ -48,7 +48,7 @@ public class KeyStorage {
   private final Logger logger = Logger.getLogger("KeyStorage");
 
   private ExerciseController controller = null;
-  private String language;
+  // private String language;
   private int user;
   private boolean showedAlert = false;
 
@@ -58,17 +58,17 @@ public class KeyStorage {
    * @param controller
    */
   public KeyStorage(ExerciseController controller) {
-    this(controller.getLanguage(), controller.getUserState().getUser());
+    this(/*controller.getLanguage(),*/ controller.getUserState().getUser());
     this.controller = controller;
   }
 
   /**
-   * @param language
+   * @paramx language
    * @param user
    * @see mitll.langtest.client.user.UserPassLogin#UserPassLogin
    */
-  private KeyStorage(String language, int user) {
-    this.language = language;
+  private KeyStorage(/*String language,*/ int user) {
+    //this.language = language;
     this.user = user;
   }
 
@@ -76,6 +76,7 @@ public class KeyStorage {
   public void setBoolean(String name, boolean val) {
     storeValue(name, "" + val);
   }
+
   public void setInt(String name, int val) {
     storeValue(name, "" + val);
   }
@@ -101,6 +102,9 @@ public class KeyStorage {
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String localStorageKey = getLocalStorageKey(name);
+
+      logger.info("storeValue : (" + localStorageKey + ")" + " '" + name + "' = '" + toStore + "'");
+
       try {
         localStorageIfSupported.setItem(localStorageKey, toStore);
       } catch (Exception e) {
@@ -121,15 +125,15 @@ public class KeyStorage {
   }
 
   /**
-   * @see
    * @param name
    * @return empty string if not item stored
+   * @see
    */
   public String getValue(String name) {
     if (Storage.isLocalStorageSupported()) {
       String localStorageKey = getLocalStorageKey(name);
       String item = Storage.getLocalStorageIfSupported().getItem(localStorageKey);
-      //  if (debug) System.out.println("KeyStorage : (" +localStorageKey+ ")" + " name " + name + "=" +item);
+      logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
       if (item == null) item = "";
       return item;
     } else {
@@ -146,15 +150,17 @@ public class KeyStorage {
 
   private String getLocalStorageKey(String name) {
     if (controller != null) {
-      language = controller.getLanguage();          // necessary???
-      user     = controller.getUser();
+      //   language = controller.getLanguage();          // necessary???
+      user = controller.getUser();
     }
 
     return getKey(name);
   }
 
   protected String getKey(String name) {
-    return "Navigation_" + language + "_" + user + "_" + name;
+    return "Navigation_" +
+        //language + "_" +
+        user + "_" + name;
   }
 
   public String toString() {

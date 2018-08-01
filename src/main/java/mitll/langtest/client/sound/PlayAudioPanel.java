@@ -105,6 +105,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
     if (buttonTitle.isEmpty()) {
       pauseLabel = "";
     }
+
     getElement().setId("PlayAudioPanel_" + (doSlow ? "slow" : "") + id);
 
     isSlow = doSlow;
@@ -134,14 +135,12 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   }
 
   /**
-   * @param soundManager
    * @param playListener
    * @param controller
    * @param exid
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
    */
-  public PlayAudioPanel(SoundManagerAPI soundManager, PlayListener playListener, ExerciseController controller,
-                        int exid) {
+  public PlayAudioPanel(PlayListener playListener, ExerciseController controller, int exid) {
     this(playListener, "", null, controller, exid, true);
   }
 

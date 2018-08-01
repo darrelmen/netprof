@@ -430,6 +430,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     });
   }
 
+  /**
+   * @see InitialUI#logout
+   */
   @Override
   public void reset() {
     setCogVisible(false);
@@ -503,38 +506,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
-    //setVisibleChoicesByMode(navigation.getCurrentView().getMode());
-
     reflectPermissions(controller.getPermissions());
   }
 
   @Override
   public void setVisibleChoicesByMode(ProjectMode mode) {
     logger.info("setVisibleChoicesByMode set visible choices " + mode);
-
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-//    logger.info("logException stack " + exceptionAsString);
-
     hideOrShowByMode((mode == ProjectMode.DIALOG) ? DIALOG_VIEWS : STANDARD_VIEWS);
-
-/*    if (mode == ProjectMode.DIALOG) {
-
-    }
-    if (mode == ProjectMode.VOCABULARY) {
-      hideOrShowByMode(STANDARD_VIEWS);
-
-*//*
-      BOTH.forEach(views -> {
-        NavLink widgets = viewToLink.get(views);
-        logger.info("\tAFTER link " + views + " " +widgets.getElement().getId()+
-            " " + widgets.isVisible() + " '" + widgets.getTitle() + "'" +
-            " '" + widgets.getName() + "' display " + widgets.getElement().getStyle().getDisplay() );
-      });
-*//*
-    } else if (mode == ProjectMode.DIALOG) {
-     // BOTH.forEach(views -> viewToLink.get(views).setVisible(DIALOG_VIEWS.contains(views)));
-      hideOrShowByMode(DIALOG_VIEWS);
-    }*/
   }
 
   private void hideOrShowByMode(List<VIEWS> standardViews) {
@@ -551,9 +529,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 //            " now " + contains);
         widgets.setVisible(contains);
       }
-      // widgets.setVisible(contains);
-      //  Widget link = widgets.getWidget(0);
-//       widgets.getElement().getStyle().setDisplay(contains ? Style.Display.INITIAL : Style.Display.NONE);
     });
   }
 

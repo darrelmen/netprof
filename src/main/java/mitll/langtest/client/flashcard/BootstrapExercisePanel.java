@@ -566,7 +566,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   private void showRecoOutput(PretestScore pretestScore) {
     recoOutput.clear();
 
-    playAudioPanel = new PlayAudioPanel(controller.getSoundManager(), null, controller, exercise.getID());
+    playAudioPanel = new PlayAudioPanel(null, controller, exercise.getID());
     ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, downloadContainer);
     downloadContainer.getDownloadContainer().setVisible(true);
     recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, new ClickableWords().isRTL(exercise.getForeignLanguage())));
