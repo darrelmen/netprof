@@ -94,7 +94,7 @@ public class NewContentChooser implements INavigation {
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
     //    logger.info("getCurrentView currentView " + currentView);
-    VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
+    VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : getViews(currentView);
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
 
@@ -108,6 +108,15 @@ public class NewContentChooser implements INavigation {
     }
 
     return currentStoredView;
+  }
+
+  @NotNull
+  private VIEWS getViews(String currentView) {
+    try {
+      return VIEWS.valueOf(currentView);
+    } catch (IllegalArgumentException e) {
+      return VIEWS.LEARN;
+    }
   }
 
   private boolean isNPQUser() {
@@ -388,7 +397,7 @@ public class NewContentChooser implements INavigation {
     try {
       String name = instance.toUpperCase();
       name = name.replaceAll(" ", "_");
-      views = instance.isEmpty() ? null : VIEWS.valueOf(name);
+      views = instance.isEmpty() ? null : getViews(name);
     } catch (IllegalArgumentException e) {
       logger.warning("bad instance " + instance);
     }

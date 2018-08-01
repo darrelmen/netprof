@@ -287,6 +287,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       //  choice1.addStyleName("leftTwentyMargin");
         choice1.addStyleName("leftTenMargin");
       }
+      else {
+       // choice1.getElement().getStyle().setMarginLeft(-2, Style.Unit.PX);
+        //choice1.getWidget(0).getElement().getStyle().setMarginLeft(-2, Style.Unit.PX);
+      }
       first = false;
       choices.add(choice1);
       viewToLink.put(choice, choice1);
@@ -299,6 +303,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
  //   if (instanceName.equalsIgnoreCase("Drill")) instanceName="Practice";
 //    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + instanceName;
     NavLink learn = getLink(nav, instanceName);
+    learn.getWidget(0).getElement().getStyle().setPaddingLeft(13, Style.Unit.PX);
+    learn.getWidget(0).getElement().getStyle().setPaddingRight(13, Style.Unit.PX);
     learn.addClickHandler(event -> {
       //  logger.info("getChoice got click on " + instanceName + " = " + historyToken);
       controller.logEvent("ViewLink", instanceName, "N/A", "click on view");
