@@ -41,7 +41,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> implements ContentView, PlayListener, IListenView {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
-  public static final int HEADER_HEIGHT = 120;
+  private static final int HEADER_HEIGHT = 120;
 
   private static final String VALUE = "value";
   private static final String SLIDER_MAX = "100";
@@ -62,15 +62,16 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   protected final ExerciseController controller;
   protected final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
+  final List<T> bothTurns = new ArrayList<>();
+  final List<T> leftTurnPanels = new ArrayList<>();
+  final List<T> rightTurnPanels = new ArrayList<>();
 
-  protected final List<T> bothTurns = new ArrayList<>();
-  protected final List<T> leftTurnPanels = new ArrayList<>();
-  protected final List<T> rightTurnPanels = new ArrayList<>();
-
-  protected T currentTurn;
-  protected CheckBox leftSpeakerBox, rightSpeakerBox;
+  T currentTurn;
+  CheckBox leftSpeakerBox, rightSpeakerBox;
   private ComplexWidget slider;
-  private static final boolean DEBUG = false;
+  private Button playButton;
+
+  private static final boolean DEBUG = true;
 
   /**
    * @param controller
@@ -140,7 +141,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
       checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
       leftSpeakerBox = checkBox;
 
-      DivWidget rightDiv=new DivWidget();
+      DivWidget rightDiv = new DivWidget();
       rightDiv.add(checkBox);
       rowOne.add(rightDiv);
     }
@@ -161,7 +162,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
       checkBox.addStyleName("rightFiveMargin");
       rightSpeakerBox = checkBox;
 
-      DivWidget rightDiv=new DivWidget();
+      DivWidget rightDiv = new DivWidget();
       rightDiv.add(checkBox);
       rowOne.add(rightDiv);
     }
@@ -358,7 +359,6 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     playCurrentTurn();
   }
 
-  private Button playButton;
 
   /**
    * TODO add playback rate
@@ -388,7 +388,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
       Button widgets2 = new Button("", IconType.FORWARD, event -> gotForward());
       widgets2.addStyleName("leftFiveMargin");
       rowOne.add(widgets2);
-     // Button forwardButton = widgets2;
+      // Button forwardButton = widgets2;
     }
 
     rowOne.add(slider = getSlider());
@@ -515,6 +515,8 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   }
 
   protected void gotPlay() {
+
+    logger.info("got play ");
     if (currentTurn.isPlaying()) {
       playButton.setIcon(IconType.PAUSE);
     } else {
@@ -524,6 +526,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     Boolean leftSpeakerSet = isLeftSpeakerSet();
     Boolean rightSpeakerSet = isRightSpeakerSet();
     if (leftSpeakerSet && rightSpeakerSet) {
+      logger.info("both speakers ");
 
     } else if (leftSpeakerSet && !leftTurnPanels.contains(currentTurn) || rightSpeakerSet && !rightTurnPanels.contains(currentTurn)) {
       removeMarkCurrent();
@@ -538,10 +541,12 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     return getSeq().indexOf(currentTurn) == 0;
   }
 
-  protected void playCurrentTurn() {
+  void playCurrentTurn() {
     if (currentTurn != null) {
       if (DEBUG) logger.info("playCurrentTurn - turn " + currentTurn.getExID());
       currentTurn.doPlayPauseToggle();
+    } else {
+      logger.warning("playCurrentTurn no current turn?");
     }
   }
 
@@ -569,7 +574,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
    * @see #playStopped
    */
   protected void currentTurnPlayEnded() {
-    if (DEBUG) logger.info("currentTurnPlayEnded - turn " + currentTurn.getExID());
+    if (DEBUG) logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID());
     List<T> seq = getSeq();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;

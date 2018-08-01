@@ -7,6 +7,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -32,24 +33,44 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   private SimpleAudioListener simpleAudioListener;
   private boolean playing = false;
   private static int counter = 0;
-//  private final boolean isSlow;
 
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final boolean DEBUG = false;
-  // private int volume;
 
-  public HeadlessPlayAudio(SoundManagerAPI soundManager) {
+  HeadlessPlayAudio(SoundManagerAPI soundManager) {
     id = counter++;
     this.soundManager = soundManager;
-    //this.volume = volume;
-
-    //   logger.info("HeadlessPlayAudio play volume " + volume);
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#makePlayAudio
+   * @param soundManager
+   * @param listenView
+   */
   public HeadlessPlayAudio(SoundManagerAPI soundManager, IListenView listenView) {
     this(soundManager);
     this.listenView = listenView;
+  }
+
+  /**
+   * Remember to destroy a sound once we are done with it, otherwise SoundManager
+   * will maintain references to it, listener references, etc.
+   */
+  @Override
+  protected void onUnload() {
+    if (DEBUG) logger.info("onUnload : doing unload of play ------------------> " + this.getId());
+    super.onUnload();
+
+    cleanUp();
+  }
+
+  public void cleanUp() {
+    if (DEBUG) logger.info("cleanUp : doing cleanUp of play ------------------> " + this.getId());
+    doPause();
+    destroySound();
+
+    for (AudioControl listener : listeners) listener.reinitialize();    // remove playing line, if it's there
   }
 
   /**
@@ -59,7 +80,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   public void addPlayListener(PlayListener playListener) {
     this.playListeners.add(playListener);
   }
-
   public void removePlayListener(PlayListener playListener) {
     this.playListeners.remove(playListener);
   }
@@ -337,9 +357,12 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
           destroySound();
           createSound(path, doAutoload);
         } else {
-          logger.info(" Sound manager is not OK!.");
+          logger.warning(" Sound manager is not OK!.");
           warnNoFlash.setVisible(true);
         }
+      }
+      else {
+        logger.warning("sound manager is not ready???");
       }
     }
   }
@@ -360,7 +383,11 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
           ": (" + getElement().getId() + ") for " + song + " : " + this + " created sound " + currentSound);
     }
 
-    soundManager.createSound(currentSound, uniqueID, song, doAutoload, listenView == null ? 100 : listenView.getVolume());
+    soundManager.createSound(currentSound, uniqueID, song, doAutoload, getVolume());
+  }
+
+  private int getVolume() {
+    return listenView == null ? 100 : listenView.getVolume();
   }
 
   /**
@@ -481,7 +508,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
       logger.info("PlayAudioPanel playing now = " + isPlaying() + " path " + currentPath);
     }
     markPlaying();
-    // setPlayButtonText();
     soundManager.play(currentSound);
   }
 

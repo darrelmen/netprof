@@ -66,7 +66,7 @@ import java.util.logging.Logger;
 public class PlayAudioPanel extends HeadlessPlayAudio {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   protected static final IconType PLAY = IconType.PLAY;
 
@@ -180,7 +180,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
    * Remember to destroy a sound once we are done with it, otherwise SoundManager
    * will maintain references to it, listener references, etc.
    */
-  @Override
+/*  @Override
   protected void onUnload() {
     if (DEBUG) logger.info("onUnload : doing unload of play ------------------> " + this.getId());
     super.onUnload();
@@ -189,7 +189,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
     destroySound();
 
     for (AudioControl listener : listeners) listener.reinitialize();    // remove playing line, if it's there
-  }
+  }*/
 
   /**
    * @param optionalToTheRight

@@ -92,6 +92,9 @@ public class SoundManagerStatic implements SoundManagerAPI {
       if (DEBUG) logger.info("SoundManagerStatic.createSound " + sound + " title " +title + " vol " + volume);
       SoundManager.createSound(sound, title, file, doAutoload, volume);
     }
+    else {
+      logger.warning("createSound - can't");
+    }
   }
 
   @Override

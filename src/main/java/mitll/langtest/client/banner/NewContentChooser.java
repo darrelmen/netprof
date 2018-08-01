@@ -69,7 +69,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private VIEWS currentSection = VIEWS.NONE;
   private HandlerRegistration handlerRegistration;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * @param controller
@@ -205,12 +205,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           dialogHelper.showContent(divWidget, DIALOG.toString(), fromClick);
           break;
         case LISTEN:
-//          logger.info("showing " + LISTEN + " \n\n\n");
+          //logger.info("showing " + LISTEN + " \n\n\n");
           clearAndPushKeep(LISTEN);
           listenHelper.showContent(divWidget, LISTEN.toString(), fromClick);
           break;
         case REHEARSE:
-          //        logger.info(" \n\n\n showing " + REHEARSE + " \n\n\n");
+         // logger.info(" showing " + REHEARSE + " \n\n\n");
           clearAndPushKeep(REHEARSE);
           rehearseHelper.showContent(divWidget, REHEARSE.toString(), fromClick);
           break;

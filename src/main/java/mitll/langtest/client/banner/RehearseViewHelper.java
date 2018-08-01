@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExercise>> extends ListenViewHelper<T> {
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final int DELAY_MILLIS = 20;
 
@@ -234,7 +234,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       directClick = false;
       markCurrent();
     } else {
-      if (DEBUG) logger.info("currentTurnPlayEnded - turn " + currentTurn.getExID());
+      if (DEBUG) logger.info("currentTurnPlayEnded (rehearse) - turn " + currentTurn.getExID());
       List<T> seq = getSeq();
 
       boolean isCurrentPrompt = seq.contains(currentTurn);

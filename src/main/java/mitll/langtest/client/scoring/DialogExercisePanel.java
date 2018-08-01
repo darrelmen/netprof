@@ -197,6 +197,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
   }
 
+
+  @Override
+  protected void onUnload() {
+    playAudio.cleanUp();
+  }
+
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
     clickableWords = new ClickableWords(listContainer, exercise.getID(), controller.getLanguage(), projectStartupInfo.getLanguageInfo().getFontSize(), BLUE);
   }
@@ -850,8 +856,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   @Override
   public void doPlayPauseToggle() {
     if (playAudio != null) {
+      logger.info("doPlayPauseToggle");
       playAudio.doPlayPauseToggle();
-    }
+    } else logger.warning("no play audio???");
   }
 
   public void addPlayListener(PlayListener playListener) {
