@@ -68,7 +68,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   private final Set<Widget> completed = new HashSet<>();
   protected T exercise = null;
   final ExerciseController controller;
-  private final NavigationHelper navigationHelper;
+  protected final NavigationHelper navigationHelper;
   final ListInterface<L, T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
   protected final String instance;
@@ -79,6 +79,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * @param controller
    * @param exerciseList
    * @param instance
+   * @param enableNextOnlyWhenBothCompleted
    * @see ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.list.ListInterface#loadExercise
    */
@@ -86,7 +87,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
                 final ExerciseController controller,
                 ListInterface<L, T> exerciseList,
                 String instance,
-                boolean doNormalRecording) {
+                boolean doNormalRecording, boolean enableNextOnlyWhenBothCompleted) {
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
@@ -97,7 +98,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     /*    logger.info("for " + e.getID() + " instance " + instance +
         " doNormal " + doNormalRecording);*/
 
-    this.navigationHelper = getNavigationHelper(controller);
+    this.navigationHelper = getNavigationHelper(controller, enableNextOnlyWhenBothCompleted);
 
     addInstructions();
     add(getQuestionContentRTL(e));
@@ -132,11 +133,11 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     return hp;
   }
 
-  private NavigationHelper getNavigationHelper(ExerciseController controller) {
+  private NavigationHelper getNavigationHelper(ExerciseController controller, boolean enableNextOnlyWhenBothCompleted) {
     return new NavigationHelper(exercise, controller, this, exerciseList,
         true,
         true,
-        true,
+        enableNextOnlyWhenBothCompleted,
         showPrevButton());
   }
 

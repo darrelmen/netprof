@@ -81,13 +81,14 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    * @param controller
    * @param doNormalRecording
    * @param instance
+   * @param enableNextOnlyWhenBothCompleted
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
   public WaveformExercisePanel(T e,
                                ExerciseController controller, ListInterface<L, T> exerciseList,
                                boolean doNormalRecording,
-                               String instance) {
-    super(e, controller, exerciseList, instance, doNormalRecording);
+                               String instance, boolean enableNextOnlyWhenBothCompleted) {
+    super(e, controller, exerciseList, instance, doNormalRecording, enableNextOnlyWhenBothCompleted);
   }
 
   @Override

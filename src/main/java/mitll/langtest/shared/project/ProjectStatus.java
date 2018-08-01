@@ -79,7 +79,7 @@ public enum ProjectStatus implements IsSerializable {
   }
 
   /**
-   * @see ProjectEditForm#getBox
+   * @see ProjectEditForm#getStatusChoices
    * @return
    */
   public boolean shouldShow() {

@@ -158,7 +158,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
      * @see RecorderNPFHelper#getFactory
      */
     RecordRefAudioPanel(ClientExercise e, ExerciseController controller1, ListInterface<T, ClientExercise> exerciseList1, String instance) {
-      super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance);
+      super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance, false);
     }
 
     @Override
@@ -168,7 +168,9 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
 
     @Override
     protected void enableNext() {
-      super.enableNext();
+
+      navigationHelper.enableNextButton(true);
+      //super.enableNext();
       if (isCompleted()) {
         showRecordedState(exercise);
       }

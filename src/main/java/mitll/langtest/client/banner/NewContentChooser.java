@@ -69,6 +69,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private VIEWS currentSection = VIEWS.NONE;
   private HandlerRegistration handlerRegistration;
 
+  private static final boolean DEBUG = false;
+
   /**
    * @param controller
    * @see InitialUI#makeNavigation
@@ -169,10 +171,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+    if (DEBUG) logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
-      logger.info("showView - showing " + view);
+      if (DEBUG) logger.info("showView - showing " + view);
       //} else {
       currentSection = view;
       storeValue(view);
@@ -208,7 +210,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           listenHelper.showContent(divWidget, LISTEN.toString(), fromClick);
           break;
         case REHEARSE:
-  //        logger.info(" \n\n\n showing " + REHEARSE + " \n\n\n");
+          //        logger.info(" \n\n\n showing " + REHEARSE + " \n\n\n");
           clearAndPushKeep(REHEARSE);
           rehearseHelper.showContent(divWidget, REHEARSE.toString(), fromClick);
           break;
@@ -255,7 +257,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
       //   logger.info("setInstanceHistory clearing history for instance " + views);
       int dialog = selectionState.getDialog();
-     pushItem(getInstanceParam(views) + SelectionState.SECTION_SEPARATOR +
+      pushItem(getInstanceParam(views) + SelectionState.SECTION_SEPARATOR +
           (dialog > 0 ? (SelectionState.DIALOG + "=" + dialog) : ""));
     } else {
       //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
@@ -264,8 +266,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private void setInstanceHistory(VIEWS views) {
     if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
-        logger.info("setInstanceHistory clearing history for instance " + views);
-     pushItem(getInstanceParam(views));
+      logger.info("setInstanceHistory clearing history for instance " + views);
+      pushItem(getInstanceParam(views));
     } else {
       //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
@@ -397,7 +399,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
     // logger.info("pushUnitOrChapter ");
-   pushItem(s + "=" + next.getValue());
+    pushItem(s + "=" + next.getValue());
   }
 
   /**
@@ -480,7 +482,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   @Override
   public void storeViewForMode(ProjectMode mode) {
-   // logger.info("storeViewForMode " + mode);
+    // logger.info("storeViewForMode " + mode);
     //pushItem(""); // clear instance in url
     storeValue(mode == ProjectMode.DIALOG ? DIALOG : LEARN);
   }
@@ -565,7 +567,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
       //   logger.info("getShowTab history after - " + History.getToken());
 
-     pushItem(
+      pushItem(
           getInstanceParam(LEARN) +
               SelectionState.SECTION_SEPARATOR + SelectionState.ITEM + "=" + exid
       );
@@ -581,7 +583,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private void setHistoryWithList(int listid, VIEWS views) {
     // logger.info("showListIn - " + listid + " " + views);
-   pushItem(
+    pushItem(
         FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
             getInstanceParam(views));
   }
@@ -594,7 +596,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @Override
   public void showDialogIn(int dialogid, VIEWS view) {
     // logger.info("showListIn - " + listid + " " + view);
-   pushItem(
+    pushItem(
         SelectionState.DIALOG + "=" + dialogid + SelectionState.SECTION_SEPARATOR +
             getInstanceParam(view));
     banner.show(view);
@@ -607,6 +609,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 //    logger.info("logException stack " + exceptionAsString);
     History.newItem(url);
   }
+
   @Override
   public void setBannerVisible(boolean visible) {
     banner.setVisible(visible);

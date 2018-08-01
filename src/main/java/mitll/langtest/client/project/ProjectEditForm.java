@@ -60,6 +60,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
@@ -295,7 +298,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   boolean isValid() {
-  //  logger.info("isValid unit '" + unit.getSafeText() + "'");
+    //  logger.info("isValid unit '" + unit.getSafeText() + "'");
 
     if (nameField.getSafeText().isEmpty()) {
       markErrorNoGrabRight(nameField, PLEASE_ENTER_A_PROJECT_NAME);
@@ -471,7 +474,7 @@ public class ProjectEditForm extends UserDialog {
     lifecycle.add(statusBox = getStatusChoices());
     statusBox.setWidth("150px");
     {
-      DivWidget ios=new DivWidget();
+      DivWidget ios = new DivWidget();
 
       ios.addStyleName("leftThirtyMargin");
       showOniOSBox = new CheckBox(SHOW_ON_I_OS);
@@ -500,10 +503,10 @@ public class ProjectEditForm extends UserDialog {
   private ListBox getTypeBox() {
     ListBox affBox = new ListBox();
     affBox.addStyleName("leftTenMargin");
+    logger.info("getTypeBox type " + affBox.getItemCount());
 
-    Arrays.stream(ProjectType.values())
-        .filter(ProjectType::shouldShow)
-        .forEach(projectType->affBox.addItem(projectType.name()));
+    getVisibleProjectTypes().forEach(projectType -> affBox.addItem(projectType.name()));
+    logger.info("getTypeBox after type " + affBox.getItemCount());
 
     return affBox;
   }
@@ -512,15 +515,24 @@ public class ProjectEditForm extends UserDialog {
     int i = 0;
     boolean found = false;
 
-    for (ProjectType projectType1 : ProjectType.values()) {
+    logger.info("project type " + projectType);
+
+    for (ProjectType projectType1 : getVisibleProjectTypes()) {
       if (projectType1 == projectType) {
         found = true;
         break;
       } else i++;
     }
+    logger.info("project type " + projectType + " found " + found + " i " + i);
 
     // first is please select.
     statusBox.setSelectedIndex(found ? i : 0);
+  }
+
+  @NotNull
+  private List<ProjectType> getVisibleProjectTypes() {
+    return Arrays.stream(ProjectType.values())
+        .filter(ProjectType::shouldShow).collect(Collectors.toList());
   }
 
   /**
@@ -622,7 +634,7 @@ public class ProjectEditForm extends UserDialog {
             }
           });
 
-     //     logger.info("got " + result.size() + " matching projects.");
+          //     logger.info("got " + result.size() + " matching projects.");
 
       /*    if (dominoToProject.size() == 1) {
             if (info.getDominoID() == -1) {
@@ -641,12 +653,12 @@ public class ProjectEditForm extends UserDialog {
    */
   private void setUnitAndChapter(String selectedValue, DominoProject dominoProject) {
     if (dominoProject != null) {
-    //  logger.info("setUnitAndChapter got " + dominoProject);
+      //  logger.info("setUnitAndChapter got " + dominoProject);
       unit.setText(dominoProject.getFirstType());
       chapter.setText(dominoProject.getSecondType());
-    //  logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
+      //  logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
     } else {
-     // logger.info("setUnitAndChapter no domino project for " + selectedValue);
+      // logger.info("setUnitAndChapter no domino project for " + selectedValue);
     }
   }
 
@@ -841,9 +853,7 @@ public class ProjectEditForm extends UserDialog {
     affBox.getElement().setId(STATUS_BOX);
     affBox.addStyleName("leftTenMargin");
 
-    Arrays.stream(ProjectStatus.values())
-        .filter(ProjectStatus::shouldShow)
-        .forEach(projectType->affBox.addItem(projectType.name()));
+    getVisibleStatus().forEach(projectType -> affBox.addItem(projectType.name()));
 
     affBox.addChangeHandler(event ->
         showOniOSBox.setEnabled(affBox.getValue().equalsIgnoreCase(ProjectStatus.PRODUCTION.toString()))
@@ -856,7 +866,7 @@ public class ProjectEditForm extends UserDialog {
     int i = 0;
     boolean found = false;
 
-    for (ProjectStatus status : ProjectStatus.values()) {
+    for (ProjectStatus status : getVisibleStatus()) {
       if (status == statusValue) {
         found = true;
         break;
@@ -865,5 +875,13 @@ public class ProjectEditForm extends UserDialog {
 
     // first is please select.
     statusBox.setSelectedIndex(found ? i : 0);
+  }
+
+  @NotNull
+  private List<ProjectStatus> getVisibleStatus() {
+    Stream<ProjectStatus> projectStatusStream = Arrays.stream(ProjectStatus.values())
+        .filter(ProjectStatus::shouldShow);
+    List<ProjectStatus> collect = projectStatusStream.collect(Collectors.toList());
+    return collect;
   }
 }

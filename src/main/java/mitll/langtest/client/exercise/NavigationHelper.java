@@ -63,7 +63,7 @@ public class NavigationHelper extends HorizontalPanel {
 
   private Button prev;
   protected Button next;
-  private boolean enableNextOnlyWhenAllCompleted = true;
+  private boolean enableNextOnlyWhenAllCompleted;
   private final PostAnswerProvider provider;
   private final ListInterface<?, ?> listContainer;
 
@@ -73,7 +73,7 @@ public class NavigationHelper extends HorizontalPanel {
    * @param provider
    * @param listContainer
    * @param addKeyHandler
-   * @see ExercisePanel#getNavigationHelper(ExerciseController)
+   * @see ExercisePanel#getNavigationHelper
    */
   protected NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
                              ListInterface<?, ?> listContainer, boolean addKeyHandler) {
@@ -89,7 +89,7 @@ public class NavigationHelper extends HorizontalPanel {
    * @param addKeyHandler
    * @param enableNextOnlyWhenAllCompleted
    * @param addPrevButton
-   * @see ExercisePanel#getNavigationHelper(ExerciseController)
+   * @see ExercisePanel#getNavigationHelper
    */
   NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
                    ListInterface<?, ?> listContainer, boolean addButtons, boolean addKeyHandler,

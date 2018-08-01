@@ -364,6 +364,13 @@ public class DialogPopulate {
    * @return
    */
   public boolean cleanDialog(Project project) {
+    List<IDialog> dialogs = db.getDialogDAO().getDialogs(project.getID());
+
+    Collection<Integer> toDelete = new HashSet<>();
+    dialogs.forEach(iDialog -> iDialog.getExercises().forEach(clientExercise -> toDelete.add(clientExercise.getID())));
+
+    db.getUserExerciseDAO().deleteByExID(toDelete);
+
     db.getDialogDAO().removeForProject(project.getID());
     return true;
   }
