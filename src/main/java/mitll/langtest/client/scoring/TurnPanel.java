@@ -60,6 +60,7 @@ public class TurnPanel<T extends ClientExercise> extends DialogExercisePanel<T> 
 //      style.setBackgroundColor(LEFT_COLOR);
 //    }
 
+    flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
     //  wrapper.addStyleName("bubble");
     addMarginStyle();
 

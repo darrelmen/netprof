@@ -40,7 +40,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 4/5/17.
  */
 public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements ContentView, PlayListener, IListenView {
-  public static final int SPACER_HEIGHT = 50;
+  public static final int SPACER_HEIGHT = 10;
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final int HEADER_HEIGHT = 120;
@@ -92,7 +92,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     DivWidget child = new DivWidget();
     child.setWidth("100%");
     listContent.add(child);
-    listContent.setWidth(95 +        "%");
+    Style style = child.getElement().getStyle();
+//    style.setDisplay(Style.Display.FLEX);
+//    style.setProperty("flexDirection", "column");
+    listContent.setWidth(95 + "%");
 
     bothTurns.clear();
     leftTurnPanels.clear();
@@ -112,7 +115,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     });
   }
 
-  private void showDialogGetRef(IDialog dialog, DivWidget child) {
+  protected void showDialogGetRef(IDialog dialog, DivWidget child) {
     showDialog(dialog, child);
     List<RefAudioGetter> getters = new ArrayList<>(bothTurns);
     getRefAudio(getters.iterator());
@@ -122,17 +125,38 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     child.add(getHeader(dialog));
     child.add(getSpeakerRow(dialog));
 
+    DivWidget scroller = getScroller();
+
     DivWidget turns = getTurns(dialog);
+    scroller.add(turns);
+
+    child.add(scroller);
+  }
+
+  /**
+   * TODO : sigh - got to set height in javascript - I think -
+   *
+   * Element Height = Viewport height - element.offset.top - desired bottom margin
+   *
+   * add onresize events listener too
+   *
+   * TODO : scrolling doesn't work so well at bottom... scroll down a page?
+   * 
+   * @return
+   */
+  @NotNull
+  private DivWidget getScroller() {
     DivWidget scroller = new DivWidget();
 
+    scroller.getElement().setId("scroller");
+    scroller.addStyleName("cardBorderShadow");
     Style style = scroller.getElement().getStyle();
     style.setPosition(Style.Position.FIXED);
 
     scroller.setHeight("50%");
-    scroller.setWidth("95%");
+    scroller.setWidth("92%");
     style.setOverflow(Style.Overflow.AUTO);
-    scroller.add(turns);
-    child.add(scroller);
+    return scroller;
   }
 
   @NotNull
@@ -643,7 +667,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     //logger.info("markCurrent on " + currentTurn.getExID());
     currentTurn.markCurrent();
 
-    currentTurn.getElement().scrollIntoView();
+    //  currentTurn.getElement().scrollIntoView();
 
     List<T> seq = getSeq();
     int i = seq.indexOf(currentTurn);

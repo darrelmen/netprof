@@ -15,6 +15,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.client.scoring.ScoreProgressBar;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,22 +53,38 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     super(controller, viewContainer, myView);
     controller.registerStopDetected(this::silenceDetected);
   }
+/*
 
   @Override
   public void showContent(Panel listContent, String instanceName, boolean fromClick) {
     super.showContent(listContent, instanceName, fromClick);
 
+    DivWidget breadRow = getOverallFeedback();
+
+    listContent.add(breadRow);
+  }
+*/
+
+  @NotNull
+  private DivWidget getOverallFeedback() {
     DivWidget breadRow = new DivWidget();
     breadRow.setWidth("100%");
     Style style = breadRow.getElement().getStyle();
     style.setMarginTop(60, Style.Unit.PX);
     style.setMarginLeft(135, Style.Unit.PX);
+    style.setBottom(10, Style.Unit.PX);
     style.setClear(Style.Clear.BOTH);
+    style.setPosition(Style.Position.FIXED);
 
     breadRow.getElement().setId("breadRow");
     breadRow.add(showScoreFeedback());
+    return breadRow;
+  }
 
-    listContent.add(breadRow);
+  @Override
+  protected void showDialogGetRef(IDialog dialog, DivWidget child) {
+    super.showDialogGetRef(dialog, child);
+    child.add(getOverallFeedback());
   }
 
   protected void gotGoBack() {
@@ -206,7 +223,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     T widgets =
         (T) new RecordDialogExercisePanel<ClientExercise>(clientExercise, controller, null, alignments, this, isRight);
     // widgets.addWidgets(true,false,PhonesChoices.HIDE);
-   // widgets.setIsRight(isRight);
+    // widgets.setIsRight(isRight);
 
     return widgets;
   }
@@ -277,9 +294,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     if (num == expected) {
       double total = getTotal();
-     // logger.info("showScore showing " + num);
+      // logger.info("showScore showing " + num);
       total /= (float) num;
-    //  logger.info("showScore total   " + total);
+      //  logger.info("showScore total   " + total);
 
       double percent = total * 100;
       double round = percent;// Math.max(percent, 30);

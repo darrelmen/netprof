@@ -45,6 +45,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       minDur = (long) (((float) minDur) * DELAY_SCALAR);
       minDur -= END_DUR_SKEW;
     }
+    addStyleName("inlineFlex");
     //  logger.info("ex " + commonExercise.getID() + " min dur " + minDur);
   }
 
