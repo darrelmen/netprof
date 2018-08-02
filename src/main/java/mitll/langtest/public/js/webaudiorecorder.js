@@ -43,10 +43,10 @@ var mics = {};
 // called from initWebAudio
 function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
-    __log('Media stream created.');
+    // __log('Media stream created.');
 
     recorder = new Recorder(input);
-    __log('Recorder initialised.');
+//    __log('Recorder initialised.');
 
     rememberedInput = input;
     webAudioMicAvailable();
@@ -219,11 +219,11 @@ function initWebAudio() {
                     function (e) {
                         __log('initWebAudio (old) No live audio input: ' + e);
                         __log('initWebAudio (old) error: ' + e.name);
-                        if (e.name.startsWith("NotAllowedError")) {
-                            webAudioPermissionDenied();
-                        }
-                        webAudioMicNotAvailable();
-                    });
+                    if (e.name.startsWith("NotAllowedError")) {
+                        webAudioPermissionDenied();
+                    }
+                    webAudioMicNotAvailable();
+                });
             }
             else {
                 __log('initWebAudio getMedia null - no mic.');
@@ -238,7 +238,7 @@ function initWebAudio() {
 
     if (navigator.mediaDevices) {
         navigator.mediaDevices.ondevicechange = function (event) {
-            // __log("got device change... ");
+            __log("got device change... ");
             location.reload();
             //      initWebAudio();
             //updateDeviceList();

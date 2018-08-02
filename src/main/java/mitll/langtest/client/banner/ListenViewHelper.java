@@ -18,12 +18,14 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.DialogExercisePanel;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RefAudioGetter;
+import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -39,6 +41,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 4/5/17.
  */
 public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> implements ContentView, PlayListener, IListenView {
+  public static final int SPACER_HEIGHT = 50;
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final int HEADER_HEIGHT = 120;
@@ -71,7 +74,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   private ComplexWidget slider;
   private Button playButton;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -302,14 +305,17 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     DivWidget w = new DivWidget();
     w.getElement().setId("spacer");
     w.setWidth("100%");
-    w.setHeight("200px");
+    w.setHeight(SPACER_HEIGHT + "px");
     w.getElement().getStyle().setClear(Style.Clear.BOTH);
+    spacer = w;
     rowOne.add(w);
 
 
     rowOne.getElement().getStyle().setMarginBottom(10, PX);
     return rowOne;
   }
+
+  private DivWidget spacer;
 
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {
@@ -567,11 +573,18 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     }
   }
 
-
+  /**
+   * @seex mitll.langtest.client.sound.PlayAudioPanel#setPlayLabel
+   * @see HeadlessPlayAudio#songFinished
+   */
   @Override
   public void playStopped() {
     if (currentTurn != null) {
       if (DEBUG) logger.info("playStopped - turn " + currentTurn.getExID());
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("playStopped " + currentTurn.getExID()));
+//      logger.info("logException stack " + exceptionAsString);
+
       removeMarkCurrent();
       currentTurnPlayEnded();
       setPlayButtonToPlay();
@@ -610,12 +623,16 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     //logger.info("markCurrent on " + currentTurn.getExID());
     currentTurn.markCurrent();
 
+    currentTurn.getElement().scrollIntoView();
+
     List<T> seq = getSeq();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
 
     if (i1 > seq.size() - 1) {
-     // currentTurn = seq.get(0);
+      spacer.getElement().scrollIntoView();
+      // currentTurn = seq.get(0);
+//      currentTurn.getElement().scrollIntoView();
     } else {
       seq.get(i1).getElement().scrollIntoView();
     }

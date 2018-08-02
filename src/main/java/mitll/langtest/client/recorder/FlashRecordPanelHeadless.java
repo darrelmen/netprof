@@ -163,10 +163,11 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   // web audio calls
-  public boolean tryWebAudio() {
+/*  public boolean tryWebAudio() {
     return webAudio.tryWebAudio();
-  }
+  }*/
 
+  public static WebAudioRecorder getWebAudio() { return webAudio; }
   /**
    * @return
    * @see UserMenu#getAbout
@@ -349,7 +350,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     Timer t = new Timer() {
       @Override
       public void run() {
-        long now = System.currentTimeMillis();
+    //    long now = System.currentTimeMillis();
       //  logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then));
         stopWebRTCRecording(wavCallback);
       }
@@ -364,8 +365,8 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     Timer t = new Timer() {
       @Override
       public void run() {
-        long now = System.currentTimeMillis();
-        logger.info("stopFlashRecording timer at " + now + " diff " + (now - then));
+      //  long now = System.currentTimeMillis();
+      //  logger.info("stopFlashRecording timer at " + now + " diff " + (now - then));
         flashStopRecording();
         wavCallback.getBase64EncodedWavFile(flashGetWav());
       }

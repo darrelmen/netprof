@@ -58,8 +58,10 @@ public class WebAudioRecorder {
    * IF we get no response in 5 seconds, ask again!
    *
    * The user can easily ignore the dialog by clicking away.
+   *
+   * @see FlashRecordPanelHeadless#tryWebAudio
    */
-  boolean tryWebAudio() {
+  public boolean tryWebAudio() {
     if (!tried) {
       tried = true;
       //attempts--;
@@ -90,7 +92,7 @@ public class WebAudioRecorder {
    * or one of webAudioMicNotAvailable or webAudioPermissionDenied if the browser doesn't support recording or
    * there's no mic, or the user doesn't permit it.
    */
-  private native void initWebaudio() /*-{
+  public native void initWebaudio() /*-{
       $wnd.initWebAudio();
   }-*/;
 
@@ -130,7 +132,7 @@ public class WebAudioRecorder {
   }
 
   public static void silenceDetected() {
-  //  console("silenceDetected -- now!");
+    //  console("silenceDetected -- now!");
     FlashRecordPanelHeadless.micPermission.silenceDetected();
   }
 

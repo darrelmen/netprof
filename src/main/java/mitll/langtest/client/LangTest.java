@@ -735,7 +735,7 @@ public class LangTest implements
        * @see mitll.langtest.client.recorder.WebAudioRecorder
        */
       public void gotPermission() {
-        logger.info("\tmakeFlashContainer - got permission!");
+        logger.info("makeFlashContainer - got permission!");
         hideFlash();
         checkLogin();
       }
@@ -883,7 +883,7 @@ public class LangTest implements
       checkLogin();
     } else {
       if (DEBUG) logger.info("checkInitFlash : initFlash - no permission yet");
-      flashRecordPanel.tryWebAudio();
+      FlashRecordPanelHeadless.getWebAudio().initWebaudio();
       if (!WebAudioRecorder.isWebRTCAvailable()) {
         checkLogin();
       }
@@ -1167,6 +1167,7 @@ public class LangTest implements
    * @see PostAudioRecordButton#startRecording()
    */
   public void startRecording() {
+
     flashRecordPanel.recordOnClick();
   }
 

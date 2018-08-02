@@ -363,6 +363,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     RootPanel.get().clear();   // necessary?
 
     DivWidget verticalContainer = new FluidContainer();
+//    DivWidget verticalContainer = new DivWidget();
     verticalContainer.setId("rootVerticalContainer");
     addMouseOverHandler(verticalContainer, event -> confirmCurrentProject());
     // logger.info("getRootContainer Add mouse over to " + verticalContainer.getId());

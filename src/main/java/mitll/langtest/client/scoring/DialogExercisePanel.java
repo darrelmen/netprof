@@ -102,8 +102,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
       }
     });
-    getElement().getStyle().setCursor(Style.Cursor.POINTER);
-
+    Style style = getElement().getStyle();
+    style.setCursor(Style.Cursor.POINTER);
+    style.setOverflow(Style.Overflow.HIDDEN);
     getElement().setId("DialogExercisePanel_" + getExID());
 
   }
@@ -145,16 +146,19 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   private void styleMe(DivWidget widget) {
-    Style style = widget.getElement().getStyle();
-    if (isRight) {
-      style.setFloat(Style.Float.RIGHT);
-      style.setTextAlign(Style.TextAlign.RIGHT);
-      style.setBackgroundColor(RIGHT_BKG_COLOR);
-    } else {
-      style.setFloat(Style.Float.LEFT);
-      style.setTextAlign(Style.TextAlign.LEFT);
-      style.setBackgroundColor(LEFT_COLOR);
-    }
+    //Style style = widget.getElement().getStyle();
+    //   if (isRight) {
+//      style.setFloat(Style.Float.RIGHT);
+//      style.setTextAlign(Style.TextAlign.RIGHT);
+//      style.setBackgroundColor(RIGHT_BKG_COLOR);
+    widget.addStyleName(isRight ? "rightbubble" : "leftbubble");
+    // } else {
+    // widget.addStyleName("leftbubble");
+//
+//      style.setFloat(Style.Float.LEFT);
+//      style.setTextAlign(Style.TextAlign.LEFT);
+//      style.setBackgroundColor(LEFT_COLOR);
+//    }
 
     //  widget.addStyleName("bubble");
     {
@@ -856,7 +860,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   @Override
   public void doPlayPauseToggle() {
     if (playAudio != null) {
-      logger.info("doPlayPauseToggle");
+      if (DEBUG) logger.info("doPlayPauseToggle");
       playAudio.doPlayPauseToggle();
     } else logger.warning("no play audio???");
   }
