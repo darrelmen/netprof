@@ -2,6 +2,8 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -26,13 +28,13 @@ import java.util.stream.Collectors;
  */
 public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     implements AudioChangeListener, RefAudioGetter, IPlayAudioControl {
+  public static final int WORD_SPACER = 7;
   private Logger logger = Logger.getLogger("DialogExercisePanel");
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
   private static final String BLUE = "#2196F3";
-  private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
-  private static final String LEFT_COLOR = "#e7e6ec";
-  private static final String HIGHLIGHT_COLOR = "green";
+  //  private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
+//  private static final String LEFT_COLOR = "#e7e6ec";
 
 
   static final int CONTEXT_INDENT = 45;//50;
@@ -47,7 +49,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   /**
    * @see #getFLEntry
    */
-  List<IHighlightSegment> flclickables = null;
+  protected List<IHighlightSegment> flclickables = null;
 
   /**
    * @see #makePlayAudio
@@ -108,18 +110,19 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     getElement().setId("DialogExercisePanel_" + getExID());
 
   }
+/*
 
-  boolean isRight;
+private   boolean isRight;
 
   public void setIsRight(boolean isRight) {
     this.isRight = isRight;
   }
+*/
 
   public int getExID() {
     return exercise.getID();
   }
 
-  private DivWidget bubble;
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
@@ -132,43 +135,27 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       DivWidget flEntry = getFLEntry(exercise);
       //  this.addStyleName("bubble");
 
-      DivWidget rightSide = new DivWidget();
-      this.bubble = rightSide;
-      rightSide.getElement().setId("rightSideBubble_" + getExID());
-      rightSide.addStyleName("bubble");
-      rightSide.add(flEntry);
-      styleMe(rightSide);
+      //  DivWidget wrapper = doStyle(flEntry);
+      DivWidget wrapper = new DivWidget();
+      wrapper.add(flEntry);
+      styleMe(wrapper);
 
-      add(rightSide);
+      add(wrapper);
 
       makePlayAudio(exercise, null);
     }
   }
 
-  private void styleMe(DivWidget widget) {
-    //Style style = widget.getElement().getStyle();
-    //   if (isRight) {
-//      style.setFloat(Style.Float.RIGHT);
-//      style.setTextAlign(Style.TextAlign.RIGHT);
-//      style.setBackgroundColor(RIGHT_BKG_COLOR);
-    widget.addStyleName(isRight ? "rightbubble" : "leftbubble");
-    // } else {
-    // widget.addStyleName("leftbubble");
-//
-//      style.setFloat(Style.Float.LEFT);
-//      style.setTextAlign(Style.TextAlign.LEFT);
-//      style.setBackgroundColor(LEFT_COLOR);
-//    }
+  protected void styleMe(DivWidget widget) {
+    addMarginStyle();
+  }
 
-    //  widget.addStyleName("bubble");
-    {
-      Style style2 = getFlClickableRow().getElement().getStyle();
-      addMarginLeft(style2);
-      style2.setMarginRight(10, Style.Unit.PX);
-      style2.setMarginTop(7, Style.Unit.PX);
-      style2.setMarginBottom(7, Style.Unit.PX);
-    }
-
+  protected void addMarginStyle() {
+    Style style2 = getFlClickableRow().getElement().getStyle();
+    addMarginLeft(style2);
+    style2.setMarginRight(10, Style.Unit.PX);
+    style2.setMarginTop(7, Style.Unit.PX);
+    style2.setMarginBottom(7, Style.Unit.PX);
   }
 
   protected void addMarginLeft(Style style2) {
@@ -201,10 +188,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
   }
 
-
   @Override
   protected void onUnload() {
-    playAudio.destroySound();
+    if (playAudio != null) {
+      playAudio.destroySound();
+    }
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
@@ -329,11 +317,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       logger.warning("setPlayListener no type to segment for " + id + " and exercise " + exercise.getID());
     } else {
       if (DEBUG) {
-        TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap =
-            typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
+//        TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap =
+//            typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
         logger.info("setPlayListener segments now for ex " + exercise.getID() +
             " audio " + id + " dur " + duration +
-            "\n\twords: " + transcriptSegmentIHighlightSegmentTreeMap.keySet() +
+            "\n\twords: " + typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT).keySet() +
             "\n\tphone: " + typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT).keySet()
         );
       }
@@ -379,19 +367,19 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       } else {
         TreeMap<TranscriptSegment, IHighlightSegment> phoneMap = new TreeMap<>();
         typeToTranscriptToHighlight.put(NetPronImageType.PHONE_TRANSCRIPT, phoneMap);
-        ListIterator<IHighlightSegment> iterator = flclickables.listIterator();
+        ListIterator<IHighlightSegment> highlightSegments = flclickables.listIterator();
 
         List<TranscriptSegment> phones = alignmentOutput.getTypeToSegments().get(NetPronImageType.PHONE_TRANSCRIPT);
 
         if (transcriptMatches(flclickables, wordSegments)) {
-          doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, iterator, wordSegments, clickablePhones);
+          doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments, wordSegments, clickablePhones);
         } else {
           if (DEBUG_MATCH) logger.warning("matchSegmentToWidgetForAudio no match for" +
               "\n\tsegments " + wordSegments +
               "\n\tto       " + flclickables);
 
           clickableRow.clear();
-          doOneToManyMatch(phones, audioControl, phoneMap, segmentToWord, iterator, wordSegments, clickableRow, clickablePhones);
+          doOneToManyMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments, wordSegments, clickableRow, clickablePhones);
         }
       }
     }
@@ -400,6 +388,16 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return typeToTranscriptToHighlight;
   }
 
+  /**
+   * @param phones
+   * @param audioControl
+   * @param phoneMap
+   * @param segmentToWord
+   * @param clickablesIterator
+   * @param wordSegments
+   * @param clickableRow
+   * @param clickablePhones
+   */
   private void doOneToManyMatch(List<TranscriptSegment> phones,
                                 AudioControl audioControl,
                                 TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
@@ -419,10 +417,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         if (DEBUG_MATCH)
           logger.info("doOneToManyMatch got segment " + wordSegment);// + " length " + segmentLength);
 
-        IHighlightSegment value1 =
-            matchEventSegmentToClickable(clickablesIterator, wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones);
+        List<IHighlightSegment> unclickable = new ArrayList<>();
+        IHighlightSegment highlightSegment =
+            matchEventSegmentToClickable(clickablesIterator, wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, unclickable);
 
-        if (value1 == null) {
+        if (highlightSegment == null) {
           if (DEBUG_MATCH) logger.info("doOneToManyMatch can't find match for wordSegment " + wordSegment);
 
           // so here we have something where we need more segments for this clickable...?
@@ -490,11 +489,43 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
           }
         } else {
           // logger.warning("doOneToManyMatch no match for " + wordSegment);
-          if (!isRTL) {
-            addFloatLeft(value1);
+          boolean hasSpace = false;
+          for (IHighlightSegment iHighlightSegment : unclickable) {
+ /*           HTML html = new HTML(iHighlightSegment.getContent(), isRTL ? HasDirection.Direction.RTL : HasDirection.Direction.LTR);
+            if (!isRTL) {
+              html.addStyleName("floatLeft");
+            }
+            clickableRow.add(html);*/
+
+            if (!iHighlightSegment.getContent().trim().isEmpty()) {
+
+              if (!isRTL) {
+                addFloatLeft(iHighlightSegment);
+              }
+//              if (iHighlightSegment.getContent().trim().isEmpty()) {
+//                iHighlightSegment.asWidget().setWidth("30px");
+//              }
+              clickableRow.add(iHighlightSegment.asWidget());
+            } else hasSpace = true;
           }
-          segmentToWord.put(wordSegment, value1);
-          clickableRow.add(value1.asWidget());
+          ;
+
+          if (!isRTL) {
+            addFloatLeft(highlightSegment);
+
+          }
+          if (hasSpace) {
+            Style style = highlightSegment.asWidget().getElement().getStyle();
+            if (isRTL) {
+              style.setMarginRight(WORD_SPACER, Style.Unit.PX);
+            } else {
+              style.setMarginLeft(WORD_SPACER, Style.Unit.PX);
+            }
+            if (DEBUG_MATCH) logger.info("Add space to " + highlightSegment.getContent());
+          }
+
+          segmentToWord.put(wordSegment, highlightSegment);
+          clickableRow.add(highlightSegment.asWidget());
           //clickableRow.add(new InlineHTML(" "));
         }
       }
@@ -526,8 +557,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param phones
    * @param audioControl
    * @param phoneMap
-   * @param segmentToWord   remember map of transcript seg to highlight segment
-   * @param iterator
+   * @param segmentToWord            remember map of transcript seg to highlight segment
+   * @param highlightSegmentIterator
    * @param wordSegments
    * @param clickablePhones
    */
@@ -535,27 +566,27 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                AudioControl audioControl,
                                TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord,
-                               Iterator<IHighlightSegment> iterator,
+                               Iterator<IHighlightSegment> highlightSegmentIterator,
                                List<TranscriptSegment> wordSegments,
                                DivWidget clickablePhones) {
     clickablePhones.clear();
     for (TranscriptSegment wordSegment : wordSegments) {
-      if (iterator.hasNext()) {
+      if (highlightSegmentIterator.hasNext()) {
         List<TranscriptSegment> phonesInWord = getSegs(phones, wordSegment);
 
-        if (DEBUG)
+        if (DEBUG_MATCH)
           logger.info("doOneToOneMatch got segment " + wordSegment);// + " length " + segmentLength);
 
-        IHighlightSegment value1 =
-            matchEventSegmentToClickable(iterator, wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones);
+        IHighlightSegment highlightSegment =
+            matchEventSegmentToClickable(highlightSegmentIterator, wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, new ArrayList<>());
 
-        if (value1 == null) {
-          if (DEBUG) logger.warning("doOneToOneMatch can't find match for wordSegment " + wordSegment);
+        if (highlightSegment == null) {
+          if (DEBUG_MATCH) logger.warning("doOneToOneMatch can't find match for wordSegment " + wordSegment);
         } else {
-          segmentToWord.put(wordSegment, value1);
+          segmentToWord.put(wordSegment, highlightSegment);
         }
       } else {
-        if (DEBUG) logger.warning("doOneToOneMatch no match for " + wordSegment);
+        if (DEBUG_MATCH) logger.warning("doOneToOneMatch no match for " + wordSegment);
       }
     }
   }
@@ -595,20 +626,21 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                                          List<TranscriptSegment> phonesInWord,
                                                          AudioControl audioControl,
                                                          TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                                                         DivWidget clickablePhones) {
+                                                         DivWidget clickablePhones,
+                                                         List<IHighlightSegment> unclickable) {
     IHighlightSegment clickable = clickables.next();
-    clickable = skipUnclickable(clickables, clickable);
+    clickable = skipUnclickable(clickables, clickable, unclickable);
     String segment = wordSegment.getEvent();
-    if (DEBUG_DETAIL)
-      logger.info("matchSegmentToWidgetForAudio compare :" +
+    if (DEBUG_DETAIL || DEBUG_MATCH)
+      logger.info("matchEventSegmentToClickable compare :" +
           "\n\tsegment      " + segment + //" length " + segmentLength +
           "\n\tvs clickable " + clickable);
 
     String lcSegment = removePunct(segment.toLowerCase());
     String fragment1 = removePunct(clickable.getContent().toLowerCase());
 
-    if (DEBUG_DETAIL)
-      logger.info("matchSegmentToWidgetForAudio compare :" +
+    if (DEBUG_DETAIL || DEBUG_MATCH)
+      logger.info("matchEventSegmentToClickable compare :" +
           "\n\tlc segment   " + lcSegment + //" length " + segmentLength +
           "\n\tvs fragment1 '" + fragment1 + "'");
 
@@ -622,7 +654,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
       return clickable;
     } else {
-      Collection<IHighlightSegment> bulk = getMatchingSegments(clickables, clickable, lcSegment);// : Collections.EMPTY_LIST;
+      Collection<IHighlightSegment> bulk = getMatchingSegments(clickables, clickable, lcSegment, unclickable);// : Collections.EMPTY_LIST;
 
       if (bulk.isEmpty()) {
         return null;
@@ -633,8 +665,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
           addSouthClickable(clickablePhones, allHighlight, phoneDivBelowWord);
         }
 
-        if (DEBUG)
-          logger.info("matchSegmentToWidgetForAudio create composite from " + bulk.size() + " = " + allHighlight);
+        if (DEBUG || DEBUG_MATCH)
+          logger.info("matchEventSegmentToClickable create composite from " + bulk.size() + " = " + allHighlight);
 
         return allHighlight;
       }
@@ -673,7 +705,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   @NotNull
   private Collection<IHighlightSegment> getMatchingSegments(Iterator<IHighlightSegment> clickables,
                                                             IHighlightSegment clickable,
-                                                            String lcSegment) {
+                                                            String lcSegment,
+                                                            List<IHighlightSegment> unclickable) {
     Collection<IHighlightSegment> bulk = new ArrayList<>();
 
     if (DEBUG_MATCH) logger.info("\tgetMatchingSegments (2) compare :" +
@@ -705,7 +738,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         }
         clickable = clickables.next();
         // logger.info("clickable now        " + clickable);
-        clickable = skipUnclickable(clickables, clickable);
+        clickable = skipUnclickable(clickables, clickable, unclickable);
         // logger.info("after skip clickable " + clickable);
       } else {
         if (DEBUG_MATCH) {
@@ -735,22 +768,21 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       }
     }
     boolean b = c == segments.size();
-    if (!b) {
-      if (DEBUG) logger.info("clickables " + c + " segments " + segments.size());
+    if (!b && DEBUG_MATCH) {
+      logger.info("transcriptMatches  clickables " + c + " segments " + segments.size());
       StringBuilder builder = new StringBuilder();
       for (IHighlightSegment clickable : clickables) {
         if (clickable.isClickable()) {
           builder.append(clickable.getContent()).append(" ");
         }
       }
-      if (DEBUG) logger.info("clickable : " + builder);
+      logger.info("transcriptMatches clickable : " + builder);
 
       StringBuilder builder2 = new StringBuilder();
       for (TranscriptSegment segment : segments) {
         builder2.append(segment.getEvent()).append(" ");
       }
-      if (DEBUG) logger.info("align    : " + builder2);
-
+      logger.info("transcriptMatches align    : " + builder2);
     }
     return b;
   }
@@ -806,9 +838,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   @NotNull
-  private IHighlightSegment skipUnclickable(Iterator<IHighlightSegment> iterator, IHighlightSegment clickable) {
+  private IHighlightSegment skipUnclickable(Iterator<IHighlightSegment> iterator, IHighlightSegment clickable, List<IHighlightSegment> unclickable) {
     while (!clickable.isClickable() && iterator.hasNext()) {
       // logger.info("skipUnclickable : skip " + clickable);
+      unclickable.add(clickable);
       clickable = iterator.next();
     }
     return clickable;
@@ -883,13 +916,4 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return (playAudio != null) && playAudio.isPlaying();
   }
 
-  public void removeMarkCurrent() {
-    //   logger.info("removeMarkCurrent on " + getExID());
-    bubble.getElement().getStyle().setBorderColor("white");
-  }
-
-  public void markCurrent() {
-    // logger.info("markCurrent on " + getExID());
-    bubble.getElement().getStyle().setBorderColor(HIGHLIGHT_COLOR);
-  }
 }

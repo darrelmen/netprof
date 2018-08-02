@@ -18,13 +18,12 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.client.scoring.DialogExercisePanel;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RefAudioGetter;
+import mitll.langtest.client.scoring.TurnPanel;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.dialog.IDialog;
@@ -40,7 +39,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> implements ContentView, PlayListener, IListenView {
+public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements ContentView, PlayListener, IListenView {
   public static final int SPACER_HEIGHT = 50;
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
@@ -57,6 +56,9 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   private static final String RANGE = "range";
   private static final String INPUT = "input";
 
+  /**
+   * @see #getHeader
+   */
   private static final int ROW_WIDTH = 97;
   private static final String HEIGHT = 100 + "px";
   private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
@@ -90,7 +92,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     DivWidget child = new DivWidget();
     child.setWidth("100%");
     listContent.add(child);
-    listContent.setWidth("90%");
+    listContent.setWidth(95 +        "%");
 
     bothTurns.clear();
     leftTurnPanels.clear();
@@ -119,7 +121,18 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   private void showDialog(IDialog dialog, DivWidget child) {
     child.add(getHeader(dialog));
     child.add(getSpeakerRow(dialog));
-    child.add(getTurns(dialog));
+
+    DivWidget turns = getTurns(dialog);
+    DivWidget scroller = new DivWidget();
+
+    Style style = scroller.getElement().getStyle();
+    style.setPosition(Style.Position.FIXED);
+
+    scroller.setHeight("50%");
+    scroller.setWidth("95%");
+    style.setOverflow(Style.Overflow.AUTO);
+    scroller.add(turns);
+    child.add(scroller);
   }
 
   @NotNull
@@ -273,6 +286,7 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   private DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
 
+    rowOne.getElement().setId("turnContainer");
     rowOne.setWidth(97 + "%");
     rowOne.getElement().getStyle().setMarginTop(10, PX);
 
@@ -296,6 +310,8 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     });
 
     rowOne.getElement().getStyle().setPaddingBottom(50, PX);
+    rowOne.getElement().getStyle().setMarginBottom(10, PX);
+
     if (!bothTurns.isEmpty()) {
       currentTurn = bothTurns.get(0);
       logger.info("getTurns : markCurrent ");
@@ -311,7 +327,6 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
     rowOne.add(w);
 
 
-    rowOne.getElement().getStyle().setMarginBottom(10, PX);
     return rowOne;
   }
 
@@ -350,8 +365,8 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   private T getTurnPanel(ClientExercise clientExercise, boolean isRight) {
     T turn = reallyGetTurnPanel(clientExercise, isRight);
     turn.addWidgets(true, false, PhonesChoices.HIDE);
-    turn.getElement()
-        .getStyle().setClear(Style.Clear.BOTH);
+
+    //turn.getElement().getStyle().setClear(Style.Clear.BOTH);
 
     turn.addPlayListener(this);
 
@@ -362,8 +377,13 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
 
   @NotNull
   protected T reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    T widgets = (T) new DialogExercisePanel<>(clientExercise, controller, null, alignments, this);
-    widgets.setIsRight(isRight);
+    T widgets = (T) new TurnPanel<>(
+        clientExercise,
+        controller,
+        null,
+        alignments,
+        this, isRight);
+    //  widgets.setIsRight(isRight);
     return widgets;
   }
 
@@ -642,4 +662,5 @@ public class ListenViewHelper<T extends DialogExercisePanel<ClientExercise>> imp
   public void setSmiley(Image smiley, double total) {
 
   }
+
 }

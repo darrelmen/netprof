@@ -2219,7 +2219,27 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
     border-radius: 30px;
     -webkit-box-shadow: 2px 2px 4px #888;
     -moz-box-shadow: 2px 2px 4px #888;
+    /*
     box-shadow: 2px 2px 4px #888;
+    */
+
+    box-shadow: 1px 1px 1px #888;
+    overflow: hidden;
+}
+
+.leftbubble {
+    /*
+    float: left;
+    */
+    background-color: rgb(231, 230, 236);
+}
+
+.rightbubble {
+    /*
+    float: right;
+    */
+    margin-right: 5px;
+    background-color: rgba(74, 168, 238, 0.69);
 }
 
 .label .input {

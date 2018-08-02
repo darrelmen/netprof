@@ -32,8 +32,6 @@ import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
 public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExercisePanel<T> {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
-  //public enum FieldType {FL, TRANSLIT, MEANING, EN}
-
   private static final String N_A = "N/A";
 
   private static final String LEFT_WIDTH = "60%";

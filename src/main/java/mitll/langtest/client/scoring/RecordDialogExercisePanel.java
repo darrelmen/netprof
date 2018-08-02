@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogExercisePanel<T> implements IRecordDialogTurn {
+public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
   public static final int DIM = 40;
   public static final long END_DUR_SKEW = 1500L;
   private long start = 0;
@@ -37,8 +37,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends DialogE
                                    final ExerciseController controller,
                                    final ListInterface<?, ?> listContainer,
                                    Map<Integer, AlignmentOutput> alignments,
-                                   IListenView listenView) {
-    super(commonExercise, controller, listContainer, alignments, listenView);
+                                   IListenView listenView,
+                                   boolean isRight) {
+    super(commonExercise, controller, listContainer, alignments, listenView, isRight);
     if (commonExercise.hasRefAudio()) {
       minDur = commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
       minDur = (long) (((float) minDur) * DELAY_SCALAR);

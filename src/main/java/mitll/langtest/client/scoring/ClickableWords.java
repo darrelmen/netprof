@@ -51,7 +51,6 @@ public class ClickableWords  {
   private int fontSize;
 
   private static final boolean DEBUG = false;
-  //private boolean showPhones = true;
   private String highlightColor;
 
   /**
@@ -92,7 +91,6 @@ public class ClickableWords  {
                               FieldType fieldType,
                               List<IHighlightSegment> clickables,
                               boolean isRTL) {
-    //boolean isFL = fieldType == FieldType.FL;
     boolean flLine = fieldType == FieldType.FL || (isJapanese && fieldType == FieldType.TRANSLIT);
     boolean isChineseCharacter = flLine && hasClickableAsian;
     HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL :

@@ -204,9 +204,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 //    return super.reallyGetTurnPanel(clientExercise);
     // logger.info("making record dialog ex panel for " + clientExercise.getID());
     T widgets =
-        (T) new RecordDialogExercisePanel<ClientExercise>(clientExercise, controller, null, alignments, this);
+        (T) new RecordDialogExercisePanel<ClientExercise>(clientExercise, controller, null, alignments, this, isRight);
     // widgets.addWidgets(true,false,PhonesChoices.HIDE);
-    widgets.setIsRight(isRight);
+   // widgets.setIsRight(isRight);
 
     return widgets;
   }
