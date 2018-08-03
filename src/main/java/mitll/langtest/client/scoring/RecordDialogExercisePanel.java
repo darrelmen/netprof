@@ -57,7 +57,12 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     while (scoredWords.hasNext()) {
       TranscriptSegment scoredWord = scoredWords.next();
       if (highlightSegment.hasNext()) {
+
         IHighlightSegment next1 = highlightSegment.next();
+        while (!next1.isClickable()) {
+          next1 = highlightSegment.next();
+        }
+
         next1.setHighlightColor(SimpleColumnChart.getColor(scoredWord.getScore()));
         next1.showHighlight();
       }

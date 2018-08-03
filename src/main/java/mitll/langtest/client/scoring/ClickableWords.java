@@ -75,7 +75,9 @@ public class ClickableWords  {
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     isUrdu = language.equalsIgnoreCase("Urdu");
     this.hasClickableAsian =
-        language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
+        language.equalsIgnoreCase(MANDARIN) ||
+          //  language.equalsIgnoreCase(Language.KOREAN.name()) ||
+            isJapanese;
     this.fontSize = fontSize;
   }
 

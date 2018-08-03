@@ -110,19 +110,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     getElement().setId("DialogExercisePanel_" + getExID());
 
   }
-/*
-
-private   boolean isRight;
-
-  public void setIsRight(boolean isRight) {
-    this.isRight = isRight;
-  }
-*/
 
   public int getExID() {
     return exercise.getID();
   }
-
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {

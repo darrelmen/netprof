@@ -357,7 +357,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
 
     if (pool != null) {
-      logger.info("close : closing connection to " + pool, new Exception());
+      logger.info("close : closing connection to " + pool);
       pool.closeConnection();
     }
 
