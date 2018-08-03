@@ -90,7 +90,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     this.listView = new ListView(controller);
     this.banner = banner;
     divWidget.setId("NewContentChooser");
-    divWidget.setHeight("100%");
+    //divWidget.setHeight("100%");
 
     addHistoryListener();
   }
@@ -275,13 +275,13 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private void clearAndFixScroll() {
     clear();
-    fixDivToNotScrollUnderHeader();
+  //  fixDivToNotScrollUnderHeader();
   }
 
-  private void fixDivToNotScrollUnderHeader() {
+/*  private void fixDivToNotScrollUnderHeader() {
     divWidget.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
     divWidget.getElement().getStyle().setPosition(Style.Position.FIXED);
-  }
+  }*/
 
   /**
    * @see #showView(VIEWS, boolean, boolean)
@@ -533,9 +533,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void clear() {
     divWidget.clear();
 
-    Style style = divWidget.getElement().getStyle();
+/*    Style style = divWidget.getElement().getStyle();
     style.clearProperty("overflow");
-    style.clearProperty("position");
+    style.clearProperty("position");*/
   }
 
   /**

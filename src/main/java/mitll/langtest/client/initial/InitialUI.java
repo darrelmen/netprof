@@ -66,7 +66,6 @@ import mitll.langtest.client.user.SendResetPassword;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.HeartbeatStatus;
@@ -91,6 +90,7 @@ import static mitll.langtest.client.user.UserPassLogin.*;
  * @since 2/23/16
  */
 public class InitialUI implements UILifecycle, BreadcrumbPartner {
+  public static final int TOP_OF_ROOT = 58;
   private final Logger logger = Logger.getLogger("InitialUI");
 
   /**
@@ -260,8 +260,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
     DivWidget contentRow = new DivWidget();
     contentRow.getElement().setId("InitialUI_contentRow");
-    contentRow.setHeight("100%");
-
     verticalContainer.add(contentRow);
     this.contentRow = contentRow;
 
@@ -364,12 +362,27 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
     DivWidget verticalContainer = new FluidContainer();
 //    DivWidget verticalContainer = new DivWidget();
-    verticalContainer.setId("rootVerticalContainer");
+    // verticalContainer.setId("rootVerticalContainer");
     addMouseOverHandler(verticalContainer, event -> confirmCurrentProject());
     // logger.info("getRootContainer Add mouse over to " + verticalContainer.getId());
-    com.google.gwt.user.client.Element element = verticalContainer.getElement();
-    element.setId(ROOT_VERTICAL_CONTAINER);
-    element.getStyle().setMarginTop(MARGIN_TOP, Style.Unit.PX);
+    //com.google.gwt.user.client.Element element = verticalContainer.getElement();
+    verticalContainer.getElement().setId(ROOT_VERTICAL_CONTAINER);
+
+    Style style = verticalContainer.getElement().getStyle();
+//    style.setMarginTop(MARGIN_TOP, Style.Unit.PX);
+    style.setTop(TOP_OF_ROOT, Style.Unit.PX);
+    verticalContainer.setHeight("100%");  // critical for scrolling
+    style.setOverflowY(Style.Overflow.AUTO);
+    style.setPosition(Style.Position.FIXED);
+
+/*
+
+    Style style = contentRow.getElement().getStyle();
+    style.setPosition(Style.Position.FIXED);
+    style.setOverflowY(Style.Overflow.AUTO);
+*/
+
+
     //   verticalContainer.getElement().getStyle().setProperty("height", "calc(100% - 49px)");
 
     return verticalContainer;
@@ -754,7 +767,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     // logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     boolean hasStartupInfo = lifecycleSupport.getProjectStartupInfo() != null;
     if (hasStartupInfo) {
-     logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+      logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     } else {

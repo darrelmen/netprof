@@ -66,11 +66,6 @@ public interface UILifecycle {
   void showInitialState();
 
 
-/*  ProjectMode getMode();
-
-  void setMode(ProjectMode mode);*/
-
-
   void addBreadcrumbs();
 
   /**
@@ -82,7 +77,6 @@ public interface UILifecycle {
   NavLink makeBreadcrumb(String name);
 
   void clickOnParentCrumb(SlimProject parent);
- // String getLastBreadcrumb();
 
   /**
    * @see LangTest#makeFlashContainer()
@@ -99,5 +93,4 @@ public interface UILifecycle {
   INavigation getNavigation();
 
   void showCogMenu();
-
 }

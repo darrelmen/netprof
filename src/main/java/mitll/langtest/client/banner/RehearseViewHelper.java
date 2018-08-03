@@ -81,8 +81,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     return breadRow;
   }
 
+  /**
+   *
+   * @param dialog
+   * @param child
+   */
   @Override
-  protected void showDialogGetRef(IDialog dialog, DivWidget child) {
+  protected void showDialogGetRef(IDialog dialog, Panel child) {
     super.showDialogGetRef(dialog, child);
     child.add(getOverallFeedback());
   }

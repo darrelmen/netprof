@@ -1,9 +1,6 @@
 package mitll.langtest.client.banner;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -87,15 +84,21 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     this.controller = controller;
   }
 
+  /**
+   * @param listContent
+   * @param instanceName
+   * @param fromClick
+   * @see NewContentChooser#showView(INavigation.VIEWS, boolean, boolean)
+   */
   @Override
   public void showContent(Panel listContent, String instanceName, boolean fromClick) {
-    DivWidget child = new DivWidget();
-    child.setWidth("100%");
-    listContent.add(child);
-    Style style = child.getElement().getStyle();
-//    style.setDisplay(Style.Display.FLEX);
-//    style.setProperty("flexDirection", "column");
-    listContent.setWidth(95 + "%");
+//    DivWidget child = new DivWidget();
+//    child.setWidth("100%");
+//    listContent.add(child);
+//  //  Style style = child.getElement().getStyle();
+////    style.setDisplay(Style.Display.FLEX);
+////    style.setProperty("flexDirection", "column");
+//    listContent.setWidth(95 + "%");
 
     bothTurns.clear();
     leftTurnPanels.clear();
@@ -110,105 +113,91 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
 
       @Override
       public void onSuccess(IDialog dialog) {
-        showDialogGetRef(dialog, child);
+        showDialogGetRef(dialog, listContent);
       }
     });
   }
 
-  protected void showDialogGetRef(IDialog dialog, DivWidget child) {
+  protected void showDialogGetRef(IDialog dialog, Panel child) {
     showDialog(dialog, child);
     List<RefAudioGetter> getters = new ArrayList<>(bothTurns);
     getRefAudio(getters.iterator());
   }
 
-  private void showDialog(IDialog dialog, DivWidget child) {
+  /**
+   * Main method for showing the three sections
+   *
+   * @param dialog
+   * @param child
+   * @see #showDialogGetRef
+   */
+  private void showDialog(IDialog dialog, Panel child) {
     child.add(getHeader(dialog));
     child.add(getSpeakerRow(dialog));
-
-    DivWidget scroller = getScroller();
-
-    DivWidget turns = getTurns(dialog);
-    scroller.add(turns);
-
-    child.add(scroller);
-  }
-
-  /**
-   * TODO : sigh - got to set height in javascript - I think -
-   *
-   * Element Height = Viewport height - element.offset.top - desired bottom margin
-   *
-   * add onresize events listener too
-   *
-   * TODO : scrolling doesn't work so well at bottom... scroll down a page?
-   * 
-   * @return
-   */
-  @NotNull
-  private DivWidget getScroller() {
-    DivWidget scroller = new DivWidget();
-
-    scroller.getElement().setId("scroller");
-    scroller.addStyleName("cardBorderShadow");
-    Style style = scroller.getElement().getStyle();
-    style.setPosition(Style.Position.FIXED);
-
-    scroller.setHeight("50%");
-    scroller.setWidth("92%");
-    style.setOverflow(Style.Overflow.AUTO);
-    return scroller;
+    child.add(getTurns(dialog));
   }
 
   @NotNull
   private DivWidget getSpeakerRow(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
-    rowOne.addStyleName("cardBorderShadow");
+    styleControlRow(rowOne);
 
-    rowOne.setHeight("40px");
-    rowOne.setWidth(97 + "%");
-    rowOne.getElement().getStyle().setMarginTop(10, PX);
-
-    List<String> speakers = dialog.getSpeakers();
-    {
-      String label = speakers.get(0);
-      CheckBox checkBox = new CheckBox(label, true);
-      setLeftTurnSpeakerInitial(checkBox);
-      checkBox.addStyleName("floatLeft");
-      checkBox.addStyleName("leftFiveMargin");
-      checkBox.addStyleName("leftSpeaker");
-      checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
-
-      checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
-      leftSpeakerBox = checkBox;
-
-      DivWidget rightDiv = new DivWidget();
-      rightDiv.add(checkBox);
-      rowOne.add(rightDiv);
-    }
+    leftSpeakerBox = addLeftSpeaker(rowOne, dialog.getSpeakers().get(0));
 
     rowOne.add(getControls());
-    {
-      String label = speakers.get(1);
-      CheckBox checkBox = new CheckBox(label, true);
 
-      setRightTurnInitialValue(checkBox);
-      Style style = checkBox.getElement().getStyle();
-      style.setBackgroundColor(RIGHT_BKG_COLOR);
-      checkBox.addStyleName("rightSpeaker");
+    rightSpeakerBox = addRightSpeaker(rowOne, dialog.getSpeakers().get(1));
 
-      checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
-      checkBox.addStyleName("rightAlign");
-      checkBox.addStyleName("floatRight");
-      checkBox.addStyleName("rightFiveMargin");
-      rightSpeakerBox = checkBox;
-
-      DivWidget rightDiv = new DivWidget();
-      rightDiv.add(checkBox);
-      rowOne.add(rightDiv);
-    }
-
-    rowOne.getElement().getStyle().setMarginBottom(10, PX);
     return rowOne;
+  }
+
+  private void styleControlRow(DivWidget rowOne) {
+    rowOne.addStyleName("cardBorderShadow");
+    Style style = rowOne.getElement().getStyle();
+    style.setProperty("position", "sticky");
+    style.setTop(0, PX);
+    rowOne.setHeight("40px");
+    rowOne.setWidth(97 + "%");
+    style.setMarginTop(10, PX);
+    style.setMarginBottom(10, PX);
+    style.setZIndex(1000);
+  }
+
+  private CheckBox addRightSpeaker(DivWidget rowOne, String label) {
+    CheckBox checkBox = new CheckBox(label, true);
+
+    setRightTurnInitialValue(checkBox);
+    Style style = checkBox.getElement().getStyle();
+    style.setBackgroundColor(RIGHT_BKG_COLOR);
+
+    checkBox.addStyleName("rightSpeaker");
+    checkBox.addStyleName("rightAlign");
+    checkBox.addStyleName("floatRight");
+    checkBox.addStyleName("rightFiveMargin");
+
+    checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
+
+
+    DivWidget rightDiv = new DivWidget();
+    rightDiv.add(checkBox);
+    rowOne.add(rightDiv);
+    return checkBox;
+  }
+
+  private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
+    CheckBox checkBox = new CheckBox(label, true);
+    setLeftTurnSpeakerInitial(checkBox);
+    checkBox.addStyleName("floatLeft");
+    checkBox.addStyleName("leftFiveMargin");
+    checkBox.addStyleName("leftSpeaker");
+    checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+
+    checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
+
+    DivWidget rightDiv = new DivWidget();
+    rightDiv.add(checkBox);
+    rowOne.add(rightDiv);
+    return checkBox;
   }
 
   private void setLeftTurnSpeakerInitial(CheckBox checkBox) {
@@ -230,7 +219,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
   @NotNull
   private DivWidget getHeader(IDialog dialog) {
     DivWidget outer = new DivWidget();
-
+    outer.getElement().setId("dialogInfo");
     {
       DivWidget row = new DivWidget();
       row.addStyleName("cardBorderShadow");
@@ -421,18 +410,19 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
   /**
    * TODO add playback rate
    *
+   * Prev, play, next buttons
+   *
    * @return
    */
   @NotNull
   private DivWidget getControls() {
     DivWidget rowOne = new DivWidget();
+    rowOne.getElement().setId("controls");
     rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
-
     {
       Button widgets = new Button("", IconType.BACKWARD, event -> gotBackward());
       widgets.addStyleName("leftFiveMargin");
       rowOne.add(widgets);
-      //Button backwardButton = widgets;
     }
     {
       Button widgets1 = new Button("", IconType.PLAY, event -> gotPlay());
@@ -446,9 +436,11 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
       Button widgets2 = new Button("", IconType.FORWARD, event -> gotForward());
       widgets2.addStyleName("leftFiveMargin");
       rowOne.add(widgets2);
-      // Button forwardButton = widgets2;
     }
 
+    Icon w = new Icon(IconType.VOLUME_UP);
+    w.addStyleName("leftTenMargin");
+    rowOne.add(w);
     rowOne.add(slider = getSlider());
 
     return rowOne;
@@ -462,6 +454,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
   @NotNull
   private ComplexWidget getSlider() {
     ComplexWidget input = new ComplexWidget(INPUT);
+
     input.getElement().setPropertyString(TYPE, RANGE);
     input.getElement().setPropertyString(MIN, SLIDER_MIN);
     input.getElement().setPropertyString(MAX, SLIDER_MAX);
@@ -543,12 +536,12 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
   }
 
-  protected Boolean isRightSpeakerSet() {
-    return rightSpeakerBox.getValue();
-  }
-
   protected Boolean isLeftSpeakerSet() {
     return leftSpeakerBox.getValue();
+  }
+
+  protected Boolean isRightSpeakerSet() {
+    return rightSpeakerBox.getValue();
   }
 
   private void gotForward() {
@@ -574,22 +567,24 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
 
   protected void gotPlay() {
 
-    logger.info("got play ");
+    logger.info("got click on play ");
     if (currentTurn.isPlaying()) {
       playButton.setIcon(IconType.PAUSE);
     } else {
       setPlayButtonToPlay();
     }
 
-    Boolean leftSpeakerSet = isLeftSpeakerSet();
-    Boolean rightSpeakerSet = isRightSpeakerSet();
-    if (leftSpeakerSet && rightSpeakerSet) {
-      logger.info("both speakers ");
+    {
+      Boolean leftSpeakerSet = isLeftSpeakerSet();
+      Boolean rightSpeakerSet = isRightSpeakerSet();
+      if (leftSpeakerSet && rightSpeakerSet) {
+        logger.info("gotPlay both speakers ");
 
-    } else if (leftSpeakerSet && !leftTurnPanels.contains(currentTurn) || rightSpeakerSet && !rightTurnPanels.contains(currentTurn)) {
-      removeMarkCurrent();
-      int i = bothTurns.indexOf(currentTurn); // must be on right
-      currentTurn = bothTurns.get(i + 1);
+      } else if (leftSpeakerSet && !leftTurnPanels.contains(currentTurn) || rightSpeakerSet && !rightTurnPanels.contains(currentTurn)) {
+        removeMarkCurrent();
+        int i = bothTurns.indexOf(currentTurn); // must be on right
+        currentTurn = bothTurns.get(i + 1);
+      }
     }
 
     playCurrentTurn();
@@ -666,7 +661,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
   protected void markCurrent() {
     //logger.info("markCurrent on " + currentTurn.getExID());
     currentTurn.markCurrent();
-
     //  currentTurn.getElement().scrollIntoView();
 
     List<T> seq = getSeq();
