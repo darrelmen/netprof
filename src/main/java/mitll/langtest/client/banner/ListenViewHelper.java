@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
@@ -68,7 +69,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
   final List<T> leftTurnPanels = new ArrayList<>();
   final List<T> rightTurnPanels = new ArrayList<>();
 
-  T currentTurn;
+  private T currentTurn;
   CheckBox leftSpeakerBox, rightSpeakerBox;
   private ComplexWidget slider;
   private Button playButton;
@@ -124,6 +125,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     getRefAudio(getters.iterator());
   }
 
+  DivWidget dialogHeader;
+
   /**
    * Main method for showing the three sections
    *
@@ -132,7 +135,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
    * @see #showDialogGetRef
    */
   private void showDialog(IDialog dialog, Panel child) {
-    child.add(getHeader(dialog));
+    child.add(dialogHeader = getHeader(dialog));
     child.add(getSpeakerRow(dialog));
     child.add(getTurns(dialog));
   }
@@ -289,6 +292,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     return image;
   }
 
+  DivWidget turnContainer;
 
   /**
    * @param dialog
@@ -299,6 +303,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
   private DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
 
+    turnContainer = rowOne;
     rowOne.getElement().setId("turnContainer");
     rowOne.setWidth(97 + "%");
     rowOne.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
@@ -328,24 +333,37 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     });
 
     if (!bothTurns.isEmpty()) {
-      currentTurn = bothTurns.get(0);
+      setCurrentTurn(bothTurns.get(0));
       logger.info("getTurns : markCurrent ");
       markCurrent();
+      makeVisible(currentTurn);
     }
 
-    DivWidget w = new DivWidget();
-    w.getElement().setId("spacer");
-    w.setWidth("100%");
-    w.setHeight(SPACER_HEIGHT + "px");
-    w.getElement().getStyle().setClear(Style.Clear.BOTH);
-    spacer = w;
+//    DivWidget w = new DivWidget();
+//    w.getElement().setId("spacer");
+//    w.setWidth("100%");
+//    w.setHeight(SPACER_HEIGHT + "px");
+//    w.getElement().getStyle().setClear(Style.Clear.BOTH);
+    //spacer = w;
 //    rowOne.add(w);
 
 
     return rowOne;
   }
 
-  private DivWidget spacer;
+  void setCurrentTurn(T toMakeCurrent) {
+    this.currentTurn = toMakeCurrent;
+  }
+
+  T getCurrentTurn() {
+    return currentTurn;
+  }
+
+  protected void makeVisible(UIObject currentTurn) {
+    currentTurn.getElement().scrollIntoView();
+  }
+
+  // private DivWidget spacer;
 
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {
@@ -404,7 +422,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
 
   protected void gotCardClick(T turn) {
     removeMarkCurrent();
-    this.currentTurn = turn;
+    setCurrentTurn(turn);
     playCurrentTurn();
   }
 
@@ -523,28 +541,27 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
 
     currentTurn.clearHighlight();
     removeMarkCurrent();
+
+
+    if (!makePrevVisible()) {
+      //makeVisible(currentTurn);
+    //  logger.info("gotBackward make current turn visible " + currentTurn.getExID() + " at " + i);
+      makeVisible(seq.get(seq.size() - 1));
+      // turnContainer.getElement().setScrollTop(300);
+      //   turnContainer.getParent().getElement().setScrollTop(0);
+    }
+
     if (i1 < 0) {
-      currentTurn = seq.get(seq.size() - 1);
+      setCurrentTurn(seq.get(seq.size() - 1));
     } else {
-      currentTurn = seq.get(i1);
+      setCurrentTurn(seq.get(i1));
     }
     markCurrent();
+
+
     if (isPlaying) playCurrentTurn();
   }
 
-  protected List<T> getSeq() {
-    boolean leftSpeaker = isLeftSpeakerSet();
-    boolean rightSpeaker = isRightSpeakerSet();
-    return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
-  }
-
-  protected Boolean isLeftSpeakerSet() {
-    return leftSpeakerBox.getValue();
-  }
-
-  protected Boolean isRightSpeakerSet() {
-    return rightSpeakerBox.getValue();
-  }
 
   private void gotForward() {
     setPlayButtonToPlay();
@@ -558,18 +575,26 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
 
     currentTurn.clearHighlight();
     removeMarkCurrent();
-    if (i1 > seq.size() - 1) {
-      currentTurn = seq.get(0);
-    } else {
-      currentTurn = seq.get(i1);
+
+    // makeVisible(currentTurn);
+    if (!makeNextVisible()) {
+    //  logger.info("gotForward : make current turn visible!");
+      makeVisible(dialogHeader);  // make the top header visible...
     }
+
+    if (i1 > seq.size() - 1) {
+      setCurrentTurn(seq.get(0));
+    } else {
+      setCurrentTurn(seq.get(i1));
+    }
+
     markCurrent();
     if (isPlaying) playCurrentTurn();
   }
 
   protected void gotPlay() {
+    //   logger.info("got click on play ");
 
-    logger.info("got click on play ");
     if (currentTurn.isPlaying()) {
       playButton.setIcon(IconType.PAUSE);
     } else {
@@ -585,7 +610,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
       } else if (leftSpeakerSet && !leftTurnPanels.contains(currentTurn) || rightSpeakerSet && !rightTurnPanels.contains(currentTurn)) {
         removeMarkCurrent();
         int i = bothTurns.indexOf(currentTurn); // must be on right
-        currentTurn = bothTurns.get(i + 1);
+//        if (i + 1 == bothTurns.size()) {
+//
+//        }
+        setCurrentTurn(bothTurns.get((i + 1 == bothTurns.size()) ? 0 : i + 1));
       }
     }
 
@@ -594,6 +622,20 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
 
   boolean onFirstTurn() {
     return getSeq().indexOf(currentTurn) == 0;
+  }
+
+  protected List<T> getSeq() {
+    boolean leftSpeaker = isLeftSpeakerSet();
+    boolean rightSpeaker = isRightSpeakerSet();
+    return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
+  }
+
+  protected Boolean isLeftSpeakerSet() {
+    return leftSpeakerBox.getValue();
+  }
+
+  protected Boolean isRightSpeakerSet() {
+    return rightSpeakerBox.getValue();
   }
 
   void playCurrentTurn() {
@@ -611,6 +653,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
       if (DEBUG) logger.info("playStarted - turn " + currentTurn.getExID());
       playButton.setIcon(IconType.PAUSE);
       markCurrent();
+
     }
   }
 
@@ -637,18 +680,47 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
    */
   protected void currentTurnPlayEnded() {
     if (DEBUG) logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID());
-    List<T> seq = getSeq();
-    int i = seq.indexOf(currentTurn);
-    int i1 = i + 1;
-    removeMarkCurrent();
-    if (i1 > seq.size() - 1) {
+    T next = getNext();
+//    List<T> seq = getSeq();
+//    int i = seq.indexOf(currentTurn);
+//    int i1 = i + 1;
+
+    makeNextVisible();
+
+    if (next == null) {
       if (DEBUG) logger.info("OK stop");
-      currentTurn = seq.get(0);
-      markCurrent();
+      //  setCurrentTurn(getSeq().get(0));
+      //  markCurrent();
+
+//      makeNextVisible();
+
     } else {
-      currentTurn = seq.get(i1);
+      removeMarkCurrent();
+      setCurrentTurn(next);
       playCurrentTurn();
     }
+  }
+
+  void makeCurrentTurnVisible() {
+    makeVisible(currentTurn);
+  }
+
+  private boolean makeNextVisible() {
+    T next = getNext();
+    if (next != null) {
+      makeVisible((T) next);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private boolean makePrevVisible() {
+    T next = getPrev();
+    if (next != null) {
+      makeVisible((T) next);
+      return true;
+    } else return false;
   }
 
   protected void setPlayButtonToPlay() {
@@ -661,20 +733,45 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
   }
 
   protected void markCurrent() {
-    //logger.info("markCurrent on " + currentTurn.getExID());
     currentTurn.markCurrent();
     //  currentTurn.getElement().scrollIntoView();
 
+/*    List<T> seq = getSeq();
+    int i = seq.indexOf(currentTurn);
+    int i1 = i + 1;
+
+    if (i1 > seq.size() - 1) {
+      logger.info("markCurrent on " + currentTurn.getExID() + " on last!");
+      //scrollForLastTurn();
+      // setCurentTurn(seq.get(0);
+      currentTurn.getElement().scrollIntoView();
+    } else {
+      logger.info("markCurrent on " + currentTurn.getExID() + " scroll into view");
+      seq.get(i1).getElement().scrollIntoView();
+    }*/
+  }
+
+  private T getNext() {
     List<T> seq = getSeq();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
 
     if (i1 > seq.size() - 1) {
-      //scrollForLastTurn();
-      // currentTurn = seq.get(0);
-      currentTurn.getElement().scrollIntoView();
+      return null;
     } else {
-      seq.get(i1).getElement().scrollIntoView();
+      return seq.get(i1);
+    }
+  }
+
+  private T getPrev() {
+    List<T> seq = getSeq();
+    int i = seq.indexOf(currentTurn);
+    int i1 = i - 1;
+
+    if (i1 > -1) {
+      return seq.get(i1);
+    } else {
+      return null;
     }
   }
 

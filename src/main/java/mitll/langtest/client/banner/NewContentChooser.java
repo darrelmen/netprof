@@ -69,7 +69,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private VIEWS currentSection = VIEWS.NONE;
   private HandlerRegistration handlerRegistration;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param controller

@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExercise>> extends ListenViewHelper<T> {
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private static final int DELAY_MILLIS = 20;
 
@@ -53,43 +53,33 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     super(controller, viewContainer, myView);
     controller.registerStopDetected(this::silenceDetected);
   }
-/*
 
-  @Override
-  public void showContent(Panel listContent, String instanceName, boolean fromClick) {
-    super.showContent(listContent, instanceName, fromClick);
-
-    DivWidget breadRow = getOverallFeedback();
-
-    listContent.add(breadRow);
-  }
-*/
-
-  @NotNull
-  private DivWidget getOverallFeedback() {
-    DivWidget breadRow = new DivWidget();
-    breadRow.setWidth("100%");
-    Style style = breadRow.getElement().getStyle();
-    style.setMarginTop(60, Style.Unit.PX);
-    style.setMarginLeft(135, Style.Unit.PX);
-    style.setBottom(10, Style.Unit.PX);
-    style.setClear(Style.Clear.BOTH);
-    style.setPosition(Style.Position.FIXED);
-
-    breadRow.getElement().setId("breadRow");
-    breadRow.add(showScoreFeedback());
-    return breadRow;
-  }
+  private DivWidget overallFeedback;
 
   /**
-   *
    * @param dialog
    * @param child
    */
   @Override
   protected void showDialogGetRef(IDialog dialog, Panel child) {
     super.showDialogGetRef(dialog, child);
-    child.add(getOverallFeedback());
+    child.add(overallFeedback = getOverallFeedback());
+  }
+
+  @NotNull
+  private DivWidget getOverallFeedback() {
+    DivWidget breadRow = new DivWidget();
+    //breadRow.setWidth("100%");
+    Style style = breadRow.getElement().getStyle();
+    style.setMarginTop(10, Style.Unit.PX);
+    style.setMarginLeft(135, Style.Unit.PX);
+    style.setMarginBottom(10, Style.Unit.PX);
+    style.setClear(Style.Clear.BOTH);
+    //   style.setPosition(Style.Position.FIXED);
+
+    breadRow.getElement().setId("breadRow");
+    breadRow.add(showScoreFeedback());
+    return breadRow;
   }
 
   protected void gotGoBack() {
@@ -138,7 +128,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       scoreContainer.setWidth("73%");
 
       container.setWidth("78%");
-      container.getElement().getStyle().setMarginLeft(20, Style.Unit.PCT);
+      Style style = container.getElement().getStyle();
+      style.setOverflow(Style.Overflow.HIDDEN);
+      style.setMarginLeft(20, Style.Unit.PCT);
+      style.setMarginBottom(20, Style.Unit.PX);
       container.add(scoreContainer);
     }
 
@@ -170,6 +163,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       if (recordDialogExercisePanel.isRecording()) {
         //    logger.info("\tsilenceDetected recordDialogExercisePanel is recording");
         if (recordDialogExercisePanel.stopRecording()) {
+        //  currentTurnPlayEnded();
+
+
           Timer timer = new Timer() {
             @Override
             public void run() {
@@ -177,6 +173,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
             }
           };
           timer.schedule(DELAY_MILLIS);
+
         }
         break;
       }
@@ -198,7 +195,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     if (showScore(isRightSpeakerSet() ? leftTurnPanels.size() : rightTurnPanels.size())) {
       recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
     }
-    ;
   }
 
   protected void setRightTurnInitialValue(CheckBox checkBox) {
@@ -251,11 +247,15 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     recordDialogTurns.clear();
   }
 
+  /**
+   *
+   */
   protected void currentTurnPlayEnded() {
     if (directClick) {
       directClick = false;
       markCurrent();
     } else {
+      T currentTurn = getCurrentTurn();
       if (DEBUG) logger.info("currentTurnPlayEnded (rehearse) - turn " + currentTurn.getExID());
       List<T> seq = getSeq();
 
@@ -264,32 +264,37 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       int i2 = bothTurns.indexOf(currentTurn);
       int nextOtherSide = i2 + 1;
 
-      logger.info("seq " + seq.size() +
-          "\n\tleft  " + isLeftSpeakerSet() +
-          "\n\tright " + isRightSpeakerSet() +
-          "\n\tboth " + bothTurns.size() +
-          "\n\t is current playing " + isCurrentPrompt +
-          "\n\ti2    " + i2 +
-          "\n\tnext " + nextOtherSide
-      );
+      if (DEBUG) {
+        logger.info("currentTurnPlayEnded" +
+            "\n\t seq  " + seq.size() +
+            "\n\tleft  " + isLeftSpeakerSet() +
+            "\n\tright " + isRightSpeakerSet() +
+            "\n\tboth  " + bothTurns.size() +
+            "\n\t is current playing " + isCurrentPrompt +
+            "\n\ti2    " + i2 +
+            "\n\tnext  " + nextOtherSide
+        );
+      }
 
       if (nextOtherSide < bothTurns.size()) {
         T nextTurn = bothTurns.get(nextOtherSide);
-        removeMarkCurrent();
-        currentTurn = nextTurn;
-        markCurrent();
 
+        if (DEBUG) logger.info("currentTurnPlayEnded next is " + nextTurn.getId() + "  at " + nextOtherSide);
+        removeMarkCurrent();
+        setCurrentTurn(nextTurn);
+        markCurrent();
+        makeCurrentTurnVisible();
         if (isCurrentPrompt) {
-          logger.info("currentTurnPlayEnded - startRecording " + currentTurn.getExID());
-          currentTurn.startRecording();
+          if (DEBUG)  logger.info("currentTurnPlayEnded - startRecording " + nextTurn.getExID());
+          nextTurn.startRecording();
         } else {
-          logger.info("currentTurnPlayEnded - play current " + currentTurn.getExID());
+          if (DEBUG) logger.info("currentTurnPlayEnded - play current " + nextTurn.getExID());
           playCurrentTurn();
         }
       } else {
-        removeMarkCurrent();
-        currentTurn = seq.get(0);
-        markCurrent();
+//        removeMarkCurrent();
+        // currentTurn = seq.get(0);
+        //   markCurrent();
       }
     }
   }
@@ -309,6 +314,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       scoreProgress.setPercent(num == 0 ? 100 : percent);
       scoreProgress.setVisible(true);
       scoreProgress.setText("Score " + Math.round(percent) + "%");
+
+      makeVisible(overallFeedback);
+
       new ScoreProgressBar(false).setColor(scoreProgress, total, round);
 
       setSmiley(smiley, total);
@@ -347,7 +355,5 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
 
     smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
-    // smiley.setVisible(true);
   }
-
 }
