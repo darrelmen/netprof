@@ -90,9 +90,9 @@ import static mitll.langtest.client.user.UserPassLogin.*;
  * @since 2/23/16
  */
 public class InitialUI implements UILifecycle, BreadcrumbPartner {
-  public static final int TOP_OF_ROOT = 58;
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  public static final int TOP_OF_ROOT = 48;//58;
   /**
    * Make sure we can talk to the server...
    *
@@ -142,11 +142,10 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
   private Widget headerRow;
 
-  /**
-   * TODO : move breadcrumbHelper up into banner
-   */
-  //private final Breadcrumbs breadcrumbHelper;
   private final IBreadcrumbHelper breadcrumbHelper;
+  /**
+   * @see #makeFirstTwoRows
+   */
   private DivWidget contentRow;
   private INavigation navigation;
   private DivWidget verticalContainer;
@@ -258,10 +257,10 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     RootPanel rootPanel = RootPanel.get();
     rootPanel.add(headerRow = makeHeaderRow());
 
-    DivWidget contentRow = new DivWidget();
-    contentRow.getElement().setId("InitialUI_contentRow");
-    verticalContainer.add(contentRow);
-    this.contentRow = contentRow;
+    //DivWidget contentRow = new DivWidget();
+    //contentRow.getElement().setId("InitialUI_contentRow");
+    //verticalContainer.add(contentRow);
+    this.contentRow = verticalContainer;
 
     rootPanel.add(getDownloadDiv());
 
@@ -340,7 +339,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     //logger.info("clearContent -");
     clearStartupInfo();
     contentRow.clear();
-    contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
+//    contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
 
     contentRow.add(lifecycleSupport.getFlashRecordPanel()); // put back record panel
   }
@@ -362,28 +361,15 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
     DivWidget verticalContainer = new FluidContainer();
 //    DivWidget verticalContainer = new DivWidget();
-    // verticalContainer.setId("rootVerticalContainer");
     addMouseOverHandler(verticalContainer, event -> confirmCurrentProject());
-    // logger.info("getRootContainer Add mouse over to " + verticalContainer.getId());
-    //com.google.gwt.user.client.Element element = verticalContainer.getElement();
     verticalContainer.getElement().setId(ROOT_VERTICAL_CONTAINER);
 
     Style style = verticalContainer.getElement().getStyle();
-//    style.setMarginTop(MARGIN_TOP, Style.Unit.PX);
     style.setTop(TOP_OF_ROOT, Style.Unit.PX);
-    verticalContainer.setHeight("100%");  // critical for scrolling
+    style.setBottom(0, Style.Unit.PX);
+   // verticalContainer.setHeight("100%");  // critical for scrolling
     style.setOverflowY(Style.Overflow.AUTO);
     style.setPosition(Style.Position.FIXED);
-
-/*
-
-    Style style = contentRow.getElement().getStyle();
-    style.setPosition(Style.Position.FIXED);
-    style.setOverflowY(Style.Overflow.AUTO);
-*/
-
-
-    //   verticalContainer.getElement().getStyle().setProperty("height", "calc(100% - 49px)");
 
     return verticalContainer;
   }

@@ -37,9 +37,9 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 4/5/17.
  */
 public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements ContentView, PlayListener, IListenView {
-  public static final int SPACER_HEIGHT = 10;
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
+  private static final int SPACER_HEIGHT = 10;
   private static final int HEADER_HEIGHT = 120;
 
   private static final String VALUE = "value";
@@ -301,7 +301,12 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
 
     rowOne.getElement().setId("turnContainer");
     rowOne.setWidth(97 + "%");
+    rowOne.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
     rowOne.getElement().getStyle().setMarginTop(10, PX);
+    rowOne.addStyleName("cardBorderShadow");
+//
+//    rowOne.getElement().getStyle().setPaddingBottom(50, PX);
+    rowOne.getElement().getStyle().setMarginBottom(10, PX);
 
     List<String> speakers = dialog.getSpeakers();
 
@@ -322,9 +327,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
       rowOne.add(turn);
     });
 
-    rowOne.getElement().getStyle().setPaddingBottom(50, PX);
-    rowOne.getElement().getStyle().setMarginBottom(10, PX);
-
     if (!bothTurns.isEmpty()) {
       currentTurn = bothTurns.get(0);
       logger.info("getTurns : markCurrent ");
@@ -337,7 +339,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     w.setHeight(SPACER_HEIGHT + "px");
     w.getElement().getStyle().setClear(Style.Clear.BOTH);
     spacer = w;
-    rowOne.add(w);
+//    rowOne.add(w);
 
 
     return rowOne;
@@ -668,13 +670,17 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     int i1 = i + 1;
 
     if (i1 > seq.size() - 1) {
-      spacer.getElement().scrollIntoView();
+      //scrollForLastTurn();
       // currentTurn = seq.get(0);
-//      currentTurn.getElement().scrollIntoView();
+      currentTurn.getElement().scrollIntoView();
     } else {
       seq.get(i1).getElement().scrollIntoView();
     }
   }
+
+//  private void scrollForLastTurn() {
+//    spacer.getElement().scrollIntoView();
+//  }
 
   @Override
   public void setSmiley(Image smiley, double total) {
