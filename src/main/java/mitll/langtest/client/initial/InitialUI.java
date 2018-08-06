@@ -217,6 +217,8 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     // first row ---------------
     choices.setContentRow(makeFirstTwoRows(verticalContainer));
     if (!showLogin()) {
+      verticalContainer.getElement().removeAttribute("height");
+
       populateBelowHeader(verticalContainer);
 
       try {
@@ -618,11 +620,13 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     // check if we're here as a result of resetting a password
     final String resetPassToken = props.getResetPassToken();
     if (!resetPassToken.isEmpty()) {
+      verticalContainer.setHeight("100%");
       handleResetPass(verticalContainer, contentRow, eventRegistration, resetPassToken);
       return true;
     }
 
     if (!props.getSendResetPassToken().isEmpty()) {
+      verticalContainer.setHeight("100%");
       handleSendResetPass(verticalContainer, contentRow, eventRegistration);
       return true;
     }
@@ -630,6 +634,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     boolean show = userManager.getUserID() == null;
     if (show) {
       // logger.info("showLogin user is not valid : user expired " + userManager.getUserID());
+      verticalContainer.setHeight("100%");
       showLogin(eventRegistration);
       return true;
     }
