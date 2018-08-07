@@ -218,7 +218,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
         controller.usingFlashRecorder(),
         "browser",
-        controller.getBrowserInfo(),
+        getDevice(),
         decoderOptions,
         new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
@@ -230,6 +230,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
             onPostSuccess(result, then);
           }
         });
+  }
+
+  protected String getDevice() {
+    return controller.getBrowserInfo();
   }
 
   private void onPostFailure(long then, int user, String exception) {

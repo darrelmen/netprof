@@ -5,6 +5,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.banner.RehearseViewHelper;
+import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
@@ -21,10 +22,11 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
+  private Logger logger = Logger.getLogger("RecordDialogExercisePanel");
+
   public static final int DIM = 40;
   public static final long END_DUR_SKEW = 1500L;
   private long start = 0;
-  private Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
   private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
   private static final float DELAY_SCALAR = 1.0F;
@@ -32,12 +34,14 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private long minDur;
   private Image emoticon;
   private AlignmentOutput alignmentOutput;
+  private SessionManager sessionManager;
 
   public RecordDialogExercisePanel(final T commonExercise,
                                    final ExerciseController controller,
                                    final ListInterface<?, ?> listContainer,
                                    Map<Integer, AlignmentOutput> alignments,
                                    IListenView listenView,
+                                   SessionManager sessionManager,
                                    boolean isRight) {
     super(commonExercise, controller, listContainer, alignments, listenView, isRight);
     if (commonExercise.hasRefAudio()) {
@@ -45,6 +49,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       minDur = (long) (((float) minDur) * DELAY_SCALAR);
       minDur -= END_DUR_SKEW;
     }
+    this.sessionManager = sessionManager;
+
     addStyleName("inlineFlex");
     //  logger.info("ex " + commonExercise.getID() + " min dur " + minDur);
   }
@@ -80,7 +86,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
-    NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<T>(exercise, controller) {
+    NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<T>(exercise, controller, sessionManager) {
       @Override
       public void useResult(AudioAnswer result) {
         super.useResult(result);
@@ -140,7 +146,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   protected void addMarginLeft(Style style2) {
     style2.setMarginLeft(15, Style.Unit.PX);
   }
-
 
   /**
    * @see RehearseViewHelper#currentTurnPlayEnded

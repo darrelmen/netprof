@@ -10,6 +10,7 @@ import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.dialog.*;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogType;
@@ -118,12 +119,12 @@ public class DialogPopulate {
           // add dialog attributes
           addDialogAttributes(dialogDAO, defaultUser, modified, attrToInt, dialog, dialogID);
 
-          if (false) {
+   /*       if (false) {
             dialog
                 .getExercises()
                 .forEach(commonExercise ->
                     logger.info(commonExercise.getOldID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getUnitToValue()));
-          }
+          }*/
 
           // add the exercises
 
@@ -140,6 +141,9 @@ public class DialogPopulate {
                 new HashMap<>(), true);
 
             allImportExToID.putAll(importExToID);
+
+            importExToID.forEach((k, v) -> k.getMutable().setID(v));
+
             {
               List<SlickRelatedExercise> relatedExercises = getSlickRelatedExercises(projid, modified, dialog, dialogID, importExToID);
               db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(relatedExercises);
@@ -157,6 +161,11 @@ public class DialogPopulate {
 
 
         addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
+
+        {
+          AudioCopy audioCopy = new AudioCopy(db, db.getProjectManagement(), db);
+          audioCopy.copyAudio(projid, allImportExToID.keySet(), new HashMap<>());
+        }
       }
 
       return true;
@@ -240,6 +249,8 @@ public class DialogPopulate {
         addResultAndAudio(project, projid, defaultUser, now, k, v, valid, exid);
       }
     });
+
+
   }
 
   private void addDialogAttributes(IDialogDAO dialogDAO, int defaultUser, Timestamp modified,

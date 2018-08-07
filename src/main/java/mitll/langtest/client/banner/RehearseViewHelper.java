@@ -12,6 +12,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.flashcard.SessionStorage;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.client.scoring.ScoreProgressBar;
@@ -28,7 +29,8 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExercise>> extends ListenViewHelper<T> {
+public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExercise>>
+    extends ListenViewHelper<T> implements SessionManager {
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final boolean DEBUG = false;
@@ -42,7 +44,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private Image smiley = new Image();
 
   private final Map<Integer, Float> exToScore = new HashMap<>();
+  private final Map<Integer, T> exToTurn = new HashMap<>();
   private List<IRecordDialogTurn> recordDialogTurns = new ArrayList<>();
+  private SessionStorage sessionStorage;
 
   /**
    * @param controller
@@ -51,6 +55,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    */
   RehearseViewHelper(ExerciseController controller, IViewContaner viewContainer, INavigation.VIEWS myView) {
     super(controller, viewContainer, myView);
+    this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
     controller.registerStopDetected(this::silenceDetected);
   }
 
@@ -69,13 +74,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   @NotNull
   private DivWidget getOverallFeedback() {
     DivWidget breadRow = new DivWidget();
-    //breadRow.setWidth("100%");
     Style style = breadRow.getElement().getStyle();
     style.setMarginTop(10, Style.Unit.PX);
     style.setMarginLeft(135, Style.Unit.PX);
     style.setMarginBottom(10, Style.Unit.PX);
     style.setClear(Style.Clear.BOTH);
-    //   style.setPosition(Style.Position.FIXED);
 
     breadRow.getElement().setId("breadRow");
     breadRow.add(showScoreFeedback());
@@ -187,6 +190,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   /**
    * Forget about scores after showing them...
    *
+   * Show scores if just recorded the last record turn.
+   *
    * @param exid
    * @param score
    * @param recordDialogTurn
@@ -196,9 +201,22 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     exToScore.put(exid, score);
     recordDialogTurns.add(recordDialogTurn);
 
-    if (showScore(isRightSpeakerSet() ? leftTurnPanels.size() : rightTurnPanels.size())) {
+    T turn = exToTurn.get(exid);
+    List<T> recordTurns = getRecordTurns();
+    boolean onLast = false;
+    if (turn == null) logger.warning("can't find turn for ex " + exid);
+    else {
+      onLast = recordTurns.indexOf(turn) == recordDialogTurns.size() - 1;
+    }
+
+    if (onLast) {
+      showScore();
       recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
     }
+  }
+
+  private List<T> getRecordTurns() {
+    return isRightSpeakerSet() ? leftTurnPanels : rightTurnPanels;
   }
 
   protected void setRightTurnInitialValue(CheckBox checkBox) {
@@ -223,14 +241,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   @NotNull
   @Override
   protected T reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
-//    return super.reallyGetTurnPanel(clientExercise);
     // logger.info("making record dialog ex panel for " + clientExercise.getID());
-    T widgets =
-        (T) new RecordDialogExercisePanel<ClientExercise>(clientExercise, controller, null, alignments, this, isRight);
-    // widgets.addWidgets(true,false,PhonesChoices.HIDE);
-    // widgets.setIsRight(isRight);
+    T turnPanel =
+        (T) new RecordDialogExercisePanel<ClientExercise>(clientExercise, controller,
+            null, alignments, this, this, isRight);
 
-    return widgets;
+    exToTurn.put(clientExercise.getID(), turnPanel);
+    return turnPanel;
   }
 
   @Override
@@ -238,6 +255,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     super.gotPlay();
 
     if (onFirstTurn()) {
+      sessionStorage.storeSession();
       clearScores();
     }
   }
@@ -303,32 +321,32 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
   }
 
-  private boolean showScore(int expected) {
+  private void showScore() {
     int num = exToScore.values().size();
+//
+//    if (num == expected) {
+    double total = getTotal();
+    // logger.info("showScore showing " + num);
+    total /= (float) num;
+    //  logger.info("showScore total   " + total);
 
-    if (num == expected) {
-      double total = getTotal();
-      // logger.info("showScore showing " + num);
-      total /= (float) num;
-      //  logger.info("showScore total   " + total);
+    double percent = total * 100;
+    double round = percent;// Math.max(percent, 30);
+    if (percent == 0d) round = 100d;
+    scoreProgress.setPercent(num == 0 ? 100 : percent);
+    scoreProgress.setVisible(true);
+    scoreProgress.setText("Score " + Math.round(percent) + "%");
 
-      double percent = total * 100;
-      double round = percent;// Math.max(percent, 30);
-      if (percent == 0d) round = 100d;
-      scoreProgress.setPercent(num == 0 ? 100 : percent);
-      scoreProgress.setVisible(true);
-      scoreProgress.setText("Score " + Math.round(percent) + "%");
+    makeVisible(overallFeedback);
 
-      makeVisible(overallFeedback);
+    new ScoreProgressBar(false).setColor(scoreProgress, total, round);
 
-      new ScoreProgressBar(false).setColor(scoreProgress, total, round);
+    setSmiley(smiley, total);
 
-      setSmiley(smiley, total);
+    smiley.setVisible(true);
 
-      smiley.setVisible(true);
-
-      return true;
-    } else return false;
+//      return true;
+//    } else return false;
   }
 
 
@@ -359,5 +377,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
 
     smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
+  }
+
+  @Override
+  public String getSession() {
+    return "" + sessionStorage.getSession();
   }
 }

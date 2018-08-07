@@ -33,34 +33,44 @@ public class EnglishDialog extends DialogReader implements IDialogReader {
 
   private final String docIDS =
       "333815\n" +
-          "333816\n";
+          "333816\n" +
+          "333817\n";
 
   private final String title =
       "Meeting someone for the first time\n" +
-          "What time is it?\n";
+          "What time is it?\n" +
+          "You dialed the wrong number.\n";
 
   private final String fltitle =
       "처음 만났을 때\n" +
-          "지금 몇 시예요?\n";
+          "지금 몇 시예요?\n" +
+          "전화 잘못 거셨어요.\n";
 
   private final String dir =
       "010_C01\n" +
-          "001_C05\n";
+          "001_C05\n" +
+          "003_C09\n";
 
-  private final String pres =
-      "Topic Presentation B\n" +
-          "Topic Presentation A\n";
 
   private final String unit =
-      "1\n" + "2\n";
+      "1\n" +
+          "2\n" +
+          "3\n";
 
   private final String chapter =
       "1\n" +
-          "5\n";
+          "5\n" +
+          "9\n";
 
   private final String page =
       "12\n" +
+          "5\n" +
           "5\n";
+
+  private final String pres =
+      "Topic Presentation B\n" +
+          "Topic Presentation A\n" +
+          "Topic Presentation A\n";
 
   private DialogProps dialogProps = new DialogProps(docIDS, title, fltitle, dir, unit, chapter, page, pres);
 

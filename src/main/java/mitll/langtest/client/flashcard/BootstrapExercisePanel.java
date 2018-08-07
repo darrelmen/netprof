@@ -283,6 +283,10 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
         return getDeviceTypeValue();
       }
 
+      /**
+       * @see RecordButtonPanel#postAudioFile
+       * @return
+       */
       @Override
       protected String getDevice() {
         return getDeviceValue();

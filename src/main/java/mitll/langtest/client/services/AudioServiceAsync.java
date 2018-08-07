@@ -33,6 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
@@ -50,6 +51,8 @@ public interface AudioServiceAsync {
    * @param device
    * @param decoderOptions
    * @param async
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
    */
   void writeAudioFile(String base64EncodedString,
                       AudioContext audioContext,

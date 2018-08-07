@@ -53,6 +53,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
@@ -1187,6 +1188,7 @@ public class LangTest implements
 
   /**
    * Recording interface
+   * @see mitll.langtest.client.banner.RehearseViewHelper#RehearseViewHelper
    */
   public void registerStopDetected(WavEndCallback wavEndCallback) {
     this.wavEndCallback = wavEndCallback;

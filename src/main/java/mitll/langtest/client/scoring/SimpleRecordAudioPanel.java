@@ -2,6 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.list.ListInterface;
@@ -25,22 +26,20 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
 /**
  * An ASR scoring panel with a record button.
  */
-public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends NoFeedbackRecordAudioPanel<T> {
+public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends NoFeedbackRecordAudioPanel<T>
+    implements SessionManager {
    private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
   public static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
   private static final float HUNDRED = 100.0f;
-  protected WaitCursorHelper waitCursorHelper = null;
+  private WaitCursorHelper waitCursorHelper = null;
 
   private MiniScoreListener miniScoreListener;
 
   private String audioPath;
 
-  /**
-   *
-   */
-  //private DivWidget scoreFeedback;
+
   private boolean hasScoreHistory;
   private final ListInterface<?, ?> listContainer;
   private final boolean isRTL;
@@ -57,9 +56,13 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
    */
   SimpleRecordAudioPanel(ExerciseController controller,
                          T exercise,
-
                          ListInterface<?, ?> listContainer, boolean addPlayer) {
-    super(exercise, controller);
+    super(exercise, controller, new SessionManager() {
+      @Override
+      public String getSession() {
+        return null;
+      }
+    });
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;
     getElement().setId("SimpleRecordAudioPanel_" +exercise.getID());
@@ -276,11 +279,16 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
     miniScoreListener.showChart(controller.getHost());
   }
 
-  protected WaitCursorHelper makeWaitCursor() {
+  private WaitCursorHelper makeWaitCursor() {
     if (waitCursorHelper == null) {
       waitCursorHelper = new WaitCursorHelper();
       waitCursorHelper.showFinished();
     }
     return waitCursorHelper;
+  }
+
+  @Override
+  public String getSession() {
+    return null;
   }
 }

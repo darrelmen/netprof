@@ -37,10 +37,11 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements ContentView, PlayListener, IListenView {
+public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
+    implements ContentView, PlayListener, IListenView {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
-  private static final int SPACER_HEIGHT = 10;
+ // private static final int SPACER_HEIGHT = 10;
   private static final int HEADER_HEIGHT = 120;
 
   private static final String VALUE = "value";
@@ -93,14 +94,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
    */
   @Override
   public void showContent(Panel listContent, String instanceName, boolean fromClick) {
-//    DivWidget child = new DivWidget();
-//    child.setWidth("100%");
-//    listContent.add(child);
-//  //  Style style = child.getElement().getStyle();
-////    style.setDisplay(Style.Display.FLEX);
-////    style.setProperty("flexDirection", "column");
-//    listContent.setWidth(95 + "%");
-
     bothTurns.clear();
     leftTurnPanels.clear();
     rightTurnPanels.clear();
@@ -339,15 +332,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
       makeVisible(currentTurn);
     }
 
-//    DivWidget w = new DivWidget();
-//    w.getElement().setId("spacer");
-//    w.setWidth("100%");
-//    w.setHeight(SPACER_HEIGHT + "px");
-//    w.getElement().getStyle().setClear(Style.Clear.BOTH);
-    //spacer = w;
-//    rowOne.add(w);
-
-
     return rowOne;
   }
 
@@ -398,9 +382,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
   private T getTurnPanel(ClientExercise clientExercise, boolean isRight) {
     T turn = reallyGetTurnPanel(clientExercise, isRight);
     turn.addWidgets(true, false, PhonesChoices.HIDE);
-
-    //turn.getElement().getStyle().setClear(Style.Clear.BOTH);
-
     turn.addPlayListener(this);
 
     turn.addDomHandler(event -> gotCardClick(turn), ClickEvent.getType());
@@ -555,7 +536,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
 
     if (!makePrevVisible()) {
       //makeVisible(currentTurn);
-    //  logger.info("gotBackward make current turn visible " + currentTurn.getExID() + " at " + i);
+      //  logger.info("gotBackward make current turn visible " + currentTurn.getExID() + " at " + i);
       makeVisible(seq.get(seq.size() - 1));
       // turnContainer.getElement().setScrollTop(300);
       //   turnContainer.getParent().getElement().setScrollTop(0);
@@ -588,7 +569,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
 
     // makeVisible(currentTurn);
     if (!makeNextVisible()) {
-    //  logger.info("gotForward : make current turn visible!");
+      //  logger.info("gotForward : make current turn visible!");
       makeVisible(dialogHeader);  // make the top header visible...
     }
 
@@ -640,11 +621,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
   }
 
-  protected Boolean isLeftSpeakerSet() {
+  Boolean isLeftSpeakerSet() {
     return leftSpeakerBox.getValue();
   }
-
-  protected Boolean isRightSpeakerSet() {
+  Boolean isRightSpeakerSet() {
     return rightSpeakerBox.getValue();
   }
 
@@ -663,7 +643,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
       if (DEBUG) logger.info("playStarted - turn " + currentTurn.getExID());
       playButton.setIcon(IconType.PAUSE);
       markCurrent();
-
     }
   }
 
@@ -791,7 +770,5 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
 
   @Override
   public void setSmiley(Image smiley, double total) {
-
   }
-
 }

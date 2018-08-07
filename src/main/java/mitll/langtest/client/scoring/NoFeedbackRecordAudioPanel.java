@@ -1,7 +1,9 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.exercise.Shell;
@@ -10,40 +12,37 @@ import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
-public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extends DivWidget implements RecordingAudioListener {
+public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise>
+    extends DivWidget
+    implements RecordingAudioListener {
+
   private final Logger logger = Logger.getLogger("NoFeedbackRecordAudioPanel");
+
   protected final ExerciseController controller;
   protected final T exercise;
   protected PostAudioRecordButton postAudioRecordButton;
-  protected RecorderPlayAudioPanel playAudioPanel;
-  protected DivWidget recordFeedback;
-  protected DivWidget scoreFeedback;
+  RecorderPlayAudioPanel playAudioPanel;
+  DivWidget recordFeedback;
+  DivWidget scoreFeedback;
+  private SessionManager sessionManager;
 
   /**
-   * @see RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices)
    * @param exercise
    * @param controller
+   * @see RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices)
    */
-  public NoFeedbackRecordAudioPanel(T exercise, ExerciseController controller) {
+  public NoFeedbackRecordAudioPanel(T exercise, ExerciseController controller, SessionManager sessionManager) {
     this.exercise = exercise;
     this.controller = controller;
+    this.sessionManager = sessionManager;
 
-    getElement().setId("NoFeedbackRecordAudioPanel_"+ exercise.getID());
+    getElement().setId("NoFeedbackRecordAudioPanel_" + exercise.getID());
   }
 
   protected void addWidgets() {
-    //logger.info("addWidets");
-
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
     scoreFeedback.getElement().setId("scoreFeedback_" + exercise.getID());
-
-    //long then = System.currentTimeMillis();
-    //DivWidget col = new DivWidget();
-
-    //add(this::makePlayAudioPanel);
-    //makePlayAudioPanel();
-
     recordFeedback = makePlayAudioPanel().getRecordFeedback(null, controller.shouldRecord());
     recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
     scoreFeedback.add(recordFeedback);
@@ -63,10 +62,19 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
    * @seex #addWidgets
    * @see AudioPanel#getPlayButtons
    */
-  public RecorderPlayAudioPanel makePlayAudioPanel() {
+  RecorderPlayAudioPanel makePlayAudioPanel() {
     //long then = System.currentTimeMillis();
+    postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller) {
 
-    postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller);
+      /**
+       * @see RecordButtonPanel#postAudioFile
+       * @return
+       */
+      @Override
+      protected String getDevice() {
+        return getDeviceValue();
+      }
+    };
     postAudioRecordButton.addStyleName("leftFiveMargin");
     postAudioRecordButton.setVisible(controller.getProjectStartupInfo().isHasModel());
 
@@ -78,6 +86,10 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
 //    long now = System.currentTimeMillis();
     // logger.info("took " + (now-then) + " for makeAudioPanel");
     return playAudioPanel;
+  }
+
+  private String getDeviceValue() {
+    return sessionManager.getSession();
   }
 
   /**
@@ -122,7 +134,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
 
   @Override
   public void useResult(AudioAnswer result) {
-   //logger.info("useScoredResult " + result);
+    //logger.info("useScoredResult " + result);
     setVisible(true);
     playAudioPanel.showPlayButton();
   }
@@ -139,4 +151,5 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
   public DivWidget getScoreFeedback() {
     return scoreFeedback;
   }
+
 }

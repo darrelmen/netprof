@@ -131,6 +131,9 @@ public class WebAudioRecorder {
     return webAudioMicAvailable;
   }
 
+  /**
+   * @see #advertise
+   */
   public static void silenceDetected() {
     //  console("silenceDetected -- now!");
     FlashRecordPanelHeadless.micPermission.silenceDetected();

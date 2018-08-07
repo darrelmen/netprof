@@ -137,6 +137,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   /**
    * Get session start...
    *
+   * @see #getAnswerWidget
    * @return
    */
   @Override

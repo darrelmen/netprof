@@ -46,7 +46,9 @@
 
 
         var silenceDetectionConfig =  {};
-        silenceDetectionConfig.time =  1500;
+
+        // how long of a silence before we start saying we've found silence
+        silenceDetectionConfig.time =  1000;
         silenceDetectionConfig.amplitude =  0.2;
 
 

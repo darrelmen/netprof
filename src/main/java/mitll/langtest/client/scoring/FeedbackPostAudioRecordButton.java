@@ -3,6 +3,7 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 
@@ -91,4 +92,6 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   protected void gotShortDurationRecording() {
     simpleRecordAudioPanel.gotShortDurationRecording();
   }
+
+
 }
