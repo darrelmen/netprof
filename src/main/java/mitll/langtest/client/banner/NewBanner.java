@@ -519,7 +519,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   @Override
   public void setVisibleChoicesByMode(ProjectMode mode) {
-    logger.info("setVisibleChoicesByMode set visible choices " + mode);
+ //   logger.info("setVisibleChoicesByMode set visible choices " + mode);
     hideOrShowByMode((mode == ProjectMode.DIALOG) ? DIALOG_VIEWS : STANDARD_VIEWS);
   }
 

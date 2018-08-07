@@ -901,10 +901,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   public void clearHighlight() {
+    flclickables.forEach(IHighlightSegment::clearHighlight);
   }
 
   public boolean isPlaying() {
     return (playAudio != null) && playAudio.isPlaying();
   }
 
+  public void resetAudio() {
+    playAudio.reinitialize();
+  }
 }

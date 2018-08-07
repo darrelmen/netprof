@@ -86,7 +86,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
       } else {
         addBreadcrumbLevels(crumbs, startupInfo);
       }
-      logger.info("addCrumbs ");
+     // logger.info("addCrumbs ");
 
       // WHY???
       //  banner.checkProjectSelected();
@@ -113,7 +113,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     //  logger.info("addBreadcrumb " + projects.size());
     for (SlimProject project : lifecycleSupport.getStartupInfo().getProjects()) {
       if (project.hasChildren() && project.hasChild(currentProject)) {
-        logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+      //  logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         crumbs.add(getLangBreadcrumb(project));
         INavigation.VIEWS currentView = breadcrumbPartner.getNavigation().getCurrentView();
 

@@ -68,8 +68,9 @@ import static com.github.gwtbootstrap.client.ui.constants.Placement.TOP;
  * To change this template use File | Settings | File Templates.
  */
 public class BasicDialog {
-  private static final int DELAY_MILLIS = 3000;
   private final Logger logger = Logger.getLogger("BasicDialog");
+
+  private static final int DELAY_MILLIS = 3000;
 
   private static final boolean DEBUG = false;
   static final String TRY_AGAIN = "Try Again";

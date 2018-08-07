@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
@@ -41,7 +42,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     implements ContentView, PlayListener, IListenView {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
- // private static final int SPACER_HEIGHT = 10;
+  // private static final int SPACER_HEIGHT = 10;
   private static final int HEADER_HEIGHT = 120;
 
   private static final String VALUE = "value";
@@ -118,7 +119,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     getRefAudio(getters.iterator());
   }
 
-  DivWidget dialogHeader;
+  private DivWidget dialogHeader;
 
   /**
    * Main method for showing the three sections
@@ -159,6 +160,22 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     style.setZIndex(1000);
   }
 
+  private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
+    CheckBox checkBox = new CheckBox(label, true);
+    setLeftTurnSpeakerInitial(checkBox);
+    checkBox.addStyleName("floatLeft");
+    checkBox.addStyleName("leftFiveMargin");
+    checkBox.addStyleName("leftSpeaker");
+    checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+
+    checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
+
+    DivWidget rightDiv = new DivWidget();
+    rightDiv.add(checkBox);
+    rowOne.add(rightDiv);
+    return checkBox;
+  }
+
   private CheckBox addRightSpeaker(DivWidget rowOne, String label) {
     CheckBox checkBox = new CheckBox(label, true);
 
@@ -173,22 +190,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
     checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
 
-
-    DivWidget rightDiv = new DivWidget();
-    rightDiv.add(checkBox);
-    rowOne.add(rightDiv);
-    return checkBox;
-  }
-
-  private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
-    CheckBox checkBox = new CheckBox(label, true);
-    setLeftTurnSpeakerInitial(checkBox);
-    checkBox.addStyleName("floatLeft");
-    checkBox.addStyleName("leftFiveMargin");
-    checkBox.addStyleName("leftSpeaker");
-    checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
-
-    checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
 
     DivWidget rightDiv = new DivWidget();
     rightDiv.add(checkBox);
@@ -285,7 +286,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return image;
   }
 
-  DivWidget turnContainer;
+  //private DivWidget turnContainer;
 
   /**
    * @param dialog
@@ -296,7 +297,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
 
-    turnContainer = rowOne;
+//    turnContainer = rowOne;
     rowOne.getElement().setId("turnContainer");
     rowOne.setWidth(97 + "%");
     rowOne.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
@@ -467,9 +468,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   private void gotSliderChange() {
-    //   int value = getVolume();
     controller.getSoundManager().setVolume(getVolume());
-    //  logger.info("got slider change " + value);
   }
 
   @Override
@@ -477,6 +476,12 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return slider.getElement().getPropertyInt(VALUE);
   }
 
+  /**
+   * TODO : move this down, add interface...
+   * @param exid
+   * @param score
+   * @param recordDialogTurn
+   */
   @Override
   public void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
 
@@ -486,6 +491,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private Widget getLeftArrow() {
     DivWidget buttonDiv = new DivWidget();
     Button widgets = new Button("", IconType.ARROW_LEFT, event -> gotGoBack());
+    new TooltipHelper().addTooltip(widgets, getPrevTooltip());
+
     widgets.addStyleName("leftFiveMargin");
     widgets.addStyleName("rightTenMargin");
     buttonDiv.add(widgets);
@@ -496,6 +503,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private Widget getRightArrow() {
     DivWidget buttonDiv = new DivWidget();
     Button widgets = new Button("", IconType.ARROW_RIGHT, event -> gotGoForward());
+    new TooltipHelper().addTooltip(widgets, getNextTooltip());
     widgets.addStyleName("leftFiveMargin");
     widgets.addStyleName("rightTenMargin");
     buttonDiv.add(widgets);
@@ -509,6 +517,14 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   @NotNull
   protected INavigation.VIEWS getPrevView() {
     return INavigation.VIEWS.DIALOG;
+  }
+
+  protected String getPrevTooltip() {
+    return "Go back to " + getPrevView().toString();
+  }
+
+  protected String getNextTooltip() {
+    return "Go ahead to " + getNextView().toString();
   }
 
   private void gotGoForward() {
@@ -530,8 +546,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
     boolean isPlaying = currentTurn.doPause();
 
-    currentTurn.clearHighlight();
-    removeMarkCurrent();
+    clearHighlightAndRemoveMark();
 
 
     if (!makePrevVisible()) {
@@ -564,8 +579,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
     boolean isPlaying = currentTurn.doPause();
 
-    currentTurn.clearHighlight();
-    removeMarkCurrent();
+    clearHighlightAndRemoveMark();
 
     // makeVisible(currentTurn);
     if (!makeNextVisible()) {
@@ -583,47 +597,69 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     if (isPlaying) playCurrentTurn();
   }
 
+  private void clearHighlightAndRemoveMark() {
+    currentTurn.resetAudio();
+    currentTurn.clearHighlight();
+    removeMarkCurrent();
+  }
+
   protected void gotPlay() {
     //   logger.info("got click on play ");
+    setPlayButtonIcon();
 
-    if (currentTurn.isPlaying()) {
-      playButton.setIcon(IconType.PAUSE);
-    } else {
-      setPlayButtonToPlay();
-    }
-
-    {
-      Boolean leftSpeakerSet = isLeftSpeakerSet();
-      Boolean rightSpeakerSet = isRightSpeakerSet();
-      if (leftSpeakerSet && rightSpeakerSet) {
-        logger.info("gotPlay both speakers ");
-
-      } else if (leftSpeakerSet && !leftTurnPanels.contains(currentTurn) || rightSpeakerSet && !rightTurnPanels.contains(currentTurn)) {
-        removeMarkCurrent();
-        int i = bothTurns.indexOf(currentTurn); // must be on right
-//        if (i + 1 == bothTurns.size()) {
-//
-//        }
-        setCurrentTurn(bothTurns.get((i + 1 == bothTurns.size()) ? 0 : i + 1));
-      }
-    }
+    setTurnToPromptSide();
 
     playCurrentTurn();
+  }
+
+  void setTurnToPromptSide() {
+    Boolean leftSpeakerSet = isLeftSpeakerSet();
+    Boolean rightSpeakerSet = isRightSpeakerSet();
+    if (leftSpeakerSet && rightSpeakerSet) {
+      // logger.info("gotPlay both speakers ");
+    } else if (leftSpeakerSet && !leftTurnPanels.contains(currentTurn) || rightSpeakerSet && !rightTurnPanels.contains(currentTurn)) {
+      setNextTurnForSide();
+    }
+  }
+
+
+  protected void setNextTurnForSide() {
+    removeMarkCurrent();
+    int i = bothTurns.indexOf(currentTurn); // must be on right
+
+    if (currentTurn == null) logger.warning("no current turn");
+    else logger.info("current turn for ex " + currentTurn.getExID());
+
+    int nextIndex = (i + 1 == bothTurns.size()) ? 0 : i + 1;
+    logger.info("setCurrentTurnForSide " + i + " next " + nextIndex);
+
+    setCurrentTurn(bothTurns.get(nextIndex));
   }
 
   boolean onFirstTurn() {
     return getSeq().indexOf(currentTurn) == 0;
   }
 
+  /**
+   * Spoken or prompt sequence
+   *
+   * @return
+   */
   protected List<T> getSeq() {
     boolean leftSpeaker = isLeftSpeakerSet();
     boolean rightSpeaker = isRightSpeakerSet();
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
   }
+  protected List<T> getRespSeq() {
+    boolean leftSpeaker = isLeftSpeakerSet();
+    boolean rightSpeaker = isRightSpeakerSet();
+    return leftSpeaker ? rightTurnPanels :  rightSpeaker ? leftTurnPanels : null;
+  }
 
   Boolean isLeftSpeakerSet() {
     return leftSpeakerBox.getValue();
   }
+
   Boolean isRightSpeakerSet() {
     return rightSpeakerBox.getValue();
   }
@@ -640,8 +676,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   @Override
   public void playStarted() {
     if (currentTurn != null) {
-      if (DEBUG) logger.info("playStarted - turn " + currentTurn.getExID());
-      playButton.setIcon(IconType.PAUSE);
+      if (DEBUG || true) logger.info("playStarted - turn " + currentTurn.getExID());
+      setPlayButtonToPause();
       markCurrent();
     }
   }
@@ -670,19 +706,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   protected void currentTurnPlayEnded() {
     if (DEBUG) logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID());
     T next = getNext();
-//    List<T> seq = getSeq();
-//    int i = seq.indexOf(currentTurn);
-//    int i1 = i + 1;
-
     makeNextVisible();
 
     if (next == null) {
       if (DEBUG) logger.info("OK stop");
-      //  setCurrentTurn(getSeq().get(0));
-      //  markCurrent();
-
-//      makeNextVisible();
-
     } else {
       removeMarkCurrent();
       setCurrentTurn(next);
@@ -712,11 +739,29 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     } else return false;
   }
 
-  protected void setPlayButtonToPlay() {
-    playButton.setIcon(IconType.PLAY);
+  private boolean playing = false;
+
+  void setPlayButtonIcon() {
+    if (playing) {
+      setPlayButtonToPause();
+    } else {
+      setPlayButtonToPlay();
+    }
   }
 
-  protected void removeMarkCurrent() {
+  private void setPlayButtonToPause() {
+    logger.info("setPlayButtonToPause");
+    playButton.setIcon(IconType.PAUSE);
+    playing = false;
+  }
+
+  void setPlayButtonToPlay() {
+    logger.info("setPlayButtonToPlay");
+    playButton.setIcon(IconType.PLAY);
+    playing = true;
+  }
+
+  void removeMarkCurrent() {
     //   logger.info("removeMarkCurrent on " + currentTurn.getExID());
     currentTurn.removeMarkCurrent();
   }
@@ -770,5 +815,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   @Override
   public void setSmiley(Image smiley, double total) {
+  }
+
+  @Override
+  public void stopRecording() {
+
   }
 }

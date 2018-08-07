@@ -446,10 +446,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     VIEWS views = getCurrentViewFromURL();
     if (views == null) {
       String storedView = getStoredView();
-    //  logger.info("getCurrentStoredView storedView " + storedView);
+      //  logger.info("getCurrentStoredView storedView " + storedView);
       return storedView;
     } else {
-     // logger.info("getCurrentStoredView url   view '" + views +"'");
+      // logger.info("getCurrentStoredView url   view '" + views +"'");
       return views.name();
     }
   }
@@ -672,8 +672,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         VIEWS currentStoredView = VIEWS.valueOf(getCurrentStoredView());
 
         if (views != currentStoredView) {
-          logger.info("onValueChange url says               " + views);
-          logger.info("onValueChange currentStoredView says " + currentStoredView);
+          if (DEBUG) logger.info("onValueChange url says               " + views);
+          if (DEBUG) logger.info("onValueChange currentStoredView says " + currentStoredView);
 
           if (currentStoredView == DIALOG) {
             banner.show(DIALOG);

@@ -86,17 +86,17 @@ public abstract class TypeAhead implements ITypeAhead {
 
   @Override
   public void grabFocus() {
-    if (typeAhead != null) typeAhead.setFocus(true);
+    typeAhead.setFocus(true);
   }
 
   @Override
   public String getText() {
-    return typeAhead == null ? "" : typeAhead.getText();
+    return typeAhead.getText();
   }
 
   @Override
   public void setText(String text) {
-    if (typeAhead != null) typeAhead.setText(text);
+    typeAhead.setText(text);
   }
 
   /**

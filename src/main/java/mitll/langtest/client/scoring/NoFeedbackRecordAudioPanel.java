@@ -109,14 +109,14 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise>
     clearScoreFeedback();
   }
 
-  protected void clearScoreFeedback() {
+  void clearScoreFeedback() {
     scoreFeedback.clear();
     scoreFeedback.add(recordFeedback);
   }
 
   @Override
   public void stopRecording() {
-    logger.info("stopRecording...");
+//    logger.info("stopRecording...");
     playAudioPanel.setEnabled(true);
     playAudioPanel.hideRecord();
   }

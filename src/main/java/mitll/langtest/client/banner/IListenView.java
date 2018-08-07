@@ -7,8 +7,10 @@ import java.util.List;
 
 public interface IListenView {
   int getVolume();
+
   void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn);
+
   void setSmiley(Image smiley, double total);
 
-//  String getSession();
+  void stopRecording();
 }

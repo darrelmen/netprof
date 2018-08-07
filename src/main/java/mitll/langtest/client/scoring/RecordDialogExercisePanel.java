@@ -55,6 +55,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     //  logger.info("ex " + commonExercise.getID() + " min dur " + minDur);
   }
 
+  /**
+   * TODO : do this better - should
+   */
   @Override
   public void showScoreInfo() {
     emoticon.setVisible(true);
@@ -93,9 +96,23 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
         alignmentOutput = result.getPretestScore();
         listenView.addScore(result.getExid(), (float) result.getScore(), RecordDialogExercisePanel.this);
         listenView.setSmiley(emoticon, result.getScore());
-        // logger.info("useResult got " + result.getValidity() + " " + result.getScore());
+        logger.info("useResult got for   " + getExID() + " = " + result.getValidity() + " " + result.getScore());
+       // logger.info("useResult got words " + result.getPretestScore().getWordScores());
+      }
+
+      @Override
+      public void useInvalidResult(boolean isValid) {
+        super.useInvalidResult(isValid);
+        logger.info("useInvalidResult got valid = " + isValid);
+      }
+
+      @Override
+      public void stopRecording() {
+        super.stopRecording();
+        listenView.stopRecording();
       }
     };
+
     this.recordAudioPanel = recordPanel;
 
     recordPanel.addWidgets();
@@ -154,6 +171,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     start = System.currentTimeMillis();
     recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
   }
+
+
 
   /**
    * @return

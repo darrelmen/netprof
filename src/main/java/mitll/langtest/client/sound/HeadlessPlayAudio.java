@@ -113,7 +113,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     markPlaying();
     // tell other widgets to pause if they are playing audio
 
-
     // TODO : probably a bad idea
     LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(id));
 

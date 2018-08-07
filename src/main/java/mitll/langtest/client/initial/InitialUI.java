@@ -92,7 +92,7 @@ import static mitll.langtest.client.user.UserPassLogin.*;
 public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private final Logger logger = Logger.getLogger("InitialUI");
 
-  public static final int TOP_OF_ROOT = 48;//58;
+  private static final int TOP_OF_ROOT = 48;//58;
   /**
    * Make sure we can talk to the server...
    *
@@ -758,7 +758,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     // logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     boolean hasStartupInfo = lifecycleSupport.getProjectStartupInfo() != null;
     if (hasStartupInfo) {
-      logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+     // logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     } else {
@@ -775,34 +775,11 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   @Override
   public void showInitialState() {
     // setMode(mode);
-    logger.info("showInitialState ");
+  //  logger.info("showInitialState ");
     showNavigation();
     banner.checkProjectSelected();
-    //banner.setVisibleChoicesByMode(getMode());
     navigation.showInitialState();
   }
-/*
-  @Override
-  public ProjectMode getMode() {
-    String mode = controller.getStorage().getValue("Mode");
-    ProjectMode modeEnum = ProjectMode.VOCABULARY;
-
-    if (mode == null) {
-
-    } else {
-      try {
-        modeEnum = ProjectMode.valueOf(mode);
-      } catch (IllegalArgumentException e) {
-      }
-    }
-    return modeEnum;
-  }
-
-  @Override
-  public void setMode(ProjectMode mode) {
-    controller.getStorage().storeValue("Mode", mode.toString());
-    logger.info("mode now " + getMode());
-  }*/
 
   /**
    * @see #configureUIGivenUser
@@ -850,19 +827,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     breadcrumbHelper.removeLastCrumb();
     addProjectChoices(1, parent);
   }
-
-  /**
-   * @see #clickOnParentCrumb
-   */
-//  private void removeLastCrumb() {
-//    breadcrumbHelper.removeLastCrumb();
-//  }
-
-/*
-  public String getLastBreadcrumb() {
-    return breadcrumbHelper.getLastBreadcrumb();
-  }
-*/
 
   /**
    * @param userID

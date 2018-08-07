@@ -6,6 +6,8 @@ import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
@@ -41,12 +43,16 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   /**
    *
    */
-  private Image smiley = new Image();
+  private Image overallSmiley = new Image();
+  private static final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif");
+
+  private Image waitCursor = new Image(animated);
 
   private final Map<Integer, Float> exToScore = new HashMap<>();
   private final Map<Integer, T> exToTurn = new HashMap<>();
   private List<IRecordDialogTurn> recordDialogTurns = new ArrayList<>();
   private SessionStorage sessionStorage;
+  private DivWidget overallFeedback;
 
   /**
    * @param controller
@@ -59,7 +65,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     controller.registerStopDetected(this::silenceDetected);
   }
 
-  private DivWidget overallFeedback;
 
   /**
    * @param dialog
@@ -117,8 +122,27 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       DivWidget iconContainer = new DivWidget();
       iconContainer.addStyleName("floatLeft");
 
-      iconContainer.add(smiley);
-      smiley.setVisible(false);
+      iconContainer.add(waitCursor);
+      waitCursor.setVisible(false);
+      waitCursor.setWidth("72px");
+      waitCursor.setHeight("72px");
+      container.add(iconContainer);
+    }
+
+    {
+      DivWidget iconContainer = new DivWidget();
+      iconContainer.addStyleName("floatLeft");
+
+      iconContainer.add(overallSmiley);
+
+      iconContainer.setWidth("72px");
+      iconContainer.setHeight("72px");
+
+      styleAnimatedSmiley();
+
+      // setSmiley(overallSmiley,0.2);
+      // overallSmiley.addStyleName("animation-target");
+
       container.add(iconContainer);
     }
 
@@ -143,6 +167,15 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
 
     return container;
+  }
+
+  private void styleAnimatedSmiley() {
+    overallSmiley.setWidth("36px");
+    overallSmiley.setHeight("36px");
+    overallSmiley.setVisible(false);
+    overallSmiley.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+    overallSmiley.getElement().getStyle().setLeft(18, Style.Unit.PX);
+    overallSmiley.getElement().getStyle().setTop(18, Style.Unit.PX);
   }
 
 /*  @NotNull
@@ -192,6 +225,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    * @param exid
    * @param score
    * @param recordDialogTurn
+   * @see RecordDialogExercisePanel#addWidgets
    */
   @Override
   public void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
@@ -199,39 +233,55 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     recordDialogTurns.add(recordDialogTurn);
 
     T turn = exToTurn.get(exid);
+    logger.info("addScore exid " + exid + " score " + score + " now " + exToScore.keySet());
 
-    logger.info("addScore exid " + exid + " score " + score + " turn " + turn);
-
-    List<T> recordTurns = getRecordTurns();
-    boolean onLast = false;
-    if (turn == null) {
-      logger.warning("can't find turn for ex " + exid);
-    }
-    else {
-      onLast = recordTurns.indexOf(turn) == recordTurns.size() - 1;
-    }
-
-    if (onLast) {
-      showScore();
-      recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
-    }
+    checkAtEnd(turn);
   }
 
-  private List<T> getRecordTurns() {
-    return isRightSpeakerSet() ? leftTurnPanels : rightTurnPanels;
+  /**
+   * So if the response is the last turn, go ahead and show the scores
+   *
+   * @param turn
+   */
+  private void checkAtEnd(T turn) {
+    boolean onLast = bothTurns.indexOf(turn) == bothTurns.size() - 1;
+
+    if (onLast) {
+      showScores();
+    }
+    logger.info("not at end");
+  }
+
+  private void showScores() {
+    showScore();
+    recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
   }
 
   protected void setRightTurnInitialValue(CheckBox checkBox) {
   }
 
+  /**
+   * @param value
+   * @see #addLeftSpeaker
+   */
   protected void speakerOneCheck(Boolean value) {
     rightSpeakerBox.setValue(!value);
     setPlayButtonToPlay();
+
+    makeFirstTurnCurrent();
   }
 
   protected void speakerTwoCheck(Boolean value) {
     leftSpeakerBox.setValue(!value);
     setPlayButtonToPlay();
+
+    makeFirstTurnCurrent();
+  }
+
+  private void makeFirstTurnCurrent() {
+    removeMarkCurrent();
+    setCurrentTurn(leftTurnPanels.get(0));
+    markCurrent();
   }
 
   /**
@@ -254,16 +304,40 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   @Override
   protected void gotPlay() {
-    super.gotPlay();
+    if (overallSmiley.isVisible()) {
+      makeFirstTurnCurrent();
+      sessionStorage.storeSession();
+      clearScores();
+    }
+
+    setPlayButtonIcon();
+    setTurnToPromptSide();
+
+    T currentTurn = getCurrentTurn();
+    if (currentTurn == null) {
+      logger.info("gotPlay no current turn");
+      setCurrentTurn(getSeq().get(0));
+    } else logger.info("gotPlay (rehearse) Current turn for ex " + currentTurn.getExID());
 
     if (onFirstTurn()) {
       sessionStorage.storeSession();
       clearScores();
     }
+
+    if (getSeq().contains(currentTurn)) {
+      playCurrentTurn();
+    } else {
+      getCurrentTurn().startRecording();
+    }
+  }
+
+  protected void setNextTurnForSide() {
   }
 
   private void clearScores() {
-    smiley.setVisible(false);
+    overallSmiley.setVisible(false);
+    overallSmiley.removeStyleName("animation-target");
+
     scoreProgress.setVisible(false);
     exToScore.clear();
 
@@ -280,7 +354,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       markCurrent();
     } else {
       T currentTurn = getCurrentTurn();
-      if (DEBUG) logger.info("currentTurnPlayEnded (rehearse) - turn " + currentTurn.getExID());
+      int exID = currentTurn.getExID();
+      if (DEBUG) logger.info("currentTurnPlayEnded (rehearse) - turn " + exID);
       List<T> seq = getSeq();
 
       boolean isCurrentPrompt = seq.contains(currentTurn);
@@ -288,7 +363,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       int i2 = bothTurns.indexOf(currentTurn);
       int nextOtherSide = i2 + 1;
 
-      if (DEBUG) {
+      if (DEBUG || true) {
         logger.info("currentTurnPlayEnded" +
             "\n\t seq  " + seq.size() +
             "\n\tleft  " + isLeftSpeakerSet() +
@@ -307,6 +382,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         removeMarkCurrent();
         setCurrentTurn(nextTurn);
         markCurrent();
+
         makeCurrentTurnVisible();
         if (isCurrentPrompt) {
           if (DEBUG) logger.info("currentTurnPlayEnded - startRecording " + nextTurn.getExID());
@@ -316,14 +392,30 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
           playCurrentTurn();
         }
       } else {
-//        removeMarkCurrent();
-        // currentTurn = seq.get(0);
-        //   markCurrent();
+        if (isCurrentPrompt) {
+          logger.info("currentTurnPlayEnded - showScores " + exID);
+
+          // TODO : a race - does the play end before the score is available, or is the score available before the play ends?
+
+          List<T> respSeq = getRespSeq();
+          T widgets = respSeq.get(respSeq.size() - 1);
+
+          boolean hasScore = exToScore.containsKey(widgets.getExID());
+          if (hasScore) {
+            showScores();
+          } else {
+            logger.info("currentTurnPlayEnded - no score for " + exID + " know about " + exToScore.keySet());
+
+            waitCursor.setVisible(true);  // wait for it
+          }
+        }
       }
     }
   }
 
   private void showScore() {
+    waitCursor.setVisible(false);
+
     int num = exToScore.values().size();
 //
 //    if (num == expected) {
@@ -343,14 +435,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     new ScoreProgressBar(false).setColor(scoreProgress, total, round);
 
-    setSmiley(smiley, total);
+    setSmiley(overallSmiley, total);
 
-    smiley.setVisible(true);
-
-//      return true;
-//    } else return false;
+    overallSmiley.setVisible(true);
+    overallSmiley.addStyleName("animation-target");
   }
-
 
   private double getTotal() {
     double total = 0D;
@@ -379,6 +468,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
 
     smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
+  }
+
+  @Override
+  public void stopRecording() {
+    if (getCurrentTurn() == bothTurns.get(bothTurns.size() - 1) && !exToScore.isEmpty()) {
+      waitCursor.setVisible(true);
+    }
   }
 
   @Override
