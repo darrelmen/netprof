@@ -34,14 +34,13 @@ public class ReportHelper {
   private static final int REPORT_THIS_PROJECT = 9;
 
   private final ServerProperties serverProps;
-  // private IReport report;
   private final IProjectManagement projectManagement;
 
   private final IProjectDAO projectDAO;
   private final IUserDAO userDAO;
   private final PathHelper pathHelper;
   private final MailSupport mailSupport;
-
+  Thread thread;
   public ReportHelper(ServerProperties serverProperties,
                       IProjectManagement projectManagement,
                       IProjectDAO projectDAO,
@@ -90,7 +89,7 @@ public class ReportHelper {
     Duration duration = Duration.between(now, tomorrowStart);
     long candidate = duration.toMillis() - 30 * 1000;
     long toWait = candidate > 0 ? candidate : candidate + DAY;
-    new Thread(() -> {
+    Thread thread = new Thread(() -> {
       try {
         logger.info("tryTomorrow :" +
             "\n\tWaiting for " + toWait + " or " + toWait / 1000 + " sec or " + toWait / (60 * 1000) + " min or " + toWait / (60 * 60 * 1000) + " hours" +
@@ -100,8 +99,12 @@ public class ReportHelper {
         e.printStackTrace();
       }
       doReport(report); // try again later
-    }).start();
+    });
+    this.thread=thread;
+    thread.start();
   }
+
+  public void interrupt() { this.thread.interrupt(); }
 
   public boolean isTodayAGoodDay() {
     return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;

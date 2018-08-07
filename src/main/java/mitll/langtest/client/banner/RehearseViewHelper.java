@@ -82,12 +82,16 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     return breadRow;
   }
 
-  protected void gotGoBack() {
-    controller.getNavigation().show(INavigation.VIEWS.LISTEN);
+  @NotNull
+  @Override
+  protected INavigation.VIEWS getPrevView() {
+    return INavigation.VIEWS.LISTEN;
   }
 
-  protected void gotGoForward() {
-    controller.getNavigation().show(INavigation.VIEWS.REHEARSE);
+  @NotNull
+  @Override
+  protected INavigation.VIEWS getNextView() {
+    return INavigation.VIEWS.REHEARSE;
   }
 
   private boolean directClick = false;
@@ -163,7 +167,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       if (recordDialogExercisePanel.isRecording()) {
         //    logger.info("\tsilenceDetected recordDialogExercisePanel is recording");
         if (recordDialogExercisePanel.stopRecording()) {
-        //  currentTurnPlayEnded();
+          //  currentTurnPlayEnded();
 
 
           Timer timer = new Timer() {
@@ -285,7 +289,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         markCurrent();
         makeCurrentTurnVisible();
         if (isCurrentPrompt) {
-          if (DEBUG)  logger.info("currentTurnPlayEnded - startRecording " + nextTurn.getExID());
+          if (DEBUG) logger.info("currentTurnPlayEnded - startRecording " + nextTurn.getExID());
           nextTurn.startRecording();
         } else {
           if (DEBUG) logger.info("currentTurnPlayEnded - play current " + nextTurn.getExID());

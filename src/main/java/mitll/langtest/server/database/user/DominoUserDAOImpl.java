@@ -188,7 +188,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             @Override
             public DBUser load(Integer key) {
               // logger.info("idToDBUser Load " + key);
-              return delegate.lookupDBUser(key);
+              DBUser dbUser = delegate.lookupDBUser(key);
+              if (dbUser == null) dbUser = delegate.lookupDBUser(getDefaultUser());
+              return dbUser;
             }
           });
 
@@ -292,7 +294,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private void noServletContextSetup(Database database, Properties props) {
     pool = Mongo.createPool(new DBProperties(props));
     serializer = Mongo.makeSerializer();
-//      logger.info("OK made serializer " + serializer);
+    logger.info("connectToMongo : OK made serializer " + serializer);
     Mailer mailer = new Mailer(new MailerProperties(props));
     ServerProperties dominoProps = getDominoProps(database, props);
     //String appName = dominoProps.getAppName();
@@ -364,6 +366,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (ignite != null) {
       ignite.close();
     }
+/*    if (pool != null) {
+      logger.info("close : closing connection to " + pool);
+      pool.closeConnection();
+      if (ignite != null) ignite.close();
+    }*/
   }
 
   @Override

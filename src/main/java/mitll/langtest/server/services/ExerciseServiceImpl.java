@@ -141,7 +141,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
       //   logger.info("found " + unRec.size() + " unrecorded");
 
-      Map<String, Long> collect = unRec.stream().collect(Collectors.groupingBy(ex -> ex.getUnitToValue().get(firstType), Collectors.counting()));
+      Map<String, Long> collect = unRec.stream().collect(Collectors.groupingBy(ex -> ex.getUnitToValue().get(firstType) == null ? "Unknown" : ex.getUnitToValue().get(firstType), Collectors.counting()));
 
       // logger.info("map is " + collect);
 

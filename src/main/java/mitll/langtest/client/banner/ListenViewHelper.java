@@ -521,12 +521,22 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> implements Co
     return buttonDiv;
   }
 
-  protected void gotGoBack() {
-    controller.getNavigation().show(INavigation.VIEWS.DIALOG);
+  private void gotGoBack() {
+    controller.getNavigation().show(getPrevView());
   }
 
-  protected void gotGoForward() {
-    controller.getNavigation().show(INavigation.VIEWS.REHEARSE);
+  @NotNull
+  protected INavigation.VIEWS getPrevView() {
+    return INavigation.VIEWS.DIALOG;
+  }
+
+  private void gotGoForward() {
+    controller.getNavigation().show(getNextView());
+  }
+
+  @NotNull
+  protected INavigation.VIEWS getNextView() {
+    return INavigation.VIEWS.REHEARSE;
   }
 
   private void gotBackward() {

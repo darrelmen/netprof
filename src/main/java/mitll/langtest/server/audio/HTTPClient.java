@@ -171,39 +171,8 @@ public class HTTPClient {
   }
 
   private HttpURLConnection getHttpURLConnection(String url) throws IOException {
-    HttpURLConnection httpURLConnection = (HttpURLConnection) (new URL(url)).openConnection();
-
-/*
-    try {
-      SSLContext ctx = SSLContext.getInstance("TLS");
-      ctx.init(new KeyManager[0], new TrustManager[]{new DefaultTrustManager()}, new SecureRandom());
-      SSLContext.setDefault(ctx);
-    } catch (NoSuchAlgorithmException | KeyManagementException e) {
-      logger.error("got " +e,e);
-    }
-*/
-
-    return httpURLConnection;
+    return (HttpURLConnection) (new URL(url)).openConnection();
   }
-
-  /**
-   * @deprecated can we avoid this?
-   */
- /* private static class DefaultTrustManager implements X509TrustManager {
-
-    @Override
-    public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-    }
-
-    @Override
-    public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-    }
-
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-      return null;
-    }
-  }*/
 
   private void setRequestProperties(HttpURLConnection httpConn) {
     httpConn.setRequestProperty("Content-Type", "text/plain; charset=utf-8");

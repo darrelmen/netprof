@@ -335,7 +335,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return this;
   }
 
-
   /**
    * Slick db connection.
    */
@@ -848,20 +847,25 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see ScoreServlet#getJsonNestedChapters
    */
   public JsonExport getJSONExport(int projectid) {
-    getExercises(projectid, false);
+    Project project = getProject(projectid);
+    if (project == null) {
+      logger.warn("asking for unknown project " + projectid);
+      return new JsonExport(null, null, Collections.emptyList(), false);
+    } else {
+      getExercises(projectid, false);
 
-    Map<String, Integer> stringIntegerMap = Collections.emptyMap();
-    AudioFileHelper audioFileHelper = getProject(projectid).getAudioFileHelper();
+      AudioFileHelper audioFileHelper = project.getAudioFileHelper();
 
-    JsonExport jsonExport = new JsonExport(
-        audioFileHelper == null ? stringIntegerMap : audioFileHelper.getPhoneToCount(),
-        getSectionHelper(projectid),
-        serverProps.getPreferredVoices(),
-        getLanguage(projectid).equalsIgnoreCase("english")
-    );
+      JsonExport jsonExport = new JsonExport(
+          audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
+          getSectionHelper(projectid),
+          serverProps.getPreferredVoices(),
+          getLanguage(projectid).equalsIgnoreCase("english")
+      );
 
-    attachAllAudio(projectid);
-    return jsonExport;
+      attachAllAudio(projectid);
+      return jsonExport;
+    }
   }
 
   /**
@@ -1489,11 +1493,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.error("close got " + e, e);
     }
 
+    reportHelper.interrupt();
+
     if (mailSupport != null) {
       mailSupport.stopHeartbeat();
     }
     try {
-//      logger.info(this.getClass() + " : closing db connection : " + dbConnection);
+    //  logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();
     } catch (Exception e) {
       logger.error("close got " + e, e);

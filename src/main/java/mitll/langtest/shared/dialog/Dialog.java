@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import static mitll.langtest.shared.exercise.STATE.UNSET;
 
 public class Dialog implements IDialog, MutableShell {
-  //private static final transient Logger logger = LogManager.getLogger(Dialog.class);
   private static final String SPEAKER = "Speaker".toLowerCase();
   public static final String UNIT = "unit";
   private static final String CHAPTER = "chapter";
@@ -26,7 +25,6 @@ public class Dialog implements IDialog, MutableShell {
 
   private String fltitle;
   private String entitle;
-
 
 
   private String unit;
@@ -116,7 +114,6 @@ public class Dialog implements IDialog, MutableShell {
   }
 
   /**
-   *
    * @param metadata
    * @return empty if no attribute of that type
    */
