@@ -43,6 +43,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Does ASR scoring -- adds phone and word transcript images below waveform and spectrum
@@ -54,7 +55,9 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class ASRScoringAudioPanel<T extends HasID> extends ScoringAudioPanel<T> {
-  //private final Logger logger = Logger.getLogger("ASRScoringAudioPanel");
+  private final Logger logger = Logger.getLogger("ASRScoringAudioPanel");
+
+
   private static final String ANIMATED_PROGRESS44_GIF = "animated_progress44.gif";
   private static final String WAIT_GIF = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS44_GIF;
   private static final String SCORE = "score";
@@ -80,7 +83,7 @@ public class ASRScoringAudioPanel<T extends HasID> extends ScoringAudioPanel<T> 
                               T exercise,
                               String instance) {
     super(path, refSentence, transliteration, controller, showSpectrogram, rightMargin, playButtonSuffix,
-        exercise, exercise.getID(), instance);
+        exercise, exercise.getID());
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -111,7 +114,7 @@ public class ASRScoringAudioPanel<T extends HasID> extends ScoringAudioPanel<T> 
                             int height,
                             final int reqid) {
     if (path == null || path.equals("FILE_MISSING")) return;
-    //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
+    logger.info("scoreAudio : scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.isVisible();
 
     // only show the spinning icon if it's going to take awhile

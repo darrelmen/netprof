@@ -116,7 +116,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
         controller, showSpectrogram,
         1.0f, 0,
         exercise,
-        exercise.getID(), instance
+        exercise.getID()
     );
 
     this.exercisePanel = widgets;

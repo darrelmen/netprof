@@ -257,9 +257,10 @@ public class ResultManager extends PagerTable {
       // logger.info("audio type " + audioType);
       String foreignText = selectedObject.getForeignText();
 
-      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, "", controller,
-          exID, // no exercise!
-          "instance");
+      ReviewScoringPanel w = new ReviewScoringPanel(
+          selectedObject.getAnswer(), foreignText, controller,
+          exID // no exercise!
+      );
 
       w.setResultID(selectedObject.getUniqueID());
 
@@ -270,8 +271,13 @@ public class ResultManager extends PagerTable {
       reviewContainer.add(vert);
       reviewContainer.add(w.getTables());
     } else {
-      AudioPanel w = new AudioPanel<>(selectedObject.getAnswer(), controller, false, 10, "",
-          null, exID, "instance");
+      AudioPanel w = new AudioPanel<>(selectedObject.getAnswer(),
+          controller,
+          false,
+          10,
+          "",
+          null,
+          exID);
       reviewContainer.add(w);
     }
   }
@@ -293,17 +299,19 @@ public class ResultManager extends PagerTable {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
-        logger.info("createProvider asking for " + start + "->" + end);
+      //  logger.info("createProvider asking for " + start + "->" + end);
 
         StringBuilder builder = tableSortHelper.getColumnSortedState(table);
         final Map<String, String> unitToValue = resultTypeAhead.getUnitToValue();
 
         int currentReq = req++;
         String text = resultTypeAhead.getText();
+
+/*
         logger.info("createProvider req " + unitToValue
             +
             //" user " + userID +
-            " text '" + text + "' currentReq " + currentReq);
+            " text '" + text + "' currentReq " + currentReq);*/
         //   logger.info("got " + builder.toString());
 
         String sortInfo = builder.toString();

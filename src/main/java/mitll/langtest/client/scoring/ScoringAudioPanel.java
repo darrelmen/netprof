@@ -68,14 +68,12 @@ public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
    * @param refSentence
    * @param playButtonSuffix
    * @param exercise
-   * @param instance
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel
    */
   ScoringAudioPanel(String refSentence, String transliteration, ExerciseController controller,
-                    String playButtonSuffix, T exercise,
-                    String instance) {
+                    String playButtonSuffix, T exercise) {
     this(null, refSentence, transliteration, controller, SHOW_SPECTROGRAM, 23,
-        playButtonSuffix, exercise, exercise.getID(), instance);
+        playButtonSuffix, exercise, exercise.getID());
   }
 
   /**
@@ -86,7 +84,6 @@ public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
    * @param playButtonSuffix
    * @param exercise
    * @param exerciseID
-   * @param instance
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel
    */
   ScoringAudioPanel(String path, String refSentence,
@@ -96,10 +93,8 @@ public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
                     int rightMargin,
                     String playButtonSuffix,
                     T exercise,
-                    int exerciseID,
-                    String instance) {
-    super(path, controller, showSpectrogram, rightMargin, playButtonSuffix,
-        exercise, exerciseID, instance);
+                    int exerciseID) {
+    super(path, controller, showSpectrogram, rightMargin, playButtonSuffix, exercise, exerciseID);
     this.refSentence = refSentence;
     this.transliteration = transliteration;
     this.clickableTranscript = new ClickableTranscript(words, phones, controller.getButtonFactory(), exerciseID, playAudio);

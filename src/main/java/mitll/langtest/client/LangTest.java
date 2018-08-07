@@ -554,7 +554,6 @@ public class LangTest implements
   public void getImage(int reqid, final String path, final String type, int toUse, int height, int exerciseID,
                        AsyncCallback<ImageResponse> client) {
     String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
-
     getImage(reqid, key, client);
   }
 
@@ -576,7 +575,7 @@ public class LangTest implements
     //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
-      //logger.info("getImage for key " + key+ " found  " + ifPresent);
+       logger.info("getImage for key " + key+ " found  " + ifPresent);
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
@@ -595,7 +594,7 @@ public class LangTest implements
 
             public void onSuccess(ImageResponse result) {
               imageCache.put(key, result);
-              //logger.info("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
+              logger.info("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
               client.onSuccess(result);
             }
           });

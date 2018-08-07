@@ -82,6 +82,9 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
   protected final ExerciseController controller;
 
+  /**
+   * Only so we can log the event for a specific exercise
+   */
   protected final int exid;
 
   /**

@@ -171,8 +171,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         //    logger.info("\tsilenceDetected recordDialogExercisePanel is recording");
         if (recordDialogExercisePanel.stopRecording()) {
           //  currentTurnPlayEnded();
-
-
           Timer timer = new Timer() {
             @Override
             public void run() {
@@ -180,7 +178,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
             }
           };
           timer.schedule(DELAY_MILLIS);
-
         }
         break;
       }
@@ -202,11 +199,16 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     recordDialogTurns.add(recordDialogTurn);
 
     T turn = exToTurn.get(exid);
+
+    logger.info("addScore exid " + exid + " score " + score + " turn " + turn);
+
     List<T> recordTurns = getRecordTurns();
     boolean onLast = false;
-    if (turn == null) logger.warning("can't find turn for ex " + exid);
+    if (turn == null) {
+      logger.warning("can't find turn for ex " + exid);
+    }
     else {
-      onLast = recordTurns.indexOf(turn) == recordDialogTurns.size() - 1;
+      onLast = recordTurns.indexOf(turn) == recordTurns.size() - 1;
     }
 
     if (onLast) {

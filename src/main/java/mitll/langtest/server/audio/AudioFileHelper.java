@@ -103,10 +103,13 @@ public class AudioFileHelper implements AlignDecode {
   public static final boolean DEBUG = false;
   private static final String FRENCH = "french";
   private static final double MIN_SCORE_FOR_CORRECT_ALIGN = 0.35;
+  /**
+   * @see #getSession
+   */
   private static final String TEST_USER = "demo_";
   private static final String TEST_PASSWORD = "domino22";//"demo";
   public static final long DAY = 24 * 60 * 60 * 1000L;
-  public static final String COOKIE = "Cookie";
+  private static final String COOKIE = "Cookie";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -1334,7 +1337,7 @@ public class AudioFileHelper implements AlignDecode {
             "\n\tnor      " + file.getAbsolutePath());
         return new PretestScore();
       } else {
-        logger.info("found " + testAudioFile + " at " + absolutePath);
+        logger.info("getASRScoreForAudio : found " + testAudioFile + " at " + absolutePath);
       }
     }
 

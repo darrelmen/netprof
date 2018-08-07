@@ -446,10 +446,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     VIEWS views = getCurrentViewFromURL();
     if (views == null) {
       String storedView = getStoredView();
-      logger.info("getCurrentStoredView storedView " + storedView);
+    //  logger.info("getCurrentStoredView storedView " + storedView);
       return storedView;
     } else {
-      logger.info("getCurrentStoredView url   view '" + views +"'");
+     // logger.info("getCurrentStoredView url   view '" + views +"'");
       return views.name();
     }
   }
