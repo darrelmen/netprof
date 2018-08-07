@@ -1,7 +1,6 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -19,7 +18,6 @@ import mitll.langtest.client.custom.content.ReviewItemHelper;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE;
@@ -116,7 +114,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-    logger.info("getCurrentView currentView " + currentView);
+    //    logger.info("getCurrentView currentView " + currentView);
     VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
@@ -124,7 +122,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
     List<User.Permission> requiredPerms = currentStoredView.getPerms();
     userPerms.retainAll(requiredPerms);
-
 
     if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
       logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
@@ -210,24 +207,24 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           listenHelper.showContent(divWidget, LISTEN.toString(), fromClick);
           break;
         case REHEARSE:
-         // logger.info(" showing " + REHEARSE + " \n\n\n");
+          // logger.info(" showing " + REHEARSE + " \n\n\n");
           clearAndPushKeep(REHEARSE);
           rehearseHelper.showContent(divWidget, REHEARSE.toString(), fromClick);
           break;
-        case RECORD:
+        case RECORD_ENTRIES:
           clearAndFixScroll();
-          setInstanceHistory(RECORD);
-          new RecorderNPFHelper(controller, true, this, RECORD).showNPF(divWidget, RECORD.toString());
+          setInstanceHistory(RECORD_ENTRIES);
+          new RecorderNPFHelper(controller, true, this, RECORD_ENTRIES).showNPF(divWidget, RECORD_ENTRIES.toString());
           break;
-        case CONTEXT:
+        case RECORD_CONTEXT:
           clearAndFixScroll();
-          setInstanceHistory(CONTEXT);
-          new RecorderNPFHelper(controller, false, this, CONTEXT).showNPF(divWidget, CONTEXT.toString());
+          setInstanceHistory(RECORD_CONTEXT);
+          new RecorderNPFHelper(controller, false, this, RECORD_CONTEXT).showNPF(divWidget, RECORD_CONTEXT.toString());
           break;
-        case DEFECTS:
+        case QC:
           clear();
-          setInstanceHistory(DEFECTS);
-          new MarkDefectsChapterNPFHelper(controller, this, DEFECTS).showNPF(divWidget, DEFECTS.toString());
+          setInstanceHistory(QC);
+          new MarkDefectsChapterNPFHelper(controller, this, QC).showNPF(divWidget, QC.toString());
           break;
         case FIX:
           clear();
@@ -275,7 +272,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private void clearAndFixScroll() {
     clear();
-  //  fixDivToNotScrollUnderHeader();
+    //  fixDivToNotScrollUnderHeader();
   }
 
 /*  private void fixDivToNotScrollUnderHeader() {
@@ -452,8 +449,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       logger.info("getCurrentStoredView storedView " + storedView);
       return storedView;
     } else {
-      logger.info("getCurrentStoredView url   view " + views);
-      return views.toString().toUpperCase();
+      logger.info("getCurrentStoredView url   view '" + views +"'");
+      return views.name();
     }
   }
 
@@ -462,9 +459,28 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     String instance = getCurrentInstance();
     VIEWS views = null;
     try {
-      views = instance.isEmpty() ? null : VIEWS.valueOf(instance.toUpperCase());
+      String name = instance.toUpperCase();
+      name = name.replaceAll(" ", "_");
+      views = instance.isEmpty() ? null : VIEWS.valueOf(name);
     } catch (IllegalArgumentException e) {
       logger.warning("bad instance " + instance);
+    }
+    //logger.info("getCurrentStoredView instance = " + instance + "/" + views);
+
+//    return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
+
+    if (views == null) {
+      String storedView = getStoredView();
+
+      if (storedView.isEmpty()) views = VIEWS.NONE;
+      else {
+        try {
+          views = VIEWS.valueOf(storedView.toUpperCase());
+        } catch (IllegalArgumentException e) {
+          logger.warning("bad instance " + storedView);
+          views = VIEWS.NONE;
+        }
+      }
     }
     return views;
   }
@@ -510,7 +526,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     if (getCurrentView() == VIEWS.FIX) {
       divWidget.add(review);
     } else {
-      logger.warning("not adding review since current is " + getCurrentView());
+      logger.warning("showReviewItems not adding since current is " + getCurrentView());
     }
   }
 

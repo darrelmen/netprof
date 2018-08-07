@@ -43,7 +43,7 @@ public class TurnPanel<T extends ClientExercise> extends DialogExercisePanel<T> 
 
   protected void styleMe(DivWidget wrapper) {
     this.bubble = wrapper;
-    wrapper.getElement().setId("rightSideBubble_" + getExID());
+    wrapper.getElement().setId("bubble_" + getExID());
     wrapper.addStyleName("bubble");
 
     //Style style = wrapper.getElement().getStyle();

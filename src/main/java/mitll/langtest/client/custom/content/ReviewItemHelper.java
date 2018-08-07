@@ -62,7 +62,7 @@ import static mitll.langtest.shared.answer.ActivityType.QUALITY_CONTROL;
  * @seex ListManager#ListManager
  * @since 3/26/2014.
  */
-public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> extends NPFHelper<T,U> {
+public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> extends NPFHelper<T, U> {
   private final Logger logger = Logger.getLogger("ReviewItemHelper");
 
   /**
@@ -129,18 +129,14 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
       return new ExercisePanelFactory<T, U>(getController(), pagingExerciseList) {
         @Override
         public Panel getExercisePanel(U exercise) {
-          //U userExercise = new Exercise(exercise);
-          ReviewEditableExercise<T,U> reviewEditableExercise =
+          ReviewEditableExercise<T, U> reviewEditableExercise =
               new ReviewEditableExercise<>(controller,
                   exercise,
                   ulID,
                   pagingExerciseList,
                   "ReviewEditableExercise"
               );
-
-          SimplePanel ignoredContainer = new SimplePanel();
-
-          Panel widgets = reviewEditableExercise.addFields(npfExerciseList, ignoredContainer);
+          Panel widgets = reviewEditableExercise.addFields(npfExerciseList, new SimplePanel());
           reviewEditableExercise.setFields(exercise);
 
           return widgets;
@@ -150,7 +146,7 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
 
     @Override
     protected PagingExerciseList<T, U> makeExerciseList(Panel topRow, Panel currentExercisePanel,
-                                                                               String instanceName, DivWidget listHeader, DivWidget footer) {
+                                                        String instanceName, DivWidget listHeader, DivWidget footer) {
       FlexListLayout outer = this;
       return new NPExerciseList<T, U>(currentExercisePanel, outer.getController(),
           new ListOptions(instanceName).setActivityType(QUALITY_CONTROL), -1) {
@@ -165,7 +161,7 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
               onlyUninspected)
               .setQC(true)
               .setAddContext(false);
-      //    logger.info("making request "  + exerciseListRequest);
+          //    logger.info("making request "  + exerciseListRequest);
           return exerciseListRequest;
         }
 

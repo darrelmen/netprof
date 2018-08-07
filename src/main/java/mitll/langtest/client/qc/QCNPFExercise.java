@@ -200,7 +200,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
         CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED :
         UNINSPECTED_TOOLTIP);
 
-    if (!getInstance().toLowerCase().contains(INavigation.VIEWS.FIX.toString().toLowerCase())
+    if (!getInstance().toLowerCase().contains(INavigation.VIEWS.QC.toString().toLowerCase())
     //    &&
       //  !getInstance().toLowerCase().contains(COMMENT.toLowerCase())
     ) {

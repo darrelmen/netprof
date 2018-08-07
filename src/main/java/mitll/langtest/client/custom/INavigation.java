@@ -2,7 +2,6 @@ package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.User;
 
@@ -21,36 +20,40 @@ import static mitll.langtest.shared.user.User.Permission.*;
 public interface INavigation extends IViewContaner {
 
   enum VIEWS {
-    NONE(EITHER),
+    NONE("", EITHER),
 
-    LISTS(VOCABULARY),
-    PROGRESS(VOCABULARY),
-    LEARN(VOCABULARY),
-    DRILL(VOCABULARY),
-    QUIZ(VOCABULARY),
+    LISTS("Lists", VOCABULARY),
+    PROGRESS("Progress", VOCABULARY),
+    LEARN("Learn", VOCABULARY),
+    DRILL("Drill", VOCABULARY),
+    QUIZ("Quiz", VOCABULARY),
 
-    DIALOG(ProjectMode.DIALOG),
+    DIALOG("Dialog", ProjectMode.DIALOG),
     /**
      * @see mitll.langtest.client.banner.DialogExerciseList#gotClickOnDialog
      * @see mitll.langtest.client.banner.NewContentChooser#showView
      */
-    LISTEN(ProjectMode.DIALOG),
-    REHEARSE(ProjectMode.DIALOG),
+    LISTEN("Listen", ProjectMode.DIALOG),
+    REHEARSE("Rehearse", ProjectMode.DIALOG),
 
-    RECORD(Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    CONTEXT(Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    DEFECTS(Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    FIX(Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN));
+    RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+    RECORD_CONTEXT("Record Context", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+    QC("QC", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+    FIX("Fix", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN));
 
     private List<User.Permission> perms;
     private ProjectMode mode;
 
-    VIEWS(List<User.Permission> perms) {
+    String display;
+
+    VIEWS(String display, List<User.Permission> perms) {
+      this.display = display;
       this.perms = perms;
       this.mode = EITHER;
     }
 
-    VIEWS(ProjectMode mode) {
+    VIEWS(String display, ProjectMode mode) {
+      this.display = display;
       this.perms = Collections.emptyList();
       this.mode = mode;
     }
@@ -64,11 +67,9 @@ public interface INavigation extends IViewContaner {
     }
 
     public String toString() {
-      return name().substring(0, 1) + name().substring(1).toLowerCase();
+      return display;
     }
   }
-
- // String getCurrentStoredView();
 
   void storeViewForMode(ProjectMode mode);
 

@@ -113,7 +113,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
                                                                        DivWidget listHeader,
                                                                        DivWidget footer) {
         return new RecordingFacetExerciseList<T>(controller,
-            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.CONTEXT) {
+            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.RECORD_CONTEXT) {
 
         };
       }

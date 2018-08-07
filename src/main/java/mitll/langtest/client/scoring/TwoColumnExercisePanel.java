@@ -672,7 +672,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       public void audioChanged(int id, long duration) {
         if (DEBUG) {
           logger.info("getContextPlay audioChanged for ex " + exercise.getID() + "/" + contextExercise.getID() +
-              " CONTEXT audio id "
+              " RECORD_CONTEXT audio id "
           );
         }
 
@@ -683,7 +683,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
         if (DEBUG) {
           logger.info("getContextPlay audioChangedWithAlignment for ex " + exercise.getID() + "/" + contextExercise.getID() +
-              " CONTEXT audio id "
+              " RECORD_CONTEXT audio id "
           );
         }
         contextAudioChangedWithAlignment(id, duration, alignmentOutputFromAudio);
@@ -700,7 +700,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   private void contextAudioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
     if (DEBUG) {
-      logger.info("contextAudioChangedWithAlignment audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
+      logger.info("contextAudioChangedWithAlignment audioChanged for ex " + exercise.getID() + " RECORD_CONTEXT audio id " + id +
           " alignment " + alignmentOutputFromAudio);
     }
 
@@ -718,7 +718,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(id);
     if (alignmentOutput != null) {
       if (DEBUG) {
-        logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " CONTEXT audio id " + id +
+        logger.info("contextAudioChanged audioChanged for ex " + exercise.getID() + " RECORD_CONTEXT audio id " + id +
             " alignment " + alignmentOutput);
       }
       if (contextClickables == null) {

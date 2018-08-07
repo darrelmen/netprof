@@ -9,11 +9,9 @@ import com.github.gwtbootstrap.client.ui.constants.NavbarPosition;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.UILifecycle;
@@ -32,6 +30,8 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
+  public static final String RECORD = "Record";
+  public static final String QC = "QC";
   private final Logger logger = Logger.getLogger("NewBanner");
 
   private static final List<VIEWS> STANDARD_VIEWS =
@@ -131,14 +131,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     }
 
     {
-      Nav recnav = getRecNav();
+      ComplexWidget recnav = getRecNav();
       this.recnav = recnav;
       navCollapse.add(recnav);
     }
     recordMenuVisible();
 
     {
-      Nav defectnav = getDefectNav();
+      ComplexWidget defectnav = getDefectNav();
       this.defectnav = defectnav;
       navCollapse.add(defectnav);
     }
@@ -167,30 +167,39 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Nav recnav = new Nav();
     recnav.getElement().setId("recnav");
     styleNav(recnav);
-    rememberViewAndLink(recnav, VIEWS.RECORD);
-    rememberViewAndLink(recnav, VIEWS.CONTEXT);
+
+    Dropdown nav = new Dropdown(RECORD);
+    rememberViewAndLink(nav, VIEWS.RECORD_ENTRIES);
+    rememberViewAndLink(nav, VIEWS.RECORD_CONTEXT);
+
+    recnav.add(nav);
     return recnav;
   }
 
-  private void styleNav(Nav recnav) {
-    recnav.addStyleName("inlineFlex");
+  private void styleNav(ComplexWidget recnav) {
+  //  recnav.addStyleName("inlineFlex");
+    zeroLeftRightMargins(recnav);
+  }
+
+  private void zeroLeftRightMargins(ComplexWidget recnav) {
     recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
     recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
   }
 
   @NotNull
-  private Nav getDefectNav() {
-    Nav nav = new Nav();
-    nav.getElement().setId("defectnav");
-    styleNav(nav);
+  private ComplexWidget getDefectNav() {
+    Nav rnav = new Nav();
+    zeroLeftRightMargins(rnav);
 
-    rememberViewAndLink(nav, VIEWS.DEFECTS);
+    Dropdown nav = new Dropdown(QC);
+    rnav.add(nav);
+    rememberViewAndLink(nav, VIEWS.QC);
     rememberViewAndLink(nav, VIEWS.FIX);
 
-    return nav;
+    return rnav;
   }
 
-  private void rememberViewAndLink(Nav recnav, VIEWS record) {
+  private void rememberViewAndLink(ComplexWidget recnav, VIEWS record) {
     viewToLink.put(record, getChoice(recnav, record));
   }
 
@@ -269,11 +278,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       userDrop.clear();
       userMenu.getStandardUserMenuChoices().forEach(linkAndTitle -> userDrop.add(linkAndTitle.makeNewLink()));
     });
-
-    //  Scheduler.get().scheduleDeferred(() -> userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink())));
-//    userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink()));
   }
-
 
   /**
    * Tell them we can't record.
@@ -312,7 +317,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       NavLink choice1 = getChoice(nav, choice);
       choice1.getElement().setId("Link_" + choice.name());
       if (first) {
-        choice1.addStyleName("leftTwentyMargin");
+      //  choice1.addStyleName("leftTwentyMargin");
+        choice1.addStyleName("leftTenMargin");
       }
       first = false;
       //choices.add(choice1);
@@ -352,9 +358,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void showSection(String instance1, boolean fromClick) {
     VIEWS choices = VIEWS.NONE;
     try {
-      choices = VIEWS.valueOf(instance1.toUpperCase());
+      String name = instance1.toUpperCase();
+      name = name.replaceAll(" ", "_");
+      choices = INavigation.VIEWS.valueOf(name);
     } catch (IllegalArgumentException e) {
-      logger.info("showSection can't parse " + instance1);
+      logger.warning("showSection can't parse " + instance1);
     }
     navigation.showView(choices, false, fromClick);
   }

@@ -402,7 +402,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 /*
       if (customOrPredefExercise != null) {
         logger.info("getAlignmentsFromDB decoding " + audioID +
-            (contextAudio ? " CONTEXT" : "") +
+            (contextAudio ? " RECORD_CONTEXT" : "") +
             " for exercise " + byID.getExid() + " : '" +
             customOrPredefExercise.getEnglish() + "' = '" + customOrPredefExercise.getForeignLanguage() + "'");
       }
