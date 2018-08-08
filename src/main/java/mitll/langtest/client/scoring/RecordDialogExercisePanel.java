@@ -106,6 +106,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
         logger.info("useInvalidResult got valid = " + isValid);
       }
 
+      /**
+       * @see FeedbackPostAudioRecordButton#stopRecording(long)
+       */
       @Override
       public void stopRecording() {
         super.stopRecording();
@@ -140,6 +143,10 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
     add(flContainer);
     super.addWidgets(showFL, showALTFL, phonesChoices);
+  }
+
+  public void cancelRecording() {
+    recordAudioPanel.cancelRecording();
   }
 
   @NotNull

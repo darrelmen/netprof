@@ -24,6 +24,8 @@ public class ThumbnailChoices {
     final Section section = new Section("section");
     section.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
     section.setHeight("100%");
+    section.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
+
     return section;
   }
 

@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.NavLink;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.SlimProject;
 import org.jetbrains.annotations.NotNull;
 

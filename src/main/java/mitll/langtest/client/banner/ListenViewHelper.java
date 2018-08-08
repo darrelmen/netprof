@@ -69,7 +69,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   final List<T> bothTurns = new ArrayList<>();
   final List<T> leftTurnPanels = new ArrayList<>();
-  final List<T> rightTurnPanels = new ArrayList<>();
+  private  final List<T> rightTurnPanels = new ArrayList<>();
 
   private T currentTurn;
   CheckBox leftSpeakerBox, rightSpeakerBox;
@@ -597,7 +597,11 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     if (isPlaying) playCurrentTurn();
   }
 
-  private void clearHighlightAndRemoveMark() {
+  /**
+   * @see #gotForward()
+   * @see #gotBackward()
+   */
+  protected void clearHighlightAndRemoveMark() {
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();

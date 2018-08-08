@@ -28,10 +28,9 @@ import java.util.stream.Collectors;
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
-  public static final int CHOICES_WIDTH = 970;
+  private static final int CHOICES_WIDTH = 970;
 
-  private static final int MAX_LENGTH_ID = 19;//23;//45;//55;//35;// 23;
-  //private static final int CHOICE_WIDTH = 170;//180;//190;//195;
+  private static final int MAX_LENGTH_ID = 19;
   private static final int NORMAL_MIN_HEIGHT = 67;
   private static final int LANGUAGE_SIZE = 6;
 
@@ -41,6 +40,8 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
                      ExerciseController controller) {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false);
   }
+
+  @Override protected int getFirstPageSize() {  return 10;  }
 
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
@@ -228,7 +229,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    */
   private void gotClickOnDialog(IDialog dialog) {
 //    logger.info("got click on " + name);
-//    History.replaceItem(SelectionState.DIALOG + "=" + dialog.getID(), false);
     controller.getNavigation().showDialogIn(dialog.getID(), INavigation.VIEWS.LISTEN);
   }
 }

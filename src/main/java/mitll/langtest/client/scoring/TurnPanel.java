@@ -11,7 +11,8 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 import java.util.Map;
 
 public class TurnPanel<T extends ClientExercise> extends DialogExercisePanel<T> {
-  protected final boolean isRight;
+
+  final boolean isRight;
   private DivWidget bubble;
   private static final String HIGHLIGHT_COLOR = "green";
 

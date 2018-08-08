@@ -170,7 +170,7 @@ public class RecordButton extends Button {
     if (doClickAndHold) {
       addMouseDownHandler(event -> {
         if (!mouseDown) {
-         // logger.info("gotMouseDown  " + mouseDown);
+          // logger.info("gotMouseDown  " + mouseDown);
           mouseDown = true;
           doClick();
         } else {
@@ -180,7 +180,7 @@ public class RecordButton extends Button {
       });
 
       addMouseUpHandler(event -> {
-       // logger.info("gotMouseUp  " + mouseDown);
+        // logger.info("gotMouseUp  " + mouseDown);
         if (mouseDown) {
           mouseDown = false;
           doClick();
@@ -204,8 +204,8 @@ public class RecordButton extends Button {
 
   /**
    * Can't be private - IDEA mistake...
-   * @see #setupRecordButton
    *
+   * @see #setupRecordButton
    */
   public void doClick() {
     if (isVisible() && isEnabled()) {
@@ -245,7 +245,7 @@ public class RecordButton extends Button {
     started = System.currentTimeMillis();
 
     cancelAfterStopTimer();
-  //  logger.info("startOrStopRecording started = " + started);
+    //  logger.info("startOrStopRecording started = " + started);
     start();
     addRecordingMaxLengthTimeout();
   }
@@ -298,14 +298,20 @@ public class RecordButton extends Button {
 
   /**
    * @param duration
+   * @see #stopRecording()
+   * @see #addRecordingMaxLengthTimeout()
    * @see #startOrStopRecording
    */
   protected void stop(long duration) {
-  //  long now = System.currentTimeMillis();
-  //  long duration2 = now - started;
-   // logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
+    //  long now = System.currentTimeMillis();
+    //  long duration2 = now - started;
+    // logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
     showStopped();
     recordingListener.stopRecording(duration);
+  }
+
+  public void cancelRecording() {
+    if (isRecording()) stop(0);
   }
 
   /**

@@ -470,11 +470,25 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
   }
 
+  /**
+   * @see RecordDialogExercisePanel#addWidgets
+   */
   @Override
   public void stopRecording() {
     if (getCurrentTurn() == bothTurns.get(bothTurns.size() - 1) && !exToScore.isEmpty()) {
       waitCursor.setVisible(true);
     }
+  }
+
+  /**
+   * cancel recording if we're doing it... when we change the current turn via
+   * @see #gotForward()
+   * @see #gotBackward()
+   */
+  @Override
+  protected void clearHighlightAndRemoveMark() {
+    getCurrentTurn().cancelRecording();
+    super.clearHighlightAndRemoveMark();
   }
 
   @Override

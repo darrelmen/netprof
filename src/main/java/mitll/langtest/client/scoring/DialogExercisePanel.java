@@ -2,8 +2,6 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.i18n.client.HasDirection;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;

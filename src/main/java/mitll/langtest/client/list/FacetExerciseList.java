@@ -326,7 +326,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private int getChosenPageIndex() {
     int pageIndex = getPageIndex();
 //    logger.info("getChosenPageIndex pageIndex " + pageIndex);
-    return pageIndex == -1 ? PAGE_SIZE_CHOICES.indexOf(FIRST_PAGE_SIZE) : pageIndex;
+    return pageIndex == -1 ? PAGE_SIZE_CHOICES.indexOf(getFirstPageSize()) : pageIndex;
+  }
+
+  protected int getFirstPageSize() {
+    return FIRST_PAGE_SIZE;
   }
 
   private int getChosenPageSize() {

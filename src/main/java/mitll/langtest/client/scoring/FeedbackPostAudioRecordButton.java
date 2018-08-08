@@ -3,7 +3,6 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 
@@ -21,7 +20,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    * @param exid
    * @param simpleRecordAudioPanel
    * @param controller
-   * @see SimpleRecordAudioPanel#makePlayAudioPanel
+   * @see NoFeedbackRecordAudioPanel#makePlayAudioPanel
    */
   FeedbackPostAudioRecordButton(int exid, RecordingAudioListener simpleRecordAudioPanel, ExerciseController controller) {
     super(
@@ -46,6 +45,11 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     simpleRecordAudioPanel.startRecording();
   }
 
+  /**
+   * @see RecordButton#stop(long)
+   * @param duration
+   * @return
+   */
   @Override
   public boolean stopRecording(long duration) {
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording");

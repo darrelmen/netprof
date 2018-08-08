@@ -7,7 +7,6 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.ClientExercise;
 
 import java.util.*;
 import java.util.logging.Logger;

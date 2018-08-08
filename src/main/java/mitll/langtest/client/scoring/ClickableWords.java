@@ -14,7 +14,6 @@ import mitll.langtest.client.custom.dialog.WordBoundsFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
-import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

@@ -2,7 +2,6 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.event.dom.client.ClickHandler;
-import mitll.langtest.client.user.UserManager;
 import org.jetbrains.annotations.NotNull;
 
 /**
