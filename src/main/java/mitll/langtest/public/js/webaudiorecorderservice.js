@@ -45,11 +45,11 @@
         var worker = new Worker(config.workerPath || WORKER_PATH);
 
 
-        var silenceDetectionConfig =  {};
+        var silenceDetectionConfig = {};
 
         // how long of a silence before we start saying we've found silence
-        silenceDetectionConfig.time =  1000;
-        silenceDetectionConfig.amplitude =  0.2;
+        silenceDetectionConfig.time = 1000;
+        silenceDetectionConfig.amplitude = 0.2;
 
 
         worker.postMessage({
@@ -87,7 +87,7 @@
             //  this.node.connect(this.context.destination);    //this should not be necessary
             //source.start();
             recording = true;
-            start=Date.now();
+            start = Date.now();
 //      console.log("record " + "  at " + new Date().getTime());
         };
 

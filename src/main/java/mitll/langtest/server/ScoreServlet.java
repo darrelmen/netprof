@@ -425,97 +425,9 @@ public class ScoreServlet extends DatabaseServlet {
     return db;
   }
 
-  /**
-   * TODO : put this back - need to add project as an argument
-   * Worries about sql injection attack.
-   * Remove ref result entry for an exercise, helpful if you want to clear the ref result for just one exercise
-   *
-   * @return
-   * @paramx queryString
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
-   */
- /* private JSONObject removeRefResult(String queryString) {
-    String[] split = queryString.split("&");
-    if (split.length != 3) {
-      return getJsonResponse("Expecting exid and projid");
-    } else {
-      // http://netprof/sccoreServlet?removeRefResult&projid=2&exid=3
-      // http://netprof/sccoreServlet?removeRefResult
-      // projid=2
-      // exid=3
-
-      int exid = -1;
-      int projid = -1;
-
-      for (int arg = 1; arg < split.length; arg++) {
-        {
-          String[] pair = split[arg].split("=");
-          String key = pair[0];
-          String value = pair[1];
-          try {
-            int exid1 = Integer.parseInt(value);
-            if (key.equals("exid")) exid = exid1;
-            else if (key.equals("projid")) projid = exid1;
-          } catch (NumberFormatException e) {
-            return getJsonResponse("expecting integer arg not " + value);
-          }
-        }
-      }
-
-      CommonExercise exercise = db.getExercise(projid, exid);
-      if (exercise == null) {
-        logger.info("removeRefResult can't find '" + exid + "'");
-        return getJsonResponse("no exercise with that id");
-      } else {
-        boolean b = getDAOContainer().getRefResultDAO().removeForExercise(exid);
-        logger.info("removeRefResult Remove ref for " + exid + " got " + b);
-        JSONObject jsonObject = new JSONObject();
-        addSuccess(jsonObject, b);
-        return jsonObject;
-      }
-    }
-  }*/
-
-/*
-  @NotNull
-  private JSONObject getJsonResponse(String message) {
-    JSONObject jsonObject = new JSONObject();
-    addSuccess(jsonObject, false);
-    jsonObject.put(ERROR1, message);
-    return jsonObject;
-  }
-  */
-
-/*
-  private void addSuccess(JSONObject jsonObject, boolean b) {
-    jsonObject.put(SUCCESS, Boolean.valueOf(b).toString());
-  }
-*/
-
-  /**
-   * Defaults to this year.
-   *
-   * @param queryString
-   * @return
-   */
-/*  private int getYear(String queryString) {
-    String[] split1 = queryString.split("&");
-    int year = -1;
-    if (split1.length == 2) {
-      String param = split1[1];
-//      logger.info("Got param " + param);
-      int paramIntValue = getParamIntValue(param, YEAR);
-      if (paramIntValue > 0) year = paramIntValue;
-    }
-    // else {
-    //   year = Calendar.getInstance().get(Calendar.YEAR);
-    // }
-    return year;
-  }*/
   private String removePrefix(String queryString, String prefix) {
     return queryString.substring(queryString.indexOf(prefix) + prefix.length());
   }
-
 
   /**
    * Check for a parameter to control what we send back
@@ -538,25 +450,6 @@ public class ScoreServlet extends DatabaseServlet {
     }
     return s.equals(param + "=true") ? "true" : "false";
   }
-
-/*  private int getParamIntValue(String arg, String param) {
-    boolean hasParam = arg.startsWith(param);
-    if (!hasParam) {
-      return -1;
-    }
-    String[] split = arg.split("=");
-    try {
-      if (split.length == 2) {
-        return Integer.parseInt(split[1]);
-      } else {
-        return Integer.parseInt(arg);
-      }
-    } catch (NumberFormatException e) {
-      logger.warn("got " + e + " on " + arg);
-      return 0;
-    }
-  }*/
-
 
   /**
    * @param toReturn
@@ -1088,7 +981,10 @@ public class ScoreServlet extends DatabaseServlet {
         "\n\tdevice   " + deviceType + "/" + device);
 
     int session = getStreamSession(request);
-    int packet  = getStreamPacket(request);
+    int packet = getStreamPacket(request);
+    String state = getHeader(request, HeaderValue.STREAMSTATE);
+
+    logger.info("Session " + session + " state " + state + " packet " + packet);
 
     return new JSONObject();
     // File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
