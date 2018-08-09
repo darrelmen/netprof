@@ -474,7 +474,7 @@ public class LangTest implements
     if (!isDefault(host)) {
       String moduleBaseURL = audioService.getServiceEntryPoint();
       audioService.setServiceEntryPoint(moduleBaseURL + "/" + host);
-      //logger.info("createHostSpecificServices service " + "now at " + audioService.getServiceEntryPoint());
+      logger.info("createHostSpecificServices service " + "now at " + audioService.getServiceEntryPoint());
     }
   }
 

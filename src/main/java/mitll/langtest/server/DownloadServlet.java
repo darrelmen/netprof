@@ -51,10 +51,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
@@ -105,6 +102,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String UNIT = "unit";
   public static final String SEARCH = "search";
   public static final String AUDIO1 = "audio";
+  private static final int BUFFER_SIZE = 4096;
 
   /**
    * This is getting complicated.
@@ -608,5 +606,35 @@ public class DownloadServlet extends DatabaseServlet {
   public void init() throws ServletException {
     super.init();
     setPaths();
+  }
+
+  /**
+   *
+   * @param inputStream
+   * @param saveFile
+   * @throws IOException
+   */
+  void writeToFile(InputStream inputStream, File saveFile) throws IOException {
+    // opens an output stream for writing file
+    copyToOutput(inputStream, new FileOutputStream(saveFile));
+  }
+
+  /**
+   * TODO replace with commons call
+   *
+   * @param inputStream
+   * @param outputStream
+   * @throws IOException
+   */
+  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
+    byte[] buffer = new byte[BUFFER_SIZE];
+    int bytesRead;
+
+    while ((bytesRead = inputStream.read(buffer)) != -1) {
+      outputStream.write(buffer, 0, bytesRead);
+    }
+
+    outputStream.close();
+    inputStream.close();
   }
 }

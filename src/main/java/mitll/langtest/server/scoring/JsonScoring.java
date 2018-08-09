@@ -48,7 +48,7 @@ public class JsonScoring {
 
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
   public static final boolean TRY_TO_DO_ALIGNMENT = false;
-  public static final String EXERCISE_TEXT = "exerciseText";
+//  public static final String EXERCISE_TEXT = "exerciseText";
   public static final float MIN_HYDRA_ALIGN = 0.3F;
   public static final String BAD_EXERCISE_ID = "bad_exercise_id";
   private final DatabaseImpl db;

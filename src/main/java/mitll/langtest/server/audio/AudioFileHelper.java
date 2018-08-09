@@ -77,7 +77,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static mitll.langtest.server.ScoreServlet.EXERCISE_TEXT;
+import static mitll.langtest.server.ScoreServlet.GetRequest.HASUSER;
+import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 
 /**
@@ -1088,7 +1089,6 @@ public class AudioFileHelper implements AlignDecode {
         }
 */
 
-
         PrecalcScores precalcScores = getProxyScore(english, foreignLanguage, userid, theFile, hydraHost);
         return (precalcScores != null && precalcScores.isDidRunNormally()) ? precalcScores : null;
       } else {
@@ -1164,12 +1164,12 @@ public class AudioFileHelper implements AlignDecode {
     boolean isDefault = project.getWebserviceHost().equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
 
     HTTPClient httpClient = getHttpClient(hydraHost, isDefault ? "" : project.getWebserviceHost());
-    httpClient.addRequestProperty(ScoreServlet.REQUEST, requestToServer.toString());
-    httpClient.addRequestProperty(ScoreServlet.ENGLISH, english);
-    httpClient.addRequestProperty(EXERCISE_TEXT, new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
-    httpClient.addRequestProperty(ScoreServlet.LANGUAGE, getLanguage());
-    httpClient.addRequestProperty(ScoreServlet.USER, "" + userid);
-    httpClient.addRequestProperty(ScoreServlet.FULL, ScoreServlet.FULL);  // full json returned
+    httpClient.addRequestProperty(REQUEST.toString(), requestToServer.toString());
+    httpClient.addRequestProperty(ENGLISH.toString(), english);
+    httpClient.addRequestProperty(EXERCISE_TEXT.toString(), new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
+    httpClient.addRequestProperty(LANGUAGE.toString(), getLanguage());
+    httpClient.addRequestProperty(USER.toString(), "" + userid);
+    httpClient.addRequestProperty(FULL.toString(), FULL.toString());  // full json returned
     return httpClient;
   }
 
@@ -1189,6 +1189,11 @@ public class AudioFileHelper implements AlignDecode {
   private String session = null;
 
   /**
+   * For laptop dev
+   *
+   * Get session from netprof1-dev for demo/demo or equivalent.
+   * We just need some session.
+   *
    * @param hydraHost
    * @param projID
    * @return
@@ -1197,10 +1202,10 @@ public class AudioFileHelper implements AlignDecode {
   private String getSession(String hydraHost, int projID) {
     try {
       HTTPClient httpClient = getHttpClient(hydraHost, "");
-      httpClient.addRequestProperty(ScoreServlet.REQUEST, ScoreServlet.GetRequest.HASUSER.toString());
-      httpClient.addRequestProperty(ScoreServlet.PROJID, "" + projID);
-      httpClient.addRequestProperty(ScoreServlet.USERID, TEST_USER);
-      httpClient.addRequestProperty(ScoreServlet.PASS, TEST_PASSWORD);
+      httpClient.addRequestProperty(REQUEST.toString(), HASUSER.toString());
+      httpClient.addRequestProperty(PROJID.toString(), "" + projID);
+      httpClient.addRequestProperty(USERID.toString(), TEST_USER);
+      httpClient.addRequestProperty(PASS.toString(), TEST_PASSWORD);
       String json = httpClient.sendAndReceiveCookie("");
       logger.info("getSession response " + json);
       return json;
@@ -1217,7 +1222,6 @@ public class AudioFileHelper implements AlignDecode {
   public boolean isHydraAvailable() {
     return webserviceScoring.isAvailable();
   }
-
   public boolean isHydraAvailableCheckNow() {
     return webserviceScoring.isAvailableCheckNow();
   }

@@ -89,17 +89,12 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     try {
       ServletContext servletContext = getServletContext();
       String property = System.getProperty(CONFIG_HOME_ATTR_NM);
-      logger.info("\n--->prop for domino = '" + property + "'");
-
-//      if (property == null) {
-//        System.setProperty(CONFIG_HOME_ATTR_NM, "/opt/netprof/config/");
-//        logger.info("--->prop for domino now = '" + System.getProperty(CONFIG_HOME_ATTR_NM) + "'");
-//      }
+      logger.info("init : prop for domino = '" + property + "'");
       this.pathHelper = new PathHelper(servletContext);
       this.serverProps = readProperties(servletContext);
       pathHelper.setProperties(serverProps);
       setInstallPath(db, servletContext);
-      logger.info("finished init");
+      // logger.info("finished init");
 
     } catch (Exception e) {
       startupMessage = e.getMessage();
@@ -112,7 +107,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   private void optionalInit() {
     try {
-        logger.info("optionalInit -- ");
+      logger.info("optionalInit -- ");
       if (db != null) db.doReport();
     } catch (Exception e) {
       logger.error("optionalInit couldn't load database " + e, e);
@@ -124,7 +119,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.error("Got " + e, e);
     }
   }
-
 
   /**
    * This allows us to upload an exercise file.
@@ -252,7 +246,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return db.getMaleFemaleProgress(getProjectIDFromUser(getUserIDFromSessionOrDB()));
   }
 
-  public static final String TEST_EXCEPTION = "Test Exception";
+  private static final String TEST_EXCEPTION = "Test Exception";
 
   public void logMessage(String message, boolean sendEmail) {
     if (message.length() > 10000) message = message.substring(0, 10000);

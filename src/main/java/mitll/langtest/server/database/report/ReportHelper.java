@@ -40,7 +40,8 @@ public class ReportHelper {
   private final IUserDAO userDAO;
   private final PathHelper pathHelper;
   private final MailSupport mailSupport;
-  Thread thread;
+  private Thread thread;
+
   public ReportHelper(ServerProperties serverProperties,
                       IProjectManagement projectManagement,
                       IProjectDAO projectDAO,
@@ -100,11 +101,13 @@ public class ReportHelper {
       }
       doReport(report); // try again later
     });
-    this.thread=thread;
+    this.thread = thread;
     thread.start();
   }
 
-  public void interrupt() { this.thread.interrupt(); }
+  public void interrupt() {
+    if (this.thread != null) this.thread.interrupt();
+  }
 
   public boolean isTodayAGoodDay() {
     return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;
@@ -226,6 +229,4 @@ public class ReportHelper {
         });
     return stats;
   }
-
-
 }

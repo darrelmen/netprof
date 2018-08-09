@@ -55,7 +55,6 @@ import java.io.*;
  */
 public class DatabaseServlet extends HttpServlet {
   private static final Logger logger = LogManager.getLogger(DatabaseServlet.class);
-  private static final int BUFFER_SIZE = 4096;
   DatabaseImpl db = null;
   PathHelper pathHelper;
   IUserSecurityManager securityManager;
@@ -78,30 +77,6 @@ public class DatabaseServlet extends HttpServlet {
     ServerProperties serverProps = database.getServerProps();
     if (serverProps == null) throw new IllegalArgumentException("getPathHelper huh? props is null?");
     return new PathHelper(getServletContext(), serverProps);
-  }
-
-  void writeToFile(InputStream inputStream, File saveFile) throws IOException {
-    // opens an output stream for writing file
-    copyToOutput(inputStream, new FileOutputStream(saveFile));
-  }
-
-  /**
-   * TODO replace with commons call
-   *
-   * @param inputStream
-   * @param outputStream
-   * @throws IOException
-   */
-  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
-    byte[] buffer = new byte[BUFFER_SIZE];
-    int bytesRead;
-
-    while ((bytesRead = inputStream.read(buffer)) != -1) {
-      outputStream.write(buffer, 0, bytesRead);
-    }
-
-    outputStream.close();
-    inputStream.close();
   }
 
   /**

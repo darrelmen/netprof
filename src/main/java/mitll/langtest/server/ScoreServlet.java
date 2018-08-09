@@ -54,10 +54,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -73,20 +70,20 @@ import java.util.stream.Collectors;
 public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = LogManager.getLogger(ScoreServlet.class);
 
-  public static final String REQUEST = "request";
+//  public static final String REQUEST = "request";
 
   private static final String CHAPTER_HISTORY = "chapterHistory";
-  private static final String ROUND_TRIP1 = "roundTrip";
+  //private static final String ROUND_TRIP1 = "roundTrip";
   /**
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private static final String PHONE_REPORT = "phoneReport";
   private static final String ERROR = "ERROR";
-  public static final String USER = "user";
+  //public static final String USER = "user";
 
   private static final String DEVICE_TYPE = "deviceType";
   private static final String DEVICE = "device";
-  public static final String CONTENT = "content";
+  private static final String CONTENT = "content";
   private static final String HAS_MODEL = "hasModel";
   private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000L;
   private static final long REFRESH_CONTENT_INTERVAL_THREE = 3 * 60 * 60 * 1000L;
@@ -96,33 +93,35 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String VERSION = "version";
   private static final String CONTEXT = "context";
   private static final String WIDGET = "widget";
-  private static final String REQUEST1 = REQUEST + "=";
+
+  private static final String REQUEST1 = HeaderValue.REQUEST.toString() + "=";
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
 
   /**
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private static final String VERSION_NOW = "1.0";
-  private static final String RESULT_ID = "resultID";
+  // private static final String RESULT_ID = "resultID";
   private static final String USE_PHONE_TO_DISPLAY = "USE_PHONE_TO_DISPLAY";
   private static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
-  private static final String EXERCISE = "exercise";
-  public static final String EXERCISE_TEXT = "exerciseText";
+  //private static final String EXERCISE = "exercise";
+  // public static final String EXERCISE_TEXT = "exerciseText";
   private static final String NO_SESSION = "no session";
 
-  public static final String PASS = "pass";
-  public static final String PROJID = "projid";
-  public static final String USERID = "userid";
-  public static final String ENGLISH = "english";
-  public static final String LANGUAGE = "language";
-  public static final String FULL = "full";
-  private static final String WIDGET_TYPE = "widgetType";
+  // public static final String PASS = "pass";
+//  public static final String PROJID = "projid";
+//  public static final String USERID = "userid";
+//  public static final String ENGLISH = "english";
+  //public static final String LANGUAGE = "language";
+  //public static final String FULL = "full";
+  //private static final String WIDGET_TYPE = "widgetType";
   private static final boolean REPORT_ON_HEADERS = false;
   /**
    * for now we force decode requests into forced alignment... better to do false positive than false negative
    */
   private static final boolean CONVERT_DECODE_TO_ALIGN = true;
   private static final String MESSAGE = "message";
+  private static final int BUFFER_SIZE = 4096;
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -138,7 +137,59 @@ public class ScoreServlet extends DatabaseServlet {
     UNKNOWN
   }
 
-  public enum PostRequest {EVENT, HASUSER, ADDUSER, SETPROJECT, ROUNDTRIP, DECODE, ALIGN, RECORD, WRITEFILE, UNKNOWN}
+  public enum PostRequest {
+    EVENT,
+    HASUSER,
+    ADDUSER,
+    SETPROJECT,
+    ROUNDTRIP,
+    /**
+     * @see #doPost
+     */
+    DECODE,
+    /**
+     * @see #doPost
+     */
+    ALIGN,
+    RECORD,
+    WRITEFILE,
+    STREAM,
+    UNKNOWN
+  }
+
+  public enum HeaderValue {
+    PASS,
+    PROJID,
+    USER,
+    USERID,
+    REQUEST,
+    EXERCISE,
+    EXERCISE_TEXT("exerciseText"),
+    ENGLISH,
+    LANGUAGE,
+    FULL,
+    WIDGET_TYPE("widgetType"),
+    RESULT_ID("resultID"),
+    ROUND_TRIP1("roundTrip"),
+
+    STREAMSESSION,
+    STREAMSTATE,
+    STREAMSPACKET;
+
+    String value = null;
+
+    HeaderValue() {
+    }
+
+    HeaderValue(String value) {
+      this.value = value;
+    }
+
+    @Override
+    public String toString() {
+      return value == null ? name().toLowerCase() : value;
+    }
+  }
 
   private final Map<Integer, JSONObject> projectToNestedChaptersEverything = new HashMap<>();
   private final Map<Integer, Long> projectToWhenCachedEverything = new HashMap<>();
@@ -633,7 +684,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @throws IOException
    */
   @Override
-  protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     logger.info("ScoreServlet.doPost : Request " + request.getQueryString() +// " path " + pathInfo +
         " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
@@ -674,6 +725,8 @@ public class ScoreServlet extends DatabaseServlet {
             jsonObject.put(ERROR, "got except " + e.getMessage());
           }
           break;
+        case STREAM:
+
         case EVENT:
           gotLogEvent(request, device, jsonObject);
           break;
@@ -761,8 +814,8 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private void addRT(HttpServletRequest request, JSONObject jsonObject) {
-    String resultID = request.getHeader(RESULT_ID);
-    String roundTripMillis = request.getHeader(ROUND_TRIP1);
+    String resultID = getHeader(request, HeaderValue.RESULT_ID);
+    String roundTripMillis = getHeader(request, HeaderValue.ROUND_TRIP1);
 
     try {
       addRT(Integer.parseInt(resultID), Integer.parseInt(roundTripMillis), jsonObject);
@@ -770,6 +823,7 @@ public class ScoreServlet extends DatabaseServlet {
       jsonObject.put(ERROR, "bad param format " + e.getMessage());
     }
   }
+
 
   private PostRequest getPostRequest(String requestType) {
     String s = requestType.toLowerCase();
@@ -813,7 +867,7 @@ public class ScoreServlet extends DatabaseServlet {
       String context = request.getHeader(CONTEXT);
       String exid = request.getHeader(EXID);
       String widgetid = request.getHeader(WIDGET);
-      String widgetType = request.getHeader(WIDGET_TYPE);
+      String widgetType = getHeader(request, HeaderValue.WIDGET_TYPE);
 
       //   logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " " + exid);
 
@@ -930,37 +984,19 @@ public class ScoreServlet extends DatabaseServlet {
     try {
       checkSession(request);
     } catch (DominoSessionException dse) {
-      logger.info("got " + dse);
+      logger.info("getJsonForAudio got " + dse);
       JSONObject jsonObject = new JSONObject();
       jsonObject.put(MESSAGE, NO_SESSION);
       return jsonObject;
     }
 
-    int realExID = 0;
-    try {
-      realExID = Integer.parseInt(getExerciseHeader(request));
-      if (realExID == -1) {
-        realExID = getDAOContainer().getUserExerciseDAO().getUnknownExercise().id();
-        logger.info("getJsonForAudio : using unknown exercise id " + realExID);
-      } else {
-        logger.info("getJsonForAudio got exercise id " + realExID);
-      }
-    } catch (NumberFormatException e) {
-      logger.info("couldn't parse exercise request header = '" + getExerciseHeader(request) + "'");
-    }
+    int realExID = getRealExID(request);
     int reqid = getReqID(request);
-    int projid = getProjectID(request);
-
-    logger.debug("getJsonForAudio got projid from session " + projid);
-    if (projid == -1) {
-      projid = getProjID(request);
-      logger.debug("getJsonForAudio got projid from request " + projid);
-    }
+    int projid = getProjid(request);
 
     String postedWordOrPhrase = "";
     // language overrides user id mapping...
     {
-      projid = getProjidFromLanguage(request, projid);
       ExAndText exerciseIDFromText = getExerciseIDFromText(request, realExID, projid);
       realExID = exerciseIDFromText.exid;
       postedWordOrPhrase = exerciseIDFromText.text;
@@ -968,7 +1004,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     String user = getUser(request);
     int userid = userManagement.getUserFromParam(user);
-    String fullJSONFormat = request.getHeader(FULL);
+    boolean fullJSON = isFullJSON(request);
 
     logger.info("getJsonForAudio got" +
         "\n\trequest  " + requestType +
@@ -977,7 +1013,7 @@ public class ScoreServlet extends DatabaseServlet {
         "\n\texid     " + realExID +
         //"\n\texercise text " + realExID +
         "\n\treq      " + reqid +
-        "\n\tfull     " + fullJSONFormat +
+        "\n\tfull     " + fullJSON +
         "\n\tdevice   " + deviceType + "/" + device);
 
     File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
@@ -1007,37 +1043,144 @@ public class ScoreServlet extends DatabaseServlet {
         new DecoderOptions()
             .setAllowAlternates(getAllowAlternates(request))
             .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
-        fullJSONFormat != null);
+        fullJSON);
+  }
+
+  private JSONObject getJSONForStream(HttpServletRequest request,
+                                      PostRequest requestType,
+                                      String deviceType,
+                                      String device) throws IOException {
+    try {
+      checkSession(request);
+    } catch (DominoSessionException dse) {
+      logger.info("getJsonForAudio got " + dse);
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put(MESSAGE, NO_SESSION);
+      return jsonObject;
+    }
+
+
+    int realExID = getRealExID(request);
+    int reqid = getReqID(request);
+    int projid = getProjid(request);
+
+
+    String postedWordOrPhrase = "";
+    // language overrides user id mapping...
+    {
+      ExAndText exerciseIDFromText = getExerciseIDFromText(request, realExID, projid);
+      realExID = exerciseIDFromText.exid;
+      postedWordOrPhrase = exerciseIDFromText.text;
+    }
+
+    String user = getUser(request);
+    int userid = userManagement.getUserFromParam(user);
+    boolean fullJSON = isFullJSON(request);
+
+    logger.info("getJsonForAudio got" +
+        "\n\trequest  " + requestType +
+        "\n\tfor user " + user +
+        "\n\tprojid   " + projid +
+        "\n\texid     " + realExID +
+        //"\n\texercise text " + realExID +
+        "\n\treq      " + reqid +
+        "\n\tfull     " + fullJSON +
+        "\n\tdevice   " + deviceType + "/" + device);
+
+    int session = getStreamSession(request);
+    int packet  = getStreamPacket(request);
+
+    return new JSONObject();
+    // File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
+  }
+
+  private boolean isFullJSON(HttpServletRequest request) {
+    String fullJSONFormat = getHeader(request, HeaderValue.FULL);
+    return fullJSONFormat != null;
+  }
+
+  /**
+   * First see if it's on the request session,
+   * then see if it's on the request header,
+   * then if there's a language on the request header, use the project for the language
+   *
+   * the last helps if we're running from a dev laptop to a server...
+   *
+   * @param request
+   * @return
+   */
+  private int getProjid(HttpServletRequest request) {
+    int projid = getProjectID(request);
+
+    logger.debug("getJsonForAudio got projid from session " + projid);
+    if (projid == -1) {
+      projid = getProjID(request);
+      logger.debug("getJsonForAudio got projid from request " + projid);
+    }
+    projid = getProjidFromLanguage(request, projid);
+
+    return projid;
+  }
+
+  private int getRealExID(HttpServletRequest request) {
+    int realExID = 0;
+    try {
+      realExID = Integer.parseInt(getExerciseHeader(request));
+      if (realExID == -1) {
+        realExID = getDAOContainer().getUserExerciseDAO().getUnknownExercise().id();
+        logger.info("getJsonForAudio : using unknown exercise id " + realExID);
+      } else {
+        logger.info("getJsonForAudio got exercise id " + realExID);
+      }
+    } catch (NumberFormatException e) {
+      logger.info("couldn't parse exercise request header = '" + getExerciseHeader(request) + "'");
+    }
+    return realExID;
   }
 
   private String getRequestType(HttpServletRequest request) {
-    return request.getHeader(REQUEST);
+    return getHeader(request, HeaderValue.REQUEST);
   }
 
   private int getProjID(HttpServletRequest request) {
-    return request.getIntHeader(PROJID);
+    return request.getIntHeader(HeaderValue.PROJID.toString());
   }
 
   private String getExerciseHeader(HttpServletRequest request) {
-    return request.getHeader(EXERCISE);
+    return getHeader(request, HeaderValue.EXERCISE);
   }
 
   private String getUser(HttpServletRequest request) {
-    return request.getHeader(USER);
+    return getHeader(request, HeaderValue.USER);
   }
 
   private String getPass(HttpServletRequest request) {
-    return request.getHeader(PASS);
+    return getHeader(request, HeaderValue.PASS);
   }
 
   private String getUserID(HttpServletRequest request) {
-    return request.getHeader(USERID);
+    return getHeader(request, HeaderValue.USERID);
   }
 
   private String getLanguage(HttpServletRequest request) {
-    return request.getHeader(LANGUAGE);
+    return getHeader(request, HeaderValue.LANGUAGE);
   }
 
+  private int getStreamSession(HttpServletRequest request) {
+    return request.getIntHeader(HeaderValue.STREAMSESSION.toString());
+  }
+
+  private int getStreamPacket(HttpServletRequest request) {
+    return request.getIntHeader(HeaderValue.STREAMSPACKET.toString());
+  }
+
+  private String getHeader(HttpServletRequest request, HeaderValue resultId) {
+    return request.getHeader(resultId.toString());
+  }
+
+  /**
+   * For stream, we need headers: session, state (start, packet, end)
+   */
   /**
    * Find the project by using the language header.
    * Or failing that, find the session user and use their current project.
@@ -1071,14 +1214,14 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #getJsonForAudio
    */
   private ExAndText getExerciseIDFromText(HttpServletRequest request, int realExID, int projid) {
-    String exerciseText = request.getHeader(ENGLISH);
+    String exerciseText = getHeader(request, HeaderValue.ENGLISH);
     String decoded = "";
     if (exerciseText == null) exerciseText = "";
     if (projid > 0) {
       Project project1 = getProject(projid);
-      String flText = request.getHeader(EXERCISE_TEXT);
+      String flText = getHeader(request, HeaderValue.EXERCISE_TEXT);
       if (flText == null) {
-        logger.info("getExerciseIDFromText no optional header " + EXERCISE_TEXT);
+        logger.info("getExerciseIDFromText no optional header " + HeaderValue.EXERCISE_TEXT);
         return new ExAndText(realExID, decoded);
       } else {
         decoded = new String(Base64.getDecoder().decode(flText.getBytes()));
@@ -1099,10 +1242,10 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private static class ExAndText {
-    int exid;
-    String text;
+    final int exid;
+    final String text;
 
-    public ExAndText(int exid, String text) {
+    ExAndText(int exid, String text) {
       this.exid = exid;
       this.text = text;
     }
@@ -1120,7 +1263,8 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #getJsonForAudio
    */
   @NotNull
-  private File writeAudioFile(ServletInputStream inputStream, int project, int realExID, int userid) throws IOException {
+  private File writeAudioFile(ServletInputStream inputStream, int project, int realExID, int userid)
+      throws IOException {
     String wavPath = pathHelper.getAbsoluteToAnswer(
         getProject(project).getLanguage(),
         realExID,
@@ -1132,7 +1276,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     // logger.info("writeAudioFile : wrote file " + saveFile.getAbsolutePath() + " proj " + project + " exid " + realExID + " by " + userid);
     if (!saveFile.setReadOnly()) {
-      logger.warn("huh? can't mark file read only?");
+      logger.warn("writeAudioFile huh? can't mark file read only?");
     }
 
     return saveFile;
@@ -1144,6 +1288,35 @@ public class ScoreServlet extends DatabaseServlet {
     if (!mkdirs && !parent.exists()) {
       logger.error("Couldn't make " + parent.getAbsolutePath() + " : permissions set? chown done ?");
     }
+  }
+
+  /**
+   * @param inputStream
+   * @param saveFile
+   * @throws IOException
+   */
+  private void writeToFile(InputStream inputStream, File saveFile) throws IOException {
+    // opens an output stream for writing file
+    copyToOutput(inputStream, new FileOutputStream(saveFile));
+  }
+
+  /**
+   * TODO replace with commons call
+   *
+   * @param inputStream
+   * @param outputStream
+   * @throws IOException
+   */
+  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
+    byte[] buffer = new byte[BUFFER_SIZE];
+    int bytesRead;
+
+    while ((bytesRead = inputStream.read(buffer)) != -1) {
+      outputStream.write(buffer, 0, bytesRead);
+    }
+
+    outputStream.close();
+    inputStream.close();
   }
 
   private boolean getUsePhoneToDisplay(HttpServletRequest request) {
@@ -1242,7 +1415,7 @@ public class ScoreServlet extends DatabaseServlet {
         if (split.length == 2) {
           String key = split[0];
           String value = split[1];
-          if (key.equals(USER)) {
+          if (key.equals(HeaderValue.USER.toString())) {
             //user = value;
           } else {
             selection.put(key, Collections.singleton(value));

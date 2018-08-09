@@ -179,7 +179,7 @@
         <url-pattern>/langtest/project-manager</url-pattern>
     </servlet-mapping>
 
-        <servlet>
+ <!--       <servlet>
             <servlet-name>MyDefaultServlet</servlet-name>
             <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
             <init-param>
@@ -243,7 +243,7 @@
     <servlet-mapping>
         <servlet-name>DefaultServletImages</servlet-name>
         <url-pattern>/images/*</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>-->
 
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
@@ -296,19 +296,6 @@
         <servlet-name>scoreServlet</servlet-name>
         <url-pattern>/scoreServlet/h2/*</url-pattern>
     </servlet-mapping>
-
-<!--
-
-    <servlet>
-        <servlet-name>echoEndpoint</servlet-name>
-        <servlet-class>mitll.langtest.server.EchoEndpoint</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>echoEndpoint</servlet-name>
-        <url-pattern>/echoEndpoint/*</url-pattern>
-    </servlet-mapping>
--->
 
     <!-- ==================================================================== -->
     <!-- START filters	                                                    -->
