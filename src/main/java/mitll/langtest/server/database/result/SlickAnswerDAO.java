@@ -68,7 +68,9 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
     boolean isAudioAnswer = answerInfo.getAnswer() == null || answerInfo.getAnswer().length() == 0;
     String answerInserted = isAudioAnswer ? answerInfo.getAudioFile() : answerInfo.getAnswer();
 
-    String model = answerInfo.getModel() == null ? "" : answerInfo.getModel();
+//    String model = answerInfo.getModel() == null ? "" : answerInfo.getModel();
+    String device = answerInfo.getDevice();
+    if (device == null) device = "";
     SlickResult res = new SlickResult(-1,
         answerInfo.getUserid(),
         answerInfo.getId(),
@@ -83,7 +85,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.isCorrect(),
         answerInfo.getPronScore(),
         answerInfo.getDeviceType(),
-        answerInfo.getDevice(),
+        device,
         answerInfo.getScoreJson(),
         answerInfo.isWithFlash(),
         (float) answerInfo.getSnr(),

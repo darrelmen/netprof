@@ -191,6 +191,10 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     webAudio.stopRecording(wavCallback);
   }
 
+  public void stopRecordingAndPost(String url, String exid){
+    webAudio.stopRecordingAndPost(url, exid);
+  }
+
   /**
    * @return
    * @see #installFlash()
@@ -344,7 +348,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   private void stopWebRTCRecordingLater(final WavCallback wavCallback) {
-    final long then = System.currentTimeMillis();
+    //final long then = System.currentTimeMillis();
     //logger.info("stopWebRTCRecordingLater - initial ");
 
     Timer t = new Timer() {
@@ -359,7 +363,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   private void stopFlashRecording(final WavCallback wavCallback) {
-    final long then = System.currentTimeMillis();
+   // final long then = System.currentTimeMillis();
     logger.info("stopFlashRecording - initial ");
 
     Timer t = new Timer() {

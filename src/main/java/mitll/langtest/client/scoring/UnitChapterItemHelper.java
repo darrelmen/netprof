@@ -142,6 +142,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
       }
     }
 
+
     int dominoID = exercise.getDominoID();
     String oldID = exercise.getOldID();
 

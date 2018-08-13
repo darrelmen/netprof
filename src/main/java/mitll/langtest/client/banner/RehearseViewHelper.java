@@ -177,14 +177,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     overallSmiley.getElement().getStyle().setLeft(18, Style.Unit.PX);
     overallSmiley.getElement().getStyle().setTop(18, Style.Unit.PX);
   }
-
-/*  @NotNull
-  private DivWidget getProgressBar(double score, boolean isFullMatch) {
-    DivWidget widgets = new ScoreProgressBar().showScore(score * 100, isFullMatch);
-    widgets.setHeight("25px");
-    return widgets;
-  }*/
-
+ 
   private void styleProgressBarContainer(ProgressBar progressBar) {
     Style style = progressBar.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);

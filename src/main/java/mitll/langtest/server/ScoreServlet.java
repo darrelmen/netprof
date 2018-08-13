@@ -407,7 +407,7 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private int checkSession(HttpServletRequest request) throws DominoSessionException {
     int userIDFromSession = securityManager.getUserIDFromSessionLight(request);
-    logger.info("doGet user id from session is " + userIDFromSession);
+    logger.info("checkSession user id from session is " + userIDFromSession);
     return userIDFromSession;
   }
 
@@ -909,7 +909,8 @@ public class ScoreServlet extends DatabaseServlet {
         "\n\tfull     " + fullJSON +
         "\n\tdevice   " + deviceType + "/" + device);
 
-    File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
+    File saveFile = new FileSaver().writeAudioFile(
+        pathHelper, request.getInputStream(), realExID, userid, getProject(projid).getLanguage());
 
     logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath());
     // TODO : put back trim silence? or is it done somewhere else
@@ -970,7 +971,7 @@ public class ScoreServlet extends DatabaseServlet {
     int userid = userManagement.getUserFromParam(user);
     boolean fullJSON = isFullJSON(request);
 
-    logger.info("getJsonForAudio got" +
+    logger.info("\n\n\ngetJSONForStream got" +
         "\n\trequest  " + requestType +
         "\n\tfor user " + user +
         "\n\tprojid   " + projid +
@@ -984,8 +985,10 @@ public class ScoreServlet extends DatabaseServlet {
     int packet = getStreamPacket(request);
     String state = getHeader(request, HeaderValue.STREAMSTATE);
 
-    logger.info("Session " + session + " state " + state + " packet " + packet);
+    logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
+    //File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
 
+    //logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
     return new JSONObject();
     // File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
   }
@@ -1145,74 +1148,6 @@ public class ScoreServlet extends DatabaseServlet {
       this.exid = exid;
       this.text = text;
     }
-  }
-
-  /**
-   * After writing the file, it shouldn't be modified any more.
-   *
-   * @param inputStream
-   * @param project
-   * @param realExID
-   * @param userid
-   * @return
-   * @throws IOException
-   * @see #getJsonForAudio
-   */
-  @NotNull
-  private File writeAudioFile(ServletInputStream inputStream, int project, int realExID, int userid)
-      throws IOException {
-    String wavPath = pathHelper.getAbsoluteToAnswer(
-        getProject(project).getLanguage(),
-        realExID,
-        userid);
-    File saveFile = new File(wavPath);
-    makeFileSaveDir(saveFile);
-
-    writeToFile(inputStream, saveFile);
-
-    // logger.info("writeAudioFile : wrote file " + saveFile.getAbsolutePath() + " proj " + project + " exid " + realExID + " by " + userid);
-    if (!saveFile.setReadOnly()) {
-      logger.warn("writeAudioFile huh? can't mark file read only?");
-    }
-
-    return saveFile;
-  }
-
-  private void makeFileSaveDir(File saveFile) {
-    File parent = new File(saveFile.getParent());
-    boolean mkdirs = parent.mkdirs();
-    if (!mkdirs && !parent.exists()) {
-      logger.error("Couldn't make " + parent.getAbsolutePath() + " : permissions set? chown done ?");
-    }
-  }
-
-  /**
-   * @param inputStream
-   * @param saveFile
-   * @throws IOException
-   */
-  private void writeToFile(InputStream inputStream, File saveFile) throws IOException {
-    // opens an output stream for writing file
-    copyToOutput(inputStream, new FileOutputStream(saveFile));
-  }
-
-  /**
-   * TODO replace with commons call
-   *
-   * @param inputStream
-   * @param outputStream
-   * @throws IOException
-   */
-  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
-    byte[] buffer = new byte[BUFFER_SIZE];
-    int bytesRead;
-
-    while ((bytesRead = inputStream.read(buffer)) != -1) {
-      outputStream.write(buffer, 0, bytesRead);
-    }
-
-    outputStream.close();
-    inputStream.close();
   }
 
   private boolean getUsePhoneToDisplay(HttpServletRequest request) {

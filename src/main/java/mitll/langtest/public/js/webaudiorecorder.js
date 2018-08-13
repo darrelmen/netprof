@@ -91,6 +91,54 @@ function stopRecording() {
     grabWav();
 }
 
+function stopRecordingAndPost(url, exid) {
+    recorder && recorder.exportMonoWAV(function (blob) {
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url, true);
+
+//Send the proper header information along with the request
+            xhr.setRequestHeader("Content-Type", "application/wav");
+            xhr.setRequestHeader("EXERCISE", exid);
+
+            xhr.onreadystatechange = function() {//Call a function when the state changes.
+                if(this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    // Request finished. Do processing here.
+
+                    __log('stopRecordingAndPost completed');
+                }
+            }
+            xhr.send(blob);
+        } catch (e) {
+            __log('Bad call to blob');
+
+            var vDebug = "";
+            for (var prop in e) {
+                vDebug += "property: " + prop + " value: [" + e[prop] + "]\n";
+            }
+            vDebug += "toString(): " + " value: [" + e.toString() + "]";
+            __log(vDebug);
+            throw e;
+        }
+    });
+
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+
+//Send the proper header information along with the request
+    xhr.setRequestHeader("Content-Type", "application/wav");
+
+    xhr.onreadystatechange = function() {//Call a function when the state changes.
+        if(this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+            // Request finished. Do processing here.
+
+            __log('stopRecordingAndPost completed');
+        }
+    }
+  //  xhr.send("foo=bar&lorem=ipsum");
+// xhr.send(new Blob());
+}
 function uint6ToB64(nUint6) {
 
     return nUint6 < 26 ?
@@ -247,6 +295,7 @@ function initWebAudio() {
 //    updateDeviceList();
 }
 
+/*
 function updateDeviceList() {
     navigator.mediaDevices.enumerateDevices()
         .then(function (devices) {
@@ -298,3 +347,4 @@ function updateDeviceList() {
             // }
         });
 }
+*/

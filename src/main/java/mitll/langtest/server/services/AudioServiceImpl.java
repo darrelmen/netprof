@@ -33,6 +33,8 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.AudioService;
+import mitll.langtest.server.FileSaver;
+import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
@@ -56,11 +58,21 @@ import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
+import net.sf.json.JSONObject;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.util.HashMap;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * does image generation here too - since it's done from a file.
@@ -71,6 +83,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private static final int WARN_THRESH = 10;
   public static final String UNKNOWN = "unknown";
+
+
+  private static final String EXID = "exid";
+  private static final String REQID = "reqid";
+  private static final String VERSION = "version";
+  private static final String CONTEXT = "context";
+  private static final String WIDGET = "widget";
 
   private PathWriter pathWriter;
   private IEnsureAudioHelper ensureAudioHelper;
@@ -84,6 +103,195 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     pathWriter = new PathWriter(serverProps);
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
     pathWriter.doSanityCheckOnDir(new File(serverProps.getAnswerDir()), " answers dir ");
+  }
+
+
+  /**
+   * This allows us to upload an exercise file.
+   *
+   * This might be helpful if we want to stream audio in a simple way outside a GWT RPC call.
+   *
+   * @throws ServletException
+   * @throws IOException
+   * @paramx request
+   * @paramx response
+   */
+  @Override
+  protected void service(HttpServletRequest request,
+                         HttpServletResponse response) throws ServletException, IOException {
+    ServletRequestContext ctx = new ServletRequestContext(request);
+    //  boolean isMultipart = ServletFileUpload.isMultipartContent(ctx);
+    String contentType = ctx.getContentType();
+    String requestType = getRequestType(request);
+
+    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
+    if (contentType.equalsIgnoreCase("application/wav")) {
+      reportOnHeaders(request);
+
+      try {
+        getJSONForStream(request, ScoreServlet.PostRequest.ALIGN, "", "");
+      } catch (DominoSessionException e) {
+        logger.warn("got " +e,e);
+      }
+      logger.debug("service : Request " + request.getQueryString() + " path " + request.getPathInfo());
+//      FileUploadHelper.UploadInfo uploadInfo = db.getProjectManagement().getFileUploadHelper().gotFile(request);
+//      if (uploadInfo == null) {
+//        super.service(request, response);
+//      } else {
+//        db.getProjectManagement().getFileUploadHelper().doUploadInfoResponse(response, uploadInfo);
+//      }
+    } else {
+      super.service(request, response);
+    }
+  }
+
+
+  private final Set<String> notInteresting = new HashSet<>(Arrays.asList(
+      "Accept-Encoding",
+      "Accept-Language",
+      "accept",
+      "connection",
+      "password",
+      "pass"));
+
+  private void reportOnHeaders(HttpServletRequest request) {
+    Enumeration<String> headerNames = request.getHeaderNames();
+    Set<String> headers = new TreeSet<>();
+    while (headerNames.hasMoreElements()) headers.add(headerNames.nextElement());
+    List<String> collect = headers.stream().filter(name -> !notInteresting.contains(name)).collect(Collectors.toList());
+    collect.forEach(header -> logger.info("\trequest header " + header + " = " + request.getHeader(header)));
+  }
+
+
+  private static final String MESSAGE = "message";
+  private static final String NO_SESSION = "no session";
+
+  private JSONObject getJSONForStream(HttpServletRequest request,
+                                      ScoreServlet.PostRequest requestType,
+                                      String deviceType,
+                                      String device) throws IOException, DominoSessionException {
+    int userIDFromSession=-1;
+    try {
+       userIDFromSession = checkSession(request);
+    } catch (DominoSessionException dse) {
+      logger.info("getJsonForAudio got " + dse);
+      JSONObject jsonObject = new JSONObject();
+      jsonObject.put(MESSAGE, NO_SESSION);
+      return jsonObject;
+    }
+
+
+    int realExID = getRealExID(request);
+    int reqid = getReqID(request);
+    int projid = getProjectID(request);
+
+
+    String postedWordOrPhrase = "";
+
+    //String user = getUser(request);
+
+    logger.info("\n\n\ngetJSONForStream got" +
+        "\n\trequest  " + requestType +
+        "\n\tprojid   " + projid +
+        "\n\texid     " + realExID +
+        //"\n\texercise text " + realExID +
+        "\n\treq      " + reqid +
+        "\n\tdevice   " + deviceType + "/" + device);
+
+    int session = getStreamSession(request);
+    int packet = getStreamPacket(request);
+    String state = getHeader(request, ScoreServlet.HeaderValue.STREAMSTATE);
+
+    logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
+    File saveFile = new FileSaver().writeAudioFile(pathHelper,
+        request.getInputStream(), realExID, userIDFromSession, getProject(projid).getLanguage());
+
+     logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
+    return new JSONObject();
+    // File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
+  }
+
+  private int checkSession(HttpServletRequest request) throws DominoSessionException {
+    int userIDFromSession = securityManager.getUserIDFromSessionLight(request);
+    logger.info("checkSession user id from session is " + userIDFromSession);
+    return userIDFromSession;
+  }
+
+  /**
+   * @param request
+   * @return
+   * @see #doGet
+   */
+  int getProjectID(HttpServletRequest request) {
+
+    int userIDFromRequest = securityManager.getUserIDFromRequest(request);
+    if (userIDFromRequest == -1) {
+      return -1;
+    } else {
+      return getMostRecentProjectByUser(userIDFromRequest);
+    }
+  }
+
+  private String getRequestType(HttpServletRequest request) {
+    return getHeader(request, ScoreServlet.HeaderValue.REQUEST);
+  }
+
+  int getMostRecentProjectByUser(int id) {
+    return getDatabase().getUserProjectDAO().getCurrentProjectForUser(id);
+  }
+
+  /**
+   * @param request
+   * @return
+   * @seex #getJsonForAudio
+   */
+  private int getReqID(HttpServletRequest request) {
+    String reqid = request.getHeader(REQID);
+    //logger.debug("got req id " + reqid);
+    if (reqid == null) reqid = "1";
+    try {
+      //logger.debug("returning req id " + req);
+      return Integer.parseInt(reqid);
+    } catch (NumberFormatException e) {
+      logger.warn("Got parse error on reqid " + reqid);
+    }
+    return 1;
+  }
+
+  private int getProjID(HttpServletRequest request) {
+    return request.getIntHeader(ScoreServlet.HeaderValue.PROJID.toString());
+  }
+
+  private int getRealExID(HttpServletRequest request) {
+    int realExID = 0;
+    try {
+      realExID = Integer.parseInt(getExerciseHeader(request));
+      if (realExID == -1) {
+        realExID = getDatabase().getUserExerciseDAO().getUnknownExercise().id();
+        logger.info("getJsonForAudio : using unknown exercise id " + realExID);
+      } else {
+        logger.info("getJsonForAudio got exercise id " + realExID);
+      }
+    } catch (NumberFormatException e) {
+      logger.info("couldn't parse exercise request header = '" + getExerciseHeader(request) + "'");
+    }
+    return realExID;
+  }
+
+  private int getStreamSession(HttpServletRequest request) {
+    return request.getIntHeader(ScoreServlet.HeaderValue.STREAMSESSION.toString());
+  }
+
+  private int getStreamPacket(HttpServletRequest request) {
+    return request.getIntHeader(ScoreServlet.HeaderValue.STREAMSPACKET.toString());
+  }
+
+  private String getExerciseHeader(HttpServletRequest request) {
+    return getHeader(request, ScoreServlet.HeaderValue.EXERCISE);
+  }
+
+  private String getHeader(HttpServletRequest request, ScoreServlet.HeaderValue resultId) {
+    return request.getHeader(resultId.toString());
   }
 
   /**
@@ -499,7 +707,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         new ProjectHelper().getProjectInfos(db, securityManager), "server", serverProps.getAffiliations());
   }
 
- /**
+  /**
    * @param userExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */

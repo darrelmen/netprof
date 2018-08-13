@@ -271,7 +271,7 @@ public class RecordButton extends Button {
     cancelTimer();
     long duration = now - started;
 
-    logger.info("stopRecording : ui time between button clicks = " + duration + " millis, ");
+   // logger.info("stopRecording : ui time between button clicks = " + duration + " millis, ");
 
     afterStopTimer = new Timer() {
       @Override

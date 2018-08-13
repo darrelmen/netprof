@@ -13,6 +13,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   //private final Logger logger = Logger.getLogger("FeedbackPostAudioRecordButton");
   private static final String STOP = "Stop";
   private static final String RECORD_BUTTON = "RecordButton";
+  private static final int DEFAULT_INDEX = 1;
 
   private final RecordingAudioListener simpleRecordAudioPanel;
 
@@ -22,11 +23,12 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    * @param controller
    * @see NoFeedbackRecordAudioPanel#makePlayAudioPanel
    */
-  FeedbackPostAudioRecordButton(int exid, RecordingAudioListener simpleRecordAudioPanel, ExerciseController controller) {
+  FeedbackPostAudioRecordButton(int exid, RecordingAudioListener simpleRecordAudioPanel,
+                                ExerciseController controller) {
     super(
         exid,
         controller,
-        1,
+        DEFAULT_INDEX,
         true,
         "",
         controller.getProps().doClickAndHold() ? "" : STOP,

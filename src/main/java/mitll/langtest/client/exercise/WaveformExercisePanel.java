@@ -51,6 +51,7 @@ import mitll.langtest.shared.exercise.STATE;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -101,6 +102,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    * Make sure we disable the other companion panel.
    *
    * Only change enabled state if it's not recording already.
+   *
    * @param v
    */
   public void setBusy(boolean v) {
@@ -122,7 +124,23 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    * @see ExercisePanel#ExercisePanel
    */
   protected void addInstructions() {
-    Panel flow = new UnitChapterItemHelper<T>(controller.getTypeOrder()).addUnitChapterItem(exercise, this);
+
+    if (logger == null) logger = Logger.getLogger("WaveformExercisePanel");
+    List<String> typeOrder = new ArrayList<>(controller.getTypeOrder());
+
+    if (exercise != null && exercise.getAttributes() != null) {
+      exercise.getAttributes().forEach(exerciseAttribute -> logger.info("for " + exercise.getID() + " " + exerciseAttribute));
+
+      exercise.getAttributes().forEach(exerciseAttribute -> {
+        exercise.getUnitToValue().put(exerciseAttribute.getProperty(), exerciseAttribute.getValue());
+        if (!typeOrder.contains(exerciseAttribute.getProperty())) {
+          typeOrder.add(exerciseAttribute.getProperty());
+        }
+      });
+    }
+
+
+    Panel flow = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, this);
     if (flow != null) {
       flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }

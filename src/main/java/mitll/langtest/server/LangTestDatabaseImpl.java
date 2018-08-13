@@ -297,27 +297,26 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     ServerProperties serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
 
     File configDir = serverInitializationManagerNetProf.getConfigDir();
-    logger.info("readProperties : configDir from props " + configDir);
+ //   logger.info("readProperties : configDir from props " + configDir);
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     //åString configDir1 = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
-    logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
+   // logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 
     try {
       Object attribute = servletContext.getAttribute(USER_SVC);
 
       if (attribute != null) {
-        logger.info("got " + attribute + " : " + attribute.getClass());
+        logger.info("readProperties got " + attribute + " : " + attribute.getClass());
       } else {
         logger.warn("readProperties : no " + USER_SVC + " attribute...? ");
       }
 
       db = makeDatabaseImpl(serverProps);
-      logger.info("readProperties made database " + db);
+//      logger.info("readProperties made database " + db);
 
       securityManager = new NPUserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
-      logger.info("readProperties made securityManager " + securityManager);
-
+  //    logger.info("readProperties made securityManager " + securityManager);
       db.setUserSecurityManager(securityManager);
     } catch (Exception e) {
       logger.error("readProperties got " + e, e);

@@ -168,9 +168,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
 
     @Override
     protected void enableNext() {
-
       navigationHelper.enableNextButton(true);
-      //super.enableNext();
       if (isCompleted()) {
         showRecordedState(exercise);
       }

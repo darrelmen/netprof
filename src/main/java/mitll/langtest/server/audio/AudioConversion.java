@@ -35,6 +35,7 @@ import mitll.langtest.server.ServerProperties;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -105,6 +106,11 @@ public class AudioConversion extends AudioBase {
 
     writeToFile(getBytesFromBase64String(base64EncodedString), file);
 
+    return getValidityAndDur(file, useSensitiveTooLoudCheck, quietAudioOK, then);
+  }
+
+  @NotNull
+  AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
     if (DEBUG) logger.debug("convertBase64ToAudioFiles: wrote wav file " + file.getAbsolutePath());
 
     if (!file.exists()) {

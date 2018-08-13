@@ -474,7 +474,9 @@ public class LangTest implements
     if (!isDefault(host)) {
       String moduleBaseURL = audioService.getServiceEntryPoint();
       audioService.setServiceEntryPoint(moduleBaseURL + "/" + host);
-      logger.info("createHostSpecificServices service " + "now at " + audioService.getServiceEntryPoint());
+      logger.info("adjustEntryPoint createHostSpecificServices service now at " + audioService.getServiceEntryPoint());
+    } else {
+     // logger.info("adjustEntryPoint createHostSpecificServices service is at " + audioService.getServiceEntryPoint());
     }
   }
 
@@ -574,7 +576,7 @@ public class LangTest implements
     //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
-       logger.info("getImage for key " + key+ " found  " + ifPresent);
+      logger.info("getImage for key " + key + " found  " + ifPresent);
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
@@ -593,7 +595,7 @@ public class LangTest implements
 
             public void onSuccess(ImageResponse result) {
               imageCache.put(key, result);
-              logger.info("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
+           //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
               client.onSuccess(result);
             }
           });
@@ -1182,10 +1184,21 @@ public class LangTest implements
     flashRecordPanel.stopRecording(wavCallback);
   }
 
+  /**
+   * @see PostAudioRecordButton#stopRecording(long)
+   * @param exid
+   */
+  public void stopRecordingAndPost(int exid) {
+    AudioServiceAsync audioService = getAudioService();
+    String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
+    flashRecordPanel.stopRecordingAndPost(serviceEntryPoint, ""+exid);
+  }
+
   private WavEndCallback wavEndCallback;
 
   /**
    * Recording interface
+   *
    * @see mitll.langtest.client.banner.RehearseViewHelper#RehearseViewHelper
    */
   public void registerStopDetected(WavEndCallback wavEndCallback) {

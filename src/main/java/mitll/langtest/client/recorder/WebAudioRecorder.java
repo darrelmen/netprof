@@ -112,6 +112,10 @@ public class WebAudioRecorder {
       $wnd.stopRecording();
   }-*/;
 
+  public native void stopRecordingAndPost(String url, String exid) /*-{
+      $wnd.stopRecordingAndPost(url, exid);
+  }-*/;
+
   private static void console(String message) {
     try {
       int ieVersion = BrowserCheck.getIEVersion();

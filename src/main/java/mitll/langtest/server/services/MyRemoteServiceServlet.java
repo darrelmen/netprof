@@ -469,7 +469,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    *
    * @return
    */
-  private DatabaseImpl getDatabase() {
+  protected DatabaseImpl getDatabase() {
     DatabaseImpl db = null;
 
     Object databaseReference = getServletContext().getAttribute(DATABASE_REFERENCE);
