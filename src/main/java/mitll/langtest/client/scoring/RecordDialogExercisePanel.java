@@ -11,6 +11,7 @@ import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -18,7 +19,9 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
@@ -61,8 +64,12 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   @Override
   public void showScoreInfo() {
     emoticon.setVisible(true);
-    Iterator<TranscriptSegment> scoredWords = alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT).iterator();
+
+   /* List<TranscriptSegment> transcriptSegments = alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+    transcriptSegments.sort(TranscriptSegment::compareTo);
+    Iterator<TranscriptSegment> scoredWords = transcriptSegments.iterator();
     Iterator<IHighlightSegment> highlightSegment = flclickables.iterator();
+
     while (scoredWords.hasNext()) {
       TranscriptSegment scoredWord = scoredWords.next();
       if (highlightSegment.hasNext()) {
@@ -72,9 +79,30 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
           next1 = highlightSegment.next();
         }
 
-        next1.setHighlightColor(SimpleColumnChart.getColor(scoredWord.getScore()));
+        String color = SimpleColumnChart.getColor(scoredWord.getScore());
+
+        logger.info("word '" + scoredWord.getDisplayEvent() +
+            "' or '" + scoredWord.getEvent() +
+            "' = " + scoredWord.getScore() + " = " + color);
+
+        next1.setHighlightColor(color);
         next1.showHighlight();
       }
+    }*/
+
+    TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = showAlignment(0, durationInMillis, alignmentOutput);
+
+    if (transcriptSegmentIHighlightSegmentTreeMap != null) {
+      transcriptSegmentIHighlightSegmentTreeMap.forEach((k, v) -> {
+        String color = SimpleColumnChart.getColor(k.getScore());
+
+        logger.info("word '" + k.getDisplayEvent() +
+            "' or '" + k.getEvent() +
+            "' = " + k.getScore() + " = " + color);
+
+        v.setHighlightColor(color);
+        v.showHighlight();
+      });
     }
   }
 
@@ -85,8 +113,11 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       iHighlightSegment.setHighlightColor(IHighlightSegment.DEFAULT_HIGHLIGHT);
       iHighlightSegment.clearHighlight();
     });
+
+   maybeShowAlignment(getRegularSpeedIfAvailable(exercise));
   }
 
+ private long durationInMillis;
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
     NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<T>(exercise, controller, sessionManager) {
@@ -94,10 +125,11 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       public void useResult(AudioAnswer result) {
         super.useResult(result);
         alignmentOutput = result.getPretestScore();
+        durationInMillis=result.getDurationInMillis();
         listenView.addScore(result.getExid(), (float) result.getScore(), RecordDialogExercisePanel.this);
         listenView.setSmiley(emoticon, result.getScore());
         logger.info("useResult got for   " + getExID() + " = " + result.getValidity() + " " + result.getScore());
-       // logger.info("useResult got words " + result.getPretestScore().getWordScores());
+        // logger.info("useResult got words " + result.getPretestScore().getWordScores());
       }
 
       @Override
@@ -178,7 +210,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     start = System.currentTimeMillis();
     recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
   }
-
 
 
   /**

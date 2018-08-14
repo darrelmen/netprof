@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
@@ -34,6 +35,9 @@ import java.util.logging.Logger;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExercise>>
     extends ListenViewHelper<T> implements SessionManager {
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
+
+  private static final String THEY_SPEAK = "<i>They</i> Speak";
+  private static final String YOU_SPEAK = "<i>You</i> Speak";
 
   private static final boolean DEBUG = false;
 
@@ -65,7 +69,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     controller.registerStopDetected(this::silenceDetected);
   }
 
-
   /**
    * @param dialog
    * @param child
@@ -74,6 +77,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   protected void showDialogGetRef(IDialog dialog, Panel child) {
     super.showDialogGetRef(dialog, child);
     child.add(overallFeedback = getOverallFeedback());
+  }
+
+  int getControlRowHeight() {
+    return 55;
   }
 
   @NotNull
@@ -100,6 +107,56 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   @Override
   protected INavigation.VIEWS getNextView() {
     return INavigation.VIEWS.REHEARSE;
+  }
+
+
+  private HTML leftSpeakerHint, rightSpeakerHint;
+
+  @NotNull
+  protected DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
+    DivWidget rightDiv = new DivWidget();
+    rightDiv.add(checkBox);
+    checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
+
+    leftSpeakerHint = new HTML(THEY_SPEAK);
+    leftSpeakerHint.addStyleName("floatLeft");
+
+    Style style = leftSpeakerHint.getElement().getStyle();
+    style.setClear(Style.Clear.BOTH);
+    style.setMarginLeft(41, Style.Unit.PX);
+
+    rightDiv.add(leftSpeakerHint);
+
+    return rightDiv;
+  }
+
+  @NotNull
+  DivWidget getRightSpeakerDiv(CheckBox checkBox) {
+    DivWidget rightDiv = new DivWidget();
+    rightDiv.add(checkBox);
+
+    // checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
+
+    rightSpeakerHint = new HTML(YOU_SPEAK);
+    rightSpeakerHint.addStyleName("floatRight");
+
+    Style style = rightSpeakerHint.getElement().getStyle();
+    style.setMarginRight(17, Style.Unit.PX);
+
+    rightDiv.add(rightSpeakerHint);
+
+
+    return rightDiv;
+  }
+
+  @NotNull
+  private String getLeftHint() {
+    return isLeftSpeakerSet() ? THEY_SPEAK : YOU_SPEAK;
+  }
+
+  @NotNull
+  private String getRightHint() {
+    return isRightSpeakerSet() ? THEY_SPEAK : YOU_SPEAK;
   }
 
   private boolean directClick = false;
@@ -140,9 +197,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
       styleAnimatedSmiley();
 
-      // setSmiley(overallSmiley,0.2);
-      // overallSmiley.addStyleName("animation-target");
-
       container.add(iconContainer);
     }
 
@@ -177,7 +231,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     overallSmiley.getElement().getStyle().setLeft(18, Style.Unit.PX);
     overallSmiley.getElement().getStyle().setTop(18, Style.Unit.PX);
   }
- 
+
   private void styleProgressBarContainer(ProgressBar progressBar) {
     Style style = progressBar.getElement().getStyle();
     style.setMarginTop(5, Style.Unit.PX);
@@ -242,7 +296,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     if (onLast) {
       showScores();
     }
-    logger.info("not at end");
+    logger.info("checkAtEnd : not at end");
   }
 
   private void showScores() {
@@ -259,16 +313,24 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    */
   protected void speakerOneCheck(Boolean value) {
     rightSpeakerBox.setValue(!value);
-    setPlayButtonToPlay();
 
+    gotSpeakerChoice();
+  }
+
+  private void gotSpeakerChoice() {
+    setPlayButtonToPlay();
     makeFirstTurnCurrent();
+    setHints();
+  }
+
+  private void setHints() {
+    leftSpeakerHint.setHTML(getLeftHint());
+    rightSpeakerHint.setHTML(getRightHint());
   }
 
   protected void speakerTwoCheck(Boolean value) {
     leftSpeakerBox.setValue(!value);
-    setPlayButtonToPlay();
-
-    makeFirstTurnCurrent();
+    gotSpeakerChoice();
   }
 
   private void makeFirstTurnCurrent() {
@@ -475,6 +537,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   /**
    * cancel recording if we're doing it... when we change the current turn via
+   *
    * @see #gotForward()
    * @see #gotBackward()
    */

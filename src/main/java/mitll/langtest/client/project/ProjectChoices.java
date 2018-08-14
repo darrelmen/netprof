@@ -98,6 +98,9 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final String PLEASE_SELECT_A_LANGUAGE = "Select a language";
   private static final String PLEASE_SELECT_A_COURSE = "Select a course";
+  /**
+   * @see #getHeader(List, int)
+   */
   private static final String PLEASE_SELECT_A_MODE = "Select a mode";
   /**
    * @see #getHeader(List, int)
@@ -330,6 +333,8 @@ public class ProjectChoices extends ThumbnailChoices {
     header.addStyleName("container");
     List<SlimProject> dialogProjects = getDialogProjects(result);
 
+    logger.info("getHeader " + result.size() + " nest  " + nest);
+
     String text = dialogProjects.size() == result.size() ? PLEASE_SELECT_A_MODE : (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
 
     if (result.isEmpty()) {
@@ -368,7 +373,10 @@ public class ProjectChoices extends ThumbnailChoices {
   }
 
   private List<SlimProject> getDialogProjects(List<SlimProject> projects) {
-    return projects.stream().filter(slimProject -> slimProject.getProjectType() == ProjectType.DIALOG).collect(Collectors.toList());
+    return projects
+        .stream()
+        .filter(slimProject -> slimProject.getProjectType() == ProjectType.DIALOG && !slimProject.hasChildren())
+        .collect(Collectors.toList());
   }
 
   /**
@@ -967,7 +975,7 @@ public class ProjectChoices extends ThumbnailChoices {
     NavLink breadcrumb = makeBreadcrumb(name);
     if (children.size() < 2) {
       if (DEBUG) logger.info("gotClickOnFlag onClick select leaf project " + projid +
-          " "+ projectForLang.getMode()+
+          " " + projectForLang.getMode() +
           "\n\tcurrent user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
 
       setProjectForUser(projid, projectForLang.getMode());
@@ -1000,7 +1008,7 @@ public class ProjectChoices extends ThumbnailChoices {
     if (contentRow.getWidgetCount() == 1) {
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     } else {
-      if (DEBUG)     logger.info("addProjectChoices not adding project choices again...");
+      if (DEBUG) logger.info("addProjectChoices not adding project choices again...");
     }
   }
 

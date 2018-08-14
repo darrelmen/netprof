@@ -69,7 +69,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   final List<T> bothTurns = new ArrayList<>();
   final List<T> leftTurnPanels = new ArrayList<>();
-  private  final List<T> rightTurnPanels = new ArrayList<>();
+  private final List<T> rightTurnPanels = new ArrayList<>();
 
   private T currentTurn;
   CheckBox leftSpeakerBox, rightSpeakerBox;
@@ -153,11 +153,16 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     Style style = rowOne.getElement().getStyle();
     style.setProperty("position", "sticky");
     style.setTop(0, PX);
-    rowOne.setHeight("40px");
+    rowOne.setHeight(getControlRowHeight() +
+        "px");
     rowOne.setWidth(97 + "%");
     style.setMarginTop(10, PX);
     style.setMarginBottom(10, PX);
     style.setZIndex(1000);
+  }
+
+   int getControlRowHeight() {
+    return 40;
   }
 
   private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
@@ -170,10 +175,15 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
     checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
 
+    rowOne.add(getLeftSpeakerDiv(checkBox));
+    return checkBox;
+  }
+
+  @NotNull
+  protected DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
     DivWidget rightDiv = new DivWidget();
     rightDiv.add(checkBox);
-    rowOne.add(rightDiv);
-    return checkBox;
+    return rightDiv;
   }
 
   private CheckBox addRightSpeaker(DivWidget rowOne, String label) {
@@ -190,11 +200,15 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
     checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
 
+    rowOne.add(getRightSpeakerDiv(checkBox));
+    return checkBox;
+  }
 
+  @NotNull
+   DivWidget getRightSpeakerDiv(CheckBox checkBox) {
     DivWidget rightDiv = new DivWidget();
     rightDiv.add(checkBox);
-    rowOne.add(rightDiv);
-    return checkBox;
+    return rightDiv;
   }
 
   private void setLeftTurnSpeakerInitial(CheckBox checkBox) {
@@ -361,7 +375,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
         next.getRefAudio(() -> {
           if (iterator.hasNext()) {
             //     logger.info("\tgetRefAudio panel complete...");
-            final int reqid = next.getReq();
+         //   final int reqid = next.getReq();
             if (true) {
               Scheduler.get().scheduleDeferred(() -> {
                 if (true) {
@@ -397,8 +411,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
         controller,
         null,
         alignments,
-        this, isRight);
-    //  widgets.setIsRight(isRight);
+        this,
+        isRight);
     return widgets;
   }
 
@@ -407,7 +421,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     setCurrentTurn(turn);
     playCurrentTurn();
   }
-
 
   /**
    * TODO add playback rate
@@ -478,6 +491,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   /**
    * TODO : move this down, add interface...
+   *
    * @param exid
    * @param score
    * @param recordDialogTurn
@@ -654,10 +668,11 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     boolean rightSpeaker = isRightSpeakerSet();
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
   }
+
   protected List<T> getRespSeq() {
     boolean leftSpeaker = isLeftSpeakerSet();
     boolean rightSpeaker = isRightSpeakerSet();
-    return leftSpeaker ? rightTurnPanels :  rightSpeaker ? leftTurnPanels : null;
+    return leftSpeaker ? rightTurnPanels : rightSpeaker ? leftTurnPanels : null;
   }
 
   Boolean isLeftSpeakerSet() {
@@ -754,13 +769,13 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   private void setPlayButtonToPause() {
-    logger.info("setPlayButtonToPause");
+   // logger.info("setPlayButtonToPause");
     playButton.setIcon(IconType.PAUSE);
     playing = false;
   }
 
   void setPlayButtonToPlay() {
-    logger.info("setPlayButtonToPlay");
+  //  logger.info("setPlayButtonToPlay");
     playButton.setIcon(IconType.PLAY);
     playing = true;
   }

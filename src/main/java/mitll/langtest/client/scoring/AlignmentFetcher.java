@@ -55,7 +55,7 @@ public class AlignmentFetcher {
    * @param listener
    * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio
    */
-  // @Override
+
   public void getRefAudio(RefAudioListener listener) {
     AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
     int refID = currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();

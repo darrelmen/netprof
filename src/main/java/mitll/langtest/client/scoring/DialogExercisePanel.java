@@ -26,14 +26,11 @@ import java.util.stream.Collectors;
  */
 public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     implements AudioChangeListener, RefAudioGetter, IPlayAudioControl {
-  public static final int WORD_SPACER = 7;
   private Logger logger = Logger.getLogger("DialogExercisePanel");
+  private static final int WORD_SPACER = 7;
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
   private static final String BLUE = "#2196F3";
-  //  private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
-//  private static final String LEFT_COLOR = "#e7e6ec";
-
 
   static final int CONTEXT_INDENT = 45;//50;
   private static final char FULL_WIDTH_ZERO = '\uFF10';
@@ -47,7 +44,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   /**
    * @see #getFLEntry
    */
-  protected List<IHighlightSegment> flclickables = null;
+  List<IHighlightSegment> flclickables = null;
 
   /**
    * @see #makePlayAudio
@@ -121,15 +118,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       makeClickableWords(projectStartupInfo, null);
       this.isRTL = clickableWords.isRTL(exercise.getForeignLanguage());
 
-      DivWidget flEntry = getFLEntry(exercise);
-      //  this.addStyleName("bubble");
-
-      //  DivWidget wrapper = doStyle(flEntry);
-      DivWidget wrapper = new DivWidget();
-      wrapper.add(flEntry);
-      styleMe(wrapper);
-
-      add(wrapper);
+      {
+        DivWidget wrapper = new DivWidget();
+        wrapper.add(getFLEntry(exercise));
+        styleMe(wrapper);
+        add(wrapper);
+      }
 
       makePlayAudio(exercise, null);
     }
@@ -139,7 +133,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     addMarginStyle();
   }
 
-  protected void addMarginStyle() {
+  void addMarginStyle() {
     Style style2 = getFlClickableRow().getElement().getStyle();
     addMarginLeft(style2);
     style2.setMarginRight(10, Style.Unit.PX);
@@ -154,27 +148,39 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   /**
    * @param e
    * @param flContainer ignored here
+   * @see #addWidgets
+   * @see TwoColumnExercisePanel#makeFirstRow
    */
   protected void makePlayAudio(T e, DivWidget flContainer) {
     if (hasAudio(e)) {
       playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
       alignmentFetcher.setPlayAudio(playAudio);
-      if (!e.getAudioAttributes().isEmpty()) {
-        AudioAttribute candidate = e.getRegularSpeed();
-        AudioAttribute next = candidate == null ? e.getAudioAttributes().iterator().next() : candidate;
-        playAudio.rememberAudio(next);
-        //  logger.info("makePlayAudio audio for " + e.getID() + "  " + next);
 
-        if (next.getAlignmentOutput() != null) {
-          showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
-        }
+      //   if (!e.getAudioAttributes().isEmpty()) {
+      AudioAttribute next = getRegularSpeedIfAvailable(e);
+      playAudio.rememberAudio(next);
+      //  logger.info("makePlayAudio audio for " + e.getID() + "  " + next);
+
+      maybeShowAlignment(next);
+
 //        audioChanged(next.getUniqueID(), next.getDurationInMillis());
-      } else {
-        logger.warning("makePlayAudio no audio for " + e.getID());
-      }
+//      } else {
+//        logger.warning("makePlayAudio no audio for " + e.getID());
+//      }
     } else {
       logger.warning("makePlayAudio no audio in " + e.getAudioAttributes());
     }
+  }
+
+  protected void maybeShowAlignment(AudioAttribute next) {
+    if (next.getAlignmentOutput() != null) {
+      showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
+    }
+  }
+
+  protected AudioAttribute getRegularSpeedIfAvailable(T e) {
+    AudioAttribute candidate = e.getRegularSpeed();
+    return candidate == null ? e.getAudioAttributes().iterator().next() : candidate;
   }
 
   @Override
@@ -252,19 +258,23 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param id
    * @param duration
    * @param alignmentOutput
+   * @see #makePlayAudio
+   * @see #audioChanged
+   * @see RecordDialogExercisePanel#showScoreInfo
    */
-  protected void showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
+  protected TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
     if (alignmentOutput != null) {
       if (currentAudioDisplayed != id) {
         currentAudioDisplayed = id;
         if (DEBUG) {
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         }
-        matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, new DivWidget());
-      }
+        return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, new DivWidget());
+      } else return null;
     } else {
       if (DEBUG || true)
         logger.warning("showAlignment no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
+      return null;
     }
   }
 
@@ -279,23 +289,25 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see #audioChanged
    * @see #contextAudioChanged
    */
-  void matchSegmentsToClickables(int id,
-                                 long duration,
-                                 AlignmentOutput alignmentOutput,
-                                 List<IHighlightSegment> flclickables,
-                                 HeadlessPlayAudio playAudio,
-                                 DivWidget clickableRow,
-                                 DivWidget clickablePhones) {
+  TreeMap<TranscriptSegment, IHighlightSegment> matchSegmentsToClickables(int id,
+                                                                          long duration,
+                                                                          AlignmentOutput alignmentOutput,
+                                                                          List<IHighlightSegment> flclickables,
+                                                                          HeadlessPlayAudio playAudio,
+                                                                          DivWidget clickableRow,
+                                                                          DivWidget clickablePhones) {
     if (DEBUG) logger.info("matchSegmentsToClickables match seg to clicable " + id + " : " + alignmentOutput);
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget =
         matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio, clickableRow, clickablePhones);
     setPlayListener(id, duration, typeToSegmentToWidget, playAudio);
+
+    return typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
   }
 
-  private void setPlayListener(int id,
-                               long duration,
-                               Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
-                               HeadlessPlayAudio playAudio) {
+  protected void setPlayListener(int id,
+                                 long duration,
+                                 Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
+                                 HeadlessPlayAudio playAudio) {
     if (DEBUG) {
       logger.info("setPlayListener for ex " + exercise.getID() +
           " audio id " + id + " : " +
@@ -306,8 +318,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       logger.warning("setPlayListener no type to segment for " + id + " and exercise " + exercise.getID());
     } else {
       if (DEBUG) {
-//        TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap =
-//            typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
         logger.info("setPlayListener segments now for ex " + exercise.getID() +
             " audio " + id + " dur " + duration +
             "\n\twords: " + typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT).keySet() +

@@ -12,14 +12,12 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.qc.QCNPFExercise.ENGLISH;
@@ -44,25 +42,17 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private static final String RIGHT_WIDTH = "40%";
   private static final String RIGHT_WIDTH_NO_ENGLISH = (100 - LEFT_WIDTH_NO_ENGLISH_VALUE) + "%";
 
-
   static final int CONTEXT_INDENT = 45;//50;
-
 
   private final CommentAnnotator annotationHelper;
   /**
    * @see #addWidgets(boolean, boolean, PhonesChoices)
    */
-//  private ClickableWords<T> clickableWords;
   private static final boolean showInitially = false;
   private UnitChapterItemHelper<ClientExercise> commonExerciseUnitChapterItemHelper;
   private final ListInterface<?, ?> listContainer;
-  //private ChoicePlayAudioPanel<ClientExercise> playAudio, contextPlay;
   private ChoicePlayAudioPanel<ClientExercise> contextPlay;
   private List<IHighlightSegment> altflClickables = null;
-  /**
-   * @see #getFLEntry
-   */
-//  private List<IHighlightSegment> flclickables = null;
   private List<IHighlightSegment> contextClickables;//, altContextClickables;
 
   private DivWidget altFLClickableRow;
@@ -86,11 +76,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private PhonesChoices phonesChoices;
 
   private static final boolean DEBUG = false;
-  // private static final boolean DEBUG_DETAIL = false;
-  // private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
 
-  //  private AlignmentFetcher alignmentFetcher;
   private ItemMenu itemMenu;
   private boolean addPlayer;
 
@@ -115,27 +102,11 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                                 Map<Integer, AlignmentOutput> alignments,
                                 boolean addPlayer) {
     super(commonExercise, controller, listContainer, alignments, null);
-    //this.exercise = commonExercise;
-    // this.controller = controller;
+
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;
     addStyleName("twoColumnStyle");
-    //  isMandarin = getProjectStartupInfo() != null && getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
     annotationHelper = controller.getCommentAnnotator();
-
-    //    this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
-//        controller, listContainer,
-//        alignments, this, new AudioChangeListener() {
-//      @Override
-//      public void audioChanged(int id, long duration) {
-//        contextAudioChanged(id, duration);
-//      }
-//
-//      @Override
-//      public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
-//
-//      }
-//    });
     this.itemMenu = new ItemMenu(controller, commonExercise);
   }
 
@@ -168,7 +139,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @param duration
    * @param alignmentOutput
    */
-  protected void showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
+  protected TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
     if (alignmentOutput != null) {
       if (currentAudioDisplayed != id) {
         currentAudioDisplayed = id;
@@ -177,11 +148,14 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
         DivWidget flClickableRow = this.getFlClickableRow() == null ? altFLClickableRow : this.getFlClickableRow();
         DivWidget flClickablePhoneRow = this.flClickableRowPhones == null ? altFLClickableRowPhones : this.flClickableRowPhones;
-        matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickablePhoneRow);
+        return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickablePhoneRow);
+      } else {
+        return null;
       }
     } else {
       if (DEBUG)
         logger.info("showAlignment no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
+      return null;
     }
   }
 
@@ -355,7 +329,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   private void stylePhoneRow(UIObject phoneRow) {
-    //  phoneRow.addStyleName("inlineFlex");
     if (isRTL) phoneRow.addStyleName("floatRight");
   }
 
@@ -510,17 +483,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     }
   }
 
-  /**
-   * TODO: do we need this???
-   *
-   * @return
-   * @paramx e
-   * @see #getItemContent
-   */
-/*  @NotNull
-  private SimpleRecordAudioPanel<T> getRecordPanel(T e) {
-    return new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer);
-  }*/
   @NotNull
   private DivWidget getHorizDiv() {
     DivWidget flContainer = new DivWidget();

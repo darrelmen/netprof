@@ -1,0 +1,25 @@
+<!--
+   Establish an alias to the netprof bestAudio and answers resource directories. This is necessary to allow
+   link based download via embedded audio players in netprof, and should match the value for
+   /opt/netprof/bestAudio or /opt/netprof/answers.
+
+   This lives at /opt/tomcat-latest/conf/Catalina/localhost/netprof.xml
+  -->
+<Context>
+    <!-- probably need to add allowLinking -->
+    <Resources>
+        <!-- TODO: Change path to attach, and external location to something that doesn't include domino. -->
+        <PostResources base="/opt/netprof/bestAudio"
+                       className="org.apache.catalina.webresources.DirResourceSet"
+                       webAppMount="/bestAudio"
+                       readOnly="true"/>
+        <PostResources base="/opt/netprof/answers"
+                       className="org.apache.catalina.webresources.DirResourceSet"
+                       webAppMount="/answers"
+                       readOnly="true"/>
+        <PostResources base="/opt/netprof/images"
+                       className="org.apache.catalina.webresources.DirResourceSet"
+                       webAppMount="/images"
+                       readOnly="true"/>
+    </Resources>
+</Context>

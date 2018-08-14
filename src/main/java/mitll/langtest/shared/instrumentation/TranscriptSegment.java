@@ -53,10 +53,6 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
   public TranscriptSegment() {
   }
 
-/*  public TranscriptSegment(TranscriptEvent event, String displayName) {
-    this(event.getStart(), event.getEnd(), event.getEvent(), event.getScore(), displayName);
-  }*/
-
   /**
    * Constructor
    *
