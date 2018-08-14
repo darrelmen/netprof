@@ -157,6 +157,14 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return countryCode;
   }
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#addModeChoices
+   * @param cc
+   */
+  public void setCountryCode(String cc) {
+    this.countryCode = cc;
+  }
+
   @Override
   public void setStatus(ProjectStatus status) {
     this.status = status;
@@ -179,8 +187,8 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.CreateProject#createProject
    * @return
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject
    */
   public Map<String, String> getPropertyValue() {
     return propertyValue;
@@ -247,7 +255,9 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.audioPerProject = audioPerProject;
   }
 
-  public boolean isMine(int sessionUser) {    return userID == sessionUser;  }
+  public boolean isMine(int sessionUser) {
+    return userID == sessionUser;
+  }
 
   public String toString() {
     return "#" + getID() + "  " + getName() + " " + getStatus() + " " + getProjectType() +

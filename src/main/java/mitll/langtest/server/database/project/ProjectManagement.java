@@ -977,6 +977,12 @@ public class ProjectManagement implements IProjectManagement {
     return projectInfos;
   }
 
+  /**
+   * Use custom icons for both vocab and dialog - hack the country code.
+   *
+   * @param project
+   * @param projectInfo
+   */
   private void addModeChoices(Project project, SlimProject projectInfo) {
     if (project.getKind() == ProjectType.DIALOG) {
       SlimProject vocab = getProjectInfo(project);
@@ -984,12 +990,14 @@ public class ProjectManagement implements IProjectManagement {
       vocab.setName(VOCABULARY);
       vocab.setProjectType(ProjectType.DIALOG);
       vocab.setMode(ProjectMode.VOCABULARY);
+      vocab.setCountryCode("vocab");
 
       SlimProject dialog = getProjectInfo(project);
       projectInfo.addChild(dialog);
       dialog.setName(DIALOG);
       dialog.setProjectType(ProjectType.DIALOG);
       dialog.setMode(ProjectMode.DIALOG);
+      dialog.setCountryCode("dialog");
     }
   }
 

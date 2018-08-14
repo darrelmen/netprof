@@ -78,17 +78,14 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     practiceHelper = new PracticeHelper(controller, this, DRILL);
     quizHelper = new QuizHelper(controller, this, VIEWS.QUIZ, this);
 
-
     dialogHelper = new DialogViewHelper(controller, this, DIALOG);
     listenHelper = new ListenViewHelper(controller, this, LISTEN);
     rehearseHelper = new RehearseViewHelper(controller, this, REHEARSE);
-
 
     this.controller = controller;
     this.listView = new ListView(controller);
     this.banner = banner;
     divWidget.setId("NewContentChooser");
-    //divWidget.setHeight("100%");
 
     addHistoryListener();
   }

@@ -282,8 +282,12 @@ body {
     margin-right: 3px;
 }
 
+/**
+ added padding bottom so we don't cut off bottom of turn text
+ */
 .wordSpacerRight {
     margin-right: 4px;
+    padding-bottom: 2px;
 }
 
 .wordSpacerLeft {

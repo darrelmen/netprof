@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.project;
 
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
 
 import java.util.ArrayList;
@@ -111,12 +110,11 @@ public class SlimProject extends ProjectInfo {
   public boolean hasChildren() {
     return !children.isEmpty();
   }
-
   public boolean hasChild(int projectid) {
     return getChild(projectid) != null;
   }
 
-  public SlimProject getChild(int projectid) {
+  private SlimProject getChild(int projectid) {
     for (SlimProject child : children) {
       if (child.getID() == projectid) return child;
     }
@@ -153,15 +151,14 @@ public class SlimProject extends ProjectInfo {
     return props;
   }
 
-  public String toString() {
-    return "SlimProject " + super.toString() + "\n\tnum children " + children.size();
-  }
-
   public ProjectMode getMode() {
     return mode;
   }
-
   public void setMode(ProjectMode mode) {
     this.mode = mode;
+  }
+
+  public String toString() {
+    return "SlimProject " + super.toString() + "\n\tnum children " + children.size();
   }
 }

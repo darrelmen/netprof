@@ -30,15 +30,15 @@ import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
-  public static final String RECORD = "Record";
-  public static final String QC = "QC";
   private final Logger logger = Logger.getLogger("NewBanner");
+
+  private static final String RECORD = "Record";
+  public static final String QC = "QC";
 
   private static final List<VIEWS> STANDARD_VIEWS =
       Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
 
-  private static final List<VIEWS> DIALOG_VIEWS =
-      Arrays.asList(VIEWS.DIALOG, VIEWS.LISTEN, VIEWS.REHEARSE);
+  private static final List<VIEWS> DIALOG_VIEWS = Arrays.asList(VIEWS.DIALOG, VIEWS.LISTEN, VIEWS.REHEARSE);
 
   private static List<VIEWS> BOTH = new ArrayList<>(STANDARD_VIEWS);
 
@@ -68,7 +68,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String DOCUMENTATION = "User Manual";
 
   private final UILifecycle lifecycle;
-  private ComplexWidget recnav, defectnav, dialogNav;
+  private ComplexWidget recnav, defectnav;
 
   private Nav lnav;
   private Dropdown cog;
@@ -81,15 +81,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private final Map<VIEWS, NavLink> viewToLink = new HashMap<>();
 
-  /**
-   * @see #addChoicesForUser
-   */
-  // private final List<Widget> choices = new ArrayList<>();
-
   private final ExerciseController controller;
   private Label subtitle;
 
-  private static final boolean DEBUG = true;
+//  private static final boolean DEBUG = true;
 
   /**
    * @param userManager
@@ -125,9 +120,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     }
 
    {
-      Nav recnav = getDialogNav();
-      this.dialogNav = recnav;
-      navCollapse.add(recnav);
+      navCollapse.add(getDialogNav());
     }
 
     {
@@ -153,7 +146,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private Nav getDialogNav() {
     Nav recnav = new Nav();
     recnav.getElement().setId("dialogNav");
-    styleNav(recnav);
+
+    recnav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+
     DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
     return recnav;
   }
@@ -317,11 +313,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       NavLink choice1 = getChoice(nav, choice);
       choice1.getElement().setId("Link_" + choice.name());
       if (first) {
-      //  choice1.addStyleName("leftTwentyMargin");
         choice1.addStyleName("leftTenMargin");
       }
       first = false;
-      //choices.add(choice1);
       viewToLink.put(choice, choice1);
     }
   }
@@ -502,7 +496,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       logger.warning("checkProjectSelected Current view is " + currentView);
       logger.warning("checkProjectSelected Current view link is null");
       logger.warning("checkProjectSelected huh? keys are " + viewToLink.keySet());
-      linkToShow = viewToLink.get(VIEWS.LEARN);//lifecycle.getMode() == ProjectMode.VOCABULARY ? VIEWS.LEARN : VIEWS.DIALOG);
+      linkToShow = viewToLink.get(VIEWS.LEARN);
     }
     showActive(linkToShow);
     recordMenuVisible();
