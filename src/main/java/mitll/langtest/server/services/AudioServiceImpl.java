@@ -94,7 +94,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private PathWriter pathWriter;
   private IEnsureAudioHelper ensureAudioHelper;
 
-  //  private final ConcurrentHashMap<Integer, List<AudioChunk>> sessionToChunks = new ConcurrentHashMap<>();
   private final LoadingCache<Integer, List<AudioChunk>> sessionToChunks = CacheBuilder.newBuilder()
       .maximumSize(1000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
@@ -303,7 +302,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           .setAllowAlternates(false);
 
 
-      getAudioAnswer(null, audioContext, false, deviceType, device, decoderOptions, saveFile);
+      getAudioAnswer(null, audioContext, false,
+          deviceType, device, decoderOptions, saveFile, projid);
       logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
     }
     // so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
@@ -493,7 +493,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                     String device,
                                     DecoderOptions decoderOptions
   ) throws DominoSessionException {
-    return getAudioAnswer(base64EncodedString, audioContext, recordedWithFlash, deviceType, device, decoderOptions, null);
+    return getAudioAnswer(base64EncodedString, audioContext, recordedWithFlash,
+        deviceType, device, decoderOptions, null, getProjectIDFromUser());
   }
 
   private AudioAnswer getAudioAnswer(String base64EncodedString,
@@ -502,8 +503,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                      String deviceType,
                                      String device,
                                      DecoderOptions decoderOptions,
-                                     File fileInstead) throws DominoSessionException {
-    int projectID = getProjectIDFromUser();
+                                     File fileInstead,
+                                     int projectID) throws DominoSessionException {
     Project project = db.getProject(projectID);
     boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
     AudioFileHelper audioFileHelper = getAudioFileHelper(project);
