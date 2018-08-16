@@ -92,18 +92,23 @@ function stopRecording() {
     grabWav();
 }
 
-function serviceStopStream() {
-    recorder && recorder.serviceStopStream(function (blob) {
-        __log('getStreamResponse.');
-        getStreamResponse(blob);
-    });
-}
-
 function serviceStartStream(url, exid) {
     //__log('webaudiorecorder.startStream ');
-    __log('\n\n\nwebaudiorecorder.startStream calling recorder');
+    __log('webaudiorecorder.startStream calling recorder');
 
-    recorder && recorder.serviceStartStream(url, exid);
+    recorder && recorder.serviceStartStream(url, exid,
+        function (blob) {
+            __log('startStream getStreamResponse.');
+            getStreamResponse(blob);
+        });
+}
+
+function serviceStopStream() {
+    recorder && recorder.stop();
+    recorder && recorder.serviceStopStream(function (blob) {
+        __log('serviceStopStream getStreamResponse.');
+        getStreamResponse(blob);
+    });
 }
 
 function stopRecordingAndPost(url, exid) {

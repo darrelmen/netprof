@@ -163,7 +163,6 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
 
     scoreFeedbackDiv.hideScore();
 
-
     waitCursorHelper.showFinished();
 
     scoreHistory.setVisible(false);

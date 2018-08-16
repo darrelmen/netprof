@@ -74,7 +74,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       }
 
       @Override
-      public void gotFrame() {
+      public void gotStreamResponse() {
         myGotFrame();
       }
     });

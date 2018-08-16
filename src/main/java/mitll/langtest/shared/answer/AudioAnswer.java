@@ -240,6 +240,10 @@ public class AudioAnswer implements IsSerializable {
     return exid;
   }
 
+  /**
+   * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#receivedAudioAnswer
+   * @return
+   */
   public long getRoundTripMillis() {
     return roundTripMillis;
   }

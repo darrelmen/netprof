@@ -135,6 +135,10 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     playAudioPanel.flip(first);
   }
 
+  /**
+   *
+   * @param result IGNORED HERE
+   */
   @Override
   public void useResult(AudioAnswer result) {
     //logger.info("useScoredResult " + result);

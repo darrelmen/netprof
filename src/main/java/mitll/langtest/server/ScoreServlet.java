@@ -51,7 +51,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -910,7 +909,7 @@ public class ScoreServlet extends DatabaseServlet {
         "\n\tdevice   " + deviceType + "/" + device);
 
     File saveFile = new FileSaver().writeAudioFile(
-        pathHelper, request.getInputStream(), realExID, userid, getProject(projid).getLanguage());
+        pathHelper, request.getInputStream(), realExID, userid, getProject(projid).getLanguage(), true);
 
     logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath());
     // TODO : put back trim silence? or is it done somewhere else

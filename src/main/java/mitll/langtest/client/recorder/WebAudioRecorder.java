@@ -32,7 +32,11 @@
 
 package mitll.langtest.client.recorder;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Timer;
+import mitll.hlt.domino.shared.Constants;
 import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
 
@@ -51,7 +55,10 @@ public class WebAudioRecorder {
   private static boolean webAudioMicAvailable;
   private static boolean tried = false;
   private static boolean gotResponse = false;
+  private static boolean USE_STREAMS = true;
+
   private Timer theTimer = null;
+
 
   /**
    * The valid responses to this are : webAudioMicAvailable, webAudioMicNotAvailable, webAudioPermissionDenied
@@ -59,7 +66,7 @@ public class WebAudioRecorder {
    *
    * The user can easily ignore the dialog by clicking away.
    *
-   * @see FlashRecordPanelHeadless#tryWebAudio
+   * @seex FlashRecordPanelHeadless#tryWebAudio
    */
   private void tryWebAudio() {
     if (!tried) {
@@ -107,6 +114,11 @@ public class WebAudioRecorder {
       $wnd.startRecording();
   }-*/;
 
+  /**
+   * @param url
+   * @param exid
+   * @see FlashRecordPanelHeadless#startStream(String, String)
+   */
   public native void startStream(String url, String exid) /*-{
       $wnd.serviceStartStream(url, exid);
   }-*/;
@@ -118,6 +130,9 @@ public class WebAudioRecorder {
       $wnd.stopRecording();
   }-*/;
 
+  /**
+   *
+   */
   public native void doStopStream() /*-{
       $wnd.serviceStopStream();
   }-*/;
@@ -155,7 +170,7 @@ public class WebAudioRecorder {
 
   public static void gotFrame() {
     //  console("silenceDetected -- now!");
-    FlashRecordPanelHeadless.micPermission.gotFrame();
+    FlashRecordPanelHeadless.micPermission.gotStreamResponse();
   }
 
   public static void webAudioMicAvailable() {
@@ -212,12 +227,14 @@ public class WebAudioRecorder {
   }
 
   /**
-   * @param encoded
+   * Called by webaudiorecorder.serviceStartStream or stop
+   * @param json
    * @see #advertise()
    */
-  public static void getStreamResponse(String encoded) {
+  public static void getStreamResponse(String json) {
     //if (encoded.length() < 100) {
-    console("getStreamResponse  = '" + encoded + "'");
+    console("getStreamResponse  = '" + json + "'");
+
     // }
     //   console("getStreamResponse   bytes = '" + encoded.length() + "'");
 
@@ -229,12 +246,31 @@ public class WebAudioRecorder {
     } else {
       // TODO : do something with response -- parse the JSON!
 
-      //WebAudioRecorder.wavCallback.getBase64EncodedWavFile(encoded);
+    WebAudioRecorder.wavCallback.gotStreamResponse(json);
       // WebAudioRecorder.wavCallback = null;
 
-      FlashRecordPanelHeadless.micPermission.gotFrame();
+     // FlashRecordPanelHeadless.micPermission.gotStreamResponse();
     }
   }
+
+
+  /** Digest a json response from a servlet checking for a session expiration code */
+/*  protected static JSONObject digestJsonResponse(String json) {
+    console("Digesting response " + json);
+    try {
+      JSONValue val = JSONParser.parseStrict(json);
+      JSONObject obj = (val != null) ? val.isObject() : null;
+      JSONValue code = obj == null ? null : obj.get(Constants.SESSION_EXPIRED_CODE);
+      if (code != null && code.isBoolean() != null && code.isBoolean().booleanValue()) {
+        getSessionHelper().logoutUserInClient(null, true);
+        return null;
+      } else {
+        return obj;
+      }
+    } catch(Exception ex) {
+      return null;
+    }
+  }*/
 
   /**
    * @see mitll.langtest.client.LangTest#stopRecording(WavCallback)
@@ -243,9 +279,12 @@ public class WebAudioRecorder {
 
   public void stopRecording(WavCallback wavCallback) {
     WebAudioRecorder.wavCallback = wavCallback;
-    //logger.info("got stopRecording ");
-    stopRecording();
+    console("stopRecording ");
 
-  //  doStopStream();
+    if (USE_STREAMS) {
+      doStopStream();
+    } else {
+      stopRecording();
+    }
   }
 }

@@ -153,8 +153,9 @@
             });
         };
 
-        this.serviceStartStream = function (url, exid) {
-            //  currCallback = cb || config.callback;
+        // see webaudiorecorder serviceStartStream
+        this.serviceStartStream = function (url, exid, cb) {
+            currCallback = cb || config.callback;
             // console.log('service.startStream');
             if (url) {
                 console.log('service.startStream url ' + url);
@@ -190,7 +191,17 @@
 
         // get reply from worker
         worker.onmessage = function (e) {
-            currCallback(e.data);
+            if (currCallback) {
+                if (typeof currCallback === 'function') {
+                    currCallback(e.data);
+                }
+                else {
+                    console.log("currCallback not a function")
+                }
+            }
+            else {
+                console.log("currCallback not set - maybe that's ok...?")
+            }
         };
 
         this.getAllZero = function (cb) {

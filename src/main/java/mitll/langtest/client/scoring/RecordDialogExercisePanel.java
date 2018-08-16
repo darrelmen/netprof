@@ -116,10 +116,11 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       iHighlightSegment.clearHighlight();
     });
 
-   maybeShowAlignment(getRegularSpeedIfAvailable(exercise));
+    maybeShowAlignment(getRegularSpeedIfAvailable(exercise));
   }
 
- private long durationInMillis;
+  private long durationInMillis;
+
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
     NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<T>(exercise, controller, sessionManager) {
@@ -127,10 +128,12 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       public void useResult(AudioAnswer result) {
         super.useResult(result);
         alignmentOutput = result.getPretestScore();
-        durationInMillis=result.getDurationInMillis();
-        listenView.addScore(result.getExid(), (float) result.getScore(), RecordDialogExercisePanel.this);
-        listenView.setSmiley(emoticon, result.getScore());
-        logger.info("useResult got for   " + getExID() + " = " + result.getValidity() + " " + result.getScore());
+        durationInMillis = result.getDurationInMillis();
+        double score = result.getScore();
+        listenView.addScore(result.getExid(), (float) score, RecordDialogExercisePanel.this);
+        listenView.setSmiley(emoticon, score);
+
+        logger.info("useResult got for   " + getExID() + " = " + result.getValidity() + " " + score);
         // logger.info("useResult got words " + result.getPretestScore().getWordScores());
       }
 

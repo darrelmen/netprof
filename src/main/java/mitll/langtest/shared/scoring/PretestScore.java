@@ -33,6 +33,7 @@
 package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
@@ -55,9 +56,13 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
   private Map<String, Float> phoneScores;
   private Map<String, Float> wordScores;
   private Map<NetPronImageType, String> sTypeToImage = new HashMap<>();
-  private String recoSentence;
+
+  private transient String recoSentence;
+
   private float wavFileLengthSeconds;
-  private int processDur = 0;
+
+  private transient int processDur = 0;
+
   private String json;
   private transient boolean ranNormally;
   private boolean fullMatch = true;
@@ -110,6 +115,10 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
     return hydecScore;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @return
+   */
   public Map<String, Float> getPhoneScores() {
     return phoneScores;
   }
@@ -126,6 +135,10 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
     return recoSentence;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.ClickableTranscript#getClickedOnSegment
+   * @return
+   */
   public float getWavFileLengthInSeconds() {
     return wavFileLengthSeconds;
   }

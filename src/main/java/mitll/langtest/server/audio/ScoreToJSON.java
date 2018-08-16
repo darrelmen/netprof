@@ -91,6 +91,7 @@ public class ScoreToJSON {
   private static final JSONObject jsonNULL = new JSONObject(true);
 
   /**
+   * @see DecodeAlignOutput#DecodeAlignOutput(PretestScore, boolean)
    * @param pretestScore
    * @return
    */

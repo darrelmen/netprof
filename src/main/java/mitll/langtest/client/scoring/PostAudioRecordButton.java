@@ -33,12 +33,16 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.initial.PopupHelper;
+import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -143,9 +147,20 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     if (duration > MIN_DURATION) {
 //      logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
 
-      controller.stopRecording(this::postAudioFile);
+      controller.stopRecording(new WavCallback() {
+        @Override
+        public void getBase64EncodedWavFile(String bytes) {
+          postAudioFile(bytes);
+        }
 
-   //   controller.stopRecordingAndPost(exerciseID);
+        @Override
+        public void gotStreamResponse(String json) {
+          logger.info("gotStreamResponse " + json);
+          gotResponse(json);
+        }
+      });
+
+      //   controller.stopRecordingAndPost(exerciseID);
 
       return true;
     } else {
@@ -187,6 +202,34 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   protected void gotShortDurationRecording() {
   }
 
+  private void gotResponse(String json) {
+    JSONObject jsonObject = digestJsonResponse(json);
+    logger.info("Got " + jsonObject);
+  }
+
+  /**
+   * Digest a json response from a servlet checking for a session expiration code
+   */
+  protected JSONObject digestJsonResponse(String json) {
+    logger.info("Digesting response " + json);
+    try {
+      JSONValue val = JSONParser.parseStrict(json);
+      JSONObject obj = (val != null) ? val.isObject() : null;
+
+//      JSONValue code = obj == null ? null : obj.get(Constants.SESSION_EXPIRED_CODE);
+//      if (code != null && code.isBoolean() != null && code.isBoolean().booleanValue()) {
+//        getSessionHelper().logoutUserInClient(null, true);
+//        return null;
+//      } else {
+//        return obj;
+//      }
+
+      return obj;
+    } catch (Exception ex) {
+      return null;
+    }
+  }
+
   /**
    * @param base64EncodedWavFile
    * @see #stopRecording
@@ -221,13 +264,12 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
     controller.getAudioService().writeAudioFile(
         base64EncodedWavFile,
-        audioContext,
 
+        audioContext,
         controller.usingFlashRecorder(),
         "browser",
         getDevice(),
-        decoderOptions,
-        new AsyncCallback<AudioAnswer>() {
+        decoderOptions, new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
             onPostFailure(then, user, getExceptionAsString(caught));
             controller.handleNonFatalError("posting audio", caught);

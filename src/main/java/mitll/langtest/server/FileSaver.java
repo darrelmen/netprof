@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import javax.servlet.ServletInputStream;
 import java.io.*;
 
 public class FileSaver {
@@ -18,6 +17,7 @@ public class FileSaver {
    * @param inputStream
    * @param realExID
    * @param userid
+   * @param makeDir
    * @return
    * @throws IOException
    * @see ScoreServlet#getJsonForAudio
@@ -27,14 +27,19 @@ public class FileSaver {
                              InputStream inputStream,
                              int realExID,
                              int userid,
-                             String language)
+                             String language,
+                             boolean makeDir)
       throws IOException {
-    String wavPath = pathHelper.getAbsoluteToAnswer(
-        language,
-        realExID,
-        userid);
-    File saveFile = new File(wavPath);
-    makeFileSaveDir(saveFile);
+
+    File saveFile = new File(
+        pathHelper.getAbsoluteToAnswer(
+            language,
+            realExID,
+            userid));
+
+    if (makeDir) {
+      makeFileSaveDir(saveFile);
+    }
 
     writeToFile(inputStream, saveFile);
 

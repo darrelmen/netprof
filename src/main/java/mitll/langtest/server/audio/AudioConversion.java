@@ -92,8 +92,8 @@ public class AudioConversion extends AudioBase {
    * @param file                     where we want to write the wav file to
    * @param useSensitiveTooLoudCheck
    * @return true if audio is valid (not too short, not silence)
-   * @see AudioFileHelper#writeAudioFile
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
+   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getAlignment
    */
   AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString,
                                                       File file,
@@ -160,6 +160,7 @@ public class AudioConversion extends AudioBase {
   }
 
   /**
+   * TODO: dom't necessarily force us to use a file to do the validity check
    * @param file
    * @param useSensitiveTooLoudCheck
    * @param quietAudioOK
@@ -169,20 +170,6 @@ public class AudioConversion extends AudioBase {
    */
   public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     return audioCheck.isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
-/*    try {
-      if (file.length() < 44) {
-        logger.warn("isValid : audio file " + file.getAbsolutePath() + " length was " + file.length() + " bytes.");
-        return new AudioCheck.ValidityAndDur(AudioAnswer.Validity.TOO_SHORT, 0, false);
-      } else {
-        AudioCheck.ValidityAndDur validityAndDur =
-            useSensitiveTooLoudCheck ? audioCheck.checkWavFileRejectAnyTooLoud(file, quietAudioOK) :
-                audioCheck.checkWavFile(file, quietAudioOK);
-        return validityAndDur;
-      }
-    } catch (Exception e) {
-      logger.error("isValid got " + e, e);
-    }
-    return AudioCheck.INVALID_AUDIO;*/
   }
 
   /**

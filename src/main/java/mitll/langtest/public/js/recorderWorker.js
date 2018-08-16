@@ -90,18 +90,6 @@ function startStream(url, exid) {
     myexid = new String(exid);
 }
 
-/*function testURL() {
-    if (typeof myurl === 'undefined' || myurl === null) {
-        // Do stuff
-        console.log('webaudiorecorder.testURL myurl is undefined in worker ' + id);
-        return false;
-    }
-    else {
-        console.log("webaudiorecorder.testURL myurl = " + myurl + ' in worker ' + id);
-        return true;
-    }
-}*/
-
 function stopStream(type) {
     console.log("stopStream record got " + frameRecLength);
 
@@ -202,11 +190,16 @@ function sendBlob(framesBeforeRound, audioBlob, isLast) {
 
                 var Data = JSON.parse(xhr.responseText);
                 console.log(Data);
+
+                postSomething(xhr.responseText);
+
 //                console.log(Data.MESSAGE);
                 //  console.log('stopRecordingAndPost completed for ' + framesAfterRound);
             }
             else if (this.status != 200) {
-                console.log("got response code : " + this.status);
+                console.log("warning : got response code : " + this.status);
+                var resp = { status : "error", code : this.status};
+                postSomething(JSON.stringify(resp));
             }
         };
         xhr.send(audioBlob);
@@ -223,6 +216,11 @@ function sendBlob(framesBeforeRound, audioBlob, isLast) {
         console.log(vDebug);
         throw e;
     }
+}
+
+// send message to parent...
+function postSomething(something) {
+    this.postMessage(something);
 }
 
 function updateProgress(oEvent) {

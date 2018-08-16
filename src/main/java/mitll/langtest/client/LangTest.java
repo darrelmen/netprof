@@ -787,8 +787,8 @@ public class LangTest implements
       }
 
       @Override
-      public void gotFrame() {
-        if (wavEndCallback != null) wavEndCallback.gotFrame();
+      public void gotStreamResponse() {
+        if (wavEndCallback != null) wavEndCallback.gotStreamResponse();
 
       }
     };

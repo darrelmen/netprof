@@ -40,6 +40,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.initial.PopupHelper;
+import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
@@ -178,7 +179,19 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
     // logger.info("stopRecording : got stop recording " + duration);
     if (duration > MIN_DURATION) {
-      controller.stopRecording(bytes -> postAudioFile(getPanel(), bytes));
+      controller.stopRecording(
+
+          new WavCallback() {
+            @Override
+            public void getBase64EncodedWavFile(String bytes) {
+              postAudioFile(getPanel(), bytes);
+            }
+
+            @Override
+            public void gotStreamResponse(String json) {
+              logger.warning("got stream response... " + json);
+            }
+          });
       return true;
     } else {
       initRecordButton();
@@ -229,11 +242,11 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
         controller.usingFlashRecorder(),
         getDeviceType(),
         getDevice(),
-        decoderOptions,
-        new AsyncCallback<AudioAnswer>() {
+        decoderOptions, new AsyncCallback<AudioAnswer>() {
           public void onFailure(Throwable caught) {
             onPostFailure(caught, then, len);
           }
+
           public void onSuccess(AudioAnswer result) {
             onPostSuccess(result, then, outer, len);
           }
@@ -248,7 +261,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
   protected String getDevice() {
     String browserInfo = controller.getBrowserInfo();
-   // logger.info("GetDevice " + browserInfo);
+    // logger.info("GetDevice " + browserInfo);
     return browserInfo;
   }
 
@@ -335,7 +348,8 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     return recordButton;
   }
 
-  protected void postedAudio() {}
+  protected void postedAudio() {
+  }
 
   /**
    * @param result
