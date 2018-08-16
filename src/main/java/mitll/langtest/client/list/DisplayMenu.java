@@ -21,8 +21,8 @@ import java.util.logging.Logger;
 public class DisplayMenu {
   private final Logger logger = Logger.getLogger("DisplayMenu");
 
-  public static final String SHOW_CM_SIMPLIFIED = "Show CM Simplified";
-  public static final String SHOW_CM_TRADITIONAL = "Show CM Traditional";
+  private static final String SHOW_CM_SIMPLIFIED = "Show CM Simplified";
+  private static final String SHOW_CM_TRADITIONAL = "Show CM Traditional";
 
   private static final String SHOW1 = "Options";
   private static final String DOWNLOAD = "Download Content";

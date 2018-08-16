@@ -507,7 +507,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
               clickableRow.add(iHighlightSegment.asWidget());
             } else hasSpace = true;
           }
-          ;
 
           if (!isRTL) {
             addFloatLeft(highlightSegment);

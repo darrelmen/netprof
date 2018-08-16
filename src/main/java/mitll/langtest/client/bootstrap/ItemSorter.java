@@ -176,7 +176,7 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
   }
 
   private String dropGreater(String item) {
-    if (item.startsWith(PREFIX)) item = item.substring(1, item.length());
+    if (item.startsWith(PREFIX)) item = item.substring(1);
     return item;
   }
 

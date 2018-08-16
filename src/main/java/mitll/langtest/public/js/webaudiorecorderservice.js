@@ -35,10 +35,15 @@
     var WORKER_PATH = 'langtest/js/recorderWorker.js';
 
     window.Recorder = function (source, cfg) {
-//        console.log("making recorder  at " + new Date());
+        console.log("window.Recorder : making recorder at " + new Date());
 
         var config = cfg || {};
         var bufferLen = config.bufferLen || 4096;
+
+        var recording = false,
+            currCallback, start, totalSamples, didStream;
+
+
         this.context = source.context;
         this.node = (this.context.createScriptProcessor ||
             this.context.createJavaScriptNode).call(this.context, bufferLen, 2, 2);
@@ -59,18 +64,34 @@
             }
         });
 
-        var recording = false,
-            currCallback, start, silenceCallback;
 
+        // when audio samples come in, they come in here and passed to the worker
         this.node.onaudioprocess = function (e) {
             if (!recording) return;
+            var mytype = config.type || 'audio/wav';
             worker.postMessage({
                 command: 'record',
                 buffer: [
                     e.inputBuffer.getChannelData(0),
                     e.inputBuffer.getChannelData(1)
-                ]
-            });
+                ],
+                type: mytype
+            })
+            ;
+
+            // var framesBefore = totalSamples / (this.context.sampleRate / 2);
+            // totalSamples += e.inputBuffer.getChannelData(0).length;
+            // var framesAfter = totalSamples / (this.context.sampleRate / 2);
+            // var framesAfterRound = Math.round(framesAfter);
+            // if (framesAfter > framesBefore) {
+            //     console.log("got " + totalSamples + " rate " + this.context.sampleRate +
+            //         " frame " + framesAfter + " rounded " + framesAfterRound);
+            //     //gotFrame();
+            // }
+            // else {
+            //     console.log("2 got " + totalSamples + " frame " + framesAfter);
+            //
+            // }
             analyse();
         };
 
@@ -88,6 +109,7 @@
             //source.start();
             recording = true;
             start = Date.now();
+            totalSamples = 0;
 //      console.log("record " + "  at " + new Date().getTime());
         };
 
@@ -95,6 +117,7 @@
             //    source.disconnect(this.node);
             //    this.node.disconnect(this.context.destination);    //this should not be necessary
             recording = false;
+            // didStream = false;
 //      console.log("stop " + "  at " + new Date().getTime());
         };
 
@@ -122,22 +145,57 @@
         this.exportMonoWAV = function (cb, type) {
             currCallback = cb || config.callback;
             type = type || config.type || 'audio/wav';
-//      console.log("exportMonoWAV " + "  at " + new Date().getTime());
-            if (!currCallback) throw new Error('Callback not set');
+            console.log("exportMonoWAV " + "  at " + new Date().getTime());
+            //  if (!currCallback) throw new Error('Callback not set');
             worker.postMessage({
                 command: 'exportMonoWAV',
                 type: type
             });
         };
 
+        this.serviceStartStream = function (url, exid) {
+            //  currCallback = cb || config.callback;
+            // console.log('service.startStream');
+            if (url) {
+                console.log('service.startStream url ' + url);
+            }
+            else {
+                console.log('service.startStream url undefined');
+            }
+            //  if (!currCallback) throw new Error('Callback not set');
+            didStream = true;
+
+            worker.postMessage({
+                command: 'startStream',
+                url: url,
+                exid: exid
+            });
+        };
+
+        this.serviceStopStream = function (cb) {
+            currCallback = cb || config.callback;
+
+            if (didStream) {
+                didStream = false;
+                currCallback = cb || config.callback;
+                console.log("serviceStopStream " + "  at " + new Date().getTime());
+                if (!currCallback) throw new Error('Callback not set');
+                worker.postMessage({
+                    command: 'stopStream',
+                    type: 'audio/wav'
+                });
+            }
+            else console.log("stopStream - never started.")
+        };
+
+        // get reply from worker
+        worker.onmessage = function (e) {
+            currCallback(e.data);
+        };
+
         this.getAllZero = function (cb) {
             currCallback = cb || config.callback;
             worker.postMessage({command: 'getAllZero'})
-        };
-
-        worker.onmessage = function (e) {
-            var blob = e.data;
-            currCallback(blob);
         };
 
         /**

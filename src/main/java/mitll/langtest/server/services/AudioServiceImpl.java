@@ -47,6 +47,7 @@ import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectHelper;
+import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -56,11 +57,13 @@ import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import net.sf.json.JSONObject;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -69,9 +72,13 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import java.io.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -93,6 +100,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private PathWriter pathWriter;
   private IEnsureAudioHelper ensureAudioHelper;
+
+  private final ConcurrentHashMap<Integer, List<AudioChunk>> sessionToChunks = new ConcurrentHashMap<>();
 
   /**
    * Sanity checks on answers and bestAudio dir
@@ -120,18 +129,18 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   protected void service(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException {
     ServletRequestContext ctx = new ServletRequestContext(request);
-    //  boolean isMultipart = ServletFileUpload.isMultipartContent(ctx);
     String contentType = ctx.getContentType();
-    String requestType = getRequestType(request);
+    //  String requestType = getRequestType(request);
 
-    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
+//    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
     if (contentType.equalsIgnoreCase("application/wav")) {
       reportOnHeaders(request);
 
       try {
-        getJSONForStream(request, ScoreServlet.PostRequest.ALIGN, "", "");
+        JSONObject jsonForStream = getJSONForStream(request, ScoreServlet.PostRequest.ALIGN, "", "");
+        reply(response, jsonForStream);
       } catch (DominoSessionException e) {
-        logger.warn("got " +e,e);
+        logger.warn("got " + e, e);
       }
       logger.debug("service : Request " + request.getQueryString() + " path " + request.getPathInfo());
 //      FileUploadHelper.UploadInfo uploadInfo = db.getProjectManagement().getFileUploadHelper().gotFile(request);
@@ -145,6 +154,20 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
+  private void reply(HttpServletResponse response, JSONObject jsonObject) {
+    reply(response, jsonObject.toString());
+  }
+
+  private void reply(HttpServletResponse response, String x) {
+    try {
+      PrintWriter writer = response.getWriter();
+      writer.println(x);
+      writer.close();
+    } catch (IOException e) {
+      logger.error("got " + e, e);
+
+    }
+  }
 
   private final Set<String> notInteresting = new HashSet<>(Arrays.asList(
       "Accept-Encoding",
@@ -162,7 +185,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     collect.forEach(header -> logger.info("\trequest header " + header + " = " + request.getHeader(header)));
   }
 
-
   private static final String MESSAGE = "message";
   private static final String NO_SESSION = "no session";
 
@@ -170,9 +192,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                       ScoreServlet.PostRequest requestType,
                                       String deviceType,
                                       String device) throws IOException, DominoSessionException {
-    int userIDFromSession=-1;
+    int userIDFromSession = -1;
     try {
-       userIDFromSession = checkSession(request);
+      userIDFromSession = checkSession(request);
     } catch (DominoSessionException dse) {
       logger.info("getJsonForAudio got " + dse);
       JSONObject jsonObject = new JSONObject();
@@ -188,9 +210,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     String postedWordOrPhrase = "";
 
-    //String user = getUser(request);
-
-    logger.info("\n\n\ngetJSONForStream got" +
+    logger.info("getJSONForStream got" +
         "\n\trequest  " + requestType +
         "\n\tprojid   " + projid +
         "\n\texid     " + realExID +
@@ -202,18 +222,157 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int packet = getStreamPacket(request);
     String state = getHeader(request, ScoreServlet.HeaderValue.STREAMSTATE);
 
-    logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
-    File saveFile = new FileSaver().writeAudioFile(pathHelper,
-        request.getInputStream(), realExID, userIDFromSession, getProject(projid).getLanguage());
+    byte[] targetArray = IOUtils.toByteArray(request.getInputStream());
+    AudioChunk newChunk = new AudioChunk(packet, targetArray);
 
-     logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
-    return new JSONObject();
+    // little state machine - START - new buffering, STREAM concat or append, END write file and score
+    if (state.equalsIgnoreCase("START")) {
+      List<AudioChunk> chunks = new CopyOnWriteArrayList<>();
+      sessionToChunks.put(session, chunks);
+      chunks.add(newChunk);
+    } else if (state.equalsIgnoreCase("STREAM")) {
+      List<AudioChunk> audioChunks = sessionToChunks.get(session);
+    /*  if (audioChunks.size() == 1) {
+        AudioChunk audioChunk = audioChunks.get(0);
+        if (audioChunk.getPacket()== packet-1) {
+          AudioChunk combined = newChunk.concat(audioChunk);
+          if (combined == null) logger.error("huh? can't combine???");
+          else {
+            audioChunks.remove(0);
+          }
+        }
+      }*/
+      audioChunks.add(newChunk);
+    } else {  // STOP
+      List<AudioChunk> audioChunks = sessionToChunks.remove(session);
+      audioChunks.add(newChunk);
+
+      long then=System.currentTimeMillis();
+      logger.info("Stop - combine " + audioChunks.size());
+
+      AudioChunk combined = audioChunks.get(0);
+  //    logger.info("Stop - combine " + combined);
+
+      for (int i = 1; i < audioChunks.size(); i++) {
+        AudioChunk next = audioChunks.get(i);
+  //      logger.info("\tStop - 1 combine " + combined);
+   //     logger.info("\tStop - next " + next);
+
+        combined = combined.concat(next);
+  //      logger.info("\tStop - 2 combine " + combined);
+
+      }
+      long now=System.currentTimeMillis();
+
+         logger.info("Stop - finally combine " + combined + " in " + (now-then));
+
+      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(combined.getWavFile());
+      logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
+      File saveFile = new FileSaver().writeAudioFile(pathHelper,
+          byteArrayInputStream, realExID, userIDFromSession, getProject(projid).getLanguage());
+
+      logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
+    }
+    // so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
+    // otherwise, we'll have to make a list and combine them...
+
+//    logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
+//    File saveFile = new FileSaver().writeAudioFile(pathHelper,
+//        request.getInputStream(), realExID, userIDFromSession, getProject(projid).getLanguage());
+
+    //  logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("MESSAGE", "OK");
+    return jsonObject;
     // File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
+  }
+
+  private static class AudioChunk implements Comparable<AudioChunk> {
+    private int packet;
+    private boolean combined;
+    private byte[] wavFile;
+
+    AudioChunk(int packet, byte[] wavFile) {
+      this.packet = packet;
+      this.wavFile = wavFile;
+    }
+
+    AudioChunk(int packet, boolean combined, byte[] wavFile) {
+      this.packet = packet;
+      this.combined = combined;
+      this.wavFile = wavFile;
+    }
+
+    AudioChunk concat(AudioChunk other) {
+      try {
+        AudioInputStream clip1 = AudioSystem.getAudioInputStream(new ByteArrayInputStream(wavFile));
+        AudioInputStream clip2 = AudioSystem.getAudioInputStream(new ByteArrayInputStream(other.wavFile));
+
+        AudioInputStream appendedFiles =
+            new AudioInputStream(
+                new SequenceInputStream(clip1, clip2),
+                clip1.getFormat(),
+                clip1.getFrameLength() + clip2.getFrameLength());
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        AudioSystem.write(appendedFiles,
+            AudioFileFormat.Type.WAVE,
+            byteArrayOutputStream);
+
+        return new AudioChunk(packet, true, byteArrayOutputStream.toByteArray());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      return null;
+    }
+
+    @Override
+    public int compareTo(@NotNull AudioChunk o) {
+      return Integer.compare(packet, o.packet);
+    }
+
+    public int getPacket() {
+      return packet;
+    }
+
+    public boolean isCombined() {
+      return combined;
+    }
+
+    byte[] getWavFile() {
+      return wavFile;
+    }
+
+    public String toString() {
+      return "packet " + packet + " combined " + combined + " len " + wavFile.length;
+    }
+  }
+
+  private void combine() {
+    String wavFile1 = "D:\\wav1.wav";
+    String wavFile2 = "D:\\wav2.wav";
+
+    try {
+      AudioInputStream clip1 = AudioSystem.getAudioInputStream(new File(wavFile1));
+      AudioInputStream clip2 = AudioSystem.getAudioInputStream(new File(wavFile2));
+
+      AudioInputStream appendedFiles =
+          new AudioInputStream(
+              new SequenceInputStream(clip1, clip2),
+              clip1.getFormat(),
+              clip1.getFrameLength() + clip2.getFrameLength());
+
+      AudioSystem.write(appendedFiles,
+          AudioFileFormat.Type.WAVE,
+          new File("D:\\wavAppended.wav"));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   private int checkSession(HttpServletRequest request) throws DominoSessionException {
     int userIDFromSession = securityManager.getUserIDFromSessionLight(request);
-    logger.info("checkSession user id from session is " + userIDFromSession);
+//    logger.info("checkSession user id from session is " + userIDFromSession);
     return userIDFromSession;
   }
 

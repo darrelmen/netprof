@@ -293,6 +293,7 @@ public class LangTest implements
   private MessageHelper messageHelper;
   private AnnotationHelper annotationHelper;
   private boolean hasNetworkProblem;
+  private WavEndCallback wavEndCallback;
 
   /**
    * This gets called first.
@@ -476,7 +477,7 @@ public class LangTest implements
       audioService.setServiceEntryPoint(moduleBaseURL + "/" + host);
       logger.info("adjustEntryPoint createHostSpecificServices service now at " + audioService.getServiceEntryPoint());
     } else {
-     // logger.info("adjustEntryPoint createHostSpecificServices service is at " + audioService.getServiceEntryPoint());
+      // logger.info("adjustEntryPoint createHostSpecificServices service is at " + audioService.getServiceEntryPoint());
     }
   }
 
@@ -595,7 +596,7 @@ public class LangTest implements
 
             public void onSuccess(ImageResponse result) {
               imageCache.put(key, result);
-           //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
+              //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
               client.onSuccess(result);
             }
           });
@@ -736,7 +737,7 @@ public class LangTest implements
        * @see mitll.langtest.client.recorder.WebAudioRecorder
        */
       public void gotPermission() {
-        logger.info("makeFlashContainer - got permission!");
+//        logger.info("makeFlashContainer - got permission!");
         hideFlash();
         checkLogin();
       }
@@ -777,9 +778,18 @@ public class LangTest implements
         flashRecordPanel.initFlash();
       }
 
+      /**
+       * @see WebAudioRecorder#silenceDetected
+       */
       @Override
       public void silenceDetected() {
         if (wavEndCallback != null) wavEndCallback.silenceDetected();
+      }
+
+      @Override
+      public void gotFrame() {
+        if (wavEndCallback != null) wavEndCallback.gotFrame();
+
       }
     };
     flashRecordPanel = new FlashRecordPanelHeadless(micPermission);
@@ -1168,9 +1178,17 @@ public class LangTest implements
    * @see PostAudioRecordButton#startRecording()
    */
   public void startRecording() {
-
     flashRecordPanel.recordOnClick();
   }
+
+  public void startStream(int exid) {
+    AudioServiceAsync audioService = getAudioService();
+    String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
+
+    logger.info("startStream " + serviceEntryPoint + " exid " + exid);
+    flashRecordPanel.startStream(serviceEntryPoint, "" + exid);
+  }
+
 
   /**
    * Recording interface
@@ -1185,16 +1203,15 @@ public class LangTest implements
   }
 
   /**
-   * @see PostAudioRecordButton#stopRecording(long)
    * @param exid
+   * @see PostAudioRecordButton#stopRecording(long)
    */
   public void stopRecordingAndPost(int exid) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
-    flashRecordPanel.stopRecordingAndPost(serviceEntryPoint, ""+exid);
+    flashRecordPanel.stopRecordingAndPost(serviceEntryPoint, "" + exid);
   }
 
-  private WavEndCallback wavEndCallback;
 
   /**
    * Recording interface

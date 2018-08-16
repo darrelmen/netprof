@@ -399,7 +399,6 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     return path;
   }
 
-  @Nullable
   private String getReadyToPlayAudio(String path) {
     path = getPath(path);
     if (DEBUG) logger.info("getReadyToPlayAudio : " + getElement().getId() + " getImagesForPath " + path);

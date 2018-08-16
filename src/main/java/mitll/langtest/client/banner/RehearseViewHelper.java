@@ -16,6 +16,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.SessionStorage;
+import mitll.langtest.client.initial.WavEndCallback;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.client.scoring.ScoreProgressBar;
@@ -66,7 +67,17 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   RehearseViewHelper(ExerciseController controller, IViewContaner viewContainer, INavigation.VIEWS myView) {
     super(controller, viewContainer, myView);
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
-    controller.registerStopDetected(this::silenceDetected);
+    controller.registerStopDetected(new WavEndCallback() {
+      @Override
+      public void silenceDetected() {
+        mySilenceDetected();
+      }
+
+      @Override
+      public void gotFrame() {
+        myGotFrame();
+      }
+    });
   }
 
   /**
@@ -244,7 +255,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     progressBar.setVisible(false);
   }
 
-  private void silenceDetected() {
+  private void mySilenceDetected() {
     //  logger.info("silenceDetected got silence");
     for (T recordDialogExercisePanel : bothTurns) {
       if (recordDialogExercisePanel.isRecording()) {
@@ -262,6 +273,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         break;
       }
     }
+  }
+
+  int count=0;
+  private void myGotFrame() {
+    logger.info("got frame "+(count++));
   }
 
   /**

@@ -95,10 +95,12 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     if (transcriptSegmentIHighlightSegmentTreeMap != null) {
       transcriptSegmentIHighlightSegmentTreeMap.forEach((k, v) -> {
         String color = SimpleColumnChart.getColor(k.getScore());
+/*
 
         logger.info("word '" + k.getDisplayEvent() +
             "' or '" + k.getEvent() +
             "' = " + k.getScore() + " = " + color);
+*/
 
         v.setHighlightColor(color);
         v.showHighlight();

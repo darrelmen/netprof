@@ -40,6 +40,8 @@ var rememberedInput;
 var allZero;
 var mics = {};
 
+var start = new Date().getTime();
+
 // called from initWebAudio
 function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
@@ -68,15 +70,14 @@ function onVisibilityChange() {
     }
 }
 
-var start = new Date().getTime();
-
 // fix for bug where chrome prevents recording unless calls resume first
 // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
 function startRecording() {
     audio_context && audio_context.resume();
     recorder && recorder.clear();
     recorder && recorder.record();
-    //    __log('Start Recording. ' + recorder);
+
+    __log('webaudiorecorder.startRecording Start Recording. ');
 }
 
 // called from FlashRecordPanelHeadless.stopRecording
@@ -84,11 +85,25 @@ function stopRecording() {
     recorder && recorder.stop();
     // audio_context && audio_context.suspend();
 
-    // __log('Stop Recording.');
+    __log('Stop Recording.');
     //   var end = new Date().getTime();
     //  __log("duration " + (end-start));
     // get WAV from audio data blob
     grabWav();
+}
+
+function serviceStopStream() {
+    recorder && recorder.serviceStopStream(function (blob) {
+        __log('getStreamResponse.');
+        getStreamResponse(blob);
+    });
+}
+
+function serviceStartStream(url, exid) {
+    //__log('webaudiorecorder.startStream ');
+    __log('\n\n\nwebaudiorecorder.startStream calling recorder');
+
+    recorder && recorder.serviceStartStream(url, exid);
 }
 
 function stopRecordingAndPost(url, exid) {
@@ -101,8 +116,8 @@ function stopRecordingAndPost(url, exid) {
             xhr.setRequestHeader("Content-Type", "application/wav");
             xhr.setRequestHeader("EXERCISE", exid);
 
-            xhr.onreadystatechange = function() {//Call a function when the state changes.
-                if(this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+            xhr.onreadystatechange = function () {//Call a function when the state changes.
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
                     // Request finished. Do processing here.
 
                     __log('stopRecordingAndPost completed');
@@ -121,24 +136,8 @@ function stopRecordingAndPost(url, exid) {
             throw e;
         }
     });
-
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", url, true);
-
-//Send the proper header information along with the request
-    xhr.setRequestHeader("Content-Type", "application/wav");
-
-    xhr.onreadystatechange = function() {//Call a function when the state changes.
-        if(this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-            // Request finished. Do processing here.
-
-            __log('stopRecordingAndPost completed');
-        }
-    }
-  //  xhr.send("foo=bar&lorem=ipsum");
-// xhr.send(new Blob());
 }
+
 function uint6ToB64(nUint6) {
 
     return nUint6 < 26 ?
@@ -188,7 +187,7 @@ function grabWav() {
     recorder && recorder.exportMonoWAV(function (blob) {
         try {
             var reader = new FileReader();
-            //      __log("grabWav");
+            __log("grabWav");
 
             var arrayBuffer;
             reader.onloadend = function () {
@@ -196,7 +195,7 @@ function grabWav() {
 
                 var myArray = new Uint8Array(arrayBuffer);
 
-                //        __log("grabWav onloadend " + myArray.length);
+                __log("grabWav onloadend " + myArray.length);
 
                 var bytes = bytesToBase64(myArray);
                 getBase64(bytes);
@@ -267,11 +266,11 @@ function initWebAudio() {
                     function (e) {
                         __log('initWebAudio (old) No live audio input: ' + e);
                         __log('initWebAudio (old) error: ' + e.name);
-                    if (e.name.startsWith("NotAllowedError")) {
-                        webAudioPermissionDenied();
-                    }
-                    webAudioMicNotAvailable();
-                });
+                        if (e.name.startsWith("NotAllowedError")) {
+                            webAudioPermissionDenied();
+                        }
+                        webAudioMicNotAvailable();
+                    });
             }
             else {
                 __log('initWebAudio getMedia null - no mic.');

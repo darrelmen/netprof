@@ -183,13 +183,8 @@ public class ResultTypeAhead {
       //  logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
 
       // NOTE : we need both a redraw on key up and one on selection!
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        public void execute() {
-          //       logger.info("--> getUpdaterCallback onSelection REDRAW ");
-          redraw();
-        }
-      });
-
+      //       logger.info("--> getUpdaterCallback onSelection REDRAW ");
+      Scheduler.get().scheduleDeferred(this::redraw);
       return replacementString;
     };
   }

@@ -167,7 +167,10 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     return webAudio.tryWebAudio();
   }*/
 
-  public static WebAudioRecorder getWebAudio() { return webAudio; }
+  public static WebAudioRecorder getWebAudio() {
+    return webAudio;
+  }
+
   /**
    * @return
    * @see UserMenu#getAbout
@@ -187,11 +190,27 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }
   }
 
+  public void startStream(String url, String exid) {
+    if (usingWebRTC()) {
+      logger.info("startStream post" +
+          "\n\tto  " + url +
+          "\n\tfor " + exid);
+      webAudio.startStream(url, exid);
+    } else if (usingFlash()) {
+      //flashRecordOnClick();
+      logger.warning("no stream with flash!!!!\\n\n");
+    }
+  }
+
+  /**
+   * @param wavCallback
+   * @see #stopWebRTCRecordingLater(WavCallback)
+   */
   private void stopWebRTCRecording(WavCallback wavCallback) {
     webAudio.stopRecording(wavCallback);
   }
 
-  public void stopRecordingAndPost(String url, String exid){
+  public void stopRecordingAndPost(String url, String exid) {
     webAudio.stopRecordingAndPost(url, exid);
   }
 
@@ -348,14 +367,14 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   private void stopWebRTCRecordingLater(final WavCallback wavCallback) {
-    //final long then = System.currentTimeMillis();
+    final long then = System.currentTimeMillis();
     //logger.info("stopWebRTCRecordingLater - initial ");
 
     Timer t = new Timer() {
       @Override
       public void run() {
-    //    long now = System.currentTimeMillis();
-      //  logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then));
+        long now = System.currentTimeMillis();
+        logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then));
         stopWebRTCRecording(wavCallback);
       }
     };
@@ -363,14 +382,14 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   private void stopFlashRecording(final WavCallback wavCallback) {
-   // final long then = System.currentTimeMillis();
+    // final long then = System.currentTimeMillis();
     logger.info("stopFlashRecording - initial ");
 
     Timer t = new Timer() {
       @Override
       public void run() {
-      //  long now = System.currentTimeMillis();
-      //  logger.info("stopFlashRecording timer at " + now + " diff " + (now - then));
+        //  long now = System.currentTimeMillis();
+        //  logger.info("stopFlashRecording timer at " + now + " diff " + (now - then));
         flashStopRecording();
         wavCallback.getBase64EncodedWavFile(flashGetWav());
       }

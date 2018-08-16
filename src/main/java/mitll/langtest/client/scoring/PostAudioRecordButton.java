@@ -129,7 +129,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   public void startRecording() {
     LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
+
+    logger.info("startRecording!");
     controller.startRecording();
+    controller.startStream(getExerciseID());
   }
 
   /**

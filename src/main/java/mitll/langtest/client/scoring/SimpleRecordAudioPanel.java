@@ -57,12 +57,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
   SimpleRecordAudioPanel(ExerciseController controller,
                          T exercise,
                          ListInterface<?, ?> listContainer, boolean addPlayer) {
-    super(exercise, controller, new SessionManager() {
-      @Override
-      public String getSession() {
-        return null;
-      }
-    });
+    super(exercise, controller, () -> null);
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;
     getElement().setId("SimpleRecordAudioPanel_" +exercise.getID());

@@ -362,7 +362,7 @@ public class DownloadHelper implements IShowStatus {
     if ((!(baseUrl.endsWith("/")) && (!(relativeLoc.startsWith("/"))))) {
       dominoUrl.append(baseUrl + "/");
     } else if (baseUrl.endsWith("/") && relativeLoc.startsWith("/")) {
-      dominoUrl.append(baseUrl.substring(0, baseUrl.length() - 1)); // remove extra slash
+      dominoUrl.append(baseUrl, 0, baseUrl.length() - 1); // remove extra slash
     } else {
       dominoUrl.append(baseUrl);
     }

@@ -277,7 +277,6 @@ public class UserListSupport {
         token +
         (hasProject ? "" : getProjectParam()) +
         (hasInstance ? "" : getInstance(false));
-    ;
 
     String encode = s.replaceAll("\\s", "+");//URL.encode(s);
 

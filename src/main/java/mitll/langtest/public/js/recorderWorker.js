@@ -33,7 +33,16 @@
 var recLength = 0,
     recBuffersL = [],
     recBuffersR = [],
-    sampleRate, allZero;
+    sampleRate,
+    allZero;
+
+var myurl;
+var myexid;
+
+var frameRecLength = 0;
+var frameRecBuffersL = [];
+var id = new Date().getTime();
+var session = new Date().getTime();
 
 var fixedSampleRate = 16000;
 var doDownsample = true;
@@ -44,7 +53,7 @@ this.onmessage = function (e) {
             init(e.data.config);
             break;
         case 'record':
-            record(e.data.buffer);
+            record(e.data.buffer, e.data.type);
             break;
         case 'exportWAV':
             exportWAV(e.data.type);
@@ -61,6 +70,13 @@ this.onmessage = function (e) {
         case 'clear':
             clear();
             break;
+        case 'startStream':
+            startStream(e.data.url, e.data.exid);
+            break;
+        case 'stopStream':
+            stopStream(e.data.type);
+            break;
+        // todo : consider default error log
     }
 };
 
@@ -68,10 +84,167 @@ function init(config) {
     sampleRate = config.sampleRate;
 }
 
-function record(inputBuffer) {
+function startStream(url, exid) {
+    console.log("worker.startStream ");
+    myurl = new String(url);
+    myexid = new String(exid);
+}
+
+/*function testURL() {
+    if (typeof myurl === 'undefined' || myurl === null) {
+        // Do stuff
+        console.log('webaudiorecorder.testURL myurl is undefined in worker ' + id);
+        return false;
+    }
+    else {
+        console.log("webaudiorecorder.testURL myurl = " + myurl + ' in worker ' + id);
+        return true;
+    }
+}*/
+
+function stopStream(type) {
+    console.log("stopStream record got " + frameRecLength);
+
+    var bufferL = mergeBuffers(frameRecBuffersL, frameRecLength);
+    var audioBlob = getAudioBlob(bufferL, type);
+
+    // OK - got the blob, clear backing buffer
+    frameRecBuffersL = [];
+    frameRecLength = 0;
+
+    var framesBefore = recLength / (sampleRate / 2);
+    var framesBeforeRound = Math.round(framesBefore);
+
+    sendBlob(framesBeforeRound, audioBlob, true);
+}
+
+function record(inputBuffer, type) {
+    // every half second, send a blob
+    var framesBefore = recLength / (sampleRate / 2);
+    var framesBeforeRound = Math.round(framesBefore);
+
     recBuffersL.push(inputBuffer[0]);
     recBuffersR.push(inputBuffer[1]);
     recLength += inputBuffer[0].length;
+
+    frameRecBuffersL.push(inputBuffer[0]);
+    frameRecLength += inputBuffer[0].length;
+
+    var framesAfter = recLength / (sampleRate / 2);
+    var framesAfterRound = Math.round(framesAfter);
+
+    if (framesAfterRound > framesBeforeRound) {
+        console.log(
+            "worker.record send blob - got " + frameRecLength +
+            " rate " + sampleRate +
+            " frame " + framesAfter +
+            " rounded " + framesAfterRound);
+
+        var bufferL = mergeBuffers(frameRecBuffersL, frameRecLength);
+        var audioBlob = getAudioBlob(bufferL, type);
+
+        // OK - got the blob, clear backing buffer
+        frameRecBuffersL = [];
+        frameRecLength = 0;
+
+        sendBlob(framesBeforeRound, audioBlob, false);
+    }
+    else {
+        // console.log("worker.record 2 got " + recLength + " frame " + framesAfterRound +
+        //     " type " + type + " url " + myurl + " exid " + myexid);
+    }
+}
+
+//
+// function sendFrame(type, isLast) {
+//     var bufferL = mergeBuffers(frameRecBuffersL, frameRecLength);
+//     var audioBlob = getAudioBlob(bufferL, type);
+//
+//     // OK - got the blob, clear backing buffer
+//     frameRecBuffersL = [];
+//     frameRecLength = 0;
+//
+//     sendBlob(framesBeforeRound, audioBlob, isLast);
+// }
+
+function sendBlob(framesBeforeRound, audioBlob, isLast) {
+//    console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "'");
+
+    try {
+        var xhr = new XMLHttpRequest();
+
+        xhr.addEventListener("progress", updateProgress);
+        xhr.addEventListener("load", transferComplete);
+        xhr.addEventListener("error", transferFailed);
+        xhr.addEventListener("abort", transferCanceled);
+
+        xhr.open("POST", myurl, true);
+
+//Send the proper header information along with the request
+        xhr.setRequestHeader("Content-Type", "application/wav");
+        xhr.setRequestHeader("EXERCISE", myexid);
+        if (framesBeforeRound === 0) {
+            xhr.setRequestHeader("STREAMSTATE", "START");
+        }
+        else if (isLast) {
+            xhr.setRequestHeader("STREAMSTATE", "END");
+        }
+        else {
+            xhr.setRequestHeader("STREAMSTATE", "STREAM");
+        }
+        xhr.setRequestHeader("STREAMSESSION", session);
+        xhr.setRequestHeader("STREAMSPACKET", framesBeforeRound);
+
+        xhr.onreadystatechange = function () {//Call a function when the state changes.
+            if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                // Request finished. Do processing here.
+                console.log("got response " + xhr.responseText.length);
+
+                var Data = JSON.parse(xhr.responseText);
+                console.log(Data);
+//                console.log(Data.MESSAGE);
+                //  console.log('stopRecordingAndPost completed for ' + framesAfterRound);
+            }
+            else if (this.status != 200) {
+                console.log("got response code : " + this.status);
+            }
+        };
+        xhr.send(audioBlob);
+
+        // todo : read result!
+    } catch (e) {
+        console.log('got exception - Bad call to blob');
+
+        var vDebug = "";
+        for (var prop in e) {
+            vDebug += "property: " + prop + " value: [" + e[prop] + "]\n";
+        }
+        vDebug += "toString(): " + " value: [" + e.toString() + "]";
+        console.log(vDebug);
+        throw e;
+    }
+}
+
+function updateProgress(oEvent) {
+    if (oEvent.lengthComputable) {
+        var percentComplete = oEvent.loaded / oEvent.total * 100;
+     //   console.log("updateProgress " + oEvent.loaded + "/" + oEvent.total + " " + percentComplete);
+    } else {
+        //   console.log("updateProgress size unknown");
+        // Unable to compute progress information since the total size is unknown
+    }
+}
+
+function transferComplete(evt) {
+  //  console.log("The transfer is complete.");
+}
+
+function transferFailed(evt) {
+    console.log("An error occurred while transferring the file.");
+}
+
+function transferCanceled(evt) {
+    console.log("The transfer has been canceled by the user.");
 }
 
 function exportWAV(type) {
@@ -84,14 +257,7 @@ function exportWAV(type) {
     this.postMessage(audioBlob);
 }
 
-/**
- * Allow downsampling the buffer to 16K.
- * true by default
- * @param type
- */
-function exportMonoWAV(type) {
-    var bufferL = mergeBuffers(recBuffersL, recLength);
-
+function getAudioBlob(bufferL, type) {
     var sampleRateToUse = sampleRate;
     var toUse = bufferL;
 
@@ -101,9 +267,22 @@ function exportMonoWAV(type) {
     }
 
     var dataview = encodeWAV(toUse, true, sampleRateToUse);
-    var audioBlob = new Blob([dataview], {type: type});
+    return new Blob([dataview], {type: type});
+}
 
+function exportBuffer(bufferL, type) {
+    var audioBlob = getAudioBlob(bufferL, type);
     this.postMessage(audioBlob);
+}
+
+/**
+ * Allow downsampling the buffer to 16K.
+ * true by default
+ * @param type
+ */
+function exportMonoWAV(type) {
+    var bufferL = mergeBuffers(recBuffersL, recLength);
+    exportBuffer(bufferL, type);
 }
 
 function getBuffers() {
@@ -117,6 +296,12 @@ function clear() {
     recLength = 0;
     recBuffersL = [];
     recBuffersR = [];
+
+    frameRecLength = 0;
+    frameRecBuffersL = [];
+//    console.log("clear - session before " + session);
+    session = new Date().getTime();
+    console.log("clear - session after  " + session);
 }
 
 function getAllZero() {
@@ -170,7 +355,7 @@ function writeString(view, offset, string) {
  * @param buffer
  * @param bufferSampleRate of the input buffer
  * @param sampleRate
- * @returns {*}
+ * @returns Float32Array
  */
 function downsampleBuffer(buffer, bufferSampleRate, sampleRate) {
     if (bufferSampleRate === sampleRate) {
@@ -236,4 +421,36 @@ function encodeWAV(samples, mono, sampleRateToUse) {
     floatTo16BitPCM(view, 44, samples);
 
     return view;
+}
+
+function stopRecordingAndPost(url, exid) {
+    exportMonoWAV(function (blob) {
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url, true);
+
+//Send the proper header information along with the request
+            xhr.setRequestHeader("Content-Type", "application/wav");
+            xhr.setRequestHeader("EXERCISE", exid);
+
+            xhr.onreadystatechange = function () {//Call a function when the state changes.
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    // Request finished. Do processing here.
+
+                    console.log('stopRecordingAndPost completed');
+                }
+            };
+            xhr.send(blob);
+        } catch (e) {
+            console.log('Bad call to blob');
+
+            var vDebug = "";
+            for (var prop in e) {
+                vDebug += "property: " + prop + " value: [" + e[prop] + "]\n";
+            }
+            vDebug += "toString(): " + " value: [" + e.toString() + "]";
+            console.log(vDebug);
+            throw e;
+        }
+    });
 }

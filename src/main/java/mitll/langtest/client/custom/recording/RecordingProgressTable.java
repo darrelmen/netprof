@@ -82,7 +82,7 @@ public class RecordingProgressTable extends FlexTable {
     // fourth col
     setLabelAndVal(result, total, r, col, TOTAL, "total", false);
 
-    labels = Arrays.<String>asList("Female ", REGULAR, SLOW);
+    labels = Arrays.asList("Female ", REGULAR, SLOW);
     keys = Arrays.asList(FEMALE, FEMALE_FAST, FEMALE_SLOW);
     r++;
     addCols(result, total, r, 0, labels, keys);
@@ -91,14 +91,14 @@ public class RecordingProgressTable extends FlexTable {
     float ctotal = result.get(BaseAudioDAO.TOTAL_CONTEXT);
 
     //labels = Arrays.<String>asList("Context Male ", "Female");
-    labels = Arrays.<String>asList("Context Male ", REGULAR, SLOW);
+    labels = Arrays.asList("Context Male ", REGULAR, SLOW);
     keys   = Arrays.asList(BaseAudioDAO.CMALE, BaseAudioDAO.CMALE_FAST, BaseAudioDAO.CMALE_SLOW);
 
     r++;
     col = addCols(result, ctotal, r, 0, labels, keys);
     setLabelAndVal(result, total, r, col, TOTAL, BaseAudioDAO.TOTAL_CONTEXT, false);
 
-    labels = Arrays.<String>asList("Context Female ", REGULAR, SLOW);
+    labels = Arrays.asList("Context Female ", REGULAR, SLOW);
     keys   = Arrays.asList(BaseAudioDAO.CFEMALE, BaseAudioDAO.CFEMALE_FAST, BaseAudioDAO.CFEMALE_SLOW);
 
     r++;

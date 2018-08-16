@@ -79,9 +79,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     //   logger.info("made choice panel for " + exercise.getID());
 // TODO : don't do this - leaves pointers to dead components unless removed...
 
-    LangTest.EVENT_BUS.addHandler(AudioSelectedEvent.TYPE, authenticationEvent -> {
-      gotAudioSelected(authenticationEvent.getExid());
-    });
+    LangTest.EVENT_BUS.addHandler(AudioSelectedEvent.TYPE, authenticationEvent -> gotAudioSelected(authenticationEvent.getExid()));
   }
 
   /**

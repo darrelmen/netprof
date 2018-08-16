@@ -23,8 +23,11 @@ public class FileSaver {
    * @see ScoreServlet#getJsonForAudio
    */
   @NotNull
-  public File writeAudioFile(PathHelper pathHelper, ServletInputStream inputStream,  int realExID, int userid,
-                              String language)
+  public File writeAudioFile(PathHelper pathHelper,
+                             InputStream inputStream,
+                             int realExID,
+                             int userid,
+                             String language)
       throws IOException {
     String wavPath = pathHelper.getAbsoluteToAnswer(
         language,

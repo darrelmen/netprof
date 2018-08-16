@@ -308,7 +308,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     List<VIEWS> toShow = isPoly ? POLY_VIEWS : STANDARD_VIEWS;
 
-    logger.info("addChoicesForUser " + toShow.size());
+  //  logger.info("addChoicesForUser " + toShow.size());
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
       choice1.getElement().setId("Link_" + choice.name());

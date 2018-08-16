@@ -248,7 +248,7 @@ public class HTTPClient {
       logger.info("no header fields for cookie, got " + httpConn.getHeaderFields());
       return null;
     } else {
-      for (String s : strings) logger.info("cookie receive " + s);
+      //for (String s : strings) logger.info("cookie receive " + s);
       return (strings.isEmpty() ? null : strings.iterator().next());
     }
   }

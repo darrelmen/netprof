@@ -1207,7 +1207,9 @@ public class AudioFileHelper implements AlignDecode {
       httpClient.addRequestProperty(USERID.toString(), TEST_USER);
       httpClient.addRequestProperty(PASS.toString(), TEST_PASSWORD);
       String json = httpClient.sendAndReceiveCookie("");
-      logger.info("getSession response " + json);
+
+//      logger.info("getSession response " + json);
+
       return json;
     } catch (IOException e) {
       logger.warn("Got " + e, e);

@@ -98,12 +98,7 @@ public class PopupContainerFactory {
     Button ok = new Button("OK");
     ok.setType(ButtonType.PRIMARY);
     ok.addStyleName("leftTenMargin");
-    ok.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        commentPopup.hide();
-      }
-    });
+    ok.addClickHandler(event -> commentPopup.hide());
     if (clickHandler != null) {
       ok.addClickHandler(clickHandler);
     }
@@ -125,12 +120,7 @@ public class PopupContainerFactory {
                             final TextBox textEntry,
                             final Tooltip tooltip) {
     //  logger.info("configurePopupButton for " + textEntry.getElement().getId());
-    popupButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        showOrHideRelative(popup, popupButton, textEntry, tooltip);
-      }
-    });
+    popupButton.addClickHandler(event -> showOrHideRelative(popup, popupButton, textEntry, tooltip));
   }
 
   public void showOrHideRelative(PopupPanel popup, UIObject popupButton, TextBox textEntry, Tooltip tooltip) {
@@ -145,11 +135,7 @@ public class PopupContainerFactory {
       popup.showRelativeTo(popupButton);
 //          textEntry.setFocus(true);
 
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        public void execute() {
-          textEntry.setFocus(true);
-        }
-      });
+      Scheduler.get().scheduleDeferred(() -> textEntry.setFocus(true));
 
      if (tooltip != null) tooltip.hide();
     }
@@ -185,14 +171,11 @@ public class PopupContainerFactory {
    */
   public static class HidePopupTextBox extends TextBox {
     void configure(final PopupPanel popup) {
-      addKeyPressHandler(new KeyPressHandler() {
-        @Override
-        public void onKeyPress(KeyPressEvent event) {
-          int keyCode = event.getNativeEvent().getKeyCode();
-          if (keyCode == KeyCodes.KEY_ENTER) {
-            popup.hide();
-            onEnter();
-          }
+      addKeyPressHandler(event -> {
+        int keyCode = event.getNativeEvent().getKeyCode();
+        if (keyCode == KeyCodes.KEY_ENTER) {
+          popup.hide();
+          onEnter();
         }
       });
     }

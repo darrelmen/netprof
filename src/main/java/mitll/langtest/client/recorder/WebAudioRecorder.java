@@ -61,7 +61,7 @@ public class WebAudioRecorder {
    *
    * @see FlashRecordPanelHeadless#tryWebAudio
    */
-  public boolean tryWebAudio() {
+  private void tryWebAudio() {
     if (!tried) {
       tried = true;
       //attempts--;
@@ -80,9 +80,7 @@ public class WebAudioRecorder {
         }
       };
       theTimer.schedule(DELAY_MILLIS);
-      return true;
     } else {
-      return false;
     }
   }
 
@@ -102,14 +100,26 @@ public class WebAudioRecorder {
       $wnd.webAudioMicNotAvailable = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioMicNotAvailable());
       $wnd.webAudioPermissionDenied = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioPermissionDenied());
       $wnd.getBase64 = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::getBase64(Ljava/lang/String;));
+      $wnd.getStreamResponse = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::getStreamResponse(Ljava/lang/String;));
   }-*/;
 
   public native void startRecording() /*-{
       $wnd.startRecording();
   }-*/;
 
+  public native void startStream(String url, String exid) /*-{
+      $wnd.serviceStartStream(url, exid);
+  }-*/;
+
+  /**
+   * @see #stopRecording(WavCallback)
+   */
   public native void stopRecording() /*-{
       $wnd.stopRecording();
+  }-*/;
+
+  public native void doStopStream() /*-{
+      $wnd.serviceStopStream();
   }-*/;
 
   public native void stopRecordingAndPost(String url, String exid) /*-{
@@ -141,6 +151,11 @@ public class WebAudioRecorder {
   public static void silenceDetected() {
     //  console("silenceDetected -- now!");
     FlashRecordPanelHeadless.micPermission.silenceDetected();
+  }
+
+  public static void gotFrame() {
+    //  console("silenceDetected -- now!");
+    FlashRecordPanelHeadless.micPermission.gotFrame();
   }
 
   public static void webAudioMicAvailable() {
@@ -197,6 +212,31 @@ public class WebAudioRecorder {
   }
 
   /**
+   * @param encoded
+   * @see #advertise()
+   */
+  public static void getStreamResponse(String encoded) {
+    //if (encoded.length() < 100) {
+    console("getStreamResponse  = '" + encoded + "'");
+    // }
+    //   console("getStreamResponse   bytes = '" + encoded.length() + "'");
+
+/*    if (getAllZero()) {
+      logger.info("Seems like the mic is not plugged in?");
+    }*/
+    if (WebAudioRecorder.wavCallback == null) {
+      console("getStreamResponse no callback?");
+    } else {
+      // TODO : do something with response -- parse the JSON!
+
+      //WebAudioRecorder.wavCallback.getBase64EncodedWavFile(encoded);
+      // WebAudioRecorder.wavCallback = null;
+
+      FlashRecordPanelHeadless.micPermission.gotFrame();
+    }
+  }
+
+  /**
    * @see mitll.langtest.client.LangTest#stopRecording(WavCallback)
    */
   private static WavCallback wavCallback = null;
@@ -205,5 +245,7 @@ public class WebAudioRecorder {
     WebAudioRecorder.wavCallback = wavCallback;
     //logger.info("got stopRecording ");
     stopRecording();
+
+  //  doStopStream();
   }
 }

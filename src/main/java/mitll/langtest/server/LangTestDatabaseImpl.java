@@ -89,7 +89,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     try {
       ServletContext servletContext = getServletContext();
       String property = System.getProperty(CONFIG_HOME_ATTR_NM);
-      logger.info("init : prop for domino = '" + property + "'");
+    //  logger.info("init : prop for domino = '" + property + "'");
       this.pathHelper = new PathHelper(servletContext);
       this.serverProps = readProperties(servletContext);
       pathHelper.setProperties(serverProps);
@@ -107,7 +107,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   private void optionalInit() {
     try {
-      logger.info("optionalInit -- ");
+   //   logger.info("optionalInit -- ");
       if (db != null) db.doReport();
     } catch (Exception e) {
       logger.error("optionalInit couldn't load database " + e, e);

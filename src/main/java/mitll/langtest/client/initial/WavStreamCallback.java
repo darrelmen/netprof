@@ -38,10 +38,10 @@ package mitll.langtest.client.initial;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/24/14.
  */
-public interface WavEndCallback {
+public interface WavStreamCallback {
   /**
-   * @see mitll.langtest.client.LangTest#makeFlashContainer
+   * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#stopFlashRecording
+   * @param bytes
    */
-  void silenceDetected();
-  void gotFrame();
+  void getResponse(String bytes);
 }

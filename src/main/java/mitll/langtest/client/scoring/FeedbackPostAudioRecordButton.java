@@ -44,7 +44,9 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   public void startRecording() {
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "startRecording");
     super.startRecording();
+
     simpleRecordAudioPanel.startRecording();
+
   }
 
   /**
