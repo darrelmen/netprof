@@ -236,7 +236,7 @@ public class ProjectManagement implements IProjectManagement {
         if (debugOne) {
           if (slickProject.id() == debugProjectID ||
               slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)
-              ) {
+          ) {
             rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
           }
         } else {
@@ -972,13 +972,21 @@ public class ProjectManagement implements IProjectManagement {
     Map<String, String> info = new LinkedHashMap<>();
 
     SlickProject project = pproject.getProject();
-    User creator = db.getUserDAO().getByID(project.userid());
-    String userInfo = creator == null ? "" : " : " + creator.getUserID();
-    info.put(CREATED + " by", project.userid() + userInfo);
+
+    {
+      User creator = db.getUserDAO().getByID(project.userid());
+      String userInfo = creator == null ? "" : " : " + creator.getUserID();
+      info.put(CREATED + " by", project.userid() + userInfo);
+    }
+//    logger.info(project.id() + " : model type " + pproject.getID() + " : " + pproject.getModelType());
+
+    info.put(ProjectProperty.MODEL_TYPE.toString(), pproject.getModelType().toString());
 
     addDateProps(project, info);
 
     boolean isRTL = addOtherProps(project, info);
+
+  //   logger.info(project.id() + " : props now " + info);
 
     return new SlimProject(
         project.id(),

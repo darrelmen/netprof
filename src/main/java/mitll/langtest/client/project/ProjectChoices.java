@@ -644,7 +644,7 @@ public class ProjectChoices {
   }
 
   private Map<String, String> getProps(SlimProject projectForLang) {
-    return projectForLang.getProps();
+    return projectForLang.getPropertyValue();
   }
 
   @NotNull

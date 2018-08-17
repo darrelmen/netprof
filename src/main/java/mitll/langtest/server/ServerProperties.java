@@ -105,11 +105,6 @@ public class ServerProperties {
   private static final String FALSE = "false";
   private static final String TRUE = "true";
 
-  /*
-  private static final List<String> AMAS_SITES =
-      Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-*/
-
   /**
    * Mira stuff... mostly kinda dead
    */
@@ -137,6 +132,8 @@ public class ServerProperties {
   public static final String LOG_MAILHOST = "log.mailhost";
   public static final String LOG_MAILFROM = "log.mailfrom";
   public static final String MAIL_FROM = "mail.from";
+  public static final String SCORING_MODEL = "scoringModel";
+  public static final String TALKS_TO_DOMINO = "talksToDomino";
 
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
@@ -399,7 +396,7 @@ public class ServerProperties {
    * @Deprecated only for use when importing data from old site
    */
   public String getLessonPlan() {
-    return props.getProperty(LESSON_PLAN_FILE, "");//, props.getProperty(LANGUAGE) + ".json");
+    return props.getProperty(LESSON_PLAN_FILE, "");
   }
 
   public boolean useScoreCache() {
@@ -608,10 +605,10 @@ public class ServerProperties {
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
 
-    props.put("scoringModel", getPropertyDef(MODELS_DIR, ""));
+    props.put(SCORING_MODEL, getPropertyDef(MODELS_DIR, ""));
 
     String lessonPlan = getLessonPlan();
-    if (lessonPlan != null && lessonPlan.startsWith("http")) props.setProperty("talksToDomino", TRUE);
+    if (lessonPlan != null && lessonPlan.startsWith("http")) props.setProperty(TALKS_TO_DOMINO, TRUE);
 
 /*    if (getFontFamily() != null) {
       props.setProperty(FONT_FAMILY, getFontFamily());
@@ -871,7 +868,7 @@ public class ServerProperties {
     return props.getProperty(HYDRA_HOST, HYDRA_HOST_URL_DEFAULT);
   }
 
-  public String getProp(String prop, String def) {
+  private String getProp(String prop, String def) {
     return props.getProperty(prop, def);
   }
 

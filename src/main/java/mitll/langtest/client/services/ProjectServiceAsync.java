@@ -53,15 +53,7 @@ public interface ProjectServiceAsync {
 
   void getDominoForLanguage(String lang, AsyncCallback<List<DominoProject>> async);
 
-/*
-  void getProperty(int projid, ProjectProperty key, AsyncCallback<String> async);
-*/
-
   void getListProperty(int projid, ProjectProperty key, AsyncCallback<List<String>> async);
-
-/*
-  void setProperty(int projid, ProjectProperty key, String newValue, AsyncCallback<Boolean> async);
-*/
 
   void setListProperty(int projid, ProjectProperty key, List<String> newValue, AsyncCallback<Boolean> async);
 }

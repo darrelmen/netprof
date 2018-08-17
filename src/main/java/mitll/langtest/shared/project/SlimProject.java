@@ -32,19 +32,27 @@
 
 package mitll.langtest.shared.project;
 
+import com.github.gwtbootstrap.client.ui.Breadcrumbs;
+import mitll.langtest.server.database.project.ProjectManagement;
+
 import java.util.*;
 import java.util.function.ToIntFunction;
 
+/**
+ * UI-friendly representation of a project...
+ * @see mitll.langtest.client.initial.InitialUI#addBreadcrumbLevels(Breadcrumbs, ProjectStartupInfo)
+ */
 public class SlimProject extends ProjectInfo {
   private boolean hasModel;
   private boolean isRTL;
   private List<SlimProject> children = new ArrayList<>();
-  private Map<String, String> props;
 
   public SlimProject() {
   }
 
   /**
+   * TODO : way too many slots here...
+   *
    * @param projectid
    * @param name
    * @param language
@@ -86,12 +94,15 @@ public class SlimProject extends ProjectInfo {
                      Map<String, String> props,
                      int userID) {
     super(projectid, name, language, course, countryCode, status, type, displayOrder, created, lastImport, lastNetprof, host, port, modelsDir,
-        firstType, secondType, showOniOS, dominoID, userID);
+        firstType, secondType, showOniOS, dominoID, userID, props);
     this.hasModel = hasModel;
     this.isRTL = isRTL;
-    this.props = props;
   }
 
+  /**
+   * @param projectInfo
+   * @see ProjectManagement#getNestedProjectInfo
+   */
   public void addChild(SlimProject projectInfo) {
     children.add(projectInfo);
   }
@@ -99,12 +110,8 @@ public class SlimProject extends ProjectInfo {
   public boolean hasChildren() {
     return !children.isEmpty();
   }
-
   public boolean hasChild(int projectid) {
-    for (SlimProject child : children) {
-      if (child.getID() == projectid) return true;
-    }
-    return false;
+    return getChild(projectid) != null;
   }
 
   public SlimProject getChild(int projectid) {
@@ -122,6 +129,7 @@ public class SlimProject extends ProjectInfo {
   public boolean isHasModel() {
     return hasModel;
   }
+
   public boolean isRTL() {
     return isRTL;
   }
@@ -130,13 +138,11 @@ public class SlimProject extends ProjectInfo {
    * @return
    * @see mitll.langtest.client.project.ProjectChoices#getImageAnchor
    */
-  public Map<String, String> getProps() {
+/*  public Map<String, String> getProps() {
     return props;
-  }
+  }*/
 
   public String toString() {
-    return "SlimProject " + super.toString() +
-        // "\n\t#" + getID() +
-        "\n\tnum children " + children.size();
+    return "SlimProject " + super.toString() + "\n\tnum children " + children.size();
   }
 }

@@ -66,17 +66,19 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
-  public static final String GVIDAVER = "gvidaver";
-  public static final String CHECKING_AUDIO = "Checking audio and making mp3's...";
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
-  public static final String IN_PROGRESS = "In progress...";
+  private static final String GVIDAVER = "gvidaver";
+  private static final String CHECKING_AUDIO = "Checking audio and making mp3's...";
+  private static final String MODEL_TYPE = "Model Type";
 
-  public static final String PROJECT_TYPE = "Project Type";
-  public static final boolean SHOW_PROJECT_TYPE = false;
+  private static final String IN_PROGRESS = "In progress...";
 
-  public static final String LANGUAGE = "Language";
-  public static final String LIFECYCLE = "Lifecycle";
+  private static final String PROJECT_TYPE = "Project Type";
+  private static final boolean SHOW_PROJECT_TYPE = false;
+
+  private static final String LANGUAGE = "Language";
+  private static final String LIFECYCLE = "Lifecycle";
 
   private static final int LEFT_MARGIN_FOR_DOMINO = 320;
 
@@ -144,6 +146,7 @@ public class ProjectEditForm extends UserDialog {
    */
   private ListBox language;
   private ListBox dominoProjectsListBox;
+  private ListBox modelTypeBox;
   private FormField model;
   private CheckBox showOniOSBox;
   private final Services services;
@@ -214,6 +217,9 @@ public class ProjectEditForm extends UserDialog {
    */
   void updateProject() {
     info.setLanguage(language.getSelectedValue());
+    info.setModelType(ModelType.valueOf(modelTypeBox.getSelectedValue()));
+
+  //  logger.info("updateProject get model type " + info.getModelType());
     DominoProject id = dominoToProject.get(dominoProjectsListBox.getSelectedValue());
 
     if (id != null) {
@@ -268,7 +274,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   @Nullable
-  private ProjectStatus checkHydraModelAndPort() {
+  private void checkHydraModelAndPort() {
     ProjectStatus status = ProjectStatus.valueOf(statusBox.getValue());
 
     if (status == ProjectStatus.EVALUATION || status == ProjectStatus.PRODUCTION) {
@@ -281,17 +287,15 @@ public class ProjectEditForm extends UserDialog {
 
       } catch (NumberFormatException e) {
         markError(hydraPort, PLEASE_ENTER_A_PORT_NUMBER_FOR_THE_SERVICE);
-        return null;
       }
     } else {
       clearError(model.getGroup());
       clearError(hydraPort.getGroup());
     }
-    return status;
   }
 
   boolean isValid() {
-  //  logger.info("isValid unit '" + unit.getSafeText() + "'");
+    //  logger.info("isValid unit '" + unit.getSafeText() + "'");
 
     if (nameField.getSafeText().isEmpty()) {
       markErrorNoGrabRight(nameField, PLEASE_ENTER_A_PROJECT_NAME);
@@ -427,6 +431,11 @@ public class ProjectEditForm extends UserDialog {
       if (isNew) hDivLabel.setVisible(false);
     }
 
+    {
+      DivWidget widgets = addModelType(info, fieldset);
+      if (isNew) widgets.setVisible(false);
+    }
+
     DivWidget hDivLabel = getHDivLabel(fieldset, LANGUAGE_MODEL, false);
     model = getModel(hDivLabel, info.getModelsDir());
 
@@ -499,40 +508,40 @@ public class ProjectEditForm extends UserDialog {
     name.getElement().getStyle().setMarginTop(0, PX);
 
     this.language = new ListBox();
-    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(this.language.getSelectedValue(), new AsyncCallback<List<DominoProject>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        logger.warning("got failure asking for " + language.getSelectedValue());
-      }
-
-      @Override
-      public void onSuccess(List<DominoProject> result) {
-        dominoProjectsListBox.clear();
-
-        result.forEach(dominoProject -> {
-          String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
-          dominoProjectsListBox.addItem(item);
-          dominoToProject.put(item, dominoProject);
-
-        });
-
-        Scheduler.get().scheduleDeferred(() -> {
-          if (!result.isEmpty()) {
-            setUnitAndChapter("", result.iterator().next());
-          }
-//          else {
-          //          logger.info("---> addLanguage : results size = " + result.size());
-          //      }
-        });
-      }
-    }));
     this.language.addStyleName("leftTenMargin");
+
+    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(this.language.getSelectedValue(),
+        new AsyncCallback<List<DominoProject>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            logger.warning("got failure asking for " + language.getSelectedValue());
+          }
+
+          @Override
+          public void onSuccess(List<DominoProject> result) {
+            dominoProjectsListBox.clear();
+
+            result.forEach(dominoProject -> {
+              String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
+              dominoProjectsListBox.addItem(item);
+              dominoToProject.put(item, dominoProject);
+
+            });
+
+            Scheduler.get().scheduleDeferred(() -> {
+              if (!result.isEmpty()) {
+                setUnitAndChapter("", result.iterator().next());
+              }
+            });
+          }
+        }));
 
     name.add(this.language);
 
     if (isNew) {
       this.language.addItem(PLEASE_SELECT_A_LANGUAGE);
     }
+
     int i = 0;
 
     for (Language value : Language.values()) {
@@ -542,6 +551,28 @@ public class ProjectEditForm extends UserDialog {
       }
       i++;
     }
+  }
+
+  /**
+   * Add model type choice - e.g. to do kaldi.
+   * @param info
+   * @param fieldset
+   * @return
+   */
+  private DivWidget addModelType(ProjectInfo info, Fieldset fieldset) {
+    DivWidget name = getHDivLabel(fieldset, MODEL_TYPE, false);
+    name.getElement().getStyle().setMarginTop(0, PX);
+
+    this.modelTypeBox = new ListBox();
+    this.modelTypeBox.addStyleName("leftTenMargin");
+
+    name.add(this.modelTypeBox);
+
+    modelTypeBox.addItem(ModelType.HYDRA.toString());
+    modelTypeBox.addItem(ModelType.KALDI.toString());
+    modelTypeBox.setItemSelected(info.getModelType() == ModelType.KALDI ? 1 : 0, true);
+
+    return name;
   }
 
   /**
@@ -587,7 +618,7 @@ public class ProjectEditForm extends UserDialog {
             }
           });
 
-     //     logger.info("got " + result.size() + " matching projects.");
+          //     logger.info("got " + result.size() + " matching projects.");
 
       /*    if (dominoToProject.size() == 1) {
             if (info.getDominoID() == -1) {
@@ -607,12 +638,12 @@ public class ProjectEditForm extends UserDialog {
    */
   private void setUnitAndChapter(String selectedValue, DominoProject dominoProject) {
     if (dominoProject != null) {
-    //  logger.info("setUnitAndChapter got " + dominoProject);
+      //  logger.info("setUnitAndChapter got " + dominoProject);
       unit.setText(dominoProject.getFirstType());
       chapter.setText(dominoProject.getSecondType());
-    //  logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
+      //  logger.info("setUnitAndChapter set unit " + dominoProject.getFirstType());
     } else {
-     // logger.info("setUnitAndChapter no domino project for " + selectedValue);
+      // logger.info("setUnitAndChapter no domino project for " + selectedValue);
     }
   }
 

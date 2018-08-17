@@ -126,10 +126,16 @@
         <url-pattern>/langtest/audio-manager/h2</url-pattern>
     </servlet-mapping>
 
-    <!--    <servlet-mapping>
+    <servlet>
+        <servlet-name>amasService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.AmasServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
         <servlet-name>amasService</servlet-name>
         <url-pattern>/langtest/amas-manager</url-pattern>
-        </servlet-mapping>-->
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>qcService</servlet-name>
@@ -180,50 +186,50 @@
         <url-pattern>/langtest/project-manager</url-pattern>
     </servlet-mapping>
 
+    <!--
+        <servlet>
+            <servlet-name>MyDefaultServlet</servlet-name>
+            <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+            <init-param>
+                <param-name>resourceBase</param-name>
+                <param-value>/opt/netprof/bestAudio</param-value>
+            </init-param>
+            <init-param>
+                <param-name>dirAllowed</param-name>
+                <param-value>true</param-value>
+            </init-param>
+            <init-param>
+                <param-name>pathInfoOnly</param-name>
+                <param-value>true</param-value>
+            </init-param>
+        </servlet>
 
-    <servlet>
-        <servlet-name>MyDefaultServlet</servlet-name>
-        <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
-        <init-param>
-            <param-name>resourceBase</param-name>
-            <param-value>/opt/netprof/bestAudio</param-value>
-        </init-param>
-        <init-param>
-            <param-name>dirAllowed</param-name>
-            <param-value>true</param-value>
-        </init-param>
-        <init-param>
-            <param-name>pathInfoOnly</param-name>
-            <param-value>true</param-value>
-        </init-param>
-    </servlet>
+        <servlet>
+            <servlet-name>DefaultServletAnswers</servlet-name>
+            <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+            <init-param>
+                <param-name>resourceBase</param-name>
+                <param-value>/opt/netprof/answers</param-value>
+            </init-param>
+            <init-param>
+                <param-name>dirAllowed</param-name>
+                <param-value>true</param-value>
+            </init-param>
+            <init-param>
+                <param-name>pathInfoOnly</param-name>
+                <param-value>true</param-value>
+            </init-param>
+        </servlet>
 
-    <servlet>
-        <servlet-name>DefaultServletAnswers</servlet-name>
-        <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
-        <init-param>
-            <param-name>resourceBase</param-name>
-            <param-value>/opt/netprof/answers</param-value>
-        </init-param>
-        <init-param>
-            <param-name>dirAllowed</param-name>
-            <param-value>true</param-value>
-        </init-param>
-        <init-param>
-            <param-name>pathInfoOnly</param-name>
-            <param-value>true</param-value>
-        </init-param>
-    </servlet>
+        <servlet-mapping>
+            <servlet-name>MyDefaultServlet</servlet-name>
+            <url-pattern>/bestAudio/*</url-pattern>
+        </servlet-mapping>
 
-    <servlet-mapping>
-        <servlet-name>MyDefaultServlet</servlet-name>
-        <url-pattern>/bestAudio/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>DefaultServletAnswers</servlet-name>
-        <url-pattern>/answers/*</url-pattern>
-    </servlet-mapping>
+        <servlet-mapping>
+            <servlet-name>DefaultServletAnswers</servlet-name>
+            <url-pattern>/answers/*</url-pattern>
+        </servlet-mapping>-->
 
 
     <!-- ==================================================================== -->

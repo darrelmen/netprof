@@ -36,23 +36,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 /**
  * @see mitll.langtest.server.database.project.ProjectDAO#add
  */
-public enum ProjectType implements IsSerializable {
-  NP(true),
-  //  AMAS,
-  POLYGLOT(true),
-  DIALOG(false),
-  //  EXPERIMENTAL(false),
-  // TESTING,
-//  OTHER(false),
-  DEFAULT(false);
-
-  private boolean show = false;
-
-  ProjectType(boolean show) {
-    this.show = show;
-  }
-
-  public boolean shouldShow() {
-    return show;
-  }
+public enum ModelType implements IsSerializable {
+  HYDRA, KALDI;
 }

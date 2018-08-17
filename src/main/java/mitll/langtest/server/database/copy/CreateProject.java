@@ -4,12 +4,9 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.shared.project.ProjectProperty;
+import mitll.langtest.shared.project.*;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectServices;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
@@ -33,6 +30,7 @@ public class CreateProject {
   private static final String PROPERTY = "property";
   public static final String TRUE = Boolean.TRUE.toString();
   private static final String MANDARIN_TRAD = "mandarinTrad";
+  private static final String DEFAULT_MODEL_TYPE = ModelType.HYDRA.toString();
   private final Set<String> h2Languages;
 
   public CreateProject(Set<String> h2Languages) {
@@ -216,6 +214,14 @@ public class CreateProject {
       addModelProp(projectDAO, projectID, WEBSERVICE_HOST_PORT, "" + info.getPort());
       addModelProp(projectDAO, projectID, MODELS_DIR, "" + info.getModelsDir());
 
+      String modelTypeValue = info.getPropertyValue().get(MODEL_TYPE.toString());
+      if (modelTypeValue == null) {
+        logger.warn("no model type in " + info.getPropertyValue().keySet());
+        modelTypeValue = DEFAULT_MODEL_TYPE;
+      }
+
+      addModelProp(projectDAO, projectID, MODEL_TYPE, modelTypeValue);
+
       info.getPropertyValue().forEach((k, v) -> addProperty(projectDAO, projectID, k, v));
 
       projectServices.rememberProject(projectID);
@@ -345,7 +351,6 @@ public class CreateProject {
     logger.info("\n\n\n getSinceCreated is at " + new Date(netprofUpdate));
     return netprofUpdate;
   }
-
 
 
   /**

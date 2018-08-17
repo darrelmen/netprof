@@ -365,6 +365,19 @@ public class Project implements IPronunciationLookup {
     return getProp(MODELS_DIR);
   }
 
+  public ModelType getModelType() {
+    String prop = getProp(MODEL_TYPE);
+    if (prop == null) return ModelType.HYDRA;
+    else {
+      try {
+        return ModelType.valueOf(prop);
+      } catch (IllegalArgumentException e) {
+        logger.error("couldn't parse '" +prop + "' as model type enum?");
+        return ModelType.HYDRA;
+      }
+    }
+  }
+
   public boolean hasProjectSpecificAudio() {
     return getProp(AUDIO_PER_PROJECT).equalsIgnoreCase(TRUE);
   }
@@ -399,8 +412,10 @@ public class Project implements IPronunciationLookup {
     if (s == null) {
       putAllProps();
 
-      // logger.info("getProp : project " + getID() + " prop " + prop, new Exception());
       String propValue = db.getProjectDAO().getPropValue(getID(), prop);  // blank if miss, not null
+
+      logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
+
       propCache.put(prop, propValue);
       return propValue;
     } else {

@@ -282,7 +282,7 @@ public class CopyToPostgres<T extends CommonShell> {
     return new CreateProject(serverProps.getHydra2Languages());
   }
 
-  private void dropOneConfig(Integer projid) {
+/*  private void dropOneConfig(Integer projid) {
     DatabaseImpl database = getDatabase();
     IProjectDAO projectDAO = database.getProjectDAO();
     if (projectDAO.exists(projid)) {
@@ -296,7 +296,7 @@ public class CopyToPostgres<T extends CommonShell> {
     }
 
     database.close();
-  }
+  }*/
 
 /*  private void dropAllButOneConfig(Integer projid) {
     DatabaseImpl database = getDatabase();

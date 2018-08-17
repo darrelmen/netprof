@@ -33,15 +33,15 @@
 package mitll.langtest.shared.project;
 
 import mitll.langtest.client.project.ProjectEditForm;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static mitll.langtest.shared.project.ProjectProperty.MODEL_TYPE;
 
 public class ProjectInfo extends DominoProject implements HasID, MutableProject {
   private int id = -1;
@@ -59,6 +59,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   private String host = Project.WEBSERVICE_HOST_DEFAULT;
   private int port = -1;
   private String modelsDir = "";
+
   private boolean showOniOS = true;
   private boolean audioPerProject = false;
 
@@ -93,7 +94,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
                      String secondType,
                      boolean showOniOS,
                      int dominoID,
-                     int userID) {
+                     int userID, Map<String, String> props) {
     super(dominoID, name, first, secondType);
     this.language = language;
     this.id = projectid;
@@ -110,6 +111,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.modelsDir = modelsDir;
     this.showOniOS = showOniOS;
     this.userID = userID;
+    this.propertyValue = props;
   }
 
   public String getLanguage() {
@@ -176,18 +178,37 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return modelsDir;
   }
 
+  public ModelType getModelType() {
+    String s = getPropertyValue().get(MODEL_TYPE.toString());
+    if (s == null) {
+      return ModelType.HYDRA;
+    } else return ModelType.valueOf(s);
+  }
+
+  public void setModelType(ModelType type) {
+    getPropertyValue().put(MODEL_TYPE.toString(), type.toString());
+  }
+
+  /**
+   * @param modelsDir
+   * @see ProjectEditForm#setCommonFields
+   */
   public void setModelsDir(String modelsDir) {
     this.modelsDir = modelsDir;
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.CreateProject#createProject
    * @return
+   * @see mitll.langtest.server.database.copy.CreateProject#createProject
    */
   public Map<String, String> getPropertyValue() {
     return propertyValue;
   }
 
+  /**
+   * @param course
+   * @see ProjectEditForm#setCommonFields
+   */
   public void setCourse(String course) {
     this.course = course;
   }
@@ -245,11 +266,13 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return audioPerProject;
   }
 
-  public void setAudioPerProject(boolean audioPerProject) {
-    this.audioPerProject = audioPerProject;
-  }
+//  public void setAudioPerProject(boolean audioPerProject) {
+//    this.audioPerProject = audioPerProject;
+//  }
 
-  public boolean isMine(int sessionUser) {    return userID == sessionUser;  }
+  public boolean isMine(int sessionUser) {
+    return userID == sessionUser;
+  }
 
   public String toString() {
     return "#" + getID() + "  " + getName() + " " + getStatus() + " " + getProjectType() +
