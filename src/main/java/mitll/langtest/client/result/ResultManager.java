@@ -54,6 +54,7 @@ import mitll.langtest.client.services.ResultService;
 import mitll.langtest.client.services.ResultServiceAsync;
 import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.table.PagerTable;
+import mitll.langtest.server.services.ResultServiceImpl;
 import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.result.MonitorResult;
 
@@ -136,7 +137,8 @@ public class ResultManager extends PagerTable {
   }
 
   /**
-   * @see UserMenu.ResultsClickHandler
+   * @see UserMenu#getProjectSpecificChoices
+   * @see ResultServiceImpl#getNumResults()
    */
   public void showResults() {
     req = 0;
