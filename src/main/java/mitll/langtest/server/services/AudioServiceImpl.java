@@ -190,6 +190,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private static final String NO_SESSION = "no session";
 
   /**
+   * TODO : consider how to handle out of order packets
+   *
+   * TODO : wait if saw END but packets out of order...?
+   *
    * @param request
    * @param requestType
    * @param deviceType  TODO fill in?
@@ -240,8 +244,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     // little state machine - START - new buffering, STREAM concat or append, END write file and score
     List<AudioChunk> audioChunks = sessionToChunks.get(session);
 
+    audioChunks.add(newChunk);
+
     if (state.equalsIgnoreCase("START")) {
-      audioChunks.add(newChunk);
     } else if (state.equalsIgnoreCase("STREAM")) {
     /*  if (audioChunks.size() == 1) {
         AudioChunk audioChunk = audioChunks.get(0);
@@ -253,28 +258,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           }
         }
       }*/
-      audioChunks.add(newChunk);
     } else {  // STOP
-      audioChunks.add(newChunk);
 
-      long then = System.currentTimeMillis();
-      logger.info("Stop - combine " + audioChunks.size());
-
-      AudioChunk combined = audioChunks.get(0);
-      //    logger.info("Stop - combine " + combined);
-
-      for (int i = 1; i < audioChunks.size(); i++) {
-        AudioChunk next = audioChunks.get(i);
-        //      logger.info("\tStop - 1 combine " + combined);
-        //     logger.info("\tStop - next " + next);
-
-        combined = combined.concat(next);
-        //      logger.info("\tStop - 2 combine " + combined);
-
-      }
-      long now = System.currentTimeMillis();
-
-      logger.info("Stop - finally combine " + combined + " in " + (now - then));
+      AudioChunk combined = getCombinedAudioChunk(audioChunks);
 
       ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(combined.getWavFile());
 //      logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
@@ -302,8 +288,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           .setAllowAlternates(false);
 
 
-      getAudioAnswer(null, audioContext, false,
+      AudioAnswer audioAnswer = getAudioAnswer(null, audioContext, false,
           deviceType, device, decoderOptions, saveFile, projid);
+
+      // TODO : convert to JSON
       logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
     }
     // so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
@@ -312,6 +300,39 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     JSONObject jsonObject = new JSONObject();
     jsonObject.put("MESSAGE", "OK");
     return jsonObject;
+  }
+
+  /**
+   * TODO : deal with gaps!
+   *
+   * @param audioChunks
+   * @return
+   */
+  private AudioChunk getCombinedAudioChunk(List<AudioChunk> audioChunks) {
+    long then = System.currentTimeMillis();
+    logger.info("Stop - combine " + audioChunks.size());
+
+    audioChunks.sort(AudioChunk::compareTo);
+
+    AudioChunk combined = audioChunks.get(0);
+    //    logger.info("Stop - combine " + combined);
+
+    for (int i = 1; i < audioChunks.size(); i++) {
+      AudioChunk next = audioChunks.get(i);
+      //      logger.info("\tStop - 1 combine " + combined);
+      //     logger.info("\tStop - next " + next);
+
+      if (combined.getPacket() != next.getPacket()+1) {
+        logger.warn("getCombinedAudioChunk : hmm current packet " + combined.getPacket() + " vs next " + next.getPacket());
+      }
+      combined = combined.concat(next);
+      //      logger.info("\tStop - 2 combine " + combined);
+
+    }
+    long now = System.currentTimeMillis();
+
+    logger.info("Stop - finally combine " + combined + " in " + (now - then));
+    return combined;
   }
 
   private static class AudioChunk implements Comparable<AudioChunk> {
@@ -342,9 +363,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                 clip1.getFrameLength() + clip2.getFrameLength());
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        AudioSystem.write(appendedFiles,
-            AudioFileFormat.Type.WAVE,
-            byteArrayOutputStream);
+        AudioSystem.write(appendedFiles, AudioFileFormat.Type.WAVE, byteArrayOutputStream);
 
         return new AudioChunk(packet, true, byteArrayOutputStream.toByteArray());
       } catch (Exception e) {
@@ -497,6 +516,19 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         deviceType, device, decoderOptions, null, getProjectIDFromUser());
   }
 
+  /**
+   * @see #getJSONForStream
+   * @param base64EncodedString
+   * @param audioContext
+   * @param recordedWithFlash
+   * @param deviceType
+   * @param device
+   * @param decoderOptions
+   * @param fileInstead
+   * @param projectID
+   * @return
+   * @throws DominoSessionException
+   */
   private AudioAnswer getAudioAnswer(String base64EncodedString,
                                      AudioContext audioContext,
                                      boolean recordedWithFlash,
@@ -544,7 +576,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //    logger.info("writeAudioFile recording info " + recordingInfo);
     AudioAnswer audioAnswer =
         audioFileHelper.writeAudioFile(
-            base64EncodedString, fileInstead,
+            base64EncodedString,
+            fileInstead,
             commonExercise,
             audioContext,
 

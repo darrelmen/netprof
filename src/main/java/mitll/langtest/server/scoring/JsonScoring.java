@@ -21,6 +21,7 @@ import mitll.langtest.shared.user.MiniUser;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
@@ -120,9 +121,9 @@ public class JsonScoring {
         options);
     long now = System.currentTimeMillis();
     PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
-    float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
 
     if (logger.isInfoEnabled()) {
+      float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
       logger.info("getJsonForAudioForUser" +
               "\n\tflashcard   " + doFlashcard +
               "\n\texercise id " + exerciseID +
@@ -135,25 +136,47 @@ public class JsonScoring {
     }
 
     if (answer != null && answer.isValid() && pretestScore != null) {
-      boolean usePhoneToDisplay = options.isUsePhoneToDisplay();
-      ScoreToJSON scoreToJSON = new ScoreToJSON();
-
-      String language = db.getProject(projid).getLanguage();
-
-      jsonForScore = fullJSON ?
-          scoreToJSON.getJsonObject(pretestScore) :
-          scoreToJSON.getJsonForScore(pretestScore, usePhoneToDisplay, serverProps, language);
-      jsonForScore.put(SCORE, pretestScore.getHydecScore());
-
-      if (doFlashcard) {
-        jsonForScore.put(IS_CORRECT, answer.isCorrect());
-        jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
-        jsonForScore.put(RESULT_ID, answer.getResultID());
-      } else {
-        jsonForScore.put(IS_CORRECT, hydecScore > MIN_HYDRA_ALIGN);
-      }
+      jsonForScore = getJsonObject(projid, options.isUsePhoneToDisplay(), fullJSON, doFlashcard, answer, pretestScore);
     }
     addValidity(exerciseID, jsonForScore, answer);
+    return jsonForScore;
+  }
+
+  /**
+   * TODO : connect this to AudioService?
+   * @param projid
+   * @param usePhoneToDisplay
+   * @param fullJSON
+   * @param doFlashcard
+   * @param answer
+   * @param pretestScore
+   * @return
+   */
+  @NotNull
+  private JSONObject getJsonObject(int projid,
+                                   boolean usePhoneToDisplay,
+                                   boolean fullJSON,
+                                   boolean doFlashcard,
+                                   AudioAnswer answer,
+                                   PretestScore pretestScore ) {
+    JSONObject jsonForScore;
+    ScoreToJSON scoreToJSON = new ScoreToJSON();
+    float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
+
+    String language = db.getProject(projid).getLanguage();
+
+    jsonForScore = fullJSON ?
+        scoreToJSON.getJsonObject(pretestScore) :
+        scoreToJSON.getJsonForScore(pretestScore, usePhoneToDisplay, serverProps, language);
+    jsonForScore.put(SCORE, pretestScore.getHydecScore());
+
+    if (doFlashcard) {
+      jsonForScore.put(IS_CORRECT, answer.isCorrect());
+      jsonForScore.put(SAID_WORD, answer.isSaidAnswer());
+      jsonForScore.put(RESULT_ID, answer.getResultID());
+    } else {
+      jsonForScore.put(IS_CORRECT, hydecScore > MIN_HYDRA_ALIGN);
+    }
     return jsonForScore;
   }
 
@@ -198,7 +221,6 @@ public class JsonScoring {
           options,
           null);
     } else {
-
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
           exerciseID,
           wavPath,

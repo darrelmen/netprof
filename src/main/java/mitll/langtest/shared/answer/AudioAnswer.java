@@ -33,16 +33,9 @@
 package mitll.langtest.shared.answer;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
-import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.PretestScore;
-
-import java.io.File;
 
 public class AudioAnswer implements IsSerializable {
   private int exid = -1;
@@ -63,14 +56,6 @@ public class AudioAnswer implements IsSerializable {
   private double dynamicRange;
   private long timestamp;
 
-  public double getDynamicRange() {
-    return dynamicRange;
-  }
-
-  public void setDynamicRange(double dynamicRange) {
-    this.dynamicRange = dynamicRange;
-  }
-
   public AudioAnswer() {
   }
 
@@ -88,6 +73,14 @@ public class AudioAnswer implements IsSerializable {
     this.validity = validity;
     this.reqid = reqid;
     this.durationInMillis = duration;
+  }
+
+  public double getDynamicRange() {
+    return dynamicRange;
+  }
+
+  public void setDynamicRange(double dynamicRange) {
+    this.dynamicRange = dynamicRange;
   }
 
   public void setDecodeOutput(String decodeOutput) {
@@ -221,7 +214,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * @param transcript
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding(CommonShell, AudioContext, AnswerInfo.RecordingInfo, String, File, AudioCheck.ValidityAndDur, DecoderOptions)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding
    */
   public void setTranscript(String transcript) {
     this.transcript = transcript;
@@ -252,9 +245,11 @@ public class AudioAnswer implements IsSerializable {
     this.roundTripMillis = roundTripMillis;
   }
 
+/*
   public String getNormTranscript() {
     return normTranscript;
   }
+*/
 
   public void setNormTranscript(String normTranscript) {
     this.normTranscript = normTranscript;
