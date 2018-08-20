@@ -253,11 +253,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     audioChunks.add(newChunk);
     JSONObject jsonObject = new JSONObject();
-    jsonObject.put("MESSAGE", "OK");
 
     if (state.equalsIgnoreCase("START")) {
+      jsonObject.put("MESSAGE", "START");
     } else if (state.equalsIgnoreCase("STREAM")) {
-    /*  if (audioChunks.size() == 1) {
+      jsonObject.put("MESSAGE", "STREAM");
+  /*  if (audioChunks.size() == 1) {
         AudioChunk audioChunk = audioChunks.get(0);
         if (audioChunk.getPacket()== packet-1) {
           AudioChunk combined = newChunk.concat(audioChunk);
@@ -488,12 +489,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
     return 1;
   }
-
-/*
-  private int getProjID(HttpServletRequest request) {
-    return request.getIntHeader(ScoreServlet.HeaderValue.PROJID.toString());
-  }
-*/
 
   private int getRealExID(HttpServletRequest request) {
     int realExID = 0;

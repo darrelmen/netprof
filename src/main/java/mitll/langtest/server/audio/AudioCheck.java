@@ -222,8 +222,10 @@ public class AudioCheck {
    * @see #getDNR
    */
   private DynamicRange.RMSInfo getDynamicRange(File file) {
-    String highPassFilterFile = new AudioConversion(trimAudio, MIN_DYNAMIC_RANGE)
-        .getHighPassFilterFile(file.getAbsolutePath());
+    String highPassFilterFile =
+        new AudioConversion(trimAudio, MIN_DYNAMIC_RANGE)
+            .getHighPassFilterFile(file.getAbsolutePath());
+
     if (highPassFilterFile == null) return new DynamicRange.RMSInfo();
     else {
       File highPass = new File(highPassFilterFile);

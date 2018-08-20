@@ -7,11 +7,14 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 
+import java.util.logging.Logger;
+
 /**
  * @see SimpleRecordAudioPanel#makePlayAudioPanel
  */
 class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
-  //private final Logger logger = Logger.getLogger("FeedbackPostAudioRecordButton");
+  private final Logger logger = Logger.getLogger("FeedbackPostAudioRecordButton");
+
   private static final String STOP = "Stop";
   private static final String RECORD_BUTTON = "RecordButton";
   private static final int DEFAULT_INDEX = 1;
@@ -95,6 +98,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    */
   @Override
   protected void useInvalidResult(Validity validity, double dynamicRange) {
+    logger.info("useInvalidResult " + validity);
     super.useInvalidResult(validity, dynamicRange);
     simpleRecordAudioPanel.useInvalidResult(validity == Validity.OK);
   }

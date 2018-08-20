@@ -154,7 +154,7 @@
         };
 
         // see webaudiorecorder serviceStartStream
-        this.serviceStartStream = function (url, exid, cb) {
+        this.serviceStartStream = function (url, exid, reqid, cb) {
             currCallback = cb || config.callback;
             // console.log('service.startStream');
             if (url) {
@@ -169,7 +169,8 @@
             worker.postMessage({
                 command: 'startStream',
                 url: url,
-                exid: exid
+                exid: exid,
+                reqid: reqid
             });
         };
 

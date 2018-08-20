@@ -27,8 +27,9 @@ public class TurnPanel<T extends ClientExercise> extends DialogExercisePanel<T> 
                    boolean isRight) {
     super(clientExercise, controller, listContainer, alignments, listenView);
     this.isRight = isRight;
-    getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
-    getElement().getStyle().setClear(Style.Clear.BOTH);
+    Style style = getElement().getStyle();
+    style.setOverflow(Style.Overflow.HIDDEN);
+    style.setClear(Style.Clear.BOTH);
     if (isRight) addStyleName("floatRight");
     else addStyleName("floatLeft");
   }

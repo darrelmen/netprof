@@ -1181,12 +1181,12 @@ public class LangTest implements
     flashRecordPanel.recordOnClick();
   }
 
-  public void startStream(int exid) {
+  public void startStream(int exid, int reqid) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
 
     logger.info("startStream " + serviceEntryPoint + " exid " + exid);
-    flashRecordPanel.startStream(serviceEntryPoint, "" + exid);
+    flashRecordPanel.startStream(serviceEntryPoint, "" + exid, ""+reqid);
   }
 
 

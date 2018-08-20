@@ -71,7 +71,7 @@ this.onmessage = function (e) {
             clear();
             break;
         case 'startStream':
-            startStream(e.data.url, e.data.exid);
+            startStream(e.data.url, e.data.exid, e.data.reqid);
             break;
         case 'stopStream':
             stopStream(e.data.type);
@@ -84,10 +84,11 @@ function init(config) {
     sampleRate = config.sampleRate;
 }
 
-function startStream(url, exid) {
+function startStream(url, exid, reqid) {
     console.log("worker.startStream ");
     myurl = new String(url);
     myexid = new String(exid);
+    myreqid = new String(reqid);
 }
 
 function stopStream(type) {
@@ -171,6 +172,8 @@ function sendBlob(framesBeforeRound, audioBlob, isLast) {
 //Send the proper header information along with the request
         xhr.setRequestHeader("Content-Type", "application/wav");
         xhr.setRequestHeader("EXERCISE", myexid);
+        xhr.setRequestHeader("reqid", myreqid);
+
         if (framesBeforeRound === 0) {
             xhr.setRequestHeader("STREAMSTATE", "START");
         }
@@ -186,10 +189,9 @@ function sendBlob(framesBeforeRound, audioBlob, isLast) {
         xhr.onreadystatechange = function () {//Call a function when the state changes.
             if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                 // Request finished. Do processing here.
-                console.log("got response " + xhr.responseText.length);
-
-                var Data = JSON.parse(xhr.responseText);
-                console.log(Data);
+                //     console.log("got response " + xhr.responseText.length);
+                // var Data = JSON.parse(xhr.responseText);
+                //  console.log(Data);
 
                 postSomething(xhr.responseText);
 
@@ -198,7 +200,7 @@ function sendBlob(framesBeforeRound, audioBlob, isLast) {
             }
             else if (this.status != 200) {
                 console.log("warning : got response code : " + this.status);
-                var resp = { status : "error", code : this.status};
+                var resp = {status: "error", code: this.status};
                 postSomething(JSON.stringify(resp));
             }
         };
@@ -226,7 +228,7 @@ function postSomething(something) {
 function updateProgress(oEvent) {
     if (oEvent.lengthComputable) {
         var percentComplete = oEvent.loaded / oEvent.total * 100;
-     //   console.log("updateProgress " + oEvent.loaded + "/" + oEvent.total + " " + percentComplete);
+        //   console.log("updateProgress " + oEvent.loaded + "/" + oEvent.total + " " + percentComplete);
     } else {
         //   console.log("updateProgress size unknown");
         // Unable to compute progress information since the total size is unknown
@@ -234,7 +236,7 @@ function updateProgress(oEvent) {
 }
 
 function transferComplete(evt) {
-  //  console.log("The transfer is complete.");
+    //  console.log("The transfer is complete.");
 }
 
 function transferFailed(evt) {

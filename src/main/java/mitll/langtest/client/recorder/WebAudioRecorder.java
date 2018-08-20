@@ -32,11 +32,7 @@
 
 package mitll.langtest.client.recorder;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Timer;
-import mitll.hlt.domino.shared.Constants;
 import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
 
@@ -117,10 +113,11 @@ public class WebAudioRecorder {
   /**
    * @param url
    * @param exid
-   * @see FlashRecordPanelHeadless#startStream(String, String)
+   * @param reqid
+   * @see FlashRecordPanelHeadless#startStream(String, String, String)
    */
-  public native void startStream(String url, String exid) /*-{
-      $wnd.serviceStartStream(url, exid);
+  public native void startStream(String url, String exid, String reqid) /*-{
+      $wnd.serviceStartStream(url, exid, reqid);
   }-*/;
 
   /**
@@ -228,12 +225,13 @@ public class WebAudioRecorder {
 
   /**
    * Called by webaudiorecorder.serviceStartStream or stop
+   *
    * @param json
    * @see #advertise()
    */
   public static void getStreamResponse(String json) {
     //if (encoded.length() < 100) {
-    console("getStreamResponse  = '" + json + "'");
+    // console("getStreamResponse  = '" + json + "'");
 
     // }
     //   console("getStreamResponse   bytes = '" + encoded.length() + "'");
@@ -242,36 +240,11 @@ public class WebAudioRecorder {
       logger.info("Seems like the mic is not plugged in?");
     }*/
     if (WebAudioRecorder.wavCallback == null) {
-      console("getStreamResponse no callback?");
+    //  console("getStreamResponse no callback?");
     } else {
-      // TODO : do something with response -- parse the JSON!
-
-
-    WebAudioRecorder.wavCallback.gotStreamResponse(json);
-      // WebAudioRecorder.wavCallback = null;
-
-     // FlashRecordPanelHeadless.micPermission.gotStreamResponse();
+      WebAudioRecorder.wavCallback.gotStreamResponse(json);
     }
   }
-
-
-  /** Digest a json response from a servlet checking for a session expiration code */
-/*  protected static JSONObject digestJsonResponse(String json) {
-    console("Digesting response " + json);
-    try {
-      JSONValue val = JSONParser.parseStrict(json);
-      JSONObject obj = (val != null) ? val.isObject() : null;
-      JSONValue code = obj == null ? null : obj.get(Constants.SESSION_EXPIRED_CODE);
-      if (code != null && code.isBoolean() != null && code.isBoolean().booleanValue()) {
-        getSessionHelper().logoutUserInClient(null, true);
-        return null;
-      } else {
-        return obj;
-      }
-    } catch(Exception ex) {
-      return null;
-    }
-  }*/
 
   /**
    * @see mitll.langtest.client.LangTest#stopRecording(WavCallback)

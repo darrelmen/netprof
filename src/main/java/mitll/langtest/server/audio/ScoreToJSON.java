@@ -62,10 +62,14 @@ public class ScoreToJSON {
   private static final Logger logger = LogManager.getLogger(ScoreToJSON.class);
 
   private static final String START = "start";
-  private static final String END = "end";
+  public static final String END1 = "end";
+  private static final String END = END1;
   private static final String EVENT = "event";
   public static final String CONTENT = "content";
   private static final String SCORE = "score";
+  public static final String STR = "str";
+  public static final String ID = "id";
+  public static final String SEGMENT_SCORE = "s";
 
   /**
    * We skip sils, since we wouldn't want to show them to the user.
@@ -164,22 +168,22 @@ public class ScoreToJSON {
   @NotNull
   private JSONObject getJSONForWord(TranscriptSegment segment, String event, String wid) {
     JSONObject wordJson = new JSONObject();
-    wordJson.put("id", wid);
+    wordJson.put(ID, wid);
     wordJson.put("w", event);
-    wordJson.put("s", getScore(segment));
-    wordJson.put("str", floatToString(segment.getStart()));
-    wordJson.put("end", floatToString(segment.getEnd()));
+    wordJson.put(SEGMENT_SCORE, getScore(segment));
+    wordJson.put(STR, floatToString(segment.getStart()));
+    wordJson.put(END1, floatToString(segment.getEnd()));
     return wordJson;
   }
 
   @NotNull
   private JSONObject getJSONForPhone(int pindex, TranscriptSegment pseg, String pevent) {
     JSONObject phoneJson = new JSONObject();
-    phoneJson.put("id", Integer.toString(pindex));
+    phoneJson.put(ID, Integer.toString(pindex));
     phoneJson.put("p", pevent);
-    phoneJson.put("s", getScore(pseg));
-    phoneJson.put("str", floatToString(pseg.getStart()));
-    phoneJson.put("end", floatToString(pseg.getEnd()));
+    phoneJson.put(SEGMENT_SCORE, getScore(pseg));
+    phoneJson.put(STR, floatToString(pseg.getStart()));
+    phoneJson.put(END1, floatToString(pseg.getEnd()));
     return phoneJson;
   }
 

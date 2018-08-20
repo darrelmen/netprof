@@ -92,11 +92,11 @@ function stopRecording() {
     grabWav();
 }
 
-function serviceStartStream(url, exid) {
+function serviceStartStream(url, exid, reqid) {
     //__log('webaudiorecorder.startStream ');
     __log('webaudiorecorder.startStream calling recorder');
 
-    recorder && recorder.serviceStartStream(url, exid,
+    recorder && recorder.serviceStartStream(url, exid, reqid,
         function (blob) {
             __log('startStream getStreamResponse.');
             getStreamResponse(blob);

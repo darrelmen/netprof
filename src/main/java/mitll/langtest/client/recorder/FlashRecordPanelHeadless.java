@@ -190,12 +190,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }
   }
 
-  public void startStream(String url, String exid) {
+  public void startStream(String url, String exid, String reqid) {
     if (usingWebRTC()) {
       logger.info("startStream post" +
           "\n\tto  " + url +
           "\n\tfor " + exid);
-      webAudio.startStream(url, exid);
+      webAudio.startStream(url, exid, reqid);
     } else if (usingFlash()) {
       //flashRecordOnClick();
       logger.warning("no stream with flash!!!!\\n\n");
