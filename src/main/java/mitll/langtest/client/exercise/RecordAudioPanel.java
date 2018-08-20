@@ -50,6 +50,7 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.HasID;
@@ -68,7 +69,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioPanel<T> {
- private final Logger logger = Logger.getLogger("RecordAudioPanel");
+  private final Logger logger = Logger.getLogger("RecordAudioPanel");
 
   /**
    * @see #getAfterPlayWidget
@@ -269,7 +270,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   public void setEnabled(boolean val) {
     //logger.info("RecordAudioPanel.setEnabled " + val);
     postAudioRecordButton.setEnabled(val);
-    if (postAudioRecordButton.hasValidAudio()){
+    if (postAudioRecordButton.hasValidAudio()) {
       playAudioPanel.setEnabled(val);
     }
   }
@@ -387,23 +388,22 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
     @Override
     public void useResult(AudioAnswer result) {
       super.useResult(result);
-      showDynamicRange(result);
+      showDynamicRange(result.getDynamicRange());
     }
 
     @Override
-    protected void useInvalidResult(AudioAnswer result) {
-      super.useInvalidResult(result);
-      showDynamicRange(result);
+    protected void useInvalidResult(Validity validity, double dynamicRange) {
+      super.useInvalidResult(validity, dynamicRange);
+      showDynamicRange(dynamicRange);
     }
 
     /**
      * Set the value on the progress bar to reflect the dynamic range we measure on the audio.
      *
-     * @param result
+     * @param dynamicRange
      * @see #useResult(AudioAnswer)
      */
-    private void showDynamicRange(AudioAnswer result) {
-      double dynamicRange = result.getDynamicRange();
+    private void showDynamicRange(double dynamicRange) {
       double percent = dynamicRange / 70;
       progressBar.setPercent(100 * percent);
       progressBar.setText("" + roundToTenth(dynamicRange));

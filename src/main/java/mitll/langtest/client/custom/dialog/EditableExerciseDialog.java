@@ -82,7 +82,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    * @paramx predefinedContent   - so we can tell it to update its tooltip
    * @see EditItem#setFactory
    */
-  public EditableExerciseDialog(ExerciseController controller,
+  EditableExerciseDialog(ExerciseController controller,
                                 U changedUserExercise,
                                 int originalListID,
 

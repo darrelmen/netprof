@@ -5,6 +5,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 
 /**
  * @see SimpleRecordAudioPanel#makePlayAudioPanel
@@ -88,18 +89,17 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   /**
-   * @param result
+   * @param validity
+   * @param dynamicRange
    * @see RecordingListener#stopRecording(long)
    */
   @Override
-  protected void useInvalidResult(AudioAnswer result) {
-    super.useInvalidResult(result);
-    simpleRecordAudioPanel.useInvalidResult(result.isValid());
+  protected void useInvalidResult(Validity validity, double dynamicRange) {
+    super.useInvalidResult(validity, dynamicRange);
+    simpleRecordAudioPanel.useInvalidResult(validity == Validity.OK);
   }
 
   protected void gotShortDurationRecording() {
     simpleRecordAudioPanel.gotShortDurationRecording();
   }
-
-
 }

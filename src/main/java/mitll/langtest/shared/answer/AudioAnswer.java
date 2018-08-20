@@ -32,18 +32,24 @@
 
 package mitll.langtest.shared.answer;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.scoring.PretestScore;
 
-public class AudioAnswer implements IsSerializable {
+/**
+ *
+ */
+public class AudioAnswer extends SimpleAudioAnswer {
   private int exid = -1;
   private int reqid = -1;
-  private String path = null;
   private Validity validity = Validity.INVALID;
   private String decodeOutput = "";
-  private String transcript = "";
+
+  /**
+   * Server side only...
+   */
+  private transient String transcript = "";
+
   private String normTranscript = "";
   private double score = -1;
   private boolean correct = false;
@@ -52,7 +58,6 @@ public class AudioAnswer implements IsSerializable {
   private long roundTripMillis;
   private int resultID;
   private AudioAttribute audioAttribute;
-  private PretestScore pretestScore;
   private double dynamicRange;
   private long timestamp;
 
@@ -75,6 +80,10 @@ public class AudioAnswer implements IsSerializable {
     this.durationInMillis = duration;
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyWaveformPostAudioRecordButton#useResult
+   * @return
+   */
   public double getDynamicRange() {
     return dynamicRange;
   }
@@ -134,7 +143,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * Not really used very much anymore ...
-   *
+   * Maybe on iOS???
    * @return
    */
   public boolean isSaidAnswer() {
@@ -149,12 +158,12 @@ public class AudioAnswer implements IsSerializable {
     return validity == Validity.OK;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#onPostSuccess
+   * @return
+   */
   public int getReqid() {
     return reqid;
-  }
-
-  public String getPath() {
-    return path;
   }
 
   public void setPath(String path) {
@@ -191,10 +200,6 @@ public class AudioAnswer implements IsSerializable {
 
   public void setAudioAttribute(AudioAttribute audioAttribute) {
     this.audioAttribute = audioAttribute;
-  }
-
-  public PretestScore getPretestScore() {
-    return pretestScore;
   }
 
   /**

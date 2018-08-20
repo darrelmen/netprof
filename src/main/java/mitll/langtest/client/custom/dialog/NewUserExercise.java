@@ -51,6 +51,7 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -825,7 +826,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
      * @param instance
      * @see #makeRecordAudioPanel
      */
-    public CreateFirstRecordAudioPanel(U newExercise, Panel row,
+    CreateFirstRecordAudioPanel(U newExercise, Panel row,
                                        boolean recordRegularSpeed, String instance) {
       super(newExercise, NewUserExercise.this.controller, row, 0, false,
           recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW, instance);
@@ -897,22 +898,27 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
               super.useResult(result);
 
               // logger.info("useResult got back " + result.getAudioAttribute() + " for " + newUserExercise);
-              if (result.getAudioAttribute() != null) {
-                if (recordRegularSpeed) {
-                  result.getAudioAttribute().markRegular();
-                } else {
-                  result.getAudioAttribute().markSlow();
-                }
-                newUserExercise.getMutableAudio().addAudio(result.getAudioAttribute());
-              } else {
-                logger.warning("no valid audio on " + result);
-              }
+              useAudioAttribute(result);
               audioPosted();
             }
 
+            private void useAudioAttribute(AudioAnswer result) {
+              AudioAttribute audioAttribute = result.getAudioAttribute();
+              if (audioAttribute != null) {
+                if (recordRegularSpeed) {
+                  audioAttribute.markRegular();
+                } else {
+                  audioAttribute.markSlow();
+                }
+                newUserExercise.getMutableAudio().addAudio(audioAttribute);
+              } else {
+                logger.warning("no valid audio on " + result);
+              }
+            }
+
             @Override
-            protected void useInvalidResult(AudioAnswer result) {
-              super.useInvalidResult(result);
+            protected void useInvalidResult(Validity validity, double dynamicRange) {
+              super.useInvalidResult(validity, dynamicRange);
 
               MutableAudioExercise mutableAudio = newUserExercise.getMutableAudio();
               if (recordRegularSpeed) {

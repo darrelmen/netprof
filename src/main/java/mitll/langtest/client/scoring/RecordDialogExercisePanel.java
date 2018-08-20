@@ -137,6 +137,10 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
         // logger.info("useResult got words " + result.getPretestScore().getWordScores());
       }
 
+      /**
+       * TODO : do something smarter here on invalid state
+       * @param isValid
+       */
       @Override
       public void useInvalidResult(boolean isValid) {
         super.useInvalidResult(isValid);

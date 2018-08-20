@@ -29,11 +29,9 @@ import java.io.File;
  * Created by go22670 on 3/7/17.
  */
 public class JsonScoring {
-
   private static final Logger logger = LogManager.getLogger(JsonScoring.class);
 
   private static final String SCORE = "score";
-
 
   public static final String CONTENT = "content";
 
@@ -49,9 +47,9 @@ public class JsonScoring {
 
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
   public static final boolean TRY_TO_DO_ALIGNMENT = false;
-//  public static final String EXERCISE_TEXT = "exerciseText";
-  public static final float MIN_HYDRA_ALIGN = 0.3F;
-  public static final String BAD_EXERCISE_ID = "bad_exercise_id";
+  //  public static final String EXERCISE_TEXT = "exerciseText";
+  private static final float MIN_HYDRA_ALIGN = 0.3F;
+  private static final String BAD_EXERCISE_ID = "bad_exercise_id";
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
 
@@ -120,9 +118,9 @@ public class JsonScoring {
         projid,
         options);
     long now = System.currentTimeMillis();
-    PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
 
     if (logger.isInfoEnabled()) {
+      PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
       float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
       logger.info("getJsonForAudioForUser" +
               "\n\tflashcard   " + doFlashcard +
@@ -135,15 +133,38 @@ public class JsonScoring {
       );
     }
 
+    return getJsonObject(projid, exerciseID, options, fullJSON, jsonForScore, doFlashcard, answer, false);
+  }
+
+  public JSONObject getJsonObject(int projid,
+                                  int exerciseID,
+                                  DecoderOptions options,
+                                  boolean fullJSON,
+                                  JSONObject jsonForScore,
+                                  boolean doFlashcard,
+                                  AudioAnswer answer, boolean addStream) {
+    PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
     if (answer != null && answer.isValid() && pretestScore != null) {
       jsonForScore = getJsonObject(projid, options.isUsePhoneToDisplay(), fullJSON, doFlashcard, answer, pretestScore);
+      if (addStream) {
+        jsonForScore.put("duration", answer.getDurationInMillis());
+        jsonForScore.put("dynamicRange", answer.getDynamicRange());
+        jsonForScore.put("path", answer.getPath());
+        jsonForScore.put("resultID", answer.getResultID());
+        jsonForScore.put("pretest", new JSONObject());
+        jsonForScore.put("timestamp", answer.getTimestamp());
+      }
+
     }
     addValidity(exerciseID, jsonForScore, answer);
+
+
     return jsonForScore;
   }
 
   /**
    * TODO : connect this to AudioService?
+   *
    * @param projid
    * @param usePhoneToDisplay
    * @param fullJSON
@@ -151,14 +172,15 @@ public class JsonScoring {
    * @param answer
    * @param pretestScore
    * @return
+   * @see #getJsonForAudioForUser
    */
   @NotNull
-  private JSONObject getJsonObject(int projid,
-                                   boolean usePhoneToDisplay,
-                                   boolean fullJSON,
-                                   boolean doFlashcard,
-                                   AudioAnswer answer,
-                                   PretestScore pretestScore ) {
+  public JSONObject getJsonObject(int projid,
+                                  boolean usePhoneToDisplay,
+                                  boolean fullJSON,
+                                  boolean doFlashcard,
+                                  AudioAnswer answer,
+                                  PretestScore pretestScore) {
     JSONObject jsonForScore;
     ScoreToJSON scoreToJSON = new ScoreToJSON();
     float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
@@ -190,10 +212,10 @@ public class JsonScoring {
   }
 
   /**
-   * @param reqid      label response with req id so the client can tell if it got a stale response
-   * @param exerciseID for this exercise - redundant
-   * @param user       by this user
-   * @param wavPath    path to posted audio file
+   * @param reqid           label response with req id so the client can tell if it got a stale response
+   * @param exerciseID      for this exercise - redundant
+   * @param user            by this user
+   * @param wavPath         path to posted audio file
    * @param saveFile
    * @param deviceType
    * @param device
@@ -311,7 +333,7 @@ public class JsonScoring {
       exercise1.setID(exerciseID);
 
     }
-     AudioContext audioContext =
+    AudioContext audioContext =
         new AudioContext(reqid, user, projectID, getLanguage(projectID), exerciseID,
             0, options.shouldDoDecoding() ? AudioType.PRACTICE : AudioType.LEARN);
     //   logger.info("getAnswer  for " + exerciseID + " for " + user + " and file " + wavPath);

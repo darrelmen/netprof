@@ -171,6 +171,7 @@ public class ScoreServlet extends DatabaseServlet {
     RESULT_ID("resultID"),
     ROUND_TRIP1("roundTrip"),
 
+    ISREFERENCE,
     STREAMSESSION,
     STREAMSTATE,
     STREAMSPACKET;

@@ -39,6 +39,7 @@ import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 
 import java.util.logging.Logger;
 
@@ -174,8 +175,8 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   @Override
-  protected void useInvalidResult(AudioAnswer result) {
-    super.useInvalidResult(result);
+  protected void useInvalidResult(Validity validity, double dynamicRange) {
+    super.useInvalidResult(validity, dynamicRange);
     //   logger.info("WaveformPostAudioRecordButton : got invalid result " + result);
     hideWaveform();
     recordAudioPanel.getSpectrogram().setVisible(false);

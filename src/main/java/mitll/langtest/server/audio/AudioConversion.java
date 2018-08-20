@@ -92,8 +92,8 @@ public class AudioConversion extends AudioBase {
    * @param file                     where we want to write the wav file to
    * @param useSensitiveTooLoudCheck
    * @return true if audio is valid (not too short, not silence)
-   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
    * @seex mitll.langtest.server.audio.AudioFileHelper#getAlignment
+   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
    */
   AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString,
                                                       File file,
@@ -111,10 +111,10 @@ public class AudioConversion extends AudioBase {
 
   @NotNull
   AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
-    if (DEBUG) logger.debug("convertBase64ToAudioFiles: wrote wav file " + file.getAbsolutePath());
+    if (DEBUG) logger.debug("getValidityAndDur: wrote wav file " + file.getAbsolutePath());
 
     if (!file.exists()) {
-      logger.error("convertBase64ToAudioFiles : after writing, can't find file at " + file.getAbsolutePath());
+      logger.error("getValidityAndDur : after writing, can't find file at " + file.getAbsolutePath());
     }
     AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
     if (valid.isValid() && trimAudio) {
@@ -124,7 +124,24 @@ public class AudioConversion extends AudioBase {
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
-      logger.debug("writeAudioFile: took " + diff + " millis to write wav file (" + file.getName() +
+      logger.debug("getValidityAndDur: took " + diff + " millis to write wav file (" + file.getName() +
+          ") " + valid.durationInMillis + " millis long");
+    }
+    return valid;
+  }
+
+  @NotNull
+  AudioCheck.ValidityAndDur getValidityAndDurStream(String name,
+                                                    String fileInfo,
+                                                    int length,
+                                                    AudioInputStream stream,
+                                                    boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
+    AudioCheck.ValidityAndDur valid = audioCheck.isValid(name, fileInfo, length, stream, useSensitiveTooLoudCheck, quietAudioOK);
+
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+    if (diff > MIN_WARN_DUR) {
+      logger.debug("writeAudioFile: took " + diff + " millis to write wav file (" + name +
           ") " + valid.durationInMillis + " millis long");
     }
     return valid;
@@ -161,12 +178,14 @@ public class AudioConversion extends AudioBase {
 
   /**
    * TODO: dom't necessarily force us to use a file to do the validity check
+   *
    * @param file
    * @param useSensitiveTooLoudCheck
    * @param quietAudioOK
    * @return
    * @see #convertBase64ToAudioFiles
    * @see AudioFileHelper#getAnswer
+   * @see #getValidityAndDur
    */
   public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     return audioCheck.isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
@@ -189,19 +208,6 @@ public class AudioConversion extends AudioBase {
     return removeSuffix(wavFile.getName());
   }
 
-  /**
-   * @param wavFile
-   * @return
-   * @see AudioCheck#getDynamicRange
-   */
-  public String getHighPassFilterFile(String wavFile) {
-    try {
-      return doHighPassFilter(wavFile);
-    } catch (IOException e) {
-      logger.error("Got " + e, e);
-    }
-    return null;
-  }
 
   /**
    * @param wavFile
@@ -278,8 +284,10 @@ public class AudioConversion extends AudioBase {
 
   private String sampleAt16KHZ(String pathToAudioFile, String tempForWavz) throws IOException {
     // i.e. sox inputFile -s -2 -c 1 -q tempForWavz.wav rate 16000
-    ProcessBuilder soxFirst = new ProcessBuilder(soxPath,
-        pathToAudioFile, "-s", "-2", "-c", "1", "-q", tempForWavz, "rate", "16000");
+    ProcessBuilder soxFirst = new ProcessBuilder(
+        soxPath,
+        pathToAudioFile,
+        "-s", "-2", "-c", "1", "-q", tempForWavz, "rate", "16000");
 //        logger.info("ENTER running sox on " + tempForWavz + " : " + soxFirst);
     if (!new ProcessRunner().runProcess(soxFirst)) {
       ProcessBuilder soxFirst2 = new ProcessBuilder(soxPath,
@@ -289,6 +297,20 @@ public class AudioConversion extends AudioBase {
     //   log.info("EXIT running sox on " + tempForWavz + " : " + soxFirst);
 
     return tempForWavz;
+  }
+
+  /**
+   * @param wavFile
+   * @return
+   * @see AudioCheck#getDynamicRange
+   */
+  public String getHighPassFilterFile(String wavFile) {
+    try {
+      return doHighPassFilter(wavFile);
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
+    return null;
   }
 
   /**

@@ -33,9 +33,7 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
@@ -47,10 +45,17 @@ import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
+import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
@@ -181,14 +186,15 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   /**
    * TODO : consider why we have to do this from the client.
    *
-   * @param result
+   * @param validity
+   * @param dynamicRange
    * @see PostAudioRecordButton#postAudioFile
    */
-  protected void useInvalidResult(AudioAnswer result) {
-    controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + result.getValidity());
+  protected void useInvalidResult(Validity validity, double dynamicRange) {
+    controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + validity);
     //  logger.info("useInvalidResult platform is " + getPlatform());
-    if (!checkAndShowTooLoud(result.getValidity())) {
-      showPopup(result.getValidity().getPrompt());
+    if (!checkAndShowTooLoud(validity)) {
+      showPopup(validity.getPrompt());
     }
   }
 
@@ -204,17 +210,124 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   private void gotResponse(String json) {
     JSONObject jsonObject = digestJsonResponse(json);
+
+    String valid1 = "valid";
+    String valid = getField(jsonObject, valid1);
+    Validity validity;
+    try {
+      validity = Validity.valueOf(valid);
+    } catch (IllegalArgumentException e) {
+      validity = Validity.INVALID;
+    }
+
+    AudioAnswer converted = new AudioAnswer(
+        getField(jsonObject, "path"),
+        validity,
+        getIntField(jsonObject, "reqid"),
+        getIntField(jsonObject, "duration"),
+        getIntField(jsonObject, "exid")
+    );
+
+    converted.setResultID(getIntField(jsonObject, "resultID"));
+
+    if (validity == Validity.INVALID) {
+      useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
+    } else {
+      converted.setTimestamp(getLongField(jsonObject, "timestamp"));
+
+      float score = getFloatField(jsonObject, "score");
+      converted.setScore(score);
+      converted.setCorrect(getBoolean(jsonObject, "isCorrect"));
+
+
+      List<TranscriptSegment> psegments = getSegments(jsonObject.get("PHONE_TRANSCRIPT").isArray());
+      List<TranscriptSegment> wsegments = getSegments(jsonObject.get("WORD_TRANSCRIPT").isArray());
+      float wavFileLengthSeconds = ((float) converted.getDurationInMillis()) / 1000F;
+      Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<>();
+      sTypeToEndTimes.put(NetPronImageType.PHONE_TRANSCRIPT, psegments);
+      sTypeToEndTimes.put(NetPronImageType.WORD_TRANSCRIPT, wsegments);
+      PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
+          new HashMap<>(),
+          new HashMap<>(),
+          sTypeToEndTimes, "", wavFileLengthSeconds,
+          0, true);
+      converted.setPretestScore(pretestScore);
+      useResult(converted);
+    }
+
     logger.info("Got " + jsonObject);
+  }
+
+  private List<TranscriptSegment> getSegments(JSONArray phone_transcript) {
+    List<TranscriptSegment> pseg = new ArrayList<>();
+    for (int i = 0; i < phone_transcript.size(); i++) {
+      JSONObject object = phone_transcript.get(i).isObject();
+      String event = getField(object, "event");
+      pseg.add(new TranscriptSegment(
+              getFloatField(object, "start"),
+              getFloatField(object, "end"),
+              event,
+              getFloatField(object, "score"),
+              event,
+              i
+          )
+      );
+    }
+    return pseg;
+  }
+
+  private int getIntField(JSONObject jsonObject, String reqid) {
+    JSONValue jsonValue = jsonObject.get(reqid);
+    if (jsonValue.isNumber() == null) {
+      logger.warning("huh? " + reqid + " is not a number? " + jsonValue.getClass());
+      try {
+        JSONString string = jsonObject.get(reqid).isString();
+        String s = string.stringValue();
+        return Integer.parseInt(s);
+      } catch (NumberFormatException e) {
+        logger.warning("can't parse " + jsonObject.get(reqid).isString().stringValue());
+        return 0;
+      }
+    } else
+      return (int) jsonValue.isNumber().doubleValue();
+    // return Integer.parseInt(jsonObject.get(reqid).().stringValue());
+  }
+
+  private long getLongField(JSONObject jsonObject, String reqid) {
+    return (long) jsonObject.get(reqid).isNumber().doubleValue();
+
+    //return Long.parseLong(getField(jsonObject, reqid));
+  }
+
+  private float getFloatField(JSONObject jsonObject, String reqid) {
+    return (float) jsonObject.get(reqid).isNumber().doubleValue();
+//    return Float.parseFloat(getField(jsonObject, reqid));
+  }
+
+  private double getDoubleField(JSONObject jsonObject, String reqid) {
+    return jsonObject.get(reqid).isNumber().doubleValue();
+//    return Float.parseFloat(getField(jsonObject, reqid));
+  }
+
+  private String getField(JSONObject jsonObject, String valid1) {
+    return jsonObject.get(valid1).isString().stringValue();
+  }
+
+  private boolean getBoolean(JSONObject jsonObject, String valid1) {
+    return jsonObject.get(valid1).isBoolean().booleanValue();
   }
 
   /**
    * Digest a json response from a servlet checking for a session expiration code
+   *
+   * @see mitll.langtest.server.scoring.JsonScoring#getJsonObject(int, int, DecoderOptions, boolean, net.sf.json.JSONObject, boolean, AudioAnswer, boolean)
    */
-  protected JSONObject digestJsonResponse(String json) {
+  private JSONObject digestJsonResponse(String json) {
     logger.info("Digesting response " + json);
     try {
       JSONValue val = JSONParser.parseStrict(json);
       JSONObject obj = (val != null) ? val.isObject() : null;
+
 
 //      JSONValue code = obj == null ? null : obj.get(Constants.SESSION_EXPIRED_CODE);
 //      if (code != null && code.isBoolean() != null && code.isBoolean().booleanValue()) {
@@ -226,7 +339,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
       return obj;
     } catch (Exception ex) {
-      return null;
+      logger.warning("couldn't parse " + json);
+      return new JSONObject();
     }
   }
 
@@ -305,13 +419,13 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     if (result.getValidity() == Validity.OK || doQuietAudioCheck(result)) {
       validAudio = true;
       useResult(result);
-      addRT(result, (int) roundtrip);
+      addRT(result.getResultID(), (int) roundtrip);
     } else {
       validAudio = false;
-      useInvalidResult(result);
+      useInvalidResult(result.getValidity(), result.getDynamicRange());
     }
     if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
-      logRoundtripTime(result, roundtrip);
+      logRoundtripTime(result.getDurationInMillis(), roundtrip);
     }
   }
 
@@ -329,8 +443,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     return controller.getUserState().getUser();
   }
 
-  private void addRT(AudioAnswer result, int roundtrip) {
-    controller.getScoringService().addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
+  private void addRT(int resultID, int roundtrip) {
+    // int resultID = result.getResultID();
+    controller.getScoringService().addRoundTrip(resultID, roundtrip, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("addRoundTrip", caught);
@@ -356,11 +471,12 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     return this;
   }
 
-  private void logRoundtripTime(AudioAnswer result, long roundtrip) {
+  private void logRoundtripTime(long durationInMillis, long roundtrip) {
+    //  long durationInMillis = result.getDurationInMillis();
     String message = "PostAudioRecordButton : (success) User #" + getUser() +
         " post audio took " + roundtrip + " millis, audio dur " +
-        result.getDurationInMillis() + " millis, " +
-        " " + ((float) roundtrip / (float) result.getDurationInMillis()) + " roundtrip/audio duration ratio.";
+        durationInMillis + " millis, " +
+        " " + ((float) roundtrip / (float) durationInMillis) + " roundtrip/audio duration ratio.";
     logMessage(message, false);
   }
 

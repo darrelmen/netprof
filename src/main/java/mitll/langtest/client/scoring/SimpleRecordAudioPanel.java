@@ -9,6 +9,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.WaitCursorHelper;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.SimpleAudioAnswer;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -145,7 +146,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
    * @param isRTL
    * @see #useResult
    */
-  private void scoreAudio(AudioAnswer result, boolean isRTL) {
+  private void scoreAudio(SimpleAudioAnswer result, boolean isRTL) {
     clearScoreFeedback();
     PretestScore pretestScore = result.getPretestScore();
     getScoreFeedback().add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL));
