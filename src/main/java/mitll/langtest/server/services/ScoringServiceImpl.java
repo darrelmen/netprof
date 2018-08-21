@@ -740,14 +740,16 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * <p>
    * Can't check if it's valid if we don't have a model.
    *
-   * @param foreign
+   * @paramx foreign
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
+   * @seex mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
+/*
   @Override
   public boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
   }
+*/
 
   /**
    * @param projID should be a projid from project table...
@@ -789,7 +791,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       String path = result.getAnswer();
       CommonExercise commonExercise = db.getExercise(projectID, result.getExID());
       /*String actualPath =*/
-      ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser);
+      ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser, true);
 //    logger.info("ensureAudioForAnswers initial path " + path + " compressed actual " + actualPath);
     }
   }

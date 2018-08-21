@@ -1029,7 +1029,7 @@ public class RefResultDecoder {
       if (absoluteFile.exists()) {
         String author = attribute.getUser().getUserID();
         audioConversion.ensureWriteMP3(pathHelper.getInstallPath(), audioRef, false,
-            new TrackInfo(title, author, comment, language));
+            new TrackInfo(title, author, comment, language), true);
       }
     }
   }

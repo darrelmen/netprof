@@ -63,6 +63,7 @@ public interface IEnsureAudioHelper {
    * @param audioType
    * @param language
    * @param idToUser
+   * @param waitToFinish
    * @return
    */
   String ensureCompressedAudio(int user,
@@ -70,7 +71,7 @@ public interface IEnsureAudioHelper {
                                String path,
                                AudioType audioType,
                                String language,
-                               Map<Integer, User> idToUser);
+                               Map<Integer, User> idToUser, boolean waitToFinish);
 
   /**
    * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile

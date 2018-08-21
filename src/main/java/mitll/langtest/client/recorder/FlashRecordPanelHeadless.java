@@ -41,8 +41,10 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.UserMenu;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
+import mitll.langtest.client.initial.WavStreamCallback;
 
 import java.util.logging.Logger;
 
@@ -186,16 +188,18 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   /**
-   * @see LangTest#startStream(int, int)
+   * @see ExerciseController#startStream(int, int, mitll.langtest.client.initial.WavStreamCallback)
    * @param url
    * @param exid
    * @param reqid
+   * @param wavStreamCallback
    */
-  public void startStream(String url, String exid, String reqid) {
+  public void startStream(String url, String exid, String reqid, WavStreamCallback wavStreamCallback) {
     if (usingWebRTC()) {
       logger.info("startStream post" +
           "\n\tto  " + url +
           "\n\tfor " + exid);
+      webAudio.setStreamCallback(wavStreamCallback);
       webAudio.startStream(url, exid, reqid);
     } else if (usingFlash()) {
       //flashRecordOnClick();

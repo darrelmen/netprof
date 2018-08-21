@@ -11,6 +11,7 @@ import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -133,6 +134,11 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
         // logger.info("useResult got words " + result.getPretestScore().getWordScores());
       }
 
+      @Override
+      public void usePartial(Validity validity) {
+        listenView.addPacketValidity(validity);
+      }
+
       /**
        * TODO : do something smarter here on invalid state
        * @param isValid
@@ -226,6 +232,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   /**
+   * Check against expected duration too see when to end.
    * @see RehearseViewHelper#mySilenceDetected()
    */
   public boolean stopRecording() {
@@ -236,7 +243,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
       return true;
     } else {
-      logger.info("stopRecording ignore too short " + diff + " vs " + minDur);
+//      logger.info("stopRecording ignore too short " + diff + " vs " + minDur);
       return false;
     }
   }

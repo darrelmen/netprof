@@ -2,6 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.Image;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
+import mitll.langtest.shared.answer.Validity;
 
 public interface IListenView {
   int getVolume();
@@ -10,5 +11,6 @@ public interface IListenView {
 
   void setSmiley(Image smiley, double total);
 
+  void addPacketValidity(Validity validity);
   void stopRecording();
 }

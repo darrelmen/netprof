@@ -43,7 +43,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class AudioConversion extends AudioBase {
@@ -138,7 +137,9 @@ public class AudioConversion extends AudioBase {
                                                     String fileInfo,
                                                     int length,
                                                     AudioInputStream stream,
-                                                    boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
+                                                    boolean useSensitiveTooLoudCheck,
+                                                    boolean quietAudioOK,
+                                                    long then) {
     AudioCheck.ValidityAndDur valid = audioCheck.isValid(name, fileInfo, length, stream, useSensitiveTooLoudCheck, quietAudioOK);
 
     long now = System.currentTimeMillis();
@@ -432,13 +433,14 @@ public class AudioConversion extends AudioBase {
    * @param pathToWav
    * @param overwrite       true if step on existing file.
    * @param trackInfo
+   * @param waitToFinish
    * @return
    * @see mitll.langtest.server.database.audio.EnsureAudioHelper#ensureMP3
    * @see mitll.langtest.server.decoder.RefResultDecoder#doEnsure
    */
-  public String ensureWriteMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo) {
+  public String ensureWriteMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo, boolean waitToFinish) {
     if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
-    return writeMP3(realContextPath, pathToWav, overwrite, trackInfo);
+    return writeMP3(realContextPath, pathToWav, overwrite, trackInfo, waitToFinish);
   }
 
   private int spew2 = 0;
@@ -449,10 +451,11 @@ public class AudioConversion extends AudioBase {
    * @param pathToWav
    * @param overwrite
    * @param trackInfo
+   * @param waitToFinish
    * @return
    * @see #ensureWriteMP3
    */
-  private String writeMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo) {
+  private String writeMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo, boolean waitToFinish) {
     File absolutePathToWav = new File(pathToWav); // LAZY - what should it be?
     if (!absolutePathToWav.exists()) {
       if (spew3++ < 100 && spew3 % 100 == 0) {
@@ -461,7 +464,7 @@ public class AudioConversion extends AudioBase {
       }
       absolutePathToWav = getAbsoluteFile(realContextPath, pathToWav);
     }
-    return writeCompressedVersions(absolutePathToWav, overwrite, trackInfo);
+    return writeCompressedVersions(absolutePathToWav, overwrite, trackInfo, waitToFinish);
   }
 
   /**
@@ -470,36 +473,41 @@ public class AudioConversion extends AudioBase {
    * @param absolutePathToWav
    * @param overwrite
    * @param trackInfo
+   * @param waitToFinish
    * @return absolute path to file
    * @see PathWriter#getPermanentAudioPath
    */
-  public String writeCompressedVersions(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo) {
+  public String writeCompressedVersions(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo, boolean waitToFinish) {
     try {
       String mp3File = getMP3ForWav(absolutePathToWav.getAbsolutePath());
       //logger.info("writeCompressedVersions started  writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
 
-      List<Boolean> results = new ArrayList<>(2);
+      if (waitToFinish) {
+        List<Boolean> results = new ArrayList<>(2);
 
-      Thread mp3Thread = new Thread(() -> results.add(
-          writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)));
-      mp3Thread.start();
+        Thread mp3Thread = new Thread(() -> results.add(
+            writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)));
+        mp3Thread.start();
 
-      Thread oggThread = new Thread(() -> results.add(new ConvertToOGG()
-          .writeOGG(absolutePathToWav, overwrite, trackInfo)));
-      oggThread.start();
+        Thread oggThread = new Thread(() -> results.add(new ConvertToOGG()
+            .writeOGG(absolutePathToWav, overwrite, trackInfo)));
+        oggThread.start();
+        try {
+          mp3Thread.join();
+          oggThread.join();
+        } catch (InterruptedException e) {
+          logger.error("could not finish the mp3 and ogg conversion.", e);
+        }
 
-      try {
-        mp3Thread.join();
-        oggThread.join();
-      } catch (InterruptedException e) {
-        logger.error("could not finish the mp3 and ogg conversion.", e);
+        long count = results.stream().filter(res -> !res).count();
+
+        if (count > 0) logger.warn("couldn't write compressed file " + mp3File);
+        // logger.info("writeCompressedVersions finished writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
+        return (count == 0) ? mp3File : FILE_MISSING;
+      } else {
+        logger.info("writeCompressedVersions not waiting for files to finish for " + mp3File);
+        return mp3File;
       }
-
-      long count = results.stream().filter(res -> !res).count();
-
-      if (count > 0) logger.warn("couldn't write compressed file " + mp3File);
-      // logger.info("writeCompressedVersions finished writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
-      return (count == 0) ? mp3File : FILE_MISSING;
     } catch (Exception e) {
       logger.error("writeCompressedVersions got " + e, e);
       return FILE_MISSING;
@@ -511,7 +519,6 @@ public class AudioConversion extends AudioBase {
   }
 
   /**
-   *
    * @param absolutePathToWav
    * @param overwrite
    * @param trackInfo

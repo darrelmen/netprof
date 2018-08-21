@@ -185,7 +185,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
         exercise,
         audioAttribute.getAudioRef(),
         audioAttribute.getAudioType(),
-        language, idToUser);
+        language, idToUser, true);
   }
 
   /**
@@ -197,6 +197,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * @param audioType
    * @param language
    * @param idToUser
+   * @param waitToFinish
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    */
   @Override
@@ -205,7 +206,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
                                       String path,
                                       AudioType audioType,
                                       String language,
-                                      Map<Integer, User> idToUser) {
+                                      Map<Integer, User> idToUser, boolean waitToFinish) {
     if (checkedExists.contains(path)) {
       return path;
     }
@@ -223,18 +224,18 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     }
 
     boolean noExerciseYet = commonShell == null;
-    String title   = noExerciseYet ? UNKNOWN : commonShell.getForeignLanguage();
+    String title = noExerciseYet ? UNKNOWN : commonShell.getForeignLanguage();
     String comment = noExerciseYet ? UNKNOWN : commonShell.getEnglish();
 
     if (audioType.isContext() && !noExerciseYet) {
       if (commonShell.hasContext()) {
         CommonShell contextSentence = commonShell.getDirectlyRelated().iterator().next();
-        title   = contextSentence.getForeignLanguage();
+        title = contextSentence.getForeignLanguage();
         comment = contextSentence.getEnglish();
       }
     }
 
-    String filePath = ensureMP3(path, new TrackInfo(title, userID, comment, language), language);
+    String filePath = ensureMP3(path, new TrackInfo(title, userID, comment, language), language, waitToFinish);
 
     {
       boolean isMissing = filePath.equals(FILE_MISSING);
@@ -265,10 +266,11 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * @param wavFile
    * @param trackInfo
    * @param language
+   * @param waitToFinish
    * @return file path of mp3 file
-   * @see IEnsureAudioHelper#ensureCompressedAudio(int, ClientExercise, String, AudioType, String, Map)
+   * @see IEnsureAudioHelper#ensureCompressedAudio(int, ClientExercise, String, AudioType, String, Map, boolean)
    */
-  private String ensureMP3(String wavFile, TrackInfo trackInfo, String language) {
+  private String ensureMP3(String wavFile, TrackInfo trackInfo, String language, boolean waitToFinish) {
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
       if (DEBUG || true) {
@@ -284,7 +286,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
         }
       }*/
 
-      String s = audioConversion.ensureWriteMP3(parent, wavFile, false, trackInfo);
+      String s = audioConversion.ensureWriteMP3(parent, wavFile, false, trackInfo, waitToFinish);
       boolean isMissing = s.equals(FILE_MISSING);
       if (isMissing) {
         if (spew++ < 10 || spew % 1000 == 0) {

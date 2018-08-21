@@ -26,6 +26,7 @@ import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.TurnPanel;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -901,6 +902,11 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   @Override
   public void stopRecording() {
+
+  }
+
+  @Override
+  public void addPacketValidity(Validity validity) {
 
   }
 }

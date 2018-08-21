@@ -10,6 +10,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
@@ -142,7 +143,8 @@ public class JsonScoring {
                                   boolean fullJSON,
                                   JSONObject jsonForScore,
                                   boolean doFlashcard,
-                                  AudioAnswer answer, boolean addStream) {
+                                  AudioAnswer answer,
+                                  boolean addStream) {
     PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
     if (answer != null && answer.isValid() && pretestScore != null) {
       jsonForScore = getJsonObject(projid, options.isUsePhoneToDisplay(), fullJSON, doFlashcard, answer, pretestScore);
@@ -154,9 +156,11 @@ public class JsonScoring {
         jsonForScore.put("pretest", new JSONObject());
         jsonForScore.put("timestamp", answer.getTimestamp());
       }
-
     }
-    addValidity(exerciseID, jsonForScore, answer);
+
+    addValidity(exerciseID, jsonForScore,
+        answer == null ? Validity.INVALID :  answer.getValidity(),
+        answer == null ? "1" : "" + answer.getReqid());
 
 
     return jsonForScore;
@@ -377,7 +381,7 @@ public class JsonScoring {
     }
 
     new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange())
-        .writeCompressedVersions(absolutePathToWav, false, trackInfo);
+        .writeCompressedVersions(absolutePathToWav, false, trackInfo, true);
   }
 
   private String getUserID(int userid) {
@@ -389,13 +393,15 @@ public class JsonScoring {
   /**
    * @param exerciseID
    * @param jsonForScore
-   * @param answer
+   * @param validity
    * @see #getJsonForAudioForUser
    */
-  private void addValidity(int exerciseID, JSONObject jsonForScore, AudioAnswer answer) {
+  public void addValidity(int exerciseID, JSONObject jsonForScore, Validity validity, String reqID) {
     jsonForScore.put(EXID, exerciseID);
-    jsonForScore.put(VALID, answer == null ? INVALID : answer.getValidity().toString());
-    jsonForScore.put(REQID, answer == null ? 1 : "" + answer.getReqid());
+
+    jsonForScore.put(VALID, validity.toString());
+
+    jsonForScore.put(REQID, reqID);
   }
 
   private String getLanguage(int projectid) {

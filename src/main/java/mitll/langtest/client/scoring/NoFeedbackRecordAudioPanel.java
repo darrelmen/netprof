@@ -5,6 +5,7 @@ import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.exercise.Shell;
 
@@ -144,6 +145,11 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     //logger.info("useScoredResult " + result);
     setVisible(true);
     playAudioPanel.showPlayButton();
+  }
+
+  @Override
+  public void usePartial(Validity validity) {
+
   }
 
   @Override

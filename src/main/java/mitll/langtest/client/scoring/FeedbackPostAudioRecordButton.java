@@ -91,6 +91,11 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     simpleRecordAudioPanel.useResult(result);
   }
 
+  @Override
+  public void usePartial(Validity validity) {
+    simpleRecordAudioPanel.usePartial(validity);
+  }
+
   /**
    * @param validity
    * @param dynamicRange

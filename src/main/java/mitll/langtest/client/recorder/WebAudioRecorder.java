@@ -35,6 +35,7 @@ package mitll.langtest.client.recorder;
 import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
+import mitll.langtest.client.initial.WavStreamCallback;
 
 /**
  * Tries to do initWebaudio, and if no response has been received in 5 seconds, tries again.
@@ -114,7 +115,7 @@ public class WebAudioRecorder {
    * @param url
    * @param exid
    * @param reqid
-   * @see FlashRecordPanelHeadless#startStream(String, String, String)
+   * @see FlashRecordPanelHeadless#startStream(String, String, String, WavStreamCallback)
    */
   public native void startStream(String url, String exid, String reqid) /*-{
       $wnd.serviceStartStream(url, exid, reqid);
@@ -161,7 +162,7 @@ public class WebAudioRecorder {
    * @see #advertise
    */
   public static void silenceDetected() {
-   // console("silenceDetected -- now!");
+    // console("silenceDetected -- now!");
     FlashRecordPanelHeadless.micPermission.silenceDetected();
   }
 
@@ -230,17 +231,13 @@ public class WebAudioRecorder {
    * @see #advertise()
    */
   public static void getStreamResponse(String json) {
-    //if (encoded.length() < 100) {
-    // console("getStreamResponse  = '" + json + "'");
-
-    // }
-    //   console("getStreamResponse   bytes = '" + encoded.length() + "'");
-
-/*    if (getAllZero()) {
-      logger.info("Seems like the mic is not plugged in?");
-    }*/
+    //  console("getStreamResponse   bytes = '" + json.length() + "'");
     if (WebAudioRecorder.wavCallback == null) {
-    //  console("getStreamResponse no callback?");
+      if (wavStreamCallback != null) {
+        wavStreamCallback.getResponse(json);
+      } else {
+        console("getStreamResponse no callback?");
+      }
     } else {
       WebAudioRecorder.wavCallback.gotStreamResponse(json);
     }
@@ -250,6 +247,7 @@ public class WebAudioRecorder {
    * @see mitll.langtest.client.LangTest#stopRecording(WavCallback)
    */
   private static WavCallback wavCallback = null;
+  private static WavStreamCallback wavStreamCallback = null;
 
   public void stopRecording(WavCallback wavCallback) {
     WebAudioRecorder.wavCallback = wavCallback;
@@ -260,5 +258,9 @@ public class WebAudioRecorder {
     } else {
       stopRecording();
     }
+  }
+
+  public void setStreamCallback(WavStreamCallback wavStreamCallback) {
+    WebAudioRecorder.wavStreamCallback = wavStreamCallback;
   }
 }

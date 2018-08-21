@@ -53,7 +53,8 @@ repositories {
 
     maven { url "${artifactory_contextUrl}/ext-snapshot-local" }
 
-    ivy { url "${artifactory_contextUrl}/domino"
+    ivy {
+        url "${artifactory_contextUrl}/domino"
         credentials {
             username = "${artifactory_user}"
             password = "${artifactory_password}"
@@ -68,14 +69,14 @@ dependencies {
     // our modules
     def dominoVers = '2.7.5'
 
-   // compile(group: 'net.jthink', name: 'jaudiotagger', version: '2.2.6-20170905.193146-1')
+    // compile(group: 'net.jthink', name: 'jaudiotagger', version: '2.2.6-20170905.193146-1')
 //    compile('mitll.hlt:domino-core:' + dcVers) { changing = true; }
     //compile('mitll.hlt:domino:' + dominoVers) { changing = true; }
 
     compile('mitll.hlt:domino:' + dominoVers) {
         changing = true
         transitive = true
-        artifact { name = 'domino'; type = 'jar'; extension='jar'}
+        artifact { name = 'domino'; type = 'jar'; extension = 'jar' }
     }
 
     compile('mitll.hlt:npdata:1.0.0') { changing = true }
@@ -87,20 +88,20 @@ dependencies {
 
     // gwt stuff
     def gwtVers = '2.8.2'
-    providedCompile('com.google.gwt:gwt-dev:' + gwtVers)
-    providedCompile('com.google.gwt:gwt-user:' + gwtVers)
+    providedCompile('com.google.gwt:gwt-dev:' + gwtVers) { transitive = false; }
+    providedCompile('com.google.gwt:gwt-user:' + gwtVers) { transitive = false; }
     runtime('com.google.gwt:gwt-servlet:' + gwtVers)
     testRuntime('com.google.gwt:gwt-codeserver:' + gwtVers)
 
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: 'latest.release'
 
- //   runtime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    //   runtime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
     // please just include this jar oh gradle gods
     //   providedRuntime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
-  //  testCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-  //  testRuntime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    //  testCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    //  testRuntime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
     compile group: 'org.apache.commons', name: 'commons-math3', version: 'latest.release'
 
@@ -131,8 +132,10 @@ dependencies {
     runtime group: 'commons-collections', name: 'commons-collections', version: '3+'
 
     compile('org.apache.commons:commons-email:1+')
+
 //    compile('org.apache.ignite:ignite-core:1.7.0')
 //    runtime('org.apache.ignite:ignite-slf4j:1.7.0')
+
     compile('commons-fileupload:commons-fileupload:1+')
 
     def poiVers = '3.17'
@@ -157,10 +160,16 @@ dependencies {
 
     // the only way I can get war to accept my explicit command to include these jars
     //compile name: 'commons-codec-1.10'
-   // compile name: 'commons-collections-3.2.2'
-  //  compile group: 'commons-collections', name: 'commons-collections', version: 'latest.integration'
+    // compile name: 'commons-collections-3.2.2'
+    //  compile group: 'commons-collections', name: 'commons-collections', version: 'latest.integration'
 
-    compile group: 'com.google.code.gson', name: 'gson', version: '2+'
+//    compile group: 'com.google.code.gson', name: 'gson', version: '2+'
+    // runtime group: 'com.google.code.gson', name: 'gson', version: '2+'
+//    runtime group: 'com.google.code.gson', name: 'gson', version: '2+'
+
+//    runtime('com.google.code.gson:gson:2.6.2@jar')
+
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
 
     compile group: 'commons-codec', name: 'commons-codec', version: '1+'
     runtime group: 'commons-codec', name: 'commons-codec', version: '1+'
@@ -174,7 +183,7 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: 'latest.release'
 
-   // compile group: 'javax.websocket', name: 'javax.websocket-api', version: '1.1'
+    // compile group: 'javax.websocket', name: 'javax.websocket-api', version: '1.1'
 
     //   compile group: 'net.bull.javamelody', name: 'javamelody-core', version: '1.72.0'
 }

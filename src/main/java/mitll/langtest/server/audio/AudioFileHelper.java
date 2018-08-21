@@ -419,7 +419,7 @@ public class AudioFileHelper implements AlignDecode {
   private void ensureCompressed(ClientExercise exercise1, AudioContext audioContext, String wavPath) {
     String actualPath =
         ensureAudioHelper.ensureCompressedAudio(audioContext.getUserid(), exercise1, wavPath,
-            audioContext.getAudioType(), language, new HashMap<>());
+            audioContext.getAudioType(), language, new HashMap<>(), true);
     logger.info("ensureCompressed wav path " + wavPath + " compressed actual " + actualPath);
   }
 

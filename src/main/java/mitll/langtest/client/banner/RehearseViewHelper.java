@@ -20,6 +20,7 @@ import mitll.langtest.client.initial.WavEndCallback;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.client.scoring.ScoreProgressBar;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
@@ -37,8 +38,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     extends ListenViewHelper<T> implements SessionManager {
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
-  private static final String THEY_SPEAK = "<i>They</i> Speak";
-  private static final String YOU_SPEAK = "<i>You</i> Speak";
+  private static final String THEY_SPEAK = "Listen to : ";//"<i>They</i> Speak";
+  private static final String YOU_SPEAK = "Speak and record : ";//"<i>You</i> Speak";
 
   private static final boolean DEBUG = false;
 
@@ -106,7 +107,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     DivWidget breadRow = new DivWidget();
     Style style = breadRow.getElement().getStyle();
     style.setMarginTop(10, Style.Unit.PX);
-    //style.setMarginLeft(135, Style.Unit.PX);
     style.setMarginBottom(10, Style.Unit.PX);
     style.setClear(Style.Clear.BOTH);
     breadRow.addStyleName("cardBorderShadow");
@@ -265,13 +265,23 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private void mySilenceDetected() {
     if (currentRecordingTurn != null && currentRecordingTurn.isRecording()) {
-      if (currentRecordingTurn.stopRecording()) {
-        logger.info("mySilenceDetected : stopped " + currentRecordingTurn);
-        currentRecordingTurn = null;
-        currentTurnPlayEndedLater();
+      if (!validities.isEmpty()) {
+        Validity validity = validities.get(validities.size() - 1);
+       // logger.info("last validity was " + validity);
+        if (validity == Validity.TOO_QUIET || validity == Validity.SNR_TOO_LOW || validity == Validity.MIC_DISCONNECTED) {
+          logger.info("OK, server agrees with client side silence detector... have seen " + validities.size());
+          stopRecordingTurn();
+        } else {
+          StringBuffer buffer = new StringBuffer();
+          validities.forEach(validity1 -> buffer.append(validity1).append(" "));
+          logger.info("mySilenceDetected : packets " + buffer);
+        }
       }
-    }
+      else {
+        stopRecordingTurn();
+      }
 
+    }
 
     //  logger.info("silenceDetected got silence");
 /*    for (T recordDialogExercisePanel : bothTurns) {
@@ -284,6 +294,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         break;
       }
     }*/
+  }
+
+  private void stopRecordingTurn() {
+    if (currentRecordingTurn.stopRecording()) {
+      logger.info("mySilenceDetected : stopped " + currentRecordingTurn);
+      currentRecordingTurn = null;
+      currentTurnPlayEndedLater();
+    }
   }
 
   private void currentTurnPlayEndedLater() {
@@ -524,6 +542,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private void startRecordingTurn(T toStart) {
     toStart.startRecording();
     currentRecordingTurn = toStart;
+    validities.clear();
   }
 
   private void showScore() {
@@ -591,6 +610,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     if (getCurrentTurn() == bothTurns.get(bothTurns.size() - 1) && !exToScore.isEmpty()) {
       waitCursor.setVisible(true);
     }
+  }
+
+  private List<Validity> validities = new ArrayList<>();
+
+  @Override
+  public void addPacketValidity(Validity validity) {
+    validities.add(validity);
   }
 
   /**

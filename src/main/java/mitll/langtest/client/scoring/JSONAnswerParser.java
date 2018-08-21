@@ -18,8 +18,8 @@ import java.util.logging.Logger;
 public class JSONAnswerParser {
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
 
-  public static final String REQID = "reqid";
-  public static final String VALID = "valid";
+  private static final String REQID = "reqid";
+  private static final String VALID = "valid";
 
   @NotNull
   AudioAnswer getAudioAnswer(JSONObject jsonObject) {
@@ -75,7 +75,7 @@ public class JSONAnswerParser {
   }
 
   @NotNull
-  private Validity getValidity(JSONObject jsonObject) {
+  public Validity getValidity(JSONObject jsonObject) {
     String valid = getField(jsonObject, VALID);
     Validity validity;
     try {

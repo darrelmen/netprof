@@ -1185,13 +1185,14 @@ public class LangTest implements
    * @see PostAudioRecordButton#startRecording
    * @param exid
    * @param reqid
+   * @param wavStreamCallback
    */
-  public void startStream(int exid, int reqid) {
+  public void startStream(int exid, int reqid, WavStreamCallback wavStreamCallback) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
 
     logger.info("startStream " + serviceEntryPoint + " exid " + exid);
-    flashRecordPanel.startStream(serviceEntryPoint, "" + exid, "" + reqid);
+    flashRecordPanel.startStream(serviceEntryPoint, "" + exid, "" + reqid, wavStreamCallback);
   }
 
 

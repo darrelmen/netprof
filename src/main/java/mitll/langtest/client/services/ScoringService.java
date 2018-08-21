@@ -91,9 +91,11 @@ public interface ScoringService extends RemoteService {
   /**
    * @param foreign
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
+   * @seex mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
+/*
   boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException;
+*/
 
   /**
    * @param projid
@@ -101,6 +103,12 @@ public interface ScoringService extends RemoteService {
    */
   void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException;
 
+  /**
+   * @see mitll.langtest.client.LangTest#tellHydraServerToRefreshProject
+   * @param projID
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
   void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException;
 
   void ensureAudio(int resultID) throws DominoSessionException;

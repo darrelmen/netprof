@@ -195,13 +195,28 @@ public class AudioCheck {
                                                  boolean quietAudioOK) {
     try {
       ValidityAndDur validityAndDur = getValidityAndDur(name, fileInfo, allowMoreClipping, quietAudioOK, stream, true);
-//      if (validityAndDur.isValid()) {
-//        addDynamicRange(file, validityAndDur);
-//      }
+      //maybeAddDNR(fileInfo, stream, validityAndDur);
       return validityAndDur;
     } catch (IOException e) {
       logger.error("got " + e, e);
       return INVALID_AUDIO;
+    }
+  }
+
+  public void maybeAddDNR(String fileInfo, AudioInputStream stream, ValidityAndDur validityAndDur) throws IOException {
+    if (validityAndDur.isValid()) {
+//        addDynamicRange(file, validityAndDur);
+      DynamicRange.RMSInfo dynamicRange = new DynamicRange().getRmsInfo(fileInfo, stream);
+
+      if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
+        logger.info("maybeAddDNR file " + fileInfo + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE +
+            "):\n" + dynamicRange);
+        validityAndDur.validity = Validity.SNR_TOO_LOW;
+      }
+      validityAndDur.setMaxMinRange(dynamicRange.maxMin);
+    }
+    else {
+     // logger.info("file " +fileInfo + " not valid so not doing DNR");
     }
   }
 
@@ -256,8 +271,8 @@ public class AudioCheck {
    * @param quietAudioOK
    * @return true if well formed
    * @see AudioConversion#isValid(File, boolean, boolean)
-   * @see #checkWavFile(File, boolean)
-   * @see #checkWavFileRejectAnyTooLoud(File, boolean)
+   * @seex #checkWavFile
+   * @seex #checkWavFileRejectAnyTooLoud
    */
   private ValidityAndDur checkWavFileWithClipThreshold(File wavFile, boolean allowMoreClipping, boolean quietAudioOK) {
     AudioInputStream ais = null;
@@ -433,7 +448,7 @@ public class AudioCheck {
 
   public static class ValidityAndDur {
     private Validity validity;
-    private boolean isValid;
+    private final boolean isValid;
     public int durationInMillis;
     private double maxMinRange;
 

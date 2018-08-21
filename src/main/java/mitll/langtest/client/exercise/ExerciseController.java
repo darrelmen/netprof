@@ -41,6 +41,7 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.initial.WavEndCallback;
+import mitll.langtest.client.initial.WavStreamCallback;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
@@ -77,7 +78,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
   int getUser();
 
   void startRecording();
-  void startStream(int exid, int reqid);
+  void startStream(int exid, int reqid, WavStreamCallback wavStreamCallback);
 
   void stopRecording(WavCallback wavCallback);
   void stopRecordingAndPost(int exid);

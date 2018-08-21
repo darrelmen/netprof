@@ -13,6 +13,7 @@ public class DecoderOptions implements IsSerializable {
   private boolean canUseCache = true;
   private boolean allowAlternates = false;
   private boolean usePhoneToDisplay = false;
+  private boolean compressLater = false;
 
   public DecoderOptions() {
   }
@@ -88,6 +89,15 @@ public class DecoderOptions implements IsSerializable {
 
   public boolean isUsePhoneToDisplay() {
     return usePhoneToDisplay;
+  }
+
+  public DecoderOptions setCompressLater(boolean val) {
+    this.compressLater = val;
+    return this;
+  }
+
+  public boolean shouldCompressLater() {
+    return compressLater;
   }
 
   public String toString() {

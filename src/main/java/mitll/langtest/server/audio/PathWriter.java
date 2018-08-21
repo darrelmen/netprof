@@ -137,7 +137,7 @@ public class PathWriter {
       }
       logger.debug("getPermanentAudioPath : *not* normalizing levels for " + destination.getAbsolutePath());
     }
-    String s = getAudioConversion(serverProperties).writeCompressedVersions(destination, overwrite, trackInfo);
+    String s = getAudioConversion(serverProperties).writeCompressedVersions(destination, overwrite, trackInfo, true);
 
   //  String audioBaseDir = serverProperties.getAudioBaseDir();
     String audioBaseDir = commonAudioPrefix;

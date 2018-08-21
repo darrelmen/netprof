@@ -41,22 +41,15 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.client.initial.WavCallback;
+import mitll.langtest.client.initial.WavStreamCallback;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
-import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.scoring.PretestScore;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
@@ -145,7 +138,17 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
 //    logger.info("startRecording!");
     controller.startRecording();
-    controller.startStream(getExerciseID(), reqid);
+    controller.startStream(getExerciseID(), reqid, json -> {
+      JSONAnswerParser jsonAnswerParser = new JSONAnswerParser();
+      JSONObject digestJsonResponse = jsonAnswerParser.digestJsonResponse(json);
+      String message = jsonAnswerParser.getField(digestJsonResponse, "MESSAGE");
+      if (!message.isEmpty()) {
+        // got interim OK
+      //  logger.info("got interim " + message + " " + json);
+        Validity validity = jsonAnswerParser.getValidity(digestJsonResponse);
+        usePartial(validity);
+      }
+    });
   }
 
   /**
@@ -165,16 +168,17 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
         @Override
         public void gotStreamResponse(String json) {
-          //    logger.info("gotStreamResponse " + json);
+        //  logger.info("gotStreamResponse " + json);
           // reqid++;
-
 
           JSONAnswerParser jsonAnswerParser = new JSONAnswerParser();
           JSONObject digestJsonResponse = jsonAnswerParser.digestJsonResponse(json);
           String message = jsonAnswerParser.getField(digestJsonResponse, "MESSAGE");
           if (!message.isEmpty()) {
             // got interim OK
-            //    logger.info("got interim " + message + " " + json);
+//            logger.info("got interim " + message + " " + json);
+           // Validity validity = jsonAnswerParser.getValidity(digestJsonResponse);
+            usePartial(jsonAnswerParser.getValidity(digestJsonResponse));
           } else if (!jsonAnswerParser.getField(digestJsonResponse, "status").isEmpty()) {
             String code = jsonAnswerParser.getField(digestJsonResponse, "code");
             onPostFailure(then, getUser(), "error (" + code + ") posting audio for exercise " + getExerciseID());
@@ -199,6 +203,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @see #onPostSuccess
    */
   public abstract void useResult(AudioAnswer result);
+
+  public void usePartial(Validity validity) {
+   // logger.info("got " + validity);
+
+  }
 
   /**
    * TODO : consider why we have to do this from the client.
@@ -320,6 +329,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       logRoundtripTime(result.getDurationInMillis(), roundtrip);
     }
   }
+
 
   /**
    * Just for load testing
