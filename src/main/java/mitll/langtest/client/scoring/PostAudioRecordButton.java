@@ -168,7 +168,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
         @Override
         public void gotStreamResponse(String json) {
-        //  logger.info("gotStreamResponse " + json);
+           logger.info("gotStreamResponse " + json);
           // reqid++;
 
           JSONAnswerParser jsonAnswerParser = new JSONAnswerParser();
@@ -400,7 +400,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    *
    * @param toShow
    */
-  private void showPopup(String toShow) {
+  protected void showPopup(String toShow) {
     logger.info("showPopup " + toShow + " on " + getExerciseID());
 
     new PopupHelper().showPopup(toShow, getOuter(), 3000);

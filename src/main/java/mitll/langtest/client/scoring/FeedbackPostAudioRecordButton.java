@@ -1,6 +1,9 @@
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
+import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -110,5 +113,20 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
 
   protected void gotShortDurationRecording() {
     simpleRecordAudioPanel.gotShortDurationRecording();
+  }
+
+  boolean showing=false;
+  @Override
+  protected void showPopup(String toShow) {
+    if (!showing) {
+      new ModalInfoDialog("Warning", toShow, new HiddenHandler() {
+        @Override
+        public void onHidden(HiddenEvent hiddenEvent) {
+          showing = false;
+        }
+      });
+
+      showing = true;
+    }
   }
 }

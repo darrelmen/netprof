@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class JSONAnswerParser {
-  private final Logger logger = Logger.getLogger("PostAudioRecordButton");
+  private final Logger logger = Logger.getLogger("JSONAnswerParser");
 
   private static final String REQID = "reqid";
   private static final String VALID = "valid";
@@ -178,7 +178,7 @@ public class JSONAnswerParser {
 
       return obj;
     } catch (Exception ex) {
-      logger.warning("couldn't parse " + json);
+      logger.warning("couldn't parse '" + json + "'");
       return new JSONObject();
     }
   }

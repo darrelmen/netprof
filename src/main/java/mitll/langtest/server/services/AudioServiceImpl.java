@@ -144,6 +144,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         reply(response, jsonForStream);
       } catch (Exception e) {
         logger.warn("got " + e, e);
+        throw new ServletException("Got getJSONForStream : " + e, e);
       }
       // logger.debug("service : Request " + request.getQueryString() + " path " + request.getPathInfo());
 //      FileUploadHelper.UploadInfo uploadInfo = db.getProjectManagement().getFileUploadHelper().gotFile(request);
@@ -220,6 +221,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return jsonObject;
     }
 
+    if (true) throw new IllegalArgumentException("dude!");
 
     int realExID = getRealExID(request);
     int reqid = getReqID(request);

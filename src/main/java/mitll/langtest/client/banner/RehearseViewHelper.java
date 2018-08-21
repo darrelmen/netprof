@@ -39,7 +39,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final String THEY_SPEAK = "Listen to : ";//"<i>They</i> Speak";
-  private static final String YOU_SPEAK = "Speak and record : ";//"<i>You</i> Speak";
+  private static final String YOU_SPEAK = "Speak : ";// and record : ";//"<i>You</i> Speak";
 
   private static final boolean DEBUG = false;
 
@@ -134,17 +134,19 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   @NotNull
   protected DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
     DivWidget rightDiv = new DivWidget();
-    rightDiv.add(checkBox);
     checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
 
-    leftSpeakerHint = new HTML(THEY_SPEAK);
-    leftSpeakerHint.addStyleName("floatLeft");
+    {
+      leftSpeakerHint = new HTML(THEY_SPEAK);
+      leftSpeakerHint.addStyleName("floatLeft");
 
-    Style style = leftSpeakerHint.getElement().getStyle();
-    style.setClear(Style.Clear.BOTH);
-    style.setMarginLeft(41, Style.Unit.PX);
+      Style style = leftSpeakerHint.getElement().getStyle();
+      style.setClear(Style.Clear.BOTH);
+      style.setMarginLeft(41, Style.Unit.PX);
 
-    rightDiv.add(leftSpeakerHint);
+      rightDiv.add(leftSpeakerHint);
+    }
+    rightDiv.add(checkBox);
 
     return rightDiv;
   }
@@ -152,18 +154,19 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   @NotNull
   DivWidget getRightSpeakerDiv(CheckBox checkBox) {
     DivWidget rightDiv = new DivWidget();
+
+    {
+      rightSpeakerHint = new HTML(YOU_SPEAK);
+      rightSpeakerHint.addStyleName("floatRight");
+
+      Style style = rightSpeakerHint.getElement().getStyle();
+      style.setMarginRight(4, Style.Unit.PX);
+      style.setMarginTop(-46, Style.Unit.PX);
+
+      rightDiv.add(rightSpeakerHint);
+    }
+     checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
     rightDiv.add(checkBox);
-
-    // checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
-
-    rightSpeakerHint = new HTML(YOU_SPEAK);
-    rightSpeakerHint.addStyleName("floatRight");
-
-    Style style = rightSpeakerHint.getElement().getStyle();
-    style.setMarginRight(17, Style.Unit.PX);
-
-    rightDiv.add(rightSpeakerHint);
-
 
     return rightDiv;
   }
