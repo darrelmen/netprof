@@ -166,7 +166,7 @@ public class DynamicRange {
     short minSample = Short.MAX_VALUE;
     short maxSample = Short.MIN_VALUE;
 
-    int windowCount = 0;
+//    int windowCount = 0;
 
     double lastTotal = 0;
     double windowTotal = 0;
@@ -195,7 +195,9 @@ public class DynamicRange {
             minSample = tmp;
             //logger.info("c : at " + sIndex + "\tnow\t" + minSample + " at i " + i + " s " + s + " i + s " + (i+s) + " f\t" + firstByte + " s\t" + secondByte + " second shifted\t" + (secondByte << 8) );
           }
-          if (tmp > maxSample) maxSample = tmp;
+          if (tmp > maxSample) {
+            maxSample = tmp;
+          }
 
           double r = ((double) tmp) / MAX_VALUE;
 
@@ -214,7 +216,7 @@ public class DynamicRange {
           }
 
           windowTotal += squared;
-          windowCount++;
+  //        windowCount++;
 
           sIndex++;
 
@@ -297,7 +299,7 @@ public class DynamicRange {
     final double maxRMS;
     final DecimalFormat decimalFormat = new DecimalFormat("##.##");
 
-    public RMSInfo() {
+    RMSInfo() {
       this(0, 0, 0, 0, 0, 0);
     }
 

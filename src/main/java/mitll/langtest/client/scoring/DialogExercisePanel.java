@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.banner.ListenViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.*;
@@ -888,12 +889,19 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return false;
   }
 
+  /**
+   * @see ListenViewHelper#playCurrentTurn
+   * @return
+   */
   @Override
-  public void doPlayPauseToggle() {
+  public boolean doPlayPauseToggle() {
     if (playAudio != null) {
       if (DEBUG) logger.info("doPlayPauseToggle");
-      playAudio.doPlayPauseToggle();
-    } else logger.warning("no play audio???");
+     return playAudio.doPlayPauseToggle();
+    } else {
+      logger.warning("no play audio???");
+      return false;
+    }
   }
 
   public void addPlayListener(PlayListener playListener) {
@@ -918,4 +926,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   public void resetAudio() {
     playAudio.reinitialize();
   }
+
+  public String toString() { return "turn for " + exercise.getID() + " " + exercise.getForeignLanguage(); }
 }

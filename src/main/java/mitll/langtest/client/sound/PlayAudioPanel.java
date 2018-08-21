@@ -236,9 +236,11 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   }
 
   @Override
-  public void doPlayPauseToggle() {
+  public boolean doPlayPauseToggle() {
     if (playButton.isVisible() && isEnabled()) {
-      super.doPlayPauseToggle();
+      return super.doPlayPauseToggle();
+    } else {
+      return false;
     }
   }
 

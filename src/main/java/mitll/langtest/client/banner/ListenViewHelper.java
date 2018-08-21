@@ -17,6 +17,7 @@ import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
@@ -42,7 +43,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     implements ContentView, PlayListener, IListenView {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
-  // private static final int SPACER_HEIGHT = 10;
   private static final int HEADER_HEIGHT = 120;
 
   private static final String VALUE = "value";
@@ -153,15 +153,14 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     Style style = rowOne.getElement().getStyle();
     style.setProperty("position", "sticky");
     style.setTop(0, PX);
-    rowOne.setHeight(getControlRowHeight() +
-        "px");
+    rowOne.setHeight(getControlRowHeight() + "px");
     rowOne.setWidth(97 + "%");
     style.setMarginTop(10, PX);
     style.setMarginBottom(10, PX);
     style.setZIndex(1000);
   }
 
-   int getControlRowHeight() {
+  int getControlRowHeight() {
     return 40;
   }
 
@@ -205,7 +204,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   @NotNull
-   DivWidget getRightSpeakerDiv(CheckBox checkBox) {
+  DivWidget getRightSpeakerDiv(CheckBox checkBox) {
     DivWidget rightDiv = new DivWidget();
     rightDiv.add(checkBox);
     return rightDiv;
@@ -220,11 +219,17 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   protected void speakerOneCheck(Boolean value) {
-    setPlayButtonToPlay();
+//    setPlayButtonToPlay();
+    if (!value && !rightSpeakerBox.getValue()) {
+      rightSpeakerBox.setValue(true);
+    }
   }
 
   protected void speakerTwoCheck(Boolean value) {
-    setPlayButtonToPlay();
+    //  setPlayButtonToPlay();
+    if (!value && !leftSpeakerBox.getValue()) {
+      leftSpeakerBox.setValue(true);
+    }
   }
 
   @NotNull
@@ -300,8 +305,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return image;
   }
 
-  //private DivWidget turnContainer;
-
   /**
    * @param dialog
    * @return
@@ -340,16 +343,24 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
       rowOne.add(turn);
     });
 
-    if (!bothTurns.isEmpty()) {
-      setCurrentTurn(bothTurns.get(0));
-      logger.info("getTurns : markCurrent ");
-      markCurrent();
-      makeVisible(currentTurn);
-    }
+    markFirstTurn();
 
     return rowOne;
   }
 
+  private void markFirstTurn() {
+    if (!bothTurns.isEmpty()) {
+      setCurrentTurn(bothTurns.get(0));
+   //   logger.info("getTurns : markCurrent ");
+      markCurrent();
+      makeVisible(currentTurn);
+    }
+  }
+
+  /**
+   * @param toMakeCurrent
+   * @see #markFirstTurn()
+   */
   void setCurrentTurn(T toMakeCurrent) {
     this.currentTurn = toMakeCurrent;
   }
@@ -358,11 +369,9 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return currentTurn;
   }
 
-  protected void makeVisible(UIObject currentTurn) {
+  void makeVisible(UIObject currentTurn) {
     currentTurn.getElement().scrollIntoView();
   }
-
-  // private DivWidget spacer;
 
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {
@@ -375,7 +384,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
         next.getRefAudio(() -> {
           if (iterator.hasNext()) {
             //     logger.info("\tgetRefAudio panel complete...");
-         //   final int reqid = next.getReq();
+            //   final int reqid = next.getReq();
             if (true) {
               Scheduler.get().scheduleDeferred(() -> {
                 if (true) {
@@ -399,7 +408,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     turn.addWidgets(true, false, PhonesChoices.HIDE);
     turn.addPlayListener(this);
 
-    turn.addDomHandler(event -> gotCardClick(turn), ClickEvent.getType());
+    turn.addDomHandler(event -> gotTurnClick(turn), ClickEvent.getType());
 
     return turn;
   }
@@ -416,7 +425,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return widgets;
   }
 
-  protected void gotCardClick(T turn) {
+  protected void gotTurnClick(T turn) {
     removeMarkCurrent();
     setCurrentTurn(turn);
     playCurrentTurn();
@@ -498,7 +507,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   @Override
   public void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
-
   }
 
   @NotNull
@@ -533,11 +541,11 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return INavigation.VIEWS.DIALOG;
   }
 
-  protected String getPrevTooltip() {
+  private String getPrevTooltip() {
     return "Go back to " + getPrevView().toString();
   }
 
-  protected String getNextTooltip() {
+  private String getNextTooltip() {
     return "Go ahead to " + getNextView().toString();
   }
 
@@ -550,7 +558,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return INavigation.VIEWS.REHEARSE;
   }
 
-  private void gotBackward() {
+  void gotBackward() {
     setPlayButtonToPlay();
 
     List<T> seq = getSeq();
@@ -561,7 +569,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     boolean isPlaying = currentTurn.doPause();
 
     clearHighlightAndRemoveMark();
-
 
     if (!makePrevVisible()) {
       //makeVisible(currentTurn);
@@ -582,8 +589,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     if (isPlaying) playCurrentTurn();
   }
 
-
-  private void gotForward() {
+  void gotForward() {
     setPlayButtonToPlay();
 
     List<T> seq = getSeq();
@@ -616,27 +622,48 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @see #gotBackward()
    */
   protected void clearHighlightAndRemoveMark() {
+  //  logger.info("clearHighlight on " + currentTurn);
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();
   }
 
+  /**
+   * @see #getControls
+   */
   protected void gotPlay() {
     //   logger.info("got click on play ");
-    setPlayButtonIcon();
+    //  setPlayButtonIcon();
 
-    setTurnToPromptSide();
+    if (!setTurnToPromptSide()) {
+      T currentTurn = getCurrentTurn();
+      boolean last = isLast(currentTurn);
+      if (last) logger.info("OK, on last - let's consider going back to start");
+      if (currentTurn != null && !currentTurn.hasCurrentMark()) {
+        markFirstTurn();
+      }
+    }
 
     playCurrentTurn();
   }
 
-  void setTurnToPromptSide() {
+  private boolean isLast(T currentTurn) {
+    List<T> seq = getSeq();
+    int i = seq.indexOf(currentTurn);
+    return i == seq.size();
+  }
+
+  boolean setTurnToPromptSide() {
     Boolean leftSpeakerSet = isLeftSpeakerSet();
     Boolean rightSpeakerSet = isRightSpeakerSet();
     if (leftSpeakerSet && rightSpeakerSet) {
-      // logger.info("gotPlay both speakers ");
+      // logger.info("setTurnToPromptSide both speakers ");
+      return false;
     } else if (leftSpeakerSet && !leftTurnPanels.contains(currentTurn) || rightSpeakerSet && !rightTurnPanels.contains(currentTurn)) {
       setNextTurnForSide();
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -669,7 +696,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
   }
 
-  protected List<T> getRespSeq() {
+  List<T> getRespSeq() {
     boolean leftSpeaker = isLeftSpeakerSet();
     boolean rightSpeaker = isRightSpeakerSet();
     return leftSpeaker ? rightTurnPanels : rightSpeaker ? leftTurnPanels : null;
@@ -683,19 +710,32 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return rightSpeakerBox.getValue();
   }
 
+  /**
+   * @see #gotTurnClick
+   */
   void playCurrentTurn() {
     if (currentTurn != null) {
       if (DEBUG) logger.info("playCurrentTurn - turn " + currentTurn.getExID());
-      currentTurn.doPlayPauseToggle();
+      boolean didPause = currentTurn.doPlayPauseToggle();
+      if (didPause) {
+        logger.info("playCurrentTurn did pause - turn " + currentTurn.getExID());
+        setPlayButtonToPlay();
+      } else {
+        //logger.info("playCurrentTurn maybe did play");
+      }
     } else {
       logger.warning("playCurrentTurn no current turn?");
     }
   }
 
+  /**
+   * @see HeadlessPlayAudio#startPlaying
+   */
   @Override
   public void playStarted() {
     if (currentTurn != null) {
-      if (DEBUG || true) logger.info("playStarted - turn " + currentTurn.getExID());
+      if (DEBUG)
+        logger.info("playStarted - turn " + currentTurn);
       setPlayButtonToPause();
       markCurrent();
     }
@@ -708,14 +748,16 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   @Override
   public void playStopped() {
     if (currentTurn != null) {
-      if (DEBUG) logger.info("playStopped - turn " + currentTurn.getExID());
+      if (DEBUG)
+        logger.info("playStopped - turn " + currentTurn.getExID());
+
+      setPlayButtonToPlay();
 
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("playStopped " + currentTurn.getExID()));
 //      logger.info("logException stack " + exceptionAsString);
 
       removeMarkCurrent();
       currentTurnPlayEnded();
-      setPlayButtonToPlay();
     }
   }
 
@@ -760,6 +802,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   private boolean playing = false;
 
+  /**
+   * @see #gotPlay
+   * @see RehearseViewHelper#gotPlay
+   */
   void setPlayButtonIcon() {
     if (playing) {
       setPlayButtonToPause();
@@ -768,14 +814,26 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     }
   }
 
+  /**
+   * @see #playStarted
+   * @see #setPlayButtonIcon
+   */
   private void setPlayButtonToPause() {
-   // logger.info("setPlayButtonToPause");
+  //  logger.info("setPlayButtonToPause");
     playButton.setIcon(IconType.PAUSE);
     playing = false;
   }
 
+  /**
+   * @see #playCurrentTurn()
+   */
   void setPlayButtonToPlay() {
-  //  logger.info("setPlayButtonToPlay");
+//    logger.info("setPlayButtonToPlay");
+
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("setPlayButtonToPlay " + currentTurn.getExID()));
+//    logger.info("logException stack " + exceptionAsString);
+
     playButton.setIcon(IconType.PLAY);
     playing = true;
   }
@@ -785,7 +843,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     currentTurn.removeMarkCurrent();
   }
 
-  protected void markCurrent() {
+  void markCurrent() {
     currentTurn.markCurrent();
     //  currentTurn.getElement().scrollIntoView();
 
@@ -804,6 +862,9 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     }*/
   }
 
+  /**
+   * @return null if on last turn
+   */
   private T getNext() {
     List<T> seq = getSeq();
     int i = seq.indexOf(currentTurn);
@@ -828,10 +889,12 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     }
   }
 
-//  private void scrollForLastTurn() {
-//    spacer.getElement().scrollIntoView();
-//  }
-
+  /**
+   * TODO : shouldn't be here...
+   *
+   * @param smiley
+   * @param total
+   */
   @Override
   public void setSmiley(Image smiley, double total) {
   }

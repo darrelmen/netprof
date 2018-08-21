@@ -204,7 +204,8 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
                                       ClientExercise commonShell,
                                       String path,
                                       AudioType audioType,
-                                      String language, Map<Integer, User> idToUser) {
+                                      String language,
+                                      Map<Integer, User> idToUser) {
     if (checkedExists.contains(path)) {
       return path;
     }
@@ -212,8 +213,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     User userBy = idToUser.get(user);
 
     if (userBy == null) {
-      userBy = getUserBy(user);
-      idToUser.put(user, userBy);
+      idToUser.put(user, userBy = getUserBy(user));
     }
 
     String userID = getUserIDForgiving(user, userBy);
@@ -223,25 +223,29 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     }
 
     boolean noExerciseYet = commonShell == null;
-    String title = noExerciseYet ? UNKNOWN : commonShell.getForeignLanguage();
+    String title   = noExerciseYet ? UNKNOWN : commonShell.getForeignLanguage();
     String comment = noExerciseYet ? UNKNOWN : commonShell.getEnglish();
 
     if (audioType.isContext() && !noExerciseYet) {
       if (commonShell.hasContext()) {
         CommonShell contextSentence = commonShell.getDirectlyRelated().iterator().next();
-        title = contextSentence.getForeignLanguage();
+        title   = contextSentence.getForeignLanguage();
         comment = contextSentence.getEnglish();
       }
     }
 
     String filePath = ensureMP3(path, new TrackInfo(title, userID, comment, language), language);
-    boolean isMissing = filePath.equals(FILE_MISSING);
 
-    if (!isMissing) {
-      checkedExists.add(path);
-      if (checkedExists.size() % CHECKED_INTERVAL == 10)
-        logger.debug("ensureCompressedAudio checked " + checkedExists.size() + " files...");
+    {
+      boolean isMissing = filePath.equals(FILE_MISSING);
+
+      if (!isMissing) {
+        checkedExists.add(path);
+        if (checkedExists.size() % CHECKED_INTERVAL == 10)
+          logger.debug("ensureCompressedAudio checked " + checkedExists.size() + " files...");
+      }
     }
+
     return filePath;
   }
 

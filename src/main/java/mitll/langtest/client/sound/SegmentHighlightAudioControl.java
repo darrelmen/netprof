@@ -39,7 +39,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
   }
 
   @Override
-  public void repeatSegment(float startInSeconds, float endInSeconds) {
+  public void loadAndPlaySegment(float startInSeconds, float endInSeconds) {
   }
 
   @Override
@@ -98,7 +98,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
     }
 
     @Override
-    public void repeatSegment(float startInSeconds, float endInSeconds) {
+    public void loadAndPlaySegment(float startInSeconds, float endInSeconds) {
     }
 
     @Override

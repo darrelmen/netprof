@@ -293,7 +293,7 @@ public class DominoImport implements IDominoImport {
       changedThread.join();
       deletedThread.join();
     } catch (InterruptedException e) {
-      logger.error("could finish the added, changed, deleted lookup.");
+      logger.error("could not finish the added, changed, deleted lookup.");
     }
 
     Map<String, Integer> npidToDominoID = checkForDominoIDs ? getNPIDToDominoID(dominoProject.getId()) : new HashMap<>();

@@ -11,24 +11,20 @@ import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
-import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
 public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
-  private Logger logger = Logger.getLogger("RecordDialogExercisePanel");
+  private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
-  public static final int DIM = 40;
-  public static final long END_DUR_SKEW = 1500L;
+  private static final int DIM = 40;
+  private static final long END_DUR_SKEW = 900L;
   private long start = 0;
 
   private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
@@ -37,7 +33,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private long minDur;
   private Image emoticon;
   private AlignmentOutput alignmentOutput;
-  private SessionManager sessionManager;
+  private final SessionManager sessionManager;
 
   public RecordDialogExercisePanel(final T commonExercise,
                                    final ExerciseController controller,
@@ -223,14 +219,14 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   /**
    * @return
-   * @see RehearseViewHelper#silenceDetected()
+   * @see RehearseViewHelper#mySilenceDetected()
    */
   public boolean isRecording() {
     return recordAudioPanel.getPostAudioRecordButton().isRecording();
   }
 
   /**
-   * @see RehearseViewHelper#silenceDetected()
+   * @see RehearseViewHelper#mySilenceDetected()
    */
   public boolean stopRecording() {
     long now = System.currentTimeMillis();

@@ -165,7 +165,7 @@ class ClickableTranscript {
     @Override
     public void onSegmentClick(TranscriptSegment segment) {
       //   playSegment(MP3_HEADER_OFFSET+segment.getStart(), MP3_HEADER_OFFSET+segment.getEnd());
-      audioControl.repeatSegment(segment.getStart(), segment.getEnd());
+      audioControl.loadAndPlaySegment(segment.getStart(), segment.getEnd());
       eventLogger.logEvent(widget, type.toString(),
           new EventContext("" + exerciseID, "Clicked on " + segment.getDisplayEvent()));
     }

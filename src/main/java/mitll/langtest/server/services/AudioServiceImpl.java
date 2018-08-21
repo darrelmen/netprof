@@ -50,6 +50,7 @@ import mitll.langtest.server.database.project.ProjectHelper;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
@@ -136,7 +137,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
     if (contentType.equalsIgnoreCase("application/wav")) {
-      reportOnHeaders(request);
+      //reportOnHeaders(request);
 
       try {
         JSONObject jsonForStream = getJSONForStream(request, ScoreServlet.PostRequest.ALIGN, "", "");
@@ -144,7 +145,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       } catch (Exception e) {
         logger.warn("got " + e, e);
       }
-      logger.debug("service : Request " + request.getQueryString() + " path " + request.getPathInfo());
+     // logger.debug("service : Request " + request.getQueryString() + " path " + request.getPathInfo());
 //      FileUploadHelper.UploadInfo uploadInfo = db.getProjectManagement().getFileUploadHelper().gotFile(request);
 //      if (uploadInfo == null) {
 //        super.service(request, response);
@@ -224,27 +225,29 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int reqid = getReqID(request);
     int projid = getProjectID(request);
 
+    //String postedWordOrPhrase = "";
 
-    String postedWordOrPhrase = "";
-
+    boolean isRef = isReference(request);
     logger.info("getJSONForStream got" +
         "\n\trequest  " + requestType +
         "\n\tprojid   " + projid +
         "\n\texid     " + realExID +
         //"\n\texercise text " + realExID +
         "\n\treq      " + reqid +
+        "\n\tref      " + isRef +
         "\n\tdevice   " + deviceType + "/" + device);
 
     int session = getStreamSession(request);
     int packet = getStreamPacket(request);
-    boolean isRef = isReference(request);
+
     String state = getHeader(request, ScoreServlet.HeaderValue.STREAMSTATE);
 
     byte[] targetArray = IOUtils.toByteArray(request.getInputStream());
     AudioChunk newChunk = new AudioChunk(packet, targetArray);
 
     long then = System.currentTimeMillis();
-    newChunk.calcValid(audioCheck, isRef, serverProps.isQuietAudioOK());
+    Validity validity = newChunk.calcValid(audioCheck, isRef, serverProps.isQuietAudioOK());
+    if (validity != Validity.OK) logger.info("chunk " + newChunk + " is " + validity);
     long now = System.currentTimeMillis();
     logger.info("took " + (now - then) + " to calc validity = " + newChunk.getValidityAndDur());
 
@@ -319,6 +322,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   /**
    * TODO : deal with gaps!
    *
+   * Wait for arrival?
+   *
    * @param audioChunks
    * @return
    */
@@ -336,8 +341,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       //      logger.info("\tStop - 1 combine " + combined);
       //     logger.info("\tStop - next " + next);
 
-      if (combined.getPacket() != next.getPacket() + 1) {
-        logger.warn("getCombinedAudioChunk : hmm current packet " + combined.getPacket() + " vs next " + next.getPacket());
+      // ordering check...
+      {
+        int packet = combined.getPacket();
+        int packet1 = next.getPacket();
+        if (packet != packet1) {
+          logger.warn("getCombinedAudioChunk : hmm current packet " + packet + " vs next " + packet1);
+        }
       }
       combined = combined.concat(next);
       //      logger.info("\tStop - 2 combine " + combined);
@@ -415,7 +425,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return wavFile;
     }
 
-    void calcValid(AudioCheck audioCheck, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
+    /**
+     * @param audioCheck
+     * @param useSensitiveTooLoudCheck
+     * @param quietAudioOK
+     * @see #getJSONForStream
+     */
+    Validity calcValid(AudioCheck audioCheck, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
       try {
         validityAndDur = audioCheck.isValid(
             "" + packet,
@@ -425,9 +441,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             useSensitiveTooLoudCheck,
             quietAudioOK
         );
+        return validityAndDur.getValidity();
       } catch (Exception e) {
         logger.error("got " + e, e);
       }
+      return null;
     }
 
     public boolean isValid() {

@@ -85,10 +85,11 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 
   /**
    * @see PlayAudioPanel#makePlayButton
-   * @see #doPlay
+   * @see #loadAndPlay
+   * @return true if paused
    */
   @Override
-  public void doPlayPauseToggle() {
+  public boolean doPlayPauseToggle() {
     //logger.info("PlayAudioPanel doPlayPauseToggle " + playing + " " +currentPath);
 
     if (currentSound != null) {
@@ -96,12 +97,15 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
         if (DEBUG) logger.info("doPlayPauseToggle pause " + playing + " " + currentPath);
         //markNotPlaying();
         pause();  // somehow get exception here?
+        return true;
       } else {
         if (DEBUG) logger.info("doPlayPauseToggle start " + playing + " " + currentPath);
         startPlaying();
+        return false;
       }
     } else {
-      doPlay();
+      loadAndPlay();
+      return false;
     }
   }
 
@@ -151,18 +155,18 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see mitll.langtest.client.scoring.WordTable#addClickHandler
    */
   @Override
-  public void repeatSegment(float startInSeconds, float endInSeconds) {
+  public void loadAndPlaySegment(float startInSeconds, float endInSeconds) {
     if (currentSound != null) {
       doPlaySegment(startInSeconds, endInSeconds);
     } else {
-      if (DEBUG || currentPath == null) logger.info("repeatSegment - new path " + currentPath);
+      if (DEBUG || currentPath == null) logger.info("loadAndPlaySegment - new path " + currentPath);
 
       addSimpleListener(new SimpleAudioListener() {
         @Override
         public void songLoaded(double duration) {
-          if (DEBUG) logger.info("doPlay - songLoaded " + currentPath + " this " + this);
+          if (DEBUG) logger.info("loadAndPlaySegment - songLoaded " + currentPath + " this " + this);
           Scheduler.get().scheduleDeferred(() -> {
-            if (DEBUG) logger.info("doPlay - songLoaded calling doPlayPauseToggle  " + currentPath);
+            if (DEBUG) logger.info("loadAndPlaySegment - songLoaded calling doPlayPauseToggle  " + currentPath);
             doPlaySegment(startInSeconds, endInSeconds);
           });
         }
@@ -206,7 +210,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   protected void pause() {
     if (DEBUG) logger.info("PlayAudioPanel :pause");
     markNotPlaying();
-    //setPlayLabel();
 
     if (soundManager != null) {
       soundManager.pause(currentSound);
@@ -220,16 +223,16 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 
   protected void playAudio(AudioAttribute audioAttribute) {
     rememberAudio(audioAttribute);
-    doPlay();
+    loadAndPlay();
     // playAudio(audioAttribute.getAudioRef());
   }
 
   /**
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#configureButton2
    */
-  protected void doPlay() {
+  protected void loadAndPlay() {
     if (currentPath == null) {
-      logger.warning("doPlay, current path is null?");
+      logger.warning("loadAndPlay, current path is null?");
     } else {
       playAudio(currentPath);
     }
@@ -294,7 +297,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * Remember to convert the path (which might be .wav) to a browser dependent format - IE can't do ogg, only mp3.
    *
    * @param path
-   * @see #repeatSegment(float, float)
+   * @see #loadAndPlaySegment(float, float)
    * @see #playAudio(String)
    */
   private void loadAudio(String path) {

@@ -128,7 +128,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   private void configureButton2(SplitDropdownButton playButton) {
     playButton.addClickHandler(event ->
         {
-          doPlay();
+          loadAndPlay();
           controller.logEvent(playButton, "playButton", exid, currentAudioAttr == null ? "unknown file?" : currentAudioAttr.getAudioRef());
         }
     );

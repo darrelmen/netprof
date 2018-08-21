@@ -47,7 +47,7 @@ public class SoundFeedback {
   public static final String CORRECT   = "langtest/sounds/correct4.mp3";
   public static final String INCORRECT = "langtest/sounds/incorrect1.mp3";
   private static final int SOFT_VOL = 50;
-  public static final int VOLUME = 100;
+  private static final int VOLUME = 100;
 
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
@@ -90,9 +90,8 @@ public class SoundFeedback {
       }
 
       @Override
-      public void repeatSegment(float startInSeconds, float endInSeconds) {
-       // logger.info("got repeatSegment");
-
+      public void loadAndPlaySegment(float startInSeconds, float endInSeconds) {
+       // logger.info("got loadAndPlaySegment");
       }
 
       @Override

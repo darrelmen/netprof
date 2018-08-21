@@ -45,6 +45,6 @@ public interface AudioControl extends SimpleAudioListener {
   void reinitialize();
   void songFirstLoaded(double durationEstimate);
 
-  void repeatSegment(float startInSeconds, float endInSeconds);
+  void loadAndPlaySegment(float startInSeconds, float endInSeconds);
   void update(double position);
 }

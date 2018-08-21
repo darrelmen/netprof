@@ -11,8 +11,8 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 import java.util.Map;
 
 /**
- * @see mitll.langtest.client.banner.ListenViewHelper#reallyGetTurnPanel
  * @param <T>
+ * @see mitll.langtest.client.banner.ListenViewHelper#reallyGetTurnPanel
  */
 public class TurnPanel<T extends ClientExercise> extends DialogExercisePanel<T> {
   final boolean isRight;
@@ -46,9 +46,15 @@ public class TurnPanel<T extends ClientExercise> extends DialogExercisePanel<T> 
   public void removeMarkCurrent() {
     setBorderColor("white");
   }
+
   public void markCurrent() {
     setBorderColor(HIGHLIGHT_COLOR);
   }
+
+  public boolean hasCurrentMark() {
+    return bubble.getElement().getStyle().getBorderColor().equalsIgnoreCase(HIGHLIGHT_COLOR);
+  }
+
   private void setBorderColor(String white) {
     bubble.getElement().getStyle().setBorderColor(white);
   }

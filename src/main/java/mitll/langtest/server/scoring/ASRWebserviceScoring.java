@@ -86,6 +86,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   static final int MAX_FROM_ANY_TOKEN = 10;
   public static final boolean DEBUG = false;
+  public static final String WAV = ".wav";
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -272,7 +273,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            boolean usePhoneToDisplay) {
     logger.info("scoreRepeatExercise decode/align '" + sentence + "'");
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
-    String pathname = noSuffix + ".wav";
+    String pathname = noSuffix + WAV;
 
     boolean b = validLTS(sentence, transliteration);
     // audio conversion stuff
@@ -352,12 +353,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       try {
         tempDir = Files.createTempDirectory("scoreRepeatExercise_" + language);
 
-        File tempFile = tempDir.toFile();
-
         // dcodr can't handle an equals in the file name... duh...
-        String wavFile1 = filePath + ".wav";
-        logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra (derived from " + wavFile1 + ")");
-        boolean wroteIt = AudioConversion.wav2raw(wavFile1, rawAudioPath);
+        String wavFilePath = filePath + WAV;
+        logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra (derived from " + wavFilePath + ")");
+        boolean wroteIt = AudioConversion.wav2raw(wavFilePath, rawAudioPath);
 
         if (!wroteIt) {
           logAndNotify.logAndNotifyServerException(null, "couldn't write the raw file to " + rawAudioPath);
@@ -368,7 +367,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         int end = (int) (cachedDuration * 100.0);
 
         cached = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
-            tempFile.getAbsolutePath(), decode, end);
+            tempDir.toFile().getAbsolutePath(), decode, end);
 
         if (cached == null) {
           return new PretestScore(0);
@@ -441,6 +440,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
+  /**
+   * @see #scoreRepeatExercise
+   * @param filePath
+   * @return
+   */
   @NotNull
   private String getUniqueRawAudioPath(String filePath) {
     return getRawAudioPath(filePath, hydraReqCounter.getAndIncrement());
@@ -458,7 +462,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   @NotNull
   private String getRawAudioPath(String filePath, long unique) {
-
     return filePath.
         replaceAll("//", "/").
         replaceAll("=", "") + "_" + unique + ".raw";
@@ -580,8 +583,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   /**
    * @param audioPath
    * @param transcript
-   * @param lmSentences
-   * @param tmpDir
+   * @param lmSentences if multiple alternatives
+   * @param tmpDir for hydra to run in
    * @param decode
    * @param end         frame number of end of file (I think)
    * @return

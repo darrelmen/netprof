@@ -430,7 +430,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
       logger.warning("bad segment " + start + "-" + end);
     } else {
 //      logger.info("playSegment segment " + start + "-" + end);
-      playAudio.repeatSegment(start, end);
+      playAudio.loadAndPlaySegment(start, end);
     }
   }
 */

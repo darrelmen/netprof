@@ -42,6 +42,9 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class AudioConversion extends AudioBase {
   private static final Logger logger = LogManager.getLogger(AudioConversion.class);
@@ -344,10 +347,11 @@ public class AudioConversion extends AudioBase {
 
   /**
    * Rip the header off to make a raw file.
-   * assumes 16Khz?
+   * Consumer should assume it's 16Khz?
    *
    * @param wavFile
    * @param rawFile
+   * @return true if raw file exists
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
   public static boolean wav2raw(String wavFile, String rawFile) {
@@ -355,12 +359,19 @@ public class AudioConversion extends AudioBase {
     AudioInputStream sourceStream = null;
 
     File sourceFile = new File(wavFile);
+    File outputFile = new File(rawFile);
+
+    long sourceLength = sourceFile.length();
+    long outputLength = outputFile.length();
+    if (outputFile.exists() && (sourceLength - 44 == outputLength)) {
+      logger.info("skip raw conversion since " + outputFile.getAbsolutePath() + " already there.");
+      return true;
+    }
     if (DEBUG)
       logger.info("wav2raw Reading from " + sourceFile + " exists " + sourceFile.exists() + " at " + sourceFile.getAbsolutePath());
 
     try {
       sourceStream = AudioSystem.getAudioInputStream(sourceFile);
-      File outputFile = new File(rawFile);
 
       String absolutePath = outputFile.getAbsolutePath();
       if (DEBUG) logger.info("wav2raw Writing to " + absolutePath);
@@ -382,13 +393,11 @@ public class AudioConversion extends AudioBase {
       sourceStream.close();
       fout.close();
 
-      boolean b1 = outputFile.setReadable(true);
-      if (!b1) {
-        logger.error("wav2raw : can't read the output file " + absolutePath);
-      }
+      makeOutputReadable(outputFile, absolutePath);
 
       if (DEBUG) {
-        logger.info("wav2raw wrote to " + absolutePath + " exists = " + outputFile.exists() + " len " + (outputFile.length() / 1024) + "K");
+        logger.info("wav2raw wrote to " + absolutePath + " exists = " + outputFile.exists() +
+            " len " + (outputLength / 1024) + "K");
       }
 
       return outputFile.exists();
@@ -407,6 +416,13 @@ public class AudioConversion extends AudioBase {
     }
   }
 
+  private static void makeOutputReadable(File outputFile, String absolutePath) {
+    boolean b1 = outputFile.setReadable(true);
+    if (!b1) {
+      logger.error("wav2raw : can't read the output file " + absolutePath);
+    }
+  }
+
   private String removeSuffix(String name1) {
     return name1.substring(0, name1.length() - 4);
   }
@@ -417,7 +433,8 @@ public class AudioConversion extends AudioBase {
    * @param overwrite       true if step on existing file.
    * @param trackInfo
    * @return
-   * @see mitll.langtest.server.services.AudioServiceImpl#ensureMP3
+   * @see mitll.langtest.server.database.audio.EnsureAudioHelper#ensureMP3
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doEnsure
    */
   public String ensureWriteMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo) {
     if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
@@ -448,6 +465,8 @@ public class AudioConversion extends AudioBase {
   }
 
   /**
+   * Do conversion in parallel...
+   *
    * @param absolutePathToWav
    * @param overwrite
    * @param trackInfo
@@ -456,13 +475,31 @@ public class AudioConversion extends AudioBase {
    */
   public String writeCompressedVersions(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo) {
     try {
-      String absolutePath = absolutePathToWav.getAbsolutePath();
-      String mp3File = getMP3ForWav(absolutePath);
+      String mp3File = getMP3ForWav(absolutePathToWav.getAbsolutePath());
       //logger.info("writeCompressedVersions started  writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
-      if (!writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)) return FILE_MISSING;
-      if (!new ConvertToOGG().writeOGG(absolutePathToWav, overwrite, trackInfo)) return FILE_MISSING;
+
+      List<Boolean> results = new ArrayList<>(2);
+
+      Thread mp3Thread = new Thread(() -> results.add(
+          writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)));
+      mp3Thread.start();
+
+      Thread oggThread = new Thread(() -> results.add(new ConvertToOGG()
+          .writeOGG(absolutePathToWav, overwrite, trackInfo)));
+      oggThread.start();
+
+      try {
+        mp3Thread.join();
+        oggThread.join();
+      } catch (InterruptedException e) {
+        logger.error("could not finish the mp3 and ogg conversion.", e);
+      }
+
+      long count = results.stream().filter(res -> !res).count();
+
+      if (count > 0) logger.warn("couldn't write compressed file " + mp3File);
       // logger.info("writeCompressedVersions finished writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
-      return mp3File;
+      return (count == 0) ? mp3File : FILE_MISSING;
     } catch (Exception e) {
       logger.error("writeCompressedVersions got " + e, e);
       return FILE_MISSING;
@@ -473,6 +510,14 @@ public class AudioConversion extends AudioBase {
     return absolutePath.replace(WAV, MP3);
   }
 
+  /**
+   *
+   * @param absolutePathToWav
+   * @param overwrite
+   * @param trackInfo
+   * @param mp3File
+   * @return true if succeeded
+   */
   private boolean writeMP3(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo, String mp3File) {
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {

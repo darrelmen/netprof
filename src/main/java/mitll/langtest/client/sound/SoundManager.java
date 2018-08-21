@@ -39,39 +39,39 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
- *
  */
 class SoundManager {
   protected static final Logger logger = Logger.getLogger("SoundManager");
 
   private static boolean onreadyWasCalled = false;
+
   //private final static boolean   debug = false;
   public static native void initialize() /*-{
-    $wnd.soundManager.onload = $wnd.loaded();
-    $wnd.soundManager.ontimeout = $wnd.ontimeout();
-    $wnd.soundManager.onready = $wnd.myready();
-	}-*/;
+      $wnd.soundManager.onload = $wnd.loaded();
+      $wnd.soundManager.ontimeout = $wnd.ontimeout();
+      $wnd.soundManager.onready = $wnd.myready();
+  }-*/;
 
   public static native boolean isOK()/*-{
       return $wnd.soundManager.ok();
   }-*/;
 
   public static native void setVolume(String title, int volume)/*-{
-      $wnd.soundManager.setVolume(title,volume);
+      $wnd.soundManager.setVolume(title, volume);
   }-*/;
 
   public static native void setVolume(int volume)/*-{
-        $wnd.soundManager.setVolume(volume);
-    }-*/;
+      $wnd.soundManager.setVolume(volume);
+  }-*/;
 
   /**
-   * @see SoundManagerAPI#createSound(Sound, String, String, boolean, int)
    * @param sound
    * @param title
    * @param file
    * @param volumeValue
+   * @see SoundManagerAPI#createSound(Sound, String, String, boolean, int)
    */
-	public static native void createSound(Sound sound, String title, String file, boolean doAutoload, int volumeValue) /*-{
+  public static native void createSound(Sound sound, String title, String file, boolean doAutoload, int volumeValue) /*-{
       var javascriptSound = $wnd.soundManager.createSound({
           id: title,
           url: file,
@@ -92,8 +92,8 @@ class SoundManager {
           }
       });
 
-		sound.@mitll.langtest.client.sound.Sound::sound = javascriptSound;
-	}-*/;
+      sound.@mitll.langtest.client.sound.Sound::sound = javascriptSound;
+  }-*/;
 
   /**
    * Actually calls destruct on sound object
@@ -108,59 +108,60 @@ class SoundManager {
       }
   }-*/;
 
-	public static native void pause(Sound sound) /*-{
-		sound.@mitll.langtest.client.sound.Sound::sound.pause();
-	}-*/;
+  public static native void pause(Sound sound) /*-{
+      sound.@mitll.langtest.client.sound.Sound::sound.pause();
+  }-*/;
 
-	public static native void play(Sound sound) /*-{
-		sound.@mitll.langtest.client.sound.Sound::sound.play();
-	}-*/;
+  public static native void play(Sound sound) /*-{
+      sound.@mitll.langtest.client.sound.Sound::sound.play();
+  }-*/;
 
   public static native void setPosition(Sound sound, double position) /*-{
       sound.@mitll.langtest.client.sound.Sound::sound.setPosition(position);
   }-*/;
 
-/*	public static native void setPositionAndPlay(Sound sound, double position) *//*-{
+  /*	public static native void setPositionAndPlay(Sound sound, double position) *//*-{
 		sound.@mitll.langtest.client.sound.Sound::sound.setPosition(position);
 		sound.@mitll.langtest.client.sound.Sound::sound.play();
 	}-*//*;*/
 
   /**
    * When the segment finished, calls songFinished
+   *
    * @param sound
    * @param start
    * @param end
    */
   public static native void playInterval(Sound sound, int start, int end) /*-{
-    sound.@mitll.langtest.client.sound.Sound::sound.stop();
-    sound.@mitll.langtest.client.sound.Sound::sound.play({
-      from: start, // start playing at start msec
-      to: end,  // end at end msec
-      onstop: function() {
-        $wnd.songFinished(sound);
+      sound.@mitll.langtest.client.sound.Sound::sound.stop();
+      sound.@mitll.langtest.client.sound.Sound::sound.play({
+          from: start, // start playing at start msec
+          to: end,  // end at end msec
+          onstop: function () {
+              $wnd.songFinished(sound);
 //        soundManager._writeDebug('sound stopped at position ' + this.position);
-        // note that the "to" target may be over-shot by 200+ msec, depending on polling and other factors.
-      }
-    });
+              // note that the "to" target may be over-shot by 200+ msec, depending on polling and other factors.
+          }
+      });
   }-*/;
 
   /**
    * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
    */
-  public static void loaded(){
+  public static void loaded() {
   }
 
   /**
    * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
    */
-  public static void ontimeout(){
+  public static void ontimeout() {
     //Window.alert("Do you have a flashblocker on?  Please add this site to your whitelist.");
   }
 
   /**
    * Not helpful in determining whether SoundManager is actually available in the context of a flash blocker.
    */
-  public static void myready(){
+  public static void myready() {
     onreadyWasCalled = true;
   }
 
@@ -168,34 +169,34 @@ class SoundManager {
     return onreadyWasCalled;
   }
 
-	public static void songFinished(Sound sound){
-		getParent(sound).songFinished();
-	}
+  public static void songFinished(Sound sound) {
+    getParent(sound).songFinished();
+  }
 
-  public static void songFirstLoaded(Sound sound, double durationEstimate){
+  public static void songFirstLoaded(Sound sound, double durationEstimate) {
     getParent(sound).songFirstLoaded(durationEstimate);
-	}
+  }
 
   /**
    * Deal with missing audio by jumping to songEnded
+   *
    * @param sound
    * @param duration
    */
-	public static void songLoaded(Sound sound, double duration){
-    boolean isNull = (""+duration).equalsIgnoreCase("null");
+  public static void songLoaded(Sound sound, double duration) {
+    boolean isNull = ("" + duration).equalsIgnoreCase("null");
 
     if (isNull) {
       songFinished(sound);
-      logger.info("songLoaded sound " +sound + " but can't find audio on server");
-    }
-    else {
+      logger.info("songLoaded sound " + sound + " but can't find audio on server");
+    } else {
       getParent(sound).songLoaded(duration);
     }
-	}
+  }
 
-	public static void update(Sound sound, double position){
-		getParent(sound).update(position);
-	}
+  public static void update(Sound sound, double position) {
+    getParent(sound).update(position);
+  }
 
   private static AudioControl getParent(Sound sound) {
     return sound.getParent();
@@ -204,13 +205,13 @@ class SoundManager {
   /**
    * @see mitll.langtest.client.sound.SoundManagerStatic#exportStaticMethods()
    */
-	public static native void exportStaticMethods() /*-{
-    $wnd.loaded = $entry(@mitll.langtest.client.sound.SoundManager::loaded());
-    $wnd.ontimeout = $entry(@mitll.langtest.client.sound.SoundManager::ontimeout());
-    $wnd.myready = $entry(@mitll.langtest.client.sound.SoundManager::myready());
-    $wnd.songFinished = $entry(@mitll.langtest.client.sound.SoundManager::songFinished(Lmitll/langtest/client/sound/Sound;));
-    $wnd.songFirstLoaded = $entry(@mitll.langtest.client.sound.SoundManager::songFirstLoaded(Lmitll/langtest/client/sound/Sound;D));
-    $wnd.songLoaded = $entry(@mitll.langtest.client.sound.SoundManager::songLoaded(Lmitll/langtest/client/sound/Sound;D));
-    $wnd.update = $entry(@mitll.langtest.client.sound.SoundManager::update(Lmitll/langtest/client/sound/Sound;D));
- 	}-*/;
+  public static native void exportStaticMethods() /*-{
+      $wnd.loaded = $entry(@mitll.langtest.client.sound.SoundManager::loaded());
+      $wnd.ontimeout = $entry(@mitll.langtest.client.sound.SoundManager::ontimeout());
+      $wnd.myready = $entry(@mitll.langtest.client.sound.SoundManager::myready());
+      $wnd.songFinished = $entry(@mitll.langtest.client.sound.SoundManager::songFinished(Lmitll/langtest/client/sound/Sound;));
+      $wnd.songFirstLoaded = $entry(@mitll.langtest.client.sound.SoundManager::songFirstLoaded(Lmitll/langtest/client/sound/Sound;D));
+      $wnd.songLoaded = $entry(@mitll.langtest.client.sound.SoundManager::songLoaded(Lmitll/langtest/client/sound/Sound;D));
+      $wnd.update = $entry(@mitll.langtest.client.sound.SoundManager::update(Lmitll/langtest/client/sound/Sound;D));
+  }-*/;
 }

@@ -527,7 +527,7 @@ public class WordTable {
    */
   private void addClickHandler(AudioControl audioControl, TranscriptSegment segmentToPlay, Label header) {
     if (audioControl != null) {
-      header.addClickHandler(event -> audioControl.repeatSegment(segmentToPlay.getStart(), segmentToPlay.getEnd()));
+      header.addClickHandler(event -> audioControl.loadAndPlaySegment(segmentToPlay.getStart(), segmentToPlay.getEnd()));
     }
   }
 
