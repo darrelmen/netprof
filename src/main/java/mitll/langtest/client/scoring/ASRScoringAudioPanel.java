@@ -114,17 +114,17 @@ public class ASRScoringAudioPanel<T extends HasID> extends ScoringAudioPanel<T> 
                             int height,
                             final int reqid) {
     if (path == null || path.equals("FILE_MISSING")) return;
-    logger.info("scoreAudio : scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
+    logger.info("scoreAudio : scoring audio " + path + " with ref sentence " + refSentence + " reqid " + reqid);
     boolean wasVisible = wordTranscript.isVisible();
 
     // only show the spinning icon if it's going to take awhile
     final Timer t = getWaitTimer(wordTranscript, phoneTranscript, wasVisible);
 
-  //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
+    //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
     AsyncCallback<PretestScore> async = getPretestScoreAsyncCallback(path, wordTranscript, phoneTranscript, t);
 
-    int id = exercise.getID();
+    int id = getExerciseID();
     ImageOptions imageOptions = new ImageOptions(toUse, height, useScoreToColorBkg, true);
 
     boolean usePhoneToDisplay = controller.getProps().shouldUsePhoneToDisplay();
@@ -142,7 +142,7 @@ public class ASRScoringAudioPanel<T extends HasID> extends ScoringAudioPanel<T> 
         //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " failure? "+ caught.getMessage());
         wordTranscript.setVisible(false);
         phoneTranscript.setVisible(false);
-        controller.handleNonFatalError("scoring audio",caught);
+        controller.handleNonFatalError("scoring audio", caught);
       }
 
       public void onSuccess(PretestScore result) {

@@ -162,11 +162,6 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }
   }
 
-  // web audio calls
-/*  public boolean tryWebAudio() {
-    return webAudio.tryWebAudio();
-  }*/
-
   public static WebAudioRecorder getWebAudio() {
     return webAudio;
   }
@@ -190,6 +185,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
     }
   }
 
+  /**
+   * @see LangTest#startStream(int, int)
+   * @param url
+   * @param exid
+   * @param reqid
+   */
   public void startStream(String url, String exid, String reqid) {
     if (usingWebRTC()) {
       logger.info("startStream post" +

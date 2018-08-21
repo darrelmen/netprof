@@ -118,7 +118,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
   protected final T exercise;
   //private final String instance;
-  private final int exerciseID;
+  protected final int exerciseID;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_GET_IMAGES = false;
@@ -180,7 +180,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     this.exerciseID = exerciseID;
     this.exercise = exercise;
    // this.instance = instance;
-    int id = exercise != null ? exercise.getID() : exerciseID;
+    int id = getExerciseID();
     getElement().setId("AudioPanel_exercise_" + id);
 
     int width = getImageWidth();
@@ -449,14 +449,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
   protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String buttonTitle,
                                               String recordButtonTitle, HasID exercise) {
-    int id = exerciseID;
-    if (exercise == null) {
-      logger.warning("makePlayAudioPanel : huh? exercise is null?");
-    } else {
-      id = exercise.getID();
-    }
-
-    return new PlayAudioPanel(buttonTitle, toTheRightWidget, false, controller, id, true);
+    return new PlayAudioPanel(buttonTitle, toTheRightWidget, false, controller, getExerciseID(), true);
   }
 
   /**
@@ -564,7 +557,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
       final int toUse = Math.max(MIN_WIDTH, width);
       int height = getScaledImageHeight(type);
-      final int id = exercise == null ? exerciseID : exercise.getID();
+      final int id = getExerciseID();
       controller.getImage(getReqID(type), path, type, toUse, height, id, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
@@ -597,6 +590,10 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
         }
       });
     }
+  }
+
+  protected int getExerciseID() {
+    return exercise == null ? exerciseID : exercise.getID();
   }
 
   protected int getScaledImageHeight(String type) {

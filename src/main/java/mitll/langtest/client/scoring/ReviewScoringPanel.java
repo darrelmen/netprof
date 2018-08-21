@@ -78,7 +78,10 @@ public class ReviewScoringPanel<T extends HasID> extends ScoringAudioPanel<T> {
                             String refSentence,
                             ExerciseController controller,
                             int exerciseID) {
-    super(path, refSentence, "", controller, false, 23, "", null, exerciseID);
+    super(path, refSentence, "", controller, false,
+        23, "", null, exerciseID);
+
+    logger.info("ReviewScoringPanel ex " + exerciseID);
     tablesContainer = new HorizontalPanel();
     tablesContainer.getElement().setId("TablesContainer");
     belowContainer = new DivWidget();

@@ -145,7 +145,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       } catch (Exception e) {
         logger.warn("got " + e, e);
       }
-     // logger.debug("service : Request " + request.getQueryString() + " path " + request.getPathInfo());
+      // logger.debug("service : Request " + request.getQueryString() + " path " + request.getPathInfo());
 //      FileUploadHelper.UploadInfo uploadInfo = db.getProjectManagement().getFileUploadHelper().gotFile(request);
 //      if (uploadInfo == null) {
 //        super.service(request, response);
@@ -229,13 +229,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     boolean isRef = isReference(request);
     logger.info("getJSONForStream got" +
-        "\n\trequest  " + requestType +
-        "\n\tprojid   " + projid +
-        "\n\texid     " + realExID +
+//        "\n\trequest  " + requestType +
+//        "\n\tprojid   " + projid +
+            // "\n\t" +
+            " exid     " + realExID// +
         //"\n\texercise text " + realExID +
-        "\n\treq      " + reqid +
-        "\n\tref      " + isRef +
-        "\n\tdevice   " + deviceType + "/" + device);
+        //      "\n\treq      " + reqid +
+        //    "\n\tref      " + isRef +
+        //      "\n\tdevice   " + deviceType + "/" + device
+    );
 
     int session = getStreamSession(request);
     int packet = getStreamPacket(request);
@@ -248,8 +250,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     long then = System.currentTimeMillis();
     Validity validity = newChunk.calcValid(audioCheck, isRef, serverProps.isQuietAudioOK());
     if (validity != Validity.OK) logger.info("chunk " + newChunk + " is " + validity);
+
+/*
     long now = System.currentTimeMillis();
     logger.info("took " + (now - then) + " to calc validity = " + newChunk.getValidityAndDur());
+*/
 
     // little state machine - START - new buffering, STREAM concat or append, END write file and score
     List<AudioChunk> audioChunks = sessionToChunks.get(session);
@@ -329,7 +334,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    */
   private AudioChunk getCombinedAudioChunk(List<AudioChunk> audioChunks) {
     long then = System.currentTimeMillis();
-    logger.info("Stop - combine " + audioChunks.size());
+    //logger.info("Stop - combine " + audioChunks.size());
 
     audioChunks.sort(AudioChunk::compareTo);
 
@@ -345,7 +350,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       {
         int packet = combined.getPacket();
         int packet1 = next.getPacket();
-        if (packet != packet1) {
+        if (packet != packet1 - 1) {
           logger.warn("getCombinedAudioChunk : hmm current packet " + packet + " vs next " + packet1);
         }
       }
@@ -453,7 +458,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     public String toString() {
-      return "packet " + packet + " valid " + isValid() +
+      return "packet " + packet + " : " + isValid() +
           " combined " + combined + " len " + wavFile.length;
     }
 

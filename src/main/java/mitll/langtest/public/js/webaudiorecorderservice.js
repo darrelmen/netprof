@@ -76,22 +76,7 @@
                     e.inputBuffer.getChannelData(1)
                 ],
                 type: mytype
-            })
-            ;
-
-            // var framesBefore = totalSamples / (this.context.sampleRate / 2);
-            // totalSamples += e.inputBuffer.getChannelData(0).length;
-            // var framesAfter = totalSamples / (this.context.sampleRate / 2);
-            // var framesAfterRound = Math.round(framesAfter);
-            // if (framesAfter > framesBefore) {
-            //     console.log("got " + totalSamples + " rate " + this.context.sampleRate +
-            //         " frame " + framesAfter + " rounded " + framesAfterRound);
-            //     //gotFrame();
-            // }
-            // else {
-            //     console.log("2 got " + totalSamples + " frame " + framesAfter);
-            //
-            // }
+            });
             analyse();
         };
 
@@ -110,7 +95,7 @@
             recording = true;
             start = Date.now();
             totalSamples = 0;
-//      console.log("record " + "  at " + new Date().getTime());
+            console.log("record at " + new Date().getTime());
         };
 
         this.stop = function () {
@@ -221,8 +206,8 @@
             var bufferLength = analyser.fftSize;
             var dataArray = new Uint8Array(bufferLength);
             var amplitude = silenceDetectionConfig.amplitude;
-            var time = silenceDetectionConfig.time;
 
+            var max = 0;
             analyser.getByteTimeDomainData(dataArray);
 
             for (var i = 0; i < bufferLength; i++) {
@@ -230,11 +215,16 @@
                 var curr_value_time = (dataArray[i] / 128) - 1.0;
                 if (curr_value_time > amplitude || curr_value_time < (-1 * amplitude)) {
                     start = Date.now();
+                    if (curr_value_time>max) max=curr_value_time;
                 }
             }
             var newtime = Date.now();
             var elapsedTime = newtime - start;
+
+            var time = silenceDetectionConfig.time;
             if (elapsedTime > time) {
+                console.log("elapsedTime is " + elapsedTime + " vs " + time + " max " +max + " start " + start);
+
                 silenceDetected();
             }
         };

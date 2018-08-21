@@ -72,9 +72,10 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
  * To change this template use File | Settings | File Templates.
  */
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+  private final Logger logger = Logger.getLogger("PostAudioRecordButton");
+
   public static final String REQID = "reqid";
   public static final String VALID = "valid";
-  private final Logger logger = Logger.getLogger("PostAudioRecordButton");
 
   public static final int MIN_DURATION = 250;
 
@@ -142,7 +143,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   public void startRecording() {
     LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
 
-    logger.info("startRecording!");
+//    logger.info("startRecording!");
     controller.startRecording();
     controller.startStream(getExerciseID(), reqid);
   }
@@ -164,20 +165,21 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
         @Override
         public void gotStreamResponse(String json) {
-      //    logger.info("gotStreamResponse " + json);
-         // reqid++;
+          //    logger.info("gotStreamResponse " + json);
+          // reqid++;
 
 
-          JSONObject digestJsonResponse = digestJsonResponse(json);
-          String message = getField(digestJsonResponse, "MESSAGE");
+          JSONAnswerParser jsonAnswerParser = new JSONAnswerParser();
+          JSONObject digestJsonResponse = jsonAnswerParser.digestJsonResponse(json);
+          String message = jsonAnswerParser.getField(digestJsonResponse, "MESSAGE");
           if (!message.isEmpty()) {
             // got interim OK
-        //    logger.info("got interim " + message + " " + json);
-          } else if (!getField(digestJsonResponse,"status").isEmpty()) {
-            String code = getField(digestJsonResponse, "code");
+            //    logger.info("got interim " + message + " " + json);
+          } else if (!jsonAnswerParser.getField(digestJsonResponse, "status").isEmpty()) {
+            String code = jsonAnswerParser.getField(digestJsonResponse, "code");
             onPostFailure(then, getUser(), "error (" + code + ") posting audio for exercise " + getExerciseID());
           } else {
-            onPostSuccess(getAudioAnswer(digestJsonResponse), then);
+            onPostSuccess(jsonAnswerParser.getAudioAnswer(digestJsonResponse), then);
           }
         }
       });
@@ -223,176 +225,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   protected void gotShortDurationRecording() {
   }
 
-  /**
-   * This must be kept in sync with audio service and ScoreToJson
-   *
-   * @param json
-   * @see mitll.langtest.server.scoring.JsonScoring#getJsonObject
-   */
-  private AudioAnswer gotResponse(String json) {
-    return getAudioAnswer(digestJsonResponse(json));
-  }
-
-  @NotNull
-  private AudioAnswer getAudioAnswer(JSONObject jsonObject) {
-    String message = getField(jsonObject, "MESSAGE");
-    if (message.equalsIgnoreCase("OK") && false) return null;
-    else {
-      Validity validity = getValidity(jsonObject);
-
-      // logger.info("Validity is " + validity);
-
-      AudioAnswer converted = new AudioAnswer(
-          getField(jsonObject, "path"),
-          validity,
-          getIntField(jsonObject, REQID),
-          getIntField(jsonObject, "duration"),
-          getIntField(jsonObject, "exid")
-      );
-
-      converted.setResultID(getIntField(jsonObject, "resultID"));
-
-      //useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
-
-      if (validity == Validity.OK || validity == Validity.CUT_OFF) {
-        // logger.info("Got validity " + validity);
-        converted.setTimestamp(getLongField(jsonObject, "timestamp"));
-
-        float score = getFloatField(jsonObject, "score");
-        converted.setScore(score);
-        converted.setCorrect(getBoolean(jsonObject, "isCorrect"));
-
-
-        List<TranscriptSegment> psegments = getSegments(jsonObject.get("PHONE_TRANSCRIPT").isArray());
-        List<TranscriptSegment> wsegments = getSegments(jsonObject.get("WORD_TRANSCRIPT").isArray());
-        float wavFileLengthSeconds = ((float) converted.getDurationInMillis()) / 1000F;
-        Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<>();
-        sTypeToEndTimes.put(NetPronImageType.PHONE_TRANSCRIPT, psegments);
-        sTypeToEndTimes.put(NetPronImageType.WORD_TRANSCRIPT, wsegments);
-        PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
-            new HashMap<>(),
-            new HashMap<>(),
-            sTypeToEndTimes, "", wavFileLengthSeconds,
-            0, true);
-        converted.setPretestScore(pretestScore);
-        // useResult(converted);
-      } else {
-        logger.info("gotResponse Got " + jsonObject);
-      }
-
-      //  logger.info("Got " + jsonObject);
-
-      return converted;
-    }
-  }
-
-  @NotNull
-  private Validity getValidity(JSONObject jsonObject) {
-    String valid = getField(jsonObject, VALID);
-    Validity validity;
-    try {
-      validity = Validity.valueOf(valid);
-    } catch (IllegalArgumentException e) {
-      validity = Validity.INVALID;
-    }
-    return validity;
-  }
-
-  private List<TranscriptSegment> getSegments(JSONArray phone_transcript) {
-    List<TranscriptSegment> pseg = new ArrayList<>();
-    for (int i = 0; i < phone_transcript.size(); i++) {
-      JSONObject object = phone_transcript.get(i).isObject();
-      String event = getField(object, "event");
-      pseg.add(new TranscriptSegment(
-              getFloatField(object, "start"),
-              getFloatField(object, "end"),
-              event,
-              getFloatField(object, "score"),
-              event,
-              i
-          )
-      );
-    }
-    return pseg;
-  }
-
-  private int getIntField(JSONObject jsonObject, String reqid) {
-    JSONValue jsonValue = jsonObject.get(reqid);
-    if (jsonValue == null) return 0;
-    else if (jsonValue.isNumber() == null) {
-      if (!reqid.equalsIgnoreCase(REQID)) {
-        logger.warning("huh? " + reqid + " is not a number? " + jsonValue.getClass());
-      }
-      try {
-        JSONString string = jsonObject.get(reqid).isString();
-        String s = string.stringValue();
-        return Integer.parseInt(s);
-      } catch (NumberFormatException e) {
-        logger.warning("can't parse " + jsonObject.get(reqid).isString().stringValue());
-        return 0;
-      }
-    } else
-      return (int) jsonValue.isNumber().doubleValue();
-    // return Integer.parseInt(jsonObject.get(reqid).().stringValue());
-  }
-
-  private long getLongField(JSONObject jsonObject, String reqid) {
-    JSONValue jsonValue = jsonObject.get(reqid);
-    return (long) (jsonValue == null ? 0L : jsonValue.isNumber().doubleValue());
-
-    //return Long.parseLong(getField(jsonObject, reqid));
-  }
-
-  private float getFloatField(JSONObject jsonObject, String reqid) {
-    JSONValue jsonValue = jsonObject.get(reqid);
-    return (float) (jsonValue == null ? 0F : jsonValue.isNumber().doubleValue());
-//    return Float.parseFloat(getField(jsonObject, reqid));
-  }
-
-  /*
-  private double getDoubleField(JSONObject jsonObject, String reqid) {
-    return jsonObject.get(reqid).isNumber().doubleValue();
-//    return Float.parseFloat(getField(jsonObject, reqid));
-  }
-*/
-
-  private String getField(JSONObject jsonObject, String valid1) {
-    JSONValue jsonValue = jsonObject.get(valid1);
-    JSONString string = jsonValue == null ? new JSONString("") : jsonValue.isString();
-    return string == null ? "" : string.stringValue();
-  }
-
-  private boolean getBoolean(JSONObject jsonObject, String valid1) {
-    JSONValue jsonValue = jsonObject.get(valid1);
-    return jsonValue != null && jsonValue.isBoolean().booleanValue();
-  }
-
-  /**
-   * Digest a json response from a servlet checking for a session expiration code
-   *
-   * @see mitll.langtest.server.scoring.JsonScoring#getJsonObject(int, int, DecoderOptions, boolean, net.sf.json.JSONObject, boolean, AudioAnswer, boolean)
-   */
-  private JSONObject digestJsonResponse(String json) {
-    //  logger.info("Digesting response " + json);
-    try {
-      JSONValue val = JSONParser.parseStrict(json);
-      JSONObject obj = (val != null) ? val.isObject() : null;
-
-
-//      JSONValue code = obj == null ? null : obj.get(Constants.SESSION_EXPIRED_CODE);
-//      if (code != null && code.isBoolean() != null && code.isBoolean().booleanValue()) {
-//        getSessionHelper().logoutUserInClient(null, true);
-//        return null;
-//      } else {
-//        return obj;
-//      }
-
-      return obj;
-    } catch (Exception ex) {
-      logger.warning("couldn't parse " + json);
-      return new JSONObject();
-    }
-  }
 
   /**
    * @param base64EncodedWavFile

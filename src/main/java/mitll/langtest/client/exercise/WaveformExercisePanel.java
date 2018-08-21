@@ -129,8 +129,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     List<String> typeOrder = new ArrayList<>(controller.getTypeOrder());
 
     if (exercise != null && exercise.getAttributes() != null) {
-      exercise.getAttributes().forEach(exerciseAttribute -> logger.info("for " + exercise.getID() + " " + exerciseAttribute));
-
+//      exercise.getAttributes().forEach(exerciseAttribute -> logger.info("for " + exercise.getID() + " " + exerciseAttribute));
       exercise.getAttributes().forEach(exerciseAttribute -> {
         exercise.getUnitToValue().put(exerciseAttribute.getProperty(), exerciseAttribute.getValue());
         if (!typeOrder.contains(exerciseAttribute.getProperty())) {

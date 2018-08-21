@@ -71,6 +71,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     super(controller, viewContainer, myView);
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
     controller.registerStopDetected(new WavEndCallback() {
+
+      /**
+       * @see LangTest#makeFlashContainer
+       */
       @Override
       public void silenceDetected() {
         mySilenceDetected();

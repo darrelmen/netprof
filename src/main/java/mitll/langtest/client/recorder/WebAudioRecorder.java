@@ -153,7 +153,7 @@ public class WebAudioRecorder {
       console.log("WebAudioRecorder:" + message);
   }-*/;
 
-  public boolean isWebAudioMicAvailable() {
+  boolean isWebAudioMicAvailable() {
     return webAudioMicAvailable;
   }
 
@@ -161,7 +161,7 @@ public class WebAudioRecorder {
    * @see #advertise
    */
   public static void silenceDetected() {
-    //  console("silenceDetected -- now!");
+   // console("silenceDetected -- now!");
     FlashRecordPanelHeadless.micPermission.silenceDetected();
   }
 
