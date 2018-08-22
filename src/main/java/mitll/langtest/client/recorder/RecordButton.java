@@ -75,7 +75,7 @@ public class RecordButton extends Button {
   /**
    * flip period
    */
-  private static final int PERIOD_MILLIS = 500;
+ // private static final int PERIOD_MILLIS = 500;
 
   private static final String WINDOWS = "Win32";
   private final String RECORD;
@@ -98,7 +98,9 @@ public class RecordButton extends Button {
   public interface RecordingListener {
     void startRecording();
 
+/*
     void flip(boolean first);
+*/
 
     /**
      * @see RecordButton#stop(long)
@@ -212,7 +214,7 @@ public class RecordButton extends Button {
    *
    * @see #setupRecordButton
    */
-  public void doClick() {
+  void doClick() {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
@@ -268,12 +270,9 @@ public class RecordButton extends Button {
     }
   }
 
-  private void stopRecording() {
-    recording = false;
+  protected void stopRecording() {
     long now = System.currentTimeMillis();
-
-    cancelAfterStopTimer();
-    cancelTimer();
+    stopRecordingFirstStep();
     long duration = now - started;
 
    // logger.info("stopRecording : ui time between button clicks = " + duration + " millis, ");
@@ -285,6 +284,13 @@ public class RecordButton extends Button {
       }
     };
     afterStopTimer.schedule(propertyHandler.getAfterStopDelayMillis());
+  }
+
+  protected void stopRecordingFirstStep() {
+    recording = false;
+
+    cancelAfterStopTimer();
+    cancelTimer();
   }
 
   private void cancelAfterStopTimer() {
@@ -326,17 +332,18 @@ public class RecordButton extends Button {
     setIcon(IconType.STOP);
 
     if (showInitialRecordImage()) {
-      flipImage();
+      showFirstRecordImage();
+//      flipImage();
     }
   }
 
-  private boolean first = true;
-  private Timer flipTimer = null;
+//  private boolean first = true;
+  //private Timer flipTimer = null;
 
   /**
    * @see #showRecording
    */
-  private void flipImage() {
+/*  private void flipImage() {
     if (flipTimer != null) {
       flipTimer.cancel();
     }
@@ -354,7 +361,7 @@ public class RecordButton extends Button {
       }
     };
     flipTimer.scheduleRepeating(PERIOD_MILLIS);
-  }
+  }*/
 
   /**
    * @see #stop
@@ -362,10 +369,10 @@ public class RecordButton extends Button {
   private void showStopped() {
     setIcon(IconType.MICROPHONE);
 
-    if (flipTimer != null) {
+  //  if (flipTimer != null) {
       hideBothRecordImages();
-      flipTimer.cancel();
-    }
+   //   flipTimer.cancel();
+    //}
   }
 
   /**
@@ -378,13 +385,15 @@ public class RecordButton extends Button {
   }
 
   /**
-   * @see #flipImage()
+   * @seex #flipImage()
    */
   void showFirstRecordImage() {
   }
 
+/*
   void showSecondRecordImage() {
   }
+*/
 
   void hideBothRecordImages() {
     setText(RECORD);

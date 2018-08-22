@@ -446,7 +446,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         originalRefAudio = newUserExercise.getRefAudio();
         originalSlowRefAudio = newUserExercise.getSlowAudioRef();
         // if (DEBUG) logger.info("postEditItem : onSuccess " + newUserExercise.getTooltip());
-        doAfterEditComplete(pagingContainer,buttonClicked);
+        doAfterEditComplete(pagingContainer, buttonClicked);
       }
     });
   }
@@ -457,7 +457,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @param pagingContainer
    * @see #reallyChange(ListInterface, boolean, boolean)
    */
-  protected void doAfterEditComplete(ListInterface<T, U> pagingContainer,boolean buttomClicked) {
+  protected void doAfterEditComplete(ListInterface<T, U> pagingContainer, boolean buttomClicked) {
     changeTooltip(pagingContainer);
   }
 
@@ -466,7 +466,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * Update the exercise shell in the exercise list with the changes to it's english/fl fields.
    *
    * @param pagingContainer
-   * @see #doAfterEditComplete(ListInterface)
+   * @see #doAfterEditComplete
    */
   private void changeTooltip(ListInterface<T, U> pagingContainer) {
     T byID = pagingContainer.byID(newUserExercise.getID());
@@ -827,7 +827,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
      * @see #makeRecordAudioPanel
      */
     CreateFirstRecordAudioPanel(U newExercise, Panel row,
-                                       boolean recordRegularSpeed, String instance) {
+                                boolean recordRegularSpeed, String instance) {
       super(newExercise, NewUserExercise.this.controller, row, 0, false,
           recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW, instance);
       this.recordRegularSpeed = recordRegularSpeed;
@@ -881,12 +881,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
               showStart();
               otherRAP.setEnabled(false);
             }
-
+/*
             @Override
             public void flip(boolean first) {
               super.flip(first);
               flipRecordImages(first);
-            }
+            }*/
 
             @Override
             protected AudioType getAudioType() {
@@ -978,7 +978,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     }*/
     return true;
   }
-
 /*  private boolean validRecordingCheck() {
     return newUserExercise == null;
   }*/

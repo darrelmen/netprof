@@ -83,14 +83,14 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
                               UserList.LIST_TYPE listType,
                               int size,
                               int duration, int minScore, boolean showAudio,
-                              Map<String,String> unitChapter) throws DominoSessionException {
+                              Map<String, String> unitChapter) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     IUserListManager userListManager = getUserListManager();
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
 
     return listType == UserList.LIST_TYPE.NORMAL ?
         userListManager.addUserList(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser) :
-        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, duration, minScore, showAudio,unitChapter);
+        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, duration, minScore, showAudio, unitChapter);
   }
 
   @Override
@@ -145,7 +145,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz) throws DominoSessionException {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    // try {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
     Collection<UserList<CommonShell>> listsForUser = getUserListManager()
@@ -153,17 +152,14 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     long now = System.currentTimeMillis();
 
-    logger.info("getListsForUser : took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+    if (now - then > 30) {
+      logger.info("getListsForUser : took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+    }
     return listsForUser;
-    // } catch (Exception e) {
-    //  logger.error("Got " + e, e);
-    // return Collections.emptyList();
-    // }
   }
 
   public Collection<IUserListWithIDs> getListsWithIDsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    // try {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
     Collection<IUserListWithIDs> listsForUser = getUserListManager()
@@ -173,10 +169,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     logger.info("getListsWithIDsForUser took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
     return listsForUser;
-    // } catch (Exception e) {
-    //  logger.error("Got " + e, e);
-    // return Collections.emptyList();
-    // }
   }
 
   /**

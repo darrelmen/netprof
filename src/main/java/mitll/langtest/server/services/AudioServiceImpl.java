@@ -221,7 +221,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return jsonObject;
     }
 
-    if (true) throw new IllegalArgumentException("dude!");
+   // if (true) throw new IllegalArgumentException("dude!");
 
     int realExID = getRealExID(request);
     int reqid = getReqID(request);

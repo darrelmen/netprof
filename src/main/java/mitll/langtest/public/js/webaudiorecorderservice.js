@@ -67,17 +67,23 @@
 
         // when audio samples come in, they come in here and passed to the worker
         this.node.onaudioprocess = function (e) {
-            if (!recording) return;
-            var mytype = config.type || 'audio/wav';
-            worker.postMessage({
-                command: 'record',
-                buffer: [
-                    e.inputBuffer.getChannelData(0),
-                    e.inputBuffer.getChannelData(1)
-                ],
-                type: mytype
-            });
-            analyse();
+            if (recording) {
+                console.log("onaudioprocess recording...");
+
+                var mytype = config.type || 'audio/wav';
+                worker.postMessage({
+                    command: 'record',
+                    buffer: [
+                        e.inputBuffer.getChannelData(0),
+                        e.inputBuffer.getChannelData(1)
+                    ],
+                    type: mytype
+                });
+                analyse();
+            }
+            else {
+               //console.log("onaudioprocess not recording...");
+            }
         };
 
         this.configure = function (cfg) {
@@ -95,7 +101,7 @@
             recording = true;
             start = Date.now();
             totalSamples = 0;
-            console.log("record at " + new Date().getTime());
+            console.log("Recorder.record at " + new Date().getTime());
         };
 
         this.stop = function () {
@@ -178,6 +184,23 @@
         // get reply from worker
         worker.onmessage = function (e) {
             if (currCallback) {
+
+                if (e.data.startsWith("{\"status\"")) { // stop recording!
+                    console.log("stop recording! ", e.data);
+                    recording = false;
+
+                    // if (source.context && source.context.state === 'running') {
+                    //     source.context.suspend().then(function () {
+                    //         __log('worker.onmessage suspended recording...');
+                    //         source.stop();
+                    //     });
+                    // }
+
+                }
+                else {
+                    console.log("worker.onmessage ", e.data);
+
+                }
                 if (typeof currCallback === 'function') {
                     currCallback(e.data);
                 }
@@ -215,7 +238,7 @@
                 var curr_value_time = (dataArray[i] / 128) - 1.0;
                 if (curr_value_time > amplitude || curr_value_time < (-1 * amplitude)) {
                     start = Date.now();
-                    if (curr_value_time>max) max=curr_value_time;
+                    if (curr_value_time > max) max = curr_value_time;
                 }
             }
             var newtime = Date.now();
@@ -223,7 +246,7 @@
 
             var time = silenceDetectionConfig.time;
             if (elapsedTime > time) {
-                console.log("elapsedTime is " + elapsedTime + " vs " + time + " max " +max + " start " + start);
+                console.log("elapsedTime is " + elapsedTime + " vs " + time + " max " + max + " start " + start);
 
                 silenceDetected();
             }

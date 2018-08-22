@@ -281,10 +281,10 @@ public class FlashcardRecordButton extends RecordButton {
     setText("");
   }
 
-  protected void showSecondRecordImage() {
+/*  protected void showSecondRecordImage() {
     setBaseIcon(MyCustomIconType.record2);
     setText("");
-  }
+  }*/
 
   protected void hideBothRecordImages() {
     initRecordButton();

@@ -137,9 +137,9 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     exercisePanel.receivedAudioAnswer(result);
   }
 
-  @Override
+/*  @Override
   public void flip(boolean first) {
-  }
+  }*/
 
   /**
    * @see RecordButton#stopRecording

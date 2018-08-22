@@ -78,7 +78,9 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   private int reqid = 0;
   private Panel panel;
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
+/*
   private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
+*/
   private boolean doFlashcardAudio, doAlignment;
   private boolean allowAlternates = false;
   private final AudioType audioType;
@@ -109,13 +111,13 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   }
 
   /**
-   * @param first
-   * @see RecordButton#flipImage
+   * @paramx first
+   * @seex RecordButton#flipImage
    */
-  public void flip(boolean first) {
+/*  public void flip(boolean first) {
     recordImage1.setVisible(!first);
     recordImage2.setVisible(first);
-  }
+  }*/
 
   /**
    * @see RecordButtonPanel#RecordButtonPanel
@@ -137,8 +139,8 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   protected void addImages() {
     panel.add(recordImage1);
     recordImage1.setVisible(false);
-    panel.add(recordImage2);
-    recordImage2.setVisible(false);
+/*    panel.add(recordImage2);
+    recordImage2.setVisible(false);*/
   }
 
   /**
@@ -175,7 +177,10 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
    */
   public boolean stopRecording(long duration) {
     recordImage1.setVisible(false);
+
+/*
     recordImage2.setVisible(false);
+*/
 
     // logger.info("stopRecording : got stop recording " + duration);
     if (duration > MIN_DURATION) {
@@ -343,7 +348,6 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   public Widget getRecordButton() {
     return recordButton;
   }
-
   public RecordButton getRealRecordButton() {
     return recordButton;
   }

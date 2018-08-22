@@ -8,12 +8,20 @@ import mitll.langtest.shared.answer.Validity;
  */
 public interface RecordingAudioListener {
   void startRecording();
+
   void stopRecording();
 
   void gotShortDurationRecording();
+
   void useResult(AudioAnswer result);
+
   void useInvalidResult(boolean isValid);
+
   void usePartial(Validity validity);
 
+  void onPostFailure();
+
+/*
   void flip(boolean first);
+*/
 }

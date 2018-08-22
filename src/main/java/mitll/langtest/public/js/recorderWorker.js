@@ -85,7 +85,7 @@ function init(config) {
 }
 
 function startStream(url, exid, reqid) {
-    console.log("worker.startStream ");
+    console.log("worker.startStream " + exid + " req " + reqid);
     myurl = new String(url);
     myexid = new String(exid);
     myreqid = new String(reqid);
@@ -144,18 +144,6 @@ function record(inputBuffer, type) {
     }
 }
 
-//
-// function sendFrame(type, isLast) {
-//     var bufferL = mergeBuffers(frameRecBuffersL, frameRecLength);
-//     var audioBlob = getAudioBlob(bufferL, type);
-//
-//     // OK - got the blob, clear backing buffer
-//     frameRecBuffersL = [];
-//     frameRecLength = 0;
-//
-//     sendBlob(framesBeforeRound, audioBlob, isLast);
-// }
-
 function sendBlob(framesBeforeRound, audioBlob, isLast) {
 //    console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "'");
 
@@ -199,8 +187,8 @@ function sendBlob(framesBeforeRound, audioBlob, isLast) {
                 //  console.log('stopRecordingAndPost completed for ' + framesAfterRound);
             }
             else if (this.status != 200) {
-                console.log("warning : got response code : " + this.status);
-                var resp = {status: "error", code: this.status};
+                console.log("sendBlob : warning : got response code : " + this.status);
+                var resp = {status: "error", code: this.status, statusText: this.statusText};
                 postSomething(JSON.stringify(resp));
             }
         };
@@ -423,6 +411,7 @@ function encodeWAV(samples, mono, sampleRateToUse) {
     return view;
 }
 
+/*
 function stopRecordingAndPost(url, exid) {
     exportMonoWAV(function (blob) {
         try {
@@ -453,4 +442,4 @@ function stopRecordingAndPost(url, exid) {
             throw e;
         }
     });
-}
+}*/

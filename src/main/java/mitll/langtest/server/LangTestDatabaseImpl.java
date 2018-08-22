@@ -273,7 +273,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.warn("DatabaseImpl was never made properly...");
     } else {
       try {
-        logger.info("DatabaseImpl.destroy");
+      //  logger.info("DatabaseImpl.destroy");
         db.getDatabase().close(); // TODO : redundant with h2 shutdown hook?
       } catch (Exception e) {
         logger.error("Got " + e, e);

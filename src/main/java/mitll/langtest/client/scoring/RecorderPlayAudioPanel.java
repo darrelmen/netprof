@@ -31,8 +31,10 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final SafeUri firstRed = UriUtils.fromSafeConstant(FIRST_RED);
 
-  private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
+/*
+ private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
   private static final SafeUri secondRed = UriUtils.fromSafeConstant(SECOND_RED);
+  */
 
   private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
   private static final SafeUri RED_X_URL = UriUtils.fromSafeConstant(RED_X);
@@ -41,7 +43,9 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * TODO make better relationship with ASRRecordAudioPanel
    */
   private Image recordImage1;
+/*
   private Image recordImage2;
+*/
   private Image redX;
   private final DownloadContainer downloadContainer;
   private boolean canRecord;
@@ -90,15 +94,22 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     playButton.setVisible(false);
   }
 
-  public void flip(boolean first) {
+  /**
+   * @see NoFeedbackRecordAudioPanel#flip
+   * @paramx first
+   */
+/*  public void flip(boolean first) {
     if (canRecord) {
       recordImage1.setVisible(first);
+*//*
       recordImage2.setVisible(!first);
+*//*
     }
-  }
+  }*/
 
   void showFirstRecord() {
     if (canRecord) {
+      logger.info("showFirstRecording " + exid);
       recordImage1.setVisible(true);
     } else {
       redX.setVisible(true);
@@ -106,10 +117,14 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     downloadContainer.getDownloadContainer().setVisible(false);
   }
 
+  /**
+   * @see NoFeedbackRecordAudioPanel#stopRecording()
+   */
   void hideRecord() {
     if (canRecord) {
+      logger.info("hideRecord " + exid);
       recordImage1.setVisible(false);
-      recordImage2.setVisible(false);
+    //  recordImage2.setVisible(false);
     } else {
       redX.setVisible(false);
     }
@@ -152,14 +167,20 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     recordImage1.setVisible(false);
     recordImage1.setWidth("32px");
 
+    recordImage1.addStyleName("hvr-pulse");
+/*
+
     recordImage2 = new Image(secondRed);
     recordImage2.setVisible(false);
     recordImage2.setWidth("32px");
+*/
 
     this.canRecord = canRecord;
     if (canRecord) {
       recordFeedback.add(recordImage1);
+/*
       recordFeedback.add(recordImage2);
+*/
       if (waitCursor != null) {
         recordFeedback.add(waitCursor);
       }

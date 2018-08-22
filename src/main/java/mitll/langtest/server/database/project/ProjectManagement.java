@@ -954,7 +954,7 @@ public class ProjectManagement implements IProjectManagement {
     List<SlimProject> projectInfos = new ArrayList<>();
     Map<String, List<Project>> langToProject = getLangToProjects();
 
-    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
+//    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
 
     langToProject.values().forEach(projects -> {
       Project firstProduction = getFirstProduction(projects);

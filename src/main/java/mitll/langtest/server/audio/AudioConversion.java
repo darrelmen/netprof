@@ -55,6 +55,9 @@ public class AudioConversion extends AudioBase {
   private static final String LINUX_SOX_BIN_DIR_2 = "/usr/bin";
   private static final String WINDOWS_SOX_BIN_DIR = "sox-14-3-2";
   public static final String SIXTEEN_K_SUFFIX = "_16K";
+  /**
+   *
+   */
   public static final String FILE_MISSING = "FILE_MISSING";
   private static final float SIXTEEN_K = 16000f;
   private static final String LAME = "lame";
@@ -482,16 +485,17 @@ public class AudioConversion extends AudioBase {
       String mp3File = getMP3ForWav(absolutePathToWav.getAbsolutePath());
       //logger.info("writeCompressedVersions started  writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
 
+      List<Boolean> results = new ArrayList<>(2);
+
+      Thread mp3Thread = new Thread(() -> results.add(
+          writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)));
+      mp3Thread.start();
+
+      Thread oggThread = new Thread(() -> results.add(new ConvertToOGG()
+          .writeOGG(absolutePathToWav, overwrite, trackInfo)));
+      oggThread.start();
+
       if (waitToFinish) {
-        List<Boolean> results = new ArrayList<>(2);
-
-        Thread mp3Thread = new Thread(() -> results.add(
-            writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)));
-        mp3Thread.start();
-
-        Thread oggThread = new Thread(() -> results.add(new ConvertToOGG()
-            .writeOGG(absolutePathToWav, overwrite, trackInfo)));
-        oggThread.start();
         try {
           mp3Thread.join();
           oggThread.join();

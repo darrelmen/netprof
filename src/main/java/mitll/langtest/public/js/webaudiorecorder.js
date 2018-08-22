@@ -53,6 +53,16 @@ function startUserMedia(stream) {
     rememberedInput = input;
     webAudioMicAvailable();
     document.addEventListener('webkitvisibilitychange', onVisibilityChange);
+
+/*    if (audio_context) {
+        __log('webaudiorecorder.startUserMedia : state = ' +  audio_context.state);
+
+        //} && audio_context.state === 'running')
+        // {
+        audio_context.suspend().then(function () {
+            __log('webaudiorecorder.startUserMedia suspended recording...');
+        });
+    }*/
 }
 
 // if the user goes to another tab or changes focus, stop recording.
@@ -74,16 +84,44 @@ function onVisibilityChange() {
 // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
 function startRecording() {
     audio_context && audio_context.resume();
+
     recorder && recorder.clear();
     recorder && recorder.record();
 
-    __log('webaudiorecorder.startRecording Start Recording. ');
+    //  && audio_context.state === 'suspended'
+/*
+    if (audio_context) {
+        __log('webaudiorecorder.startRecording 1 Start Recording. ' +  audio_context.state);
+
+        audio_context.resume().then(function () {
+            __log('webaudiorecorder.startRecording resumed recording...');
+            rememberedInput.start();
+
+            recorder && recorder.clear();
+            recorder && recorder.record();
+        });
+    }
+*/
+
+    __log('webaudiorecorder.startRecording 2 Start Recording. ' +  audio_context.state);
 }
 
 // called from FlashRecordPanelHeadless.stopRecording
 function stopRecording() {
     recorder && recorder.stop();
     // audio_context && audio_context.suspend();
+
+    if (audio_context) {
+        __log('webaudiorecorder.stopRecording : state = ' +  audio_context.state);
+
+        //} && audio_context.state === 'running')
+   // {
+        audio_context.suspend().then(function () {
+            __log('webaudiorecorder.stopRecording suspended recording...');
+            rememberedInput.stop();
+        });
+    }
+
 
     __log('Stop Recording.');
     //   var end = new Date().getTime();
@@ -99,20 +137,28 @@ function serviceStartStream(url, exid, reqid) {
 
     recorder && recorder.serviceStartStream(url, exid, reqid,
         function (blob) {
-      //      __log('startStream getStreamResponse.');
+            //      __log('startStream getStreamResponse.');
             getStreamResponse(blob);
         });
 }
 
 function serviceStopStream() {
     recorder && recorder.stop();
+
+    if (audio_context && audio_context.state === 'running') {
+        audio_context.suspend().then(function () {
+            __log('webaudiorecorder.serviceStopStream suspended recording...');
+        });
+    }
+
     recorder && recorder.serviceStopStream(function (blob) {
-      //  __log('serviceStopStream getStreamResponse.');
+        //  __log('serviceStopStream getStreamResponse.');
         getStreamResponse(blob);
     });
 }
 
-function stopRecordingAndPost(url, exid) {
+// not really needed
+/*function stopRecordingAndPost(url, exid) {
     recorder && recorder.exportMonoWAV(function (blob) {
         try {
             var xhr = new XMLHttpRequest();
@@ -142,10 +188,9 @@ function stopRecordingAndPost(url, exid) {
             throw e;
         }
     });
-}
+}*/
 
 function uint6ToB64(nUint6) {
-
     return nUint6 < 26 ?
         nUint6 + 65
         : nUint6 < 52 ?
@@ -291,65 +336,8 @@ function initWebAudio() {
 
     if (navigator.mediaDevices) {
         navigator.mediaDevices.ondevicechange = function (event) {
-            __log("got device change... ");
+//            __log("got device change... ");
             location.reload();
-            //      initWebAudio();
-            //updateDeviceList();
         };
     }
-//    updateDeviceList();
 }
-
-/*
-function updateDeviceList() {
-    navigator.mediaDevices.enumerateDevices()
-        .then(function (devices) {
-
-            var newmics = [];
-            devices.forEach(function (device) {
-                var isMatch = device.kind === "audioinput";
-                // __log("got device " + device.label);
-                //
-                if (isMatch) {
-                    __log("got mic " + device.label);
-                    newmics.push(device.deviceId);
-                    // __log("got kind " + device.kind);
-                    // __log("got groupId " + device.groupId );
-                    //  __log("got deviceId " + device.deviceId );
-                    //  audioList.appendChild(elem);
-                }
-                else {
-                    __log("got not a mic " + device.label);
-                    __log("got kind " + device.kind);
-                    __log("got groupId " + device.groupId);
-                    __log("got deviceId " + device.deviceId);
-
-                }
-                //else if (type === "video") {
-                //     __log("got video " + message);
-                // }
-            });
-
-            newmics.sort();
-
-            if (newmics.length !== mics.length) {
-                __log("got mics " + newmics.length + " before " + mics.length);
-                // initWebAudio();
-            }
-            else {
-                __log("no change mics " + newmics.length + " before " + mics.length);
-            }
-
-            mics = newmics;
-            // else {
-            //     for (i = 0; i < newmics.length; i++) {
-            //         __log("mic " + i + " " + newmics[i]);
-            //         if (newmics[i] !== mics[i]) {
-            //             __log("different mic " + i + " " + newmics[i]);
-            //             break;
-            //         }
-            //     }
-            // }
-        });
-}
-*/

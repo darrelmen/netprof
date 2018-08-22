@@ -145,7 +145,7 @@ public class JSONAnswerParser {
 */
 
 
-   String getField(JSONObject jsonObject, String valid1) {
+  String getField(JSONObject jsonObject, String valid1) {
     JSONValue jsonValue = jsonObject.get(valid1);
     JSONString string = jsonValue == null ? new JSONString("") : jsonValue.isString();
     return string == null ? "" : string.stringValue();
@@ -161,7 +161,7 @@ public class JSONAnswerParser {
    *
    * @see mitll.langtest.server.scoring.JsonScoring#getJsonObject(int, int, DecoderOptions, boolean, net.sf.json.JSONObject, boolean, AudioAnswer, boolean)
    */
-   JSONObject digestJsonResponse(String json) {
+  JSONObject digestJsonResponse(String json) {
     //  logger.info("Digesting response " + json);
     try {
       JSONValue val = JSONParser.parseStrict(json);

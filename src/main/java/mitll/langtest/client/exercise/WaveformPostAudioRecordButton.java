@@ -127,9 +127,11 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     setPlayEnabled(false);
   }
 
+/*
   @Override
   public void flip(boolean first) {
   } // force not to be abstract
+*/
 
   /**
    * @param duration

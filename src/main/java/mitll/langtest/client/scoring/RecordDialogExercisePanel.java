@@ -3,6 +3,7 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.banner.RehearseViewHelper;
 import mitll.langtest.client.banner.SessionManager;
@@ -50,9 +51,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       minDur -= END_DUR_SKEW;
     }
     this.sessionManager = sessionManager;
-
     addStyleName("inlineFlex");
-    //  logger.info("ex " + commonExercise.getID() + " min dur " + minDur);
   }
 
   /**
@@ -135,8 +134,19 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       }
 
       @Override
+      Widget getPopupTargetWidget() {
+        return myGetPopupTargetWidget();
+      }
+
+      @Override
       public void usePartial(Validity validity) {
         listenView.addPacketValidity(validity);
+      }
+
+      @Override
+      public void onPostFailure() {
+        logger.info("onPostFailure exid " +getExID());
+        stopRecording();
       }
 
       /**
@@ -148,6 +158,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
         super.useInvalidResult(isValid);
         logger.info("useInvalidResult got valid = " + isValid);
       }
+
 
       /**
        * @see FeedbackPostAudioRecordButton#stopRecording(long)
@@ -186,6 +197,10 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
     add(flContainer);
     super.addWidgets(showFL, showALTFL, phonesChoices);
+  }
+
+  private Widget myGetPopupTargetWidget() {
+    return this;
   }
 
   public void cancelRecording() {
@@ -233,6 +248,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   /**
    * Check against expected duration too see when to end.
+   *
    * @see RehearseViewHelper#mySilenceDetected()
    */
   public boolean stopRecording() {

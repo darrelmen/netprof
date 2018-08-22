@@ -92,7 +92,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
    * @see #flipRecordImages
    */
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
-  private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
+  //private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   protected T exercise;
   protected AudioType audioType;
 
@@ -103,7 +103,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
    * @param showSpectrogram
    * @param audioType
    * @param instance
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(CommonExercise, Panel, boolean, String)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel
    * @see ExercisePanel#getAnswerWidget
    */
   public RecordAudioPanel(T exercise,
@@ -221,7 +221,9 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
     postAudioRecordButton = myPostAudioRecordButton;
 
     // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
-    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, buttonTitle, toTheRightWidget, controller, exercise);
+    playAudioPanel = new MyPlayAudioPanel(recordImage1,
+        //recordImage2,
+        exercisePanel, buttonTitle, toTheRightWidget, controller, exercise);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
     return playAudioPanel;
@@ -247,7 +249,9 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
 
   protected void showStop() {
     recordImage1.setVisible(false);
+/*
     recordImage2.setVisible(false);
+*/
   }
 
   protected void showStart() {
@@ -255,13 +259,15 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   }
 
   /**
-   * @param first
+   * @paramx first
    * @see RecordAudioPanel.MyWaveformPostAudioRecordButton#flip
    */
-  protected void flipRecordImages(boolean first) {
+/*  protected void flipRecordImages(boolean first) {
     recordImage1.setVisible(first);
+*//*
     recordImage2.setVisible(!first);
-  }
+*//*
+  }*/
 
   public Button getButton() {
     return postAudioRecordButton;
@@ -284,7 +290,9 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
    * A play button that controls the state of the record button.
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
-    public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel,
+    public MyPlayAudioPanel(Image recordImage1,
+                            //Image recordImage2,
+                            final Panel panel,
                             String suffix, Widget toTheRightWidget, ExerciseController controller, HasID exercise) {
       super(
           new PlayListener() {
@@ -301,8 +309,8 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
       add(recordImage1);
       recordImage1.setVisible(false);
 
-      add(recordImage2);
-      recordImage2.setVisible(false);
+/*      add(recordImage2);
+      recordImage2.setVisible(false);*/
 
 //      getElement().setId("MyPlayAudioPanel");
       postAudioRecordButton.addStyleName("leftFiveMargin");
@@ -367,10 +375,10 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
       return b;
     }
 
-    @Override
+  /*  @Override
     public void flip(boolean first) {
       flipRecordImages(first);
-    }
+    }*/
 
     /**
      * From Paul Gatewood:

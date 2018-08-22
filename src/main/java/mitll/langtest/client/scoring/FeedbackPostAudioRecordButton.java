@@ -77,13 +77,13 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   /**
-   * @see RecordButton#flipImage
+   * @seex RecordButton#flipImage
    * @param first
    */
-  @Override
+/*  @Override
   public void flip(boolean first) {
     simpleRecordAudioPanel.flip(first);
-  }
+  }*/
 
   /**
    * @param result
@@ -94,9 +94,21 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     simpleRecordAudioPanel.useResult(result);
   }
 
+  /**
+   * @see PostAudioRecordButton#startRecording
+   * @param validity
+   */
   @Override
   public void usePartial(Validity validity) {
     simpleRecordAudioPanel.usePartial(validity);
+  }
+
+  /**
+   * @see PostAudioRecordButton#onPostFailure(long, int, String)
+   */
+  @Override
+  protected void onPostFailure() {
+    simpleRecordAudioPanel.onPostFailure();
   }
 
   /**
@@ -115,6 +127,9 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     simpleRecordAudioPanel.gotShortDurationRecording();
   }
 
+  /**
+   * TODO : don't do this...
+   */
   boolean showing=false;
   @Override
   protected void showPopup(String toShow) {

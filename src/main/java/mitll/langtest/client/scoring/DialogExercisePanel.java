@@ -102,9 +102,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     });
     Style style = getElement().getStyle();
     style.setCursor(Style.Cursor.POINTER);
-   // style.setOverflow(Style.Overflow.HIDDEN);
     getElement().setId("DialogExercisePanel_" + getExID());
-
   }
 
   public int getExID() {

@@ -70,7 +70,7 @@ public class AudioCheck {
   //private static final short ct = 32112;
   // private static final short clippedThreshold2 = 32752; // 32768-16
   // private static final short clippedThreshold2Minus = -32752; // 32768-16
-  private static final float MAX_VALUE = 32768.0f;
+  private static final float MAX_VALUE = 32768.0F;
   private static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
   private static final boolean DEBUG = false;
   private static final int WAV_HEADER_LENGTH = 44;
@@ -395,16 +395,17 @@ public class AudioCheck {
 
     if (wasClipped || !validAudio) {
       logger.info("checkWavFile: audio recording (Length: " + frameLength + " frames) " +
-          "mean power = " + mean + " (dB) vs " + PowerThreshold +
-          ", std = " + std + " vs " + VarianceThreshold +
-          " valid = " + validAudio +
-          " was clipped (1) " + wasClipped + " (" + (clippedRatio * 100f) + "% samples clipped, # clipped = " + countClipped + ") " +
+          "\n\tmean power " + mean + " (dB) vs " + PowerThreshold +
+          "\n\tstd        " + std + " vs " + VarianceThreshold +
+          "\n\tvalid      " + validAudio +
+          "\n\tclipped (1) " + wasClipped + " (" + (clippedRatio * 100f) + "% samples clipped, # clipped = " + countClipped + ") " +
           // " was clipped (2) " + wasClipped2 + " (" + (clippedRatio2 * 100f) + "% samples clipped, # clipped = " + cc + ")" +
-          " max = " + max + "/" + nmax
+          "\n\tmax = " + max + "/" + nmax
       );
     }
 
-    boolean micDisconnected = mean < -79.999 && std < 0.001;
+    // literally flatline -- 0 = 0
+    boolean micDisconnected = max == nmax;// mean < -79.999 && std < 0.001;
 
     Validity validity = validAudio ?
         (wasClipped ?

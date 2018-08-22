@@ -1,6 +1,7 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButtonPanel;
@@ -9,11 +10,13 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.exercise.Shell;
 
+import java.util.logging.Logger;
+
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
 public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extends DivWidget
     implements RecordingAudioListener {
-//  private final Logger logger = Logger.getLogger("NoFeedbackRecordAudioPanel");
+  private final Logger logger = Logger.getLogger("NoFeedbackRecordAudioPanel");
 
   protected final ExerciseController controller;
   protected final T exercise;
@@ -36,6 +39,9 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     getElement().setId("NoFeedbackRecordAudioPanel_" + exercise.getID());
   }
 
+  /**
+   * @see RecordDialogExercisePanel#addWidgets
+   */
   protected void addWidgets() {
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
@@ -56,11 +62,12 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
    * audio, we can't record. We also mark the widget as busy so we can't move on to a different exercise.
    *
    * @return
-   * @seex #addWidgets
+   * @see #addWidgets
    * @see AudioPanel#getPlayButtons
    */
   RecorderPlayAudioPanel makePlayAudioPanel() {
     //long then = System.currentTimeMillis();
+    NoFeedbackRecordAudioPanel outer =this;
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller) {
 
       /**
@@ -70,6 +77,11 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
       @Override
       protected String getDevice() {
         return getDeviceValue();
+      }
+
+      @Override
+      protected Widget getPopupTargetWidget() {
+        return outer.getPopupTargetWidget();
       }
     };
     postAudioRecordButton.addStyleName("leftFiveMargin");
@@ -85,6 +97,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     return playAudioPanel;
   }
 
+  Widget getPopupTargetWidget() { return this; }
   private String getDeviceValue() {
     return sessionManager.getSession();
   }
@@ -116,12 +129,12 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
    */
   @Override
   public void stopRecording() {
-//    logger.info("stopRecording...");
+    logger.info("stopRecording on " + exercise.getID());
     playAudioPanel.setEnabled(true);
     playAudioPanel.hideRecord();
   }
 
-  public void cancelRecording() {
+  void cancelRecording() {
     postAudioRecordButton.cancelRecording();
   }
 
@@ -131,10 +144,16 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     //  scoreHistory.setVisible(true);
   }
 
+  /**
+   * @see FeedbackPostAudioRecordButton#flip(boolean)
+   * @param first
+   */
+/*
   @Override
   public void flip(boolean first) {
     playAudioPanel.flip(first);
   }
+*/
 
   /**
    *
@@ -150,6 +169,14 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
   @Override
   public void usePartial(Validity validity) {
 
+  }
+
+  /**
+   * @see FeedbackPostAudioRecordButton#onPostFailure()
+   */
+  @Override
+  public void onPostFailure() {
+      logger.info("onPostFailure...");
   }
 
   @Override
