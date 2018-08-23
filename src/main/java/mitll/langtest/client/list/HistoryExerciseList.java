@@ -38,6 +38,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
@@ -113,7 +114,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     // logger.info(getInstance() + " : getHistoryTokenFromUIState for " + id + " and search '" + search + "'");
 
     boolean hasItemID = id != -1;
-    String instanceSuffix = getInstance().isEmpty() ? "" : SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();
+    String instanceSuffix = getInstance() == INavigation.VIEWS.NONE ? "" : SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();
 
     String s = (hasItemID ?
         super.getHistoryTokenFromUIState(search, id) :

@@ -47,7 +47,6 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.image.ImageResponse;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

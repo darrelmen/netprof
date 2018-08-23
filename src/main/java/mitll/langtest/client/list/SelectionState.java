@@ -33,6 +33,7 @@
 package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.History;
+import mitll.langtest.client.custom.INavigation;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -245,8 +246,18 @@ public class SelectionState {
     }
   }
 
+  @Deprecated
   public String getInstance() {
     return instance;
+  }
+
+  public INavigation.VIEWS getView() {
+    try {
+      return instance.isEmpty() ? INavigation.VIEWS.NONE : INavigation.VIEWS.valueOf(instance.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.warning("getView : hmm, couldn't parse " + instance);
+      return INavigation.VIEWS.NONE;
+    }
   }
 
   public String getSearch() {

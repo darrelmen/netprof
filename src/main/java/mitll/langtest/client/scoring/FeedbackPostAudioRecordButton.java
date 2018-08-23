@@ -49,11 +49,10 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
 
   @Override
   public void startRecording() {
-    controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "startRecording");
     super.startRecording();
-
     simpleRecordAudioPanel.startRecording();
 
+    controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "startRecording");
   }
 
   /**
@@ -77,15 +76,6 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   /**
-   * @seex RecordButton#flipImage
-   * @param first
-   */
-/*  @Override
-  public void flip(boolean first) {
-    simpleRecordAudioPanel.flip(first);
-  }*/
-
-  /**
    * @param result
    * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
    */
@@ -96,6 +86,9 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
 
   /**
    * @see PostAudioRecordButton#startRecording
+   *
+   * @see #gotPacketResponse
+   * @see #stopRecording(long)
    * @param validity
    */
   @Override
@@ -134,13 +127,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   @Override
   protected void showPopup(String toShow) {
     if (!showing) {
-      new ModalInfoDialog("Warning", toShow, new HiddenHandler() {
-        @Override
-        public void onHidden(HiddenEvent hiddenEvent) {
-          showing = false;
-        }
-      });
-
+      new ModalInfoDialog("Warning", toShow, hiddenEvent -> showing = false);
       showing = true;
     }
   }

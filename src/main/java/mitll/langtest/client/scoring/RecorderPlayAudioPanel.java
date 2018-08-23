@@ -94,18 +94,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     playButton.setVisible(false);
   }
 
-  /**
-   * @see NoFeedbackRecordAudioPanel#flip
-   * @paramx first
-   */
-/*  public void flip(boolean first) {
-    if (canRecord) {
-      recordImage1.setVisible(first);
-*//*
-      recordImage2.setVisible(!first);
-*//*
-    }
-  }*/
+
 
   void showFirstRecord() {
     if (canRecord) {
@@ -122,7 +111,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    */
   void hideRecord() {
     if (canRecord) {
-      logger.info("hideRecord " + exid);
+     // logger.info("hideRecord " + exid);
       recordImage1.setVisible(false);
     //  recordImage2.setVisible(false);
     } else {

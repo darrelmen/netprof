@@ -2,6 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
@@ -17,13 +18,15 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise> extends LearnFacetExerciseList<T> {
-  private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
+  //private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
   private final PracticeHelper<T, U> practiceHelper;
   private ControlState controlState;
 
   PracticeFacetExerciseList(ExerciseController controller,
                             PracticeHelper<T, U> practiceHelper,
-                            Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
+                            Panel topRow, Panel currentExercisePanel,
+                            INavigation.VIEWS instanceName,
+                            DivWidget listHeader) {
     super(
         topRow,
         currentExercisePanel,

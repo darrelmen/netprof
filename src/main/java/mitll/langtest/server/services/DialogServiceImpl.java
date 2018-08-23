@@ -38,7 +38,10 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.FilterRequest;
+import mitll.langtest.shared.exercise.FilterResponse;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,13 +58,13 @@ import java.util.stream.Collectors;
 public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet implements DialogService {
   private static final Logger logger = LogManager.getLogger(DialogServiceImpl.class);
 
-
   private static final String ANY = "Any";
 
   /**
    * @param request
    * @return
-   * @see mitll.langtest.client.list.FacetExerciseList#getTypeToValues
+   * @seex mitll.langtest.client.list.FacetExerciseList#getTypeToValues
+   * @see mitll.langtest.client.banner.DialogExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
     ISection<IDialog> sectionHelper = getDialogSectionHelper();
@@ -86,13 +89,10 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
             typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
           }
         });
-
-
       }
 
       return response;
     }
-    //}
   }
 
   @Override

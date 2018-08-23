@@ -32,12 +32,8 @@
 
 package mitll.langtest.server.amas;
 
-import mitll.langtest.server.database.DatabaseServices;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.flashcard.QuizCorrectAndScore;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

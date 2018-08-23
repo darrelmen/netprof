@@ -86,7 +86,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     super(currentExerciseVPanel, factory, controller, listOptions);
     this.waitCursorHelper = new WaitCursorHelper();
     addComponents();
-    getElement().setId("PagingExerciseList_" + getInstance());
+   // getElement().setId("PagingExerciseList_" + getInstance());
   }
 
   public Map<Integer, T> getIdToExercise() {

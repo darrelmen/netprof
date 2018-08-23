@@ -2,26 +2,12 @@ package mitll.langtest.server.database.dialog;
 
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
-import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.SlickDialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Stream;
-
-import static mitll.langtest.shared.dialog.IDialog.METADATA.FLTITLE;
+import java.util.Map;
 
 /**
  * Dialog data from Paul - 6/20/18

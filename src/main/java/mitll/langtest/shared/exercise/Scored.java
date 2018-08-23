@@ -32,10 +32,6 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.shared.flashcard.CorrectAndScore;
-
-import java.util.List;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

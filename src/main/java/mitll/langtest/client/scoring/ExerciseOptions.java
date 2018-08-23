@@ -1,25 +1,27 @@
 package mitll.langtest.client.scoring;
 
+import mitll.langtest.client.custom.INavigation;
+
 /**
  * Created by go22670 on 2/21/17.
  */
 public class ExerciseOptions {
   private float screenPortion = 1.0f;
   private boolean addKeyHandler = false;
-  private String instance = "";
+  private INavigation.VIEWS instance = INavigation.VIEWS.NONE;
   private boolean allowRecording = true;
   private boolean includeListButtons = true;
 
   public ExerciseOptions() {
   }
 
-  public ExerciseOptions(String instance) {
+  public ExerciseOptions(INavigation.VIEWS instance) {
     this.instance = instance;
   }
 
   public ExerciseOptions(float screenPortion,
                          boolean addKeyHandler,
-                         String instance,
+                         INavigation.VIEWS instance,
                          boolean allowRecording,
                          boolean includeListButtons) {
     this.screenPortion = screenPortion;
@@ -32,49 +34,16 @@ public class ExerciseOptions {
   float getScreenPortion() {
     return screenPortion;
   }
-
-/*  public ExerciseOptions setScreenPortion(float screenPortion) {
-    this.screenPortion = screenPortion;
-    return this;
-  }*/
-
   public boolean isAddKeyHandler() {
     return addKeyHandler;
   }
-
-/*
-  public ExerciseOptions setAddKeyHandler(boolean addKeyHandler) {
-    this.addKeyHandler = addKeyHandler;
-    return this;
-  }
-*/
-
-  public String getInstance() {
+  public INavigation.VIEWS getInstance() {
     return instance;
   }
-
-/*  public ExerciseOptions setInstance(String instance) {
-    this.instance = instance;
-    return this;
-  }*/
-
   boolean isAllowRecording() {
     return allowRecording;
   }
-
-/*
-  public ExerciseOptions setAllowRecording(boolean allowRecording) {
-    this.allowRecording = allowRecording;
-    return this;
-  }
-*/
-
   boolean isIncludeListButtons() {
     return includeListButtons;
   }
-/*
-  public ExerciseOptions setIncludeListButtons(boolean includeListButtons) {
-    this.includeListButtons = includeListButtons;
-    return this;
-  }*/
 }

@@ -51,7 +51,6 @@ import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.ExerciseOptions;
@@ -66,6 +65,9 @@ import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.custom.INavigation.VIEWS.FIX;
+import static mitll.langtest.client.custom.INavigation.VIEWS.QC;
 
 /**
  * Created with IntelliJ IDEA.
@@ -129,18 +131,18 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    * @param controller
    * @param listContainer
    * @param instance
-   * @see mitll.langtest.client.custom.content.NPFHelper#getFactory(PagingExerciseList, String, boolean)
+   * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
    */
   public QCNPFExercise(T e,
                        ExerciseController controller,
                        ListInterface<?, ?> listContainer,
-                       String instance) {
+                       INavigation.VIEWS instance) {
     super(e, controller, listContainer, new ExerciseOptions(instance));
     this.listContainer = listContainer;
   }
 
   @Override
-  protected void makeScorePanel(T e, String instance) {
+  protected void makeScorePanel(T e, INavigation.VIEWS instance) {
     if (audioWasPlayed == null) {
       initAudioWasPlayed();
     }
@@ -200,12 +202,10 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
         CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED :
         UNINSPECTED_TOOLTIP);
 
-    if (!getInstance().toLowerCase().contains(INavigation.VIEWS.QC.toString().toLowerCase())
-    //    &&
-      //  !getInstance().toLowerCase().contains(COMMENT.toLowerCase())
-    ) {
+    if (getInstance() == FIX) {
       approvedButton = addApprovedButton(listContainer, navHelper);
     }
+
     setApproveButtonState();
     return navHelper;
   }
@@ -318,7 +318,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
   }
 
   private Heading getComment() {
-    boolean isComment = getInstance().equalsIgnoreCase(COMMENT);
+    boolean isComment = getInstance() == INavigation.VIEWS.QC;
     String columnLabel = isComment ? COMMENT : DEFECT;
     Heading heading = new Heading(4, columnLabel);
     heading.addStyleName("borderBottomQC");
@@ -622,7 +622,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     }
     String speed = audio.isRegularSpeed() ? " Regular speed" : " Slow speed";
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<>(audioRef, e.getFLToShow(), e.getTransliteration(), controller,
-        controller.getProps().showSpectrogram(), 70, speed, e, getInstance());
+        controller.getProps().showSpectrogram(), 70, speed, e);
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.addPlayListener(new PlayListener() {
@@ -778,7 +778,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    */
   private CheckBox makeCheckBox(final String field, final Panel commentRow, final FocusWidget commentEntry,
                                 boolean alreadyMarkedCorrect) {
-    boolean isComment = getInstance().equalsIgnoreCase(COMMENT);
+    boolean isComment = getInstance() == QC;
 
     final CheckBox checkBox = new CheckBox("");
     checkBox.getElement().setId("CheckBox_" + field);

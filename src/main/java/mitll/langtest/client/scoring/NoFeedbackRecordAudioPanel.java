@@ -141,19 +141,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
   public void gotShortDurationRecording() {
     playAudioPanel.hideRecord();
     setVisible(true);
-    //  scoreHistory.setVisible(true);
   }
-
-  /**
-   * @see FeedbackPostAudioRecordButton#flip(boolean)
-   * @param first
-   */
-/*
-  @Override
-  public void flip(boolean first) {
-    playAudioPanel.flip(first);
-  }
-*/
 
   /**
    *

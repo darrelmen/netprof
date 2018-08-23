@@ -18,7 +18,6 @@ import static mitll.langtest.shared.user.User.Permission.*;
  * Created by go22670 on 4/10/17.
  */
 public interface INavigation extends IViewContaner {
-
   enum VIEWS {
     NONE("", EITHER),
 
@@ -33,8 +32,11 @@ public interface INavigation extends IViewContaner {
      * @see mitll.langtest.client.banner.DialogExerciseList#gotClickOnDialog
      * @see mitll.langtest.client.banner.NewContentChooser#showView
      */
+    STUDY("Study", ProjectMode.DIALOG),
     LISTEN("Listen", ProjectMode.DIALOG),
     REHEARSE("Rehearse", ProjectMode.DIALOG),
+    PERFORM("Perform", ProjectMode.DIALOG),
+    SCORES("Scores", ProjectMode.DIALOG),
 
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     RECORD_CONTEXT("Record Context", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),

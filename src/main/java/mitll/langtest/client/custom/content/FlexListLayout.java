@@ -35,11 +35,11 @@ package mitll.langtest.client.custom.content;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -63,7 +63,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
   /**
    * @param controller
-   * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @see NPFHelper#doInternalLayout(int, INavigation.VIEWS)
    */
   public FlexListLayout(ExerciseController controller) {
     this.controller = controller;
@@ -77,9 +77,9 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    * @param hasTopRow
    * @return
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#doNPF
-   * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @see NPFHelper#doInternalLayout(int, INavigation.VIEWS)
    */
-  public Panel doInternalLayout(int userListID, String instanceName, boolean hasTopRow) {
+  public Panel doInternalLayout(int userListID, INavigation.VIEWS instanceName, boolean hasTopRow) {
     Panel twoRows = hasTopRow ? new FlowPanel() : new DivWidget();
     twoRows.getElement().setId("FlexListLayout_twoRows");
 
@@ -127,7 +127,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
         listHeader, footer);
     npfExerciseList = widgets;
 
-    addThirdColumn(bottomRow);
+  //  addThirdColumn(bottomRow);
 
     if (npfExerciseList == null) {
       logger.warning("huh? exercise list is null for " + instanceName + " and " + userListID);
@@ -211,8 +211,8 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     return currentExerciseVPanel;
   }
 
-  protected void addThirdColumn(Panel bottomRow) {
-  }
+//  private void addThirdColumn(Panel bottomRow) {
+//  }
 
   protected void styleBottomRow(Panel bottomRow) {
   }
@@ -229,7 +229,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    */
   private PagingExerciseList<T, U> makeNPFExerciseList(final Panel topRow,
                                                        Panel currentExercisePanel,
-                                                       String instanceName,
+                                                       INavigation.VIEWS instanceName,
                                                        int userListID,
                                                        DivWidget listHeader,
                                                        DivWidget footer) {
@@ -244,7 +244,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
   protected abstract PagingExerciseList<T, U> makeExerciseList(final Panel topRow,
                                                                Panel currentExercisePanel,
-                                                               final String instanceName,
+                                                               final INavigation.VIEWS instanceName,
                                                                DivWidget listHeader, DivWidget footer);
 
   protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);

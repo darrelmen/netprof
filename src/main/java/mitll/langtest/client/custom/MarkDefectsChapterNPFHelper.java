@@ -50,6 +50,8 @@ import mitll.langtest.shared.exercise.ExerciseListRequest;
 import java.util.Collection;
 import java.util.Map;
 
+import static mitll.langtest.client.custom.INavigation.VIEWS.QC;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -68,7 +70,7 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends Client
    * @see
    */
   public MarkDefectsChapterNPFHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
-    super(controller, viewContaner, myView);
+    super(controller);
   }
 
   /**
@@ -92,10 +94,10 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends Client
 
       @Override
       protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
-                                                                                 Panel currentExercisePanel,
-                                                                                 String instanceName,
-                                                                                 DivWidget listHeader,
-                                                                                 DivWidget footer) {
+                                                          Panel currentExercisePanel,
+                                                          INavigation.VIEWS instanceName,
+                                                          DivWidget listHeader,
+                                                          DivWidget footer) {
 
         return new NPExerciseList<T,U>(currentExercisePanel, controller,
             new ListOptions()
@@ -190,9 +192,7 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends Client
     final PagingExerciseList<T, U> outerExerciseList =exerciseList;
     return new ExercisePanelFactory<T, U>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(U e) {
-        return new QCNPFExercise<U>(e, controller, outerExerciseList, ActivityType.MARK_DEFECTS.toString());
-      }
+      public Panel getExercisePanel(U e) { return new QCNPFExercise<U>(e, controller, outerExerciseList, QC); }
     };
   }
 }

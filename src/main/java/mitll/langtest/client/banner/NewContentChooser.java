@@ -58,6 +58,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final DialogViewHelper dialogHelper;
   private final ListenViewHelper listenHelper;
   private final ListenViewHelper rehearseHelper;
+  private final ListenViewHelper performHelper;
   private final PracticeHelper practiceHelper;
   private final QuizHelper quizHelper;
   private final ExerciseController controller;
@@ -74,13 +75,17 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    * @see InitialUI#makeNavigation
    */
   public NewContentChooser(ExerciseController controller, IBanner banner) {
-    learnHelper = new NewLearnHelper(controller, this, LEARN);
+    learnHelper = new LearnHelper(controller, this, LEARN);
     practiceHelper = new PracticeHelper(controller, this, DRILL);
     quizHelper = new QuizHelper(controller, this, VIEWS.QUIZ, this);
 
     dialogHelper = new DialogViewHelper(controller, this, DIALOG);
-    listenHelper = new ListenViewHelper(controller, this, LISTEN);
+
+    // todo : add study
+    listenHelper = new ListenViewHelper(controller);
     rehearseHelper = new RehearseViewHelper(controller, this, REHEARSE);
+    performHelper = new PerformViewHelper(controller, this, PERFORM);
+    // todo : add score
 
     this.controller = controller;
     this.listView = new ListView(controller);
@@ -175,7 +180,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       switch (view) {
         case LEARN:
           clearAndPush(isFirstTime, currentStoredView, LEARN);
-          learnHelper.showContent(divWidget, LEARN.toString(), fromClick);
+          learnHelper.showContent(divWidget, LEARN, fromClick);
           break;
         case DRILL:
           setInstanceHistory(DRILL);
@@ -192,36 +197,38 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case LISTS:
           clearAndFixScroll();
           setInstanceHistory(LISTS);
-          listView.showContent(divWidget, "listView", fromClick);
+          listView.showContent(divWidget, LISTS, fromClick);
           break;
         case DIALOG:
           clearAndPush(isFirstTime, currentStoredView, DIALOG);
-          dialogHelper.showContent(divWidget, DIALOG.toString(), fromClick);
+          dialogHelper.showContent(divWidget, DIALOG, fromClick);
           break;
         case LISTEN:
-          //logger.info("showing " + LISTEN + " \n\n\n");
           clearAndPushKeep(LISTEN);
-          listenHelper.showContent(divWidget, LISTEN.toString(), fromClick);
+          listenHelper.showContent(divWidget, LISTEN, fromClick);
           break;
         case REHEARSE:
-          // logger.info(" showing " + REHEARSE + " \n\n\n");
           clearAndPushKeep(REHEARSE);
-          rehearseHelper.showContent(divWidget, REHEARSE.toString(), fromClick);
+          rehearseHelper.showContent(divWidget, REHEARSE, fromClick);
+          break;
+        case PERFORM:
+          clearAndPushKeep(PERFORM);
+          performHelper.showContent(divWidget, PERFORM, fromClick);
           break;
         case RECORD_ENTRIES:
           clearAndFixScroll();
           setInstanceHistory(RECORD_ENTRIES);
-          new RecorderNPFHelper(controller, true, this, RECORD_ENTRIES).showNPF(divWidget, RECORD_ENTRIES.toString());
+          new RecorderNPFHelper(controller, true, this, RECORD_ENTRIES).showNPF(divWidget, RECORD_ENTRIES);
           break;
         case RECORD_CONTEXT:
           clearAndFixScroll();
           setInstanceHistory(RECORD_CONTEXT);
-          new RecorderNPFHelper(controller, false, this, RECORD_CONTEXT).showNPF(divWidget, RECORD_CONTEXT.toString());
+          new RecorderNPFHelper(controller, false, this, RECORD_CONTEXT).showNPF(divWidget, RECORD_CONTEXT);
           break;
         case QC:
           clear();
           setInstanceHistory(QC);
-          new MarkDefectsChapterNPFHelper(controller, this, QC).showNPF(divWidget, QC.toString());
+          new MarkDefectsChapterNPFHelper(controller, this, QC).showNPF(divWidget, QC);
           break;
         case FIX:
           clear();
@@ -248,18 +255,19 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
     SelectionState selectionState = new SelectionState();
     //String instance = selectionState.getInstance();
-    if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
+    if (selectionState.getView() != views) {
       //   logger.info("setInstanceHistory clearing history for instance " + views);
       int dialog = selectionState.getDialog();
       pushItem(getInstanceParam(views) + SelectionState.SECTION_SEPARATOR +
           (dialog > 0 ? (SelectionState.DIALOG + "=" + dialog) : ""));
-    } else {
-      //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
+    //else {
+    //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
+    //}
   }
 
   private void setInstanceHistory(VIEWS views) {
-    if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
+    if (new SelectionState().getView() != views) {
       logger.info("setInstanceHistory clearing history for instance " + views);
       pushItem(getInstanceParam(views));
     } else {
@@ -354,7 +362,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void showPractice() {
     practiceHelper.setMode(mode, prompt);
     practiceHelper.setNavigation(this);
-    practiceHelper.showContent(divWidget, DRILL.toString(), true);
+    practiceHelper.showContent(divWidget, DRILL, true);
     practiceHelper.hideList();
   }
 
@@ -365,7 +373,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void showQuizForReal(boolean fromClick) {
     quizHelper.setMode(mode, prompt);
     quizHelper.setNavigation(this);
-    quizHelper.showContent(divWidget, VIEWS.QUIZ.toString(), fromClick);
+    quizHelper.showContent(divWidget, QUIZ, fromClick);
     quizHelper.hideList();
     if (fromClick) quizHelper.showQuizIntro();
   }
@@ -453,28 +461,30 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   @Nullable
   private VIEWS getCurrentViewFromURL() {
-    String instance = getCurrentInstance();
-    VIEWS views = null;
-    try {
+    VIEWS views = new SelectionState().getView();
+    // String instance = getCurrentInstance();
+    // VIEWS views = null;
+ /*   try {
       String name = instance.toUpperCase();
       name = name.replaceAll(" ", "_");
       views = instance.isEmpty() ? null : VIEWS.valueOf(name);
     } catch (IllegalArgumentException e) {
       logger.warning("bad instance " + instance);
-    }
+    }*/
     //logger.info("getCurrentStoredView instance = " + instance + "/" + views);
 
 //    return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
 
-    if (views == null) {
+    if (views == NONE) {
       String storedView = getStoredView();
 
-      if (storedView.isEmpty()) views = VIEWS.NONE;
-      else {
+      if (storedView.isEmpty()) {
+        views = VIEWS.NONE;
+      } else {
         try {
           views = VIEWS.valueOf(storedView.toUpperCase());
         } catch (IllegalArgumentException e) {
-          logger.warning("bad instance " + storedView);
+          logger.warning("getCurrentViewFromURL : bad instance " + storedView);
           views = VIEWS.NONE;
         }
       }
@@ -485,9 +495,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   /**
    * @return
    */
-  private String getCurrentInstance() {
-    return new SelectionState().getInstance();
-  }
+//  private VIEWS getCurrentView() {
+//    return new SelectionState().getInstance();
+//  }
 
   /**
    * @param mode
@@ -519,7 +529,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     // logger.info("got back " + result.getNumItems() + " exercises");
     CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
     Panel review = new ReviewItemHelper<CommonShell, CommonExercise>(controller)
-        .doNPF(result, VIEWS.FIX.toString().toLowerCase(), true, toSelect);
+        .doNPF(result, VIEWS.FIX, true, toSelect);
     if (getCurrentView() == VIEWS.FIX) {
       divWidget.add(review);
     } else {
@@ -658,12 +668,13 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   /**
    * Do forward/back between DIALOG and LISTEN.
    *
+   * TODO : add more views - STUDY, SCORE.
    * @param event
    */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    String instance = new SelectionState().getInstance();
-    if (!instance.isEmpty()) {
+    VIEWS instance = new SelectionState().getView();
+    if (instance != NONE) {
       try {
         VIEWS views = VIEWS.valueOf(getStoredView());
         VIEWS currentStoredView = VIEWS.valueOf(getCurrentStoredView());
@@ -678,6 +689,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
             banner.show(LISTEN);
           } else if (currentStoredView == REHEARSE) {
             banner.show(REHEARSE);
+          } else if (currentStoredView == PERFORM) {
+            banner.show(PERFORM);
           }
         }
       } catch (IllegalArgumentException e) {

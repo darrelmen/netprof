@@ -12,5 +12,5 @@ public interface ContentView {
    * @param instanceName
    * @param fromClick
    */
-  void showContent(Panel listContent, String instanceName, boolean fromClick);
+  void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick);
 }

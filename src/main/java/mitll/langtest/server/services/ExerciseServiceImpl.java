@@ -46,7 +46,6 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,7 +56,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.Collator;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")

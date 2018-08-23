@@ -74,7 +74,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param controller
    * @param alignments
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
-   * @see mitll.langtest.client.banner.NewLearnHelper#getFactory
+   * @see mitll.langtest.client.banner.LearnHelper#getFactory
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    * @see mitll.langtest.client.banner.ListenViewHelper#getTurnPanel
@@ -171,13 +171,13 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
   }
 
-  protected void maybeShowAlignment(AudioAttribute next) {
+  void maybeShowAlignment(AudioAttribute next) {
     if (next.getAlignmentOutput() != null) {
       showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
     }
   }
 
-  protected AudioAttribute getRegularSpeedIfAvailable(T e) {
+  AudioAttribute getRegularSpeedIfAvailable(T e) {
     AudioAttribute candidate = e.getRegularSpeed();
     return candidate == null ? e.getAudioAttributes().iterator().next() : candidate;
   }

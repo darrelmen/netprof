@@ -439,7 +439,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
         "",
         controller,
         controller.getProps().showSpectrogram(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED,
-        exercise, instance
+        exercise
     ) {
       //audio.isRegularSpeed() ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW) {
 

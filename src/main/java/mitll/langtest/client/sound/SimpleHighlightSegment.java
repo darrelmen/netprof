@@ -40,9 +40,17 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
     return getElement().getId();
   }
 
-  public int getLength() {
-    return length;
-  }
+  /**
+   * Not needed here.
+   */
+  @Override
+  public void obscureText() {}
+
+  /**
+   * Not needed here.
+   */
+  @Override
+  public void restoreText() {}
 
   @Override
   public void setBackground(String background) {
@@ -114,6 +122,10 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   @Override
   public void setHighlightColor(String highlightColor) {
     this.highlightColor = highlightColor;
+  }
+
+  public int getLength() {
+    return length;
   }
 
   public String toString() {

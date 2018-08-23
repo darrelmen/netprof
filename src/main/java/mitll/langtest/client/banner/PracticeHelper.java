@@ -74,7 +74,7 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
   PracticeHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
-    super(controller, viewContaner, myView);
+    super(controller);
   }
 
   /**
@@ -105,7 +105,7 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
       @Override
       protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
                                                           Panel currentExercisePanel,
-                                                          String instanceName, DivWidget listHeader, DivWidget footer) {
+                                                          INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
         return new PracticeFacetExerciseList(controller, PracticeHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
       }
 

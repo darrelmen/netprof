@@ -87,7 +87,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
                            boolean doNormalRecording,
                            IViewContaner viewContaner,
                            INavigation.VIEWS myView) {
-    super(controller, viewContaner, myView);
+    super(controller);
     this.myView = myView;
     this.doNormalRecording = doNormalRecording;
   }
@@ -109,7 +109,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
       @Override
       protected PagingExerciseList<T, ClientExercise> makeExerciseList(Panel topRow,
                                                                        Panel currentExercisePanel,
-                                                                       String instanceName,
+                                                                       INavigation.VIEWS instanceName,
                                                                        DivWidget listHeader,
                                                                        DivWidget footer) {
         return new RecordingFacetExerciseList<T>(controller,

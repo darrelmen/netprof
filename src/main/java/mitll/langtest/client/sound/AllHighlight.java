@@ -81,12 +81,6 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
     return !set.isEmpty() && set.iterator().next().isHighlighted();
   }
 
-  @Override
-  public int getLength() {
-    int total = 0;
-    for (IHighlightSegment seg : set) total += seg.getLength();
-    return total;
-  }
 
   @Override
   public boolean isClickable() {
@@ -113,10 +107,7 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   @Override
   public String getContent() {
     StringBuilder builder = new StringBuilder();
-    for (IHighlightSegment seg : set) {
-      builder.append(seg.getContent());
-    }
-
+    set.forEach(iHighlightSegment -> builder.append(iHighlightSegment.getContent()));
     return builder.toString();
   }
 
@@ -128,7 +119,6 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
     south.clear();
     south.add(widget);
   }
-
 
   public void setSouthScore(DivWidget widget) {
     setSouth(widget);
@@ -142,6 +132,29 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   @Override
   public DivWidget getNorth() {
     return north;
+  }
+
+  @Override
+  public void obscureText() {
+    set.forEach(IHighlightSegment::obscureText);
+  }
+
+  @Override
+  public void restoreText() {
+    set.forEach(IHighlightSegment::restoreText);
+  }
+
+  /**
+   * Just for toString really.
+   *
+   * @return
+   */
+  @Override
+  public int getLength() {
+    //int total = 0;
+    //for (IHighlightSegment seg : set) total += seg.getLength();
+    return set.stream().mapToInt(IHighlightSegment::getLength).sum();
+    //return total;
   }
 
   public String toString() {

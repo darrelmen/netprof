@@ -36,7 +36,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   private ThumbnailChoices thumbnailChoices = new ThumbnailChoices();
 
-  DialogExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader,
+  DialogExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader,
                      ExerciseController controller) {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false);
   }
@@ -228,7 +228,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    * @param dialog
    */
   private void gotClickOnDialog(IDialog dialog) {
-//    logger.info("got click on " + name);
     controller.getNavigation().showDialogIn(dialog.getID(), INavigation.VIEWS.LISTEN);
   }
 }

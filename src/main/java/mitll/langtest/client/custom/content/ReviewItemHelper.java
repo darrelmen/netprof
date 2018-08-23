@@ -36,6 +36,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -44,7 +45,6 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
@@ -83,17 +83,17 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
   /**
    * Left and right components
    *
-   * @param ul
+   * @param userListID
    * @param instanceName
    * @return
    * @see #doNPF
    */
   @Override
-  protected Panel doInternalLayout(final UserList<?> ul, String instanceName) {
-    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
-    int id = ul.getID();
-    this.flexListLayout = new ReviewFlexListLayout(id);
-    Panel widgets = flexListLayout.doInternalLayout(id, instanceName, true);
+  protected Panel doInternalLayout(final int userListID, INavigation.VIEWS instanceName) {
+    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + userListID);
+   // int id = userListID.getID();
+    this.flexListLayout = new ReviewFlexListLayout(userListID);
+    Panel widgets = flexListLayout.doInternalLayout(userListID, instanceName, true);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
   }
@@ -146,7 +146,7 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
 
     @Override
     protected PagingExerciseList<T, U> makeExerciseList(Panel topRow, Panel currentExercisePanel,
-                                                        String instanceName, DivWidget listHeader, DivWidget footer) {
+                                                        INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
       FlexListLayout outer = this;
       return new NPExerciseList<T, U>(currentExercisePanel, outer.getController(),
           new ListOptions(instanceName).setActivityType(QUALITY_CONTROL), -1) {

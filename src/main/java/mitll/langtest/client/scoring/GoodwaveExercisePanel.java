@@ -42,6 +42,7 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -178,13 +179,13 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
   public void wasRevealed() {
   }
 
-  protected abstract void makeScorePanel(T e, String instance);
+  protected abstract void makeScorePanel(T e, INavigation.VIEWS instance);
 
   protected void loadNext() {
     listContainer.loadNextExercise(exercise.getID());
   }
 
-  protected void nextWasPressed(ListInterface<?,?> listContainer, HasID completedExercise) {
+  protected void nextWasPressed(ListInterface<?, ?> listContainer, HasID completedExercise) {
     navigationHelper.enableNextButton(false);
     listContainer.loadNextExercise(completedExercise.getID());
   }
@@ -428,6 +429,7 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     return isBusy;
   }
 
-  protected String getInstance() {    return options.getInstance();
+  protected INavigation.VIEWS getInstance() {
+    return options.getInstance();
   }
 }

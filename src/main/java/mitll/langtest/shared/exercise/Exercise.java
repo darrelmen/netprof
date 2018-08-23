@@ -38,7 +38,6 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.user.UserDAO;
-import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.npdata.dao.SlickExercise;
 

@@ -37,6 +37,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -106,7 +107,7 @@ public class EditItem {
     contentOnRight.getElement().setId("EditItem_content");
     hp.add(contentOnRight);
 
-    exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, originalList);
+    exerciseList = makeExerciseList(contentOnRight, INavigation.VIEWS.LISTS, originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
     div.add(hp);
     return div;
@@ -128,11 +129,10 @@ public class EditItem {
    * @see #editItem
    */
   private PagingExerciseList<CommonShell, ClientExercise> makeExerciseList(Panel right,
-                                                                           String instanceName,
+                                                                           INavigation.VIEWS instanceName,
                                                                            UserList<CommonShell> originalList) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
-    EditableExerciseList exerciseList = new EditableExerciseList(controller, right, instanceName, originalList);
-    this.exerciseList = exerciseList;
+    this.exerciseList = new EditableExerciseList(controller, right, instanceName, originalList);
     setFactory(this.exerciseList);
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());

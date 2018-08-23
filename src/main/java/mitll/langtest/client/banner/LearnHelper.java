@@ -23,8 +23,8 @@ import java.util.Map;
 /**
  * Created by go22670 on 4/5/17.
  */
-class NewLearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
-  //  private final Logger logger = Logger.getLogger("NewLearnHelper");
+class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
+  //  private final Logger logger = Logger.getLogger("LearnHelper");
 
   /**
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner) 
@@ -32,8 +32,8 @@ class NewLearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapt
    * @param viewContaner
    * @param myView
    */
-  NewLearnHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
-    super(controller, viewContaner, myView);
+  LearnHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
+    super(controller);
   }
 
   @Override
@@ -50,10 +50,10 @@ class NewLearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapt
        */
       @Override
       protected PagingExerciseList<T, ClientExercise> makeExerciseList(Panel topRow,
-                                                          Panel currentExercisePanel,
-                                                          String instanceName,
-                                                          DivWidget listHeader,
-                                                          DivWidget footer) {
+                                                                       Panel currentExercisePanel,
+                                                                       INavigation.VIEWS instanceName,
+                                                                       DivWidget listHeader,
+                                                                       DivWidget footer) {
         return new LearnFacetExerciseList<T>(
             topRow,
             currentExercisePanel,

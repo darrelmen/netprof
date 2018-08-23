@@ -73,15 +73,13 @@ public class ASRScoringAudioPanel<T extends HasID> extends ScoringAudioPanel<T> 
    * @param rightMargin
    * @param playButtonSuffix
    * @param exercise
-   * @param instance
    * @paramx audioType
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
    */
   public ASRScoringAudioPanel(String path, String refSentence, String transliteration,
                               ExerciseController controller, boolean showSpectrogram,
                               int rightMargin, String playButtonSuffix,
-                              T exercise,
-                              String instance) {
+                              T exercise) {
     super(path, refSentence, transliteration, controller, showSpectrogram, rightMargin, playButtonSuffix,
         exercise, exercise.getID());
     this.useScoreToColorBkg = controller.useBkgColorForRef();

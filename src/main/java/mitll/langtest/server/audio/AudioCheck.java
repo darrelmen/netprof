@@ -38,7 +38,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import javax.sound.sampled.*;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 
@@ -393,7 +396,7 @@ public class AudioCheck {
     double std = Math.sqrt(var);
     final boolean validAudio = mean > PowerThreshold || std > VarianceThreshold;
 
-    if (wasClipped || !validAudio) {
+    if (DEBUG && (wasClipped || !validAudio)) {
       logger.info("checkWavFile: audio recording (Length: " + frameLength + " frames) " +
           "\n\tmean power " + mean + " (dB) vs " + PowerThreshold +
           "\n\tstd        " + std + " vs " + VarianceThreshold +

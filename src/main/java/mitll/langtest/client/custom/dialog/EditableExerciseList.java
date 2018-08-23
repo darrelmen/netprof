@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
  */
 class EditableExerciseList extends NPExerciseList implements FeedbackExerciseList {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
-  //private final EditItem editItem;
+
   private final UserList<CommonShell> list;
   private SearchTypeahead searchTypeahead;
   private HTML message;
@@ -41,7 +42,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
    */
   EditableExerciseList(ExerciseController controller,
                        Panel right,
-                       String instanceName,
+                       INavigation.VIEWS instanceName,
                        UserList<CommonShell> list) {
     super(right,
         controller,
@@ -49,7 +50,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
             .setInstance(instanceName)
             .setShowTypeAhead(false)
             .setSort(false), 12);
-   // this.editItem = editItem;
     setUserListID(list.getID());
     this.list = list;
 
@@ -143,7 +143,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private Button makeDeleteButtonItself() {
     Button delete = new Button("");//REMOVE_FROM_LIST);
     delete.setIcon(IconType.MINUS);
-    delete.getElement().getStyle().setMarginTop(10,Style.Unit.PX );
+    delete.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     delete.getElement().setId("Remove_from_list");
     // delete.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
     delete.setType(ButtonType.WARNING);
@@ -192,7 +192,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private Button getAddButton() {
     Button add = new Button("", IconType.PLUS);
     add.setType(ButtonType.SUCCESS);
-    add.getElement().getStyle().setMarginTop(10,Style.Unit.PX );
+    add.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
     add.setEnabled(false);
     add.addClickHandler(event -> onClickAdd(add));
@@ -278,7 +278,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
       }
     });
   }*/
-
   private void enableButton(Button add) {
     add.setEnabled(true);
   }
@@ -335,7 +334,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   }
 
   /**
-   * Removes from 4 lists!
+   * Removes from 4 lists!  ??????
    *
    * @param exid
    * @param exerciseList

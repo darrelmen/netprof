@@ -49,6 +49,7 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.QuizHelper;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
@@ -449,8 +450,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       maybeSwitchProject(selectionState, getStartupInfo().getProjectid());
     }
 
-    String instance = selectionState.getInstance();
-    if (!instance.isEmpty() && !instance.equalsIgnoreCase(getInstance())) {
+    INavigation.VIEWS instance = selectionState.getView();
+    //   if (!instance.isEmpty() && !instance.equalsIgnoreCase(getInstance())) {
+    if (instance != getInstance()) {
       Collection<String> remove = selectionState.getTypeToSection().remove(getDynamicFacet());
       logger.info("addWidgets selection '" + instance + "' != " + getInstance() + " so removing " + remove);
     }
@@ -1657,8 +1659,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #reallyGetExercises
    */
   void getFullExercisesSuccess(ExerciseListWrapper<U> result,
-                                         List<U> alreadyFetched,
-                                         Collection<Integer> visibleIDs) {
+                               List<U> alreadyFetched,
+                               Collection<Integer> visibleIDs) {
     // long now = System.currentTimeMillis();
 //    int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
     //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
@@ -1820,7 +1822,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return toAskFor;
   }
 
-   List<Integer> getIDs(Collection<U> result) {
+  List<Integer> getIDs(Collection<U> result) {
     return result.stream().map(HasID::getID).collect(Collectors.toList());
   }
 

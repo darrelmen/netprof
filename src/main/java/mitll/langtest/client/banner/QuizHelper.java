@@ -214,7 +214,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
       @Override
       protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
                                                           Panel currentExercisePanel,
-                                                          String instanceName, DivWidget listHeader, DivWidget footer) {
+                                                          INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
         rememberedTopRow = topRow;
         return (PagingExerciseList<T, U>) new MyPracticeFacetExerciseList (topRow, currentExercisePanel, instanceName, listHeader);
       }
@@ -234,7 +234,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
   }
 
   @Override
-  public void showContent(Panel listContent, String instanceName, boolean fromClick) {
+  public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
     super.showContent(listContent, instanceName, fromClick);
     rememberedTopRow.getParent().setVisible(false);
   }
@@ -249,7 +249,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
   }
 
   private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList<T,U> {
-    MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, String instanceName, DivWidget listHeader) {
+    MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel,  INavigation.VIEWS instanceName, DivWidget listHeader) {
       super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
     }
 

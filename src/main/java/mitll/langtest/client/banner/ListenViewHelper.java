@@ -15,9 +15,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
@@ -81,21 +79,20 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   /**
    * @param controller
-   * @param myView
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  ListenViewHelper(ExerciseController controller, IViewContaner viewContainer, INavigation.VIEWS myView) {
+  ListenViewHelper(ExerciseController controller) {
     this.controller = controller;
   }
 
   /**
    * @param listContent
-   * @param instanceName
+   * @param instanceName IGNORED HERE
    * @param fromClick
    * @see NewContentChooser#showView(INavigation.VIEWS, boolean, boolean)
    */
   @Override
-  public void showContent(Panel listContent, String instanceName, boolean fromClick) {
+  public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
     bothTurns.clear();
     leftTurnPanels.clear();
     rightTurnPanels.clear();
@@ -312,7 +309,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @see #showDialog
    */
   @NotNull
-  private DivWidget getTurns(IDialog dialog) {
+  protected DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
 
 //    turnContainer = rowOne;
@@ -333,20 +330,24 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
     dialog.getExercises().forEach(clientExercise -> {
       // logger.info("ex " + clientExercise.getID() + " audio " + clientExercise.getAudioAttributes());
-      boolean isRight = rightTurns != null && rightTurns.contains(clientExercise);
-
-      T turn = getTurnPanel(clientExercise, isRight);
-
-      if (isRight) rightTurnPanels.add(turn);
-      else leftTurnPanels.add(turn);
-
-      bothTurns.add(turn);
-      rowOne.add(turn);
+      addTurn(rowOne, rightTurns, clientExercise);
     });
 
     markFirstTurn();
 
     return rowOne;
+  }
+
+  private void addTurn(DivWidget rowOne, List<ClientExercise> rightTurns, ClientExercise clientExercise) {
+    boolean isRight = rightTurns != null && rightTurns.contains(clientExercise);
+
+    T turn = getTurnPanel(clientExercise, isRight);
+
+    if (isRight) rightTurnPanels.add(turn);
+    else leftTurnPanels.add(turn);
+
+    bothTurns.add(turn);
+    rowOne.add(turn);
   }
 
   private void markFirstTurn() {
@@ -403,14 +404,18 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     }
   }
 
+  /**
+   *
+   * @param clientExercise
+   * @param isRight
+   * @return
+   */
   @NotNull
   private T getTurnPanel(ClientExercise clientExercise, boolean isRight) {
     T turn = reallyGetTurnPanel(clientExercise, isRight);
     turn.addWidgets(true, false, PhonesChoices.HIDE);
     turn.addPlayListener(this);
-
     turn.addDomHandler(event -> gotTurnClick(turn), ClickEvent.getType());
-
     return turn;
   }
 
@@ -650,17 +655,23 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   private boolean isLast(T currentTurn) {
     List<T> seq = getSeq();
-    int i = seq.indexOf(currentTurn);
-    return i == seq.size();
+    return seq.indexOf(currentTurn) == seq.size();
   }
 
+  /**
+   *
+   * @return true if changed turn to next one
+   */
   boolean setTurnToPromptSide() {
     Boolean leftSpeakerSet = isLeftSpeakerSet();
     Boolean rightSpeakerSet = isRightSpeakerSet();
     if (leftSpeakerSet && rightSpeakerSet) {
       // logger.info("setTurnToPromptSide both speakers ");
       return false;
-    } else if (leftSpeakerSet && !leftTurnPanels.contains(currentTurn) || rightSpeakerSet && !rightTurnPanels.contains(currentTurn)) {
+    } else if (
+        leftSpeakerSet && !leftTurnPanels.contains(currentTurn) ||  // current turn is not the prompt set
+        rightSpeakerSet && !rightTurnPanels.contains(currentTurn)
+    ) {
       setNextTurnForSide();
       return true;
     } else {
@@ -668,7 +679,9 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     }
   }
 
-
+  /**
+   * Wrap around if on last turn.
+   */
   protected void setNextTurnForSide() {
     removeMarkCurrent();
     int i = bothTurns.indexOf(currentTurn); // must be on right
@@ -697,6 +710,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
   }
 
+  /**
+   * The other RESPONDING side of the conversation.
+   * @return
+   */
   List<T> getRespSeq() {
     boolean leftSpeaker = isLeftSpeakerSet();
     boolean rightSpeaker = isRightSpeakerSet();
@@ -749,8 +766,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   @Override
   public void playStopped() {
     if (currentTurn != null) {
-      if (DEBUG)
-        logger.info("playStopped - turn " + currentTurn.getExID());
+      if (DEBUG || true)
+        logger.info("playStopped for turn " + currentTurn);
 
       setPlayButtonToPlay();
 
@@ -908,5 +925,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   @Override
   public void addPacketValidity(Validity validity) {
 
+  }
+
+  @Override
+  public int getNumValidities() {
+    return 0;
   }
 }

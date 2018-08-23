@@ -38,7 +38,10 @@ import com.google.common.cache.LoadingCache;
 import mitll.langtest.client.services.AudioService;
 import mitll.langtest.server.FileSaver;
 import mitll.langtest.server.ScoreServlet;
-import mitll.langtest.server.audio.*;
+import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.PathWriter;
+import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.imagewriter.SimpleImageWriter;
 import mitll.langtest.server.database.AnswerInfo;
@@ -90,6 +93,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private static final int WARN_THRESH = 10;
   public static final String UNKNOWN = "unknown";
   private static final String REQID = "reqid";
+  public static final String START = "START";
+  //public static final String MESSAGE1 = "MESSAGE";
+  public static final String STREAM = "STREAM";
+
+  private static final String MESSAGE = "message";
+  private static final String NO_SESSION = "no session";
+
 
   private PathWriter pathWriter;
   private IEnsureAudioHelper ensureAudioHelper;
@@ -189,9 +199,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     collect.forEach(header -> logger.info("\trequest header " + header + " = " + request.getHeader(header)));
   }
 
-  private static final String MESSAGE = "message";
-  private static final String NO_SESSION = "no session";
-
   /**
    * TODO : consider how to handle out of order packets
    *
@@ -259,18 +266,20 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     logger.info("took " + (now - then) + " to calc validity = " + newChunk.getValidityAndDur());
 */
 
-    // little state machine - START - new buffering, STREAM concat or append, END write file and score
-    List<AudioChunk> audioChunks = sessionToChunks.get(session);
+    // little state machine -
+    // START - new buffering,
+    // STREAM concat or append,
+    // END write file and score
 
+    List<AudioChunk> audioChunks = sessionToChunks.get(session);
     audioChunks.add(newChunk);
+
     JSONObject jsonObject = new JSONObject();
 
     new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, validity, "" + reqid);
 
-    if (state.equalsIgnoreCase("START")) {
-      jsonObject.put("MESSAGE", "START");
-    } else if (state.equalsIgnoreCase("STREAM")) {
-      jsonObject.put("MESSAGE", "STREAM");
+    if (state.equalsIgnoreCase(START)) {
+    } else if (state.equalsIgnoreCase(STREAM)) {
   /*  if (audioChunks.size() == 1) {
         AudioChunk audioChunk = audioChunks.get(0);
         if (audioChunk.getPacket()== packet-1) {
@@ -289,6 +298,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
     // so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
     // otherwise, we'll have to make a list and combine them...
+
+    jsonObject.put(MESSAGE, state);
 
     return jsonObject;
   }

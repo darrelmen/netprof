@@ -20,8 +20,4 @@ public interface RecordingAudioListener {
   void usePartial(Validity validity);
 
   void onPostFailure();
-
-/*
-  void flip(boolean first);
-*/
 }

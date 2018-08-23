@@ -38,7 +38,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final List<VIEWS> STANDARD_VIEWS =
       Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
 
-  private static final List<VIEWS> DIALOG_VIEWS = Arrays.asList(VIEWS.DIALOG, VIEWS.LISTEN, VIEWS.REHEARSE);
+  private static final List<VIEWS> DIALOG_VIEWS = Arrays.asList(VIEWS.DIALOG, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.PERFORM);
 
   private static List<VIEWS> BOTH = new ArrayList<>(STANDARD_VIEWS);
 
@@ -68,7 +68,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String DOCUMENTATION = "User Manual";
 
   private final UILifecycle lifecycle;
-  private ComplexWidget recnav, defectnav;
+  private ComplexWidget recnav, defectnav, dialognav;
 
   private Nav lnav;
   private Dropdown cog;
@@ -119,8 +119,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       addChoicesForUser(lnav);
     }
 
-   {
-      navCollapse.add(getDialogNav());
+    {
+      navCollapse.add(dialognav = getDialogNav());
     }
 
     {
@@ -173,7 +173,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private void styleNav(ComplexWidget recnav) {
-  //  recnav.addStyleName("inlineFlex");
+    //  recnav.addStyleName("inlineFlex");
     zeroLeftRightMargins(recnav);
   }
 
@@ -308,7 +308,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     List<VIEWS> toShow = isPoly ? POLY_VIEWS : STANDARD_VIEWS;
 
-  //  logger.info("addChoicesForUser " + toShow.size());
+    //  logger.info("addChoicesForUser " + toShow.size());
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
       choice1.getElement().setId("Link_" + choice.name());
@@ -409,6 +409,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   public void reflectPermissions(Collection<User.Permission> permissions) {
     recordMenuVisible();
     defectMenuVisible();
+    dialognav.setVisible(hasProjectChoice());
   }
 
   @Override
@@ -424,7 +425,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     cog.setVisible(isAdmin());
 
     boolean hasProject = controller.getProjectStartupInfo() != null;
-  //  if (DEBUG) logger.info("setCogVisible " + val + " has project " + hasProject + " for " + hasProjectChoices.size());
+    //  if (DEBUG) logger.info("setCogVisible " + val + " has project " + hasProject + " for " + hasProjectChoices.size());
 
     hasProjectChoices.forEach(linkAndTitle -> {
       linkAndTitle.getMyLink().setVisible(hasProject);
@@ -440,6 +441,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setCogVisible(false);
     setRecNavVisible(false);
     setDefectNavVisible(false);
+    dialognav.setVisible(false);
   }
 
   @Override
@@ -483,7 +485,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
-    * @see UILifecycle#showInitialState
+   * @see UILifecycle#showInitialState
    */
   @Override
   public void checkProjectSelected() {
@@ -513,7 +515,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   @Override
   public void setVisibleChoicesByMode(ProjectMode mode) {
- //   logger.info("setVisibleChoicesByMode set visible choices " + mode);
+    //   logger.info("setVisibleChoicesByMode set visible choices " + mode);
     hideOrShowByMode((mode == ProjectMode.DIALOG) ? DIALOG_VIEWS : STANDARD_VIEWS);
   }
 
@@ -522,8 +524,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       NavLink widgets = viewToLink.get(views);
       if (widgets == null) {
         logger.warning("no widget for " + views);
-      }
-      else {
+      } else {
         boolean contains = standardViews.contains(views);
 //        logger.info("\tlink " + views + " " +widgets.getElement().getId()+
 //            " " + widgets.isVisible() + " '" + widgets.getTitle() + "'" +
@@ -539,8 +540,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       boolean visible = isPermittedToRecord() && hasProjectChoice();
 
 //      boolean learnVisible = viewToLink.get(VIEWS.LEARN).isVisible();
-  //    logger.info("recordMenuVisible learn vis " + learnVisible);
-  //    visible &= learnVisible;
+      //    logger.info("recordMenuVisible learn vis " + learnVisible);
+      //    visible &= learnVisible;
       setRecNavVisible(visible);
     }
   }

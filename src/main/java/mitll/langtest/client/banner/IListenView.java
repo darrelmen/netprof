@@ -13,4 +13,7 @@ public interface IListenView {
 
   void addPacketValidity(Validity validity);
   void stopRecording();
+
+  int getNumValidities();
+
 }
