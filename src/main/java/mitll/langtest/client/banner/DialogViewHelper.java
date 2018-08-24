@@ -15,7 +15,7 @@ import mitll.langtest.shared.dialog.IDialog;
  * Created by go22670 on 4/5/17.
  */
 public class DialogViewHelper  extends SimpleChapterNPFHelper<IDialog, IDialog> {
-  //  private final Logger logger = Logger.getLogger("NewLearnHelper");
+  //  private final Logger logger = Logger.getLogger("LearnHelper");
   /**
    * @param controller
    * @param viewContaner
@@ -23,7 +23,7 @@ public class DialogViewHelper  extends SimpleChapterNPFHelper<IDialog, IDialog> 
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
   DialogViewHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
-    super(controller, viewContaner, myView);
+    super(controller);
   }
 
   @Override
@@ -40,10 +40,10 @@ public class DialogViewHelper  extends SimpleChapterNPFHelper<IDialog, IDialog> 
        */
       @Override
       protected PagingExerciseList<IDialog, IDialog> makeExerciseList(Panel topRow,
-                                                                Panel currentExercisePanel,
-                                                                String instanceName,
-                                                                DivWidget listHeader,
-                                                                DivWidget footer) {
+                                                                      Panel currentExercisePanel,
+                                                                      INavigation.VIEWS instanceName,
+                                                                      DivWidget listHeader,
+                                                                      DivWidget footer) {
         return new DialogExerciseList(topRow, currentExercisePanel, instanceName, listHeader, controller);
       }
     };

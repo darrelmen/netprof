@@ -177,7 +177,8 @@ public class ScoreServlet extends DatabaseServlet {
     ISREFERENCE,
     STREAMSESSION,
     STREAMSTATE,
-    STREAMSPACKET;
+    STREAMSPACKET,
+    STREAMTIMESTAMP;  // when it's sent
 
     String value = null;
 

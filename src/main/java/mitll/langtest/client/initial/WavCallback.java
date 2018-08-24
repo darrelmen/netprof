@@ -44,5 +44,5 @@ public interface WavCallback {
    * @param bytes
    */
   void getBase64EncodedWavFile(String bytes);
-  void gotStreamResponse(String json);
+  //void gotStreamResponse(String json);
 }

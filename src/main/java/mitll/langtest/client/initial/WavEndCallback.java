@@ -43,5 +43,5 @@ public interface WavEndCallback {
    * @see mitll.langtest.client.LangTest#makeFlashContainer
    */
   void silenceDetected();
-  void gotStreamResponse();
+//  void gotStreamResponse();
 }

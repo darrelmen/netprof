@@ -169,11 +169,6 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
     scoreHistory.setVisible(false);
   }
 
-//  private void clearScoreFeedback() {
-//    scoreFeedback.clear();
-//    scoreFeedback.add(recordFeedback);
-//  }
-
   /**
    * @see FeedbackPostAudioRecordButton#stopRecording
    */
@@ -205,12 +200,12 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
   }
 
   @Override
-  public void useInvalidResult(boolean isValid) {
+  public void useInvalidResult(int exid, boolean isValid) {
     //  logger.info("useInvalidResult " + isValid);
     waitCursorHelper.showFinished();
     setVisible(hasScoreHistory);
 
-    super.useInvalidResult(isValid);
+    super.useInvalidResult(exid, isValid);
   }
 
   /**

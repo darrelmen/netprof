@@ -126,7 +126,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     String floatDir = isLTR ? "floatLeft" : "floatRight";
     north.addStyleName(floatDir);
     north.addStyleName(isLTR ? "wordSpacerRight" : "wordSpacerLeft");
-   }
+  }
 
   private void configureSouth(int id, Widget south, boolean isLTR, boolean ensureHeight) {
     if (isLTR) {
@@ -166,7 +166,9 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   public void clearHighlight() {
     highlighted = false;
     if (background == null) {
-      getSpanStyle().clearBackgroundColor();
+      if (!didObscure) {
+        getSpanStyle().clearBackgroundColor();
+      }
     } else {
       getSpanStyle().setBackgroundColor(background);
     }

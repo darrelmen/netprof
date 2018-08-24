@@ -38,6 +38,7 @@ import com.google.common.cache.LoadingCache;
 import mitll.langtest.client.services.AudioService;
 import mitll.langtest.server.FileSaver;
 import mitll.langtest.server.ScoreServlet;
+import mitll.langtest.server.ScoreServlet.HeaderValue;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.PathWriter;
@@ -83,6 +84,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
+
 /**
  * does image generation here too - since it's done from a file.
  */
@@ -93,9 +96,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private static final int WARN_THRESH = 10;
   public static final String UNKNOWN = "unknown";
   private static final String REQID = "reqid";
+
+  // TODO : make these enums...
   public static final String START = "START";
   //public static final String MESSAGE1 = "MESSAGE";
-  public static final String STREAM = "STREAM";
+  private static final String STREAM = "STREAM";
 
   private static final String MESSAGE = "message";
   private static final String NO_SESSION = "no session";
@@ -251,7 +256,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     long session = getStreamSession(request);
     int packet = getStreamPacket(request);
 
-    String state = getHeader(request, ScoreServlet.HeaderValue.STREAMSTATE);
+    String state = getHeader(request, STREAMSTATE);
+    String timestamp = getHeader(request, STREAMTIMESTAMP);
 
     byte[] targetArray = IOUtils.toByteArray(request.getInputStream());
     AudioChunk newChunk = new AudioChunk(packet, targetArray);
@@ -300,6 +306,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     // otherwise, we'll have to make a list and combine them...
 
     jsonObject.put(MESSAGE, state);
+    jsonObject.put(STREAMTIMESTAMP.toString(), timestamp);
+    jsonObject.put(STREAMSPACKET.toString(), packet);
 
     return jsonObject;
   }
@@ -568,7 +576,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   private long getStreamSession(HttpServletRequest request) {
-    String header = request.getHeader(ScoreServlet.HeaderValue.STREAMSESSION.toString());
+    String header = request.getHeader(STREAMSESSION.toString());
     try {
       long l = Long.parseLong(header);
       return l;
@@ -579,18 +587,18 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   private int getStreamPacket(HttpServletRequest request) {
-    return request.getIntHeader(ScoreServlet.HeaderValue.STREAMSPACKET.toString());
+    return request.getIntHeader(STREAMSPACKET.toString());
   }
 
   private String getExerciseHeader(HttpServletRequest request) {
-    return getHeader(request, ScoreServlet.HeaderValue.EXERCISE);
+    return getHeader(request, EXERCISE);
   }
 
   private boolean isReference(HttpServletRequest request) {
-    return request.getHeader(ScoreServlet.HeaderValue.ISREFERENCE.toString()) != null;
+    return request.getHeader(ISREFERENCE.toString()) != null;
   }
 
-  private String getHeader(HttpServletRequest request, ScoreServlet.HeaderValue resultId) {
+  private String getHeader(HttpServletRequest request, HeaderValue resultId) {
     return request.getHeader(resultId.toString());
   }
 

@@ -1,7 +1,5 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -32,8 +30,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    */
   FeedbackPostAudioRecordButton(int exid, RecordingAudioListener simpleRecordAudioPanel,
                                 ExerciseController controller) {
-    super(
-        exid,
+    super(exid,
         controller,
         DEFAULT_INDEX,
         true,
@@ -56,9 +53,9 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   /**
-   * @see RecordButton#stop(long)
    * @param duration
    * @return
+   * @see RecordButton#stop(long)
    */
   @Override
   public boolean stopRecording(long duration) {
@@ -85,14 +82,28 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   /**
-   * @see PostAudioRecordButton#startRecording
    *
-   * @see #gotPacketResponse
-   * @see #stopRecording(long)
+   * @param exid
    * @param validity
+   * @param dynamicRange
+   * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
+   * @see RecordingListener#stopRecording(long)
    */
   @Override
-  public void usePartial(Validity validity) {
+  protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+    logger.info("useInvalidResult " + validity);
+    super.useInvalidResult(exid, validity, dynamicRange);
+    simpleRecordAudioPanel.useInvalidResult(exid, validity == Validity.OK);
+  }
+
+  /**
+   * @param validity
+   * @see PostAudioRecordButton#startRecording
+   * @see #gotPacketResponse
+   * @see #stopRecording(long)
+   */
+  @Override
+  public void usePartial(StreamResponse validity) {
     simpleRecordAudioPanel.usePartial(validity);
   }
 
@@ -104,18 +115,6 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     simpleRecordAudioPanel.onPostFailure();
   }
 
-  /**
-   * @param validity
-   * @param dynamicRange
-   * @see RecordingListener#stopRecording(long)
-   */
-  @Override
-  protected void useInvalidResult(Validity validity, double dynamicRange) {
-    logger.info("useInvalidResult " + validity);
-    super.useInvalidResult(validity, dynamicRange);
-    simpleRecordAudioPanel.useInvalidResult(validity == Validity.OK);
-  }
-
   protected void gotShortDurationRecording() {
     simpleRecordAudioPanel.gotShortDurationRecording();
   }
@@ -123,7 +122,8 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   /**
    * TODO : don't do this...
    */
-  boolean showing=false;
+  private boolean showing = false;
+
   @Override
   protected void showPopup(String toShow) {
     if (!showing) {

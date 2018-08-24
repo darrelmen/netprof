@@ -496,64 +496,58 @@ public class RestUserManagement {
     } catch (NumberFormatException e) {
       logger.error("Got " + e, e);
     }
-    if (existingUser == null) {
-      User checkExisting = existingUser;// kinda stupid but here we are
+    if (existingUser == null) { // OK, nobody with matching user and password
+      String age = request.getHeader(AGE);
+      String gender = request.getHeader(GENDER);
+      String dialect = request.getHeader(DIALECT);
+      String emailH = request.getHeader(EMAIL_H);
+      String email = request.getHeader(EMAIL);
+      if (email == null) email = "";
 
-      if (checkExisting == null) { // OK, nobody with matching user and password
-        String age = request.getHeader(AGE);
-        String gender = request.getHeader(GENDER);
-        String dialect = request.getHeader(DIALECT);
-        String emailH = request.getHeader(EMAIL_H);
-        String email = request.getHeader(EMAIL);
-        if (email == null) email = "";
+      logger.warn("addUser : Request " + requestType + " for " + deviceType + "\n\tuser " + user +
+          " adding " + gender +
+          " age " + age + " dialect " + dialect);
 
-        logger.warn("addUser : Request " + requestType + " for " + deviceType + "\n\tuser " + user +
-            " adding " + gender +
-            " age " + age + " dialect " + dialect);
+      User user1 = null;
+      //String appURL = serverProps.getAppURL();
+      if (age != null && gender != null && dialect != null) {
+        try {
+          int age1 = Integer.parseInt(age);
+          boolean male = gender.equalsIgnoreCase(MALE);
 
-        User user1 = null;
-        //String appURL = serverProps.getAppURL();
-        if (age != null && gender != null && dialect != null) {
-          try {
-            int age1 = Integer.parseInt(age);
-            boolean male = gender.equalsIgnoreCase(MALE);
+          SignUpUser user2 = new SignUpUser(user,
+              emailH,
+              email,
+              Kind.CONTENT_DEVELOPER,
+              male,
+              male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
+              age1,
+              deviceType,
+              device,
+              "",
+              "",
+              "OTHER");
 
-            SignUpUser user2 = new SignUpUser(user,
-                emailH,
-                email,
-                Kind.CONTENT_DEVELOPER,
-                male,
-                male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
-                age1,
-                deviceType,
-                device,
-                "",
-                "",
-                "OTHER");
-
-            user1 = getUserManagement().addUser(user2);
-          } catch (NumberFormatException e) {
-            logger.warn("couldn't parse age " + age);
-            jsonObject.put(ERROR, "bad age");
-          }
-        } else {
-          try {
-            user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
-          } catch (Exception e) {
-            jsonObject.put(ERROR, "got " + e.getMessage());
-            logger.error("Got " + e, e);
-          }
+          user1 = getUserManagement().addUser(user2);
+        } catch (NumberFormatException e) {
+          logger.warn("couldn't parse age " + age);
+          jsonObject.put(ERROR, "bad age");
         }
-
-        if (user1 == null) { // how could this happen?
-          jsonObject.put(EXISTING_USER_NAME, "");
-        } else {
-          jsonObject.put(USERID, user1.getID());
-        }
-
       } else {
-        jsonObject.put(EXISTING_USER_NAME, "");
+        try {
+          user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
+        } catch (Exception e) {
+          jsonObject.put(ERROR, "got " + e.getMessage());
+          logger.error("Got " + e, e);
+        }
       }
+
+      if (user1 == null) { // how could this happen?
+        jsonObject.put(EXISTING_USER_NAME, "");
+      } else {
+        jsonObject.put(USERID, user1.getID());
+      }
+
     } else {
       logger.warn("addUser - found existing user for " + user +
           //" pass " + passwordH +

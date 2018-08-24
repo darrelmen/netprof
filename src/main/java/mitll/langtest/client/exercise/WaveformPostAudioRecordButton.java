@@ -177,8 +177,8 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   @Override
-  protected void useInvalidResult(Validity validity, double dynamicRange) {
-    super.useInvalidResult(validity, dynamicRange);
+  protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+    super.useInvalidResult(exid, validity, dynamicRange);
     //   logger.info("WaveformPostAudioRecordButton : got invalid result " + result);
     hideWaveform();
     recordAudioPanel.getSpectrogram().setVisible(false);

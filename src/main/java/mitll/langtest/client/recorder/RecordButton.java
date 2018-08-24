@@ -72,11 +72,6 @@ public class RecordButton extends Button {
   public static final String RECORD1 = "Record      ";
   public static final String STOP1 = "Recording...";
 
-  /**
-   * flip period
-   */
- // private static final int PERIOD_MILLIS = 500;
-
   private static final String WINDOWS = "Win32";
   private final String RECORD;
   private final String STOP;
@@ -90,22 +85,22 @@ public class RecordButton extends Button {
   private RecordingListener recordingListener;
   private final PropertyHandler propertyHandler;
 
+  private long started = 0;
+
   /**
    * don't actually stop recording until a little while after end of recording
    */
   private Timer afterStopTimer = null;
 
   public interface RecordingListener {
-    void startRecording();
-
-/*
-    void flip(boolean first);
-*/
-
     /**
-     * @see RecordButton#stop(long)
+     * @see #start()
+     */
+    void startRecording();
+    /**
      * @param duration
      * @return
+     * @see RecordButton#stop(long)
      */
     boolean stopRecording(long duration);
   }
@@ -148,9 +143,7 @@ public class RecordButton extends Button {
     StyleHelper.removeStyle(icon, icon.getBaseIconType());
   }
 
-  public boolean isRecording() {
-    return recording;
-  }
+
 
   /**
    * @see RecordAudioPanel#clickStop
@@ -220,10 +213,6 @@ public class RecordButton extends Button {
     }
   }
 
-  // private long last = 0;
-  private long started = 0;
-  //private long last = 0;
-
   /**
    * Delay end of recording by some number of milliseconds
    * Wait after the user releases the button, since it seems to get cut off...
@@ -252,14 +241,15 @@ public class RecordButton extends Button {
     started = System.currentTimeMillis();
 
     cancelAfterStopTimer();
-    //  logger.info("startOrStopRecording started = " + started);
+    logger.info("startOrStopRecording started = " + started);
     start();
     addRecordingMaxLengthTimeout();
   }
 
-  public void stopRecordingSafe() {
+  public boolean stopRecordingSafe() {
     if (isRecording()) {
       stopRecording();
+      return true;
     } else {
 /*      boolean running = afterStopTimer != null && afterStopTimer.isRunning();
       boolean running1 = recordTimer != null && recordTimer.isRunning();
@@ -267,6 +257,8 @@ public class RecordButton extends Button {
           "\n\tafter stop running = " + running +
           "\n\trecord timer       = " + running1
       );*/
+
+      return false;
     }
   }
 
@@ -275,7 +267,7 @@ public class RecordButton extends Button {
     stopRecordingFirstStep();
     long duration = now - started;
 
-   // logger.info("stopRecording : ui time between button clicks = " + duration + " millis, ");
+    // logger.info("stopRecording : ui time between button clicks = " + duration + " millis, ");
 
     afterStopTimer = new Timer() {
       @Override
@@ -286,7 +278,12 @@ public class RecordButton extends Button {
     afterStopTimer.schedule(propertyHandler.getAfterStopDelayMillis());
   }
 
+  public boolean isRecording() {
+    return recording;
+  }
+
   protected void stopRecordingFirstStep() {
+   // logger.info("stopRecordingFirstStep : ");
     recording = false;
 
     cancelAfterStopTimer();
@@ -308,21 +305,25 @@ public class RecordButton extends Button {
   }
 
   /**
+   *
+   */
+  public void cancelRecording() {
+    if (isRecording()) stop(0);
+  }
+
+  /**
    * @param duration
    * @see #stopRecording()
+   * @see #cancelRecording
    * @see #addRecordingMaxLengthTimeout()
    * @see #startOrStopRecording
    */
   protected void stop(long duration) {
-      long now = System.currentTimeMillis();
-      long duration2 = now - started;
-     logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
+    long now = System.currentTimeMillis();
+    long duration2 = now - started;
+    logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
     showStopped();
     recordingListener.stopRecording(duration);
-  }
-
-  public void cancelRecording() {
-    if (isRecording()) stop(0);
   }
 
   /**
@@ -333,46 +334,15 @@ public class RecordButton extends Button {
 
     if (showInitialRecordImage()) {
       showFirstRecordImage();
-//      flipImage();
     }
   }
-
-//  private boolean first = true;
-  //private Timer flipTimer = null;
-
-  /**
-   * @see #showRecording
-   */
-/*  private void flipImage() {
-    if (flipTimer != null) {
-      flipTimer.cancel();
-    }
-    flipTimer = new Timer() {
-      @Override
-      public void run() {
-        if (first) {
-          showSecondRecordImage();
-          recordingListener.flip(true);
-        } else {
-          showFirstRecordImage();
-          recordingListener.flip(false);
-        }
-        first = !first;
-      }
-    };
-    flipTimer.scheduleRepeating(PERIOD_MILLIS);
-  }*/
-
   /**
    * @see #stop
    */
   private void showStopped() {
     setIcon(IconType.MICROPHONE);
 
-  //  if (flipTimer != null) {
-      hideBothRecordImages();
-   //   flipTimer.cancel();
-    //}
+    hideBothRecordImages();
   }
 
   /**
@@ -387,13 +357,7 @@ public class RecordButton extends Button {
   /**
    * @seex #flipImage()
    */
-  void showFirstRecordImage() {
-  }
-
-/*
-  void showSecondRecordImage() {
-  }
-*/
+  void showFirstRecordImage() {  }
 
   void hideBothRecordImages() {
     setText(RECORD);

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercise>> extends RehearseViewHelper<T> {
   PerformViewHelper(ExerciseController controller, IViewContaner viewContainer, INavigation.VIEWS myView) {
-    super(controller, viewContainer, myView);
+    super(controller);
   }
 
   /**

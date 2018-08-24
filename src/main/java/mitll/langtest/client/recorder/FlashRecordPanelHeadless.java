@@ -188,7 +188,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   /**
-   * @see ExerciseController#startStream(int, int, mitll.langtest.client.initial.WavStreamCallback)
+   * @see LangTest#startStream(int, int, mitll.langtest.client.initial.WavStreamCallback)
    * @param url
    * @param exid
    * @param reqid
@@ -199,7 +199,9 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       logger.info("startStream post" +
           "\n\tto  " + url +
           "\n\tfor " + exid);
-      webAudio.setStreamCallback(wavStreamCallback);
+
+      WebAudioRecorder.setStreamCallback(wavStreamCallback);
+
       webAudio.startStream(url, exid, reqid);
     } else if (usingFlash()) {
       //flashRecordOnClick();
@@ -211,7 +213,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @param wavCallback
    * @see #stopWebRTCRecordingLater(WavCallback)
    */
-  private void stopWebRTCRecording(WavCallback wavCallback) {
+  public void stopWebRTCRecording(WavCallback wavCallback) {
     webAudio.stopRecording(wavCallback);
   }
 
@@ -361,7 +363,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * Handles either state - either we have flash, in which case we ask flash for the wav file,
    * otherwise we ask webRTC to stop recording and post the audio to us.
    *
-   * @see mitll.langtest.client.LangTest#stopRecording(WavCallback)
+   * @see ExerciseController#stopRecording(WavCallback, boolean)
    */
   public void stopRecording(final WavCallback wavCallback) {
     if (usingWebRTC()) {

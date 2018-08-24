@@ -6,7 +6,6 @@ import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.exercise.Shell;
 
@@ -134,6 +133,9 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     playAudioPanel.hideRecord();
   }
 
+  /**
+   * @see RecordDialogExercisePanel#cancelRecording()
+   */
   void cancelRecording() {
     postAudioRecordButton.cancelRecording();
   }
@@ -144,7 +146,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
   }
 
   /**
-   *
+   * @see FeedbackPostAudioRecordButton#useResult
    * @param result IGNORED HERE
    */
   @Override
@@ -155,7 +157,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
   }
 
   @Override
-  public void usePartial(Validity validity) {
+  public void usePartial(StreamResponse validity) {
 
   }
 
@@ -168,11 +170,10 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
   }
 
   @Override
-  public void useInvalidResult(boolean isValid) {
+  public void useInvalidResult(int exid, boolean isValid) {
     //  logger.info("useInvalidResult " + isValid);
     if (!isValid) playAudioPanel.hidePlayButton();
     else playAudioPanel.showPlayButton();
-
     playAudioPanel.setEnabled(isValid);
   }
 

@@ -80,7 +80,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
   void startRecording();
   void startStream(int exid, int reqid, WavStreamCallback wavStreamCallback);
 
-  void stopRecording(WavCallback wavCallback);
+  void stopRecording(WavCallback wavCallback, boolean useDelay);
   void stopRecordingAndPost(int exid);
   void registerStopDetected(WavEndCallback wavEndCallback);
   int getRecordTimeout();

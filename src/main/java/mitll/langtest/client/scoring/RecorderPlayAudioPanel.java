@@ -98,7 +98,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
   void showFirstRecord() {
     if (canRecord) {
-      logger.info("showFirstRecording " + exid);
+      logger.info("showFirstRecording " + exid + " red recording signal now visible!");
       recordImage1.setVisible(true);
     } else {
       redX.setVisible(true);

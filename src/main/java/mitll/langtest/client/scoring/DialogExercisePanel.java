@@ -272,7 +272,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       } else return null;
     } else {
       if (DEBUG || true)
-        logger.warning("showAlignment no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
+        logger.warning("showAlignment no alignment info for " + this + " id " + id + " dur " + duration);
       return null;
     }
   }

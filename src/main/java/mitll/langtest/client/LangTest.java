@@ -786,11 +786,11 @@ public class LangTest implements
         if (wavEndCallback != null) wavEndCallback.silenceDetected();
       }
 
-      @Override
+  /*    @Override
       public void gotStreamResponse() {
         if (wavEndCallback != null) wavEndCallback.gotStreamResponse();
 
-      }
+      }*/
     };
     flashRecordPanel = new FlashRecordPanelHeadless(micPermission);
   }
@@ -1190,11 +1190,11 @@ public class LangTest implements
   public void startStream(int exid, int reqid, WavStreamCallback wavStreamCallback) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
-
-    logger.info("startStream " + serviceEntryPoint + " exid " + exid);
+/*    logger.info("startStream " +
+        "\n\tURL  " + serviceEntryPoint +
+        "\n\texid " + exid);*/
     flashRecordPanel.startStream(serviceEntryPoint, "" + exid, "" + reqid, wavStreamCallback);
   }
-
 
   /**
    * Recording interface
@@ -1203,9 +1203,13 @@ public class LangTest implements
    * @see PostAudioRecordButton#stopRecording(long)
    * @see RecordButton.RecordingListener#stopRecording(long)
    */
-  public void stopRecording(WavCallback wavCallback) {
+  public void stopRecording(WavCallback wavCallback, boolean useDelay) {
     // logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
-    flashRecordPanel.stopRecording(wavCallback);
+    if (useDelay) {
+      flashRecordPanel.stopRecording(wavCallback);
+    } else {
+      flashRecordPanel.stopWebRTCRecording(wavCallback);
+    }
   }
 
   /**

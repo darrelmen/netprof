@@ -88,11 +88,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   private final ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
   private final HorizontalPanel afterPlayWidget = new HorizontalPanel();
 
-  /**
-   * @see #flipRecordImages
-   */
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
-  //private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   protected T exercise;
   protected AudioType audioType;
 
@@ -249,25 +245,13 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
 
   protected void showStop() {
     recordImage1.setVisible(false);
-/*
-    recordImage2.setVisible(false);
-*/
   }
 
   protected void showStart() {
     recordImage1.setVisible(true);
   }
 
-  /**
-   * @paramx first
-   * @see RecordAudioPanel.MyWaveformPostAudioRecordButton#flip
-   */
-/*  protected void flipRecordImages(boolean first) {
-    recordImage1.setVisible(first);
-*//*
-    recordImage2.setVisible(!first);
-*//*
-  }*/
+
 
   public Button getButton() {
     return postAudioRecordButton;
@@ -400,8 +384,8 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
     }
 
     @Override
-    protected void useInvalidResult(Validity validity, double dynamicRange) {
-      super.useInvalidResult(validity, dynamicRange);
+    protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+      super.useInvalidResult(exid, validity, dynamicRange);
       showDynamicRange(dynamicRange);
     }
 

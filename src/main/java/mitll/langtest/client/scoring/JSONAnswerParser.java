@@ -23,55 +23,59 @@ public class JSONAnswerParser {
 
   @NotNull
   AudioAnswer getAudioAnswer(JSONObject jsonObject) {
-    String message = getField(jsonObject, "MESSAGE");
-    if (message.equalsIgnoreCase("OK") && false) return null;
-    else {
-      Validity validity = getValidity(jsonObject);
+//    String message = getField(jsonObject, "MESSAGE");
+    Validity validity = getValidity(jsonObject);
+    // logger.info("Validity is " + validity);
 
-      // logger.info("Validity is " + validity);
+    AudioAnswer converted = new AudioAnswer(
+        getField(jsonObject, "path"),
+        validity,
+        getIntField(jsonObject, REQID),
+        getIntField(jsonObject, "duration"),
+        getIntField(jsonObject, "exid")
+    );
 
-      AudioAnswer converted = new AudioAnswer(
-          getField(jsonObject, "path"),
-          validity,
-          getIntField(jsonObject, REQID),
-          getIntField(jsonObject, "duration"),
-          getIntField(jsonObject, "exid")
-      );
+    converted.setResultID(getIntField(jsonObject, "resultID"));
 
-      converted.setResultID(getIntField(jsonObject, "resultID"));
+    //useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
 
-      //useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
+    if (validity == Validity.OK || validity == Validity.CUT_OFF) {
+      // logger.info("Got validity " + validity);
+      converted.setTimestamp(getLongField(jsonObject, "timestamp"));
 
-      if (validity == Validity.OK || validity == Validity.CUT_OFF) {
-        // logger.info("Got validity " + validity);
-        converted.setTimestamp(getLongField(jsonObject, "timestamp"));
-
-        float score = getFloatField(jsonObject, "score");
-        converted.setScore(score);
-        converted.setCorrect(getBoolean(jsonObject, "isCorrect"));
+      float score = getFloatField(jsonObject, "score");
+      converted.setScore(score);
+      converted.setCorrect(getBoolean(jsonObject, "isCorrect"));
 
 
-        List<TranscriptSegment> psegments = getSegments(jsonObject.get("PHONE_TRANSCRIPT").isArray());
-        List<TranscriptSegment> wsegments = getSegments(jsonObject.get("WORD_TRANSCRIPT").isArray());
-        float wavFileLengthSeconds = ((float) converted.getDurationInMillis()) / 1000F;
-        Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<>();
-        sTypeToEndTimes.put(NetPronImageType.PHONE_TRANSCRIPT, psegments);
-        sTypeToEndTimes.put(NetPronImageType.WORD_TRANSCRIPT, wsegments);
-        PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
-            new HashMap<>(),
-            new HashMap<>(),
-            sTypeToEndTimes, "", wavFileLengthSeconds,
-            0, true);
-        converted.setPretestScore(pretestScore);
-        // useResult(converted);
-      } else {
-        logger.info("gotResponse Got " + jsonObject);
-      }
-
-      //  logger.info("Got " + jsonObject);
-
-      return converted;
+      List<TranscriptSegment> psegments = getSegments(jsonObject.get("PHONE_TRANSCRIPT").isArray());
+      List<TranscriptSegment> wsegments = getSegments(jsonObject.get("WORD_TRANSCRIPT").isArray());
+      float wavFileLengthSeconds = ((float) converted.getDurationInMillis()) / 1000F;
+      Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<>();
+      sTypeToEndTimes.put(NetPronImageType.PHONE_TRANSCRIPT, psegments);
+      sTypeToEndTimes.put(NetPronImageType.WORD_TRANSCRIPT, wsegments);
+      PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
+          new HashMap<>(),
+          new HashMap<>(),
+          sTypeToEndTimes, "", wavFileLengthSeconds,
+          0, true);
+      converted.setPretestScore(pretestScore);
+      // useResult(converted);
+    } else {
+      logger.info("gotResponse Got " + jsonObject);
     }
+
+    //  logger.info("Got " + jsonObject);
+
+    return converted;
+  }
+
+  public StreamResponse getResponse(JSONObject jsonObject) {
+    return new StreamResponse(getValidity(jsonObject), getStreamTimestamp(jsonObject));
+  }
+
+  public long getStreamTimestamp(JSONObject jsonObject) {
+    return getLongField(jsonObject, "STREAMTIMESTAMP".toLowerCase());
   }
 
   @NotNull
@@ -121,29 +125,36 @@ public class JSONAnswerParser {
       }
     } else
       return (int) jsonValue.isNumber().doubleValue();
-    // return Integer.parseInt(jsonObject.get(reqid).().stringValue());
   }
 
   private long getLongField(JSONObject jsonObject, String reqid) {
+//    JSONValue jsonValue = jsonObject.get(reqid);
+//    return (long) (jsonValue == null ? 0L : jsonValue.isNumber().doubleValue());
+//
+//
+//
     JSONValue jsonValue = jsonObject.get(reqid);
-    return (long) (jsonValue == null ? 0L : jsonValue.isNumber().doubleValue());
-
-    //return Long.parseLong(getField(jsonObject, reqid));
+    if (jsonValue == null) return 0;
+    else if (jsonValue.isNumber() == null) {
+//      if (!reqid.equalsIgnoreCase(REQID)) {
+//        logger.warning("huh? " + reqid + " is not a number? " + jsonValue.getClass());
+//      }
+      JSONString string = jsonObject.get(reqid).isString();
+      String s = string.stringValue();
+      try {
+        return Long.parseLong(s);
+      } catch (NumberFormatException e) {
+        logger.warning("can't parse " + s);
+        return 0;
+      }
+    } else
+      return (int) jsonValue.isNumber().doubleValue();
   }
 
   private float getFloatField(JSONObject jsonObject, String reqid) {
     JSONValue jsonValue = jsonObject.get(reqid);
     return (float) (jsonValue == null ? 0F : jsonValue.isNumber().doubleValue());
-//    return Float.parseFloat(getField(jsonObject, reqid));
   }
-
-  /*
-  private double getDoubleField(JSONObject jsonObject, String reqid) {
-    return jsonObject.get(reqid).isNumber().doubleValue();
-//    return Float.parseFloat(getField(jsonObject, reqid));
-  }
-*/
-
 
   String getField(JSONObject jsonObject, String valid1) {
     JSONValue jsonValue = jsonObject.get(valid1);
@@ -165,18 +176,7 @@ public class JSONAnswerParser {
     //  logger.info("Digesting response " + json);
     try {
       JSONValue val = JSONParser.parseStrict(json);
-      JSONObject obj = (val != null) ? val.isObject() : null;
-
-
-//      JSONValue code = obj == null ? null : obj.get(Constants.SESSION_EXPIRED_CODE);
-//      if (code != null && code.isBoolean() != null && code.isBoolean().booleanValue()) {
-//        getSessionHelper().logoutUserInClient(null, true);
-//        return null;
-//      } else {
-//        return obj;
-//      }
-
-      return obj;
+      return (val != null) ? val.isObject() : null;
     } catch (Exception ex) {
       logger.warning("couldn't parse '" + json + "'");
       return new JSONObject();

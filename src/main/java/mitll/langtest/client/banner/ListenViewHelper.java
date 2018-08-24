@@ -507,13 +507,13 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   /**
    * TODO : move this down, add interface...
    *
-   * @param exid
-   * @param score
-   * @param recordDialogTurn
+   * @paramx exid
+   * @paramx score
+   * @paramx recordDialogTurn
    */
-  @Override
+/*  @Override
   public void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
-  }
+  }*/
 
   @NotNull
   private Widget getLeftArrow() {
@@ -760,6 +760,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   /**
+   * When the prompt finishes playing, move on to the next turn.
+   *
    * @seex mitll.langtest.client.sound.PlayAudioPanel#setPlayLabel
    * @see HeadlessPlayAudio#songFinished
    */
@@ -913,8 +915,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @param smiley
    * @param total
    */
-  @Override
-  public void setSmiley(Image smiley, double total) {
+/*  @Override
+  public void setEmoticon(Image smiley, double total) {
   }
 
   @Override
@@ -930,5 +932,5 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   @Override
   public int getNumValidities() {
     return 0;
-  }
+  }*/
 }

@@ -247,7 +247,7 @@ public abstract class BaseResultDAO extends DAO {
                                                                     final ExerciseSorter sorter
   ) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
-    Collections.sort(sortedResults, (o1, o2) -> {
+    sortedResults.sort((o1, o2) -> {
       CommonExercise o1Ex = idToEx.get(o1.getId());
       CommonExercise o2Ex = idToEx.get(o2.getId());
       return compareUsingPhones(o1, o2, o1Ex, o2Ex, sorter);
@@ -291,6 +291,8 @@ public abstract class BaseResultDAO extends DAO {
   }
 
   /**
+   * BUG BUG BUG - score json returned is for the oldest result, not the latest, gah.
+   *
    * @param userid
    * @param allIds
    * @param idToEx

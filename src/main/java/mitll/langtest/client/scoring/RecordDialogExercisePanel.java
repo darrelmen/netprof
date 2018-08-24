@@ -4,7 +4,7 @@ import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.banner.IRehearseView;
 import mitll.langtest.client.banner.RehearseViewHelper;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -25,9 +25,13 @@ import java.util.logging.Logger;
 public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
+  private static final long MOVE_ON_DUR = 3000L;
+  private static final long END_SILENCE = 300L;
+
   private static final int DIM = 40;
   private static final long END_DUR_SKEW = 900L;
-  private long start = 0;
+  private long start = 0L;
+  private long firstVAD = -1L;
 
   private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
   private static final float DELAY_SCALAR = 1.0F;
@@ -36,77 +40,55 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private Image emoticon;
   private AlignmentOutput alignmentOutput;
   private final SessionManager sessionManager;
+  private long durationInMillis;
+  private IRehearseView rehearseView;
 
   public RecordDialogExercisePanel(final T commonExercise,
                                    final ExerciseController controller,
                                    final ListInterface<?, ?> listContainer,
                                    Map<Integer, AlignmentOutput> alignments,
-                                   IListenView listenView,
+                                   IRehearseView listenView,
                                    SessionManager sessionManager,
                                    boolean isRight) {
     super(commonExercise, controller, listContainer, alignments, listenView, isRight);
+    this.rehearseView = listenView;
+
     if (commonExercise.hasRefAudio()) {
       minDur = commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
       minDur = (long) (((float) minDur) * DELAY_SCALAR);
       minDur -= END_DUR_SKEW;
     }
+
     this.sessionManager = sessionManager;
     addStyleName("inlineFlex");
   }
 
   /**
-   * TODO : do this better - should
+   * TODOx : do this better - should
+   *
+   * @see RehearseViewHelper#showScores
    */
   @Override
   public void showScoreInfo() {
     emoticon.setVisible(true);
 
-   /* List<TranscriptSegment> transcriptSegments = alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
-    transcriptSegments.sort(TranscriptSegment::compareTo);
-    Iterator<TranscriptSegment> scoredWords = transcriptSegments.iterator();
-    Iterator<IHighlightSegment> highlightSegment = flclickables.iterator();
-
-    while (scoredWords.hasNext()) {
-      TranscriptSegment scoredWord = scoredWords.next();
-      if (highlightSegment.hasNext()) {
-
-        IHighlightSegment next1 = highlightSegment.next();
-        while (!next1.isClickable()) {
-          next1 = highlightSegment.next();
-        }
-
-        String color = SimpleColumnChart.getColor(scoredWord.getScore());
-
-        logger.info("word '" + scoredWord.getDisplayEvent() +
-            "' or '" + scoredWord.getEvent() +
-            "' = " + scoredWord.getScore() + " = " + color);
-
-        next1.setHighlightColor(color);
-        next1.showHighlight();
-      }
-    }*/
-
     TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = showAlignment(0, durationInMillis, alignmentOutput);
 
     if (transcriptSegmentIHighlightSegmentTreeMap != null) {
-      transcriptSegmentIHighlightSegmentTreeMap.forEach((k, v) -> {
-        String color = SimpleColumnChart.getColor(k.getScore());
-/*
-
-        logger.info("word '" + k.getDisplayEvent() +
-            "' or '" + k.getEvent() +
-            "' = " + k.getScore() + " = " + color);
-*/
-
-        v.setHighlightColor(color);
-        v.showHighlight();
-      });
+      transcriptSegmentIHighlightSegmentTreeMap.forEach(this::showWordScore);
     }
+  }
+
+  private void showWordScore(TranscriptSegment k, IHighlightSegment v) {
+    v.setHighlightColor(SimpleColumnChart.getColor(k.getScore()));
+    v.showHighlight();
+    v.restoreText();
   }
 
   @Override
   public void clearScoreInfo() {
     emoticon.setVisible(false);
+
     flclickables.forEach(iHighlightSegment -> {
       iHighlightSegment.setHighlightColor(IHighlightSegment.DEFAULT_HIGHLIGHT);
       iHighlightSegment.clearHighlight();
@@ -115,21 +97,56 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     maybeShowAlignment(getRegularSpeedIfAvailable(exercise));
   }
 
-  private long durationInMillis;
+  public void obscureText() {
+    flclickables.forEach(IHighlightSegment::obscureText);
+  }
+
+  public void restoreText() {
+    flclickables.forEach(IHighlightSegment::restoreText);
+  }
+
+  @Override
+  public void useResult(AudioAnswer result) {
+    alignmentOutput = result.getPretestScore();
+    durationInMillis = result.getDurationInMillis();
+    double score = result.getScore();
+    rehearseView.addScore(result.getExid(), (float) score, RecordDialogExercisePanel.this);
+    rehearseView.setEmoticon(emoticon, score);
+  }
+
+  /**
+   * Maybe color in the words red?
+   */
+  @Override
+  public void useInvalidResult() {
+    rehearseView.setEmoticon(emoticon, 0F);
+  }
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
     NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<T>(exercise, controller, sessionManager) {
+      /**
+       *
+       * SO in an async world, this result may not be for this exercise panel!
+       *
+       * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
+       * @see FeedbackPostAudioRecordButton#useResult
+       * @param result
+       */
       @Override
       public void useResult(AudioAnswer result) {
         super.useResult(result);
-        alignmentOutput = result.getPretestScore();
-        durationInMillis = result.getDurationInMillis();
-        double score = result.getScore();
-        listenView.addScore(result.getExid(), (float) score, RecordDialogExercisePanel.this);
-        listenView.setSmiley(emoticon, score);
 
-        logger.info("useResult got for   " + getExID() + " = " + result.getValidity() + " " + score);
+//        alignmentOutput = result.getPretestScore();
+//        durationInMillis = result.getDurationInMillis();
+//        double score = result.getScore();
+//        rehearseView.addScore(result.getExid(), (float) score, RecordDialogExercisePanel.this);
+//        rehearseView.setEmoticon(emoticon, score);
+
+        rehearseView.useResult(result);
+
+        logger.info("useResult got for ex " + result.getExid() + " vs local " + getExID() +
+            " = " + result.getValidity() + " " + result.getPretestScore());
         // logger.info("useResult got words " + result.getPretestScore().getWordScores());
       }
 
@@ -138,27 +155,57 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
         return myGetPopupTargetWidget();
       }
 
+      /**
+       * @see PostAudioRecordButton#usePartial
+       * @param response
+       */
       @Override
-      public void usePartial(Validity validity) {
-        listenView.addPacketValidity(validity);
+      public void usePartial(StreamResponse response) {
+        if (isRecording()) {
+          Validity validity = response.getValidity();
+          rehearseView.addPacketValidity(validity);
+
+          if (validity == Validity.OK && firstVAD == -1) {
+            firstVAD = response.getStreamTimestamp();//System.currentTimeMillis();
+            logger.info("usePartial : (" + rehearseView.getNumValidities() +
+                ") got first vad : " + firstVAD +
+                " (" + (start - firstVAD) + ")" +
+                " for " + report() + " diff " + (System.currentTimeMillis() - start));
+          } else {
+            logger.info("usePartial : (" + rehearseView.getNumValidities() +
+                " packets) skip validity " + validity +
+                " first vad " + firstVAD +
+                " (" + (start - firstVAD) + ")" +
+                " for " + report() + " diff " + (System.currentTimeMillis() - start));
+          }
+        } else {
+          logger.warning("hmm " + report() + " getting response " + response + " but not recording...?");
+        }
       }
 
+      /**
+       *
+       */
       @Override
       public void onPostFailure() {
-        logger.info("onPostFailure exid " +getExID());
+        logger.info("onPostFailure exid " + getExID());
         stopRecording();
       }
 
       /**
-       * TODO : do something smarter here on invalid state
+       * TODO : do something smarter here on invalid state????
+       *
+       * @param exid
        * @param isValid
+       * @see PostAudioRecordButton#useInvalidResult
        */
       @Override
-      public void useInvalidResult(boolean isValid) {
-        super.useInvalidResult(isValid);
-        logger.info("useInvalidResult got valid = " + isValid);
-      }
+      public void useInvalidResult(int exid, boolean isValid) {
+        super.useInvalidResult(exid, isValid);
+        rehearseView.useInvalidResult(exid);
 
+        logger.warning("useInvalidResult got valid = " + isValid);
+      }
 
       /**
        * @see FeedbackPostAudioRecordButton#stopRecording(long)
@@ -166,7 +213,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       @Override
       public void stopRecording() {
         super.stopRecording();
-        listenView.stopRecording();
+        rehearseView.stopRecording();
       }
     };
 
@@ -197,6 +244,10 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
     add(flContainer);
     super.addWidgets(showFL, showALTFL, phonesChoices);
+  }
+
+  private String report() {
+    return this.toString();
   }
 
   private Widget myGetPopupTargetWidget() {
@@ -234,9 +285,41 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    */
   public void startRecording() {
     start = System.currentTimeMillis();
+    firstVAD = -1;
     recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
   }
 
+  /**
+   * Check against expected duration to see when to end.
+   *
+   * @see #startRecording
+   * @see RehearseViewHelper#mySilenceDetected()
+   */
+  public boolean stopRecording() {
+    long now = System.currentTimeMillis();
+
+    long diff = now - start;
+
+    long minDurPlusMoveOn = minDur + MOVE_ON_DUR;
+    long diffVAD = now - firstVAD;
+    boolean vadCheck = firstVAD > 0 && diffVAD > minDur + END_SILENCE;
+    if (vadCheck || diff > minDurPlusMoveOn) {
+      logger.info("stopRecording " + this +
+          "\n\tvadCheck  " + vadCheck +
+          "\n\tfirstVAD  " + firstVAD +
+          "\n\tVAD delay " + (diffVAD - diff) +
+          "\n\tdiffVAD   " + diffVAD +
+          "\n\tminDur    " + minDur +
+          "\n\tminDur+move on " + minDurPlusMoveOn +
+          "\n\tdiff      " + diff
+      );
+      recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
+      return true;
+    } else {
+      logger.info("stopRecording ignore too short " + diff + " vs " + minDur);
+      return false;
+    }
+  }
 
   /**
    * @return
@@ -246,21 +329,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     return recordAudioPanel.getPostAudioRecordButton().isRecording();
   }
 
-  /**
-   * Check against expected duration too see when to end.
-   *
-   * @see RehearseViewHelper#mySilenceDetected()
-   */
-  public boolean stopRecording() {
-    long now = System.currentTimeMillis();
-
-    long diff = now - start;
-    if (diff > minDur) {
-      recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
-      return true;
-    } else {
-//      logger.info("stopRecording ignore too short " + diff + " vs " + minDur);
-      return false;
-    }
+  public boolean abortRecording() {
+    return recordAudioPanel.getPostAudioRecordButton().stopRecordingSafe();
   }
 }
