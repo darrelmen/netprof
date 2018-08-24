@@ -54,15 +54,15 @@ function startUserMedia(stream) {
     webAudioMicAvailable();
     document.addEventListener('webkitvisibilitychange', onVisibilityChange);
 
-/*    if (audio_context) {
-        __log('webaudiorecorder.startUserMedia : state = ' +  audio_context.state);
+    /*    if (audio_context) {
+            __log('webaudiorecorder.startUserMedia : state = ' +  audio_context.state);
 
-        //} && audio_context.state === 'running')
-        // {
-        audio_context.suspend().then(function () {
-            __log('webaudiorecorder.startUserMedia suspended recording...');
-        });
-    }*/
+            //} && audio_context.state === 'running')
+            // {
+            audio_context.suspend().then(function () {
+                __log('webaudiorecorder.startUserMedia suspended recording...');
+            });
+        }*/
 }
 
 // if the user goes to another tab or changes focus, stop recording.
@@ -89,21 +89,21 @@ function startRecording() {
     recorder && recorder.record();
 
     //  && audio_context.state === 'suspended'
-/*
-    if (audio_context) {
-        __log('webaudiorecorder.startRecording 1 Start Recording. ' +  audio_context.state);
+    /*
+        if (audio_context) {
+            __log('webaudiorecorder.startRecording 1 Start Recording. ' +  audio_context.state);
 
-        audio_context.resume().then(function () {
-            __log('webaudiorecorder.startRecording resumed recording...');
-            rememberedInput.start();
+            audio_context.resume().then(function () {
+                __log('webaudiorecorder.startRecording resumed recording...');
+                rememberedInput.start();
 
-            recorder && recorder.clear();
-            recorder && recorder.record();
-        });
-    }
-*/
+                recorder && recorder.clear();
+                recorder && recorder.record();
+            });
+        }
+    */
 
-    __log('webaudiorecorder.startRecording 2 Start Recording. ' +  audio_context.state);
+    __log('webaudiorecorder.startRecording 1 Start Recording.  state =' + audio_context.state);
 }
 
 // called from FlashRecordPanelHeadless.stopRecording
@@ -112,10 +112,10 @@ function stopRecording() {
     // audio_context && audio_context.suspend();
 
     if (audio_context) {
-        __log('webaudiorecorder.stopRecording : state = ' +  audio_context.state);
+        __log('webaudiorecorder.stopRecording : state = ' + audio_context.state);
 
         //} && audio_context.state === 'running')
-   // {
+        // {
         audio_context.suspend().then(function () {
             __log('webaudiorecorder.stopRecording suspended recording...');
             rememberedInput.stop();
@@ -145,7 +145,8 @@ function serviceStartStream(url, exid, reqid) {
 function serviceStopStream() {
     recorder && recorder.stop();
 
-    if (audio_context && audio_context.state === 'running') {
+    if (audio_context) {//} && audio_context.state === 'running') {
+        __log('webaudiorecorder.serviceStopStream state = ' +  audio_context.state);
         audio_context.suspend().then(function () {
             __log('webaudiorecorder.serviceStopStream suspended recording...');
         });
@@ -156,39 +157,6 @@ function serviceStopStream() {
         getStreamResponse(blob);
     });
 }
-
-// not really needed
-/*function stopRecordingAndPost(url, exid) {
-    recorder && recorder.exportMonoWAV(function (blob) {
-        try {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", url, true);
-
-//Send the proper header information along with the request
-            xhr.setRequestHeader("Content-Type", "application/wav");
-            xhr.setRequestHeader("EXERCISE", exid);
-
-            xhr.onreadystatechange = function () {//Call a function when the state changes.
-                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
-                    // Request finished. Do processing here.
-
-                    __log('stopRecordingAndPost completed');
-                }
-            }
-            xhr.send(blob);
-        } catch (e) {
-            __log('Bad call to blob');
-
-            var vDebug = "";
-            for (var prop in e) {
-                vDebug += "property: " + prop + " value: [" + e[prop] + "]\n";
-            }
-            vDebug += "toString(): " + " value: [" + e.toString() + "]";
-            __log(vDebug);
-            throw e;
-        }
-    });
-}*/
 
 function uint6ToB64(nUint6) {
     return nUint6 < 26 ?

@@ -68,8 +68,7 @@
         // when audio samples come in, they come in here and passed to the worker
         this.node.onaudioprocess = function (e) {
             if (recording) {
-                console.log("onaudioprocess recording...");
-
+                //      console.log("onaudioprocess recording...");
                 var mytype = config.type || 'audio/wav';
                 worker.postMessage({
                     command: 'record',
@@ -82,7 +81,7 @@
                 analyse();
             }
             else {
-               //console.log("onaudioprocess not recording...");
+                //console.log("onaudioprocess not recording...");
             }
         };
 
@@ -147,6 +146,8 @@
         // see webaudiorecorder serviceStartStream
         this.serviceStartStream = function (url, exid, reqid, cb) {
             currCallback = cb || config.callback;
+
+            //   source.connect(analyser);
             // console.log('service.startStream');
             if (url) {
                 console.log('service.startStream url ' + url);
@@ -169,6 +170,7 @@
             currCallback = cb || config.callback;
 
             if (didStream) {
+                //   source.disconnect(analyser);
                 didStream = false;
                 currCallback = cb || config.callback;
                 console.log("serviceStopStream " + "  at " + new Date().getTime());
@@ -195,10 +197,9 @@
                     //         source.stop();
                     //     });
                     // }
-
                 }
                 else {
-                    console.log("worker.onmessage ", e.data);
+                    //  console.log("worker.onmessage ", e.data);
 
                 }
                 if (typeof currCallback === 'function') {
@@ -231,6 +232,7 @@
             var amplitude = silenceDetectionConfig.amplitude;
 
             var max = 0;
+            var nonzero = 0;
             analyser.getByteTimeDomainData(dataArray);
 
             for (var i = 0; i < bufferLength; i++) {
@@ -238,7 +240,12 @@
                 var curr_value_time = (dataArray[i] / 128) - 1.0;
                 if (curr_value_time > amplitude || curr_value_time < (-1 * amplitude)) {
                     start = Date.now();
-                    if (curr_value_time > max) max = curr_value_time;
+                    if (curr_value_time > max) {
+                        max = curr_value_time;
+                    }
+                }
+                else if (curr_value_time !== 0) {
+                    nonzero = curr_value_time;
                 }
             }
             var newtime = Date.now();
@@ -246,10 +253,18 @@
 
             var time = silenceDetectionConfig.time;
             if (elapsedTime > time) {
-                console.log("elapsedTime is " + elapsedTime + " vs " + time + " max " + max + " start " + start);
-
+                console.log("analyze : SILENCE! elapsedTime is " + elapsedTime + " vs " + time + " max " + max + "/" +nonzero+
+                    " start " + start);
                 silenceDetected();
             }
+            else if (max > 0) {
+                console.log("analyze : VAD      elapsedTime is " + elapsedTime + " vs " + time + " max " + max + " start " + start);
+            }
+   /*         else {
+                console.log("analyze : SHORT SL elapsedTime is " + elapsedTime + " vs " + time + " max " + max + "/" +nonzero+
+                    " start " + start);
+            }*/
+
         };
 
 
@@ -261,7 +276,6 @@
         source.connect(analyser);
         analyser.connect(this.node);
 
-//        source.connect(this.node);
         this.node.connect(this.context.destination);    //this should not be necessary
     };
 

@@ -38,6 +38,8 @@ var recLength = 0,
 
 var myurl;
 var myexid;
+var myreqid;
+var lastSendMoment;
 
 var frameRecLength = 0;
 var frameRecBuffersL = [];
@@ -89,6 +91,7 @@ function startStream(url, exid, reqid) {
     myurl = new String(url);
     myexid = new String(exid);
     myreqid = new String(reqid);
+    lastSendMoment = new Date().getTime();
 }
 
 function stopStream(type) {
@@ -104,11 +107,17 @@ function stopStream(type) {
     var framesBefore = recLength / (sampleRate / 2);
     var framesBeforeRound = Math.round(framesBefore);
 
-    sendBlob(framesBeforeRound, audioBlob, true);
+    sendBlob(framesBeforeRound, audioBlob, true, lastSendMoment);
 }
 
+// so we tag each packet with the time it's generated - so we know when on the client is the
+// start of the packet
 function record(inputBuffer, type) {
     // every half second, send a blob
+
+    var beforeSendMoment = lastSendMoment;
+    var sendMoment = new Date().getTime();
+
     var framesBefore = recLength / (sampleRate / 2);
     var framesBeforeRound = Math.round(framesBefore);
 
@@ -123,6 +132,7 @@ function record(inputBuffer, type) {
     var framesAfterRound = Math.round(framesAfter);
 
     if (framesAfterRound > framesBeforeRound) {
+        lastSendMoment = sendMoment;  // OK remember send moment
         console.log(
             "worker.record send blob - got " + frameRecLength +
             " rate " + sampleRate +
@@ -136,7 +146,7 @@ function record(inputBuffer, type) {
         frameRecBuffersL = [];
         frameRecLength = 0;
 
-        sendBlob(framesBeforeRound, audioBlob, false);
+        sendBlob(framesBeforeRound, audioBlob, false, beforeSendMoment);
     }
     else {
         // console.log("worker.record 2 got " + recLength + " frame " + framesAfterRound +
@@ -144,10 +154,11 @@ function record(inputBuffer, type) {
     }
 }
 
-function sendBlob(framesBeforeRound, audioBlob, isLast) {
+function sendBlob(framesBeforeRound, audioBlob, isLast, sendMoment) {
 //    console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "'");
 
     try {
+
         var xhr = new XMLHttpRequest();
 
         xhr.addEventListener("progress", updateProgress);
@@ -161,6 +172,7 @@ function sendBlob(framesBeforeRound, audioBlob, isLast) {
         xhr.setRequestHeader("Content-Type", "application/wav");
         xhr.setRequestHeader("EXERCISE", myexid);
         xhr.setRequestHeader("reqid", myreqid);
+        xhr.setRequestHeader("STREAMTIMESTAMP", sendMoment);
 
         if (framesBeforeRound === 0) {
             xhr.setRequestHeader("STREAMSTATE", "START");

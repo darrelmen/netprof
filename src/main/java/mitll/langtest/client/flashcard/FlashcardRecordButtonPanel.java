@@ -54,7 +54,7 @@ import mitll.langtest.shared.answer.AudioType;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
-//  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
+  //  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
   private final AudioAnswerListener exercisePanel;
   private IconAnchor waiting;
 
@@ -69,8 +69,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
                                     ExerciseController controller,
                                     int exerciseID,
                                     int index) {
-    super(controller, exerciseID, index, true, AudioType.PRACTICE,
-        "Record", true);
+    super(controller, exerciseID, index, true, AudioType.PRACTICE, "Record", true);
     this.exercisePanel = exercisePanel;
   }
 
@@ -137,14 +136,10 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     exercisePanel.receivedAudioAnswer(result);
   }
 
-/*  @Override
-  public void flip(boolean first) {
-  }*/
-
   /**
-   * @see RecordButton#stopRecording
    * @param duration
    * @return
+   * @see RecordButton#stopRecording
    */
   @Override
   public boolean stopRecording(long duration) {
@@ -159,6 +154,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   private void hideRecord() {
     recordButton.setVisible(false);
   }
+
   private void showRecord() {
     recordButton.setVisible(true);
   }
