@@ -45,6 +45,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
+import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.dialog.IDialog;
@@ -61,8 +62,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implements LogAndNotify {
@@ -409,11 +410,11 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return db.getSectionHelper(projectID);
   }
 
-  protected ISection<IDialog> getDialogSectionHelper() throws DominoSessionException {
+   ISection<IDialog> getDialogSectionHelper() throws DominoSessionException {
     return getDialogSectionHelper(getProjectIDFromUser());
   }
 
-  protected ISection<IDialog> getDialogSectionHelper(int projectID) {
+   ISection<IDialog> getDialogSectionHelper(int projectID) {
     return db.getDialogSectionHelper(projectID);
   }
 
@@ -513,5 +514,42 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       remoteAddr = request.getRemoteAddr();
     }
     return remoteAddr;
+  }
+
+  public IDialog getDialog(int id) throws DominoSessionException {
+    IDialog iDialog = getOneDialog(id);
+
+    logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
+
+    int projid = iDialog.getProjid();
+    Project project = db.getProject(projid);
+
+    {
+      String language = project.getLanguage();
+      iDialog.getExercises().forEach(clientExercise ->
+          db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>())
+      );
+    }
+
+    new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projid, project, iDialog.getExercises());
+
+    return iDialog;
+  }
+
+  private IDialog getOneDialog(int id) throws DominoSessionException {
+    List<IDialog> iDialogs = getDialogs(getUserIDFromSessionOrDB());
+    List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == id).collect(Collectors.toList());
+    return collect.isEmpty() ? iDialogs.iterator().next() : collect.iterator().next();
+  }
+
+  protected List<IDialog> getDialogs(int userIDFromSessionOrDB) {
+    List<IDialog> dialogList = new ArrayList<>();
+    {
+      int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+      if (projectIDFromUser != -1) {
+        dialogList = getProject(projectIDFromUser).getDialogs();
+      }
+    }
+    return dialogList;
   }
 }

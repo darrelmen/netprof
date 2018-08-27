@@ -1,35 +1,71 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.LearnFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.scoring.TwoColumnExercisePanel;
+import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.list.StudyExerciseList;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
-import mitll.langtest.shared.scoring.AlignmentOutput;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by go22670 on 4/5/17.
  */
-class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
+class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T> {
   //  private final Logger logger = Logger.getLogger("LearnHelper");
+
   /**
-   * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    * @param controller
+   * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  LearnHelper(ExerciseController controller) {
+  StudyHelper(ExerciseController controller) {
     super(controller);
+  }
+
+  @Override
+  public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
+    controller.getDialogService().getDialog(getDialogFromURL(), new AsyncCallback<IDialog>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        // TODO fill in
+      }
+
+      @Override
+      public void onSuccess(IDialog dialog) {
+        showDialogGetRef(dialog,listContent);
+      }
+    });
+  }
+
+  private void showDialogGetRef(IDialog dialog, Panel child) {
+    DivWidget header = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog);
+    child.add(header);
+    header.addStyleName("bottomFiveMargin");
+    super.showContent(child, INavigation.VIEWS.STUDY, false);
+    hideList();
+  }
+
+  @NotNull
+  private INavigation.VIEWS getPrevView() {
+    return INavigation.VIEWS.DIALOG;
+  }
+
+  @NotNull
+  private INavigation.VIEWS getNextView() {
+    return INavigation.VIEWS.LISTEN;
+  }
+
+  private int getDialogFromURL() {
+    return new SelectionState().getDialog();
   }
 
   @Override
@@ -50,24 +86,15 @@ class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterN
                                                                        INavigation.VIEWS instanceName,
                                                                        DivWidget listHeader,
                                                                        DivWidget footer) {
-        return new LearnFacetExerciseList<T>(
+        StudyExerciseList<T> widgets = new StudyExerciseList<>(
             topRow,
             currentExercisePanel,
             controller,
             new ListOptions(instanceName),
             listHeader,
             false);
-      }
-    };
-  }
-
-  protected ExercisePanelFactory<T, ClientExercise> getFactory(final PagingExerciseList<T, ClientExercise> exerciseList) {
-    return new ExercisePanelFactory<T, ClientExercise>(controller, exerciseList) {
-      private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
-
-      @Override
-      public Panel getExercisePanel(ClientExercise e) {
-        return new TwoColumnExercisePanel<>(e, controller, exerciseList, alignments, false);
+        widgets.hideSectionPanel();
+        return widgets;
       }
     };
   }

@@ -114,8 +114,6 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
         bottomRow.addStyleName("centerPractice");
         outerBottomRow = bottomRow;
       }
-
-
     };
   }
 

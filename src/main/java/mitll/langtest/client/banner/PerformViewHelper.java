@@ -3,7 +3,6 @@ package mitll.langtest.client.banner;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.shared.dialog.IDialog;
@@ -11,7 +10,7 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
 public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercise>> extends RehearseViewHelper<T> {
-  PerformViewHelper(ExerciseController controller, IViewContaner viewContainer, INavigation.VIEWS myView) {
+  PerformViewHelper(ExerciseController controller) {
     super(controller);
   }
 

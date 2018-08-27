@@ -27,7 +27,6 @@ public class DialogReader {
   private static final Logger logger = LogManager.getLogger(DialogReader.class);
 
   /**
-   *
    * @param defaultUser
    * @param projID
    * @param exToAudio
@@ -65,7 +64,7 @@ public class DialogReader {
       List<ExerciseAttribute> attributes = getExerciseAttributes(pages[i], topics[i]);
 
       List<ClientExercise> exercises = new ArrayList<>();
-      List<ClientExercise> coreExercises = new ArrayList<>();
+      Set<ClientExercise> coreExercises = new TreeSet<>();
 
       String dirPath = dialogDataDir + dir;
       File loc = new File(dirPath);
@@ -86,9 +85,8 @@ public class DialogReader {
               .filter(Files::isRegularFile)
               .forEach(file -> {
                 if (file.getFileName().toString().endsWith("~")) {
-                  logger.info("skip tilde - " +file);
-                }
-                else {
+                  logger.info("skip tilde - " + file);
+                } else {
                   logger.info(dir + " found " + file);
                   String fileName = file.getFileName().toString();
                   String[] parts = fileName.split("_");
@@ -189,7 +187,7 @@ public class DialogReader {
 
           dialogAttr,
           exercises,
-          coreExercises);
+          new ArrayList<>(coreExercises));
 
       dialogToSlick.put(dialog, slickDialog);
       // logger.info("read " + dialog);
@@ -203,11 +201,18 @@ public class DialogReader {
     return dialogToSlick;
   }
 
-  public static class DialogProps {
-    String docIDS, title, fltitle, dir, unit, chapter, page, pres;
+  static class DialogProps {
+    final String docIDS;
+    final String title;
+    final String fltitle;
+    final String dir;
+    final String unit;
+    final String chapter;
+    final String page;
+    final String pres;
 
-    public DialogProps(String docIDS,
-                       String title, String fltitle, String dir, String unit, String chapter, String page, String pres) {
+    DialogProps(String docIDS,
+                String title, String fltitle, String dir, String unit, String chapter, String page, String pres) {
       this.docIDS = docIDS;
       this.title = title;
       this.fltitle = fltitle;
@@ -220,11 +225,11 @@ public class DialogReader {
   }
 
   @NotNull
-  protected String getDialogDataDir(Project project) {
+  private String getDialogDataDir(Project project) {
     return IDialogReader.OPT_NETPROF_DIALOG + project.getLanguage().toLowerCase() + File.separator;
   }
 
-  protected void addSpeakerAttrbutes(List<ExerciseAttribute> attributes, Set<String> speakers) {
+  private void addSpeakerAttrbutes(List<ExerciseAttribute> attributes, Set<String> speakers) {
     List<String> speakersList = new ArrayList<>(speakers);
     speakersList
         .forEach(s -> attributes
@@ -232,7 +237,13 @@ public class DialogReader {
                 " " + IDialogReader.SPEAKER_LABELS.get(speakersList.indexOf(s)), s, false)));
   }
 
-  protected void addCoreWords(Project project, List<ClientExercise> coreExercises, ClientExercise exercise) {
+  /**
+   *
+   * @param project
+   * @param coreExercises set - only unique exercises...
+   * @param exercise
+   */
+  private void addCoreWords(Project project, Collection<ClientExercise> coreExercises, ClientExercise exercise) {
     String[] tokens = exercise.getForeignLanguage().split(" ");
     Set<String> uniq = new HashSet<>(Arrays.asList(tokens));
     uniq.forEach(token -> {
@@ -249,7 +260,7 @@ public class DialogReader {
    * @return
    */
   @NotNull
-  protected List<ExerciseAttribute> getExerciseAttributes(String page, String topic) {
+  private List<ExerciseAttribute> getExerciseAttributes(String page, String topic) {
     List<ExerciseAttribute> attributes = new ArrayList<>();
     attributes.add(new ExerciseAttribute(IDialogReader.PAGE, page));
     attributes.add(new ExerciseAttribute(IDialogReader.PRESENTATION, topic));
@@ -268,11 +279,11 @@ public class DialogReader {
    * @seex #getDialogs
    */
   @NotNull
-  protected Exercise getExercise(List<ExerciseAttribute> attributes,
-                                 Set<String> speakers,
-                                 Path path,
-                                 String fileText,
-                                 String unit, String chapter, List<String> typeOrder) {
+  private Exercise getExercise(List<ExerciseAttribute> attributes,
+                               Set<String> speakers,
+                               Path path,
+                               String fileText,
+                               String unit, String chapter, List<String> typeOrder) {
     Exercise exercise = new Exercise();
     {
       Map<String, String> unitToValue = new HashMap<>();
@@ -303,7 +314,7 @@ public class DialogReader {
   }
 
   @NotNull
-  protected String getTextFromFile(Path path) {
+  private String getTextFromFile(Path path) {
     StringBuilder builder = new StringBuilder();
 
     try (Stream<String> stream = Files.lines(path)) {
@@ -314,7 +325,7 @@ public class DialogReader {
     return builder.toString();
   }
 
-  protected int getIndex(String o1) {
+  private int getIndex(String o1) {
     String[] split = o1.split("/");
     String name = split[split.length - 1];
     // logger.info("index " + name );

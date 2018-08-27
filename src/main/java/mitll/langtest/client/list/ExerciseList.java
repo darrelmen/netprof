@@ -569,7 +569,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
    */
   @Override
   public void hide() {
-    getParent().setVisible(false);
+    Widget parent = getParent();
+    logger.info("hide parent " + parent.getElement().getId());
+    logger.info("hide parent parent " + parent.getParent().getElement().getId());
+    parent.setVisible(false);
   }
 
   /**

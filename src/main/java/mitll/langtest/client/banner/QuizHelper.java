@@ -227,6 +227,9 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
     };
   }
 
+  /**
+   * @see MyPracticeFacetExerciseList#getQuizIntro
+   */
   private void showQuizForReal() {
     setMode(POLYGLOT, PolyglotDialog.PROMPT_CHOICE.NOT_YET);
     setNavigation(navigation);

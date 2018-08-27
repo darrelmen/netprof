@@ -39,8 +39,6 @@ public class Dialog implements IDialog, MutableShell {
 
   float score;
 
-  // private transient SlickDialog slickDialog;
-
   public Dialog() {
   }
 

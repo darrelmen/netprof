@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> extends FacetExerciseList<T, ClientExercise> {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   public LearnFacetExerciseList(Panel secondRow,
                                 Panel currentExerciseVPanel,
@@ -97,10 +97,7 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
                 if (now - then > 150 || DEBUG) {
                   logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
                 }
-                List<ClientExercise> exercises = result.getExercises();
-
-
-                setScoreHistory(result.getScoreHistoryPerExercise(), exercises);
+                setScoreHistory(result.getScoreHistoryPerExercise(), result.getExercises());
                 result.getExercises().forEach(ex -> addExerciseToCached(ex));
               } else {
                 logger.warning("getFullExercises huh? no exercises");

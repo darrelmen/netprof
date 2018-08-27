@@ -68,8 +68,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   protected final ExerciseController controller;
   private ExerciseList npfExerciseList;
   protected final FlexListLayout<T, U> flexListLayout;
-//  private   IViewContaner viewContaner;
-//  private INavigation.VIEWS myView;
 
   /**
    * @param controller
@@ -79,8 +77,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     this.controller = controller;
     final SimpleChapterNPFHelper<T, U> outer = this;
     this.flexListLayout = getMyListLayout(outer);
-//    this.viewContaner = viewContaner;
-//    this.myView = myView;
   }
 
   protected abstract FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer);
@@ -158,6 +154,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   @Override
   public void hideList() {
+    logger.info("hideList on exercise list : " + npfExerciseList.getElement().getId());
     npfExerciseList.hide();
   }
 
@@ -174,21 +171,20 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
 
+  /*
   protected ExercisePanelFactory<CommonShell, ClientExercise> getFactoryInject(
-      final PagingExerciseList<CommonShell, ClientExercise> exerciseList,
-      PanelFactory panelFactory) {
+      final PagingExerciseList<CommonShell, ClientExercise> exerciseList, PanelFactory panelFactory) {
     return new ExercisePanelFactory<CommonShell, ClientExercise>(controller, exerciseList) {
       @Override
       public Panel getExercisePanel(ClientExercise e) {
         return panelFactory.getExercisePanel(e);
       }
     };
-  }
+  }*/
 
-  public interface PanelFactory {
+/*  public interface PanelFactory {
     Panel getExercisePanel(ClientExercise e);
-  }
-
+  }*/
 
   @Override
   public void onResize() {

@@ -66,8 +66,7 @@ public class DialogPopulate {
 
     List<IDialog> dialogs1 = dialogDAO.getDialogs(projid);
     if (dialogs1.isEmpty()) {
-      logger.warn("no dialog info yet loaded for " + project);
-      // populateDatabase(project, dialogDAO);
+      logger.warn("addDialogInfo no dialog info yet loaded for " + project);
       return true;
     } else {
       project.setDialogs(dialogs1);
@@ -76,8 +75,8 @@ public class DialogPopulate {
   }
 
   /**
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyDialog
    * @param project
-   * @paramx dialogDAO
    */
   public boolean populateDatabase(Project project) {
     int projid = project.getID();
@@ -194,7 +193,10 @@ public class DialogPopulate {
         relatedExercises.add(new SlickRelatedExercise(-1, clientExercise.getID(),
             clientExercise.getID(), projid, dialogID, modified))
     );
-    db.getUserExerciseDAO().getRelatedCoreExercise().addBulkRelated(relatedExercises);
+    db
+        .getUserExerciseDAO()
+        .getRelatedCoreExercise()
+        .addBulkRelated(relatedExercises);
   }
 
   @NotNull
@@ -249,10 +251,17 @@ public class DialogPopulate {
         addResultAndAudio(project, projid, defaultUser, now, k, v, valid, exid);
       }
     });
-
-
   }
 
+  /**
+   * @see #populateDatabase
+   * @param dialogDAO
+   * @param defaultUser
+   * @param modified
+   * @param attrToInt
+   * @param dialog
+   * @param dialogID
+   */
   private void addDialogAttributes(IDialogDAO dialogDAO, int defaultUser, Timestamp modified,
                                    Map<ExerciseAttribute, Integer> attrToInt,
                                    Dialog dialog, int dialogID) {

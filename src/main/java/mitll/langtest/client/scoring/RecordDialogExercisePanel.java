@@ -3,7 +3,10 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.IRehearseView;
 import mitll.langtest.client.banner.RehearseViewHelper;
 import mitll.langtest.client.banner.SessionManager;
@@ -105,21 +108,32 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     flclickables.forEach(IHighlightSegment::restoreText);
   }
 
+  /**
+   * @see RehearseViewHelper#useResult
+   * @param result
+   */
   @Override
   public void useResult(AudioAnswer result) {
     alignmentOutput = result.getPretestScore();
     durationInMillis = result.getDurationInMillis();
-    double score = result.getScore();
-    rehearseView.addScore(result.getExid(), (float) score, RecordDialogExercisePanel.this);
-    rehearseView.setEmoticon(emoticon, score);
+    {
+      double score = result.getScore();
+    //  rehearseView.addScore(result.getExid(), (float) score, RecordDialogExercisePanel.this);
+      rehearseView.setEmoticon(emoticon, score);
+    }
   }
+
+  private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
+  private static final SafeUri RED_X_URL = UriUtils.fromSafeConstant(RED_X);
 
   /**
    * Maybe color in the words red?
    */
   @Override
   public void useInvalidResult() {
-    rehearseView.setEmoticon(emoticon, 0F);
+    // rehearseView.setEmoticon(emoticon, 0F);
+    emoticon.setUrl(RED_X_URL);
+
   }
 
   @Override

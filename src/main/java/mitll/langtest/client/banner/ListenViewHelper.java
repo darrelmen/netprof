@@ -38,11 +38,8 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
-    implements ContentView, PlayListener, IListenView {
+public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends DialogView implements ContentView, PlayListener, IListenView {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
-
-  private static final int HEADER_HEIGHT = 120;
 
   private static final String VALUE = "value";
   private static final String SLIDER_MAX = "100";
@@ -55,11 +52,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private static final String RANGE = "range";
   private static final String INPUT = "input";
 
-  /**
-   * @see #getHeader
-   */
-  private static final int ROW_WIDTH = 97;
-  private static final String HEIGHT = 100 + "px";
   private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
   private static final String LEFT_COLOR = "#e7e6ec";
 
@@ -74,6 +66,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   CheckBox leftSpeakerBox, rightSpeakerBox;
   private ComplexWidget slider;
   private Button playButton;
+  private DivWidget dialogHeader;
 
   private static final boolean DEBUG = false;
 
@@ -98,7 +91,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     rightTurnPanels.clear();
     currentTurn = null;
 
-    controller.getDialogService().getDialog(new SelectionState().getDialog(), new AsyncCallback<IDialog>() {
+    controller.getDialogService().getDialog(getDialogFromURL(), new AsyncCallback<IDialog>() {
       @Override
       public void onFailure(Throwable caught) {
         // TODO fill in
@@ -111,13 +104,15 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     });
   }
 
-  protected void showDialogGetRef(IDialog dialog, Panel child) {
-    showDialog(dialog, child);
-    List<RefAudioGetter> getters = new ArrayList<>(bothTurns);
-    getRefAudio(getters.iterator());
+  private int getDialogFromURL() {
+    return new SelectionState().getDialog();
   }
 
-  private DivWidget dialogHeader;
+  protected void showDialogGetRef(IDialog dialog, Panel child) {
+    showDialog(dialog, child);
+    getRefAudio(new ArrayList<RefAudioGetter>(bothTurns).iterator());
+  }
+
 
   /**
    * Main method for showing the three sections
@@ -127,7 +122,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @see #showDialogGetRef
    */
   private void showDialog(IDialog dialog, Panel child) {
-    child.add(dialogHeader = getHeader(dialog));
+    child.add(dialogHeader = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog));
     child.add(getSpeakerRow(dialog));
     child.add(getTurns(dialog));
   }
@@ -230,78 +225,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     }
   }
 
-  @NotNull
-  private DivWidget getHeader(IDialog dialog) {
-    DivWidget outer = new DivWidget();
-    outer.getElement().setId("dialogInfo");
-    {
-      DivWidget row = new DivWidget();
-      row.addStyleName("cardBorderShadow");
-      row.setHeight(HEADER_HEIGHT + "px");
-      row.setWidth(ROW_WIDTH + "%");
-      row.addStyleName("inlineFlex");
-
-      row.add(getLeftArrow());
-      row.add(getRightArrow());
-
-      {
-        com.google.gwt.user.client.ui.Image flag = getFlag(dialog.getImageRef());
-        flag.addStyleName("floatLeft");
-        row.add(flag);
-      }
-
-      DivWidget vert = new DivWidget();
-      vert.getElement().setId("vert");
-      row.add(vert);
-      vert.addStyleName("leftTenMargin");
-
-      {
-        DivWidget titleDiv = new DivWidget();
-        titleDiv.addStyleName("titleBlue");
-        titleDiv.add(getFLTitle(dialog));
-        vert.add(titleDiv);
-      }
-
-      {
-        DivWidget titleDiv = new DivWidget();
-        titleDiv.getElement().getStyle().setBackgroundColor("#dff4fc");
-        titleDiv.add(getHeading(5, dialog.getEnglish()));
-        vert.add(titleDiv);
-      }
-
-      {
-        DivWidget oreintDiv = new DivWidget();
-        Heading w1 = new Heading(5, dialog.getOrientation());
-        w1.addStyleName("wrapword");
-
-        oreintDiv.add(w1);
-        vert.add(oreintDiv);
-      }
-      outer.add(row);
-    }
-    return outer;
-  }
-
-  @NotNull
-  private Heading getFLTitle(IDialog dialog) {
-    return getHeading(3, dialog.getForeignLanguage());
-  }
-
-  @NotNull
-  private Heading getHeading(int size, String foreignLanguage) {
-    Heading w1 = new Heading(size, foreignLanguage);//, dialog.getEnglish());
-    w1.getElement().getStyle().setMarginTop(0, PX);
-    w1.getElement().getStyle().setMarginBottom(5, PX);
-    return w1;
-  }
-
-  @NotNull
-  private com.google.gwt.user.client.ui.Image getFlag(String cc) {
-    com.google.gwt.user.client.ui.Image image = new com.google.gwt.user.client.ui.Image(cc);
-    image.setHeight(HEIGHT);
-    image.setWidth(HEIGHT);
-    return image;
-  }
 
   /**
    * @param dialog
@@ -353,7 +276,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private void markFirstTurn() {
     if (!bothTurns.isEmpty()) {
       setCurrentTurn(bothTurns.get(0));
-   //   logger.info("getTurns : markCurrent ");
+      //   logger.info("getTurns : markCurrent ");
       markCurrent();
       makeVisible(currentTurn);
     }
@@ -405,7 +328,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   /**
-   *
    * @param clientExercise
    * @param isRight
    * @return
@@ -504,17 +426,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return slider.getElement().getPropertyInt(VALUE);
   }
 
-  /**
-   * TODO : move this down, add interface...
-   *
-   * @paramx exid
-   * @paramx score
-   * @paramx recordDialogTurn
-   */
-/*  @Override
-  public void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
-  }*/
-
   @NotNull
   private Widget getLeftArrow() {
     DivWidget buttonDiv = new DivWidget();
@@ -542,11 +453,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     controller.getNavigation().show(getPrevView());
   }
 
-  @NotNull
-  protected INavigation.VIEWS getPrevView() {
-    return INavigation.VIEWS.DIALOG;
-  }
-
   private String getPrevTooltip() {
     return "Go back to " + getPrevView().toString();
   }
@@ -557,6 +463,11 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   private void gotGoForward() {
     controller.getNavigation().show(getNextView());
+  }
+
+  @NotNull
+  protected INavigation.VIEWS getPrevView() {
+    return INavigation.VIEWS.STUDY;
   }
 
   @NotNull
@@ -628,7 +539,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @see #gotBackward()
    */
   protected void clearHighlightAndRemoveMark() {
-  //  logger.info("clearHighlight on " + currentTurn);
+    //  logger.info("clearHighlight on " + currentTurn);
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();
@@ -659,7 +570,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   /**
-   *
    * @return true if changed turn to next one
    */
   boolean setTurnToPromptSide() {
@@ -670,7 +580,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
       return false;
     } else if (
         leftSpeakerSet && !leftTurnPanels.contains(currentTurn) ||  // current turn is not the prompt set
-        rightSpeakerSet && !rightTurnPanels.contains(currentTurn)
+            rightSpeakerSet && !rightTurnPanels.contains(currentTurn)
     ) {
       setNextTurnForSide();
       return true;
@@ -712,6 +622,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   /**
    * The other RESPONDING side of the conversation.
+   *
    * @return
    */
   List<T> getRespSeq() {
@@ -839,7 +750,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @see #setPlayButtonIcon
    */
   private void setPlayButtonToPause() {
-  //  logger.info("setPlayButtonToPause");
+    //  logger.info("setPlayButtonToPause");
     playButton.setIcon(IconType.PAUSE);
     playing = false;
   }
@@ -849,7 +760,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   void setPlayButtonToPlay() {
 //    logger.info("setPlayButtonToPlay");
-
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("setPlayButtonToPlay " + currentTurn.getExID()));
 //    logger.info("logException stack " + exceptionAsString);
@@ -865,21 +775,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   void markCurrent() {
     currentTurn.markCurrent();
-    //  currentTurn.getElement().scrollIntoView();
-
-/*    List<T> seq = getSeq();
-    int i = seq.indexOf(currentTurn);
-    int i1 = i + 1;
-
-    if (i1 > seq.size() - 1) {
-      logger.info("markCurrent on " + currentTurn.getExID() + " on last!");
-      //scrollForLastTurn();
-      // setCurentTurn(seq.get(0);
-      currentTurn.getElement().scrollIntoView();
-    } else {
-      logger.info("markCurrent on " + currentTurn.getExID() + " scroll into view");
-      seq.get(i1).getElement().scrollIntoView();
-    }*/
   }
 
   /**
@@ -908,29 +803,4 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
       return null;
     }
   }
-
-  /**
-   * TODO : shouldn't be here...
-   *
-   * @param smiley
-   * @param total
-   */
-/*  @Override
-  public void setEmoticon(Image smiley, double total) {
-  }
-
-  @Override
-  public void stopRecording() {
-
-  }
-
-  @Override
-  public void addPacketValidity(Validity validity) {
-
-  }
-
-  @Override
-  public int getNumValidities() {
-    return 0;
-  }*/
 }

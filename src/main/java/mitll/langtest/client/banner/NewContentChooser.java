@@ -55,6 +55,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private static final String CURRENT_VIEW = "CurrentView";
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
+
+  private final ExerciseListContent studyHelper;
+
   private final DialogViewHelper dialogHelper;
   private final ListenViewHelper listenHelper;
   private final ListenViewHelper rehearseHelper;
@@ -75,16 +78,17 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    * @see InitialUI#makeNavigation
    */
   public NewContentChooser(ExerciseController controller, IBanner banner) {
-    learnHelper = new LearnHelper(controller, this, LEARN);
+    learnHelper = new LearnHelper(controller);
     practiceHelper = new PracticeHelper(controller, this, DRILL);
     quizHelper = new QuizHelper(controller, this, VIEWS.QUIZ, this);
 
     dialogHelper = new DialogViewHelper(controller, this, DIALOG);
 
     // todo : add study
+    studyHelper = new StudyHelper<>(controller);
     listenHelper = new ListenViewHelper(controller);
     rehearseHelper = new RehearseViewHelper(controller);
-    performHelper = new PerformViewHelper(controller, this, PERFORM);
+    performHelper = new PerformViewHelper(controller);
     // todo : add score
 
     this.controller = controller;
@@ -202,6 +206,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case DIALOG:
           clearAndPush(isFirstTime, currentStoredView, DIALOG);
           dialogHelper.showContent(divWidget, DIALOG, fromClick);
+          break;
+        case STUDY:
+          clearAndPushKeep(STUDY);
+          studyHelper.showContent(divWidget, STUDY, fromClick);
           break;
         case LISTEN:
           clearAndPushKeep(LISTEN);
@@ -626,7 +634,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushItem(String url) {
-  //  logger.info("pushItem - " + url);
+    //  logger.info("pushItem - " + url);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //    logger.info("logException stack " + exceptionAsString);
     History.newItem(url);
@@ -668,6 +676,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    * Do forward/back between DIALOG and LISTEN.
    *
    * TODO : add more views - STUDY, SCORE.
+   *
    * @param event
    */
   @Override
@@ -682,15 +691,18 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           if (DEBUG) logger.info("onValueChange url says               " + views);
           if (DEBUG) logger.info("onValueChange currentStoredView says " + currentStoredView);
 
-          if (currentStoredView == DIALOG) {
-            banner.show(DIALOG);
-          } else if (currentStoredView == LISTEN) {
-            banner.show(LISTEN);
-          } else if (currentStoredView == REHEARSE) {
-            banner.show(REHEARSE);
-          } else if (currentStoredView == PERFORM) {
-            banner.show(PERFORM);
+          if (currentStoredView.getMode() == ProjectMode.DIALOG) {
+            banner.show(currentStoredView);
           }
+//          if (currentStoredView == DIALOG) {
+//            banner.show(DIALOG);
+//          } else if (currentStoredView == LISTEN) {
+//            banner.show(LISTEN);
+//          } else if (currentStoredView == REHEARSE) {
+//            banner.show(REHEARSE);
+//          } else if (currentStoredView == PERFORM) {
+//            banner.show(PERFORM);
+//          }
         }
       } catch (IllegalArgumentException e) {
         logger.warning("got " + e);

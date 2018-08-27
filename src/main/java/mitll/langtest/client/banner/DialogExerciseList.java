@@ -77,7 +77,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     logger.info("getExerciseIDs " +
         "\n\trequest " + request +
         "\n\t ex     " + exerciseID + " type " + typeToSection);*/
-
     if (controller.getUser() > 0) {
       controller.getDialogService().getDialogs(request,
           new SetExercisesCallback("" + "_" + typeToSection.toString(), prefix, exerciseID, request));
@@ -97,16 +96,19 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
           @Override
           public void onSuccess(ExerciseListWrapper<IDialog> result) {
             List<IDialog> toShow = result.getExercises().stream().filter(iDialog -> visibleIDs.contains(iDialog.getID())).collect(Collectors.toList());
-
-            List<Integer> ordered = new ArrayList<>(visibleIDs);
-            toShow.sort((o1, o2) -> {
-              int i = ordered.indexOf(o1.getID());
-              int j = ordered.indexOf(o2.getID());
-              return Integer.compare(i, j);
-            });
+            sortDialogs(toShow, visibleIDs);
             showExerciesForCurrentReq(toShow, incrReq());
           }
         });
+  }
+
+  private void sortDialogs(List<IDialog> toShow, Collection<Integer> visibleIDs) {
+    List<Integer> ordered = new ArrayList<>(visibleIDs);
+    toShow.sort((o1, o2) -> {
+      int i = ordered.indexOf(o1.getID());
+      int j = ordered.indexOf(o2.getID());
+      return Integer.compare(i, j);
+    });
   }
 
   @Override
@@ -228,6 +230,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    * @param dialog
    */
   private void gotClickOnDialog(IDialog dialog) {
-    controller.getNavigation().showDialogIn(dialog.getID(), INavigation.VIEWS.LISTEN);
+    controller.getNavigation().showDialogIn(dialog.getID(), INavigation.VIEWS.STUDY);
   }
 }

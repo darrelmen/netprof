@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.dialog;
 
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.project.ProjectDAO;
 import mitll.langtest.shared.dialog.DialogType;
@@ -56,28 +57,22 @@ public interface IDialogDAO extends IDAO {
           String orientation
   );
 
-
-  /**
-   * Deprecated - this doesn't really work in practice - takes forever, locks database while it's running.
-   * It's like a suicide pill.
-   * @param id
-   * @return
-   */
-  boolean delete(int id);
-  boolean deleteAllBut(int id);
-
   int ensureDefault(int defaultUser);
-  int getDefault();
+//  int getDefault();
 
   List<IDialog> getDialogs(int projid);
 
   /**
    * @see ProjectDAO#update
-   * @param changed
+   * @paramx changed
    * @return
    */
-  boolean easyUpdate(SlickDialog changed);
+ // boolean easyUpdate(SlickDialog changed);
 
+  /**
+   * @see DatabaseImpl#createTables
+   * @return
+   */
   DialogAttributeJoinHelper getDialogAttributeJoinHelper();
 
   void removeForProject(int id);

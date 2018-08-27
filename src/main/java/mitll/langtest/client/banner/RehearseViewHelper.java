@@ -568,11 +568,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private void startRecordingTurn(T toStart) {
     toStart.startRecording();
     setCurrentRecordingTurn(toStart);
-    if (toStart == null) {
-      logger.warning("\n\n\nhuh? start recording on null turn???\n\n\n");
-    } else {
-      logger.info("startRecordingTurn : " + currentRecordingTurn);
-    }
+
+    logger.info("startRecordingTurn : " + currentRecordingTurn);
+
     validities.clear();
   }
 
@@ -680,6 +678,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   @Override
   public void useInvalidResult(int exid) {
     T matchingTurn = exToTurn.get(exid);
+    addScore(exid,0,matchingTurn);
     matchingTurn.useInvalidResult();
   }
 

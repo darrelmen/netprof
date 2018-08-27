@@ -132,7 +132,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    *
    * @see #PagingExerciseList
    */
-  protected void addComponents() {
+   void addComponents() {
     addTableWithPager(makePagingContainer());
   }
 

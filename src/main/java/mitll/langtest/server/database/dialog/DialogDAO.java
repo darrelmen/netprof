@@ -41,6 +41,7 @@ import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.*;
@@ -82,9 +83,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   /**
-   * @see DatabaseImpl#finalSetup(SlickAudioDAO)
    * @param defaultUser
    * @return
+   * @see DatabaseImpl#finalSetup(SlickAudioDAO)
    */
   public int ensureDefault(int defaultUser) {
     SlickDialog defaultProject = getDefaultDialog();
@@ -103,7 +104,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
         databaseImpl.getProjectDAO().getDefault(),
         -1,
         1,
-
         now,
         now,
         "", "",
@@ -113,11 +113,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
         ""
     );
   }
-
+/*
   public int getDefault() {
     SlickDialog defaultProject = getDefaultDialog();
     return defaultProject == null ? -1 : defaultProject.id();
-  }
+  }*/
 
   private SlickDialog getDefaultDialog() {
     Collection<SlickDialog> aDefault = dao.getDefault();
@@ -189,20 +189,28 @@ public class DialogDAO extends DAO implements IDialogDAO {
       //add exercises
       addExercises(projid, dialogIDToRelated, dialogID, dialog);
 
-      List<SlickRelatedExercise> relatedExercises = dialogIDToCoreRelated.get(dialogID);
-      if (relatedExercises != null) {
-        relatedExercises.forEach(slickRelatedExercise ->
-            dialog
-                .getCoreVocabulary()
-                .add(project
-                    .getExerciseByID(slickRelatedExercise.exid()))
-        );
-      }
+      addCoreVocab(dialogIDToCoreRelated.get(dialogID), project, dialog);
       // add images
       addImage(projid, dialog);
     });
 
     return dialogs;
+  }
+
+  private void addCoreVocab(List<SlickRelatedExercise> relatedExercises, Project project, Dialog dialog) {
+    if (relatedExercises != null) {
+      Set<CommonExercise> uniq = new HashSet<>();
+
+      relatedExercises.forEach(slickRelatedExercise ->
+          uniq
+              .add(project
+                  .getExerciseByID(slickRelatedExercise.exid()))
+      );
+
+      List<CommonExercise> inOrder = new ArrayList<>(uniq);
+      inOrder.sort(Comparator.comparing(CommonShell::getForeignLanguage));
+      dialog.getCoreVocabulary().addAll(inOrder);
+    }
   }
 
   private Dialog makeDialog(SlickDialog slickDialog) {
@@ -220,9 +228,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
         "",
         slickDialog.entitle(),
         new ArrayList<>(),
-        new ArrayList<>(), new ArrayList<>());
-    //  this.slickDialog = slickDialog;
-
+        new ArrayList<>(),
+        new ArrayList<>());
   }
 
   /**
@@ -376,13 +383,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @return
    * @see mitll.langtest.server.domino.ProjectSync#updateProjectIfSomethingChanged
    */
-  @Override
+/*  @Override
   public boolean easyUpdate(SlickDialog changed) {
     return dao.update(changed) > 0;
-  }
+  }*/
 
   /**
    * TODO fill this in
+   *
    * @param id
    */
   @Override
@@ -399,25 +407,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return dao.dao().name();
   }
 
-
-  /**
-   * Really does delete it - could take a long time if a big project.
-   * <p>
-   * Mainly called from drop.sh or tests
-   * In general we want to retire projects when we don't want them visible.
-   *
-   * @param id
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#dropOneConfig
-   */
-  public boolean delete(int id) {
-    // logger.info("delete project #" + id);
-    return dao.delete(id) > 0;
-  }
-
-  public boolean deleteAllBut(int id) {
-    // logger.info("delete project #" + id);
-    return dao.deleteAllBut(id) > 0;
-  }
 
   /**
    * TODO : consider adding lts class

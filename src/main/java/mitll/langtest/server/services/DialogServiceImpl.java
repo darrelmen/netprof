@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
 public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet implements DialogService {
   private static final Logger logger = LogManager.getLogger(DialogServiceImpl.class);
 
-  private static final String ANY = "Any";
+  //private static final String ANY = "Any";
 
   /**
    * @param request
@@ -73,7 +73,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       return new FilterResponse();
     } else {
       FilterResponse response = sectionHelper.getTypeToValues(request, false);
-
+/*
       User userFromSession = getUserFromSession();
 
       if (userFromSession != null) {
@@ -89,7 +89,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
             typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
           }
         });
-      }
+      }*/
 
       return response;
     }
@@ -105,11 +105,10 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 
-
       if (userIDFromSessionOrDB != -1) {
         List<IDialog> dialogList = getDialogs(request, sectionHelper, userIDFromSessionOrDB);
-
         dialogList.sort(this::getDialogComparator);
+
         return new ExerciseListWrapper<>(request.getReqID(),
             dialogList,
             null, new HashMap<>()
@@ -143,41 +142,10 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return collect1.isEmpty() ? null : collect1.iterator().next().getValue();
   }*/
 
-  @Override
-  public IDialog getDialog(int id) throws DominoSessionException {
-    List<IDialog> iDialogs = getDialogs(getUserIDFromSessionOrDB());
-    List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == id).collect(Collectors.toList());
-    IDialog iDialog = collect.isEmpty() ? iDialogs.iterator().next() : collect.iterator().next();
-
-    logger.info("get dialog " + id + "\n\treturns " + iDialog);
-
-    int projid = iDialog.getProjid();
-    Project project = db.getProject(projid);
-    String language = project.getLanguage();
-
-    iDialog.getExercises().forEach(clientExercise ->
-        db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>())
-    );
-
-    new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projid, project, iDialog.getExercises());
-
-    return iDialog;
-  }
-
   private List<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
     return (request.getTypeToSelection().isEmpty()) ?
         getDialogs(userIDFromSessionOrDB) :
         new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
   }
 
-  private List<IDialog> getDialogs(int userIDFromSessionOrDB) {
-    List<IDialog> dialogList = new ArrayList<>();
-    {
-      int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
-      if (projectIDFromUser != -1) {
-        dialogList = getProject(projectIDFromUser).getDialogs();
-      }
-    }
-    return dialogList;
-  }
 }

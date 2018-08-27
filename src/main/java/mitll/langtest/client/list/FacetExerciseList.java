@@ -233,6 +233,28 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost()));
   }
 
+  public void hideSectionPanel() {
+    sectionPanel
+        .getParent()
+        .getParent()
+        .setVisible(false);
+
+
+    Widget parent = sectionPanel
+        .getParent()
+        .getParent()
+        .getParent();
+
+    logger.info("parent is " + parent.getElement().getId());
+    Iterator<Widget> iterator = ((HasWidgets) parent).iterator();
+    Widget sibling = iterator.next();
+    logger.info("sibling is " + sibling.getElement().getId());
+    Widget next = iterator.next();
+    logger.info("next is " + next.getElement().getId());
+    next.getElement().getStyle().setMarginRight(100, Style.Unit.PX );
+
+  }
+
   /**
    * @param controller
    * @return
@@ -626,8 +648,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         //only one user list can be selected, and they don't nest
         String next = strings.iterator().next();
         try {
-          Integer userListID = Integer.parseInt(next);
-          exerciseListRequest.setUserListID(userListID);
+          exerciseListRequest.setUserListID(Integer.parseInt(next));
           //   logger.info("getExerciseListRequest userlist = " + userListID);
         } catch (NumberFormatException e) {
           logger.warning("getExerciseListRequest couldn't parse " + next);
@@ -1687,8 +1708,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return idToEx;
   }
 
-  private List<U> getVisibleExercises(Collection<Integer> visibleIDs,
-                                      Map<Integer, U> idToEx) {
+  private List<U> getVisibleExercises(Collection<Integer> visibleIDs, Map<Integer, U> idToEx) {
     List<U> toShow = new ArrayList<>();
     for (int id : visibleIDs) {
       U e = idToEx.get(id);

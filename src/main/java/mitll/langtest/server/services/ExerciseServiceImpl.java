@@ -205,6 +205,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     logger.info("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
 
+    if (request.getDialogID() != -1) {
+      return getDialogResponse(request, projectID);
+    }
+
     try {
       boolean isUserListReq = request.getUserListID() != -1;
       UserList<CommonExercise> userListByID =
@@ -245,6 +249,24 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       logAndNotifyServerException(e);
       return new ExerciseListWrapper<>();
     }
+  }
+
+  private ExerciseListWrapper<T> getDialogResponse(ExerciseListRequest request, int projectID) throws DominoSessionException {
+   // List<ClientExercise> exercises = getDialog(request.getDialogID()).getExercises();
+    List<CommonExercise> collect = getCommonExercises(getDialog(request.getDialogID()).getCoreVocabulary());
+    collect.addAll(getCommonExercises(getDialog(request.getDialogID()).getExercises()));
+
+    logger.info("getDialogResponse returning exercises for " +request.getDialogID() + " " + collect.size());
+    ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, collect, projectID);
+    return exerciseListWrapper;
+  }
+
+  @NotNull
+  private List<CommonExercise> getCommonExercises(List<ClientExercise> exercises) {
+    return exercises
+        .stream()
+        .map(ClientExercise::asCommon)
+        .collect(Collectors.toList());
   }
 
   /**
