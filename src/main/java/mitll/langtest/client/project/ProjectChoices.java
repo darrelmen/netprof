@@ -44,6 +44,8 @@ import static mitll.langtest.shared.user.User.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices extends ThumbnailChoices {
+  public static final String EDIT_PROJECT = "Edit project.";
+  public static final String MODES = "2 modes";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
 
@@ -605,6 +607,7 @@ public class ProjectChoices extends ThumbnailChoices {
   @NotNull
   private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC, int numVisibleChildren) {
     boolean hasChildren = projectForLang.hasChildren();
+    boolean alldialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
 
     DivWidget container = new DivWidget();
     Heading label;
@@ -613,7 +616,11 @@ public class ProjectChoices extends ThumbnailChoices {
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
-    if (isQC && !hasChildren) {
+    ProjectType projectType = projectForLang.getProjectType();
+  //  logger.info("project " + projectForLang.getID() + " " + projectForLang.getName() + " " + projectType);
+
+    if (isQC &&
+        (hasChildren && alldialog) || (!hasChildren && projectType != ProjectType.DIALOG)) {
       container.add(getQCButtons(projectForLang, label));
     }
     return container;
@@ -649,16 +656,20 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param numVisibleChildren
    * @return
    * @paramx hasChildren
-   * @see #getImageAnchor
+   * @see #getContainerWithButtons(String, SlimProject, boolean, int)
    */
   @NotNull
   private Heading getLabel(String name, SlimProject projectForLang, int numVisibleChildren) {
     ProjectStatus status = projectForLang.getStatus();
     String statusText = status == ProjectStatus.PRODUCTION ? "" : status.name();
 
-    List<SlimProject> collect = getDialogProjects(projectForLang);
-    boolean alldialog = (collect.size() == numVisibleChildren) && collect.size() == 2;
+    boolean alldialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
     return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText, alldialog);
+  }
+
+  private boolean areAllChildrenDialogChoices(SlimProject projectForLang, int numVisibleChildren) {
+    List<SlimProject> collect = getDialogProjects(projectForLang);
+    return (collect.size() == numVisibleChildren) && collect.size() == 2;
   }
 
   private List<SlimProject> getDialogProjects(SlimProject projectForLang) {
@@ -670,7 +681,7 @@ public class ProjectChoices extends ThumbnailChoices {
                            String statusText, boolean alldialog) {
     Heading label = getChoiceLabel(LANGUAGE_SIZE, name);
 
-    String subtext = alldialog ? ("2 modes") : hasChildren ?
+    String subtext = alldialog ? MODES : hasChildren ?
         (numVisibleChildren + ((numVisibleChildren == 1) ? COURSE1 : COURSES)) : statusText;
 
     label.setSubtext(subtext);
@@ -749,11 +760,17 @@ public class ProjectChoices extends ThumbnailChoices {
     return buttonContainer;
   }
 
+  /**
+   * @param projectForLang
+   * @param label
+   * @return
+   * @see #getEditButtonContainer(SlimProject, Heading)
+   */
   @NotNull
   private com.github.gwtbootstrap.client.ui.Button getEditButton(SlimProject projectForLang, Heading label) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.PENCIL);
-    addTooltip(w, "Edit project.");
+    addTooltip(w, EDIT_PROJECT);
 
     w.addClickHandler(event -> showEditDialog(projectForLang, label));
     return w;

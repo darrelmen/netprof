@@ -513,6 +513,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     reflectPermissions(controller.getPermissions());
   }
 
+  /**
+   * @see NewBanner#setCogVisible
+   * @param mode
+   */
   @Override
   public void setVisibleChoicesByMode(ProjectMode mode) {
     //   logger.info("setVisibleChoicesByMode set visible choices " + mode);

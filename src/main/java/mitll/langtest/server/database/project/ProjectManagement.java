@@ -93,6 +93,8 @@ public class ProjectManagement implements IProjectManagement {
   private static final String DOMINO_NAME = "Domino Project";
   public static final String VOCABULARY = "Vocabulary";
   public static final String DIALOG = "Dialog";
+  public static final String VOCAB = "vocab";
+  public static final String DIALOG1 = "dialog";
   /**
    * JUST FOR TESTING
    */
@@ -990,14 +992,14 @@ public class ProjectManagement implements IProjectManagement {
       vocab.setName(VOCABULARY);
       vocab.setProjectType(ProjectType.DIALOG);
       vocab.setMode(ProjectMode.VOCABULARY);
-      vocab.setCountryCode("vocab");
+      vocab.setCountryCode(VOCAB);
 
       SlimProject dialog = getProjectInfo(project);
       projectInfo.addChild(dialog);
       dialog.setName(DIALOG);
       dialog.setProjectType(ProjectType.DIALOG);
       dialog.setMode(ProjectMode.DIALOG);
-      dialog.setCountryCode("dialog");
+      dialog.setCountryCode(DIALOG1);
     }
   }
 

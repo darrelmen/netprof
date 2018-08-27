@@ -286,8 +286,16 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
         exerciseID, controller);
   }
 
+  /**
+   * Made word score use inline-flex layout...
+   * @param tooltipHelper
+   * @param scoreAndPath
+   * @return
+   */
   private Widget makeColoredTable(TooltipHelper tooltipHelper, CorrectAndScore scoreAndPath) {
     Widget row = new DivWidget();
+    row.getElement().setId("wordScores");
+    row.addStyleName("inlineFlex");
     Map<NetPronImageType, List<TranscriptSegment>> scores = scoreAndPath.getScores();
     if (scores.isEmpty()) {
       logger.warning("makeColoredTable no segments for " + scoreAndPath);
