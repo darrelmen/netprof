@@ -56,7 +56,7 @@ class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterN
             controller,
             new ListOptions(instanceName),
             listHeader,
-            false);
+            false, INavigation.VIEWS.LEARN);
       }
     };
   }

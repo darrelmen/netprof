@@ -3,6 +3,7 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -29,8 +30,8 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
                                 ExerciseController controller,
                                 ListOptions listOptions,
                                 DivWidget listHeader,
-                                boolean isDrillView) {
-    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView);
+                                boolean isDrillView, INavigation.VIEWS views) {
+    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView, views);
   }
 
   protected void getFullExercises(Collection<Integer> visibleIDs,

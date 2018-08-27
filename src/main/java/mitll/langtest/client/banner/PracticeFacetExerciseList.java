@@ -15,7 +15,6 @@ import mitll.langtest.shared.exercise.ScoredExercise;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise> extends LearnFacetExerciseList<T> {
   //private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
@@ -26,14 +25,14 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
                             PracticeHelper<T, U> practiceHelper,
                             Panel topRow, Panel currentExercisePanel,
                             INavigation.VIEWS instanceName,
-                            DivWidget listHeader) {
+                            DivWidget listHeader, INavigation.VIEWS views) {
     super(
         topRow,
         currentExercisePanel,
         controller,
         new ListOptions(instanceName)
             .setShowPager(false).
-            setShowTypeAhead(false), listHeader, true);
+            setShowTypeAhead(false), listHeader, true, views);
     this.practiceHelper = practiceHelper;
   }
 

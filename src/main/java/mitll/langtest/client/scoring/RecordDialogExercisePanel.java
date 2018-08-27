@@ -21,9 +21,12 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
@@ -46,6 +49,16 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private long durationInMillis;
   private IRehearseView rehearseView;
 
+  /**
+   * @param commonExercise
+   * @param controller
+   * @param listContainer
+   * @param alignments
+   * @param listenView
+   * @param sessionManager
+   * @param isRight
+   * @see RehearseViewHelper#reallyGetTurnPanel(ClientExercise, boolean)
+   */
   public RecordDialogExercisePanel(final T commonExercise,
                                    final ExerciseController controller,
                                    final ListInterface<?, ?> listContainer,
@@ -100,6 +113,24 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     maybeShowAlignment(getRegularSpeedIfAvailable(exercise));
   }
 
+  /**
+   * @see mitll.langtest.client.banner.PerformViewHelper#getTurnPanel
+   * Or should we use exact match?
+   * @param coreVocab
+   */
+  public void maybeSetObscure(Collection<String> coreVocab) {
+    flclickables.forEach(iHighlightSegment ->
+    {
+      List<String> matches = coreVocab
+          .stream()
+          .filter(core -> clickableWords.isSearchMatch(iHighlightSegment.getContent(), core)).collect(Collectors.toList());
+      if (!matches.isEmpty()) {
+        logger.info("maybeSetObscure for " + iHighlightSegment + " found " + matches);
+        iHighlightSegment.setObscurable();
+      }
+    });
+  }
+
   public void obscureText() {
     flclickables.forEach(IHighlightSegment::obscureText);
   }
@@ -109,18 +140,14 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   /**
-   * @see RehearseViewHelper#useResult
    * @param result
+   * @see RehearseViewHelper#useResult
    */
   @Override
   public void useResult(AudioAnswer result) {
     alignmentOutput = result.getPretestScore();
     durationInMillis = result.getDurationInMillis();
-    {
-      double score = result.getScore();
-    //  rehearseView.addScore(result.getExid(), (float) score, RecordDialogExercisePanel.this);
-      rehearseView.setEmoticon(emoticon, score);
-    }
+    rehearseView.setEmoticon(emoticon, result.getScore());
   }
 
   private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
@@ -133,8 +160,14 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   public void useInvalidResult() {
     // rehearseView.setEmoticon(emoticon, 0F);
     emoticon.setUrl(RED_X_URL);
-
   }
+
+  /**
+   *
+   * @param showFL
+   * @param showALTFL
+   * @param phonesChoices
+   */
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
@@ -150,15 +183,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       @Override
       public void useResult(AudioAnswer result) {
         super.useResult(result);
-
-//        alignmentOutput = result.getPretestScore();
-//        durationInMillis = result.getDurationInMillis();
-//        double score = result.getScore();
-//        rehearseView.addScore(result.getExid(), (float) score, RecordDialogExercisePanel.this);
-//        rehearseView.setEmoticon(emoticon, score);
-
         rehearseView.useResult(result);
-
         logger.info("useResult got for ex " + result.getExid() + " vs local " + getExID() +
             " = " + result.getValidity() + " " + result.getPretestScore());
         // logger.info("useResult got words " + result.getPretestScore().getWordScores());

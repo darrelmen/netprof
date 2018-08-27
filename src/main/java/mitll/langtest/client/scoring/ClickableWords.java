@@ -14,6 +14,7 @@ import mitll.langtest.client.custom.dialog.WordBoundsFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
+import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class ClickableWords  {
+public class ClickableWords {
   private final Logger logger = Logger.getLogger("ClickableWords");
   private static final String SEARCHMATCH = "searchmatch";
 
@@ -75,7 +76,7 @@ public class ClickableWords  {
     isUrdu = language.equalsIgnoreCase("Urdu");
     this.hasClickableAsian =
         language.equalsIgnoreCase(MANDARIN) ||
-          //  language.equalsIgnoreCase(Language.KOREAN.name()) ||
+            //  language.equalsIgnoreCase(Language.KOREAN.name()) ||
             isJapanese;
     this.fontSize = fontSize;
   }
@@ -84,8 +85,10 @@ public class ClickableWords  {
    * Split the value into tokens, and make each one clickable - so we can search on it.
    *
    * @param value
+   * @param fieldType  fl, meaning, english, etc.
    * @param clickables
    * @param isRTL
+   * @see DialogExercisePanel#getFLEntry(ClientExercise)
    * @see TwoColumnExercisePanel#getFLEntry
    */
   DivWidget getClickableWords(String value,
@@ -415,14 +418,20 @@ public class ClickableWords  {
     }
   }
 
-  private boolean isSearchMatch(String first, String search) {
-    if (search == null || search.isEmpty()) {
+  boolean isSearchMatch(String first, String toSearchFor) {
+    if (toSearchFor == null || toSearchFor.isEmpty()) {
       return false;
     } else {
       String context = removePunct(first.toLowerCase());
-      String lcSearch = removePunct(search.toLowerCase());
+      String lcSearch = removePunct(toSearchFor.toLowerCase());
       return (context.contains(lcSearch));
     }
+  }
+
+  boolean isExactMatch(String first, String toSearchFor) {
+    String context = removePunct(first.toLowerCase());
+    String lcSearch = removePunct(toSearchFor.toLowerCase());
+    return (context.equalsIgnoreCase(lcSearch));
   }
 
   /**
@@ -459,8 +468,10 @@ public class ClickableWords  {
   /**
    * @param dir            text direction
    * @param html           a token that can be clicked on to search on it
+   * @param searchToken
    * @param isContextMatch
-   * @param id
+   * @param id             to label highlight segment
+   * @param fieldType      if meaning, use english font, if FL, choose the font
    * @return
    * @see #getClickableWords
    * @see #getClickableWordsHighlight
@@ -479,16 +490,7 @@ public class ClickableWords  {
 
     HTML highlightSegment = highlightSegmentDiv.getClickable();
     if (fieldType == FieldType.FL) {
-      if (dir == HasDirection.Direction.RTL) {
-        String bigflfont = "bigflfont";
-        if (isUrdu) bigflfont = "urdubigflfont";
-        highlightSegment.addStyleName(bigflfont);
-      } else {
-        highlightSegment.addStyleName("flfont");
-        if (fontSize != 24) {
-          highlightSegment.getElement().getStyle().setFontSize(fontSize, Style.Unit.PX);
-        }
-      }
+      setFont(dir, highlightSegment);
     } else {
       highlightSegment.addStyleName("Instruction-data-with-wrap-keep-word");
     }
@@ -514,6 +516,23 @@ public class ClickableWords  {
     }
 
     return highlightSegmentDiv;
+  }
+
+  /**
+   * Use bigflfont for RTL.
+   * @param dir
+   * @param highlightSegment
+   */
+  private void setFont(HasDirection.Direction dir, HTML highlightSegment) {
+    if (dir == HasDirection.Direction.RTL) {
+      String bigflfont = isUrdu ? "urdubigflfont" : "bigflfont";
+      highlightSegment.addStyleName(bigflfont);
+    } else {
+      highlightSegment.addStyleName("flfont");
+      if (fontSize != 24) {
+        highlightSegment.getElement().getStyle().setFontSize(fontSize, Style.Unit.PX);
+      }
+    }
   }
 
   /**

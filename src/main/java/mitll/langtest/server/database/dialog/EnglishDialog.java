@@ -12,7 +12,6 @@ import java.util.Map;
 public class EnglishDialog extends DialogReader implements IDialogReader {
   private static final Logger logger = LogManager.getLogger(EnglishDialog.class);
 
-
 /*
 
   String values2 = "\n" +
@@ -29,7 +28,6 @@ public class EnglishDialog extends DialogReader implements IDialogReader {
       "Park So-jung:  Where are you from?\n" +
       "Brown: California.";
 */
-
 
   private final String docIDS =
       "333815\n" +
@@ -50,7 +48,6 @@ public class EnglishDialog extends DialogReader implements IDialogReader {
       "010_C01\n" +
           "001_C05\n" +
           "003_C09\n";
-
 
   private final String unit =
       "1\n" +
@@ -87,6 +84,4 @@ public class EnglishDialog extends DialogReader implements IDialogReader {
                                              Project project) {
     return getDialogsByProp(defaultUser, projID, exToAudio, project, dialogProps);
   }
-
-
 }

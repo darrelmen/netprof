@@ -253,7 +253,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
 
   private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList<T,U> {
     MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel,  INavigation.VIEWS instanceName, DivWidget listHeader) {
-      super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
+      super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader, INavigation.VIEWS.QUIZ);
     }
 
 

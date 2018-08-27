@@ -81,8 +81,9 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 public abstract class FacetExerciseList<T extends CommonShell & Scored, U extends CommonShell>
     extends HistoryExerciseList<T, U>
     implements ShowEventListener {
-  public static final String RECORDED = "Recorded";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
+
+  private static final String RECORDED = "Recorded";
 
   private static final String PRACTICED = " practiced.";
   private static final String NO_SCORE = "No score yet.";
@@ -123,14 +124,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    * Smaller on a laptop.
    *
-   * @see mitll.langtest.client.banner.NewLearnHelper#getMyListLayout
+   * @seex mitll.langtest.client.banner.NewLearnHelper#getMyListLayout
    */
   private static final int FIVE_PAGE_SIZE = Window.getClientHeight() < 1080 ? 4 : 5;
   private static final int FIRST_PAGE_SIZE = FIVE_PAGE_SIZE;
   private static final List<Integer> PAGE_SIZE_CHOICES = Arrays.asList(1, FIVE_PAGE_SIZE, 10, 25);
   private static final String ITEMS_PAGE = " items/page";
 
-  protected static final int TOTAL = 28;
+  private static final int TOTAL = 28;
   private static final int CLOSE_TO_END = 2;
 
   /**
@@ -138,10 +139,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   private static final String SHOW_LESS = "<i>View fewer</i>";
 
-  /**
-   * @see #getShowMoreAnchor
-   */
-  private static final String SHOW_MORE = "<i>View all</i>";
   private static final String ANY = "Any";
   private static final String MENU_ITEM = "menuItem";
 
@@ -174,7 +171,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   private final Map<Integer, Float> exerciseToScore = new HashMap<>();
   private final Map<Integer, U> fetched = new ConcurrentHashMap<>();
-
+  private INavigation.VIEWS views;
+  private  String pageSizeSelected;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -183,6 +181,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param listOptions
    * @param listHeader
    * @param isDrillView           hack - should not have drill stuff in here... although eventually there won't be a drill view
+   * @param views
    * @seex mitll.langtest.client.custom.content.NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
   public FacetExerciseList(Panel secondRow,
@@ -190,9 +189,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
                            ExerciseController controller,
                            ListOptions listOptions,
                            DivWidget listHeader,
-                           boolean isDrillView) {
+                           boolean isDrillView,
+                           INavigation.VIEWS views) {
     super(currentExerciseVPanel, controller, listOptions);
-
+    this.views = views;
+    this.pageSizeSelected = PAGE_SIZE_SELECTED + "_" + views.toString();
     this.isDrill = isDrillView;
     sectionPanel = new DivWidget();
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
@@ -245,19 +246,20 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         .getParent()
         .getParent();
 
-    logger.info("parent is " + parent.getElement().getId());
+//    logger.info("parent is " + parent.getElement().getId());
     Iterator<Widget> iterator = ((HasWidgets) parent).iterator();
     Widget sibling = iterator.next();
-    logger.info("sibling is " + sibling.getElement().getId());
+//    logger.info("sibling is " + sibling.getElement().getId());
+//
     Widget next = iterator.next();
-    logger.info("next is " + next.getElement().getId());
-    next.getElement().getStyle().setMarginRight(100, Style.Unit.PX );
-
+    //   logger.info("next is " + next.getElement().getId());
+    next.getElement().getStyle().setMarginRight(100, Style.Unit.PX);
   }
 
   /**
    * @param controller
    * @return
+   * @see #FacetExerciseList
    */
   @NotNull
   protected DivWidget getPagerAndSort(ExerciseController controller) {
@@ -267,23 +269,26 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     pagerAndSort.setWidth("100%");
 
     pagerAndSort.add(tableWithPager);
-    tableWithPager.addStyleName("floatLeft");
-    tableWithPager.setWidth("100%");
-    tableWithPager.getElement().getStyle().setProperty("minWidth", "250px");
 
-//    DivWidget expander = new DivWidget();
-//    expander.setWidth("100%");
-//    pagerAndSort.add(expander);
-//    expander.addStyleName("floatRight");
+    {
+      tableWithPager.addStyleName("floatLeft");
+      tableWithPager.setWidth("100%");
+      tableWithPager.getElement().getStyle().setProperty("minWidth", "250px");
+    }
+
     {
       // better name for primary and alternate choices
       boolean isMandarin = controller.getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
       boolean shouldSwap = controller.getProjectStartupInfo().isShouldSwap();
-      Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu();
-      DivWidget widgets = new DivWidget();
-      widgets.addStyleName("topFiveMargin");
-      widgets.add(realViewMenu);
-      pagerAndSort.add(widgets);
+      Dropdown realViewMenu =
+          new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu();
+
+      {
+        DivWidget widgets = new DivWidget();
+        widgets.addStyleName("topFiveMargin");
+        widgets.add(realViewMenu);
+        pagerAndSort.add(widgets);
+      }
     }
 
     addPageSize(pagerAndSort);
@@ -314,11 +319,13 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   private ListBox addPageSize(DivWidget footer) {
     pageSizeContainer = new DivWidget();
-    pageSizeContainer.addStyleName("floatRight");
-    pageSizeContainer.addStyleName("rightFiveMargin");
-    pageSizeContainer.addStyleName("inlineFlex");
+    {
+      pageSizeContainer.addStyleName("floatRight");
+      pageSizeContainer.addStyleName("rightFiveMargin");
+      pageSizeContainer.addStyleName("inlineFlex");
 
-    footer.add(pageSizeContainer);
+      footer.add(pageSizeContainer);
+    }
 
     {
       HTML label = new HTML(PAGE_SIZE_HEADER);
@@ -369,7 +376,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     String value = pagesize.getValue();
     int i = Integer.parseInt(value);
     pagingContainer.setPageSize(i);
-    controller.getStorage().setInt(PAGE_SIZE_SELECTED, pagesize.getSelectedIndex());
+    controller.getStorage().setInt(pageSizeSelected, pagesize.getSelectedIndex());
     scrollToTop();
   }
 
@@ -381,6 +388,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private ListBox sortBoxReally;
   private ListSorting<T, U> listSorting;
 
+  /**
+   * @return
+   * @see #getPagerAndSort(ExerciseController)
+   */
   @NotNull
   private DivWidget addSortBox() {
     DivWidget w = new DivWidget();
@@ -394,7 +405,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     w.add(w1);
 
-    listSorting = new ListSorting<>(this);
+    listSorting = new ListSorting<>(this, views);
     sortBoxReally = listSorting.getSortBox();
     w.add(sortBoxReally);
     return w;
@@ -601,7 +612,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private ListItem liForDimensionForList;
 
   /**
-   * @see #FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, boolean)
+   * @see #FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, boolean, INavigation.VIEWS)
    */
   private void gotListChanged() {
     if (liForDimensionForList != null) {

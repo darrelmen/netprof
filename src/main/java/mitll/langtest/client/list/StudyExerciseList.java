@@ -1,17 +1,10 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Full exercises returns CommonExercise - so we're kinda stuck with it...
@@ -28,7 +21,7 @@ public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends L
                            ListOptions listOptions,
                            DivWidget listHeader,
                            boolean isDrillView) {
-    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView);
+    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView, INavigation.VIEWS.STUDY);
   }
 
   @Override

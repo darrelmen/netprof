@@ -1,6 +1,8 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.ListBox;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Scored;
 import mitll.langtest.shared.exercise.Shell;
@@ -24,7 +26,6 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
 
   private static final String ASCENDING = "ascending";
   private static final String DESCENDING = "descending";
-  private static final String LIST_BOX_SETTING = "listBoxSetting";
 
   private final PagingExerciseList<T, U> exerciseList;
   private final String locale;
@@ -41,15 +42,23 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
   private static final String SCORE_LOW_TO_HIGH = "Score : low to high";
   private static final String SCORE_DSC = "Score : high to low";
   private static final String SHUFFLE = "Shuffle";
+  private static final String LIST_BOX_SETTING = "listBoxSetting";
+
   private String language;
-  private static final boolean DEBUG = false;
+  private String keyForSorting;
+
+  private static final boolean DEBUG = true;
 
   /**
    * @param exerciseList
+   * @param view
    * @see FacetExerciseList#addSortBox
    */
-  ListSorting(PagingExerciseList<T, U> exerciseList) {
+  ListSorting(PagingExerciseList<T, U> exerciseList, INavigation.VIEWS view) {
     this.exerciseList = exerciseList;
+    keyForSorting = LIST_BOX_SETTING + "_" + view.toString();
+
+    logger.info("ListSorting: key " + keyForSorting);
     ProjectStartupInfo projectStartupInfo = exerciseList.controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
       language = exerciseList.controller.getLanguage();
@@ -95,7 +104,7 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
    * @param langDSC
    */
   private void makeDropDownReflectStoredValue(ListBox w1, String langASC, String langDSC) {
-    String value = exerciseList.controller.getStorage().getValue(LIST_BOX_SETTING);
+    String value = getStoredValue();
 
     //   logger.info("makeDropDownReflectStoredValue value is " + value);
     if (!value.isEmpty()) {
@@ -148,11 +157,26 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
     } else if (toStore.equalsIgnoreCase(langDSC)) {
       toStore = LANG_DSC;
     }
-    exerciseList.controller.getStorage().storeValue(LIST_BOX_SETTING, toStore);
+    storeValue(toStore);
     if (DEBUG) logger.info("START onChange Sort by " + selectedValue + " to sort is null ");
 
     sortByValue(null, selectedValue, langASC, langDSC);
     if (DEBUG) logger.info("END   onChange Sort by " + selectedValue + " to sort is null ");
+  }
+
+  private void storeValue(String toStore) {
+    logger.info("store " + keyForSorting + " = " + toStore);
+    getStorage().storeValue(keyForSorting, toStore);
+  }
+
+  private String getStoredValue() {
+    String value = getStorage().getValue(keyForSorting);
+    logger.info("get   " + keyForSorting + " = " + value);
+    return value;
+  }
+
+  private KeyStorage getStorage() {
+    return exerciseList.controller.getStorage();
   }
 
   /**

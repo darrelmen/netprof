@@ -106,7 +106,8 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
       protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
                                                           Panel currentExercisePanel,
                                                           INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
-        return new PracticeFacetExerciseList(controller, PracticeHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
+        return new PracticeFacetExerciseList(controller,
+            PracticeHelper.this, topRow, currentExercisePanel, instanceName, listHeader, INavigation.VIEWS.DRILL);
       }
 
       @Override

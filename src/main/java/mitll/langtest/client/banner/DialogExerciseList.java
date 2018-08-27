@@ -38,7 +38,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   DialogExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader,
                      ExerciseController controller) {
-    super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false);
+    super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false, INavigation.VIEWS.DIALOG);
   }
 
   @Override protected int getFirstPageSize() {  return 10;  }

@@ -48,7 +48,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
             .setInstance(instanceName)
             .setShowFirstNotCompleted(true)
             .setActivityType(ActivityType.RECORDER)
-        , listHeader, true);
+        , listHeader, true, isContext ? INavigation.VIEWS.RECORD_CONTEXT : INavigation.VIEWS.RECORD_ENTRIES);
     this.isContext = isContext;
   }
 
@@ -110,6 +110,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
 
   /**
    * No list facet or special facet.
+   *
    * @param typeToValues
    * @return
    */

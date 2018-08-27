@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 public class HighlightSegment extends DivWidget implements IHighlightSegment {
   protected final Logger logger = Logger.getLogger("HighlightSegment");
 
-  public static final String UNDERLINE = "underline";
+  private static final String UNDERLINE = "underline";
 
   private String highlightColor;
   private final int length;
@@ -82,19 +82,27 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     length = html.length();
   }
 
+  private boolean shouldObscure = false;
   private boolean didObscure = false;
 
   @Override
+  public void setObscurable() {
+    shouldObscure = true;
+  }
+
+  @Override
   public void obscureText() {
-    Style style = this.span.getElement().getStyle();
-    style.setColor("gray");
-    style.setBackgroundColor("gray");
-    didObscure = true;
+    if (shouldObscure) {
+      Style style = this.span.getElement().getStyle();
+      style.setColor("gray");
+      style.setBackgroundColor("gray");
+      didObscure = true;
+    }
   }
 
   @Override
   public void restoreText() {
-    if (didObscure) {
+    if (shouldObscure && didObscure) {
       Style style = this.span.getElement().getStyle();
       style.setColor("rgb(51, 51, 51)");
       style.clearBackgroundColor();

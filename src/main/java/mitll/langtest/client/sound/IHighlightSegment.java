@@ -23,8 +23,8 @@ public interface IHighlightSegment {
   void clearHighlight();
   boolean isHighlighted();
 
+  void setObscurable();
   void obscureText();
-
   void restoreText();
 
   int getLength();

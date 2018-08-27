@@ -1,6 +1,5 @@
 package mitll.langtest.client.list;
 
-import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.INavigation.VIEWS;
 import mitll.langtest.shared.answer.ActivityType;
 

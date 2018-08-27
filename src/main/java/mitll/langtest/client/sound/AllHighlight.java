@@ -135,6 +135,11 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   }
 
   @Override
+  public void setObscurable() {
+    set.forEach(IHighlightSegment::setObscurable);
+  }
+
+  @Override
   public void obscureText() {
     set.forEach(IHighlightSegment::obscureText);
   }

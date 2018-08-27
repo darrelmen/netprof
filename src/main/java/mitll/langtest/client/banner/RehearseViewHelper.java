@@ -55,7 +55,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private Image waitCursor = new Image(animated);
 
   private final Map<Integer, Float> exToScore = new HashMap<>();
-  private final Map<Integer, T> exToTurn = new HashMap<>();
+  protected final Map<Integer, T> exToTurn = new HashMap<>();
   private List<IRecordDialogTurn> recordDialogTurns = new ArrayList<>();
   private SessionStorage sessionStorage;
   private DivWidget overallFeedback;

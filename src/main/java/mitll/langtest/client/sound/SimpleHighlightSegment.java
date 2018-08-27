@@ -40,6 +40,11 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
     return getElement().getId();
   }
 
+  @Override
+  public void setObscurable() {
+
+  }
+
   /**
    * Not needed here.
    */

@@ -333,7 +333,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    * @return
    */
   @NotNull
-  private T getTurnPanel(ClientExercise clientExercise, boolean isRight) {
+  protected T getTurnPanel(ClientExercise clientExercise, boolean isRight) {
     T turn = reallyGetTurnPanel(clientExercise, isRight);
     turn.addWidgets(true, false, PhonesChoices.HIDE);
     turn.addPlayListener(this);
