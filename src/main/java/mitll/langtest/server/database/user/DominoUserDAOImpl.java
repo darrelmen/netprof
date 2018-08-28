@@ -122,7 +122,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * Should be consistent with DOMINO.
    * Actually it's all lower case.
    */
-  public static final String NETPROF = DLIApplication.NetProf;
+  public static final String NETPROF = "netprof";//DLIApplication.NetProf;
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
   private static final String LYDIA_01 = "Lydia01";
   private static final String PO_M = "PoM";
@@ -153,6 +153,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   private final boolean addUserViaEmail;
 
+  /**
+   *
+   */
   private IUserServiceDelegate delegate = null;
   private MyMongoUserServiceDelegate myDelegate;
 
@@ -179,8 +182,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private IProjectManagement projectManagement;
   private Group primaryGroup = null;
 
-  private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
+  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
+  private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
@@ -196,7 +200,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
 
   private LoadingCache<Integer, User> idToUser = CacheBuilder.newBuilder()
-
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
@@ -595,7 +598,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @NotNull
   private Group makePrimaryGroup(String name) {
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
-    return new Group(name, name + "Group", 365, 24 * 365, out, adminUser);
+    String description = name + "Group";
+    UserDescriptor adminUser = this.adminUser;
+    return new Group(
+        name,
+        description,
+        365,
+        24 * 365,
+        out,
+        adminUser,
+        "netprof");
   }
 
   @NotNull
@@ -632,7 +644,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
     SResult<ClientGroupDetail> name1 = groupDAO1.doAdd(adminUser,
-        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser));
+        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser, "netprof"));
 
     Group group = null;
     if (name1.isError()) {
@@ -1453,14 +1465,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }*/
   }
 
-
-  /**
-   * It seems like getting users in and out of mongo is slow... trying to use a cache to mitigate that.
-   */
-/*  private synchronized void invalidateCache() {
-    miniUserCache = null;
-  }*/
-
   /**
    * TODO: try to avoid - super slow, doesn't scale...
    *
@@ -1493,116 +1497,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     DBUser byID = lookupUser(userid);
     return byID == null ? null : getMini(byID);
   }
-
-/*
-  public Map<Integer, FirstLastUser> getFirstLastUsers() {
-    Collection<List<Object>> userFields = delegate.getUserFields("_id", "userId", "firstName", "lastName");
-    long now = System.currentTimeMillis();
-
-    Map<Integer, FirstLastUser> idToFirstLast = new HashMap<>();
-    for (List<Object> userField : userFields) {
-      int i = 0;
-      Object o = userField.get(i++);
-      Integer o1 = o instanceof Integer ? (Integer) o : ((Double) o).intValue();
-      String o2 = (String) userField.get(i++);
-      String o3 = (String) userField.get(i++);
-      String o4 = (String) userField.get(i++);
-      idToFirstLast.put(o1, new FirstLastUser(o1, o2, o3, o4, now));
-    }
-    return idToFirstLast;
-  }
-*/
-
-/*  private Map<Integer, ReportUser> getReportUsersQuick() {
-    Collection<List<Object>> userFields =
-        delegate.getUserFields("_id", "userId", "acctDtl.createTime", "roles", "acctDtl.device");
-    long now = System.currentTimeMillis();
-    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
-    Map<Integer, ReportUser> idToFirstLast = new HashMap<>();
-    for (List<Object> userField : userFields) {
-      int i = 0;
-      Object o = userField.get(i++);
-      Integer o1 = o instanceof Integer ? (Integer) o : ((Double) o).intValue();
-      String o2 = (String) userField.get(i++);
-
-
-      Object o3 = userField.get(i++);
-      long time = now;
-      try {
-        if (o3 == null) {
-          logger.warn("no create time?");
-        }
-        else {
-          time = inputFormat.parse((String)o3).getTime();
-        }
-      } catch (ParseException e) {
-        logger.warn("couldn't parse " + o3);
-      }
-
-
-      Object roles = userField.get(i++);
-     // logger.info("got " + roles + " " + roles.getClass());
-
-      String dev = (String) userField.get(i++);
-      logger.info("dev " +dev+
-          " got " + roles + " " + roles.getClass());
-
-      idToFirstLast.put(o1, new ReportUserImpl(o1,
-          o2,
-          time, Kind.STUDENT, dev));
-    }
-    return idToFirstLast;
-  }*/
-
-/*  private static class ReportUserImpl implements ReportUser {
-
-    int id;
-    String userID, device;
-    long timestamp;
-    Kind kind;
-
-    public ReportUserImpl(int id, String userID, long timestamp,
-                          Kind kind, String device) {
-      this.id = id;
-      this.userID = userID;
-      this.timestamp = timestamp;
-      this.kind = kind;
-      this.device = device;
-    }
-
-    @Override
-    public int getID() {
-      return id;
-    }
-
-    @Override
-    public String getUserID() {
-      return userID;
-    }
-
-    @Override
-    public long getTimestampMillis() {
-      return timestamp;
-    }
-
-    @Override
-    public String getIpaddr() {
-      return "";
-    }
-
-    @Override
-    public Kind getUserKind() {
-      return kind;
-    }
-
-    @Override
-    public String getDevice() {
-      return device;
-    }
-  }*/
-
-  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
   /**
    * @param userDBIds

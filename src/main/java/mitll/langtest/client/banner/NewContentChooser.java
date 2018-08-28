@@ -94,7 +94,13 @@ public class NewContentChooser implements INavigation {
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
    //    logger.info("getCurrentView currentView " + currentView);
-    VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
+    VIEWS currentStoredView = null;
+    try {
+      currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
+    } catch (IllegalArgumentException e) {
+      logger.warning("hmm can't parse " + currentView);
+      currentStoredView = LEARN;
+    }
 
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
 
