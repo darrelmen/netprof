@@ -252,11 +252,11 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   private ExerciseListWrapper<T> getDialogResponse(ExerciseListRequest request, int projectID) throws DominoSessionException {
-   // List<ClientExercise> exercises = getDialog(request.getDialogID()).getExercises();
+    // List<ClientExercise> exercises = getDialog(request.getDialogID()).getExercises();
     List<CommonExercise> collect = getCommonExercises(getDialog(request.getDialogID()).getCoreVocabulary());
     collect.addAll(getCommonExercises(getDialog(request.getDialogID()).getExercises()));
 
-    logger.info("getDialogResponse returning exercises for " +request.getDialogID() + " " + collect.size());
+    logger.info("getDialogResponse returning exercises for " + request.getDialogID() + " " + collect.size());
     ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, collect, projectID);
     return exerciseListWrapper;
   }
@@ -923,13 +923,11 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @return
    * @see #getExerciseIds
    */
-  private
-  //<U extends CommonExercise>
-  TripleExercises<CommonExercise> getExercisesForSearch(String prefix,
-                                                        Collection<CommonExercise> exercises,
-                                                        boolean predefExercises,
-                                                        int projectID,
-                                                        int userID, boolean matchOnContext) {
+  private TripleExercises<CommonExercise> getExercisesForSearch(String prefix,
+                                                                Collection<CommonExercise> exercises,
+                                                                boolean predefExercises,
+                                                                int projectID,
+                                                                int userID, boolean matchOnContext) {
     Search<CommonExercise> search = new Search<CommonExercise>(db);
     TripleExercises<CommonExercise> exercisesForSearch =
         search.getExercisesForSearch(prefix, exercises, predefExercises, projectID, matchOnContext);

@@ -27,13 +27,13 @@ import java.util.stream.Collectors;
  */
 public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     implements AudioChangeListener, RefAudioGetter, IPlayAudioControl {
-  private Logger logger = Logger.getLogger("DialogExercisePanel");
+  private final Logger logger = Logger.getLogger("DialogExercisePanel");
   private static final int WORD_SPACER = 7;
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
   private static final String BLUE = "#2196F3";
 
-  static final int CONTEXT_INDENT = 45;//50;
+//  static final int CONTEXT_INDENT = 45;//50;
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char FULL_WIDTH_NINE = '\uFF10' + 9;
 
@@ -58,13 +58,13 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
 
-  AlignmentFetcher alignmentFetcher;
+  final AlignmentFetcher alignmentFetcher;
 
   /**
    * Mandarin has special rules for the moment so we can match simplified chinese characters to traditional ones...
    */
-  private boolean isMandarin;
-  final IListenView listenView;
+  private final boolean isMandarin;
+  private final IListenView listenView;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -79,7 +79,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    * @see mitll.langtest.client.banner.ListenViewHelper#getTurnPanel
    */
-  public DialogExercisePanel(final T commonExercise,
+   DialogExercisePanel(final T commonExercise,
                              final ExerciseController controller,
                              final ListInterface<?, ?> listContainer,
                              Map<Integer, AlignmentOutput> alignments,
@@ -303,10 +303,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT);
   }
 
-  protected void setPlayListener(int id,
-                                 long duration,
-                                 Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
-                                 HeadlessPlayAudio playAudio) {
+  private void setPlayListener(int id,
+                               long duration,
+                               Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget,
+                               HeadlessPlayAudio playAudio) {
     if (DEBUG) {
       logger.info("setPlayListener for ex " + exercise.getID() +
           " audio id " + id + " : " +
@@ -757,7 +757,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   private boolean transcriptMatches(List<IHighlightSegment> clickables,
                                     List<TranscriptSegment> segments) {
-    int i = 0;
+    //int i = 0;
     int c = 0;
     for (IHighlightSegment clickable : clickables) {
       if (clickable.isClickable()) {
@@ -765,6 +765,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       }
     }
     boolean b = c == segments.size();
+
     if (!b && DEBUG_MATCH) {
       logger.info("transcriptMatches  clickables " + c + " segments " + segments.size());
       StringBuilder builder = new StringBuilder();
@@ -781,6 +782,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       }
       logger.info("transcriptMatches align    : " + builder2);
     }
+
     return b;
   }
 
@@ -917,9 +919,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     flclickables.forEach(IHighlightSegment::clearHighlight);
   }
 
-  public boolean isPlaying() {
+/*  public boolean isPlaying() {
     return (playAudio != null) && playAudio.isPlaying();
-  }
+  }*/
 
   public void resetAudio() {
     playAudio.reinitialize();

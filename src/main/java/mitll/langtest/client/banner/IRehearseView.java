@@ -12,7 +12,7 @@ public interface IRehearseView extends IListenView {
 
   void useInvalidResult(int exid);
 
-  void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn);
+  //void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn);
 
   void setEmoticon(Image smiley, double total);
 

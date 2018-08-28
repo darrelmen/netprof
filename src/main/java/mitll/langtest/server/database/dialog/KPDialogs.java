@@ -255,6 +255,6 @@ public class KPDialogs extends DialogReader implements IDialogReader {
   public Map<Dialog, SlickDialog> getDialogs(int defaultUser, int projID,
                                              Map<ClientExercise, String> exToAudio,
                                              Project project) {
-    return getDialogsByProp(defaultUser, exToAudio, project, dialogProps, new ArrayList<>());
+    return getDialogsByProp(defaultUser, exToAudio, project, dialogProps, cv);
   }
 }

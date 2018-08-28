@@ -326,6 +326,10 @@ public class Project implements IPronunciationLookup {
     return audioFileHelper;
   }
 
+  /**
+   *
+   * @return
+   */
   public ExerciseTrie<CommonExercise> getFullTrie() {
     return fullTrie;
   }

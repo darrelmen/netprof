@@ -63,7 +63,7 @@ class DialogReader {
     for (int i = 0; i < docs.length; i++) {
       String dir = dirs[i];
 
-      CVMatch cvMatch = cvs.size() < i ? cvs.get(i) : null;
+      CVMatch cvMatch = i < cvs.size() ? cvs.get(i) : null;
       //  logger.info("Dir " + dir);
       String imageRef = imageBaseDir + dir + File.separator + dir + IDialogReader.JPG;
       String unit = units[i];
@@ -232,13 +232,50 @@ class DialogReader {
         CommonExercise exerciseBySearch = project.getExerciseBySearch(entry);
 
         if (exerciseBySearch != null) {
-          coreExercises.add(exerciseBySearch);
+          remember(coreExercises, entry, exerciseBySearch);
         } else {
           logger.warn("getCVs can't find token '" + entry + "'");
+
+          // remove things in parens
+          entry = entry.replaceAll("\\([^()]*\\)", "");
+          exerciseBySearch = project.getExerciseBySearch(entry);
+
+          if (exerciseBySearch == null) {
+            logger.warn("getCVs 1 can't find token '" + entry + "'");
+
+            String[] split1 = entry.split("\\/");
+            if (split1.length > 1) {
+              entry = split1[0].trim();
+              exerciseBySearch = project.getExerciseBySearch(entry);
+              if (exerciseBySearch == null) {
+                logger.warn("getCVs 2 can't find token '" + entry + "'");
+
+                entry = entry.replaceAll("~", "").trim();
+                exerciseBySearch = project.getExerciseBySearch(entry);
+                if (exerciseBySearch == null) {
+                  logger.warn("getCVs 3 can't find token '" + entry + "'");
+                } else {
+                  remember(coreExercises, entry, exerciseBySearch);
+                }
+              } else {
+                remember(coreExercises, entry, exerciseBySearch);
+              }
+            }
+
+          } else {
+            remember(coreExercises, entry, exerciseBySearch);
+          }
+
         }
       });
     });
     return cvs;
+  }
+
+  private void remember(Set<CommonExercise> coreExercises, String entry, CommonExercise exerciseBySearch) {
+    logger.info("getCVs : core vocab '" + entry + "' = '" + exerciseBySearch.getForeignLanguage() +
+        "'");
+    coreExercises.add(exerciseBySearch);
   }
 
   class CVMatch {
@@ -247,7 +284,7 @@ class DialogReader {
 
     CVMatch(Set<CommonExercise> netprofEntries) {//}, Map<String, CommonExercise> tokenToEx) {
       this.netprofEntries = netprofEntries;
-      this.tokenToEx = tokenToEx;
+      //this.tokenToEx = tokenToEx;
     }
 
     Set<CommonExercise> getNetprofEntries() {

@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.SessionStorage;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
@@ -36,6 +35,7 @@ import java.util.logging.Logger;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExercise>>
     extends ListenViewHelper<T>
     implements SessionManager, IRehearseView {
+  public static final String WIDTH = "97%";
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final String THEY_SPEAK = "Listen to : ";
@@ -43,8 +43,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private static final boolean DEBUG = false;
 
+/*
   private static final int DELAY_MILLIS = 20;
+*/
 
+  /**
+   * @see #clearScores
+   */
   private ProgressBar scoreProgress;
   /**
    *
@@ -55,9 +60,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private Image waitCursor = new Image(animated);
 
   private final Map<Integer, Float> exToScore = new HashMap<>();
-  protected final Map<Integer, T> exToTurn = new HashMap<>();
+  private final Map<Integer, Float> exToRate = new HashMap<>();
+  final Map<Integer, T> exToTurn = new HashMap<>();
   private List<IRecordDialogTurn> recordDialogTurns = new ArrayList<>();
   private SessionStorage sessionStorage;
+  /**
+   * @see #showScore()
+   * @see #showDialogGetRef(IDialog, Panel)
+   */
   private DivWidget overallFeedback;
   private HTML leftSpeakerHint, rightSpeakerHint;
 
@@ -96,14 +106,17 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   @NotNull
   private DivWidget getOverallFeedback() {
     DivWidget breadRow = new DivWidget();
+    breadRow.getElement().setId("overallFeedbackRow");
+
     Style style = breadRow.getElement().getStyle();
     style.setMarginTop(10, Style.Unit.PX);
     style.setMarginBottom(10, Style.Unit.PX);
     style.setClear(Style.Clear.BOTH);
+
     breadRow.addStyleName("cardBorderShadow");
-    breadRow.setWidth("97%");  //??? why 97???
-    breadRow.getElement().setId("breadRow");
+    breadRow.setWidth(WIDTH);  //??? why 97???
     breadRow.add(showScoreFeedback());
+
     return breadRow;
   }
 
@@ -179,59 +192,72 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   }
 
   /**
+   * Three parts : wait cursor, emoticon for overall score, progress bar for quantitive feedback.
+   *
    * @return
+   * @see
    */
   private DivWidget showScoreFeedback() {
     DivWidget container = new DivWidget();
 
     container.setId("feedbackContainerAndBar");
 
+    // style the feedback container
     {
-      DivWidget iconContainer = new DivWidget();
-      iconContainer.addStyleName("floatLeft");
-
-      iconContainer.add(waitCursor);
-      waitCursor.setVisible(false);
-      waitCursor.setWidth("72px");
-      waitCursor.setHeight("72px");
-      container.add(iconContainer);
-    }
-
-    {
-      DivWidget iconContainer = new DivWidget();
-      iconContainer.addStyleName("floatLeft");
-
-      iconContainer.add(overallSmiley);
-
-      iconContainer.setWidth("72px");
-      iconContainer.setHeight("72px");
-
-      styleAnimatedSmiley();
-
-      container.add(iconContainer);
-    }
-
-    {
-      DivWidget scoreContainer = new DivWidget();
-      scoreContainer.addStyleName("rehearseScoreContainer");
-      scoreContainer.addStyleName("floatLeft");
-
-      scoreContainer.addStyleName("topMargin");
-      scoreContainer.addStyleName("leftFiveMargin");
-      scoreContainer.add(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
-      styleProgressBarContainer(scoreProgress);
-
-      scoreContainer.setWidth("73%");
-
       container.setWidth("78%");
+
       Style style = container.getElement().getStyle();
       style.setOverflow(Style.Overflow.HIDDEN);
       style.setMarginLeft(20, Style.Unit.PCT);
       style.setMarginBottom(20, Style.Unit.PX);
-      container.add(scoreContainer);
     }
 
+    container.add(getWaitCursor());
+    container.add(getOverallEmoticon());
+    container.add(getProgressBarDiv(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT)));
+
     return container;
+  }
+
+  @NotNull
+  private DivWidget getProgressBarDiv(ProgressBar scoreProgress) {
+    DivWidget scoreContainer = new DivWidget();
+    scoreContainer.addStyleName("rehearseScoreContainer");
+    scoreContainer.addStyleName("floatLeft");
+
+    scoreContainer.addStyleName("topMargin");
+    scoreContainer.addStyleName("leftFiveMargin");
+    scoreContainer.add(scoreProgress);
+    styleProgressBarContainer(scoreProgress);
+
+    scoreContainer.setWidth("73%");
+    return scoreContainer;
+  }
+
+  @NotNull
+  private DivWidget getOverallEmoticon() {
+    DivWidget iconContainer = new DivWidget();
+    iconContainer.addStyleName("floatLeft");
+
+    iconContainer.add(overallSmiley);
+
+    iconContainer.setWidth("72px");
+    iconContainer.setHeight("72px");
+
+    styleAnimatedSmiley();
+    return iconContainer;
+  }
+
+  @NotNull
+  private DivWidget getWaitCursor() {
+    DivWidget iconContainer = new DivWidget();
+    iconContainer.addStyleName("floatLeft");
+
+    iconContainer.add(waitCursor);
+    waitCursor.setVisible(false);
+    waitCursor.setWidth("72px");
+    waitCursor.setHeight("72px");
+    return iconContainer;
   }
 
   private void styleAnimatedSmiley() {
@@ -315,9 +341,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    * @param score
    * @param recordDialogTurn
    * @see RecordDialogExercisePanel#addWidgets
+   * @see #useResult(AudioAnswer)
    */
-  @Override
-  public void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
+
+  private void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
     exToScore.put(exid, score);
     recordDialogTurns.add(recordDialogTurn);
 
@@ -487,6 +514,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     scoreProgress.setVisible(false);
     exToScore.clear();
+    exToRate.clear();
 
     bothTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
@@ -585,12 +613,32 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    */
   private void showScore() {
     waitCursor.setVisible(false);
+    makeVisible(overallFeedback);
 
     int num = exToScore.values().size();
 //
 //    if (num == expected) {
-    double total = getTotal();
-    // logger.info("showScore showing " + num);
+    double total = getTotalScore();
+    double totalRatio = getTotalRatios();
+    double totalAvgRate = totalRatio / ((float) num);
+    logger.info("showScore avg rate " + totalAvgRate);
+
+    total = setScoreProgressLevel(total, num);
+
+    setEmoticon(overallSmiley, total);
+
+    overallSmiley.setVisible(true);
+    overallSmiley.addStyleName("animation-target");
+  }
+
+  /**
+   * @param total
+   * @param num
+   * @return ratio of total to num
+   */
+  private double setScoreProgressLevel(double total, int num) {
+    ProgressBar scoreProgress = this.scoreProgress;
+
     total /= (float) num;
     //  logger.info("showScore total   " + total);
 
@@ -601,19 +649,22 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     scoreProgress.setVisible(true);
     scoreProgress.setText("Score " + Math.round(percent) + "%");
 
-    makeVisible(overallFeedback);
 
     new ScoreProgressBar(false).setColor(scoreProgress, total, round);
-
-    setEmoticon(overallSmiley, total);
-
-    overallSmiley.setVisible(true);
-    overallSmiley.addStyleName("animation-target");
+    return total;
   }
 
-  private double getTotal() {
+  private double getTotalScore() {
     double total = 0D;
     for (Float score : exToScore.values()) {
+      total += score;
+    }
+    return total;
+  }
+
+  private double getTotalRatios() {
+    double total = 0D;
+    for (Float score : exToRate.values()) {
       total += score;
     }
     return total;
@@ -669,10 +720,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    */
   @Override
   public void useResult(AudioAnswer audioAnswer) {
-    T matchingTurn = exToTurn.get(audioAnswer.getExid());
-    addScore(audioAnswer.getExid(), (float) audioAnswer.getScore(), matchingTurn);
+    int exid = audioAnswer.getExid();
+    T matchingTurn = exToTurn.get(exid);
+    addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
 //    logger.info("useResult set answer on " + matchingTurn + " to " + audioAnswer);
     matchingTurn.useResult(audioAnswer);
+    float speakingRate = matchingTurn.getSpeakingRate();
+    exToRate.put(exid, speakingRate);
   }
 
   @Override

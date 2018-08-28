@@ -84,6 +84,18 @@ public class DialogPopulate {
     if (!dialogDAO.getDialogs(projid).isEmpty()) {
       return false;
     } else {
+
+      for (int i = 0; i< 20;i++) {
+        if (project.getFullTrie() == null) {
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
+        else break;
+      }
+
       Map<ClientExercise, String> exToAudio = new HashMap<>();
       int defaultUser = db.getUserDAO().getDefaultUser();
       Language languageEnum = project.getLanguageEnum();

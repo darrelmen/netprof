@@ -2,28 +2,23 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.dom.client.ClickEvent;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
-import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercise>> extends RehearseViewHelper<T> {
-  private final Logger logger = Logger.getLogger("PerformViewHelper");
+ // private final Logger logger = Logger.getLogger("PerformViewHelper");
 
   private Set<String> uniqueCoreVocab;
-  private Set<String> uniqueCoreVocabThisUnit;
+  //private Set<String> uniqueCoreVocabThisUnit;
 
   PerformViewHelper(ExerciseController controller) {
     super(controller);
@@ -40,6 +35,7 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
   protected DivWidget getTurns(IDialog dialog) {
     List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
 
+/*
     Map<String, String> unitToValue = dialog.getUnitToValue();
     String unitDialogIsIn = unitToValue.get(Dialog.UNIT);
 
@@ -54,27 +50,21 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
         .filter(clientExercise -> clientExercise.getUnitToValue().get(unit).equalsIgnoreCase(unitDialogIsIn))
         .map(CommonShell::getForeignLanguage)
         .collect(Collectors.toSet());
+*/
 
     uniqueCoreVocab = coreVocabulary
         .stream()
         .map(CommonShell::getForeignLanguage)
         .collect(Collectors.toSet());
 
-    logger.info("getTurns uniqueCoreVocab " + uniqueCoreVocab + " ");
+//    logger.info("getTurns uniqueCoreVocabThisUnit " + uniqueCoreVocabThisUnit + " ");
+ //   logger.info("getTurns uniqueCoreVocab " + uniqueCoreVocab + " ");
 
     DivWidget turns = super.getTurns(dialog);
 
     Scheduler.get().scheduleDeferred(this::obscureRespTurns);
     return turns;
   }
-
-//  @NotNull
-//  @Override
-//  protected T reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
-//    T widgets = super.reallyGetTurnPanel(clientExercise, isRight);
-//    widgets.maybeSetObscure(uniqueCoreVocab);
-//    return widgets;
-//  }
 
   /**
    * @param clientExercise

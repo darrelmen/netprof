@@ -12,7 +12,7 @@ public class ScoreProgressBar {
   //private Logger logger = Logger.getLogger("ScoreProgressBar");
 
   private static final String AUDIO_CUT_OFF = "Audio cut off.";
-  protected ProgressBar progressBar;
+    ProgressBar progressBar;
 
   public ScoreProgressBar() {
     progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);

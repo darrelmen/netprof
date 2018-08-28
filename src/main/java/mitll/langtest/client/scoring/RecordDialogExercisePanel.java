@@ -19,7 +19,9 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,10 +46,15 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   private long minDur;
   private Image emoticon;
+  /**
+   *
+   */
   private AlignmentOutput alignmentOutput;
   private final SessionManager sessionManager;
   private long durationInMillis;
   private IRehearseView rehearseView;
+  private float refSpeechDur = 0F;
+  private float studentSpeechDur = 0F;
 
   /**
    * @param commonExercise
@@ -77,6 +84,26 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
     this.sessionManager = sessionManager;
     addStyleName("inlineFlex");
+  }
+
+
+  @Override
+  protected TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
+    TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = super.showAlignment(id, duration, alignmentOutput);
+    this.refSpeechDur = getSpeechDur(id, alignmentOutput);
+    return transcriptSegmentIHighlightSegmentTreeMap;
+  }
+
+  private float getSpeechDur(int id, AlignmentOutput alignmentOutput) {
+    List<TranscriptSegment> transcriptSegments = alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+    if (transcriptSegments == null || transcriptSegments.isEmpty()) {
+      logger.warning("huh? no transcript for " + id);
+      return 0F;
+    } else {
+      float start = transcriptSegments.get(0).getStart();
+      float end = transcriptSegments.get(transcriptSegments.size() - 1).getEnd();
+      return end - start;
+    }
   }
 
   /**
@@ -115,27 +142,53 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   /**
    * Rules:
+   *
    * 1) don't obscure everything
    * 2) obscure something
    * 3) Don't obscure more than one or two or three? words?
    * 4) if choosing only two out of all of them, choose the longest ones?
    * 3) if you have a choice, don't obscure first token? ?
+   *
    * @param coreVocab
    * @see mitll.langtest.client.banner.PerformViewHelper#getTurnPanel
    * Or should we use exact match?
    */
   public void maybeSetObscure(Collection<String> coreVocab) {
-    flclickables.forEach(iHighlightSegment ->
-    {
+    IHighlightSegment candidate = getObscureCandidate(coreVocab, true);
+
+    if (candidate == null || flclickables.indexOf(candidate) == 0 ) {
+      candidate = getObscureCandidate(coreVocab, false);
+    }
+
+    if (candidate != null) {
+      candidate.setObscurable();
+    }
+  }
+
+  @Nullable
+  private IHighlightSegment getObscureCandidate(Collection<String> coreVocab, boolean useExact) {
+    IHighlightSegment candidate = null;
+
+    boolean isFirst = true;
+
+    for (IHighlightSegment segment : flclickables) {
       List<String> matches = coreVocab
           .stream()
-          .filter(core -> clickableWords.isSearchMatch(iHighlightSegment.getContent(), core)).collect(Collectors.toList());
+          .filter(core ->
+              useExact ?
+                  clickableWords.isExactMatch(segment.getContent(), core) :
+                  clickableWords.isSearchMatch(segment.getContent(), core)
+          ).collect(Collectors.toList());
 
       if (!matches.isEmpty()) {
-        logger.info("maybeSetObscure for " + iHighlightSegment + " found " + matches);
-        iHighlightSegment.setObscurable();
+       // logger.info("getObscureCandidate for " + segment + " found " + matches + (useExact ? " exact" : " contains"));
+        candidate = segment;
+        if (!isFirst && candidate.getContent().length()>1) break;
       }
-    });
+
+      isFirst = false;
+    }
+    return candidate;
   }
 
   public void obscureText() {
@@ -153,8 +206,14 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   @Override
   public void useResult(AudioAnswer result) {
     alignmentOutput = result.getPretestScore();
+    this.studentSpeechDur = getSpeechDur(result.getExid(), alignmentOutput);
+
     durationInMillis = result.getDurationInMillis();
     rehearseView.setEmoticon(emoticon, result.getScore());
+  }
+
+  public float getSpeakingRate() {
+    return (refSpeechDur == 0F || studentSpeechDur == 0F) ? -1F : (studentSpeechDur / refSpeechDur);
   }
 
   private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
@@ -191,6 +250,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       public void useResult(AudioAnswer result) {
         super.useResult(result);
         rehearseView.useResult(result);
+
         logger.info("useResult got for ex " + result.getExid() + " vs local " + getExID() +
             " = " + result.getValidity() + " " + result.getPretestScore());
         // logger.info("useResult got words " + result.getPretestScore().getWordScores());

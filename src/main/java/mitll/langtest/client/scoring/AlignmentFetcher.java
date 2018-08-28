@@ -1,11 +1,13 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
@@ -30,6 +32,7 @@ public class AlignmentFetcher {
   private AudioChangeListener audioChangeListener, contextChangeListener;
 
   /**
+   * @see DialogExercisePanel#DialogExercisePanel
    * @param exerciseID
    * @param controller
    * @param listContainer
