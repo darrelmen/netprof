@@ -7,6 +7,7 @@ import mitll.npdata.dao.SlickDialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public class EnglishDialog extends DialogReader implements IDialogReader {
@@ -82,6 +83,6 @@ public class EnglishDialog extends DialogReader implements IDialogReader {
   public Map<Dialog, SlickDialog> getDialogs(int defaultUser, int projID,
                                              Map<ClientExercise, String> exToAudio,
                                              Project project) {
-    return getDialogsByProp(defaultUser, projID, exToAudio, project, dialogProps);
+    return getDialogsByProp(defaultUser, exToAudio, project, dialogProps, new ArrayList<>());
   }
 }

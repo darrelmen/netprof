@@ -23,6 +23,7 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
   private final Logger logger = Logger.getLogger("PerformViewHelper");
 
   private Set<String> uniqueCoreVocab;
+  private Set<String> uniqueCoreVocabThisUnit;
 
   PerformViewHelper(ExerciseController controller) {
     super(controller);
@@ -47,9 +48,15 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
     String chapter = typeOrder.size() > 1 ? typeOrder.get(1) : null;
 
     logger.info("getTurns match dialog " + unitToValue + " ");
-    uniqueCoreVocab = coreVocabulary
+
+    uniqueCoreVocabThisUnit = coreVocabulary
         .stream()
         .filter(clientExercise -> clientExercise.getUnitToValue().get(unit).equalsIgnoreCase(unitDialogIsIn))
+        .map(CommonShell::getForeignLanguage)
+        .collect(Collectors.toSet());
+
+    uniqueCoreVocab = coreVocabulary
+        .stream()
         .map(CommonShell::getForeignLanguage)
         .collect(Collectors.toSet());
 

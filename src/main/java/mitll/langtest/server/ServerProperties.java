@@ -100,7 +100,7 @@ public class ServerProperties {
   public static final String H2_HOST = "h2";
 
   private static final String APP_TITLE = "appTitle";
-  private static final String APP_URL = "app.url";
+//  private static final String APP_URL = "app.url";
 
   private static final String FALSE = "false";
   private static final String TRUE = "true";

@@ -23,21 +23,25 @@ import java.util.stream.Stream;
 
 import static mitll.langtest.shared.dialog.IDialog.METADATA.FLTITLE;
 
-public class DialogReader {
+class DialogReader {
   private static final Logger logger = LogManager.getLogger(DialogReader.class);
 
   /**
    * @param defaultUser
-   * @param projID
    * @param exToAudio
    * @param project
    * @param dialogProps
+   * @param coreVocabs
    * @return
+   * @see EnglishDialog#getDialogs(int, int, Map, Project)
+   * @see KPDialogs#getDialogs(int, int, Map, Project)
    */
   @NotNull
-  Map<Dialog, SlickDialog> getDialogsByProp(int defaultUser, int projID,
-                                            Map<ClientExercise, String> exToAudio, Project project,
-                                            DialogProps dialogProps) {
+  Map<Dialog, SlickDialog> getDialogsByProp(int defaultUser,
+                                            Map<ClientExercise, String> exToAudio,
+                                            Project project,
+                                            DialogProps dialogProps, List<String> coreVocabs) {
+    int projID = project.getID();
     String[] docs = dialogProps.docIDS.split("\n");
     String[] titles = dialogProps.title.split("\n");
     String[] ktitles = dialogProps.fltitle.split("\n");
@@ -55,8 +59,11 @@ public class DialogReader {
     String projectLanguage = project.getLanguage().toLowerCase();
     String imageBaseDir = IDialogReader.IMAGES + projectLanguage + File.separator;
 
+    List<CVMatch> cvs = getCVs(coreVocabs, project);
     for (int i = 0; i < docs.length; i++) {
       String dir = dirs[i];
+
+      CVMatch cvMatch = cvs.size() < i ? cvs.get(i) : null;
       //  logger.info("Dir " + dir);
       String imageRef = imageBaseDir + dir + File.separator + dir + IDialogReader.JPG;
       String unit = units[i];
@@ -145,7 +152,15 @@ public class DialogReader {
             }
             //   logger.info(" trie ready...");
 
-            addCoreWords(project, coreExercises, exercise);
+            if (cvMatch == null) {
+              // if we don't have core vocab defined for a dialog, try to find matches in netprof
+              addCoreWords(project, coreExercises, exercise);
+            } else {
+              coreExercises.addAll(cvMatch.getNetprofEntries());
+
+              logger.info("for dialog " + dir + " adding " + cvMatch.getNetprofEntries().size() + " : ");
+
+            }
             exercises.add(exercise);
 //            logger.info("Ex " + exercise.getOldID() + " " + exercise.getUnitToValue());
           }
@@ -201,6 +216,49 @@ public class DialogReader {
     return dialogToSlick;
   }
 
+  private List<CVMatch> getCVs(List<String> coreVocabs, Project project) {
+    List<CVMatch> cvs = new ArrayList<>(coreVocabs.size());
+
+//    Set<CommonExercise> coreExercises=new HashSet<>();
+    coreVocabs.forEach(raw -> {
+      Set<CommonExercise> coreExercises = new HashSet<>();
+      CVMatch cvMatch = new CVMatch(coreExercises);
+      cvs.add(cvMatch);
+      String[] split = raw.split("\n");
+      List<String> rawEntries = Arrays.asList(split);
+      rawEntries.forEach(rawEntry -> {
+        String entry = rawEntry.trim();
+
+        CommonExercise exerciseBySearch = project.getExerciseBySearch(entry);
+
+        if (exerciseBySearch != null) {
+          coreExercises.add(exerciseBySearch);
+        } else {
+          logger.warn("getCVs can't find token '" + entry + "'");
+        }
+      });
+    });
+    return cvs;
+  }
+
+  class CVMatch {
+    private Set<CommonExercise> netprofEntries;
+    private Map<String, CommonExercise> tokenToEx;
+
+    CVMatch(Set<CommonExercise> netprofEntries) {//}, Map<String, CommonExercise> tokenToEx) {
+      this.netprofEntries = netprofEntries;
+      this.tokenToEx = tokenToEx;
+    }
+
+    Set<CommonExercise> getNetprofEntries() {
+      return netprofEntries;
+    }
+
+    public Map<String, CommonExercise> getTokenToEx() {
+      return tokenToEx;
+    }
+  }
+
   static class DialogProps {
     final String docIDS;
     final String title;
@@ -238,7 +296,6 @@ public class DialogReader {
   }
 
   /**
-   *
    * @param project
    * @param coreExercises set - only unique exercises...
    * @param exercise

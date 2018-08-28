@@ -7,6 +7,9 @@ import mitll.npdata.dao.SlickDialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -112,6 +115,133 @@ public class KPDialogs extends DialogReader implements IDialogReader {
           "Topic Presentation A\n" +
           "Topic Presentation B";
 
+  private final String coreVocab1 = "고맙습니다 / 감사합니다\n" +
+      "고향 \n" +
+      "공군 \n" +
+      "괜찮습니다 \n" +
+      "네/예\n" +
+      "만나서 반갑습니다 \n" +
+      "미안합니다 / 죄송합니다\n" +
+      "실례합니다 \n" +
+      "~ 씨 \n" +
+      "아니오 \n" +
+      "어디\n" +
+      "~이/가 어떻게 되십니까?\n" +
+      "~은 / 는\n" +
+      "~이/가\n" +
+      "~이다 \n" +
+      "이름 / 성함 (↑)\n" +
+      "제 (↓) / 내\n" +
+      "처음 뵙겠습니다\n" +
+      "천만에요 \n" +
+      "캘리포니아";
+
+  private final String coreVocab2 = "가끔\n" +
+      "~까지 \n" +
+      "끝나다 \n" +
+      "매일\n" +
+      "반\n" +
+      "~번\n" +
+      "보내다 \n" +
+      "~부터 \n" +
+      "~ 분\n" +
+      "~ 시 \n" +
+      "시간 \n" +
+      "시작(하다) \n" +
+      "언제\n" +
+      "얼마나 \n" +
+      "~에\n" +
+      "오전\n" +
+      "오후\n" +
+      "자주\n" +
+      "저녁 \n" +
+      "점심\n" +
+      "~주/~주일\n" +
+      "~쯤 \n" +
+      "하루";
+
+  private final String coreVocab3 = "국 \n" +
+      "기다리다\n" +
+      "남기다\n" +
+      "다시\n" +
+      "문자\n" +
+      "메시지/메세지\n" +
+      "바꾸다 \n" +
+      "보내다\n" +
+      "부탁(하다)/부탁드리다\n" +
+      "여보세요\n" +
+      "음성\n" +
+      "~의\n" +
+      "잠시만/잠깐만\n" +
+      "전화(를) 걸다 \n" +
+      "중학교\n" +
+      "통화 중\n" +
+      "핸드폰/휴대폰";
+
+  private final String coreVocab4 = "나흘\n" +
+      "~ 때 \n" +
+      "~(으)로 \n" +
+      "방학\n" +
+      "~박~일 \n" +
+      "비행기\n" +
+      "사흘\n" +
+      "아직\n" +
+      "이틀\n" +
+      "–(으)ㄹ 거다\n" +
+      "–(으)ㄹ 수 있다 / 없다\n" +
+      "특별하다\n" +
+      "편하다\n" +
+      "표\n" +
+      "한 ~\n" +
+      "힘들다";
+
+  private final String coreVocab5 = "가방\n" +
+      "네모나다\n" +
+      "녹색\n" +
+      "동그랗다\n" +
+      "두고 내리다\n" +
+      "모양\n" +
+      "바꾸다\n" +
+      "배낭\n" +
+      "보라색\n" +
+      "세모나다\n" +
+      "센터\n" +
+      "–(으)려면\n" +
+      "잃어버리다\n" +
+      "주황색\n" +
+      "지하\n" +
+      "확인(하다) \n" +
+      "환전(하다)\n" +
+      "환전소";
+
+  private final String coreVocab6 = "게임\n" +
+      "관람(하다) \n" +
+      "낚시(하다) \n" +
+      "다양(하다)\n" +
+      "~대/세대\n" +
+      "레저\n" +
+      "뮤지컬\n" +
+      "바이올린\n" +
+      "스포츠\n" +
+      "시간이 나다\n" +
+      "악기\n" +
+      "암벽등반\n" +
+      "연극\n" +
+      "연주(하다)\n" +
+      "음악회\n" +
+      "~ 이상\n" +
+      "인터넷\n" +
+      "조사(하다 / 되다)\n" +
+      "주로\n" +
+      "즐기다\n" +
+      "초대권\n" +
+      "피아노\n" +
+      "활동\n" +
+      "헬스";
+
+
+  private final List<String> cv = Arrays.asList(coreVocab1, coreVocab2, coreVocab3, coreVocab4, coreVocab5, coreVocab6);
+
   private DialogProps dialogProps = new DialogProps(docIDS, title, fltitle, dir, unit, chapter, page, pres);
 
   /**
@@ -125,7 +255,6 @@ public class KPDialogs extends DialogReader implements IDialogReader {
   public Map<Dialog, SlickDialog> getDialogs(int defaultUser, int projID,
                                              Map<ClientExercise, String> exToAudio,
                                              Project project) {
-    return getDialogsByProp(defaultUser, projID, exToAudio, project, dialogProps);
+    return getDialogsByProp(defaultUser, exToAudio, project, dialogProps, new ArrayList<>());
   }
-
 }

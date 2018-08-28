@@ -114,6 +114,12 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   /**
+   * Rules:
+   * 1) don't obscure everything
+   * 2) obscure something
+   * 3) Don't obscure more than one or two or three? words?
+   * 4) if choosing only two out of all of them, choose the longest ones?
+   * 3) if you have a choice, don't obscure first token? ?
    * @param coreVocab
    * @see mitll.langtest.client.banner.PerformViewHelper#getTurnPanel
    * Or should we use exact match?
@@ -124,6 +130,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       List<String> matches = coreVocab
           .stream()
           .filter(core -> clickableWords.isSearchMatch(iHighlightSegment.getContent(), core)).collect(Collectors.toList());
+
       if (!matches.isEmpty()) {
         logger.info("maybeSetObscure for " + iHighlightSegment + " found " + matches);
         iHighlightSegment.setObscurable();
