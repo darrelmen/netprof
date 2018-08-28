@@ -236,7 +236,7 @@ public class ProjectManagement implements IProjectManagement {
         if (debugOne) {
           if (slickProject.id() == debugProjectID ||
               slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)
-              ) {
+          ) {
             rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
           }
         } else {
@@ -641,7 +641,11 @@ public class ProjectManagement implements IProjectManagement {
   public CommonExercise getExercise(int id) {
     int projectForExercise = db.getUserExerciseDAO().getProjectForExercise(id);
     if (projectForExercise == -1) {
-      logger.error("getExercise : can't find project for exercise " + id);
+      if (id == 0) {
+        logger.info("getExercise : can't find project for exercise " + id);
+      } else {
+        logger.error("getExercise : can't find project for exercise " + id);
+      }
       return null;
     } else {
       Project project = getProject(projectForExercise, false);
