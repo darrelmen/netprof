@@ -43,9 +43,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private static final boolean DEBUG = false;
 
-/*
-  private static final int DELAY_MILLIS = 20;
-*/
 
   /**
    * @see #clearScores
@@ -281,6 +278,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     progressBar.setVisible(false);
   }
 
+  int beforeCount = 0;
+
   /**
    * silence analyzer has triggered...
    * Ideally we'd look at packet duration here...
@@ -296,15 +295,20 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         if (isSilence(penultimateValidity) && isSilence(lastValidity)) {
           logger.info("mySilenceDetected : OK, server agrees with client side silence detector... have seen " + validities.size());
           stopRecordingTurn();
+          beforeCount = 0;
         } else {
           StringBuffer buffer = new StringBuffer();
-          validities.forEach(validity1 -> buffer.append(validity1).append(" "));
-          logger.info("mySilenceDetected : silence for " + currentRecordingTurn +
-              " packets (" + validities.size() + ") : " + buffer);
+          if (beforeCount < validities.size()) {
+            validities.forEach(validity1 -> buffer.append(validity1).append(" "));
+            logger.info("mySilenceDetected : silence for " + currentRecordingTurn +
+                " packets (" + validities.size() + ") : " + buffer);
+            beforeCount = validities.size();
+          }
         }
       } else {
-        logger.warning("mySilenceDetected : stopRecordingTurn ");
+        logger.info("mySilenceDetected : stopRecordingTurn, num validities "+ validities.size());
         stopRecordingTurn();
+        beforeCount = 0;
       }
     } else {
       if (hasRecordingTurn) {
@@ -508,7 +512,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   protected void setNextTurnForSide() {
   }
 
-  private void clearScores() {
+  protected void clearScores() {
     overallSmiley.setVisible(false);
     overallSmiley.removeStyleName("animation-target");
 
@@ -518,6 +522,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     bothTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
+
   }
 
   /**
@@ -722,11 +727,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   public void useResult(AudioAnswer audioAnswer) {
     int exid = audioAnswer.getExid();
     T matchingTurn = exToTurn.get(exid);
-    addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
 //    logger.info("useResult set answer on " + matchingTurn + " to " + audioAnswer);
     matchingTurn.useResult(audioAnswer);
     float speakingRate = matchingTurn.getSpeakingRate();
     exToRate.put(exid, speakingRate);
+
+    addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
   }
 
   @Override

@@ -23,10 +23,7 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -86,7 +83,13 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     addStyleName("inlineFlex");
   }
 
-
+  /**
+   *
+   * @param id
+   * @param duration
+   * @param alignmentOutput
+   * @return
+   */
   @Override
   protected TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
     TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = super.showAlignment(id, duration, alignmentOutput);
@@ -95,13 +98,16 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   private float getSpeechDur(int id, AlignmentOutput alignmentOutput) {
-    List<TranscriptSegment> transcriptSegments = alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> transcriptSegments = alignmentOutput == null ? null : alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
     if (transcriptSegments == null || transcriptSegments.isEmpty()) {
-      logger.warning("huh? no transcript for " + id);
+      logger.warning("getSpeechDur : huh? no transcript for " + id);
       return 0F;
     } else {
-      float start = transcriptSegments.get(0).getStart();
-      float end = transcriptSegments.get(transcriptSegments.size() - 1).getEnd();
+      TranscriptSegment first = transcriptSegments.get(0);
+      float start = first.getStart();
+      TranscriptSegment last = transcriptSegments.get(transcriptSegments.size() - 1);
+      float end = last.getEnd();
+      logger.info("getSpeechDur " + first.getEvent() + " - " + last.getEvent());
       return end - start;
     }
   }
@@ -123,9 +129,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   private void showWordScore(TranscriptSegment k, IHighlightSegment v) {
+    v.restoreText();
     v.setHighlightColor(SimpleColumnChart.getColor(k.getScore()));
     v.showHighlight();
-    v.restoreText();
   }
 
   @Override
@@ -156,7 +162,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   public void maybeSetObscure(Collection<String> coreVocab) {
     IHighlightSegment candidate = getObscureCandidate(coreVocab, true);
 
-    if (candidate == null || flclickables.indexOf(candidate) == 0 ) {
+    if (candidate == null || flclickables.indexOf(candidate) == 0) {
       candidate = getObscureCandidate(coreVocab, false);
     }
 
@@ -181,9 +187,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
           ).collect(Collectors.toList());
 
       if (!matches.isEmpty()) {
-       // logger.info("getObscureCandidate for " + segment + " found " + matches + (useExact ? " exact" : " contains"));
+        // logger.info("getObscureCandidate for " + segment + " found " + matches + (useExact ? " exact" : " contains"));
         candidate = segment;
-        if (!isFirst && candidate.getContent().length()>1) break;
+        if (!isFirst && candidate.getContent().length() > 1) break;
       }
 
       isFirst = false;
@@ -213,7 +219,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   public float getSpeakingRate() {
-    return (refSpeechDur == 0F || studentSpeechDur == 0F) ? -1F : (studentSpeechDur / refSpeechDur);
+    float v = (refSpeechDur == 0F || studentSpeechDur == 0F) ? -1F : (studentSpeechDur / refSpeechDur);
+    logger.info("getSpeakingRate " + getExID() + " student " + studentSpeechDur + " ref " + refSpeechDur + " ratio " +v);
+    return v;
   }
 
   private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
@@ -280,8 +288,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
           } else {
             logger.info("usePartial : (" + rehearseView.getNumValidities() +
                 " packets) skip validity " + validity +
-                " first vad " + firstVAD +
-                " (" + (start - firstVAD) + ")" +
+                " vad " + firstVAD +
+               // " (" + (start - firstVAD) + ")" +
                 " for " + report() + " diff " + (System.currentTimeMillis() - start));
           }
         } else {
@@ -391,6 +399,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    */
   public void startRecording() {
     start = System.currentTimeMillis();
+    logger.info("startRecording at " + start + " or " + new Date(start));
     firstVAD = -1;
     recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
   }

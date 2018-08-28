@@ -385,10 +385,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     long now = System.currentTimeMillis();
     long roundtrip = now - then;
 
-    if (false) {
+    if (true) {
       logger.info("PostAudioRecordButton : onPostSuccess Got audio " +
-          "\n\tanswer    " + result +
-          "\n\troundtrip " + roundtrip);
+          "\n\tanswer for " + result.getExid() +
+          "\n\tscore      " + result.getScore()+
+          "\n\troundtrip  " + roundtrip);
     }
 
 /*    if (result.getReqid() != reqid) {

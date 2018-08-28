@@ -112,6 +112,12 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
     obscureRespTurns();
   }
 
+  @Override
+  protected void clearScores() {
+    super.clearScores();
+    obscureRespTurns();
+  }
+
   private void obscureRespTurns() {
     getSeq().forEach(RecordDialogExercisePanel::restoreText);
     getRespSeq().forEach(RecordDialogExercisePanel::obscureText);

@@ -264,7 +264,7 @@ public class WebAudioRecorder {
     }
 */
     if (wavStreamCallback != null) {
-      console("getStreamResponse got " + json.length() + " " + json);
+    //  console("getStreamResponse got " + json.length() + " " + json);
       wavStreamCallback.getResponse(json);
     } else {
       console("getStreamResponse no callback?");
