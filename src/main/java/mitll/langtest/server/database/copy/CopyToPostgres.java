@@ -124,6 +124,7 @@ public class CopyToPostgres<T extends CommonShell> {
     SEND("s"),
     DIALOG("g"),
     CLEANDIALOG("n"),
+    LIST("p"),
     UNKNOWN("k");
 
     private String value;
@@ -1479,6 +1480,8 @@ public class CopyToPostgres<T extends CommonShell> {
     } else if (cmd.hasOption(CLEANDIALOG.toLower())) {
       action = CLEANDIALOG;
       to = Integer.parseInt(cmd.getOptionValue(CLEANDIALOG.toLower()));
+    } else if (cmd.hasOption(LIST.toLower())) {
+      action = LIST;
     } else if (cmd.hasOption(MERGE.toLower())) {
       action = MERGE;
       from = Integer.parseInt(cmd.getOptionValue(MERGE.toLower()));
@@ -1647,6 +1650,10 @@ public class CopyToPostgres<T extends CommonShell> {
         cleanDialog(to);
         doExit(true);  // ?
         break;
+      case LIST:
+        listProjects();
+        doExit(true);  // ?
+        break;
  /*       case MERGEDAY:
         logger.info("merge project from into project to");
         copyToPostgres.merge(from, to, onDay);
@@ -1680,7 +1687,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
   @NotNull
   private static PathHelper getPathHelper(DatabaseImpl database) {
-    return getPathHelper("war",database.getServerProps());
+    return getPathHelper("war", database.getServerProps());
   }
 
   private static void cleanDialog(int to) {
@@ -1694,6 +1701,14 @@ public class CopyToPostgres<T extends CommonShell> {
         if (!b) logger.info("project " + project + " already has dialog data.");
       }
     }
+  }
+
+  private static void listProjects() {
+    DatabaseImpl database = getDatabase();
+    database.getProject(1);
+    Collection<Project> projects = database.getProjects();
+    logger.info("known projects in " + database.getDbConfig() + " = " + projects.size());
+    projects.forEach(project -> logger.info("project #" + project.getID() + " : " + project));
   }
 
   private void sendReports() {
@@ -1770,6 +1785,11 @@ public class CopyToPostgres<T extends CommonShell> {
       mapFile = new Option(act2.getValue(), act2.toLower(), true, "clean dialogs from project id");
       options.addOption(mapFile);
 
+      {
+        ACTION act3 = LIST;
+        mapFile = new Option(act3.getValue(), act3.toLower(), false, "list projects");
+        options.addOption(mapFile);
+      }
 
       addOption(options, TO);
       addOption(options, ONDAY);
