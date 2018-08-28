@@ -71,8 +71,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList<T extends CommonShell, U extends Shell>
-    extends VerticalPanel
+public abstract class ExerciseList<T extends CommonShell, U extends Shell> extends VerticalPanel
     implements ListInterface<T, U>, ProvidesResize {
   private final Logger logger = Logger.getLogger("ExerciseList");
 
@@ -570,8 +569,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>
   @Override
   public void hide() {
     Widget parent = getParent();
-    logger.info("hide parent " + parent.getElement().getId());
-    logger.info("hide parent parent " + parent.getParent().getElement().getId());
+//    logger.info("hide parent " + parent.getElement().getId());
+//    logger.info("hide parent parent " + parent.getParent().getElement().getId());
     parent.setVisible(false);
   }
 

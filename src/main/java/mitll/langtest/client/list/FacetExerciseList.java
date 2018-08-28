@@ -368,7 +368,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   private int getPageIndex() {
-    return isDrill ? 0 : controller.getStorage().getInt(PAGE_SIZE_SELECTED);
+    return isDrill ? 0 : controller.getStorage().getInt(pageSizeSelected);
   }
 
   private void onPageSizeChange(ListBox pagesize) {

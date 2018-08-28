@@ -66,9 +66,8 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
    */
   RecorderPlayAudioPanel makePlayAudioPanel() {
     //long then = System.currentTimeMillis();
-    NoFeedbackRecordAudioPanel outer =this;
+    NoFeedbackRecordAudioPanel outer = this;
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller) {
-
       /**
        * @see RecordButtonPanel#postAudioFile
        * @return
@@ -96,7 +95,10 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     return playAudioPanel;
   }
 
-  Widget getPopupTargetWidget() { return this; }
+  Widget getPopupTargetWidget() {
+    return this;
+  }
+
   private String getDeviceValue() {
     return sessionManager.getSession();
   }
@@ -146,8 +148,8 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
   }
 
   /**
-   * @see FeedbackPostAudioRecordButton#useResult
    * @param result IGNORED HERE
+   * @see FeedbackPostAudioRecordButton#useResult
    */
   @Override
   public void useResult(AudioAnswer result) {
@@ -166,7 +168,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
    */
   @Override
   public void onPostFailure() {
-      logger.info("onPostFailure...");
+    logger.info("onPostFailure...");
   }
 
   @Override

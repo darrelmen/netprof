@@ -59,9 +59,9 @@ public class PopupContainerFactory {
   /**
    * @param commentEntryText
    * @return
-   * @see NPFExercise#getNextListButton
+   * @seex NPFExercise#getNextListButton
    */
-  public DecoratedPopupPanel makePopupAndButton(PopupContainerFactory.HidePopupTextBox commentEntryText,
+  /*public DecoratedPopupPanel makePopupAndButton(PopupContainerFactory.HidePopupTextBox commentEntryText,
                                                 Button triggerButton,
                                                 Tooltip triggerButtonTooltip,
                                                 ClickHandler clickHandler) {
@@ -72,10 +72,16 @@ public class PopupContainerFactory {
     configurePopupButton(triggerButton, thePopup, commentEntryText, triggerButtonTooltip);
 
     return thePopup;
-  }
+  }*/
 
+  /**
+   * @param commentEntryText
+   * @param clickHandler
+   * @return
+   * @see NewListButton#getNewListButton2
+   */
   @NotNull
-  public DecoratedPopupPanel getPopup(HidePopupTextBox commentEntryText, ClickHandler clickHandler) {
+  DecoratedPopupPanel getPopup(HidePopupTextBox commentEntryText, ClickHandler clickHandler) {
     final DecoratedPopupPanel thePopup = new DecoratedPopupPanel();
     thePopup.setAutoHideEnabled(true);
 
@@ -114,7 +120,7 @@ public class PopupContainerFactory {
    * @param popup
    * @param textEntry
    * @param tooltip
-   * @see mitll.langtest.client.custom.exercise.CommentBox#configureCommentButton(com.github.gwtbootstrap.client.ui.Button, boolean, com.google.gwt.user.client.ui.PopupPanel, String, com.github.gwtbootstrap.client.ui.TextBox)
+   * @see mitll.langtest.client.custom.exercise.CommentBox#configureCommentButton
    */
   void configurePopupButton(final Button popupButton,
                             final PopupPanel popup,
@@ -124,7 +130,7 @@ public class PopupContainerFactory {
     popupButton.addClickHandler(event -> showOrHideRelative(popup, popupButton, textEntry, tooltip));
   }
 
-  public void showOrHideRelative(PopupPanel popup, UIObject popupButton, TextBox textEntry, Tooltip tooltip) {
+  void showOrHideRelative(PopupPanel popup, UIObject popupButton, TextBox textEntry, Tooltip tooltip) {
     boolean visible = popup.isShowing();
 
     if (visible) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
@@ -138,7 +144,7 @@ public class PopupContainerFactory {
 
       Scheduler.get().scheduleDeferred(() -> textEntry.setFocus(true));
 
-     if (tooltip != null) tooltip.hide();
+      if (tooltip != null) tooltip.hide();
     }
   }
 

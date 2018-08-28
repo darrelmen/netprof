@@ -119,16 +119,4 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     simpleRecordAudioPanel.gotShortDurationRecording();
   }
 
-  /**
-   * TODO : don't do this...
-   */
-  private boolean showing = false;
-
-  @Override
-  protected void showPopup(String toShow) {
-    if (!showing) {
-      new ModalInfoDialog("Warning", toShow, hiddenEvent -> showing = false);
-      showing = true;
-    }
-  }
 }

@@ -37,6 +37,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.initial.PopupHelper;
@@ -350,8 +351,22 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
     long now = System.currentTimeMillis();
     logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis :\n" + exception);
+    showWarning(Validity.INVALID.getPrompt() + "\n" + exception);
+
     logMessage("failed to post audio for " + user + " exercise " + getExerciseID(), true);
-    showPopup(Validity.INVALID.getPrompt() + "\n" + exception);
+  }
+
+
+  /**
+   * TODO : don't do this...
+   */
+  private boolean showing = false;
+
+  private void showWarning(String toShow) {
+    if (!showing) {
+      new ModalInfoDialog("Warning", toShow, hiddenEvent -> showing = false);
+      showing = true;
+    }
   }
 
   protected void onPostFailure() {

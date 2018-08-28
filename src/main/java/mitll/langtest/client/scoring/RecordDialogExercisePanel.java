@@ -114,9 +114,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   /**
+   * @param coreVocab
    * @see mitll.langtest.client.banner.PerformViewHelper#getTurnPanel
    * Or should we use exact match?
-   * @param coreVocab
    */
   public void maybeSetObscure(Collection<String> coreVocab) {
     flclickables.forEach(iHighlightSegment ->
@@ -154,6 +154,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private static final SafeUri RED_X_URL = UriUtils.fromSafeConstant(RED_X);
 
   /**
+   * @see RehearseViewHelper#useInvalidResult
    * Maybe color in the words red?
    */
   @Override
@@ -163,7 +164,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   /**
-   *
    * @param showFL
    * @param showALTFL
    * @param phonesChoices

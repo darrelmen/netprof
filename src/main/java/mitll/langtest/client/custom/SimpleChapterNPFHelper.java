@@ -154,7 +154,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   @Override
   public void hideList() {
-    logger.info("hideList on exercise list : " + npfExerciseList.getElement().getId());
+  //  logger.info("hideList on exercise list : " + npfExerciseList.getElement().getId());
     npfExerciseList.hide();
   }
 
@@ -170,21 +170,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see mitll.langtest.client.exercise.WaveformExercisePanel
    */
   protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
-
-  /*
-  protected ExercisePanelFactory<CommonShell, ClientExercise> getFactoryInject(
-      final PagingExerciseList<CommonShell, ClientExercise> exerciseList, PanelFactory panelFactory) {
-    return new ExercisePanelFactory<CommonShell, ClientExercise>(controller, exerciseList) {
-      @Override
-      public Panel getExercisePanel(ClientExercise e) {
-        return panelFactory.getExercisePanel(e);
-      }
-    };
-  }*/
-
-/*  public interface PanelFactory {
-    Panel getExercisePanel(ClientExercise e);
-  }*/
 
   @Override
   public void onResize() {

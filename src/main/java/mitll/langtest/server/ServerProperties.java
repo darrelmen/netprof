@@ -820,10 +820,7 @@ public class ServerProperties {
    *
    * @return
    */
-  public String getDBConfig() {
-    return dbConfig;//
-    // props.getProperty(DB_CONFIG, POSTGRES_HYDRA);
-  }
+  public String getDBConfig() {  return dbConfig;  }
 
   public void setDBConfig(String optDatabase) {
     this.dbConfig = optDatabase;

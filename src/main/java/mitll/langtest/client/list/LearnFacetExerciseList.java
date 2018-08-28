@@ -21,9 +21,9 @@ import java.util.logging.Logger;
  * @param <T>
  */
 public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> extends FacetExerciseList<T, ClientExercise> {
-  private final Logger logger = Logger.getLogger("FacetExerciseList");
+  private final Logger logger = Logger.getLogger("LearnFacetExerciseList");
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   public LearnFacetExerciseList(Panel secondRow,
                                 Panel currentExerciseVPanel,

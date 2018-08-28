@@ -678,7 +678,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   @Override
   public void useInvalidResult(int exid) {
     T matchingTurn = exToTurn.get(exid);
-    addScore(exid,0,matchingTurn);
+    addScore(exid, 0F, matchingTurn);
     matchingTurn.useInvalidResult();
   }
 
