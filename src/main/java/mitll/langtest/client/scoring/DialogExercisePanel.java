@@ -167,7 +167,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 //        logger.warning("makePlayAudio no audio for " + e.getID());
 //      }
     } else {
-      logger.warning("makePlayAudio no audio in " + e.getAudioAttributes());
+      logger.warning("makePlayAudio no audio in audio attributes " + e.getAudioAttributes() + " for exercise " + e.getID());
     }
   }
 

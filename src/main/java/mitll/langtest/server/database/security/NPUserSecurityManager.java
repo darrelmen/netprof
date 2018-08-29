@@ -536,6 +536,11 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     return sessUser;
   }
 
+  /**
+   * @see #lookupUserIDFromSessionOrDB(HttpServletRequest, boolean)
+   * @param request
+   * @return
+   */
   private Integer lookupUserIDFromHttpSession(HttpServletRequest request) {
     //long then = System.currentTimeMillis();
     HttpSession session = request != null ? getCurrentSession(request) : null;

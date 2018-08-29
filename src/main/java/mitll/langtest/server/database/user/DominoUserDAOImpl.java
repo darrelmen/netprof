@@ -1262,7 +1262,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           projID = collect.iterator().next().getID();
           logger.info("getProjectAssignment : match " + next + " to project " + projID);
         } else {
-          logger.warn("getProjectAssignment no polyglot project for " + languageMatchingGroup);
+          logger.info("getProjectAssignment no polyglot project for " + languageMatchingGroup);
         }
       } else {
         logger.warn("getProjectAssignment no language matching group " + next);
@@ -1502,7 +1502,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   public List<DBUser> getAll() {
     long then = System.currentTimeMillis();
-    logger.info("getAll calling get all users", new Exception());
+    logger.info("getAll calling get all users");
     FindOptions<UserColumn> opts = getUserColumnFindOptions();
     List<DBUser> users = delegate.getUsers(-1, opts);
     long now = System.currentTimeMillis();

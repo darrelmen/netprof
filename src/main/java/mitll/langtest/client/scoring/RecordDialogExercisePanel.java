@@ -107,7 +107,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       float start = first.getStart();
       TranscriptSegment last = transcriptSegments.get(transcriptSegments.size() - 1);
       float end = last.getEnd();
-      logger.info("getSpeechDur " + first.getEvent() + " - " + last.getEvent());
+     // logger.info("getSpeechDur " + first.getEvent() + " - " + last.getEvent());
       return end - start;
     }
   }
@@ -122,7 +122,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     emoticon.setVisible(true);
 
     TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = showAlignment(0, durationInMillis, alignmentOutput);
-
     if (transcriptSegmentIHighlightSegmentTreeMap != null) {
       transcriptSegmentIHighlightSegmentTreeMap.forEach(this::showWordScore);
     }

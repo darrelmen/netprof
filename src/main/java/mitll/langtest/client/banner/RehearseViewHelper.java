@@ -63,7 +63,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private SessionStorage sessionStorage;
   /**
    * @see #showScore()
-   * @see #showDialogGetRef(IDialog, Panel)
+   * @see ListenViewHelper#showDialogGetRef(int, IDialog, Panel)
    */
   private DivWidget overallFeedback;
   private HTML leftSpeakerHint, rightSpeakerHint;
@@ -86,12 +86,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   }
 
   /**
+   * @param dialogID
    * @param dialog
    * @param child
    */
   @Override
-  protected void showDialogGetRef(IDialog dialog, Panel child) {
-    super.showDialogGetRef(dialog, child);
+  protected void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
+    super.showDialogGetRef(dialogID, dialog, child);
     child.add(overallFeedback = getOverallFeedback());
   }
 

@@ -273,7 +273,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
   private String ensureMP3(String wavFile, TrackInfo trackInfo, String language, boolean waitToFinish) {
     String parent = serverProps.getAnswerDir();
     if (wavFile != null) {
-      if (DEBUG || true) {
+      if (DEBUG) {
         logger.debug("ensureMP3 : trying to ensure compressed" +
             "\n\tfor " + wavFile +
             "\n\tunder " + parent);

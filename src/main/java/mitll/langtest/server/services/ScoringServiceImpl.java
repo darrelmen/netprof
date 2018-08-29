@@ -773,6 +773,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         }
       }
     } else {
+      logger.warn("configureAndRefresh project " + projID + " user #" +userIDFromSessionOrDB + " does not have permission?");
       throw getRestricted(UPDATING_PROJECT_INFO);
     }
   }

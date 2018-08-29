@@ -295,7 +295,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @param dialogID
    * @param dialog
    */
-  private void addExercises(int projid, Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated, Integer dialogID, Dialog dialog) {
+  private void addExercises(int projid,
+                            Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated,
+                            Integer dialogID,
+                            Dialog dialog) {
     List<SlickRelatedExercise> slickRelatedExercises = dialogIDToRelated.get(dialogID);
 
     if (slickRelatedExercises != null) {

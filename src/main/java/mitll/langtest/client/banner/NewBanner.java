@@ -38,7 +38,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final List<VIEWS> STANDARD_VIEWS =
       Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
 
-  private static final List<VIEWS> DIALOG_VIEWS = Arrays.asList(VIEWS.DIALOG, VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.PERFORM);
+  private static final List<VIEWS> DIALOG_VIEWS =
+      Arrays.asList(VIEWS.DIALOG, VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.PERFORM);
 
   private static List<VIEWS> BOTH = new ArrayList<>(STANDARD_VIEWS);
 
@@ -496,7 +497,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     if (linkToShow == null) {
       logger.warning("checkProjectSelected Current view is " + currentView);
-      logger.warning("checkProjectSelected Current view link is null");
+    //  logger.warning("checkProjectSelected Current view link is null");
       logger.warning("checkProjectSelected huh? keys are " + viewToLink.keySet());
       linkToShow = viewToLink.get(VIEWS.LEARN);
     }

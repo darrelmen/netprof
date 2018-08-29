@@ -1499,6 +1499,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       mailSupport.stopHeartbeat();
     }
     try {
+
     //  logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();
     } catch (Exception e) {
@@ -1831,7 +1832,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       } else {
         logger.info("doReport : not sending email report since this is not Sunday...");
       }
-      reportHelper.tryTomorrow(getReport());
+      reportHelper.tryTomorrow(this);
     } else {
       logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
     }
@@ -1871,7 +1872,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return getReport().getAllReports(getProjectDAO().getAll(), jsonObject, year, new ArrayList<>());
   }
 
-  private IReport getReport() {
+  public IReport getReport() {
     IUserDAO.ReportUsers reportUsers = userDAO.getReportUsers();
     return new Report(resultDAO, eventDAO, audioDAO,
         reportUsers.getAllUsers(),

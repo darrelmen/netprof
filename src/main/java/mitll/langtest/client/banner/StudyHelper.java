@@ -2,6 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
@@ -33,7 +34,8 @@ class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T>
 
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
-    controller.getDialogService().getDialog(getDialogFromURL(), new AsyncCallback<IDialog>() {
+    int dialogFromURL = getDialogFromURL();
+    controller.getDialogService().getDialog(dialogFromURL, new AsyncCallback<IDialog>() {
       @Override
       public void onFailure(Throwable caught) {
         // TODO fill in
@@ -41,15 +43,19 @@ class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T>
 
       @Override
       public void onSuccess(IDialog dialog) {
-        showDialogGetRef(dialog,listContent);
+        showDialogGetRef(dialogFromURL, dialog, listContent);
       }
     });
   }
 
-  private void showDialogGetRef(IDialog dialog, Panel child) {
-    DivWidget header = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog);
-    child.add(header);
-    header.addStyleName("bottomFiveMargin");
+  private void showDialogGetRef(int dialogFromURL, IDialog dialog, Panel child) {
+    if (dialog == null) {
+      child.add(new HTML("hmm can't find dialog #" + dialogFromURL + " in database?"));
+    } else {
+      DivWidget header = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog);
+      header.addStyleName("bottomFiveMargin");
+      child.add(header);
+    }
     super.showContent(child, INavigation.VIEWS.STUDY, false);
     hideList();
   }

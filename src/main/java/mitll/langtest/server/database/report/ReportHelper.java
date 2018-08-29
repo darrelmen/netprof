@@ -3,6 +3,7 @@ package mitll.langtest.server.database.report;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IReport;
 import mitll.langtest.server.database.ReportStats;
 import mitll.langtest.server.database.exercise.Project;
@@ -57,14 +58,14 @@ public class ReportHelper {
     this.mailSupport = mailSupport;
   }
 
-  private void doReport(IReport report) {
+  private void doReport(DatabaseImpl database, IReport report) {
     if (serverProps.isFirstHydra()) {
       if (isTodayAGoodDay()) {
         sendReports(report);
       } else {
         logger.info("doReport : not sending email report since this is not Sunday...");
       }
-      tryTomorrow(report);
+      tryTomorrow(database);
     } else {
       logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
     }
@@ -80,8 +81,10 @@ public class ReportHelper {
    * <p>
    * fire at 11:59:30 PM Saturday, so the report ends this saturday and not next saturday...
    * i.e. if it's Sunday 12:01 AM, it rounds up and includes a line for the whole upcoming week
+   *
+   * @param database
    */
-  public void tryTomorrow(IReport report) {
+  public void tryTomorrow(DatabaseImpl database) {
     ZoneId zone = ZoneId.systemDefault();
     ZonedDateTime now = ZonedDateTime.now(zone);
 
@@ -99,7 +102,7 @@ public class ReportHelper {
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
-      doReport(report); // try again later
+      doReport(database, database.getReport()); // try again later
     });
     this.thread = thread;
     thread.start();

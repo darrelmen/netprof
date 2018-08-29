@@ -107,6 +107,8 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final boolean ALLOW_DELETE = false;
   //public static final int PASUYA_ID = 736;
 
+  private static DatabaseImpl database;
+
   enum ACTION {
     COPY("c"),
 
@@ -345,7 +347,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }*/
 
   private void merge(int from, int to) {
-    DatabaseImpl database = getDatabase();
+    database = getDatabase();
     Project fProject = database.getProject(from);
     Project tProject = database.getProject(to);
     logger.info("merging " +
@@ -369,7 +371,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private void mergeRecordings(int from, int to, Date onDay) {
-    DatabaseImpl database = getDatabase();
+    database = getDatabase();
     Project fProject = database.getProject(from);
     Project tProject = database.getProject(to);
     logger.info("merging " +
@@ -1672,7 +1674,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static void copyDialog(int to) {
-    DatabaseImpl database = getDatabase();
+    database = getDatabase();
     if (to == -1) logger.error("remember to set the project id");
     else {
       Project project = database.getProject(to);
@@ -1683,6 +1685,7 @@ public class CopyToPostgres<T extends CommonShell> {
         }
       }
     }
+    if (database != null) database.close();
   }
 
   @NotNull
@@ -1691,7 +1694,7 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static void cleanDialog(int to) {
-    DatabaseImpl database = getDatabase();
+    database = getDatabase();
     if (to == -1) logger.error("remember to set the project id");
     else {
       Project project = database.getProject(to);
@@ -1701,23 +1704,29 @@ public class CopyToPostgres<T extends CommonShell> {
         if (!b) logger.info("project " + project + " already has dialog data.");
       }
     }
+    if (database != null) database.close();
   }
 
   private static void listProjects() {
-    DatabaseImpl database = getDatabase();
+    database = getDatabase();
     database.getProject(1);
     Collection<Project> projects = database.getProjects();
     logger.info("known projects in " + database.getDbConfig() + " = " + projects.size());
     projects.forEach(project -> logger.info("project #" + project.getID() + " : " + project));
+    if (database != null) database.close();
   }
 
   private void sendReports() {
-    DatabaseImpl database = getDatabase();
+    database = getDatabase();
     database.getProject(2);
     database.sendReports();
+    if (database != null) database.close();
   }
 
   private static void doExit(boolean b) {
+    if (database != null) {
+      database.close();
+    }
     System.exit(b ? 0 : 1);
   }
 

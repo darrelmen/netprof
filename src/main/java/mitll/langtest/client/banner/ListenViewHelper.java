@@ -10,6 +10,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -18,13 +19,11 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.TurnPanel;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -91,7 +90,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
     rightTurnPanels.clear();
     currentTurn = null;
 
-    controller.getDialogService().getDialog(getDialogFromURL(), new AsyncCallback<IDialog>() {
+    int dialogFromURL = getDialogFromURL();
+    controller.getDialogService().getDialog(dialogFromURL, new AsyncCallback<IDialog>() {
       @Override
       public void onFailure(Throwable caught) {
         // TODO fill in
@@ -99,7 +99,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
 
       @Override
       public void onSuccess(IDialog dialog) {
-        showDialogGetRef(dialog, listContent);
+        showDialogGetRef(dialogFromURL, dialog, listContent);
       }
     });
   }
@@ -108,8 +108,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
     return new SelectionState().getDialog();
   }
 
-  protected void showDialogGetRef(IDialog dialog, Panel child) {
-    showDialog(dialog, child);
+  protected void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
+    showDialog(dialogID, dialog, child);
     getRefAudio(new ArrayList<RefAudioGetter>(bothTurns).iterator());
   }
 
@@ -117,14 +117,19 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
   /**
    * Main method for showing the three sections
    *
+   * @param dialogID
    * @param dialog
    * @param child
    * @see #showDialogGetRef
    */
-  private void showDialog(IDialog dialog, Panel child) {
-    child.add(dialogHeader = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog));
-    child.add(getSpeakerRow(dialog));
-    child.add(getTurns(dialog));
+  private void showDialog(int dialogID, IDialog dialog, Panel child) {
+    if (dialog == null) {
+      child.add(new HTML("hmmm can't find dialog #" + dialogID +      " in database"));
+    } else {
+      child.add(dialogHeader = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog));
+      child.add(getSpeakerRow(dialog));
+      child.add(getTurns(dialog));
+    }
   }
 
   @NotNull
