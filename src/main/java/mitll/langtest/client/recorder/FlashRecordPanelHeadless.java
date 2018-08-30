@@ -188,13 +188,14 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   /**
-   * @see LangTest#startStream(int, int, mitll.langtest.client.initial.WavStreamCallback)
    * @param url
    * @param exid
    * @param reqid
+   * @param isReference
    * @param wavStreamCallback
+   * @see ExerciseController#startStream(int, int, boolean, WavStreamCallback)
    */
-  public void startStream(String url, String exid, String reqid, WavStreamCallback wavStreamCallback) {
+  public void startStream(String url, String exid, String reqid, boolean isReference, WavStreamCallback wavStreamCallback) {
     if (usingWebRTC()) {
       logger.info("startStream post" +
           "\n\tto  " + url +
@@ -202,7 +203,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
       WebAudioRecorder.setStreamCallback(wavStreamCallback);
 
-      webAudio.startStream(url, exid, reqid);
+      webAudio.startStream(url, exid, reqid, isReference ? "true" : "false");
     } else if (usingFlash()) {
       //flashRecordOnClick();
       logger.warning("no stream with flash!!!!\\n\n");

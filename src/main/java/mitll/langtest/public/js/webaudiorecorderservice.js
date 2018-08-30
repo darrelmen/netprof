@@ -144,7 +144,7 @@
         };
 
         // see webaudiorecorder serviceStartStream
-        this.serviceStartStream = function (url, exid, reqid, cb) {
+        this.serviceStartStream = function (url, exid, reqid, isreference, cb) {
             currCallback = cb || config.callback;
 
             //   source.connect(analyser);
@@ -162,7 +162,8 @@
                 command: 'startStream',
                 url: url,
                 exid: exid,
-                reqid: reqid
+                reqid: reqid,
+                isreference: isreference
             });
         };
 

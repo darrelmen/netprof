@@ -277,7 +277,7 @@ public class UserManager {
     localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
     localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
 
-    logger.info("storeUser : user now " + user.getID() + " / " + getUser());
+    if (DEBUG) logger.info("storeUser : user now " + user.getID() + " / " + getUser());
   }
 
   /**

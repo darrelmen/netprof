@@ -144,8 +144,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @paramx response
    */
   @Override
-  protected void service(HttpServletRequest request,
-                         HttpServletResponse response) throws ServletException, IOException {
+  protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     ServletRequestContext ctx = new ServletRequestContext(request);
     String contentType = ctx.getContentType();
     //  String requestType = getRequestType(request);
@@ -242,16 +241,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     //String postedWordOrPhrase = "";
 
     boolean isRef = isReference(request);
-/*    logger.info("getJSONForStream got" +
-//        "\n\trequest  " + requestType +
-//        "\n\tprojid   " + projid +
-            // "\n\t" +
-            " exid     " + realExID// +
-        //"\n\texercise text " + realExID +
-        //      "\n\treq      " + reqid +
-        //    "\n\tref      " + isRef +
-        //      "\n\tdevice   " + deviceType + "/" + device
-    );*/
+    logger.info("getJSONForStream got" +
+        "\n\trequest  " + requestType +
+        "\n\tprojid   " + projid +
+        "\n\texid     " + realExID +
+        "\n\texercise text " + realExID +
+        "\n\treq      " + reqid +
+        "\n\tref      " + isRef +
+        "\n\tdevice   " + deviceType + "/" + device
+    );
 
     long session = getStreamSession(request);
     int packet = getStreamPacket(request);
@@ -265,7 +263,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     long then = System.currentTimeMillis();
     Validity validity = newChunk.calcValid(audioCheck, isRef, serverProps.isQuietAudioOK());
     //if (validity != Validity.OK)
-    logger.info("getJSONForStream : chunk for exid " + realExID + " " + newChunk + " is " + validity + " : " + newChunk.getValidityAndDur());
+    logger.info("getJSONForStream : (" + state + ") chunk for exid " + realExID + " " + newChunk + " is " + validity + " : " + newChunk.getValidityAndDur());
 
 /*
     long now = System.currentTimeMillis();
@@ -298,7 +296,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       }*/
     } else {  // STOP
       long then2 = System.currentTimeMillis();
-      jsonObject = getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid, audioChunks, jsonObject);
+      jsonObject = getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid,
+          isRef,
+          audioChunks, jsonObject);
+
       long now2 = System.currentTimeMillis();
       logger.info("getJsonObject took " + (now2 - then2) + " for  " + realExID + " req " + reqid);
     }
@@ -314,6 +315,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private JSONObject getJsonObject(String deviceType, String device, int userIDFromSession,
                                    int realExID, int reqid, int projid,
+                                   boolean isReference,
                                    List<AudioChunk> audioChunks, JSONObject jsonObject) throws IOException, DominoSessionException {
     AudioChunk combined = getCombinedAudioChunk(audioChunks);
 
@@ -339,7 +341,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         .setDoDecode(true)
         .setDoAlignment(true)
         .setRecordInResults(true)
-        .setRefRecording(false)
+        .setRefRecording(isReference)
         .setAllowAlternates(false)
         .setCompressLater(true);
 
@@ -595,7 +597,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   private boolean isReference(HttpServletRequest request) {
-    return request.getHeader(ISREFERENCE.toString()) != null;
+    String header = request.getHeader(ISREFERENCE.toString());
+    return header != null && header.equalsIgnoreCase("true");
   }
 
   private String getHeader(HttpServletRequest request, HeaderValue resultId) {

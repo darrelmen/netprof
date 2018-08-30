@@ -58,7 +58,7 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
     this.exerciseList = exerciseList;
     keyForSorting = LIST_BOX_SETTING + "_" + view.toString();
 
-    logger.info("ListSorting: key " + keyForSorting);
+  //  logger.info("ListSorting: key " + keyForSorting);
     ProjectStartupInfo projectStartupInfo = exerciseList.controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
       language = exerciseList.controller.getLanguage();
@@ -165,13 +165,13 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
   }
 
   private void storeValue(String toStore) {
-    logger.info("store " + keyForSorting + " = " + toStore);
+    if (DEBUG)  logger.info("store " + keyForSorting + " = " + toStore);
     getStorage().storeValue(keyForSorting, toStore);
   }
 
   private String getStoredValue() {
     String value = getStorage().getValue(keyForSorting);
-    logger.info("get   " + keyForSorting + " = " + value);
+    if (DEBUG) logger.info("get   " + keyForSorting + " = " + value);
     return value;
   }
 

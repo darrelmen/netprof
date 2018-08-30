@@ -146,7 +146,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
   private void addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     NavLink lang = new NavLink(project.getName());
 
-    logger.info("addProjectCrumb  for " + project.getName() + " " + project.getMode());
+   if (DEBUG) logger.info("addProjectCrumb  for " + project.getName() + " " + project.getMode());
 
     lang.addClickHandler(clickEvent -> {
       logger.info("addProjectCrumb choose project again for " + project.getName() + " " + project.getMode());

@@ -67,6 +67,8 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
 
+  private static final boolean DEBUG = false;
+
   private static final boolean USE_DELAY = false;
   private static final String END = "END";
 
@@ -145,11 +147,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
     long then = System.currentTimeMillis();
 
-//    logger.info("startRecording!");
+ if (DEBUG)   logger.info("startRecording!");
     controller.startRecording();
-    controller.startStream(getExerciseID(), reqid, bytes -> gotPacketResponse(bytes, then));
+    controller.startStream(getExerciseID(), reqid, shouldAddToAudioTable(), bytes -> gotPacketResponse(bytes, then));
   }
-
 
   /**
    * TODO : consider putting back reqid increment
@@ -159,22 +160,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    */
   public boolean stopRecording(long duration) {
     if (duration > MIN_DURATION) {
-//      logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
+      logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
 
-      long then = System.currentTimeMillis();
-      controller.stopRecording(new WavCallback() {
-        @Override
-        public void getBase64EncodedWavFile(String bytes) {
-          postAudioFile(bytes);
-        }
- /*       @Override
-        public void gotStreamResponse(String json) {
-          // logger.info("gotStreamResponse " + json);
-          // reqid++;
-          PostAudioRecordButton.this.gotStreamResponse(json, then);
-        }*/
-      }, USE_DELAY);
-
+      controller.stopRecording(bytes -> postAudioFile(bytes), USE_DELAY);
       return true;
     } else {
       showPopup(Validity.TOO_SHORT.getPrompt());
@@ -207,21 +195,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     }
   }
 
-/*  private void gotStreamResponse(String json, long then) {
-    JSONObject digestJsonResponse = jsonAnswerParser.digestJsonResponse(json);
-    String message = getMessage(digestJsonResponse);
-
-    if (!message.isEmpty()) {
-      // got interim OK
-      logger.info("stopRecording - should not happen : got interim " + message + " " + json);
-      usePartial(jsonAnswerParser.getValidity(digestJsonResponse));
-    } else if (!jsonAnswerParser.getField(digestJsonResponse, "status").isEmpty()) {
-      handlePostError(then, digestJsonResponse);
-    } else {
-      onPostSuccess(jsonAnswerParser.getAudioAnswer(digestJsonResponse), then);
-    }
-  }*/
-
   private String getMessage(JSONObject digestJsonResponse) {
     return jsonAnswerParser.getField(digestJsonResponse, "MESSAGE".toLowerCase());
   }
@@ -247,6 +220,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   /**
    * why so confusing -- ?
+   *
    * @param result
    * @see #onPostSuccess
    */
@@ -258,7 +232,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   /**
    * TODO : consider why we have to do this from the client.
-   *
    *
    * @param exid
    * @param validity
@@ -305,10 +278,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
         index,
         getAudioType());
 
- /*
-    logger.info("\n\n\nPostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext +
+
+    logger.info("\n\n\n\n\nPostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext +
         "\n\t bytes " + base64EncodedWavFile.length());
-        */
+
 
     DecoderOptions decoderOptions = new DecoderOptions()
         .setDoDecode(scoreAudioNow)
@@ -341,7 +314,6 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   /**
-   *
    * @param then
    * @param user
    * @param exception
@@ -388,7 +360,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     if (true) {
       logger.info("PostAudioRecordButton : onPostSuccess Got audio " +
           "\n\tanswer for " + result.getExid() +
-          "\n\tscore      " + result.getScore()+
+          "\n\tscore      " + result.getScore() +
           "\n\troundtrip  " + roundtrip);
     }
 
@@ -412,10 +384,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     }
   }
 
-  public void setValidAudio(boolean validAudio) {
-    this.validAudio=validAudio;
+  private void setValidAudio(boolean validAudio) {
+    this.validAudio = validAudio;
   }
-
 
   /**
    * Just for load testing

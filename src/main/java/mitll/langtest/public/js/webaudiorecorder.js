@@ -111,19 +111,21 @@ function stopRecording() {
     recorder && recorder.stop();
     // audio_context && audio_context.suspend();
 
-    if (audio_context) {
-        __log('webaudiorecorder.stopRecording : state = ' + audio_context.state);
+    /*
+        if (audio_context) {
+            __log('webaudiorecorder.stopRecording : state = ' + audio_context.state);
 
-        //} && audio_context.state === 'running')
-        // {
-        audio_context.suspend().then(function () {
-            __log('webaudiorecorder.stopRecording suspended recording...');
-            rememberedInput.stop();
-        });
-    }
+            //} && audio_context.state === 'running')
+            // {
+            audio_context.suspend().then(function () {
+                __log('webaudiorecorder.stopRecording suspended recording...');
+                rememberedInput.stop();
+            });
+        }
+    */
 
+    __log('webaudiorecorder.stopRecording');
 
-    __log('Stop Recording.');
     //   var end = new Date().getTime();
     //  __log("duration " + (end-start));
     // get WAV from audio data blob
@@ -131,11 +133,11 @@ function stopRecording() {
 }
 
 // see WebAudioRecorder.startStream
-function serviceStartStream(url, exid, reqid) {
+function serviceStartStream(url, exid, reqid, isreference) {
     //__log('webaudiorecorder.startStream ');
     __log('webaudiorecorder.startStream calling recorder');
 
-    recorder && recorder.serviceStartStream(url, exid, reqid,
+    recorder && recorder.serviceStartStream(url, exid, reqid, isreference,
         function (blob) {
             //      __log('startStream getStreamResponse.');
             getStreamResponse(blob);
@@ -146,7 +148,7 @@ function serviceStopStream() {
     recorder && recorder.stop();
 
     if (audio_context) {//} && audio_context.state === 'running') {
-        __log('webaudiorecorder.serviceStopStream state = ' +  audio_context.state);
+        __log('webaudiorecorder.serviceStopStream state = ' + audio_context.state);
         audio_context.suspend().then(function () {
             __log('webaudiorecorder.serviceStopStream suspended recording...');
         });

@@ -223,7 +223,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
   private VerticalPanel addRecordAudioPanelNoCaption(T exercise,
                                                      ExerciseController controller, int index, Panel vp, AudioType audioType) {
     RecordAudioPanel fast =
-        new RecordAudioPanel<>(exercise, controller, this, index, false, audioType, instance);
+        new RecordAudioPanel<>(exercise, controller, this, index, false, audioType);
     audioPanels.add(fast);
     vp.add(fast);
 

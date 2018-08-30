@@ -829,7 +829,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     CreateFirstRecordAudioPanel(U newExercise, Panel row,
                                 boolean recordRegularSpeed, String instance) {
       super(newExercise, NewUserExercise.this.controller, row, 0, false,
-          recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW, instance);
+          recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW);
       this.recordRegularSpeed = recordRegularSpeed;
       setExercise(newExercise);
 

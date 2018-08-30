@@ -37,6 +37,9 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.initial.WavStreamCallback;
+import mitll.langtest.client.scoring.PostAudioRecordButton;
+
+import java.util.logging.Logger;
 
 /**
  * Tries to do initWebaudio, and if no response has been received in 5 seconds, tries again.
@@ -47,7 +50,7 @@ import mitll.langtest.client.initial.WavStreamCallback;
  * @since 5/27/2014.
  */
 public class WebAudioRecorder {
-  // private final Logger logger = Logger.getLogger("WebAudioRecorder");
+   private static final Logger logger = Logger.getLogger("WebAudioRecorder");
   private static final int DELAY_MILLIS = 4000;
 
   private static boolean webAudioMicAvailable;
@@ -109,6 +112,9 @@ public class WebAudioRecorder {
 //      $wnd.getStopStreamResponse = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::getStopStreamResponse(Ljava/lang/String;));
   }-*/;
 
+  /**
+   * Call webaudiorecorder.startRecording
+   */
   public native void startRecording() /*-{
       $wnd.startRecording();
   }-*/;
@@ -117,10 +123,10 @@ public class WebAudioRecorder {
    * @param url
    * @param exid
    * @param reqid
-   * @see FlashRecordPanelHeadless#startStream(String, String, String, WavStreamCallback)
+   * @see FlashRecordPanelHeadless#startStream(String, String, String, boolean, WavStreamCallback)
    */
-  public native void startStream(String url, String exid, String reqid) /*-{
-      $wnd.serviceStartStream(url, exid, reqid);
+  public native void startStream(String url, String exid, String reqid, String isreference) /*-{
+      $wnd.serviceStartStream(url, exid, reqid, isreference);
   }-*/;
 
   /**
@@ -231,12 +237,16 @@ public class WebAudioRecorder {
    */
   private static WavCallback wavCallback = null;
 
+  /**
+   * @see FlashRecordPanelHeadless#stopWebRTCRecording
+   * @param wavCallback
+   */
   public void stopRecording(WavCallback wavCallback) {
-    console("WebAudioRecorder.stopRecording ");
-
     if (USE_STREAMS) {
+      logger.info("WebAudioRecorder.stopRecording - stop stream");
       doStopStream();
     } else {
+      logger.info("WebAudioRecorder.stopRecording - stop and grab wav");
       WebAudioRecorder.wavCallback = wavCallback;
       stopRecording();
     }
@@ -252,17 +262,6 @@ public class WebAudioRecorder {
    */
   public static void getStreamResponse(String json) {
     //  console("getStreamResponse   bytes = '" + json.length() + "'");
-/*
-    if (WebAudioRecorder.wavCallback == null) {
-      if (wavStreamCallback != null) {
-        wavStreamCallback.getResponse(json);
-      } else {
-        console("getStreamResponse no callback?");
-      }
-    } else {
-      WebAudioRecorder.wavCallback.gotStreamResponse(json);
-    }
-*/
     if (wavStreamCallback != null) {
     //  console("getStreamResponse got " + json.length() + " " + json);
       wavStreamCallback.getResponse(json);
@@ -271,27 +270,11 @@ public class WebAudioRecorder {
     }
   }
 
-/*
-  public static void getStopStreamResponse(String json) {
-    //  console("getStreamResponse   bytes = '" + json.length() + "'");
-    if (wavCallback == null) {
-
-//      if (wavStreamCallback != null) {
-//        wavStreamCallback.getResponse(json);
-//      } else {
-//        console("getStreamResponse no callback?");
-//      }
-      console("getStopStreamResponse no callback?");
-    } else {
-      console("getStopStreamResponse got " + json.length());
-      wavCallback.gotStreamResponse(json);
-    }
-  }
-*/
-
   /**
    * @param wavStreamCallback
-   * @see FlashRecordPanelHeadless#startStream(String, String, String, WavStreamCallback)
+   * @see PostAudioRecordButton#startRecording
+   * @see ExerciseController#startStream(int, int, boolean, WavStreamCallback)
+   * @see FlashRecordPanelHeadless#startStream(String, String, String, boolean, WavStreamCallback)
    */
   static void setStreamCallback(WavStreamCallback wavStreamCallback) {
     WebAudioRecorder.wavStreamCallback = wavStreamCallback;

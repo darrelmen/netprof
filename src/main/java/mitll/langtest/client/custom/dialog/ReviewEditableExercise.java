@@ -848,7 +848,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
     MyRecordAudioPanel(DivWidget widget, AudioType audioType, String instance) {
       super(ReviewEditableExercise.this.newUserExercise, ReviewEditableExercise.this.controller, widget,
-          0, false, audioType, instance);
+          0, false, audioType);
       this.audioType = audioType;
     }
 

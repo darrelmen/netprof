@@ -37,6 +37,7 @@ public class JSONAnswerParser {
 
     converted.setResultID(getIntField(jsonObject, "resultID"));
 
+    converted.setDynamicRange(getFloatField(jsonObject, "dynamicRange"));
     //useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
 
     if (validity == Validity.OK || validity == Validity.CUT_OFF) {
@@ -153,6 +154,7 @@ public class JSONAnswerParser {
 
   private float getFloatField(JSONObject jsonObject, String reqid) {
     JSONValue jsonValue = jsonObject.get(reqid);
+    if (jsonValue == null) logger.warning("no field " + reqid);
     return (float) (jsonValue == null ? 0F : jsonValue.isNumber().doubleValue());
   }
 

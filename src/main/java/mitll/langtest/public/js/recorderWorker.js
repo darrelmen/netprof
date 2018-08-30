@@ -39,6 +39,7 @@ var recLength = 0,
 var myurl;
 var myexid;
 var myreqid;
+var myisreference;
 var lastSendMoment;
 
 var frameRecLength = 0;
@@ -73,7 +74,7 @@ this.onmessage = function (e) {
             clear();
             break;
         case 'startStream':
-            startStream(e.data.url, e.data.exid, e.data.reqid);
+            startStream(e.data.url, e.data.exid, e.data.reqid, e.data.isreference);
             break;
         case 'stopStream':
             stopStream(e.data.type);
@@ -86,11 +87,12 @@ function init(config) {
     sampleRate = config.sampleRate;
 }
 
-function startStream(url, exid, reqid) {
+function startStream(url, exid, reqid, isreference) {
     console.log("worker.startStream " + exid + " req " + reqid);
     myurl = new String(url);
     myexid = new String(exid);
     myreqid = new String(reqid);
+    myisreference = new String(isreference);
     lastSendMoment = new Date().getTime();
 }
 
@@ -172,6 +174,7 @@ function sendBlob(framesBeforeRound, audioBlob, isLast, sendMoment) {
         xhr.setRequestHeader("Content-Type", "application/wav");
         xhr.setRequestHeader("EXERCISE", myexid);
         xhr.setRequestHeader("reqid", myreqid);
+        xhr.setRequestHeader("ISREFERENCE", myisreference);
         xhr.setRequestHeader("STREAMTIMESTAMP", sendMoment);
 
         if (framesBeforeRound === 0) {

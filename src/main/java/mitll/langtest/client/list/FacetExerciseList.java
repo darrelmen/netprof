@@ -713,7 +713,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
                                Map<String, Set<MatchInfo>> finalTypeToValues,
                                ListItem liForDimensionForType) {
     long l = System.currentTimeMillis();
-    if (l - then > 150) {
+    if (l - then > 250) {
       logger.info("addListsAsLinks : took " + (l - then) + " to get lists for user.");
     }
     finalTypeToValues.put(getDynamicFacet(), getMatchInfoForEachList(result));

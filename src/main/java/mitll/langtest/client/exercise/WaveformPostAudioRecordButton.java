@@ -100,8 +100,8 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   /**
-   * So when we're recording reference audio for an item, we want to add the audio to the audio table and not
-   * the results table.
+   * So when we're recording reference audio for an item,
+   * we want to add the audio to the audio table in addition to the results table.
    *
    * @return
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
@@ -111,7 +111,6 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   protected boolean shouldAddToAudioTable() {
     return true;
   }
-
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#start
@@ -126,12 +125,6 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     super.startRecording();
     setPlayEnabled(false);
   }
-
-/*
-  @Override
-  public void flip(boolean first) {
-  } // force not to be abstract
-*/
 
   /**
    * @param duration
@@ -169,6 +162,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    */
   @Override
   public void useResult(AudioAnswer result) {
+    logger.info("useResult -- " + result);
     recordAudioPanel.getImagesForPath(result.getPath());
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordCompleted(recordAudioPanel);

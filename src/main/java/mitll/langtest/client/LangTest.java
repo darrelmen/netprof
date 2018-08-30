@@ -1185,15 +1185,16 @@ public class LangTest implements
    * @see PostAudioRecordButton#startRecording
    * @param exid
    * @param reqid
+   * @param isReference
    * @param wavStreamCallback
    */
-  public void startStream(int exid, int reqid, WavStreamCallback wavStreamCallback) {
+  public void startStream(int exid, int reqid, boolean isReference, WavStreamCallback wavStreamCallback) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
 /*    logger.info("startStream " +
         "\n\tURL  " + serviceEntryPoint +
         "\n\texid " + exid);*/
-    flashRecordPanel.startStream(serviceEntryPoint, "" + exid, "" + reqid, wavStreamCallback);
+    flashRecordPanel.startStream(serviceEntryPoint, "" + exid, "" + reqid, isReference, wavStreamCallback);
   }
 
   /**
@@ -1216,12 +1217,13 @@ public class LangTest implements
    * @param exid
    * @see PostAudioRecordButton#stopRecording(long)
    */
+/*
   public void stopRecordingAndPost(int exid) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
     flashRecordPanel.stopRecordingAndPost(serviceEntryPoint, "" + exid);
   }
-
+*/
 
   /**
    * Recording interface

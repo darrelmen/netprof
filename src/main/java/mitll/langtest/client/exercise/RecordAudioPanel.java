@@ -98,7 +98,6 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
    * @param index
    * @param showSpectrogram
    * @param audioType
-   * @param instance
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel
    * @see ExercisePanel#getAnswerWidget
    */
@@ -107,8 +106,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
                           Panel widgets,
                           int index,
                           boolean showSpectrogram,
-                          AudioType audioType,
-                          String instance) {
+                          AudioType audioType) {
     super(
         controller, showSpectrogram,
         1.0f, 0,
@@ -252,7 +250,6 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   }
 
 
-
   public Button getButton() {
     return postAudioRecordButton;
   }
@@ -324,6 +321,10 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   }
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
+
+
+    private long then, now;
+
     /**
      * @param audioType
      * @param recordButtonTitle
@@ -344,7 +345,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
      */
     @Override
     public void startRecording() {
-      /// then = System.currentTimeMillis();
+      then = System.currentTimeMillis();
       super.startRecording();
       showStart();
       afterPlayWidget.setVisible(false);
@@ -352,17 +353,12 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
 
     @Override
     public boolean stopRecording(long duration) {
-      //  now = System.currentTimeMillis();
-      // logger.info("stopRecording " + now + " diff " + (now-then) + " millis");
+      now = System.currentTimeMillis();
+      logger.info("stopRecording " + now + " diff " + (now - then) + " millis");
       boolean b = super.stopRecording(duration);
       showStop();
       return b;
     }
-
-  /*  @Override
-    public void flip(boolean first) {
-      flipRecordImages(first);
-    }*/
 
     /**
      * From Paul Gatewood:

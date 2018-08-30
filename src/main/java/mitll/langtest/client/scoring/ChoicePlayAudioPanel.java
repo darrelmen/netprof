@@ -30,11 +30,11 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/5/17.
  */
 class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudioPanel {
-  public static final String REG = "Reg";
+  private static final String REG = "Reg";
   private final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
 
   private static final String FAST = "Fast";
-  public static final String SLOW2 = "Slow";
+  private static final String SLOW2 = "Slow";
   private static final String SLOW1 = SLOW2;
 
   private static final String IS_MALE = "isMale";
@@ -42,7 +42,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   public static final String MALE = "male";
   public static final String SLOW = "slow";
 
-  private boolean includeContext;
+  private final boolean includeContext;
 
   /**
    * TODO : Sorta redundant...
@@ -54,9 +54,9 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   //private AudioAttribute currentAudioAttr = null;
   private final AudioChangeListener listener;
   private Set<AudioAttribute> allPossible;
-  private int exid;
-  private Map<AudioAttribute, IconAnchor> attrToCheck = new HashMap<>();
-  protected final T exercise;
+  private final int exid;
+  private final Map<AudioAttribute, IconAnchor> attrToCheck = new HashMap<>();
+  private final T exercise;
 
   /**
    * @see TwoColumnExercisePanel#getPlayAudioPanel
@@ -93,7 +93,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
-      logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
+    //  logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
       addChoices(null, includeContext, null, true);
     }
   }
