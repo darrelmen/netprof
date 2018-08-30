@@ -233,7 +233,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return jsonObject;
     }
 
-   // if (true) throw new IllegalArgumentException("dude!");
+    // if (true) throw new IllegalArgumentException("dude!");
 
     int realExID = getRealExID(request);
     int reqid = getReqID(request);
@@ -773,7 +773,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           " - took " + (now - then) + " millis to check audio");
     }
 
-    new Thread(() -> ensureAudioHelper.ensureAudio(projectid)).start();
+    new Thread(() -> ensureAudioHelper.ensureAudio(projectid), "checkAudio_" + projectid).start();
   }
 
   private void logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID) {

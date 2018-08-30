@@ -405,7 +405,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 //        logger.info("finalSetup : default user " + defaultUser);
         dialogDAO.ensureDefault(defaultUser);
       }
-    }).start();
+    },"ensureDefaultUser").start();
 
     afterDAOSetup(slickAudioDAO);
 
@@ -1832,7 +1832,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       } else {
         logger.info("doReport : not sending email report since this is not Sunday...");
       }
-      reportHelper.tryTomorrow(this);
+      //reportHelper.tryTomorrow(this);
     } else {
       logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
     }

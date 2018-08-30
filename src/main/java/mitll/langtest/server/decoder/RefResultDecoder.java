@@ -709,7 +709,7 @@ public class RefResultDecoder {
     }
 
     if (consumer == null) {
-      consumer = new Thread(new Consumer());
+      consumer = new Thread(new Consumer(),"RefResultDecoderConsumer");
       consumer.setDaemon(true);
       consumer.start();
     }

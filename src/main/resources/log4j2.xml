@@ -122,17 +122,18 @@
         <logger name="slick.compiler" level="INFO">
             <appender-ref ref="LogFile"/>
         </logger>
-        <logger name="slick.compiler.CodeGen" level="INFO">
+  <!--      <logger name="slick.compiler.CodeGen" level="INFO">
             <appender-ref ref="LogFile"/>
         </logger>
-
+-->
         <logger name="slick.jdbc" level="INFO">
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="slick.jdbc.JdbcBackend" level="INFO">
+   <!--     <logger name="slick.jdbc.JdbcBackend" level="DEBUG">
             <appender-ref ref="LogFile"/>
         </logger>
+-->
         <logger name="slick.backend" level="INFO">
             <appender-ref ref="LogFile"/>
         </logger>
@@ -141,7 +142,7 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="slick.session" level="INFO">
+        <logger name="slick.session" level="DEBUG">
             <appender-ref ref="LogFile"/>
         </logger>
 
@@ -149,23 +150,23 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="com.zaxxer.hikari" level="WARN">
+  <!--      <logger name="com.zaxxer.hikari" level="DEBUG">
+            <appender-ref ref="LogFile"/>
+        </logger>
+-->
+        <logger name="com.zaxxer.hikari.pool" level="DEBUG">
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="com.zaxxer.hikari.pool" level="INFO">
+   <!--     <logger name="mitll.hlt.domino.server.util" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
 
-        <logger name="mitll.hlt.domino.server.util" level="DEBUG">
+        <logger name="mitll.hlt.domino.server.util.Mailer" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
-
-        <logger name="mitll.hlt.domino.server.util.Mailer" level="INFO">
-            <appender-ref ref="LogFile"/>
-        </logger>
-
-        <logger name="mitll.hlt.domino.server" level="DEBUG">
+-->
+        <logger name="mitll.hlt.domino.server" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
 
@@ -173,6 +174,7 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
+<!--
         <logger name="org.eclipse.jetty.io" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
@@ -180,6 +182,7 @@
         <logger name="org.eclipse.jetty.servlet" level="WARN">
             <appender-ref ref="LogFile"/>
         </logger>
+-->
 
         <logger name="org.eclipse.jetty.util.component" level="WARN">
             <appender-ref ref="LogFile"/>

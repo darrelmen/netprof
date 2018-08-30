@@ -58,8 +58,8 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   private static final Logger logger = LogManager.getLogger(OpenUserServiceImpl.class);
   //private static final int BOUND = 10000;
   //private static final boolean SIMULATE_NETWORK = false;
- // private static final String USER_AGENT = "User-Agent";
- // private static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
+  // private static final String USER_AGENT = "User-Agent";
+  // private static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
   /**
    * If successful, establishes a session.
@@ -389,7 +389,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   private void updateVisitedLater() {
     final String sid = getSessionID();
     // TODO : expensive?
-    new Thread(() -> updateVisited(sid)).start();
+    new Thread(() -> updateVisited(sid), "updateVisited").start();
   }
 
   private void updateVisited(String sid) {

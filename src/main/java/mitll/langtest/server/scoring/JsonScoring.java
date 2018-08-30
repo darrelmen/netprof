@@ -366,7 +366,7 @@ public class JsonScoring {
       writeCompressedVersions(path, new TrackInfo(foreignLanguage, getUserID(user), english, language));
       // long now = System.currentTimeMillis();
       //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
-    }).start();
+    },"ensureMP3Later").start();
   }
 
   /**

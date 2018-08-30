@@ -167,8 +167,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     new Thread(() -> {
       available = isAvailableCheckNow();
       reportOnHydra();
-    }
-    ).start();
+    }, "setAvailable").start();
   }
 
   /**
@@ -441,9 +440,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   /**
-   * @see #scoreRepeatExercise
    * @param filePath
    * @return
+   * @see #scoreRepeatExercise
    */
   @NotNull
   private String getUniqueRawAudioPath(String filePath) {
@@ -584,7 +583,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param audioPath
    * @param transcript
    * @param lmSentences if multiple alternatives
-   * @param tmpDir for hydra to run in
+   * @param tmpDir      for hydra to run in
    * @param decode
    * @param end         frame number of end of file (I think)
    * @return

@@ -272,8 +272,8 @@ public class Project implements IPronunciationLookup {
     final List<CommonExercise> rawExercises = getRawExercises();
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
 
-    new Thread(() -> makeItemTrie(rawExercises, smallVocabDecoder)).start();
-    new Thread(() -> makeContextTrie(rawExercises, smallVocabDecoder)).start();
+    new Thread(() -> makeItemTrie(rawExercises, smallVocabDecoder),"makeFullTrie_"+getID()).start();
+    new Thread(() -> makeContextTrie(rawExercises, smallVocabDecoder),"makeContextTrie_"+getID()).start();
   }
 
   /**

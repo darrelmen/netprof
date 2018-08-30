@@ -212,20 +212,17 @@ public class MyUserService extends MongoUserServiceDelegate {
         if (success) {
           getEventDAO().logEvent(changeUser, UserEventType.PWChange, changeUser, false);
 
-          new Thread(new Runnable() {
-            @Override
-            public void run() {
-              try {
-                mailSupport.email(changeUser.getEmail(), acctTypeName + " Password Changed",
-                    "Hello " + changeUser.getUserId() + ",\nYour " + acctTypeName + " password has been changed.\n\n" +
-                        "If you did not change your password, you can recover access by resetting your password" +
-                        " at the following link:\n\n" + urlBase + RESET_PW_HASH +
-                        "\n\nThanks,\n   " + acctTypeName + " Administrator");
-              } catch (Exception e) {
-                log.warn("couldn't send email " + e, e);
-              }
+          new Thread(() -> {
+            try {
+              mailSupport.email(changeUser.getEmail(), acctTypeName + " Password Changed",
+                  "Hello " + changeUser.getUserId() + ",\nYour " + acctTypeName + " password has been changed.\n\n" +
+                      "If you did not change your password, you can recover access by resetting your password" +
+                      " at the following link:\n\n" + urlBase + RESET_PW_HASH +
+                      "\n\nThanks,\n   " + acctTypeName + " Administrator");
+            } catch (Exception e) {
+              log.warn("couldn't send email " + e, e);
             }
-          }).start();
+          },"changePassword").start();
 
         }
       } else {

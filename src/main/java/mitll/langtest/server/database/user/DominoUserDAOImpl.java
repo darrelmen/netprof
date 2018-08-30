@@ -104,7 +104,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
   private static final mitll.hlt.domino.shared.model.user.User.Gender UNSPECIFIED = mitll.hlt.domino.shared.model.user.User.Gender.Unspecified;
-  private static final String PRIMARY = "primary";
+  private static final String PRIMARY = "Netprof";//"primary";
   private static final String DEFAULT_AFFILIATION = "";
 
   private static final String UID_F = "userId";
@@ -251,7 +251,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       }
       usedDominoResources = false;
       try {
-        new Thread(() -> connectToMongo(database, props)).start();
+        new Thread(() -> connectToMongo(database, props),"connectToMongo").start();
       } catch (Exception e) {
         logger.error("Couldn't connect to mongo - is it running and accessible? " + e, e);
         throw e;
@@ -601,7 +601,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
-   * Need a group - just use the first one.
+   * Need a group - use "Netprof"
    *
    * @return
    * @see #addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
@@ -610,7 +610,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @NotNull
   public Group getGroup() {
     if (primaryGroup == null) {
-      List<Group> groups = delegate.getGroupDAO().searchGroups("");
+      List<Group> groups = delegate.getGroupDAO().searchGroups("Netprof");
       primaryGroup = groups.isEmpty() ? null : groups.iterator().next();
 
       if (primaryGroup == null) { //defensive

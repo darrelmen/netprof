@@ -58,7 +58,7 @@ public class ReportHelper {
     this.mailSupport = mailSupport;
   }
 
-  private void doReport(DatabaseImpl database, IReport report) {
+/*  private void doReport(DatabaseImpl database, IReport report) {
     if (serverProps.isFirstHydra()) {
       if (isTodayAGoodDay()) {
         sendReports(report);
@@ -69,11 +69,13 @@ public class ReportHelper {
     } else {
       logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
     }
-  }
+  }*/
 
   public void sendReports(IReport report) {
     sendReports(report, false, -1);
   }
+
+
 
   /**
    * Fire at Saturday night, just before midnight EST (or local)
@@ -82,8 +84,9 @@ public class ReportHelper {
    * fire at 11:59:30 PM Saturday, so the report ends this saturday and not next saturday...
    * i.e. if it's Sunday 12:01 AM, it rounds up and includes a line for the whole upcoming week
    *
-   * @param database
+   * @paramx database
    */
+/*
   public void tryTomorrow(DatabaseImpl database) {
     ZoneId zone = ZoneId.systemDefault();
     ZonedDateTime now = ZonedDateTime.now(zone);
@@ -107,6 +110,7 @@ public class ReportHelper {
     this.thread = thread;
     thread.start();
   }
+*/
 
   public void interrupt() {
     if (this.thread != null) this.thread.interrupt();
@@ -129,7 +133,7 @@ public class ReportHelper {
    * @param report
    * @param forceSend
    * @param userID    if -1 uses report list property to determine recipients
-   * @see #doReport
+   * @seex #doReport
    * @see #sendReport
    */
   private void sendReports(IReport report, boolean forceSend, int userID) {

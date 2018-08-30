@@ -488,11 +488,11 @@ public class AudioConversion extends AudioBase {
       List<Boolean> results = new ArrayList<>(2);
 
       Thread mp3Thread = new Thread(() -> results.add(
-          writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)));
+          writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)),"writeCompressedVersionsMP3");
       mp3Thread.start();
 
       Thread oggThread = new Thread(() -> results.add(new ConvertToOGG()
-          .writeOGG(absolutePathToWav, overwrite, trackInfo)));
+          .writeOGG(absolutePathToWav, overwrite, trackInfo)),"writeCompressedVersionsOGG");
       oggThread.start();
 
       if (waitToFinish) {

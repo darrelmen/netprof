@@ -253,8 +253,10 @@ public class DominoImport implements IDominoImport {
    * @see #getImportFromDomino
    */
   @NotNull
-  private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser,
-                                           ClientPMProject dominoProject, boolean checkForDominoIDs) {
+  private ChangedAndDeleted getChangedDocs(String sinceInUTC,
+                                           DBUser dominoAdminUser,
+                                           ClientPMProject dominoProject,
+                                           boolean checkForDominoIDs) {
     Set<Integer> added = new HashSet<>();
     long then = System.currentTimeMillis();
 
@@ -267,7 +269,8 @@ public class DominoImport implements IDominoImport {
       long now = System.currentTimeMillis();
       if (now - then > 100)
         logger.info("getChangedDocs took " + (now - then) + " to get " + addedImports.size() + " added imports");
-    });
+    },
+        "getAddedImports");
     addedThread.start();
 
 
@@ -277,16 +280,17 @@ public class DominoImport implements IDominoImport {
           long now = System.currentTimeMillis();
           if (now - then > 100)
             logger.info("getChangedDocs took " + (now - then) + " to get " + addedImports.size() + " changed imports");
-        });
+        },
+            "getChangedImports");
     changedThread.start();
 
 
     Set<String> deletedNPIDs = new TreeSet<>();
 
     Thread deletedThread =
-        new Thread(() -> deletedDocsSince.addAll(getDeletedDocsSince(sinceInUTC, dominoProject.getId(), deletedNPIDs)));
+        new Thread(() -> deletedDocsSince.addAll(getDeletedDocsSince(sinceInUTC, dominoProject.getId(), deletedNPIDs)),
+            "getDeletedDocsSince");
     deletedThread.start();
-
 
     try {
       addedThread.join();

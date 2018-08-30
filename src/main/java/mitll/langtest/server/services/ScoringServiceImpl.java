@@ -655,7 +655,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         String userChosenID = db.getUserDAO().getUserChosenID(userIDFromSessionOrDB);
         new Thread(() -> sendEmail("Slow round trip : " + roundTrip,
             getInfo("Slow round trip (" + roundTrip + ") recording #" + resultID +
-                " by user #" + userIDFromSessionOrDB + "/" + userChosenID))).start();
+                " by user #" + userIDFromSessionOrDB + "/" + userChosenID)), "addRoundTrip").start();
+
       } catch (Exception e) {
         logger.warn("addRoundTrip got " + e, e);
       }
@@ -773,7 +774,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         }
       }
     } else {
-      logger.warn("configureAndRefresh project " + projID + " user #" +userIDFromSessionOrDB + " does not have permission?");
+      logger.warn("configureAndRefresh project " + projID + " user #" + userIDFromSessionOrDB + " does not have permission?");
       throw getRestricted(UPDATING_PROJECT_INFO);
     }
   }

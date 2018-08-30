@@ -379,7 +379,7 @@ public class ProjectManagement implements IProjectManagement {
       );
 
       if (myProject) {
-        new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises)).start();
+        new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises),"checkLTSAndCountPhones_"+project.getID()).start();
       }
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
       //  logMemory();
@@ -399,7 +399,7 @@ public class ProjectManagement implements IProjectManagement {
       logger.info("configure END " + projectID + " " + project.getLanguage() + " in " + (System.currentTimeMillis() - then) + " millis.");
 
       // side effect is to cache the users.
-      new Thread(() -> rememberUsers(projectID)).start();
+      new Thread(() -> rememberUsers(projectID),"rememberUsers_"+projectID).start();
 
       if (project.getLanguageEnum() == Language.KOREAN) {
         addDialogInfo(project);
@@ -444,7 +444,7 @@ public class ProjectManagement implements IProjectManagement {
       }
 
       db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
-    }).start();
+    },"ProjectManagement.rememberUsers_"+projectID).start();
   }
 
   @Override

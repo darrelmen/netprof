@@ -362,7 +362,7 @@ public class AudioFileHelper implements AlignDecode {
 
     if (options.isRefRecording() && validity.isValid()) {
       // make sure there's a compressed version for later review.
-      new Thread(() -> ensureCompressed(exercise1, audioContext, wavPath)).start();
+      new Thread(() -> ensureCompressed(exercise1, audioContext, wavPath),"ensureCompressedAudio").start();
     }
 
     // remember who recorded this audio wavFile.
@@ -891,7 +891,7 @@ public class AudioFileHelper implements AlignDecode {
 
 
     // do this db write later
-    new Thread(() -> db.recordWordAndPhoneInfo(projid, answer, answerID)).start();
+    new Thread(() -> db.recordWordAndPhoneInfo(projid, answer, answerID),"recordWordAndPhoneInfo").start();
   }
 
   /**

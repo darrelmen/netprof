@@ -265,34 +265,31 @@ public class DAO {
     }
 
     //Exception exception = new Exception();
-    new Thread(new Runnable() {
-      @Override
-      public void run() {
-        long then = now;
-        try {
+    new Thread(() -> {
+      long then1 = now;
+      try {
 //          logger.info("start closing " + statement);
-          statement.close();
+        statement.close();
 //          logger.info("end   closing " + statement);
-        } catch (SQLException e) {
-          logger.error("got " + e, e);
-        }
-        long now = System.currentTimeMillis();
+      } catch (SQLException e) {
+        logger.error("got " + e, e);
+      }
+      long now1 = System.currentTimeMillis();
 
-        if (now - then > i) {
-          logger.info("finish took " + (now - then) + " millis to close " + statement);// + " sql " + sql);
+      if (now1 - then1 > i) {
+        logger.info("finish took " + (now1 - then1) + " millis to close " + statement);// + " sql " + sql);
 //          if (now - then > 100) {
 //            logger.info("long sql " + sql, exception);
 //          }
-        }
-
-        then = now;
-        database.closeConnection(connection);
-        now = System.currentTimeMillis();
-//        if (now - then > i) {
-        //        logger.info("finish took " + (now - then) + " millis to close connection - sql " + sql);
-        //    }
       }
-    }).start();
+
+      then1 = now1;
+      database.closeConnection(connection);
+      now1 = System.currentTimeMillis();
+//        if (now - then > i) {
+      //        logger.info("finish took " + (now - then) + " millis to close connection - sql " + sql);
+      //    }
+    },"DAO.finish.closeConnection").start();
 
   }
 
