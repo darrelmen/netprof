@@ -41,7 +41,6 @@ import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.initial.PopupHelper;
-import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -149,7 +148,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
  if (DEBUG)   logger.info("startRecording!");
     controller.startRecording();
-    controller.startStream(getExerciseID(), reqid, shouldAddToAudioTable(), bytes -> gotPacketResponse(bytes, then));
+    controller.startStream(getExerciseID(), reqid, shouldAddToAudioTable(), getAudioType(), bytes -> gotPacketResponse(bytes, then));
   }
 
   /**

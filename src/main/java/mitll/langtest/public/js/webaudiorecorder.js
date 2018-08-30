@@ -133,11 +133,11 @@ function stopRecording() {
 }
 
 // see WebAudioRecorder.startStream
-function serviceStartStream(url, exid, reqid, isreference) {
+function serviceStartStream(url, exid, reqid, isreference, audioType) {
     //__log('webaudiorecorder.startStream ');
     __log('webaudiorecorder.startStream calling recorder');
 
-    recorder && recorder.serviceStartStream(url, exid, reqid, isreference,
+    recorder && recorder.serviceStartStream(url, exid, reqid, isreference, audioType,
         function (blob) {
             //      __log('startStream getStreamResponse.');
             getStreamResponse(blob);

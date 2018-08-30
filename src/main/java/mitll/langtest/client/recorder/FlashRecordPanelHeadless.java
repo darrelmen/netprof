@@ -45,6 +45,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.initial.WavStreamCallback;
+import mitll.langtest.shared.answer.AudioType;
 
 import java.util.logging.Logger;
 
@@ -192,10 +193,11 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * @param exid
    * @param reqid
    * @param isReference
+   * @param audioType
    * @param wavStreamCallback
-   * @see ExerciseController#startStream(int, int, boolean, WavStreamCallback)
+   * @see ExerciseController#startStream(int, int, boolean, AudioType, WavStreamCallback)
    */
-  public void startStream(String url, String exid, String reqid, boolean isReference, WavStreamCallback wavStreamCallback) {
+  public void startStream(String url, String exid, String reqid, boolean isReference, AudioType audioType, WavStreamCallback wavStreamCallback) {
     if (usingWebRTC()) {
       logger.info("startStream post" +
           "\n\tto  " + url +
@@ -203,7 +205,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
 
       WebAudioRecorder.setStreamCallback(wavStreamCallback);
 
-      webAudio.startStream(url, exid, reqid, isReference ? "true" : "false");
+      webAudio.startStream(url, exid, reqid, isReference ? "true" : "false", audioType.toString());
     } else if (usingFlash()) {
       //flashRecordOnClick();
       logger.warning("no stream with flash!!!!\\n\n");

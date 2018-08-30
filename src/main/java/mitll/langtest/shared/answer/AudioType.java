@@ -89,7 +89,7 @@ public enum AudioType implements IsSerializable {
   }
 
   public boolean isRef() {
-    return this==REGULAR || this==SLOW || isContext();
+    return this == REGULAR || this == SLOW || isContext();
   }
 
   public boolean isContext() {

@@ -47,6 +47,7 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
@@ -78,7 +79,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
   int getUser();
 
   void startRecording();
-  void startStream(int exid, int reqid, boolean isReference, WavStreamCallback wavStreamCallback);
+  void startStream(int exid, int reqid, boolean isReference, AudioType audioType, WavStreamCallback wavStreamCallback);
 
   void stopRecording(WavCallback wavCallback, boolean useDelay);
   void registerStopDetected(WavEndCallback wavEndCallback);

@@ -76,6 +76,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -1186,15 +1187,16 @@ public class LangTest implements
    * @param exid
    * @param reqid
    * @param isReference
+   * @param audioType
    * @param wavStreamCallback
    */
-  public void startStream(int exid, int reqid, boolean isReference, WavStreamCallback wavStreamCallback) {
+  public void startStream(int exid, int reqid, boolean isReference, AudioType audioType, WavStreamCallback wavStreamCallback) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
 /*    logger.info("startStream " +
         "\n\tURL  " + serviceEntryPoint +
         "\n\texid " + exid);*/
-    flashRecordPanel.startStream(serviceEntryPoint, "" + exid, "" + reqid, isReference, wavStreamCallback);
+    flashRecordPanel.startStream(serviceEntryPoint, "" + exid, "" + reqid, isReference, audioType, wavStreamCallback);
   }
 
   /**

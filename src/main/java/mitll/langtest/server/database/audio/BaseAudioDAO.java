@@ -155,7 +155,7 @@ public abstract class BaseAudioDAO extends DAO {
    * <p>
    * Concurrent since could be multiple threads coming through.
    */
-  protected Map<Integer, MiniUser> idToMini = new ConcurrentHashMap<>();
+  final Map<Integer, MiniUser> idToMini = new ConcurrentHashMap<>();
 
   /**
    * TODO : consider why doing this all the time
@@ -487,7 +487,7 @@ public abstract class BaseAudioDAO extends DAO {
     return StringUtils.stripAccents(normArabic(foreignLanguage, normalizer));
   }
 
-  private ArabicNormalizer normalizer = new ArabicNormalizer();
+  private final ArabicNormalizer normalizer = new ArabicNormalizer();
 
   private String normArabic(String f, ArabicNormalizer normalizer) {
     char[] s2 = f.toCharArray();
@@ -778,7 +778,7 @@ public abstract class BaseAudioDAO extends DAO {
    */
   public Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
                                                Map<String, ExerciseAnnotation> fieldToAnnotation) {
-    Set<AudioAttribute> defects = new HashSet<AudioAttribute>();
+    Set<AudioAttribute> defects = new HashSet<>();
 
     for (Map.Entry<String, ExerciseAnnotation> fieldAnno : fieldToAnnotation.entrySet()) {
       ExerciseAnnotation value = fieldAnno.getValue();

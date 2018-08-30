@@ -93,13 +93,15 @@ import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
 public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioService {
   private static final Logger logger = LogManager.getLogger(AudioServiceImpl.class);
 
+  private static final boolean DEBUG = false;
+
+
   private static final int WARN_THRESH = 10;
   public static final String UNKNOWN = "unknown";
   private static final String REQID = "reqid";
 
   // TODO : make these enums...
   public static final String START = "START";
-  //public static final String MESSAGE1 = "MESSAGE";
   private static final String STREAM = "STREAM";
 
   private static final String MESSAGE = "message";
@@ -241,15 +243,20 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     //String postedWordOrPhrase = "";
 
     boolean isRef = isReference(request);
-    logger.info("getJSONForStream got" +
-        "\n\trequest  " + requestType +
-        "\n\tprojid   " + projid +
-        "\n\texid     " + realExID +
-        "\n\texercise text " + realExID +
-        "\n\treq      " + reqid +
-        "\n\tref      " + isRef +
-        "\n\tdevice   " + deviceType + "/" + device
-    );
+    AudioType audioType = getAudioType(request);
+
+    if (DEBUG) {
+      logger.info("getJSONForStream got" +
+          "\n\trequest  " + requestType +
+          "\n\tprojid   " + projid +
+          "\n\texid     " + realExID +
+          "\n\texercise text " + realExID +
+          "\n\treq      " + reqid +
+          "\n\tref      " + isRef +
+          "\n\taudio type " + audioType +
+          "\n\tdevice   " + deviceType + "/" + device
+      );
+    }
 
     long session = getStreamSession(request);
     int packet = getStreamPacket(request);
@@ -297,7 +304,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     } else {  // STOP
       long then2 = System.currentTimeMillis();
       jsonObject = getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid,
-          isRef,
+          isRef, audioType,
           audioChunks, jsonObject);
 
       long now2 = System.currentTimeMillis();
@@ -313,9 +320,21 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return jsonObject;
   }
 
+  @NotNull
+  private AudioType getAudioType(HttpServletRequest request) {
+    String header = getHeader(request, AUDIOTYPE);
+    try {
+      return AudioType.valueOf(header.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.warn("getAudioType " + header);
+      return AudioType.LEARN;
+    }
+  }
+
   private JSONObject getJsonObject(String deviceType, String device, int userIDFromSession,
                                    int realExID, int reqid, int projid,
                                    boolean isReference,
+                                   AudioType audioType,
                                    List<AudioChunk> audioChunks, JSONObject jsonObject) throws IOException, DominoSessionException {
     AudioChunk combined = getCombinedAudioChunk(audioChunks);
 
@@ -335,7 +354,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         language,
         realExID,
         1,
-        AudioType.LEARN);
+        audioType);
+
+    logger.info("audio context " + audioContext);
 
     DecoderOptions decoderOptions = new DecoderOptions()
         .setDoDecode(true)

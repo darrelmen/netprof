@@ -769,7 +769,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     }
     then = now;
     int i = attachAudio(firstExercise);
-    //logger.info("attached " + i + " audio cuts to " + firstExercise.getID());
+    logger.info("attached " + i + " audio cuts to " + firstExercise.getID());
 
     if (DEBUG) {
       for (AudioAttribute audioAttribute : firstExercise.getAudioAttributes())

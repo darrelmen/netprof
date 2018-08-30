@@ -123,10 +123,11 @@ public class WebAudioRecorder {
    * @param url
    * @param exid
    * @param reqid
-   * @see FlashRecordPanelHeadless#startStream(String, String, String, boolean, WavStreamCallback)
+   * @param audioType
+   * @see FlashRecordPanelHeadless#startStream(String, String, String, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
    */
-  public native void startStream(String url, String exid, String reqid, String isreference) /*-{
-      $wnd.serviceStartStream(url, exid, reqid, isreference);
+  public native void startStream(String url, String exid, String reqid, String isreference, String audioType) /*-{
+      $wnd.serviceStartStream(url, exid, reqid, isreference, audioType);
   }-*/;
 
   /**
@@ -273,8 +274,8 @@ public class WebAudioRecorder {
   /**
    * @param wavStreamCallback
    * @see PostAudioRecordButton#startRecording
-   * @see ExerciseController#startStream(int, int, boolean, WavStreamCallback)
-   * @see FlashRecordPanelHeadless#startStream(String, String, String, boolean, WavStreamCallback)
+   * @see ExerciseController#startStream(int, int, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
+   * @see FlashRecordPanelHeadless#startStream(String, String, String, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
    */
   static void setStreamCallback(WavStreamCallback wavStreamCallback) {
     WebAudioRecorder.wavStreamCallback = wavStreamCallback;
