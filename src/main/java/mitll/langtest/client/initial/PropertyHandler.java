@@ -86,7 +86,8 @@ public class PropertyHandler {
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
   private static final String NAME_FOR_RECORDER = "nameForRecorder";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
-  private static final String DIALOG = "dialog";
+  private static final String DIALOG1 = "dialog";
+  private static final String DIALOG = DIALOG1;
 
   // URL parameters that can override above parameters
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
@@ -397,8 +398,16 @@ public class PropertyHandler {
   }
 
   public String getAppTitle() {
-    return appTitle;
+//    String path = Window.Location.getPath();
+//    String substring = path.substring(0, path.lastIndexOf("/"));
+//    logger.info("candidate " +substring);
+//    logger.info("path      " +path);
+    return DIALOG1;
   }
+
+  private static native String getAppName() /*-{
+      return $wnd.navigator.appName;
+  }-*/;
 
   @Deprecated
   public boolean isDemoMode() {

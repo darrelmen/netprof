@@ -79,11 +79,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @paramx projectManagement
    * @see
    */
-  public NPUserSecurityManager(IUserDAO userDAO,
-                               IUserSessionDAO userSessionDAO) {
+  public NPUserSecurityManager(IUserDAO userDAO, IUserSessionDAO userSessionDAO) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
-    // this.projectManagement = projectManagement;
     //startShiro();
   }
 
@@ -470,9 +468,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   /**
-   * @see mitll.langtest.server.rest.RestUserManagement#loginUser
    * @param request
    * @return
+   * @see mitll.langtest.server.rest.RestUserManagement#loginUser
    */
   public String getRemoteAddr(HttpServletRequest request) {
     String remoteAddr = request.getHeader(X_FORWARDED_FOR);
@@ -537,9 +535,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   }
 
   /**
-   * @see #lookupUserIDFromSessionOrDB(HttpServletRequest, boolean)
    * @param request
    * @return
+   * @see #lookupUserIDFromSessionOrDB(HttpServletRequest, boolean)
    */
   private Integer lookupUserIDFromHttpSession(HttpServletRequest request) {
     //long then = System.currentTimeMillis();
@@ -609,7 +607,6 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 */
 
   /**
-   *
    * @param threadLocalRequest
    * @return -1 if no user session, else user id
    * @throws DominoSessionException

@@ -75,6 +75,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    */
   public static final String DATABASE_REFERENCE = "databaseReference";
 
+  /**
+   * @see mitll.langtest.server.database.user.UserManagement
+   */
   public static final String USER_AGENT = "User-Agent";
   public static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
 

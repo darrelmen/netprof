@@ -34,6 +34,7 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.History;
 import mitll.langtest.client.custom.INavigation;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -251,6 +252,11 @@ public class SelectionState {
     return instance;
   }
 
+  /**
+   *
+   * @return the view on the URL or NONE
+   */
+  @NotNull
   public INavigation.VIEWS getView() {
     try {
       return instance.isEmpty() ? INavigation.VIEWS.NONE : INavigation.VIEWS.valueOf(instance.toUpperCase());

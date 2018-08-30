@@ -92,6 +92,9 @@ import static mitll.langtest.client.user.UserPassLogin.*;
 public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  private static final boolean DEBUG = false;
+
+
   private static final int TOP_OF_ROOT = 48;//58;
   /**
    * Make sure we can talk to the server...
@@ -120,6 +123,8 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
   /**
    * Critical - don't mess with this.
+   *
+   * @see #populateRootPanelIfLogin()
    */
   private static final String LOGIN = "Login";
   private static final int NO_USER_INITIAL = -2;
@@ -151,7 +156,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private DivWidget verticalContainer;
   private final ProjectChoices choices;
 
-  private static final boolean DEBUG = false;
 
   /**
    * @param langTest
@@ -196,7 +200,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       if (DEBUG) logger.info("populateRootPanelIfLogin found : '" + as.getId() + "'");
 
       if (as.getId().contains(LOGIN)) {
-        logger.info("populateRootPanelIfLogin found login...");
+        if (DEBUG) logger.info("populateRootPanelIfLogin found login...");
         populateRootPanel();
       } else {
         if (DEBUG) logger.info("populateRootPanelIfLogin no login...");
@@ -369,7 +373,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     Style style = verticalContainer.getElement().getStyle();
     style.setTop(TOP_OF_ROOT, Style.Unit.PX);
     style.setBottom(0, Style.Unit.PX);
-   // verticalContainer.setHeight("100%");  // critical for scrolling
+    // verticalContainer.setHeight("100%");  // critical for scrolling
     style.setOverflowY(Style.Overflow.AUTO);
     style.setPosition(Style.Position.FIXED);
 
@@ -758,7 +762,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     // logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     boolean hasStartupInfo = lifecycleSupport.getProjectStartupInfo() != null;
     if (hasStartupInfo) {
-     // logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+      // logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     } else {
@@ -775,7 +779,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   @Override
   public void showInitialState() {
     // setMode(mode);
-  //  logger.info("showInitialState ");
+    //  logger.info("showInitialState ");
     showNavigation();
     banner.checkProjectSelected();
     navigation.showInitialState();

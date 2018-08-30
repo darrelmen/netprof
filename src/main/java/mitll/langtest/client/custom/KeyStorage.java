@@ -58,20 +58,18 @@ public class KeyStorage {
    * @param controller
    */
   public KeyStorage(ExerciseController controller) {
-    this(/*controller.getLanguage(),*/ controller.getUserState().getUser());
+    this(controller.getUserState().getUser());
     this.controller = controller;
   }
 
   /**
-   * @paramx language
    * @param user
+   * @paramx language
    * @see mitll.langtest.client.user.UserPassLogin#UserPassLogin
    */
-  private KeyStorage(/*String language,*/ int user) {
-    //this.language = language;
+  private KeyStorage(int user) {
     this.user = user;
   }
-
 
   public void setBoolean(String name, boolean val) {
     storeValue(name, "" + val);
@@ -103,7 +101,7 @@ public class KeyStorage {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String localStorageKey = getLocalStorageKey(name);
 
-    if (DEBUG)  logger.info("storeValue : (" + localStorageKey + ")" + " '" + name + "' = '" + toStore + "'");
+      if (DEBUG) logger.info("storeValue : (" + localStorageKey + ")" + " '" + name + "' = '" + toStore + "'");
 
       try {
         localStorageIfSupported.setItem(localStorageKey, toStore);
@@ -133,7 +131,7 @@ public class KeyStorage {
     if (Storage.isLocalStorageSupported()) {
       String localStorageKey = getLocalStorageKey(name);
       String item = Storage.getLocalStorageIfSupported().getItem(localStorageKey);
-      if (DEBUG)  logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
+      if (DEBUG) logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
       if (item == null) item = "";
       return item;
     } else {
@@ -150,16 +148,20 @@ public class KeyStorage {
 
   private String getLocalStorageKey(String name) {
     if (controller != null) {
-      //   language = controller.getLanguage();          // necessary???
       user = controller.getUser();
     }
 
     return getKey(name);
   }
 
+  /**
+   * So try to make separate name space for different apps "netprof" vs "dialog"
+   * and in the space of a user.
+   * @param name
+   * @return
+   */
   protected String getKey(String name) {
-    return "Navigation_" +
-        //language + "_" +
+    return controller.getProps().getAppTitle() + "_" +
         user + "_" + name;
   }
 

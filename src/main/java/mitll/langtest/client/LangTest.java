@@ -475,7 +475,7 @@ public class LangTest implements
     if (!isDefault(host)) {
       String moduleBaseURL = audioService.getServiceEntryPoint();
       audioService.setServiceEntryPoint(moduleBaseURL + "/" + host);
-      logger.info("adjustEntryPoint createHostSpecificServices service now at " + audioService.getServiceEntryPoint());
+   //   logger.info("adjustEntryPoint createHostSpecificServices service now at " + audioService.getServiceEntryPoint());
     } else {
       // logger.info("adjustEntryPoint createHostSpecificServices service is at " + audioService.getServiceEntryPoint());
     }
@@ -628,7 +628,7 @@ public class LangTest implements
 
     buttonFactory = new ButtonFactory(service, props, this);
 
-    userManager = new UserManager(this, this, userService, openUserService, props);
+    userManager = new UserManager(this, this, userService, props);
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 

@@ -27,6 +27,8 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
   private final LifecycleSupport lifecycleSupport;
   private BreadcrumbPartner breadcrumbPartner;
 
+  private static final boolean DEBUG = false;
+
   BreadcrumbHelper(UserManager userManager,
                    LifecycleSupport lifecycleSupport,
                    BreadcrumbPartner breadcrumbPartner) {
@@ -86,7 +88,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
       } else {
         addBreadcrumbLevels(crumbs, startupInfo);
       }
-     // logger.info("addCrumbs ");
+      // logger.info("addCrumbs ");
 
       // WHY???
       //  banner.checkProjectSelected();
@@ -113,7 +115,8 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     //  logger.info("addBreadcrumb " + projects.size());
     for (SlimProject project : lifecycleSupport.getStartupInfo().getProjects()) {
       if (project.hasChildren() && project.hasChild(currentProject)) {
-      //  logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+        if (DEBUG)
+          logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         crumbs.add(getLangBreadcrumb(project));
         INavigation.VIEWS currentView = breadcrumbPartner.getNavigation().getCurrentView();
 
@@ -123,7 +126,8 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
         }*/
         break;
       } else if (project.getID() == currentProject) {
-        logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+        if (DEBUG)
+          logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
         addProjectCrumb(crumbs, project);
         break;
       }
@@ -141,6 +145,9 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
    */
   private void addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     NavLink lang = new NavLink(project.getName());
+
+    logger.info("addProjectCrumb  for " + project.getName() + " " + project.getMode());
+
     lang.addClickHandler(clickEvent -> {
       logger.info("addProjectCrumb choose project again for " + project.getName() + " " + project.getMode());
       breadcrumbPartner.chooseProjectAgain();
@@ -156,6 +163,9 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
   @NotNull
   private NavLink getLangBreadcrumb(SlimProject project) {
     NavLink lang = new NavLink(project.getLanguage());
+
+    if (DEBUG) logger.info("addProjectCrumb  for " + project.getName() + " " + project.getMode());
+
     lang.addClickHandler(clickEvent -> {
       // logger.info("getLangBreadcrumb got click on " + project.getName());
       removeUntilCrumb(2);

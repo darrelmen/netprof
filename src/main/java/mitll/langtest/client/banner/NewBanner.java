@@ -17,6 +17,7 @@ import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectMode;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,6 +25,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
+import static mitll.langtest.shared.project.ProjectType.DIALOG;
 
 /**
  * Holds nav links at top of page...
@@ -85,7 +87,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final ExerciseController controller;
   private Label subtitle;
 
-//  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param userManager
@@ -307,9 +309,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean first = true;
     boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == User.Permission.POLYGLOT;
 
-    List<VIEWS> toShow = isPoly ? POLY_VIEWS : STANDARD_VIEWS;
+    List<VIEWS> toShow = isPoly ?
+        POLY_VIEWS :
+        (controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG ?
+            DIALOG_VIEWS :
+            STANDARD_VIEWS);
 
-    //  logger.info("addChoicesForUser " + toShow.size());
+    if (DEBUG) logger.info("addChoicesForUser " + toShow.size());
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
       choice1.getElement().setId("Link_" + choice.name());
@@ -490,16 +496,24 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   @Override
   public void checkProjectSelected() {
-    setVisibleChoices(controller.getProjectStartupInfo() != null);
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    setVisibleChoices(projectStartupInfo != null);
 
     VIEWS currentView = navigation.getCurrentView();
     NavLink linkToShow = viewToLink.get(currentView);
 
     if (linkToShow == null) {
       logger.warning("checkProjectSelected Current view is " + currentView);
-    //  logger.warning("checkProjectSelected Current view link is null");
+      //  logger.warning("checkProjectSelected Current view link is null");
       logger.warning("checkProjectSelected huh? keys are " + viewToLink.keySet());
-      linkToShow = viewToLink.get(VIEWS.LEARN);
+
+      if (projectStartupInfo != null && projectStartupInfo.getProjectType() == DIALOG) {
+        if (DEBUG) logger.info("choosing dialog view... " + projectStartupInfo.getProjectType());
+        linkToShow = viewToLink.get(VIEWS.DIALOG);
+      } else {
+        if (DEBUG) logger.info("choosing learn view..." + projectStartupInfo);
+        linkToShow = viewToLink.get(VIEWS.LEARN);
+      }
     }
     showActive(linkToShow);
     recordMenuVisible();
@@ -515,12 +529,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
-   * @see NewBanner#setCogVisible
    * @param mode
+   * @see NewBanner#setCogVisible
    */
   @Override
   public void setVisibleChoicesByMode(ProjectMode mode) {
-    //   logger.info("setVisibleChoicesByMode set visible choices " + mode);
+    if (DEBUG) logger.info("setVisibleChoicesByMode set visible choices " + mode);
     hideOrShowByMode((mode == ProjectMode.DIALOG) ? DIALOG_VIEWS : STANDARD_VIEWS);
   }
 

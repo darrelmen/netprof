@@ -40,6 +40,7 @@ public interface OpenUserServiceAsync {
    * @param userId
    * @param attemptedFreeTextPassword
    * @param async
+   * @see mitll.langtest.client.user.SignInForm#gotLogin
    */
   void loginUser(String userId, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
 

@@ -47,7 +47,7 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
   private String language;
   private String keyForSorting;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param exerciseList

@@ -120,20 +120,30 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-    //    logger.info("getCurrentView currentView " + currentView);
-    VIEWS currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
-
-    Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
-
-    //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
-    List<User.Permission> requiredPerms = currentStoredView.getPerms();
-    userPerms.retainAll(requiredPerms);
-
-    if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
-      logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
-      currentStoredView = LEARN;
+    if (DEBUG) logger.info("getCurrentView currentView " + currentView);
+    VIEWS currentStoredView;
+    try {
+      currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
+    } catch (IllegalArgumentException e) {
+      currentStoredView = VIEWS.NONE;
     }
 
+    {
+      Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
+
+      //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
+      List<User.Permission> requiredPerms = currentStoredView.getPerms();
+      userPerms.retainAll(requiredPerms);
+
+      if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
+        logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
+        currentStoredView = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+      }
+    }
+
+    if (currentStoredView == NONE) {
+      currentStoredView = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+    }
     return currentStoredView;
   }
 
@@ -244,11 +254,13 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           getReviewList();
           break;
         case NONE:
-          logger.info("skipping choice " + view);
+          logger.info("showView skipping choice " + view);
           break;
         default:
-          logger.warning("huh? unknown view " + view);
+          logger.warning("showView huh? unknown view " + view);
       }
+    } else {
+      if (DEBUG) logger.info("showView skip current view " + view);
     }
   }
 
@@ -276,7 +288,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private void setInstanceHistory(VIEWS views) {
     if (new SelectionState().getView() != views) {
-      logger.info("setInstanceHistory clearing history for instance " + views);
+      if (DEBUG) logger.info("setInstanceHistory clearing history for instance " + views);
       pushItem(getInstanceParam(views));
     } else {
       //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
@@ -453,36 +465,24 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    *
    * @return
    */
-//  @Override
   private String getCurrentStoredView() {
-    // logger.info("getCurrentStoredView instance = " + instance);
     VIEWS views = getCurrentViewFromURL();
-    if (views == null) {
+    if (views == NONE) {
       String storedView = getStoredView();
-      //  logger.info("getCurrentStoredView storedView " + storedView);
+      if (DEBUG) logger.info("getCurrentStoredView storedView " + storedView);
       return storedView;
     } else {
-      // logger.info("getCurrentStoredView url   view '" + views +"'");
+      if (DEBUG) logger.info("getCurrentStoredView from url view '" + views + "'");
       return views.name();
     }
   }
 
-  @Nullable
+  /**
+   * @return view on url or in storage
+   */
+  @NotNull
   private VIEWS getCurrentViewFromURL() {
     VIEWS views = new SelectionState().getView();
-    // String instance = getCurrentInstance();
-    // VIEWS views = null;
- /*   try {
-      String name = instance.toUpperCase();
-      name = name.replaceAll(" ", "_");
-      views = instance.isEmpty() ? null : VIEWS.valueOf(name);
-    } catch (IllegalArgumentException e) {
-      logger.warning("bad instance " + instance);
-    }*/
-    //logger.info("getCurrentStoredView instance = " + instance + "/" + views);
-
-//    return views == null ? controller.getStorage().getValue(CURRENT_VIEW).toUpperCase() : views.toString().toUpperCase();
-
     if (views == NONE) {
       String storedView = getStoredView();
 
@@ -499,13 +499,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
     return views;
   }
-
-  /**
-   * @return
-   */
-//  private VIEWS getCurrentView() {
-//    return new SelectionState().getInstance();
-//  }
 
   /**
    * @param mode
@@ -563,10 +556,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   private void clear() {
     divWidget.clear();
-
-/*    Style style = divWidget.getElement().getStyle();
-    style.clearProperty("overflow");
-    style.clearProperty("position");*/
   }
 
   /**
@@ -694,15 +683,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           if (currentStoredView.getMode() == ProjectMode.DIALOG) {
             banner.show(currentStoredView);
           }
-//          if (currentStoredView == DIALOG) {
-//            banner.show(DIALOG);
-//          } else if (currentStoredView == LISTEN) {
-//            banner.show(LISTEN);
-//          } else if (currentStoredView == REHEARSE) {
-//            banner.show(REHEARSE);
-//          } else if (currentStoredView == PERFORM) {
-//            banner.show(PERFORM);
-//          }
         }
       } catch (IllegalArgumentException e) {
         logger.warning("got " + e);
