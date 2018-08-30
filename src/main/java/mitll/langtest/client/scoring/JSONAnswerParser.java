@@ -9,13 +9,12 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class JSONAnswerParser {
+  public static final String PHONE_TRANSCRIPT = "PHONE_TRANSCRIPT";
+  public static final String WORD_TRANSCRIPT = "WORD_TRANSCRIPT";
   private final Logger logger = Logger.getLogger("JSONAnswerParser");
 
   private static final String REQID = "reqid";
@@ -49,24 +48,31 @@ public class JSONAnswerParser {
       converted.setCorrect(getBoolean(jsonObject, "isCorrect"));
 
 
-      List<TranscriptSegment> psegments = getSegments(jsonObject.get("PHONE_TRANSCRIPT").isArray());
-      List<TranscriptSegment> wsegments = getSegments(jsonObject.get("WORD_TRANSCRIPT").isArray());
-      float wavFileLengthSeconds = ((float) converted.getDurationInMillis()) / 1000F;
+      JSONValue phone_transcript = jsonObject.get(PHONE_TRANSCRIPT);
+
+      List<TranscriptSegment> psegments =
+          (phone_transcript == null) ? Collections.emptyList() : getSegments(phone_transcript.isArray());
+
+      JSONValue word_transcript = jsonObject.get(WORD_TRANSCRIPT);
+
+      List<TranscriptSegment> wsegments =
+          word_transcript == null ? Collections.emptyList() : getSegments(word_transcript.isArray());
+
       Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<>();
       sTypeToEndTimes.put(NetPronImageType.PHONE_TRANSCRIPT, psegments);
       sTypeToEndTimes.put(NetPronImageType.WORD_TRANSCRIPT, wsegments);
+
+      float wavFileLengthSeconds = ((float) converted.getDurationInMillis()) / 1000F;
       PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
           new HashMap<>(),
           new HashMap<>(),
           sTypeToEndTimes, "", wavFileLengthSeconds,
           0, true);
+
       converted.setPretestScore(pretestScore);
-      // useResult(converted);
     } else {
       logger.info("gotResponse Got " + jsonObject);
     }
-
-    //  logger.info("Got " + jsonObject);
 
     return converted;
   }

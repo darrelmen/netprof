@@ -57,7 +57,7 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
   private Map<String, Float> wordScores;
   private Map<NetPronImageType, String> sTypeToImage = new HashMap<>();
 
-  private transient String recoSentence;
+  private transient String recoSentence = "";
 
   private float wavFileLengthSeconds;
 

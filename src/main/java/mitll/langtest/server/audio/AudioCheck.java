@@ -167,7 +167,6 @@ public class AudioCheck {
                                            boolean useSensitiveTooLoudCheck,
                                            boolean quietAudioOK) {
     try {
-
       if (length < WAV_HEADER_LENGTH) {
         logger.warn("isValid : audio file " + fileInfo + " length was " + length + " bytes.");
         return new AudioCheck.ValidityAndDur(Validity.TOO_SHORT, 0, false);

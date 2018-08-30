@@ -45,6 +45,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.client.scoring.SimpleRecordAudioPanel;
@@ -214,7 +215,8 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
     {
       DivWidget downloadC = new DivWidget();
-      downloadC.add(getDownload(scoreAndPath.getPath(), linkIndex, getDateToDisplay(scoreAndPath.getTimestamp()), host));
+      downloadC.add(new DownloadContainer()
+          .getDownload(scoreAndPath.getPath(), linkIndex, getDateToDisplay(scoreAndPath.getTimestamp()), host, exerciseID, controller));
       hp.add(downloadC);
     }
 
@@ -223,56 +225,6 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
   private String getDateToDisplay(long timestamp) {
     return timestamp > 0 ? getVariableInfoDateStamp(new Date(timestamp)) : "";
-  }
-
-
-  /**
-   * @param audioPath
-   * @param host
-   * @return link for this audio
-   * @see #getAudioAndScore
-   */
-  private IconAnchor getDownload(final String audioPath, int linkIndex, String dateFormat, String host) {
-    final IconAnchor download = new IconAnchor();
-    download.getElement().setId("Download_user_audio_link_" + linkIndex);
-    download.setIcon(IconType.DOWNLOAD);
-    download.setIconSize(IconSize.LARGE);
-    download.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
-
-    addTooltip(download, dateFormat);
-    setDownloadHref(download, audioPath, host);
-
-    download.addClickHandler(event -> controller.logEvent(download, "DownloadUserAudio_History",
-        exerciseID, "downloading audio file " + audioPath));
-
-    return download;
-  }
-
-  /**
-   * @param download
-   * @param audioPath
-   * @param host
-   * @see #getDownload
-   */
-  private void setDownloadHref(IconAnchor download, String audioPath, String host) {
-    audioPath = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg", ".mp3") : audioPath;
-    String href = getDownloadAudio(host) +
-        "?" +
-        "file=" + audioPath + "&" +
-        "exerciseID=" + exerciseID + "&" +
-        "userID=" + controller.getUserState().getUser();
-    download.setHref(href);
-  }
-
-  /**
-   * @param w
-   * @see #getDownload
-   */
-  private void addTooltip(Widget w, String dateFormat) {
-    String tip = "Download recording" +
-        (dateFormat.isEmpty()
-            ? "" : " from " + dateFormat);
-    new TooltipHelper().createAddTooltip(w, tip, Placement.LEFT);
   }
 
   /**
@@ -288,6 +240,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
   /**
    * Made word score use inline-flex layout...
+   *
    * @param tooltipHelper
    * @param scoreAndPath
    * @return

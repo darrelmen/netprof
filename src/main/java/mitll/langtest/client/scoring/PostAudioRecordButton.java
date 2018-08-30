@@ -158,13 +158,14 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * @see RecordButton#stop
    */
   public boolean stopRecording(long duration) {
+    controller.stopRecording(bytes -> postAudioFile(bytes), USE_DELAY);
+
     if (duration > MIN_DURATION) {
       logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
 
-      controller.stopRecording(bytes -> postAudioFile(bytes), USE_DELAY);
       return true;
     } else {
-      showPopup(Validity.TOO_SHORT.getPrompt());
+     // showPopup(Validity.TOO_SHORT.getPrompt());
       hideWaveform();
       gotShortDurationRecording();
       logger.info("stopRecording duration " + duration + " < min = " + MIN_DURATION);

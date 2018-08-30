@@ -98,10 +98,10 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String RESULTS_XLSX = "results.xlsx";
   private static final String EVENTS_XLSX = "events.xlsx";
   private static final String WAV = ".wav";
-  public static final String MP3 = ".mp3";
+  private static final String MP3 = ".mp3";
   private static final String UNIT = "unit";
-  public static final String SEARCH = "search";
-  public static final String AUDIO1 = "audio";
+  private static final String SEARCH = "search";
+  private static final String AUDIO1 = "audio";
   private static final int BUFFER_SIZE = 4096;
 
   /**
@@ -372,17 +372,19 @@ public class DownloadServlet extends DatabaseServlet {
 
     if (file.endsWith(WAV)) file = file.replaceAll(WAV, MP3);
 
-    String exercise = split[1].split("=")[1];
-    String useridString = split[2].split("=")[1];
+    {
+      String exercise = split[1].split("=")[1];
+      String useridString = split[2].split("=")[1];
 
-    logger.debug("returnAudioFile download exercise #" + exercise + " for user id=" + useridString + " file " + file);
+      logger.debug("returnAudioFile download exercise #" + exercise + " for user id=" + useridString + " file " + file);
 
-    String underscores = getFilenameForDownload(db, projid, Integer.parseInt(exercise), useridString, language);
+      String underscores = getFilenameForDownload(db, projid, Integer.parseInt(exercise), useridString, language);
 
-    logger.debug("returnAudioFile query is " + queryString + " exercise " + exercise +
-        " user " + useridString + " so name is " + underscores);
+      logger.debug("returnAudioFile query is " + queryString + " exercise " + exercise +
+          " user " + useridString + " so name is " + underscores);
 
-    setResponse(response, underscores);
+      setResponse(response, underscores);
+    }
 
     File fileRef = pathHelper.getAbsoluteAudioFile(file);
     if (!fileRef.exists()) {
