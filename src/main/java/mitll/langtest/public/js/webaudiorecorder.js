@@ -89,19 +89,17 @@ function startRecording() {
     recorder && recorder.record();
 
     //  && audio_context.state === 'suspended'
-    /*
-        if (audio_context) {
+   /*     if (audio_context) {
             __log('webaudiorecorder.startRecording 1 Start Recording. ' +  audio_context.state);
 
             audio_context.resume().then(function () {
                 __log('webaudiorecorder.startRecording resumed recording...');
-                rememberedInput.start();
+            //    rememberedInput.start();
 
                 recorder && recorder.clear();
                 recorder && recorder.record();
             });
-        }
-    */
+        }*/
 
     __log('webaudiorecorder.startRecording 1 Start Recording.  state =' + audio_context.state);
 }
@@ -111,18 +109,20 @@ function stopRecording() {
     recorder && recorder.stop();
     // audio_context && audio_context.suspend();
 
-    /*
-        if (audio_context) {
-            __log('webaudiorecorder.stopRecording : state = ' + audio_context.state);
+ /*   if (audio_context) {
+        __log('webaudiorecorder.stopRecording : state = ' + audio_context.state);
 
-            //} && audio_context.state === 'running')
-            // {
-            audio_context.suspend().then(function () {
-                __log('webaudiorecorder.stopRecording suspended recording...');
-                rememberedInput.stop();
-            });
-        }
-    */
+        //} && audio_context.state === 'running')
+        // {
+        audio_context.suspend().then(function () {
+            __log('webaudiorecorder.stopRecording suspended recording...');
+         //   rememberedInput.stop();
+
+
+            recorder && recorder.clear();
+
+        });
+    }*/
 
     __log('webaudiorecorder.stopRecording');
 
@@ -146,13 +146,16 @@ function serviceStartStream(url, exid, reqid, isreference, audioType) {
 
 function serviceStopStream() {
     recorder && recorder.stop();
+    //recorder && recorder.clear();
 
-    if (audio_context) {//} && audio_context.state === 'running') {
+/*    if (audio_context) {//} && audio_context.state === 'running') {
         __log('webaudiorecorder.serviceStopStream state = ' + audio_context.state);
         audio_context.suspend().then(function () {
             __log('webaudiorecorder.serviceStopStream suspended recording...');
+
+            recorder && recorder.clear();
         });
-    }
+    }*/
 
     recorder && recorder.serviceStopStream(function (blob) {
         //  __log('serviceStopStream getStreamResponse.');

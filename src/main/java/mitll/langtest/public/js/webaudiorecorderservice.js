@@ -100,7 +100,7 @@
             recording = true;
             start = Date.now();
             totalSamples = 0;
-            console.log("Recorder.record at " + new Date().getTime());
+         //   console.log("Recorder.record at " + new Date().getTime());
         };
 
         this.stop = function () {

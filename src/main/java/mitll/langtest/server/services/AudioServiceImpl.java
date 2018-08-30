@@ -364,7 +364,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         .setRecordInResults(true)
         .setRefRecording(isReference)
         .setAllowAlternates(false)
-        .setCompressLater(true);
+        .setCompressLater(false);
 
     AudioAnswer audioAnswer = getAudioAnswer(null, // not doing it!
         audioContext,
