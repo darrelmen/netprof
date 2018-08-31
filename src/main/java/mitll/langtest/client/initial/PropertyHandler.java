@@ -57,9 +57,16 @@ import static mitll.langtest.client.user.ResetPassword.SHOW_ADVERTISED_IOS;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
+  private final Logger logger = Logger.getLogger("PropertyHandler");
+
+
+  public static final boolean IS_BETA=true;
+
+
   private static final String AFTER_STOP_DELAY_MILLIS = "afterStopDelayMillis";
   private static final String SHOW_SPECTROGRAM1 = "showSpectrogram";
-  private final Logger logger = Logger.getLogger("PropertyHandler");
+  public static final String PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS = "Practice vocabulary with audio flashcards.";
+  public static final String RECEIVE_FEEDBACK_ON_STRENGTHS_AND_WEAKNESSES = "Receive feedback on strengths and weaknesses.";
 
   private static final String PRONUNCIATION_FEEDBACK = "netprof";//"Pronunciation Feedback";
   private static final String CPW_TOKEN = "CPWtoken";
@@ -106,18 +113,16 @@ public class PropertyHandler {
   private static final String HELP = "help";
   private static final String HELP_EMAIL = "helpEmail";
   private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
-  //private String HELP_DEFAULT = getHelpDefault();
 
+  //private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
+  // private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
+  private static final String INITIAL_PROMPT = "Practice dialogs to improve pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
+  //private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
 
 
   private boolean isAMAS;
 
   private boolean usePhoneToDisplay;
-  private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
-
-  private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
-
-  private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
   private String fontFamily = "";
 
   private int afterStopDelayMillis = DEFAULT_AFTER_STOP_DELAY_MILLIS;
@@ -282,15 +287,15 @@ public class PropertyHandler {
   }
 
   private String getAppTitleSuffix() {
-    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " " + PRONUNCIATION_FEEDBACK;
+    return PRONUNCIATION_FEEDBACK;
   }
 
   public String getInitialPrompt() {
-    return isAMAS() ? AMAS_INITIAL_PROMPT : INITIAL_PROMPT;
+    return INITIAL_PROMPT;
   }
 
   public String getFirstBullet() {
-    return isAMAS() ? "Receive feedback on strengths and weaknesses." : "Practice vocabulary with audio flashcards.";
+    return PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS;
   }
 
   @Deprecated

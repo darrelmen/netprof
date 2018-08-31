@@ -110,11 +110,11 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private static final String PLEASE_ALLOW_RECORDING = "Please allow recording";
 
   /**
-   * TODO : WHY???
+   * TODOx : WHY???
    *
    * @see #getRootContainer
    */
-  private static final int MARGIN_TOP = 47;//5;//47;
+//  private static final int MARGIN_TOP = 47;//5;//47;
 
   /**
    * @see #getRootContainer
@@ -373,7 +373,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     Style style = verticalContainer.getElement().getStyle();
     style.setTop(TOP_OF_ROOT, Style.Unit.PX);
     style.setBottom(0, Style.Unit.PX);
-    // verticalContainer.setHeight("100%");  // critical for scrolling
     style.setOverflowY(Style.Overflow.AUTO);
     style.setPosition(Style.Position.FIXED);
 

@@ -58,6 +58,7 @@ import static mitll.hlt.domino.shared.Constants.RESET_PW_HASH;
 import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 
 public class SignUpForm extends UserDialog implements SignUp {
+  public static final String USERNAME1 = "username";
   private final Logger logger = Logger.getLogger("SignUpForm");
 
   private static final String DLIFLC_EDU = "dliflc.edu";
@@ -351,7 +352,8 @@ public class SignUpForm extends UserDialog implements SignUp {
     signUpUser = getFormField(fieldset, MIN_LENGTH_USER_ID, USERNAME_WIDTH, USERNAME);
     final TextBoxBase userBox = signUpUser.box;
     styleBoxNotLast(userBox);
-    addFocusHandler(userBox, "username");
+    addFocusHandler(userBox, USERNAME1);
+    userBox.getElement().setPropertyString(AUTOCOMPLETE, USERNAME1);
 
     signUpUser.box.addBlurHandler(event -> onUserIDBlur());
 
@@ -423,6 +425,8 @@ public class SignUpForm extends UserDialog implements SignUp {
   private void makeSignUpFirstName(Fieldset fieldset) {
     firstName = getFormField(fieldset, 3, USERNAME_WIDTH, "First Name");
     final TextBoxBase userBox = firstName.box;
+    userBox.getElement().setPropertyString(AUTOCOMPLETE, "given-name");
+
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "firstName");
   }
@@ -436,6 +440,8 @@ public class SignUpForm extends UserDialog implements SignUp {
   private void makeSignUpLastName(Fieldset fieldset) {
     lastName = getFormField(fieldset, 3, USERNAME_WIDTH, LAST_NAME);
     final TextBoxBase userBox = lastName.box;
+    userBox.getElement().setPropertyString(AUTOCOMPLETE, "family-name");
+
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "lastName");
   }
@@ -450,6 +456,8 @@ public class SignUpForm extends UserDialog implements SignUp {
   private TextBoxBase makeSignUpEmail(Fieldset fieldset) {
     signUpEmail = getFormField(fieldset, MIN_EMAIL_LENGTH, USER_ID_MAX_LENGTH, EMAIL);
     final TextBoxBase emailBox = signUpEmail.box;
+    emailBox.getElement().setPropertyString(AUTOCOMPLETE, "email");
+
     styleBox(emailBox);
     addFocusHandler(emailBox, EMAIL1);
 

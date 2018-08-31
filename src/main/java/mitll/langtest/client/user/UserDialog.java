@@ -36,10 +36,12 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.PropertyHandler;
@@ -61,6 +63,9 @@ import org.jetbrains.annotations.NotNull;
  * To change this template use File | Settings | File Templates.
  */
 public class UserDialog extends BasicDialog {
+  //public static final String LOGIN_PAGE_BACK = "loginPageBack";
+  public static final String LOGIN_PAGE_BACK = "dialogLoginPageBack";
+  public static final String AUTOCOMPLETE = "autocomplete";
   static final String NO_SERVER = "Can't communicate with server - check network connection.";
   static final String USER_ID = "User ID";
   static final String VALID_EMAIL = "Please enter a valid email address.";
@@ -280,5 +285,40 @@ public class UserDialog extends BasicDialog {
     enterKeyButtonHelper.addKeyHandler(changePassword);
     eventRegistration.register(changePassword);
     return changePassword;
+  }
+
+  @NotNull
+  protected Panel getLoginContainer(Fieldset fieldset) {
+    Panel container = new DivWidget();
+    container.getElement().setId("ResetPassswordContent");
+
+    DivWidget child = new DivWidget();
+    container.add(child);
+    child.addStyleName(LOGIN_PAGE_BACK);
+
+    Panel leftAndRight = new DivWidget();
+    boolean isIOS = Window.getClientWidth() < 800;
+    leftAndRight.addStyleName(isIOS ? "resetPageMobile" : "resetPage");
+    container.add(leftAndRight);
+
+    DivWidget right = new DivWidget();
+
+    leftAndRight.add(right);
+    right.addStyleName("floatRight");
+
+    DivWidget rightDiv = new DivWidget();
+    right.add(rightDiv);
+
+    Form form = new Form();
+    {
+      form.getElement().setId("resetForm");
+      rightDiv.add(form);
+
+      form.addStyleName("topMargin");
+      form.addStyleName("formRounded");
+      form.getElement().getStyle().setBackgroundColor("white");
+    }
+    form.add(fieldset);
+    return container;
   }
 }

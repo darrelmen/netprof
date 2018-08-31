@@ -14,6 +14,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectMode;
@@ -51,7 +52,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private static final List<VIEWS> POLY_VIEWS = Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS);
 
-  private static final String NETPROF = "netprof";
+  private static final String NETPROF = "dialog" + (PropertyHandler.IS_BETA ? "BETA" : "");
+
   private static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
 
   private static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";

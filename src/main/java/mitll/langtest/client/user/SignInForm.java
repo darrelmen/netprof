@@ -175,6 +175,7 @@ public class SignInForm extends UserDialog implements SignIn {
     userField.box.addStyleName("topMargin");
     userField.box.addStyleName("rightFiveMargin");
     userField.box.getElement().setId("Username_Box_SignIn");
+    userField.box.getElement().setPropertyString(AUTOCOMPLETE,"username email");
     userField.box.setWidth(SIGN_UP_WIDTH);
 
     userField.box.addFocusHandler(event -> {
@@ -200,6 +201,8 @@ public class SignInForm extends UserDialog implements SignIn {
 
     hp.add(password.getGroup());
     box.addStyleName("rightFiveMargin");
+
+    box.getElement().setPropertyString(AUTOCOMPLETE,"current-password");
 
     return password;
   }

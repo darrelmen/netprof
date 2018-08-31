@@ -83,35 +83,9 @@ public class SendResetPassword extends UserDialog {
    * @see InitialUI#handleResetPass
    */
   public Panel getResetPassword() {
-    Panel container = new DivWidget();
-    container.getElement().setId("SendResetPassswordContent");
-
-    DivWidget child = new DivWidget();
-    container.add(child);
-    child.addStyleName("loginPageBack");
-
-    Panel leftAndRight = new DivWidget();
-    boolean isIOS = Window.getClientWidth() < 800;
-    leftAndRight.addStyleName(isIOS ? "resetPageMobile" : "resetPage");
-    container.add(leftAndRight);
-
-    DivWidget right = new DivWidget();
-
-    leftAndRight.add(right);
-    right.addStyleName("floatRight");
-
-    DivWidget rightDiv = new DivWidget();
-
-    Form form = new Form();
-    form.getElement().setId("resetForm");
-    rightDiv.add(form);
-
-    form.addStyleName("topMargin");
-    form.addStyleName("formRounded");
-    form.getElement().getStyle().setBackgroundColor("white");
-
     final Fieldset fieldset = new Fieldset();
-    form.add(fieldset);
+
+    Panel container = getLoginContainer(fieldset);
 
     Heading w = new Heading(3, ENTER_USER_ID);
     fieldset.add(w);
@@ -127,8 +101,6 @@ public class SendResetPassword extends UserDialog {
     Button changePasswordButton = getChangePasswordButton(useridField);
 
     fieldset.add(changePasswordButton);
-
-    right.add(rightDiv);
 
     setFocusOn(useridField.getWidget());
     return container;

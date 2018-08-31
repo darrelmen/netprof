@@ -66,6 +66,9 @@ import java.util.List;
  */
 public class UserPassLogin extends UserDialog implements UserPassDialog {
   //  private final Logger logger = Logger.getLogger("UserPassLogin");
+
+  private static final boolean ADD_WATERMARK = PropertyHandler.IS_BETA;
+
   public static final String USER_NAME_BOX = "UserNameBox";
 
   /**
@@ -203,17 +206,35 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     // THIS ID IS USED IN INITIAL UI. LEAVE IT!
     container.getElement().setId("UserPassLogin");
 
-    DivWidget child = new DivWidget();
-    container.add(child);
-    child.addStyleName("loginPageBack");
+    {
+      DivWidget child = new DivWidget();
+      container.add(child);
 
-    Panel leftAndRight = new DivWidget();
-    leftAndRight.addStyleName("loginPage");
+      if (ADD_WATERMARK) addWatermark(container);
 
-    container.add(leftAndRight);
-    getLeftIntro(leftAndRight);
-    getRightLogin(leftAndRight);
+      child.addStyleName(LOGIN_PAGE_BACK);
+    }
+
+    {
+      Panel leftAndRight = new DivWidget();
+      leftAndRight.addStyleName("loginPage");
+
+      container.add(leftAndRight);
+      getLeftIntro(leftAndRight);
+      getRightLogin(leftAndRight);
+    }
+
     return container;
+  }
+
+  private void addWatermark(Panel container) {
+    HTML for_demonstration_only = new HTML("For Demonstration Only");
+    for_demonstration_only.addStyleName("watermark");
+    container.add(for_demonstration_only);
+
+    HTML for_demonstration_only2 = new HTML("For Demonstration Only");
+    for_demonstration_only2.addStyleName("leftwatermark");
+    container.add(for_demonstration_only2);
   }
 
   private void getRightLogin(Panel leftAndRight) {

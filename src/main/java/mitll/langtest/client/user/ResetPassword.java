@@ -46,6 +46,7 @@ import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.user.ChoosePasswordResult;
 import mitll.langtest.shared.user.User;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -107,36 +108,9 @@ public class ResetPassword extends UserDialog {
    * @see InitialUI#handleResetPass
    */
   public Panel getResetPassword(final String token) {
-    Panel container = new DivWidget();
-    container.getElement().setId("ResetPassswordContent");
-
-    DivWidget child = new DivWidget();
-    container.add(child);
-    child.addStyleName("loginPageBack");
-
-    Panel leftAndRight = new DivWidget();
-    boolean isIOS = Window.getClientWidth() < 800;
-    leftAndRight.addStyleName(isIOS ? "resetPageMobile" : "resetPage");
-    container.add(leftAndRight);
-
-    DivWidget right = new DivWidget();
-
-    leftAndRight.add(right);
-    right.addStyleName("floatRight");
-
-    DivWidget rightDiv = new DivWidget();
-
-    Form form = new Form();
-    {
-      form.getElement().setId("resetForm");
-      rightDiv.add(form);
-
-      form.addStyleName("topMargin");
-      form.addStyleName("formRounded");
-      form.getElement().getStyle().setBackgroundColor("white");
-    }
     final Fieldset fieldset = new Fieldset();
-    form.add(fieldset);
+
+    Panel container = getLoginContainer(fieldset);
 
     Heading w = new Heading(3, CHOOSE_A_NEW_PASSWORD);
     fieldset.add(w);
@@ -144,6 +118,7 @@ public class ResetPassword extends UserDialog {
 
     final TextBox user = new TextBox();
     user.setMaxLength(35);
+    user.getElement().setPropertyString("autocomplete","username");
     user.setPlaceholder(USER_ID);
     String pendingUserID = userManager.getPendingUserID();
     user.setText(userManager.getPendingUserID());
@@ -162,7 +137,6 @@ public class ResetPassword extends UserDialog {
 
     fieldset.add(changePasswordButton);
 
-    right.add(rightDiv);
 
     setFocusOn((pendingUserID == null || pendingUserID.isEmpty()) ? useridField.getWidget() : firstPassword.getWidget());
     return container;
@@ -170,6 +144,7 @@ public class ResetPassword extends UserDialog {
 
   private FormField getPasswordField(Fieldset fieldset, String hint) {
     FormField formField = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, hint);
+    formField.box.getElement().setPropertyString("autocomplete","new-password");
     turnOffAutoCapitalize(formField);
     return formField;
   }
@@ -259,6 +234,7 @@ public class ResetPassword extends UserDialog {
 
   /**
    * Add the advertise param to url
+   *
    * @param user
    */
   private void reloadPage(User user) {
