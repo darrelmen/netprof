@@ -17,4 +17,9 @@ public interface IRecordDialogTurn {
 
   void useResult(AudioAnswer result);
   void useInvalidResult();
+
+  void switchAudioToStudent();
+  void switchAudioToReference();
+
+  void revealScore();
 }

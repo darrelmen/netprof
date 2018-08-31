@@ -12,6 +12,7 @@ import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
 import java.util.logging.Logger;
 
@@ -170,6 +171,15 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     getSpanStyle().setBackgroundColor(highlightColor);
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.RecordDialogExercisePanel#showWordScore
+   * @param highlightColor
+   */
+  @Override
+  public void setHighlightColor(String highlightColor) {
+    this.highlightColor = highlightColor;
+  }
+
   @Override
   public void clearHighlight() {
     highlighted = false;
@@ -242,10 +252,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     return north;
   }
 
-  @Override
-  public void setHighlightColor(String highlightColor) {
-    this.highlightColor = highlightColor;
-  }
+
 
   public String toString() {
     return //"#" + id + " " +

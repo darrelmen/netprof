@@ -736,7 +736,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int user = audioContext.getUserid();
 
     if (decoderOptions.isRefRecording() && audioAnswer.isValid()) {
-      audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(), commonExercise, exerciseID, audioAnswer, hasProjectSpecificAudio));
+      audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(),
+          commonExercise, exerciseID, audioAnswer, hasProjectSpecificAudio));
     } //else {
     // So Wade has observed that this really messes up the ASR -- silence doesn't appear as silence after you multiply
     // the signal.  Also, the user doesn't get feedback that their mic gain is too high/too low or that they

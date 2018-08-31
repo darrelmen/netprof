@@ -33,7 +33,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
   private static final String BLUE = "#2196F3";
 
-//  static final int CONTEXT_INDENT = 45;//50;
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char FULL_WIDTH_NINE = '\uFF10' + 9;
 
@@ -79,11 +78,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    * @see mitll.langtest.client.banner.ListenViewHelper#getTurnPanel
    */
-   DialogExercisePanel(final T commonExercise,
-                             final ExerciseController controller,
-                             final ListInterface<?, ?> listContainer,
-                             Map<Integer, AlignmentOutput> alignments,
-                             IListenView listenView) {
+  DialogExercisePanel(final T commonExercise,
+                      final ExerciseController controller,
+                      final ListInterface<?, ?> listContainer,
+                      Map<Integer, AlignmentOutput> alignments,
+                      IListenView listenView) {
     this.exercise = commonExercise;
     this.controller = controller;
     this.listenView = listenView;
@@ -156,11 +155,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       alignmentFetcher.setPlayAudio(playAudio);
 
       //   if (!e.getAudioAttributes().isEmpty()) {
-      AudioAttribute next = getRegularSpeedIfAvailable(e);
-      playAudio.rememberAudio(next);
-      //  logger.info("makePlayAudio audio for " + e.getID() + "  " + next);
-
-      maybeShowAlignment(next);
+      //   AudioAttribute next = getRegularSpeedIfAvailable(e);
+      rememberAudio(getRegularSpeedIfAvailable(e));
 
 //        audioChanged(next.getUniqueID(), next.getDurationInMillis());
 //      } else {
@@ -171,8 +167,18 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
   }
 
+   void rememberAudio(AudioAttribute next) {
+    playAudio.rememberAudio(next);
+  //  logger.info("rememberAudio audio for " + this + "  " + next);
+    maybeShowAlignment(next);
+  }
+
+  /**
+   * @param next
+   */
   void maybeShowAlignment(AudioAttribute next) {
     if (next.getAlignmentOutput() != null) {
+   //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
       showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
     }
   }
@@ -260,6 +266,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see #makePlayAudio
    * @see #audioChanged
    * @see RecordDialogExercisePanel#showScoreInfo
+   * @see RecordDialogExercisePanel#showAlignment(int, long, AlignmentOutput)
    */
   protected TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
     if (alignmentOutput != null) {
@@ -269,7 +276,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         }
         return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, new DivWidget());
-      } else return null;
+      } else {
+        logger.info("showAlignment SKIP for ex " + exercise.getID() + " audio id " + id + " vs " + currentAudioDisplayed);
+        return null;
+      }
     } else {
       if (DEBUG || true)
         logger.warning("showAlignment no alignment info for " + this + " id " + id + " dur " + duration);
@@ -890,14 +900,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   /**
-   * @see ListenViewHelper#playCurrentTurn
    * @return
+   * @see ListenViewHelper#playCurrentTurn
    */
   @Override
   public boolean doPlayPauseToggle() {
     if (playAudio != null) {
       if (DEBUG) logger.info("doPlayPauseToggle");
-     return playAudio.doPlayPauseToggle();
+      return playAudio.doPlayPauseToggle();
     } else {
       logger.warning("no play audio???");
       return false;
@@ -915,17 +925,18 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return playAudio.doPause();
   }
 
+  /**
+   * @see ListenViewHelper#clearHighlightAndRemoveMark
+   */
   public void clearHighlight() {
     flclickables.forEach(IHighlightSegment::clearHighlight);
   }
-
-/*  public boolean isPlaying() {
-    return (playAudio != null) && playAudio.isPlaying();
-  }*/
 
   public void resetAudio() {
     playAudio.reinitialize();
   }
 
-  public String toString() { return "turn for " + exercise.getID() + " " + exercise.getForeignLanguage(); }
+  public String toString() {
+    return "turn for " + exercise.getID() + " " + exercise.getForeignLanguage();
+  }
 }

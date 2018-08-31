@@ -41,9 +41,7 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   }
 
   @Override
-  public void setObscurable() {
-
-  }
+  public void setObscurable() {}
 
   /**
    * Not needed here.

@@ -7,6 +7,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -64,7 +65,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     cleanUp();
   }
 
-  public void cleanUp() {
+  private void cleanUp() {
     if (DEBUG) logger.info("cleanUp : doing cleanUp of play ------------------> " + this.getId());
     doPause();
     destroySound();
@@ -238,6 +239,10 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     }
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#makePlayAudio(ClientExercise, DivWidget)
+   * @param audioAttribute
+   */
   public void rememberAudio(AudioAttribute audioAttribute) {
     this.currentAudioAttr = audioAttribute;
     rememberAudio(currentAudioAttr.getAudioRef());
@@ -317,7 +322,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices
    * @see #loadAudio
    */
-  protected String rememberAudio(String path) {
+  public String rememberAudio(String path) {
     //  if (DEBUG || path == null) logger.info("rememberAudio - path " + path);
     destroySound();
     this.currentPath = CompressedAudio.getPath(path);

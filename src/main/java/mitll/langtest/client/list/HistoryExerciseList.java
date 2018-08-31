@@ -54,6 +54,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
+ * TODO : all the history stuff is way too confusing - make it simpler!
+ *
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -73,7 +75,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   private HandlerRegistration handlerRegistration;
   private final FacetContainer sectionWidgetContainer;
 
-  private static final boolean DEBUG_ON_VALUE_CHANGE = true;
+  private static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PUSH = false;
 

@@ -173,7 +173,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.setUser(miniUser);
     this.userid = miniUser.getID();
   }*/
-
   public String getAudioRef() {
     return audioRef;
   }
@@ -331,7 +330,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @param hasBeenPlayed
-   * @see EventDAO#addPlayedMarkings
+   * @seex EventDAO#addPlayedMarkings
    */
   public void setHasBeenPlayed(boolean hasBeenPlayed) {
     this.hasBeenPlayed = hasBeenPlayed;
@@ -343,6 +342,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   public long getDurationInMillis() {
     return durationInMillis;
+  }
+
+  public void setDurationInMillis(long durationInMillis) {
+    this.durationInMillis = durationInMillis;
   }
 
   public int getUniqueID() {
@@ -369,7 +372,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
         transcript.toLowerCase()
             .equals(
                 foreignLanguage
-                .toLowerCase());
+                    .toLowerCase());
   }
 
   public String getTranscript() {
@@ -377,8 +380,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyAudio
    * @param transcript
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyAudio
    */
   public void setTranscript(String transcript) {
     this.transcript = transcript;

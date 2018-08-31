@@ -124,7 +124,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    */
   private void showDialog(int dialogID, IDialog dialog, Panel child) {
     if (dialog == null) {
-      child.add(new HTML("hmmm can't find dialog #" + dialogID +      " in database"));
+      child.add(new HTML("hmmm can't find dialog #" + dialogID + " in database"));
     } else {
       child.add(dialogHeader = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog));
       child.add(getSpeakerRow(dialog));
@@ -151,11 +151,17 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
     Style style = rowOne.getElement().getStyle();
     style.setProperty("position", "sticky");
     style.setTop(0, PX);
-    rowOne.setHeight(getControlRowHeight() + "px");
+
+    setControlRowHeight(rowOne);
+
     rowOne.setWidth(97 + "%");
     style.setMarginTop(10, PX);
     style.setMarginBottom(10, PX);
     style.setZIndex(1000);
+  }
+
+  protected void setControlRowHeight(DivWidget rowOne) {
+    rowOne.setHeight(getControlRowHeight() + "px");
   }
 
   int getControlRowHeight() {
@@ -183,7 +189,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
     return rightDiv;
   }
 
-  private CheckBox addRightSpeaker(DivWidget rowOne, String label) {
+  protected CheckBox addRightSpeaker(DivWidget rowOne, String label) {
     CheckBox checkBox = new CheckBox(label, true);
 
     setRightTurnInitialValue(checkBox);
@@ -372,15 +378,17 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    * @return
    */
   @NotNull
-  private DivWidget getControls() {
+  protected DivWidget getControls() {
     DivWidget rowOne = new DivWidget();
     rowOne.getElement().setId("controls");
     rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+
     {
       Button widgets = new Button("", IconType.BACKWARD, event -> gotBackward());
       widgets.addStyleName("leftFiveMargin");
       rowOne.add(widgets);
     }
+
     {
       Button widgets1 = new Button("", IconType.PLAY, event -> gotPlay());
       widgets1.setSize(ButtonSize.LARGE);
@@ -395,10 +403,12 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
       rowOne.add(widgets2);
     }
 
-    Icon w = new Icon(IconType.VOLUME_UP);
-    w.addStyleName("leftTenMargin");
-    rowOne.add(w);
-    rowOne.add(slider = getSlider());
+    {
+      Icon w = new Icon(IconType.VOLUME_UP);
+      w.addStyleName("leftTenMargin");
+      rowOne.add(w);
+      rowOne.add(slider = getSlider());
+    }
 
     return rowOne;
   }
@@ -544,7 +554,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    * @see #gotBackward()
    */
   protected void clearHighlightAndRemoveMark() {
-    //  logger.info("clearHighlight on " + currentTurn);
+    logger.info("clearHighlight on " + currentTurn);
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();

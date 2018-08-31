@@ -15,8 +15,11 @@ import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -43,15 +46,24 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   private long minDur;
   private Image emoticon;
+  private final SessionManager sessionManager;
+
   /**
    *
    */
-  private AlignmentOutput alignmentOutput;
-  private final SessionManager sessionManager;
-  private long durationInMillis;
+//  private AlignmentOutput studentAlignment;
+  /**
+   * @see #useResult
+   */
+  //private long studentAudioDurationInMillis;
+
   private IRehearseView rehearseView;
+
+  long rawRefSpeechDur = 0L;
   private float refSpeechDur = 0F;
   private float studentSpeechDur = 0F;
+
+  private AudioAttribute /*refAudioAttr, */studentAudioAttribute;
 
   /**
    * @param commonExercise
@@ -84,11 +96,13 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   /**
-   *
    * @param id
    * @param duration
    * @param alignmentOutput
    * @return
+   * @see #showScoreInfo
+   * @see #maybeShowAlignment
+   * @see #audioChanged
    */
   @Override
   protected TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
@@ -100,41 +114,22 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private float getSpeechDur(int id, AlignmentOutput alignmentOutput) {
     List<TranscriptSegment> transcriptSegments = alignmentOutput == null ? null : alignmentOutput.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
     if (transcriptSegments == null || transcriptSegments.isEmpty()) {
-      logger.warning("getSpeechDur : huh? no transcript for " + id);
+      logger.warning("getSpeechDur : huh? no transcript for " + id + " for ex " + exercise.getID() + " " + exercise.getForeignLanguage() + " " + exercise.getEnglish());
       return 0F;
     } else {
       TranscriptSegment first = transcriptSegments.get(0);
       float start = first.getStart();
       TranscriptSegment last = transcriptSegments.get(transcriptSegments.size() - 1);
       float end = last.getEnd();
-     // logger.info("getSpeechDur " + first.getEvent() + " - " + last.getEvent());
+      // logger.info("getSpeechDur " + first.getEvent() + " - " + last.getEvent());
       return end - start;
     }
   }
 
-  /**
-   * TODOx : do this better - should
-   *
-   * @see RehearseViewHelper#showScores
-   */
-  @Override
-  public void showScoreInfo() {
-    emoticon.setVisible(true);
-
-    TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = showAlignment(0, durationInMillis, alignmentOutput);
-    if (transcriptSegmentIHighlightSegmentTreeMap != null) {
-      transcriptSegmentIHighlightSegmentTreeMap.forEach(this::showWordScore);
-    }
-  }
-
-  private void showWordScore(TranscriptSegment k, IHighlightSegment v) {
-    v.restoreText();
-    v.setHighlightColor(SimpleColumnChart.getColor(k.getScore()));
-    v.showHighlight();
-  }
-
   @Override
   public void clearScoreInfo() {
+    transcriptToHighlight = null;
+
     emoticon.setVisible(false);
 
     flclickables.forEach(iHighlightSegment -> {
@@ -142,7 +137,43 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       iHighlightSegment.clearHighlight();
     });
 
-    maybeShowAlignment(getRegularSpeedIfAvailable(exercise));
+    rememberAudio(getRegularSpeedIfAvailable(exercise));
+  }
+
+  private TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight = null;
+
+  /**
+   * TODOx : do this better - should
+   *
+   * @see RehearseViewHelper#showScores
+   * @see #switchAudioToStudent
+   */
+  @Override
+  public void showScoreInfo() {
+ //   logger.info("showScoreInfo for " + this);
+    emoticon.setVisible(true);
+
+    if (transcriptToHighlight == null) {
+      transcriptToHighlight =
+          showAlignment(0, studentAudioAttribute.getDurationInMillis(), studentAudioAttribute.getAlignmentOutput());
+    }
+
+    revealScore();
+  }
+
+  public void revealScore() {
+    if (transcriptToHighlight != null) {
+      transcriptToHighlight.forEach(this::showWordScore);
+    } else {
+      logger.warning("no transcript map for " + this);
+    }
+  }
+
+  private void showWordScore(SlimSegment withScore, IHighlightSegment v) {
+    v.restoreText();
+
+    v.setHighlightColor(SimpleColumnChart.getColor(withScore.getScore()));
+    v.showHighlight();
   }
 
   /**
@@ -210,16 +241,35 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    */
   @Override
   public void useResult(AudioAnswer result) {
-    alignmentOutput = result.getPretestScore();
-    this.studentSpeechDur = getSpeechDur(result.getExid(), alignmentOutput);
+//    studentAudioPath = result.getPath();
+    //   studentAlignment = result.getPretestScore();
+    this.studentSpeechDur = getSpeechDur(result.getExid(), result.getPretestScore());
 
-    durationInMillis = result.getDurationInMillis();
+    studentAudioAttribute = new AudioAttribute();
+    studentAudioAttribute.setAudioRef(result.getPath());
+    studentAudioAttribute.setAlignmentOutput(result.getPretestScore());
+    studentAudioAttribute.setDurationInMillis(result.getDurationInMillis());
+    // studentAudioDurationInMillis = result.getDurationInMillis();
+
     rehearseView.setEmoticon(emoticon, result.getScore());
+  }
+
+  @Override
+  public void switchAudioToStudent() {
+    //logger.info("switchAudioToStudent " + this);
+    playAudio.rememberAudio(studentAudioAttribute);
+    showScoreInfo();
+  }
+
+  @Override
+  public void switchAudioToReference() {
+    //logger.info("switchAudioToReference " + this);
+    clearScoreInfo();
   }
 
   public float getSpeakingRate() {
     float v = (refSpeechDur == 0F || studentSpeechDur == 0F) ? -1F : (studentSpeechDur / refSpeechDur);
-    logger.info("getSpeakingRate " + getExID() + " student " + studentSpeechDur + " ref " + refSpeechDur + " ratio " +v);
+    logger.info("getSpeakingRate " + getExID() + " student " + studentSpeechDur + " ref " + refSpeechDur + " ratio " + v);
     return v;
   }
 
@@ -288,7 +338,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
             logger.info("usePartial : (" + rehearseView.getNumValidities() +
                 " packets) skip validity " + validity +
                 " vad " + firstVAD +
-               // " (" + (start - firstVAD) + ")" +
+                // " (" + (start - firstVAD) + ")" +
                 " for " + report() + " diff " + (System.currentTimeMillis() - start));
           }
         } else {
