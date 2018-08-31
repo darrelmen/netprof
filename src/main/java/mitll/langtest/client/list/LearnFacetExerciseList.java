@@ -34,6 +34,13 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
     super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView, views);
   }
 
+  /**
+   * @see #reallyGetExercises
+   * @param visibleIDs
+   * @param currentReq
+   * @param requested
+   * @param alreadyFetched
+   */
   protected void getFullExercises(Collection<Integer> visibleIDs,
                                   int currentReq,
                                   Collection<Integer> requested,

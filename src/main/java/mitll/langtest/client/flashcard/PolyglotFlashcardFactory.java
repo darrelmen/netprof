@@ -328,7 +328,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
         listChoice = lists == null || lists.isEmpty() ? "" : LISTS + "=" + lists.iterator().next();
       }
       //logger.info("lists " + lists);
-      String historyToken = SelectionState.INSTANCE + "=" + selectionState.getInstance() +
+      String historyToken = SelectionState.INSTANCE + "=" + selectionState.getView() +
           SelectionState.SECTION_SEPARATOR +
           SelectionState.PROJECT + "=" + selectionState.getProject() +//  controller.getProjectStartupInfo().getProjectid()
           SelectionState.SECTION_SEPARATOR +

@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -69,11 +68,9 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
 
   /**
    * @param controller
-   * @param viewContaner
-   * @param myView
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  PracticeHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
+  PracticeHelper(ExerciseController controller) {
     super(controller);
   }
 

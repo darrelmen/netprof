@@ -89,7 +89,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
              IViewContaner viewContaner,
              INavigation.VIEWS myView,
              INavigation navigation) {
-    super(controller, viewContaner, myView);
+    super(controller);
     this.navigation = navigation;
   }
 

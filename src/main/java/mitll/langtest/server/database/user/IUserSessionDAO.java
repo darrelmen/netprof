@@ -59,8 +59,6 @@ public interface IUserSessionDAO extends IDAO {
 
   Map<Integer, ActiveInfo> getActiveSince(long when);
 
-//  int getNumRows();
-
   class ActiveInfo {
     private int userid;
     private long when;

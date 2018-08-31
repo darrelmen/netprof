@@ -1,10 +1,15 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Full exercises returns CommonExercise - so we're kinda stuck with it...
@@ -12,7 +17,12 @@ import mitll.langtest.shared.exercise.*;
  * @param <T>
  */
 public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends LearnFacetExerciseList<T> {
-  //private final Logger logger = Logger.getLogger("FacetExerciseList");
+  private Logger logger = Logger.getLogger("StudyExerciseList");
+
+  public static final int TWO = 2;
+  public static final int THREE = 3;
+  public static final int FIVE = 5;
+  public static final List<Integer> STUDY_CHOICES = Arrays.asList(1, TWO, THREE, FIVE, 10, 25);
   //private static final boolean DEBUG = false;
 
   public StudyExerciseList(Panel secondRow,
@@ -22,6 +32,18 @@ public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends L
                            DivWidget listHeader,
                            boolean isDrillView) {
     super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView, INavigation.VIEWS.STUDY);
+  }
+
+  @Override
+  protected List<Integer> getPageSizeChoiceValues() {
+    if (logger == null) logger = Logger.getLogger("StudyExerciseList");
+    return STUDY_CHOICES;
+  }
+
+  @Override
+  protected int getFirstPageSize() {
+    int clientHeight = Window.getClientHeight();
+    return clientHeight < 650 ? TWO : clientHeight < 800 ? THREE : FIVE;
   }
 
   @Override

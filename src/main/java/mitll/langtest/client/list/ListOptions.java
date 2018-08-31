@@ -68,7 +68,6 @@ public class ListOptions {
     return showTypeAhead;
   }
 
-
   boolean isShowFirstNotCompleted() {
     return showFirstNotCompleted;
   }

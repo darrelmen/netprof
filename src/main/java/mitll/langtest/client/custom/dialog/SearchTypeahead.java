@@ -63,7 +63,7 @@ public class SearchTypeahead {
     SuggestOracle oracle = new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        //logger.info("make request for '" + request.getQuery() + "'");
+        logger.info("getTypeaheadUsing make request for '" + request.getQuery() + "'");
         ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
             .setPrefix(textBox.getText())
             .setLimit(DISPLAY_ITEMS)

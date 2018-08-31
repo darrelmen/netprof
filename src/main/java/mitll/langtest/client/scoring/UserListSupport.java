@@ -22,6 +22,7 @@ import mitll.langtest.shared.custom.IUserListWithIDs;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
+import org.omg.PortableInterceptor.NON_EXISTENT;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -270,7 +271,7 @@ public class UserListSupport {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
     boolean hasProject = selectionState.getProject() != -1;
-    boolean hasInstance = !selectionState.getInstance().isEmpty();
+    boolean hasInstance = selectionState.getView() != INavigation.VIEWS.NONE;
 
     String s = getURL() +
         "#" +

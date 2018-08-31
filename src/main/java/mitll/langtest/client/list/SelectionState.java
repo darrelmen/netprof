@@ -247,10 +247,7 @@ public class SelectionState {
     }
   }
 
-  @Deprecated
-  public String getInstance() {
-    return instance;
-  }
+
 
   /**
    *

@@ -73,7 +73,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   private HandlerRegistration handlerRegistration;
   private final FacetContainer sectionWidgetContainer;
 
-  private static final boolean DEBUG_ON_VALUE_CHANGE = false;
+  private static final boolean DEBUG_ON_VALUE_CHANGE = true;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PUSH = false;
 
@@ -111,10 +111,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       logger = Logger.getLogger("HistoryExerciseList");
     }
 
-    // logger.info(getInstance() + " : getHistoryTokenFromUIState for " + id + " and search '" + search + "'");
+    if (DEBUG) logger.info(getInstance() + " : getHistoryTokenFromUIState for " + id + " and search '" + search + "'");
 
     boolean hasItemID = id != -1;
-    String instanceSuffix = getInstance() == INavigation.VIEWS.NONE ? "" : SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();
+    String instanceSuffix =
+        getInstance() == INavigation.VIEWS.NONE ? "" : SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();
 
     String s = (hasItemID ?
         super.getHistoryTokenFromUIState(search, id) :
@@ -170,17 +171,20 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   void pushFirstSelection(int exerciseID, String searchIfAny) {
     String token = getHistoryToken();
+    logger.info("pushFirstSelection : (" + getInstance() + ") current token " + token);
     int exidFromToken = getIDFromToken(token);
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
         "' vs new exercise " + exerciseID + " instance " + getInstance());*/
 
     if (exidFromToken == exerciseID) {
       if (DEBUG)
-        logger.info("pushFirstSelection : (" + getInstance() + ") current token " + token + " same as new " + exerciseID);
+        logger.info("pushFirstSelection : (" + getInstance() + ") " +
+            "\n\tcurrent token " + token + " same as new " + exerciseID);
       checkAndAskOrFirst(exerciseID);
     } else {
       if (DEBUG)
-        logger.info("pushFirstSelection : (" + getInstance() + ") pushNewItem " + exerciseID + " vs " + exidFromToken);
+        logger.info("pushFirstSelection : (" + getInstance() + ") " +
+            "\n\tpushNewItem " + exerciseID + " vs " + exidFromToken);
       pushNewItem(searchIfAny, getValidExerciseID(exerciseID));
     }
   }
@@ -191,17 +195,21 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   private int getIDFromToken(String token) {
-    if (token.startsWith("#item=") || token.startsWith("item=")) {
-      SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
-      if (!selectionState.getInstance().equals(getInstance())) {
-        //if (DEBUG) logger.info("got history item for another instance '" + selectionState.getInstance() + "' vs me '" + instance +"'");
-      } else {
-        int item = selectionState.getItem();
-        // if (DEBUG) logger.info("got history item for instance '" + selectionState.getInstance() + " : '" + item+"'");
-        return item;
-      }
+    // if (token.startsWith("#item=") || token.startsWith("item=")) {
+    SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
+    if (selectionState.getView() != getInstance()) {
+      if (DEBUG) logger.warning("getIDFromToken got history item for another instance '" + selectionState.getView()
+          + "' vs me '" + getInstance() + "'");
+      //   return -1;
+
+      return selectionState.getItem();
+    } else {
+      int item = selectionState.getItem();
+      // if (DEBUG) logger.info("got history item for instance '" + selectionState.getInstance() + " : '" + item+"'");
+      return item;
     }
-    return -1;
+    // }
+    // return -1;
   }
 
   /**
@@ -213,10 +221,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   private void checkAndAskOrFirst(int exerciseID) {
     int toUse = getValidExerciseID(exerciseID);
     if (hasExercise(toUse)) {
-      //logger.info("\tcheckAndAskOrFirst "+ exerciseID);
+      // logger.info("\tcheckAndAskOrFirst " + exerciseID);
       checkAndAskServer(toUse);
     } else {
-      logger.warning("tcheckAndAskOrFirst no exercise " + exerciseID);
+      logger.warning("checkAndAskOrFirst no exercise " + exerciseID);
     }
   }
 
@@ -255,7 +263,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       checkAndAskOrFirst(exerciseID);
     } else {
       if (DEBUG_PUSH) {
-        logger.info(getInstance() + " HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' different menu state '" + historyToken + "' from new " + exerciseID);
+        logger.info(getInstance() + " HistoryExerciseList.pushNewItem : current" +
+            "\n\t currentToken '" + currentToken + "' different menu state '" + historyToken + "' from new " + exerciseID);
       }
       setHistoryItem(historyToken);
     }
@@ -308,10 +317,13 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #pushNewItem
    */
   void setHistoryItem(String historyToken) {
-    if (DEBUG_PUSH) logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+    String token = History.getToken();
+  logger.info("before " + token);
+    if (DEBUG_PUSH) {
+      logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+    }
     History.newItem(historyToken);
   }
-
 
   /**
    * @param selectionState
@@ -381,7 +393,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    // if (DEBUG_ON_VALUE_CHANGE) logger.info("HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
+    if (DEBUG_ON_VALUE_CHANGE) logger.info("HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
     if (controller.getProjectStartupInfo() == null) {
       logger.warning("onValueChange skipping change event since no project");
       return;
@@ -395,18 +407,19 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     if (DEBUG_ON_VALUE_CHANGE) {
       logger.info("onValueChange got " + value + " sel " + selectionState + " " + selectionState.getInfo());
     }
-    String instance1 = selectionState.getInstance();
+    INavigation.VIEWS instance1 = selectionState.getView();
 
-    if (!instance1.equals(getInstance()) && instance1.length() > 0) {
+    if (instance1 != getInstance()) {
       if (DEBUG_ON_VALUE_CHANGE) {
-        logger.info("onValueChange : skipping event " + value + " for instance '" + instance1 +
+        logger.info("onValueChange : MAYBE skipping event " + value + " for instance '" + instance1 +
             "' that is not mine '" + getInstance() + "'");
       }
-      if (getCreatedPanel() == null) {
+
+    /*  if (getCreatedPanel() == null) {
         popRequest();
         noSectionsGetExercises(selectionState.getItem());
       }
-      return;
+      return;*/
     }
     if (DEBUG_ON_VALUE_CHANGE) {
       logger.info("HistoryExerciseList.onValueChange : originalValue '" + value +
@@ -559,9 +572,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #loadExercisesUsingPrefix(Map, String, int, boolean, boolean, boolean)
    */
   protected void getExerciseIDs(Map<String, Collection<String>> typeToSection,
-                              String prefix,
-                              int exerciseID,
-                              ExerciseListRequest request) {
+                                String prefix,
+                                int exerciseID,
+                                ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
     if (DEBUG) {
       logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID +

@@ -90,6 +90,7 @@ import static mitll.langtest.client.user.UserPassLogin.*;
  * @since 2/23/16
  */
 public class InitialUI implements UILifecycle, BreadcrumbPartner {
+  public static final boolean DO_HEARTBEAT = false;
   private final Logger logger = Logger.getLogger("InitialUI");
 
   private static final boolean DEBUG = false;
@@ -396,6 +397,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       if (projectStartupInfo == null) {
         long then = System.currentTimeMillis();
         Timer timer = getWifiTimer();
+
         controller.getOpenUserService().checkHeartbeat(implementationVersion, new AsyncCallback<HeartbeatStatus>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -414,30 +416,31 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
           }
         });
       } else {
-        long then = System.currentTimeMillis();
+        if (DO_HEARTBEAT) {
+          long then = System.currentTimeMillis();
 
-        Timer timer = getWifiTimer();
-
-        controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), implementationVersion, new AsyncCallback<HeartbeatStatus>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            cancelHeartbeatTimer(timer);
-          }
-
-          @Override
-          public void onSuccess(HeartbeatStatus result) {
-            cancelHeartbeatTimer(timer);
-            long now = System.currentTimeMillis();
-            //logger.info("2 waited " + (now - then));
-            if (result.isCodeHasUpdated()) {
-              logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
-              Window.Location.reload();
-            } else if (!result.isHasSession()) {
-              logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user - logging out!");
-              logout();
+          Timer timer = getWifiTimer();
+          controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), implementationVersion, new AsyncCallback<HeartbeatStatus>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              cancelHeartbeatTimer(timer);
             }
-          }
-        });
+
+            @Override
+            public void onSuccess(HeartbeatStatus result) {
+              cancelHeartbeatTimer(timer);
+              long now = System.currentTimeMillis();
+              //logger.info("2 waited " + (now - then));
+              if (result.isCodeHasUpdated()) {
+                logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
+                Window.Location.reload();
+              } else if (!result.isHasSession()) {
+                logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user - logging out!");
+                logout();
+              }
+            }
+          });
+        }
       }
     }
   }

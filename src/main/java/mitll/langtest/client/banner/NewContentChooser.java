@@ -36,7 +36,6 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -79,7 +78,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   public NewContentChooser(ExerciseController controller, IBanner banner) {
     learnHelper = new LearnHelper(controller);
-    practiceHelper = new PracticeHelper(controller, this, DRILL);
+    practiceHelper = new PracticeHelper(controller);
     quizHelper = new QuizHelper(controller, this, VIEWS.QUIZ, this);
 
     dialogHelper = new DialogViewHelper(controller, this, DIALOG);
@@ -623,7 +622,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushItem(String url) {
-    //  logger.info("pushItem - " + url);
+    logger.info("pushItem - " + url);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //    logger.info("logException stack " + exceptionAsString);
     History.newItem(url);

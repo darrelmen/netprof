@@ -75,6 +75,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
     implements ListInterface<T, U>, ProvidesResize {
   private final Logger logger = Logger.getLogger("ExerciseList");
 
+  private static final boolean DEBUG_STALE = true;
+  private static final boolean DEBUG = false;
+
   private static final String SERVER_ERROR = "Server error";
   private static final String GETTING_EXERCISE = "getting exercise";
 
@@ -99,6 +102,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
   protected final ExerciseController controller;
 
   protected Panel createdPanel;
+  /**
+   *
+   */
   private int lastReqID = 0;
   final boolean allowPlusInURL;
   private final List<ListChangeListener<T>> listeners = new ArrayList<>();
@@ -111,7 +117,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
    */
   ExerciseListRequest lastSuccessfulRequest = null;
 
-  private static final boolean DEBUG = false;
+
   private final UserState userState;
   final ListOptions listOptions;
 
@@ -184,6 +190,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
 
   protected abstract ExerciseListRequest getExerciseListRequest(String prefix);
 
+  /**
+   * @return
+   * @see PagingExerciseList#getExerciseListRequest
+   */
   int incrRequest() {
     return ++lastReqID;
   }
@@ -315,13 +325,15 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
 
         if (exercises != null) {
           logger.info("\tExerciseList.SetExercisesCallback Got " + exercises.size() + " results ");
-      //    exercises.forEach(exercise -> logger.info("SetExercisesCallback.onSuccess: got " + exercise.getID() + " " + exercise.getEnglish()));
+          //    exercises.forEach(exercise -> logger.info("SetExercisesCallback.onSuccess: got " + exercise.getID() + " " + exercise.getEnglish()));
         }
       }
 
       if (isStaleResponse(result)) {
-        if (DEBUG) {
-          logger.info("SetExercisesCallback.onSuccess ignoring result " + result.getReqID() + " b/c before latest " + lastReqID);
+        if (DEBUG_STALE) {
+          logger.info("SetExercisesCallback.onSuccess ignoring" +
+              "\n\tresult " + result.getReqID() + " b/c before" +
+              "\n\tlatest " + lastReqID);
         }
         ignoreStaleRequest(result);
       } else {
@@ -382,7 +394,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
         logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() + " results, id = " +
             id);
       if (isStaleResponse(result)) {
-        if (DEBUG)
+        if (DEBUG_STALE)
           logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
               " b/c before latest " + lastReqID);
       } else {
@@ -608,8 +620,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
   }
 
   /**
-   * @see #loadFirstExercise
    * @return
+   * @see #loadFirstExercise
    */
   private int findFirstID() {
     return findFirstExercise().getID();
@@ -648,7 +660,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
     }
 
     if (hasExercise(id)) {
-      //    logger.info("checkAndAskServer for " + id);
+      if (DEBUG) logger.info("checkAndAskServer for " + id);
 
       askServerForExercise(id);
     } else {
@@ -804,7 +816,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
 
   protected void showEmptySelection() {
     Scheduler.get().scheduleDeferred((Command) () -> {
-  //    String emptySearchMessage = isEmpty() ? "No exercises in this project yet." : getEmptySearchMessage();
+      //    String emptySearchMessage = isEmpty() ? "No exercises in this project yet." : getEmptySearchMessage();
       showEmptyExercise(getEmptySearchMessage());
     });
   }

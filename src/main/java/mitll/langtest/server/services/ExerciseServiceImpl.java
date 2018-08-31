@@ -855,7 +855,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private List<CommonExercise> filterExercises(ExerciseListRequest request,
                                                List<CommonExercise> exercises,
                                                int projid) {
-    logger.info("filter req " + request);
+//    logger.info("filter req " + request);
     exercises = filterByUnrecorded(request, exercises, projid);
 
     if (request.isOnlyWithAudioAnno()) {

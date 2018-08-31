@@ -15,9 +15,11 @@ import mitll.langtest.shared.exercise.ScoredExercise;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
-public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise> extends LearnFacetExerciseList<T> {
-  //private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
+public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise>
+    extends LearnFacetExerciseList<T> {
+   private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
   private final PracticeHelper<T, U> practiceHelper;
   private ControlState controlState;
 
@@ -25,14 +27,18 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
                             PracticeHelper<T, U> practiceHelper,
                             Panel topRow, Panel currentExercisePanel,
                             INavigation.VIEWS instanceName,
-                            DivWidget listHeader, INavigation.VIEWS views) {
+                            DivWidget listHeader,
+                            INavigation.VIEWS views) {
     super(
         topRow,
         currentExercisePanel,
         controller,
         new ListOptions(instanceName)
             .setShowPager(false).
-            setShowTypeAhead(false), listHeader, true, views);
+            setShowTypeAhead(false),
+        listHeader,
+        true,
+        views);
     this.practiceHelper = practiceHelper;
   }
 
@@ -47,7 +53,7 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
   @Override
   protected void onDetach() {
     super.onDetach();
-    // logger.info("\n\ngot detach ---> \n\n\n");
+// logger.info("\n\ngot detach ---> \n\n\n");
 
     if (controlState.isAutoPlay()) {
       // logger.info("onDetach : audio on, so turn auto advance OFF");
@@ -56,6 +62,8 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
   }
 
   protected void goToFirst(String searchIfAny, int exerciseID) {
+    //logger.info("\ngoToFirst ---> \n\n\n");
+
     super.goToFirst(searchIfAny, exerciseID);
     if (practiceHelper.getPolyglotFlashcardFactory() != null) {
       practiceHelper.getPolyglotFlashcardFactory().setMode(practiceHelper.getMode());
@@ -92,6 +100,11 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
     return practiceHelper.getStatsFlashcardFactory();
   }
 
+  /**
+   * No one call this...
+   * @param selectionState
+   */
+  @Deprecated
   void restoreUI(SelectionState selectionState) {
     restoreUIState(selectionState);
   }
