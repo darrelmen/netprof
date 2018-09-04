@@ -155,27 +155,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     }
   }
 
-  /**
-   * @paramx audioRef
-   * @seex mitll.langtest.shared.exercise.AudioExercise#setRefAudio(String)
-   */
-/*  protected AudioAttribute(String audioRef) {
-    this.audioRef = audioRef;
-    if (audioRef == null) throw new IllegalArgumentException("huh audio ref is null?");
-    markRegular();
-  }*/
-
-  /**
-   * @paramx audioRef
-   * @paramx miniUser
-   * @seex AudioExercise#addAudioForUser
-   */
-/*  public AudioAttribute(String audioRef, MiniUser miniUser) {
-    this(audioRef);
-    this.setUser(miniUser);
-    this.userid = miniUser.getID();
-  }*/
-
   public String getAudioRef() {
     return audioRef;
   }
@@ -234,12 +213,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     String s = getAttributes().get(SPEED);
     return s == null ? isRegularSpeed() ? REGULAR : SLOW : s;
   }
-
-/*
-  private boolean hasOnlySpeed() {
-    return attributes.size() == 1 && attributes.containsKey(SPEED);
-  }
-*/
 
   public boolean matches(String name, String value) {
     return attributes.containsKey(name) && attributes.get(name).equals(value);

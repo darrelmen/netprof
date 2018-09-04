@@ -40,6 +40,7 @@ import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.scoring.RecalcRefResponse;
 
 public interface AudioServiceAsync {
   /**
@@ -88,7 +89,7 @@ public interface AudioServiceAsync {
    * @param asyncCallback
    * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    */
-  void recalcRefAudio(int id, AsyncCallback<Void> asyncCallback);
+  void recalcRefAudio(int id, AsyncCallback<RecalcRefResponse> asyncCallback);
 
   void logMessage(String subject, String message, boolean sendEmail, AsyncCallback<Void> async);
 

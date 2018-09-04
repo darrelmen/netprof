@@ -51,7 +51,10 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.project.*;
+import mitll.langtest.shared.scoring.RecalcRefResponse;
+import mitll.langtest.shared.scoring.RecalcResponses;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,7 +74,9 @@ public class ProjectEditForm extends UserDialog {
   private static final String GVIDAVER = "gvidaver";
   private static final String CHECKING_AUDIO = "Checking audio and making mp3's...";
   private static final String MODEL_TYPE = "Model Type";
-
+  /**
+   *
+   */
   private static final String IN_PROGRESS = "In progress...";
 
   private static final String PROJECT_TYPE = "Project Type";
@@ -219,7 +224,7 @@ public class ProjectEditForm extends UserDialog {
     info.setLanguage(language.getSelectedValue());
     info.setModelType(ModelType.valueOf(modelTypeBox.getSelectedValue()));
 
-  //  logger.info("updateProject get model type " + info.getModelType());
+    //  logger.info("updateProject get model type " + info.getModelType());
     DominoProject id = dominoToProject.get(dominoProjectsListBox.getSelectedValue());
 
     if (id != null) {
@@ -555,6 +560,7 @@ public class ProjectEditForm extends UserDialog {
 
   /**
    * Add model type choice - e.g. to do kaldi.
+   *
    * @param info
    * @param fieldset
    * @return
@@ -810,22 +816,33 @@ public class ProjectEditForm extends UserDialog {
     recalcRefAudio(info, w);
   }
 
+  /**
+   * @see Project#recalcRefAudio
+   * @param info
+   * @param w
+   */
   private void recalcRefAudio(ProjectInfo info, Button w) {
-    services.getAudioServiceAsyncForHost(info.getHost()).recalcRefAudio(info.getID(), new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        w.setEnabled(true);
-        messageHelper.handleNonFatalError("recalc audio alignments for project", caught);
-      }
+    services.getAudioServiceAsyncForHost(info.getHost())
+        .recalcRefAudio(info.getID(), new AsyncCallback<RecalcRefResponse>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            w.setEnabled(true);
+            messageHelper.handleNonFatalError("recalc audio alignments for project", caught);
+          }
 
-      @Override
-      public void onSuccess(Void result) {
-        w.setEnabled(true);
-        feedback.setText(IN_PROGRESS);
-      }
-    });
+          @Override
+          public void onSuccess(RecalcRefResponse result) {
+            w.setEnabled(true);
+
+            {
+              RecalcResponses recalcRefResponse = result.getRecalcRefResponse();
+              String text = recalcRefResponse.getDisp();
+              if (recalcRefResponse == RecalcResponses.WORKING) text += " " + result.getNum() + " to do.";
+              feedback.setText(text);
+            }
+          }
+        });
   }
-
 
   /**
    * Production status controls whether show on iOS is enabled.

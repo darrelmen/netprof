@@ -51,6 +51,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
@@ -297,10 +298,10 @@ public class Project implements IPronunciationLookup {
   /**
    * @see mitll.langtest.server.services.AudioServiceImpl#recalcRefAudio
    */
-  public void recalcRefAudio() {
+  public RecalcRefResponse recalcRefAudio() {
     Collection<CommonExercise> exercisesForUser = getRawExercises();
-    logger.info("recalcRefAudio " + project + " " + exercisesForUser.size() + " exercises.");
-    refResultDecoder.writeRefDecode(getLanguage(), exercisesForUser, project.id());
+    logger.info("recalcRefAudio " + project + " for " + exercisesForUser.size() + " exercises.");
+    return refResultDecoder.writeRefDecode(getLanguage(), exercisesForUser, project.id());
   }
 
   public SlickAnalysis getAnalysis() {
@@ -372,7 +373,7 @@ public class Project implements IPronunciationLookup {
       try {
         return ModelType.valueOf(prop);
       } catch (IllegalArgumentException e) {
-        logger.error("couldn't parse '" +prop + "' as model type enum?");
+        logger.error("couldn't parse '" + prop + "' as model type enum?");
         return ModelType.HYDRA;
       }
     }

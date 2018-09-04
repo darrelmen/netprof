@@ -559,7 +559,7 @@ public class AudioFileHelper implements AlignDecode {
       decodeAndRemember(exercise, attribute, true, userID, absoluteFile);
       // }
     } else {
-      logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
+      logger.warn("decodeOneAttribute skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
     }
   }
 
@@ -621,9 +621,6 @@ public class AudioFileHelper implements AlignDecode {
     AudioAnswer decodeAnswer = doDecode ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis) : new AudioAnswer();
 
     DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
-    //options.setUseOldSchool(doHydec);
-    PretestScore alignmentScoreOld = /*doHydec ? getAlignmentScore(exercise, absolutePath, options) :*/ new PretestScore();
-    DecodeAlignOutput alignOutputOld = new DecodeAlignOutput(alignmentScoreOld, false);
 
     // Do decoding, and record alignment info we just got in the database ...
     //AudioAnswer decodeAnswerOld = doHydec ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, true) : new AudioAnswer();
@@ -639,7 +636,7 @@ public class AudioFileHelper implements AlignDecode {
         alignOutput,
         decodeOutput,
 
-        alignOutputOld,
+        new DecodeAlignOutput(new PretestScore(), false),
         decodeOutputOld,
 
         attribute.isMale(),
@@ -753,7 +750,8 @@ public class AudioFileHelper implements AlignDecode {
                                          DecodeAlignOutput alignOutputOld,
                                          DecodeAlignOutput decodeOutputOld,
 
-                                         boolean isMale, String speed,
+                                         boolean isMale,
+                                         String speed,
                                          String model) {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(duration);
     // logger.debug("validity dur " + validity.durationInMillis);
@@ -771,7 +769,8 @@ public class AudioFileHelper implements AlignDecode {
           alignOutputOld,
           decodeOutputOld,
 
-          isMale, speed,
+          isMale,
+          speed,
           model);
       // TODO : add word and phone table for refs
       //	recordWordAndPhoneInfo(decodeAnswer, answerID);

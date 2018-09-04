@@ -60,6 +60,7 @@ import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
@@ -484,8 +485,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return new ImageResponse(reqid, imageURL, duration);
   }
 
-  public void recalcRefAudio(int projid) {
-    db.getProject(projid).recalcRefAudio();
+  public RecalcRefResponse recalcRefAudio(int projid) {
+    return db.getProject(projid).recalcRefAudio();
   }
 
   /**
@@ -517,7 +518,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         new ProjectHelper().getProjectInfos(db, securityManager), "server", serverProps.getAffiliations());
   }
 
- /**
+  /**
    * @param userExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */

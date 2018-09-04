@@ -76,7 +76,8 @@ public interface IRefResultDAO extends IDAO {
                  DecodeAlignOutput alignOutputOld,
                  DecodeAlignOutput decodeOutputOld,
 
-                 boolean isMale, String speed, String model);
+                 boolean isMale,
+                 String speed, String model);
 
   boolean removeByAudioID(int audioID);
 
