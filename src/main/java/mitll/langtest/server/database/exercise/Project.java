@@ -263,8 +263,8 @@ public class Project implements IPronunciationLookup {
     final List<CommonExercise> rawExercises = getRawExercises();
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
 
-    new Thread(() -> makeItemTrie(rawExercises, smallVocabDecoder)).start();
-    new Thread(() -> makeContextTrie(rawExercises, smallVocabDecoder)).start();
+    new Thread(() -> makeItemTrie(Collections.unmodifiableList(rawExercises), smallVocabDecoder)).start();
+    new Thread(() -> makeContextTrie(Collections.unmodifiableList(new ArrayList<>(rawExercises)), smallVocabDecoder)).start();
   }
 
   private void makeItemTrie(List<CommonExercise> rawExercises, SmallVocabDecoder smallVocabDecoder) {
@@ -366,10 +366,13 @@ public class Project implements IPronunciationLookup {
     return getProp(MODELS_DIR);
   }
 
+
   public ModelType getModelType() {
     String prop = getProp(MODEL_TYPE);
-    if (prop == null) return ModelType.HYDRA;
-    else {
+
+    if (prop == null || prop.isEmpty()) {
+      return ModelType.HYDRA;
+    } else {
       try {
         return ModelType.valueOf(prop);
       } catch (IllegalArgumentException e) {
@@ -414,8 +417,7 @@ public class Project implements IPronunciationLookup {
       putAllProps();
 
       String propValue = db.getProjectDAO().getPropValue(getID(), prop);  // blank if miss, not null
-
-      logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
+   //   logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
 
       propCache.put(prop, propValue);
       return propValue;

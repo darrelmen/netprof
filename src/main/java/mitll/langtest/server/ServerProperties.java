@@ -127,13 +127,13 @@ public class ServerProperties {
   public static final String DEFAULT_MAIL_FROM = "netprof-admin@ll.mit.edu";
   private static final String MAIL_REPLYTO = "mail.replyto";
   private static final String HEARTBEAT_REC = "gordon.vidaver@ll.mit.edu,zebin.xia@dliflc.edu";
-  public static final int DEFAULT_PERIOD = 5 * 60 * 1000;
-  public static final String DOMINO_LL_MIT_EDU = "domino.ll.mit.edu";
-  public static final String LOG_MAILHOST = "log.mailhost";
-  public static final String LOG_MAILFROM = "log.mailfrom";
-  public static final String MAIL_FROM = "mail.from";
-  public static final String SCORING_MODEL = "scoringModel";
-  public static final String TALKS_TO_DOMINO = "talksToDomino";
+  private static final int DEFAULT_PERIOD = 5 * 60 * 1000;
+  private static final String DOMINO_LL_MIT_EDU = "domino.ll.mit.edu";
+  private static final String LOG_MAILHOST = "log.mailhost";
+  private static final String LOG_MAILFROM = "log.mailfrom";
+  private static final String MAIL_FROM = "mail.from";
+  private static final String SCORING_MODEL = "scoringModel";
+  private static final String TALKS_TO_DOMINO = "talksToDomino";
 
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
@@ -792,6 +792,7 @@ public class ServerProperties {
   private static final int TRIM_SILENCE_BEFORE = 300;
   private static final int TRIM_SILENCE_AFTER = 300;
 
+  /*
   public long getTrimBefore() {
     return getIntPropertyDef("trimBeforeMillis", TRIM_SILENCE_BEFORE);
   }
@@ -799,6 +800,7 @@ public class ServerProperties {
   public long getTrimAfter() {
     return getIntPropertyDef("trimAfterMillis", TRIM_SILENCE_AFTER);
   }
+*/
 
   public String getDBConfig() {
     return props.getProperty(DB_CONFIG, POSTGRES_HYDRA);
