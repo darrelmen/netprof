@@ -68,6 +68,12 @@ public class DecodeCorrectnessChecker {
   public static final String UNKNOWN_MODEL = ASR.UNKNOWN_MODEL;
   public static final String MANDARIN = "mandarin";
   public static final String FRENCH = "french";
+  public static final String KOREAN = "korean";
+  public static final String SPANISH = "spanish";
+  public static final String UD = "Ud.";
+  public static final String USTED = "usted";
+  public static final String UDS = "Uds.";
+  public static final String USTEDES = "ustedes";
 
   private final AlignDecode alignDecode;
   private final double minPronScore;
@@ -119,8 +125,10 @@ public class DecodeCorrectnessChecker {
 
   private boolean isAsianLanguage(String language) {
     return language.equalsIgnoreCase(MANDARIN) ||
-        language.equalsIgnoreCase("japanese") ||
-        language.equalsIgnoreCase("korean");
+        language.equalsIgnoreCase("japanese");
+
+//        ||
+  //      language.equalsIgnoreCase(KOREAN);
   }
 
   private void logDecodeOutput(AudioAnswer answer, Collection<String> foregroundSentences, int id) {
@@ -290,11 +298,11 @@ public class DecodeCorrectnessChecker {
    * @return
    */
   public String getPhraseToDecode(String rawRefSentence, String language) {
-    if (language.equalsIgnoreCase("spanish")) {
+    if (language.equalsIgnoreCase(SPANISH)) {
       //     logger.info("raw before " + rawRefSentence);
       rawRefSentence = rawRefSentence
-          .replaceAll("Ud.", "usted")
-          .replaceAll("Uds.", "ustedes");
+          .replaceAll(UD, USTED)
+          .replaceAll(UDS, USTEDES);
       // logger.info("raw after   " + rawRefSentence);
     }
 

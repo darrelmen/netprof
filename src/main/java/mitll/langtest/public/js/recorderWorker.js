@@ -90,7 +90,7 @@ function init(config) {
 }
 
 function startStream(url, exid, reqid, isreference, audiotype) {
-    console.log("worker.startStream " + exid + " req " + reqid);
+  //  console.log("worker.startStream " + exid + " req " + reqid);
     myurl = new String(url);
     myexid = new String(exid);
     myreqid = new String(reqid);
@@ -100,7 +100,7 @@ function startStream(url, exid, reqid, isreference, audiotype) {
 }
 
 function stopStream(type, abort) {
-    console.log("stopStream record got " + frameRecLength + " abort " +abort);
+    //console.log("stopStream record got " + frameRecLength + " abort " +abort);
 
     var bufferL = mergeBuffers(frameRecBuffersL, frameRecLength);
     var audioBlob = getAudioBlob(bufferL, type);
@@ -138,11 +138,12 @@ function record(inputBuffer, type) {
 
     if (framesAfterRound > framesBeforeRound) {
         lastSendMoment = sendMoment;  // OK remember send moment
-        console.log(
+
+        /*        console.log(
             "worker.record send blob - got " + frameRecLength +
             " rate " + sampleRate +
             " frame " + framesAfter +
-            " rounded " + framesAfterRound);
+            " rounded " + framesAfterRound);*/
 
         var bufferL = mergeBuffers(frameRecBuffersL, frameRecLength);
         var audioBlob = getAudioBlob(bufferL, type);
@@ -191,7 +192,7 @@ function sendBlob(framesBeforeRound, audioBlob, isLast, abort, sendMoment) {
             xhr.setRequestHeader("STREAMSTATE", "ABORT");
         }
         else if (isLast) {
-            console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "' - abort " +abort + " is last " + isLast);
+      //      console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "' - abort " +abort + " is last " + isLast);
             xhr.setRequestHeader("STREAMSTATE", "END");
         }
         else {

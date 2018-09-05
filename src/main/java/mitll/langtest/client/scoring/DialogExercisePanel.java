@@ -338,7 +338,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         );
       }
 
-      playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
+      playAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget, getExID()));
     }
   }
 
@@ -374,6 +374,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         logger.info("matchSegmentToWidgetForAudio " + audioID + " got clickables " + flclickables.size());
 
       List<TranscriptSegment> wordSegments = getWordSegments(alignmentOutput);
+
+      wordSegments.forEach(transcriptSegment -> logger.info("ex " + getExID() + " " + transcriptSegment));
+
       if (wordSegments == null) {
         if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio no word segments in " + alignmentOutput);
       } else {
@@ -383,7 +386,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
         List<TranscriptSegment> phones = alignmentOutput.getTypeToSegments().get(NetPronImageType.PHONE_TRANSCRIPT);
 
-        if (transcriptMatches(flclickables, wordSegments)) {
+        if (transcriptMatchesOneToOne(flclickables, wordSegments)) {
           doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments, wordSegments, clickablePhones);
         } else {
           if (DEBUG_MATCH) logger.warning("matchSegmentToWidgetForAudio no match for" +
@@ -665,7 +668,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
       return clickable;
     } else {
-      Collection<IHighlightSegment> bulk = getMatchingSegments(clickables, clickable, lcSegment, unclickable);// : Collections.EMPTY_LIST;
+      Collection<IHighlightSegment> bulk = getMatchingSegments(clickables, clickable, lcSegment, unclickable);
 
       if (bulk.isEmpty()) {
         return null;
@@ -769,8 +772,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return bulk;
   }
 
-  private boolean transcriptMatches(List<IHighlightSegment> clickables,
-                                    List<TranscriptSegment> segments) {
+  private boolean transcriptMatchesOneToOne(List<IHighlightSegment> clickables, List<TranscriptSegment> segments) {
     //int i = 0;
     int c = 0;
     for (IHighlightSegment clickable : clickables) {
@@ -780,21 +782,21 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
     boolean b = c == segments.size();
 
-    if (!b && DEBUG_MATCH) {
-      logger.info("transcriptMatches  clickables " + c + " segments " + segments.size());
+    if (DEBUG_MATCH && !b) {
+      logger.info("transcriptMatchesOneToOne  clickables " + c + " segments " + segments.size());
       StringBuilder builder = new StringBuilder();
       for (IHighlightSegment clickable : clickables) {
         if (clickable.isClickable()) {
           builder.append(clickable.getContent()).append(" ");
         }
       }
-      logger.info("transcriptMatches clickable : " + builder);
+      logger.info("transcriptMatchesOneToOne clickable : " + builder);
 
       StringBuilder builder2 = new StringBuilder();
       for (TranscriptSegment segment : segments) {
         builder2.append(segment.getEvent()).append(" ");
       }
-      logger.info("transcriptMatches align    : " + builder2);
+      logger.info("transcriptMatchesOneToOne align    : " + builder2);
     }
 
     return b;

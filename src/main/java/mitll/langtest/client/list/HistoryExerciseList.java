@@ -129,7 +129,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         SECTION_SEPARATOR +
         instanceSuffix;
 
-    if (DEBUG_PUSH || true) logger.info("getHistoryTokenFromUIState '" + s + "'");
+    if (DEBUG_PUSH) logger.info("getHistoryTokenFromUIState '" + s + "'");
 
     return s;
   }
@@ -320,7 +320,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    */
   void setHistoryItem(String historyToken) {
     String token = History.getToken();
-  logger.info("before " + token);
+  //logger.info("before " + token);
     if (DEBUG_PUSH) {
       logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     }

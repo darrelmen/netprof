@@ -131,7 +131,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
     scoreFeedbackDiv.add(new WordTable()
         .getDivWord(pretestScore.getTypeToSegments(), playAudioPanel, typeToSegmentToWidget, isRTL));
 
-    playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
+    playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget, 0));
     // so it will play on drill tab...
     enablePlayAudio();
 
