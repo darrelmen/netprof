@@ -264,7 +264,7 @@ public class AudioFileHelper implements AlignDecode {
   private boolean isValidForeignPhrase(long now, Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise) {
     boolean validForeignPhrase = exercise.isSafeToDecode();
     if (isStale(now, exercise)// || exercise.getEnglish().equalsIgnoreCase("teacher")
-        ) {
+    ) {
       validForeignPhrase = isInDictOrLTS(exercise);
 //      logger.warn("isValidForeignPhrase valid " + validForeignPhrase + " ex " +exercise);
       (validForeignPhrase ? safe : unsafe).add(exercise.getID());
@@ -513,7 +513,7 @@ public class AudioFileHelper implements AlignDecode {
       if (exercise != null) {
         answer.setTranscript(exercise.getForeignLanguage()); // TODO : necessary?
       }
-    //  logger.info("getAudioAnswerDecoding recordInResults answer " + answer);// + " " + answer.getTranscript());
+      //  logger.info("getAudioAnswerDecoding recordInResults answer " + answer);// + " " + answer.getTranscript());
       recordInResults(context, recordingInfo, validity, answer);
     } else {
       answer.setTranscript(recordingInfo.getTranscript());
@@ -575,7 +575,14 @@ public class AudioFileHelper implements AlignDecode {
   public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute, boolean doDecode, int userID, File absoluteFile) {
     String audioRef = attribute.getAudioRef();
 
-    if (DEBUG) logger.info("decodeAndRemember alignment -- " + exercise.getID() + " " + attribute);
+    if (DEBUG) {
+      logger.info("decodeAndRemember alignment " +
+          "\n\texid    " + exercise.getID() +
+          "\n\tfl      " + exercise.getForeignLanguage() +
+          "\n\ten      " + exercise.getEnglish() +
+          "\n\tcontext " + exercise.isContext() +
+          "\n\tattr    " + attribute);
+    }
 
 //    boolean doHydec = false;
     // Do alignment...
@@ -587,11 +594,17 @@ public class AudioFileHelper implements AlignDecode {
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoDecode(false);
 
     PrecalcScores precalcScores = null;
+    String transcript = attribute.getTranscript();
+
+    if (!transcript.equalsIgnoreCase(exercise.getForeignLanguage())) {
+      logger.warn("hmm, the audio transscript " + transcript + " doesn't match the exercise " + exercise.getForeignLanguage());
+    }
+
     try {
       precalcScores = checkForWebservice(
           exercise.getID(),
           exercise.getEnglish(),
-          attribute.getTranscript(),
+          transcript,
           exercise.getProjectID(),
           userID,
           absoluteFile);
@@ -608,7 +621,7 @@ public class AudioFileHelper implements AlignDecode {
     PretestScore alignmentScore = precalcScores == null ? getAlignmentScore(exercise, absolutePath, options) :
         getPretestScoreMaybeUseCache(-1,
             absolutePath,
-            attribute.getTranscript(),
+            transcript,
             exercise.getTransliteration(),
             ImageOptions.getDefault(),
             exercise.getID(),
@@ -837,11 +850,11 @@ public class AudioFileHelper implements AlignDecode {
             .setAllowAlternates(false),
         context.getUserid());
 
-  //  logger.info("getAudioAnswerAlignment 1 answer " + answer);
+    //  logger.info("getAudioAnswerAlignment 1 answer " + answer);
 
     if (options.isRecordInResults()) {
       if (answer.getPretestScore() == null) {
-       // logger.info("getAudioAnswerAlignment set score to " + pretestScore);
+        // logger.info("getAudioAnswerAlignment set score to " + pretestScore);
         answer.setPretestScore(pretestScore);
       }
 
@@ -971,6 +984,14 @@ public class AudioFileHelper implements AlignDecode {
    */
 
   private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, DecoderOptions options) {
+    if (DEBUG) {
+      logger.info("getAlignmentScore alignment " +
+          "\n\texid    " + exercise.getID() +
+          "\n\tfl      " + exercise.getForeignLanguage() +
+          "\n\ten      " + exercise.getEnglish() +
+          "\n\tcontext " + exercise.isContext() +
+          "\n\tattr    " + testAudioPath);
+    }
     return getASRScoreForAudio(0, testAudioPath,
         exercise.getForeignLanguage(),
         exercise.getTransliteration(),
@@ -1240,7 +1261,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param prefix
    * @param options
    * @return
-   * @see #getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions)
+   * @see #getASRScoreForAudio(int, File, Collection, String, DecoderOptions, PrecalcScores)
    */
   private PretestScore getASRScoreForAudio(int reqid,
                                            String testAudioFile,
@@ -1407,7 +1428,7 @@ public class AudioFileHelper implements AlignDecode {
       audioAnswer.setCorrect(audioAnswer.getScore() > MIN_SCORE_FOR_CORRECT_ALIGN &&
           audioAnswer.getPretestScore().isFullMatch());
 
-    //  logger.info("align : validity " + audioAnswer.getValidity());
+      //  logger.info("align : validity " + audioAnswer.getValidity());
 
       return audioAnswer;
     } else if (decoderOptions.shouldDoDecoding()) {
@@ -1430,7 +1451,7 @@ public class AudioFileHelper implements AlignDecode {
 
       audioAnswer.setPretestScore(flashcardAnswer);
 
-    //  logger.info("decoding : validity " + audioAnswer.getValidity());
+      //  logger.info("decoding : validity " + audioAnswer.getValidity());
       return audioAnswer;
     }
 

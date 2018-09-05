@@ -734,9 +734,12 @@ public class RefResultDecoder {
       try {
         int c = 0;
         while (!stopDecode) {
-          DecodeTask remove = queue.take();
-          decodeOneExercise(remove.language, remove.exercise, remove.toDecode, defaultUser);
-          if (++c % 500 == 0) logger.debug("decode did " + c);
+          {
+            DecodeTask remove = queue.take();
+            decodeOneExercise(remove.language, remove.exercise, remove.toDecode, defaultUser);
+          }
+
+          if (++c % 500 == 0) logger.info("decode did " + c);
 
           if (queue.isEmpty()) {
             logger.info("decode queue is empty.");
@@ -765,8 +768,9 @@ public class RefResultDecoder {
     int vocab = 0;
     int context = 0;
     Stats stats = new Stats();
-    Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
+
     {
+      Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
       int added1 = queueDecode(language, decodedFiles, exercise, audioAttributes);
       added += added1;
       vocab += added1;
@@ -776,7 +780,7 @@ public class RefResultDecoder {
 
     for (CommonExercise direct : exercise.getDirectlyRelated()) {
       Collection<AudioAttribute> audioAttributes2 = direct.getAudioAttributes();
-      int added1 = queueDecode(language, decodedFiles, exercise, audioAttributes2);
+      int added1 = queueDecode(language, decodedFiles, direct, audioAttributes2);
 
       added += added1;
       context += added1;
@@ -949,7 +953,7 @@ public class RefResultDecoder {
 
       try {
         String audioRef = attribute.getAudioRef();
-        File absoluteFile = new File(getAbsFilePath(attribute, language));
+        File absoluteFile = new File(getAbsFilePath(audioRef, language));
         boolean fileExists = absoluteFile.exists();
 
         if (fileExists) {
@@ -989,8 +993,12 @@ public class RefResultDecoder {
     return count;
   }
 
-  private String getAbsFilePath(AudioAttribute attribute, String language) {
+/*  private String getAbsFilePath(AudioAttribute attribute, String language) {
     String audioRef = attribute.getAudioRef();
+    return getAbsFilePath(language, audioRef);
+  }*/
+
+  private String getAbsFilePath(String language, String audioRef) {
     String audioBaseDir = serverProps.getAudioBaseDir();
     String absPathForAudio = audioConversion.getAbsPathForAudio(audioRef, language, "", audioBaseDir);
 //    logger.info("getAbsFilePath audioBaseDir " + audioBaseDir + " " + absPathForAudio);
