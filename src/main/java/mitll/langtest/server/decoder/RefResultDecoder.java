@@ -685,9 +685,10 @@ public class RefResultDecoder {
     db.getRefResultDAO().deleteForProject(projid);
 
     Set<Integer> decodedFiles = getDecodedFiles(projid);
-    logger.info("writeRefDecode for project " + projid +
-        " found " + decodedFiles.size() + " previous ref results, checking " +
-        exercises.size() + " exercises ");
+    logger.info("writeRefDecode for " +
+        "\n\tproject  " + projid +
+        "\n\tfound    " + decodedFiles.size() + " previous ref results," +
+        "\n\tchecking " + exercises.size() + " exercises ");
 
     if (stopDecode) logger.debug("Stop decode true");
 //      int childCount = 0;
@@ -929,11 +930,11 @@ public class RefResultDecoder {
       this.toDecode = toDecode;
     }
 
-    public boolean hasAudioToDecode() {
+    boolean hasAudioToDecode() {
       return !toDecode.isEmpty();
     }
 
-    public int getNumToDecode() {
+    int getNumToDecode() {
       return toDecode.size();
     }
   }
@@ -953,7 +954,7 @@ public class RefResultDecoder {
 
       try {
         String audioRef = attribute.getAudioRef();
-        File absoluteFile = new File(getAbsFilePath(audioRef, language));
+        File absoluteFile = new File(getAbsFilePath(attribute, language));
         boolean fileExists = absoluteFile.exists();
 
         if (fileExists) {
@@ -993,10 +994,10 @@ public class RefResultDecoder {
     return count;
   }
 
-/*  private String getAbsFilePath(AudioAttribute attribute, String language) {
+  private String getAbsFilePath(AudioAttribute attribute, String language) {
     String audioRef = attribute.getAudioRef();
     return getAbsFilePath(language, audioRef);
-  }*/
+  }
 
   private String getAbsFilePath(String language, String audioRef) {
     String audioBaseDir = serverProps.getAudioBaseDir();
@@ -1032,9 +1033,9 @@ public class RefResultDecoder {
   }
 
   /**
+   * @return
    * @paramx title
    * @paramx exid
-   * @return
    * @paramx audioAttributes
    * @seex #trimRef
    */
