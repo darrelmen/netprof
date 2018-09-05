@@ -530,7 +530,9 @@ public class ClickableWords {
     } else {
       highlightSegment.addStyleName("flfont");
       if (fontSize != 24) {
-        highlightSegment.getElement().getStyle().setFontSize(fontSize, Style.Unit.PX);
+        Style style = highlightSegment.getElement().getStyle();
+        style.setFontSize(fontSize, Style.Unit.PX);
+        style.setLineHeight(fontSize+8, Style.Unit.PX);
       }
     }
   }

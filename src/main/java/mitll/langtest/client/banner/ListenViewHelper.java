@@ -554,7 +554,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    * @see #gotBackward()
    */
   protected void clearHighlightAndRemoveMark() {
-   // logger.info("clearHighlight on " + currentTurn);
+    // logger.info("clearHighlight on " + currentTurn);
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();
@@ -611,11 +611,11 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
     removeMarkCurrent();
     int i = bothTurns.indexOf(currentTurn); // must be on right
 
-    if (currentTurn == null) logger.warning("no current turn");
-    else logger.info("current turn for ex " + currentTurn.getExID());
+    if (currentTurn == null) logger.warning("setNextTurnForSide no current turn");
+    else logger.info("setNextTurnForSide current turn for ex " + currentTurn.getExID());
 
     int nextIndex = (i + 1 == bothTurns.size()) ? 0 : i + 1;
-    logger.info("setCurrentTurnForSide " + i + " next " + nextIndex);
+    logger.info("setNextTurnForSide " + i + " next " + nextIndex);
 
     setCurrentTurn(bothTurns.get(nextIndex));
   }
@@ -694,8 +694,9 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
   @Override
   public void playStopped() {
     if (currentTurn != null) {
-      if (DEBUG || true)
+      if (DEBUG) {
         logger.info("playStopped for turn " + currentTurn);
+      }
 
       setPlayButtonToPlay();
 

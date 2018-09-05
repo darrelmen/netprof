@@ -476,7 +476,7 @@ public class LangTest implements
     if (!isDefault(host)) {
       String moduleBaseURL = audioService.getServiceEntryPoint();
       audioService.setServiceEntryPoint(moduleBaseURL + "/" + host);
-   //   logger.info("adjustEntryPoint createHostSpecificServices service now at " + audioService.getServiceEntryPoint());
+      //   logger.info("adjustEntryPoint createHostSpecificServices service now at " + audioService.getServiceEntryPoint());
     } else {
       // logger.info("adjustEntryPoint createHostSpecificServices service is at " + audioService.getServiceEntryPoint());
     }
@@ -1183,19 +1183,16 @@ public class LangTest implements
   }
 
   /**
-   * @see PostAudioRecordButton#startRecording
    * @param exid
    * @param reqid
    * @param isReference
    * @param audioType
    * @param wavStreamCallback
+   * @see PostAudioRecordButton#startRecording
    */
   public void startStream(int exid, int reqid, boolean isReference, AudioType audioType, WavStreamCallback wavStreamCallback) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
-/*    logger.info("startStream " +
-        "\n\tURL  " + serviceEntryPoint +
-        "\n\texid " + exid);*/
     flashRecordPanel.startStream(serviceEntryPoint, "" + exid, "" + reqid, isReference, audioType, wavStreamCallback);
   }
 
@@ -1207,7 +1204,7 @@ public class LangTest implements
    * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
   public void stopRecording(WavCallback wavCallback, boolean useDelay, boolean abort) {
-    // logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
+    logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis, abort = " + abort);
     if (useDelay) {
       flashRecordPanel.stopRecording(wavCallback, abort);
     } else {

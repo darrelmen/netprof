@@ -100,7 +100,7 @@ function startStream(url, exid, reqid, isreference, audiotype) {
 }
 
 function stopStream(type, abort) {
-    console.log("stopStream record got " + frameRecLength);
+    console.log("stopStream record got " + frameRecLength + " abort " +abort);
 
     var bufferL = mergeBuffers(frameRecBuffersL, frameRecLength);
     var audioBlob = getAudioBlob(bufferL, type);
@@ -112,7 +112,7 @@ function stopStream(type, abort) {
     var framesBefore = recLength / (sampleRate / 2);
     var framesBeforeRound = Math.round(framesBefore);
 
-    sendBlob(framesBeforeRound, audioBlob, true, abort, lastSendMoment);
+    sendBlob(framesBeforeRound, audioBlob, true, abort.toUpperCase() === "TRUE", lastSendMoment);
 }
 
 // so we tag each packet with the time it's generated - so we know when on the client is the
@@ -159,6 +159,9 @@ function record(inputBuffer, type) {
     }
 }
 
+// abort is a boolean
+// isLast is a boolean
+// doesn't anyone care about types???
 function sendBlob(framesBeforeRound, audioBlob, isLast, abort, sendMoment) {
 //    console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "'");
 
@@ -184,9 +187,11 @@ function sendBlob(framesBeforeRound, audioBlob, isLast, abort, sendMoment) {
             xhr.setRequestHeader("STREAMSTATE", "START");
         }
         else if (abort) {
+            console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "' - abort " +abort);
             xhr.setRequestHeader("STREAMSTATE", "ABORT");
         }
         else if (isLast) {
+            console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "' - abort " +abort + " is last " + isLast);
             xhr.setRequestHeader("STREAMSTATE", "END");
         }
         else {

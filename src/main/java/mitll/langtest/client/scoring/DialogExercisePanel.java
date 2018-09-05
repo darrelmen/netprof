@@ -136,7 +136,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     addMarginLeft(style2);
     style2.setMarginRight(10, Style.Unit.PX);
     style2.setMarginTop(7, Style.Unit.PX);
-    style2.setMarginBottom(7, Style.Unit.PX);
+
+    style2.setMarginBottom(0, Style.Unit.PX);
   }
 
   protected void addMarginLeft(Style style2) {
@@ -196,7 +197,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
-    clickableWords = new ClickableWords(listContainer, exercise.getID(), controller.getLanguage(), projectStartupInfo.getLanguageInfo().getFontSize(), BLUE);
+    clickableWords = new ClickableWords(listContainer, exercise.getID(),
+        controller.getLanguage(), projectStartupInfo.getLanguageInfo().getFontSize(), BLUE);
   }
 
   /**

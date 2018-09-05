@@ -270,7 +270,7 @@ public class RecordButton extends Button {
     stopRecordingFirstStep();
     long duration = now - started;
 
-    // logger.info("stopRecording : ui time between button clicks = " + duration + " millis, ");
+    logger.info("stopRecording : ui time between button clicks = " + duration + " millis, ");
 
     afterStopTimer = new Timer() {
       @Override
@@ -314,7 +314,8 @@ public class RecordButton extends Button {
    */
   public void cancelRecording() {
     if (isRecording()) {
-      logger.info("Abort recording!");
+//      logger.info("Abort recording!");
+      stopRecordingFirstStep();
       stop(0, true);
     }
   }

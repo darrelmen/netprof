@@ -124,6 +124,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final boolean CONVERT_DECODE_TO_ALIGN = true;
   private static final String MESSAGE = "message";
   private static final int BUFFER_SIZE = 4096;
+  private static final String UTF_8 = "UTF-8";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -399,7 +400,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (queryString == null) {
       queryString = ""; // how could this happen???
     } else {
-      queryString = URLDecoder.decode(request.getQueryString(), "UTF-8");
+      queryString = URLDecoder.decode(request.getQueryString(), UTF_8);
     }
     return queryString;
   }
@@ -793,11 +794,13 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @see #doPost(HttpServletRequest, HttpServletResponse)
    * @param response
    */
   private void configureResponse(HttpServletResponse response) {
     response.setContentType("application/json; charset=UTF-8");
-    response.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding(UTF_8);
   }
 
   /**

@@ -175,7 +175,6 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
    */
   @Override
   public void stopRecording() {
-
     super.stopRecording();
 
     scoreHistory.setVisible(true);
@@ -202,7 +201,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
 
   @Override
   public void useInvalidResult(int exid, boolean isValid) {
-    //  logger.info("useInvalidResult " + isValid);
+    logger.info("useInvalidResult " + isValid);
     waitCursorHelper.showFinished();
     setVisible(hasScoreHistory);
 

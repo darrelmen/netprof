@@ -649,7 +649,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   public void addRoundTrip(int resultID, int roundTrip) {
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
 
-    if (roundTrip > SLOW_ROUND_TRIP) {
+  /*  if (roundTrip > SLOW_ROUND_TRIP) {
       try {
         int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
         String userChosenID = db.getUserDAO().getUserChosenID(userIDFromSessionOrDB);
@@ -660,7 +660,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       } catch (Exception e) {
         logger.warn("addRoundTrip got " + e, e);
       }
-    }
+    }*/
   }
 
   /**

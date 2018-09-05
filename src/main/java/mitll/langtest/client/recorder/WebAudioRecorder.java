@@ -245,7 +245,7 @@ public class WebAudioRecorder {
    */
   public void stopRecording(boolean abort, WavCallback wavCallback) {
     if (USE_STREAMS) {
-      logger.info("WebAudioRecorder.stopRecording - stop stream");
+      logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
       doStopStream(""+abort);
     } else {
       logger.info("WebAudioRecorder.stopRecording - stop and grab wav");

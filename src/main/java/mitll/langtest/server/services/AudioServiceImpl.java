@@ -80,10 +80,11 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
 
@@ -99,12 +100,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private static final int WARN_THRESH = 10;
   public static final String UNKNOWN = "unknown";
   private static final String REQID = "reqid";
+  private static final String UTF_8 = "UTF-8";
 
   // TODO : make these enums...
   public static final String START = "START";
   private static final String STREAM = "STREAM";
 
-  enum STEAMSTATES { START, STREAM, END, ABORT};
+  enum STEAMSTATES {START, STREAM, END, ABORT}
 
   private static final String MESSAGE = "message";
   private static final String NO_SESSION = "no session";
@@ -158,6 +160,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
       try {
         JSONObject jsonForStream = getJSONForStream(request, ScoreServlet.PostRequest.ALIGN, "", "");
+        configureResponse(response);
         reply(response, jsonForStream);
       } catch (Exception e) {
         logger.warn("got " + e, e);
@@ -175,6 +178,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
+  /**
+   * @param response
+   * @see #service(HttpServletRequest, HttpServletResponse)
+   */
+  private void configureResponse(HttpServletResponse response) {
+    response.setContentType("application/json; charset=UTF-8");
+    response.setCharacterEncoding(UTF_8);
+  }
+
   private void reply(HttpServletResponse response, JSONObject jsonObject) {
     reply(response, jsonObject.toString());
   }
@@ -190,14 +202,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
-  private final Set<String> notInteresting = new HashSet<>(Arrays.asList(
+/*  private final Set<String> notInteresting = new HashSet<>(Arrays.asList(
       "Accept-Encoding",
       "Accept-Language",
       "accept",
       "connection",
       "password",
-      "pass"));
+      "pass"));*/
 
+/*
   private void reportOnHeaders(HttpServletRequest request) {
     Enumeration<String> headerNames = request.getHeaderNames();
     Set<String> headers = new TreeSet<>();
@@ -205,6 +218,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     List<String> collect = headers.stream().filter(name -> !notInteresting.contains(name)).collect(Collectors.toList());
     collect.forEach(header -> logger.info("\trequest header " + header + " = " + request.getHeader(header)));
   }
+*/
 
   /**
    * TODO : consider how to handle out of order packets
@@ -532,7 +546,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           " len " + wavFile.length + " " + validityAndDur;
     }
 
-    public AudioCheck.ValidityAndDur getValidityAndDur() {
+    AudioCheck.ValidityAndDur getValidityAndDur() {
       return validityAndDur;
     }
   }

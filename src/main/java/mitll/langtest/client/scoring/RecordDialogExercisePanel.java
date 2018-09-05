@@ -48,22 +48,13 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private Image emoticon;
   private final SessionManager sessionManager;
 
-  /**
-   *
-   */
-//  private AlignmentOutput studentAlignment;
-  /**
-   * @see #useResult
-   */
-  //private long studentAudioDurationInMillis;
-
   private IRehearseView rehearseView;
 
   long rawRefSpeechDur = 0L;
   private float refSpeechDur = 0F;
   private float studentSpeechDur = 0F;
 
-  private AudioAttribute /*refAudioAttr, */studentAudioAttribute;
+  private AudioAttribute studentAudioAttribute;
 
   /**
    * @param commonExercise
@@ -241,15 +232,12 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    */
   @Override
   public void useResult(AudioAnswer result) {
-//    studentAudioPath = result.getPath();
-    //   studentAlignment = result.getPretestScore();
     this.studentSpeechDur = getSpeechDur(result.getExid(), result.getPretestScore());
 
     studentAudioAttribute = new AudioAttribute();
     studentAudioAttribute.setAudioRef(result.getPath());
     studentAudioAttribute.setAlignmentOutput(result.getPretestScore());
     studentAudioAttribute.setDurationInMillis(result.getDurationInMillis());
-    // studentAudioDurationInMillis = result.getDurationInMillis();
 
     rehearseView.setEmoticon(emoticon, result.getScore());
   }

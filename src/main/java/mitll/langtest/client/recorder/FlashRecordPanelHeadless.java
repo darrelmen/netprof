@@ -385,7 +385,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       @Override
       public void run() {
         long now = System.currentTimeMillis();
-        logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then));
+        logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then) + " abort " +abort);
         stopWebRTCRecording(abort, wavCallback);
       }
     };

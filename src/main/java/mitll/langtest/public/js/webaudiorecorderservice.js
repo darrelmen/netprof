@@ -175,7 +175,7 @@
                 //   source.disconnect(analyser);
                 didStream = false;
                 currCallback = cb || config.callback;
-                console.log("serviceStopStream " + "  at " + new Date().getTime());
+                console.log("serviceStopStream " + " abort " + abort + " at " + new Date().getTime());
                 if (!currCallback) throw new Error('Callback not set');
                 worker.postMessage({
                     command: 'stopStream',

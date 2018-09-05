@@ -68,9 +68,10 @@ public abstract class PostAudioRecordButton extends RecordButton
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
 
   // TODO : enum
-  public static final String ABORT = "ABORT";
+  private static final String ABORT = "ABORT";
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PACKET = false;
 
   private static final boolean USE_DELAY = false;
   private static final String END = "END";
@@ -163,7 +164,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see RecordButton#stop
    */
   public boolean stopRecording(long duration, boolean abort) {
-    controller.stopRecording(bytes -> postAudioFile(bytes), USE_DELAY, false);
+    controller.stopRecording(bytes -> postAudioFile(bytes), USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {
       logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
@@ -186,16 +187,25 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see #startRecording
    */
   private void gotPacketResponse(String json, long then) {
+    if (DEBUG_PACKET) logger.info("gotPacketResponse " + json);
     JSONObject digestJsonResponse = jsonAnswerParser.digestJsonResponse(json);
+    if (DEBUG_PACKET) logger.info("gotPacketResponse digestJsonResponse " + digestJsonResponse);
     String message = getMessage(digestJsonResponse);
     if (message.isEmpty()) {
+      if (DEBUG_PACKET) logger.info("gotPacketResponse message empty!");
       handlePostError(System.currentTimeMillis(), digestJsonResponse);
     } else if (message.equalsIgnoreCase(ABORT)) {
+      logger.info("gotPacketResponse gotAbort");
       gotAbort();
     } else if (message.equalsIgnoreCase(END)) {
-      onPostSuccess(jsonAnswerParser.getAudioAnswer(digestJsonResponse), then);
+      AudioAnswer audioAnswer = jsonAnswerParser.getAudioAnswer(digestJsonResponse);
+      if (DEBUG_PACKET) logger.info("gotPacketResponse audioAnswer " + audioAnswer);
+      onPostSuccess(audioAnswer, then);
     } else {
-      logger.info("gotPacketResponse: post " + getElement().getId() + " got " + json);
+      if (DEBUG_PACKET) {
+        logger.info("gotPacketResponse: post " + getElement().getId() +
+            "\n\tgot " + json);
+      }
       usePartial(jsonAnswerParser.getResponse(digestJsonResponse));
     }
   }
@@ -236,6 +246,8 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   public void gotAbort() {
+    logger.warning("gotAbort\n\n\n ");
+
   }
 
   /**

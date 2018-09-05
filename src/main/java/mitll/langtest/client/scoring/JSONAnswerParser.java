@@ -20,6 +20,11 @@ public class JSONAnswerParser {
   private static final String REQID = "reqid";
   private static final String VALID = "valid";
 
+  /**
+   *
+   * @param jsonObject
+   * @return
+   */
   @NotNull
   AudioAnswer getAudioAnswer(JSONObject jsonObject) {
 //    String message = getField(jsonObject, "MESSAGE");
