@@ -256,13 +256,13 @@
 
             var time = silenceDetectionConfig.time;
             if (elapsedTime > time) {
-                console.log("analyze : SILENCE! elapsedTime is " + elapsedTime + " vs " + time + " max " + max + "/" + nonzero +
-                    " start " + start);
+/*                console.log("analyze : SILENCE! elapsedTime is " + elapsedTime + " vs " + time + " max " + max + "/" + nonzero +
+                    " start " + start);*/
                 silenceDetected();
             }
-            else if (max > 0) {
+/*            else if (max > 0) {
                 console.log("analyze : VAD      elapsedTime is " + elapsedTime + " vs " + time + " max " + max + " start " + start);
-            }
+            }*/
             /*         else {
                          console.log("analyze : SHORT SL elapsedTime is " + elapsedTime + " vs " + time + " max " + max + "/" +nonzero+
                              " start " + start);

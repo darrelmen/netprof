@@ -88,6 +88,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
     super.showContent(listContent, instanceName, fromClick);
+
     controller.registerStopDetected(this::mySilenceDetected);
   }
 
@@ -148,32 +149,36 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private Widget getButtonBarChoices(final String type) {
     ButtonToolbar toolbar = new ButtonToolbar();
-    toolbar.getElement().setId("Choices_" + type);
+//    toolbar.getElement().setId("Choices_" + type);
     toolbar.getElement().getStyle().setClear(Style.Clear.BOTH);
     styleToolbar(toolbar);
 
+    {
+      ButtonGroup buttonGroup = new ButtonGroup();
+      toolbar.add(buttonGroup);
 
-    ButtonGroup buttonGroup = new ButtonGroup();
-    toolbar.add(buttonGroup);
+      {
+        rehearseChoice = getChoice(buttonGroup, REHEARSE, event -> gotRehearse());
+        rehearseChoice.setActive(true);
+        rehearseChoice.setType(ButtonType.DEFAULT);
+        buttonGroup.add(rehearseChoice);
+        doRehearse = true;
+      }
 
-    rehearseChoice = getChoice(buttonGroup, REHEARSE, event -> gotRehearse());
-
-    rehearseChoice.setActive(true);
-    hearYourself = getChoice(buttonGroup, HEAR_YOURSELF, event -> gotHearYourself());
-
-    hearYourself.setActive(false);
-    hearYourself.setEnabled(false);
-
-    rehearseChoice.setType(ButtonType.DEFAULT);
-    buttonGroup.add(rehearseChoice);
-
-    hearYourself.setType(ButtonType.DEFAULT);
-    buttonGroup.add(hearYourself);
-
+      {
+        hearYourself = getChoice(buttonGroup, HEAR_YOURSELF, event -> gotHearYourself());
+        hearYourself.setActive(false);
+        hearYourself.setEnabled(false);
+        hearYourself.setType(ButtonType.DEFAULT);
+        buttonGroup.add(hearYourself);
+      }
+    }
     return toolbar;
   }
 
-
+  /**
+   * @see #getButtonBarChoices
+   */
   private void gotRehearse() {
     recordDialogTurns.forEach(IRecordDialogTurn::switchAudioToReference);
     doRehearse = true;
@@ -376,6 +381,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   /**
    * silence analyzer has triggered...
    * Ideally we'd look at packet duration here...
+   *
+   * @see #showContent
    */
   private void mySilenceDetected() {
     //logger.info("mySilenceDetected got silence : " + currentRecordingTurn);
@@ -403,7 +410,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         stopRecordingTurn();
         beforeCount = 0;
       }
-    } else {
+    } else if (DEBUG) {
       if (hasRecordingTurn) {
         logger.info("silenceDetected got silence but current turn is not recording???");
       } else {
@@ -426,8 +433,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       currentTurnPlayEnded();
     }
   }
-
-  private int count = 0;
+  // private int count = 0;
 
   /**
    * Forget about scores after showing them...
@@ -447,7 +453,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     T turn = exToTurn.get(exid);
 
-    logger.info("addScore exid " + exid + " score " + score +
+    logger.info("addScore exid " + exid +
+        " score " + score +
         "\n\t now ex->score (" + exToScore.keySet().size() +
         ")" + exToScore.keySet() +
         " vs expected " + exToTurn.keySet().size() + " : " + exToTurn.keySet());
@@ -696,7 +703,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         }
       } else {  // on the last turn!
         if (isCurrentPrompt) {
-         // logger.info("currentTurnPlayEnded - showScores " + exID);
+          // logger.info("currentTurnPlayEnded - showScores " + exID);
 
           // TODO : a race - does the play end before the score is available, or is the score available before the play ends?
 
@@ -859,9 +866,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     int exid = audioAnswer.getExid();
     T matchingTurn = exToTurn.get(exid);
 
-    logger.info("useResult set answer" +
-        "\n\ton " + matchingTurn +
-        "\n\tto " + audioAnswer);
+    if (DEBUG) {
+      logger.info("useResult set answer" +
+          "\n\ton " + matchingTurn +
+          "\n\tto " + audioAnswer);
+    }
 
     matchingTurn.useResult(audioAnswer);
 

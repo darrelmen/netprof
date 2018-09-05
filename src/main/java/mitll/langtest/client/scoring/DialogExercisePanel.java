@@ -168,9 +168,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
   }
 
-   void rememberAudio(AudioAttribute next) {
+  void rememberAudio(AudioAttribute next) {
     playAudio.rememberAudio(next);
-  //  logger.info("rememberAudio audio for " + this + "  " + next);
+    //  logger.info("rememberAudio audio for " + this + "  " + next);
     maybeShowAlignment(next);
   }
 
@@ -179,7 +179,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    */
   void maybeShowAlignment(AudioAttribute next) {
     if (next.getAlignmentOutput() != null) {
-   //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
+      //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
       showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
     }
   }
@@ -279,7 +279,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         }
         return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, new DivWidget());
       } else {
-        logger.info("showAlignment SKIP for ex " + exercise.getID() + " audio id " + id + " vs " + currentAudioDisplayed);
+        if (DEBUG) {
+          logger.info("showAlignment SKIP for ex " + exercise.getID() + " audio id " + id + " vs " + currentAudioDisplayed);
+        }
         return null;
       }
     } else {

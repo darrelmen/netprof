@@ -146,8 +146,6 @@ public class RecordButton extends Button {
     StyleHelper.removeStyle(icon, icon.getBaseIconType());
   }
 
-
-
   /**
    * @see RecordAudioPanel#clickStop
    */

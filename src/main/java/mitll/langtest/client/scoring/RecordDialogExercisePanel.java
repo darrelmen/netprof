@@ -43,7 +43,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
   private static final float DELAY_SCALAR = 1.0F;
-
+  /**
+   *
+   */
   private long minDur;
   private Image emoticon;
   private final SessionManager sessionManager;
@@ -76,14 +78,18 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     super(commonExercise, controller, listContainer, alignments, listenView, isRight);
     this.rehearseView = listenView;
 
+    setMinExpectedDur(commonExercise);
+
+    this.sessionManager = sessionManager;
+    addStyleName("inlineFlex");
+  }
+
+  private void setMinExpectedDur(T commonExercise) {
     if (commonExercise.hasRefAudio()) {
       minDur = commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
       minDur = (long) (((float) minDur) * DELAY_SCALAR);
       minDur -= END_DUR_SKEW;
     }
-
-    this.sessionManager = sessionManager;
-    addStyleName("inlineFlex");
   }
 
   /**
@@ -141,7 +147,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    */
   @Override
   public void showScoreInfo() {
- //   logger.info("showScoreInfo for " + this);
+    //   logger.info("showScoreInfo for " + this);
     emoticon.setVisible(true);
 
     if (transcriptToHighlight == null) {
@@ -156,7 +162,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     if (transcriptToHighlight != null) {
       transcriptToHighlight.forEach(this::showWordScore);
     } else {
-      logger.warning("no transcript map for " + this);
+      logger.warning("revealScore : no transcript map for " + this);
     }
   }
 
@@ -270,7 +276,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    */
   @Override
   public void useInvalidResult() {
-    // rehearseView.setEmoticon(emoticon, 0F);
     emoticon.setUrl(RED_X_URL);
   }
 
@@ -296,8 +301,10 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
         super.useResult(result);
         rehearseView.useResult(result);
 
-        logger.info("useResult got for ex " + result.getExid() + " vs local " + getExID() +
-            " = " + result.getValidity() + " " + result.getPretestScore());
+        if (false) {
+          logger.info("useResult got for ex " + result.getExid() + " vs local " + getExID() +
+              " = " + result.getValidity() + " " + result.getPretestScore());
+        }
         // logger.info("useResult got words " + result.getPretestScore().getWordScores());
       }
 
