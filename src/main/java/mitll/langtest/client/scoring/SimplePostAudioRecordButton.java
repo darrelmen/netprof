@@ -109,7 +109,7 @@ public abstract class SimplePostAudioRecordButton {//extends RecordButton implem
 
   *//**
    * @param duration
-   * @see RecordButton#stop(long)
+   * @see RecordButton#stop(long, boolean)
    *//*
   public boolean stopRecording(long duration) {
     controller.stopRecording(new WavCallback() {

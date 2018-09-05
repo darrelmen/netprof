@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.ScoredExercise;
@@ -126,7 +127,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
   }
 
   /**
-   * @see FeedbackPostAudioRecordButton#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
   @Override
   public void stopRecording() {
@@ -134,6 +135,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     playAudioPanel.setEnabled(true);
     playAudioPanel.hideRecord();
   }
+
 
   /**
    * @see RecordDialogExercisePanel#cancelRecording()
@@ -160,6 +162,11 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
 
   @Override
   public void usePartial(StreamResponse validity) {
+
+  }
+
+  @Override
+  public void gotAbort() {
 
   }
 

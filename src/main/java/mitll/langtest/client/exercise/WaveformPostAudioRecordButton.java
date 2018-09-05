@@ -128,10 +128,11 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
 
   /**
    * @param duration
+   * @param abort
    * @see mitll.langtest.client.recorder.RecordButton#stop
    */
   @Override
-  public boolean stopRecording(long duration) {
+  public boolean stopRecording(long duration, boolean abort) {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
     } else {
@@ -140,7 +141,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (System.currentTimeMillis() - then) + " millis");
 
     getWaveform().setUrl(WAIT_URL);
-    return super.stopRecording(duration);
+    return super.stopRecording(duration, abort);
   }
 
   private AudioPanel.ImageAndCheck getWaveform() {
@@ -158,7 +159,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
 
   /**
    * @param result
-   * @see RecordingListener#stopRecording(long)
+   * @see RecordingListener#stopRecording(long, boolean)
    */
   @Override
   public void useResult(AudioAnswer result) {

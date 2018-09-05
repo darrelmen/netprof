@@ -120,7 +120,7 @@ public class FlashcardRecordButton extends RecordButton {
 
     if (isRecording()) {
       logger.info("stop recording since detach!");
-      stop(MIN_DURATION + 1);
+      stop(MIN_DURATION + 1, true);
     }
   }
 

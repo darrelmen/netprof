@@ -71,7 +71,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    *
    */
   private static final int FLASH_RECORDING_STOP_DELAY = 210; // was 160
-  private static final int DELAY_MILLIS = 100;
+  private static final int DELAY_MILLIS = 130;
 
   private final String id = "flashcontent";
   static MicPermission micPermission;
@@ -213,11 +213,12 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   /**
+   * @param abort
    * @param wavCallback
-   * @see #stopWebRTCRecordingLater(WavCallback)
+   * @see #stopWebRTCRecordingLater(boolean, WavCallback)
    */
-  public void stopWebRTCRecording(WavCallback wavCallback) {
-    webAudio.stopRecording(wavCallback);
+  public void stopWebRTCRecording(boolean abort, WavCallback wavCallback) {
+    webAudio.stopRecording(abort, wavCallback);
   }
 
   public void stopRecordingAndPost(String url, String exid) {
@@ -366,17 +367,17 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
    * Handles either state - either we have flash, in which case we ask flash for the wav file,
    * otherwise we ask webRTC to stop recording and post the audio to us.
    *
-   * @see ExerciseController#stopRecording(WavCallback, boolean)
+   * @see ExerciseController#stopRecording(WavCallback, boolean, boolean)
    */
-  public void stopRecording(final WavCallback wavCallback) {
+  public void stopRecording(final WavCallback wavCallback, boolean abort) {
     if (usingWebRTC()) {
-      stopWebRTCRecordingLater(wavCallback);
+      stopWebRTCRecordingLater(abort, wavCallback);
     } else if (usingFlash()) {
       stopFlashRecording(wavCallback);
     }
   }
 
-  private void stopWebRTCRecordingLater(final WavCallback wavCallback) {
+  private void stopWebRTCRecordingLater(boolean abort, final WavCallback wavCallback) {
     final long then = System.currentTimeMillis();
     //logger.info("stopWebRTCRecordingLater - initial ");
 
@@ -385,7 +386,7 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
       public void run() {
         long now = System.currentTimeMillis();
         logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then));
-        stopWebRTCRecording(wavCallback);
+        stopWebRTCRecording(abort, wavCallback);
       }
     };
     t.schedule(DELAY_MILLIS); // add flash delay

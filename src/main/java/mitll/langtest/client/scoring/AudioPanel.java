@@ -351,7 +351,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
     /**
      * @param visible
-     * @see RecordButton.RecordingListener#stopRecording(long)
+     * @see RecordButton.RecordingListener#stopRecording(long, boolean)
      */
     public void setVisible(boolean visible) {
       getImage().setVisible(visible);
@@ -363,7 +363,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
     /**
      * @param url
-     * @see RecordButton.RecordingListener#stopRecording(long)
+     * @see RecordButton.RecordingListener#stopRecording(long, boolean)
      */
     public void setUrl(String url) {
       getImage().setUrl(url);
@@ -386,7 +386,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
    * @param path to audio on the server
    * @seex mitll.langtest.client.scoring.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult
    * @see #onLoad()
-   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable
    */
   public String getImagesForPath(String path) {

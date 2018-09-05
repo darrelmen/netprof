@@ -131,7 +131,7 @@ public class WebAudioRecorder {
   }-*/;
 
   /**
-   * @see #stopRecording(WavCallback)
+   * @see #stopRecording(boolean, WavCallback)
    */
   public native void stopRecording() /*-{
       $wnd.stopRecording();
@@ -140,8 +140,8 @@ public class WebAudioRecorder {
   /**
    *
    */
-  public native void doStopStream() /*-{
-      $wnd.serviceStopStream();
+  public native void doStopStream(String abort) /*-{
+      $wnd.serviceStopStream(abort);
   }-*/;
 
   public native void stopRecordingAndPost(String url, String exid) /*-{
@@ -234,18 +234,19 @@ public class WebAudioRecorder {
   }
 
   /**
-   * @see ExerciseController#stopRecording(WavCallback, boolean)
+   * @see ExerciseController#stopRecording(WavCallback, boolean, boolean)
    */
   private static WavCallback wavCallback = null;
 
   /**
    * @see FlashRecordPanelHeadless#stopWebRTCRecording
+   * @param abort
    * @param wavCallback
    */
-  public void stopRecording(WavCallback wavCallback) {
+  public void stopRecording(boolean abort, WavCallback wavCallback) {
     if (USE_STREAMS) {
       logger.info("WebAudioRecorder.stopRecording - stop stream");
-      doStopStream();
+      doStopStream(""+abort);
     } else {
       logger.info("WebAudioRecorder.stopRecording - stop and grab wav");
       WebAudioRecorder.wavCallback = wavCallback;

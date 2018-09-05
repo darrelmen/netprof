@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.audio;
 
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.server.*;
 import mitll.langtest.server.autocrt.AutoCRT;
@@ -328,8 +329,8 @@ public class AudioFileHelper implements AlignDecode {
    * @param exercise1           exerciseID within the plan - could be null if we're creating a new user exercise
    * @param options
    * @return URL to audio on server and if audio is valid (not too short, etc.)
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording
+   * @see RecordButton.RecordingListener#stopRecording
+   * @see RecordButton.RecordingListener#stopRecording
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    */
   public AudioAnswer writeAudioFile(String base64EncodedString,

@@ -7,6 +7,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.WaitCursorHelper;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.SimpleAudioAnswer;
@@ -170,7 +171,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
   }
 
   /**
-   * @see FeedbackPostAudioRecordButton#stopRecording
+   * @see RecordButton.RecordingListener#stopRecording
    */
   @Override
   public void stopRecording() {

@@ -159,26 +159,16 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
    * This is used to make the audio playback widget.
    *
    * @param duration
+   * @param abort
    * @return true if valid duration
    * @see #RecordButtonPanel
    */
-  public boolean stopRecording(long duration) {
+  public boolean stopRecording(long duration, boolean abort) {
     recordImage1.setVisible(false);
 
     // logger.info("stopRecording : got stop recording " + duration);
     if (duration > MIN_DURATION) {
-      controller.stopRecording(
-
-          new WavCallback() {
-            @Override
-            public void getBase64EncodedWavFile(String bytes) {
-              postAudioFile(getPanel(), bytes);
-            }
-      /*      @Override
-            public void gotStreamResponse(String json) {
-              logger.warning("got stream response... " + json);
-            }*/
-          }, true);
+      controller.stopRecording(bytes -> postAudioFile(getPanel(), bytes), true, abort);
       return true;
     } else {
       initRecordButton();
@@ -199,7 +189,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
    * @param outer
    * @param base64EncodedWavFile
    * @see #postAudioFile
-   * @see #stopRecording
+   * @seex RecordButton.RecordingListener#stopRecording
    */
   private void postAudioFile(final Panel outer, final String base64EncodedWavFile) {
     reqid++;
@@ -330,6 +320,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   public Widget getRecordButton() {
     return recordButton;
   }
+
   public RecordButton getRealRecordButton() {
     return recordButton;
   }

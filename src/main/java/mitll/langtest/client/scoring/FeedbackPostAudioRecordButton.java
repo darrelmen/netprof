@@ -1,7 +1,6 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -54,13 +53,14 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
 
   /**
    * @param duration
+   * @param abort
    * @return
-   * @see RecordButton#stop(long)
+   * @see RecordButton#stop(long, boolean)
    */
   @Override
-  public boolean stopRecording(long duration) {
+  public boolean stopRecording(long duration, boolean abort) {
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording");
-    boolean b = super.stopRecording(duration);
+    boolean b = super.stopRecording(duration, abort);
     if (b) {
       simpleRecordAudioPanel.stopRecording();
     }
@@ -87,7 +87,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    * @param validity
    * @param dynamicRange
    * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
-   * @see RecordingListener#stopRecording(long)
+   * @see RecordingListener#stopRecording(long, boolean)
    */
   @Override
   protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
@@ -100,11 +100,16 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    * @param validity
    * @see PostAudioRecordButton#startRecording
    * @see #gotPacketResponse
-   * @see #stopRecording(long)
+   * @see RecordingListener#stopRecording(long, boolean)
    */
   @Override
   public void usePartial(StreamResponse validity) {
     simpleRecordAudioPanel.usePartial(validity);
+  }
+
+  @Override
+  public void gotAbort() {
+    simpleRecordAudioPanel.gotAbort();
   }
 
   /**

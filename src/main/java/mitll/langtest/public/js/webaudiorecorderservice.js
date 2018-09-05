@@ -100,7 +100,7 @@
             recording = true;
             start = Date.now();
             totalSamples = 0;
-         //   console.log("Recorder.record at " + new Date().getTime());
+            //   console.log("Recorder.record at " + new Date().getTime());
         };
 
         this.stop = function () {
@@ -168,7 +168,7 @@
             });
         };
 
-        this.serviceStopStream = function (cb) {
+        this.serviceStopStream = function (abort, cb) {
             currCallback = cb || config.callback;
 
             if (didStream) {
@@ -179,7 +179,8 @@
                 if (!currCallback) throw new Error('Callback not set');
                 worker.postMessage({
                     command: 'stopStream',
-                    type: 'audio/wav'
+                    type: 'audio/wav',
+                    abort: abort
                 });
             }
             else console.log("stopStream - never started.")

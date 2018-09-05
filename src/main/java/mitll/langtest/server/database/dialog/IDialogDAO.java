@@ -34,10 +34,8 @@ package mitll.langtest.server.database.dialog;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.project.ProjectDAO;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.npdata.dao.SlickDialog;
 
 import java.util.List;
 
@@ -58,16 +56,8 @@ public interface IDialogDAO extends IDAO {
   );
 
   int ensureDefault(int defaultUser);
-//  int getDefault();
 
   List<IDialog> getDialogs(int projid);
-
-  /**
-   * @see ProjectDAO#update
-   * @paramx changed
-   * @return
-   */
- // boolean easyUpdate(SlickDialog changed);
 
   /**
    * @see DatabaseImpl#createTables

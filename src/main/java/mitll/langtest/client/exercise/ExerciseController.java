@@ -42,6 +42,7 @@ import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.initial.WavEndCallback;
 import mitll.langtest.client.initial.WavStreamCallback;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
@@ -79,9 +80,17 @@ public interface ExerciseController extends Services, ExceptionSupport {
   int getUser();
 
   void startRecording();
-  void startStream(int exid, int reqid, boolean isReference, AudioType audioType, WavStreamCallback wavStreamCallback);
+  void startStream(int exid, int reqid, boolean isReference,
+                   AudioType audioType, WavStreamCallback wavStreamCallback);
 
-  void stopRecording(WavCallback wavCallback, boolean useDelay);
+  /**
+   * @see RecordButton.RecordingListener#stopRecording
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
+   * @param wavCallback
+   * @param useDelay
+   * @param abort
+   */
+  void stopRecording(WavCallback wavCallback, boolean useDelay, boolean abort);
   void registerStopDetected(WavEndCallback wavEndCallback);
   int getRecordTimeout();
 

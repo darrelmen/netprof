@@ -209,7 +209,10 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private DivWidget getContainerWithButtons(IDialog dialog) {
     DivWidget container = new DivWidget();
 
-    container.add(getLabel(thumbnailChoices.truncate(dialog.getForeignLanguage(), MAX_LENGTH_ID), dialog.getEnglish()));
+    String truncate = thumbnailChoices.truncate(dialog.getForeignLanguage(), MAX_LENGTH_ID);
+    String english = thumbnailChoices.truncate(dialog.getEnglish(), MAX_LENGTH_ID);
+    container.add(getLabel(truncate));
+    container.add(getLabel(english));
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
@@ -217,9 +220,9 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   @NotNull
-  private Heading getLabel(String name, String statusText) {
+  private Heading getLabel(String name) {
     Heading label = thumbnailChoices.getChoiceLabel(LANGUAGE_SIZE, name);
-    label.setSubtext(statusText);
+   // label.setSubtext(statusText);
     return label;
   }
 

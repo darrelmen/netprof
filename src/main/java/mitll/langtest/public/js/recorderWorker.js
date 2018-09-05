@@ -79,7 +79,7 @@ this.onmessage = function (e) {
             startStream(e.data.url, e.data.exid, e.data.reqid, e.data.isreference, e.data.audiotype);
             break;
         case 'stopStream':
-            stopStream(e.data.type);
+            stopStream(e.data.type, e.data.abort);
             break;
         // todo : consider default error log
     }
@@ -99,7 +99,7 @@ function startStream(url, exid, reqid, isreference, audiotype) {
     lastSendMoment = new Date().getTime();
 }
 
-function stopStream(type) {
+function stopStream(type, abort) {
     console.log("stopStream record got " + frameRecLength);
 
     var bufferL = mergeBuffers(frameRecBuffersL, frameRecLength);
@@ -112,7 +112,7 @@ function stopStream(type) {
     var framesBefore = recLength / (sampleRate / 2);
     var framesBeforeRound = Math.round(framesBefore);
 
-    sendBlob(framesBeforeRound, audioBlob, true, lastSendMoment);
+    sendBlob(framesBeforeRound, audioBlob, true, abort, lastSendMoment);
 }
 
 // so we tag each packet with the time it's generated - so we know when on the client is the
@@ -151,7 +151,7 @@ function record(inputBuffer, type) {
         frameRecBuffersL = [];
         frameRecLength = 0;
 
-        sendBlob(framesBeforeRound, audioBlob, false, beforeSendMoment);
+        sendBlob(framesBeforeRound, audioBlob, false, false, beforeSendMoment);
     }
     else {
         // console.log("worker.record 2 got " + recLength + " frame " + framesAfterRound +
@@ -159,11 +159,10 @@ function record(inputBuffer, type) {
     }
 }
 
-function sendBlob(framesBeforeRound, audioBlob, isLast, sendMoment) {
+function sendBlob(framesBeforeRound, audioBlob, isLast, abort, sendMoment) {
 //    console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "'");
 
     try {
-
         var xhr = new XMLHttpRequest();
 
         xhr.addEventListener("progress", updateProgress);
@@ -183,6 +182,9 @@ function sendBlob(framesBeforeRound, audioBlob, isLast, sendMoment) {
 
         if (framesBeforeRound === 0) {
             xhr.setRequestHeader("STREAMSTATE", "START");
+        }
+        else if (abort) {
+            xhr.setRequestHeader("STREAMSTATE", "ABORT");
         }
         else if (isLast) {
             xhr.setRequestHeader("STREAMSTATE", "END");

@@ -2,7 +2,9 @@ package mitll.langtest.client.scoring;
 
 import mitll.langtest.shared.answer.Validity;
 
-
+/**
+ *
+ */
 public class StreamResponse {
   private Validity validity;
   private long streamTimestamp;

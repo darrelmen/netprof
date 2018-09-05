@@ -138,12 +138,13 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
 
   /**
    * @param duration
+   * @param abort
    * @return
    * @see RecordButton#stopRecording
    */
   @Override
-  public boolean stopRecording(long duration) {
-    boolean b = super.stopRecording(duration);
+  public boolean stopRecording(long duration, boolean abort) {
+    boolean b = super.stopRecording(duration, abort);
     if (b) {
       hideRecord();
       showWaiting();

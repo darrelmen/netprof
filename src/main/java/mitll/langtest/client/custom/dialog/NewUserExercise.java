@@ -869,10 +869,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
               RecordButton.STOP1,
               audioType) {
             @Override
-            public boolean stopRecording(long duration) {
+            public boolean stopRecording(long duration, boolean abort) {
               otherRAP.setEnabled(true);
               showStop();
-              return super.stopRecording(duration);
+              return super.stopRecording(duration, abort);
             }
 
             @Override

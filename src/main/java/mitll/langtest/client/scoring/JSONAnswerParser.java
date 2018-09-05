@@ -77,11 +77,16 @@ public class JSONAnswerParser {
     return converted;
   }
 
-  public StreamResponse getResponse(JSONObject jsonObject) {
+  /**
+   *
+   * @param jsonObject
+   * @return
+   */
+  StreamResponse getResponse(JSONObject jsonObject) {
     return new StreamResponse(getValidity(jsonObject), getStreamTimestamp(jsonObject));
   }
 
-  public long getStreamTimestamp(JSONObject jsonObject) {
+  private long getStreamTimestamp(JSONObject jsonObject) {
     return getLongField(jsonObject, "STREAMTIMESTAMP".toLowerCase());
   }
 

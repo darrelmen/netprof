@@ -13,9 +13,9 @@ import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -346,6 +346,11 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
         }
       }
 
+      @Override
+      public void gotAbort() {
+        logger.info("OK got abort!");
+      }
+
       /**
        *
        */
@@ -371,7 +376,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       }
 
       /**
-       * @see FeedbackPostAudioRecordButton#stopRecording(long)
+       * @see RecordButton.RecordingListener#stopRecording(long, boolean)
        */
       @Override
       public void stopRecording() {
@@ -417,6 +422,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     return this;
   }
 
+  /**
+   * @see RehearseViewHelper#gotPlay()
+   */
   public void cancelRecording() {
     recordAudioPanel.cancelRecording();
   }

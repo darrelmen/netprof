@@ -42,6 +42,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.initial.PropertyHandler;
+import mitll.langtest.client.scoring.NoFeedbackRecordAudioPanel;
+import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.answer.Validity;
 
@@ -99,10 +101,11 @@ public class RecordButton extends Button {
     void startRecording();
     /**
      * @param duration
+     * @param abort
      * @return
-     * @see RecordButton#stop(long)
+     * @see RecordButton#stop(long, boolean)
      */
-    boolean stopRecording(long duration);
+    boolean stopRecording(long duration, boolean abort);
   }
 
   /**
@@ -272,7 +275,7 @@ public class RecordButton extends Button {
     afterStopTimer = new Timer() {
       @Override
       public void run() {
-        stop(duration);
+        stop(duration, false);
       }
     };
     afterStopTimer.schedule(propertyHandler.getAfterStopDelayMillis());
@@ -305,25 +308,31 @@ public class RecordButton extends Button {
   }
 
   /**
-   *
+   * Stop with abort so we know when to not expect a result (score or anything) to be returned.
+   * @see RecordDialogExercisePanel#cancelRecording()
+   * @see NoFeedbackRecordAudioPanel#cancelRecording
    */
   public void cancelRecording() {
-    if (isRecording()) stop(0);
+    if (isRecording()) {
+      logger.info("Abort recording!");
+      stop(0, true);
+    }
   }
 
   /**
    * @param duration
+   * @param abort
    * @see #stopRecording()
    * @see #cancelRecording
    * @see #addRecordingMaxLengthTimeout()
    * @see #startOrStopRecording
    */
-  protected void stop(long duration) {
+  protected void stop(long duration, boolean abort) {
     long now = System.currentTimeMillis();
     long duration2 = now - started;
     logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
     showStopped();
-    recordingListener.stopRecording(duration);
+    recordingListener.stopRecording(duration, abort);
   }
 
   /**
@@ -376,7 +385,7 @@ public class RecordButton extends Button {
       @Override
       public void run() {
         if (isRecording()) {
-          stop(autoStopDelay);
+          stop(autoStopDelay, false);
         }
       }
     };

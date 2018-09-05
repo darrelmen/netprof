@@ -144,7 +144,7 @@ function serviceStartStream(url, exid, reqid, isreference, audioType) {
         });
 }
 
-function serviceStopStream() {
+function serviceStopStream(abort) {
     recorder && recorder.stop();
     //recorder && recorder.clear();
 
@@ -157,7 +157,7 @@ function serviceStopStream() {
         });
     }*/
 
-    recorder && recorder.serviceStopStream(function (blob) {
+    recorder && recorder.serviceStopStream(abort, function (blob) {
         //  __log('serviceStopStream getStreamResponse.');
         getStreamResponse(blob);
     });

@@ -63,8 +63,12 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
  * Time: 6:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+public abstract class PostAudioRecordButton extends RecordButton
+    implements RecordButton.RecordingListener {
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
+
+  // TODO : enum
+  public static final String ABORT = "ABORT";
 
   private static final boolean DEBUG = false;
 
@@ -146,7 +150,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
     long then = System.currentTimeMillis();
 
- if (DEBUG)   logger.info("startRecording!");
+    if (DEBUG) logger.info("startRecording!");
     controller.startRecording();
     controller.startStream(getExerciseID(), reqid, shouldAddToAudioTable(), getAudioType(), bytes -> gotPacketResponse(bytes, then));
   }
@@ -155,17 +159,16 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
    * TODO : consider putting back reqid increment
    *
    * @param duration
+   * @param abort
    * @see RecordButton#stop
    */
-  public boolean stopRecording(long duration) {
-    controller.stopRecording(bytes -> postAudioFile(bytes), USE_DELAY);
+  public boolean stopRecording(long duration, boolean abort) {
+    controller.stopRecording(bytes -> postAudioFile(bytes), USE_DELAY, false);
 
     if (duration > MIN_DURATION) {
       logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
-
       return true;
     } else {
-     // showPopup(Validity.TOO_SHORT.getPrompt());
       hideWaveform();
       gotShortDurationRecording();
       logger.info("stopRecording duration " + duration + " < min = " + MIN_DURATION);
@@ -175,7 +178,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   /**
    * We can get back START, STREAM, END or nothing - in which case we got a 500 or 503 or something...
-   *
+   * <p>
    * So if we get something other than a 200 http response, stop recording and show a big failure warning.
    * which is different than a "hey, please speak in response to the prompt" or "check your mic"
    *
@@ -187,6 +190,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     String message = getMessage(digestJsonResponse);
     if (message.isEmpty()) {
       handlePostError(System.currentTimeMillis(), digestJsonResponse);
+    } else if (message.equalsIgnoreCase(ABORT)) {
+      gotAbort();
     } else if (message.equalsIgnoreCase(END)) {
       onPostSuccess(jsonAnswerParser.getAudioAnswer(digestJsonResponse), then);
     } else {
@@ -230,6 +235,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     // logger.info("got " + validity);
   }
 
+  public void gotAbort() {
+  }
+
   /**
    * TODO : consider why we have to do this from the client.
    *
@@ -259,7 +267,7 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   /**
    * @param base64EncodedWavFile
-   * @see #stopRecording
+   * @see RecordingListener#stopRecording
    * @deprecated
    */
   private void postAudioFile(String base64EncodedWavFile) {

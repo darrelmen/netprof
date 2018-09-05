@@ -554,7 +554,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    * @see #gotBackward()
    */
   protected void clearHighlightAndRemoveMark() {
-    logger.info("clearHighlight on " + currentTurn);
+   // logger.info("clearHighlight on " + currentTurn);
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();

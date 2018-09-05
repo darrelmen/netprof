@@ -35,6 +35,7 @@ package mitll.langtest.server.services;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.services.AudioService;
 import mitll.langtest.server.FileSaver;
 import mitll.langtest.server.ScoreServlet;
@@ -95,7 +96,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private static final boolean DEBUG = false;
 
-
   private static final int WARN_THRESH = 10;
   public static final String UNKNOWN = "unknown";
   private static final String REQID = "reqid";
@@ -104,9 +104,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   public static final String START = "START";
   private static final String STREAM = "STREAM";
 
+  enum STEAMSTATES { START, STREAM, END, ABORT};
+
   private static final String MESSAGE = "message";
   private static final String NO_SESSION = "no session";
-
 
   private PathWriter pathWriter;
   private IEnsureAudioHelper ensureAudioHelper;
@@ -382,7 +383,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             decoderOptions,
             false,
             jsonObject, false, audioAnswer, true);
-    // TODO : convert to JSON
+
     logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
     return jsonObject;
   }
@@ -649,8 +650,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @paramx recordInResults     if true, record in results table -- only when recording in a learn or practice tab
    * @paramx addToAudioTable     if true, add to audio table -- only when recording reference audio for an item.
    * @paramx allowAlternates
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording
+   * @see RecordButton.RecordingListener#stopRecording
+   * @see RecordButton.RecordingListener#stopRecording
    */
   @Override
   public AudioAnswer writeAudioFile(String base64EncodedString,

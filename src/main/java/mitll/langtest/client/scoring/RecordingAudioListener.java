@@ -19,5 +19,7 @@ public interface RecordingAudioListener {
 
   void usePartial(StreamResponse validity);
 
+  void gotAbort();
+
   void onPostFailure();
 }

@@ -310,11 +310,11 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
           }
 
           @Override
-          public void stop(long duration) {
+          public void stop(long duration, boolean abort) {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Stop_Recording");
             outer.setAllowAlternates(showOnlyEnglish);
             //logger.info("BootstrapExercisePlugin : stop recording " + duration);
-            super.stop(duration);
+            super.stop(duration, abort);
           }
 
 

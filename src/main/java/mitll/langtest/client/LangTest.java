@@ -1202,22 +1202,22 @@ public class LangTest implements
   /**
    * Recording interface
    *
-   * @see RecordButtonPanel#stopRecording(long)
-   * @see PostAudioRecordButton#stopRecording(long)
-   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
-  public void stopRecording(WavCallback wavCallback, boolean useDelay) {
+  public void stopRecording(WavCallback wavCallback, boolean useDelay, boolean abort) {
     // logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
     if (useDelay) {
-      flashRecordPanel.stopRecording(wavCallback);
+      flashRecordPanel.stopRecording(wavCallback, abort);
     } else {
-      flashRecordPanel.stopWebRTCRecording(wavCallback);
+      flashRecordPanel.stopWebRTCRecording(abort, wavCallback);
     }
   }
 
   /**
    * @param exid
-   * @see PostAudioRecordButton#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
 /*
   public void stopRecordingAndPost(int exid) {
