@@ -369,15 +369,10 @@ public abstract class BaseAudioDAO extends DAO {
     return allSucceeded;
   }
 
-//  private Collection<Integer> getAudioIDs(CommonExercise firstExercise) {
-//    return firstExercise.getAudioIDs();
-//  }
-
   private Collection<Integer> getAudioIDs(ClientExercise firstExercise) {
     Collection<AudioAttribute> audioAttributes1 = firstExercise.getAudioAttributes();
     synchronized (audioAttributes1) {
       return audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
-     // return collect;
     }
   }
 

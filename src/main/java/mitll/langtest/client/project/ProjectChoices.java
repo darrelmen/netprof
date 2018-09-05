@@ -679,7 +679,7 @@ public class ProjectChoices extends ThumbnailChoices {
   @NotNull
   private Heading getLabel(String name, boolean hasChildren, int numVisibleChildren,
                            String statusText, boolean alldialog) {
-    Heading label = getChoiceLabel(LANGUAGE_SIZE, name);
+    Heading label = getChoiceLabel(LANGUAGE_SIZE, name, true);
 
     String subtext = alldialog ? MODES : hasChildren ?
         (numVisibleChildren + ((numVisibleChildren == 1) ? COURSE1 : COURSES)) : statusText;

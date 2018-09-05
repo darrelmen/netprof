@@ -38,12 +38,13 @@ public class ThumbnailChoices {
   }
 
   @NotNull
-  public Heading getChoiceLabel(int size, String name) {
+  public Heading getChoiceLabel(int size, String name, boolean setLineHeight) {
     Heading label = new Heading(size, name);
     label.addStyleName("floatLeft");
     label.setWidth("100%");
-    label.getElement().getStyle().setLineHeight(25, Style.Unit.PX);
-
+    if (setLineHeight) {
+      label.getElement().getStyle().setLineHeight(25, Style.Unit.PX);
+    }
     {
       Widget subtitle = label.getWidget(0);
       subtitle.addStyleName("floatLeft");

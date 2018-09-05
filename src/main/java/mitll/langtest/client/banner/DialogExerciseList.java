@@ -31,9 +31,12 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private static final int CHOICES_WIDTH = 970;
 
   private static final int MAX_LENGTH_ID = 19;
+  public static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID+12;
   private static final int NORMAL_MIN_HEIGHT = 67;
   private static final int LANGUAGE_SIZE = 6;
-
+  /**
+   *
+   */
   private ThumbnailChoices thumbnailChoices = new ThumbnailChoices();
 
   DialogExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader,
@@ -209,10 +212,21 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private DivWidget getContainerWithButtons(IDialog dialog) {
     DivWidget container = new DivWidget();
 
-    String truncate = thumbnailChoices.truncate(dialog.getForeignLanguage(), MAX_LENGTH_ID);
-    String english = thumbnailChoices.truncate(dialog.getEnglish(), MAX_LENGTH_ID);
-    container.add(getLabel(truncate));
-    container.add(getLabel(english));
+    {
+      String truncate = thumbnailChoices.truncate(dialog.getForeignLanguage(), MAX_LENGTH_ID);
+      Heading label = getLabel(truncate);
+      label.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+      label.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+      container.add(label);
+    }
+
+    {
+      String english = thumbnailChoices.truncate(dialog.getEnglish(), MAX_LENGTH_ID1);
+      Heading label1 = getLabel(english);
+      label1.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+      label1.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+      container.add(label1);
+    }
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
@@ -221,7 +235,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   @NotNull
   private Heading getLabel(String name) {
-    Heading label = thumbnailChoices.getChoiceLabel(LANGUAGE_SIZE, name);
+    Heading label = thumbnailChoices.getChoiceLabel(LANGUAGE_SIZE, name, false);
    // label.setSubtext(statusText);
     return label;
   }

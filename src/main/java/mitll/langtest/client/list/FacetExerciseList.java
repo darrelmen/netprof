@@ -1173,7 +1173,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #addRemoveClickHandler
    */
   private void setHistory(Map<String, String> candidate) {
-    logger.info("setHistory "+candidate);
+  //  logger.info("setHistory "+candidate);
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
 
@@ -1414,7 +1414,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   // keepSearchItem(builder);
     String s = builder.toString();
 
-       logger.info("getHistoryToken token '" + s + "'");
+  //     logger.info("getHistoryToken token '" + s + "'");
     return s;
   }
 

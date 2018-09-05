@@ -58,8 +58,6 @@ import java.util.stream.Collectors;
 public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet implements DialogService {
   private static final Logger logger = LogManager.getLogger(DialogServiceImpl.class);
 
-  //private static final String ANY = "Any";
-
   /**
    * @param request
    * @return
@@ -72,49 +70,49 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
     } else {
-      FilterResponse response = sectionHelper.getTypeToValues(request, false);
-/*
-      User userFromSession = getUserFromSession();
-
-      if (userFromSession != null) {
-//        logger.info("getTypeToValues got " + userFromSession);
-        //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
-        //  int userFromSessionID = userFromSession.getID();
-        //  int projectID = getProjectIDFromUser(userFromSessionID);
-
-        Map<String, Collection<String>> typeToSelection = new HashMap<>();
-        request.getTypeToSelection().forEach(pair -> {
-          String value1 = pair.getValue();
-          if (!value1.equalsIgnoreCase(ANY)) {
-            typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
-          }
-        });
-      }*/
-
-      return response;
+      return sectionHelper.getTypeToValues(request, false);
     }
   }
 
+  /**
+   * Allow search over title of dialog via prefix field of request
+   *
+   * @param request
+   * @return
+   * @throws DominoSessionException
+   * @see ExerciseListRequest#getPrefix()
+   */
   @Override
   public ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException {
     ISection<IDialog> sectionHelper = getDialogSectionHelper();
     if (sectionHelper == null) {
-      logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
+      logger.info("getDialogs no response...");
       return new ExerciseListWrapper<>();
     } else {
-
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 
       if (userIDFromSessionOrDB != -1) {
         List<IDialog> dialogList = getDialogs(request, sectionHelper, userIDFromSessionOrDB);
+
+        String prefix = request.getPrefix().trim();
+        if (!prefix.isEmpty()) {
+          String lowerCase = prefix.toLowerCase();
+          dialogList = dialogList
+              .stream()
+              .filter(iDialog ->
+                  iDialog.getEnglish().toLowerCase().contains(lowerCase) ||
+                  iDialog.getForeignLanguage().toLowerCase().contains(lowerCase))
+              .collect(Collectors.toList());
+        }
         dialogList.sort(this::getDialogComparator);
 
         return new ExerciseListWrapper<>(request.getReqID(),
             dialogList,
             null, new HashMap<>()
         );
-
       } else {
+        logger.info("getDialogs no user?");
+
         return new ExerciseListWrapper<>();
       }
     }
@@ -147,5 +145,4 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
         getDialogs(userIDFromSessionOrDB) :
         new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
   }
-
 }

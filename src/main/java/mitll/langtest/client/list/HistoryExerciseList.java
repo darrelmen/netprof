@@ -75,8 +75,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   private HandlerRegistration handlerRegistration;
   private final FacetContainer sectionWidgetContainer;
 
-  private static final boolean DEBUG_ON_VALUE_CHANGE = false;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_ON_VALUE_CHANGE = true;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_PUSH = false;
 
   /**
@@ -129,7 +129,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         SECTION_SEPARATOR +
         instanceSuffix;
 
-    if (DEBUG_PUSH) logger.info("getHistoryTokenFromUIState '" + s + "'");
+    if (DEBUG_PUSH || true) logger.info("getHistoryTokenFromUIState '" + s + "'");
 
     return s;
   }
@@ -407,7 +407,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     maybeSwitchProject(selectionState, controller.getProjectStartupInfo().getProjectid());
 
     if (DEBUG_ON_VALUE_CHANGE) {
-      logger.info("onValueChange got " + value + " sel " + selectionState + " " + selectionState.getInfo());
+      logger.info("onValueChange got '" + value + "' sel '" + selectionState + "' '" + selectionState.getInfo() +"'");
     }
     INavigation.VIEWS instance1 = selectionState.getView();
 
@@ -424,9 +424,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
       return;*/
     }
     if (DEBUG_ON_VALUE_CHANGE) {
-      logger.info("HistoryExerciseList.onValueChange : originalValue '" + value +
-          "'" +
-          " token is '" + value + "' for " + instance1 + " vs my instance " + getInstance());
+      logger.info("HistoryExerciseList.onValueChange : " +
+          "\n\toriginalValue '" + value +          "'" +
+         // " token is '" + value + "' " +
+          "for " + instance1 + " vs my instance " + getInstance());
     }
 
     restoreUIState(selectionState);
