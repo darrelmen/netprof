@@ -44,8 +44,8 @@ import static mitll.langtest.shared.user.User.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices extends ThumbnailChoices {
-  public static final String EDIT_PROJECT = "Edit project.";
-  public static final String MODES = "2 modes";
+  private static final String EDIT_PROJECT = "Edit project.";
+  private static final String MODES = "2 modes";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
 
@@ -335,7 +335,7 @@ public class ProjectChoices extends ThumbnailChoices {
     header.addStyleName("container");
     List<SlimProject> dialogProjects = getDialogProjects(result);
 
-    logger.info("getHeader " + result.size() + " nest  " + nest);
+  //  logger.info("getHeader " + result.size() + " nest  " + nest);
 
     String text = dialogProjects.size() == result.size() ? PLEASE_SELECT_A_MODE : (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
 

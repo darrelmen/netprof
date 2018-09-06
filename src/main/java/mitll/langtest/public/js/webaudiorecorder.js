@@ -101,7 +101,7 @@ function startRecording() {
             });
         }*/
 
-    __log('webaudiorecorder.startRecording 1 Start Recording.  state =' + audio_context.state);
+  //  __log('webaudiorecorder.startRecording 1 Start Recording.  state =' + audio_context.state);
 }
 
 // called from FlashRecordPanelHeadless.stopRecording
@@ -135,7 +135,7 @@ function stopRecording() {
 // see WebAudioRecorder.startStream
 function serviceStartStream(url, exid, reqid, isreference, audioType) {
     //__log('webaudiorecorder.startStream ');
-    __log('webaudiorecorder.startStream calling recorder');
+  //  __log('webaudiorecorder.startStream calling recorder');
 
     recorder && recorder.serviceStartStream(url, exid, reqid, isreference, audioType,
         function (blob) {

@@ -56,7 +56,7 @@ public class BrowserCheck {
   private static final String IE = "IE";
 
   private String browser = "Unknown";
-  int ver = 0;
+  private int ver = 0;
   private String version = "";
 
   private final Map<String, Integer> browserToVersion = new HashMap<>();
@@ -97,9 +97,9 @@ public class BrowserCheck {
     return this;
   }
 
-  public boolean isIE7() {
+/*  public boolean isIE7() {
     return getBrowserAndVersion().equals("IE 7");
-  }
+  }*/
 
 /*
   public boolean isIE() {

@@ -1,6 +1,7 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -47,7 +48,9 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     col.add(scoreFeedback = new DivWidget());
     scoreFeedback.getElement().setId("scoreFeedback_" + exercise.getID());
     recordFeedback = makePlayAudioPanel().getRecordFeedback(null, controller.shouldRecord());
-    recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
+    Style style = recordFeedback.getElement().getStyle();
+    style.setMarginTop(7, Style.Unit.PX);
+    style.setProperty("minWidth", CONTEXT_INDENT + "px");
     scoreFeedback.add(recordFeedback);
 
     add(col);

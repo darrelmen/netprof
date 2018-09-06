@@ -42,9 +42,9 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * TODO make better relationship with ASRRecordAudioPanel
    */
   private Image recordImage1;
-/*
-  private Image recordImage2;
-*/
+  /*
+    private Image recordImage2;
+  */
   private Image redX;
   private final DownloadContainer downloadContainer;
   private boolean canRecord;
@@ -57,17 +57,17 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    */
   RecorderPlayAudioPanel(final Button postAudioRecordButton1, ExerciseController controller, HasID exercise) {
     super(new PlayListener() {
-          public void playStarted() {
+            public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
-            // TODO put back busy thing?
-            postAudioRecordButton1.setEnabled(false);
-          }
+              // TODO put back busy thing?
+              postAudioRecordButton1.setEnabled(false);
+            }
 
-          public void playStopped() {
-            //  goodwaveExercisePanel.setBusy(false);
-            postAudioRecordButton1.setEnabled(true);
-          }
-        },
+            public void playStopped() {
+              //  goodwaveExercisePanel.setBusy(false);
+              postAudioRecordButton1.setEnabled(true);
+            }
+          },
         "",
         null, controller, exercise.getID(), true);
 
@@ -89,10 +89,10 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void showPlayButton() {
     playButton.setVisible(true);
   }
+
   void hidePlayButton() {
     playButton.setVisible(false);
   }
-
 
 
   void showFirstRecord() {
@@ -110,9 +110,9 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    */
   void hideRecord() {
     if (canRecord) {
-     // logger.info("hideRecord " + exid);
+      // logger.info("hideRecord " + exid);
       recordImage1.setVisible(false);
-    //  recordImage2.setVisible(false);
+      //  recordImage2.setVisible(false);
     } else {
       redX.setVisible(false);
     }
@@ -156,19 +156,10 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     recordImage1.setWidth("32px");
 
     recordImage1.addStyleName("hvr-pulse");
-/*
-
-    recordImage2 = new Image(secondRed);
-    recordImage2.setVisible(false);
-    recordImage2.setWidth("32px");
-*/
 
     this.canRecord = canRecord;
     if (canRecord) {
       recordFeedback.add(recordImage1);
-/*
-      recordFeedback.add(recordImage2);
-*/
       if (waitCursor != null) {
         recordFeedback.add(waitCursor);
       }
@@ -199,6 +190,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
                        String host) {
     downloadContainer.setDownloadHref(audioPathToUse, id, user, host);
   }
+
   /**
    * @return
    * @see SimpleRecordAudioPanel#scoreAudio

@@ -526,7 +526,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   void gotPlay() {
     //   logger.info("got click on play ");
-    //  setPlayButtonIcon();
 
     if (!setTurnToPromptSide()) {
       T currentTurn = getCurrentTurn();
@@ -552,12 +551,14 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     Boolean leftSpeakerSet = isLeftSpeakerSet();
     Boolean rightSpeakerSet = isRightSpeakerSet();
     if (leftSpeakerSet && rightSpeakerSet) {
-      // logger.info("setTurnToPromptSide both speakers ");
+      if (DEBUG) logger.info("setTurnToPromptSide both speakers ");
       return false;
     } else if (
         leftSpeakerSet && !leftTurnPanels.contains(currentTurn) ||  // current turn is not the prompt set
             rightSpeakerSet && !rightTurnPanels.contains(currentTurn)
     ) {
+      if (DEBUG) logger.info("setTurnToPromptSide setNextTurnForSide ");
+
       setNextTurnForSide();
       return true;
     } else {
@@ -572,17 +573,26 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     removeMarkCurrent();
     int i = bothTurns.indexOf(currentTurn); // must be on right
 
-    if (currentTurn == null) logger.warning("setNextTurnForSide no current turn");
-    else logger.info("setNextTurnForSide current turn for ex " + currentTurn.getExID());
+    if (currentTurn == null) {
+      logger.warning("setNextTurnForSide no current turn");
+    } else {
+      if (DEBUG) logger.info("setNextTurnForSide current turn for ex " + currentTurn.getExID());
+    }
 
     int nextIndex = (i + 1 == bothTurns.size()) ? 0 : i + 1;
-    logger.info("setNextTurnForSide " + i + " next " + nextIndex);
+
+    if (DEBUG) logger.info("setNextTurnForSide " + i + " next " + nextIndex);
 
     setCurrentTurn(bothTurns.get(nextIndex));
   }
 
   boolean onFirstTurn() {
-    return getSeq().indexOf(currentTurn) == 0;
+    return bothTurns.indexOf(currentTurn) == 0;
+  }
+
+  boolean onLastTurn() {
+    List<T> seq = bothTurns;
+    return seq.indexOf(currentTurn) == seq.size() - 1;
   }
 
   /**
@@ -617,16 +627,17 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   /**
    * @see #gotTurnClick
+   * @see #gotPlay()
    */
   void playCurrentTurn() {
     if (currentTurn != null) {
-      if (DEBUG) logger.info("playCurrentTurn - turn " + currentTurn.getExID());
+      if (DEBUG) logger.info("playCurrentTurn - turn " + currentTurn);
       boolean didPause = currentTurn.doPlayPauseToggle();
       if (didPause) {
-        logger.info("playCurrentTurn did pause - turn " + currentTurn.getExID());
+        if (DEBUG) logger.info("playCurrentTurn did pause - turn " + currentTurn);
         setPlayButtonToPlay();
       } else {
-        //logger.info("playCurrentTurn maybe did play");
+        if (DEBUG) logger.info("playCurrentTurn maybe did play " + currentTurn);
       }
     } else {
       logger.warning("playCurrentTurn no current turn?");
@@ -639,8 +650,9 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   @Override
   public void playStarted() {
     if (currentTurn != null) {
-      if (DEBUG)
+      if (DEBUG) {
         logger.info("playStarted - turn " + currentTurn);
+      }
       setPlayButtonToPause();
       markCurrent();
     }
@@ -661,14 +673,15 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
       setPlayButtonToPlay();
       removeMarkCurrent();
-      currentTurnPlayEnded();
+      currentTurnPlayEnded(false);
     }
   }
 
   /**
+   * @param wasRecording
    * @see #playStopped
    */
-  void currentTurnPlayEnded() {
+  void currentTurnPlayEnded(boolean wasRecording) {
     if (DEBUG) logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID());
     T next = getNext();
     makeNextVisible();
@@ -705,8 +718,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   /**
-   * @see #playStarted
    * @seex #setPlayButtonIcon
+   * @see #playStarted
    */
   private void setPlayButtonToPause() {
     playButton.setIcon(IconType.PAUSE);

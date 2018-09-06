@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
+  public static final boolean DEBUG_PARTIAL = false;
+
   private static final long MOVE_ON_DUR = 3000L;
   private static final long END_SILENCE = 300L;
 
@@ -52,7 +54,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   private final IRehearseView rehearseView;
 
- // long rawRefSpeechDur = 0L;
+  // long rawRefSpeechDur = 0L;
   private float refSpeechDur = 0F;
   private float studentSpeechDur = 0F;
 
@@ -325,16 +327,19 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
           if (validity == Validity.OK && firstVAD == -1) {
             firstVAD = response.getStreamTimestamp();//System.currentTimeMillis();
-            logger.info("usePartial : (" + rehearseView.getNumValidities() +
-                ") got first vad : " + firstVAD +
-                " (" + (start - firstVAD) + ")" +
-                " for " + report() + " diff " + (System.currentTimeMillis() - start));
+            if (DEBUG_PARTIAL) {
+              logger.info("usePartial : (" + rehearseView.getNumValidities() +
+                  ") got first vad : " + firstVAD +
+                  " (" + (start - firstVAD) + ")" +
+                  " for " + report() + " diff " + (System.currentTimeMillis() - start));
+            }
           } else {
-            logger.info("usePartial : (" + rehearseView.getNumValidities() +
-                " packets) skip validity " + validity +
-                " vad " + firstVAD +
-                // " (" + (start - firstVAD) + ")" +
-                " for " + report() + " diff " + (System.currentTimeMillis() - start));
+            if (DEBUG_PARTIAL) {
+              logger.info("usePartial : (" + rehearseView.getNumValidities() +
+                  " packets) skip validity " + validity +
+                  " vad " + firstVAD +
+                  " for " + report() + " diff " + (System.currentTimeMillis() - start));
+            }
           }
         } else {
           logger.warning("hmm " + report() + " getting response " + response + " but not recording...?");

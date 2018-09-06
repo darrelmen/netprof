@@ -23,6 +23,10 @@ class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
   //private static final String DIALOG_PRACTICE_STEPS = "Dialog Practice Steps";
   private static final String WELCOME_TO_DIALOG_PRACTICE = "Welcome to Dialog Practice!";
   private static final String CHOOSE_A_DIALOG_AND_THEN = "Choose a dialog and then:";
+  private static final String STUDY = "Study";
+  private static final String LISTEN = "Listen";
+  private static final String REHEARSE = "Rehearse";
+  private static final String PERFORM = "Perform";
 
   /**
    * @param controller
@@ -44,14 +48,13 @@ class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
     if (!dialogIntroShown) {
       controller.getStorage().setBoolean("dialogIntroShown", true);
 
-      //String s = CHOOSE_A_DIALOG_AND_THEN;
       new ModalInfoDialog(WELCOME_TO_DIALOG_PRACTICE, Arrays.asList(
           getLarger(CHOOSE_A_DIALOG_AND_THEN),
-          getLarger("* " + getLarge("Study") + " the new vocabulary and turns by recording yourself speaking each item."),
-          getLarger("* " + getLarge("Listen") + " to the dialog."),
-          getLarger("* " + getLarge("Rehearse") + " by speaking after hearing each prompt."),
-          getLarger("* " + getLarge("Perform") + " by speaking and filling in the the obscured vocabulary.")
-      ), 260, true);
+          getLarger("* " + getLarge(STUDY) + " the new vocabulary and turns by recording yourself speaking each item."),
+          getLarger("* " + getLarge(LISTEN) + " to the dialog."),
+          getLarger("* " + getLarge(REHEARSE) + " by speaking after hearing each prompt."),
+          getLarger("* " + getLarge(PERFORM) + " by speaking and filling in the the obscured vocabulary.")
+      ), 240, false);
     }
   }
 

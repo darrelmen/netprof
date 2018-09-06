@@ -3,7 +3,6 @@ package mitll.langtest.client.initial;
 import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.project.ProjectChoices;
 import mitll.langtest.client.user.UserManager;
@@ -23,9 +22,9 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
   private Breadcrumbs breadcrumbs;
   private static final String DIVIDER = ">";
   private static final String HOME = "Home";
-  private UserManager userManager;
+  private final UserManager userManager;
   private final LifecycleSupport lifecycleSupport;
-  private BreadcrumbPartner breadcrumbPartner;
+  private final BreadcrumbPartner breadcrumbPartner;
 
   private static final boolean DEBUG = false;
 
@@ -82,7 +81,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
       if (startupInfo == null) {
         //  logger.info("addCrumbs no project startup info yet for " + current.getUserID());
         if (showOnlyHomeLink) {
-          logger.info("\taddCrumbs add all link");
+       //   logger.info("\taddCrumbs add all link");
           addHomeLink(crumbs);
         }
       } else {
@@ -194,22 +193,23 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     breadcrumbs.clear();
   }
 
+/*
   //@Override
   public void addBreadcrumbs() {
     addCrumbs(true);
   }
+*/
 
   /**
    * @param name
    * @return
    * @see ProjectChoices#gotClickOnFlag
    */
-  //@Override
   @Override
   @NotNull
   public NavLink makeBreadcrumb(String name) {
     NavLink projectCrumb = new NavLink(name);
-    logger.info("makeBreadcrumb add " + name + " now " + breadcrumbs.getWidgetCount());
+ //   logger.info("makeBreadcrumb add " + name + " now " + breadcrumbs.getWidgetCount());
     breadcrumbs.add(projectCrumb);
     breadcrumbs.setVisible(true);
     return projectCrumb;
@@ -225,6 +225,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     // logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
   }
 
+/*
   public String getLastBreadcrumb() {
     Widget widget = breadcrumbs.getWidget(breadcrumbs.getWidgetCount() - 1);
     if (widget instanceof NavLink) {
@@ -232,6 +233,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
       return link.getTitle();
     } else return "Unknown";
   }
+*/
 
   /**
    * @param count

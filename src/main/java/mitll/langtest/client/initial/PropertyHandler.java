@@ -65,7 +65,7 @@ public class PropertyHandler {
 
   private static final String AFTER_STOP_DELAY_MILLIS = "afterStopDelayMillis";
   private static final String SHOW_SPECTROGRAM1 = "showSpectrogram";
-  public static final String PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS = "Practice vocabulary with audio flashcards.";
+  private static final String PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS = "Practice vocabulary with audio flashcards.";
   public static final String RECEIVE_FEEDBACK_ON_STRENGTHS_AND_WEAKNESSES = "Receive feedback on strengths and weaknesses.";
 
   private static final String PRONUNCIATION_FEEDBACK = "netprof";//"Pronunciation Feedback";
@@ -119,11 +119,10 @@ public class PropertyHandler {
   private static final String INITIAL_PROMPT = "Practice dialogs to improve pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
   //private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
 
-
   private boolean isAMAS;
 
   private boolean usePhoneToDisplay;
-  private String fontFamily = "";
+  //private String fontFamily = "";
 
   private int afterStopDelayMillis = DEFAULT_AFTER_STOP_DELAY_MILLIS;
 
@@ -163,9 +162,9 @@ public class PropertyHandler {
     return isAMAS;
   }
 
-  public boolean isBeta() {
+/*  public boolean isBeta() {
     return true;
-  }
+  }*/
 
   /**
    * Typically 50 or 100 milliseconds.
@@ -181,13 +180,13 @@ public class PropertyHandler {
    *
    * @return
    */
-  public String getFontFamily() {
+/*  public String getFontFamily() {
     return fontFamily;
-  }
-
+  }*/
+/*
   public void setFontFamily(String fontFamily) {
     this.fontFamily = fontFamily;
-  }
+  }*/
 
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
@@ -220,7 +219,7 @@ public class PropertyHandler {
 
   private static final String RESPONSE_TYPE = "responseType";
   private static final String SPEECH = "Speech";
-  public static final String TEXT = "Text";
+  private static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
   private String responseType = AUDIO;
   private String helpEmail = NETPROF_HELP_DLIFLC_EDU;
@@ -244,33 +243,74 @@ public class PropertyHandler {
       String key = kv.getKey();
       String value = kv.getValue();
 
-      if (key.equals(APP_TITLE)) appTitle = value;
-      else if (key.equals(RELEASE_DATE)) releaseDate = value;
-      else if (key.equals(BKG_COLOR_FOR_REF)) bkgColorForRef = getBoolean(value);
-      else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
-      else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
-      else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
-      else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
-      else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
-      else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
-      else if (key.equals(SPLASH_TITLE)) splashTitle = value;
-      else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
-      else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
-      else if (key.equals(SHOW_SPECTROGRAM1)) spectrogram = getBoolean(value);
-      else if (key.equals(DIALOG)) dialog = value;
-      else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
-      else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
-      else if (key.equals(FONT_FAMILY)) fontFamily = value;
-      else if (key.equals(DOMINO_SERVER)) dominoURL = value;
-      else if (key.equals(HELP)) helpMessage = value;
-      else if (key.equals(HELP_EMAIL)) helpEmail = value;
-      else if (key.equals(AFTER_STOP_DELAY_MILLIS)) {
-        afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, AFTER_STOP_DELAY_MILLIS);
-      } else if (key.equals(USE_PHONE_TO_DISPLAY)) {
-        // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
-        usePhoneToDisplay = getBoolean(value);
-      } else if (key.equals(PREFERRED_VOICES)) {
-        getPreferredVoices(value);
+      switch (key) {
+        case APP_TITLE:
+          appTitle = value;
+          break;
+        case RELEASE_DATE:
+          releaseDate = value;
+          break;
+        case BKG_COLOR_FOR_REF:
+          bkgColorForRef = getBoolean(value);
+          break;
+        case DEMO_MODE:
+          demoMode = getBoolean(value);
+          break;
+        case RECORD_TIMEOUT:
+          recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
+          break;
+        case NAME_FOR_ITEM:
+          nameForItem = value;
+          break;
+        case NAME_FOR_ANSWER:
+          nameForAnswer = value;
+          break;
+        case NAME_FOR_RECORDER:
+          nameForRecorder = value;
+          break;
+        case LOG_CLIENT_MESSAGES:
+          logClientMessages = getBoolean(value);
+          break;
+        case SPLASH_TITLE:
+          splashTitle = value;
+          break;
+        case ALLOW_PLUS_IN_URL:
+          allowPlusInURL = getBoolean(value);
+          break;
+        case SHOW_SPECTROGRAM:
+          spectrogram = getBoolean(value);
+          break;
+        case SHOW_SPECTROGRAM1:
+          spectrogram = getBoolean(value);
+          break;
+        case DIALOG:
+          dialog = value;
+          break;
+        case QUIET_AUDIO_OK:
+          quietAudioOK = getBoolean(value);
+          break;
+        case IS_AMAS:
+          isAMAS = getBoolean(value);
+          break;
+        case DOMINO_SERVER:
+          dominoURL = value;
+          break;
+        case HELP:
+          helpMessage = value;
+          break;
+        case HELP_EMAIL:
+          helpEmail = value;
+          break;
+        case AFTER_STOP_DELAY_MILLIS:
+          afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, AFTER_STOP_DELAY_MILLIS);
+          break;
+        case USE_PHONE_TO_DISPLAY:
+          // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
+          usePhoneToDisplay = getBoolean(value);
+          break;
+        case PREFERRED_VOICES:
+          getPreferredVoices(value);
+          break;
       }
     }
 
@@ -419,33 +459,34 @@ public class PropertyHandler {
     return demoMode;
   }
 
-  public String getReleaseDate() {
+ /* public String getReleaseDate() {
     return releaseDate;
   }
-
+*/
   public int getRecordTimeout() {
     return recordTimeout;
   }
 
+  /*
   public String getNameForItem() {
     return nameForItem;
-  }
+  }*/
 
   public String getNameForAnswer() {
     return nameForAnswer;
   }
 
-  public String getNameForRecorder() {
+ /* public String getNameForRecorder() {
     return nameForRecorder;
-  }
+  }*/
 
   public boolean isLogClientMessages() {
     return logClientMessages;
   }
 
-  public boolean hasDialog() {
+/*  public boolean hasDialog() {
     return !dialog.isEmpty();
-  }
+  }*/
 
   public boolean shouldAllowPlusInURL() {
     return allowPlusInURL;
@@ -491,14 +532,16 @@ public class PropertyHandler {
       }
     }
   }
-
+/*
   public String getResponseType() {
     return responseType;
-  }
+  }*/
 
+/*
   public void setResponseType(String responseType) {
     this.responseType = responseType;
   }
+*/
 
   @Deprecated
   public boolean isOdaMode() {
@@ -532,7 +575,7 @@ public class PropertyHandler {
     return props;
   }
 
-  public boolean isShowAdvertiseIOS() {
+  boolean isShowAdvertiseIOS() {
     return showAdvertiseIOS;
   }
 

@@ -70,6 +70,15 @@ import static mitll.langtest.shared.project.ProjectProperty.WEBSERVICE_HOST_PORT
 public class ServerProperties {
   private static final Logger logger = LogManager.getLogger(ServerProperties.class);
 
+  private static final String APP_NAME = "appName";
+
+
+  /**
+   * ON THIS BRANCH!
+   */
+
+  private static final String APP_NAME_DEFAULT = "dialog";
+
   /**
    * As of 8/2/17 we have these languages on the hydra2 server:
    * korean, levantine, msa, and russian
@@ -100,15 +109,9 @@ public class ServerProperties {
   public static final String H2_HOST = "h2";
 
   private static final String APP_TITLE = "appTitle";
-//  private static final String APP_URL = "app.url";
 
   private static final String FALSE = "false";
   private static final String TRUE = "true";
-
-  /*
-  private static final List<String> AMAS_SITES =
-      Arrays.asList("Dari", "Farsi", "Korean", "Mandarin", "MSA", "Pashto", "Russian", "Spanish", "Urdu");
-*/
 
   /**
    * Mira stuff... mostly kinda dead
@@ -132,14 +135,14 @@ public class ServerProperties {
   public static final String DEFAULT_MAIL_FROM = "netprof-admin@ll.mit.edu";
   private static final String MAIL_REPLYTO = "mail.replyto";
   private static final String HEARTBEAT_REC = "gordon.vidaver@ll.mit.edu,zebin.xia@dliflc.edu";
-  public static final int DEFAULT_PERIOD = 5 * 60 * 1000;
-  public static final String DOMINO_LL_MIT_EDU = "domino.ll.mit.edu";
-  public static final String LOG_MAILHOST = "log.mailhost";
-  public static final String LOG_MAILFROM = "log.mailfrom";
-  public static final String MAIL_FROM = "mail.from";
-  public static final String IMAGE = "image";
-  public static final String NETPROF = "netprof";
-  public static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
+  private static final int DEFAULT_PERIOD = 5 * 60 * 1000;
+  private static final String DOMINO_LL_MIT_EDU = "domino.ll.mit.edu";
+  private static final String LOG_MAILHOST = "log.mailhost";
+  private static final String LOG_MAILFROM = "log.mailfrom";
+  private static final String MAIL_FROM = "mail.from";
+  private static final String IMAGE = "image";
+  private static final String NETPROF = "netprof";
+  private static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
 
   private String dbConfig = POSTGRES_DATA2_DIALOG;
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
@@ -152,7 +155,7 @@ public class ServerProperties {
 
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   private static final String DB_CONFIG = "dbConfig";
-  private static final String POSTGRES_HYDRA = "postgresHydra";
+  //private static final String POSTGRES_HYDRA = "postgresHydra";
   private static final String POSTGRES = "postgres";
 
   /**
@@ -179,7 +182,7 @@ public class ServerProperties {
   private static final String LANGUAGE = "language";
 
   private static final String MEDIA_DIR = "mediaDir";
-  private static final String IMAGE_DIR = "imageDir";
+  // private static final String IMAGE_DIR = "imageDir";
   private static final String ANSWER_DIR = "answerDir";
   private static final String NETPROF_AUDIO_DIR = "audioDir";
   private static final String DCODR_DIR = "dcodrDir";
@@ -448,9 +451,9 @@ public class ServerProperties {
     return props.getProperty(MEDIA_DIR, getAudioBaseDir() + BEST_AUDIO);
   }
 
-  public String getImageDir() {
+/*  public String getImageDir() {
     return props.getProperty(IMAGE_DIR, getAudioBaseDir() + IMAGE);
-  }
+  }*/
 
   /**
    * Relative to install location
@@ -820,7 +823,9 @@ public class ServerProperties {
    *
    * @return
    */
-  public String getDBConfig() {  return dbConfig;  }
+  public String getDBConfig() {
+    return dbConfig;
+  }
 
   public void setDBConfig(String optDatabase) {
     this.dbConfig = optDatabase;
@@ -845,6 +850,10 @@ public class ServerProperties {
 
   public String getAppTitle() {
     return props.getProperty(APP_TITLE, NETPROF);
+  }
+
+  public String getAppName() {
+    return props.getProperty(APP_NAME, APP_NAME_DEFAULT);
   }
 
   /**
@@ -879,7 +888,7 @@ public class ServerProperties {
     return props.getProperty(HYDRA_HOST, HYDRA_HOST_URL_DEFAULT);
   }
 
-  public String getProp(String prop, String def) {
+  private String getProp(String prop, String def) {
     return props.getProperty(prop, def);
   }
 

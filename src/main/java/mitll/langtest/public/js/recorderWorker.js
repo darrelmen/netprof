@@ -314,9 +314,9 @@ function clear() {
 
     frameRecLength = 0;
     frameRecBuffersL = [];
-//    console.log("clear - session before " + session);
+
     session = new Date().getTime();
-    console.log("clear - session after  " + session);
+   // console.log("clear - session after  " + session);
 }
 
 function getAllZero() {

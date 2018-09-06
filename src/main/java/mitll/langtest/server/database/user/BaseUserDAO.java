@@ -187,13 +187,16 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   /**
+   * Will send out an email with an embedded url to click on - should match the webapp.
+   *
    * @param user
    * @return -1 if we couldn't add this user
    * @paramx perms
    * @see #addUser
    */
   private LoginResult addUserAndGetID(SignUpUser user) {
-    String urlToUse = "https://" + getDatabase().getServerProps().getNPServer() + "/netprof";
+    String urlToUse = "https://" + getDatabase().getServerProps().getNPServer() + "/" +
+        database.getServerProps().getAppName();
 
     // logger.info("addUserAndGetID user will see url = " + urlToUse);
 

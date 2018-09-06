@@ -29,6 +29,10 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    *
    */
   protected AudioAttribute currentAudioAttr = null;
+
+  /**
+   *
+   */
   private Sound currentSound = null;
   private SimpleAudioListener simpleAudioListener;
   private boolean playing = false;
@@ -37,16 +41,19 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_DETAIL = false;
 
   HeadlessPlayAudio(SoundManagerAPI soundManager) {
     id = counter++;
+    getElement().setId("HeadlessPlayAudio_" + id);
+
     this.soundManager = soundManager;
   }
 
   /**
-   * @see mitll.langtest.client.scoring.DialogExercisePanel#makePlayAudio
    * @param soundManager
    * @param listenView
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#makePlayAudio
    */
   public HeadlessPlayAudio(SoundManagerAPI soundManager, IListenView listenView) {
     this(soundManager);
@@ -85,9 +92,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   /**
+   * @return true if paused
    * @see PlayAudioPanel#makePlayButton
    * @see #loadAndPlay
-   * @return true if paused
    */
   @Override
   public boolean doPlayPauseToggle() {
@@ -95,16 +102,20 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 
     if (currentSound != null) {
       if (isPlaying()) {
-        if (DEBUG) logger.info("doPlayPauseToggle pause " + playing + " " + currentPath);
+        if (DEBUG) logger.info("doPlayPauseToggle pause, is playing = " + playing + " " + currentPath);
         //markNotPlaying();
         pause();  // somehow get exception here?
         return true;
       } else {
-        if (DEBUG) logger.info("doPlayPauseToggle start " + playing + " " + currentPath);
+        if (DEBUG) logger.info("doPlayPauseToggle start, is playing = " + playing + " " + currentPath);
         startPlaying();
         return false;
       }
     } else {
+      if (DEBUG) {
+        logger.info("doPlayPauseToggle no current sound, so calling loadAndPlay, is playing = " + playing + " " + currentPath);
+      }
+
       loadAndPlay();
       return false;
     }
@@ -166,10 +177,12 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
         @Override
         public void songLoaded(double duration) {
           if (DEBUG) logger.info("loadAndPlaySegment - songLoaded " + currentPath + " this " + this);
-          Scheduler.get().scheduleDeferred(() -> {
-            if (DEBUG) logger.info("loadAndPlaySegment - songLoaded calling doPlayPauseToggle  " + currentPath);
-            doPlaySegment(startInSeconds, endInSeconds);
-          });
+          if (Scheduler.get() != null) {
+            Scheduler.get().scheduleDeferred(() -> {
+              if (DEBUG) logger.info("loadAndPlaySegment - songLoaded calling doPlaySegment with  " + currentPath);
+              doPlaySegment(startInSeconds, endInSeconds);
+            });
+          }
         }
 
         @Override
@@ -209,7 +222,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see #reinitialize()
    */
   protected void pause() {
-    if (DEBUG) logger.info("PlayAudioPanel :pause");
+    if (DEBUG) logger.info("HeadlessPlayAudioPanel :pause");
     markNotPlaying();
 
     if (soundManager != null) {
@@ -225,7 +238,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   protected void playAudio(AudioAttribute audioAttribute) {
     rememberAudio(audioAttribute);
     loadAndPlay();
-    // playAudio(audioAttribute.getAudioRef());
   }
 
   /**
@@ -240,8 +252,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   /**
-   * @see mitll.langtest.client.scoring.DialogExercisePanel#makePlayAudio(ClientExercise, DivWidget)
    * @param audioAttribute
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#makePlayAudio(ClientExercise, DivWidget)
    */
   public void rememberAudio(AudioAttribute audioAttribute) {
     this.currentAudioAttr = audioAttribute;
@@ -322,8 +334,10 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices
    * @see #loadAudio
    */
-  public String rememberAudio(String path) {
-    //  if (DEBUG || path == null) logger.info("rememberAudio - path " + path);
+  protected String rememberAudio(String path) {
+     if (DEBUG || path == null) {
+       logger.info("rememberAudio - path " + path);
+     }
     destroySound();
     this.currentPath = CompressedAudio.getPath(path);
 /*    if (DEBUG && path != null && path.endsWith(".wav")) {
@@ -351,14 +365,14 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   public void startSong(String path, boolean doAutoload) {
     if (path == null) logger.warning("no path given???");
     else if (!path.equals(FILE_MISSING)) {
-      //logger.info("PlayAudioPanel.loadAudio - skipping " + path);
-      if (DEBUG) logger.info("PlayAudioPanel : startSong : " + path);
+      //logger.info("HeadlessPlayAudio.loadAudio - skipping " + path);
+      if (DEBUG) logger.info("HeadlessPlayAudio : startSong : " + path);
       if (soundManager.isReady()) {
         //if (DEBUG) logger.info(new Date() + " Sound manager is ready.");
         if (soundManager.isOK()) {
           //  if (DEBUG)
           if (DEBUG)
-            logger.info("PlayAudioPanel : startSong : " + path + " destroy current sound " + currentSound);
+            logger.info("HeadlessPlayAudio : startSong : " + path + " destroy current sound " + currentSound);
 
           destroySound();
           createSound(path, doAutoload);
@@ -366,8 +380,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
           logger.warning(" Sound manager is not OK!.");
           warnNoFlash.setVisible(true);
         }
-      }
-      else {
+      } else {
         logger.warning("sound manager is not ready???");
       }
     }
@@ -382,11 +395,12 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     currentSound = new Sound(this);
     String uniqueID = song + "_" + getElement().getId(); // fix bug where multiple npf panels might load the same audio file and not load the second one seemingly
 
-
     if (DEBUG) {
-      logger.info("HeadlessPlayAudioPanel.createSound  " + uniqueID +
+      logger.info("HeadlessPlayAudioPanel.createSound " + uniqueID +
           "" +
-          ": (" + getElement().getId() + ") for " + song + " : " + this + " created sound " + currentSound);
+          ": (" + getId() + ")" +
+          "\n\tfor           " + song +
+          "\n\tcreated sound " + currentSound);
     }
 
     soundManager.createSound(currentSound, uniqueID, song, doAutoload, getVolume());
@@ -402,8 +416,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    */
   public void destroySound() {
     if (currentSound != null) {
-      //if (DEBUG)
-   //  logger.info("HeadlessPlayAudio.destroySound : (" + getElement().getId() + ") destroy sound " + currentSound);
+      if (DEBUG) {
+        logger.info("HeadlessPlayAudio.destroySound : (" + getId() + ") destroy sound " + currentSound);
+      }
       this.soundManager.destroySound(currentSound);
       currentSound = null;
     }
@@ -413,19 +428,19 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * Does repeat audio if childCount > 0
    */
   public void reinitialize() {
-    if (DEBUG /*|| LOCAL_TESTING*/) {
-      logger.info("PlayAudioPanel :reinitialize " + getElement().getId());
+    if (DEBUG_DETAIL /*|| LOCAL_TESTING*/) {
+      logger.info("HeadlessPlayAudio :reinitialize " + getId());
     }
 
     resetAudio();
 
-    if (DEBUG /*|| LOCAL_TESTING*/)
-      logger.info("PlayAudioPanel :reinitialize - telling listener to reinitialize " + listeners);
+    if (DEBUG_DETAIL /*|| LOCAL_TESTING*/)
+      logger.info("HeadlessPlayAudio :reinitialize - telling listener to reinitialize " + listeners);
 
     for (AudioControl listener : listeners) listener.reinitialize();
 
 //    else {
-//      logger.info("PlayAudioPanel :reinitialize - no listener");
+//      logger.info("HeadlessPlayAudio :reinitialize - no listener");
 //    }
   }
 
@@ -446,8 +461,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @param durationEstimate
    */
   public void songFirstLoaded(double durationEstimate) {
-    if (DEBUG) {
-      logger.info("PlayAudioPanel.songFirstLoaded : " + this);
+    if (DEBUG_DETAIL) {
+      logger.info("HeadlessPlayAudio.songFirstLoaded : " + this.getId());
     }
 
     for (AudioControl listener : listeners) listener.songFirstLoaded(durationEstimate);
@@ -455,7 +470,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 //    if (listener != null && listener != this) {
 //      listener.songFirstLoaded(durationEstimate);
 //    } else if (listener != null) {
-//      logger.info("PlayAudioPanel :songFirstLoaded - listener is me??? ");
+//      logger.info("HeadlessPlayAudio :songFirstLoaded - listener is me??? ");
 //    }
     //setEnabled(true);
   }
@@ -465,7 +480,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see SoundManager#songLoaded(Sound, double)
    */
   public void songLoaded(double duration) {
-    // if (DEBUG) logger.info("PlayAudioPanel.songLoaded : " + this);
+    // if (DEBUG) logger.info("HeadlessPlayAudio.songLoaded : " + this);
 
 //    if (listener != null) {
 //      listener.songLoaded(duration);
@@ -473,14 +488,14 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     for (AudioControl listener : listeners) listener.songLoaded(duration);
 
     if (simpleAudioListener != null) {
-      if (DEBUG) logger.info("PlayAudioPanel.songLoaded : " + this);
+      if (DEBUG) logger.info("HeadlessPlayAudio.songLoaded : " + this.getId());
       simpleAudioListener.songLoaded(duration);
     }
 //    else {
 //      logger.info("no listener for song loaded " + duration);
 //    }
     // setEnabled(true);
-    if (DEBUG) logger.info("song loaded : reinit");
+    if (DEBUG_DETAIL) logger.info("song loaded : reinit");
     reinitialize();
   }
 
@@ -488,7 +503,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * Called when the audio stops playing, also relays the message to the listener if there is one.
    */
   public void songFinished() {
-    if (DEBUG) logger.info("PlayAudioPanel :songFinished " + getElement().getId() + " to " + listeners.size());
+    if (DEBUG) logger.info("HeadlessPlayAudio :songFinished " + getElement().getId() +
+        ", tell " + listeners.size() + " listeners...");
 
     markNotPlaying();
     //setPlayLabel();
@@ -510,8 +526,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see #doPlayPauseToggle
    */
   protected void play() {
-    if (DEBUG) {
-      logger.info("PlayAudioPanel playing now = " + isPlaying() + " path " + currentPath);
+    if (DEBUG_DETAIL) {
+      logger.info("HeadlessPlayAudio playing now = " + isPlaying() + " path " + currentPath);
     }
     markPlaying();
     soundManager.play(currentSound);

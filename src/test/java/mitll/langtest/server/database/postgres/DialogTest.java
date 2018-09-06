@@ -62,6 +62,36 @@ public class DialogTest extends BaseTest {
   public static final String KOREAN = "Korean";
 
   @Test
+  public void testDict() {
+    DatabaseImpl andPopulate = getDatabase().setInstallPath("");
+
+    Project project = andPopulate.getProjectByName(KOREAN);
+
+    List<IDialog> dialogs = andPopulate.getDialogDAO().getDialogs(project.getID());
+    dialogs.forEach(iDialog -> {
+      logger.info("dialog " + iDialog);
+
+      logger.info("sp    " + iDialog.getSpeakers());
+      logger.info("attr  " + iDialog.getAttributes());
+     // logger.info("by sp " + iDialog.groupBySpeaker());
+      logger.info("core  " + iDialog.getCoreVocabulary().size());
+      iDialog.getCoreVocabulary().forEach(clientExercise -> {
+        String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+
+        logger.info("core " + clientExercise.getForeignLanguage() + " -> " + pronunciationsFromDictOrLTS);
+      });
+      logger.info("\n\n\n");
+
+//      iDialog.getExercises().forEach(clientExercise -> clientExercise.getAttributes().forEach(exerciseAttribute -> logger.info("\t" + exerciseAttribute)));
+      iDialog.getExercises().forEach(clientExercise -> {
+        String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+
+        logger.info(clientExercise.getForeignLanguage() + " -> " + pronunciationsFromDictOrLTS);
+      });
+    });
+  }
+
+  @Test
   public void testEx() {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("");
 

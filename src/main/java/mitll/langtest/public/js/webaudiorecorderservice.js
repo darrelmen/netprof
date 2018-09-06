@@ -147,10 +147,8 @@
         this.serviceStartStream = function (url, exid, reqid, isreference, audiotype, cb) {
             currCallback = cb || config.callback;
 
-            //   source.connect(analyser);
-            // console.log('service.startStream');
             if (url) {
-                console.log('service.startStream url ' + url);
+                // console.log('service.startStream url ' + url);
             }
             else {
                 console.log('service.startStream url undefined');
@@ -175,7 +173,9 @@
                 //   source.disconnect(analyser);
                 didStream = false;
                 currCallback = cb || config.callback;
-                console.log("serviceStopStream " + " abort " + abort + " at " + new Date().getTime());
+
+              //  console.log("serviceStopStream " + " abort " + abort + " at " + new Date().getTime());
+
                 if (!currCallback) throw new Error('Callback not set');
                 worker.postMessage({
                     command: 'stopStream',
@@ -256,13 +256,13 @@
 
             var time = silenceDetectionConfig.time;
             if (elapsedTime > time) {
-/*                console.log("analyze : SILENCE! elapsedTime is " + elapsedTime + " vs " + time + " max " + max + "/" + nonzero +
-                    " start " + start);*/
+                /*                console.log("analyze : SILENCE! elapsedTime is " + elapsedTime + " vs " + time + " max " + max + "/" + nonzero +
+                                    " start " + start);*/
                 silenceDetected();
             }
-/*            else if (max > 0) {
-                console.log("analyze : VAD      elapsedTime is " + elapsedTime + " vs " + time + " max " + max + " start " + start);
-            }*/
+            /*            else if (max > 0) {
+                            console.log("analyze : VAD      elapsedTime is " + elapsedTime + " vs " + time + " max " + max + " start " + start);
+                        }*/
             /*         else {
                          console.log("analyze : SHORT SL elapsedTime is " + elapsedTime + " vs " + time + " max " + max + "/" +nonzero+
                              " start " + start);

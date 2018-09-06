@@ -154,23 +154,15 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     if (hasAudio(e)) {
       playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
       alignmentFetcher.setPlayAudio(playAudio);
-
-      //   if (!e.getAudioAttributes().isEmpty()) {
-      //   AudioAttribute next = getRegularSpeedIfAvailable(e);
       rememberAudio(getRegularSpeedIfAvailable(e));
-
-//        audioChanged(next.getUniqueID(), next.getDurationInMillis());
-//      } else {
-//        logger.warning("makePlayAudio no audio for " + e.getID());
-//      }
     } else {
       logger.warning("makePlayAudio no audio in audio attributes " + e.getAudioAttributes() + " for exercise " + e.getID());
     }
   }
 
   void rememberAudio(AudioAttribute next) {
+  //  logger.info("rememberAudio audio for " + this + "  " + next);
     playAudio.rememberAudio(next);
-    //  logger.info("rememberAudio audio for " + this + "  " + next);
     maybeShowAlignment(next);
   }
 
@@ -816,6 +808,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * <p>
    * 2d = dash like in twenty-first
    *
+   * left quote and right quote : LEFT SINGLE QUOTATION MARK and RIGHT SINGLE QUOTATION MARK
+   *
    * @param t
    * @return
    * @see #doOneToManyMatch
@@ -823,7 +817,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private String removePunct(String t) {
     return fromFull(t
         .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("['%\\u06D4\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u002D\\u0021\\u2026\\u2019\\u005C\\u2013\\u061F\\uFF0C\\u201D]", ""));
+        .replaceAll("['%\\u06D4\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u002D\\u0021\\u2026\\u005C\\u2013\\u061F\\uFF0C\\u201D\\u2018\\u2019]", ""));
   }
 
   /**
@@ -917,7 +911,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       if (DEBUG) logger.info("doPlayPauseToggle");
       return playAudio.doPlayPauseToggle();
     } else {
-      logger.warning("no play audio???");
+      logger.warning("doPlayPauseToggle no play audio???");
       return false;
     }
   }
@@ -931,6 +925,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   @Override
   public boolean doPause() {
     return playAudio.doPause();
+  }
+
+  public boolean isPlaying() {
+    return playAudio.isPlaying();
   }
 
   /**

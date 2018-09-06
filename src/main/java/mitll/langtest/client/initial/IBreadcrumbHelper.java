@@ -4,7 +4,7 @@ import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import org.jetbrains.annotations.NotNull;
 
-public interface IBreadcrumbHelper {
+interface IBreadcrumbHelper {
   void setVisible(boolean visible);
 
   Breadcrumbs getBreadcrumbs();

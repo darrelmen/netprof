@@ -90,9 +90,9 @@ import static mitll.langtest.client.user.UserPassLogin.*;
  * @since 2/23/16
  */
 public class InitialUI implements UILifecycle, BreadcrumbPartner {
-  public static final boolean DO_HEARTBEAT = false;
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  private static final boolean DO_HEARTBEAT = true;
   private static final boolean DEBUG = false;
 
 

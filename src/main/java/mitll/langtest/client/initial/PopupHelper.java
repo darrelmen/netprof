@@ -47,6 +47,7 @@ public class PopupHelper {
 
   private static final int HIDE_DELAY = 2500;
 
+/*
   public void showPopup(String html) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
@@ -61,6 +62,7 @@ public class PopupHelper {
     };
     t.schedule(HIDE_DELAY);
   }
+*/
 
   public void showPopup(String html, Widget target) {
     showPopup(html, target, 2000);
@@ -82,7 +84,7 @@ public class PopupHelper {
     return pleaseWait;
   }
 
-  public void showPopup(String toShow, String toShow2, Widget over) {
+/*  public void showPopup(String toShow, String toShow2, Widget over) {
     final PopupPanel popupImage = new PopupPanel(true);
     Panel vp = new VerticalPanel();
     vp.add(new HTML(toShow));
@@ -99,5 +101,5 @@ public class PopupHelper {
       }
     };
     t.schedule(3000);
-  }
+  }*/
 }
