@@ -156,16 +156,16 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
     return praise;
   }
 
-  private Random rand = new Random();
+  private final Random rand = new Random();
 
   @NotNull
   private String getPraiseMessage() {
     return praise.get(rand.nextInt(praise.size()));
   }
 
-  public void setDownloadHref(String audioPathToUse, int id, int user, String host) {
+ /* public void setDownloadHref(String audioPathToUse, int id, int user, String host) {
     downloadContainer.setDownloadHref(audioPathToUse, id, user, host);
-  }
+  }*/
 
   @NotNull
   private DivWidget getPlayButtonDiv() {

@@ -100,11 +100,10 @@ public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
     this.clickableTranscript = new ClickableTranscript(words, phones, controller.getButtonFactory(), exerciseID, playAudio);
   }
 
-
-  public void addMinicoreListener(MiniScoreListener l) {
+ /* public void addMinicoreListener(MiniScoreListener l) {
     this.miniScoreListener = l;
   }
-
+*/
   /**
    * @param resultID
    * @seex mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
@@ -167,11 +166,11 @@ public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
    * @param path
    * @see #scoreAudio
    */
-  protected void useResult(PretestScore result,
-                           ImageAndCheck wordTranscript,
-                           ImageAndCheck phoneTranscript,
-                           boolean scoredBefore,
-                           String path) {
+  void useResult(PretestScore result,
+                 ImageAndCheck wordTranscript,
+                 ImageAndCheck phoneTranscript,
+                 boolean scoredBefore,
+                 String path) {
     Map<NetPronImageType, String> netPronImageTypeStringMap = result.getsTypeToImage();
     {
       String words = netPronImageTypeStringMap.get(NetPronImageType.WORD_TRANSCRIPT);

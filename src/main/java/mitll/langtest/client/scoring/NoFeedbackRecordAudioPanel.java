@@ -18,13 +18,13 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     implements RecordingAudioListener {
   private final Logger logger = Logger.getLogger("NoFeedbackRecordAudioPanel");
 
-  protected final ExerciseController controller;
-  protected final T exercise;
+  final ExerciseController controller;
+  final T exercise;
   private PostAudioRecordButton postAudioRecordButton;
   RecorderPlayAudioPanel playAudioPanel;
   DivWidget recordFeedback;
   DivWidget scoreFeedback;
-  private SessionManager sessionManager;
+  private final SessionManager sessionManager;
 
   /**
    * @param exercise
@@ -42,7 +42,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
   /**
    * @see RecordDialogExercisePanel#addWidgets
    */
-  protected void addWidgets() {
+  void addWidgets() {
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
     scoreFeedback.getElement().setId("scoreFeedback_" + exercise.getID());

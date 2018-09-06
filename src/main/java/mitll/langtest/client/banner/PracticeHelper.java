@@ -143,10 +143,6 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
     return mode;
   }
 
-  PolyglotDialog.PROMPT_CHOICE getPromptChoice() {
-    return promptChoice;
-  }
-
   public INavigation getNavigation() {
     return navigation;
   }

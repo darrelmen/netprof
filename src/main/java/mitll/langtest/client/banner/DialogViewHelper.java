@@ -3,7 +3,6 @@ package mitll.langtest.client.banner;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -14,15 +13,13 @@ import mitll.langtest.shared.dialog.IDialog;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class DialogViewHelper  extends SimpleChapterNPFHelper<IDialog, IDialog> {
+class DialogViewHelper  extends SimpleChapterNPFHelper<IDialog, IDialog> {
   //  private final Logger logger = Logger.getLogger("LearnHelper");
   /**
    * @param controller
-   * @param viewContaner
-   * @param myView
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  DialogViewHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
+  DialogViewHelper(ExerciseController controller) {
     super(controller);
   }
 

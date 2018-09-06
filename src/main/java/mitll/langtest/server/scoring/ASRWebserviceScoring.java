@@ -321,7 +321,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     JsonObject jsonObject = null;
 
     if (precalcScores != null && precalcScores.isValid()) {
-      logger.info("scoreRepeatExercise got valid precalc  " + precalcScores);
+      logger.info("scoreRepeatExercise got valid precalc " + precalcScores);
       Scores scores = precalcScores.getScores();
 
       if (cached == null) {

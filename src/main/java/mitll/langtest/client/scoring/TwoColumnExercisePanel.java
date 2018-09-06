@@ -78,8 +78,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private static final boolean DEBUG = false;
   private boolean isRTL = false;
 
-  private ItemMenu itemMenu;
-  private boolean addPlayer;
+  private final ItemMenu itemMenu;
+  private final boolean addPlayer;
 
 
   /**

@@ -1,6 +1,8 @@
 package mitll.langtest.client.banner;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -13,10 +15,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.PhonesChoices;
@@ -54,8 +54,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
   private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
   private static final String LEFT_COLOR = "#e7e6ec";
 
-  protected final ExerciseController controller;
-  protected final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
+  final ExerciseController controller;
+  final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
   final List<T> bothTurns = new ArrayList<>();
   final List<T> leftTurnPanels = new ArrayList<>();
@@ -108,7 +108,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
     return new SelectionState().getDialog();
   }
 
-  protected void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
+  void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
     showDialog(dialogID, dialog, child);
     getRefAudio(new ArrayList<RefAudioGetter>(bothTurns).iterator());
   }
@@ -160,11 +160,11 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
     style.setZIndex(1000);
   }
 
-  protected void setControlRowHeight(DivWidget rowOne) {
+  void setControlRowHeight(DivWidget rowOne) {
     rowOne.setHeight(getControlRowHeight() + "px");
   }
 
-  int getControlRowHeight() {
+  private int getControlRowHeight() {
     return 40;
   }
 
@@ -183,13 +183,13 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
   }
 
   @NotNull
-  protected DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
+  DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
     DivWidget rightDiv = new DivWidget();
     rightDiv.add(checkBox);
     return rightDiv;
   }
 
-  protected CheckBox addRightSpeaker(DivWidget rowOne, String label) {
+  CheckBox addRightSpeaker(DivWidget rowOne, String label) {
     CheckBox checkBox = new CheckBox(label, true);
 
     setRightTurnInitialValue(checkBox);
@@ -218,19 +218,17 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
     checkBox.setValue(true);
   }
 
-  protected void setRightTurnInitialValue(CheckBox checkBox) {
+  void setRightTurnInitialValue(CheckBox checkBox) {
     checkBox.setValue(true);
   }
 
-  protected void speakerOneCheck(Boolean value) {
-//    setPlayButtonToPlay();
+  void speakerOneCheck(Boolean value) {
     if (!value && !rightSpeakerBox.getValue()) {
       rightSpeakerBox.setValue(true);
     }
   }
 
-  protected void speakerTwoCheck(Boolean value) {
-    //  setPlayButtonToPlay();
+  void speakerTwoCheck(Boolean value) {
     if (!value && !leftSpeakerBox.getValue()) {
       leftSpeakerBox.setValue(true);
     }
@@ -243,7 +241,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    * @see #showDialog
    */
   @NotNull
-  protected DivWidget getTurns(IDialog dialog) {
+  DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
 
 //    turnContainer = rowOne;
@@ -344,7 +342,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    * @return
    */
   @NotNull
-  protected T getTurnPanel(ClientExercise clientExercise, boolean isRight) {
+  T getTurnPanel(ClientExercise clientExercise, boolean isRight) {
     T turn = reallyGetTurnPanel(clientExercise, isRight);
     turn.addWidgets(true, false, PhonesChoices.HIDE);
     turn.addPlayListener(this);
@@ -353,18 +351,17 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
   }
 
   @NotNull
-  protected T reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    T widgets = (T) new TurnPanel<>(
+  T reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
+    return (T) new TurnPanel<>(
         clientExercise,
         controller,
         null,
         alignments,
         this,
         isRight);
-    return widgets;
   }
 
-  protected void gotTurnClick(T turn) {
+  void gotTurnClick(T turn) {
     removeMarkCurrent();
     setCurrentTurn(turn);
     playCurrentTurn();
@@ -378,7 +375,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    * @return
    */
   @NotNull
-  protected DivWidget getControls() {
+  DivWidget getControls() {
     DivWidget rowOne = new DivWidget();
     rowOne.getElement().setId("controls");
     rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
@@ -439,45 +436,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
   @Override
   public int getVolume() {
     return slider.getElement().getPropertyInt(VALUE);
-  }
-
-  @NotNull
-  private Widget getLeftArrow() {
-    DivWidget buttonDiv = new DivWidget();
-    Button widgets = new Button("", IconType.ARROW_LEFT, event -> gotGoBack());
-    new TooltipHelper().addTooltip(widgets, getPrevTooltip());
-
-    widgets.addStyleName("leftFiveMargin");
-    widgets.addStyleName("rightTenMargin");
-    buttonDiv.add(widgets);
-    return buttonDiv;
-  }
-
-  @NotNull
-  private Widget getRightArrow() {
-    DivWidget buttonDiv = new DivWidget();
-    Button widgets = new Button("", IconType.ARROW_RIGHT, event -> gotGoForward());
-    new TooltipHelper().addTooltip(widgets, getNextTooltip());
-    widgets.addStyleName("leftFiveMargin");
-    widgets.addStyleName("rightTenMargin");
-    buttonDiv.add(widgets);
-    return buttonDiv;
-  }
-
-  private void gotGoBack() {
-    controller.getNavigation().show(getPrevView());
-  }
-
-  private String getPrevTooltip() {
-    return "Go back to " + getPrevView().toString();
-  }
-
-  private String getNextTooltip() {
-    return "Go ahead to " + getNextView().toString();
-  }
-
-  private void gotGoForward() {
-    controller.getNavigation().show(getNextView());
   }
 
   @NotNull
@@ -553,7 +511,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    * @see #gotForward()
    * @see #gotBackward()
    */
-  protected void clearHighlightAndRemoveMark() {
+  private void clearHighlightAndRemoveMark() {
     // logger.info("clearHighlight on " + currentTurn);
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
@@ -563,7 +521,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
   /**
    * @see #getControls
    */
-  protected void gotPlay() {
+  void gotPlay() {
     //   logger.info("got click on play ");
     //  setPlayButtonIcon();
 
@@ -607,7 +565,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
   /**
    * Wrap around if on last turn.
    */
-  protected void setNextTurnForSide() {
+  void setNextTurnForSide() {
     removeMarkCurrent();
     int i = bothTurns.indexOf(currentTurn); // must be on right
 
@@ -629,7 +587,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
    *
    * @return
    */
-  protected List<T> getSeq() {
+  List<T> getSeq() {
     boolean leftSpeaker = isLeftSpeakerSet();
     boolean rightSpeaker = isRightSpeakerSet();
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
@@ -699,10 +657,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
       }
 
       setPlayButtonToPlay();
-
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("playStopped " + currentTurn.getExID()));
-//      logger.info("logException stack " + exceptionAsString);
-
       removeMarkCurrent();
       currentTurnPlayEnded();
     }
@@ -711,7 +665,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
   /**
    * @see #playStopped
    */
-  protected void currentTurnPlayEnded() {
+  void currentTurnPlayEnded() {
     if (DEBUG) logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID());
     T next = getNext();
     makeNextVisible();
@@ -747,41 +701,19 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
     } else return false;
   }
 
-  private boolean playing = false;
-
-  /**
-   * @see #gotPlay
-   * @see RehearseViewHelper#gotPlay
-   */
-  void setPlayButtonIcon() {
-    if (playing) {
-      setPlayButtonToPause();
-    } else {
-      setPlayButtonToPlay();
-    }
-  }
-
   /**
    * @see #playStarted
-   * @see #setPlayButtonIcon
+   * @seex #setPlayButtonIcon
    */
   private void setPlayButtonToPause() {
-    //  logger.info("setPlayButtonToPause");
     playButton.setIcon(IconType.PAUSE);
-    playing = false;
   }
 
   /**
    * @see #playCurrentTurn()
    */
   void setPlayButtonToPlay() {
-//    logger.info("setPlayButtonToPlay");
-
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("setPlayButtonToPlay " + currentTurn.getExID()));
-//    logger.info("logException stack " + exceptionAsString);
-
     playButton.setIcon(IconType.PLAY);
-    playing = true;
   }
 
   void removeMarkCurrent() {

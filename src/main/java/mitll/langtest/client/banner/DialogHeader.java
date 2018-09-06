@@ -15,10 +15,9 @@ import java.util.logging.Logger;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
-public class DialogHeader {
-  private final Logger logger = Logger.getLogger("DialogHeader");
-
-  private static final int HEADER_HEIGHT = 120;
+class DialogHeader {
+  //private final Logger logger = Logger.getLogger("DialogHeader");
+ // private static final int HEADER_HEIGHT = 120;
   private static final String HEIGHT = 100 + "px";
 
   /**
@@ -26,8 +25,9 @@ public class DialogHeader {
    */
   private static final int ROW_WIDTH = 97;
 
-  private INavigation.VIEWS prev, next;
-  private ExerciseController controller;
+  private final INavigation.VIEWS prev;
+  private final INavigation.VIEWS next;
+  private final ExerciseController controller;
 
   DialogHeader(ExerciseController controller, INavigation.VIEWS prev, INavigation.VIEWS next) {
     this.controller = controller;
@@ -42,7 +42,9 @@ public class DialogHeader {
     {
       DivWidget row = new DivWidget();
       row.addStyleName("cardBorderShadow");
-      row.setHeight(HEADER_HEIGHT + "px");
+
+    //  row.setHeight(HEADER_HEIGHT + "px");
+
       row.setWidth(ROW_WIDTH + "%");
       row.addStyleName("inlineFlex");
 
@@ -150,12 +152,12 @@ public class DialogHeader {
   }
 
   @NotNull
-  protected INavigation.VIEWS getPrevView() {
+  private INavigation.VIEWS getPrevView() {
     return prev;
   }
 
   @NotNull
-  protected INavigation.VIEWS getNextView() {
+  private INavigation.VIEWS getNextView() {
     return next;
   }
 }

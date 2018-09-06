@@ -22,7 +22,6 @@ import mitll.langtest.shared.custom.IUserListWithIDs;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
-import org.omg.PortableInterceptor.NON_EXISTENT;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -296,7 +295,7 @@ public class UserListSupport {
   }
 
   @NotNull
-  public String getPrefix() {
+  private String getPrefix() {
     return "Hi%2C%0A%20Here's%20a%20link%20to%20";
   }
 
@@ -304,7 +303,7 @@ public class UserListSupport {
    * @return
    */
   @NotNull
-  public String getSuffix() {
+  private String getSuffix() {
     return "%0A%20Thanks%2C%20%0A%20" + getFullName();
   }
 

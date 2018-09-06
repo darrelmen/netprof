@@ -47,7 +47,7 @@ import mitll.langtest.client.recorder.RecordButton;
  * <p>
  * TODO : make PostAudioRecordButton extend this class.
  */
-public abstract class SimplePostAudioRecordButton {//extends RecordButton implements RecordButton.RecordingListener {
+abstract class SimplePostAudioRecordButton {//extends RecordButton implements RecordButton.RecordingListener {
 /*  private final Logger logger = Logger.getLogger("SimplePostAudioRecordButton");
 
   private static final String RELEASE_TO_STOP = "Release";

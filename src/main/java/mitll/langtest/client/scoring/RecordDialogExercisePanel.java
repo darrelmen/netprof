@@ -50,9 +50,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private Image emoticon;
   private final SessionManager sessionManager;
 
-  private IRehearseView rehearseView;
+  private final IRehearseView rehearseView;
 
-  long rawRefSpeechDur = 0L;
+ // long rawRefSpeechDur = 0L;
   private float refSpeechDur = 0F;
   private float studentSpeechDur = 0F;
 
@@ -496,7 +496,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     return recordAudioPanel.getPostAudioRecordButton().isRecording();
   }
 
-  public boolean abortRecording() {
+/*  public boolean abortRecording() {
     return recordAudioPanel.getPostAudioRecordButton().stopRecordingSafe();
-  }
+  }*/
 }

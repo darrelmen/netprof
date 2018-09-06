@@ -8,7 +8,6 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.download.DownloadContainer;
@@ -26,7 +25,7 @@ import java.util.logging.Logger;
  * @see SimpleRecordAudioPanel#makePlayAudioPanel
  */
 class RecorderPlayAudioPanel extends PlayAudioPanel {
-  protected final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
+  private final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
 
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final SafeUri firstRed = UriUtils.fromSafeConstant(FIRST_RED);
@@ -204,9 +203,9 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @return
    * @see SimpleRecordAudioPanel#scoreAudio
    */
-  Panel getDownloadContainer() {
+/*  Panel getDownloadContainer() {
     return downloadContainer.getDownloadContainer();
-  }
+  }*/
 
   DownloadContainer getRealDownloadContainer() {
     return downloadContainer;

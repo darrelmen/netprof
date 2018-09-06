@@ -76,8 +76,10 @@ public abstract class PostAudioRecordButton extends RecordButton
   private static final boolean USE_DELAY = false;
   private static final String END = "END";
 
+/*
   public static final String REQID = "reqid";
   public static final String VALID = "valid";
+*/
 
   public static final int MIN_DURATION = 250;
 
@@ -89,7 +91,7 @@ public abstract class PostAudioRecordButton extends RecordButton
   protected final ExerciseController controller;
   private final boolean recordInResults;
   private final boolean scoreAudioNow;
-  private JSONAnswerParser jsonAnswerParser = new JSONAnswerParser();
+  private final JSONAnswerParser jsonAnswerParser = new JSONAnswerParser();
 
   /**
    * @param exerciseID
@@ -164,7 +166,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see RecordButton#stop
    */
   public boolean stopRecording(long duration, boolean abort) {
-    controller.stopRecording(bytes -> postAudioFile(bytes), USE_DELAY, abort);
+    controller.stopRecording(this::postAudioFile, USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {
       logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
@@ -241,11 +243,11 @@ public abstract class PostAudioRecordButton extends RecordButton
    */
   public abstract void useResult(AudioAnswer result);
 
-  public void usePartial(StreamResponse validity) {
+  void usePartial(StreamResponse validity) {
     // logger.info("got " + validity);
   }
 
-  public void gotAbort() {
+  void gotAbort() {
     logger.warning("gotAbort\n\n\n ");
 
   }
@@ -273,7 +275,7 @@ public abstract class PostAudioRecordButton extends RecordButton
   protected void hideWaveform() {
   }
 
-  protected void gotShortDurationRecording() {
+  void gotShortDurationRecording() {
   }
 
 
@@ -329,7 +331,7 @@ public abstract class PostAudioRecordButton extends RecordButton
         });
   }
 
-  protected String getDevice() {
+  String getDevice() {
     return controller.getBrowserInfo();
   }
 
@@ -338,7 +340,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @param user
    * @param exception
    */
-  void onPostFailure(long then, int user, String exception) {
+  private void onPostFailure(long then, int user, String exception) {
     onPostFailure();
 
     long now = System.currentTimeMillis();
@@ -361,7 +363,7 @@ public abstract class PostAudioRecordButton extends RecordButton
     }
   }
 
-  protected void onPostFailure() {
+  void onPostFailure() {
     logger.info("onPostFailure --- !");
   }
 
@@ -445,7 +447,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    */
   abstract protected AudioType getAudioType();
 
-  protected Widget getPopupTargetWidget() {
+  Widget getPopupTargetWidget() {
     return this;
   }
 
@@ -476,7 +478,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    *
    * @param toShow
    */
-  protected void showPopup(String toShow) {
+  private void showPopup(String toShow) {
     logger.info("showPopup " + toShow + " on " + getExerciseID());
     new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 3000);
   }

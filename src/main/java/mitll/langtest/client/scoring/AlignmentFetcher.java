@@ -1,13 +1,11 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
@@ -16,8 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-public class AlignmentFetcher {
-  private Logger logger = Logger.getLogger("AlignmentFetcher");
+class AlignmentFetcher {
+  private final Logger logger = Logger.getLogger("AlignmentFetcher");
 
   private static final boolean DEBUG = false;
 
@@ -29,7 +27,8 @@ public class AlignmentFetcher {
   private HeadlessPlayAudio playAudio;
   private HeadlessPlayAudio contextPlay;
   private int req;
-  private AudioChangeListener audioChangeListener, contextChangeListener;
+  private final AudioChangeListener audioChangeListener;
+  private final AudioChangeListener contextChangeListener;
 
   /**
    * @see DialogExercisePanel#DialogExercisePanel

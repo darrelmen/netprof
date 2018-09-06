@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/8/17.
  */
 public class UserMenu {
-  public static final String ARE_YOU_AN_INSTRUCTOR = "Are you an instructor?";
+  private static final String ARE_YOU_AN_INSTRUCTOR = "Are you an instructor?";
   private final Logger logger = Logger.getLogger("UserMenu");
 
   private static final String REQUEST_INSTRUCTOR_STATUS = "Request Instructor Status";
@@ -208,37 +208,35 @@ public class UserMenu {
     User current = userManager.getCurrent();
 
     if (current != null && !current.isTeacher() && !current.getPermissions().contains(User.Permission.TEACHER_PERM)) {
-      choices.add(new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS, new SuccessClickHandler(() -> {
-        new DialogHelper(true).show(ARE_YOU_AN_INSTRUCTOR,
-            REQ_MESSAGE, new DialogHelper.CloseListener() {
-              @Override
-              public boolean gotYes() {
-                //logger.info("Sending request.");
-                controller.getUserService().sendTeacherRequest(new AsyncCallback<Void>() {
-                  @Override
-                  public void onFailure(Throwable caught) {
+      choices.add(new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS,
+          new SuccessClickHandler(() -> new DialogHelper(true)
+              .show(ARE_YOU_AN_INSTRUCTOR,
+          REQ_MESSAGE, new DialogHelper.CloseListener() {
+            @Override
+            public boolean gotYes() {
+              //logger.info("Sending request.");
+              controller.getUserService().sendTeacherRequest(new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                }
 
-                  }
+                @Override
+                public void onSuccess(Void result) {
+                }
+              });
+              return true;
+            }
 
-                  @Override
-                  public void onSuccess(Void result) {
+            @Override
+            public void gotNo() {
 
-                  }
-                });
-                return true;
-              }
+            }
 
-              @Override
-              public void gotNo() {
+            @Override
+            public void gotHidden() {
 
-              }
-
-              @Override
-              public void gotHidden() {
-
-              }
-            }, "OK", "Cancel");
-      })));
+            }
+          }, "OK", "Cancel"))));
     }
 
     choices.add(getLogOut());
@@ -379,6 +377,6 @@ public class UserMenu {
   private String getMailTo() {
     return "mailto:" + controller.getProps().getHelpEmail() +
         "?Subject=" +
-        "Question%20about%20NetProF";
+        "Question%20about%20Netprof";
   }
 }

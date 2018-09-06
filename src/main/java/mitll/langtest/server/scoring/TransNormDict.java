@@ -5,7 +5,7 @@ public class TransNormDict {
   private String normTranscript;
   private String dict;
 
-  public TransNormDict(String transcript, String normTranscript, String dict) {
+  TransNormDict(String transcript, String normTranscript, String dict) {
     this.transcript = transcript;
     this.normTranscript = normTranscript;
     this.dict = dict;
@@ -15,7 +15,7 @@ public class TransNormDict {
     return transcript;
   }
 
-  public String getNormTranscript() {
+  String getNormTranscript() {
     return normTranscript;
   }
 

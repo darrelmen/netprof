@@ -192,7 +192,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
     return inlineLabel;
   }
 
-  public void showPopup(InlineLabel label, String toShow) {
+  private void showPopup(InlineLabel label, String toShow) {
     label.addMouseOverHandler(event -> new BasicDialog().showPopover(
         label,
         null,

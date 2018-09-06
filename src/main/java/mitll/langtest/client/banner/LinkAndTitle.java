@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 class LinkAndTitle {
   private final ClickHandler clickHandler;
   private final String title;
-  private String linkURL;
+  private final String linkURL;
   private NavLink myLink;
 
   /**

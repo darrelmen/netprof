@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemMenu {
+class ItemMenu {
   /**
    * @see #getDropdown
    */

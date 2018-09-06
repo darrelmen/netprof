@@ -140,14 +140,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   @Override
   protected DivWidget getControls() {
     DivWidget controls = super.getControls();
-    controls.add(getButtonBarChoices("Playback"));
+    controls.add(getButtonBarChoices());
     return controls;
   }
 
   private Button rehearseChoice;
   private Button hearYourself;
 
-  private Widget getButtonBarChoices(final String type) {
+  private Widget getButtonBarChoices() {
     ButtonToolbar toolbar = new ButtonToolbar();
 //    toolbar.getElement().setId("Choices_" + type);
     toolbar.getElement().getStyle().setClear(Style.Clear.BOTH);
@@ -513,7 +513,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   /**
    * Move current turn to first turn when we switch who is the prompting speaker.
    */
-  protected void gotSpeakerChoice() {
+  void gotSpeakerChoice() {
     setPlayButtonToPlay();
     makeFirstTurnCurrent();
     setHints();
@@ -634,7 +634,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   /**
    * @see #gotPlay()
    */
-  protected void clearScores() {
+  void clearScores() {
     overallSmiley.setVisible(false);
     overallSmiley.removeStyleName("animation-target");
 

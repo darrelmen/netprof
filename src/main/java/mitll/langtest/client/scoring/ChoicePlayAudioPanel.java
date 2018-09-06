@@ -39,8 +39,9 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
   private static final String IS_MALE = "isMale";
   private static final String IS_REG = "isReg";
-  public static final String MALE = "male";
-  public static final String SLOW = "slow";
+
+//  public static final String MALE = "male";
+//  public static final String SLOW = "slow";
 
   private final boolean includeContext;
 
@@ -385,14 +386,17 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     return null;
   }
 
+/*
   public void hidePlayButton() {
     playButton.setVisible(false);
   }
+*/
 
+/*
   public void showPlayButton() {
     playButton.setVisible(true);
   }
-
+*/
 
   /**
    * @return

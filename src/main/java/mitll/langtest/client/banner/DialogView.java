@@ -3,7 +3,7 @@ package mitll.langtest.client.banner;
 import mitll.langtest.client.custom.INavigation;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class DialogView {
+abstract class DialogView {
   @NotNull
   protected abstract INavigation.VIEWS getPrevView();
 

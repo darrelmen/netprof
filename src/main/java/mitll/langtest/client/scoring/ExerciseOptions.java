@@ -6,19 +6,22 @@ import mitll.langtest.client.custom.INavigation;
  * Created by go22670 on 2/21/17.
  */
 public class ExerciseOptions {
-  private float screenPortion = 1.0f;
-  private boolean addKeyHandler = false;
-  private INavigation.VIEWS instance = INavigation.VIEWS.NONE;
-  private boolean allowRecording = true;
-  private boolean includeListButtons = true;
+  private final float screenPortion = 1.0f;
+  private final boolean addKeyHandler = false;
+  private final INavigation.VIEWS instance;
+  private final boolean allowRecording = true;
+  private final boolean includeListButtons = true;
 
+/*
   public ExerciseOptions() {
   }
+*/
 
   public ExerciseOptions(INavigation.VIEWS instance) {
     this.instance = instance;
   }
 
+/*
   public ExerciseOptions(float screenPortion,
                          boolean addKeyHandler,
                          INavigation.VIEWS instance,
@@ -30,6 +33,7 @@ public class ExerciseOptions {
     this.instance = instance;
     this.allowRecording = allowRecording;
   }
+*/
 
   float getScreenPortion() {
     return screenPortion;

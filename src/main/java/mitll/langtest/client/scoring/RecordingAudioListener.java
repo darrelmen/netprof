@@ -6,7 +6,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
  * Created by go22670 on 3/30/17.
  * @see RecordDialogExercisePanel#addWidgets
  */
-public interface RecordingAudioListener {
+interface RecordingAudioListener {
   void startRecording();
 
   void stopRecording();

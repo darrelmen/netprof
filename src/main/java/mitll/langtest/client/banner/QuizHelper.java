@@ -37,7 +37,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -81,14 +80,9 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
 
   /**
    * @param controller
-   * @param viewContaner
-   * @param myView
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  QuizHelper(ExerciseController controller,
-             IViewContaner viewContaner,
-             INavigation.VIEWS myView,
-             INavigation navigation) {
+  QuizHelper(ExerciseController controller, INavigation navigation) {
     super(controller);
     this.navigation = navigation;
   }

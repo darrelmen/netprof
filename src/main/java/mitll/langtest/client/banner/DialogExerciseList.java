@@ -25,19 +25,19 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
+class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
   private static final int CHOICES_WIDTH = 970;
 
   private static final int MAX_LENGTH_ID = 19;
-  public static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID+12;
+  private static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID+12;
   private static final int NORMAL_MIN_HEIGHT = 67;
   private static final int LANGUAGE_SIZE = 6;
   /**
    *
    */
-  private ThumbnailChoices thumbnailChoices = new ThumbnailChoices();
+  private final ThumbnailChoices thumbnailChoices = new ThumbnailChoices();
 
   DialogExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader,
                      ExerciseController controller) {

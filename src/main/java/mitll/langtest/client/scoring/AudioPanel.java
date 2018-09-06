@@ -97,7 +97,6 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   private ImageAndCheck spectrogram;
   /**
    * @see #addWidgets(String, String)
-   *
    */
   ImageAndCheck words;
   ImageAndCheck phones;
@@ -106,8 +105,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   private int lastWidthOuter = 0;
   private AudioPositionPopup audioPositionPopup;
 
-//  private final SoundManagerAPI soundManager;
-  protected PlayAudioPanel playAudio;
+  PlayAudioPanel playAudio;
   @Deprecated
   private float screenPortion = 1.0f;
   private final boolean logMessages;
@@ -116,8 +114,8 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   private final int rightMargin;
 
   protected final T exercise;
-  //private final String instance;
-  protected final int exerciseID;
+
+  private final int exerciseID;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_GET_IMAGES = false;
@@ -171,14 +169,14 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
                        T exercise,
                        int exerciseID) {
     this.screenPortion = screenPortion;
- //   this.soundManager = controller.getSoundManager();
+    //   this.soundManager = controller.getSoundManager();
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
     this.exercise = exercise;
-   // this.instance = instance;
+    // this.instance = instance;
     int id = getExerciseID();
     getElement().setId("AudioPanel_exercise_" + id);
 
@@ -357,7 +355,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
       getImage().setVisible(visible);
     }
 
-    public boolean isVisible() {
+    boolean isVisible() {
       return getImage().isVisible();
     }
 
@@ -528,7 +526,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
    * @param width
    * @see #getImages()
    */
-  protected void getEachImage(int width) {
+  void getEachImage(int width) {
     //  logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
@@ -591,7 +589,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     }
   }
 
-  protected int getExerciseID() {
+  int getExerciseID() {
     return exercise == null ? exerciseID : exercise.getID();
   }
 

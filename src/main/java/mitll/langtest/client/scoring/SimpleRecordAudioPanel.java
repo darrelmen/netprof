@@ -31,7 +31,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
 public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends NoFeedbackRecordAudioPanel<T>
     implements SessionManager {
    private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
-  public static final String MP3 = ".mp3";
+  private static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
   private static final float HUNDRED = 100.0f;
@@ -46,7 +46,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
   private final ListInterface<?, ?> listContainer;
   private final boolean isRTL;
   private ScoreFeedbackDiv scoreFeedbackDiv;
-  private boolean addPlayer;
+  private final boolean addPlayer;
   private Widget scoreHistory;
 
   /**

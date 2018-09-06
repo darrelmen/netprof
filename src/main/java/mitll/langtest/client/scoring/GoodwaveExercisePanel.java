@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -73,7 +72,7 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
   /**
    *
    */
-  public static final String CONTEXT = "Context";
+  private static final String CONTEXT = "Context";
   private static final String SAY = "Say";
   private static final String TRANSLITERATION = "Transliteration";
 
@@ -98,12 +97,6 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
   @Deprecated
   boolean isBusy = false;
 
-  /**
-   * TODO make better relationship with ASRRecordAudioPanel
-   */
-  Image recordImage1;
-  Image recordImage2;
-
   protected final T exercise;
   protected final ExerciseController controller;
 
@@ -111,7 +104,7 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
   private boolean hasClickable = false;
   private boolean isJapanese = false;
   private boolean isUrdu = false;
-  protected final ExerciseOptions options;
+  private final ExerciseOptions options;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -143,7 +136,7 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     addContent();
   }
 
-  protected boolean isRTL(T exercise) {
+  private boolean isRTL(T exercise) {
     return isRTLContent(exercise.getForeignLanguage());
   }
 
@@ -175,9 +168,6 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
   protected abstract NavigationHelper getNavigationHelper(ExerciseController controller,
                                                           final ListInterface<?, ?> listContainer,
                                                           boolean addKeyHandler, boolean includeListButtons);
-
-  public void wasRevealed() {
-  }
 
   protected abstract void makeScorePanel(T e, INavigation.VIEWS instance);
 
@@ -284,15 +274,8 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
           }
 
           @Override
-          public void onSuccess(Void result) {
-//        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + getExercise().getOldID() +
-//            " field '" + field + "' commentLabel '" + commentToPost + "' is " + status);//, took " + (now - then) + " millis");
-          }
+          public void onSuccess(Void result) {}
         });
-  }
-
-  protected int getUser() {
-    return controller.getUserState().getUser();
   }
 
   /**
@@ -420,7 +403,7 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     return new TooltipHelper().addTooltip(w, tip);
   }
 
-  protected String removePunct(String t) {
+  private String removePunct(String t) {
     return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "");
   }
 

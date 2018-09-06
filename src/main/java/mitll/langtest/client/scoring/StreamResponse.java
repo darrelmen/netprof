@@ -5,9 +5,9 @@ import mitll.langtest.shared.answer.Validity;
 /**
  *
  */
-public class StreamResponse {
-  private Validity validity;
-  private long streamTimestamp;
+class StreamResponse {
+  private final Validity validity;
+  private final long streamTimestamp;
 
   public StreamResponse(Validity validity, long streamTimestamp) {
     this.validity = validity;

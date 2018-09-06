@@ -5,7 +5,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
-public class HttpStatus {
+class HttpStatus {
   private int code;
   private String statusText;
 
@@ -29,10 +29,6 @@ public class HttpStatus {
 
   public String getStatusText() {
     return statusText;
-  }
-
-  public boolean isError() {
-    return code != 200;
   }
 
   public String toString() {

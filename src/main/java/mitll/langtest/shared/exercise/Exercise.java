@@ -301,7 +301,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return this;
   }
 
-  private void copyAudio(AudioRefExercise exercise) {    exercise.getAudioAttributes().forEach(this::addAudio);  }
+  private void copyAudio(AudioRefExercise exercise) {
+    exercise.getAudioAttributes().forEach(this::addAudio);
+  }
 
   @Override
   public Collection<String> getRefSentences() {
@@ -361,8 +363,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.client.banner.ListenViewHelper#getTurns
    * @return
+   * @see mitll.langtest.client.banner.ListenViewHelper#getTurns
    */
   @Override
   public List<ExerciseAttribute> getAttributes() {
@@ -533,9 +535,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
         " np id '" + getOldID() + "'" +
         " context index " + dominoContextIndex +
         " project " + projectid +
-        "\n\tshouldSwap = " + shouldSwap() +
 
-        " english '" + getEnglish() +
+        (shouldSwap() ? "\n\tshouldSwap = " + shouldSwap() : "") +
+
+        "'" + getEnglish() +
         "'/'" + getForeignLanguage() + "' " +
         (getAltFL().isEmpty() ? "" : getAltFL()) +
         "meaning '" + getMeaning() +

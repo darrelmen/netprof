@@ -141,8 +141,10 @@ public abstract class Scoring {
 
   private boolean isAsianLanguage(String language) {
     return language.equalsIgnoreCase(MANDARIN) ||
-        language.equalsIgnoreCase(JAPANESE) ||
-        language.equalsIgnoreCase(KOREAN);
+        language.equalsIgnoreCase(JAPANESE)
+//        ||
+//        language.equalsIgnoreCase(KOREAN)
+        ;
   }
 
   LTS getLTS() {

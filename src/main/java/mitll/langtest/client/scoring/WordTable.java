@@ -187,13 +187,13 @@ public class WordTable {
   /**
    * @param netPronImageTypeToEndTime
    * @return
-   * @see mitll.langtest.client.gauge.ASRHistoryPanel#makeColoredTable
+   * @seex mitll.langtest.client.gauge.ASRHistoryPanel#makeColoredTable
    */
-  public String makeColoredTable(Map<NetPronImageType, List<SlimSegment>> netPronImageTypeToEndTime) {
+/*  public String makeColoredTable(Map<NetPronImageType, List<SlimSegment>> netPronImageTypeToEndTime) {
     StringBuilder builder = new StringBuilder();
     List<SlimSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
     return getHTMLForWords(builder, words);
-  }
+  }*/
 
   public String makeColoredTableFull(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     StringBuilder builder = new StringBuilder();

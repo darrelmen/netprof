@@ -216,8 +216,10 @@ public class PronunciationLookup implements IPronunciationLookup {
           candidates.add(addDictParts(justPhones, dict, wordProns, word));
         } else {  // not in the dictionary, let's ask LTS
           {
-            String optional = russian ? " or " + getSmallVocabDecoder().removeAccents(word) : "";
-            if (DEBUG) logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
+            if (DEBUG) {
+              String optional = russian ? " or " + getSmallVocabDecoder().removeAccents(word) : "";
+              logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
+            }
           }
           if (!hasLTS) {
             logger.warn("getPronunciationsFromDictOrLTS " + this + " : LTS is null???");

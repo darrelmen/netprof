@@ -12,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class JSONAnswerParser {
-  public static final String PHONE_TRANSCRIPT = "PHONE_TRANSCRIPT";
-  public static final String WORD_TRANSCRIPT = "WORD_TRANSCRIPT";
+class JSONAnswerParser {
+  private static final String PHONE_TRANSCRIPT = "PHONE_TRANSCRIPT";
+  private static final String WORD_TRANSCRIPT = "WORD_TRANSCRIPT";
   private final Logger logger = Logger.getLogger("JSONAnswerParser");
 
   private static final String REQID = "reqid";
@@ -96,7 +96,7 @@ public class JSONAnswerParser {
   }
 
   @NotNull
-  public Validity getValidity(JSONObject jsonObject) {
+  private Validity getValidity(JSONObject jsonObject) {
     String valid = getField(jsonObject, VALID);
     Validity validity;
     try {

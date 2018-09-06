@@ -166,15 +166,19 @@ public class AudioFileHelper implements AlignDecode {
    * @see Project#getPronunciationsFromDictOrLTS
    */
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, true, false, new ArrayList<>()).getDict();
+    return getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, true, false, new ArrayList<>()).getDict();
   }
 
   public String getPronunciationsFromDictOrLTSFull(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, false, false, new ArrayList<>()).getDict();
+    return getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, false, false, new ArrayList<>()).getDict();
   }
 
   public int getNumPhonesFromDictionary(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciationLookup().getNumPhonesFromDictionaryOrLTS(transcript, transliteration);
+    return getPronunciationLookup().getNumPhonesFromDictionaryOrLTS(transcript, transliteration);
+  }
+
+  private IPronunciationLookup getPronunciationLookup() {
+    return webserviceScoring.getPronunciationLookup();
   }
 
   public String getLM(String fl, boolean removeAllAccents) {
@@ -1291,7 +1295,7 @@ public class AudioFileHelper implements AlignDecode {
     // alignment trumps decoding
     boolean shouldDoDecoding = options.shouldDoDecoding() && !options.shouldDoAlignment();
     logger.info("getASRScoreForAudio (" + getLanguage() + ")" +
-        "\n\t" + (shouldDoDecoding ? " Decoding " : " Aligning ") +
+        "\n\t" + (shouldDoDecoding ? "Decoding " : "Aligning ") +
         "" + testAudioFile +
         "\n\twith sentence '" + sentence + "'" +
         "\n\treq# " + reqid +

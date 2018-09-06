@@ -36,8 +36,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char FULL_WIDTH_NINE = '\uFF10' + 9;
 
-  protected final T exercise;
-  protected final ExerciseController controller;
+  final T exercise;
+  final ExerciseController controller;
   DivWidget flClickableRow;
   ClickableWords clickableWords;
 
@@ -49,7 +49,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   /**
    * @see #makePlayAudio
    */
-  protected HeadlessPlayAudio playAudio;
+  HeadlessPlayAudio playAudio;
 
 
   private static final boolean DEBUG = false;
@@ -127,7 +127,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
   }
 
-  protected void styleMe(DivWidget widget) {
+  void styleMe(DivWidget widget) {
     addMarginStyle();
   }
 
@@ -140,7 +140,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     style2.setMarginBottom(0, Style.Unit.PX);
   }
 
-  protected void addMarginLeft(Style style2) {
+  void addMarginLeft(Style style2) {
     style2.setMarginLeft(15, Style.Unit.PX);
   }
 
@@ -150,7 +150,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see #addWidgets
    * @see TwoColumnExercisePanel#makeFirstRow
    */
-  protected void makePlayAudio(T e, DivWidget flContainer) {
+  void makePlayAudio(T e, DivWidget flContainer) {
     if (hasAudio(e)) {
       playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
       alignmentFetcher.setPlayAudio(playAudio);
@@ -177,7 +177,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   /**
    * @param next
    */
-  void maybeShowAlignment(AudioAttribute next) {
+  private void maybeShowAlignment(AudioAttribute next) {
     if (next.getAlignmentOutput() != null) {
       //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
       showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
@@ -210,7 +210,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     alignmentFetcher.getRefAudio(listener);
   }
 
-  protected ProjectStartupInfo getProjectStartupInfo() {
+  ProjectStartupInfo getProjectStartupInfo() {
     return controller == null ? null : controller.getProjectStartupInfo();
   }
 
@@ -270,7 +270,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see RecordDialogExercisePanel#showScoreInfo
    * @see RecordDialogExercisePanel#showAlignment(int, long, AlignmentOutput)
    */
-  protected TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
+  TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
     if (alignmentOutput != null) {
       if (currentAudioDisplayed != id) {
         currentAudioDisplayed = id;
@@ -375,7 +375,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
       List<TranscriptSegment> wordSegments = getWordSegments(alignmentOutput);
 
-      wordSegments.forEach(transcriptSegment -> logger.info("ex " + getExID() + " " + transcriptSegment));
+      if (DEBUG_MATCH) {
+        wordSegments.forEach(transcriptSegment -> logger.info("ex " + getExID() + " " + transcriptSegment));
+      }
 
       if (wordSegments == null) {
         if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio no word segments in " + alignmentOutput);
@@ -873,7 +875,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see TwoColumnExercisePanel#makeFirstRow(ClientExercise, DivWidget, boolean)
    */
   @NotNull
-  protected DivWidget getFLEntry(T e) {
+  DivWidget getFLEntry(T e) {
     flclickables = new ArrayList<>();
     flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL);
     return flClickableRow;
@@ -888,11 +890,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @return
    * @see #makePlayAudio(ClientExercise, DivWidget)
    */
-  protected boolean hasAudio(T e) {
+  boolean hasAudio(T e) {
     return e.hasAudioNonContext(true);
   }
 
-  public void contextAudioChanged(int id, long duration) {
+  void contextAudioChanged(int id, long duration) {
     logger.info("contextAudioChanged : audio changed for " + id + " - " + duration);
     audioChanged(id, duration);
   }
@@ -901,7 +903,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return flClickableRow;
   }
 
-  protected boolean shouldShowPhones() {
+  boolean shouldShowPhones() {
     return false;
   }
 

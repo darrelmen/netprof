@@ -5,7 +5,7 @@ import com.google.gwt.event.shared.GwtEvent;
 /**
  * Created by go22670 on 11/18/16.
  */
-public class AudioSelectedEvent extends GwtEvent<AudioSelectedEventHandler> {
+class AudioSelectedEvent extends GwtEvent<AudioSelectedEventHandler> {
   public static final Type<AudioSelectedEventHandler> TYPE = new Type<>();
   private final int exid;
 

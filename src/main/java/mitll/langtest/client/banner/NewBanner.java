@@ -36,7 +36,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
   private static final String RECORD = "Record";
-  public static final String QC = "QC";
+  private static final String QC = "QC";
 
   private static final List<VIEWS> STANDARD_VIEWS =
       Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
@@ -44,7 +44,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final List<VIEWS> DIALOG_VIEWS =
       Arrays.asList(VIEWS.DIALOG, VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.PERFORM);
 
-  private static List<VIEWS> BOTH = new ArrayList<>(STANDARD_VIEWS);
+  private static final List<VIEWS> BOTH = new ArrayList<>(STANDARD_VIEWS);
 
   static {
     BOTH.addAll(DIALOG_VIEWS);
@@ -108,7 +108,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     addWidgets(userManager, userMenu, breadcrumbs);
   }
 
-  public void addWidgets(UserManager userManager, UserMenu userMenu, Breadcrumbs breadcrumbs) {
+  private void addWidgets(UserManager userManager, UserMenu userMenu, Breadcrumbs breadcrumbs) {
     add(getImage());
     add(getBrand());
     add(breadcrumbs);
