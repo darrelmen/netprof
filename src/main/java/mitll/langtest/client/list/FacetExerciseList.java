@@ -275,6 +275,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     {
       tableWithPager.addStyleName("floatLeft");
       tableWithPager.setWidth("100%");
+
       tableWithPager.getElement().getStyle().setProperty("minWidth", "250px");
     }
 

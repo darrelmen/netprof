@@ -110,7 +110,7 @@ public class ListView implements ContentView, CreateListComplete {
     this.controller = controller;
   }
 
-  public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
+  public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
     names.clear();
 
     listContent.clear();

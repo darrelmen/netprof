@@ -44,7 +44,6 @@ import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.logging.Logger;
@@ -92,7 +91,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
     //  logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
-      showContent(content, instanceName, true);
+      showContent(content, instanceName);
       npfExerciseList.reloadWithCurrent();
     } else {
       logger.warning("showNPF not doing anything for " + instanceName);
@@ -101,24 +100,23 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   /**
    * @param listContent
-   * @param instanceName
-   * @param fromClick
+   * @param views
    * @see #showNPF
    */
   @Override
-  public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
-    //logger.info(getClass() + " : showContent instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
-    Panel child = doNPF(instanceName);
+  public void showContent(Panel listContent, INavigation.VIEWS views) {
+    //logger.info(getClass() + " : showContent views = " + views);//+ " loadExercises " + loadExercises);
+//    Panel child = doNPF(views);
 
 /*
-    logger.info("showContent - (" + instanceName + " ) " +
+    logger.info("showContent - (" + views + " ) " +
         myView + " vs " + viewContaner.getCurrentView() +
         " adding " + child.getElement().getId() + " to " + listContent.getElement().getId() + " with " + listContent.getElement().getChildCount());
 */
 
-    listContent.add(child);
+    listContent.add(doNPF(views));
  /*   if (fromClick) {
-      logger.info(getClass() + " : END showContent instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
+      logger.info(getClass() + " : END showContent views = " + views);//+ " loadExercises " + loadExercises);
     }*/
   }
 
@@ -131,7 +129,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   private Panel doNPF(INavigation.VIEWS instanceName) {
    // logger.info(getClass() + " : doNPF instanceName = " + instanceName);
-
     Panel widgets = flexListLayout.doInternalLayout(-1, instanceName, false);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;

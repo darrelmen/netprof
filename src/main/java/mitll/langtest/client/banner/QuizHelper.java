@@ -231,8 +231,8 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
   }
 
   @Override
-  public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
-    super.showContent(listContent, instanceName, fromClick);
+  public void showContent(Panel listContent, INavigation.VIEWS views) {
+    super.showContent(listContent, views);
     rememberedTopRow.getParent().setVisible(false);
   }
 

@@ -37,7 +37,8 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends DialogView implements ContentView, PlayListener, IListenView {
+public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
+    extends DialogView implements ContentView, PlayListener, IListenView {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final String VALUE = "value";
@@ -80,11 +81,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
   /**
    * @param listContent
    * @param instanceName IGNORED HERE
-   * @param fromClick
    * @see NewContentChooser#showView(INavigation.VIEWS, boolean, boolean)
    */
   @Override
-  public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
+  public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
     bothTurns.clear();
     leftTurnPanels.clear();
     rightTurnPanels.clear();
@@ -320,13 +320,16 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>> extends Dialo
             //     logger.info("\tgetRefAudio panel complete...");
             //   final int reqid = next.getReq();
             if (true) {
-              Scheduler.get().scheduleDeferred(() -> {
-                if (true) {
-                  getRefAudio(iterator);
-                } else {
+
+              if (Scheduler.get() != null) {
+                Scheduler.get().scheduleDeferred(() -> {
+                  if (true) {
+                    getRefAudio(iterator);
+                  } else {
 //              /
-                }
-              });
+                  }
+                });
+              }
             }
           } else {
             //   logger.info("\tgetRefAudio all panels complete...");

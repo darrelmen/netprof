@@ -103,9 +103,11 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    */
   @NotNull
   protected Panel getTable(ListOptions listOptions) {
-    final SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, true, true);
+    final SimplePager pager =
+        new SimplePager(SimplePager.TextLocation.CENTER, true, true);
 
     this.pager = pager;
+    pager.addStyleName("simplePager");
     // Set the cellList as the display.
     pager.setDisplay(table);
     pager.setVisible(listOptions.isShowPager());

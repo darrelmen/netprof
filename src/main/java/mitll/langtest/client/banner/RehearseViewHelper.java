@@ -86,8 +86,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   }
 
   @Override
-  public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
-    super.showContent(listContent, instanceName, fromClick);
+  public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
+    super.showContent(listContent, instanceName);
 
     controller.registerStopDetected(this::mySilenceDetected);
   }
@@ -382,7 +382,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    * silence analyzer has triggered...
    * Ideally we'd look at packet duration here...
    *
-   * @see #showContent
+   * @see ContentView#showContent
    */
   private void mySilenceDetected() {
     //logger.info("mySilenceDetected got silence : " + currentRecordingTurn);

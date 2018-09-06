@@ -193,7 +193,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       switch (view) {
         case LEARN:
           clearAndPush(isFirstTime, currentStoredView, LEARN);
-          learnHelper.showContent(divWidget, LEARN, fromClick);
+          learnHelper.showContent(divWidget, LEARN);
           break;
         case DRILL:
           setInstanceHistory(DRILL);
@@ -210,27 +210,27 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case LISTS:
           clearAndFixScroll();
           setInstanceHistory(LISTS);
-          listView.showContent(divWidget, LISTS, fromClick);
+          listView.showContent(divWidget, LISTS);
           break;
         case DIALOG:
           clearAndPush(isFirstTime, currentStoredView, DIALOG);
-          dialogHelper.showContent(divWidget, DIALOG, fromClick);
+          dialogHelper.showContent(divWidget, DIALOG);
           break;
         case STUDY:
           clearAndPushKeep(STUDY);
-          studyHelper.showContent(divWidget, STUDY, fromClick);
+          studyHelper.showContent(divWidget, STUDY);
           break;
         case LISTEN:
           clearAndPushKeep(LISTEN);
-          listenHelper.showContent(divWidget, LISTEN, fromClick);
+          listenHelper.showContent(divWidget, LISTEN);
           break;
         case REHEARSE:
           clearAndPushKeep(REHEARSE);
-          rehearseHelper.showContent(divWidget, REHEARSE, fromClick);
+          rehearseHelper.showContent(divWidget, REHEARSE);
           break;
         case PERFORM:
           clearAndPushKeep(PERFORM);
-          performHelper.showContent(divWidget, PERFORM, fromClick);
+          performHelper.showContent(divWidget, PERFORM);
           break;
         case RECORD_ENTRIES:
           clearAndFixScroll();
@@ -381,7 +381,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void showPractice() {
     practiceHelper.setMode(mode, prompt);
     practiceHelper.setNavigation(this);
-    practiceHelper.showContent(divWidget, DRILL, true);
+    practiceHelper.showContent(divWidget, DRILL);
     practiceHelper.hideList();
   }
 
@@ -392,7 +392,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void showQuizForReal(boolean fromClick) {
     quizHelper.setMode(mode, prompt);
     quizHelper.setNavigation(this);
-    quizHelper.showContent(divWidget, QUIZ, fromClick);
+    quizHelper.showContent(divWidget, QUIZ);
     quizHelper.hideList();
     if (fromClick) quizHelper.showQuizIntro();
   }

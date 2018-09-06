@@ -50,7 +50,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
    * @param slim
    * @param storageID
    * @param shortPageSize
-   * @see ContentView#showContent(Panel, mitll.langtest.client.custom.INavigation.VIEWS, boolean)
+   * @see ContentView#showContent(Panel, mitll.langtest.client.custom.INavigation.VIEWS)
    */
   ListContainer(ExerciseController controller, int pageSize, boolean slim, String storageID, int shortPageSize, boolean addOwnerToDescrip) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + storageID, "List",

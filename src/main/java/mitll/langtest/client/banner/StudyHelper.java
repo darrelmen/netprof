@@ -33,7 +33,7 @@ class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T>
   }
 
   @Override
-  public void showContent(Panel listContent, INavigation.VIEWS instanceName, boolean fromClick) {
+  public void showContent(Panel listContent, INavigation.VIEWS views) {
     int dialogFromURL = getDialogFromURL();
     controller.getDialogService().getDialog(dialogFromURL, new AsyncCallback<IDialog>() {
       @Override
@@ -56,7 +56,7 @@ class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T>
       header.addStyleName("bottomFiveMargin");
       child.add(header);
     }
-    super.showContent(child, INavigation.VIEWS.STUDY, false);
+    super.showContent(child, INavigation.VIEWS.STUDY);
     hideList();
   }
 
