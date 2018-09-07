@@ -264,9 +264,9 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     RootPanel rootPanel = RootPanel.get();
     rootPanel.add(headerRow = makeHeaderRow());
 
-    //DivWidget contentRow = new DivWidget();
-    //contentRow.getElement().setId("InitialUI_contentRow");
-    //verticalContainer.add(contentRow);
+//    DivWidget contentRow = new DivWidget();
+//    contentRow.getElement().setId("InitialUI_contentRow");
+//    verticalContainer.add(contentRow);
     this.contentRow = verticalContainer;
 
     rootPanel.add(getDownloadDiv());
@@ -679,7 +679,9 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
                                final EventRegistration eventRegistration,
                                final String resetPassToken) {
     //logger.info("showLogin token '" + resetPassToken + "' for password reset");
-    firstRow.add(new ResetPassword(props, eventRegistration, userManager, controller.getStorage()).getResetPassword(resetPassToken));
+    Panel resetPassword = new ResetPassword(props, eventRegistration, userManager, controller.getStorage()).getResetPassword(resetPassToken);
+    resetPassword.setWidth("630px");
+    firstRow.add(resetPassword);
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     hideCogMenu();
