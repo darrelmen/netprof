@@ -161,9 +161,13 @@ public abstract class BaseUserDAO extends DAO {
     if (currentUser == null) {
       LoginResult loginResult = addUserAndGetID(user);
       int userid = loginResult.getId();
+
       User userWhere = userid == -1 ? null : getUserWhere(userid);
-      if (userWhere != null) userWhere.setResetKey(loginResult.getToken());
-      logger.warn(" : addUser : added new user " + userWhere);
+      if (userWhere != null) {
+        userWhere.setResetKey(loginResult.getToken());
+      }
+      logger.info(" : addUser : added new user " + userWhere);
+
       return userWhere;
     } else {
       logger.warn(" : addUser : user exists ");
@@ -198,7 +202,7 @@ public abstract class BaseUserDAO extends DAO {
     String urlToUse = "https://" + getDatabase().getServerProps().getNPServer() + "/" +
         database.getServerProps().getAppName();
 
-    // logger.info("addUserAndGetID user will see url = " + urlToUse);
+    logger.info("addUserAndGetID user will see url = " + urlToUse);
 
     return addUser(user.getAge(),
         user.getRealGender(),
@@ -264,7 +268,7 @@ public abstract class BaseUserDAO extends DAO {
         0, "", "", UNKNOWN, UNKNOWN, userID, false, EMPTY_PERMISSIONS,
         kind,
         "",
-        UNSET_EMAIL,//"admin@dliflc.edu",
+        UNSET_EMAIL,
         "",
         first,
         last,

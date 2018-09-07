@@ -54,10 +54,13 @@ public class User extends MiniUser implements ReportUser {
    * @deprecated
    */
   private String passwordHash;
+
+/*
   @Deprecated
   private String nativeLang;
   @Deprecated
   private String dialect;
+*/
 
   private String resetKey = "";
 
@@ -120,9 +123,6 @@ public class User extends MiniUser implements ReportUser {
     return hasAppPermission;
   }
 
-  public void setResetKey(String resetKey) {
-    this.resetKey = resetKey;
-  }
 
   /**
    * Closely related to {@link mitll.langtest.client.custom.INavigation.VIEWS}
@@ -271,12 +271,12 @@ public class User extends MiniUser implements ReportUser {
     this.enabled = enabled;
     this.admin = isAdmin;
     this.permissions = permissions;
-    this.nativeLang = nativeLang;
-    this.dialect = dialect;
+//    this.nativeLang = nativeLang;
+//    this.dialect = dialect;
     this.device = device;
     this.resetKey = resetPassKey;
     setLastChecked(timestamp);
-//    this.timestamp = timestamp;
+
     this.affiliation = affiliation;
     this.hasAppPermission = hasAppPermission;
   }
@@ -313,6 +313,7 @@ public class User extends MiniUser implements ReportUser {
     return startupInfo;
   }
 
+
   public String getFirst() {
     return first;
   }
@@ -328,6 +329,11 @@ public class User extends MiniUser implements ReportUser {
   public void setLast(String last) {
     this.last = last;
   }
+
+  public String getFullName() {
+    return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? getName() : getUserID();
+  }
+
 
   public Collection<Permission> getPermissions() {
     return permissions;
@@ -380,12 +386,6 @@ public class User extends MiniUser implements ReportUser {
     return enabled;
   }
 
-/*
-  public void setEnabled(boolean enabled) {
-    this.enabled = enabled;
-  }
-*/
-
   public boolean hasResetKey() {
     return resetKey != null && !resetKey.isEmpty();
   }
@@ -393,15 +393,9 @@ public class User extends MiniUser implements ReportUser {
   public String getResetKey() {
     return resetKey;
   }
-
-/*  @Deprecated
-  public String getNativeLang() {
-    return nativeLang;
-  }*/
-/*
-  public String getDialect() {
-    return dialect;
-  }*/
+  public void setResetKey(String resetKey) {
+    this.resetKey = resetKey;
+  }
 
   @Override
   public String getDevice() {
@@ -419,23 +413,6 @@ public class User extends MiniUser implements ReportUser {
   public void setEmail(String email) {
     this.email = email;
   }
-
-/*
-  public void setDialect(String dialect) {
-    this.dialect = dialect;
-  }
-*/
-
-
-  public String getFullName() {
-    return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? getName() : getUserID();
-  }
-
-/*
-  public void setAdmin(boolean admin) {
-    this.admin = admin;
-  }
-*/
 
   /**
    * Two cases-

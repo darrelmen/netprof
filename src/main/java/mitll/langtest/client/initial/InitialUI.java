@@ -92,8 +92,10 @@ import static mitll.langtest.client.user.UserPassLogin.*;
 public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private final Logger logger = Logger.getLogger("InitialUI");
 
-  private static final boolean DO_HEARTBEAT = true;
   private static final boolean DEBUG = false;
+
+
+  private static final boolean DO_HEARTBEAT = true;
 
 
   private static final int TOP_OF_ROOT = 48;//58;
@@ -109,13 +111,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    *
    */
   private static final String PLEASE_ALLOW_RECORDING = "Please allow recording";
-
-  /**
-   * TODOx : WHY???
-   *
-   * @see #getRootContainer
-   */
-//  private static final int MARGIN_TOP = 47;//5;//47;
 
   /**
    * @see #getRootContainer
@@ -215,7 +210,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   @Override
   public void populateRootPanel() {
-    //  logger.info("----> populateRootPanel BEGIN ------>");
+  //  logger.info("----> populateRootPanel BEGIN ------>");
     DivWidget verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
     // header/title line
@@ -234,7 +229,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
         logger.warning("got " + e);
       }
     }
-//    logger.info("----> populateRootPanel END   ------>");
+  //  logger.info("----> populateRootPanel END   ------>");
   }
 
   private void showIOSAd() {
@@ -478,8 +473,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private Heading child;
 
   /**
-   * * TODOx : FIX ME for headstart?
-   *
    * @param verticalContainer
    * @see #populateRootPanel
    * @see #showLogin()
@@ -489,7 +482,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
     /**
      */
-  //  contentRow.add(lifecycleSupport.getFlashRecordPanel());
+    //  contentRow.add(lifecycleSupport.getFlashRecordPanel());
 
     {
       child = new Heading(3, PLEASE_ALLOW_RECORDING);
@@ -504,6 +497,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       waitTimer.schedule(1000);
 
       child.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
+
       contentRow.add(child);
     }
 
@@ -523,7 +517,8 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private void showNavigation() {
     int childCount = contentRow.getElement().getChildCount();
     if (childCount <= 2) {
-      //   logger.info("showNavigation : - add to content root = " + childCount);
+      if (DEBUG) logger.info("showNavigation : - add to content root = " + childCount);
+
       contentRow.remove(child);
       if (navigation == null) makeNavigation(); // TODO : cheesy
       contentRow.add(navigation.getNavigation());
@@ -538,7 +533,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     pushClearHistory();
     clearStartupInfo();
     clearContent();
-//    removeUntilCrumb(levelToRemove);
     banner.setVisibleChoices(false);
     choices.showProject(project);
   }
@@ -571,13 +565,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       logger.warning("chooseProjectAgain no user --- ");
     }
   }
-/*
-
-  private void clearBreadcrumbs() {
-    // logger.info("breadcrumbHelper clear");
-    breadcrumbHelper.clear();
-  }
-*/
 
   private void forgetProjectForUser() {
     controller.getOpenUserService().forgetProject(new AsyncCallback<Void>() {
@@ -723,10 +710,11 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
     banner.setUserName(getGreeting());
     if (userID != lastUser) {
+      if (DEBUG) logger.info("\tgotUser : userID " + userID + " vs last " + lastUser);
       configureUIGivenUser(userID);
       lifecycleSupport.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
-      // logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
+      logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
       if (navigation != null) {
         showNavigation();
         navigation.showPreviousState();
@@ -762,13 +750,14 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    * @see UILifecycle#gotUser
    */
   private void configureUIGivenUser(long userID) {
-    // logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
+    if (DEBUG) logger.info("configureUIGivenUser : user changed - new " + userID + " vs last " + lastUser);
     boolean hasStartupInfo = lifecycleSupport.getProjectStartupInfo() != null;
     if (hasStartupInfo) {
-      // logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
+      if (DEBUG) logger.info("\tconfigureUIGivenUser : " + userID + " get exercises...");
       addBreadcrumbs();
       showInitialState();
     } else {
+      if (DEBUG) logger.info("\tconfigureUIGivenUser : " + userID + " No project startup info yet");
       addProjectChoices(0, null);
     }
     showUserPermissions(userID);
@@ -781,8 +770,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   @Override
   public void showInitialState() {
-    // setMode(mode);
-    //  logger.info("showInitialState ");
+    if (DEBUG) logger.info("showInitialState ");
     showNavigation();
     banner.checkProjectSelected();
     navigation.showInitialState();
@@ -795,11 +783,11 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   private void addProjectChoices(int level, SlimProject parent) {
     clearContent();
-    //logger.info("addProjectChoices level " + level + " parent " + parent);
-    // if (level == 0) {
-    ///  logger.info("\taddProjectChoices level " + level + " parent " + parent);
+
+    if (DEBUG) logger.info("addProjectChoices level " + level + " parent " + parent);
+
     breadcrumbHelper.addCrumbs(level == 0);
-    //}
+
     choices.showProjectChoices(parent, level);
   }
 

@@ -44,10 +44,11 @@ import static mitll.langtest.shared.user.User.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices extends ThumbnailChoices {
-  private static final String EDIT_PROJECT = "Edit project.";
-  private static final String MODES = "2 modes";
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
+
+  private static final String EDIT_PROJECT = "Edit project.";
+  private static final String MODES = "2 modes";
 
   private static final String GVIDAVER = "gvidaver";
 
@@ -244,7 +245,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
   /**
    * @param project
-   * @see InitialUI#getLangBreadcrumb
+   * @see InitialUI#resetLanguageSelection(int, SlimProject)
    */
   public void showProject(SlimProject project) {
     int widgetCount = contentRow.getWidgetCount();
@@ -1022,10 +1023,10 @@ public class ProjectChoices extends ThumbnailChoices {
   private void addProjectChoices(int nest, List<SlimProject> children) {
     // int widgetCount = contentRow.getWidgetCount();
     // logger.info("addProjectChoices " + widgetCount);
-    if (contentRow.getWidgetCount() == 1) {
+    if (contentRow.getWidgetCount() == 0) {
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     } else {
-      if (DEBUG) logger.info("addProjectChoices not adding project choices again...");
+      if (DEBUG ||true) logger.info("addProjectChoices not adding project choices again...");
     }
   }
 

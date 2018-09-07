@@ -35,6 +35,7 @@ package mitll.langtest.server.database.user;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.gwt.user.client.DOM;
 import com.mongodb.MongoTimeoutException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
@@ -115,12 +116,18 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
+  private static final List<String> DOMAINS =
+      Arrays.asList(
+          "dliflc.edu",
+          "mail.mil", //146
+          "us.af.mil"
+      );
 
   /**
    * Should be consistent with DOMINO.
    * Actually it's all lower case.
    */
-  public static final String NETPROF = "netprof";//DLIApplication.NetProf;
+  public static final String NETPROF = "netprof";
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
   private static final String LYDIA_01 = "Lydia01";
   private static final String PO_M = "PoM";
@@ -142,7 +149,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
-  private static final boolean SKIP_SIGNUP_EMAIL = false;
+  //private static final boolean SKIP_SIGNUP_EMAIL = false;
 
   /**
    * If false, don't use email to set the initial user password via email.
@@ -251,7 +258,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       }
       usedDominoResources = false;
       try {
-        new Thread(() -> connectToMongo(database, props),"connectToMongo").start();
+        new Thread(() -> connectToMongo(database, props), "connectToMongo").start();
       } catch (Exception e) {
         logger.error("Couldn't connect to mongo - is it running and accessible? " + e, e);
         throw e;
@@ -447,14 +454,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   private void ensureDefaultUsersLocal() {
-   // logger.info("ensureDefaultUsersLocal --- ");
+    // logger.info("ensureDefaultUsersLocal --- ");
     this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", Kind.QAQC);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", USER, Kind.CONTENT_DEVELOPER);
     this.defaultUser = getOrAdd(DEFAULT_USER1, DEFAULT, USER, Kind.AUDIO_RECORDER);
     this.defaultMale = getOrAdd(DEFAULT_MALE_USER, DEFAULT, "Male", Kind.AUDIO_RECORDER);
     this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, DEFAULT, "Female", Kind.AUDIO_RECORDER);
-  //  logger.info("ensureDefaultUsersLocal defaultUser " + defaultUser);
+    //  logger.info("ensureDefaultUsersLocal defaultUser " + defaultUser);
 
     this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
   }
@@ -508,8 +515,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return delegate.addUser(sendEmail ? user : adminUser, user, url);
   }
 
-
+  /**
+   * @param user
+   * @param url
+   * @param sendEmail
+   * @return
+   * @see #addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
+   */
   private MyUserService.LoginResult addUserToMongoNoEmail(ClientUserDetail user, String url, boolean sendEmail) {
+    logger.info("addUserToMongoNoEmail " + user + " send email " + sendEmail);
     return myUserService.addUserNoEmail(sendEmail ? user : adminUser, user, url);
   }
 
@@ -575,8 +589,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     setCreationTime(updateUser);
 
+    boolean useUsualLogin = shouldUseUsualDominoEmail(email);
+
+    logger.info("usual login " + useUsualLogin + " for " + email);
+
     MyUserService.LoginResult loginResult =
-        addUserViaEmail ?
+        useUsualLogin ?
             loginViaEmail(url, updateUser) :
             addUserToMongoNoEmail(updateUser, url, true);
 
@@ -585,7 +603,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       return new LoginResult(-1, ""); // password error?
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
-      return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(), SKIP_SIGNUP_EMAIL ? loginResult.emailToken : "");
+      return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(),
+          useUsualLogin ? "" : loginResult.emailToken);
     }
   }
 
@@ -596,6 +615,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   private MyUserService.LoginResult loginViaEmail(String url, ClientUserDetail updateUser) {
+    logger.info("loginViaEmail " + updateUser);
+
     SResult<ClientUserDetail> clientUserDetailSResultOrig = addUserToMongo(updateUser, url, true);
     return new MyUserService.LoginResult(clientUserDetailSResultOrig, "");
   }
@@ -611,6 +632,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public Group getGroup() {
     if (primaryGroup == null) {
       List<Group> groups = delegate.getGroupDAO().searchGroups("Netprof");
+      if (groups.isEmpty()) {
+        groups = delegate.getGroupDAO().searchGroups("netprof");
+      }
+      if (groups.isEmpty()) {
+        groups = delegate.getGroupDAO().searchGroups("");
+      }
       primaryGroup = groups.isEmpty() ? null : groups.iterator().next();
 
       if (primaryGroup == null) { //defensive
@@ -1673,12 +1700,25 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param userKey
    * @param newPassword
    * @param url
+   * @param email
    * @return
    */
-  public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url) {
-    return addUserViaEmail ?
+  public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url, String email) {
+    return shouldUseUsualDominoEmail(email) ?
         delegate.changePassword(userId, userKey, newPassword, url) :
         myUserService.changePassword(userId, userKey, newPassword, url);
+  }
+
+  private boolean shouldUseUsualDominoEmail(String email) {
+    boolean b = hasBlessedEmail(email);
+    logger.info("shouldUseUsualDominoEmail '" + email + "' - " + b);
+    return addUserViaEmail && !b;
+  }
+
+  @NotNull
+  private boolean hasBlessedEmail(String email) {
+    String lc = email.toLowerCase();
+    return DOMAINS.stream().anyMatch(lc::endsWith);
   }
 
   /**

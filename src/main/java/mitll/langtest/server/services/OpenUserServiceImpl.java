@@ -197,6 +197,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       }
     } else {
       ResultType resultType = Exists;
+
       if (!userByID.isValid()) {
         userByID.setEmail(user.getEmail());
         userByID.setFirst(user.getFirst());
@@ -208,6 +209,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         db.getUserDAO().update(userByID);
         resultType = Updated;
       }
+
       return new LoginResult(userByID, resultType);
     }
   }
@@ -239,9 +241,10 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   public ChoosePasswordResult changePasswordWithToken(String userId, String userKey, String newPassword) {
     //long startMS = System.currentTimeMillis();
     logger.info("changePasswordWithToken - userId '" + userId + "' key " + userKey + " pass length " + newPassword.length());
-    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL());
-
     User userByID = getUserByID(userId);
+    String email = userByID != null ? userByID.getEmail() : "";
+    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL(), email);
+
     if (result) {
       if (userByID != null) {
         boolean newSession = false;

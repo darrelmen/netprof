@@ -59,6 +59,7 @@ import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 
 public class SignUpForm extends UserDialog implements SignUp {
   public static final String USERNAME1 = "username";
+  public static final String DLIFLC_COM = "dliflc.com";
   private final Logger logger = Logger.getLogger("SignUpForm");
 
   private static final String DLIFLC_EDU = "dliflc.edu";
@@ -109,6 +110,10 @@ public class SignUpForm extends UserDialog implements SignUp {
    *
    */
   private static final String CHOOSE_AFFILIATION = " -- Choose Affiliation -- ";
+
+  /**
+   *
+   */
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
 //  public static final String SORRY_NO_EMAIL_MATCH = "Sorry, this email is not in this user account.";
 
@@ -133,6 +138,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final int USERNAME_WIDTH = 25;
   private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
+  private static final String CURRENT_USERS = "Please update your name and email.";
 
   private FormField signUpUser;
 
@@ -150,11 +156,14 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private Button signUp;
   private final UserPassDialog userPassLogin;
-  private static final String CURRENT_USERS = "Please update your name and email.";
   private boolean markFieldsWithLabels = false;
   private final UserManager userManager;
   private ListBox affBox;
   private final List<Affiliation> affiliations;
+
+  /**
+   *
+   */
   private Heading pleaseCheck;
 
   /**
@@ -473,7 +482,7 @@ public class SignUpForm extends UserDialog implements SignUp {
     String value = box.getValue();
     if (isValidEmail(value)) {
       String[] split = value.split("@");
-      if (value.endsWith("dliflc.com")) {
+      if (value.endsWith(DLIFLC_COM)) {
         didYouMean(split, DLIFLC_EDU);
       } else {
         if (split.length == 2) {
@@ -856,6 +865,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * - user should provide password, otherwise anyone could take over an account
    * - user is new and needs to be added
    *
+   * @see #gotSignUp(String, String)
    * @param result
    */
   private void handleAddUserResponse(LoginResult result, String user) {
@@ -877,6 +887,8 @@ public class SignUpForm extends UserDialog implements SignUp {
         userManager.setPendingUserStorage(theUser.getUserID());
         if (theUser.isEnabled()) {
           eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser));
+
+          logger.info("handleAddUserResponse reset  key " + theUser.getResetKey());
           if (theUser.hasResetKey()) {
             reloadPage(theUser);
           } else {
@@ -894,7 +906,6 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private void reloadPage(User user) {
-    // String changePwPnm = CHANGE_PW_PNM;
     String changePwPnm = PropertyHandler.CPW_TOKEN_2;
     String newURL = trimURL(Window.Location.getHref()) + "?" + changePwPnm + "=" + user.getResetKey() + RESET_PW_HASH;
     userManager.rememberUser(user);

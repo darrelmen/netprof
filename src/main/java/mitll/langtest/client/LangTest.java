@@ -737,9 +737,9 @@ public class LangTest implements
       }
 
       /**
-       * @see FlashRecordPanelHeadless#noMicrophoneFound
+       * @seex FlashRecordPanelHeadless#noMicrophoneFound
        */
-      public void noMicAvailable() {
+ /*     public void noMicAvailable() {
         if (!showingPlugInNotice) {
           showingPlugInNotice = true;
           List<String> messages = Arrays.asList("If you want to record audio, ",
@@ -753,7 +753,7 @@ public class LangTest implements
                 isMicConnected = false;
               }, false, true, 600, 400);
         }
-      }
+      }*/
 
       /**
        * @see
@@ -785,7 +785,6 @@ public class LangTest implements
   }
 
 
-
   public boolean hasModel() {
     return projectStartupInfo != null && getProjectStartupInfo().isHasModel();
   }
@@ -803,7 +802,7 @@ public class LangTest implements
 
   @Override
   public ProjectStartupInfo getProjectStartupInfo() {
-    //  logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
+    //logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
     return projectStartupInfo;
   }
 
@@ -817,9 +816,13 @@ public class LangTest implements
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
-//    if (projectStartupInfo == null) {
-//      logger.info("setProjectStartupInfo project startup null for " + user);
-//    }
+
+    if (projectStartupInfo == null) {
+      logger.info("setProjectStartupInfo project startup null for " + user);
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("no startup?"));
+//      logger.info("logException stack " + exceptionAsString);
+    }
 
     initialUI.showCogMenu();
   }
@@ -867,7 +870,7 @@ public class LangTest implements
    */
   public void gotUser(User user) {
     setProjectStartupInfo(user);
-    //  logger.info("\ngotUser Got startup info " + projectStartupInfo);
+    if (DEBUG) logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
   }
 

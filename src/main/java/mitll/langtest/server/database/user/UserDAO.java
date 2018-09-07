@@ -695,7 +695,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
-  public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url) {
+  public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url, String email) {
     return false;
   }
 

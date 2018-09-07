@@ -32,58 +32,57 @@
   -->
 
 <module rename-to='langtest'>
-  <!-- Inherit the core Web Toolkit stuff.                        -->
-  <inherits name='com.google.gwt.user.User'/>
-<!--  <inherits name="com.google.gwt.i18n.I18N"/>
-  <inherits name="com.google.gwt.i18n.CldrLocales"/>-->
+    <!-- Inherit the core Web Toolkit stuff.                        -->
+    <inherits name='com.google.gwt.user.User'/>
+    <!--  <inherits name="com.google.gwt.i18n.I18N"/>
+      <inherits name="com.google.gwt.i18n.CldrLocales"/>-->
 
-  <inherits name="com.google.gwt.logging.Logging"/>
+    <inherits name="com.google.gwt.logging.Logging"/>
 
-  <!-- Inherit the default GWT style sheet.  You can change       -->
-  <!-- the theme of your GWT application by uncommenting          -->
-  <!-- any one of the following lines.                            -->
-  <inherits name='com.google.gwt.user.theme.clean.Clean'/>
-<!--
-  <inherits name='com.google.gwt.visualization.Visualization'/>
--->
-  <inherits name="com.github.gwtbootstrap.Bootstrap"/>
+    <!-- Inherit the default GWT style sheet.  You can change       -->
+    <!-- the theme of your GWT application by uncommenting          -->
+    <!-- any one of the following lines.                            -->
+    <inherits name='com.google.gwt.user.theme.clean.Clean'/>
+    <!--
+      <inherits name='com.google.gwt.visualization.Visualization'/>
+    -->
+    <inherits name="com.github.gwtbootstrap.Bootstrap"/>
 
-<!--
-  <inherits name="org.gwtbootstrap3.GwtBootstrap3"/>
--->
+    <!--
+      <inherits name="org.gwtbootstrap3.GwtBootstrap3"/>
+    -->
 
-<!--
-  <inherits name="org.gwtbootstrap3.extras.respond.Respond"/>
--->
+    <!--
+      <inherits name="org.gwtbootstrap3.extras.respond.Respond"/>
+    -->
 
-  <inherits name="org.moxieapps.gwt.highcharts.Highcharts"/>
+    <inherits name="org.moxieapps.gwt.highcharts.Highcharts"/>
 
-<!--
-  <inherits name="gwt.material.design.GwtMaterialBasicWithJQuery" />
-  <inherits name="gwt.material.design.addins.GwtMaterialAddins" />
-  -->
+    <!--
+      <inherits name="gwt.material.design.GwtMaterialBasicWithJQuery" />
+      <inherits name="gwt.material.design.addins.GwtMaterialAddins" />
+      -->
 
-  <!--  <inherits name="com.google.common.collect.Collect"/>
-    <inherits name="com.google.common.cache.Cache"/>-->
+    <!--  <inherits name="com.google.common.collect.Collect"/>
+      <inherits name="com.google.common.cache.Cache"/>-->
 
-  <set-property name="bootstrap.responsiveDesign" value="true"/>
+    <set-property name="bootstrap.responsiveDesign" value="true"/>
 
-<!--    <set-property name="gwt.logging.logLevel" value="FINE" />
-    <set-property name="gwt.logging.systemHandler" value="ENABLED" />
-    <set-property name="gwt.logging.consoleHandler" value="ENABLED" />
-    <set-property name="gwt.logging.developmentModeHandler" value="ENABLED" />
-    <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />-->
+    <!--    <set-property name="gwt.logging.logLevel" value="FINE" />
+        <set-property name="gwt.logging.systemHandler" value="ENABLED" />
+        <set-property name="gwt.logging.consoleHandler" value="ENABLED" />
+        <set-property name="gwt.logging.developmentModeHandler" value="ENABLED" />
+        <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />-->
 
     <set-property name="gwt.logging.enabled" value="TRUE"/>
-  <set-property name="gwt.logging.logLevel" value="ALL"/>
-<!--
-  <set-property name="media.ondevicechange.enabled" value="true"/>
--->
+    <set-property name="gwt.logging.logLevel" value="ALL"/>
+    <!--
+      <set-property name="media.ondevicechange.enabled" value="true"/>
+    -->
 
 
-
-    <set-configuration-property name="devModeRedirectEnabled" value="true" />
-    <set-property name="compiler.stackMode" value="emulated" />
+    <set-configuration-property name="devModeRedirectEnabled" value="true"/>
+    <set-property name="compiler.stackMode" value="emulated"/>
     <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
     <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>
 
@@ -95,23 +94,22 @@
       <inherits name="com.google.gwt.activity.Activity" />
     -->
 
-  <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
-  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
-  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+    <!-- <inherits name='com.google.gwt.user.theme.standard.Standard'/> -->
+    <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+    <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
-  <!-- Other module inherits                                      -->
+    <!-- Other module inherits                                      -->
 
-  <!-- Specify the app entry point class.                         -->
-  <entry-point class='mitll.langtest.client.LangTest'/>
+    <!-- Specify the app entry point class.                         -->
+    <entry-point class='mitll.langtest.client.LangTest'/>
 
-  <!-- Specify the paths for translatable code                    -->
-  <source path='client'/>
-  <source path='shared'/>
+    <!-- Specify the paths for translatable code                    -->
+    <source path='client'/>
+    <source path='shared'/>
+    <public path='public'/>
 
-  <public path='public'/>
+    <!-- These 3 scripts are necessary so that Flash Recording can work -->
 
-  <!-- These 3 scripts are necessary so that Flash Recording can work -->
-
-  <!-- speed up compilation during development -->
-  <collapse-all-properties />
+    <!-- speed up compilation during development -->
+    <collapse-all-properties/>
 </module>

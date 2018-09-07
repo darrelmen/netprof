@@ -202,10 +202,11 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @param userKey
    * @param newPassword
    * @param url
+   * @param email
    * @return
    * @see
    */
-  boolean changePasswordForToken(String userId, String userKey, String newPassword, String url);
+  boolean changePasswordForToken(String userId, String userKey, String newPassword, String url, String email);
 
   SResult<ClientUserDetail> updateUser(DBUser dbUser);
 

@@ -27,11 +27,7 @@ public class BrowserRecording {
     return webAudio;
   }
 
-  public static boolean usingWebRTC() {
-    return webAudio.isWebAudioMicAvailable();
-  }
-
-  public static MicPermission getMicPermission() {
+  static MicPermission getMicPermission() {
     return micPermission;
   }
 
@@ -68,7 +64,7 @@ public class BrowserRecording {
   public static boolean gotPermission() {
     boolean b = usingWebRTC();
     if (!b) {
-      logger.info("\n\n\ngotPermission permission FALSE usingWebRTC " + usingWebRTC());
+      logger.info("gotPermission permission FALSE usingWebRTC " + usingWebRTC());
     }
     return b;
   }
@@ -109,5 +105,7 @@ public class BrowserRecording {
     webAudio.stopRecording(abort, wavCallback);
   }
 
-
+  private static boolean usingWebRTC() {
+    return webAudio.isWebAudioMicAvailable();
+  }
 }

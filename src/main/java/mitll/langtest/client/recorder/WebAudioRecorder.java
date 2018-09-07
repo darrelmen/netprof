@@ -69,6 +69,7 @@ public class WebAudioRecorder {
    *
    * @seex FlashRecordPanelHeadless#tryWebAudio
    */
+/*
   private void tryWebAudio() {
     if (!tried) {
       tried = true;
@@ -91,6 +92,7 @@ public class WebAudioRecorder {
     } else {
     }
   }
+*/
 
   /**
    * Call initWebAudio in webaudiorecorder.js.
@@ -124,7 +126,7 @@ public class WebAudioRecorder {
    * @param exid
    * @param reqid
    * @param audioType
-   * @see FlashRecordPanelHeadless#startStream(String, String, String, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
+   * @see BrowserRecording#startStream(String, String, String, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
    */
   public native void startStream(String url, String exid, String reqid, String isreference, String audioType) /*-{
       $wnd.serviceStartStream(url, exid, reqid, isreference, audioType);
@@ -208,7 +210,6 @@ public class WebAudioRecorder {
 
   private static void noWebRTC() {
     webAudioMicAvailable = false;
-//    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
     getMicPermission().noWebRTCAvailable();
   }
 
@@ -226,9 +227,6 @@ public class WebAudioRecorder {
     }
     console("getBase64   bytes = '" + encoded.length() + "'");
 
-/*    if (getAllZero()) {
-      logger.info("Seems like the mic is not plugged in?");
-    }*/
     if (WebAudioRecorder.wavCallback == null) {
       console("getBase64 no callback?");
     } else {
@@ -243,7 +241,7 @@ public class WebAudioRecorder {
   private static WavCallback wavCallback = null;
 
   /**
-   * @see FlashRecordPanelHeadless#stopWebRTCRecording
+   * @see BrowserRecording#stopWebRTCRecording
    * @param abort
    * @param wavCallback
    */
@@ -280,7 +278,7 @@ public class WebAudioRecorder {
    * @param wavStreamCallback
    * @see PostAudioRecordButton#startRecording
    * @see ExerciseController#startStream(int, int, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
-   * @see FlashRecordPanelHeadless#startStream(String, String, String, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
+   * @see BrowserRecording#startStream(String, String, String, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
    */
   static void setStreamCallback(WavStreamCallback wavStreamCallback) {
     WebAudioRecorder.wavStreamCallback = wavStreamCallback;
