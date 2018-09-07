@@ -70,9 +70,6 @@ import static mitll.langtest.shared.project.ProjectProperty.WEBSERVICE_HOST_PORT
 public class ServerProperties {
   private static final Logger logger = LogManager.getLogger(ServerProperties.class);
 
-  private static final String APP_NAME = "appName";
-
-
   /**
    * ON THIS BRANCH!
    */
@@ -108,6 +105,7 @@ public class ServerProperties {
    */
   public static final String H2_HOST = "h2";
 
+  private static final String APP_NAME = "appName";
   private static final String APP_TITLE = "appTitle";
 
   private static final String FALSE = "false";
@@ -143,6 +141,10 @@ public class ServerProperties {
   private static final String IMAGE = "image";
   private static final String NETPROF = "netprof";
   private static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
+  public static final String ADD_USER_VIA_EMAIL = "addUserViaEmail";
+  public static final String SEND_HEARTBEAT = "sendHeartbeat";
+  public static final String HEARTBEAT_PERIOD = "heartbeatPeriod";
+  public static final String HEARTBEAT_REC1 = "heartbeatRec";
 
   private String dbConfig = POSTGRES_DATA2_DIALOG;
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
@@ -940,24 +942,22 @@ public class ServerProperties {
   }
 
   public boolean addUserViaEmail() {
-    return getDefaultFalse("addUserViaEmail");
+    return getDefaultTrue(ADD_USER_VIA_EMAIL);
   }
 
   /**
    * @return
    */
   public boolean sendHeartbeat() {
-    return getDefaultFalse("sendHeartbeat");
+    return getDefaultFalse(SEND_HEARTBEAT);
   }
 
   public List<String> getHeartbeatRec() {
-    String heartbeatRec = props.getProperty("heartbeatRec", HEARTBEAT_REC);
+    String heartbeatRec = props.getProperty(HEARTBEAT_REC1, HEARTBEAT_REC);
     return Arrays.asList(heartbeatRec.split(","));
   }
 
   public int getHeartbeatPeriod() {
-    return getIntPropertyDef("heartbeatPeriod", DEFAULT_PERIOD);
+    return getIntPropertyDef(HEARTBEAT_PERIOD, DEFAULT_PERIOD);
   }
-
-
 }

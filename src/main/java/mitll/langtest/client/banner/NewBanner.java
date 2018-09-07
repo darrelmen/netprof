@@ -345,7 +345,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   public void show(VIEWS views) {
-    gotClickOnChoice(views.toString(), viewToLink.get(views), false);
+    NavLink learn = viewToLink.get(views);
+    if (learn == null) {
+      logger.warning("no view for " + views + " yet...");
+    } else {
+      gotClickOnChoice(views.toString(), learn, false);
+    }
   }
 
   /**
