@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.initial;
 
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.StartupInfo;
@@ -41,7 +40,7 @@ import mitll.langtest.shared.user.User;
 import java.util.Collection;
 
 /**
- * MUST BE PUBLIC - for AMASInitialUI to access.
+ * MUST BE PUBLIC -
  */
 public interface LifecycleSupport extends EventRegistration {
   void recordingModeSelect();
@@ -55,8 +54,6 @@ public interface LifecycleSupport extends EventRegistration {
   StartupInfo getStartupInfo();
 
   Collection<User.Permission> getPermissions();
-
-  Widget getFlashRecordPanel();
 
   void onFailure(Throwable caught, long then);
 }

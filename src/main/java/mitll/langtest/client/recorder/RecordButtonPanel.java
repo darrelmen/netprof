@@ -40,7 +40,6 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.initial.PopupHelper;
-import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
@@ -216,7 +215,6 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     postedAudio();
     controller.getAudioService().writeAudioFile(base64EncodedWavFile,
         audioContext,
-        controller.usingFlashRecorder(),
         getDeviceType(),
         getDevice(),
         decoderOptions, new AsyncCallback<AudioAnswer>() {

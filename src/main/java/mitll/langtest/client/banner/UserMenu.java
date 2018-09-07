@@ -19,7 +19,6 @@ import mitll.langtest.client.initial.LifecycleSupport;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.instrumentation.EventTable;
-import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.result.ActiveUsersManager;
 import mitll.langtest.client.result.ReportListManager;
 import mitll.langtest.client.result.ResultManager;
@@ -39,6 +38,9 @@ import java.util.logging.Logger;
  */
 public class UserMenu {
   private static final String ARE_YOU_AN_INSTRUCTOR = "Are you an instructor?";
+  public static final String BROWSER_RECORDING = "Browser recording";
+  public static final String RECORDING_TYPE = "Recording type";
+  public static final String DOMINO_URL = "domino.url";
   private final Logger logger = Logger.getLogger("UserMenu");
 
   private static final String REQUEST_INSTRUCTOR_STATUS = "Request Instructor Status";
@@ -349,12 +351,11 @@ public class UserMenu {
   private List<String> getPropKeys(Map<String, String> props, int server) {
     List<String> strings = new ArrayList<>();
     try {
-      String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? "Browser recording" : "Flash recording";
       if (server == 1) {
-        props.put("Recording type", recordingInfo);
+        props.put(RECORDING_TYPE, BROWSER_RECORDING);
       }
 
-      props.remove("domino.url");
+      props.remove(DOMINO_URL);
       Optional<String> max = props.keySet().stream().max(Comparator.comparingInt(String::length));
       if (max.isPresent()) {
         int maxl = max.get().length();

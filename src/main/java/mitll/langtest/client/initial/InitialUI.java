@@ -348,7 +348,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     contentRow.clear();
 //    contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
 
-    contentRow.add(lifecycleSupport.getFlashRecordPanel()); // put back record panel
+//    contentRow.add(lifecycleSupport.getFlashRecordPanel()); // put back record panel
   }
 
   /**
@@ -488,9 +488,8 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     RootPanel.get().add(verticalContainer);
 
     /**
-     * {@link #makeFlashContainer}
      */
-    contentRow.add(lifecycleSupport.getFlashRecordPanel());
+  //  contentRow.add(lifecycleSupport.getFlashRecordPanel());
 
     {
       child = new Heading(3, PLEASE_ALLOW_RECORDING);
@@ -847,7 +846,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
   /**
    * @param message
-   * @see LangTest#makeFlashContainer
+   * @see LangTest#initBrowserRecording
    */
   @Override
   public void setSplash(String message) {

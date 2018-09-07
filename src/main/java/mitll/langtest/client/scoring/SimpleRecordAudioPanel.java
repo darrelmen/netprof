@@ -98,7 +98,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
       col.add(historyHoriz);
     }
     makeWaitCursor();
-    recordFeedback = makePlayAudioPanel().getRecordFeedback(makeWaitCursor().getWaitCursor(), controller.shouldRecord());
+    recordFeedback = makePlayAudioPanel().getRecordFeedback(makeWaitCursor().getWaitCursor());
     recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
 
     getScoreFeedback().add(recordFeedback);

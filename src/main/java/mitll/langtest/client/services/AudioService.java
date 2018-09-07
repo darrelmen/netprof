@@ -55,7 +55,6 @@ public interface AudioService extends RemoteService {
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
    * @param base64EncodedString encoded audio bytes
    * @param audioContext
-   * @param recordedWithFlash
    * @param deviceType
    * @param device
 
@@ -63,7 +62,6 @@ public interface AudioService extends RemoteService {
    */
   AudioAnswer writeAudioFile(String base64EncodedString,
                              AudioContext audioContext,
-                             boolean recordedWithFlash,
                              String deviceType,
                              String device,
                              DecoderOptions decoderOptions) throws DominoSessionException;

@@ -574,7 +574,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
           if (!result.successful) {
             logger.warning("getImageURLForAudio : got error for request for type " + type + " and " + path + " and exid " + id);
-            waveform.setUrl(LangTest.LANGTEST_IMAGES + "redx.png");
+            waveform.setUrl(LangTest.RED_X_URL.asString());
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
             showResult(result, imageAndCheck);

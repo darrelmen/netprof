@@ -47,7 +47,7 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
     scoreFeedback.getElement().setId("scoreFeedback_" + exercise.getID());
-    recordFeedback = makePlayAudioPanel().getRecordFeedback(null, controller.shouldRecord());
+    recordFeedback = makePlayAudioPanel().getRecordFeedback(null);
     Style style = recordFeedback.getElement().getStyle();
     style.setMarginTop(7, Style.Unit.PX);
     style.setProperty("minWidth", CONTEXT_INDENT + "px");

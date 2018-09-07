@@ -474,7 +474,7 @@ public class AudioFileHelper implements AlignDecode {
       PretestScore pretestScore) {
     AudioCheck.ValidityAndDur validity = audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
 
-    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, true, "", "");
+    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, "", "");
 
     return options.shouldDoDecoding() ?
         getAudioAnswerDecoding(exercise,

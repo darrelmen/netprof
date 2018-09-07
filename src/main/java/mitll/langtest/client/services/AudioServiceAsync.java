@@ -45,7 +45,6 @@ public interface AudioServiceAsync {
   /**
    * @param base64EncodedString
    * @param audioContext
-   * @param recordedWithFlash
    * @param deviceType
    * @param device
    * @param decoderOptions
@@ -56,7 +55,6 @@ public interface AudioServiceAsync {
   void writeAudioFile(String base64EncodedString,
                       AudioContext audioContext,
 
-                      boolean recordedWithFlash,
                       String deviceType,
                       String device,
                       DecoderOptions decoderOptions,

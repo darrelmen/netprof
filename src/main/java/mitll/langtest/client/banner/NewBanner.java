@@ -355,7 +355,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private void gotClickOnChoice(String instanceName, NavLink learn, boolean fromClick) {
     showSection(instanceName, fromClick);
-    showActive(learn);
+    showActive(learn);  // how can this be null?
   }
 
   private void showSection(String instance1, boolean fromClick) {

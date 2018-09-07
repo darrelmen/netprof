@@ -30,6 +30,8 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.client.LangTest.RED_X_URL;
+
 public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
@@ -268,9 +270,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     logger.info("getSpeakingRate " + getExID() + " student " + studentSpeechDur + " ref " + refSpeechDur + " ratio " + v);
     return v;
   }
-
-  private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
-  private static final SafeUri RED_X_URL = UriUtils.fromSafeConstant(RED_X);
 
   /**
    * @see RehearseViewHelper#useInvalidResult

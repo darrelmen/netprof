@@ -61,7 +61,7 @@ public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
   private final ClickableTranscript clickableTranscript;
   private int resultID = -1;
   private final String transliteration;
-  private MiniScoreListener miniScoreListener;
+//  private MiniScoreListener miniScoreListener;
 //  private static final boolean debug = false;
 
   /**
@@ -154,8 +154,6 @@ public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
                                      int height,
                                      int reqid);
 
-  private static final String IMAGES_REDX_PNG = LangTest.LANGTEST_IMAGES + "redx.png";
-
   /**
    * Record the image URLs in the Image widgets and enable the check boxes
    *
@@ -177,7 +175,7 @@ public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
       if (words != null) {
         showImageAndCheck(words, wordTranscript);
       } else {
-        wordTranscript.getImage().setUrl(IMAGES_REDX_PNG);
+        wordTranscript.getImage().setUrl(LangTest.RED_X_URL.asString());
       }
     }
     {
@@ -185,12 +183,12 @@ public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
       if (phones != null) {
         showImageAndCheck(phones, phoneTranscript);
       } else {
-        phoneTranscript.getImage().setUrl(IMAGES_REDX_PNG);
+        phoneTranscript.getImage().setUrl(LangTest.RED_X_URL.asString());
       }
     }
-    if (!scoredBefore && miniScoreListener != null) {
+ /*   if (!scoredBefore && miniScoreListener != null) {
       miniScoreListener.gotScore(result, path);
-    }
+    }*/
     clickableTranscript.setScore(result);
   }
 
@@ -203,16 +201,20 @@ public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
    * @param scores
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
+/*
   void addScores(Collection<CorrectAndScore> scores) {
     for (CorrectAndScore score : scores) {
       miniScoreListener.addScore(score);
     }
   }
+*/
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
+/*
   public void showChart() {
     miniScoreListener.showChart(controller.getHost());
   }
+*/
 }

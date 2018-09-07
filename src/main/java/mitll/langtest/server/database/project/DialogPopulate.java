@@ -326,7 +326,7 @@ public class DialogPopulate {
     int resultID = db.getAnswerDAO()
         .addAnswer(new AnswerInfo(
             new AudioContext(0, defaultUser, projid, language, exid, 0, REGULAR),
-            new AnswerInfo.RecordingInfo(pathOnDisk, pathOnDisk, "", "", false, k.getForeignLanguage(), ""), valid, ""), now);
+            new AnswerInfo.RecordingInfo(pathOnDisk, pathOnDisk, "", "", k.getForeignLanguage(), ""), valid, ""), now);
     logger.info("Remember path " + pathOnDisk);
     File absoluteFile = pathHelper.getAbsoluteAudioFile(pathOnDisk);
     logger.info("Remember absoluteFile " + absoluteFile.getAbsolutePath());

@@ -19,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.LangTest.RED_X_URL;
+
 /**
  * Created by go22670 on 4/5/17.
  *
@@ -30,24 +32,16 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final SafeUri firstRed = UriUtils.fromSafeConstant(FIRST_RED);
 
-/*
- private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
-  private static final SafeUri secondRed = UriUtils.fromSafeConstant(SECOND_RED);
-  */
-
-  private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
-  private static final SafeUri RED_X_URL = UriUtils.fromSafeConstant(RED_X);
-
   /**
    * TODO make better relationship with ASRRecordAudioPanel
    */
   private Image recordImage1;
-  /*
-    private Image recordImage2;
-  */
+
+  /**
+   *
+   */
   private Image redX;
   private final DownloadContainer downloadContainer;
-  private boolean canRecord;
 
   /**
    * @param postAudioRecordButton1
@@ -96,7 +90,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
 
   void showFirstRecord() {
-    if (canRecord) {
+    if (controller.shouldRecord()) {
       logger.info("showFirstRecording " + exid + " red recording signal now visible!");
       recordImage1.setVisible(true);
     } else {
@@ -109,7 +103,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @see NoFeedbackRecordAudioPanel#stopRecording()
    */
   void hideRecord() {
-    if (canRecord) {
+    if (controller.shouldRecord()) {
       // logger.info("hideRecord " + exid);
       recordImage1.setVisible(false);
       //  recordImage2.setVisible(false);
@@ -141,11 +135,10 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
   /**
    * @param waitCursor null OK
-   * @param canRecord
    * @return
    * @see SimpleRecordAudioPanel#addWidgets
    */
-  DivWidget getRecordFeedback(Widget waitCursor, boolean canRecord) {
+  DivWidget getRecordFeedback(Widget waitCursor) {
     DivWidget recordFeedback = new DivWidget();
     recordFeedback.addStyleName("inlineFlex");
     recordFeedback.addStyleName("floatLeft");
@@ -157,8 +150,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
     recordImage1.addStyleName("hvr-pulse");
 
-    this.canRecord = canRecord;
-    if (canRecord) {
+    if (controller.shouldRecord()) {
       recordFeedback.add(recordImage1);
       if (waitCursor != null) {
         recordFeedback.add(waitCursor);
@@ -190,14 +182,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
                        String host) {
     downloadContainer.setDownloadHref(audioPathToUse, id, user, host);
   }
-
-  /**
-   * @return
-   * @see SimpleRecordAudioPanel#scoreAudio
-   */
-/*  Panel getDownloadContainer() {
-    return downloadContainer.getDownloadContainer();
-  }*/
 
   DownloadContainer getRealDownloadContainer() {
     return downloadContainer;

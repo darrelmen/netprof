@@ -42,6 +42,8 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -235,10 +237,17 @@ public class LangTest implements
 
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
-  public static final String VERSION_INFO = "2.0.7";
+/*
+  public static final String VERSION_INFO = "3.0.3";
+*/
 
   private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
+
+
+  private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
+  public static final SafeUri RED_X_URL = UriUtils.fromSafeConstant(RED_X);
+
   /**
    * @see
    */
@@ -250,7 +259,6 @@ public class LangTest implements
   private static final boolean DEBUG = false;
 
   private UserManager userManager;
-  private FlashRecordPanelHeadless flashRecordPanel;
 
   // services
   private final AudioServiceAsync defaultAudioService = GWT.create(AudioService.class);
@@ -633,23 +641,8 @@ public class LangTest implements
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 
-    makeFlashContainer();
+    initBrowserRecording();
 
- /*   if (props.isAMAS()) {
-      final LangTest outer = this;
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          logger.info("run async to get amas ui");
-          initialUI = new AMASInitialUI(outer, userManager);
-          populateRootPanel();
-        }
-      });
-    } else {
-    */
     this.initialUI = new InitialUI(this, userManager);
     messageHelper = new MessageHelper(initialUI, this);
     annotationHelper = new AnnotationHelper(this, messageHelper);
@@ -731,15 +724,15 @@ public class LangTest implements
    * @see #onModuleLoad2()
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
-  private void makeFlashContainer() {
-    // logger.info("makeFlashContainer - called");
+  private void initBrowserRecording() {
+    // logger.info("initBrowserRecording - called");
     MicPermission micPermission = new MicPermission() {
       /**
        * @see mitll.langtest.client.recorder.WebAudioRecorder
        */
       public void gotPermission() {
-//        logger.info("makeFlashContainer - got permission!");
-        hideFlash();
+//        logger.info("initBrowserRecording - got permission!");
+
         checkLogin();
       }
 
@@ -754,7 +747,7 @@ public class LangTest implements
           new ModalInfoDialog("Plug in microphone", messages, Collections.emptyList(),
               null,
               hiddenEvent -> {
-                hideFlash();
+
                 checkLogin();
                 initialUI.setSplash(RECORDING_DISABLED);
                 isMicConnected = false;
@@ -766,8 +759,8 @@ public class LangTest implements
        * @see
        */
       public void noRecordingMethodAvailable() {
-        logger.info("\tmakeFlashContainer - no way to record");
-        hideFlash();
+        logger.info("\tnoRecordingMethodAvailable - no way to record");
+
         new ModalInfoDialog(CAN_T_RECORD_AUDIO, RECORDING_AUDIO_IS_NOT_SUPPORTED, hiddenEvent -> checkLogin());
 
         initialUI.setSplash(RECORDING_DISABLED);
@@ -776,7 +769,7 @@ public class LangTest implements
 
       @Override
       public void noWebRTCAvailable() {
-        flashRecordPanel.initFlash();
+        noRecordingMethodAvailable();
       }
 
       /**
@@ -786,20 +779,12 @@ public class LangTest implements
       public void silenceDetected() {
         if (wavEndCallback != null) wavEndCallback.silenceDetected();
       }
-
-  /*    @Override
-      public void gotStreamResponse() {
-        if (wavEndCallback != null) wavEndCallback.gotStreamResponse();
-
-      }*/
     };
-    flashRecordPanel = new FlashRecordPanelHeadless(micPermission);
+
+    BrowserRecording.init(micPermission);
   }
 
-  private void hideFlash() {
-    flashRecordPanel.hide();
-    flashRecordPanel.hide2(); // must be a separate call!
-  }
+
 
   public boolean hasModel() {
     return projectStartupInfo != null && getProjectStartupInfo().isHasModel();
@@ -876,7 +861,7 @@ public class LangTest implements
    * Only get the exercises if the user has accepted mic access.
    *
    * @param user
-   * @see #makeFlashContainer
+   * @see #initBrowserRecording
    * @see UserManager#gotNewUser(User)
    * @see UserManager#storeUser
    */
@@ -890,12 +875,12 @@ public class LangTest implements
    * @see #recordingModeSelect()
    */
   private void checkInitFlash() {
-    if (flashRecordPanel.gotPermission()) {
+    if (BrowserRecording.gotPermission()) {
       if (DEBUG) logger.info("checkInitFlash : initFlash - has permission");
       checkLogin();
     } else {
       if (DEBUG) logger.info("checkInitFlash : initFlash - no permission yet");
-      FlashRecordPanelHeadless.getWebAudio().initWebaudio();
+      BrowserRecording.getWebAudio().initWebaudio();
       if (!WebAudioRecorder.isWebRTCAvailable()) {
         checkLogin();
       }
@@ -977,7 +962,7 @@ public class LangTest implements
    * Called after the user clicks "Yes" in flash mic permission dialog.
    *
    * @see #checkInitFlash()
-   * @see #makeFlashContainer()
+   * @see #initBrowserRecording()
    */
   private void checkLogin() {
     //console("checkLogin");
@@ -1167,11 +1152,6 @@ public class LangTest implements
   }
   // recording methods...
 
-  @Override
-  public Widget getFlashRecordPanel() {
-    return flashRecordPanel;
-  }
-
   /**
    * Recording interface
    *
@@ -1179,7 +1159,7 @@ public class LangTest implements
    * @see PostAudioRecordButton#startRecording()
    */
   public void startRecording() {
-    flashRecordPanel.recordOnClick();
+    BrowserRecording.recordOnClick();
   }
 
   /**
@@ -1193,7 +1173,7 @@ public class LangTest implements
   public void startStream(int exid, int reqid, boolean isReference, AudioType audioType, WavStreamCallback wavStreamCallback) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
-    flashRecordPanel.startStream(serviceEntryPoint, "" + exid, "" + reqid, isReference, audioType, wavStreamCallback);
+    BrowserRecording.startStream(serviceEntryPoint, "" + exid, "" + reqid, isReference, audioType, wavStreamCallback);
   }
 
   /**
@@ -1206,23 +1186,11 @@ public class LangTest implements
   public void stopRecording(WavCallback wavCallback, boolean useDelay, boolean abort) {
     logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis, abort = " + abort);
     if (useDelay) {
-      flashRecordPanel.stopRecording(wavCallback, abort);
+      BrowserRecording.stopRecording(wavCallback, abort);
     } else {
-      flashRecordPanel.stopWebRTCRecording(abort, wavCallback);
+      BrowserRecording.stopWebRTCRecording(abort, wavCallback);
     }
   }
-
-  /**
-   * @param exid
-   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
-   */
-/*
-  public void stopRecordingAndPost(int exid) {
-    AudioServiceAsync audioService = getAudioService();
-    String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
-    flashRecordPanel.stopRecordingAndPost(serviceEntryPoint, "" + exid);
-  }
-*/
 
   /**
    * Recording interface
@@ -1271,12 +1239,7 @@ public class LangTest implements
 
   @Override
   public boolean isRecordingEnabled() {
-    return flashRecordPanel.gotPermission();
-  }
-
-  @Override
-  public boolean usingFlashRecorder() {
-    return flashRecordPanel.usingFlash();
+    return BrowserRecording.gotPermission();
   }
 
   /**

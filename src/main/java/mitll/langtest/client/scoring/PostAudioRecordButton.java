@@ -316,7 +316,6 @@ public abstract class PostAudioRecordButton extends RecordButton
         base64EncodedWavFile,
 
         audioContext,
-        controller.usingFlashRecorder(),
         "browser",
         getDevice(),
         decoderOptions, new AsyncCallback<AudioAnswer>() {

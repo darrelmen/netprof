@@ -172,7 +172,7 @@ public class WebAudioRecorder {
    */
   public static void silenceDetected() {
     // console("silenceDetected -- now!");
-    FlashRecordPanelHeadless.micPermission.silenceDetected();
+    getMicPermission().silenceDetected();
   }
 
  /* public static void gotFrame() {
@@ -185,7 +185,7 @@ public class WebAudioRecorder {
 
     console("webAudioMicAvailable -- connected!");
     webAudioMicAvailable = true;
-    FlashRecordPanelHeadless.micPermission.gotPermission();
+    getMicPermission().gotPermission();
   }
 
   public static void webAudioMicNotAvailable() {
@@ -209,7 +209,11 @@ public class WebAudioRecorder {
   private static void noWebRTC() {
     webAudioMicAvailable = false;
 //    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
-    FlashRecordPanelHeadless.micPermission.noWebRTCAvailable();
+    getMicPermission().noWebRTCAvailable();
+  }
+
+  private static MicPermission getMicPermission() {
+    return BrowserRecording.getMicPermission();
   }
 
   /**

@@ -58,7 +58,7 @@ public class AnswerInfo {
   private final String deviceType;
   private final String device;
   private String scoreJson = "";
-  private final boolean withFlash;
+
   private int processDur;
   private final int roundTripDur;
   private final String validity;
@@ -93,7 +93,6 @@ public class AnswerInfo {
     final String audioFile;
     final String deviceType;
     final String device;
-    final boolean withFlash;
     private String transcript = "";
     private String normtranscript = "";
 
@@ -102,7 +101,6 @@ public class AnswerInfo {
       this.audioFile = audioFile;
       this.deviceType = other.deviceType;
       this.device = other.device;
-      this.withFlash = other.withFlash;
       this.transcript = other.transcript;
       this.normtranscript = other.normtranscript;
     }
@@ -111,14 +109,12 @@ public class AnswerInfo {
                          String audioFile,
                          String deviceType,
                          String device,
-                         boolean withFlash,
                          String transcript,
                          String normtranscript) {
       this.answer = answer;
       this.audioFile = audioFile;
       this.deviceType = deviceType;
       this.device = device;
-      this.withFlash = withFlash;
       this.transcript = transcript;
       this.normtranscript = normtranscript;
     }
@@ -127,7 +123,7 @@ public class AnswerInfo {
       return transcript;
     }
 
-    public String getNormtranscript() {
+    String getNormtranscript() {
       return normtranscript;
     }
 
@@ -135,7 +131,6 @@ public class AnswerInfo {
       return "RecordingInfo " +
           "\n\tanswer    " + answer +
           "\n\taudioFile " + audioFile + " device " + deviceType + "/" + device +
-          " with flash    " + withFlash +
           "\n\ttranscript " + getTranscript() +
           "\n\tnorm       " + getNormtranscript();
     }
@@ -180,7 +175,7 @@ public class AnswerInfo {
         recordingInfo.deviceType,
         recordingInfo.device,
 
-        recordingInfo.withFlash, validity, model);
+        validity, model);
     if (transcript.isEmpty()) {
       transcript = recordingInfo.getTranscript();
     }
@@ -196,7 +191,6 @@ public class AnswerInfo {
                      String audioFile,
                      String deviceType,
                      String device,
-                     boolean withFlash,
 
                      AudioCheck.ValidityAndDur validity,
                      String model) {
@@ -211,16 +205,14 @@ public class AnswerInfo {
     this.durationInMillis = validity.durationInMillis;
     this.deviceType = deviceType;
     this.device = device;
-    this.withFlash = withFlash;
+
     this.validity = validity.getValidity().name();
-    this.roundTripDur = 0;//roundTripDur;
+    this.roundTripDur = 0;
     this.snr = validity.getDynamicRange();
     this.model = model;
   }
 
-  public AnswerInfo(AnswerInfo other,
-                    ScoreInfo scoreInfo,
-                    String model) {
+  public AnswerInfo(AnswerInfo other, ScoreInfo scoreInfo, String model) {
     this(other, scoreInfo.correct, scoreInfo.pronScore, scoreInfo.scoreJson, scoreInfo.processDur);
     this.model = model;
   }
@@ -241,7 +233,6 @@ public class AnswerInfo {
         other.getDeviceType(),
         other.getDevice(),
 
-        other.isWithFlash(),
         other.getDurationInMillis(),
         other.isValid(),
         other.getValidity(),
@@ -256,7 +247,7 @@ public class AnswerInfo {
 
   private AnswerInfo(int userid, int projid, int id, int questionID,
                      AudioType audioType, String answer, String audioFile,
-                     String deviceType, String device, boolean withFlash,
+                     String deviceType, String device,
 
                      long durationInMillis,
                      boolean valid,
@@ -279,7 +270,7 @@ public class AnswerInfo {
     this.deviceType = deviceType;
     this.device = device;
     this.scoreJson = scoreJson;
-    this.withFlash = withFlash;
+
     this.validity = validity;
     this.processDur = processDur;
     this.roundTripDur = 0;//roundTripDur;
@@ -338,10 +329,6 @@ public class AnswerInfo {
 
   public String getScoreJson() {
     return scoreJson;
-  }
-
-  public boolean isWithFlash() {
-    return withFlash;
   }
 
   public int getProcessDur() {
