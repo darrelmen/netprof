@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+import static mitll.langtest.server.database.phone.SlickPhoneDAO.UNDERSCORE;
+
 /**
  * Created by go22670 on 3/29/16.
  */
@@ -75,7 +77,8 @@ public class MakePhoneReport {
       logger.info("getPhoneReport phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
     }
 
-    Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = getPhoneToWordAndScore(phoneToBigramToWS, sorted);
+    /*Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =*/
+    getPhoneToWordAndScore(phoneToBigramToWS, sorted);
 
     if (DEBUG) {
       logger.info("getPhoneReport phone->words " + phoneToBigramToWS.size() + " : " + phoneToBigramToWS.keySet());
@@ -99,7 +102,14 @@ public class MakePhoneReport {
     phoneToBigram.forEach((k,v)->{
       v.sort((o1, o2) -> Float.compare(o1.getScore(),o2.getScore()));
       logger.info("getPhoneReport " + k + " has " + v);
+      if (v.get(0).getBigram().startsWith(UNDERSCORE)) {
+        if (v.size()>1) {
+          v.remove(0);
+        }
+      }
     });
+
+
     // bigramToCount.forEach((k, v) -> phoneToBigram.put(k));
     return new PhoneReport(percentOverall,
         phoneToBigram,
@@ -111,11 +121,11 @@ public class MakePhoneReport {
   }
 
   @NotNull
-  private Map<String, Map<String, List<WordAndScore>>> getPhoneToWordAndScore(//Map<String, List<WordAndScore>> phoneToWordAndScore,
+  private void getPhoneToWordAndScore(//Map<String, List<WordAndScore>> phoneToWordAndScore,
 
                                                                               Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
                                                                               List<String> sorted) {
-    Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWSSorted = new LinkedHashMap<>();
+    //Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWSSorted = new LinkedHashMap<>();
 
     for (String phone : sorted) {
       Map<String, List<WordAndScore>> bigramToExamples = phoneToBigramToWS.get(phone);
@@ -131,7 +141,7 @@ public class MakePhoneReport {
 //      }
 //      phoneToBigramToWSSorted.put(phone, value);
     }
-    return phoneToBigramToWSSorted;
+   // return phoneToBigramToWSSorted;
   }
 
   /**

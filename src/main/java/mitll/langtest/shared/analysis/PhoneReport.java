@@ -65,14 +65,14 @@ public class PhoneReport implements Serializable {
    */
   public PhoneReport(int overallPercent,
                      //Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted,
-                     Map<String,List<Bigram>> phoneToBigrams,
+                     Map<String, List<Bigram>> phoneToBigrams,
                      Map<String, PhoneStats> phoneToAvgSorted,
                      Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted) {
     this.overallPercent = overallPercent;
-   this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
+    this.phoneToBigrams = phoneToBigrams;
     this.phoneToAvgSorted = phoneToAvgSorted;
-    this.phoneToBigrams=phoneToBigrams;
-   // this.bigramToScore=bigramToScore;
+    this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
+
     valid = true;
   }
 
@@ -102,12 +102,6 @@ public class PhoneReport implements Serializable {
     return valid;
   }
 
-  public String toString() {
-    Map<String, PhoneStats> phoneToAvgSorted = getPhoneToAvgSorted();
-    return "valid " + valid + " : " +
-        (phoneToAvgSorted == null ? "null phoneToAvgSorted?" : phoneToAvgSorted.keySet());
-  }
-
   public int getReqid() {
     return reqid;
   }
@@ -117,8 +111,13 @@ public class PhoneReport implements Serializable {
     return this;
   }
 
-
   public Map<String, List<Bigram>> getPhoneToBigrams() {
     return phoneToBigrams;
+  }
+
+  public String toString() {
+    Map<String, PhoneStats> phoneToAvgSorted = getPhoneToAvgSorted();
+    return "valid " + valid + " : " +
+        (phoneToAvgSorted == null ? "null phoneToAvgSorted?" : phoneToAvgSorted.keySet());
   }
 }

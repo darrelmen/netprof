@@ -50,9 +50,11 @@ import org.apache.logging.log4j.Logger;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
+  public static final String UNDERSCORE = "_";
 
   private final PhoneDAOWrapper dao;
 
@@ -268,7 +270,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     // first by phone,
     // then by bigram, then examples per bigram
     Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS = new HashMap<>();
-    String prevPhone = "_";
+    String prevPhone = UNDERSCORE;
 
     // float prevScore = 0F;
 
@@ -316,9 +318,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           if (DEBUG_PHONE)
             logger.info("getPhoneReport prevResult " + prevResult + " resultID " + resultID + " prevWord " + prevWord + " wseq " + wseq + " phone " + report.phone());
 
-          prevPhone = "_";
-          //      prevScore = 0F;
-
+          prevPhone = UNDERSCORE;
           prevResult = resultID;
           prevWord = wseq;
         }
@@ -334,7 +334,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       {
         float bigramScore = phoneScore;//firstPhoneInWord ? phoneScore : (prevScore + phoneScore) / 2F;
-        //   prevScore = phoneScore;
         bigramToCount.put(bigram, bigramToCount.getOrDefault(bigram, 0F) + 1F);
         bigramToScore.put(bigram, bigramToScore.getOrDefault(bigram, 0F) + bigramScore);
       }
@@ -362,6 +361,16 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         List<WordAndScore> wordAndScores1 = bigramToWords.computeIfAbsent(bigram, k -> new ArrayList<>());
         wordAndScores1.add(wordAndScore);
       }
+
+      phoneToBigramToWS.forEach((k, v) -> {
+        if (v.size() > 1) {
+        //  logger.info("for " + phone + " and " + v.keySet());
+          List<String> collect = v.keySet().stream().filter(bg -> bg.startsWith(UNDERSCORE)).collect(Collectors.toList());
+          if (!collect.isEmpty()) {
+            v.remove(collect.get(0));
+          }
+        }
+      });
 
       if (DEBUG) {
         logger.info("getPhoneReport adding " +

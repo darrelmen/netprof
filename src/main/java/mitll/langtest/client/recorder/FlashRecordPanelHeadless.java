@@ -163,8 +163,8 @@ public class FlashRecordPanelHeadless extends AbsolutePanel {
   }
 
   // web audio calls
-  public boolean tryWebAudio() {
-    return webAudio.tryWebAudio();
+  public void tryWebAudio() {
+     webAudio.initWebaudio();
   }
 
   /**

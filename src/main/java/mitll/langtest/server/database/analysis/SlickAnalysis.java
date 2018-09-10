@@ -297,7 +297,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       } else {
         String foreignLanguage = exerciseByID.getForeignLanguage();
         scoreToFL.put(bestScore, foreignLanguage);
-        logger.info("populateScoreToFL " + bestScore + " = " + foreignLanguage);
+        if (DEBUG) logger.info("populateScoreToFL " + bestScore + " = " + foreignLanguage);
       }
     });
   }
@@ -352,7 +352,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         parseResultJson.slimReadFromJSON(bestScore.getJson());
     StringBuilder builder = new StringBuilder();
     List<SlimSegment> slimSegments = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
-    slimSegments.forEach(slimSegment -> builder.append(slimSegment.getEvent()).append(" "));
+
+    if (slimSegments == null) {
+      logger.warn("no word segments for ex " + bestScore.getExId() + " and result " + bestScore.getResultID());
+    } else {
+      slimSegments.forEach(slimSegment -> builder.append(slimSegment.getEvent()).append(" "));
+    }
+
     return builder.toString().trim();
   }
 
@@ -390,9 +396,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
     UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
 
-
     long then = System.currentTimeMillis();
-
 
     if (DEBUG || DEBUG_PHONE) {
       logger.info("getPhoneReportFor for" +

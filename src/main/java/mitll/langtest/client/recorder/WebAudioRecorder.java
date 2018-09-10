@@ -62,7 +62,7 @@ public class WebAudioRecorder {
    *
    * The user can easily ignore the dialog by clicking away.
    */
-  boolean tryWebAudio() {
+/*  boolean tryWebAudio() {
     if (!tried) {
       tried = true;
       //attempts--;
@@ -86,7 +86,7 @@ public class WebAudioRecorder {
     else {
       return false;
     }
-  }
+  }*/
 
   /**
    * Call initWebAudio in webaudiorecorder.js.
@@ -94,7 +94,7 @@ public class WebAudioRecorder {
    * or one of webAudioMicNotAvailable or webAudioPermissionDenied if the browser doesn't support recording or
    * there's no mic, or the user doesn't permit it.
    */
-  private native void initWebaudio() /*-{
+  public native void initWebaudio() /*-{
       $wnd.initWebAudio();
   }-*/;
 
