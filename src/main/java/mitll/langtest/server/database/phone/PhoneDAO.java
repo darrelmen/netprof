@@ -276,10 +276,12 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       }
 
       try {
-        WordAndScore wordAndScore = getAndRememberWordAndScore(null, phoneToScores, phoneToWordAndScore,
-            Integer.parseInt(exid), audioAnswer, scoreJson, resultTime,
-            "", wseq, word,
-            (int)rid, phone, seq, phoneScore, database.getLanguage());
+        WordAndScore wordAndScore = null;
+
+//            getAndRememberWordAndScore(null, phoneToScores, phoneToWordAndScore,
+//            Integer.parseInt(exid), audioAnswer, scoreJson, resultTime,
+//            "", wseq, word,
+//            (int)rid, phone, seq, phoneScore, database.getLanguage());
 
         if (addTranscript) {
           addTranscript(stringToMap, scoreJson, wordAndScore, "unknown");
@@ -294,7 +296,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     }
     finish(connection, statement, rs, sql);
 
-    return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample, false);
+    return null;//new MakePhoneReport().getPhoneReport(phoneToScores, null, bigramToCount, bigramToScore, totalScore, totalItems);
   }
 
   /**

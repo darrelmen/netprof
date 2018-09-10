@@ -337,7 +337,6 @@ public class ScoreServlet extends DatabaseServlet {
     collect.forEach(header -> logger.info("\trequest header " + header + " = " + request.getHeader(header)));
   }
 
-
   private String getQuery(HttpServletRequest request) throws UnsupportedEncodingException {
     String queryString = request.getQueryString();
     if (queryString == null) {

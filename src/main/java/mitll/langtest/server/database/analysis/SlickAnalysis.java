@@ -77,7 +77,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private Collator collator;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PHONE = false;
+  private static final boolean DEBUG_PHONE = true;
 
   /**
    * @param database
@@ -110,6 +110,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param listid
    * @param req
    * @return
+   * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser
    */
   @Override
@@ -129,6 +130,23 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long now = System.currentTimeMillis();
     logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid + " and list " + listid);// + analysisReport);
     return analysisReport;
+  }
+
+  /**
+   * @param userid
+   * @param listid
+   * @param from
+   * @param to
+   * @return
+   * @see AnalysisServiceImpl#getPhoneReport(int, int, long, long, int)
+   */
+  public PhoneReport getPhoneReportForPeriod(int userid, int listid, long from, long to) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
+
+    Collection<UserInfo> userInfos = bestForUser.values();
+    UserInfo firstUser = bestForUser.isEmpty() ? null : userInfos.iterator().next();
+
+    return getPhoneReportForPeriod(userid, firstUser, project, from, to);
   }
 
   /**
@@ -338,12 +356,15 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return builder.toString().trim();
   }
 
-  public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to) {
+  public List<Bigram> getBigramPhoneReportFor(int userid,
+                                              int listid,
+                                              String phone,
+                                              long from,
+                                              long to) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
     UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
 
     long then = System.currentTimeMillis();
-
 
     if (DEBUG || DEBUG_PHONE) {
       logger.info("getPhoneReportFor for" +
@@ -357,31 +378,77 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
 
     PhoneReport phoneReportForPhone = getPhoneReportForPhone(userid, next, project, phone, from, to);
+    return phoneReportForPhone.getPhoneToBigrams().get(phone);
+  }
 
-    List<WordAndScore> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);
+  public List<WordAndScore> getPhoneReportFor(int userid,
+                                              int listid,
+                                              String phone,
+                                              String bigram,
+                                              long from,
+                                              long to) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
+    UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
 
-    if (wordAndScores == null) {
-      logger.warn("getPhoneReportFor huh? no scores for " + phone + " in " + phoneReportForPhone.getPhoneToWordAndScoreSorted().keySet());
-      return new ArrayList<>();
-    } else {
 
-      if (DEBUG || DEBUG_PHONE)
-        logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
+    long then = System.currentTimeMillis();
 
-      SortedSet<WordAndScore> examples = new TreeSet<>(wordAndScores);
-      // examples.addAll(wordAndScores);
-      List<WordAndScore> filteredWords = new ArrayList<>(examples);
 
-      if (filteredWords.size() > MAX_TO_SEND) {
-        filteredWords = new ArrayList<>(filteredWords.subList(0, Math.min(filteredWords.size(), MAX_TO_SEND)));
-      }
-
-      long now = System.currentTimeMillis();
-      logger.info("getPhoneReportFor (took " + (now - then) + ") " +
-          "to get " + wordAndScores.size() + " " + filteredWords.size() +
-          "  report for " + userid + " and list " + listid);// + analysisReport);
-      return filteredWords;
+    if (DEBUG || DEBUG_PHONE) {
+      logger.info("getPhoneReportFor for" +
+          "\n\tuser   " + next +
+          "\n\tuserid " + userid +
+          "\n\tlistid " + listid +
+          "\n\tphone  " + phone +
+          "\n\tbigram " + bigram +
+          "\n\tfrom   " + from + " " + new Date(from) +
+          "\n\tto     " + to + " " + new Date(to)
+      );
     }
+
+    PhoneReport phoneReportForPhone = getPhoneReportForPhone(userid, next, project, phone, from, to);
+    Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =
+        phoneReportForPhone.getPhoneToWordAndScoreSorted();
+    Map<String, List<WordAndScore>> bigramToExample = phoneToWordAndScoreSorted.get(phone);
+
+    if (bigramToExample == null) {
+      logger.warn("getPhoneReportFor no bigrams for phone '" + phone + "'");
+      return Collections.emptyList();
+    } else {
+      List<WordAndScore> wordAndScores = bigramToExample.get(bigram);
+      if (wordAndScores == null || wordAndScores.isEmpty()) {
+        logger.warn("getPhoneReportFor no examples for" +
+            "\n\tphone  " + phone +
+            "\n\tbigram " + bigram +
+            "\n\tknown  " + bigramToExample.keySet()
+            + "\n\twords " + wordAndScores
+        );
+      }
+      return wordAndScores;//phoneReportForPhone;
+    }
+    // Map<String, List<WordAndScore>> wordAndScores = phoneReportForPhone.getPhoneToWordAndScoreSorted().get(phone);
+
+//    if (wordAndScores == null) {
+//      logger.warn("getPhoneReportFor huh? no scores for " + phone + " in " + phoneReportForPhone.getPhoneToWordAndScoreSorted().keySet());
+//      return new ArrayList<>();
+//    } else {
+//
+//      if (DEBUG || DEBUG_PHONE) logger.info("getPhoneReportFor for " + phone + " got word num = " + wordAndScores.size());
+//
+//      SortedSet<WordAndScore> examples = new TreeSet<>(wordAndScores);
+//      // examples.addAll(wordAndScores);
+//      List<WordAndScore> filteredWords = new ArrayList<>(examples);
+//
+//      if (filteredWords.size() > MAX_TO_SEND) {
+//        filteredWords = new ArrayList<>(filteredWords.subList(0, Math.min(filteredWords.size(), MAX_TO_SEND)));
+//      }
+//
+//      long now = System.currentTimeMillis();
+//      logger.info("getPhoneReportFor (took " + (now - then) + ") " +
+//          "to get " + wordAndScores.size() + " " + filteredWords.size() +
+//          "  report for " + userid + " and list " + listid);// + analysisReport);
+//      return filteredWords;
+//    }
   }
 
   /**
@@ -390,7 +457,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param listid
    * @return
    * @see IAnalysis#getPerformanceReportForUser(int, int, int, int)
-   * @see #getPhoneReportFor(int, int, String, long, long)
+   * @see IAnalysis#getPhoneReportFor(int, int, String, String, long, long)
    */
   private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings, int listid) {
     long then = System.currentTimeMillis();

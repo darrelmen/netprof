@@ -863,7 +863,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     if (onlyOne && matches.size() == 1 &&
         getList().get(0).getID() == matches.iterator().next().getID()) {
-      logger.info("skip...");
+    //  logger.info("skip...");
     } else {
       populateTable(matches);
     }

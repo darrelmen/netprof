@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.analysis.IAnalysis;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -45,8 +47,10 @@ import java.util.Map;
  */
 public class PhoneReport implements Serializable {
   private int overallPercent;
-  private Map<String, List<WordAndScore>> phoneToWordAndScoreSorted = new HashMap<>();
+  private Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = new HashMap<>();
   private Map<String, PhoneStats> phoneToAvgSorted = new HashMap<>();
+  private int reqid;
+  private Map<String, List<Bigram>> phoneToBigrams;
 
   private boolean valid;
 
@@ -56,15 +60,19 @@ public class PhoneReport implements Serializable {
 
   /**
    * @param overallPercent
-   * @param phoneToWordAndScoreSorted
+   * @paramx phoneToWordAndScoreSorted
    * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport
    */
   public PhoneReport(int overallPercent,
-                     Map<String, List<WordAndScore>> phoneToWordAndScoreSorted,
-                     Map<String, PhoneStats> phoneToAvgSorted) {
+                     //Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted,
+                     Map<String,List<Bigram>> phoneToBigrams,
+                     Map<String, PhoneStats> phoneToAvgSorted,
+                     Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted) {
     this.overallPercent = overallPercent;
-    this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
+   this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
     this.phoneToAvgSorted = phoneToAvgSorted;
+    this.phoneToBigrams=phoneToBigrams;
+   // this.bigramToScore=bigramToScore;
     valid = true;
   }
 
@@ -72,8 +80,9 @@ public class PhoneReport implements Serializable {
    * Map of each phone to words it appears in.
    *
    * @return
+   * @see IAnalysis#getPhoneReportFor(int, int, String, String, long, long)
    */
-  public Map<String, List<WordAndScore>> getPhoneToWordAndScoreSorted() {
+  public Map<String, Map<String, List<WordAndScore>>> getPhoneToWordAndScoreSorted() {
     return phoneToWordAndScoreSorted;
   }
 
@@ -97,5 +106,19 @@ public class PhoneReport implements Serializable {
     Map<String, PhoneStats> phoneToAvgSorted = getPhoneToAvgSorted();
     return "valid " + valid + " : " +
         (phoneToAvgSorted == null ? "null phoneToAvgSorted?" : phoneToAvgSorted.keySet());
+  }
+
+  public int getReqid() {
+    return reqid;
+  }
+
+  public PhoneReport setReqid(int reqid) {
+    this.reqid = reqid;
+    return this;
+  }
+
+
+  public Map<String, List<Bigram>> getPhoneToBigrams() {
+    return phoneToBigrams;
   }
 }

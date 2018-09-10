@@ -34,7 +34,6 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -44,8 +43,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
-public class BasePhoneDAO extends DAO {
-  private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
+
+class BasePhoneDAO extends DAO {
+  //private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
+
 
   static final String PHONE = "phone";
   static final String SEQ = "seq";
@@ -55,7 +56,10 @@ public class BasePhoneDAO extends DAO {
 
   private Map<String, Long> sessionToLong = new HashMap<>();
 
-  BasePhoneDAO(Database database) {    super(database);  }
+  BasePhoneDAO(Database database) {
+    super(database);
+  }
+
 
   /**
    * @param jsonToTranscript
@@ -78,7 +82,7 @@ public class BasePhoneDAO extends DAO {
    * look it up in a better way
    *
    * @param phoneToScores
-   * @param phoneToWordAndScore
+   * @param phoneToBigramToWS
    * @param exid
    * @param audioAnswer
    * @param scoreJson
@@ -96,7 +100,8 @@ public class BasePhoneDAO extends DAO {
    */
   WordAndScore getAndRememberWordAndScore(String refAudioForExercise,
                                           Map<String, List<PhoneAndScore>> phoneToScores,
-                                          Map<String, List<WordAndScore>> phoneToWordAndScore,
+                                          Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
+                                      //    Map<String, List<WordAndScore>> phoneToWordAndScore,
                                           int exid,
                                           String audioAnswer,
                                           String scoreJson,
@@ -106,12 +111,14 @@ public class BasePhoneDAO extends DAO {
                                           String word,
                                           int rid,
                                           String phone,
+                                          String bigram,
                                           int seq,
                                           float phoneScore,
                                           String language) {
     PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime, getSessionTime(sessionToLong, device));
 
-    List<WordAndScore> wordAndScores = phoneToWordAndScore.computeIfAbsent(phone, k -> new ArrayList<>());
+    Map<String, List<WordAndScore>> bigramToWords = phoneToBigramToWS.computeIfAbsent(phone, k -> new HashMap<>());
+    List<WordAndScore> wordAndScores1 = bigramToWords.computeIfAbsent(bigram, k -> new ArrayList<>());
 
     String webPageAudioRef = database.getWebPageAudioRef(language, audioAnswer);
 
@@ -133,7 +140,7 @@ public class BasePhoneDAO extends DAO {
         scoreJson,
         resultTime);
 
-    wordAndScores.add(wordAndScore);
+    wordAndScores1.add(wordAndScore);
     phoneAndScore.setWordAndScore(wordAndScore);
 
     return wordAndScore;

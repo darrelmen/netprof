@@ -34,7 +34,6 @@ package mitll.langtest.shared.analysis;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

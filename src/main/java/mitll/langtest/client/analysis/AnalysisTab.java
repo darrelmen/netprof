@@ -50,6 +50,7 @@ import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.AnalysisReport;
+import mitll.langtest.shared.analysis.Bigram;
 import mitll.langtest.shared.analysis.PhoneReport;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,7 +68,7 @@ public class AnalysisTab extends DivWidget {
   private static final String WORD_EXAMPLES = "WordExamples";
 
   private static final String REPORT_FOR_USER = "getting performance report for user";
-  public static final int TIME_WINDOW_WIDTH = 92;
+  private static final int TIME_WINDOW_WIDTH = 92;
   private static final int MIN_HEIGHT = 325;
 
   /**
@@ -94,8 +95,8 @@ public class AnalysisTab extends DivWidget {
 
   static final long TENMIN_DUR = 10 * MINUTE;
   static final long DAY_DUR = 24 * HOUR;
-  private static final long WEEK_DUR = 7 * DAY_DUR;
-  private static final long MONTH_DUR = 4 * WEEK_DUR;
+   static final long WEEK_DUR = 7 * DAY_DUR;
+   static final long MONTH_DUR = 4 * WEEK_DUR;
   static final long YEAR_DUR = 52 * WEEK_DUR;
   private static final long YEARS = 20 * YEAR_DUR;
 
@@ -238,7 +239,7 @@ public class AnalysisTab extends DivWidget {
       return userid;
     }
 
-    public int getMinRecordings() {
+    int getMinRecordings() {
       return minRecordings;
     }
 
@@ -275,11 +276,9 @@ public class AnalysisTab extends DivWidget {
           "\n\tfor    " + userid + " " + userChosenID +
           "\n\twords  " + result.getNumScores() +
           "\n\tphones " + phoneReport.getPhoneToAvgSorted().size() +
-          "\n\tphones word and score " + phoneReport.getPhoneToWordAndScoreSorted().values().size()
+          "\n\tphones word and score " + phoneReport.getPhoneToBigrams().values().size()
       );
     }
-    PhoneReport fphoneReport = phoneReport;
-
     long then2 = now;
     Scheduler.get().scheduleDeferred(() -> analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView));
 
@@ -289,7 +288,7 @@ public class AnalysisTab extends DivWidget {
     }
     long then3 = now;
 
-    showWordScores(result.getNumScores(), controller, analysisPlot, bottom, fphoneReport, reqInfo);
+    showWordScores(result.getNumScores(), controller, analysisPlot, bottom, phoneReport, reqInfo);
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
@@ -370,7 +369,7 @@ public class AnalysisTab extends DivWidget {
         monthChoice,
         sessionChoice,
 
-        scoreHeader);
+        scoreHeader, timeScale);
     return stepper;
   }
 
@@ -436,7 +435,6 @@ public class AnalysisTab extends DivWidget {
     buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH));
     buttonGroup.add(allChoice = getAllChoice());
 
-
     return buttonGroup;
   }
 
@@ -446,9 +444,7 @@ public class AnalysisTab extends DivWidget {
     timeScale.addStyleName("leftTenMargin");
     timeScale.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     timeScale.addChangeHandler(event -> {
-      int selectedIndex = timeScale.getSelectedIndex();
-      TIME_HORIZON horizon = TIME_HORIZON.values()[selectedIndex];
-      analysisPlot.setTimeHorizon(horizon);
+      gotTimeScaleChange();
     });
 
     for (TIME_HORIZON horizon : TIME_HORIZON.values()) {
@@ -457,17 +453,19 @@ public class AnalysisTab extends DivWidget {
 
     Scheduler.get().scheduleDeferred(() -> {
       if (isPolyglot) {
-      //  logger.info("is poly...");
         timeScale.setSelectedValue(TIME_HORIZON.values()[0].getDisplay());
       } else {
         timeScale.setSelectedIndex(TIME_HORIZON.values().length - 1);
-//        timeScale.setSelectedValue(TIME_HORIZON.values()[TIME_HORIZON.values().length - 1].getDisplay());
       }
-     // int selectedIndex = timeScale.getSelectedIndex();
-     // logger.info("selectedIndex ..." + selectedIndex);
     });
 
     return timeScale;
+  }
+
+  private void gotTimeScaleChange() {
+    int selectedIndex = timeScale.getSelectedIndex();
+    TIME_HORIZON horizon = TIME_HORIZON.values()[selectedIndex];
+    analysisPlot.setTimeHorizon(horizon);
   }
 
   private Button getButtonChoice(TIME_HORIZON week) {
@@ -498,7 +496,6 @@ public class AnalysisTab extends DivWidget {
    * @param analysisPlot
    * @param lowerHalf
    * @param phoneReport
-   * @paramx showTab
    * @see #useReport
    */
   private void showWordScores(
@@ -516,9 +513,6 @@ public class AnalysisTab extends DivWidget {
           numScores,
           controller, analysisPlot,
           wordsTitle);
-
-      //  tableWithPager.setWidth(WORD_WIDTH + "px");
-
       {
         DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", wordsTitle);
         wordsContainer.addStyleName("cardBorderShadow");
@@ -549,8 +543,6 @@ public class AnalysisTab extends DivWidget {
    * @param analysisPlot
    * @param wordsTitle
    * @return
-   * @paramx showTab
-   * @paramx wordScores
    */
   private Panel getWordContainer(
       ReqInfo reqInfo,
@@ -594,20 +586,25 @@ public class AnalysisTab extends DivWidget {
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot) {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, exampleHeader);
-    //final PhonePlot phonePlot = new PhonePlot();
-    final PhoneContainer phoneContainer = new PhoneContainer(controller, exampleContainer, analysisServiceAsync, listid, userid);
+    final BigramContainer bigramContainer =
+        new BigramContainer(controller, exampleContainer, analysisServiceAsync, listid, userid);
+    final PhoneContainer phoneContainer =
+        new PhoneContainer(controller, bigramContainer, analysisServiceAsync, listid, userid);
 
     analysisPlot.addListener(phoneContainer);
 
-    showPhoneReport(phoneReport, phoneContainer, lowerHalf, exampleContainer);
+    showPhoneReport(phoneReport, phoneContainer, bigramContainer,lowerHalf, exampleContainer);
   }
 
   private void showPhoneReport(PhoneReport phoneReport,
-                               PhoneContainer phoneContainer, Panel lowerHalf,
+                               PhoneContainer phoneContainer,
+                               BigramContainer bigramContainer,
+                               Panel lowerHalf,
                                PhoneExampleContainer exampleContainer) {
     // #1 - phones
-    // Panel phones = phoneContainer.getTableWithPager(phoneReport);
     lowerHalf.add(getSoundsContainer(phoneContainer.getTableWithPager(phoneReport)));
+
+    lowerHalf.add(getBigramContainer(bigramContainer.getTableWithPager(phoneReport)));
 
     // #2 - word examples
     lowerHalf.add(getWordExamples(exampleContainer.getTableWithPager()));
@@ -622,9 +619,18 @@ public class AnalysisTab extends DivWidget {
   }
 
   private DivWidget getSoundsContainer(Panel phones) {
+    return getContainer(phones, "SoundsContainer", SOUNDS);
+  }
+
+  private DivWidget getBigramContainer(Panel phones) {
+    return getContainer(phones, "BigramContainer", "Context");
+  }
+
+  @NotNull
+  private DivWidget getContainer(Panel phones, String bigramContainer, String context) {
     DivWidget sounds = new DivWidget();
-    sounds.getElement().setId("SoundsContainer");
-    sounds.add(getHeading(SOUNDS));
+    sounds.getElement().setId(bigramContainer);
+    sounds.add(getHeading(context));
     sounds.add(phones);
     return sounds;
   }

@@ -54,8 +54,6 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.client.table.PagerTable.WHITE_SPACE_NOWRAP;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -90,10 +88,11 @@ public class WordTable {
   /**
    * @param netPronImageTypeToEndTime
    * @param filter
+   * @param first
    * @return
    * @see PhoneExampleContainer#getItemColumn
    */
-  public String toHTML(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, String filter) {
+  public String toHTML(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime, String filter, String bigram, boolean first) {
     Map<TranscriptSegment, List<TranscriptSegment>> wordToPhones = getWordToPhones(netPronImageTypeToEndTime);
     StringBuilder builder = new StringBuilder();
 
@@ -108,12 +107,14 @@ public class WordTable {
     {
       builder.append("<tr>");
 
-      for (Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair : wordToPhones.entrySet()) {
+      //logger.info("show " + filter + " and " + bigram);
+
+      for (List<TranscriptSegment> phones : wordToPhones.values()) {
         builder.append("<td>");
         builder.append(TABLE);
         builder.append(THEAD);
 
-        addPhones(filter, builder, pair);
+        addPhones(filter, bigram, builder, phones, first);
 
         builder.append("</thead>");
         builder.append(TABLEEND);
@@ -141,23 +142,88 @@ public class WordTable {
   /**
    * Only color one phone.
    *
+   * if prev phone matches and next phone matches
+   *
    * @param filter
+   * @param contextPhone
    * @param builder
-   * @param pair
+   * @param first
    */
-  private void addPhones(String filter, StringBuilder builder, Map.Entry<TranscriptSegment, List<TranscriptSegment>> pair) {
-    for (TranscriptSegment phone : pair.getValue()) {
+  private void addPhones(String filter, String contextPhone, StringBuilder builder, List<TranscriptSegment> phones, boolean first) {
+    //TranscriptSegment prev = null;
+
+    Set<TranscriptSegment> toColor = new HashSet<>();
+    Set<TranscriptSegment> toMark = new HashSet<>();
+
+    boolean isUnder = contextPhone.equalsIgnoreCase("_");
+
+    for (int i = 0; i < phones.size(); i++) {
+      TranscriptSegment prev = phones.get(i);
+      TranscriptSegment next = i + 1 < phones.size() ? phones.get(i + 1) : new TranscriptSegment();
+
+      String prevCandidate = prev.getDisplayEvent();
+      String nextCandidate = next.getDisplayEvent();
+
+      logger.info("addPhones at " + i + " prev " + prevCandidate + " next " + nextCandidate);
+
+      if (!first && (prevCandidate.equalsIgnoreCase(contextPhone)) &&
+          nextCandidate.equalsIgnoreCase(filter)
+      ) {
+        toMark.add(prev);
+        toColor.add(next);
+      } else {
+
+        if (isUnder) {
+          // first phone
+          if (i == 0 && prevCandidate.equalsIgnoreCase(filter)) {
+            toColor.add(prev);
+          }
+        } else if (
+            (first && prevCandidate.equalsIgnoreCase(filter)) &&
+                (nextCandidate.equalsIgnoreCase(contextPhone))
+        ) {
+          toColor.add(prev);
+          toMark.add(next);
+        }
+      }
+    }
+
+    logger.info("toMark  " + toMark);
+    logger.info("toColor " + toColor);
+
+//    Iterator<TranscriptSegment> iterator = phones.iterator();
+//    while (iterator.hasNext()) {
+//      TranscriptSegment prev = iterator.next();
+//
+//      if (iterator.hasNext()) {
+//        TranscriptSegment next = iterator.next();
+//      }
+//
+//      if (prev.getDisplayEvent().equalsIgnoreCase(filter)) toColor.add(prev);
+//
+//    }
+//    //List<TranscriptSegment> value = pair.getValue();
+    for (TranscriptSegment phone : phones) {
       String event = phone.getDisplayEvent();
+      boolean match = toColor.contains(phone);
+      boolean contextMatch = toMark.contains(phone);
+
       if (!event.equals(SIL)) {
-        String color = event.equals(filter) ? " " + BACKGROUND_COLOR + ":" + getColor(phone) : "";
-        builder
-            .append("<th style='" + TEXT_ALIGN_CENTER
-            )
-            .append(color)
-            .append("'>");
+        {
+          String color = match ?
+              (" " + BACKGROUND_COLOR + ":" + getColor(phone)) :
+              contextMatch ? (" " + BACKGROUND_COLOR + ":" + "#C0C0C0") :
+                  "";
+          builder
+              .append("<th style='" + TEXT_ALIGN_CENTER)
+              .append(color)
+              .append("'>");
+        }
         builder.append(event);
         builder.append("</th>");
       }
+
+      // prev = phone;
     }
   }
 
