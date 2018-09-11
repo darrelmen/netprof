@@ -64,7 +64,6 @@ public class PhoneReport implements Serializable {
    * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport
    */
   public PhoneReport(int overallPercent,
-                     //Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted,
                      Map<String, List<Bigram>> phoneToBigrams,
                      Map<String, PhoneStats> phoneToAvgSorted,
                      Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted) {
@@ -80,7 +79,7 @@ public class PhoneReport implements Serializable {
    * Map of each phone to words it appears in.
    *
    * @return
-   * @see IAnalysis#getPhoneReportFor(int, int, String, String, long, long)
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getPhoneReportFor(int, int, String, String, long, long)
    */
   public Map<String, Map<String, List<WordAndScore>>> getPhoneToWordAndScoreSorted() {
     return phoneToWordAndScoreSorted;

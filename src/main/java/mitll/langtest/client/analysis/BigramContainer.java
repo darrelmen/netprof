@@ -165,8 +165,14 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
     this.to = to;
     Map<String, List<Bigram>> phoneToAvgSorted = result.getPhoneToBigrams();
     List<Bigram> bigrams = phoneToAvgSorted.get(phone);
-    logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
-    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsListForPeriod(bigrams);
+    List<PhoneAndStats> phoneAndStatsList;
+    if (bigrams == null) {
+      logger.warning("no bigrams for phone " + phone);
+      phoneAndStatsList = new ArrayList<>();
+    } else {
+      logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
+      phoneAndStatsList = getPhoneAndStatsListForPeriod(bigrams);
+    }
     logger.info("gotNewPhoneReport Got " + phoneAndStatsList.size() + " items for " + phone);
 
     addItems(phoneAndStatsList);
@@ -407,7 +413,12 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
    * @param bigram
    */
   private void clickOnPhone2(String bigram) {
-    analysisServiceAsync.getPerformanceReportForUserForPhone(userid, listid, phone, bigram, from, to, new AsyncCallback<List<WordAndScore>>() {
+    analysisServiceAsync.getPerformanceReportForUserForPhone(userid,
+        listid,
+        phone,
+        bigram,
+        from,
+        to, new AsyncCallback<List<WordAndScore>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting performance report for user and phone", caught);
@@ -419,7 +430,7 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
           logger.warning("clickOnPhone2 no result for " + phone + " " + bigram);
           exampleContainer.addItems(phone, bigram, Collections.emptyList(), MAX_EXAMPLES);
         } else {
-          filteredWords.forEach(wordAndScore -> logger.info("clickOnPhone2 : for " + phone + " and bigram " + bigram+
+          filteredWords.forEach(wordAndScore -> logger.info("clickOnPhone2 : for " + phone + " and bigram " + bigram +
               "  got " + wordAndScore));
           exampleContainer.addItems(phone,
               bigram, filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),

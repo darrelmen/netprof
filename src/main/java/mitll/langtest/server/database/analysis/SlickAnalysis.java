@@ -387,6 +387,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return phoneReportForPhone.getPhoneToBigrams().get(phone);
   }
 
+  /**
+   * @see AnalysisServiceImpl#getPerformanceReportForUserForPhone(int, int, String, String, long, long)
+   * @param userid
+   * @param listid
+   * @param phone
+   * @param bigram
+   * @param from
+   * @param to
+   * @return
+   */
   public List<WordAndScore> getPhoneReportFor(int userid,
                                               int listid,
                                               String phone,

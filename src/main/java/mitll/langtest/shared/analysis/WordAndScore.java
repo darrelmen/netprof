@@ -156,11 +156,11 @@ public class WordAndScore extends WordScore {
 
   public String toString() {
     return
-        "\n\tExercise #" + getExid() +
-            "\n\t #" + getWseq() +
-            "\n\tseq   " + getSeq() +
-            "\n\t:     " + getWord() +
-            "\n\tscore " + getPronScore() +
+        "\n\tExercise   #" + getExid() +
+            "\n\t       #" + getWseq() +
+            "\n\tseq    " + getSeq() +
+            "\n\t:      " + getWord() +
+            "\n\tscore  " + getPronScore() +
             "\n\tres    " + getResultID() +
             "\n\tanswer " + getAnswerAudio() +
             "\n\tref    " + getRefAudio();

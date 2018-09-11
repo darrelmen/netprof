@@ -21,8 +21,7 @@ public class MakePhoneReport {
   /**
    * @param phoneToScores
    * @param phoneToBigramToWS
-   * @param bigramToCount
-   * @param bigramToScore
+   * @param phoneToBigramToScore
    * @param totalScore
    * @param totalItems
    * @return
@@ -30,9 +29,10 @@ public class MakePhoneReport {
    */
   public PhoneReport getPhoneReport(Map<String, List<PhoneAndScore>> phoneToScores,
                                     Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
-                                    // Map<String, List<WordAndScore>> phoneToWordAndScore,
-                                    Map<String, Float> bigramToCount,
-                                    Map<String, Float> bigramToScore,
+//                                    Map<String, Float> bigramToCount,
+//                                    Map<String, Float> bigramToScore,
+
+                                    Map<String, Map<String, Bigram>> phoneToBigramToScore,
                                     float totalScore,
                                     float totalItems) {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
@@ -77,54 +77,93 @@ public class MakePhoneReport {
       logger.info("getPhoneReport phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
     }
 
-    /*Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =*/
-    getPhoneToWordAndScore(phoneToBigramToWS, sorted);
+    sortExamples(phoneToBigramToWS);
 
     if (DEBUG) {
       logger.info("getPhoneReport phone->words " + phoneToBigramToWS.size() + " : " + phoneToBigramToWS.keySet());
     }
 
-    Map<String, List<Bigram>> phoneToBigram = new HashMap<>();
-    logger.warn("getPhoneReport found " + allPhones.size() + " phones : " + allPhones);
-    allPhones.forEach(phone -> {
-      Map<String, List<WordAndScore>> bigramToExamples = phoneToBigramToWS.get(phone);
-      List<Bigram> bigrams = phoneToBigram.computeIfAbsent(phone, k -> new ArrayList<>());
-      Set<String> bigramsForPhone = bigramToExamples.keySet();
-      bigramsForPhone.forEach(bigram->{
-        Float score = bigramToScore.get(bigram);
-        Float countForBigram = bigramToCount.get(bigram);
-        bigrams.add(
-            new Bigram(bigram, countForBigram.intValue(), score / countForBigram));
-      });
+    Map<String, List<Bigram>> phoneToBigram = getPhoneToBigrams(phoneToBigramToScore);//phoneToBigramToWS, bigramToCount, bigramToScore);
 
-    });
-
-    phoneToBigram.forEach((k,v)->{
-      v.sort((o1, o2) -> Float.compare(o1.getScore(),o2.getScore()));
-      logger.info("getPhoneReport " + k + " has " + v);
-      if (v.get(0).getBigram().startsWith(UNDERSCORE)) {
-        if (v.size()>1) {
-          v.remove(0);
-        }
-      }
-    });
-
+    if (DEBUG) {
+      phoneToBigram.forEach((k, v) -> logger.info("phoneToBigram " + k + "->" + v));
+    }
+    maybeRemoveUnderscore(phoneToBigram);
 
     // bigramToCount.forEach((k, v) -> phoneToBigram.put(k));
     return new PhoneReport(percentOverall,
         phoneToBigram,
         phoneToAvgSorted,
         phoneToBigramToWS
-        //,
-        //   bigramToCount,bigramToScore
     );
   }
 
-  @NotNull
-  private void getPhoneToWordAndScore(//Map<String, List<WordAndScore>> phoneToWordAndScore,
+  private void maybeRemoveUnderscore(Map<String, List<Bigram>> phoneToBigram) {
+    phoneToBigram.forEach((k, v) -> {
+      v.sort((o1, o2) -> Float.compare(o1.getScore(), o2.getScore()));
+      logger.info("getPhoneReport " + k + " has " + v.size() + " bigrams : " + v);
+      if (v.get(0).getBigram().startsWith(UNDERSCORE)) {
+        if (v.size() > 1) {
+          v.remove(0);
+          logger.info("\tgetPhoneReport REMOVE : " + k + " has " + v.size() + " bigrams : " + v);
+        }
+      }
+    });
+  }
 
-                                                                              Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
-                                                                              List<String> sorted) {
+  @NotNull
+  private Map<String, List<Bigram>> getPhoneToBigrams(
+                                                      Map<String, Map<String, Bigram>> phoneToBigramToScore) {
+    Map<String, List<Bigram>> phoneToBigram = new HashMap<>(phoneToBigramToScore.size());
+
+  //  logger.info("phones? " + phoneToBigramToScore.keySet());
+
+    phoneToBigramToScore.keySet().forEach(phone -> phoneToBigram.put(phone, new ArrayList<>()));
+
+    phoneToBigramToScore.forEach((k, v) -> {
+      List<Bigram> bigramsForPhone = phoneToBigram.get(k);
+      bigramsForPhone.addAll(v.values());
+//      bigramsForPhone.sort(Bigram::compareTo);
+    });
+
+    phoneToBigram.forEach((k, v) -> logger.info("after " + k + "->" + v));
+/*
+    phoneToBigram.values().forEach(bigrams -> bigrams.sort(Bigram::compareTo));
+
+    phoneToBigram.forEach((k, v) -> logger.info("after 2 " + k + "->" + v));*/
+
+/*
+
+    logger.info("getPhoneReport found " + phoneToBigramToWS.keySet().size() + " phones : " + phoneToBigramToWS.keySet());
+    phoneToBigramToWS.forEach((phone, bigramToExamples) -> {
+      List<Bigram> bigrams = phoneToBigram.computeIfAbsent(phone, k -> new ArrayList<>());
+      Set<String> bigramsForPhone = bigramToExamples.keySet();
+      bigramsForPhone.forEach(bigram -> {
+        bigrams.add(getClienBigram(bigramToCount, bigramToScore, bigram));
+      });
+    });
+*/
+
+    return phoneToBigram;
+  }
+/*
+
+  @NotNull
+  private Bigram getClienBigram(Map<String, Float> bigramToCount, Map<String, Float> bigramToScore, String bigram) {
+    Float score = bigramToScore.get(bigram);
+    Float countForBigram = bigramToCount.get(bigram);
+    float score1 = score / countForBigram;
+    if (bigram.startsWith("nj-e")) {
+      logger.info("getPhoneReport bigram " + bigram + " score " + score + " count " + countForBigram + " score " + score1);
+    }
+    return new Bigram(bigram, countForBigram.intValue(), score1);
+  }
+*/
+
+/*
+  @NotNull
+  private void getPhoneToWordAndScore(Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
+                                      List<String> sorted) {
     //Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWSSorted = new LinkedHashMap<>();
 
     for (String phone : sorted) {
@@ -141,7 +180,17 @@ public class MakePhoneReport {
 //      }
 //      phoneToBigramToWSSorted.put(phone, value);
     }
-   // return phoneToBigramToWSSorted;
+    // return phoneToBigramToWSSorted;
+  }
+*/
+
+  private void sortExamples(Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS) {
+    phoneToBigramToWS
+        .values()
+        .forEach(wordAndScores -> wordAndScores
+            .values()
+            .forEach(scores -> scores
+                .sort(WordAndScore::compareTo)));
   }
 
   /**

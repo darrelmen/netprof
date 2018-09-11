@@ -347,7 +347,7 @@ public abstract class Analysis extends DAO {
 
       long diff2 = System.currentTimeMillis() - start;
       if (DEBUG || diff2 > 100) {
-        logger.debug(" getPhonesForUser " + userid + " took " + diff2 + " millis to get " +
+        logger.debug("getPhonesForUser " + userid + " took " + diff2 + " millis to get " +
             /*phonesForUser.size() +*/ " phones for " + resultIDs.isEmpty() + " result ids ");
       }
 
@@ -364,7 +364,7 @@ public abstract class Analysis extends DAO {
   }
 
   PhoneReport getPhoneReportForPhone(int userid, UserInfo next, Project project, String phone, long from, long to) {
-    //UserInfo next = best.isEmpty() ? null:best.values().iterator().next();
+
     if (DEBUG)
       logger.debug(" getPhoneReportForPhone " + userid + " got " + next + " from " + new Date(from) + " to " + new Date(to));
 
@@ -391,7 +391,6 @@ public abstract class Analysis extends DAO {
         logger.debug(" getPhonesForUser " + userid + " took " + diff2 + " millis to get " +
             /*phonesForUser.size() +*/ " phones");
       }
-
       // setSessions(phoneReport.getPhoneToAvgSorted());
 
       return phoneReport;

@@ -165,6 +165,7 @@ public class ScoreServlet extends DatabaseServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     try {
+      long then = System.currentTimeMillis();
       makeAudioFileHelper();
 
       ReportingServices reportingServices = getDatabase();
@@ -172,7 +173,9 @@ public class ScoreServlet extends DatabaseServlet {
       String queryString = getQuery(request);
 
       GetRequest realRequest = getGetRequest(queryString);
+
       logger.info("doGet query '" + queryString + "' = request " + realRequest);
+
       if (realRequest == GetRequest.PROJECTS) {
         reply(response, getProjects());
         return;
@@ -181,6 +184,22 @@ public class ScoreServlet extends DatabaseServlet {
         JSONObject toReturn = new JSONObject();
         checkUserAndLogin(request, toReturn);
         reply(response, toReturn);
+        return;
+      }
+
+      JSONObject toReturn = new JSONObject();
+
+      // fix for https://gh.ll.mit.edu/DLI-LTEA/iOSNetProF/issues/28
+      if (userManagement.doGet(
+          request,
+          queryString,
+          toReturn
+      )) {
+        configureResponse(response);
+
+        logger.info("doGet handled user command");
+
+        reply(response, "", then, toReturn);
         return;
       }
 
@@ -213,11 +232,8 @@ public class ScoreServlet extends DatabaseServlet {
 
       if (REPORT_ON_HEADERS) reportOnHeaders(request);
 
-      long then = System.currentTimeMillis();
       configureResponse(response);
 
-      JSONObject toReturn = new JSONObject();
-      String jsonString = "";
       //toReturn.put(ERROR, "expecting request");
 
       try {
@@ -255,29 +271,9 @@ public class ScoreServlet extends DatabaseServlet {
             }
             toReturn = nestedChapters;
           }
-        } else if (userManagement.doGet(
-            request,
-            response,
-            queryString,
-            toReturn
-        )) {
-          logger.info("doGet " + language + " handled user command");
         } else if (realRequest == GetRequest.CHAPTER_HISTORY) {
           queryString = removePrefix(queryString, CHAPTER_HISTORY);
           toReturn = getChapterHistory(queryString, toReturn, projid, userID);
-//        } else if (realRequest ==  JSON_REPORT)) {
-//          queryString = removePrefix(queryString, JSON_REPORT);
-//          reportingServices.getReport(getYear(queryString), toReturn);
-//        } else if (matchesRequest(queryString, EXPORT)) {
-//          toReturn = getJSONForExercises(projid);
-////        } else if (matchesRequest(queryString, REMOVE_REF_RESULT)) {
-////          toReturn = removeRefResult(queryString);
-//        } else if (matchesRequest(queryString, REPORT)) {
-//          queryString = removePrefix(queryString, REPORT);
-//          int year = getYear(queryString);
-//          configureResponseHTML(response, year);
-//          reply(response, reportingServices.getReport(year, toReturn));
-//          return;
         } else if (realRequest == GetRequest.PHONE_REPORT) {
           queryString = removePrefix(queryString, PHONE_REPORT);
           String[] split1 = queryString.split("&");
@@ -294,23 +290,7 @@ public class ScoreServlet extends DatabaseServlet {
         reportingServices.getLogAndNotify().logAndNotifyServerException(e);
       }
 
-      long now = System.currentTimeMillis();
-      long l = now - then;
-      if (l > 10) {
-        logger.info("doGet : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
-      }
-      then = now;
-
-      String respString = jsonString.isEmpty() ? toReturn.toString() : jsonString;
-      now = System.currentTimeMillis();
-      l = now - then;
-      if (l > 50) {
-        logger.info("doGet : (" + language + ") took " + l + " millis" +
-            //" to do " + request.getQueryString() +
-            " and to do toString on json");
-      }
-
-      reply(response, respString);
+      reply(response, language, then, toReturn);
     } catch (DominoSessionException e) {
       logger.warn("doGet Got " + e);
       reply(response, NO_SESSION);
@@ -319,6 +299,26 @@ public class ScoreServlet extends DatabaseServlet {
       db.logAndNotify(e);
       throw new IOException("doGet couldn't process request.", e);
     }
+  }
+
+  private void reply(HttpServletResponse response, String language, long then, JSONObject toReturn) {
+    long now = System.currentTimeMillis();
+    long l = now - then;
+    if (l > 10) {
+      logger.info("doGet : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
+    }
+    then = now;
+
+    String respString = toReturn.toString();
+    now = System.currentTimeMillis();
+    l = now - then;
+    if (l > 50) {
+      logger.info("reply : (" + language + ") took " + l + " millis" +
+          //" to do " + request.getQueryString() +
+          " and to do toString on json");
+    }
+
+    reply(response, respString);
   }
 
   private final Set<String> notInteresting = new HashSet<>(Arrays.asList(
