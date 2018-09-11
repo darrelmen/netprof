@@ -430,8 +430,10 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
           logger.warning("clickOnPhone2 no result for " + phone + " " + bigram);
           exampleContainer.addItems(phone, bigram, Collections.emptyList(), MAX_EXAMPLES);
         } else {
-          filteredWords.forEach(wordAndScore -> logger.info("clickOnPhone2 : for " + phone + " and bigram " + bigram +
+     /*     filteredWords.forEach(wordAndScore -> logger.info("clickOnPhone2 : for " + phone + " and bigram " + bigram +
               "  got " + wordAndScore));
+          */
+
           exampleContainer.addItems(phone,
               bigram, filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),
               MAX_EXAMPLES);

@@ -38,8 +38,6 @@ import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -93,6 +91,7 @@ class BasePhoneDAO extends DAO {
    * @param rid
    * @param phone
    * @param seq
+   * @param prevScore
    * @param phoneScore
    * @param language
    * @return
@@ -101,7 +100,6 @@ class BasePhoneDAO extends DAO {
   WordAndScore getAndRememberWordAndScore(String refAudioForExercise,
                                           Map<String, List<PhoneAndScore>> phoneToScores,
                                           Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
-                                      //    Map<String, List<WordAndScore>> phoneToWordAndScore,
                                           int exid,
                                           String audioAnswer,
                                           String scoreJson,
@@ -113,7 +111,7 @@ class BasePhoneDAO extends DAO {
                                           String phone,
                                           String bigram,
                                           int seq,
-                                          float phoneScore,
+                                          float prevScore, float phoneScore,
                                           String language) {
     PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime, getSessionTime(sessionToLong, device));
 
@@ -131,7 +129,7 @@ class BasePhoneDAO extends DAO {
 
     WordAndScore wordAndScore = new WordAndScore(exid,
         word,
-        phoneScore,
+        prevScore, phoneScore,
         rid,
         wseq,
         seq,

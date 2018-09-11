@@ -81,7 +81,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @see #addItems(String, String, Collection, int)
    */
   private String phone, bigram;
-  private  boolean first;
+  private boolean first;
   private final boolean isSpanish;
   private final TextHeader header = new TextHeader(EXAMPLES_OF_SOUND);
   private final Heading heading;
@@ -150,6 +150,9 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     clear();
 
     if (sortedHistory != null) {
+      StringBuffer buffer = new StringBuffer();
+      sortedHistory.forEach(wordAndScore -> buffer.append(wordAndScore.getPronScore()).append(", "));
+  //    logger.info("PhoneExampleContainer Scores " + buffer);
       sortedHistory.forEach(this::addItem);
     } else {
       logger.warning("PhoneExampleContainer.addItems null items");

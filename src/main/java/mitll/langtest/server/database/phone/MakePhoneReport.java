@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.phone.SlickPhoneDAO.UNDERSCORE;
 
@@ -29,9 +30,6 @@ public class MakePhoneReport {
    */
   public PhoneReport getPhoneReport(Map<String, List<PhoneAndScore>> phoneToScores,
                                     Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
-//                                    Map<String, Float> bigramToCount,
-//                                    Map<String, Float> bigramToScore,
-
                                     Map<String, Map<String, Bigram>> phoneToBigramToScore,
                                     float totalScore,
                                     float totalItems) {
@@ -52,7 +50,6 @@ public class MakePhoneReport {
     if (DEBUG) logger.info("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     // set sessions on each phone stats
-    //  setSessions(phoneToAvg, useSessionGran);
     new PhoneAnalysis().setSessionsWithPrune(phoneToAvg);
 
     if (DEBUG && false) logger.info("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
@@ -62,11 +59,7 @@ public class MakePhoneReport {
 
     if (DEBUG) logger.info("getPhoneReport before sorted " + sorted);
 
-    //if (sortByLatestExample) {
-    //  phoneToWordAndScore = sortPhonesByLatest(phoneToAvg, sorted);
-    //} else {
     sortPhonesByAvg(phoneToAvg, sorted);
-    //}
 
     if (DEBUG) logger.info("getPhoneReport sorted " + sorted.size() + " " + sorted);
 
@@ -83,11 +76,12 @@ public class MakePhoneReport {
       logger.info("getPhoneReport phone->words " + phoneToBigramToWS.size() + " : " + phoneToBigramToWS.keySet());
     }
 
-    Map<String, List<Bigram>> phoneToBigram = getPhoneToBigrams(phoneToBigramToScore);//phoneToBigramToWS, bigramToCount, bigramToScore);
+    Map<String, List<Bigram>> phoneToBigram = getPhoneToBigrams(phoneToBigramToScore);
 
     if (DEBUG) {
       phoneToBigram.forEach((k, v) -> logger.info("phoneToBigram " + k + "->" + v));
     }
+
     maybeRemoveUnderscore(phoneToBigram);
 
     // bigramToCount.forEach((k, v) -> phoneToBigram.put(k));
@@ -100,36 +94,41 @@ public class MakePhoneReport {
 
   private void maybeRemoveUnderscore(Map<String, List<Bigram>> phoneToBigram) {
     phoneToBigram.forEach((k, v) -> {
+      if (v.size() > 1) {
+        List<Bigram> collect = v.stream().filter(bigram -> bigram.getBigram().startsWith(UNDERSCORE)).collect(Collectors.toList());
+//        logger.info("\tgetPhoneReport REMOVE : " + k + " has " + v.size() + " bigrams : " + v + " remove " + collect);
+        collect.forEach(v::remove);
+      }
+
       v.sort((o1, o2) -> Float.compare(o1.getScore(), o2.getScore()));
-      logger.info("getPhoneReport " + k + " has " + v.size() + " bigrams : " + v);
-      if (v.get(0).getBigram().startsWith(UNDERSCORE)) {
+//      logger.info("getPhoneReport " + k + " has " + v.size() + " bigrams : " + v);
+
+     /*    Bigram bigram = v.get(0);
+      if (bigram.getBigram().startsWith(UNDERSCORE)) {
         if (v.size() > 1) {
           v.remove(0);
           logger.info("\tgetPhoneReport REMOVE : " + k + " has " + v.size() + " bigrams : " + v);
         }
-      }
+      }*/
     });
   }
 
   @NotNull
-  private Map<String, List<Bigram>> getPhoneToBigrams(
-                                                      Map<String, Map<String, Bigram>> phoneToBigramToScore) {
+  private Map<String, List<Bigram>> getPhoneToBigrams(Map<String, Map<String, Bigram>> phoneToBigramToScore) {
     Map<String, List<Bigram>> phoneToBigram = new HashMap<>(phoneToBigramToScore.size());
 
-  //  logger.info("phones? " + phoneToBigramToScore.keySet());
+    //  logger.info("phones? " + phoneToBigramToScore.keySet());
 
     phoneToBigramToScore.keySet().forEach(phone -> phoneToBigram.put(phone, new ArrayList<>()));
 
     phoneToBigramToScore.forEach((k, v) -> {
       List<Bigram> bigramsForPhone = phoneToBigram.get(k);
       bigramsForPhone.addAll(v.values());
-//      bigramsForPhone.sort(Bigram::compareTo);
     });
 
-    phoneToBigram.forEach((k, v) -> logger.info("after " + k + "->" + v));
+    if (DEBUG) phoneToBigram.forEach((k, v) -> logger.info("after " + k + "->" + v));
 /*
     phoneToBigram.values().forEach(bigrams -> bigrams.sort(Bigram::compareTo));
-
     phoneToBigram.forEach((k, v) -> logger.info("after 2 " + k + "->" + v));*/
 
 /*
@@ -146,51 +145,30 @@ public class MakePhoneReport {
 
     return phoneToBigram;
   }
-/*
-
-  @NotNull
-  private Bigram getClienBigram(Map<String, Float> bigramToCount, Map<String, Float> bigramToScore, String bigram) {
-    Float score = bigramToScore.get(bigram);
-    Float countForBigram = bigramToCount.get(bigram);
-    float score1 = score / countForBigram;
-    if (bigram.startsWith("nj-e")) {
-      logger.info("getPhoneReport bigram " + bigram + " score " + score + " count " + countForBigram + " score " + score1);
-    }
-    return new Bigram(bigram, countForBigram.intValue(), score1);
-  }
-*/
-
-/*
-  @NotNull
-  private void getPhoneToWordAndScore(Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
-                                      List<String> sorted) {
-    //Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWSSorted = new LinkedHashMap<>();
-
-    for (String phone : sorted) {
-      Map<String, List<WordAndScore>> bigramToExamples = phoneToBigramToWS.get(phone);
-
-      bigramToExamples.values().forEach(wordAndScores -> wordAndScores.sort(WordAndScore::compareTo));
-
-      // Collections.sort(value);
-//      if (DEBUG) {
-//        logger.info("getPhoneReport phone->words for " + phone + " : " + value.size());
-//        for (WordAndScore wordAndScore : value) {
-//          logger.info("getPhoneReport for " + phone + " got " + wordAndScore);
-//        }
-//      }
-//      phoneToBigramToWSSorted.put(phone, value);
-    }
-    // return phoneToBigramToWSSorted;
-  }
-*/
 
   private void sortExamples(Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS) {
-    phoneToBigramToWS
+    phoneToBigramToWS.forEach((phone, bgToExamples) -> {
+      bgToExamples.forEach((bg, examples) -> {
+
+        if (bg.startsWith(phone)) {
+          examples.sort((o1, o2) -> {
+            int compare = Float.compare(o1.getPrevScore(), o2.getPrevScore());
+            if (compare == 0) {
+              return o1.getTieBreaker(o2, compare);
+            } else return compare;
+          });
+        } else {
+          examples.sort(WordAndScore::compareTo);
+        }
+      });
+    });
+
+/*    phoneToBigramToWS
         .values()
         .forEach(wordAndScores -> wordAndScores
             .values()
             .forEach(scores -> scores
-                .sort(WordAndScore::compareTo)));
+                .sort(WordAndScore::compareTo)));*/
   }
 
   /**

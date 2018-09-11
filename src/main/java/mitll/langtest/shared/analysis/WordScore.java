@@ -120,7 +120,6 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   @Override
   public int compareTo(WordScore o) {
     int i = Integer.compare(pronScore, o.pronScore);
-    // int i = Float.valueOf(getPronScore()).compareTo(o.getPronScore());
     if (i == 0) {
       i = Long.compare(timestamp, o.timestamp);
     }

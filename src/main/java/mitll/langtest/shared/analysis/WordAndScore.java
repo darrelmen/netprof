@@ -33,8 +33,6 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.client.analysis.PhoneExampleContainer;
-import mitll.langtest.server.database.phone.PhoneDAO;
-import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
@@ -53,11 +51,13 @@ public class WordAndScore extends WordScore {
   private transient int seq;
   private String word;
   private transient String scoreJson;
+  private transient float prevScore;
 
   private Map<NetPronImageType, List<TranscriptSegment>> fullTranscript;
 
   /**
    * @param word
+   * @param prevScore
    * @param pronScore
    * @param resultID
    * @param wseq        which word in phrase
@@ -68,21 +68,28 @@ public class WordAndScore extends WordScore {
    * @param timestamp
    * @see mitll.langtest.server.database.phone.BasePhoneDAO#getAndRememberWordAndScore
    */
-  public WordAndScore(int exid, String word, float pronScore, int resultID, int wseq, int seq, String answerAudio,
+  public WordAndScore(int exid, String word, float prevScore, float pronScore,
+                      int resultID, int wseq, int seq, String answerAudio,
                       String refAudio, String scoreJson, long timestamp) {
     super(exid, pronScore, timestamp, resultID, answerAudio, refAudio, null);
     this.word = word;
     this.wseq = wseq;
     this.seq = seq;
     this.scoreJson = scoreJson;
+
+    this.prevScore=prevScore;
   }
 
   public WordAndScore() {
   }
 
   public boolean equals(Object other) {
-    WordScore other1 = (WordScore) other;
-    return compareTo(other1) == 0;
+    if (!(other instanceof WordAndScore)) {
+      return false;
+    } else {
+      WordScore other1 = (WordScore) other;
+      return compareTo(other1) == 0;
+    }
   }
 
   /**
@@ -95,15 +102,18 @@ public class WordAndScore extends WordScore {
   public int compareTo(WordScore o) {
     int i = Integer.compare(getIntPronScore(), o.getIntPronScore());
 
-    WordAndScore realOther = (WordAndScore) o;
+    return getTieBreaker((WordAndScore) o, i);
+  }
+
+  public int getTieBreaker(WordAndScore o, int i) {
     if (i == 0) {
-      i = word.compareTo(realOther.word);
+      i = word.compareTo(o.word);
     }
     if (i == 0) {
-      i = Long.compare(getResultID(), realOther.getResultID());
+      i = Long.compare(getResultID(), o.getResultID());
     }
     if (i == 0) {
-      i = Integer.compare(wseq, realOther.wseq);
+      i = Integer.compare(wseq, o.wseq);
     }
     return i;
   }
@@ -152,6 +162,10 @@ public class WordAndScore extends WordScore {
    */
   public void setFullTranscript(Map<NetPronImageType, List<TranscriptSegment>> fullTranscript) {
     this.fullTranscript = fullTranscript;
+  }
+
+  public float getPrevScore() {
+    return prevScore;
   }
 
   public String toString() {

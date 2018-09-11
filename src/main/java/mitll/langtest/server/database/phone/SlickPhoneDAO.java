@@ -263,10 +263,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     int num = 0;
     Map<Integer, String> exidToRef = new HashMap<>();
 
-//    Map<String, Float> bigramToScore = new HashMap<>();
-//    Map<String, Float> bigramToCount = new HashMap<>();
-
-    // first by phone,
+     // first by phone,
     // then by bigram, then examples per bigram
     Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS = new HashMap<>();
     String prevPhone = UNDERSCORE;
@@ -286,7 +283,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       // info from result table
       int exid = report.exid();
       float pronScore = report.pronScore();
-
 
       boolean add = exids.add(exid);
       if (add) { // only first score counts ???
@@ -357,7 +353,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       }
 
-      prevScore = phoneScore;
 
       WordAndScore wordAndScore = getAndRememberWordAndScore(refAudioForExercise,
           phoneToScores,
@@ -373,8 +368,10 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           phone,
           bigram,
           report.pseq(),
-          phoneScore,
+          prevScore, phoneScore,
           language);
+
+      prevScore = phoneScore;
 
       // right thing to do?
       {
@@ -389,16 +386,21 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       // needed???
 
+/*
       phoneToBigramToWS.forEach((k, v) -> {
         if (v.size() > 1) {
           //  logger.info("for " + phone + " and " + v.keySet());
           List<String> collect = v.keySet().stream().filter(bg -> bg.startsWith(UNDERSCORE)).collect(Collectors.toList());
           if (!collect.isEmpty()) {
-            v.remove(collect.get(0));
-            logger.info("getPhoneReport for " + phone + " and " + v.keySet());
+            String key = collect.get(0);
+            logger.info("getPhoneReport for " + phone + " remove " + key + " before " + v.keySet());
+
+            List<WordAndScore> remove = v.remove(key);
+            logger.info("getPhoneReport for " + phone + " remove " + key + " after  " + v.keySet());
           }
         }
       });
+*/
 
       if (DEBUG) {
         logger.info("getPhoneReport adding " +

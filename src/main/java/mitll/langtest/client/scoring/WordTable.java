@@ -150,8 +150,6 @@ public class WordTable {
    * @param first
    */
   private void addPhones(String filter, String contextPhone, StringBuilder builder, List<TranscriptSegment> phones, boolean first) {
-    //TranscriptSegment prev = null;
-
     Set<TranscriptSegment> toColor = new HashSet<>();
     Set<TranscriptSegment> toMark = new HashSet<>();
 
@@ -164,7 +162,7 @@ public class WordTable {
       String prevCandidate = prev.getDisplayEvent();
       String nextCandidate = next.getDisplayEvent();
 
-      logger.info("addPhones at " + i + " prev " + prevCandidate + " next " + nextCandidate);
+//      logger.info("addPhones at " + i + " prev " + prevCandidate + " next " + nextCandidate);
 
       if (!first && (prevCandidate.equalsIgnoreCase(contextPhone)) &&
           nextCandidate.equalsIgnoreCase(filter)
@@ -188,21 +186,6 @@ public class WordTable {
       }
     }
 
-    logger.info("toMark  " + toMark);
-    logger.info("toColor " + toColor);
-
-//    Iterator<TranscriptSegment> iterator = phones.iterator();
-//    while (iterator.hasNext()) {
-//      TranscriptSegment prev = iterator.next();
-//
-//      if (iterator.hasNext()) {
-//        TranscriptSegment next = iterator.next();
-//      }
-//
-//      if (prev.getDisplayEvent().equalsIgnoreCase(filter)) toColor.add(prev);
-//
-//    }
-//    //List<TranscriptSegment> value = pair.getValue();
     for (TranscriptSegment phone : phones) {
       String event = phone.getDisplayEvent();
       boolean match = toColor.contains(phone);
@@ -222,8 +205,6 @@ public class WordTable {
         builder.append(event);
         builder.append("</th>");
       }
-
-      // prev = phone;
     }
   }
 
