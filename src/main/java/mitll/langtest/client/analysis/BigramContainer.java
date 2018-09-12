@@ -56,13 +56,12 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.Bigram;
-import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.PhoneBigrams;
 import mitll.langtest.shared.analysis.WordAndScore;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -141,41 +140,45 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
   }
 
   /**
-   * @param phoneReport
    * @return
    * @see AnalysisTab#getPhoneReport
    */
-  public Panel getTableWithPager(PhoneReport phoneReport) {
+  public Panel getTableWithPager() {
     from = 0;
     to = System.currentTimeMillis();
-//    Map<String, List<Bigram>> phoneToBigrams = phoneReport.getPhoneToBigrams();
-//    String phone = phoneToBigrams.keySet().iterator().next();
-//    Map<String, List<Bigram>> phoneToAvgSorted = phoneToBigrams;
-//    List<Bigram> bigrams = phoneToAvgSorted.get(phone);
-//    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsList(bigrams);
     return getTableWithPagerForHistory(new ArrayList<>());
   }
 
   private int reqid = 0;
-
   private String phone;
 
-  void gotNewPhoneReport(PhoneReport result, String phone, long from, long to) {
+  /**
+   * @see PhoneContainer#clickOnPhone2
+   * @param result
+   * @param phone
+   * @param from
+   * @param to
+   */
+  void gotNewPhoneBigrams(PhoneBigrams result, String phone, long from, long to) {
     this.from = from;
     this.to = to;
-    Map<String, List<Bigram>> phoneToAvgSorted = result.getPhoneToBigrams();
-    List<Bigram> bigrams = phoneToAvgSorted.get(phone);
-    List<PhoneAndStats> phoneAndStatsList;
-    if (bigrams == null) {
-      logger.warning("no bigrams for phone " + phone);
-      phoneAndStatsList = new ArrayList<>();
-    } else {
-      logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
-      phoneAndStatsList = getPhoneAndStatsListForPeriod(bigrams);
-    }
-    logger.info("gotNewPhoneReport Got " + phoneAndStatsList.size() + " items for " + phone);
 
-    addItems(phoneAndStatsList);
+    List<Bigram> bigrams = result.getPhoneToBigrams().get(phone);
+
+    {
+      List<PhoneAndStats> phoneAndStatsList;
+      if (bigrams == null) {
+        logger.warning("no bigrams for phone " + phone);
+        phoneAndStatsList = new ArrayList<>();
+      } else {
+        logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
+        phoneAndStatsList = getPhoneAndStatsListForPeriod(bigrams);
+      }
+      logger.info("gotNewPhoneReport Got " + phoneAndStatsList.size() + " items for " + phone);
+
+      addItems(phoneAndStatsList);
+    }
+
     this.phone = phone;
     showExamplesForSelectedSound();
   }
@@ -413,6 +416,8 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
    * @param bigram
    */
   private void clickOnPhone2(String bigram) {
+    logger.info("clickOnPhone2 bigram = " + bigram);
+
     analysisServiceAsync.getPerformanceReportForUserForPhone(userid,
         listid,
         phone,

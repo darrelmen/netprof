@@ -32,9 +32,6 @@
 
 package mitll.langtest.shared.analysis;
 
-import mitll.langtest.server.database.analysis.IAnalysis;
-
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,14 +42,13 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/22/15.
  */
-public class PhoneReport implements Serializable {
+public class PhoneReport extends PhoneSummary {
   private int overallPercent;
   private Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = new HashMap<>();
-  private Map<String, PhoneStats> phoneToAvgSorted = new HashMap<>();
-  private int reqid;
   private Map<String, List<Bigram>> phoneToBigrams;
 
   private boolean valid;
+  private long serverTime;
 
   public PhoneReport() {
     valid = false;
@@ -61,15 +57,17 @@ public class PhoneReport implements Serializable {
   /**
    * @param overallPercent
    * @paramx phoneToWordAndScoreSorted
+   * @see mitll.langtest.client.analysis.PhoneContainer
    * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport
    */
   public PhoneReport(int overallPercent,
                      Map<String, List<Bigram>> phoneToBigrams,
                      Map<String, PhoneStats> phoneToAvgSorted,
                      Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted) {
+    super(phoneToAvgSorted);
+
     this.overallPercent = overallPercent;
     this.phoneToBigrams = phoneToBigrams;
-    this.phoneToAvgSorted = phoneToAvgSorted;
     this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
 
     valid = true;
@@ -89,34 +87,28 @@ public class PhoneReport implements Serializable {
     return overallPercent;
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.client.analysis.PhoneContainer#getTableWithPager
-   */
-  public Map<String, PhoneStats> getPhoneToAvgSorted() {
-    return phoneToAvgSorted;
-  }
-
   public boolean isValid() {
     return valid;
-  }
-
-  public int getReqid() {
-    return reqid;
-  }
-
-  public PhoneReport setReqid(int reqid) {
-    this.reqid = reqid;
-    return this;
   }
 
   public Map<String, List<Bigram>> getPhoneToBigrams() {
     return phoneToBigrams;
   }
 
+  public long getServerTime() {
+    return serverTime;
+  }
+
+  public void setServerTime(long serverTime) {
+    this.serverTime = serverTime;
+  }
+
+  public PhoneReport setReqid(int reqid) {
+    super.setReqid(reqid);
+    return this;
+  }
+
   public String toString() {
-    Map<String, PhoneStats> phoneToAvgSorted = getPhoneToAvgSorted();
-    return "valid " + valid + " : " +
-        (phoneToAvgSorted == null ? "null phoneToAvgSorted?" : phoneToAvgSorted.keySet());
+    return "valid " + valid + " : " + super.toString();
   }
 }

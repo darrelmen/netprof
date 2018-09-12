@@ -34,11 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.WordsAndTotal;
-import mitll.langtest.shared.analysis.AnalysisReport;
-import mitll.langtest.shared.analysis.Bigram;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -75,11 +71,21 @@ public interface AnalysisServiceAsync {
                             int reqid,
                             AsyncCallback<WordsAndTotal> async);
 
-  void getPhoneReport(int userid, int listid, long from, long to, int reqid, AsyncCallback<PhoneReport> async);
+/*
+  void getPhoneSummary(int userid, int listid, long from, long to, int reqid, AsyncCallback<PhoneReport> async);
+*/
 
   void getPerformanceReportForUserForPhoneBigrams(int userid,
                                                   int listid,
                                                   String phone,
                                                     long from,
                                                   long to, AsyncCallback<List<Bigram>> async);
+
+/*
+  void getPhoneSummary(int userid, int minRecordings, int listid, int reqid, AsyncCallback<PhoneSummary> async);
+*/
+
+  void getPhoneSummary(int userid, int listid, long from, long to, int reqid, AsyncCallback<PhoneSummary> async);
+
+  void getPhoneBigrams(int userid, int listid, long from, long to, int reqid, AsyncCallback<PhoneBigrams> async);
 }

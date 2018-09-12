@@ -52,7 +52,7 @@ class BasePhoneDAO extends DAO {
   static final String DURATION = "duration";
   static final String RID1 = "RID";
 
-  private Map<String, Long> sessionToLong = new HashMap<>();
+  protected Map<String, Long> sessionToLong = new HashMap<>();
 
   BasePhoneDAO(Database database) {
     super(database);
@@ -150,7 +150,7 @@ class BasePhoneDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSessionTime
    */
-  private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
+  protected Long getSessionTime(Map<String, Long> sessionToLong, String device) {
     Long parsedTime = sessionToLong.get(device);
 
     if (parsedTime == null) {

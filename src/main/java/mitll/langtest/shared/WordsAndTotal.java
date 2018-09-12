@@ -51,6 +51,7 @@ public class WordsAndTotal implements IsSerializable {
   private int numTotal;
   private int req;
   private boolean allSameDay;
+  private long serverTime;
 
   public WordsAndTotal() {
   }
@@ -64,6 +65,14 @@ public class WordsAndTotal implements IsSerializable {
     this.results = results;
     this.numTotal = n;
     this.allSameDay = allSameDay;
+  }
+
+  public long getServerTime() {
+    return serverTime;
+  }
+
+  public void setServerTime(long serverTime) {
+    this.serverTime = serverTime;
   }
 
   public List<WordScore> getResults() {
@@ -84,5 +93,9 @@ public class WordsAndTotal implements IsSerializable {
 
   public boolean isAllSameDay() {
     return allSameDay;
+  }
+
+  public String toString() {
+    return "WordsAndTotal " + getNumTotal() ;
   }
 }

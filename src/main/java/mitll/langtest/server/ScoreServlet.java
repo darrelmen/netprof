@@ -516,7 +516,7 @@ public class ScoreServlet extends DatabaseServlet {
   private JSONObject getPhoneReport(JSONObject toReturn, String[] split1, int projid, int userid) {
     Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
 
-    logger.info("getPhoneReport : user " + userid + " selection " + selection + " proj " + projid);
+    logger.info("getPhoneSummary : user " + userid + " selection " + selection + " proj " + projid);
     try {
       long then = System.currentTimeMillis();
 
@@ -524,7 +524,7 @@ public class ScoreServlet extends DatabaseServlet {
       toReturn = db.getJsonPhoneReport(userid, projectID, selection);
       long now = System.currentTimeMillis();
       if (now - then > 5) {
-        logger.info("getPhoneReport :" +
+        logger.info("getPhoneSummary :" +
             "\n\tuser      " + userid +
             "\n\tselection " + selection +
             "\n\tprojectID " + projectID +

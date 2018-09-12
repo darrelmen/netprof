@@ -46,9 +46,7 @@ import java.util.*;
 
 public class UserPerformance implements Serializable {
   private static final int TOSHOW = 2;
-  /**
-   * CAN'T be final
-   */
+
   private List<TimeAndScore> rawTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> iPadTimeAndScores = new ArrayList<>();
   private List<TimeAndScore> learnTimeAndScores = new ArrayList<>();

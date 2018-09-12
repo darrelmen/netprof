@@ -57,6 +57,7 @@ public class PhoneJSON {
     if (worstPhonesAndScore != null) {
       Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =
           worstPhonesAndScore.getPhoneToWordAndScoreSorted();
+
       Map<String, List<WordAndScore>> worstPhones = new HashMap<>();
       phoneToWordAndScoreSorted.forEach((k, v) -> {
         Collection<List<WordAndScore>> values = v.values();

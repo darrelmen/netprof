@@ -47,4 +47,9 @@ public interface IAnalysis {
 
   List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, String bigram, long from, long to);
   List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings);
+
+//  PhoneSummary getPhoneSummary(int userid, int minRecordings, int listid);
+  PhoneSummary getPhoneSummaryForPeriod(int userid, int listid, long from, long to);
+
+  PhoneBigrams getPhoneBigramsForPeriod(int userid, int listid, long from, long to);
 }

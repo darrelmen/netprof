@@ -354,6 +354,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         int val = req++;
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
         //  logger.info("createProvider sort " + columnSortedState.toString());
+        long then = System.currentTimeMillis();
 
         analysisServiceAsync.getWordScoresForUser(
             reqInfo.getUserid(),
@@ -376,6 +377,15 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
               @Override
               public void onSuccess(final WordsAndTotal result) {
+
+                long now = System.currentTimeMillis();
+                long total = now - then;
+                logger.info("getWordScoresForUser userid " + reqInfo.getUserid() + " req " + req +
+                    "\n\ttook   " + total +
+                    "\n\tserver " + result.getServerTime() +
+                    "\n\tclient " + (total - result.getServerTime()));
+
+
                 if (result.getReq() < req - 1) {
                 } else {
                   final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
@@ -433,6 +443,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   /**
    * Only sort with descending score.
+   *
    * @return
    * @see AnalysisTab#getWordContainer
    */
@@ -444,7 +455,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(SCORE), true));
     //} else {
     //  wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
-   // }
+    // }
 
     createProvider(numWords, wordScoreCellTable);
 

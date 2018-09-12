@@ -73,6 +73,6 @@ public class Bigram implements Serializable, Comparable<Bigram> {
   }
 
   public String toString() {
-    return bigram;// + " " + count + " = " + score;
+    return bigram;// +" (" + count + ") = " + score;
   }
 }

@@ -36,39 +36,16 @@ public class MakePhoneReport {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * PhoneJSON.round(overallScore, 2));
 
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info(
           "getPhoneReport : \n\tscore " + overallScore +
               "\n\titems         " + totalItems +
-              //   "\n\tuseSessionGran         " + useSessionGran +
               "\n\tpercent       " + percentOverall +
               "\n\tphoneToScores " + phoneToScores.size() +
               "\n\tphones        " + phoneToScores.keySet());
     }
 
-    final Map<String, PhoneStats> phoneToAvg = getPhoneToPhoneStats(phoneToScores);
-    if (DEBUG) logger.info("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
-
-    // set sessions on each phone stats
-    new PhoneAnalysis().setSessionsWithPrune(phoneToAvg);
-
-    if (DEBUG && false) logger.info("getPhoneReport phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
-
-    Set<String> allPhones = phoneToAvg.keySet();
-    List<String> sorted = new ArrayList<>(allPhones);
-
-    if (DEBUG) logger.info("getPhoneReport before sorted " + sorted);
-
-    sortPhonesByAvg(phoneToAvg, sorted);
-
-    if (DEBUG) logger.info("getPhoneReport sorted " + sorted.size() + " " + sorted);
-
-    Map<String, PhoneStats> phoneToAvgSorted = new LinkedHashMap<>();
-    sorted.forEach(phone -> phoneToAvgSorted.put(phone, phoneToAvg.get(phone)));
-
-    if (DEBUG) {
-      logger.info("getPhoneReport phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
-    }
+    Map<String, PhoneStats> phoneToAvgSorted = getPhoneStats(phoneToScores);
 
     sortExamples(phoneToBigramToWS);
 
@@ -76,20 +53,68 @@ public class MakePhoneReport {
       logger.info("getPhoneReport phone->words " + phoneToBigramToWS.size() + " : " + phoneToBigramToWS.keySet());
     }
 
-    Map<String, List<Bigram>> phoneToBigram = getPhoneToBigrams(phoneToBigramToScore);
+    Map<String, List<Bigram>> phoneToBigram = getPhoneToBigramReally(phoneToBigramToScore);
 
-    if (DEBUG) {
-      phoneToBigram.forEach((k, v) -> logger.info("phoneToBigram " + k + "->" + v));
-    }
-
-    maybeRemoveUnderscore(phoneToBigram);
-
-    // bigramToCount.forEach((k, v) -> phoneToBigram.put(k));
     return new PhoneReport(percentOverall,
         phoneToBigram,
         phoneToAvgSorted,
         phoneToBigramToWS
     );
+  }
+
+  @NotNull
+  private Map<String, List<Bigram>> getPhoneToBigramReally(Map<String, Map<String, Bigram>> phoneToBigramToScore) {
+    Map<String, List<Bigram>> phoneToBigram = getPhoneToBigrams(phoneToBigramToScore);
+
+    if (DEBUG) {
+      phoneToBigram.forEach((k, v) -> logger.info("getPhoneToBigramReally phoneToBigram " + k + "->" + v));
+    }
+
+    maybeRemoveUnderscore(phoneToBigram);
+    return phoneToBigram;
+  }
+
+  /**
+   * @param phoneToScores
+   * @return
+   * @see SlickPhoneDAO#getPhoneSummary(Collection)
+   */
+  public PhoneSummary getPhoneSummary(Map<String, List<PhoneAndScore>> phoneToScores) {
+    return new PhoneSummary(getPhoneStats(phoneToScores));
+  }
+
+  public PhoneBigrams getPhoneBigrams(Map<String, Map<String, Bigram>> phoneToBigramToScore) {
+    return new PhoneBigrams(getPhoneToBigramReally(phoneToBigramToScore));
+  }
+
+  @NotNull
+  private Map<String, PhoneStats> getPhoneStats(Map<String, List<PhoneAndScore>> phoneToScores) {
+    Map<String, PhoneStats> phoneToAvgSorted = new LinkedHashMap<>();
+
+    final Map<String, PhoneStats> phoneToAvg = getPhoneToPhoneStats(phoneToScores);
+    if (DEBUG) logger.info("getPhoneSummary phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+
+    // set sessions on each phone stats
+    new PhoneAnalysis().setSessionsWithPrune(phoneToAvg);
+
+    if (DEBUG && false) logger.info("getPhoneSummary phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+
+    {
+      List<String> sorted = new ArrayList<>(phoneToAvg.keySet());
+
+      if (DEBUG) logger.info("getPhoneSummary before sorted " + sorted);
+
+      sortPhonesByAvg(phoneToAvg, sorted);
+
+      if (DEBUG) logger.info("getPhoneSummary sorted " + sorted.size() + " " + sorted);
+
+      sorted.forEach(phone -> phoneToAvgSorted.put(phone, phoneToAvg.get(phone)));
+
+      if (DEBUG) {
+        logger.info("getPhoneSummary phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
+      }
+    }
+    return phoneToAvgSorted;
   }
 
   private void maybeRemoveUnderscore(Map<String, List<Bigram>> phoneToBigram) {
@@ -101,7 +126,7 @@ public class MakePhoneReport {
       }
 
       v.sort((o1, o2) -> Float.compare(o1.getScore(), o2.getScore()));
-//      logger.info("getPhoneReport " + k + " has " + v.size() + " bigrams : " + v);
+//      logger.info("getPhoneSummary " + k + " has " + v.size() + " bigrams : " + v);
 
      /*    Bigram bigram = v.get(0);
       if (bigram.getBigram().startsWith(UNDERSCORE)) {
@@ -133,7 +158,7 @@ public class MakePhoneReport {
 
 /*
 
-    logger.info("getPhoneReport found " + phoneToBigramToWS.keySet().size() + " phones : " + phoneToBigramToWS.keySet());
+    logger.info("getPhoneSummary found " + phoneToBigramToWS.keySet().size() + " phones : " + phoneToBigramToWS.keySet());
     phoneToBigramToWS.forEach((phone, bigramToExamples) -> {
       List<Bigram> bigrams = phoneToBigram.computeIfAbsent(phone, k -> new ArrayList<>());
       Set<String> bigramsForPhone = bigramToExamples.keySet();
@@ -258,7 +283,7 @@ public class MakePhoneReport {
   /**
    * @param phoneToScores
    * @return
-   * @see #getPhoneReport(Map, Map, Map, Map, float, float)
+   * @see #getPhoneReport
    */
   private Map<String, PhoneStats> getPhoneToPhoneStats(Map<String, List<PhoneAndScore>> phoneToScores) {
     final Map<String, PhoneStats> phoneToAvg = new HashMap<String, PhoneStats>();
@@ -277,7 +302,7 @@ public class MakePhoneReport {
    *
    * @param phoneAndScores
    * @return
-   * @see #getPhoneReport(Map, Map, Map, Map, float, float)
+   * @see #getPhoneReport
    */
   private List<TimeAndScore> getPhoneTimeSeries(List<PhoneAndScore> phoneAndScores) {
     float total = 0;

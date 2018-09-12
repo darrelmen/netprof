@@ -35,8 +35,8 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.WordsAndTotal;
-import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonShell;
 
@@ -64,6 +64,11 @@ public interface AnalysisService extends RemoteService {
   AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req)
       throws DominoSessionException, RestrictedOperationException;
 
+/*
+  PhoneSummary getPhoneSummary(int userid, int minRecordings, int listid, int req)
+      throws DominoSessionException, RestrictedOperationException;
+*/
+
   WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid, long fromTime, long toTime,
                                      int rangeStart, int rangeEnd, String sort, int reqid) throws DominoSessionException;
 
@@ -71,12 +76,18 @@ public interface AnalysisService extends RemoteService {
                                                          String phone, String bigram, long from, long to)
       throws DominoSessionException, RestrictedOperationException;
 
-   List<Bigram> getPerformanceReportForUserForPhoneBigrams(int userid,
-                                                           int listid,
-                                                           String phone,
-                                                             long from,
-                                                           long to) throws DominoSessionException, RestrictedOperationException;
+  List<Bigram> getPerformanceReportForUserForPhoneBigrams(int userid,
+                                                          int listid,
+                                                          String phone,
+                                                          long from,
+                                                          long to) throws DominoSessionException, RestrictedOperationException;
 
 
-  PhoneReport getPhoneReport(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
+/*
+  PhoneReport getPhoneSummary(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
+*/
+
+  PhoneSummary getPhoneSummary(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
+
+  PhoneBigrams getPhoneBigrams(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
 }

@@ -56,16 +56,12 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.PhoneBigrams;
 import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.analysis.PhoneStats;
-import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.PhoneSummary;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -77,8 +73,6 @@ import java.util.logging.Logger;
 class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements AnalysisPlot.TimeChangeListener {
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
-  //private static final boolean SORT_BY_RANK = false;
-
   /**
    * @see #getTableWithPagerForHistory
    */
@@ -88,7 +82,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
    * @see #setMaxWidth
    */
   private static final int TABLE_WIDTH = 225;
-  private static final int MAX_EXAMPLES = 25;
+  // private static final int MAX_EXAMPLES = 25;
 
   private static final String SOUND = "Sound";
   private static final String COUNT_COL_HEADER = "#";
@@ -100,14 +94,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   private static final String TOOLTIP = "Click to see examples";// and scores over time";
   private static final int SOUND_WIDTH = 65;
 
-  // private final PhoneExampleContainer exampleContainer;
   private final BigramContainer bigramContainer;
   private final int listid;
   private final int userid;
 
   private long from;
   private long to;
-  //  private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final DateTimeFormat debugShortFormat = DateTimeFormat.getFormat("MMM d yyyy HH:mm:ss");
 
   private static final boolean DEBUG = false;
@@ -147,14 +139,14 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     table.getElement().getStyle().setProperty("maxWidth", TABLE_WIDTH + "px");
   }
 
-  PhoneReport phoneReport;
+  PhoneSummary phoneReport;
 
   /**
    * @param phoneReport
    * @return
    * @see AnalysisTab#getPhoneReport
    */
-  public Panel getTableWithPager(PhoneReport phoneReport) {
+  public Panel getTableWithPager(PhoneSummary phoneReport) {
     from = 0;
     to = System.currentTimeMillis();
     this.phoneReport = phoneReport;
@@ -175,36 +167,49 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
     this.from = from;
     this.to = to;
+    long then = System.currentTimeMillis();
+    analysisServiceAsync.getPhoneSummary(userid,
+        listid,
+        from,
+        to,
+        reqid++, new AsyncCallback<PhoneSummary>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            logger.warning("\n\n\n-> getPhoneSummary " + caught);
+            controller.getMessageHelper().handleNonFatalError("problem getting phone summary", caught);
+          }
 
-    analysisServiceAsync.getPhoneReport(userid, listid, from, to, reqid++, new AsyncCallback<PhoneReport>() {
-      @Override
-      public void onFailure(Throwable caught) {
+          @Override
+          public void onSuccess(PhoneSummary result) {
+            long now = System.currentTimeMillis();
+            long total = now - then;
+            logger.info("getPhoneSummary userid " + userid + " req " + reqid +
+                "\n\ttook   " + total +
+                "\n\tserver " + result.getServerTime() +
+                "\n\tclient " + (total - result.getServerTime()));
 
-      }
 
-      @Override
-      public void onSuccess(PhoneReport result) {
-        if (result.getReqid() + 1 != reqid) {
-          logger.info("skip stale req");
-        } else {
-          gotNewPhoneReport(result);
-        }
-      }
-    });
-//    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsList(from, to);
-//    addItems(phoneAndStatsList);
-//    showExamplesForSelectedSound();
+            if (result.getReqid() + 1 != reqid) {
+              logger.info("skip stale req");
+            } else {
+              gotNewPhoneSummary(result);
+            }
+          }
+        });
   }
 
-  private void gotNewPhoneReport(PhoneReport result) {
-    List<PhoneAndStats> phoneAndStatsList =
-        getPhoneAndStatsListForPeriod(result.getPhoneToAvgSorted(), from, to);
+  /**
+   * TODO :  ??? why filter by time twice??
+   * @param result
+   */
+  private void gotNewPhoneSummary(PhoneSummary result) {
+    List<PhoneAndStats> phoneAndStatsList = getPhoneAndStatsListForPeriod(result.getPhoneToAvgSorted(), from, to);
     addItems(phoneAndStatsList);
     showExamplesForSelectedSound();
   }
 
 
-  private List<PhoneAndStats> getPhoneAndStatsList(PhoneReport phoneReport, long from, long to) {
+  private List<PhoneAndStats> getPhoneAndStatsList(PhoneSummary phoneReport, long from, long to) {
     return (phoneReport == null) ? Collections.emptyList() :
         getPhoneAndStatsListForPeriod(phoneReport.getPhoneToAvgSorted(), from, to);
   }
@@ -581,6 +586,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   private void checkForClick(PhoneAndStats object, NativeEvent event) {
+    logger.info("checkForClick : stats " + object);
     if (BrowserEvents.CLICK.equals(event.getType())) {
       //   clickOnPhone(object.getPhone());
       clickOnPhone2(object.getPhone());
@@ -590,8 +596,47 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   private void clickOnPhone2(String phone) {
-    logger.info("clickOnPhone2 : got click on phone " + phone);
-    bigramContainer.gotNewPhoneReport(phoneReport, phone, from, to);
+    logger.info("clickOnPhone2 : got click on" +
+        "\n\tphone " + phone+
+        "\n\tfrom  " + from+
+        "\n\tto    " + to+
+        "\n\treqid " + reqid
+    );
+
+//    this.from = from;
+//    this.to = to;
+
+    long then = System.currentTimeMillis();
+
+    analysisServiceAsync.getPhoneBigrams(userid,
+        listid,
+        from,
+        to,
+        reqid++, new AsyncCallback<PhoneBigrams>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            logger.warning("\n\n\n-> getPhoneSummary " + caught);
+            controller.getMessageHelper().handleNonFatalError("problem getting phone summary", caught);
+          }
+
+          @Override
+          public void onSuccess(PhoneBigrams result) {
+            long now = System.currentTimeMillis();
+            long total = now - then;
+            logger.info("getPhoneBigrams userid " + userid + " req " + reqid +
+                "\n\tphone  " + phone +
+                "\n\ttook   " + total +
+                "\n\tserver " + result.getServerTime() +
+                "\n\tclient " + (total - result.getServerTime()));
+
+            if (result.getReqid() + 1 != reqid) {
+              logger.info("clickOnPhone2 : skip stale req");
+            } else {
+              bigramContainer.gotNewPhoneBigrams(result, phone, from, to);
+            }
+          }
+        });
+    // bigramContainer.gotNewPhoneSummary(phoneReport, phone, from, to);
   }
 
   private SafeHtml getSafeHtml(String columnText) {
