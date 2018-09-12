@@ -33,6 +33,7 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.shared.custom.TimeRange;
 
 import java.io.Serializable;
 import java.util.*;
@@ -189,6 +190,11 @@ public class UserPerformance implements Serializable {
    */
   public String getLast() {
     return last;
+  }
+
+  public TimeRange getTimeWindow() {
+    List<TimeAndScore> rawBestScores = getRawBestScores();
+    return new TimeRange(rawBestScores.get(0).getTimestamp(), rawBestScores.get(rawBestScores.size() - 1).getTimestamp());
   }
 
   public String toString() {

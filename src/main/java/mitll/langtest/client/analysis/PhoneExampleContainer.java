@@ -118,6 +118,8 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     Panel tableWithPager = super.getTableWithPager(listOptions);
     tableWithPager.getElement().setId("PhoneExampleContainer");
     tableWithPager.addStyleName("floatLeftAndClear");
+    tableWithPager.getElement().getStyle().setProperty("minWidth", "334px");  // helps safari in layout
+
     return tableWithPager;
   }
 

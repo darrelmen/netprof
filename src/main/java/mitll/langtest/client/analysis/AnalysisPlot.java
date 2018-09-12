@@ -130,7 +130,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private AnalysisTab.TIME_HORIZON timeHorizon;
   /**
-   * @see #setRawBestScores(List)
+   * @see #setTimeRange
    */
   private long firstTime;
   private long lastTime;
@@ -719,7 +719,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         .setType(Axis.Type.DATE_TIME)
         .setAxisSetExtremesEventHandler(axisSetExtremesEvent -> {
           if (axisSetExtremesEvent != null) {
-            logger.info("configureChart window " + new Date(firstTime) + " " + new Date(lastTime));
+         //   logger.info("configureChart window " + new Date(firstTime) + " " + new Date(lastTime));
             gotExtremes(axisSetExtremesEvent);
           }
           return true;
@@ -926,19 +926,19 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     long window = lastPlusSlack - firstTime;
     long hours = window / HOUR_DUR;
     if (hours < 24) {
-      logger.info("showAll hours " + hours);
+     // logger.info("showAll hours " + hours);
       firstW -= HOUR_DUR;
       lastPlusSlack += HOUR_DUR;
     } else if (window / DAY_DUR < 7) {
-      logger.info("showAll days " + (window / DAY_DUR));
+     // logger.info("showAll days " + (window / DAY_DUR));
       firstW -= DAY_DUR;
       lastPlusSlack += DAY_DUR;
     } else if (window / WEEK_DUR < 4) {
-      logger.info("showAll week " + (window / WEEK_DUR));
+     // logger.info("showAll week " + (window / WEEK_DUR));
       firstW -= WEEK_DUR;
       lastPlusSlack += WEEK_DUR;
     } else {//if (window / MONTH_DUR < 12) {
-      logger.info("showAll month " + (window / MONTH_DUR));
+     // logger.info("showAll month " + (window / MONTH_DUR));
       firstW -= MONTH_DUR;
       lastPlusSlack += MONTH_DUR;
     }

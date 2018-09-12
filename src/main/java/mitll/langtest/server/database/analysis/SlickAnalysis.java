@@ -486,7 +486,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =
         phoneReportForPhone.getPhoneToWordAndScoreSorted();
 
-    logger.info("keys " + phoneToWordAndScoreSorted.keySet());
+//    logger.info("keys " + phoneToWordAndScoreSorted.keySet());
    // logger.info("values " + phoneToWordAndScoreSorted.values());
     Map<String, List<WordAndScore>> bigramToExample = phoneToWordAndScoreSorted.get(phone);
 

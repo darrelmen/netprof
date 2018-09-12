@@ -52,6 +52,7 @@ import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.PhoneSummary;
+import mitll.langtest.shared.custom.TimeRange;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -282,15 +283,17 @@ public class AnalysisTab extends DivWidget {
     }
 
     if (now - then > 2) {
-      logger.info("useReport took " + (now - then) + " to get report" +
-          "\n\tfor    " + userid + " " + userChosenID +
-          "\n\twords  " + result.getNumScores() +
-          "\n\tphones " + phoneSummary.getPhoneToAvgSorted().size()
+      logger.info("useReport " +
+              "\n\ttook   " + (now - then) + " to get report" +
+              "\n\tfor    " + userid + " " + userChosenID +
+              "\n\twords  " + result.getNumScores() +
+              "\n\tphones " + phoneSummary.getPhoneToAvgSorted().size()
           //+
           //"\n\tphones word and score " + phoneSummary.getPhoneToBigrams().values().size()
       );
     }
     long then2 = now;
+
     Scheduler.get().scheduleDeferred(() -> analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView));
 
     now = System.currentTimeMillis();
@@ -299,7 +302,7 @@ public class AnalysisTab extends DivWidget {
     }
     long then3 = now;
 
-    showWordScores(result.getNumScores(), controller, analysisPlot, bottom, phoneSummary, reqInfo);
+    showWordScores(result.getNumScores(), controller, analysisPlot, bottom, phoneSummary, reqInfo, result.getUserPerformance().getTimeWindow());
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
@@ -507,6 +510,7 @@ public class AnalysisTab extends DivWidget {
    * @param analysisPlot
    * @param lowerHalf
    * @param phoneReport
+   * @param timeWindow
    * @see #useReport
    */
   private void showWordScores(
@@ -515,7 +519,8 @@ public class AnalysisTab extends DivWidget {
       AnalysisPlot analysisPlot,
       Panel lowerHalf,
       PhoneSummary phoneReport,
-      ReqInfo reqInfo) {
+      ReqInfo reqInfo,
+      TimeRange timeWindow) {
     {
       Heading wordsTitle = getHeading(WORDS);
 
@@ -523,7 +528,8 @@ public class AnalysisTab extends DivWidget {
           reqInfo,
           numScores,
           controller, analysisPlot,
-          wordsTitle);
+          wordsTitle,
+          timeWindow);
       {
         DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", wordsTitle);
         wordsContainer.addStyleName("cardBorderShadow");
@@ -561,9 +567,11 @@ public class AnalysisTab extends DivWidget {
       ExerciseController controller,
       AnalysisPlot analysisPlot,
 
-      Heading wordsTitle) {
+      Heading wordsTitle,
+
+      TimeRange timeRange) {
     WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, wordsTitle,
-        numResults, analysisServiceAsync);
+        numResults, analysisServiceAsync, timeRange);
     return wordContainer.getTableWithPager();
   }
 

@@ -651,7 +651,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     phoneToBigramToScore.values().forEach(pair -> pair.values().forEach(Bigram::setScore));
 
-    phoneToBigramToScore.forEach((k, v) -> logger.info("getPhoneReport : " + k + " -> " + v.size() + " : " + v));
+//    phoneToBigramToScore.forEach((k, v) -> logger.info("getPhoneReport : " + k + " -> " + v.size() + " : " + v));
 
     return new MakePhoneReport()
         .getPhoneReport(
