@@ -56,7 +56,7 @@ public class EasyAnalysisTest extends BaseTest {
     logger.info("Got " + performanceReportForUser);
     //  logger.info("Got word score " + performanceReportForUser.getWordScores().size() + " num");
 
-    PhoneReport phoneReport = performanceReportForUser.getPhoneReport();
+    PhoneSummary phoneReport = performanceReportForUser.getPhoneSummary();
     logger.info("phone Report " + phoneReport);
 
     Map<String, PhoneStats> phoneToAvgSorted = phoneReport.getPhoneToAvgSorted();
@@ -71,18 +71,18 @@ public class EasyAnalysisTest extends BaseTest {
 */
     });
     getPerformanceReportForUser2(andPopulate, 7, 729, -1, "b", "b-jj");
-
+/*
     Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = phoneReport.getPhoneToWordAndScoreSorted();
 
     phoneToWordAndScoreSorted.forEach((phone, v) -> {
       // v.sort(Comparator.comparingLong(WordScore::getTimestamp));
 
       logger.info(phone + " = " + v.size() + " words");
-/*      v
+*//*      v
           .forEach(phoneSession -> logger.info("\t" + phone + " = " +
               phoneSession.getWord() + " = " +
-              debugFormat(phoneSession.getTimestamp())));*/
-    });
+              debugFormat(phoneSession.getTimestamp())));*//*
+    });*/
 
     String x = "nj";
     List<WordAndScore> performanceReportForUser2 = getPerformanceReportForUser2(andPopulate, 2, 295, x);

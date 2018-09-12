@@ -34,29 +34,98 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
+import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.AnalysisReport;
+import mitll.langtest.shared.analysis.Bigram;
+import mitll.langtest.shared.analysis.PhoneBigrams;
+import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
+import mitll.langtest.shared.project.ProjectType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 
 public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);
   public static final int MAX = 200;
   public static final int USERID = 1474;
+  public static final int SPANISH = 3;
+  public static final int DEMO_USER = 659;
+
+  @Test
+  public void testPhoneReport() {
+    DatabaseImpl db = getAndPopulate();
+    int projectid = SPANISH;
+    Project project = db.getProject(projectid);
+    SlickAnalysis slickAnalysis = new SlickAnalysis(
+        db.getDatabase(),
+        db.getPhoneDAO(),
+        db.getAudioDAO(),
+        (SlickResultDAO) db.getResultDAO(),
+        project.getLanguage(),
+        projectid,
+        project.getKind() == ProjectType.POLYGLOT);
+
+    AnalysisReport performanceReportForUser = slickAnalysis.getPerformanceReportForUser(DEMO_USER, 0, -1, 0);
+
+    logger.info("Got " + performanceReportForUser);
+    logger.info("phone summary " + performanceReportForUser.getPhoneSummary().getPhoneToAvgSorted());
+
+    long maxValue = Long.MAX_VALUE;
+
+    PhoneBigrams phoneBigramsForPeriod = slickAnalysis.getPhoneBigramsForPeriod(DEMO_USER, -1, 0, maxValue);
+
+    logger.info("bigrams " + phoneBigramsForPeriod);
+
+    Map<String, List<Bigram>> phoneToBigrams = phoneBigramsForPeriod.getPhoneToBigrams();
+    phoneToBigrams.forEach((s, bigrams) -> logger.info(s + " -> " + bigrams.size() + " : " + bigrams));
+
+  //  WordsAndTotal wordScoresForUser = slickAnalysis.getWordScoresForUser(DEMO_USER, -1, -1, 0, maxValue, 0, 100, "");
+
+
+    String b = "b";
+//    List<Bigram> bigrams = phoneToBigrams.get(b);
+    long fiveYearsFromNow = System.currentTimeMillis() + 5 * 365 * 24 * 60 * 60 * 1000L;
+/*
+
+    bigrams.forEach(bigram -> {
+      logger.info(b + " " + bigram + "\n\n\n");
+      List<WordAndScore> nj = slickAnalysis.getPhoneReportFor(DEMO_USER, -1, b, bigram.getBigram(), 0, fiveYearsFromNow);
+
+      if (nj == null) {
+        logger.warn("testPhoneReport no results for " + b + " " + bigram);
+      }
+      else {
+        nj.forEach(wordAndScore -> logger.info(b + " " + bigram + " : " + wordAndScore.getWord()));
+      }
+    });
+*/
+
+    String bigram ="dh-b";
+    logger.info(b + " " + bigram + "\n\n\n");
+    List<WordAndScore> nj = slickAnalysis.getPhoneReportFor(DEMO_USER, -1, b, bigram, 0, fiveYearsFromNow);
+
+    if (nj == null) {
+      logger.warn("testPhoneReport no results for " + b + " " + bigram);
+    }
+    else {
+      nj.forEach(wordAndScore -> logger.info(b + " " + bigram + " : " + wordAndScore.getWord()));
+    }
+
+
+  }
 
   @Test
   public void testAnalysis() {
