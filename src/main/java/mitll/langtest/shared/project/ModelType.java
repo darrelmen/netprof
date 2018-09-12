@@ -1,3 +1,4 @@
+package mitll.langtest.shared.project;
 /*
  *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
@@ -30,30 +31,11 @@
  *
  */
 
-package mitll.langtest.client.services;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.project.DominoProject;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectProperty;
-
-import java.util.List;
-
-public interface ProjectServiceAsync {
-  void update(ProjectInfo info, AsyncCallback<Boolean> async);
-
-  void create(ProjectInfo newProject, AsyncCallback<Integer> async);
-
-  void existsByName(String languageChoice, String name, AsyncCallback<Boolean> async);
-
-  void delete(int id, AsyncCallback<Boolean> async);
-
-  void addPending(int id, boolean doChange, AsyncCallback<DominoUpdateResponse> async);
-
-  void getDominoForLanguage(String lang, AsyncCallback<List<DominoProject>> async);
-
-  void getListProperty(int projid, ProjectProperty key, AsyncCallback<List<String>> async);
-
-  void setListProperty(int projid, ProjectProperty key, List<String> newValue, AsyncCallback<Boolean> async);
+/**
+ * @see mitll.langtest.server.database.project.ProjectDAO#add
+ */
+public enum ModelType implements IsSerializable {
+  HYDRA, KALDI;
 }

@@ -138,6 +138,7 @@ public class ServerProperties {
   private static final String LOG_MAILHOST = "log.mailhost";
   private static final String LOG_MAILFROM = "log.mailfrom";
   private static final String MAIL_FROM = "mail.from";
+
   private static final String IMAGE = "image";
   private static final String NETPROF = "netprof";
   private static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
@@ -147,6 +148,10 @@ public class ServerProperties {
   public static final String HEARTBEAT_REC1 = "heartbeatRec";
 
   private String dbConfig = POSTGRES_DATA2_DIALOG;
+
+  private static final String SCORING_MODEL = "scoringModel";
+  private static final String TALKS_TO_DOMINO = "talksToDomino";
+
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
   @Deprecated
@@ -410,7 +415,7 @@ public class ServerProperties {
    * @Deprecated only for use when importing data from old site
    */
   public String getLessonPlan() {
-    return props.getProperty(LESSON_PLAN_FILE, "");//, props.getProperty(LANGUAGE) + ".json");
+    return props.getProperty(LESSON_PLAN_FILE, "");
   }
 
   public boolean useScoreCache() {
@@ -623,10 +628,10 @@ public class ServerProperties {
     }
     miraClassifierURL = props.getProperty(MIRA_CLASSIFIER_URL, MIRA_DEFAULT);
 
-    props.put("scoringModel", getPropertyDef(MODELS_DIR, ""));
+    props.put(SCORING_MODEL, getPropertyDef(MODELS_DIR, ""));
 
     String lessonPlan = getLessonPlan();
-    if (lessonPlan != null && lessonPlan.startsWith("http")) props.setProperty("talksToDomino", TRUE);
+    if (lessonPlan != null && lessonPlan.startsWith("http")) props.setProperty(TALKS_TO_DOMINO, TRUE);
 
 /*    if (getFontFamily() != null) {
       props.setProperty(FONT_FAMILY, getFontFamily());
@@ -810,6 +815,7 @@ public class ServerProperties {
   private static final int TRIM_SILENCE_BEFORE = 300;
   private static final int TRIM_SILENCE_AFTER = 300;
 
+  /*
   public long getTrimBefore() {
     return getIntPropertyDef("trimBeforeMillis", TRIM_SILENCE_BEFORE);
   }
@@ -817,6 +823,7 @@ public class ServerProperties {
   public long getTrimAfter() {
     return getIntPropertyDef("trimAfterMillis", TRIM_SILENCE_AFTER);
   }
+*/
 
   /**
    * Dialog branch specific config!

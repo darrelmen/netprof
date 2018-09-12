@@ -9,7 +9,9 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.word.WordDAO;
+import mitll.langtest.shared.analysis.PhoneBigrams;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.PhoneSummary;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -41,6 +43,21 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   public PhoneDAO(Database database) {
     super(database);
     initialSetup(database);
+  }
+
+  @Override
+  public PhoneReport getWorstPhonesForResultsForTimeWindow(int userid, Collection<Integer> ids, Project project, long from, long to) {
+    return null;
+  }
+
+  @Override
+  public PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids, Project project) {
+    return null;
+  }
+
+  @Override
+  public PhoneBigrams getPhoneBigrams(int userid, Collection<Integer> ids) {
+    return null;
   }
 
   @Override
@@ -225,7 +242,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   protected PhoneReport getPhoneReport(String sql,
                                        boolean addTranscript,
                                        boolean sortByLatestExample) throws SQLException {
-    //   logger.debug("getPhoneReport query is\n" + sql);
+    //   logger.debug("getPhoneSummary query is\n" + sql);
     Connection connection = getConnection();
     PreparedStatement statement = connection.prepareStatement(sql);
     ResultSet rs = statement.executeQuery();
@@ -276,10 +293,12 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       }
 
       try {
-        WordAndScore wordAndScore = getAndRememberWordAndScore(null, phoneToScores, phoneToWordAndScore,
-            Integer.parseInt(exid), audioAnswer, scoreJson, resultTime,
-            "", wseq, word,
-            (int)rid, phone, seq, phoneScore, database.getLanguage());
+        WordAndScore wordAndScore = null;
+
+//            getAndRememberWordAndScore(null, phoneToScores, phoneToWordAndScore,
+//            Integer.parseInt(exid), audioAnswer, scoreJson, resultTime,
+//            "", wseq, word,
+//            (int)rid, phone, seq, phoneScore, database.getLanguage());
 
         if (addTranscript) {
           addTranscript(stringToMap, scoreJson, wordAndScore, "unknown");
@@ -294,7 +313,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     }
     finish(connection, statement, rs, sql);
 
-    return new MakePhoneReport().getPhoneReport(phoneToScores, phoneToWordAndScore, totalScore, totalItems, sortByLatestExample, false);
+    return null;//new MakePhoneReport().getPhoneSummary(phoneToScores, null, bigramToCount, bigramToScore, totalScore, totalItems);
   }
 
   /**
@@ -306,7 +325,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @see #getPhoneReport
    */
 /*  private PhoneReport getWorstPhones(long userid, List<String> exids, Map<String, String> idToRef) throws SQLException {
-    return getPhoneReport(getJoinSQL(userid, exids), idToRef, false, true);
+    return getPhoneSummary(getJoinSQL(userid, exids), idToRef, false, true);
   }*/
   private String getResultIDJoinSQL(long userid, Collection<Integer> ids) {
     String filterClause = ResultDAO.RESULTS + "." + ResultDAO.ID + " in (" + getInList(ids) + ")";

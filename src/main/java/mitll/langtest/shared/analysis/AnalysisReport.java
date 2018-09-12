@@ -1,5 +1,7 @@
 package mitll.langtest.shared.analysis;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.server.database.analysis.IAnalysis;
 
 import java.io.Serializable;
@@ -10,30 +12,42 @@ import java.io.Serializable;
 public class AnalysisReport implements Serializable {
   private int req;
   private UserPerformance userPerformance;
-  private PhoneReport phoneReport;
+  private PhoneSummary phoneReport;
   private int numScores;
+  private long serverTime;
+
   public AnalysisReport() {
   }
 
   /**
-   * @see IAnalysis#getPerformanceReportForUser(int, int, int, int)
    * @param userPerformance
-   * @paramx wordScores
    * @param phoneReport
+   * @paramx wordScores
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getPerformanceReportForUser(int, int, int, int)
    */
   public AnalysisReport(UserPerformance userPerformance,
-                        PhoneReport phoneReport,
+                        PhoneSummary phoneReport,
                         int numScores,
                         int req) {
     this.userPerformance = userPerformance;
     this.phoneReport = phoneReport;
     this.numScores = numScores;
-    this.req=req;
+    this.req = req;
   }
 
-  public UserPerformance getUserPerformance() {  return userPerformance;  }
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisTab#useReport
+   * @return
+   */
+  public UserPerformance getUserPerformance() {
+    return userPerformance;
+  }
 
-  public PhoneReport getPhoneReport() {
+  /**
+   *
+   * @return
+   */
+  public PhoneSummary getPhoneSummary() {
     return phoneReport;
   }
 
@@ -45,10 +59,19 @@ public class AnalysisReport implements Serializable {
     return req;
   }
 
+  public long getServerTime() {
+    return serverTime;
+  }
+
+  public void setServerTime(long serverTime) {
+    this.serverTime = serverTime;
+  }
+
   public String toString() {
     return "UserPerf:" +
-        "\n\tperf :       " + userPerformance +
-        "\n\tword scores  " +numScores+ " scores " +
+        "\n\tperf         " + userPerformance +
+        "\n\ttook         " + serverTime +
+        "\n\tword scores  " + numScores + " scores " +
         "\n\tphone scores " + phoneReport;
     //+
     //   "\n\tphone to word " + phoneReport.getPhoneToWordAndScoreSorted().size();

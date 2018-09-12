@@ -48,7 +48,7 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
   private int end;                    /// End time in seconds
   private int index;                    // character index from start of string
 
-  private String displayEvent;
+  private String displayEvent = "";
 
   public TranscriptSegment() {
   }
@@ -69,7 +69,7 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     start = toInt(s);
     end = toInt(e);
     this.displayEvent = displayName;
-    this.index=index;
+    this.index = index;
   }
 
   public float getStart() {
@@ -115,6 +115,6 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
 
   public String toString() {
     return "[" + roundToHundredth(getStart()) + "-" + roundToHundredth(getEnd()) + "] " +
-        getEvent() + " (" + roundToHundredth(getScore()) + ") @ "+index;
+        getEvent() + " (" + roundToHundredth(getScore()) + ") @ " + index;
   }
 }

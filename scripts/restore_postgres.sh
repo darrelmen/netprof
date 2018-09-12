@@ -26,7 +26,12 @@ date
 psql -U postgres --host 127.0.0.1 -c "drop database netprof_old;"
 
 # so if everything goes really badly we can go back, and lets us create a new netprof database
-date
+
+# close all connections - this means shutting down the three tomcat instances
+# if you don't first you'll see a message like:
+# ERROR:  database "netprof" is being accessed by other users
+# DETAIL:  There are 60 other sessions using the database.
+
 psql -U postgres --host 127.0.0.1 -c "alter database netprof rename to netprof_old;"
 
 # create database from dump

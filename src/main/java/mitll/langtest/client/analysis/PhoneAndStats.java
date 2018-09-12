@@ -47,19 +47,16 @@ class PhoneAndStats implements Comparable<PhoneAndStats> {
 
   private final int avg;
   private final int count;
-  private final float ndiff;
-  private int rank;
 
   /**
    * @param phone
    * @param count
    * @see PhoneContainer#getPhoneStatuses
    */
-  public PhoneAndStats(String phone, int avg, int count, float ndiff) {
+   PhoneAndStats(String phone, int avg, int count) {
     this.phone = phone;
     this.avg = avg;
     this.count = count;
-    this.ndiff = ndiff;
   }
 
   /**
@@ -74,24 +71,9 @@ class PhoneAndStats implements Comparable<PhoneAndStats> {
    * @return
    * @see PhoneContainer#getItemColumn()
    */
-/*
-  public int getInitial() {
-    return score;
-  }
-*/
-  public int getAvg() {
+   int getAvg() {
     return avg;
   }
-
-  /**
-   * @return
-   * @seez PhoneContainer#getDiffSorter(Column, List)
-   */
-/*
-  public int getDiff() {
-    return avg - score;
-  }
-*/
 
   /**
    * @return
@@ -105,17 +87,5 @@ class PhoneAndStats implements Comparable<PhoneAndStats> {
   public int compareTo(PhoneAndStats o) {
     int i = Integer.compare(avg, o.getAvg());
     return i == 0 ? phone.compareTo(o.getPhone()) : i;
-  }
-
-  public int getRank() {
-    return rank;
-  }
-
-  public void setRank(int rank) {
-    this.rank = rank;
-  }
-
-  public float getNdiff() {
-    return ndiff;
   }
 }

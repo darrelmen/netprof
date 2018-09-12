@@ -33,6 +33,7 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -64,13 +65,23 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   private final Logger logger = Logger.getLogger("PhoneExampleContainer");
 
   static final String CLICK_ON = "Click on an item to review.";
+  /**
+   * @see #header
+   */
   private static final String EXAMPLES_OF_SOUND = "Examples of sound";
 
+  /**
+   * @see #addItems
+   */
   private static final String WORDS_USING = "Vocabulary with ";
 
-  private static final int ITEM_WIDTH = 200;
-
-  private String phone;
+  private static final int ITEM_WIDTH = 250;
+  /**
+   * @see #getItemColumn()
+   * @see #addItems(String, String, Collection, int)
+   */
+  private String phone, bigram;
+  private boolean first;
   private final boolean isSpanish;
   private final TextHeader header = new TextHeader(EXAMPLES_OF_SOUND);
   private final Heading heading;
@@ -107,18 +118,32 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     Panel tableWithPager = super.getTableWithPager(listOptions);
     tableWithPager.getElement().setId("PhoneExampleContainer");
     tableWithPager.addStyleName("floatLeftAndClear");
+    tableWithPager.getElement().getStyle().setProperty("minWidth", "334px");  // helps safari in layout
+
     return tableWithPager;
   }
 
   /**
    * @param phone
+   * @param bigram
    * @param sortedHistory
    * @param maxExamples
-   * @see PhoneContainer#clickOnPhone2
+   * @see BigramContainer#clickOnPhone2
    */
-  void addItems(String phone, Collection<WordAndScore> sortedHistory, int maxExamples) {
+  void addItems(String phone, String bigram, Collection<WordAndScore> sortedHistory, int maxExamples) {
     this.phone = phone;
-    heading.setText(WORDS_USING + phone);
+
+    heading.setText(WORDS_USING + bigram);
+
+    String[] split = bigram.split("-");
+    if (split[0].equalsIgnoreCase(phone)) {
+      first = true;
+      this.bigram = split[1];
+    } else {
+      first = false;
+      this.bigram = split[0];
+    }
+
     {
       boolean onlyFirstFew = sortedHistory != null && sortedHistory.size() > maxExamples;
       String subtext = sortedHistory == null ? "" : sortedHistory.size() > maxExamples ? "first " + maxExamples : "" + sortedHistory.size();
@@ -127,6 +152,9 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     clear();
 
     if (sortedHistory != null) {
+      StringBuffer buffer = new StringBuffer();
+      sortedHistory.forEach(wordAndScore -> buffer.append(wordAndScore.getPronScore()).append(", "));
+  //    logger.info("PhoneExampleContainer Scores " + buffer);
       sortedHistory.forEach(this::addItem);
     } else {
       logger.warning("PhoneExampleContainer.addItems null items");
@@ -134,21 +162,6 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
     flush();
     addPlayer();
-  }
-
-  private ColumnSortEvent.ListHandler<WordAndScore> getEnglishSorter(Column<WordAndScore, SafeHtml> englishCol,
-                                                                     List<WordAndScore> dataList) {
-    ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol,
-        (o1, o2) -> {
-          if (o1 == o2) {
-            return 0; // how?
-          }
-
-          // Compare the name columns.
-          return (o1 == null) ? -1 : (o2 == null) ? 1 : o1.getWord().compareTo(o2.getWord());
-        });
-    return columnSortHandler;
   }
 
   @Override
@@ -168,27 +181,44 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       logger.warning("Got " + e);
     }
 
-    new TooltipHelper().addTooltip(table, CLICK_ON);
+    new TooltipHelper().createAddTooltip(table, CLICK_ON, Placement.TOP);
+  }
+
+  private ColumnSortEvent.ListHandler<WordAndScore> getEnglishSorter(Column<WordAndScore, SafeHtml> englishCol,
+                                                                     List<WordAndScore> dataList) {
+    ColumnSortEvent.ListHandler<WordAndScore> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0; // how?
+          }
+
+          // Compare the name columns.
+          return (o1 == null) ? -1 : (o2 == null) ? 1 : o1.getWord().compareTo(o2.getWord());
+        });
+    return columnSortHandler;
   }
 
   /**
    * @return
-   * @see  #addColumnsToTable
+   * @see #addColumnsToTable
    */
   private Column<WordAndScore, SafeHtml> getItemColumn() {
     return new Column<WordAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, WordAndScore object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
-        gotClick(object,event);
+        gotClick(object, event);
       }
 
       @Override
       public SafeHtml getValue(WordAndScore shell) {
-        String columnText = new WordTable().toHTML(shell.getFullTranscript(), phone);
+        String columnText = new WordTable().toHTML(shell.getFullTranscript(), phone, bigram, first);
         if (columnText.isEmpty()) {
           String foreignLanguage = shell.getWord();
           if (isSpanish) foreignLanguage = foreignLanguage.toUpperCase();
+
+
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
         }
         return getSafeHtml(columnText);

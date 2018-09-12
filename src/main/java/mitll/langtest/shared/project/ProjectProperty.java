@@ -6,9 +6,13 @@ public enum ProjectProperty implements IsSerializable {
   WEBSERVICE_HOST("webserviceHost", PropertyType.STRING),
   WEBSERVICE_HOST_PORT("webserviceHostPort", PropertyType.INTEGER),
   SHOW_ON_IOS("showOniOS", PropertyType.BOOLEAN),
+  /**
+   *
+   */
   AUDIO_PER_PROJECT("audioPerProject", PropertyType.BOOLEAN),
   SWAP_PRIMARY_AND_ALT("swapPrimaryAndAlt", PropertyType.BOOLEAN),
   MODELS_DIR("MODELS_DIR", PropertyType.STRING),
+  MODEL_TYPE("MODEL_TYPE", PropertyType.STRING),
   REPORT_LIST("reportList", PropertyType.LIST);
 
   public enum PropertyType implements IsSerializable {

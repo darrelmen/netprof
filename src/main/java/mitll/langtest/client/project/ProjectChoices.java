@@ -648,7 +648,7 @@ public class ProjectChoices extends ThumbnailChoices {
   }
 
   private Map<String, String> getProps(SlimProject projectForLang) {
-    return projectForLang.getProps();
+    return projectForLang.getPropertyValue();
   }
 
   /**

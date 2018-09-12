@@ -34,9 +34,7 @@ package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.WordsAndTotal;
-import mitll.langtest.shared.analysis.AnalysisReport;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.*;
 
 import java.util.List;
 
@@ -47,6 +45,11 @@ public interface IAnalysis {
                                      long from, long to,
                                      int rangeStart, int rangeEnd, String sort);
 
-  List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to);
+  List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, String bigram, long from, long to);
   List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings);
+
+//  PhoneSummary getPhoneSummary(int userid, int minRecordings, int listid);
+  PhoneSummary getPhoneSummaryForPeriod(int userid, int listid, long from, long to);
+
+  PhoneBigrams getPhoneBigramsForPeriod(int userid, int listid, long from, long to);
 }

@@ -577,7 +577,7 @@ public class AudioFileHelper implements AlignDecode {
       decodeAndRemember(exercise, attribute, true, userID, absoluteFile);
       // }
     } else {
-      logger.warn("skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
+      logger.warn("decodeOneAttribute skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
     }
   }
 
@@ -594,7 +594,14 @@ public class AudioFileHelper implements AlignDecode {
                                         boolean doDecode, int userID, File absoluteFile) {
     String audioRef = attribute.getAudioRef();
 
-    if (DEBUG) logger.info("decodeAndRemember alignment -- " + exercise.getID() + " " + attribute);
+    if (DEBUG) {
+      logger.info("decodeAndRemember alignment " +
+          "\n\texid    " + exercise.getID() +
+          "\n\tfl      " + exercise.getForeignLanguage() +
+          "\n\ten      " + exercise.getEnglish() +
+          "\n\tcontext " + exercise.isContext() +
+          "\n\tattr    " + attribute);
+    }
 
 //    boolean doHydec = false;
     // Do alignment...
@@ -606,11 +613,17 @@ public class AudioFileHelper implements AlignDecode {
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoDecode(false);
 
     PrecalcScores precalcScores = null;
+    String transcript = attribute.getTranscript();
+
+    if (!transcript.equalsIgnoreCase(exercise.getForeignLanguage())) {
+      logger.warn("hmm, the audio transscript " + transcript + " doesn't match the exercise " + exercise.getForeignLanguage());
+    }
+
     try {
       precalcScores = checkForWebservice(
           exercise.getID(),
           exercise.getEnglish(),
-          attribute.getTranscript(),
+          transcript,
           exercise.getProjectID(),
           userID,
           absoluteFile);
@@ -627,7 +640,7 @@ public class AudioFileHelper implements AlignDecode {
     PretestScore alignmentScore = precalcScores == null ? getAlignmentScore(exercise, absolutePath, options) :
         getPretestScoreMaybeUseCache(-1,
             absolutePath,
-            attribute.getTranscript(),
+            transcript,
             exercise.getTransliteration(),
             ImageOptions.getDefault(),
             exercise.getID(),
@@ -640,9 +653,6 @@ public class AudioFileHelper implements AlignDecode {
     AudioAnswer decodeAnswer = doDecode ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis) : new AudioAnswer();
 
     DecodeAlignOutput decodeOutput = new DecodeAlignOutput(decodeAnswer, true);
-    //options.setUseOldSchool(doHydec);
-    PretestScore alignmentScoreOld = /*doHydec ? getAlignmentScore(exercise, absolutePath, options) :*/ new PretestScore();
-    DecodeAlignOutput alignOutputOld = new DecodeAlignOutput(alignmentScoreOld, false);
 
     // Do decoding, and record alignment info we just got in the database ...
     //AudioAnswer decodeAnswerOld = doHydec ? getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis, true) : new AudioAnswer();
@@ -658,7 +668,7 @@ public class AudioFileHelper implements AlignDecode {
         alignOutput,
         decodeOutput,
 
-        alignOutputOld,
+        new DecodeAlignOutput(new PretestScore(), false),
         decodeOutputOld,
 
         attribute.isMale(),
@@ -772,7 +782,8 @@ public class AudioFileHelper implements AlignDecode {
                                          DecodeAlignOutput alignOutputOld,
                                          DecodeAlignOutput decodeOutputOld,
 
-                                         boolean isMale, String speed,
+                                         boolean isMale,
+                                         String speed,
                                          String model) {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(duration);
     // logger.debug("validity dur " + validity.durationInMillis);
@@ -790,7 +801,8 @@ public class AudioFileHelper implements AlignDecode {
           alignOutputOld,
           decodeOutputOld,
 
-          isMale, speed,
+          isMale,
+          speed,
           model);
       // TODO : add word and phone table for refs
       //	recordWordAndPhoneInfo(decodeAnswer, answerID);
@@ -993,6 +1005,14 @@ public class AudioFileHelper implements AlignDecode {
    */
 
   private PretestScore getAlignmentScore(ClientExercise exercise, String testAudioPath, DecoderOptions options) {
+    if (DEBUG) {
+      logger.info("getAlignmentScore alignment " +
+          "\n\texid    " + exercise.getID() +
+          "\n\tfl      " + exercise.getForeignLanguage() +
+          "\n\ten      " + exercise.getEnglish() +
+          "\n\tcontext " + exercise.isContext() +
+          "\n\tattr    " + testAudioPath);
+    }
     return getASRScoreForAudio(0, testAudioPath,
         exercise.getForeignLanguage(),
         exercise.getTransliteration(),

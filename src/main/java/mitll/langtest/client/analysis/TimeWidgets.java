@@ -34,6 +34,7 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.google.gwt.user.client.ui.HTML;
 
 /**
@@ -53,6 +54,7 @@ class TimeWidgets {
   private final Button month;
   private final HTML display;
   private final Heading score;
+  ListBox timeScale;
 
   /**
    * @param prevButton
@@ -74,7 +76,8 @@ class TimeWidgets {
               Button month,
               Button minute,
 
-              Heading score) {
+              Heading score,
+              ListBox timeScale) {
     this.prevButton = prevButton;
     this.nextButton = nextButton;
     this.display = display;
@@ -84,6 +87,7 @@ class TimeWidgets {
     this.month = month;
     this.minute = minute;
     this.score = score;
+    this.timeScale=timeScale;
   }
 
   /**
@@ -106,6 +110,7 @@ class TimeWidgets {
     if (week != null) week.setActive(false);
     if (month != null) month.setActive(false);
     if (minute != null) minute.setActive(false);
+    if (timeScale != null) timeScale.setSelectedIndex(timeScale.getItemCount()-1);
   }
 
   Button getPrevButton() {

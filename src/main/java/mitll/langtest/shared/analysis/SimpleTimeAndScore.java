@@ -91,7 +91,6 @@ public class SimpleTimeAndScore implements Serializable {
   }
 
   /**
-   * TODOx : make this an int
    *
    * @return
    */

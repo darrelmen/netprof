@@ -38,16 +38,16 @@ import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BasePhoneDAO extends DAO {
-  private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
+
+class BasePhoneDAO extends DAO {
+  //private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
+
 
   static final String PHONE = "phone";
   static final String SEQ = "seq";
@@ -55,9 +55,12 @@ public class BasePhoneDAO extends DAO {
   static final String DURATION = "duration";
   static final String RID1 = "RID";
 
-  private Map<String, Long> sessionToLong = new HashMap<>();
+  protected Map<String, Long> sessionToLong = new HashMap<>();
 
-  BasePhoneDAO(Database database) {    super(database);  }
+  BasePhoneDAO(Database database) {
+    super(database);
+  }
+
 
   /**
    * @param jsonToTranscript
@@ -80,7 +83,7 @@ public class BasePhoneDAO extends DAO {
    * look it up in a better way
    *
    * @param phoneToScores
-   * @param phoneToWordAndScore
+   * @param phoneToBigramToWS
    * @param exid
    * @param audioAnswer
    * @param scoreJson
@@ -91,6 +94,7 @@ public class BasePhoneDAO extends DAO {
    * @param rid
    * @param phone
    * @param seq
+   * @param prevScore
    * @param phoneScore
    * @param language
    * @return
@@ -98,7 +102,7 @@ public class BasePhoneDAO extends DAO {
    */
   WordAndScore getAndRememberWordAndScore(String refAudioForExercise,
                                           Map<String, List<PhoneAndScore>> phoneToScores,
-                                          Map<String, List<WordAndScore>> phoneToWordAndScore,
+                                          Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
                                           int exid,
                                           String audioAnswer,
                                           String scoreJson,
@@ -108,12 +112,14 @@ public class BasePhoneDAO extends DAO {
                                           String word,
                                           int rid,
                                           String phone,
+                                          String bigram,
                                           int seq,
-                                          float phoneScore,
+                                          float prevScore, float phoneScore,
                                           String language) {
     PhoneAndScore phoneAndScore = getAndRememberPhoneAndScore(phoneToScores, phone, phoneScore, resultTime, getSessionTime(sessionToLong, device));
 
-    List<WordAndScore> wordAndScores = phoneToWordAndScore.computeIfAbsent(phone, k -> new ArrayList<>());
+    Map<String, List<WordAndScore>> bigramToWords = phoneToBigramToWS.computeIfAbsent(phone, k -> new HashMap<>());
+    List<WordAndScore> wordAndScores1 = bigramToWords.computeIfAbsent(bigram, k -> new ArrayList<>());
 
     String webPageAudioRef = database.getWebPageAudioRef(language, audioAnswer);
 
@@ -126,7 +132,7 @@ public class BasePhoneDAO extends DAO {
 
     WordAndScore wordAndScore = new WordAndScore(exid,
         word,
-        phoneScore,
+        prevScore, phoneScore,
         rid,
         wseq,
         seq,
@@ -135,7 +141,7 @@ public class BasePhoneDAO extends DAO {
         scoreJson,
         resultTime);
 
-    wordAndScores.add(wordAndScore);
+    wordAndScores1.add(wordAndScore);
     phoneAndScore.setWordAndScore(wordAndScore);
 
     return wordAndScore;
@@ -147,7 +153,7 @@ public class BasePhoneDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSessionTime
    */
-  private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
+  protected Long getSessionTime(Map<String, Long> sessionToLong, String device) {
     Long parsedTime = sessionToLong.get(device);
 
     if (parsedTime == null) {

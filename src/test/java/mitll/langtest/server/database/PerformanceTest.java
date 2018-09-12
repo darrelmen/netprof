@@ -212,7 +212,7 @@ public class PerformanceTest extends BaseTest {
     }
     // List<WordScore> wordScoresForUser = database.getAnalysis(-1).getWordScoresForUser(id, 1);
 
-    PhoneReport report =performanceReportForUser.getPhoneReport();// database.getAnalysis(-1).getPhonesForUser(id, 1, -1);
+    PhoneSummary report =performanceReportForUser.getPhoneSummary();// database.getAnalysis(-1).getPhonesForUser(id, 1, -1);
 
     Map<String, PhoneStats> phoneToAvgSorted = report.getPhoneToAvgSorted();
     if (phoneToAvgSorted == null) {

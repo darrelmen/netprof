@@ -79,6 +79,21 @@ class H2Analysis extends Analysis implements IAnalysis {
     return new UserPerformance(id);
   }
 
+/*  @Override
+  public PhoneSummary getPhoneSummary(int userid, int minRecordings, int listid) {
+    return null;
+  }*/
+
+  @Override
+  public PhoneSummary getPhoneSummaryForPeriod(int userid, int listid, long from, long to) {
+    return null;
+  }
+
+  @Override
+  public PhoneBigrams getPhoneBigramsForPeriod(int userid, int listid, long from, long to) {
+    return null;
+  }
+
   @Override
   public AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid, int req) {
     return null;
@@ -90,7 +105,7 @@ class H2Analysis extends Analysis implements IAnalysis {
   }
 
   @Override
-  public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, long from, long to) {
+  public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, String bigram, long from, long to) {
     return null;
   }
 
@@ -188,14 +203,14 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @seez mitll.langtest.server.LangTestDatabaseImpl#getPhoneScores
    */
   public PhoneReport getPhonesForUser(int id, int minRecordings, int listid) {
-    try {
+/*    try {
       String sql = getPerfSQL(id);
       Map<Integer, UserInfo> best = getBest(sql, minRecordings);
       UserInfo next = best.isEmpty() ? null : best.values().iterator().next();
-      return getPhoneReport(id, next, null);
+      return getPhoneSummary(id, next, null);
     } catch (Exception ee) {
       logException(ee);
-    }
+    }*/
     return null;
   }
 

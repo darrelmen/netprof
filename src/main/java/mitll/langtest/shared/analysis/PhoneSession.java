@@ -180,10 +180,6 @@ public class PhoneSession implements Serializable, Comparable<PhoneSession> {
     return (start + end) / 2;
   }
 
-/*  public List<WordAndScore> getExamples() {
-    return examples;
-  }*/
-
   public long getSessionStart() {
     return sessionStart;
   }

@@ -37,9 +37,7 @@ import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.WordsAndTotal;
-import mitll.langtest.shared.analysis.AnalysisReport;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -87,7 +85,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   @Override
   public Collection<UserInfo> getUsersWithRecordings() throws DominoSessionException, RestrictedOperationException {
     long then = System.currentTimeMillis();
-    if (hasTeacherPerm(-1)) {
+    if (hasTeacherPerm()) {
       int projectIDFromUser = getProjectIDFromUser();
       logger.info("getUsersWithRecordings for project # " + projectIDFromUser);
       List<UserInfo> userInfo = db
@@ -115,17 +113,20 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req)
       throws DominoSessionException, RestrictedOperationException {
     // logger.info("getPerformanceForUser " +userid+ " list " + listid + " min " + minRecordings);
-    int projectID = getProjectIDFromUser();
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    int projectID = getProjectIDFromUser(userIDFromSessionOrDB);
     if (projectID == -1) {
       return new AnalysisReport();
     } else {
-      if (hasTeacherPerm(userid)) {
+      if (hasTeacherPermOrSelf(userid, userIDFromSessionOrDB)) {
         long then = System.currentTimeMillis();
         AnalysisReport performanceReportForUser = getSlickAnalysis(projectID)
             .getPerformanceReportForUser(userid, minRecordings, listid, req);
         long now = System.currentTimeMillis();
 
-        logger.info("getPerformanceReportForUser : " + performanceReportForUser + " took " + (now - then) + " millis");
+        long serverTime = now - then;
+        performanceReportForUser.setServerTime(serverTime);
+        logger.info("getPerformanceReportForUser : " + performanceReportForUser + "\n\ttook " + serverTime + " millis");
         return performanceReportForUser;
       } else {
         throw getRestricted("performance report");
@@ -133,7 +134,44 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     }
   }
 
-  private boolean hasTeacherPerm(int userid) throws DominoSessionException {
+/*
+  public PhoneSummary getPhoneSummary(int userid, int minRecordings, int listid, int req)
+      throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    int projectID = getProjectIDFromUser(userIDFromSessionOrDB);
+    if (projectID == -1) {
+      return new PhoneSummary();
+    } else {
+      if (hasTeacherPermOrSelf(userid, userIDFromSessionOrDB)) {
+        long then = System.currentTimeMillis();
+        PhoneSummary phoneSummary = getSlickAnalysis(projectID).getPhoneSummary(userid, minRecordings, listid);
+        long now = System.currentTimeMillis();
+
+        long serverTime = now - then;
+        phoneSummary.setServerTime(serverTime);
+        logger.info("getPerformanceReportForUser : " + phoneSummary + "\n\ttook " + serverTime + " millis");
+        return phoneSummary;
+      } else {
+        throw getRestricted("phone summary report");
+      }
+    }
+  }
+*/
+
+  /**
+   * So if you're asking about performance data about yourself you are allowed.
+   * If you're a teacher, you can ask about everyone.
+   *
+   * @param userid
+   * @param sessionUser
+   * @return
+   * @throws DominoSessionException
+   */
+  private boolean hasTeacherPermOrSelf(int userid, int sessionUser) throws DominoSessionException {
+    return (userid == sessionUser) || hasTeacherPerm();
+  }
+
+  private boolean hasTeacherPerm() throws DominoSessionException {
     User userFromSession = getUserFromSession();
     if (userFromSession == null) {
       logger.error("no user in session?");
@@ -141,13 +179,11 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     }
     Collection<User.Permission> permissions = userFromSession.getPermissions();
     return
-        userFromSession.getID() == userid || // self
-            permissions.contains(User.Permission.TEACHER_PERM) ||
+        permissions.contains(User.Permission.TEACHER_PERM) ||
             permissions.contains(User.Permission.PROJECT_ADMIN);
   }
 
   /**
-   *
    * @param userid
    * @param minRecordings
    * @param listid
@@ -162,22 +198,69 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider
    */
   @Override
-  public WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid,
+  public WordsAndTotal getWordScoresForUser(int userid,
+                                            int minRecordings, int listid,
                                             long fromTime, long toTime,
                                             int rangeStart, int rangeEnd, String sort, int reqid) throws DominoSessionException {
+
+    long then = System.currentTimeMillis();
     int projectID = getProjectIDFromUser();
 
-//    WordsAndTotal wordsAndTotal = new WordsAndTotal();
     WordsAndTotal wordScoresForUser = getSlickAnalysis(projectID)
         .getWordScoresForUser(userid, minRecordings, listid, fromTime, toTime, rangeStart, rangeEnd, sort);
 
     wordScoresForUser.setReq(reqid);
 
+    long now = System.currentTimeMillis();
+    wordScoresForUser.setServerTime((now - then));
     return wordScoresForUser;
-    //return new WordsAndTotal(wordScoresForUser, reqid);
   }
 
   /**
+   * @param userid
+   * @param listid
+   * @param phone
+   * @param bigram
+   * @param from
+   * @param to
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   * @see mitll.langtest.client.analysis.BigramContainer#clickOnPhone2
+   */
+  @Override
+  public List<WordAndScore> getPerformanceReportForUserForPhone(int userid,
+                                                                int listid,
+                                                                String phone,
+                                                                String bigram,
+                                                                long from,
+                                                                long to)
+      throws DominoSessionException, RestrictedOperationException {
+    logger.info("getPerformanceForUser " + userid + " list " + listid + " phone " + phone + " " + bigram + " " + from + " to " + to);
+    long then = System.currentTimeMillis();
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    int projectID = getProjectIDFromUser(userIDFromSessionOrDB);
+    if (projectID == -1) {
+      return new ArrayList<>();
+    } else {
+      if (hasTeacherPermOrSelf(userid, userIDFromSessionOrDB)) {
+
+        long now = System.currentTimeMillis();
+
+        long serverTime = now - then;
+
+        List<WordAndScore> phoneReportFor =
+            getSlickAnalysis(projectID).getPhoneReportFor(userid, listid, phone, bigram, from, to);
+
+        return phoneReportFor;
+      } else {
+        throw getRestricted("performance report for phone");
+      }
+    }
+  }
+
+  /**
+   *
    * @param userid
    * @param listid
    * @param phone
@@ -186,25 +269,95 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @return
    * @throws DominoSessionException
    * @throws RestrictedOperationException
-   * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone2
    */
   @Override
-  public List<WordAndScore> getPerformanceReportForUserForPhone(int userid,
-                                                                int listid,
-                                                                String phone,
-                                                                long from,
-                                                                long to)
+  public List<Bigram> getPerformanceReportForUserForPhoneBigrams(int userid,
+                                                                 int listid,
+                                                                 String phone,
+                                                                 long from,
+                                                                 long to)
       throws DominoSessionException, RestrictedOperationException {
-    // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
+    logger.info("getPerformanceForUser " + userid + " list " + listid + " phone " + phone);
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     int projectID = getProjectIDFromUser();
-    if (projectID == -1) {
+    if (projectID == -1) {  // how can this happen??
       return new ArrayList<>();
     } else {
-      if (hasTeacherPerm(userid)) {
-        return getSlickAnalysis(projectID)
-            .getPhoneReportFor(userid, listid, phone, from, to);
+      if (hasTeacherPermOrSelf(userid, userIDFromSessionOrDB)) {
+        return getSlickAnalysis(projectID).getBigramPhoneReportFor(userid, listid, phone, from, to);
+      } else {
+        throw getRestricted("performance report for phone bigrams");
+      }
+    }
+  }
+
+/*  @Override
+  public PhoneReport getPhoneSummary(int userid, int listid, long from, long to, int reqid)
+      throws DominoSessionException, RestrictedOperationException {
+    logger.info("getPerformanceForUser " + userid + " list " + listid);
+    long then = System.currentTimeMillis();
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    int projectID = getProjectIDFromUser();
+    if (projectID == -1) {
+      return new PhoneReport();
+    } else {
+      if (hasTeacherPermOrSelf(userid, userIDFromSessionOrDB)) {
+        PhoneReport phoneReport =
+            getSlickAnalysis(projectID).getPhoneReportForPeriod(userid, listid, from, to).setReqid(reqid);
+
+        long now = System.currentTimeMillis();
+
+        long serverTime = now - then;
+
+        phoneReport.setServerTime(serverTime);
+
+        return phoneReport;
       } else {
         throw getRestricted("performance report for phone");
+      }
+    }
+  }*/
+
+  public PhoneSummary getPhoneSummary(int userid, int listid, long from, long to, int reqid)
+      throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    int projectID = getProjectIDFromUser(userIDFromSessionOrDB);
+    if (projectID == -1) {
+      return new PhoneSummary();
+    } else {
+      if (hasTeacherPermOrSelf(userid, userIDFromSessionOrDB)) {
+        long then = System.currentTimeMillis();
+        PhoneSummary phoneSummary = getSlickAnalysis(projectID).getPhoneSummaryForPeriod(userid, listid, from, to).setReqid(reqid);
+        long now = System.currentTimeMillis();
+
+        long serverTime = now - then;
+        phoneSummary.setServerTime(serverTime);
+        logger.info("getPhoneSummary : " + phoneSummary + "\n\ttook " + serverTime + " millis");
+        return phoneSummary;
+      } else {
+        throw getRestricted("phone summary report");
+      }
+    }
+  }
+
+  public PhoneBigrams getPhoneBigrams(int userid, int listid, long from, long to, int reqid)
+      throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    int projectID = getProjectIDFromUser(userIDFromSessionOrDB);
+    if (projectID == -1) {
+      return new PhoneBigrams();
+    } else {
+      if (hasTeacherPermOrSelf(userid, userIDFromSessionOrDB)) {
+        long then = System.currentTimeMillis();
+        PhoneBigrams phoneBigrams = getSlickAnalysis(projectID).getPhoneBigramsForPeriod(userid, listid, from, to).setReqid(reqid);
+        long now = System.currentTimeMillis();
+
+        long serverTime = now - then;
+        phoneBigrams.setServerTime(serverTime);
+        logger.info("getPhoneBigrams : " + phoneBigrams + "\n\ttook " + serverTime + " millis");
+        return phoneBigrams;
+      } else {
+        throw getRestricted("phone bigrams report");
       }
     }
   }
@@ -219,7 +372,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
         (SlickResultDAO) db.getResultDAO(),
         project.getLanguage(),
         projectID,
-        project.getKind()== ProjectType.POLYGLOT);
+        project.getKind() == ProjectType.POLYGLOT);
   }
 
   /**

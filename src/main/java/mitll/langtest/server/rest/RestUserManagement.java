@@ -123,7 +123,6 @@ public class RestUserManagement {
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
   protected String configDir;
-//  private PathHelper pathHelper;
 
   /**
    * @param db
@@ -133,7 +132,6 @@ public class RestUserManagement {
   public RestUserManagement(DatabaseImpl db, ServerProperties serverProps) {
     this.db = db;
     this.serverProps = serverProps;
-    // this.pathHelper = pathHelper;
   }
 
   /**
@@ -142,16 +140,12 @@ public class RestUserManagement {
    * TODO : accept forgot user name without email arg
    *
    * @param request
-   * @param response
    * @param queryString
    * @param toReturn
    * @return
    * @see mitll.langtest.server.ScoreServlet#doGet(HttpServletRequest, HttpServletResponse)
    */
-  public boolean doGet(HttpServletRequest request,
-                       HttpServletResponse response,
-                       String queryString,
-                       JSONObject toReturn) {
+  public boolean doGet(HttpServletRequest request, String queryString, JSONObject toReturn) {
     if (queryString.startsWith(FORGOT_USERNAME)) {
       String[] split1 = getParams(queryString);
       if (split1.length != 1) {
@@ -392,7 +386,6 @@ public class RestUserManagement {
    * @return
    */
   private boolean forgotUsername(String email) {
-    // String hash = Md5Hash.getHash(email);
     List<String> valid = db.getUserDAO().isValidEmail(email);
     if (valid != null) {
       getEmailHelper().getUserNameEmailDevice(email, valid);
@@ -406,7 +399,7 @@ public class RestUserManagement {
    * @param user
    * @param request
    * @return
-   * @see #doGet(HttpServletRequest, HttpServletResponse, String, JSONObject)
+   * @see #doGet(HttpServletRequest, String, JSONObject)
    */
   private String resetPassword(String user, HttpServletRequest request) {
     if (user.length() == 4) user = user + "_";

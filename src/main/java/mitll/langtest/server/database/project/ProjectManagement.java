@@ -235,7 +235,7 @@ public class ProjectManagement implements IProjectManagement {
         if (debugOne) {
           if (slickProject.id() == debugProjectID ||
               slickProject.language().equalsIgnoreCase(LANG_TO_LOAD)
-              ) {
+          ) {
             rememberProject(pathHelper, serverProps, logAndNotify, slickProject, db);
           }
         } else {
@@ -663,7 +663,7 @@ public class ProjectManagement implements IProjectManagement {
   public CommonExercise getExercise(int id) {
     int projectForExercise = db.getUserExerciseDAO().getProjectForExercise(id);
     if (projectForExercise == -1) {
-      logger.error("getExercise : can't find project for exercise " + id);
+      logger.warn("getExercise : can't find project for exercise " + id);
       return null;
     } else {
       Project project = getProject(projectForExercise, false);
@@ -1034,7 +1034,10 @@ public class ProjectManagement implements IProjectManagement {
       String userInfo = creator == null ? "" : " : " + creator.getUserID();
       info.put(CREATED_BY, project.userid() + userInfo);
     }
-    addDateProps(project, info);
+
+    info.put(ProjectProperty.MODEL_TYPE.toString(), pproject.getModelType().toString());
+
+     addDateProps(project, info);
 
     boolean isRTL = addOtherProps(project, info);
 

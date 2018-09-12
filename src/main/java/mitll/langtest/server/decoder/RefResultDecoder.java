@@ -44,6 +44,8 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.scoring.RecalcRefResponse;
+import mitll.langtest.shared.scoring.RecalcResponses;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -661,7 +663,7 @@ public class RefResultDecoder {
    *
    * @see Project#recalcRefAudio
    */
-  public void writeRefDecode(String language, Collection<CommonExercise> exercises, int projid) {
+  public RecalcRefResponse writeRefDecode(String language, Collection<CommonExercise> exercises, int projid) {
     // boolean b = db.getServerProps().shouldDoDecode();
     //logger.warn("writeRefDecode got " + b + " for should do decode");
     //if (false) {
@@ -670,7 +672,7 @@ public class RefResultDecoder {
 
     if (exercises.isEmpty()) {
       logger.error("writeRefDecode huh? no exercises?");
-      return;
+      return new RecalcRefResponse(RecalcResponses.ERROR);
     }
 
     db.getAudioDAO().attachAudioToExercises(exercises, language);
@@ -684,9 +686,10 @@ public class RefResultDecoder {
     db.getRefResultDAO().deleteForProject(projid);
 
     Set<Integer> decodedFiles = getDecodedFiles(projid);
-    logger.debug("writeRefDecode for project " + projid +
-        " found " + decodedFiles.size() + " previous ref results, checking " +
-        exercises.size() + " exercises ");
+    logger.info("writeRefDecode for " +
+        "\n\tproject  " + projid +
+        "\n\tfound    " + decodedFiles.size() + " previous ref results," +
+        "\n\tchecking " + exercises.size() + " exercises ");
 
     if (stopDecode) logger.debug("Stop decode true");
 //      int childCount = 0;
@@ -698,33 +701,31 @@ public class RefResultDecoder {
     Stats allstats = new Stats();
 
     int total = 0;
+    int context = 0;
     for (CommonExercise exercise : exercises) {
-      if (stopDecode) return;
-//        queue.add(exercise);
-      //Stats stats =
-      total += queueDecodeExercise(language, decodedFiles, exercise);
-//        allstats.add(stats);
-      //stats.childCount += stats.childCount;
-      //      if (stats.childCount > 0 && stats.childCount % 100 == 0) logger.debug("ref decode - did " + stats.childCount + " decodes");
+      if (stopDecode) return new RecalcRefResponse(RecalcResponses.STOPPED);
+
+      Stats total1 = queueDecodeExercise(language, decodedFiles, exercise);
+      total += total1.vocab;
+      context += total1.context;
     }
 
     if (consumer == null) {
-      consumer = new Thread(new Consumer(),"RefResultDecoderConsumer");
+      consumer = new Thread(new Consumer(), "RefResultDecoderConsumer");
       consumer.setDaemon(true);
       consumer.start();
     }
 
-    logger.debug("writeRefDecode examined "+ exercises.size()+ " queued " +total + " audio files.");
+    logger.info("writeRefDecode " +
+        "\n\texamined " + exercises.size() + " exercises" +
+        "\n\tqueued   " + total + " vocab audio files" +
+        "\n\tqueued   " + context + " context audio files"
+    );
 //    logger.debug("writeRefDecode : Out of " + allstats.attrc + " best audio files, " +
 //        allstats.maleAudio + " male, " + allstats.femaleAudio + " female, " +
 //        allstats.defaultAudio + " default " + "decoded " + allstats.count);
 
-/*      if (serverProps.addMissingInfo()) {
-        runMissingInfo(exercises);
-      } else {
-        logger.debug("not looking for missing info");
-      }*/
-    //}
+    return new RecalcRefResponse(total + context == 0 ? RecalcResponses.COMPLETED : RecalcResponses.WORKING, total + context);
   }
 
   /**
@@ -735,9 +736,12 @@ public class RefResultDecoder {
       try {
         int c = 0;
         while (!stopDecode) {
-          DecodeTask remove = queue.take();
-          decodeOneExercise(remove.language, remove.exercise, remove.toDecode, defaultUser);
-          if (++c % 500 == 0) logger.debug("decode did " + c);
+          {
+            DecodeTask remove = queue.take();
+            decodeOneExercise(remove.language, remove.exercise, remove.toDecode, defaultUser);
+          }
+
+          if (++c % 500 == 0) logger.info("decode did " + c);
 
           if (queue.isEmpty()) {
             logger.info("decode queue is empty.");
@@ -753,26 +757,6 @@ public class RefResultDecoder {
     }
   }
 
-/*
-  @NotNull
-  private Stats queueDecodeExercise(
-      //Map<Integer, List<AudioAttribute>> exToAudio,
-      //                       String language,
-      Set<String> decodedFiles,
-      CommonExercise exercise) {
-
-//        int excount = 0;
-//        int attrc = 0;
-//        int maleAudio = 0;
-//        int femaleAudio = 0;
-//        int defaultAudio = 0;
-
-//    List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
-
-    return decodeExercise2(decodedFiles, exercise);
-  }
-*/
-
   /**
    * @param language
    * @param decodedFiles
@@ -780,46 +764,29 @@ public class RefResultDecoder {
    * @see #writeRefDecode(String, Collection, int)
    */
   @NotNull
-  private int queueDecodeExercise(String language, Set<Integer> decodedFiles, CommonExercise exercise) {
- /*   Set<Integer> preferredVoices = Collections.emptySet();//.getPreferredVoices();
-    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(true, preferredVoices, false);
-    Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getMostRecentAudio(false, preferredVoices, false);
-
-    List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
-    boolean maleEmpty = maleUsers.isEmpty();
-
-    List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
-    boolean femaleEmpty = femaleUsers.isEmpty();
-
-    if (!maleEmpty) {
-      List<AudioAttribute> audioAttributes1 = malesMap.get(maleUsers.get(0));
-      possible += audioAttributes1.size();
-      added = queueDecode(language, decodedFiles, exercise, added, audioAttributes1);
-    }
-    if (!femaleEmpty) {
-      List<AudioAttribute> audioAttributes1 = femalesMap.get(femaleUsers.get(0));
-      possible += audioAttributes1.size();
-      added = queueDecode(language, decodedFiles, exercise, added, audioAttributes1);
-    } else if (maleEmpty) {
-      Collection<AudioAttribute> defaultUserAudio = exercise.getDefaultUserAudio();
-      possible += defaultUserAudio.size();
-      added = queueDecode(language, decodedFiles, exercise, added, defaultUserAudio);
-    }
-    if (added == 0 && (spew++ < MAX_SPEW || spew % 1000 == 0)) {
-      logger.info("queueDecodeExercise (" + spew +
-          ") no audio for ex " + exercise.getID() + " out of " + possible);
-    }
-
-*/
+  private Stats queueDecodeExercise(String language, Set<Integer> decodedFiles, CommonExercise exercise) {
     int added = 0;
     int possible = 0;
-    Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
-    added += queueDecode(language, decodedFiles, exercise, audioAttributes);
-    possible += audioAttributes.size();
+    int vocab = 0;
+    int context = 0;
+    Stats stats = new Stats();
+
+    {
+      Collection<AudioAttribute> audioAttributes = exercise.getAudioAttributes();
+      int added1 = queueDecode(language, decodedFiles, exercise, audioAttributes);
+      added += added1;
+      vocab += added1;
+      stats.add(new Stats(vocab, 0));
+      possible += audioAttributes.size();
+    }
 
     for (ClientExercise direct : exercise.getDirectlyRelated()) {
       Collection<AudioAttribute> audioAttributes2 = direct.getAudioAttributes();
-      added += queueDecode(language, decodedFiles, exercise, audioAttributes2);
+      int added1 = queueDecode(language, decodedFiles, direct.asCommon(), audioAttributes2);
+
+      added += added1;
+      context += added1;
+      stats.add(new Stats(0, context));
       possible += audioAttributes2.size();
     }
 
@@ -827,20 +794,31 @@ public class RefResultDecoder {
       logger.info("queueDecodeExercise (" + spew +
           ") no audio for ex " + exercise.getID() + " out of " + possible);
     }
-    return added;
+    return stats;
   }
 
-
-  private int queueDecode(String language, Set<Integer> decodedFiles, CommonExercise exercise,
+  /**
+   * @param language
+   * @param decodedFiles
+   * @param exercise
+   * @param audioAttributes1
+   * @return number of audio cuts to decode again
+   * @see #queueDecodeExercise
+   */
+  private int queueDecode(String language,
+                          Set<Integer> decodedFiles,
+                          CommonExercise exercise,
                           Collection<AudioAttribute> audioAttributes1) {
 
     int num = 0;
     if (!audioAttributes1.isEmpty()) {
-      //   stats.maleAudio += audioAttributes1.size();
-      //stats.childCount +=
       try {
-        queue.put(doDecode(language, decodedFiles, exercise, audioAttributes1));
-        num++;
+        DecodeTask e = doDecode(language, decodedFiles, exercise, audioAttributes1);
+
+        if (e.hasAudioToDecode()) {
+          queue.put(e);
+          num += e.getNumToDecode();
+        }
       } catch (InterruptedException e) {
         logger.error("got " + e, e);
       }
@@ -850,16 +828,6 @@ public class RefResultDecoder {
 
   private int spew = 0;
 
-/*  private void runMissingInfo(final Collection<CommonExercise> exercises) {
-    new Thread(new Runnable() {
-      @Override
-      public void run() {
-        sleep(2000);
-        doMissingInfo(exercises);
-      }
-    }).start();
-  }*/
-
   private void sleep(int millis) {
     try {
       Thread.sleep(millis); // ???
@@ -868,7 +836,7 @@ public class RefResultDecoder {
     }
   }
 
-  private static class Stats {
+ /* private static class Stats {
     final int count = 0;
     final int attrc = 0;
     final int maleAudio = 0;
@@ -883,6 +851,29 @@ public class RefResultDecoder {
 //      defaultAudio += other.defaultAudio;
 //    }
   }
+  */
+
+  private static class Stats {
+    private int vocab = 0;
+    private int context = 0;
+
+    public Stats() {
+    }
+
+    public Stats(int vocab, int context) {
+      this.vocab = vocab;
+      this.context = context;
+    }
+
+    public void add(Stats other) {
+      this.vocab += other.vocab;
+      this.context += other.context;
+    }
+
+    public String toString() {
+      return "Stats " + vocab + " context " + context;
+    }
+  }
 
   /**
    * Get the set of files that have already been decoded and aligned so we don't do them a second time.
@@ -895,7 +886,7 @@ public class RefResultDecoder {
     //List<Result> results = db.getRefResultDAO().getResults();
 
     //List<String> files = db.getRefResultDAO().getAllFilesForProject(projid);
-   // String modelsDir = db.getProject(projid).getModelsDir();
+    // String modelsDir = db.getProject(projid).getModelsDir();
 
     List<Integer> files = db.getRefResultDAO().getAllAudioIDsForProject(projid);
 
@@ -925,7 +916,8 @@ public class RefResultDecoder {
                               Set<Integer> decodedFiles,
                               CommonExercise exercise,
                               Collection<AudioAttribute> audioAttributes) {
-    return new DecodeTask(language, exercise, getNotYetDecoded(decodedFiles, audioAttributes));
+    List<AudioAttribute> notYetDecoded = getNotYetDecoded(decodedFiles, audioAttributes);
+    return new DecodeTask(language, exercise, notYetDecoded);
   }
 
   private static class DecodeTask {
@@ -938,26 +930,33 @@ public class RefResultDecoder {
       this.exercise = exercise;
       this.toDecode = toDecode;
     }
+
+    boolean hasAudioToDecode() {
+      return !toDecode.isEmpty();
+    }
+
+    int getNumToDecode() {
+      return toDecode.size();
+    }
   }
 
+  /**
+   * @param language
+   * @param exercise
+   * @param toDecode
+   * @param defaultUser
+   * @return
+   * @see Consumer#run
+   */
   private int decodeOneExercise(String language, CommonExercise exercise, List<AudioAttribute> toDecode, int defaultUser) {
     int count = 0;
-    //boolean doHydec = serverProps.shouldDoDecodeWithHydec();
     for (AudioAttribute attribute : toDecode) {
       if (stopDecode) return 0;
 
       try {
         String audioRef = attribute.getAudioRef();
-        boolean fileExists = false;
-      //  File absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
-        File absoluteFile =  new File(getAbsFilePath(attribute,language));
-
-    //    if (!audioRef.contains("context=")) {
-          //logger.debug("doing alignment -- ");
-          // Do alignment...
-//          File absoluteFile = pathHelper.getAbsoluteAudioFile(audioRef);
-          fileExists = absoluteFile.exists();
-      //  }
+        File absoluteFile = new File(getAbsFilePath(attribute, language));
+        boolean fileExists = absoluteFile.exists();
 
         if (fileExists) {
           double durationInSeconds = audioCheck.getDurationInSeconds(absoluteFile);
@@ -984,9 +983,8 @@ public class RefResultDecoder {
             logger.info("doDecode : for " + exercise.getID() + " (" + durationInMillis +
                 ") skip short file " + audioRef);
           }
-        }
-        else {
-          logger.info("decodeOneExercise : can't find audio file in attribute at "+ absoluteFile.getAbsolutePath());
+        } else {
+          logger.info("decodeOneExercise : can't find audio file in attribute at " + absoluteFile.getAbsolutePath());
         }
 
       } catch (Exception e) {
@@ -999,22 +997,23 @@ public class RefResultDecoder {
 
   private String getAbsFilePath(AudioAttribute attribute, String language) {
     String audioRef = attribute.getAudioRef();
+    return getAbsFilePath(language, audioRef);
+  }
+
+  private String getAbsFilePath(String language, String audioRef) {
     String audioBaseDir = serverProps.getAudioBaseDir();
     String absPathForAudio = audioConversion.getAbsPathForAudio(audioRef, language, "", audioBaseDir);
 //    logger.info("getAbsFilePath audioBaseDir " + audioBaseDir + " " + absPathForAudio);
-
     return absPathForAudio;
   }
 
   @NotNull
   private List<AudioAttribute> getNotYetDecoded(Set<Integer> decodedFiles, Collection<AudioAttribute> audioAttributes) {
     List<AudioAttribute> toDecode = new ArrayList<>();
+
     for (AudioAttribute attribute : audioAttributes) {
-      if (!attribute.isContextAudio()) {
-        //String bestAudio = getFile(attribute);
-        if (!decodedFiles.contains(attribute.getUniqueID())) {
-          toDecode.add(attribute);
-        }
+      if (!decodedFiles.contains(attribute.getUniqueID())) {
+        toDecode.add(attribute);
       }
     }
     return toDecode;
@@ -1035,9 +1034,11 @@ public class RefResultDecoder {
   }
 
   /**
+   * @return
    * @paramx title
    * @paramx exid
-   * @return
+   * @paramx title
+   * @paramx exid
    * @paramx audioAttributes
    * @seex #trimRef
    */

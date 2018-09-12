@@ -51,7 +51,10 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.project.*;
+import mitll.langtest.shared.scoring.RecalcRefResponse;
+import mitll.langtest.shared.scoring.RecalcResponses;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,6 +81,9 @@ public class ProjectEditForm extends UserDialog {
 
   private static final String PROJECT_TYPE = "Project Type";
   private static final boolean SHOW_PROJECT_TYPE = true;
+
+
+  private static final String MODEL_TYPE = "Model Type";
 
   private static final String LANGUAGE = "Language";
   private static final String LIFECYCLE = "Lifecycle";
@@ -151,6 +157,7 @@ public class ProjectEditForm extends UserDialog {
    */
   private ListBox language;
   private ListBox dominoProjectsListBox;
+  private ListBox modelTypeBox;
   private FormField model;
   private CheckBox showOniOSBox;
   private final Services services;
@@ -222,6 +229,9 @@ public class ProjectEditForm extends UserDialog {
    */
   void updateProject() {
     info.setLanguage(language.getSelectedValue());
+    info.setModelType(ModelType.valueOf(modelTypeBox.getSelectedValue()));
+
+    //  logger.info("updateProject get model type " + info.getModelType());
     DominoProject id = dominoToProject.get(dominoProjectsListBox.getSelectedValue());
 
     if (id != null) {
@@ -433,6 +443,11 @@ public class ProjectEditForm extends UserDialog {
       if (isNew) hDivLabel.setVisible(false);
     }
 
+    {
+      DivWidget widgets = addModelType(info, fieldset);
+      if (isNew) widgets.setVisible(false);
+    }
+
     DivWidget hDivLabel = getHDivLabel(fieldset, LANGUAGE_MODEL, false);
     model = getModel(hDivLabel, info.getModelsDir());
 
@@ -545,40 +560,40 @@ public class ProjectEditForm extends UserDialog {
     name.getElement().getStyle().setMarginTop(0, PX);
 
     this.language = new ListBox();
-    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(this.language.getSelectedValue(), new AsyncCallback<List<DominoProject>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        logger.warning("got failure asking for " + language.getSelectedValue());
-      }
-
-      @Override
-      public void onSuccess(List<DominoProject> result) {
-        dominoProjectsListBox.clear();
-
-        result.forEach(dominoProject -> {
-          String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
-          dominoProjectsListBox.addItem(item);
-          dominoToProject.put(item, dominoProject);
-
-        });
-
-        Scheduler.get().scheduleDeferred(() -> {
-          if (!result.isEmpty()) {
-            setUnitAndChapter("", result.iterator().next());
-          }
-//          else {
-          //          logger.info("---> addLanguage : results size = " + result.size());
-          //      }
-        });
-      }
-    }));
     this.language.addStyleName("leftTenMargin");
+
+    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(this.language.getSelectedValue(),
+        new AsyncCallback<List<DominoProject>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            logger.warning("got failure asking for " + language.getSelectedValue());
+          }
+
+          @Override
+          public void onSuccess(List<DominoProject> result) {
+            dominoProjectsListBox.clear();
+
+            result.forEach(dominoProject -> {
+              String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
+              dominoProjectsListBox.addItem(item);
+              dominoToProject.put(item, dominoProject);
+
+            });
+
+            Scheduler.get().scheduleDeferred(() -> {
+              if (!result.isEmpty()) {
+                setUnitAndChapter("", result.iterator().next());
+              }
+            });
+          }
+        }));
 
     name.add(this.language);
 
     if (isNew) {
       this.language.addItem(PLEASE_SELECT_A_LANGUAGE);
     }
+
     int i = 0;
 
     for (Language value : Language.values()) {
@@ -588,6 +603,29 @@ public class ProjectEditForm extends UserDialog {
       }
       i++;
     }
+  }
+
+  /**
+   * Add model type choice - e.g. to do kaldi.
+   *
+   * @param info
+   * @param fieldset
+   * @return
+   */
+  private DivWidget addModelType(ProjectInfo info, Fieldset fieldset) {
+    DivWidget name = getHDivLabel(fieldset, MODEL_TYPE, false);
+    name.getElement().getStyle().setMarginTop(0, PX);
+
+    this.modelTypeBox = new ListBox();
+    this.modelTypeBox.addStyleName("leftTenMargin");
+
+    name.add(this.modelTypeBox);
+
+    modelTypeBox.addItem(ModelType.HYDRA.toString());
+    modelTypeBox.addItem(ModelType.KALDI.toString());
+    modelTypeBox.setItemSelected(info.getModelType() == ModelType.KALDI ? 1 : 0, true);
+
+    return name;
   }
 
   /**
@@ -824,22 +862,33 @@ public class ProjectEditForm extends UserDialog {
     recalcRefAudio(info, w);
   }
 
+  /**
+   * @see Project#recalcRefAudio
+   * @param info
+   * @param w
+   */
   private void recalcRefAudio(ProjectInfo info, Button w) {
-    services.getAudioServiceAsyncForHost(info.getHost()).recalcRefAudio(info.getID(), new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        w.setEnabled(true);
-        messageHelper.handleNonFatalError("recalc audio alignments for project", caught);
-      }
+    services.getAudioServiceAsyncForHost(info.getHost())
+        .recalcRefAudio(info.getID(), new AsyncCallback<RecalcRefResponse>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            w.setEnabled(true);
+            messageHelper.handleNonFatalError("recalc audio alignments for project", caught);
+          }
 
-      @Override
-      public void onSuccess(Void result) {
-        w.setEnabled(true);
-        feedback.setText(IN_PROGRESS);
-      }
-    });
+          @Override
+          public void onSuccess(RecalcRefResponse result) {
+            w.setEnabled(true);
+
+            {
+              RecalcResponses recalcRefResponse = result.getRecalcRefResponse();
+              String text = recalcRefResponse.getDisp();
+              if (recalcRefResponse == RecalcResponses.WORKING) text += " " + result.getNum() + " to do.";
+              feedback.setText(text);
+            }
+          }
+        });
   }
-
 
   /**
    * Production status controls whether show on iOS is enabled.

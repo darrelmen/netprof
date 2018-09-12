@@ -45,6 +45,7 @@ import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.scoring.RecalcRefResponse;
 
 /**
  * Might actually live on hydra1 or hydra2 - chosen in the client.
@@ -86,7 +87,7 @@ public interface AudioService extends RemoteService {
    * @param projectid
    */
   void checkAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
-  void recalcRefAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
+  RecalcRefResponse recalcRefAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
 
   void logMessage(String subject,String message, boolean sendEmail);
 

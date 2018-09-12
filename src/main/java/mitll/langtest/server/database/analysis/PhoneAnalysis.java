@@ -51,42 +51,34 @@ public class PhoneAnalysis {
   private static final Logger logger = LogManager.getLogger(PhoneAnalysis.class);
 
   private static final int DESIRED_NUM_SESSIONS = 15;
-  private static final int MIN_SESSION_SIZE = 9;
 
   private static final long MINUTE = 60 * 1000;
   private static final long HOUR = 60 * MINUTE;
-  //  private static final long TENMIN = 10 * MINUTE;
   private static final long DAY = 24 * HOUR;
-  //  private static final long QUARTER = 6 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
   private static final long SESSION = -1L;
 
-  //  private static final long YEAR = 52 * WEEK;
   private static final List<Long> GRANULARITIES = Arrays.asList(
       SESSION,
 //      MINUTE,
-      //    TENMIN,
       HOUR,
-      //    QUARTER,
       DAY,
       WEEK,
-      MONTH//,
-      //YEAR
+      MONTH
   );
   private static final String OVERALL = "overall";
   private static final boolean DEBUG = false;
 
   /**
    * @param phoneToAvgSorted
-   * @param useSessionGran
    * @see Analysis#getPhoneReport
-   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport(Map, Map, float, float, boolean, boolean)
+   * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport(Map, Map, Map, Map, float, float)
    */
-  public void setSessionsWithPrune(Map<String, PhoneStats> phoneToAvgSorted, boolean useSessionGran) {
-    // logger.info("setSessionsWithPrune " + useSessionGran);
+  public void setSessionsWithPrune(Map<String, PhoneStats> phoneToAvgSorted) {
     phoneToAvgSorted.forEach((phone, stats) ->
-        stats.setSessions(partitionWithPrune(phone, stats.getTimeSeries(), useSessionGran)));
+        stats.setSessions(
+            partitionWithPrune(phone, stats.getTimeSeries())));
   }
 
   /**
@@ -102,9 +94,8 @@ public class PhoneAnalysis {
    * @see #setSessionsWithPrune
    */
   private List<PhoneSession> partitionWithPrune(String key,
-                                                List<TimeAndScore> answersForUser,
-                                                boolean useSessionGran) {
-    return getPhoneSessionsWithPrune(key, answersForUser, GRANULARITIES, false, useSessionGran);
+                                                List<TimeAndScore> answersForUser) {
+    return getPhoneSessionsWithPrune(key, answersForUser, GRANULARITIES);
   }
 
   /**
@@ -118,7 +109,7 @@ public class PhoneAnalysis {
     Map<Long, List<PhoneSession>> granToSessions = new HashMap<>();
     granularityToSessions
         .forEach((k, v) -> granToSessions.put(k,
-            getPhoneSessions(OVERALL, v, false)));
+            getPhoneSessions(OVERALL, v)));
 
     return granToSessions;
   }
@@ -127,23 +118,28 @@ public class PhoneAnalysis {
    * @param phone
    * @param answersForUser
    * @param possibleGrans
-   * @param shouldPrune
    * @return
    * @see #partitionWithPrune
    */
   private List<PhoneSession> getPhoneSessionsWithPrune(String phone,
                                                        List<TimeAndScore> answersForUser,
-                                                       List<Long> possibleGrans,
-                                                       boolean shouldPrune,
-                                                       boolean useSessionGran) {
+                                                       List<Long> possibleGrans) {
     Map<Long, List<PhoneSessionInternal>> granularityToSessions = getGranularityToSessions(answersForUser, possibleGrans);
 
 //    granularityToSessions.forEach((k, v) -> logger.info("getPhoneSessionsWithPrune " + k + " = " + v.size()));
-    List<PhoneSessionInternal> toUse = useSessionGran ? granularityToSessions.get(SESSION) : chooseSession(possibleGrans, granularityToSessions);
+    //List<PhoneSessionInternal> toUse = useSessionGran ? granularityToSessions.get(SESSION) : chooseSession(possibleGrans, granularityToSessions);
 //    logger.info("getPhoneSessionsWithPrune phone '" + phone + "' use " + useSessionGran + " got " + toUse.size());
-    return getPhoneSessions(phone, toUse, shouldPrune);
+    return getPhoneSessions(phone, chooseSession(possibleGrans, granularityToSessions));
   }
 
+  /**
+   * Partition recordings into sessions of different sizes so we can do by week, by day, etc....
+   *
+   * @param answersForUser
+   * @param times
+   * @param <T>
+   * @return
+   */
   private <T extends SimpleTimeAndScore> Map<Long, List<PhoneSessionInternal>> getGranularityToSessions(
       List<T> answersForUser,
       List<Long> times) {
@@ -161,47 +157,38 @@ public class PhoneAnalysis {
   /**
    * @param thePhone
    * @param toUse    raw sessions to filter
-   * @param prune    true if we want to not make sessions that are smaller than MIN_SESSION_SIZE (9)
    * @return
    * @see #getGranularityToSessions(List)
-   * @see #getPhoneSessions(String, List, boolean)
+   * @see #getPhoneSessions(String, List)
    */
   private List<PhoneSession> getPhoneSessions(String thePhone,
-                                              List<PhoneSessionInternal> toUse,
-                                              boolean prune) {
+                                              List<PhoneSessionInternal> toUse) {
     List<PhoneSession> sessions2 = new ArrayList<PhoneSession>();
 
     if (toUse == null) {
       logger.error("getPhoneSessions huh? no sessions?");
     } else {
 //      logger.info("getPhoneSessions " + thePhone + " prune " + prune + " sessions " + toUse.size());
-      int size = toUse.size();
-
       for (PhoneSessionInternal internal : toUse) {
         internal.remember();
 
-        if (!prune || (internal.getCount() > MIN_SESSION_SIZE || size == 1)) {
-          if (internal.getEnd() == 0) {
-            logger.error("getPhoneSessions got 0 end time " + internal);
-          }
-          double mean = internal.getMean();
-          double stdev1 = internal.getStdev();
-          long meanTime = internal.getMeanTime();
-
-          long bin = internal.getBin();
-          sessions2.add(new PhoneSession(thePhone,
-              bin,
-              internal.getCount(),
-              mean,
-              stdev1,
-              meanTime,
-              internal.getStart(),
-              internal.getEnd(),
-              internal.getSessionSize()));
-
-        } else {
-          logger.warn("\tgetPhoneSessions: for " + thePhone + "skipping session " + internal);
+        if (internal.getEnd() == 0) {
+          logger.error("getPhoneSessions got 0 end time " + internal);
         }
+        double mean = internal.getMean();
+        double stdev1 = internal.getStdev();
+        long meanTime = internal.getMeanTime();
+
+        long bin = internal.getBin();
+        sessions2.add(new PhoneSession(thePhone,
+            bin,
+            internal.getCount(),
+            mean,
+            stdev1,
+            meanTime,
+            internal.getStart(),
+            internal.getEnd(),
+            internal.getSessionSize()));
       }
     }
     return sessions2;

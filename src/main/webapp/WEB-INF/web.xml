@@ -126,8 +126,13 @@
     </servlet-mapping>
 
     <!--    <servlet-mapping>
+<<<<<<< HEAD
             <servlet-name>amasService</servlet-name>
             <url-pattern>/langtest/amas-manager</url-pattern>
+=======
+        <servlet-name>amasService</servlet-name>
+        <url-pattern>/langtest/amas-manager</url-pattern>
+>>>>>>> development
         </servlet-mapping>-->
 
     <servlet>
@@ -196,22 +201,22 @@
             </init-param>
         </servlet>
 
-        <servlet>
+    <servlet>
             <servlet-name>DefaultServletAnswers</servlet-name>
-            <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
-            <init-param>
-                <param-name>resourceBase</param-name>
+        <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+        <init-param>
+            <param-name>resourceBase</param-name>
                 <param-value>/opt/netprof/answers</param-value>
-            </init-param>
-            <init-param>
-                <param-name>dirAllowed</param-name>
-                <param-value>true</param-value>
-            </init-param>
-            <init-param>
-                <param-name>pathInfoOnly</param-name>
-                <param-value>true</param-value>
-            </init-param>
-        </servlet>
+        </init-param>
+        <init-param>
+            <param-name>dirAllowed</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <init-param>
+            <param-name>pathInfoOnly</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>
 
     <servlet>
         <servlet-name>DefaultServletImages</servlet-name>

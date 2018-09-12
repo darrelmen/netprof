@@ -61,9 +61,7 @@ import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
@@ -75,6 +73,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
@@ -122,6 +121,7 @@ public class CopyToPostgres<T extends CommonShell> {
     CREATED("z"),
     IMPORT("i"),
     MERGE("m"),
+    NORM("y"),
     RECORDINGS("r"),
     SEND("s"),
     DIALOG("g"),
@@ -1484,6 +1484,16 @@ public class CopyToPostgres<T extends CommonShell> {
       to = Integer.parseInt(cmd.getOptionValue(CLEANDIALOG.toLower()));
     } else if (cmd.hasOption(LIST.toLower())) {
       action = LIST;
+    } else if (cmd.hasOption(NORM.toLower())) {
+      action = NORM;
+      String optionValue = cmd.getOptionValue(NORM.toLower());
+
+      try {
+        projID = Integer.parseInt(optionValue);
+      } catch (NumberFormatException e) {
+        warnParse(options, formatter, optionValue, NORM);
+        return;
+      }
     } else if (cmd.hasOption(MERGE.toLower())) {
       action = MERGE;
       from = Integer.parseInt(cmd.getOptionValue(MERGE.toLower()));
@@ -1642,6 +1652,9 @@ public class CopyToPostgres<T extends CommonShell> {
         logger.info("send reports");
         copyToPostgres.sendReports();
         logger.info("sent reports");
+        doExit(true);  //
+      case NORM:
+        copyToPostgres.dumpNorm(projID);
         doExit(true);  // ?
         break;
       case DIALOG:
@@ -1714,6 +1727,66 @@ public class CopyToPostgres<T extends CommonShell> {
     logger.info("known projects in " + database.getDbConfig() + " = " + projects.size());
     projects.forEach(project -> logger.info("project #" + project.getID() + " : " + project));
     if (database != null) database.close();
+  }
+
+  private void dumpNorm(int projid) {
+    DatabaseImpl database = getDatabase();
+    Project project = database.getProject(projid);
+
+    try {
+      String fileName = "normTextFor" + project.getName() + "_" + project.getLanguage() + ".txt";
+      FileWriter fileWriter = new FileWriter(fileName);
+      fileWriter.write("id|raw|normalized|context\n");
+
+      int n = 20;
+      while (project.getFullTrie() == null && n-- > 0) {
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+      List<ClientExercise> rawExercises = new ArrayList<>(project.getRawExercises());
+      project.getRawExercises().forEach(commonExercise-> rawExercises.addAll(commonExercise.getDirectlyRelated()));
+
+      rawExercises.sort(Comparator.comparingInt(HasID::getID));
+      rawExercises
+          .forEach(commonExercise ->
+              {
+                try {
+                  writeLine(project, fileWriter, commonExercise);
+                 /* commonExercise.getDirectlyRelated().forEach(commonExercise1 ->
+                      {
+                        try {
+                          writeLine(project, fileWriter, commonExercise1);
+                        } catch (IOException e) {
+                          logger.error("got " + e + " on " + commonExercise1, e);
+                        }
+                      }
+                  );*/
+                } catch (IOException e) {
+                  logger.error("got " + e + " on " + commonExercise, e);
+                }
+
+              }
+          );
+
+      fileWriter.close();
+
+      logger.info("Wrote to " + fileName);
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
+
+  }
+
+  private void writeLine(Project project, FileWriter fileWriter, ClientExercise commonExercise) throws IOException {
+    String foreignLanguage = commonExercise.getForeignLanguage();
+    String norm = project.getFullTrie().getNormalized(foreignLanguage);
+    fileWriter.write(commonExercise.getID() + "|");
+    fileWriter.write(foreignLanguage.trim() + "|");
+    fileWriter.write(norm + "|");
+    fileWriter.write(commonExercise.isContext() + "\n");
   }
 
   private void sendReports() {
@@ -1804,7 +1877,10 @@ public class CopyToPostgres<T extends CommonShell> {
       addOption(options, ONDAY);
       addOption(options, DATABASE);
     }
-
+    {
+      Option mapFile = new Option(NORM.getValue(), NORM.toLower(), true, "dumpNormExerciseTable");
+      options.addOption(mapFile);
+    }
     {
       Option mapFile = new Option(SEND.getValue(), SEND.toLower(), false, "send reports now");
       options.addOption(mapFile);

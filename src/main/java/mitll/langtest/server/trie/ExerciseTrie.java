@@ -63,6 +63,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
+  boolean isMandarin;
   private boolean removeAllPunct;
   private SmallVocabDecoder smallVocabDecoder;
 
@@ -90,7 +91,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     startMakingNodes();
 
     long then = System.currentTimeMillis();
-    boolean isMandarin = language.equalsIgnoreCase(MANDARIN);
+    isMandarin = language.equalsIgnoreCase(MANDARIN);
     boolean isKorean = language.equalsIgnoreCase(KOREAN);
     boolean isJapanese = language.equalsIgnoreCase(JAPANESE);
     boolean isAsianLanguage = isMandarin || isKorean || isJapanese;
@@ -114,6 +115,13 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
       logger.debug("ExerciseTrie : took " + (now - then) +
           " millis to build trie for " + language + " over " + exercisesForState.size() + " exercises.");
     }
+  }
+
+  public String getNormalized(String fl) {
+    StringBuilder builder = new StringBuilder();
+    Collection<String> tokens = smallVocabDecoder.getTokensAllLanguages(isMandarin, fl, removeAllPunct);
+    tokens.forEach(t -> builder.append(t).append(" "));
+    return builder.toString().trim();
   }
 
   /**

@@ -59,6 +59,7 @@ import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.custom.TimeRange;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -113,12 +114,18 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   private final WordTable wordTable = new WordTable();
 
+  /**
+   *
+   */
   private final int numWords;
 
   private final TableSortHelper tableSortHelper = new TableSortHelper();
   private final AnalysisServiceAsync analysisServiceAsync;
   private final AnalysisTab.ReqInfo reqInfo;
   private boolean isAllSameDay = false;
+  /**
+   *
+   */
   private long from = 0, to = Long.MAX_VALUE;
   private int lastPlayed = -1;
 
@@ -127,6 +134,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    *
    * @param controller
    * @param plot
+   * @param timeRange
    * @see AnalysisTab#getWordContainer
    */
   WordContainerAsync(AnalysisTab.ReqInfo reqInfo,
@@ -134,11 +142,14 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                      AnalysisPlot plot,
                      Heading w,
                      int numWords,
-                     AnalysisServiceAsync analysisServiceAsync) {
+                     AnalysisServiceAsync analysisServiceAsync, TimeRange timeRange) {
     super(controller, plot);
     this.reqInfo = reqInfo;
     plot.addListener(this);
     this.heading = w;
+
+    this.from = timeRange.getStart();
+    this.to = timeRange.getEnd();
 
     this.numWords = numWords;
     todaysDate = format.format(new Date());
@@ -161,7 +172,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     DivWidget tableC = new DivWidget();
     tableC.add(table);
     tableC.setHeight(TABLE_HEIGHT + "px");
-
+    tableC.getElement().getStyle().setProperty("minWidth", "502px");  // helps safari in layout
     column.add(tableC);
     column.add(getButtonRow());
   }
@@ -319,6 +330,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private int req = 0;
 
   /**
+   * Unfortunately initially we get two calls here - once when we add the table and again when the plot says the range has changed.
    * Deals with out of order requests, or where the requests outpace the responses
    *
    * @param numResults
@@ -326,9 +338,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    * @return
    * @see #getTableWithPager
    */
-  private void createProvider(
-      final int numResults,
-      final CellTable<WordScore> cellTable) {
+  private void createProvider(final int numResults, final CellTable<WordScore> cellTable) {
     AsyncDataProvider<WordScore> dataProvider = new AsyncDataProvider<WordScore>() {
       @Override
       protected void onRangeChanged(HasData<WordScore> display) {
@@ -340,11 +350,16 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         logger.info("createProvider asking from " + from + "/" +
             new Date(from) +"->" + to +"/"+new Date(to));*/
 
+
+//        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("create provider " + start + " end " + end));
+//        logger.info("logException stack " + exceptionAsString);
+
         StringBuilder columnSortedState = tableSortHelper.getColumnSortedState(table);
 
         int val = req++;
         // logger.info("getResults req " + unitToValue + " user " + userID + " text " + text + " val " + val);
         //  logger.info("createProvider sort " + columnSortedState.toString());
+        long then = System.currentTimeMillis();
 
         analysisServiceAsync.getWordScoresForUser(
             reqInfo.getUserid(),
@@ -367,6 +382,15 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
               @Override
               public void onSuccess(final WordsAndTotal result) {
+
+                long now = System.currentTimeMillis();
+                long total = now - then;
+                logger.info("getWordScoresForUser userid " + reqInfo.getUserid() + " req " + req +
+                    "\n\ttook   " + total +
+                    "\n\tserver " + result.getServerTime() +
+                    "\n\tclient " + (total - result.getServerTime()));
+
+
                 if (result.getReq() < req - 1) {
                 } else {
                   final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
@@ -424,6 +448,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   /**
    * Only sort with descending score.
+   *
    * @return
    * @see AnalysisTab#getWordContainer
    */
@@ -431,11 +456,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     // logger.info("getTableWithPager " +listOptions);
     CellTable<WordScore> wordScoreCellTable = makeCellTable(new ListOptions().isSort());
 
-    //if (isPolyglot()) {
     wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(SCORE), true));
-    //} else {
-    //  wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(TIMESTAMP), false));
-   // }
 
     createProvider(numWords, wordScoreCellTable);
 
@@ -624,17 +645,23 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    */
   @Override
   public void timeChanged(long from, long to) {
-    if (from == 0) {
-      heading.setSubtext("");
-    } else {
+    if (from != this.from || to != this.to) {
+//      logger.info("timeChanged     " + this.from + " - " + this.to);
+//      logger.info("timeChanged new " + from + " - " + to);
+      if (from == 0) {
+        heading.setSubtext("");
+      } else {
 /*       logger.info("timeChanged Starting from " +from + " : " +to);
       logger.info("timeChanged : from " + format.format(new Date(from)) + " to " + format.format(new Date(to)));*/
-      heading.setSubtext(yearShortFormat.format(new Date(from)) + " - " + yearShortFormat.format(new Date(to)));
-      this.from = from;
-      this.to = to;
-    }
+        heading.setSubtext(yearShortFormat.format(new Date(from)) + " - " + yearShortFormat.format(new Date(to)));
+        this.from = from;
+        this.to = to;
+      }
 
-    redraw();
+      redraw();
+    } else {
+      logger.info("ignoring redraw for same time period as current.");
+    }
   }
 
   private void redraw() {

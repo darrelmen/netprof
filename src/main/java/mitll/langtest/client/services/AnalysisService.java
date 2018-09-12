@@ -35,9 +35,7 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.WordsAndTotal;
-import mitll.langtest.shared.analysis.AnalysisReport;
-import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -48,9 +46,9 @@ import java.util.List;
 @RemoteServiceRelativePath("analysis-manager")
 public interface AnalysisService extends RemoteService {
   /**
-   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    */
   Collection<UserInfo> getUsersWithRecordings() throws DominoSessionException;
 
@@ -63,9 +61,33 @@ public interface AnalysisService extends RemoteService {
    */
   List<CommonShell> getShells(Collection<Integer> ids) throws DominoSessionException;
 
-  AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req) throws DominoSessionException, RestrictedOperationException;
+  AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req)
+      throws DominoSessionException, RestrictedOperationException;
 
-  WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid, long fromTime, long toTime, int rangeStart, int rangeEnd, String sort, int reqid) throws DominoSessionException;
+/*
+  PhoneSummary getPhoneSummary(int userid, int minRecordings, int listid, int req)
+      throws DominoSessionException, RestrictedOperationException;
+*/
 
-  List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid, String phone, long from, long to) throws DominoSessionException, RestrictedOperationException;
+  WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid, long fromTime, long toTime,
+                                     int rangeStart, int rangeEnd, String sort, int reqid) throws DominoSessionException;
+
+  List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid,
+                                                         String phone, String bigram, long from, long to)
+      throws DominoSessionException, RestrictedOperationException;
+
+  List<Bigram> getPerformanceReportForUserForPhoneBigrams(int userid,
+                                                          int listid,
+                                                          String phone,
+                                                          long from,
+                                                          long to) throws DominoSessionException, RestrictedOperationException;
+
+
+/*
+  PhoneReport getPhoneSummary(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
+*/
+
+  PhoneSummary getPhoneSummary(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
+
+  PhoneBigrams getPhoneBigrams(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
 }

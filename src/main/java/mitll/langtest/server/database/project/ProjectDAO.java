@@ -284,8 +284,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     boolean didChange = addOrUpdateProperty(projid, WEBSERVICE_HOST, projectInfo.getHost());
     didChange |= addOrUpdateProperty(projid, WEBSERVICE_HOST_PORT, "" + projectInfo.getPort());
     didChange |= addOrUpdateProperty(projid, MODELS_DIR, projectInfo.getModelsDir());
-    boolean showOniOS = projectInfo.isShowOniOS();
-    didChange |= addOrUpdateBooleanProperty(projid, SHOW_ON_IOS, showOniOS);
+    didChange |= addOrUpdateProperty(projid, MODEL_TYPE, projectInfo.getModelType().toString());
+    didChange |= addOrUpdateBooleanProperty(projid, SHOW_ON_IOS, projectInfo.isShowOniOS());
     didChange |= addOrUpdateBooleanProperty(projid, AUDIO_PER_PROJECT, projectInfo.isAudioPerProject());
     return didChange;
   }
