@@ -28,6 +28,7 @@ import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MatchInfo;
@@ -94,6 +95,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     this.listView = new ListView(controller);
     this.banner = banner;
     divWidget.setId("NewContentChooser");
+
+    divWidget.addStyleName("topFiveMargin");
 
     addHistoryListener();
   }
@@ -268,8 +271,24 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void showScores(DivWidget divWidget, VIEWS scores) {
-    divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, new SelectionState().getDialog()));
-    currentSection = scores;
+    int dialog = new SelectionState().getDialog();
+    if (dialog == -1) {
+      controller.getDialogService().getDialog(-1, new AsyncCallback<IDialog>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("getting dialogs", caught);
+        }
+
+        @Override
+        public void onSuccess(IDialog dialog) {
+          divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, dialog.getID()));
+          currentSection = scores;
+        }
+      });
+    } else {
+      divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, dialog));
+      currentSection = scores;
+    }
   }
 
   private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen) {
@@ -286,12 +305,16 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     if (selectionState.getView() != views) {
       //   logger.info("setInstanceHistory clearing history for instance " + views);
       int dialog = selectionState.getDialog();
-      pushItem(getInstanceParam(views) + SelectionState.SECTION_SEPARATOR +
-          (dialog > 0 ? (SelectionState.DIALOG + "=" + dialog) : ""));
+      pushItem(getInstanceParam(views) + maybeAddDialogParam(dialog));
     }
     //else {
     //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     //}
+  }
+
+  @NotNull
+  private String maybeAddDialogParam(int dialog) {
+    return dialog > 0 ? (SelectionState.SECTION_SEPARATOR + SelectionState.DIALOG + "=" + dialog) : "";
   }
 
   private void setInstanceHistory(VIEWS views) {
@@ -584,22 +607,31 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @NotNull
   public ShowTab getShowTab(VIEWS views) {
     return (exid) -> {
+      int dialog = new SelectionState().getDialog();
+      logger.info("getShowTab Dialog id " + dialog);
+
+
       ExerciseListContent learnHelper = views == LEARN ? this.learnHelper : studyHelper;
+
       boolean wasMade = learnHelper.getReloadable() != null;
       //   logger.info("getShowTab history - " + History.getToken());
-      //VIEWS learn = LEARN;
-      if (!wasMade) {
+      logger.info("getShowTab view " + views + " was made " + wasMade);
+
+//      if (!wasMade) {
         banner.show(views);
-      }
-      learnHelper.loadExercise(exid);
-      if (wasMade) {
-        banner.show(views);
-      }
+  //    }
+//      learnHelper.loadExercise(exid);  //??? why - the push should do it
+   //   if (wasMade) {
+  //      banner.show(views);
+    //  }
+
 
       //   logger.info("getShowTab history after - " + History.getToken());
 
       pushItem(
           getInstanceParam(views) +
+              maybeAddDialogParam(dialog) +
+//              (dialog != -1 ? SelectionState.SECTION_SEPARATOR + SelectionState.DIALOG + "=" + dialog : "") +
               SelectionState.SECTION_SEPARATOR + SelectionState.ITEM + "=" + exid
       );
     };
@@ -626,7 +658,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   @Override
   public void showDialogIn(int dialogid, VIEWS view) {
-    // logger.info("showListIn - " + listid + " " + view);
+    logger.info("showDialogIn - " + dialogid + " " + view);
     pushItem(
         SelectionState.DIALOG + "=" + dialogid + SelectionState.SECTION_SEPARATOR +
             getInstanceParam(view));

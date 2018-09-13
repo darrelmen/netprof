@@ -132,9 +132,12 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
   protected int getHideDelay() {
     return HIDE_DELAY;
   }
+
   protected T getCommonShellAtTime(Integer exerciseID, long xAsLong) {
     T commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
-    if (commonShell == null) logger.warning("getCommonShellAtTime no ex found " + exerciseID);
+    if (commonShell == null) {
+      logger.info("getCommonShellAtTime no ex found " + exerciseID);
+    }
     return commonShell;
   }
 
@@ -149,6 +152,13 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
     chart.getYAxis().setAxisTitleText(title);
   }
 
+  /**
+   * @see AnalysisPlot#addCumulativeAverage(Collection, Chart, String, boolean)
+   * @param chart
+   * @param seriesTitle
+   * @param data
+   * @return
+   */
   Series getSplineSeries(Chart chart, String seriesTitle, Number[][] data) {
     return chart.createSeries()
         .setName(seriesTitle)
@@ -176,7 +186,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
    * @see #getToolTip()
    */
   protected String getTooltip(ToolTipData toolTipData, Integer exid, T commonShell) {
-//    logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
+ //  logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
     return getExerciseTooltip(toolTipData, commonShell, toolTipData.getSeriesName());
   }
 
@@ -193,7 +203,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
       english = commonShell.getMeaning();
 
     String englishTool = (english == null || english.equals("N/A")) ? "" : "<br/>" + english;
-   // String dateToShow = getDateToShow(toolTipData);
+    String dateToShow = getDateToShow(toolTipData);
 
     return
         (showEx ?
@@ -207,7 +217,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
 
             "<br/>" +
 
-           // (showDate() ? dateToShow : "") +
+            dateToShow  +
 
             (showEx ?
                 getTooltipHint()
@@ -216,7 +226,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
   }
 
   @NotNull
-  protected String getFLTooltip(String foreignLanguage) {
+  String getFLTooltip(String foreignLanguage) {
     return "<span style='font-size:200%'>" + foreignLanguage + "</span>";
   }
 

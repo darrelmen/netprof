@@ -137,7 +137,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     table.getElement().getStyle().setProperty("maxWidth", TABLE_WIDTH + "px");
   }
 
-  PhoneSummary phoneReport;
+// private PhoneSummary phoneReport;
 
   /**
    * @param phoneReport
@@ -147,7 +147,7 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   public Panel getTableWithPager(PhoneSummary phoneReport) {
     from = 0;
     to = System.currentTimeMillis();
-    this.phoneReport = phoneReport;
+  //  this.phoneReport = phoneReport;
     return getTableWithPagerForHistory(getPhoneAndStatsList(phoneReport, from, to));
   }
 
@@ -595,15 +595,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
   }
 
   private void clickOnPhone2(String phone) {
-    logger.info("clickOnPhone2 : got click on" +
+/*    logger.info("clickOnPhone2 : got click on" +
         "\n\tphone " + phone+
         "\n\tfrom  " + from+
         "\n\tto    " + to+
         "\n\treqid " + reqid
-    );
-
-//    this.from = from;
-//    this.to = to;
+    );*/
 
     long then = System.currentTimeMillis();
 

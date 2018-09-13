@@ -54,7 +54,7 @@ class TimeWidgets {
   private final Button month;
   private final HTML display;
   private final Heading score;
-  ListBox timeScale;
+  final ListBox timeScale;
 
   /**
    * @param prevButton

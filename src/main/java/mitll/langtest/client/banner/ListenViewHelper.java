@@ -94,7 +94,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     controller.getDialogService().getDialog(dialogFromURL, new AsyncCallback<IDialog>() {
       @Override
       public void onFailure(Throwable caught) {
-        // TODO fill in
+        controller.handleNonFatalError("getting dialogs", caught);
       }
 
       @Override

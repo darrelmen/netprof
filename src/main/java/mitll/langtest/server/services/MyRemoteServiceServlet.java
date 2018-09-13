@@ -519,6 +519,12 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return remoteAddr;
   }
 
+  /**
+   *
+   * @param id
+   * @return
+   * @throws DominoSessionException
+   */
   public IDialog getDialog(int id) throws DominoSessionException {
     IDialog iDialog = getOneDialog(id);
 
@@ -543,10 +549,15 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   private IDialog getOneDialog(int id) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-
     return getOneDialog(userIDFromSessionOrDB, id);
   }
 
+  /**
+   * Return the first dialog if the id is -1 or bogus...
+   * @param userIDFromSessionOrDB
+   * @param id
+   * @return the first dialog if the id is -1 or bogus...
+   */
   @Nullable
   private IDialog getOneDialog(int userIDFromSessionOrDB, int id) {
     List<IDialog> iDialogs = getDialogs(userIDFromSessionOrDB);

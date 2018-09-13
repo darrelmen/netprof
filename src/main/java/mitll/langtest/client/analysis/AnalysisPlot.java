@@ -74,7 +74,7 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.SESSION;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/19/15.
  */
-public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup {
+public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int HOUR_DUR = 60 * 60 * 1000;
@@ -82,6 +82,9 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private static final boolean DEBUG_TIMECHANGE = false;
   private static final boolean DEBUG = false;
 
+  /**
+   *
+   */
   private static final String HOUR = "Hour";
   private static final String DAY = "Day";
   private static final String WEEK = "Week";
@@ -198,6 +201,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     granToLabel.put(TIME_HORIZON.WEEK.getDuration(), WEEK);
     granToLabel.put(TIME_HORIZON.MONTH.getDuration(), MONTH);
     granToLabel.put(AnalysisTab.YEAR_DUR, YEAR);
+    granToLabel.put(-1L, "All");
 
     timezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
     //   logger.info("timezone offset " + timezoneOffset);
@@ -451,7 +455,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     service.getExerciseIds(
         new ExerciseListRequest(1, userid)
             .setOnlyForUser(true),
-        new AsyncCallback<ExerciseListWrapper<CommonShell>>() {
+        new AsyncCallback<ExerciseListWrapper<T>>() {
           @Override
           public void onFailure(Throwable throwable) {
             logger.warning("\n\n\n-> getExerciseIds " + throwable);
@@ -459,7 +463,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
           }
 
           @Override
-          public void onSuccess(ExerciseListWrapper<CommonShell> exerciseListWrapper) {
+          public void onSuccess(ExerciseListWrapper<T> exerciseListWrapper) {
             if (exerciseListWrapper != null && exerciseListWrapper.getExercises() != null) {
               //       Map<Integer, CommonShell> idToEx = getIdToEx();
 //              logger.info("populateExerciseMap : got back " + exerciseListWrapper.getExercises().size() +
@@ -532,6 +536,10 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     {
       for (Long gran : getSortedGranularities()) {
         String label = granToLabel.get(gran);
+
+        if (label == null) {
+          logger.warning("addErrorBars huh? no label for gran " + gran);
+        }
         List<PhoneSession> phoneSessions = granularityToSessions.get(gran);
         granToError.put(gran, addErrorBarSeries(phoneSessions, chart, label, true));
         Series value = addMeans(phoneSessions, chart, label, true);
@@ -720,7 +728,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         .setType(Axis.Type.DATE_TIME)
         .setAxisSetExtremesEventHandler(axisSetExtremesEvent -> {
           if (axisSetExtremesEvent != null) {
-         //   logger.info("configureChart window " + new Date(firstTime) + " " + new Date(lastTime));
+            //   logger.info("configureChart window " + new Date(firstTime) + " " + new Date(lastTime));
             gotExtremes(axisSetExtremesEvent);
           }
           return true;
@@ -747,20 +755,28 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
       Number min = axisSetExtremesEvent.getMin();
       Number max = axisSetExtremesEvent.getMax();
 
-      if (DEBUG) logger.info("gotExtremes got min " + min + " max " + max);
-      if (min != null && min.longValue() > 0) {
+      if (DEBUG || true) {
+        logger.info("gotExtremes got" +
+            "\n\tmin " + min + " " + (min == null ? "" : new Date(min.longValue())) +
+            "\n\tmax " + max + " " + (max == null ? "" : new Date(max.longValue())
+        ));
+      }
+
+      if (min != null &&
+          min.longValue() > 0) {
         long start = min.longValue();
         long end = max.longValue();
-        logger.info("gotExtremes 1 now min " + getDate(start) + " max " + getDate(end));
+        logger.info("gotExtremes 1 now min " + new Date(start) + " max " + new Date(end));
         setVisibility(start, end);
         timeChanged(start, end);
       } else {
         long end = System.currentTimeMillis();
         long start = end - ALL.getDuration();
-        logger.info("gotExtremes 2 now min " + getDate(start) + " max " + getDate(end));
+        logger.info("gotExtremes 2 now min " + new Date(start) + " max " + new Date(end));
         setVisibility(start, end);
         goToLast(TIME_HORIZON.ALL);
       }
+
       showSeriesByVisible();
 
     } catch (Exception e) {
@@ -810,6 +826,8 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   private void setTimeRange(List<TimeAndScore> rawBestScores) {
     this.firstTime = rawBestScores.get(0).getTimestamp();
     this.lastTime = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
+
+    logger.info("setTimeRange " + new Date(firstTime) + " - " + new Date(lastTime));
   }
 
   /**
@@ -818,10 +836,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
    * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    */
   void setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
-    this.timeHorizon = timeHorizon;
-
-    goToLast(timeHorizon);
-    //return (x != null) ? x : 0;
+    goToLast(this.timeHorizon = timeHorizon);
   }
 
   /**
@@ -858,7 +873,6 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
         return;
       case ALL:
         showAll(xAxis, lastPlusSlack);
-        return;
     }
   }
 
@@ -927,19 +941,19 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     long window = lastPlusSlack - firstTime;
     long hours = window / HOUR_DUR;
     if (hours < 24) {
-     // logger.info("showAll hours " + hours);
+      // logger.info("showAll hours " + hours);
       firstW -= HOUR_DUR;
       lastPlusSlack += HOUR_DUR;
     } else if (window / DAY_DUR < 7) {
-     // logger.info("showAll days " + (window / DAY_DUR));
+      // logger.info("showAll days " + (window / DAY_DUR));
       firstW -= DAY_DUR;
       lastPlusSlack += DAY_DUR;
     } else if (window / WEEK_DUR < 4) {
-     // logger.info("showAll week " + (window / WEEK_DUR));
+      // logger.info("showAll week " + (window / WEEK_DUR));
       firstW -= WEEK_DUR;
       lastPlusSlack += WEEK_DUR;
     } else {//if (window / MONTH_DUR < 12) {
-     // logger.info("showAll month " + (window / MONTH_DUR));
+      // logger.info("showAll month " + (window / MONTH_DUR));
       firstW -= MONTH_DUR;
       lastPlusSlack += MONTH_DUR;
     }
@@ -1121,7 +1135,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
   }
 
-  protected SafeHtml getNoWrapContent(String noWrapContent) {
+/*  protected SafeHtml getNoWrapContent(String noWrapContent) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
         noWrapContent +
@@ -1129,7 +1143,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     sb.appendHtmlConstant("</div>");
     return sb.toSafeHtml();
-  }
+  }*/
 
   /**
    * Uses remembered session size.
@@ -1201,16 +1215,23 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
   }
 
   protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
-    //   logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName());
     String seriesName = toolTipData.getSeriesName();
+    Collection<String> values = granToLabel.values();
 
-    if (granToLabel.values().contains(seriesName)) {
+    if (values.contains(seriesName)) {
       if (granToAverage.values().contains(chart.getSeries(toolTipData.getSeriesId()))) {
+       // logger.info("getAvgTooltip for " + exid + " series " + seriesName);
         return getAvgTooltip(toolTipData, seriesName);
       } else {
+      //  logger.info("getErrorBarToolTip for " + exid + " series " + seriesName);
         return getErrorBarToolTip(toolTipData, seriesName);
       }
     } else {
+    /*  logger.info("getExerciseTooltip " +
+          "\n\tfor " + exid +
+          "\n\t series id " + toolTipData.getSeriesId() +
+          "\n\t series " + seriesName +
+          "\n\tvalues " + values);*/
       return super.getTooltip(toolTipData, exid, commonShell);
     }
   }

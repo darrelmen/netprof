@@ -174,7 +174,7 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
         logger.warning("no bigrams for phone " + phone);
         phoneAndStatsList = new ArrayList<>();
       } else {
-        logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
+    //    logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
         phoneAndStatsList = getPhoneAndStatsListForPeriod(bigrams);
       }
       //   logger.info("gotNewPhoneReport Got " + phoneAndStatsList.size() + " items for " + phone);
@@ -431,7 +431,6 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
    */
   private void clickOnPhone2(String bigram) {
     //   logger.info("clickOnPhone2 bigram = " + bigram);
-
     analysisServiceAsync.getPerformanceReportForUserForPhone(
         getAnalysisRequest(from, to)
             .setPhone(phone)

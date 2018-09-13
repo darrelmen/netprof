@@ -17,7 +17,7 @@ public class PolyglotChart<T extends CommonShell>  extends BasicTimeSeriesPlot<T
   private static final int HEIGHT = 100;
 
   protected Chart chart = null;
-  private ListInterface<?,?> listInterface;
+  private final ListInterface<?,?> listInterface;
 
   /**
    * @param exceptionSupport

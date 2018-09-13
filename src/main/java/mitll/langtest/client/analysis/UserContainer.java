@@ -135,8 +135,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private Button add;
   private Button remove;
   private Button mineOnly;
-  private UserTypeahead userTypeahead = new UserTypeahead(this);
-  private List<UserInfo> remembered;
+  private final UserTypeahead userTypeahead = new UserTypeahead(this);
+  //private List<UserInfo> remembered;
   private Collection<UserInfo> orig;
 
   /**
@@ -191,7 +191,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private void showMyStudents(Set<Integer> result, Collection<UserInfo> users, DivWidget leftSide) {
     myStudents = result;
 
-    remembered = new ArrayList<>(users);
+    List<UserInfo> remembered = new ArrayList<>(users);
 
     List<UserInfo> filtered = new ArrayList<>();
     remembered.forEach(userInfo -> {

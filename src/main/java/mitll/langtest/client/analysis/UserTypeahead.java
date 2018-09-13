@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 import java.util.logging.Logger;
 
-public class UserTypeahead {
+class UserTypeahead {
   private final Logger logger = Logger.getLogger("UserTypeahead");
 
   private static final int DISPLAY_ITEMS = 15;
@@ -20,7 +20,7 @@ public class UserTypeahead {
   private static final int SEARCH_FONT = 14;
   private final TextBox box;
   //private Collection<UserInfo> choices;
-  TypeaheadListener listener;
+  //TypeaheadListener listener;
 
   UserTypeahead(TypeaheadListener listener) {
     TextBox box = getTextBox();

@@ -132,7 +132,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    */
   private long from, to;
   private int lastPlayed = -1;
-  private INavigation.VIEWS jumpView;
+  private final INavigation.VIEWS jumpView;
 
   /**
    * What sort order do we want?
