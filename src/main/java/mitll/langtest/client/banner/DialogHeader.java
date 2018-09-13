@@ -17,7 +17,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 
 class DialogHeader {
   //private final Logger logger = Logger.getLogger("DialogHeader");
- // private static final int HEADER_HEIGHT = 120;
+  // private static final int HEADER_HEIGHT = 120;
   private static final String HEIGHT = 100 + "px";
 
   /**
@@ -29,6 +29,11 @@ class DialogHeader {
   private final INavigation.VIEWS next;
   private final ExerciseController controller;
 
+  /**
+   * @param controller
+   * @param prev
+   * @param next
+   */
   DialogHeader(ExerciseController controller, INavigation.VIEWS prev, INavigation.VIEWS next) {
     this.controller = controller;
     this.prev = prev;
@@ -43,7 +48,7 @@ class DialogHeader {
       DivWidget row = new DivWidget();
       row.addStyleName("cardBorderShadow");
 
-    //  row.setHeight(HEADER_HEIGHT + "px");
+      //  row.setHeight(HEADER_HEIGHT + "px");
 
       row.setWidth(ROW_WIDTH + "%");
       row.addStyleName("inlineFlex");
@@ -132,6 +137,7 @@ class DialogHeader {
     widgets.addStyleName("leftFiveMargin");
     widgets.addStyleName("rightTenMargin");
     buttonDiv.add(widgets);
+    widgets.setEnabled(next != null);
     return buttonDiv;
   }
 
@@ -148,7 +154,7 @@ class DialogHeader {
   }
 
   private String getNextTooltip() {
-    return "Go ahead to " + getNextView().toString();
+    return getNextView() == null ? "" : "Go ahead to " + getNextView().toString();
   }
 
   @NotNull

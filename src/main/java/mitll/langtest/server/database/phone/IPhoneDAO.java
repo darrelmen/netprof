@@ -34,7 +34,7 @@ public interface IPhoneDAO<T> extends IDAO {
    * @return
    * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReport
    */
-  PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project);
+  //PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project);
 
   /**
    * @see mitll.langtest.server.database.analysis.Analysis#getPhoneSummary

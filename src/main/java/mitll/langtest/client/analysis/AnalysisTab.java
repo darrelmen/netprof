@@ -46,8 +46,10 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.NewContentChooser;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.AnalysisReport;
@@ -59,6 +61,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.LEARN;
+import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM;
 import static mitll.langtest.client.custom.INavigation.VIEWS.STUDY;
 
 /**
@@ -140,20 +143,19 @@ public class AnalysisTab extends DivWidget {
   private final boolean isPolyglot;
   private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
   private ListBox timeScale;
-  private final int dialogID;
+  private INavigation.VIEWS jumpView;
 
   /**
    * @param controller
    * @param isPolyglot
-   * @param dialogID
+   * @param jumpView
    * @see NewContentChooser#showProgress
    * @see PolyglotPracticePanel#getScoreHistory
    */
   public AnalysisTab(ExerciseController controller,
                      boolean isPolyglot,
                      int req,
-                     ReqCounter reqCounter,
-                     int dialogID) {
+                     ReqCounter reqCounter, INavigation.VIEWS jumpView) {
     this(controller,
         1,
         null,
@@ -161,7 +163,7 @@ public class AnalysisTab extends DivWidget {
         controller.getUserManager().getUserID(),
         -1,
         isPolyglot,
-        req, reqCounter, dialogID);
+        req, reqCounter, jumpView);
   }
 
   /**
@@ -181,7 +183,8 @@ public class AnalysisTab extends DivWidget {
                      int listid,
                      boolean isPolyglot,
                      int req,
-                     ReqCounter reqCounter, int dialogID) {
+                     ReqCounter reqCounter,
+                     INavigation.VIEWS jumpView) {
     this.userid = userid;
     this.listid = listid;
     this.isPolyglot = isPolyglot;
@@ -189,6 +192,7 @@ public class AnalysisTab extends DivWidget {
     setWidth("100%");
     addStyleName("leftFiveMargin");
     this.controller = controller;
+    this.jumpView = jumpView;
 
     Widget playFeedback = getPlayFeedback();
 
@@ -216,13 +220,14 @@ public class AnalysisTab extends DivWidget {
 
     final long then = System.currentTimeMillis();
 
-    this.dialogID = dialogID;
+
+    int dialog = new SelectionState().getDialog();
     AnalysisRequest analysisRequest = new AnalysisRequest()
         .setUserid(userid)
         .setMinRecordings(minRecordings)
         .setListid(listid)
         .setReqid(req)
-        .setDialogID(dialogID);
+        .setDialogID(dialog);
 
     analysisServiceAsync.getPerformanceReportForUser(analysisRequest, new AsyncCallback<AnalysisReport>() {
       @Override
@@ -244,7 +249,7 @@ public class AnalysisTab extends DivWidget {
         if (reqCounter.getReq() != result.getReq() + 1) {
           logger.info("getPerformanceReportForUser : skip " + reqCounter.getReq() + " vs " + result.getReq());
         } else {
-          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(userid, minRecordings, listid, dialogID));
+          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(userid, minRecordings, listid, dialog));
         }
       }
     });
@@ -596,7 +601,7 @@ public class AnalysisTab extends DivWidget {
 
       TimeRange timeRange) {
     WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, wordsTitle,
-        numResults, analysisServiceAsync, timeRange, dialogID == -1 ? LEARN : STUDY);
+        numResults, analysisServiceAsync, timeRange, jumpView);
     return wordContainer.getTableWithPager();
   }
 
@@ -652,12 +657,6 @@ public class AnalysisTab extends DivWidget {
 
     // #2 - word examples
     lowerHalf.add(getWordExamples(exampleContainer.getTableWithPager()));
-
-/*    if (false) {//!isPolyglot) {
-      // #3 - phone plot
-      phonePlot.addStyleName("topMargin");
-      lowerHalf.add(phonePlot);
-    }*/
 
     phoneContainer.showExamplesForSelectedSound();
   }

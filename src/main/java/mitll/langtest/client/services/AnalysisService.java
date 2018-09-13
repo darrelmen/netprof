@@ -69,7 +69,7 @@ public interface AnalysisService extends RemoteService {
    * @return
    * @throws DominoSessionException
    * @throws RestrictedOperationException
-   * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab(ExerciseController, boolean, int, ReqCounter, int)
+   * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab(ExerciseController, boolean, int, ReqCounter, mitll.langtest.client.custom.INavigation.VIEWS)
    */
   AnalysisReport getPerformanceReportForUser(AnalysisRequest analysisRequest) throws DominoSessionException, RestrictedOperationException;
 

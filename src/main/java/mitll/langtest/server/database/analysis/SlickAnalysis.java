@@ -118,12 +118,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
 
     Collection<UserInfo> userInfos = bestForUser.values();
-    UserInfo firstUser = bestForUser.isEmpty() ? null : userInfos.iterator().next();
+    UserInfo firstUser = bestForUser.isEmpty() ? null : getFirstUser(userInfos);
 
     long then = System.currentTimeMillis();
 
     int userid = analysisRequest.getUserid();
-    PhoneSummary phoneSummary = getPhoneSummary(userid, firstUser, project);
+    PhoneSummary phoneSummary = getPhoneSummary(userid, firstUser);
     AnalysisReport analysisReport = new AnalysisReport(
         getUserPerformance(userid, bestForUser),
         phoneSummary,
@@ -183,13 +183,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return getPhoneBigramsForPeriod(analysisRequest, getUserInfo(analysisRequest));
   }
 
-  @Nullable
-  private UserInfo getUserInfo(AnalysisRequest analysisRequest) {
-    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
-    Collection<UserInfo> userInfos = bestForUser.values();
-    return bestForUser.isEmpty() ? null : userInfos.iterator().next();
-  }
-
 
   /**
    * @param analysisRequest
@@ -230,7 +223,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     } else {
       List<WordScore> wordScores = getWordScores(userInfos, from, to, sortInfo);
       int totalSize = wordScores.size();
-      //logger.info("getWordScoresForUser got " + totalSize + " word and score ");
+      logger.info("getWordScoresForUser got " + totalSize + " word and score ");
       // wordScores.forEach(bestScore -> logger.info("after " + bestScore));
 
       // sublist is not serializable!
@@ -239,14 +232,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       // prevent sublist range error
       int startToUse = min < rangeStart ? 0 : rangeStart;
 
-
       wordScores = new ArrayList<>(wordScores.subList(startToUse, min));
 
-      ;
       if (DEBUG) {
         logger.warn("getWordScoresForUser wordScores " + totalSize);
       }
-      if (DEBUG) logger.warn("getWordScoresForUser wordScores " + totalSize + " vs " + wordScores.size() + "/" + min);
+      if (DEBUG) {
+        logger.warn("getWordScoresForUser wordScores " + totalSize + " vs " + wordScores.size() + "/" + min);
+      }
 
       return new WordsAndTotal(wordScores, totalSize, areAllSameDay(wordScores));
     }
@@ -273,17 +266,10 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   private List<WordScore> getWordScores(Collection<UserInfo> userInfos, long from, long to, String sortInfo) {
-    List<BestScore> resultsForQuery = userInfos.iterator().next().getBestScores();
-
-    if (DEBUG) logger.info("getWordScoresForUser got " + resultsForQuery.size() + " scores");
-
-    List<BestScore> inTime =
-        resultsForQuery
-            .stream()
-            .filter(bestScore -> from <= bestScore.getTimestamp() && bestScore.getTimestamp() <= to)
-            .collect(Collectors.toList());
-    if (DEBUG)
-      logger.info("getWordScoresForUser got " + inTime.size() + " scores from " + new Date(from) + " to " + new Date(to));
+    List<BestScore> inTime = getBestScoresInWindow(userInfos, from, to);
+    if (DEBUG || true)
+      logger.info("getWordScores " +
+          "\n\tgot " + inTime.size() + " scores from " + new Date(from) + " to " + new Date(to));
 
     //if (DEBUG) logger.warn("getWordScoresForUser " + resultsForQuery.size());
 
@@ -291,6 +277,32 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     // inTime.forEach(bestScore -> logger.info("sorted " + bestScore));
     return getWordScore(inTime, false);
+  }
+
+  @NotNull
+  private List<BestScore> getBestScoresInWindow(Collection<UserInfo> userInfos, long from, long to) {
+    List<BestScore> resultsForQuery = getFirstUser(userInfos).getBestScores();
+
+    if (DEBUG || true) logger.info("getBestScoresInWindow got " + resultsForQuery.size() + " scores");
+
+    return resultsForQuery
+        .stream()
+        .filter(bestScore ->
+            from <= bestScore.getTimestamp() &&
+                bestScore.getTimestamp() <= to)
+        .collect(Collectors.toList());
+  }
+
+
+  @Nullable
+  private UserInfo getUserInfo(AnalysisRequest analysisRequest) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
+    Collection<UserInfo> userInfos = bestForUser.values();
+    return bestForUser.isEmpty() ? null : getFirstUser(userInfos);
+  }
+
+  private UserInfo getFirstUser(Collection<UserInfo> userInfos) {
+    return userInfos.iterator().next();
   }
 
   /**
@@ -351,7 +363,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
             String s2 = scoreToFL.get(o2);
             comp = collator.compare(s1, s2);  // remember to do locale aware string sorting.
             if (comp == 0) {
-              logger.info("getComparator fall back to time for " + o1 + " vs " + o2);
+            //  logger.info("getComparator fall back to time for " + o1 + " vs " + o2);
               comp = compareTimes(o1, o2);
             }
             break;
@@ -403,8 +415,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @see AnalysisServiceImpl#getPerformanceReportForUserForPhoneBigrams
    */
   public List<Bigram> getBigramPhoneReportFor(AnalysisRequest analysisRequest) {
-    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
-    UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
+    UserInfo next = getFirstUser(analysisRequest);
 
     long then = System.currentTimeMillis();
     long from = analysisRequest.getFrom();
@@ -433,8 +444,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @see AnalysisServiceImpl#getPerformanceReportForUserForPhone(int, int, String, String, long, long)
    */
   public List<WordAndScore> getWordAndScoreForPhoneAndBigram(AnalysisRequest analysisRequest) {
-    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
-    UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
+    UserInfo next = getFirstUser(analysisRequest);
 
     long then = System.currentTimeMillis();
 
@@ -485,12 +495,18 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
   }
 
+  @Nullable
+  private UserInfo getFirstUser(AnalysisRequest analysisRequest) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
+    return bestForUser.isEmpty() ? null : getFirstUser(bestForUser.values());
+  }
+
   /**
-   * @param id
-   * @param minRecordings
-   * @param listid
-   * @param dialogID
+   * @param analysisRequest
    * @return
+   * @paramx id
+   * @paramx minRecordings
+   * @paramx listid
    * @see IAnalysis#getPerformanceReportForUser(AnalysisRequest)
    * @see IAnalysis#getPhoneReportFor(AnalysisRequest)
    */
@@ -501,15 +517,22 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     int userid = analysisRequest.getUserid();
     int listid = analysisRequest.getListid();
 
+
+    Collection<Integer> dialogExerciseIDs = getDialogExerciseIDs(dialogID);
+
+    logger.info("getBestForUser Dialog ids " + dialogExerciseIDs.size());
+
     Collection<SlickPerfResult> perfForUser = listid == -1 ?
         (dialogID == -1 ?
             resultDAO.getPerfForUser(userid, projid) :
-            resultDAO.getPerfForUserInDialog(userid, getDialogExerciseIDs(dialogID))) :
+            resultDAO.getPerfForUserInDialog(userid, dialogExerciseIDs)) :
         resultDAO.getPerfForUserOnList(userid, listid);
     long now = System.currentTimeMillis();
 
-    if (DEBUG) logger.info("getBestForUser best for user " + userid + " in project " + projid + " and list " + listid +
-        " were " + perfForUser.size());
+    if (DEBUG || true) logger.info("getBestForUser best for" +
+        analysisRequest +
+//        " user " + userid + " in project " + projid + " and list " + listid +
+        "\n\twere " + perfForUser.size());
 
     long diff = now - then;
     if (diff > WARN_THRESH) {
@@ -564,7 +587,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @return
    * @see #getBestForUser
    */
-  private Map<Integer, UserInfo> getBest(Collection<SlickPerfResult> perfForUser, int minRecordings, boolean addNativeAudio) {
+  private Map<Integer, UserInfo> getBest(Collection<SlickPerfResult> perfForUser,
+                                         int minRecordings, boolean addNativeAudio) {
     Map<Integer, List<BestScore>> userToResults = getUserToResults(perfForUser, addNativeAudio);
     if (DEBUG) logger.info("getBest got " + userToResults.size() + " user to results");
     return getBestForQuery(minRecordings, userToResults);
@@ -594,7 +618,10 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     if (addNativeAudio) {
       getNativeAudio(perfs);
-      logger.info("getUserToResults took " + (System.currentTimeMillis() - then) + " millis to get native audio for " + perfs.size());
+      long l = System.currentTimeMillis() - then;
+      if (l > 20) {
+        logger.info("getUserToResults took " + l + " millis to get native audio for " + perfs.size());
+      }
     }
 
     then = System.currentTimeMillis();

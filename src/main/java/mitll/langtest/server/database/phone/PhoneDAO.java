@@ -177,7 +177,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @throws SQLException
    * @seex Analysis#getPhonesForUser
    */
-  @Override
+ /* @Override
   public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project) {
     try {
       return getPhoneReport(getResultIDJoinSQL(userid, ids), true, false);
@@ -186,6 +186,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       return new PhoneReport();
     }
   }
+*/
 
   @Override
   public PhoneReport getWorstPhonesForResultsForPhone(int userid, Collection<Integer> ids, Project project, String phone, long from, long to) {

@@ -43,6 +43,7 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
@@ -857,7 +858,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
         listid,
         listid != -1,
         req++,
-        this, -1));
+        this, INavigation.VIEWS.LEARN));
   }
 
 /*  public Button getAdd() {

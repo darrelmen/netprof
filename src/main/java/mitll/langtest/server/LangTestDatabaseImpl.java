@@ -323,7 +323,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
 
     shareDB(servletContext, db);
-    logger.info("readProperties shareDB ");
+   // logger.info("readProperties shareDB ");
     return serverProps;
   }
 

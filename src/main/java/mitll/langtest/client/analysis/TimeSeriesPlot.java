@@ -261,7 +261,7 @@ class TimeSeriesPlot extends DivWidget {
    * @see AnalysisPlot#addErrorBarSeries
    */
   Series addMeans(List<PhoneSession> iPadData, Chart chart, String seriesName, boolean hidden) {
-    logger.info("addMeans seriesName " + seriesName);
+  //  logger.info("addMeans seriesName " + seriesName);
     Series series = chart.createSeries()
         .setName(seriesName)
         .setPoints(getData(iPadData))

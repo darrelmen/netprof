@@ -37,8 +37,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.UIObject;
@@ -755,7 +753,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
       Number min = axisSetExtremesEvent.getMin();
       Number max = axisSetExtremesEvent.getMax();
 
-      if (DEBUG || true) {
+      if (DEBUG) {
         logger.info("gotExtremes got" +
             "\n\tmin " + min + " " + (min == null ? "" : new Date(min.longValue())) +
             "\n\tmax " + max + " " + (max == null ? "" : new Date(max.longValue())
@@ -766,13 +764,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
           min.longValue() > 0) {
         long start = min.longValue();
         long end = max.longValue();
-        logger.info("gotExtremes 1 now min " + new Date(start) + " max " + new Date(end));
+        if (DEBUG) logger.info("gotExtremes 1 now min " + new Date(start) + " max " + new Date(end));
         setVisibility(start, end);
         timeChanged(start, end);
       } else {
         long end = System.currentTimeMillis();
         long start = end - ALL.getDuration();
-        logger.info("gotExtremes 2 now min " + new Date(start) + " max " + new Date(end));
+        if (DEBUG) logger.info("gotExtremes 2 now min " + new Date(start) + " max " + new Date(end));
         setVisibility(start, end);
         goToLast(TIME_HORIZON.ALL);
       }
@@ -1220,10 +1218,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
 
     if (values.contains(seriesName)) {
       if (granToAverage.values().contains(chart.getSeries(toolTipData.getSeriesId()))) {
-       // logger.info("getAvgTooltip for " + exid + " series " + seriesName);
+        // logger.info("getAvgTooltip for " + exid + " series " + seriesName);
         return getAvgTooltip(toolTipData, seriesName);
       } else {
-      //  logger.info("getErrorBarToolTip for " + exid + " series " + seriesName);
+        //  logger.info("getErrorBarToolTip for " + exid + " series " + seriesName);
         return getErrorBarToolTip(toolTipData, seriesName);
       }
     } else {

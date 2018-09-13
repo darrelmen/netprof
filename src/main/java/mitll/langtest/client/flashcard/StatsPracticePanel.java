@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.AnalysisTab;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.IShowStatus;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -247,7 +248,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
   }
 
   AnalysisTab getScoreHistory() {
-    return new AnalysisTab(controller, true, -1, () -> 0, -1);
+    return new AnalysisTab(controller, true, -1, () -> 0, INavigation.VIEWS.LEARN);
   }
 
   /**

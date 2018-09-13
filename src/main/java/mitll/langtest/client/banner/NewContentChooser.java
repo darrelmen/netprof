@@ -272,7 +272,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private void showScores(DivWidget divWidget, VIEWS scores) {
     int dialog = new SelectionState().getDialog();
-    if (dialog == -1) {
+ //   if (dialog == -1) {
       controller.getDialogService().getDialog(-1, new AsyncCallback<IDialog>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -281,14 +281,20 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
         @Override
         public void onSuccess(IDialog dialog) {
-          divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, dialog.getID()));
-          currentSection = scores;
+          NewContentChooser.this.showScores(divWidget, scores, dialog );
         }
       });
-    } else {
-      divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, dialog));
-      currentSection = scores;
-    }
+   // } else {
+    //  NewContentChooser.this.showScores(divWidget, scores, dialog);
+    //}
+  }
+
+  private void showScores(DivWidget divWidget, VIEWS scores, IDialog dialog) {
+    DivWidget header = new DialogHeader(controller, VIEWS.PERFORM,null).getHeader(dialog);
+    header.addStyleName("bottomFiveMargin");
+    divWidget.add(header);
+    divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, STUDY));
+    currentSection = scores;
   }
 
   private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen) {
@@ -573,7 +579,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     boolean polyglotProject = isPolyglotProject();
     divWidget.add(isTeacher() ?
         new StudentAnalysis(controller) :
-        new AnalysisTab(controller, polyglotProject, 0, () -> 1, -1));
+        new AnalysisTab(controller, polyglotProject, 0, () -> 1, LEARN));
 
     currentSection = PROGRESS;
   }

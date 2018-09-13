@@ -192,11 +192,9 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    */
   @Override
   public WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort) throws DominoSessionException {
-
     long then = System.currentTimeMillis();
-    int projectID = getProjectIDFromUser();
 
-    WordsAndTotal wordScoresForUser = getSlickAnalysis(projectID)
+    WordsAndTotal wordScoresForUser = getSlickAnalysis(getProjectIDFromUser())
         .getWordScoresForUser(analysisRequest, rangeStart, rangeEnd, sort);
 
     wordScoresForUser.setReq(analysisRequest.getReqid());

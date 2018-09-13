@@ -83,7 +83,7 @@ import static mitll.langtest.shared.analysis.WordScore.WORD;
  */
 public class WordContainerAsync extends AudioExampleContainer<WordScore> implements AnalysisPlot.TimeChangeListener {
   public static final String REVIEW = "Review";
-  //public static final String LEARN = "Learn";
+
   private final Logger logger = Logger.getLogger("WordContainerAsync");
 
   private static final int TABLE_HEIGHT = 215;
@@ -204,9 +204,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     review.setIcon(IconType.PLAY);
     review.setType(ButtonType.SUCCESS);
     review.addClickHandler(event -> gotClickOnReview());
-
-
-
 
     DivWidget wrapper = new DivWidget();
     wrapper.addStyleName("floatRight");
@@ -358,7 +355,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         logger.info("createProvider asking from " + from + "/" +
             new Date(from) +"->" + to +"/"+new Date(to));*/
 
-
 //        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("create provider " + start + " end " + end));
 //        logger.info("logException stack " + exceptionAsString);
 
@@ -369,9 +365,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         //  logger.info("createProvider sort " + columnSortedState.toString());
         long then = System.currentTimeMillis();
 
-
         AnalysisRequest analysisRequest = getAnalysisRequest().setReqid(val);
 
+        logger.info("createProvider word scores req " + analysisRequest);
         analysisServiceAsync.getWordScoresForUser(
             analysisRequest,
             start,
@@ -391,9 +387,11 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
                 long now = System.currentTimeMillis();
                 long total = now - then;
-                logger.info("getWordScoresForUser userid " + reqInfo.getUserid() + " req " + req +
+                logger.info("createProvider userid " + reqInfo.getUserid() + " req " + req +
                     "\n\ttook   " + total +
                     "\n\tserver " + result.getServerTime() +
+                    "\n\tnum    " + result.getNumTotal() +
+                    "\n\tws num " + result.getResults().size() +
                     "\n\tclient " + (total - result.getServerTime()));
 
 

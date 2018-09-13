@@ -231,10 +231,16 @@ public abstract class Analysis extends DAO {
    */
   PhoneSummary getPhoneSummaryForPeriod(AnalysisRequest analysisRequest, UserInfo next) {
   //  List<Integer> resultIDs = getResultIDsInTimeWindow(next, from, to, Collections.emptySet());
+
     List<Integer> resultIDs = getResultIDsForRequest(analysisRequest, next);
-    int userid = analysisRequest.getUserid();
-    PhoneSummary phoneReport = phoneDAO.getPhoneSummary(userid, resultIDs);
-    setSessions(userid, phoneReport);
+    logger.info("getPhoneSummaryForPeriod " +
+        "\n\treq                 " +analysisRequest +
+        "\n\tuser                " +next +
+        "\n\tresultIDs " +resultIDs.size()
+    );
+
+    PhoneSummary phoneReport = phoneDAO.getPhoneSummary(analysisRequest.getUserid(), resultIDs);
+    setSessions(analysisRequest.getUserid(), phoneReport);
 
     return phoneReport;
   }
@@ -264,8 +270,6 @@ public abstract class Analysis extends DAO {
   private List<Integer> getResultIDsInTimeWindow(UserInfo next, long from, long to, Collection<Integer> exids) {
     List<BestScore> resultsForQuery = next.getBestScores();
 
-
-
     if (!exids.isEmpty()) {
       int before = resultsForQuery.size();
 
@@ -286,6 +290,9 @@ public abstract class Analysis extends DAO {
       if (timestamp > from && timestamp <= to) {
         resultIDs.add(bs.getResultID());
       }
+      else {
+//        logger.info("getResultIDsInTimeWindow : skip " + bs.getResultID() + " at " + new Date(timestamp));
+      }
     });
 
     if (DEBUG || true)
@@ -301,7 +308,6 @@ public abstract class Analysis extends DAO {
   /**
    * @param userid
    * @param next
-   * @param project
    * @return
    * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser
@@ -341,7 +347,7 @@ public abstract class Analysis extends DAO {
       return phoneReport;
     }
   }*/
-  public PhoneSummary getPhoneSummary(int userid, UserInfo next, Project project) {
+  public PhoneSummary getPhoneSummary(int userid, UserInfo next) {
     if (next == null) {
       return new PhoneSummary();
     } else {
@@ -349,6 +355,7 @@ public abstract class Analysis extends DAO {
       long start = then;
       long now;
       List<Integer> resultIDs = getResultIDsForUser(next.getBestScores());
+      logger.info("getPhoneSummary for " + userid +  " " + resultIDs.size());
 
       then = System.currentTimeMillis();
       PhoneSummary phoneReport = phoneDAO.getPhoneSummary(userid, resultIDs);
@@ -647,7 +654,7 @@ public abstract class Analysis extends DAO {
 
     long now = System.currentTimeMillis();
     if (now - then > 20) {
-      logger.debug("getWordScore took " + (now - then) + " millis to parse json for " + bestScores.size() + " best scores");
+      logger.info("getWordScore took " + (now - then) + " millis to parse json for " + bestScores.size() + " best scores");
     }
 
     if (doDefaultSort) {
@@ -655,10 +662,10 @@ public abstract class Analysis extends DAO {
       Collections.sort(results);
       now = System.currentTimeMillis();
       if (now - then > 0) {
-        logger.debug("getWordScore took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
+        logger.info("getWordScore took " + (now - then) + " millis to sort " + bestScores.size() + " best scores");
       }
     }
-    //   logger.info("getWordScore out of " + bestScores.size() + " skipped " + skipped);
+    logger.info("getWordScore out of " + bestScores.size() + " return " + results.size());
 
     return results;
   }

@@ -1,6 +1,7 @@
 package mitll.langtest.shared.analysis;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class AnalysisRequest implements Serializable {
   private int userid = -1;
@@ -12,7 +13,7 @@ public class AnalysisRequest implements Serializable {
   private String bigram = "";
 
   private long from = 1262304000000L; // 01/01/2010
-  private long to   = 1830297600000L;   // 01/01/2028
+  private long to = 1830297600000L;   // 01/01/2028
 
   private int reqid = -1;
 
@@ -125,8 +126,8 @@ public class AnalysisRequest implements Serializable {
         "\n\tminRecordings " + minRecordings +
         "\n\tphone  " + phone +
         "\n\tbigram " + bigram +
-        "\n\tfrom " + from +
-        "\n\tto   " + to +
+        "\n\tfrom " + from + " " + new Date(from) +
+        "\n\tto   " + to + " " + new Date(to) +
         "\n\treqid  " + reqid;
   }
 }

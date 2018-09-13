@@ -154,28 +154,25 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   /**
    * @param userid
    * @param resultIDs
-   * @param project
+   * @paramx project
    * @return
    * @throws SQLException
    * @seex mitll.langtest.server.database.analysis.Analysis#getPhoneReport
    * @seex mitll.langtest.server.database.analysis.Analysis#getPhoneReportForPeriod(int, UserInfo, Project, long, long)
    */
-  @Override
+ /*  @Override
   public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> resultIDs, Project project) {
-    Collection<SlickPhoneReport> phoneReportByResult = getSlickPhoneReports(userid, resultIDs);
-    return getPhoneReport(phoneReportByResult, true, userid, project);
-  }
+    return getPhoneReport(getSlickPhoneReports(userid, resultIDs), true, userid, project);
+  }*/
 
   @Override
   public PhoneSummary getPhoneSummary(int userid, Collection<Integer> resultIDs) {
-    Collection<SlickPhoneReport> phoneReportByResult = getSlickPhoneReports(userid, resultIDs);
-    return getPhoneSummary(phoneReportByResult);
+    return getPhoneSummary(getSlickPhoneReports(userid, resultIDs));
   }
 
   @Override
   public PhoneBigrams getPhoneBigrams(int userid, Collection<Integer> resultIDs) {
-    Collection<SlickPhoneReport> phoneReportByResult = getSlickPhoneReports(userid, resultIDs);
-    return getPhoneBigrams(phoneReportByResult);
+    return getPhoneBigrams(getSlickPhoneReports(userid, resultIDs));
   }
 
   private Collection<SlickPhoneReport> getSlickPhoneReports(int userid, Collection<Integer> resultIDs) {
