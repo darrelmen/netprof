@@ -373,6 +373,7 @@ public class ProjectManagement implements IProjectManagement {
               db.getPhoneDAO(),
               db.getAudioDAO(),
               (SlickResultDAO) db.getResultDAO(),
+
               project.getLanguage(),
               id,
               isPolyglot(project))

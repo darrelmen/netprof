@@ -60,6 +60,11 @@ class H2Analysis extends Analysis implements IAnalysis {
     super(database, phoneDAO, "unknown");
   }
 
+  @Override
+  protected Collection<Integer> getDialogExerciseIDs(int dialogID) {
+    return null;
+  }
+
   /**
    * @param id
    * @param minRecordings
@@ -85,27 +90,27 @@ class H2Analysis extends Analysis implements IAnalysis {
   }*/
 
   @Override
-  public PhoneSummary getPhoneSummaryForPeriod(int userid, int listid, long from, long to) {
+  public PhoneSummary getPhoneSummaryForPeriod(AnalysisRequest analysisRequest) {
     return null;
   }
 
   @Override
-  public PhoneBigrams getPhoneBigramsForPeriod(int userid, int listid, long from, long to) {
+  public PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest) {
     return null;
   }
 
   @Override
-  public AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid, int req) {
+  public AnalysisReport getPerformanceReportForUser(AnalysisRequest analysisRequest) {
     return null;
   }
 
   @Override
-  public WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid, long from, long to, int rangeStart, int rangeEnd, String sort) {
+  public WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort) {
     return null;
   }
 
   @Override
-  public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, String bigram, long from, long to) {
+  public List<WordAndScore> getWordAndScoreForPhoneAndBigram(AnalysisRequest analysisRequest) {
     return null;
   }
 

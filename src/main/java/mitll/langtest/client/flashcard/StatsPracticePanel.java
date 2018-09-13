@@ -247,7 +247,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
   }
 
   AnalysisTab getScoreHistory() {
-    return new AnalysisTab(controller, true, -1, () -> 0);
+    return new AnalysisTab(controller, true, -1, () -> 0, -1);
   }
 
   /**

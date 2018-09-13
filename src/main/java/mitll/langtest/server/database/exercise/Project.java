@@ -266,21 +266,20 @@ public class Project implements IPronunciationLookup {
   }
 
   /**
-   *
    * @see #setAnalysis(SlickAnalysis)
    */
   private <T extends CommonShell> void buildExerciseTrie() {
     final List<CommonExercise> rawExercises = getRawExercises();
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
 
-    new Thread(() -> makeItemTrie(rawExercises, smallVocabDecoder),"makeFullTrie_"+getID()).start();
-    new Thread(() -> makeContextTrie(rawExercises, smallVocabDecoder),"makeContextTrie_"+getID()).start();
+    new Thread(() -> makeItemTrie(rawExercises, smallVocabDecoder), "makeFullTrie_" + getID()).start();
+    new Thread(() -> makeContextTrie(rawExercises, smallVocabDecoder), "makeContextTrie_" + getID()).start();
   }
 
   /**
-   * @see #buildExerciseTrie
    * @param rawExercises
    * @param smallVocabDecoder
+   * @see #buildExerciseTrie
    */
   private void makeItemTrie(List<CommonExercise> rawExercises, SmallVocabDecoder smallVocabDecoder) {
     logger.info("buildExerciseTrie : build trie from " + rawExercises.size() + " exercises for " + project);
@@ -328,14 +327,15 @@ public class Project implements IPronunciationLookup {
   }
 
   /**
-   *
    * @return
    */
   public ExerciseTrie<CommonExercise> getFullTrie() {
     return fullTrie;
   }
 
-  public boolean isTrieBuilt() { return fullTrie != null; }
+  public boolean isTrieBuilt() {
+    return fullTrie != null;
+  }
 
   public ExerciseTrie<CommonExercise> getFullContextTrie() {
     return fullContextTrie;
@@ -438,7 +438,7 @@ public class Project implements IPronunciationLookup {
       putAllProps();
 
       String propValue = db.getProjectDAO().getPropValue(getID(), prop);  // blank if miss, not null
-   //   logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
+      //   logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
 
       propCache.put(prop, propValue);
       return propValue;
@@ -474,8 +474,8 @@ public class Project implements IPronunciationLookup {
    *
    * @param prefix
    * @return
-   * @see mitll.langtest.server.ScoreServlet#getExerciseIDFromText
    * @seex mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
+   * @see mitll.langtest.server.ScoreServlet#getExerciseIDFromText
    */
   public CommonExercise getExerciseBySearch(String prefix) {
     return getMatchEither(prefix, fullTrie.getExercises(prefix));
@@ -730,9 +730,21 @@ public class Project implements IPronunciationLookup {
     return dialogs;
   }
 
+  public Collection<Integer> getDialogExerciseIDs(int dialogID) {
+    Set<Integer> dialogExercises = new HashSet<>();
+    if (dialogID != -1) {
+      Optional<IDialog> first = getDialogs().stream().filter(iDialog -> iDialog.getID() == dialogID).findFirst();
+      if (first.isPresent()) {
+        first.get().getExercises().forEach(clientExercise -> dialogExercises.add(clientExercise.getID()));
+        first.get().getCoreVocabulary().forEach(clientExercise -> dialogExercises.add(clientExercise.getID()));
+      } else logger.warn("can't find dialog " + dialogID);
+    }
+    return dialogExercises;
+  }
+
   /**
-   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogInfo
    * @param dialogs
+   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogInfo
    */
   public void setDialogs(List<IDialog> dialogs) {
     this.dialogs = dialogs;
@@ -740,7 +752,7 @@ public class Project implements IPronunciationLookup {
     List<List<Pair>> seen = new ArrayList<>();
     List<String> typeOrder = getTypeOrder();
 
-    String unitType    = typeOrder.size() > 0 ? typeOrder.get(0) : "";
+    String unitType = typeOrder.size() > 0 ? typeOrder.get(0) : "";
     boolean hasUnitType = !unitType.isEmpty();
 
     String chapterType = typeOrder.size() > 1 ? typeOrder.get(1) : "";

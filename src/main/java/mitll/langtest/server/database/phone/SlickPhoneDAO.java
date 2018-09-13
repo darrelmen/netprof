@@ -153,7 +153,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   /**
    * @param userid
-   * @param ids
+   * @param resultIDs
    * @param project
    * @return
    * @throws SQLException
@@ -161,39 +161,33 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @seex mitll.langtest.server.database.analysis.Analysis#getPhoneReportForPeriod(int, UserInfo, Project, long, long)
    */
   @Override
-  public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project) {
-    long then = System.currentTimeMillis();
-    logger.info("getWorstPhonesForResults " + userid + " project " + project.getID() + " ids " + ids);
-    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, ids);
-    long now = System.currentTimeMillis();
-    if (now - then > 0)
-      logger.info("getWorstPhonesForResults took " + (now - then) + " to get " + phoneReportByResult.size());
-
+  public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> resultIDs, Project project) {
+    Collection<SlickPhoneReport> phoneReportByResult = getSlickPhoneReports(userid, resultIDs);
     return getPhoneReport(phoneReportByResult, true, userid, project);
   }
 
   @Override
-  public PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids, Project project) {
-    long then = System.currentTimeMillis();
-    logger.info("getPhoneSummary " + userid + " project " + project.getID() + " ids " + ids);
-    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, ids);
-    long now = System.currentTimeMillis();
-    if (now - then > 0)
-      logger.info("getPhoneSummary took " + (now - then) + " to get " + phoneReportByResult.size());
-
+  public PhoneSummary getPhoneSummary(int userid, Collection<Integer> resultIDs) {
+    Collection<SlickPhoneReport> phoneReportByResult = getSlickPhoneReports(userid, resultIDs);
     return getPhoneSummary(phoneReportByResult);
   }
 
   @Override
-  public PhoneBigrams getPhoneBigrams(int userid, Collection<Integer> ids) {
+  public PhoneBigrams getPhoneBigrams(int userid, Collection<Integer> resultIDs) {
+    Collection<SlickPhoneReport> phoneReportByResult = getSlickPhoneReports(userid, resultIDs);
+    return getPhoneBigrams(phoneReportByResult);
+  }
+
+  private Collection<SlickPhoneReport> getSlickPhoneReports(int userid, Collection<Integer> resultIDs) {
     long then = System.currentTimeMillis();
-    logger.info("getPhoneBigrams " + userid + " ids " + ids);
-    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, ids);
+    logger.info("getPhoneReports " + userid + " project ids " + resultIDs);
+    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, resultIDs);
     long now = System.currentTimeMillis();
     if (now - then > 0)
-      logger.info("getPhoneBigrams took " + (now - then) + " to get " + phoneReportByResult.size());
+      logger.info("getWorstPhonesForResults took " + (now - then) + " to get " + phoneReportByResult.size());
 
-    return getPhoneBigrams(phoneReportByResult);
+
+    return phoneReportByResult;
   }
 
   /**

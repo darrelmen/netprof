@@ -320,6 +320,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
       }
 
       showFinishedGettingExercises();
+
       if (DEBUG) {
         List<T> exercises = result.getExercises();
 
@@ -343,6 +344,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
         int idToUse = exerciseID == -1 ? result.getFirstExercise() == null ? -1 : result.getFirstExercise().getID() : exerciseID;
 
         setScores(result);
+
+        // TODO : check the current list of exercise ids - if it's not different than the result set, don't blink the UI.
 
         rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
       }
@@ -524,7 +527,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
     );
 
     exercises = rememberExercises(exercises);
-    for (ListChangeListener<T> listener : listeners) {
+    for (ListChangeListener<T> listener : listeners) {  // can't do a lambda, since we change exercises...?
       listener.listChanged(exercises, selectionID);
     }
 

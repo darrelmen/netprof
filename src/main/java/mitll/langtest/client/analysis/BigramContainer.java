@@ -35,6 +35,7 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -53,8 +54,10 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.Bigram;
 import mitll.langtest.shared.analysis.PhoneBigrams;
 import mitll.langtest.shared.analysis.WordAndScore;
@@ -153,11 +156,11 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
   private String phone;
 
   /**
-   * @see PhoneContainer#clickOnPhone2
    * @param result
    * @param phone
    * @param from
    * @param to
+   * @see PhoneContainer#clickOnPhone2
    */
   void gotNewPhoneBigrams(PhoneBigrams result, String phone, long from, long to) {
     this.from = from;
@@ -174,7 +177,7 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
         logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
         phoneAndStatsList = getPhoneAndStatsListForPeriod(bigrams);
       }
-   //   logger.info("gotNewPhoneReport Got " + phoneAndStatsList.size() + " items for " + phone);
+      //   logger.info("gotNewPhoneReport Got " + phoneAndStatsList.size() + " items for " + phone);
 
       addItems(phoneAndStatsList);
     }
@@ -244,10 +247,20 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
     }
   }
 
+  /**
+   * TODO : add common base class
+   *
+   * @param sortedHistory
+   */
   private void addPhones(List<PhoneAndStats> sortedHistory) {
     clear();
+
     sortedHistory.forEach(this::addItem);
+
     flush();
+
+    Scheduler.get().scheduleDeferred(() -> table.redraw());
+
   }
 
   /**
@@ -414,37 +427,47 @@ class BigramContainer extends SimplePagingContainer<PhoneAndStats> {
    * TODO : common base class
    *
    * @param bigram
+   * @see #checkForClick
    */
   private void clickOnPhone2(String bigram) {
- //   logger.info("clickOnPhone2 bigram = " + bigram);
+    //   logger.info("clickOnPhone2 bigram = " + bigram);
 
-    analysisServiceAsync.getPerformanceReportForUserForPhone(userid,
-        listid,
-        phone,
-        bigram,
-        from,
-        to, new AsyncCallback<List<WordAndScore>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("getting performance report for user and phone", caught);
-      }
+    analysisServiceAsync.getPerformanceReportForUserForPhone(
+        getAnalysisRequest(from, to)
+            .setPhone(phone)
+            .setBigram(bigram),
+        new AsyncCallback<List<WordAndScore>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("getting performance report for user and phone", caught);
+          }
 
-      @Override
-      public void onSuccess(List<WordAndScore> filteredWords) {
-        if (filteredWords == null) {
-          logger.warning("clickOnPhone2 no result for " + phone + " " + bigram);
-          exampleContainer.addItems(phone, bigram, Collections.emptyList(), MAX_EXAMPLES);
-        } else {
+          @Override
+          public void onSuccess(List<WordAndScore> filteredWords) {
+            if (filteredWords == null) {
+              logger.warning("clickOnPhone2 no result for " + phone + " " + bigram);
+              exampleContainer.addItems(phone, bigram, Collections.emptyList(), MAX_EXAMPLES);
+            } else {
      /*     filteredWords.forEach(wordAndScore -> logger.info("clickOnPhone2 : for " + phone + " and bigram " + bigram +
               "  got " + wordAndScore));
           */
 
-          exampleContainer.addItems(phone,
-              bigram, filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),
-              MAX_EXAMPLES);
-        }
-      }
-    });
+              exampleContainer.addItems(phone,
+                  bigram, filteredWords.subList(0, Math.min(filteredWords.size(), MAX_EXAMPLES)),
+                  MAX_EXAMPLES);
+            }
+          }
+        });
+  }
+
+  private AnalysisRequest getAnalysisRequest(long from, long to) {
+    return new AnalysisRequest()
+        .setUserid(userid)
+        .setListid(listid)
+        .setFrom(from)
+        .setTo(to)
+        .setDialogID(new SelectionState().getDialog())
+        .setReqid(reqid++);
   }
 
   private SafeHtml getSafeHtml(String columnText) {

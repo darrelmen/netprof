@@ -32,8 +32,11 @@
 
 package mitll.langtest.client.services;
 
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.client.analysis.ReqCounter;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -61,33 +64,60 @@ public interface AnalysisService extends RemoteService {
    */
   List<CommonShell> getShells(Collection<Integer> ids) throws DominoSessionException;
 
-  AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req)
-      throws DominoSessionException, RestrictedOperationException;
-
-/*
-  PhoneSummary getPhoneSummary(int userid, int minRecordings, int listid, int req)
-      throws DominoSessionException, RestrictedOperationException;
-*/
-
-  WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid, long fromTime, long toTime,
-                                     int rangeStart, int rangeEnd, String sort, int reqid) throws DominoSessionException;
-
-  List<WordAndScore> getPerformanceReportForUserForPhone(int userid, int listid,
-                                                         String phone, String bigram, long from, long to)
-      throws DominoSessionException, RestrictedOperationException;
-
-  List<Bigram> getPerformanceReportForUserForPhoneBigrams(int userid,
-                                                          int listid,
-                                                          String phone,
-                                                          long from,
-                                                          long to) throws DominoSessionException, RestrictedOperationException;
+  /**
+   * @param analysisRequest
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab(ExerciseController, boolean, int, ReqCounter, int)
+   */
+  AnalysisReport getPerformanceReportForUser(AnalysisRequest analysisRequest) throws DominoSessionException, RestrictedOperationException;
 
 
-/*
-  PhoneReport getPhoneSummary(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
-*/
+  /**
+   * @param analysisRequest
+   * @param rangeStart
+   * @param rangeEnd
+   * @param sort
+   * @return
+   * @throws DominoSessionException
+   * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider(int, CellTable)
+   */
+  WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort) throws DominoSessionException;
 
-  PhoneSummary getPhoneSummary(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
+  /**
+   *
+   * @param analysisRequest
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
+  // List<Bigram> getPerformanceReportForUserForPhoneBigrams(AnalysisRequest analysisRequest) throws DominoSessionException, RestrictedOperationException;
 
-  PhoneBigrams getPhoneBigrams(int userid, int listid, long from, long to, int reqid) throws DominoSessionException, RestrictedOperationException;
+  /**
+   * @param analysisRequest
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   * @see mitll.langtest.client.analysis.PhoneContainer#timeChanged
+   */
+  PhoneSummary getPhoneSummary(AnalysisRequest analysisRequest) throws DominoSessionException, RestrictedOperationException;
+
+  /**
+   * @param analysisRequest
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone2
+   */
+  PhoneBigrams getPhoneBigrams(AnalysisRequest analysisRequest) throws DominoSessionException, RestrictedOperationException;
+
+  /**
+   * @param analysisRequest
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   * @see mitll.langtest.client.analysis.BigramContainer#clickOnPhone2
+   */
+  List<WordAndScore> getPerformanceReportForUserForPhone(AnalysisRequest analysisRequest) throws DominoSessionException, RestrictedOperationException;
 }

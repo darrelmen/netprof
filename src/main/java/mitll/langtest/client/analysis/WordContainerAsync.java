@@ -50,6 +50,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.*;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -58,6 +59,7 @@ import mitll.langtest.client.result.TableSortHelper;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.WordsAndTotal;
+import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.TimeRange;
 import mitll.langtest.shared.instrumentation.SlimSegment;
@@ -80,6 +82,8 @@ import static mitll.langtest.shared.analysis.WordScore.WORD;
  * @since 10/20/15.
  */
 public class WordContainerAsync extends AudioExampleContainer<WordScore> implements AnalysisPlot.TimeChangeListener {
+  public static final String REVIEW = "Review";
+  //public static final String LEARN = "Learn";
   private final Logger logger = Logger.getLogger("WordContainerAsync");
 
   private static final int TABLE_HEIGHT = 215;
@@ -126,8 +130,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   /**
    *
    */
-  private long from = 0, to = Long.MAX_VALUE;
+  private long from, to;
   private int lastPlayed = -1;
+  private INavigation.VIEWS jumpView;
 
   /**
    * What sort order do we want?
@@ -135,6 +140,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    * @param controller
    * @param plot
    * @param timeRange
+   * @param jumpView
    * @see AnalysisTab#getWordContainer
    */
   WordContainerAsync(AnalysisTab.ReqInfo reqInfo,
@@ -142,8 +148,11 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                      AnalysisPlot plot,
                      Heading w,
                      int numWords,
-                     AnalysisServiceAsync analysisServiceAsync, TimeRange timeRange) {
+                     AnalysisServiceAsync analysisServiceAsync,
+                     TimeRange timeRange,
+                     INavigation.VIEWS jumpView) {
     super(controller, plot);
+    this.jumpView=jumpView;
     this.reqInfo = reqInfo;
     plot.addListener(this);
     this.heading = w;
@@ -181,11 +190,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   @NotNull
   private DivWidget getButtonRow() {
     DivWidget child = new DivWidget();
-    review = new Button("Review") {
+    review = new Button(REVIEW) {
       @Override
       protected void onDetach() {
         super.onDetach();
-        // logger.info("got detach ");
         stopAudio();
       }
     };
@@ -198,18 +206,18 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     review.addClickHandler(event -> gotClickOnReview());
 
 
-    Button learn = new Button("Learn");
-    learn.addStyleName("topFiveMargin");
 
-    learn.setType(ButtonType.SUCCESS);
-
-    learn.addClickHandler(event -> {
-      gotClickOnLearn();
-    });
 
     DivWidget wrapper = new DivWidget();
     wrapper.addStyleName("floatRight");
-    wrapper.add(learn);
+
+    {
+      Button learn = new Button(jumpView.toString());
+      learn.addStyleName("topFiveMargin");
+      learn.setType(ButtonType.SUCCESS);
+      learn.addClickHandler(event -> gotClickOnLearn());
+      wrapper.add(learn);
+    }
     wrapper.add(review);
     child.add(wrapper);
     return child;
@@ -218,7 +226,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private void gotClickOnLearn() {
     if (getSelected() != null) {
       int exid = getSelected().getExid();
-      controller.getShowTab().showLearnAndItem(exid);
+      controller.getShowTab(jumpView).showLearnAndItem(exid);
     }
   }
 
@@ -361,16 +369,14 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         //  logger.info("createProvider sort " + columnSortedState.toString());
         long then = System.currentTimeMillis();
 
+
+        AnalysisRequest analysisRequest = getAnalysisRequest().setReqid(val);
+
         analysisServiceAsync.getWordScoresForUser(
-            reqInfo.getUserid(),
-            reqInfo.getMinRecordings(),
-            reqInfo.getListid(),
-            from,
-            to,
+            analysisRequest,
             start,
             end,
             columnSortedState.toString(),
-            val,
             new AsyncCallback<WordsAndTotal>() {
 
               @Override
@@ -392,6 +398,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
 
                 if (result.getReq() < req - 1) {
+                  logger.warning("ignore request " + result.getReq() + " vs " + req);
                 } else {
                   final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
                   cellTable.setRowCount(numTotal, true);
@@ -415,6 +422,16 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     // Connect the table to the data provider.
     dataProvider.addDataDisplay(table);
     dataProvider.updateRowCount(numResults, true);
+  }
+
+  private AnalysisRequest getAnalysisRequest() {
+    return new AnalysisRequest()
+        .setUserid(reqInfo.getUserid())
+        .setListid(reqInfo.getListid())
+        .setMinRecordings(reqInfo.getMinRecordings())
+        .setFrom(from)
+        .setTo(to)
+        .setDialogID(reqInfo.getDialogID());
   }
 
   private void selectFirst(WordsAndTotal result) {

@@ -40,10 +40,9 @@ public interface IPhoneDAO<T> extends IDAO {
    * @see mitll.langtest.server.database.analysis.Analysis#getPhoneSummary
    * @param userid
    * @param ids
-   * @param project
    * @return
    */
-  PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids, Project project);
+  PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids);
 
   PhoneBigrams getPhoneBigrams(int userid, Collection<Integer> ids );
 

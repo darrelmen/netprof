@@ -542,7 +542,14 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   private IDialog getOneDialog(int id) throws DominoSessionException {
-    List<IDialog> iDialogs = getDialogs(getUserIDFromSessionOrDB());
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+
+    return getOneDialog(userIDFromSessionOrDB, id);
+  }
+
+  @Nullable
+  private IDialog getOneDialog(int userIDFromSessionOrDB, int id) {
+    List<IDialog> iDialogs = getDialogs(userIDFromSessionOrDB);
     List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == id).collect(Collectors.toList());
     return collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
   }

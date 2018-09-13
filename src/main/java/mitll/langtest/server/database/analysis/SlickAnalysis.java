@@ -84,6 +84,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param phoneDAO
    * @param projid
    * @param sortByPolyScore
+   * @paramx dialogDAO
    * @see ProjectServices#configureProject
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser
    */
@@ -91,6 +92,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
                        IPhoneDAO phoneDAO,
                        IAudioDAO audioDAO,
                        SlickResultDAO resultDAO,
+
                        String language,
                        int projid,
                        boolean sortByPolyScore) {
@@ -105,32 +107,31 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   /**
-   * @param userid
-   * @param minRecordings
-   * @param listid
-   * @param req
+   * @param analysisRequest
    * @return
+   * @paramx userid
    * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getPerformanceReportForUser
    */
   @Override
-  public AnalysisReport getPerformanceReportForUser(int userid, int minRecordings, int listid, int req) {
-    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
+  public AnalysisReport getPerformanceReportForUser(AnalysisRequest analysisRequest) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
 
     Collection<UserInfo> userInfos = bestForUser.values();
     UserInfo firstUser = bestForUser.isEmpty() ? null : userInfos.iterator().next();
 
     long then = System.currentTimeMillis();
-    //PhoneReport phoneReport = getPhoneSummary(userid, firstUser, project);
-    PhoneSummary phoneReport = getPhoneSummary(userid, firstUser, project);
+
+    int userid = analysisRequest.getUserid();
+    PhoneSummary phoneSummary = getPhoneSummary(userid, firstUser, project);
     AnalysisReport analysisReport = new AnalysisReport(
         getUserPerformance(userid, bestForUser),
-        phoneReport,
+        phoneSummary,
         getCount(userInfos),
-        req);
+        analysisRequest.getReqid());
 
     long now = System.currentTimeMillis();
-    logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid + " and list " + listid);// + analysisReport);
+    logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid + " and list " + analysisRequest.getListid());// + analysisReport);
     return analysisReport;
   }
 
@@ -166,42 +167,32 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }*/
 
   /**
-   * @param userid
-   * @param listid
-   * @param from
-   * @param to
+   * @param analysisRequest
    * @return
    */
-  public PhoneSummary getPhoneSummaryForPeriod(int userid, int listid, long from, long to) {
-    return getPhoneSummaryForPeriod(userid, getUserInfo(userid, listid, 0), project, from, to);
+  public PhoneSummary getPhoneSummaryForPeriod(AnalysisRequest analysisRequest) {
+    return getPhoneSummaryForPeriod(analysisRequest, getUserInfo(analysisRequest));
   }
 
   /**
-   * @param userid
-   * @param listid
-   * @param from
-   * @param to
+   * @param analysisRequest
    * @return
    * @see AnalysisServiceImpl#getPhoneBigrams
    */
-  public PhoneBigrams getPhoneBigramsForPeriod(int userid, int listid, long from, long to) {
-    return getPhoneBigramsForPeriod(userid, getUserInfo(userid, listid, 0), from, to);
+  public PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest) {
+    return getPhoneBigramsForPeriod(analysisRequest, getUserInfo(analysisRequest));
   }
 
   @Nullable
-  private UserInfo getUserInfo(int userid, int listid, int i) {
-    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, i, listid);
+  private UserInfo getUserInfo(AnalysisRequest analysisRequest) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
     Collection<UserInfo> userInfos = bestForUser.values();
     return bestForUser.isEmpty() ? null : userInfos.iterator().next();
   }
 
 
   /**
-   * @param userid
-   * @param minRecordings
-   * @param listid
-   * @param from
-   * @param to
+   * @param analysisRequest
    * @param rangeStart
    * @param rangeEnd
    * @param sort
@@ -209,15 +200,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @see AnalysisServiceImpl#getWordScoresForUser(int, int, int, long, long, int, int, String, int)
    */
   @Override
-  public WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid,
-                                            long from, long to,
-                                            int rangeStart, int rangeEnd,
+  public WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd,
                                             String sort) {
-    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, minRecordings, listid);
+    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
     Collection<UserInfo> userInfos = bestForUser.values();
-    logger.info("getWordScoresForUser for user " + userid +
+    logger.info("getWordScoresForUser for user " + analysisRequest.getUserid() +
         " got " + userInfos.size() + " user from " + rangeStart + " to " + rangeEnd + " sort " + sort);
-    return getWordScoresForPeriod(userInfos, from, to, rangeStart, rangeEnd, sort);
+    return getWordScoresForPeriod(userInfos, analysisRequest.getFrom(), analysisRequest.getTo(), rangeStart, rangeEnd, sort);
   }
 
   /**
@@ -228,7 +217,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param rangeEnd
    * @param sortInfo
    * @return
-   * @see #getWordScoresForUser(int, int, int, long, long, int, int, String)
+   * @see IAnalysis#getWordScoresForUser(AnalysisRequest, int, int, String)
    */
   private WordsAndTotal getWordScoresForPeriod(Collection<UserInfo> userInfos,
                                                long from, long to,
@@ -410,68 +399,58 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   /**
-   * @param userid
-   * @param listid
-   * @param phone
-   * @param from
-   * @param to
-   * @return
+   * @param analysisRequest@return
    * @see AnalysisServiceImpl#getPerformanceReportForUserForPhoneBigrams
    */
-  public List<Bigram> getBigramPhoneReportFor(int userid,
-                                              int listid,
-                                              String phone,
-                                              long from,
-                                              long to) {
-    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
+  public List<Bigram> getBigramPhoneReportFor(AnalysisRequest analysisRequest) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
     UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
 
     long then = System.currentTimeMillis();
-
+    long from = analysisRequest.getFrom();
+    long to = analysisRequest.getTo();
     if (DEBUG || DEBUG_PHONE) {
+
       logger.info("getPhoneReportFor for" +
           "\n\tuser   " + next +
-          "\n\tuserid " + userid +
-          "\n\tlistid " + listid +
-          "\n\tphone  " + phone +
+          "\n\tuserid " + analysisRequest.getUserid() +
+          "\n\tlistid " + analysisRequest.getListid() +
+          "\n\tphone  " + analysisRequest.getPhone() +
           "\n\tfrom   " + from + " " + new Date(from) +
           "\n\tto     " + to + " " + new Date(to)
       );
     }
 
     // PhoneReport phoneReportForPhone = getPhoneReportForPhone(userid, next, project, phone, from, to);
-    PhoneBigrams phoneReportForPhone = getPhoneBigramsForPeriod(userid, next, from, to);
+    PhoneBigrams phoneReportForPhone = getPhoneBigramsForPeriod(analysisRequest);
     Map<String, List<Bigram>> phoneToBigrams = phoneReportForPhone.getPhoneToBigrams();
-    return phoneToBigrams.get(phone);
+    return phoneToBigrams.get(analysisRequest.getPhone());
   }
 
   /**
-   * @param userid
-   * @param listid
-   * @param phone
-   * @param bigram
-   * @param from
-   * @param to
-   * @return
+   * @param analysisRequest@return
    * @see mitll.langtest.client.analysis.BigramContainer#clickOnPhone2
    * @see AnalysisServiceImpl#getPerformanceReportForUserForPhone(int, int, String, String, long, long)
    */
-  public List<WordAndScore> getPhoneReportFor(int userid,
-                                              int listid,
-                                              String phone,
-                                              String bigram,
-                                              long from,
-                                              long to) {
-    Map<Integer, UserInfo> bestForUser = getBestForUser(userid, 0, listid);
+  public List<WordAndScore> getWordAndScoreForPhoneAndBigram(AnalysisRequest analysisRequest) {
+    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
     UserInfo next = bestForUser.isEmpty() ? null : bestForUser.values().iterator().next();
 
     long then = System.currentTimeMillis();
 
+    String phone = analysisRequest.getPhone();
+
+    if (phone.isEmpty()) logger.warn("no phone in " + analysisRequest);
+
+    String bigram = analysisRequest.getBigram();
+    long from = analysisRequest.getFrom();
+    long to = analysisRequest.getTo();
+
     if (DEBUG || DEBUG_PHONE) {
       logger.info("getPhoneReportFor for" +
           "\n\tuser   " + next +
-          "\n\tuserid " + userid +
-          "\n\tlistid " + listid +
+          "\n\tuserid " + analysisRequest.getUserid() +
+          "\n\tlistid " + analysisRequest.getListid() +
           "\n\tphone  " + phone +
           "\n\tbigram " + bigram +
           "\n\tfrom   " + from + " " + new Date(from) +
@@ -479,14 +458,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       );
     }
 
-    PhoneReport phoneReportForPhone = getPhoneReportForPhoneForBigrams(userid, next, project, from, to);
+    PhoneReport phoneReportForPhone = getPhoneReportForPhoneForBigrams(analysisRequest.getUserid(), next, project, from, to);
 
 
     Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =
         phoneReportForPhone.getPhoneToWordAndScoreSorted();
 
 //    logger.info("keys " + phoneToWordAndScoreSorted.keySet());
-   // logger.info("values " + phoneToWordAndScoreSorted.values());
+    // logger.info("values " + phoneToWordAndScoreSorted.values());
     Map<String, List<WordAndScore>> bigramToExample = phoneToWordAndScoreSorted.get(phone);
 
     if (bigramToExample == null) {
@@ -510,26 +489,40 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param id
    * @param minRecordings
    * @param listid
+   * @param dialogID
    * @return
-   * @see IAnalysis#getPerformanceReportForUser(int, int, int, int)
-   * @see IAnalysis#getPhoneReportFor(int, int, String, String, long, long)
+   * @see IAnalysis#getPerformanceReportForUser(AnalysisRequest)
+   * @see IAnalysis#getPhoneReportFor(AnalysisRequest)
    */
-  private Map<Integer, UserInfo> getBestForUser(int id, int minRecordings, int listid) {
+  private Map<Integer, UserInfo> getBestForUser(AnalysisRequest analysisRequest) {
     long then = System.currentTimeMillis();
+
+    int dialogID = analysisRequest.getDialogID();
+    int userid = analysisRequest.getUserid();
+    int listid = analysisRequest.getListid();
+
     Collection<SlickPerfResult> perfForUser = listid == -1 ?
-        resultDAO.getPerfForUser(id, projid) :
-        resultDAO.getPerfForUserOnList(id, listid);
+        (dialogID == -1 ?
+            resultDAO.getPerfForUser(userid, projid) :
+            resultDAO.getPerfForUserInDialog(userid, getDialogExerciseIDs(dialogID))) :
+        resultDAO.getPerfForUserOnList(userid, listid);
     long now = System.currentTimeMillis();
 
-    if (DEBUG) logger.info("getBestForUser best for user " + id + " in project " + projid + " and list " + listid +
+    if (DEBUG) logger.info("getBestForUser best for user " + userid + " in project " + projid + " and list " + listid +
         " were " + perfForUser.size());
 
     long diff = now - then;
     if (diff > WARN_THRESH) {
-      logger.warn("getBestForUser best for " + id + " in " + projid + " took " + diff);
+      logger.warn("getBestForUser best for " + userid + " in " + projid + " took " + diff);
     }
 
-    return getBest(perfForUser, minRecordings, true);
+    return getBest(perfForUser, analysisRequest.getMinRecordings(), true);
+  }
+
+  @NotNull
+  @Override
+  protected Collection<Integer> getDialogExerciseIDs(int dialogID) {
+    return project.getDialogExerciseIDs(dialogID);
   }
 
   /**

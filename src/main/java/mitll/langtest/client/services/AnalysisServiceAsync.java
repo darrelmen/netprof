@@ -51,41 +51,32 @@ public interface AnalysisServiceAsync {
    */
   void getShells(Collection<Integer> ids, AsyncCallback<List<CommonShell>> async);
 
-  void getPerformanceReportForUser(int id, int minRecordings, int listid, int req, AsyncCallback<AnalysisReport> async);
+  void getPerformanceReportForUser(AnalysisRequest analysisRequest, AsyncCallback<AnalysisReport> async);
 
   /**
-   * @param id
-   * @param listid
-   * @param phone
-   * @param bigram
-   * @param from
-   * @param to
+   *
+   * @param analysisRequest
    * @param async
    * @see mitll.langtest.client.analysis.PhoneContainer#clickOnPhone2
    */
-  void getPerformanceReportForUserForPhone(int id, int listid, String phone, String bigram, long from, long to,
-                                           AsyncCallback<List<WordAndScore>> async);
+  void getPerformanceReportForUserForPhone(AnalysisRequest analysisRequest, AsyncCallback<List<WordAndScore>> async);
 
-  void getWordScoresForUser(int userid, int minRecordings, int listid,
-                            long fromTime, long toTime, int rangeStart, int rangeEnd, String sort,
-                            int reqid,
+  void getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort,
                             AsyncCallback<WordsAndTotal> async);
 
 /*
   void getPhoneSummary(int userid, int listid, long from, long to, int reqid, AsyncCallback<PhoneReport> async);
 */
 
-  void getPerformanceReportForUserForPhoneBigrams(int userid,
-                                                  int listid,
-                                                  String phone,
-                                                    long from,
-                                                  long to, AsyncCallback<List<Bigram>> async);
+/*
+  void getPerformanceReportForUserForPhoneBigrams(AnalysisRequest analysisRequest, AsyncCallback<List<Bigram>> async);
+*/
 
 /*
   void getPhoneSummary(int userid, int minRecordings, int listid, int reqid, AsyncCallback<PhoneSummary> async);
 */
 
-  void getPhoneSummary(int userid, int listid, long from, long to, int reqid, AsyncCallback<PhoneSummary> async);
+  void getPhoneSummary(AnalysisRequest analysisRequest, AsyncCallback<PhoneSummary> async);
 
-  void getPhoneBigrams(int userid, int listid, long from, long to, int reqid, AsyncCallback<PhoneBigrams> async);
+  void getPhoneBigrams(AnalysisRequest analysisRequest, AsyncCallback<PhoneBigrams> async);
 }

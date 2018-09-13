@@ -61,7 +61,6 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   /**
    * @param request
    * @return
-   * @seex mitll.langtest.client.list.FacetExerciseList#getTypeToValues
    * @see mitll.langtest.client.banner.DialogExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
@@ -80,6 +79,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    * @param request
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.banner.DialogExerciseList#getExerciseIDs(Map, String, int, ExerciseListRequest)
    * @see ExerciseListRequest#getPrefix()
    */
   @Override
@@ -94,28 +94,30 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       if (userIDFromSessionOrDB != -1) {
         List<IDialog> dialogList = getDialogs(request, sectionHelper, userIDFromSessionOrDB);
 
-        String prefix = request.getPrefix().trim();
-        if (!prefix.isEmpty()) {
-          String lowerCase = prefix.toLowerCase();
-          dialogList = dialogList
-              .stream()
-              .filter(iDialog ->
-                  iDialog.getEnglish().toLowerCase().contains(lowerCase) ||
-                  iDialog.getForeignLanguage().toLowerCase().contains(lowerCase))
-              .collect(Collectors.toList());
-        }
+        dialogList = getFilteredBySearchTerm(request, dialogList);
         dialogList.sort(this::getDialogComparator);
 
-        return new ExerciseListWrapper<>(request.getReqID(),
-            dialogList,
-            null, new HashMap<>()
+        return new ExerciseListWrapper<>(request.getReqID(), dialogList, null, new HashMap<>()
         );
       } else {
         logger.info("getDialogs no user?");
-
         return new ExerciseListWrapper<>();
       }
     }
+  }
+
+  private List<IDialog> getFilteredBySearchTerm(ExerciseListRequest request, List<IDialog> dialogList) {
+    String prefix = request.getPrefix().trim();
+    if (!prefix.isEmpty()) {
+      String lowerCase = prefix.toLowerCase();
+      dialogList = dialogList
+          .stream()
+          .filter(iDialog ->
+              iDialog.getEnglish().toLowerCase().contains(lowerCase) ||
+                  iDialog.getForeignLanguage().toLowerCase().contains(lowerCase))
+          .collect(Collectors.toList());
+    }
+    return dialogList;
   }
 
   private int getDialogComparator(IDialog o1, IDialog o2) {

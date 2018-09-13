@@ -472,7 +472,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 */
 
     addPolyNumber(list);
-  //  addLastSession(list);
+    //  addLastSession(list);
     table.getColumnSortList().push(addLastOverallScore(list));
 
     table.setWidth("100%", true);
@@ -701,11 +701,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }*/
 
 
-  private Column<UserInfo, SafeHtml> getCurrent() {    return getClickable(this::getCurrentText);  }
+  private Column<UserInfo, SafeHtml> getCurrent() {
+    return getClickable(this::getCurrentText);
+  }
 
   @NotNull
-  private String getCurrentText(UserInfo shell) {    return "" + shell.getCurrent();  }  @NotNull
-  private String getNumText(UserInfo shell) {    return "" + shell.getNum();  }
+  private String getCurrentText(UserInfo shell) {
+    return "" + shell.getCurrent();
+  }
+
+  @NotNull
+  private String getNumText(UserInfo shell) {
+    return "" + shell.getNum();
+  }
 
 /*  private Column<UserInfo, SafeHtml> getLastSession() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -728,7 +736,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     };
   }*/
 
-  private Column<UserInfo, SafeHtml> getLastSession() {    return getClickableDesc(this::getLastSessionScore);  }
+  private Column<UserInfo, SafeHtml> getLastSession() {
+    return getClickableDesc(this::getLastSessionScore);
+  }
 
   @NotNull
   private String getLastSessionScore(UserInfo shell) {
@@ -737,7 +747,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return "" + lastSessionScore;
   }
 
-  private Column<UserInfo, SafeHtml> getOverall() {    return getClickableDesc(this::getOverallScore);  }
+  private Column<UserInfo, SafeHtml> getOverall() {
+    return getClickableDesc(this::getOverallScore);
+  }
 
   @NotNull
   private String getOverallScore(UserInfo shell) {
@@ -782,8 +794,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }
 */
 
-  private Column<UserInfo, SafeHtml> getNum() {    return getClickable(this::getNumText);  }
-  private Column<UserInfo, SafeHtml> getPolyNum() {    return getNoWrapCol(this::getPolyNumValue);  }
+  private Column<UserInfo, SafeHtml> getNum() {
+    return getClickable(this::getNumText);
+  }
+
+  private Column<UserInfo, SafeHtml> getPolyNum() {
+    return getNoWrapCol(this::getPolyNumValue);
+  }
 
   @NotNull
   private String getPolyNumValue(UserInfo shell) {
@@ -840,7 +857,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
         listid,
         listid != -1,
         req++,
-        this));
+        this, -1));
   }
 
 /*  public Button getAdd() {
@@ -858,7 +875,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     if (onlyOne && matches.size() == 1 &&
         getList().get(0).getID() == matches.iterator().next().getID()) {
-    //  logger.info("skip...");
+      //  logger.info("skip...");
     } else {
       populateTable(matches);
     }
@@ -878,7 +895,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           || user.getFirst().toLowerCase().startsWith(prefix)
           || user.getLast().toLowerCase().startsWith(prefix)
           || getFormattedDateString(getItemDate(user)).toLowerCase().startsWith(prefix)
-          ) {
+      ) {
         matches.add(user);
       }
     }

@@ -87,7 +87,12 @@ public interface INavigation extends IViewContaner {
 
   void showDialogIn(int dialogid, VIEWS view);
 
-  ShowTab getShowTab();
+  /**
+   *
+   * @param views
+   * @return
+   */
+  ShowTab getShowTab(VIEWS views);
 
   Widget getNavigation();
 

@@ -51,16 +51,21 @@ import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.AnalysisReport;
+import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.PhoneSummary;
 import mitll.langtest.shared.custom.TimeRange;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.custom.INavigation.VIEWS.LEARN;
+import static mitll.langtest.client.custom.INavigation.VIEWS.STUDY;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @see NewContentChooser#showProgress
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
@@ -135,17 +140,20 @@ public class AnalysisTab extends DivWidget {
   private final boolean isPolyglot;
   private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
   private ListBox timeScale;
+  private int dialogID;
 
   /**
    * @param controller
    * @param isPolyglot
+   * @param dialogID
    * @see NewContentChooser#showProgress
    * @see PolyglotPracticePanel#getScoreHistory
    */
   public AnalysisTab(ExerciseController controller,
                      boolean isPolyglot,
                      int req,
-                     ReqCounter reqCounter) {
+                     ReqCounter reqCounter,
+                     int dialogID) {
     this(controller,
         1,
         null,
@@ -153,7 +161,7 @@ public class AnalysisTab extends DivWidget {
         controller.getUserManager().getUserID(),
         -1,
         isPolyglot,
-        req, reqCounter);
+        req, reqCounter, dialogID);
   }
 
   /**
@@ -173,7 +181,7 @@ public class AnalysisTab extends DivWidget {
                      int listid,
                      boolean isPolyglot,
                      int req,
-                     ReqCounter reqCounter) {
+                     ReqCounter reqCounter, int dialogID) {
     this.userid = userid;
     this.listid = listid;
     this.isPolyglot = isPolyglot;
@@ -208,7 +216,15 @@ public class AnalysisTab extends DivWidget {
 
     final long then = System.currentTimeMillis();
 
-    analysisServiceAsync.getPerformanceReportForUser(userid, minRecordings, listid, req, new AsyncCallback<AnalysisReport>() {
+    this.dialogID = dialogID;
+    AnalysisRequest analysisRequest = new AnalysisRequest()
+        .setUserid(userid)
+        .setMinRecordings(minRecordings)
+        .setListid(listid)
+        .setReqid(req)
+        .setDialogID(dialogID);
+
+    analysisServiceAsync.getPerformanceReportForUser(analysisRequest, new AsyncCallback<AnalysisReport>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError(REPORT_FOR_USER, caught);
@@ -228,7 +244,7 @@ public class AnalysisTab extends DivWidget {
         if (reqCounter.getReq() != result.getReq() + 1) {
           logger.info("getPerformanceReportForUser : skip " + reqCounter.getReq() + " vs " + result.getReq());
         } else {
-          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(userid, minRecordings, listid));
+          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(userid, minRecordings, listid, dialogID));
         }
       }
     });
@@ -239,11 +255,18 @@ public class AnalysisTab extends DivWidget {
     private int userid;
     private int minRecordings;
     private int listid;
+    private int dialogID;
 
-    ReqInfo(int userid, int minRecordings, int listid) {
+    /**
+     * @param userid
+     * @param minRecordings
+     * @param listid
+     */
+    ReqInfo(int userid, int minRecordings, int listid, int dialogID) {
       this.userid = userid;
       this.minRecordings = minRecordings;
       this.listid = listid;
+      this.dialogID = dialogID;
     }
 
     public int getUserid() {
@@ -256,6 +279,10 @@ public class AnalysisTab extends DivWidget {
 
     public int getListid() {
       return listid;
+    }
+
+    public int getDialogID() {
+      return dialogID;
     }
   }
 
@@ -571,7 +598,7 @@ public class AnalysisTab extends DivWidget {
 
       TimeRange timeRange) {
     WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, wordsTitle,
-        numResults, analysisServiceAsync, timeRange);
+        numResults, analysisServiceAsync, timeRange, dialogID == -1 ? LEARN : STUDY);
     return wordContainer.getTableWithPager();
   }
 

@@ -1,7 +1,5 @@
 package mitll.langtest.shared.analysis;
 
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import mitll.langtest.client.analysis.AnalysisTab;
 import mitll.langtest.server.database.analysis.IAnalysis;
 
 import java.io.Serializable;
@@ -23,7 +21,7 @@ public class AnalysisReport implements Serializable {
    * @param userPerformance
    * @param phoneReport
    * @paramx wordScores
-   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getPerformanceReportForUser(int, int, int, int)
+   * @see IAnalysis#getPerformanceReportForUser(AnalysisRequest)
    */
   public AnalysisReport(UserPerformance userPerformance,
                         PhoneSummary phoneReport,

@@ -32,6 +32,8 @@
 
 package mitll.langtest.client.analysis;
 
+import mitll.langtest.client.custom.INavigation;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

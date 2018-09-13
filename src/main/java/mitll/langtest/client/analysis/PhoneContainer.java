@@ -54,12 +54,10 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.shared.analysis.PhoneBigrams;
-import mitll.langtest.shared.analysis.PhoneSession;
-import mitll.langtest.shared.analysis.PhoneStats;
-import mitll.langtest.shared.analysis.PhoneSummary;
+import mitll.langtest.shared.analysis.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -168,11 +166,12 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
     this.from = from;
     this.to = to;
     long then = System.currentTimeMillis();
-    analysisServiceAsync.getPhoneSummary(userid,
-        listid,
-        from,
-        to,
-        reqid++, new AsyncCallback<PhoneSummary>() {
+
+    AnalysisRequest analysisRequest = getAnalysisRequest(from, to);
+
+
+    analysisServiceAsync.getPhoneSummary(
+        analysisRequest, new AsyncCallback<PhoneSummary>() {
           @Override
           public void onFailure(Throwable caught) {
             logger.warning("\n\n\n-> getPhoneSummary " + caught);
@@ -608,11 +607,10 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
 
     long then = System.currentTimeMillis();
 
-    analysisServiceAsync.getPhoneBigrams(userid,
-        listid,
-        from,
-        to,
-        reqid++, new AsyncCallback<PhoneBigrams>() {
+    AnalysisRequest analysisRequest = getAnalysisRequest(from, to);
+
+    analysisServiceAsync.getPhoneBigrams(
+        analysisRequest, new AsyncCallback<PhoneBigrams>() {
           @Override
           public void onFailure(Throwable caught) {
             logger.warning("\n\n\n-> getPhoneSummary " + caught);
@@ -637,6 +635,16 @@ class PhoneContainer extends SimplePagingContainer<PhoneAndStats> implements Ana
           }
         });
     // bigramContainer.gotNewPhoneSummary(phoneReport, phone, from, to);
+  }
+
+  private AnalysisRequest getAnalysisRequest(long from, long to) {
+    return new AnalysisRequest()
+        .setUserid(userid)
+        .setListid(listid)
+        .setFrom(from)
+        .setTo(to)
+        .setDialogID(new SelectionState().getDialog())
+        .setReqid(reqid++);
   }
 
   private SafeHtml getSafeHtml(String columnText) {

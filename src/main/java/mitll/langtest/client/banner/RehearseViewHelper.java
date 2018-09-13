@@ -22,6 +22,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -45,6 +46,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private static final boolean DEBUG = false;
   private static final int TOP_TO_USE = 10;
+  private final List<Float> thresholds;
 
 
   /**
@@ -77,6 +79,27 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private T currentRecordingTurn = null;
   private boolean doRehearse = true;
+  private static final float NATIVE_HARD_CODE = 0.70F;
+
+  /**
+   * 9/13/18 histo from production
+   * Did histogram of 85K korean scores, split 6 ways, even 12K piles
+   */
+  private static final List<Float> koreanThresholds = new ArrayList<>(Arrays.asList(0.31F, 0.43F, 0.53F, 0.61F, NATIVE_HARD_CODE));
+  /**
+   * Did histogram of 18K english scores, split 6 ways, even 3K piles
+   */
+  private static final List<Float> englishThresholds = new ArrayList<>(Arrays.asList(0.23F, 0.36F, 0.47F, 0.58F, NATIVE_HARD_CODE));  // technically last is 72
+
+  private static final List<String> emoticons = new ArrayList<>(Arrays.asList(
+      "frowningEmoticon.png", // <0.3
+      "confusedEmoticon.png", //0.4
+      "thinkingEmoticon.png", //0.5
+      "neutralEmoticon.png", // 0.6
+      "smilingEmoticon.png", // 0.7
+      "grinningEmoticon.png"
+  ));
+  private static final String BEST_EMOTICON = emoticons.get(emoticons.size() - 1);
 
   /**
    * @param controller
@@ -85,6 +108,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   RehearseViewHelper(ExerciseController controller) {
     super(controller);
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
+    this.thresholds = controller.getLanguageInfo() == Language.KOREAN ? koreanThresholds : englishThresholds;
   }
 
   @Override
@@ -474,13 +498,15 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     int numScores = exToScore.size();
     int numResponses = getRespSeq().size();
     if (hasLast && numScores == numResponses) {
-      if (DEBUG)   logger.info("checkAtEnd : hasLast show scores! score " + hasLast + " and # known scores = " + numScores + " vs " + numResponses);
+      if (DEBUG)
+        logger.info("checkAtEnd : hasLast show scores! score " + hasLast + " and # known scores = " + numScores + " vs " + numResponses);
       showScores();
     } else {
       if (numScores > numResponses) {
         logger.warning("\n\n\nhuh? something is wrong! checkAtEnd : hasLast score " + hasLast + " and # known scores = " + numScores + " vs " + numResponses);
       } else {
-        if (DEBUG)  logger.info("checkAtEnd : hasLast score " + hasLast + " and # known scores = " + numScores + " vs " + numResponses);
+        if (DEBUG)
+          logger.info("checkAtEnd : hasLast score " + hasLast + " and # known scores = " + numScores + " vs " + numResponses);
       }
     }
   }
@@ -592,7 +618,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         !isCurrentTurnAPrompt() &&
         getCurrentTurn().isRecording()) {
 
-      if (DEBUG)  logger.info("gotPlay on recording turn - so abort!");
+      if (DEBUG) logger.info("gotPlay on recording turn - so abort!");
 
       getCurrentTurn().cancelRecording();
     } else {
@@ -605,7 +631,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
         T currentTurn = getCurrentTurn();
 
-        if (DEBUG)   logger.info("gotPlay currentTurn - " + currentTurn);
+        if (DEBUG) logger.info("gotPlay currentTurn - " + currentTurn);
 
         if (currentTurn == null || !currentTurn.isPlaying()) {
           setTurnToPromptSide();
@@ -623,7 +649,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
             sessionStorage.storeSession();
             clearScores();
           } else {
-            logger.info("gotPlay ignoring turn "+currentTurn);
+            logger.info("gotPlay ignoring turn " + currentTurn);
           }
         }
 
@@ -646,7 +672,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   protected void setNextTurnForSide() {
     if (!doRehearse) { // i.e. in playback
       if (onLastTurn()) {
-        if (DEBUG)   logger.info("setNextTurnForSide : wrap around ?");
+        if (DEBUG) logger.info("setNextTurnForSide : wrap around ?");
         super.setNextTurnForSide();
       } else {
         logger.info("setNextTurnForSide : skip - not on last");
@@ -733,19 +759,20 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
           // TODO : a race - does the play end before the score is available, or is the score available before the play ends?
 
           if (doWeHaveTheLastResponseScore()) {
-            if (DEBUG)    logger.info("currentTurnPlayEnded - on last " + currentTurn);
+            if (DEBUG) logger.info("currentTurnPlayEnded - on last " + currentTurn);
             if (doRehearse) {
               showScores();
             }
           } else {
-            if (DEBUG)    logger.info("currentTurnPlayEnded - no score for " + exID + " know about " + exToScore.keySet() + " so waiting...");
+            if (DEBUG)
+              logger.info("currentTurnPlayEnded - no score for " + exID + " know about " + exToScore.keySet() + " so waiting...");
 
             if (exStartedRecording.size() == getRespSeq().size()) {
               showWaitSpiner();  // wait for it
             }
           }
         } else {
-          if (DEBUG)   logger.info("currentTurnPlayEnded skip last! " + currentTurn);
+          if (DEBUG) logger.info("currentTurnPlayEnded skip last! " + currentTurn);
         }
       }
     }
@@ -773,7 +800,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       toStart.startRecording();
       setCurrentRecordingTurn(toStart);
 
-      if (DEBUG)   logger.info("startRecordingTurn : " + currentRecordingTurn);
+      if (DEBUG) logger.info("startRecordingTurn : " + currentRecordingTurn);
       validities.clear();
     } else {
       playCurrentTurn();
@@ -783,7 +810,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private void setCurrentRecordingTurn(T toStart) {
     //  logger.info("\n\n\nsetCurrentRecordingTurn BEFORE : " + toStart);
     currentRecordingTurn = toStart;
-    if (DEBUG)     logger.info("setCurrentRecordingTurn : " + currentRecordingTurn);
+    if (DEBUG) logger.info("setCurrentRecordingTurn : " + currentRecordingTurn);
   }
 
 
@@ -858,11 +885,19 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     return total;
   }
 
+
   @Override
   public void setEmoticon(Image smiley, double total) {
-    String choice;
+    String choice = BEST_EMOTICON;
 
-    if (total < 0.3) {
+    for (int i = 0; i < thresholds.size(); i++) {
+      if (total < thresholds.get(i)) {
+        choice = emoticons.get(i);
+        break;
+      }
+    }
+
+ /*   if (total < 0.3) {
       choice = "frowningEmoticon.png";
     } else if (total < 0.4) {
       choice = "confusedEmoticon.png";
@@ -874,7 +909,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       choice = "smilingEmoticon.png";
     } else {
       choice = "grinningEmoticon.png";
-    }
+    }*/
 
     smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
   }

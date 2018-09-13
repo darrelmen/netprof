@@ -50,6 +50,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 
@@ -107,6 +108,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
   void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);
 
   String getLanguage();
+  Language getLanguageInfo();
 
   boolean isRightAlignContent();
 
@@ -131,13 +133,13 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   boolean isMicAvailable();
 
-//  boolean usingFlashRecorder();
+
 
   KeyStorage getStorage();
 
   void showListIn(int listID, INavigation.VIEWS views);
 
-  ShowTab getShowTab();
+  ShowTab getShowTab(INavigation.VIEWS views);
 
   INavigation getNavigation();
 

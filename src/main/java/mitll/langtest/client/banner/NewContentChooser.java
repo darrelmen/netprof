@@ -61,6 +61,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final ListenViewHelper listenHelper;
   private final ListenViewHelper rehearseHelper;
   private final ListenViewHelper performHelper;
+
   private final PracticeHelper practiceHelper;
   private final QuizHelper quizHelper;
   private final ExerciseController controller;
@@ -83,12 +84,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
     dialogHelper = new DialogViewHelper(controller);
 
-    // todo : add study
     studyHelper = new StudyHelper<>(controller);
     listenHelper = new ListenViewHelper(controller);
     rehearseHelper = new RehearseViewHelper(controller);
     performHelper = new PerformViewHelper(controller);
-    // todo : add score
+
 
     this.controller = controller;
     this.listView = new ListView(controller);
@@ -232,6 +232,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           clearAndPushKeep(PERFORM);
           performHelper.showContent(divWidget, PERFORM);
           break;
+        case SCORES:
+          clearAndPushKeep(SCORES);
+          showScores(divWidget, SCORES);
+          break;
         case RECORD_ENTRIES:
           clearAndFixScroll();
           setInstanceHistory(RECORD_ENTRIES);
@@ -261,6 +265,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     } else {
       if (DEBUG) logger.info("showView skip current view " + view);
     }
+  }
+
+  private void showScores(DivWidget divWidget, VIEWS scores) {
+    divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, new SelectionState().getDialog()));
+    currentSection = scores;
   }
 
   private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen) {
@@ -541,7 +550,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     boolean polyglotProject = isPolyglotProject();
     divWidget.add(isTeacher() ?
         new StudentAnalysis(controller) :
-        new AnalysisTab(controller, polyglotProject, 0, () -> 1));
+        new AnalysisTab(controller, polyglotProject, 0, () -> 1, -1));
 
     currentSection = PROGRESS;
   }
@@ -569,25 +578,28 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   /**
    * Clear any current selection of unit and chapter before choosing an exercise, so we guarantee it will appear.
    *
+   * @param views
    * @return
    */
   @NotNull
-  public ShowTab getShowTab() {
-    return exid -> {
+  public ShowTab getShowTab(VIEWS views) {
+    return (exid) -> {
+      ExerciseListContent learnHelper = views == LEARN ? this.learnHelper : studyHelper;
       boolean wasMade = learnHelper.getReloadable() != null;
       //   logger.info("getShowTab history - " + History.getToken());
+      //VIEWS learn = LEARN;
       if (!wasMade) {
-        banner.show(LEARN);
+        banner.show(views);
       }
       learnHelper.loadExercise(exid);
       if (wasMade) {
-        banner.show(LEARN);
+        banner.show(views);
       }
 
       //   logger.info("getShowTab history after - " + History.getToken());
 
       pushItem(
-          getInstanceParam(LEARN) +
+          getInstanceParam(views) +
               SelectionState.SECTION_SEPARATOR + SelectionState.ITEM + "=" + exid
       );
     };
@@ -622,7 +634,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushItem(String url) {
-  //  logger.info("pushItem - " + url);
+    //  logger.info("pushItem - " + url);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //    logger.info("logException stack " + exceptionAsString);
     History.newItem(url);

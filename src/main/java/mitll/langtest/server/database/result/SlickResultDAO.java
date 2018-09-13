@@ -83,16 +83,16 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   /**
-   * @see DatabaseImpl#updateRecordings
    * @param rid
    * @param newprojid
    * @param newEXID
    * @return
+   * @see DatabaseImpl#updateRecordings
    */
   public boolean updateProjectAndEx(int rid, int newprojid, int newEXID) {
     return dao.updateProjectAndEx(rid, newprojid, newEXID) > 0;
   }
-  
+
   public int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID) {
     List<SlickResult> defResult = dao.getAllByProject(projid);
 
@@ -369,11 +369,11 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   /**
-   * @paramx ignoredSession
    * @param ids
    * @param userid
    * @param language
    * @return
+   * @paramx ignoredSession
    */
   @Override
   public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, String language) {
@@ -618,6 +618,10 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    */
   public Collection<SlickPerfResult> getPerfForUser(int userid, int projid) {
     return dao.perfForUser(userid, projid);
+  }
+
+  public Collection<SlickPerfResult> getPerfForUserInDialog(int userid, Collection<Integer> exids) {
+    return dao.perfByUserInDialog(userid, exids);
   }
 
   public Collection<SlickPerfResult> getPerfForUserOnList(int userid, int listid) {

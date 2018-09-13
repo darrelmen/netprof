@@ -51,7 +51,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   @Override
-  public PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids, Project project) {
+  public PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids) {
     return null;
   }
 

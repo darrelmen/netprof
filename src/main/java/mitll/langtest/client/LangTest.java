@@ -51,8 +51,8 @@ import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.client.analysis.WordContainerAsync;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
@@ -81,6 +81,7 @@ import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
@@ -1032,6 +1033,10 @@ public class LangTest implements
     return projectStartupInfo != null ? projectStartupInfo.getLanguage() : "";
   }
 
+  public Language getLanguageInfo() {
+    return projectStartupInfo != null ? projectStartupInfo.getLanguageInfo() : Language.UNKNOWN;
+  }
+
   public boolean isRightAlignContent() {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
     return projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
@@ -1277,9 +1282,14 @@ public class LangTest implements
     getNavigation().showListIn(listID, views);
   }
 
+  /**
+   * @see WordContainerAsync#gotClickOnLearn
+   * @param views
+   * @return
+   */
   @Override
-  public ShowTab getShowTab() {
-    return getNavigation().getShowTab();
+  public ShowTab getShowTab(INavigation.VIEWS views) {
+    return getNavigation().getShowTab(views);
   }
 
   @Override
