@@ -41,11 +41,7 @@ import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
-import mitll.langtest.shared.WordsAndTotal;
-import mitll.langtest.shared.analysis.AnalysisReport;
-import mitll.langtest.shared.analysis.Bigram;
-import mitll.langtest.shared.analysis.PhoneBigrams;
-import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.ProjectType;
@@ -61,13 +57,18 @@ public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);
   public static final int MAX = 200;
   public static final int USERID = 1474;
+  public static final int KOREAN = 2;
   public static final int SPANISH = 3;
   public static final int DEMO_USER = 659;
 
   @Test
+  public void testPhoneReport2() {}
+
+
+  @Test
   public void testPhoneReport() {
     DatabaseImpl db = getAndPopulate();
-    int projectid = SPANISH;
+    int projectid = KOREAN;
     Project project = db.getProject(projectid);
     SlickAnalysis slickAnalysis = new SlickAnalysis(
         db.getDatabase(),
@@ -78,14 +79,15 @@ public class EasyReportTest extends BaseTest {
         projectid,
         project.getKind() == ProjectType.POLYGLOT);
 
-    AnalysisReport performanceReportForUser = slickAnalysis.getPerformanceReportForUser(DEMO_USER, 0, -1, 0);
+    AnalysisRequest analysisRequest = new AnalysisRequest(DEMO_USER, -1, -1, 0);
+    AnalysisReport performanceReportForUser = slickAnalysis.getPerformanceReportForUser(analysisRequest);
 
     logger.info("Got " + performanceReportForUser);
     logger.info("phone summary " + performanceReportForUser.getPhoneSummary().getPhoneToAvgSorted());
 
     long maxValue = Long.MAX_VALUE;
 
-    PhoneBigrams phoneBigramsForPeriod = slickAnalysis.getPhoneBigramsForPeriod(DEMO_USER, -1, 0, maxValue);
+    PhoneBigrams phoneBigramsForPeriod = slickAnalysis.getPhoneBigramsForPeriod(analysisRequest);
 
     logger.info("bigrams " + phoneBigramsForPeriod);
 
@@ -113,9 +115,25 @@ public class EasyReportTest extends BaseTest {
     });
 */
 
+    phoneToBigrams.forEach((phone, bigrams) -> {
+      logger.info(phone + " -> " + bigrams.size() + " : " + bigrams);
+      bigrams.forEach(bigram -> {
+        logger.info("\t"+phone + " -> " +bigram);
+        List<WordAndScore> wordAndScoreForPhoneAndBigram = slickAnalysis.getWordAndScoreForPhoneAndBigram(
+            new AnalysisRequest()
+                .setUserid(DEMO_USER)
+                .setPhone(phone)
+                .setBigram(bigram.getBigram()));
+        logger.info("\t"+phone + " -> " +bigram + " : " + wordAndScoreForPhoneAndBigram.size());
+
+      });
+    });
+
+/*
+
     String bigram ="dh-b";
     logger.info(b + " " + bigram + "\n\n\n");
-    List<WordAndScore> nj = slickAnalysis.getPhoneReportFor(DEMO_USER, -1, b, bigram, 0, fiveYearsFromNow);
+    List<WordAndScore> nj = slickAnalysis.getPhoneReportFor(new AnalysisRequest());
 
     if (nj == null) {
       logger.warn("testPhoneReport no results for " + b + " " + bigram);
@@ -123,6 +141,7 @@ public class EasyReportTest extends BaseTest {
     else {
       nj.forEach(wordAndScore -> logger.info(b + " " + bigram + " : " + wordAndScore.getWord()));
     }
+*/
 
 
   }
@@ -133,7 +152,7 @@ public class EasyReportTest extends BaseTest {
     Project project = andPopulate.getProject(7);
    //   project.getAnalysis().getPerformanceReportForUser(USERID, 0, -1, 0);
 
-    project.getAnalysis().getPhoneReportFor(USERID, -1, "b", "b-rf", 0, System.currentTimeMillis());
+    project.getAnalysis().getWordAndScoreForPhoneAndBigram(new AnalysisRequest());
     //  andPopulate.sendReport(-1);
     andPopulate.close();
   }
