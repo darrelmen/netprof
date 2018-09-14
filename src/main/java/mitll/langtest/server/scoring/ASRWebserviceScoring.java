@@ -34,8 +34,11 @@ package mitll.langtest.server.scoring;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import com.google.gson.JsonParser;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
@@ -87,6 +90,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   static final int MAX_FROM_ANY_TOKEN = 10;
   public static final boolean DEBUG = false;
+  public static final int MSA_PORT = 5000;
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -202,8 +206,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param prefix
    * @param precalcScores
    * @param usePhoneToDisplay
+   * @param kaldi
    * @return PretestScore object
-   * @see AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions)
+   * @seex AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions)
    */
   public PretestScore scoreRepeat(String testAudioDir,
                                   String testAudioFileNoSuffix,
@@ -220,14 +225,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                   String prefix,
 
                                   PrecalcScores precalcScores,
-                                  boolean usePhoneToDisplay) {
+                                  boolean usePhoneToDisplay, boolean kaldi) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
         sentence, lmSentences, transliteration,
         imageOutDir,
         imageOptions,
         decode,
 
-        useCache, prefix, precalcScores, usePhoneToDisplay);
+        useCache, prefix, precalcScores, usePhoneToDisplay, kaldi);
   }
 
   /**
@@ -255,8 +260,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param prefix                on the names of the image files, if they are written
    * @param precalcScores
    * @param usePhoneToDisplay
+   * @param useKaldi
    * @return score info coming back from alignment/reco
-   * @see #scoreRepeat
+   * @seex ASR#scoreRepeat
    */
   private PretestScore scoreRepeatExercise(String testAudioDir,
                                            String testAudioFileNoSuffix,
@@ -270,7 +276,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            boolean useCache,
                                            String prefix,
                                            PrecalcScores precalcScores,
-                                           boolean usePhoneToDisplay) {
+                                           boolean usePhoneToDisplay,
+                                           boolean useKaldi) {
     logger.info("scoreRepeatExercise decode/align '" + sentence + "'");
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
@@ -329,7 +336,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         List<WordAndProns> possibleProns = new ArrayList<>();
         String hydraDict = getHydraDict(sentence, "", possibleProns);
 
-        logger.info("getProxyScore " +
+        logger.info("scoreRepeatExercise " +
             "\n\tdict          " + hydraDict +
             "\n\tpossibleProns " + possibleProns.size()
         );
@@ -367,8 +374,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
         int end = (int) (cachedDuration * 100.0);
 
-        cached = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
-            tempFile.getAbsolutePath(), decode, end);
+        if (useKaldi) {
+          cached = runKaldi(sentence, filePath +".wav");
+        }
+        else {
+          cached = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
+              tempFile.getAbsolutePath(), decode, end);
+        }
 
         if (cached == null) {
           return new PretestScore(0);
@@ -406,6 +418,56 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         decode, prefix, noSuffix,
         cached,
         cachedDuration, processDur, usePhoneToDisplay, jsonObject);
+  }
+
+  /**
+   * http://hydra-dev.llan.ll.mit.edu:5000/score/%7B%22reqid%22:1234,%22request%22:%22decode%22,%22phrase%22:%22%D8%B9%D8%B1%D8%A8%D9%8A%D9%91%22,%22file%22:%22/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav%22%7D
+   * @param sentence
+   * @param audioPath
+   * @return
+   */
+  private HydraOutput runKaldi(String sentence, String audioPath) {
+    try {
+      HTTPClient httpClient = new HTTPClient();
+
+      JsonObject jsonObject = new JsonObject();
+
+      logger.info("KALDI " +
+          "\n\tsentence  " + sentence+
+          "\n\taudioPath " + audioPath
+      );
+      jsonObject.addProperty("reqid", "1234");
+      jsonObject.addProperty("request", "decode");
+      jsonObject.addProperty("phrase", sentence);
+      jsonObject.addProperty("file", audioPath);
+
+      String s = jsonObject.toString();
+      String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
+
+      String json = httpClient.readFromGET("http://hydra-dev.llan.ll.mit.edu:" +
+          MSA_PORT +
+          "/score/" +
+          s1
+      );
+
+      logger.info("runKaldi response " + json);
+
+      JsonParser parser=new JsonParser();
+      JsonObject parse = parser.parse(json).getAsJsonObject();
+      float score = parse.get("score").getAsFloat();
+
+      JsonArray word_align = parse.get("word_align").getAsJsonArray();
+      for (JsonElement elem : word_align) {
+        JsonObject word = elem.getAsJsonObject();
+        float wscore = word.get("score").getAsFloat();
+        String theWord = word.get("word").getAsString();
+      }
+    } catch (IOException e) {
+      logger.warn("Got " + e, e);
+    }
+    return new HydraOutput(null,null,null,null);
+
+
   }
 
 
@@ -942,7 +1004,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   /**
    * Filter out sil
    *
-   * @param eventAndFileInfo
+   * @paramx eventAndFileInfo
    * @return
    * @see #getPretestScore
    */

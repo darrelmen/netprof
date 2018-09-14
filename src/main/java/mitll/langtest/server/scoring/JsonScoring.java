@@ -10,6 +10,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseShell;
+import mitll.langtest.shared.project.ModelType;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -234,13 +235,15 @@ public class JsonScoring {
                                            String transliteration,
                                            boolean usePhoneToDisplay,
                                            int projid) {
-    return getAudioFileHelper(projid)
+    AudioFileHelper audioFileHelper = getAudioFileHelper(projid);
+    return audioFileHelper
         .getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, "" + exerciseID,
             null,
             new DecoderOptions()
                 .setDoDecode(false)
                 .setCanUseCache(db.getServerProps().useScoreCache())
-                .setUsePhoneToDisplay(usePhoneToDisplay));
+                .setUsePhoneToDisplay(usePhoneToDisplay),
+            audioFileHelper.isKaldi());
   }
 
   private AudioFileHelper getAudioFileHelper(int projectid) {

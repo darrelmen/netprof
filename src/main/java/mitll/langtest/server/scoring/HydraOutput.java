@@ -20,8 +20,7 @@ public class HydraOutput {
    * @param phoneLab
    * @param wordAndProns
    */
-  HydraOutput(Scores scores,
-              String wordLab, String phoneLab, List<WordAndProns> wordAndProns) {
+  HydraOutput(Scores scores, String wordLab, String phoneLab, List<WordAndProns> wordAndProns) {
     this.scores = scores;
     this.wordLab = wordLab;
     this.phoneLab = phoneLab;
@@ -47,6 +46,7 @@ public class HydraOutput {
   /**
    * Does the reco word and phone sequence match any of the possible complete sequences
    * Only make sure the number of words is correct for now...
+   *
    * @param reco
    * @return
    */

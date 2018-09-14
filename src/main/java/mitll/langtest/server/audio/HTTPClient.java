@@ -144,7 +144,7 @@ public class HTTPClient {
    * @return
    * @see #isAvailable
    */
-  private String readFromGET(String url) throws IOException {
+  public String readFromGET(String url) throws IOException {
     HttpURLConnection httpConn = setupGetHttpConn(url);
     String receive = receive(httpConn);
     httpConn.disconnect();
@@ -242,7 +242,7 @@ public class HTTPClient {
     }
   }
 
-  private String receiveCookie(HttpURLConnection httpConn) throws IOException {
+  private String receiveCookie(HttpURLConnection httpConn) {
     List<String> strings = httpConn.getHeaderFields().get("Set-Cookie");
     if (strings == null) {
       logger.info("no header fields for cookie, got " + httpConn.getHeaderFields());

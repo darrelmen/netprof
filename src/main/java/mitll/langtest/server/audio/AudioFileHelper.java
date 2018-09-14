@@ -49,6 +49,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MutableExercise;
+import mitll.langtest.shared.project.ModelType;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -673,8 +674,12 @@ public class AudioFileHelper implements AlignDecode {
         new DecoderOptions()
             .setDoDecode(false)
             .setCanUseCache(serverProps.useScoreCache())
-            .setUsePhoneToDisplay(usePhoneToDisplay1)
-    );
+            .setUsePhoneToDisplay(usePhoneToDisplay1),
+        isKaldi());
+  }
+
+  public boolean isKaldi() {
+    return project.getModelType() == ModelType.KALDI;
   }
 
   /**
@@ -992,11 +997,13 @@ public class AudioFileHelper implements AlignDecode {
           "\n\tcontext " + exercise.isContext() +
           "\n\tattr    " + testAudioPath);
     }
+
+
     return getASRScoreForAudio(0, testAudioPath,
         exercise.getForeignLanguage(),
         exercise.getTransliteration(),
         NO_IMAGE_PLEASE, "" + exercise.getID(), null,
-        options);
+        options, isKaldi());
   }
 
   /**
@@ -1038,7 +1045,7 @@ public class AudioFileHelper implements AlignDecode {
 //      logger.info("getASRScoreForAudio audio file path is " + path + " " + firstSentence);
     return getASRScoreForAudio(reqid, path, firstSentence, lmSentences, transliteration,
         DEFAULT, prefix, precalcScores,
-        options);
+        options, isKaldi());
   }
 
   /**
@@ -1059,10 +1066,10 @@ public class AudioFileHelper implements AlignDecode {
                                           int projid,
                                           int userid,
                                           File theFile) {
-    boolean available = isHydraAvailable();
+    boolean available =true;// isHydraAvailable() && true;
     String hydraHost = serverProps.getHydraHost();
     if (!available) {
-      logger.debug("checkForWebservice local webservice not available" +
+      logger.info("checkForWebservice local webservice not available" +
           "\n\tfor     " + theFile.getName() +
           "\n\tproject " + projid +
           "\n\texid    " + exid +
@@ -1220,6 +1227,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param transliteration for languages we can't do normal LTS on (Kanji characters or similar)
    * @param prefix
    * @param options
+   * @param kaldi
    * @return PretestScore
    * @paramx precalcResult
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
@@ -1237,7 +1245,7 @@ public class AudioFileHelper implements AlignDecode {
                                           String prefix,
                                           PrecalcScores precalcScores,
 
-                                          DecoderOptions options) {
+                                          DecoderOptions options, boolean kaldi) {
     return getASRScoreForAudio(reqid,
         testAudioFile,
         sentence,
@@ -1246,7 +1254,7 @@ public class AudioFileHelper implements AlignDecode {
         imageOptions,
         prefix,
         precalcScores,
-        options);
+        options, kaldi);
   }
 
   /**
@@ -1260,6 +1268,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param transliteration for languages we can't do normal LTS on (Kanji characters or similar)
    * @param prefix
    * @param options
+   * @param kaldi
    * @return
    * @see #getASRScoreForAudio(int, File, Collection, String, DecoderOptions, PrecalcScores)
    */
@@ -1273,7 +1282,7 @@ public class AudioFileHelper implements AlignDecode {
 
                                            String prefix,
                                            PrecalcScores precalcScores,
-                                           DecoderOptions options) {
+                                           DecoderOptions options, boolean kaldi) {
     // alignment trumps decoding
     boolean shouldDoDecoding = options.shouldDoDecoding() && !options.shouldDoAlignment();
     logger.info("getASRScoreForAudio (" + getLanguage() + ")" +
@@ -1345,7 +1354,7 @@ public class AudioFileHelper implements AlignDecode {
         shouldDoDecoding,
         options.isCanUseCache(), prefix,
         precalcScores,
-        options.isUsePhoneToDisplay());
+        options.isUsePhoneToDisplay(), kaldi);
 
     pretestScore.setReqid(reqid);
 

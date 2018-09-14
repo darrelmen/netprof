@@ -52,6 +52,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.ModelType;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.*;
 import mitll.langtest.shared.user.User;
@@ -139,7 +140,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           return new PretestScore();
         } else {
           String audioFilePath = result.getAnswer();
-          String language = db.getProject(projectIDFromUser).getLanguage();
+          Project project = db.getProject(projectIDFromUser);
+          String language = project.getLanguage();
 
           // NOTE : actively avoid doing this -
           //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
@@ -156,7 +158,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
               new DecoderOptions()
                   .setDoDecode(false)
                   .setCanUseCache(serverProps.useScoreCache())
-                  .setUsePhoneToDisplay(serverProps.usePhoneToDisplay()));
+                  .setUsePhoneToDisplay(serverProps.usePhoneToDisplay()), isKaldi(project));
         }
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -166,6 +168,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     } else {
       throw getRestricted("result asr");
     }
+  }
+
+  private boolean isKaldi(Project project) {
+    return project.getModelType() == ModelType.KALDI;
   }
 
 /*  @Override
@@ -627,8 +633,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         new DecoderOptions()
             .setDoDecode(false)
             .setCanUseCache(serverProps.useScoreCache())
-            .setUsePhoneToDisplay(usePhoneToDisplay1)
-    );
+            .setUsePhoneToDisplay(usePhoneToDisplay1),
+        audioFileHelper.isKaldi());
   }
 
   @NotNull

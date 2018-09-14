@@ -73,6 +73,7 @@ public interface ASR {
    * @param prefix
    * @param precalcScores
    * @param usePhoneToDisplay
+   * @param kaldi
    * @return
    * @see AlignDecode#getASRScoreForAudio
    */
@@ -87,7 +88,7 @@ public interface ASR {
                            boolean useCache,
                            String prefix,
                            PrecalcScores precalcScores,
-                           boolean usePhoneToDisplay);
+                           boolean usePhoneToDisplay, boolean kaldi);
 
   /**
    * @see AudioFileHelper#isHydraAvailable

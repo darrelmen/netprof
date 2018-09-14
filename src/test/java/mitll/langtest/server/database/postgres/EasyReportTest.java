@@ -65,6 +65,14 @@ public class EasyReportTest extends BaseTest {
   public static final int DEMO_USER = 659;
 
   @Test
+  public void testKaldi() {
+    DatabaseImpl db = getAndPopulate();
+    int projectid = 5;
+    Project project = db.getProject(projectid);
+    project.recalcRefAudio();
+  }
+
+  @Test
   public void testPhoneReport() {
     DatabaseImpl db = getAndPopulate();
     int projectid = SPANISH;
