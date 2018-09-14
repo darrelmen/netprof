@@ -38,6 +38,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
+import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -128,14 +129,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
     }
   }
 
+  // TODO : may need this later
+/*
   public SlickDialog getByID(int projid) {
     Collection<SlickDialog> SlickDialogs = dao.byID(projid);
     return SlickDialogs.isEmpty() ? null : SlickDialogs.iterator().next();
   }
-
-  private Collection<SlickDialog> getByProjID(int projid) {
-    return dao.byProjID(projid);
-  }
+*/
 
   /**
    * join with attributes = meta data from domino
@@ -195,6 +195,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
     });
 
     return dialogs;
+  }
+
+  private Collection<SlickDialog> getByProjID(int projid) {
+    return dao.byProjID(projid);
   }
 
   private void addCoreVocab(List<SlickRelatedExercise> relatedExercises, Project project, Dialog dialog) {
@@ -392,8 +396,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }*/
 
   /**
-   * TODO fill this in
-   *
+   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
    * @param id
    */
   @Override
@@ -410,10 +413,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return dao.dao().name();
   }
 
-
   /**
-   * TODO : consider adding lts class
-   * TODO : consider adding domino project id
    *
    * @param userid
    * @param dominoID
@@ -421,6 +421,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @param status
    * @return
    * @see #ensureDefault
+   * @see #addDefault(int)
+   * @see mitll.langtest.server.database.project.DialogPopulate#populateDatabase(Project)
    */
   @Override
   public int add(int userid,
@@ -434,18 +436,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
                  String lesson,
                  DialogType kind,
                  DialogStatus status,
-
-//                 String fltitle,
                  String entitle,
-                 //               String flpresentation,
-                 //             String enpresentation,
-                 //           int numSpeakers,
-
-                 //         float ilr,
                  String orientation
-                 //  String audio,
-                 //       String passage,
-                 //     String translation
   ) {
     return dao.insert(new SlickDialog(
         -1,
@@ -458,17 +450,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
         unit, lesson,
         kind.toString(),
         status.toString(),
-
-        //       fltitle,
         entitle,
-        //     flpresentation,
-        //   enpresentation,
-        //   numSpeakers,
-        //   ilr,
         orientation
-        //audio,
-        //   passage,
-        //   translation
     ));
   }
 

@@ -19,12 +19,21 @@ import java.util.logging.Logger;
 public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends LearnFacetExerciseList<T> {
   private Logger logger = Logger.getLogger("StudyExerciseList");
 
-  public static final int TWO = 2;
-  public static final int THREE = 3;
-  public static final int FIVE = 5;
-  public static final List<Integer> STUDY_CHOICES = Arrays.asList(1, TWO, THREE, FIVE, 10, 25);
+  private static final int TWO = 2;
+  private static final int THREE = 3;
+  private static final int FIVE = 5;
+  private static final List<Integer> STUDY_CHOICES = Arrays.asList(1, TWO, THREE, FIVE, 10, 25);
   //private static final boolean DEBUG = false;
 
+  /**
+   *
+   * @param secondRow
+   * @param currentExerciseVPanel
+   * @param controller
+   * @param listOptions
+   * @param listHeader
+   * @param isDrillView
+   */
   public StudyExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
                            ExerciseController controller,

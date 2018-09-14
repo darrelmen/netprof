@@ -1,4 +1,4 @@
-package mitll.langtest.server.database.dialog;
+package mitll.langtest.shared.dialog;
 /*
  *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies

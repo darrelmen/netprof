@@ -13,6 +13,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.Dialog;
+import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;

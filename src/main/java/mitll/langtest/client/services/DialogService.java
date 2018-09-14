@@ -6,11 +6,15 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.dialog.IDialogSession;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
+
+import java.util.List;
 
 @RemoteServiceRelativePath("dialog-manager")
 public interface DialogService extends RemoteService {
@@ -25,4 +29,10 @@ public interface DialogService extends RemoteService {
    * @throws DominoSessionException
    */
   IDialog getDialog(int id) throws DominoSessionException;
+
+  void addSession(DialogSession dialogSession) throws DominoSessionException;
+
+ // List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException;
+
+  List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException;
 }

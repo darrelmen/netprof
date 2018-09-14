@@ -18,8 +18,10 @@ import mitll.langtest.client.flashcard.SessionStorage;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.client.scoring.ScoreProgressBar;
+import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
+import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
@@ -81,6 +83,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private boolean doRehearse = true;
   private static final float NATIVE_HARD_CODE = 0.70F;
 
+  private DialogSession dialogSession = null;
   /**
    * 9/13/18 histo from production
    * Did histogram of 85K korean scores, split 6 ways, even 12K piles
@@ -610,6 +613,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   }
 
   /**
+   * TODO : way too complicated!
+   *
    * @see ListenViewHelper#getControls
    */
   @Override
@@ -623,7 +628,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       getCurrentTurn().cancelRecording();
     } else {
       if (doRehearse) {
-        if (overallSmiley.isVisible()) {
+        boolean startOver = overallFeedback.isVisible();
+
+        if (startOver) {   // start over
           makeFirstTurnCurrent();
           sessionStorage.storeSession();
           clearScores();
@@ -646,8 +653,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
         if (onFirstTurn()) {  // if got play on the first turn, start a new session -
           if (currentTurn == null || !currentTurn.isPlaying()) {
-            sessionStorage.storeSession();
-            clearScores();
+            if (!startOver) { // we already this above!
+              sessionStorage.storeSession();
+              clearScores();
+            }
           } else {
             logger.info("gotPlay ignoring turn " + currentTurn);
           }
@@ -694,6 +703,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     bothTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
+
+    dialogSession = new DialogSession(-1, -1, controller.getProjectStartupInfo().getProjectid(), dialogID,
+        System.currentTimeMillis(), System.currentTimeMillis(), getView(), DialogStatus.DEFAULT, 0, 0F, 0F);
+  }
+
+  protected INavigation.VIEWS getView() {
+    return INavigation.VIEWS.REHEARSE;
   }
 
   /**
@@ -708,9 +724,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     } else {
       T currentTurn = getCurrentTurn();
 
-
-      int exID = currentTurn.getExID();
-      if (DEBUG) logger.info("currentTurnPlayEnded (rehearse) - turn " + exID);
+      //     int exID = currentTurn.getExID();
+      if (DEBUG) logger.info("currentTurnPlayEnded (rehearse) - turn " + currentTurn.getExID());
       List<T> seq = getSeq();
 
       boolean isCurrentPrompt = seq.contains(currentTurn);
@@ -765,7 +780,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
             }
           } else {
             if (DEBUG)
-              logger.info("currentTurnPlayEnded - no score for " + exID + " know about " + exToScore.keySet() + " so waiting...");
+              logger.info("currentTurnPlayEnded - no score for " + currentTurn.getExID() + " know about " + exToScore.keySet() + " so waiting...");
 
             if (exStartedRecording.size() == getRespSeq().size()) {
               showWaitSpiner();  // wait for it

@@ -49,8 +49,8 @@ public class DialogAttributeJoinHelper implements IDialogAttributeJoin {
    * @param joins
    * @see ProjectSync#doUpdate
    */
-  @Override
+/*  @Override
   public void removeBulkAttributeJoins(List<SlickDialogAttributeJoin> joins) {
     attributeJoinDAOWrapper.removeBulk(joins);
-  }
+  }*/
 }

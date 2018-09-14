@@ -37,7 +37,9 @@ import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.dialog.IDialogSession;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
@@ -135,12 +137,24 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return i;
   }
 
-/*  private String getAttribute(IDialog o1) {
-    List<ExerciseAttribute> collect1 = o1.getAttributes().stream().filter(
-        exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(IDialog.METADATA.PAGE.toString())
-    ).collect(Collectors.toList());
-    return collect1.isEmpty() ? null : collect1.iterator().next().getValue();
-  }*/
+  // user implicit -
+  @Override
+  public List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    return db.getDialogSessionDAO().getDialogSessions(userIDFromSessionOrDB, dialogid);
+  }
+
+  @Override
+  public List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    return db.getDialogSessionDAO().getDialogSessions(userIDFromSessionOrDB, dialogid);
+  }
+
+  @Override
+  public void addSession(DialogSession dialogSession) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    db.getDialogSessionDAO().add(dialogSession);
+  }
 
   private List<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
     return (request.getTypeToSelection().isEmpty()) ?

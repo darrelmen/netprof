@@ -52,7 +52,9 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.StateManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.dialog.DialogDAO;
+import mitll.langtest.server.database.dialog.DialogSessionDAO;
 import mitll.langtest.server.database.dialog.IDialogDAO;
+import mitll.langtest.server.database.dialog.IDialogSessionDAO;
 import mitll.langtest.server.database.dliclass.DLIClassDAO;
 import mitll.langtest.server.database.dliclass.DLIClassJoinDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassDAO;
@@ -190,6 +192,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private DominoExerciseDAO dominoExerciseDAO;
   private boolean hasValidDB = false;
   private IDialogDAO dialogDAO;
+  private IDialogSessionDAO dialogSessionDAO;
   private IImageDAO imageDAO;
 
   public DatabaseImpl() {
@@ -418,6 +421,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private void makeDialogDAOs() {
     imageDAO = new ImageDAO(this, dbConnection);
     dialogDAO = new DialogDAO(this, dbConnection, this);
+    dialogSessionDAO = new DialogSessionDAO(this, dbConnection);
   }
 
   private void afterDAOSetup(SlickAudioDAO slickAudioDAO) {
@@ -1361,6 +1365,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           dliClassJoinDAO,
           dialogDAO,
           dialogDAO.getDialogAttributeJoinHelper(),
+          dialogSessionDAO,
           imageDAO
       ).forEach(idao -> {
         if (createIfNotThere(idao, known)) {
@@ -2052,6 +2057,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   public IDialogDAO getDialogDAO() {
     return dialogDAO;
+  }
+  public IDialogSessionDAO getDialogSessionDAO() {
+    return dialogSessionDAO;
   }
 
   @Override

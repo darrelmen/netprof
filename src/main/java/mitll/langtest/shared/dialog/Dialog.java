@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 
 import static mitll.langtest.shared.exercise.STATE.UNSET;
 
+/**
+ * @see
+ */
 public class Dialog implements IDialog, MutableShell {
   private static final String SPEAKER = "Speaker".toLowerCase();
   public static final String UNIT = "unit";
@@ -299,6 +302,10 @@ public class Dialog implements IDialog, MutableShell {
     return 0;
   }
 
+  /**
+   * TODO : fill in
+   * @return
+   */
   @Override
   public float getScore() {
     return 0;
@@ -346,6 +353,11 @@ public class Dialog implements IDialog, MutableShell {
     return imageid;
   }
 
+  @Override
+  public List<ClientExercise> getCoreVocabulary() {
+    return coreVocabulary;
+  }
+
   public String toString() {
     return "Dialog #" + id +
         "\n\tunit        " + unit +
@@ -357,10 +369,5 @@ public class Dialog implements IDialog, MutableShell {
         "\n\t# ex        " + exercises.size() +
         "\n\t# core      " + coreVocabulary.size() +
         "\n\tattr        " + attributes;
-  }
-
-  @Override
-  public List<ClientExercise> getCoreVocabulary() {
-    return coreVocabulary;
   }
 }

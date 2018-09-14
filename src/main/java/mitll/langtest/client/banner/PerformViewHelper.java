@@ -15,13 +15,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercise>> extends RehearseViewHelper<T> {
- // private final Logger logger = Logger.getLogger("PerformViewHelper");
+  // private final Logger logger = Logger.getLogger("PerformViewHelper");
 
   private Set<String> uniqueCoreVocab;
-  //private Set<String> uniqueCoreVocabThisUnit;
 
   PerformViewHelper(ExerciseController controller) {
     super(controller);
+  }
+
+  protected INavigation.VIEWS getView() {
+    return INavigation.VIEWS.PERFORM;
   }
 
   /**
@@ -33,35 +36,16 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
   @NotNull
   @Override
   protected DivWidget getTurns(IDialog dialog) {
-    List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
-
-/*
-    Map<String, String> unitToValue = dialog.getUnitToValue();
-    String unitDialogIsIn = unitToValue.get(Dialog.UNIT);
-
-    List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-    String unit = typeOrder.get(0);
-    String chapter = typeOrder.size() > 1 ? typeOrder.get(1) : null;
-
-    logger.info("getTurns match dialog " + unitToValue + " ");
-
-    uniqueCoreVocabThisUnit = coreVocabulary
-        .stream()
-        .filter(clientExercise -> clientExercise.getUnitToValue().get(unit).equalsIgnoreCase(unitDialogIsIn))
-        .map(CommonShell::getForeignLanguage)
-        .collect(Collectors.toSet());
-*/
-
-    uniqueCoreVocab = coreVocabulary
+   // List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
+    uniqueCoreVocab = dialog.getCoreVocabulary()
         .stream()
         .map(CommonShell::getForeignLanguage)
         .collect(Collectors.toSet());
 
 //    logger.info("getTurns uniqueCoreVocabThisUnit " + uniqueCoreVocabThisUnit + " ");
- //   logger.info("getTurns uniqueCoreVocab " + uniqueCoreVocab + " ");
+    //   logger.info("getTurns uniqueCoreVocab " + uniqueCoreVocab + " ");
 
     DivWidget turns = super.getTurns(dialog);
-
     Scheduler.get().scheduleDeferred(this::obscureRespTurns);
     return turns;
   }

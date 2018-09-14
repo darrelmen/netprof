@@ -34,6 +34,7 @@ package mitll.langtest.server.database.dialog;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 
@@ -65,5 +66,10 @@ public interface IDialogDAO extends IDAO {
    */
   DialogAttributeJoinHelper getDialogAttributeJoinHelper();
 
+  /**
+   * For when we want to drop the current dialog data and reload
+   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
+   * @param id
+   */
   void removeForProject(int id);
 }

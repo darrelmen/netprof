@@ -30,27 +30,38 @@
  *
  */
 
-package mitll.langtest.client.services;
+package mitll.langtest.server.database.dialog;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.dialog.DialogSession;
-import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.dialog.IDialogSession;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.server.database.IDAO;
+import mitll.langtest.shared.dialog.*;
 
 import java.util.List;
 
-public interface DialogServiceAsync {
-  void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
+public interface IDialogSessionDAO extends IDAO {
+  int add(int userid,
+          int projid,
+          int dialogid,
 
-  void getDialogs(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<IDialog>> async);
+          long modified,
+          long end,
+          INavigation.VIEWS view,
+          DialogStatus status,
+          int numrecordings,
+          float score,
+          float speakingrate
+  );
 
-  void getDialog(int id, AsyncCallback<IDialog> async);
+  // seems like we want a summary of the latest scores
+  List<IDialogSession> getLatestDialogSessions(int projid, int userid);
+  List<IDialogSession> getDialogSessions(int userid,int dialog);
 
-  void addSession(DialogSession dialogSession, AsyncCallback<Void> async);
+  /**
+   * For when we want to drop the current dialog data and reload
+   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
+   * @param id
+   */
+  void removeForProject(int id);
 
-  void getDialogSessions(int userid, int dialogid, AsyncCallback<List<IDialogSession>> async);
+  void add(DialogSession dialogSession);
 }

@@ -69,6 +69,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private DivWidget dialogHeader;
 
   private static final boolean DEBUG = false;
+  protected int dialogID;
 
   /**
    * @param controller
@@ -109,6 +110,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
+    this.dialogID =dialogID;
     showDialog(dialogID, dialog, child);
     getRefAudio(new ArrayList<RefAudioGetter>(bothTurns).iterator());
   }
