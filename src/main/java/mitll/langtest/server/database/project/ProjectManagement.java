@@ -323,6 +323,9 @@ public class ProjectManagement implements IProjectManagement {
     logger.info("configure START " + projectID + "/" + getProjects().size() + " : " + project.getLanguage());
 
     project.clearPropCache();
+
+    project.getAudioFileHelper().reloadScoring(project);
+
 //    logger.info("configureProject " + project.getProject().name() + " ---- ");
     SlickProject slickProject = project.getProject();
 

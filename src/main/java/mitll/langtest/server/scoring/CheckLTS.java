@@ -62,6 +62,7 @@ class CheckLTS {
   private final boolean isAsianLanguage, removeAllAccents;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_OOV = false;
   private static final String POUND = "#";
 
   /**
@@ -148,7 +149,7 @@ class CheckLTS {
     //   String language = isAsianLanguage ? " MANDARIN " : "";
 
     if (DEBUG) {
-      logger.debug("checkLTS '" + language + "'" +
+      logger.info("checkLTS '" + language + "'" +
           "\n\ttokens : '  " + tokens + "'" +
           "\n\tlts         " + lts +
           "\n\tdict size   " + htkDictionary.size() +
@@ -175,7 +176,7 @@ class CheckLTS {
           }
         } else {
           boolean htkEntry = htkDictionary.contains(token) || htkDictionary.contains(token.toLowerCase());
-          if (DEBUG) logger.info("checkLTS in dict for " + token + " = " + htkEntry);
+          if (DEBUG && !htkEntry) logger.info("checkLTS in dict for " + token + " = " + htkEntry);
 
           if (htkEntry) {
             // we don't accept tokens when the dict is empty...
@@ -215,7 +216,7 @@ class CheckLTS {
               if (!isEmptyLTS) {
                 logger.warn(getDebugInfo(lts, foreignLanguagePhrase, i, token) + " translitOk " + translitOk + " legitLTS " + legitLTS);
               } else if (DEBUG) {
-                logger.debug(getDebugInfo(lts, foreignLanguagePhrase, i, token));
+                logger.info(getDebugInfo(lts, foreignLanguagePhrase, i, token));
               }
               oov.add(trim);
 
@@ -246,8 +247,8 @@ class CheckLTS {
       if (DEBUG)
         logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
     }
-    if (DEBUG)
-      logger.debug("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
+    if (DEBUG || (DEBUG_OOV &&!oov.isEmpty()))
+      logger.info("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
 
     return oov;
   }

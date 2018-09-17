@@ -215,8 +215,9 @@ public class AudioFileHelper implements AlignDecode {
           for (CommonExercise exercise : exercises) {
             boolean validForeignPhrase = isValidForeignPhrase(now, safe, unsafe, exercise);
             if (!validForeignPhrase) {
-              if (count < 10) {
-                logger.warn("checkLTSAndCountPhones : not a valid foreign phrase for " +
+              if (count < 10 || count % 100 == 0) {
+                logger.warn("checkLTSAndCountPhones : (" + count +
+                    ") not a valid foreign phrase for " +
                     "\n\tex      " + exercise.getID() +
                     "\n\tenglish " + exercise.getEnglish() +
                     "\n\tfl      " + exercise.getForeignLanguage());
@@ -264,17 +265,19 @@ public class AudioFileHelper implements AlignDecode {
    */
   private boolean isValidForeignPhrase(long now, Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise) {
     boolean validForeignPhrase = exercise.isSafeToDecode();
-    if (isStale(now, exercise)// || exercise.getEnglish().equalsIgnoreCase("teacher")
+    if (isStale(now, exercise) // || exercise.getEnglish().equalsIgnoreCase("teacher")
     ) {
       validForeignPhrase = isInDictOrLTS(exercise);
-//      logger.warn("isValidForeignPhrase valid " + validForeignPhrase + " ex " +exercise);
+      if (!validForeignPhrase && DEBUG) {
+        logger.info("isValidForeignPhrase valid " + validForeignPhrase + " ex " + exercise.getForeignLanguage());
+      }
       (validForeignPhrase ? safe : unsafe).add(exercise.getID());
     }
     return validForeignPhrase;
   }
 
   private boolean isStale(long now, CommonExercise exercise) {
-    return now - exercise.getLastChecked() > DAY;
+    return exercise.getProjectID() == 6;////now - exercise.getLastChecked() > DAY;
   }
 
   /**
@@ -1066,7 +1069,7 @@ public class AudioFileHelper implements AlignDecode {
                                           int projid,
                                           int userid,
                                           File theFile) {
-    boolean available =true;// isHydraAvailable() && true;
+    boolean available = true;// isHydraAvailable() && true;
     String hydraHost = serverProps.getHydraHost();
     if (!available) {
       logger.info("checkForWebservice local webservice not available" +
@@ -1482,9 +1485,9 @@ public class AudioFileHelper implements AlignDecode {
     return webserviceScoring;
   }
 
-  private boolean isMacOrWin() {
-    String property = System.getProperty("os.name").toLowerCase();
-    return property.contains("mac") || property.contains("win");
+  public void reloadScoring(Project project) {
+    webserviceScoring = null;
+    makeASRScoring(project);
   }
 
   /**
@@ -1533,26 +1536,23 @@ public class AudioFileHelper implements AlignDecode {
    * @see #makeASRScoring
    */
   private HTKDictionary makeDict(String modelsDir) {
-/*
     logger.info("makeDict :" +
-        "\n\tinstall path " + installPath +
         "\n\tmodelsDir    " + modelsDir);
-        */
+
     String scoringDir = Scoring.getScoringDir(serverProps.getDcodrBaseDir());
-    String dictFile =
-        new ConfigFileCreator(serverProps.getProperties(), scoringDir, modelsDir).getDictFile();
-//    logger.info("makeDict :" + "\n\tdictFile    " + dictFile);
+    String dictFile = new ConfigFileCreator(serverProps.getProperties(), scoringDir, modelsDir).getDictFile();
+    logger.info("makeDict :" + "\n\tdictFile    " + dictFile);
 
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
       File file = new File(dictFile);
-//      logger.info("makeDict read " + file.getAbsolutePath());
+      logger.info("makeDict read " + file.getAbsolutePath());
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
-      if (now - then > 4000) {
+      if (now - then > 10) {
         logger.info("makeDict for " + getLanguage() + " read" +
-            "\n\tdict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+            " dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
       }
       return htkDictionary;
     } else {

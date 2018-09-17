@@ -732,13 +732,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
   }
 
-  private void logEvent(String exid, String device, int projID) {
+/*  private void logEvent(String exid, String device, int projID) {
     try {
       db.logEvent(AUDIO_RECORDING, WRITE_AUDIO_FILE, exid, "Writing audio - got zero duration!", -1, device, projID);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
-  }
+  }*/
 
   /**
    * TODO : remove me - we don't do this anymore.
