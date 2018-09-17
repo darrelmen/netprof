@@ -40,7 +40,6 @@ import mitll.langtest.server.database.excel.ReportToExcel;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.result.MonitorResult;
@@ -222,7 +221,7 @@ public class Report implements IReport {
 
     StringBuilder builder = new StringBuilder();
     foundLincoln.forEach(reportUser -> builder.append(reportUser.getUserID()).append(", "));
-    logger.info("found lincoln users " + builder);
+  //  logger.info("found lincoln users " + builder);
 
     this.deviceUsers = deviceUsers;
     this.userToProject = userToProject;

@@ -69,6 +69,8 @@ public class ParseResultJson {
   private static final String W = "w";
   private final ServerProperties props;
   private final String language;
+  private final Map<NetPronImageType, List<TranscriptSegment>> emptyMap = new HashMap<>();
+
   private Map<String, String> phoneToDisplay;
 
   /**
@@ -181,8 +183,6 @@ public class ParseResultJson {
     return imageTypeMapMap;
   }
 
-  private final Map<NetPronImageType, List<TranscriptSegment>> emptyMap = new HashMap<>();
-
 
   /**
    * @param json
@@ -222,8 +222,7 @@ public class ParseResultJson {
    * @return
    * @see mitll.langtest.server.database.userexercise.ExerciseToPhone#getExToPhonePerProject
    */
-  public Map<NetPronImageType, List<TranscriptSegment>> parseJsonAndGetProns(String json,
-                                                                             Map<String, List<List<String>>> wordToPronunciations) {
+  public Map<NetPronImageType, List<TranscriptSegment>> parseJsonAndGetProns(String json, Map<String, List<List<String>>> wordToPronunciations) {
     return getNetPronImageTypeToEndTimes(parseJsonString(json, false, wordToPronunciations));
   }
 
@@ -256,7 +255,7 @@ public class ParseResultJson {
       try {
         JsonArray words = jsonObject.getAsJsonArray(words1);
         int size = words.size();
-        logger.info("readFromJSON under " + words1 + " and " + w1 + " found " + size);
+//        logger.info("readFromJSON under " + words1 + " and " + w1 + " found " + size);
         for (int i = 0; i < size; i++) {
           JsonObject word = words.get(i).getAsJsonObject();
           List<TranscriptEvent> wsubs = new ArrayList<>();
@@ -297,7 +296,7 @@ public class ParseResultJson {
           }
         }
       } catch (Exception e) {
-        logger.debug("no json array at '" + words1 + "' in " + jsonObject, e);
+        logger.info("readFromJSON no json array at '" + words1 + "' in " + jsonObject, e);
       }
 
     } else {
@@ -310,8 +309,8 @@ public class ParseResultJson {
       values.forEach(transcriptEvent -> wordEvents2.put(transcriptEvent.getStart(), transcriptEvent));
       typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents2);
 
-      logger.info("2 word event keys " + wordEvents2.keySet());
-      logger.info("2 word event values " + wordEvents2.values());
+      logger.info("readFromJSON word event keys " + wordEvents2.keySet());
+      logger.info("readFromJSON word event values " + wordEvents2.values());
       wordEvents2.forEach((k, v) -> {
         logger.info(k + " = " + v);
       });

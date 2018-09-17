@@ -36,6 +36,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gwt.http.client.URL;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
@@ -58,7 +59,9 @@ import org.jetbrains.annotations.NotNull;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -383,8 +386,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
         if (useKaldi) {
           cached = runKaldi(getSegmented(sentence), filePath + ".wav", port);
-          jsonObject = cached.getScores().getKaldiJsonObject();
-          logger.info("json obect " + jsonObject);
+          if (cached == null || cached.getScores() == null) {
+            logger.warn("scoreRepeatExercise kaldi didn't run properly....");
+          } else {
+            jsonObject = cached.getScores().getKaldiJsonObject();
+            logger.info("scoreRepeatExercise json obect " + jsonObject);
+          }
         } else {
           cached = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
               tempFile.getAbsolutePath(), decode, end);
@@ -394,10 +401,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           return new PretestScore(0);
         } else {
           processDur = (int) (System.currentTimeMillis() - then);
-          if (cached.getScores().isValid()) {
+          if (cached.getScores() != null && cached.getScores().isValid()) {
             if (cached.getWordLab() != null) {
               if (cached.getWordLab().contains("UNKNOWN")) {
-                logger.info("note : hydra result includes UNKNOWNMODEL : " + cached.getWordLab());
+                logger.info("scoreRepeatExercise note : hydra result includes UNKNOWNMODEL : " + cached.getWordLab());
               }
               cacheHydraResult(decode, filePath, cached);//, scores, phoneLab, wordLab);
             }
@@ -418,8 +425,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         cleanUpRawFile(rawAudioPath);
       }
     }
-    if (cached == null) {
-      logger.error("scoreRepeatExercise hydra failed to generate scores.");
+    if (cached == null || !cached.getStatus().isEmpty()) {
+      logger.error("scoreRepeatExercise hydra failed to generate scores : " + cached);
       return new PretestScore(-1f);
     }
     PretestScore pretestScore = getPretestScore(
@@ -429,7 +436,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         cached,
         cachedDuration, processDur, usePhoneToDisplay, jsonObject, useKaldi);
 
-    logger.info("got " + pretestScore);
+    logger.info("scoreRepeatExercise got " + pretestScore);
     return pretestScore;
   }
 
@@ -440,70 +447,102 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param audioPath
    * @param port
    * @return
+   * @see #scoreRepeatExercise
    */
   private HydraOutput runKaldi(String sentence, String audioPath, int port) {
     try {
-      HTTPClient httpClient = new HTTPClient();
-
-      JsonObject jsonObject = new JsonObject();
-
-      logger.info("KALDI " +
-          "\n\tsentence  " + sentence +
-          "\n\taudioPath " + audioPath
-      );
-      jsonObject.addProperty("reqid", "1234");
-      jsonObject.addProperty("request", "decode");
-      jsonObject.addProperty("phrase", sentence);
-      jsonObject.addProperty("file", audioPath);
-
-      String s = jsonObject.toString();
-     // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
-
       long then = System.currentTimeMillis();
-      String json = httpClient.readFromGET("http://" +"localhost"+
-          ":" +
-          port +
-          "/score/" +
-          s
-      );
+      String json = callKaldi(sentence, audioPath, port);
       long now = System.currentTimeMillis();
+      long processDur = now - then;
 
       logger.info("runKaldi response " + json);
 
       JsonObject parse = new JsonParser().parse(json).getAsJsonObject();
-      float score = parse.get("score").getAsFloat();
       String status = parse.get("status").getAsString();
+      String log = parse.has("log") ? parse.get("log").getAsString() : "";
+      float score = -1F;
 
-      logger.info("runKaldi For " + sentence + "\n\tfile "+audioPath + "\n\tstatus " + status + "\n\tscore " + score);
+      if (status.equalsIgnoreCase("OOV_IN_TRANS") || !status.isEmpty()) {
+        logger.warn("runKaldi failed " +
+            "\n\tstatus " + status +
+            "\n\tlog    " + log
+        );
+        parse = new JsonObject();
+      } else {
+        score = parse.get("score").getAsFloat();
+        logger.info("runKaldi For " + sentence + "\n\tfile " + audioPath + "\n\tstatus " + status + "\n\tscore " + score);
+      }
 
-      List<WordAndProns> possibleProns = new ArrayList<>();
-        getHydraDict(sentence, "", possibleProns);
-
-      return new HydraOutput(new Scores(score, new HashMap<>(), (int) (now - then))
-          .setKaldiJsonObject(parse), null, null, possibleProns);
-
-    /*  JsonArray word_align = parse.get("word_align").getAsJsonArray();
-      for (JsonElement wordJSON : word_align) {
-        JsonObject word = wordJSON.getAsJsonObject();
-        float wscore = word.get("score").getAsFloat();
-        String theWord = word.get("word").getAsString();
-        JsonArray phone_align = parse.get("word_align").getAsJsonArray();
-        for (JsonElement phoneJSON : phone_align) {
-          JsonObject phone = phoneJSON.getAsJsonObject();
-          float phonescore = phone.get("score").getAsFloat();
-          String thePhone = phone.get("phone").getAsString();
-          float startTime = phone.get("start_time").getAsFloat();
-          float endTime = startTime + phone.get("duration").getAsFloat();
-        }
-      }*/
-    } catch (IOException e) {
-      logger.warn("Got " + e, e);
+      return new HydraOutput(
+          new Scores(score, new HashMap<>(), (int) processDur)
+              .setKaldiJsonObject(parse),
+          null, null, getWordAndProns(sentence))
+          .setStatus(status)
+          .setLog(log);
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+      return new HydraOutput(new Scores(-1F, new HashMap<>(), (int) 0)
+          .setKaldiJsonObject(new JsonObject()), null, null, null)
+          .setStatus("ERROR")
+          .setLog(e.getMessage());
     }
 
-    return new HydraOutput(null, null, null, null);
+//    return new HydraOutput(null, null, null, null);
   }
 
+  private String callKaldi(String sentence, String audioPath, int port) throws IOException {
+    HTTPClient httpClient = new HTTPClient();
 
+    String jsonRequest = getKaldiRequest(sentence, audioPath);
+    // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
+
+    String prefix = getPrefix(port);
+    String encode = URLEncoder.encode(jsonRequest, StandardCharsets.UTF_8.name());
+    String url = prefix + encode;
+    logger.info("runKaldi " +
+        "\n\treq  " + encode +
+        "\n\traw  " + (prefix + jsonRequest) +
+        "\n\tpost " + url);
+
+    return httpClient.readFromGET(url);
+  }
+
+  @NotNull
+  private String getPrefix(int port) {
+    String localhost = props.isLaptop() ? "hydra-dev" : "localhost";
+    //String localhost =  "localhost";
+    return "http://" + localhost + ":" + port + "/score/";
+  }
+
+  private String getKaldiRequest(String sentence, String audioPath) {
+    JsonObject jsonObject = new JsonObject();
+
+    logger.info("KALDI " +
+        "\n\tsentence  " + sentence +
+        "\n\taudioPath " + audioPath
+    );
+    jsonObject.addProperty("reqid", "1234");
+    jsonObject.addProperty("request", "decode");
+    jsonObject.addProperty("phrase", sentence.trim());
+    jsonObject.addProperty("file", audioPath);
+
+    return jsonObject.toString();
+  }
+
+  @NotNull
+  private List<WordAndProns> getWordAndProns(String sentence) {
+    List<WordAndProns> possibleProns = new ArrayList<>();
+    getHydraDict(sentence, "", possibleProns);
+    return possibleProns;
+  }
+
+  /**
+   * @param wavFile
+   * @param filePath
+   * @return
+   * @see #scoreRepeatExercise
+   */
   @NotNull
   private Double getFileDuration(File wavFile, String filePath) {
     Double cachedDuration = fileToDuration.getIfPresent(filePath);

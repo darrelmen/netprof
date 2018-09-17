@@ -13,6 +13,8 @@ public class HydraOutput {
   private String wordLab;
   private String phoneLab;
   private List<WordAndProns> wordAndProns;
+  private String status;
+  private String log;
 
   /**
    * @param scores
@@ -96,6 +98,24 @@ public class HydraOutput {
   }
 
   public String toString() {
-    return wordLab + ", " + phoneLab;
+    return "status " + status + " log " + log + " " + wordLab + ", " + phoneLab;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public HydraOutput setStatus(String status) {
+    this.status = status;
+    return this;
+  }
+
+  public String getLog() {
+    return log;
+  }
+
+  public HydraOutput setLog(String log) {
+    this.log = log;
+    return this;
   }
 }
