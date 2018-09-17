@@ -46,8 +46,11 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.util.*;
+
+import static mitll.langtest.server.scoring.PronunciationLookup.SIL;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -82,7 +85,7 @@ public class ParseResultJson {
   /**
    * @param typeToEvent
    * @return
-   * @see ASRScoring#getTypeToEndTimes
+   * @seex xASRScoring#getTypeToEndTimes
    * @see #readFromJSON(String)
    * @see #parseJsonAndGetProns
    */
@@ -103,7 +106,7 @@ public class ParseResultJson {
 
         String displayName = isPhone ? getDisplayName(event1) : event1;
         endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName, builder.length()));
-       if (!isPhone) builder.append(event1);
+        if (!isPhone) builder.append(event1);
       }
     }
 
@@ -161,7 +164,7 @@ public class ParseResultJson {
       try {
         JsonElement parse1 = parser.parse(json);
         JsonObject parse = parse1.getAsJsonObject();
-        imageTypeMapMap = readFromJSON(parse, WORDS, W, usePhones, wordToPronunciations);
+        imageTypeMapMap = readFromJSON(parse, WORDS, W, usePhones, wordToPronunciations, false);
       } catch (Exception e) {
         logger.error("Couldn't parse" +
             "\n\tjson " + json +
@@ -238,28 +241,56 @@ public class ParseResultJson {
                                                                   String words1,
                                                                   String w1,
                                                                   boolean usePhones,
-                                                                  Map<String, List<List<String>>> wordToPronunciations) {
-    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
-    SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<Float, TranscriptEvent>();
-    SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<Float, TranscriptEvent>();
+                                                                  Map<String, List<List<String>>> wordToPronunciations,
+                                                                  boolean useKaldi) {
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<>();
+    SortedMap<Float, TranscriptEvent> wordEvents = new TreeMap<>();
+    SortedMap<Float, TranscriptEvent> phoneEvents = new TreeMap<>();
+    List<TranscriptEvent> allwsubs = new ArrayList<>();
 
     typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents);
     typeToEvent.put(ImageType.PHONE_TRANSCRIPT, phoneEvents);
+    String phones = useKaldi ? "phone_align" : PHONES;
 
     if (jsonObject.has(words1)) {
       try {
         JsonArray words = jsonObject.getAsJsonArray(words1);
-        for (int i = 0; i < words.size(); i++) {
+        int size = words.size();
+        logger.info("readFromJSON under " + words1 + " and " + w1 + " found " + size);
+        for (int i = 0; i < size; i++) {
           JsonObject word = words.get(i).getAsJsonObject();
-          String wordToken = objectToEvent(wordEvents, w1, word, false);
-          List<String> phones1 = getPhones(phoneEvents, word.getAsJsonArray(PHONES), usePhones);
+          List<TranscriptEvent> wsubs = new ArrayList<>();
+          String wordToken = objectToEvent(wordEvents, w1, word, false, useKaldi, wsubs);
+          allwsubs.addAll(wsubs);
+//          logger.info("\treadFromJSON wordToken " + wordToken);
+//          logger.info("\treadFromJSON wsubs     " + wsubs);
+          List<TranscriptEvent> psubs = new ArrayList<>();
+          List<String> phones1 = getPhones(phoneEvents,
+              word.getAsJsonArray(phones), usePhones, psubs,
+              useKaldi ? "phone" : P, useKaldi);
+
+          if (!psubs.isEmpty()) {
+            TranscriptEvent phoneEvent = psubs.get(psubs.size() - 1);
+            float end = phoneEvent.getEnd();
+            TranscriptEvent wordEvent = wsubs.get(wsubs.size() - 1);
+            TranscriptEvent firstPhone = psubs.get(0);
+//            logger.info("for " + wordToken + " wordEvent " + wordEvent);
+//            logger.info("for " + wordToken + " 1 phone " + firstPhone);
+//            logger.info("for " + wordToken + " last phone " + phoneEvent);
+            wordEvent.setStart(firstPhone.getStart());
+            wordEvent.setEnd(end);
+            wordEvents.put(firstPhone.getStart(), wordEvent);
+
+//            logger.info("word event keys " + wordEvents.keySet());
+//            logger.info("word event values " + wordEvents.values());
+//            wordEvents.forEach((k, v) -> {
+//              logger.info(k + " = " + v);
+//            });
+          }
 
           if (wordToPronunciations != null) {
             if (!phones1.isEmpty()) {
-              List<List<String>> lists = wordToPronunciations.get(wordToken);
-              if (lists == null) {
-                wordToPronunciations.put(wordToken, lists = new ArrayList<List<String>>());
-              }
+              List<List<String>> lists = wordToPronunciations.computeIfAbsent(wordToken, k -> new ArrayList<List<String>>());
               lists.add(phones1);
               //  logger.info("Adding " + wordToken + " -> " + phones1);
             }
@@ -268,25 +299,45 @@ public class ParseResultJson {
       } catch (Exception e) {
         logger.debug("no json array at '" + words1 + "' in " + jsonObject, e);
       }
-    } else {
-      logger.warn("skipping '" + words1 + "' '" + w1);// + " has " + jsonObject.());
-    }
 
+    } else {
+      logger.warn("readFromJSON skipping '" + words1 + "' '" + w1 + "'");// + " has " + jsonObject.());
+
+    }
+    if (useKaldi) {
+      Collection<TranscriptEvent> values = allwsubs;
+      TreeMap<Float, TranscriptEvent> wordEvents2 = new TreeMap<>();
+      values.forEach(transcriptEvent -> wordEvents2.put(transcriptEvent.getStart(), transcriptEvent));
+      typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents2);
+
+      logger.info("2 word event keys " + wordEvents2.keySet());
+      logger.info("2 word event values " + wordEvents2.values());
+      wordEvents2.forEach((k, v) -> {
+        logger.info(k + " = " + v);
+      });
+    }
     return typeToEvent;
   }
 
-  private List<String> getPhones(SortedMap<Float, TranscriptEvent> phoneEvents, JsonArray phones, boolean usePhone) {
-    return getEventsFromJson(phoneEvents, phones, P, usePhone);
+  private List<String> getPhones(SortedMap<Float, TranscriptEvent> phoneEvents,
+                                 JsonArray phones,
+                                 boolean usePhone,
+                                 List<TranscriptEvent> subs, String phoneToken,
+                                 boolean useKaldi) {
+
+    return getEventsFromJson(phoneEvents, phones, phoneToken, usePhone, subs, useKaldi);
   }
 
   private List<String> getEventsFromJson(SortedMap<Float, TranscriptEvent> phoneEvents,
                                          JsonArray phones,
                                          String tokenKey,
-                                         boolean usePhone) {
+                                         boolean usePhone,
+                                         List<TranscriptEvent> subs,
+                                         boolean useKaldi) {
     List<String> phonesForWord = new ArrayList<>();
     for (int j = 0; j < phones.size(); j++) {
       JsonObject phone = phones.get(j).getAsJsonObject();
-      String phoneToken = objectToEvent(phoneEvents, tokenKey, phone, usePhone);
+      String phoneToken = objectToEvent(phoneEvents, tokenKey, phone, usePhone, useKaldi, subs);
       phonesForWord.add(phoneToken);
     }
     return phonesForWord;
@@ -295,19 +346,32 @@ public class ParseResultJson {
   private String objectToEvent(SortedMap<Float, TranscriptEvent> phoneEvents,
                                String tokenKey,
                                JsonObject phone,
-                               boolean usePhone) {
+                               boolean usePhone,
+                               boolean useKaldi,
+                               List<TranscriptEvent> subs) {
     JsonElement jsonElement = phone.get(tokenKey);
     String token = (jsonElement.isJsonPrimitive()) ? jsonElement.getAsString() : "word";
-    double pscore = phone.get(S).getAsDouble();
-    double pstart = phone.has(STR) ? phone.get(STR).getAsDouble() : 0d;
-    double pend = phone.has(END) ? phone.get(END).getAsDouble() : 0d;
+
+    if (token.equalsIgnoreCase("<eps>")) token = SIL;
+
+    double pscore = phone.get(useKaldi ? "score" : S).getAsDouble();
+    String str = useKaldi ? "start_time" : STR;
+    double pstart = phone.has(str) ? phone.get(str).getAsDouble() : 0d;
+    double pend;
+    if (useKaldi) {
+      double v = phone.has("duration") ? phone.get("duration").getAsDouble() : 0d;
+      pend = pstart + v;
+    } else {
+      pend = phone.has(END) ? phone.get(END).getAsDouble() : 0d;
+    }
 
     if (usePhone) {
       token = props.getDisplayPhoneme(language, token);
     }
 
-    phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));
+    TranscriptEvent value = new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore);
+    phoneEvents.put((float) pstart, value);
+    subs.add(value);
     return token;
-
   }
 }

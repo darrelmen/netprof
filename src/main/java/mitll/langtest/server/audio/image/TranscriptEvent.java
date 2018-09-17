@@ -92,4 +92,12 @@ public class TranscriptEvent implements Comparable<TranscriptEvent> {
   public String toString() {
     return "[" + format.format(start) + "-" + format.format(end) + "] " + event + "(" + format.format(score) + ")";
   }
+
+  public void setEnd(float end) {
+    this.end = end;
+  }
+
+  public void setStart(float start) {
+    this.start = start;
+  }
 }

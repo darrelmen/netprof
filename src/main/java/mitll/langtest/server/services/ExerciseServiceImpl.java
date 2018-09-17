@@ -1648,10 +1648,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
-                                                                                boolean usePhoneToDisplay, String language) {
+                                                                                boolean usePhoneToDisplay,
+                                                                                String language) {
     return
         new ParseResultJson(db.getServerProps(), language)
-            .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
+            .readFromJSON(object, "words", "w", usePhoneToDisplay, null,false);
   }
 
   /**

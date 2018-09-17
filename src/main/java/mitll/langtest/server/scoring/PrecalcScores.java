@@ -134,7 +134,7 @@ public class PrecalcScores {
    */
   private Scores getCachedScores(float pronScore, JsonObject jsonObject, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
-        parseResultJson.readFromJSON(jsonObject, "words", "w", usePhones, null);
+        parseResultJson.readFromJSON(jsonObject, "words", "w", usePhones, null,false);
     Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
     return new Scores(pronScore, eventScores, 0);
   }

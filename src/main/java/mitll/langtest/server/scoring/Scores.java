@@ -35,6 +35,7 @@
  */
 package mitll.langtest.server.scoring;
 
+import com.google.gson.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,8 +60,9 @@ public class Scores {
   static final String PHONES = "phones";
   static final String WORDS = "words";
   float hydraScore = 0f;
-  final Map<String, Map<String, Float>> eventScores;
+  Map<String, Map<String, Float>> eventScores=new HashMap<>();
   private int processDur = 0;
+  private  JsonObject kaldiJsonObject;
 
   public Scores() {
     eventScores = Collections.emptyMap();
@@ -105,5 +107,14 @@ public class Scores {
 
   public String toString() {
     return "Scores score " + hydraScore + " events " + eventScores + " took " + processDur + " millis";
+  }
+
+  public JsonObject getKaldiJsonObject() {
+    return kaldiJsonObject;
+  }
+
+  public Scores setKaldiJsonObject(JsonObject kaldiJsonObject) {
+    this.kaldiJsonObject = kaldiJsonObject;
+    return this;
   }
 }

@@ -435,7 +435,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                                                                 boolean usePhoneToDisplay, String language) {
     return
         new ParseResultJson(db.getServerProps(), language)
-            .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
+            .readFromJSON(object, "words", "w", usePhoneToDisplay, null,false);
   }
 
   /**

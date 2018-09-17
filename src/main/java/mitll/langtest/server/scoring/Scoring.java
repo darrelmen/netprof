@@ -239,30 +239,35 @@ public abstract class Scoring {
                                           boolean decode,
                                           boolean useWebservice,
                                           JsonObject object,
-                                          boolean usePhoneToDisplay, boolean writeImages) {
+                                          boolean usePhoneToDisplay,
+                                          boolean writeImages,
+                                          boolean useKaldi) {
     //logger.debug("writeTranscriptsCached " + object);
     if (decode || !writeImages) {  //  skip image generation
       // These may not all exist. The speech file is created only by multisv right now.
-      String phoneLabFile = prependDeploy(audioFileNoSuffix + PHONES_LAB);
       Map<ImageType, String> typeToFile = new HashMap<>();
-      if (new File(phoneLabFile).exists()) {
-        typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
-      }
-      String wordLabFile = prependDeploy(audioFileNoSuffix + WORDS_LAB);
-      if (new File(wordLabFile).exists()) {
-        typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
+      if (!useKaldi) {
+        String phoneLabFile = prependDeploy(audioFileNoSuffix + PHONES_LAB);
+        if (new File(phoneLabFile).exists()) {
+          typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
+        }
+        String wordLabFile = prependDeploy(audioFileNoSuffix + WORDS_LAB);
+        if (new File(wordLabFile).exists()) {
+          typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
+        }
       }
       // logger.debug("writeTranscriptsCached got " + typeToFile);
 
       if (typeToFile.isEmpty()) {
         Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
-            getTypeToTranscriptEvents(object, usePhoneToDisplay);
+            getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi);
         return new EventAndFileInfo(typeToFile, imageTypeMapMap);
       } else {
         return getEventInfo(typeToFile, useWebservice, usePhoneToDisplay); // if align, don't use webservice regardless
       }
     } else {
-      Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap = getTypeToTranscriptEvents(object, usePhoneToDisplay);
+      Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
+          getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi);
 
       // logger.info("imageTypeMapMap " + imageTypeMapMap);
       String pathname = audioFileNoSuffix + ".wav";
@@ -281,10 +286,15 @@ public abstract class Scoring {
     }
   }
 
-  private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
+  private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
+                                                                                boolean usePhoneToDisplay,
+                                                                                boolean useKaldi) {
+    String words = useKaldi ? "word_align" : "words";
+    String w = useKaldi ? "word" : "w";
+
     return
         new ParseResultJson(props, language)
-            .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
+            .readFromJSON(object, words, w, usePhoneToDisplay, null,useKaldi);
   }
 
   /**
@@ -395,8 +405,8 @@ public abstract class Scoring {
   public abstract SmallVocabDecoder getSmallVocabDecoder();
 
   /**
-   * @see AudioFileHelper#getCollator
    * @return
+   * @see AudioFileHelper#getCollator
    */
   public Collator getCollator() {
     return ltsFactory.getCollator();
