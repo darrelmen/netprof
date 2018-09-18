@@ -69,7 +69,7 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
                        IAudioDAO audioDAO,
                        int projid,
                        Database database, boolean isMyProject);
-  void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe);
+  void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp);
 
   /**
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict

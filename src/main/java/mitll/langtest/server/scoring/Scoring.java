@@ -127,7 +127,7 @@ public abstract class Scoring {
 //      logger.warn("using mandarin segmentation.");
 //    }
     setLTSFactory();
-    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.hasModel(), isAsianLanguage);
+    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.getLanguageEnum(), project.hasModel(), isAsianLanguage);
   }
 
   private void setLTSFactory() {
@@ -294,7 +294,7 @@ public abstract class Scoring {
 
     return
         new ParseResultJson(props, language)
-            .readFromJSON(object, words, w, usePhoneToDisplay, null,useKaldi);
+            .readFromJSON(object, words, w, usePhoneToDisplay, null, useKaldi);
   }
 
   /**
@@ -373,15 +373,20 @@ public abstract class Scoring {
   /**
    * @param fl
    * @param transliteration
+   * @param oov
    * @return
    * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSOnForeignPhrase
    * @see mitll.langtest.server.audio.AudioFileHelper#isInDictOrLTS
    */
-  public boolean validLTS(String fl, String transliteration) {
+  public boolean validLTS(String fl, String transliteration, Set<String> oov) {
     if (fl.isEmpty()) return false;
-    Set<String> strings = checkLTSHelper.checkLTS(fl, transliteration);
-//    logger.info("validLTS : For " + fl + " got " + strings);
-    return strings.isEmpty();
+    Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
+
+   if (oov.addAll(oovForFL)) {
+    // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
+   }
+
+    return oovForFL.isEmpty();
   }
 
   /**

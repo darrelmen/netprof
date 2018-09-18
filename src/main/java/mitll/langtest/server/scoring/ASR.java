@@ -39,6 +39,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import java.text.Collator;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Defines interface to audio file helper.
@@ -54,7 +55,7 @@ public interface ASR {
 
   boolean isDictEmpty();
 
-  boolean validLTS(String foreignLanguagePhrase, String transliteration);
+  boolean validLTS(String foreignLanguagePhrase, String transliteration, Set<String> oov);
 
   PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
 

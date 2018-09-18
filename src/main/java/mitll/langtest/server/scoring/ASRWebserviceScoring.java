@@ -36,7 +36,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gwt.http.client.URL;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
@@ -64,12 +63,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
@@ -292,7 +286,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
-    boolean b = validLTS(sentence, transliteration);
+    boolean b = validLTS(sentence, transliteration, new HashSet<>());
     // audio conversion stuff
     File wavFile = new File(pathname);
     boolean mustPrepend = false;

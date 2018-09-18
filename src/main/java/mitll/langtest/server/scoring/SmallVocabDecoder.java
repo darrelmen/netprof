@@ -227,7 +227,11 @@ public class SmallVocabDecoder {
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
       String token = untrimedToken.trim();  // necessary?
       if (token.length() > 0) {
-        all.add(toFull(token));
+        String trim = token.trim();
+        if (!trim.equalsIgnoreCase("–") &&
+            !trim.equalsIgnoreCase("؟") &&
+            !trim.equalsIgnoreCase("+"))
+          all.add(toFull(token));
 //        if (!token.equals("UNKNOWNMODEL")) {
 //          logger.debug("\ttoken " + token);
 //        }
@@ -332,6 +336,7 @@ public class SmallVocabDecoder {
         .replaceAll(REMOVE_ME, " ")
         //   .replaceAll("", " ")
         .replaceAll(P_Z, " ")  // normalize all whitespace
+
         // .replaceAll(";", " ")
         // .replaceAll("~", " ")
         //  .replaceAll("\\u2191", " ")
@@ -459,7 +464,8 @@ public class SmallVocabDecoder {
         }
       }
     } else {
-      if (DEBUG_PREFIX) logger.debug("longest_prefix : dict doesn't contain " + prefix + " phrase '" + phrase + "' end " + i);
+      if (DEBUG_PREFIX)
+        logger.debug("longest_prefix : dict doesn't contain " + prefix + " phrase '" + phrase + "' end " + i);
     }
     return longest_prefix(phrase, i + 1, phraseToPrefix);
   }

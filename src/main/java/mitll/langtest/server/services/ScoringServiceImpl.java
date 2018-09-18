@@ -751,7 +751,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    */
   @Override
   public boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
-    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
+    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration, new HashSet<>());
   }
 
   /**

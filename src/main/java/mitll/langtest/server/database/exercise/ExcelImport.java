@@ -1008,7 +1008,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 */
 
   @Override
-  public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {
+  public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp) {
   }
 
   @Override

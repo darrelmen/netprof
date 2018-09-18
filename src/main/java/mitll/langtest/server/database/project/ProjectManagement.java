@@ -378,6 +378,7 @@ public class ProjectManagement implements IProjectManagement {
       );
 
       if (myProject) {
+  //      project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
         new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises)).start();
       }
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);

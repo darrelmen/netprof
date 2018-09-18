@@ -375,11 +375,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   /**
    * @param safe
    * @param unsafe
+   * @param dictTimestamp
    * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
-  public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {
-    getDao().updateCheckedBulk(safe, true);
-    getDao().updateCheckedBulk(unsafe, false);
+  public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp) {
+    getDao().updateCheckedBulk(safe, true, dictTimestamp);
+    getDao().updateCheckedBulk(unsafe, false, dictTimestamp);
   }
 
   /**
