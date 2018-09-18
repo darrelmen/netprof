@@ -79,13 +79,14 @@ public class SmallVocabDecoder {
    * @see #getTrimmedLeaveAccents
    */
   private static final String FRENCH_PUNCT = "[,.?!]";
+  public static final boolean DEBUG = false;
 
   private HTKDictionary htkDictionary;
   private boolean isAsianLanguage;
 
   private static final int TOO_LONG = 8;
 
-  private static final boolean DEBUG = false;
+  // private static final boolean DEBUG = false;
   private static final boolean DEBUG_PREFIX = false;
   private static final boolean DEBUG_SEGMENT = false;
 
@@ -216,7 +217,7 @@ public class SmallVocabDecoder {
     //if (removeAllAccents) {
 
 
-    if (false && !sentence.equalsIgnoreCase(trimmedSent)) {
+    if (DEBUG && !sentence.equalsIgnoreCase(trimmedSent)) {
       logger.info("getTokens " +
           "\n\tbefore     '" + sentence + "'" +
           "\n\tafter trim '" + trimmedSent + "'");
@@ -238,11 +239,11 @@ public class SmallVocabDecoder {
       }
     }
 
-/*    logger.info("getTokens " +
+    if (DEBUG) logger.info("getTokens " +
         "\n\tbefore     '" + sentence + "'" +
-        "\n\tafter trim '" + trimmedSent + "'"+
-        "\n\tall        " + all
-    );*/
+        "\n\tafter trim '" + trimmedSent + "'" +
+        "\n\tall        (" + all.size() + ")" + all
+    );
 
     return all;
   }

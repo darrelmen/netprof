@@ -140,7 +140,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           "@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+" +
           "(?:[A-Z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\\b";
 
-  private static final long STALE_DUR = 5L * 60L * 1000L;
+  private static final long STALE_DUR = 24L * 60L * 60L * 1000L;
   private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";

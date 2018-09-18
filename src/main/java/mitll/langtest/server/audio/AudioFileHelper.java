@@ -258,7 +258,7 @@ public class AudioFileHelper implements AlignDecode {
 
           logger.warn("checkLTSAndCountPhones took " + (now2 - then) + " millis to mark exercises safe/unsafe to decode.");
           if (count > 0) {
-            logger.warn("checkLTSAndCountPhones huh? out of " + exercises.size() + " LTS fails on " + count);
+            logger.warn("checkLTSAndCountPhones NOTE : out of " + exercises.size() + " dict and LTS fails on " + count);
           }
         }
       }
@@ -270,7 +270,7 @@ public class AudioFileHelper implements AlignDecode {
       try {
         String fileName = "Project_" + project.getLanguage() + "_" + project.getName() + ".txt";
         File file = new File(fileName);
-        logger.warn("\n\n\nwriteOOV writing oov to " + file.getAbsolutePath());
+        logger.info("writeOOV writing " +oov.size()+ " oov items to " + file.getAbsolutePath());
         FileWriter oovTokens = new FileWriter(file);
         ArrayList<String> strings = new ArrayList<>(oov);
         strings.sort(Comparator.naturalOrder());
@@ -286,7 +286,7 @@ public class AudioFileHelper implements AlignDecode {
         logger.error("writeOOV got " + e, e);
       }
     } else {
-      logger.warn("\n\n\nwriteOOV oov is empty for " + project);
+      logger.info("writeOOV oov is empty for " + project);
     }
   }
 

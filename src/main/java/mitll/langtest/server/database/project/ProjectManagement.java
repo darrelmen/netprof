@@ -378,11 +378,10 @@ public class ProjectManagement implements IProjectManagement {
       );
 
       if (myProject) {
-  //      project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
+        //    project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
         new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises)).start();
       }
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
-      //  logMemory();
 
       //Set<Integer> exids = new HashSet<>();
       //for (CommonExercise exercise : rawExercises) exids.add(exercise.getID());
@@ -990,7 +989,7 @@ public class ProjectManagement implements IProjectManagement {
 
     boolean isRTL = addOtherProps(project, info);
 
-  //   logger.info(project.id() + " : props now " + info);
+    //   logger.info(project.id() + " : props now " + info);
 
     return new SlimProject(
         project.id(),
