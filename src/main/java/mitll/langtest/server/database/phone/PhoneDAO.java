@@ -14,6 +14,7 @@ import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.PhoneSummary;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -302,7 +303,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 //            (int)rid, phone, seq, phoneScore, database.getLanguage());
 
         if (addTranscript) {
-          addTranscript(stringToMap, scoreJson, wordAndScore, "unknown");
+          addTranscript(stringToMap, scoreJson, wordAndScore, Language.UNKNOWN);
         }
       } catch (NumberFormatException e) {
         logger.warn("got " + e + " for " + exid);

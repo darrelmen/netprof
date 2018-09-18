@@ -102,6 +102,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -408,7 +409,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 //        logger.info("finalSetup : default user " + defaultUser);
         dialogDAO.ensureDefault(defaultUser);
       }
-    },"ensureDefaultUser").start();
+    }, "ensureDefaultUser").start();
 
     afterDAOSetup(slickAudioDAO);
 
@@ -699,7 +700,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
 
     DBConnection dbConnection = new DBConnection(dbConfig);
- //   dbConnection.addColumn();
+    //   dbConnection.addColumn();
 //    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
     return dbConnection;
   }
@@ -1382,7 +1383,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  private boolean createIfNotThere(IDAO slickUserDAO,  List<String> known) {
+  private boolean createIfNotThere(IDAO slickUserDAO, List<String> known) {
     String name = slickUserDAO.getName();
     if (!known.contains(name)) {
       logger.info("createIfNotThere create " + name);
@@ -1505,7 +1506,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
     try {
 
-    //  logger.info(this.getClass() + " : closing db connection : " + dbConnection);
+      //  logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();
     } catch (Exception e) {
       logger.error("close got " + e, e);
@@ -1596,7 +1597,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       exercise = getUserExerciseByExID(exid, swap);
     }
 
-    return audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguage(), idToMini);
+    return audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguageEnum(), idToMini);
   }
 
   /**
@@ -1653,8 +1654,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
         " selection " + typeToSection);
 
     if (options.getIncludeAudio()) {
-      audioDAO.attachAudioToExercises(exercisesForSelectionState, language);
-      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, language);
+      Language languageEnum = project.getLanguageEnum();
+      audioDAO.attachAudioToExercises(exercisesForSelectionState, languageEnum);
+      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, languageEnum);
     }
 
     new AudioExport(getServerProps())
@@ -1674,8 +1676,18 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   @Override
+  public Language getLanguageEnum(CommonExercise ex) {
+    return getLanguageEnum(ex.getProjectID());
+  }
+
+  @Override
   public String getLanguage(int projectid) {
     return getLanguage(getProject(projectid));
+  }
+
+  public Language getLanguageEnum(int projectid) {
+    Project project = getProject(projectid);
+    return project == null ? Language.UNKNOWN : project.getLanguageEnum();
   }
 
   private String getLanguage(Project project) {
@@ -1707,7 +1719,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
                                    int listid,
                                    int projectid,
                                    AudioExportOptions options) throws Exception {
-    String language = getLanguage(projectid);
+    Language language = getLanguageEnum(projectid);
     if (listid == -1) return language + "_Unknown";
 
     UserList<CommonShell> userListByID = getUserListManager().getSimpleUserListByID(listid);
@@ -1735,7 +1747,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           userListByID.getName(),
           getSectionHelper(projectid),
           copyAsExercises,
-          language,
+          language.getLanguage(),
           listid == COMMENT_MAGIC_ID,
           options);
     }
@@ -1756,7 +1768,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Project project = getProject(projectid);
     String language = project.getLanguage();
 
-    getAudioDAO().attachAudioToExercises(exercises, language);
+    getAudioDAO().attachAudioToExercises(exercises, project.getLanguageEnum());
 
     {
       String name = project.getName();
@@ -1959,12 +1971,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param language
    * @param path
    * @return
-   * @see mitll.langtest.server.database.phone.BasePhoneDAO#getAndRememberWordAndScore(String, Map, Map, int, String, String, long, String, int, String, int, String, int, float, String)
+   * @see mitll.langtest.server.database.phone.BasePhoneDAO#getAndRememberWordAndScore
    */
   @Override
   public String getWebPageAudioRef(String language, String path) {
-    String relPrefix = getRelPrefix(language);
-    return getWebPageAudioRefWithPrefix(relPrefix, path);
+    return getWebPageAudioRefWithPrefix(getRelPrefix(language), path);
   }
 
   @Override
@@ -1979,7 +1990,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @param language
    * @return
-   * @see SlickResultDAO#getCorrectAndScores(Collection, String)
+   * @see SlickResultDAO#getCorrectAndScores
    */
   @Override
   public String getRelPrefix(String language) {
@@ -2058,6 +2069,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public IDialogDAO getDialogDAO() {
     return dialogDAO;
   }
+
   public IDialogSessionDAO getDialogSessionDAO() {
     return dialogSessionDAO;
   }

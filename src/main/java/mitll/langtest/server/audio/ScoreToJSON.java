@@ -37,6 +37,7 @@ import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -213,11 +214,11 @@ public class ScoreToJSON {
    * Add overall score.
    *
    * @param score
-   * @param language
+   * @param languageEnum
    * @return
    * @see mitll.langtest.server.scoring.JsonScoring#getJsonForAudioForUser
    */
-  public JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps, String language) {
+  public JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps, Language languageEnum) {
     JSONObject jsonObject = new JSONObject();
 
     jsonObject.put(SCORE, score.getHydecScore());
@@ -228,7 +229,7 @@ public class ScoreToJSON {
       NetPronImageType imageType = pair.getKey();
 
       boolean usePhone = imageType == NetPronImageType.PHONE_TRANSCRIPT &&
-          (serverProps.usePhoneToDisplay() || usePhoneDisplay);
+          (serverProps.usePhoneToDisplay(languageEnum) || usePhoneDisplay);
 
       for (TranscriptSegment segment : value) {
         JSONObject object = new JSONObject();
@@ -236,7 +237,7 @@ public class ScoreToJSON {
 
         if (isValidEvent(event)) {
           if (usePhone) {  // remap to display labels
-            event = serverProps.getDisplayPhoneme(language, event);
+            event = serverProps.getDisplayPhoneme(languageEnum, event);
           }
 
           object.put(EVENT, event);

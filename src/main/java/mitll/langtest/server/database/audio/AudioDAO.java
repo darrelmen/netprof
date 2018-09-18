@@ -42,6 +42,7 @@ import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickAudio;
 import org.apache.logging.log4j.LogManager;
@@ -912,7 +913,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language, Map<Integer, MiniUser> idToMini) {
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, Language language, Map<Integer, MiniUser> idToMini) {
     return null;
   }
 

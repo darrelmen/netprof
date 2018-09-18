@@ -608,7 +608,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       }
 
       if (addTranscript) {
-        addTranscript(jsonToTranscript, scoreJson, wordAndScore, language);
+        addTranscript(jsonToTranscript, scoreJson, wordAndScore, project.getLanguageEnum());
         num++;
       }
       //    } else {

@@ -189,12 +189,13 @@ public class JsonScoring {
     ScoreToJSON scoreToJSON = new ScoreToJSON();
     float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
 
-    String language = db.getProject(projid).getLanguage();
+    Project project = db.getProject(projid);
+    String language = project.getLanguage();
 
     jsonForScore = fullJSON ?
         scoreToJSON.getJsonObject(pretestScore) :
-        scoreToJSON.getJsonForScore(pretestScore, usePhoneToDisplay, serverProps, language);
-    jsonForScore.put(SCORE, pretestScore.getHydecScore());
+        scoreToJSON.getJsonForScore(pretestScore, usePhoneToDisplay, serverProps, project.getLanguageEnum());
+    jsonForScore.put(SCORE, hydecScore);
 
     if (doFlashcard) {
       jsonForScore.put(IS_CORRECT, answer.isCorrect());
@@ -398,9 +399,7 @@ public class JsonScoring {
    */
   public void addValidity(int exerciseID, JSONObject jsonForScore, Validity validity, String reqID) {
     jsonForScore.put(EXID, exerciseID);
-
     jsonForScore.put(VALID, validity.toString());
-
     jsonForScore.put(REQID, reqID);
   }
 

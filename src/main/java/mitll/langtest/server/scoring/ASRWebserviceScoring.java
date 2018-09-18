@@ -135,7 +135,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     this.project = project;
 
     int port = getWebservicePort();
-    phoneToDisplay = properties.getPhoneToDisplay(language.toLowerCase());
+    phoneToDisplay = properties.getPhoneToDisplay(languageEnum);
 //      logger.info("(" + language + ") phone->display " + phoneToDisplay);
 
     this.pronunciationLookup = new PronunciationLookup(htkDictionary, getLTS(), project);
@@ -514,7 +514,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       int imageWidth = imageOptions.getWidth();
       int imageHeight = imageOptions.getHeight();
 
-      boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay();
+      boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay(languageEnum);
       EventAndFileInfo eventAndFileInfo = jsonObject == null ?
           writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
               useScoreForBkgColor,
@@ -919,7 +919,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   /**
    * Filter out sil
    *
-   * @param eventAndFileInfo
+   * @paramx eventAndFileInfo
    * @return
    * @see #getPretestScore
    */

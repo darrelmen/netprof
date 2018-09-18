@@ -315,7 +315,7 @@ public class Project implements IPronunciationLookup {
   public RecalcRefResponse recalcRefAudio() {
     Collection<CommonExercise> exercisesForUser = getRawExercises();
     logger.info("recalcRefAudio " + project + " for " + exercisesForUser.size() + " exercises.");
-    return refResultDecoder.writeRefDecode(getLanguage(), exercisesForUser, project.id());
+    return refResultDecoder.writeRefDecode(getLanguageEnum(), exercisesForUser, project.id());
   }
 
   public SlickAnalysis getAnalysis() {
@@ -704,7 +704,7 @@ public class Project implements IPronunciationLookup {
   /**
    * @param testAudioFile
    * @param userIDFromSessionOrDB
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore(int, int, String, String, String, ImageOptions, int, boolean, PrecalcScores, AudioFileHelper, int, int, String)
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
    */
   public void addAnswerToUser(String testAudioFile, int userIDFromSessionOrDB) {
     fileToRecorder.put(testAudioFile, userIDFromSessionOrDB);

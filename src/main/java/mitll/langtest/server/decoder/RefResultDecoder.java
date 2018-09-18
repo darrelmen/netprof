@@ -44,6 +44,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.scoring.RecalcResponses;
 import mitll.langtest.shared.user.MiniUser;
@@ -663,7 +664,7 @@ public class RefResultDecoder {
    *
    * @see Project#recalcRefAudio
    */
-  public RecalcRefResponse writeRefDecode(String language, Collection<CommonExercise> exercises, int projid) {
+  public RecalcRefResponse writeRefDecode(Language language, Collection<CommonExercise> exercises, int projid) {
     // boolean b = db.getServerProps().shouldDoDecode();
     //logger.warn("writeRefDecode got " + b + " for should do decode");
     //if (false) {
@@ -761,10 +762,10 @@ public class RefResultDecoder {
    * @param language
    * @param decodedFiles
    * @param exercise
-   * @see #writeRefDecode(String, Collection, int)
+   * @see #writeRefDecode(Language, Collection, int)
    */
   @NotNull
-  private Stats queueDecodeExercise(String language, Set<Integer> decodedFiles, CommonExercise exercise) {
+  private Stats queueDecodeExercise(Language language, Set<Integer> decodedFiles, CommonExercise exercise) {
     int added = 0;
     int possible = 0;
     int vocab = 0;
@@ -805,7 +806,7 @@ public class RefResultDecoder {
    * @return number of audio cuts to decode again
    * @see #queueDecodeExercise
    */
-  private int queueDecode(String language,
+  private int queueDecode(Language language,
                           Set<Integer> decodedFiles,
                           CommonExercise exercise,
                           Collection<AudioAttribute> audioAttributes1) {
@@ -912,7 +913,7 @@ public class RefResultDecoder {
    * @return
    * @see #queueDecodeExercise
    */
-  private DecodeTask doDecode(String language,
+  private DecodeTask doDecode(Language language,
                               Set<Integer> decodedFiles,
                               CommonExercise exercise,
                               Collection<AudioAttribute> audioAttributes) {
@@ -921,11 +922,11 @@ public class RefResultDecoder {
   }
 
   private static class DecodeTask {
-    final String language;
+    final Language language;
     final CommonExercise exercise;
     final List<AudioAttribute> toDecode;
 
-    DecodeTask(String language, CommonExercise exercise, List<AudioAttribute> toDecode) {
+    DecodeTask(Language language, CommonExercise exercise, List<AudioAttribute> toDecode) {
       this.language = language;
       this.exercise = exercise;
       this.toDecode = toDecode;
@@ -948,14 +949,14 @@ public class RefResultDecoder {
    * @return
    * @see Consumer#run
    */
-  private int decodeOneExercise(String language, CommonExercise exercise, List<AudioAttribute> toDecode, int defaultUser) {
+  private int decodeOneExercise(Language language, CommonExercise exercise, List<AudioAttribute> toDecode, int defaultUser) {
     int count = 0;
     for (AudioAttribute attribute : toDecode) {
       if (stopDecode) return 0;
 
       try {
         String audioRef = attribute.getAudioRef();
-        File absoluteFile = new File(getAbsFilePath(attribute, language));
+        File absoluteFile = new File(getAbsFilePath(attribute, language.getLanguage()));
         boolean fileExists = absoluteFile.exists();
 
         if (fileExists) {

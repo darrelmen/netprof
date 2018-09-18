@@ -163,7 +163,7 @@ public class EasyAnalysisTest extends BaseTest {
         db.getPhoneDAO(),
         db.getAudioDAO(),
         (SlickResultDAO) db.getResultDAO(),
-        db.getProject(projectID).getLanguage(),
+        db.getProject(projectID).getLanguageEnum(),
         projectID,
         false);
   }

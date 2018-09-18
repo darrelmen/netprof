@@ -40,6 +40,7 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -171,7 +172,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, String language) {
+  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language) {
     return null;
   }
 
@@ -311,7 +312,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language) {
     try {
       String list = getInList(ids);
 
@@ -357,7 +358,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @see #attachScoreHistory
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language) {
     try {
       String list = getInList(ids);
 
@@ -677,7 +678,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param statement
    * @return
    * @throws SQLException
-   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, int, String)
+   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, int, Language)
    */
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();

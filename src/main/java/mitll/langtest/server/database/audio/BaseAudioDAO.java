@@ -45,6 +45,7 @@ import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.DBConnection;
 import org.apache.commons.lang3.StringUtils;
@@ -164,7 +165,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param language
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
-  public <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, String language) {
+  public <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, Language language) {
     Set<Integer> exerciseIDs = exercises.stream().map(HasID::getID).collect(Collectors.toSet());
     logger.info("attachAudioToExercises to " + exercises.size() + " exercises for " +
         language + " : " + exerciseIDs.size());
@@ -217,9 +218,9 @@ public abstract class BaseAudioDAO extends DAO {
    * @param language
    * @param audioAttributesForExercises
    * @param exercise
-   * @see #attachAudioToExercises(Collection, String)
+   * @see #attachAudioToExercises(Collection, Language)
    */
-  private void addContextAudio(String language,
+  private void addContextAudio(Language language,
                                Map<Integer, List<AudioAttribute>> audioAttributesForExercises,
                                ClientExercise exercise) {
     int id = exercise.getID();
@@ -269,7 +270,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    * @see DatabaseImpl#writeUserListAudio(OutputStream, int, int, AudioExportOptions)
    */
-  public int attachAudioToExercise(ClientExercise firstExercise, String language, Map<Integer, MiniUser> idToMini) {
+  public int attachAudioToExercise(ClientExercise firstExercise, Language language, Map<Integer, MiniUser> idToMini) {
     long then = System.currentTimeMillis();
     int id = firstExercise.getID();
     Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(id, idToMini);
@@ -332,7 +333,7 @@ public abstract class BaseAudioDAO extends DAO {
    */
   public boolean attachAudio(ClientExercise firstExercise,
                              Collection<AudioAttribute> audioAttributes,
-                             String language,
+                             Language language,
                              boolean debug) {
     boolean allSucceeded = true;
 
@@ -399,7 +400,7 @@ public abstract class BaseAudioDAO extends DAO {
   private boolean attachAudioAndFixPath(ClientExercise firstExercise,
                                         String mediaDir,
                                         AudioAttribute attr,
-                                        String language, boolean debug) {
+                                        Language language, boolean debug) {
     Collection<ClientExercise> directlyRelated = firstExercise.getDirectlyRelated();
     boolean isContext = attr.isContextAudio();
     String exerciseText = isContext && !directlyRelated.isEmpty() ?
@@ -428,7 +429,7 @@ public abstract class BaseAudioDAO extends DAO {
 
         // or if we store bestAudio/spanish/123/regular_YYY.wav ...? e.g. for newly recorded audio
 
-        String lang = language.toLowerCase();
+        String lang = language.getLanguage();
         String prefix = mediaDir + File.separator + lang;
         String relPrefix = prefix.substring(netProfDurLength);
         if (!audioRef.contains(lang)) {

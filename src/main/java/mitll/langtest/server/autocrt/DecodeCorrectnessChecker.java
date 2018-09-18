@@ -39,6 +39,7 @@ import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.apache.logging.log4j.LogManager;
@@ -65,15 +66,15 @@ import java.util.*;
 public class DecodeCorrectnessChecker {
   private static final Logger logger = LogManager.getLogger(DecodeCorrectnessChecker.class);
 
-  public static final String UNKNOWN_MODEL = ASR.UNKNOWN_MODEL;
+  private static final String UNKNOWN_MODEL = ASR.UNKNOWN_MODEL;
   public static final String MANDARIN = "mandarin";
   public static final String FRENCH = "french";
   public static final String KOREAN = "korean";
   public static final String SPANISH = "spanish";
-  public static final String UD = "Ud.";
-  public static final String USTED = "usted";
-  public static final String UDS = "Uds.";
-  public static final String USTEDES = "ustedes";
+  private static final String UD = "Ud.";
+  private static final String USTED = "usted";
+  private static final String UDS = "Uds.";
+  private static final String USTEDES = "ustedes";
 
   private final AlignDecode alignDecode;
   private final double minPronScore;
@@ -98,6 +99,7 @@ public class DecodeCorrectnessChecker {
    * @param commonExercise
    * @param audioFile
    * @param answer
+   * @param language
    * @param precalcScores
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
@@ -105,7 +107,7 @@ public class DecodeCorrectnessChecker {
   public PretestScore getDecodeScore(ClientExercise commonExercise,
                                      File audioFile,
                                      AudioAnswer answer,
-                                     String language,
+                                     Language language,
                                      DecoderOptions decoderOptions,
                                      PrecalcScores precalcScores) {
     Collection<String> foregroundSentences = getRefSentences(commonExercise, language, decoderOptions.isAllowAlternates());
@@ -113,7 +115,7 @@ public class DecodeCorrectnessChecker {
     boolean b = isAsianLanguage(language);
 //    logger.info("is asian lang (" + language + ")" + b);
 
-    boolean b1 = language.equalsIgnoreCase(FRENCH);
+    boolean b1 = language == Language.FRENCH;
     boolean removeAllPunct = !b1;
     logger.info("getDecodeScore : " + language + " : is french " + b1 + " remove all punct " + removeAllPunct);
     PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores, b, removeAllPunct);
@@ -123,9 +125,9 @@ public class DecodeCorrectnessChecker {
     return decodeScore;
   }
 
-  private boolean isAsianLanguage(String language) {
-    return language.equalsIgnoreCase(MANDARIN) ||
-        language.equalsIgnoreCase("japanese");
+  private boolean isAsianLanguage(Language language) {
+    return language == Language.MANDARIN ||
+        language == Language.JAPANESE;
 
 //        ||
   //      language.equalsIgnoreCase(KOREAN);
@@ -274,7 +276,7 @@ public class DecodeCorrectnessChecker {
    * @return possible paths for the decoder
    * @see #getDecodeScore
    */
-  private Collection<String> getRefSentences(ClientExercise toDecode, String language, boolean allowAlternates) {
+  private Collection<String> getRefSentences(ClientExercise toDecode, Language language, boolean allowAlternates) {
     if (allowAlternates) {
       Set<String> ret = new HashSet<>();
       toDecode.asCommon().getRefSentences().forEach(alt -> ret.add(getPhraseToDecode(alt, language)));
@@ -297,8 +299,8 @@ public class DecodeCorrectnessChecker {
    * @param language
    * @return
    */
-  public String getPhraseToDecode(String rawRefSentence, String language) {
-    if (language.equalsIgnoreCase(SPANISH)) {
+  public String getPhraseToDecode(String rawRefSentence, Language language) {
+    if (language == Language.SPANISH) {
       //     logger.info("raw before " + rawRefSentence);
       rawRefSentence = rawRefSentence
           .replaceAll(UD, USTED)
@@ -313,8 +315,8 @@ public class DecodeCorrectnessChecker {
         rawRefSentence.trim().toUpperCase();
   }
 
-  private boolean isFrench(String language) {
-    return language.equalsIgnoreCase(FRENCH);
+  private boolean isFrench(Language language) {
+    return language == Language.FRENCH;
   }
 
   /**
@@ -323,13 +325,13 @@ public class DecodeCorrectnessChecker {
    * @see #getDecodeScore
    */
   private List<String> removePunct(Collection<String> possibleSentences) {
-    List<String> foreground = new ArrayList<String>(possibleSentences.size());
+    List<String> foreground = new ArrayList<>(possibleSentences.size());
     possibleSentences.forEach(ref -> foreground.add(removePunct(ref)));
     return foreground;
   }
 
   private List<String> removePunctFrench(Collection<String> possibleSentences) {
-    List<String> foreground = new ArrayList<String>(possibleSentences.size());
+    List<String> foreground = new ArrayList<>(possibleSentences.size());
     possibleSentences.forEach(ref -> foreground.add(removePunctFrench(ref)));
     return foreground;
   }

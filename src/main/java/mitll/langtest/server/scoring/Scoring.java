@@ -43,6 +43,7 @@ import mitll.langtest.server.audio.image.TranscriptReader;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.audio.imagewriter.TranscriptWriter;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.lts.EmptyLTS;
 import mitll.npdata.dao.lts.HTKDictionary;
@@ -104,6 +105,7 @@ public abstract class Scoring {
 
   private LTSFactory ltsFactory;
   final String language;
+  final Language languageEnum;
 
   /**
    * @param deployPath
@@ -119,6 +121,7 @@ public abstract class Scoring {
     this.logAndNotify = langTestDatabase;
     String language = project.getLanguage();
     this.language = language;
+    this.languageEnum = project.getLanguageEnum();
     removeAllAccents = !language.equalsIgnoreCase("french");
     isAsianLanguage = isAsianLanguage(language);
 //    logger.info("isAsian " + isAsianLanguage + " lang " + language);
@@ -197,7 +200,7 @@ public abstract class Scoring {
       logger.error("no label files found, e.g. " + phoneLabFile);
     }
 
-    boolean usePhone = usePhoneToDisplay || props.usePhoneToDisplay();
+    boolean usePhone = usePhoneToDisplay || props.usePhoneToDisplay(languageEnum);
     if (decode || !writeImages) {  //  skip image generation
       return getEventInfo(typeToFile, useWebservice, usePhone);
     } else {
@@ -211,7 +214,7 @@ public abstract class Scoring {
 
       return new TranscriptWriter().writeTranscripts(pathname,
           imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, useWebservice,
-          usePhone, props.getPhoneToDisplay(language));
+          usePhone, props.getPhoneToDisplay(languageEnum));
     }
   }
 
@@ -284,7 +287,7 @@ public abstract class Scoring {
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object, boolean usePhoneToDisplay) {
     return
-        new ParseResultJson(props, language)
+        new ParseResultJson(props, languageEnum)
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
   }
 
@@ -305,7 +308,7 @@ public abstract class Scoring {
         ImageType imageType = o.getKey();
         boolean isPhone = imageType.equals(ImageType.PHONE_TRANSCRIPT) && usePhoneToDisplay;
         TranscriptReader transcriptReader = new TranscriptReader();
-        Map<String, String> phoneToDisplay = props.getPhoneToDisplay(language);
+        Map<String, String> phoneToDisplay = props.getPhoneToDisplay(languageEnum);
         typeToEvent.put(imageType,
             useWebservice ?
                 transcriptReader.readEventsFromString(o.getValue(), isPhone, phoneToDisplay) :
@@ -396,8 +399,8 @@ public abstract class Scoring {
   public abstract SmallVocabDecoder getSmallVocabDecoder();
 
   /**
-   * @see AudioFileHelper#getCollator
    * @return
+   * @see AudioFileHelper#getCollator
    */
   public Collator getCollator() {
     return ltsFactory.getCollator();

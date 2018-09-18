@@ -138,11 +138,11 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   }
 
   // user implicit -
-  @Override
+/*  @Override
   public List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     return db.getDialogSessionDAO().getDialogSessions(userIDFromSessionOrDB, dialogid);
-  }
+  }*/
 
   @Override
   public List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException {

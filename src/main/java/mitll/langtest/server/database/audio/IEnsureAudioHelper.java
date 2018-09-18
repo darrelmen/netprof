@@ -35,6 +35,7 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
@@ -49,11 +50,10 @@ public interface IEnsureAudioHelper {
   void ensureAudio(int projectid);
 
   /**
-   *
-   * @param exercises
+   *  @param exercises
    * @param language
    */
-  void ensureCompressedAudio(Collection<CommonExercise> exercises, String language);
+  void ensureCompressedAudio(Collection<CommonExercise> exercises, Language language);
 
   /**
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
@@ -70,7 +70,7 @@ public interface IEnsureAudioHelper {
                                ClientExercise commonShell,
                                String path,
                                AudioType audioType,
-                               String language,
+                               Language language,
                                Map<Integer, User> idToUser, boolean waitToFinish);
 
   /**

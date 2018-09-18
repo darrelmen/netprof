@@ -13,9 +13,10 @@ import java.util.*;
 import java.util.logging.Logger;
 
 class JSONAnswerParser {
+  private final Logger logger = Logger.getLogger("JSONAnswerParser");
+
   private static final String PHONE_TRANSCRIPT = "PHONE_TRANSCRIPT";
   private static final String WORD_TRANSCRIPT = "WORD_TRANSCRIPT";
-  private final Logger logger = Logger.getLogger("JSONAnswerParser");
 
   private static final String REQID = "reqid";
   private static final String VALID = "valid";

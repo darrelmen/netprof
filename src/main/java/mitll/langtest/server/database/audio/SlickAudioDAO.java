@@ -40,6 +40,7 @@ import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
@@ -791,6 +792,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param userToGender
    * @param userid
    * @param exercise
+   * @param language
    * @param idToMini
    * @return
    * @see Database#getNativeAudio
@@ -799,7 +801,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender,
                                int userid,
                                CommonExercise exercise,
-                               String language,
+                               Language language,
                                Map<Integer, MiniUser> idToMini) {
     //String nativeAudio = null;
     if (exercise != null) {

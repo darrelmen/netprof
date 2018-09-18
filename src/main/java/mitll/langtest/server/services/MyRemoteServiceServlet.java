@@ -51,6 +51,7 @@ import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -310,6 +311,47 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     }
   }
 
+  protected Language getLanguageEnum(Project project) {
+    if (project == null) {
+      logger.error("getLanguage : no current project ");
+      return Language.UNKNOWN;
+    } else {
+      return toEnum(project.getProject().language());
+    }
+  }
+
+  protected Language getLanguageEnum(CommonExercise exercise) {
+    if (exercise == null) {
+      logger.error("getLanguage : no current project ");
+      return Language.UNKNOWN;
+    } else {
+      int projectID = exercise.getProjectID();
+      return getProject(projectID).getLanguageEnum();
+      //return toEnum(project.getProject().language());
+    }
+  }
+
+  protected Language getLanguageEnum(int projectID) {
+    if (projectID == -1) {
+      logger.error("getLanguage : no current project ");
+      return Language.UNKNOWN;
+    } else {
+      return getProject(projectID).getLanguageEnum();
+      //return toEnum(project.getProject().language());
+    }
+  }
+
+  private Language toEnum(String language) {
+    Language language1;
+
+    try {
+      language1 = Language.valueOf(language.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      language1 = Language.UNKNOWN;
+    }
+    return language1;
+  }
+
   /**
    * @param e
    * @see #service(HttpServletRequest, HttpServletResponse)
@@ -520,7 +562,6 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   /**
-   *
    * @param id
    * @return
    * @throws DominoSessionException
@@ -535,7 +576,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       Project project = db.getProject(projid);
 
       {
-        String language = project.getLanguage();
+        Language language = project.getLanguageEnum();
         iDialog.getExercises().forEach(clientExercise ->
             db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>())
         );
@@ -548,8 +589,6 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
 
-
-
   private IDialog getOneDialog(int id) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     return getOneDialog(userIDFromSessionOrDB, id);
@@ -557,6 +596,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   /**
    * Return the first dialog if the id is -1 or bogus...
+   *
    * @param userIDFromSessionOrDB
    * @param id
    * @return the first dialog if the id is -1 or bogus...

@@ -38,6 +38,7 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickAudio;
 
@@ -74,7 +75,7 @@ public interface IAudioDAO extends IDAO {
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    */
-  int attachAudioToExercise(ClientExercise firstExercise, String language, Map<Integer, MiniUser> idToMini);
+  int attachAudioToExercise(ClientExercise firstExercise, Language language, Map<Integer, MiniUser> idToMini);
 
   /**
    * @param exercises
@@ -83,7 +84,7 @@ public interface IAudioDAO extends IDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#writeZip
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
- <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, String language);
+ <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, Language language);
 
   /**
    * @param firstExercise
@@ -94,7 +95,7 @@ public interface IAudioDAO extends IDAO {
    */
   boolean attachAudio(ClientExercise firstExercise,
                       Collection<AudioAttribute> audioAttributes,
-                      String language, boolean debug);
+                      Language language, boolean debug);
 
   /**
    * @param userid
@@ -144,7 +145,7 @@ public interface IAudioDAO extends IDAO {
    * @see Database#getNativeAudio(Map, int, int, Project, Map)
    */
   String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise,
-                        String language, Map<Integer, MiniUser> idToMini);
+                        Language language, Map<Integer, MiniUser> idToMini);
 
   Map<String, Integer> getPairs(int projid);
 

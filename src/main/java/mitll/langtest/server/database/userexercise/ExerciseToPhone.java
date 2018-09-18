@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.SlickRefResultJson;
 import org.apache.logging.log4j.LogManager;
@@ -120,14 +121,14 @@ public class ExerciseToPhone {
    */
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhone2(
       List<SlickRefResultJson> jsonResults,
-      Set<Integer> inProject, String language) {
+      Set<Integer> inProject, Language language) {
     long then = System.currentTimeMillis();
     //List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
     logger.info("getExerciseToPhone took " + (System.currentTimeMillis() - then) + " millis to get ref results");
     return getExToPhonePerProject(inProject, jsonResults, language);
   }
 
-  Map<Integer, ExercisePhoneInfo> getExToPhonePerProject(Set<Integer> inProject, List<SlickRefResultJson> jsonResults, String language) {
+  Map<Integer, ExercisePhoneInfo> getExToPhonePerProject(Set<Integer> inProject, List<SlickRefResultJson> jsonResults, Language language) {
     long then = System.currentTimeMillis();
     Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
 

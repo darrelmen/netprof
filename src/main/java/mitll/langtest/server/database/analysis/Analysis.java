@@ -42,6 +42,7 @@ import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.SlimSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.FirstLastUser;
 import org.apache.logging.log4j.LogManager;
@@ -70,13 +71,13 @@ public abstract class Analysis extends DAO {
   /**
    * @param database
    * @param phoneDAO
-   * @param language
+   * @param languageEnum
    * @see DatabaseImpl#getAnalysis(int)
    * @see DatabaseImpl#makeDAO
    */
-  public Analysis(Database database, IPhoneDAO phoneDAO, String language) {
+  public Analysis(Database database, IPhoneDAO phoneDAO, Language languageEnum) {
     super(database);
-    parseResultJson = new ParseResultJson(database.getServerProps(), language);
+    parseResultJson = new ParseResultJson(database.getServerProps(), languageEnum);
     this.phoneDAO = phoneDAO;
     //logger.info("Analysis : exToRef has " + exToRef.size());
   }

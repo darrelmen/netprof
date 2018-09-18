@@ -38,6 +38,7 @@ import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,7 +58,7 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @param phoneDAO
    */
   public H2Analysis(Database database, IPhoneDAO phoneDAO) {
-    super(database, phoneDAO, "unknown");
+    super(database, phoneDAO, Language.UNKNOWN);
   }
 
   @Override

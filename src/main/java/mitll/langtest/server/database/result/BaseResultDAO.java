@@ -41,6 +41,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -193,7 +194,7 @@ public abstract class BaseResultDAO extends DAO {
   public <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises,
                                                                           int userid,
                                                                           Collator collator,
-                                                                          String language) {
+                                                                          Language language) {
     List<Integer> allIds = new ArrayList<>();
     Map<Integer, T> idToEx = new HashMap<>();
     Map<Integer, CollationKey> idToKey = new HashMap<>();
@@ -227,7 +228,7 @@ public abstract class BaseResultDAO extends DAO {
   private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(int userid,
                                                                     List<Integer> allIds,
                                                                     Map<Integer, CollationKey> idToKey,
-                                                                    String language) {
+                                                                    Language language) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, userid, language);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistory(results, allIds, idToKey);
@@ -300,12 +301,13 @@ public abstract class BaseResultDAO extends DAO {
    * @param language
    * @return
    * @see mitll.langtest.server.database.JsonSupport#getJsonScoreHistory(int, Map, ExerciseSorter)
+   *
    */
   public Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
-                                                                                 List<Integer> allIds,
-                                                                                 Map<Integer, CommonExercise> idToEx,
-                                                                                 ExerciseSorter sorter,
-                                                                                 String language) {
+                                                                                  List<Integer> allIds,
+                                                                                  Map<Integer, CommonExercise> idToEx,
+                                                                                  ExerciseSorter sorter,
+                                                                                  Language language) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, userid, language);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistoryByPhones(results, allIds, idToEx, sorter);
@@ -406,7 +408,7 @@ public abstract class BaseResultDAO extends DAO {
    * @param language
    * @see mitll.langtest.server.services.ExerciseServiceImpl#addAnnotationsAndAudio
    */
-  public void attachScoreHistory(int userID, CommonExercise firstExercise, String language) {
+  public void attachScoreHistory(int userID, CommonExercise firstExercise, Language language) {
     List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, language);
 
     if (resultsForExercise == null)
@@ -423,7 +425,7 @@ public abstract class BaseResultDAO extends DAO {
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getScoreHistories
    */
-  public abstract Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, String language);
+  public abstract Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language);
 
   /**
    * @param userID
@@ -434,7 +436,7 @@ public abstract class BaseResultDAO extends DAO {
    */
   private List<CorrectAndScore> getCorrectAndScores(int userID,
                                                     HasID firstExercise,
-                                                    String language) {
+                                                    Language language) {
     return getResultsForExIDInForUser(userID, firstExercise.getID(), language);
   }
 
@@ -443,12 +445,12 @@ public abstract class BaseResultDAO extends DAO {
 */
 
   public List<CorrectAndScore> getResultsForExIDInForUser(int userID,
-                                                           int id,
-                                                           String language) {
+                                                          int id,
+                                                          Language language) {
     return getResultsForExIDInForUser(Collections.singleton(id), userID, language);
   }
 
-  abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String language);
+  abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language);
 
 /*
   private Map<Integer, List<CorrectAndScore>> populateUserToAnswers(List<CorrectAndScore> results) {

@@ -10,6 +10,7 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.logging.log4j.LogManager;
@@ -50,7 +51,7 @@ public class AlignmentHelper {
         exercise.getDirectlyRelated().forEach(context -> setAlignmentInfo(audioToAlignment, idToAudio, context));
       }
 
-      Map<Integer, AlignmentOutput> alignments = rememberAlignments(projectID, idToAudio, project.getLanguage());
+      Map<Integer, AlignmentOutput> alignments = rememberAlignments(projectID, idToAudio, project.getLanguageEnum());
 
       synchronized (audioToAlignment) {
         audioToAlignment.putAll(alignments);
@@ -92,7 +93,7 @@ public class AlignmentHelper {
    * @see #addAlignmentOutput
    */
   private Map<Integer, AlignmentOutput> rememberAlignments(int projectID,
-                                                           Map<Integer, AudioAttribute> idToAudio, String language) {
+                                                           Map<Integer, AudioAttribute> idToAudio, Language language) {
     if (!idToAudio.isEmpty() && idToAudio.size() > 50)
       logger.info("rememberAlignments : asking for " + idToAudio.size() + " alignment outputs from database");
 
@@ -123,7 +124,7 @@ public class AlignmentHelper {
    * @return
    * @see #rememberAlignments
    */
-  private Map<Integer, AlignmentOutput> getAlignmentsFromDB(int projid, Set<Integer> audioIDs, String language) {
+  private Map<Integer, AlignmentOutput> getAlignmentsFromDB(int projid, Set<Integer> audioIDs, Language language) {
     //logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
     if (audioIDs.isEmpty()) {
       logger.warn("getAlignmentsFromDB not asking for any audio ids?");
@@ -146,7 +147,7 @@ public class AlignmentHelper {
 
   private Map<Integer, AlignmentOutput> parseJsonToGetAlignments(Collection<Integer> audioIDs,
                                                                  Map<Integer, ISlimResult> audioToResult,
-                                                                 String language) {
+                                                                 Language language) {
     Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
     for (Integer audioID : audioIDs) {
       // do we have alignment for this audio in the map
@@ -165,7 +166,7 @@ public class AlignmentHelper {
     return idToAlignment;
   }
 
-  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult, String language) {
+  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult, Language language) {
     PrecalcScores precalcScores = getPrecalcScores(USE_PHONE_TO_DISPLAY, cachedResult, language);
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
         getTypeToTranscriptEvents(precalcScores.getJsonObject(), USE_PHONE_TO_DISPLAY, language);
@@ -175,13 +176,14 @@ public class AlignmentHelper {
   }
 
   @NotNull
-  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, String language) {
+  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, Language language) {
     return new PrecalcScores(serverProps, cachedResult,
-        usePhoneToDisplay || serverProps.usePhoneToDisplay(), language);
+        usePhoneToDisplay || serverProps.usePhoneToDisplay(language), language);
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
-                                                                                boolean usePhoneToDisplay, String language) {
+                                                                                boolean usePhoneToDisplay,
+                                                                                Language language) {
     return
         new ParseResultJson(serverProps, language)
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
@@ -196,7 +198,7 @@ public class AlignmentHelper {
    * @see #getCachedAudioRef
    */
   @NotNull
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent, String language) {
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent, Language language) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
 
     Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);

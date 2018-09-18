@@ -4,6 +4,7 @@ import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.IProjectSync;
 import mitll.langtest.server.services.OpenUserServiceImpl;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 
 import java.util.Collection;
@@ -47,6 +48,7 @@ public interface ProjectServices {
   int configureProject(Project project, boolean forceReload);
 
   String getLanguage(int projectid);
-
+  Language getLanguageEnum(int projectid);
+  
   IProjectSync getProjectSync();
 }

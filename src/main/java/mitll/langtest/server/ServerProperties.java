@@ -32,12 +32,20 @@
 
 package mitll.langtest.server;
 
+import com.google.gson.JsonObject;
 import com.typesafe.config.ConfigFactory;
+import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
+import mitll.langtest.server.scoring.HydraOutput;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectProperty;
+import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.Affiliation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -258,7 +266,7 @@ public class ServerProperties {
   private final Set<Integer> preferredVoices = new HashSet<>();
   private EmailList emailList;
   //  private final Map<String, String> phoneToDisplay = new HashMap<>();
-  private final Map<String, Map<String, String>> langToPhoneToDisplay = new HashMap<>();
+  private final Map<Language, Map<String, String>> langToPhoneToDisplay = new HashMap<>();
 
   private List<Affiliation> affliations = new ArrayList<>();
 
@@ -272,7 +280,6 @@ public class ServerProperties {
   private String configFileFullPath;
 
   public ServerProperties() {
-
     Map<String, String> value = new HashMap<>();
 
     // ā	á	ǎ	à	ē	é	ě	è	ī	í	ǐ	ì	ō	ó	ǒ	ò	ū	ú	ǔ	ù	ǖ	ǘ	ǚ	ǜ
@@ -686,8 +693,8 @@ public class ServerProperties {
     return preferredVoices;
   }
 
-  public Map<String, String> getPhoneToDisplay(String language) {
-    Map<String, String> stringStringMap = langToPhoneToDisplay.get(language);
+  public Map<String, String> getPhoneToDisplay(Language languageEnum) {
+    Map<String, String> stringStringMap = langToPhoneToDisplay.get(languageEnum);
     return stringStringMap == null ? Collections.emptyMap() : stringStringMap;
   }
 
@@ -697,7 +704,7 @@ public class ServerProperties {
    * @return
    * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore
    */
-  public String getDisplayPhoneme(String language, String phone) {
+  public String getDisplayPhoneme(Language language, String phone) {
     Map<String, String> phoneToDisplay = getPhoneToDisplay(language);
     if (phoneToDisplay == null) {
       return phone;
@@ -707,8 +714,19 @@ public class ServerProperties {
     }
   }
 
-  public boolean usePhoneToDisplay() {
-    return getDefaultFalse(USE_PHONE_TO_DISPLAY);
+  /**
+   * @see AudioFileHelper#isUsePhoneToDisplay
+   * @see AudioFileHelper#getEasyAlignment(ClientExercise, String)
+   * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore(PretestScore, boolean, ServerProperties, Language)
+   * @see mitll.langtest.server.scoring.AlignmentHelper#getPrecalcScores(boolean, ISlimResult, String)
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore(String, ImageOptions, boolean, String, String, HydraOutput, double, int, boolean, JsonObject)
+   *
+   * @return
+   * @param languageEnum
+   */
+  public boolean usePhoneToDisplay(Language languageEnum) {
+    return languageEnum == Language.KOREAN;
+//    return getDefaultFalse(USE_PHONE_TO_DISPLAY);
   }
 
   // EMAIL ------------------------

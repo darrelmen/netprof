@@ -47,6 +47,7 @@ import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -118,7 +119,7 @@ public class AudioFileHelper implements AlignDecode {
 
   private AudioConversion audioConversion;
   private boolean hasModel;
-  private String language;
+  private Language language;
 
   private EnsureAudioHelper ensureAudioHelper;
 
@@ -147,8 +148,8 @@ public class AudioFileHelper implements AlignDecode {
     this.mp3Support = new MP3Support(pathHelper);
     audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange());
 
-    this.language = project.getLanguage();
-    removeAccents = !language.equalsIgnoreCase(FRENCH);
+    this.language = project.getLanguageEnum();
+    removeAccents = language != Language.FRENCH;
     hasModel = project.hasModel();
     makeASRScoring(project);
     this.project = project;
@@ -306,7 +307,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param foreignLanguagePhrase
    * @return
    * @see InDictFilter#isPhraseInDict
-   * @see mitll.langtest.server.services.ScoringServiceImpl#isValidForeignPhrase
+   * @seex mitll.langtest.server.services.ScoringServiceImpl#isValidForeignPhrase
    */
   public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration) {
     return asrScoring.validLTS(foreignLanguagePhrase, transliteration);
@@ -606,7 +607,7 @@ public class AudioFileHelper implements AlignDecode {
 //    boolean doHydec = false;
     // Do alignment...
     if (absoluteFile == null) {
-      absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
+      absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language.getLanguage());
     }
     String absolutePath = absoluteFile.getAbsolutePath();
 
@@ -747,7 +748,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private boolean isUsePhoneToDisplay() {
-    return serverProps.usePhoneToDisplay();
+    return serverProps.usePhoneToDisplay(project.getLanguageEnum());
   }
 
   private boolean isQuietAudioOK() {
@@ -995,7 +996,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private PretestScore getEasyAlignment(ClientExercise exercise, String testAudioPath) {
-    DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
+    DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay());
     return getAlignmentScore(exercise, testAudioPath, options);
   }
 
@@ -1146,7 +1147,7 @@ public class AudioFileHelper implements AlignDecode {
           requestToServer +
           "\n\teng '" + english + "'" +
           "\n\tfl  '" + foreignLanguage + "'" +
-          (language.equalsIgnoreCase("Japanese") ? "\n\tsegmented '" + getSegmented(foreignLanguage) + "'" : "")
+          (language == Language.JAPANESE ? "\n\tsegmented '" + getSegmented(foreignLanguage) + "'" : "")
       );
 
       {
@@ -1333,7 +1334,7 @@ public class AudioFileHelper implements AlignDecode {
       String absolutePath = pathHelper.getAbsoluteAudioFile(testAudioFile).getAbsolutePath();
       File file = new File(absolutePath);
       if (!file.exists()) {
-        String relPrefix = db.getDatabase().getRelPrefix(language);
+        String relPrefix = db.getDatabase().getRelPrefix(language.getLanguage());
 
         if (!testAudioFile.startsWith(relPrefix)) {
           String webPageAudioRefWithPrefix = db.getDatabase().getWebPageAudioRefWithPrefix(relPrefix, testAudioFile);
@@ -1379,7 +1380,7 @@ public class AudioFileHelper implements AlignDecode {
         testAudioDir, removeSuffix(testAudioName),
         sentence, lmSentences, transliteration,
 
-        pathHelper.getImageOutDir(language.toLowerCase()), imageOptions,
+        pathHelper.getImageOutDir(language.getLanguage()), imageOptions,
         shouldDoDecoding,
         options.isCanUseCache(), prefix,
         precalcScores,
@@ -1411,12 +1412,13 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @return
    */
+  @Deprecated
   private String getLanguage() {
-    return language;
+    return language.getLanguage();
   }
 
   private boolean isEnglish() {
-    return getLanguage().equalsIgnoreCase("English");
+    return language == Language.ENGLISH;
   }
 
   private String removeSuffix(String audioFile) {

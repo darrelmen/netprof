@@ -59,6 +59,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
@@ -72,6 +73,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.moxieapps.gwt.highcharts.client.Lang;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -718,7 +720,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (audioContextProjid != projectID)
       logger.error("huh? session project " + projectID + " vs " + audioContextProjid);
 
-    String language = db.getProject(audioContextProjid).getLanguage();
+    Project project1 = db.getProject(audioContextProjid);
+    Language language = project1.getLanguageEnum();
 
     if (!isExistingExercise) {
       ((Exercise) commonExercise).setProjectID(audioContextProjid);

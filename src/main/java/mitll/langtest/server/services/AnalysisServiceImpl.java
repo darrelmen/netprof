@@ -338,7 +338,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
         db.getPhoneDAO(),
         db.getAudioDAO(),
         (SlickResultDAO) db.getResultDAO(),
-        project.getLanguage(),
+        project.getLanguageEnum(),
         projectID,
         project.getKind() == ProjectType.POLYGLOT
     );

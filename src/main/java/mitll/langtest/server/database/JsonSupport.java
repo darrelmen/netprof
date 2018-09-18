@@ -43,6 +43,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
+import mitll.langtest.shared.project.Language;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -66,7 +67,7 @@ public class JsonSupport {
   private final IAudioDAO audioDAO;
   private final IPhoneDAO phoneDAO;
 
-  private String language;
+  private Language language;
   private Project project;
 
   /**
@@ -86,7 +87,7 @@ public class JsonSupport {
 
     this.audioDAO = audioDAO;
     this.phoneDAO = phoneDAO;
-    this.language = project.getLanguage();
+    this.language = project.getLanguageEnum();
     this.project = project;
   }
 

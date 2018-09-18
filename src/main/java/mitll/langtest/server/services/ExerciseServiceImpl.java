@@ -46,11 +46,13 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.project.Language;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.moxieapps.gwt.highcharts.client.Lang;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -347,7 +349,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       if (DEBUG)
         logger.info("getSortedExercises adding isIncorrectFirstOrder " + exercises.getByExercise().size() + " basicExercises");
       commonExercises =
-          db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID, getAudioFileHelper(projID).getCollator(), getLanguage(projectForUser));
+          db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID,
+              getAudioFileHelper(projID).getCollator(), getLanguageEnum(projectForUser));
     } else {
       if (predefExercises) {
         commonExercises = new ArrayList<>(exercises.getByID());
@@ -580,7 +583,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     List<CommonExercise> copy;
 
     if (incorrectFirst) {
-      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getAudioFileHelper(projID).getCollator(), getLanguage(projID));
+      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getAudioFileHelper(projID).getCollator(), getLanguageEnum(projID));
     } else {
       copy = new ArrayList<>(exercisesForState);
 //      if (!request.isQuiz()) {
@@ -793,7 +796,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     then = now;
 
-    db.getResultDAO().attachScoreHistory(userID, firstExercise, getLanguage(firstExercise));
+    db.getResultDAO().attachScoreHistory(userID, firstExercise, getLanguageEnum(firstExercise));
 
     now = System.currentTimeMillis();
     if (now - then > SLOW_MILLIS) {
@@ -825,7 +828,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, int)
    */
   private int attachAudio(CommonExercise firstExercise) {
-    return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise), new HashMap<>());
+    return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguageEnum(firstExercise), new HashMap<>());
   }
 
   private String getLanguage(CommonExercise firstExercise) {
@@ -1365,7 +1368,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       logger.info("getFullExercises : no project for user " + userID);
       return new ExerciseListWrapper<>();
     }
-    String language = getLanguage(projectID);
+    Language language = getLanguageEnum(projectID);
 
     long then = System.currentTimeMillis();
     Set<ClientExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
@@ -1475,7 +1478,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     if (byID == null) {
       logger.warn("getRefAudio can't find ex id " + exid);
     } else {
-      db.getAudioDAO().attachAudioToExercises(Collections.singleton(byID), getLanguage(projectIDFromUser));
+      db.getAudioDAO().attachAudioToExercises(Collections.singleton(byID), getLanguageEnum(projectIDFromUser));
       AudioAttribute audioAttributePrefGender = byID.getAudioAttributePrefGender(db.getUserDAO().isMale(userID), true);
       if (audioAttributePrefGender == null) {
         logger.warn("getRefAudio : no audio on ex " + exid + " ?");
@@ -1490,7 +1493,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
                                                          int exid) {
 
     return db.getResultDAO()
-        .getResultsForExIDInForUser(userID, exid, getLanguage(projectIDFromUser));
+        .getResultsForExIDInForUser(userID, exid, getLanguageEnum(projectIDFromUser));
   }
 
   /**
@@ -1508,7 +1511,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    */
   private Map<Integer, CorrectAndScore> getScoreHistoryPerExercise(Collection<Integer> ids,
                                                                    List<ClientExercise> exercises,
-                                                                   int userID, String language) {
+                                                                   int userID, Language language) {
     long then = System.currentTimeMillis();
     Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(ids, exercises, userID, language);
     long now = System.currentTimeMillis();
@@ -1558,7 +1561,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private Map<Integer, CorrectAndScore> getScoreHistories(Collection<Integer> exids,
                                                           List<ClientExercise> exercises,
                                                           int userID,
-                                                          String language) {
+                                                          Language language) {
     return (exercises.isEmpty()) ? Collections.emptyMap() :
         db.getResultDAO().getScoreHistories(userID, exids, language);
   }

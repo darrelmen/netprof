@@ -34,6 +34,7 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.server.audio.AudioExport;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
@@ -202,7 +203,7 @@ public class AudioExercise extends ExerciseShell {
    * @param isRegular prefer speed match
    * @return null only if no audio at all
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#hasAudio
-   * @see mitll.langtest.server.database.audio.SlickAudioDAO#getNativeAudio
+   * @see IAudioDAO#getNativeAudio
    */
   public synchronized AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular) {
     Collection<AudioAttribute> collect = getAudioPrefGender(isMale);

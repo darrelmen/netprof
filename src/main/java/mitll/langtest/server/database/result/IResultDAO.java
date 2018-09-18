@@ -41,6 +41,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 
 import java.text.Collator;
@@ -104,23 +105,23 @@ public interface IResultDAO extends IDAO {
   <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises,
                                                                    int userid,
                                                                    Collator collator,
-                                                                   String language);
+                                                                   Language language);
 
   Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
                                                                           List<Integer> allIds,
                                                                           Map<Integer, CommonExercise> idToEx,
                                                                           ExerciseSorter sorter,
-                                                                          String language);
+                                                                          Language language);
 
-  void attachScoreHistory(int userID, CommonExercise firstExercise, String language);
+  void attachScoreHistory(int userID, CommonExercise firstExercise, Language language);
 
-  Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, String language);
+  Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language);
 
   List<CorrectAndScore> getResultsForExIDInForUser(int userID,
                                                    int id,
-                                                   String language);
+                                                   Language language);
 
-  List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, String language);
+  List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language);
 
   int getNumResults(int projid);
 

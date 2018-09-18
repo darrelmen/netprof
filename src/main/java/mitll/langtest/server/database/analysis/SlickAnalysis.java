@@ -44,6 +44,7 @@ import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.SlimSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickPerfResult;
@@ -68,7 +69,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final int DEFAULT_PROJECT = 1;
   private static final int UNKNOWN_EXERCISE = 2;
   private final SlickResultDAO resultDAO;
-  private final String language;
+  private final Language language;
   private final int projid;
   private final Project project;
 
@@ -82,6 +83,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   /**
    * @param database
    * @param phoneDAO
+   * @param language
    * @param projid
    * @param sortByPolyScore
    * @paramx dialogDAO
@@ -93,7 +95,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
                        IAudioDAO audioDAO,
                        SlickResultDAO resultDAO,
 
-                       String language,
+                       Language language,
                        int projid,
                        boolean sortByPolyScore) {
     super(database, phoneDAO, language);
@@ -190,7 +192,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param rangeEnd
    * @param sort
    * @return
-   * @see AnalysisServiceImpl#getWordScoresForUser(int, int, int, long, long, int, int, String, int)
+   * @see AnalysisServiceImpl#getWordScoresForUser
    */
   @Override
   public WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd,
@@ -414,7 +416,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param analysisRequest@return
    * @see AnalysisServiceImpl#getPerformanceReportForUserForPhoneBigrams
    */
-  public List<Bigram> getBigramPhoneReportFor(AnalysisRequest analysisRequest) {
+/*  public List<Bigram> getBigramPhoneReportFor(AnalysisRequest analysisRequest) {
     UserInfo next = getFirstUser(analysisRequest);
 
     long then = System.currentTimeMillis();
@@ -436,12 +438,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     PhoneBigrams phoneReportForPhone = getPhoneBigramsForPeriod(analysisRequest);
     Map<String, List<Bigram>> phoneToBigrams = phoneReportForPhone.getPhoneToBigrams();
     return phoneToBigrams.get(analysisRequest.getPhone());
-  }
+  }*/
 
   /**
    * @param analysisRequest@return
    * @see mitll.langtest.client.analysis.BigramContainer#clickOnPhone2
-   * @see AnalysisServiceImpl#getPerformanceReportForUserForPhone(int, int, String, String, long, long)
+   * @see AnalysisServiceImpl#getPerformanceReportForUserForPhone
    */
   public List<WordAndScore> getWordAndScoreForPhoneAndBigram(AnalysisRequest analysisRequest) {
     UserInfo next = getFirstUser(analysisRequest);
@@ -675,7 +677,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
 
       BestScore e = new BestScore(exid, pronScore, time, id, json, isiPad, isFlashcard,
-          database.getWebPageAudioRef(language, path),
+          database.getWebPageAudioRef(language.getLanguage(), path),
           nativeAudio,
           sessionTime, sessionSize);
 //      if (e.getSessionStart()> 0) {
@@ -765,6 +767,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size() + " (" + skipped.size() +
         " skipped) and project " + projid);
 
-    audioDAO.attachAudioToExercises(exercises, language);
+    audioDAO.attachAudioToExercises(exercises, language );
   }
 }

@@ -43,6 +43,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,25 +66,25 @@ public class ParseResultJson {
   private static final String WORDS = "words";
   private static final String W = "w";
   private final ServerProperties props;
-  private final String language;
+  private final Language languageEnum;
   private Map<String, String> phoneToDisplay;
 
   /**
    * @param properties
-   * @param language
+   * @param languageEnum
    * @see PhoneDAO#PhoneDAO(Database)
    */
-  public ParseResultJson(ServerProperties properties, String language) {
+  public ParseResultJson(ServerProperties properties, Language languageEnum) {
     this.props = properties;
-    this.language = language;
-    phoneToDisplay = props.getPhoneToDisplay(language);
+    this.languageEnum = languageEnum;
+    phoneToDisplay = props.getPhoneToDisplay(languageEnum);
   }
 
   /**
    * @param typeToEvent
    * @return
    * @see ASRScoring#getTypeToEndTimes
-   * @see #readFromJSON(String)
+   * @see #readFromJSON
    * @see #parseJsonAndGetProns
    */
   private Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(
@@ -303,7 +304,7 @@ public class ParseResultJson {
     double pend = phone.has(END) ? phone.get(END).getAsDouble() : 0d;
 
     if (usePhone) {
-      token = props.getDisplayPhoneme(language, token);
+      token = props.getDisplayPhoneme(languageEnum, token);
     }
 
     phoneEvents.put((float) pstart, new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore));

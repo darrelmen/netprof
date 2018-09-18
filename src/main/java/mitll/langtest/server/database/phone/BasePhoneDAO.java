@@ -37,6 +37,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
 import java.util.ArrayList;
@@ -66,14 +67,14 @@ class BasePhoneDAO extends DAO {
    * @param jsonToTranscript
    * @param scoreJson
    * @param wordAndScore
-   * @param language
+   * @param languageEnum
    * @see SlickPhoneDAO#getPhoneReport
    */
   void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript,
                      String scoreJson,
                      WordAndScore wordAndScore,
-                     String language) {
-    ParseResultJson parseResultJson = new ParseResultJson(database.getServerProps(), language);
+                     Language languageEnum) {
+    ParseResultJson parseResultJson = new ParseResultJson(database.getServerProps(), languageEnum);
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
         jsonToTranscript.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
     setTranscript(wordAndScore, netPronImageTypeListMap);
@@ -190,7 +191,7 @@ class BasePhoneDAO extends DAO {
   /**
    * @param wordAndScore
    * @param netPronImageTypeListMap
-   * @see #addTranscript(Map, String, WordAndScore, String)
+   * @see #addTranscript(Map, String, WordAndScore, Language)
    */
   private void setTranscript(WordAndScore wordAndScore,
                              Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {

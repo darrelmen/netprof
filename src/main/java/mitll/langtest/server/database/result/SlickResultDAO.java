@@ -42,6 +42,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.DBConnection;
@@ -337,7 +338,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @param language
    * @return
    */
-  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> ids, String language) {
+  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> ids, Language language) {
     Map<Integer, CorrectAndScore> exidToMaxScoreEver = new HashMap<>(ids.size());
 
     getResultsForExIDInForUserEasy(ids, userid, language)
@@ -364,7 +365,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @return
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language) {
     return getResultsForExIDInForUserEasy(ids, userid, language);
   }
 
@@ -376,7 +377,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @paramx ignoredSession
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language) {
     return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids), language);
   }
 
@@ -515,9 +516,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @param language              so we can fix the file path
    * @return
    */
-  private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
+  private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, Language language) {
     List<CorrectAndScore> cs = new ArrayList<>(slickCorrectAndScores.size());
-    String relPrefix = database.getRelPrefix(language);
+    String relPrefix = database.getRelPrefix(language.getLanguage());
     slickCorrectAndScores
         .forEach(slickCorrectAndScore -> cs.add(fromSlickCorrectAndScoreWithRelPath(slickCorrectAndScore, relPrefix, language)));
     return cs;
@@ -527,7 +528,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   @NotNull
   private CorrectAndScore fromSlickCorrectAndScoreWithRelPath(SlickCorrectAndScore cs,
                                                               String relPrefix,
-                                                              String language) {
+                                                              Language language) {
     String path = cs.path();
 
 //    boolean isLegacy = path.startsWith("answers");

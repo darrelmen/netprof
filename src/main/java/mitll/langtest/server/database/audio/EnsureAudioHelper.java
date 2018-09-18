@@ -43,6 +43,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -105,7 +106,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     if (now - then > WARN_THRESH)
       logger.info("ensureAudio for " + projectid + " - took " + (now - then) + " millis to get exercises");
 
-    ensureAudioForExercises(exercises, db.getLanguage(projectid));
+    ensureAudioForExercises(exercises, db.getLanguageEnum(projectid));
   }
 
   /**
@@ -113,7 +114,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * @param language
    * @see #ensureAudio(int)
    */
-  private void ensureAudioForExercises(List<CommonExercise> exercises, String language) {
+  private void ensureAudioForExercises(List<CommonExercise> exercises, Language language) {
     long then = System.currentTimeMillis();
     db.getAudioDAO().attachAudioToExercises(exercises, language);
     long now = System.currentTimeMillis();
@@ -130,7 +131,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * @see #ensureAudioForExercises
    */
   @Override
-  public void ensureCompressedAudio(Collection<CommonExercise> exercises, String language) {
+  public void ensureCompressedAudio(Collection<CommonExercise> exercises, Language language) {
     long then = System.currentTimeMillis();
 
     int c = 0;
@@ -179,7 +180,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     }
   }
 
-  private String ensureCompressed(CommonExercise exercise, AudioAttribute audioAttribute, String language, Map<Integer, User> idToUser) {
+  private String ensureCompressed(CommonExercise exercise, AudioAttribute audioAttribute, Language language, Map<Integer, User> idToUser) {
     return ensureCompressedAudio(
         audioAttribute.getUserid(),
         exercise,
@@ -205,7 +206,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
                                       ClientExercise commonShell,
                                       String path,
                                       AudioType audioType,
-                                      String language,
+                                      Language language,
                                       Map<Integer, User> idToUser, boolean waitToFinish) {
     if (checkedExists.contains(path)) {
       return path;
@@ -235,7 +236,8 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
       }
     }
 
-    String filePath = ensureMP3(path, new TrackInfo(title, userID, comment, language), language, waitToFinish);
+    String language1 = language.getLanguage();
+    String filePath = ensureMP3(path, new TrackInfo(title, userID, comment, language1), language1, waitToFinish);
 
     {
       boolean isMissing = filePath.equals(FILE_MISSING);
@@ -268,7 +270,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * @param language
    * @param waitToFinish
    * @return file path of mp3 file
-   * @see IEnsureAudioHelper#ensureCompressedAudio(int, ClientExercise, String, AudioType, String, Map, boolean)
+   * @see IEnsureAudioHelper#ensureCompressedAudio(int, ClientExercise, String, AudioType, Language, Map, boolean)
    */
   private String ensureMP3(String wavFile, TrackInfo trackInfo, String language, boolean waitToFinish) {
     String parent = serverProps.getAnswerDir();
