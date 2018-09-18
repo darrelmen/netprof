@@ -75,7 +75,7 @@ public class EasyReportTest extends BaseTest {
         db.getPhoneDAO(),
         db.getAudioDAO(),
         (SlickResultDAO) db.getResultDAO(),
-        project.getLanguage(),
+        project.getLanguageEnum(),
         projectid,
         project.getKind() == ProjectType.POLYGLOT);
 
