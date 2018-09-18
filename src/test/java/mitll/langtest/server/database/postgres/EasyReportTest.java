@@ -73,6 +73,14 @@ public class EasyReportTest extends BaseTest {
   }
 
   @Test
+  public void testTurkish() {
+    DatabaseImpl db = getAndPopulate();
+    int projectid = 6;
+    Project project = db.getProject(projectid);
+    project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
+  }
+
+  @Test
   public void testPhoneReport() {
     DatabaseImpl db = getAndPopulate();
     int projectid = SPANISH;
