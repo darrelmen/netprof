@@ -69,13 +69,40 @@ public class EasyReportTest extends BaseTest {
     DatabaseImpl db = getAndPopulate();
     int projectid = 5;
     Project project = db.getProject(projectid);
-    project.recalcRefAudio();
+  //  project.recalcRefAudio();
   }
 
   @Test
   public void testTurkish() {
     DatabaseImpl db = getAndPopulate();
     int projectid = 6;
+    Project project = db.getProject(projectid);
+    CommonExercise exerciseByID = project.getExerciseByID(33981);
+    String foreignLanguage = exerciseByID.getForeignLanguage();
+    String segmented = project.getAudioFileHelper().getASR().getSegmented(foreignLanguage);
+    logger.info("For " + exerciseByID);
+    logger.info("For '" + foreignLanguage + "' : '" + segmented + "'");
+    // project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
+  }
+
+  @Test
+  public void testCroatian() {
+    DatabaseImpl db = getAndPopulate();
+    int projectid = 7;
+    Project project = db.getProject(projectid);
+    project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
+
+    try {
+      Thread.sleep(20000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testSerbian() {
+    DatabaseImpl db = getAndPopulate();
+    int projectid = 8;
     Project project = db.getProject(projectid);
     project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
   }
