@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.postgres;
 
+import lm.K;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
@@ -41,15 +42,25 @@ import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
+import mitll.langtest.server.scoring.LTSFactory;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.scoring.WordAndProns;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.ProjectType;
+import mitll.npdata.dao.lts.HTKDictionary;
+import mitll.npdata.dao.lts.KoreanLTS;
+import mitll.npdata.dao.lts.LTS;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
+//import scala.collection.Iterator;
+//import scala.collection.immutable.List;
 
 import java.util.*;
 
@@ -60,10 +71,230 @@ public class EasyReportTest extends BaseTest {
   public static final int KOREAN = 2;
   public static final int SPANISH = 3;
   public static final int DEMO_USER = 659;
+  public static final String KANGNU = "강루";
+  String longer="대폭강화하기로";
 
   @Test
-  public void testPhoneReport2() {}
+  public void testPhoneReport2() {
+  }
 
+  @Test
+  public void testCom() {
+//    String test = "연약한";
+//    String test2= "침략당한";
+//    List<String> koreanFragments = getKoreanFragments(test);
+//    koreanFragments.forEach(logger::info);
+//    koreanFragments = getKoreanFragments(test2);
+//    koreanFragments.forEach(logger::info);
+
+    List<String> koreanFragments = getKoreanFragments(KANGNU);
+    koreanFragments.forEach(logger::info);
+  }
+
+  @Test
+  public void testKorean() {
+    //  DatabaseImpl db = getAndPopulate();
+//    int projectid = KOREAN;
+    //  Project project = db.getProject(projectid);
+
+    //  CommonExercise next = project.getRawExercises().iterator().next();
+    String foreignLanguage = longer;//"한글";//next.getForeignLanguage();
+
+    HTKDictionary htkDictionary = new HTKDictionary("/opt/dcodr/scoring/models.dli-korean/rsi-sctm-hlda/dict-wo-sp");
+   // SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary, false);
+
+
+    scala.collection.immutable.List<String[]> pronunciationList = htkDictionary.apply(foreignLanguage);
+
+    // scala.collection.Iterator<String> keys = htkDictionary.keysIterator();
+
+//    int n = 0;
+//    while (keys.hasNext()) {
+//      String next = keys.next();
+//      java.util.List<java.util.List<String>> pronsFromDict = getPronsFromDict(htkDictionary.apply(next));
+//
+//      pronsFromDict.forEach(p -> {
+//        StringBuilder builder = new StringBuilder();
+//        p.forEach(c -> builder.append(c).append("-"));
+//        logger.info(next + " got " + builder);
+//      });
+//
+//      getKoreanFragments(next);
+//      if (n++ > 10) break;
+//    }
+
+    List<List<String>> pronsFromDict = getPronsFromDict(pronunciationList);
+    pronsFromDict.forEach(p -> {
+      StringBuilder builder = new StringBuilder();
+      p.forEach(c -> builder.append(c).append("-"));
+      logger.info("for " + foreignLanguage + " got " + builder);
+
+
+      String[][] process = new String[1][];
+      String[] strings1 = new String[p.size()];
+      process[0] = strings1;
+      for (int i = 0; i < p.size(); i++) strings1[i] = p.get(i);
+      List<String> koreanFragments = getKoreanFragments(foreignLanguage, new KoreanLTS(), process);
+
+      StringBuilder builder2 = new StringBuilder();
+      koreanFragments.forEach(c -> builder2.append(c).append("-"));
+      logger.info("for " + foreignLanguage + " " + builder + " = " + builder2);
+    });
+
+//    getKoreanFragments(foreignLanguage);
+//    getKoreanFragments(KANGNU);
+  }
+
+  private java.util.List<java.util.List<String>> getPronsFromDict(scala.collection.immutable.List<String[]> pronunciationList) {
+    scala.collection.Iterator<String[]> iterator = pronunciationList.iterator();
+    java.util.List<java.util.List<String>> prons = new ArrayList<>();
+    while (iterator.hasNext()) {
+      String[] next = iterator.next();
+//      logger.info(next);
+      ArrayList<String> pron = new ArrayList<>();
+      prons.add(pron);
+      pron.addAll(Arrays.asList(next));
+    }
+    return prons;
+  }
+
+//  List<WordAndProns> getProns(String foreignLanguage) {
+//    List<WordAndProns> possibleProns = new ArrayList<>();
+//
+////    logger.info("getProxyScore " +
+////
+////        "\n\tdict " + getHydraDict(foreignLanguage, possibleProns));
+//    return possibleProns;
+//    //possibleProns.forEach(p -> logger.info(foreignLanguage + " : " + p));
+//  }
+
+  // so take every pronunciation in the dict and map back into fragment sequence
+  // if two hydra phonemes combine to form one compound, use it and skip ahead two
+  // if multiple fragments are possible, try to chose the one that is expected from the compound character
+  // if it's not there, use the first simple match...
+  private List<String> getKoreanFragments(String foreignLanguage) {
+    KoreanLTS koreanLTS = new KoreanLTS();
+    String[][] process = koreanLTS.process(foreignLanguage);
+    return getKoreanFragments(foreignLanguage, koreanLTS, process);
+  }
+
+  @NotNull
+  private List<String> getKoreanFragments(String foreignLanguage, KoreanLTS koreanLTS, String[][] process) {
+    char[] chars = foreignLanguage.toCharArray();
+    List<List<String>> fragmentList = new ArrayList<>();
+    for (char aChar : chars) {
+      List<String> e = koreanLTS.expectedFragments(aChar);
+      fragmentList.add(e);
+
+      e.forEach(f -> logger.info("for " + foreignLanguage + " " + aChar +
+          "  expected " + f + " of " + e.size()));
+      // logger.info("for " + foreignLanguage + " expected "+fragmentList);
+    }
+
+    // logger.info("for " + foreignLanguage + " expected "+fragmentList);
+    int fragIndex = 0;
+    int fragCount = 0;
+    // StringBuilder converted = new StringBuilder();
+    List<String> ret = new ArrayList<>();
+    for (int i = 0; i < process.length; i++) {
+      logger.info("got " + foreignLanguage + " " + i);
+      int length = process[i].length;
+      StringBuilder builder = new StringBuilder();
+
+      List<String> currentFragments = fragmentList.get(fragIndex);
+
+      new KoreanLTS().phoneToKoreanJava().forEach((k, v) -> {
+        int lsize = v.size();
+        HashSet<String> strings = new HashSet<>(v);
+        int ssize = strings.size();
+        //logger.info(k + "->" + v);
+        if (lsize != ssize) logger.warn("l " + lsize + " s " + ssize);
+      });
+      for (int j = 0; j < length; j++) {
+        String process1 = process[i][j];
+        String nextToken = j < length - 1 ? process[i][j + 1] : "";
+        List<String> simpleKorean = LTSFactory.getSimpleKorean(process1);
+        List<String> compoundKorean = LTSFactory.getCompoundKorean(process1, nextToken);
+
+        logger.info("got " + i + " " + j + " " + process1 + "+" + nextToken +
+            " = " + simpleKorean + " - " + compoundKorean);
+
+        if (compoundKorean == null || compoundKorean.isEmpty()) {
+          String str = simpleKorean.get(0);
+
+          if (simpleKorean.size() == 1) {
+            builder.append(str).append(" ");
+          } else {
+            String match = getMatch(fragIndex, currentFragments, simpleKorean);
+            if (match != null) builder.append(match).append(" ");
+            else {
+              logger.warn("fall back to " + str);
+              builder.append(str).append(" ");
+            }
+          }
+
+          fragCount++;
+          if (fragCount == currentFragments.size()) {
+//            logger.info("1 frag index now " + fragCount + " vs " + currentFragments.size() + " index " + fragIndex);
+            fragCount = 0;
+            fragIndex++;
+            if (fragIndex < fragmentList.size()) {
+              currentFragments = fragmentList.get(fragIndex);
+              logger.info("1 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
+            } else {
+              logger.info("1 frag index NOPE " + fragIndex + " " + new HashSet<>(currentFragments));
+            }
+          } else {
+//            logger.info("1 " + fragCount + " vs " + currentFragments.size());
+          }
+
+        } else {
+          j++;
+
+          String match = getMatch(fragIndex, currentFragments, compoundKorean);
+
+          if (match != null) builder.append(match).append(" ");
+          else {
+            String s = compoundKorean.get(0);
+            logger.warn("2 fall back to " + s);
+            builder.append(s).append(" ");
+          }
+          fragCount++;
+          if (fragCount == currentFragments.size()) {
+            fragCount = 0;
+            fragIndex++;
+            if (fragIndex < fragmentList.size()) {
+              currentFragments = fragmentList.get(fragIndex);
+              logger.info("2 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
+            }
+          }
+          //else logger.info("2 " + fragCount + " vs " + currentFragments.size());
+
+        }
+//        logger.info("got " + i + " " + j + " " + process1 + " = " + simpleKorean + " - " + compoundKorean);
+
+      }
+      ret.add(builder.toString());
+    }
+    return ret;
+  }
+
+  @Nullable
+  private String getMatch(int fragIndex, List<String> currentFragments, List<String> simpleKorean) {
+    String match = null;
+    for (String candidate : simpleKorean) {
+      boolean contains = currentFragments.contains(candidate);
+      logger.info("1 check " + candidate + " in (" + fragIndex +
+          ")" + new HashSet<>(currentFragments) + " = " + contains);
+      if (contains) {
+        match = candidate;
+//                builder.append(candidate).append(" ");
+//              found = true;
+        break;
+      }
+    }
+    return match;
+  }
 
   @Test
   public void testPhoneReport() {
@@ -94,7 +325,7 @@ public class EasyReportTest extends BaseTest {
     Map<String, List<Bigram>> phoneToBigrams = phoneBigramsForPeriod.getPhoneToBigrams();
     phoneToBigrams.forEach((s, bigrams) -> logger.info(s + " -> " + bigrams.size() + " : " + bigrams));
 
-  //  WordsAndTotal wordScoresForUser = slickAnalysis.getWordScoresForUser(DEMO_USER, -1, -1, 0, maxValue, 0, 100, "");
+    //  WordsAndTotal wordScoresForUser = slickAnalysis.getWordScoresForUser(DEMO_USER, -1, -1, 0, maxValue, 0, 100, "");
 
 
     String b = "b";
@@ -118,13 +349,13 @@ public class EasyReportTest extends BaseTest {
     phoneToBigrams.forEach((phone, bigrams) -> {
       logger.info(phone + " -> " + bigrams.size() + " : " + bigrams);
       bigrams.forEach(bigram -> {
-        logger.info("\t"+phone + " -> " +bigram);
+        logger.info("\t" + phone + " -> " + bigram);
         List<WordAndScore> wordAndScoreForPhoneAndBigram = slickAnalysis.getWordAndScoreForPhoneAndBigram(
             new AnalysisRequest()
                 .setUserid(DEMO_USER)
                 .setPhone(phone)
                 .setBigram(bigram.getBigram()));
-        logger.info("\t"+phone + " -> " +bigram + " : " + wordAndScoreForPhoneAndBigram.size());
+        logger.info("\t" + phone + " -> " + bigram + " : " + wordAndScoreForPhoneAndBigram.size());
 
       });
     });
@@ -150,7 +381,7 @@ public class EasyReportTest extends BaseTest {
   public void testAnalysis() {
     DatabaseImpl andPopulate = getAndPopulate();
     Project project = andPopulate.getProject(7);
-   //   project.getAnalysis().getPerformanceReportForUser(USERID, 0, -1, 0);
+    //   project.getAnalysis().getPerformanceReportForUser(USERID, 0, -1, 0);
 
     project.getAnalysis().getWordAndScoreForPhoneAndBigram(new AnalysisRequest());
     //  andPopulate.sendReport(-1);
@@ -163,7 +394,6 @@ public class EasyReportTest extends BaseTest {
     andPopulate.getReport();
     andPopulate.close();
   }*/
-
 
 
   @Test
