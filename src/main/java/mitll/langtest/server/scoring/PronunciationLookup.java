@@ -3,14 +3,18 @@ package mitll.langtest.server.scoring;
 
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.LTS;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.moxieapps.gwt.highcharts.client.Lang;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 import static mitll.langtest.server.autocrt.DecodeCorrectnessChecker.MANDARIN;
 import static mitll.langtest.server.scoring.Scoring.JAPANESE;
@@ -52,12 +56,12 @@ public class PronunciationLookup implements IPronunciationLookup {
     hasLTS = lts != null;
     emptyLTS = hasLTS && LTSFactory.isEmpty(lts);
 
-    String language = project.getLanguage();
-    korean = language.equalsIgnoreCase("korean");
-    russian = language.equalsIgnoreCase("russian");
-    french = language.equalsIgnoreCase("french");
-    german = language.equalsIgnoreCase("german");
-    removeAllPunct = !language.equalsIgnoreCase("french");
+    Language language = project.getLanguageEnum();
+    korean = language == Language.KOREAN;
+    russian = language == Language.RUSSIAN;
+    french =language == Language.FRENCH;
+    german = language == Language.GERMAN;
+    removeAllPunct = language != Language.FRENCH;
     this.isAsianLanguage = isAsianLanguage(language);
 
     makeDecoder();
@@ -69,10 +73,10 @@ public class PronunciationLookup implements IPronunciationLookup {
     }
   }
 
-  private boolean isAsianLanguage(String language) {
-    return language.equalsIgnoreCase(MANDARIN) ||
-        language.equalsIgnoreCase(JAPANESE) ||
-        language.equalsIgnoreCase(KOREAN);
+  private boolean isAsianLanguage(Language language) {
+    return language == Language.MANDARIN ||
+    language == Language.JAPANESE ||
+    language == Language.KOREAN;
   }
 
   /**

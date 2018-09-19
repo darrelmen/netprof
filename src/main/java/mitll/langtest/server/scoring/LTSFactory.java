@@ -35,13 +35,14 @@ package mitll.langtest.server.scoring;
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.EmptyLTS;
+import mitll.npdata.dao.lts.KoreanLTS;
 import mitll.npdata.dao.lts.LTS;
 import mitll.npdata.dao.lts.ModernStandardArabicLTS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.text.Collator;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -149,9 +150,9 @@ public class LTSFactory {
   }*/
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfoOnUser
    * @param language1
    * @return
+   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfoOnUser
    */
   public static String getLocale(String language1) {
     Language lang;
@@ -316,4 +317,118 @@ public class LTSFactory {
 //    logger.debug("Country Code: " + locale.getCountry() + ", Country Display Name: " + locale.getDisplayCountry());
     return locale;
   }
+
+  static KoreanLTS koreanLTS = new KoreanLTS();
+
+  static public List<String> getSimpleKorean(String hydraPhone) {
+    return koreanLTS.phoneToKoreanJava().get(hydraPhone);
+  }
+
+  static public List<String> getCompoundKorean(String hydraPhone1, String hydraPhone2) {
+    Map<String, List<String>> stringListMap = koreanLTS.phoneToKoreanCompooundJava().get(hydraPhone1);
+    if (stringListMap == null) return Collections.emptyList();
+    else {
+      return stringListMap.get(hydraPhone2);
+    }
+  }
+
+//  static Map<String, Set<String>> phoneToKorean = new HashMap<>();
+//  static Map<String, Map<String, Set<String>>> phoneToKoreanCompound = new HashMap<>();
+//
+//  static void popKorean() {
+//
+//  }
+/*
+  static {
+    phoneToKorean.put("K", List("ᄀ", "ᄁ", "ᆿ"));
+    phoneToKorean.put("N", List("ᄂ"));
+    phoneToKorean.put("T", List("ᄃ", "ᄄ", "ᄐ"));
+    phoneToKorean.put("L", List("ᄅ"));
+    phoneToKorean.put("M", List("ᄆ"));
+    phoneToKorean.put("P", List("ᄇ", "ᄈ", "ᄑ"));
+    phoneToKorean.put("S", List("ᄉ", "ᄊ"));
+    phoneToKorean.put("J", List("ᄌ", "ᄍ", "ᄎ"));
+
+    phoneToKorean.put("H", List("ᄒ"));
+
+    phoneToKorean.put("A", List("ᅡ", "ᅢ"));
+    phoneToKorean.put("EO", List("ᅥ"));
+    phoneToKorean.put("E", List("ᅦ"));
+    phoneToKorean.put("O", List("ᅩ"));
+    phoneToKorean.put("U", List("ᅮ"));
+    phoneToKorean.put("EU", List("ᅳ"));
+    phoneToKorean.put("I", List("ᅴ", "ᅵ"));
+
+    phoneToKorean.put("NG", List("ᆼ"));
+
+
+
+
+    phoneToKoreanCompound.put(    "I" ->"A"->  List("ᅣ","ᅤ"));
+    phoneToKoreanCompound.put(  "I"->"EO"->    List("ᅧ"));
+        phoneToKoreanCompound.put(     "I"->"E"->
+
+    List("ᅨ"));
+        phoneToKoreanCompound.put(     "O"->"A"->
+
+    List("ᅪ","ᅫ"));
+        phoneToKoreanCompound.put(      "O"->"E"->
+
+    List("ᅬ"));
+        phoneToKoreanCompound.put(         "I"->"O"->
+
+    List("ᅭ"));
+        phoneToKoreanCompound.put(         "O"->"EO"->
+
+    List("ᅯ","ᅰ"));
+        phoneToKoreanCompound.put(         "O"->"I"->
+
+    List("ᅱ"));
+        phoneToKoreanCompound.put(         "I"->"U"->
+
+    List("ᅲ"));
+
+        phoneToKoreanCompound.put(         "K"->"S"->
+
+    List("ᆪ"));
+        phoneToKoreanCompound.put(         "N"->"J"->
+
+    List("ᆬ"));
+        phoneToKoreanCompound.put(         "N"->"H"->
+
+    List("ᆭ"));
+        phoneToKoreanCompound.put(         "L"->"K"->
+
+    List("ᆰ"));
+        phoneToKoreanCompound.put(         "L"->"M"->
+
+    List("ᆱ"));
+        phoneToKoreanCompound.put(         "L"->"P"->
+
+    List("ᆲ"));
+        phoneToKoreanCompound.put(         "L"->"S"->
+
+    List("ᆳ"));
+        phoneToKoreanCompound.put(         "L"->"T"->
+
+    List("ᆴ"));
+        phoneToKoreanCompound.put(         "L"->"P"->
+
+    List("ᆵ"));
+        phoneToKoreanCompound.put(         "L"->"H"->
+
+    List("ᆶ"));
+        phoneToKoreanCompound.put(         "P"->"S"->
+
+    List("ᆹ"));
+  )
+  }
+*/
+
+
+  static Set<String> List(String... var) {
+    return new HashSet<String>(Arrays.asList(var));
+  }
+
+
 }
