@@ -302,7 +302,7 @@ public class AudioFileHelper implements AlignDecode {
     boolean validForeignPhrase = exercise.isSafeToDecode();
     if (isStale(exercise) // || exercise.getEnglish().equalsIgnoreCase("teacher")
     ) {
-      logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
+    //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
       // int before = oov.size();
       validForeignPhrase = asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration(), oov);
 //      if (oov.size() > before) {
@@ -391,16 +391,19 @@ public class AudioFileHelper implements AlignDecode {
 
     File wavFile = new File(wavPath);
     String absolutePath = wavFile.getAbsolutePath();
+    String path = wavFile.getPath();
 
     AudioCheck.ValidityAndDur validity =
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, wavFile, options.isRefRecording(),
             isQuietAudioOK());
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("writeAudioFile writing" +
+    if (logger.isInfoEnabled()) {
+      logger.info("writeAudioFile writing" +
           "\n\tfor        " + audioContext +
           "\n\trec        " + recordingInfoInitial +
           "\n\twav        " + wavPath +
+          "\n\trelPath    " + relPath +
+          "\n\tpath       " + path +
           "\n\tabs        " + absolutePath +
           "\n\tvalidity   " + validity +
           "\n\ttranscript " + recordingInfoInitial.getTranscript());
@@ -408,15 +411,19 @@ public class AudioFileHelper implements AlignDecode {
 
     if (options.isRefRecording() && validity.isValid()) {
       // make sure there's a compressed version for later review.
-      new Thread(() -> ensureCompressed(exercise1, audioContext, wavPath)).start();
+      new Thread(() -> ensureCompressed(exercise1, audioContext, wavPath),"ensureCompressed").start();
     }
 
     // remember who recorded this audio wavFile.
     rememberWhoRecordedAudio(audioContext, relPath, absolutePath);
 
+    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo(recordingInfoInitial, path);
+
+    logger.info("writeAudioFile recordingInfo " + recordingInfo);
+
     return getAudioAnswerDecoding(exercise1,
         audioContext,
-        new AnswerInfo.RecordingInfo(recordingInfoInitial, wavFile.getPath()),
+        recordingInfo,
 
         relPath,
         wavFile,
@@ -434,6 +441,8 @@ public class AudioFileHelper implements AlignDecode {
    * @param absolutePath
    */
   private void rememberWhoRecordedAudio(AudioContext audioContext, String relPath, String absolutePath) {
+    logger.info("rememberWhoRecordedAudio " + audioContext);
+
     int userid = audioContext.getUserid();
 
     int projid = audioContext.getProjid();

@@ -13,7 +13,7 @@ public class HydraOutput {
   private String wordLab;
   private String phoneLab;
   private List<WordAndProns> wordAndProns;
-  private String status;
+  private String status = "";
   private String log;
 
   /**
