@@ -72,7 +72,7 @@ public class EasyReportTest extends BaseTest {
   public static final int SPANISH = 3;
   public static final int DEMO_USER = 659;
   public static final String KANGNU = "강루";
-  String longer="대폭강화하기로";
+  String longer = "대폭강화하기로";
 
   @Test
   public void testPhoneReport2() {
@@ -101,7 +101,7 @@ public class EasyReportTest extends BaseTest {
     String foreignLanguage = longer;//"한글";//next.getForeignLanguage();
 
     HTKDictionary htkDictionary = new HTKDictionary("/opt/dcodr/scoring/models.dli-korean/rsi-sctm-hlda/dict-wo-sp");
-   // SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary, false);
+    // SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary, false);
 
 
     scala.collection.immutable.List<String[]> pronunciationList = htkDictionary.apply(foreignLanguage);
@@ -131,14 +131,17 @@ public class EasyReportTest extends BaseTest {
 
 
       String[][] process = new String[1][];
-      String[] strings1 = new String[p.size()];
+      int size = p.size();
+      String[] strings1 = new String[size];
       process[0] = strings1;
-      for (int i = 0; i < p.size(); i++) strings1[i] = p.get(i);
+      for (int i = 0; i < size; i++) strings1[i] = p.get(i);
       List<String> koreanFragments = getKoreanFragments(foreignLanguage, new KoreanLTS(), process);
 
       StringBuilder builder2 = new StringBuilder();
-      koreanFragments.forEach(c -> builder2.append(c).append("-"));
-      logger.info("for " + foreignLanguage + " " + builder + " = " + builder2);
+      koreanFragments.forEach(c -> builder2.append(c).append(" "));
+      logger.info("for " + foreignLanguage + " fl (" + size +
+          ") " + builder + " = frag (" +koreanFragments.get(0).split("\\s").length+
+          ") " + builder2);
     });
 
 //    getKoreanFragments(foreignLanguage);
@@ -186,8 +189,8 @@ public class EasyReportTest extends BaseTest {
       List<String> e = koreanLTS.expectedFragments(aChar);
       fragmentList.add(e);
 
-      e.forEach(f -> logger.info("for " + foreignLanguage + " " + aChar +
-          "  expected " + f + " of " + e.size()));
+      e.forEach(f -> logger.info("for " + foreignLanguage + " '" + aChar +
+          "'  expected '" + f + "' of " + e.size()));
       // logger.info("for " + foreignLanguage + " expected "+fragmentList);
     }
 
@@ -210,6 +213,7 @@ public class EasyReportTest extends BaseTest {
         //logger.info(k + "->" + v);
         if (lsize != ssize) logger.warn("l " + lsize + " s " + ssize);
       });
+      String prevMatch = null;
       for (int j = 0; j < length; j++) {
         String process1 = process[i][j];
         String nextToken = j < length - 1 ? process[i][j + 1] : "";
@@ -224,12 +228,44 @@ public class EasyReportTest extends BaseTest {
 
           if (simpleKorean.size() == 1) {
             builder.append(str).append(" ");
+            prevMatch = str;
           } else {
             String match = getMatch(fragIndex, currentFragments, simpleKorean);
-            if (match != null) builder.append(match).append(" ");
+            if (match != null) {
+              builder.append(match).append(" ");
+              prevMatch = match;
+            }
             else {
-              logger.warn("fall back to " + str);
-              builder.append(str).append(" ");
+              if (currentFragments.contains(prevMatch)) {
+                logger.info("using prev match " +prevMatch + " for " +currentFragments);
+
+                fragCount++;
+                if (fragCount == currentFragments.size()) {
+//            logger.info("1 frag index now " + fragCount + " vs " + currentFragments.size() + " index " + fragIndex);
+                  fragCount = 0;
+                  fragIndex++;
+                  if (fragIndex < fragmentList.size()) {
+                    currentFragments = fragmentList.get(fragIndex);
+                    logger.info("3 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
+                  } else {
+                    logger.info("3 frag index NOPE " + fragIndex + " " + new HashSet<>(currentFragments));
+                  }
+                } else {
+//            logger.info("1 " + fragCount + " vs " + currentFragments.size());
+                }
+
+
+                match = getMatch(fragIndex, currentFragments, simpleKorean);
+                if (match != null) {
+                  builder.append(match).append(" ");
+                  prevMatch = match;
+                }
+              }
+              else {
+                //match = getMatch(fragIndex, currentFragments, prevSimple);
+                logger.warn("fall back to " + str);
+                builder.append(str).append(" ");
+              }
             }
           }
 
@@ -247,6 +283,7 @@ public class EasyReportTest extends BaseTest {
           } else {
 //            logger.info("1 " + fragCount + " vs " + currentFragments.size());
           }
+
 
         } else {
           j++;
