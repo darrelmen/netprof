@@ -140,7 +140,7 @@ public class EasyReportTest extends BaseTest {
       StringBuilder builder2 = new StringBuilder();
       koreanFragments.forEach(c -> builder2.append(c).append(" "));
       logger.info("for " + foreignLanguage + " fl (" + size +
-          ") " + builder + " = frag (" +koreanFragments.get(0).split("\\s").length+
+          ") " + builder + " = frag (" + koreanFragments.get(0).split("\\s").length +
           ") " + builder2);
     });
 
@@ -183,6 +183,140 @@ public class EasyReportTest extends BaseTest {
 
   @NotNull
   private List<String> getKoreanFragments(String foreignLanguage, KoreanLTS koreanLTS, String[][] process) {
+    List<List<String>> fragmentList = getKoreanFragments(foreignLanguage, koreanLTS);
+
+    // logger.info("for " + foreignLanguage + " expected "+fragmentList);
+    // StringBuilder converted = new StringBuilder();
+    List<String> ret = new ArrayList<>();
+    for (int i = 0; i < process.length; i++) {
+      logger.info("got " + foreignLanguage + " " + i);
+      String[] hydraPhoneSequence = process[i];
+      ret.add(getKoreanFragmentSequence(fragmentList, hydraPhoneSequence));
+    }
+    return ret;
+  }
+
+  private String getKoreanFragmentSequence(List<List<String>> fragmentList, String[] hydraPhoneSequence) {
+    int length = hydraPhoneSequence.length;
+    StringBuilder builder = new StringBuilder();
+
+    int fragIndex = 0;
+    int fragCount = 0;
+    List<String> currentFragments = fragmentList.get(fragIndex);
+
+    //sanityCheck();
+
+    String prevMatch = null;
+    for (int j = 0; j < length; j++) {
+      String process1 = hydraPhoneSequence[j];
+      String nextToken = j < length - 1 ? hydraPhoneSequence[j + 1] : "";
+      List<String> simpleKorean = LTSFactory.getSimpleKorean(process1);
+      List<String> compoundKorean = LTSFactory.getCompoundKorean(process1, nextToken);
+
+      logger.info("got " + j + " " + process1 + "+" + nextToken +
+          " = " + simpleKorean + " - " + compoundKorean);
+
+      if (compoundKorean == null || compoundKorean.isEmpty()) {
+        String str = simpleKorean.get(0);
+
+        if (simpleKorean.size() == 1) {
+          builder.append(str).append(" ");
+          prevMatch = str;
+        } else {
+          String match = getMatch(fragIndex, currentFragments, simpleKorean);
+          if (match != null) {
+            builder.append(match).append(" ");
+            prevMatch = match;
+          } else {
+            if (currentFragments.contains(prevMatch)) {
+              logger.info("using prev match " + prevMatch + " for " + currentFragments);
+
+              fragCount++;
+              if (fragCount == currentFragments.size()) {
+//            logger.info("1 frag index now " + fragCount + " vs " + currentFragments.size() + " index " + fragIndex);
+                fragCount = 0;
+                fragIndex++;
+                if (fragIndex < fragmentList.size()) {
+                  currentFragments = fragmentList.get(fragIndex);
+                  logger.info("3 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
+                } else {
+                  logger.info("3 frag index NOPE " + fragIndex + " " + new HashSet<>(currentFragments));
+                }
+              } else {
+//            logger.info("1 " + fragCount + " vs " + currentFragments.size());
+              }
+
+              match = getMatch(fragIndex, currentFragments, simpleKorean);
+              if (match != null) {
+                builder.append(match).append(" ");
+                prevMatch = match;
+              }
+            } else {
+              //match = getMatch(fragIndex, currentFragments, prevSimple);
+              logger.warn("fall back to " + str + " given expected " + new HashSet<>(currentFragments));
+              builder.append(str).append(" ");
+            }
+          }
+        }
+
+        fragCount++;
+        if (fragCount == currentFragments.size()) {
+//            logger.info("1 frag index now " + fragCount + " vs " + currentFragments.size() + " index " + fragIndex);
+          fragCount = 0;
+          fragIndex++;
+          if (fragIndex < fragmentList.size()) {
+            currentFragments = fragmentList.get(fragIndex);
+            logger.info("1 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
+          } else {
+            logger.info("1 frag index NOPE " + fragIndex + " " + new HashSet<>(currentFragments));
+          }
+        } else {
+//            logger.info("1 " + fragCount + " vs " + currentFragments.size());
+        }
+
+
+      } else {
+        j++;
+
+        String match = getMatch(fragIndex, currentFragments, compoundKorean);
+
+        if (match != null) builder.append(match).append(" ");
+        else {
+          String s = compoundKorean.get(0);
+          logger.warn("2 fall back to " + s + " given " + new HashSet<>(currentFragments));
+          builder.append(s).append(" ");
+        }
+        fragCount++;
+        if (fragCount == currentFragments.size()) {
+          fragCount = 0;
+          fragIndex++;
+          if (fragIndex < fragmentList.size()) {
+            currentFragments = fragmentList.get(fragIndex);
+            logger.info("2 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
+          }
+        }
+        //else logger.info("2 " + fragCount + " vs " + currentFragments.size());
+
+      }
+//        logger.info("got " + i + " " + j + " " + process1 + " = " + simpleKorean + " - " + compoundKorean);
+
+    }
+    return builder.toString();
+    //ret.add(e);
+  }
+
+  private void sanityCheck() {
+    new KoreanLTS().phoneToKoreanJava().forEach((k, v) -> {
+      int lsize = v.size();
+      HashSet<String> strings = new HashSet<>(v);
+      int ssize = strings.size();
+      //logger.info(k + "->" + v);
+      if (lsize != ssize) logger.warn("l " + lsize + " s " + ssize);
+    });
+  }
+
+  @NotNull
+  private List<List<String>> getKoreanFragments(String foreignLanguage, KoreanLTS koreanLTS) {
     char[] chars = foreignLanguage.toCharArray();
     List<List<String>> fragmentList = new ArrayList<>();
     for (char aChar : chars) {
@@ -193,127 +327,7 @@ public class EasyReportTest extends BaseTest {
           "'  expected '" + f + "' of " + e.size()));
       // logger.info("for " + foreignLanguage + " expected "+fragmentList);
     }
-
-    // logger.info("for " + foreignLanguage + " expected "+fragmentList);
-    int fragIndex = 0;
-    int fragCount = 0;
-    // StringBuilder converted = new StringBuilder();
-    List<String> ret = new ArrayList<>();
-    for (int i = 0; i < process.length; i++) {
-      logger.info("got " + foreignLanguage + " " + i);
-      int length = process[i].length;
-      StringBuilder builder = new StringBuilder();
-
-      List<String> currentFragments = fragmentList.get(fragIndex);
-
-      new KoreanLTS().phoneToKoreanJava().forEach((k, v) -> {
-        int lsize = v.size();
-        HashSet<String> strings = new HashSet<>(v);
-        int ssize = strings.size();
-        //logger.info(k + "->" + v);
-        if (lsize != ssize) logger.warn("l " + lsize + " s " + ssize);
-      });
-      String prevMatch = null;
-      for (int j = 0; j < length; j++) {
-        String process1 = process[i][j];
-        String nextToken = j < length - 1 ? process[i][j + 1] : "";
-        List<String> simpleKorean = LTSFactory.getSimpleKorean(process1);
-        List<String> compoundKorean = LTSFactory.getCompoundKorean(process1, nextToken);
-
-        logger.info("got " + i + " " + j + " " + process1 + "+" + nextToken +
-            " = " + simpleKorean + " - " + compoundKorean);
-
-        if (compoundKorean == null || compoundKorean.isEmpty()) {
-          String str = simpleKorean.get(0);
-
-          if (simpleKorean.size() == 1) {
-            builder.append(str).append(" ");
-            prevMatch = str;
-          } else {
-            String match = getMatch(fragIndex, currentFragments, simpleKorean);
-            if (match != null) {
-              builder.append(match).append(" ");
-              prevMatch = match;
-            }
-            else {
-              if (currentFragments.contains(prevMatch)) {
-                logger.info("using prev match " +prevMatch + " for " +currentFragments);
-
-                fragCount++;
-                if (fragCount == currentFragments.size()) {
-//            logger.info("1 frag index now " + fragCount + " vs " + currentFragments.size() + " index " + fragIndex);
-                  fragCount = 0;
-                  fragIndex++;
-                  if (fragIndex < fragmentList.size()) {
-                    currentFragments = fragmentList.get(fragIndex);
-                    logger.info("3 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
-                  } else {
-                    logger.info("3 frag index NOPE " + fragIndex + " " + new HashSet<>(currentFragments));
-                  }
-                } else {
-//            logger.info("1 " + fragCount + " vs " + currentFragments.size());
-                }
-
-
-                match = getMatch(fragIndex, currentFragments, simpleKorean);
-                if (match != null) {
-                  builder.append(match).append(" ");
-                  prevMatch = match;
-                }
-              }
-              else {
-                //match = getMatch(fragIndex, currentFragments, prevSimple);
-                logger.warn("fall back to " + str);
-                builder.append(str).append(" ");
-              }
-            }
-          }
-
-          fragCount++;
-          if (fragCount == currentFragments.size()) {
-//            logger.info("1 frag index now " + fragCount + " vs " + currentFragments.size() + " index " + fragIndex);
-            fragCount = 0;
-            fragIndex++;
-            if (fragIndex < fragmentList.size()) {
-              currentFragments = fragmentList.get(fragIndex);
-              logger.info("1 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
-            } else {
-              logger.info("1 frag index NOPE " + fragIndex + " " + new HashSet<>(currentFragments));
-            }
-          } else {
-//            logger.info("1 " + fragCount + " vs " + currentFragments.size());
-          }
-
-
-        } else {
-          j++;
-
-          String match = getMatch(fragIndex, currentFragments, compoundKorean);
-
-          if (match != null) builder.append(match).append(" ");
-          else {
-            String s = compoundKorean.get(0);
-            logger.warn("2 fall back to " + s);
-            builder.append(s).append(" ");
-          }
-          fragCount++;
-          if (fragCount == currentFragments.size()) {
-            fragCount = 0;
-            fragIndex++;
-            if (fragIndex < fragmentList.size()) {
-              currentFragments = fragmentList.get(fragIndex);
-              logger.info("2 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
-            }
-          }
-          //else logger.info("2 " + fragCount + " vs " + currentFragments.size());
-
-        }
-//        logger.info("got " + i + " " + j + " " + process1 + " = " + simpleKorean + " - " + compoundKorean);
-
-      }
-      ret.add(builder.toString());
-    }
-    return ret;
+    return fragmentList;
   }
 
   @Nullable
@@ -321,8 +335,8 @@ public class EasyReportTest extends BaseTest {
     String match = null;
     for (String candidate : simpleKorean) {
       boolean contains = currentFragments.contains(candidate);
-      logger.info("1 check " + candidate + " in (" + fragIndex +
-          ")" + new HashSet<>(currentFragments) + " = " + contains);
+      if (contains)
+        logger.info("check " + candidate + " in (" + fragIndex + ")" + new HashSet<>(currentFragments) + " = " + contains);
       if (contains) {
         match = candidate;
 //                builder.append(candidate).append(" ");
