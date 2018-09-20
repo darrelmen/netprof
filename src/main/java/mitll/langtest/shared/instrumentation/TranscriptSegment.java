@@ -44,9 +44,9 @@ import java.util.Map;
  * @since 3/25/2014.
  */
 public class TranscriptSegment extends SlimSegment implements IsSerializable, Comparable<TranscriptSegment> {
-  private int start;                  /// Start time in seconds
-  private int end;                    /// End time in seconds
-  private int index;                    // character index from start of string
+  private int start;                  // Start time in seconds
+  private int end;                    // End time in seconds
+  private int index;                  // character index from start of string
 
   private String displayEvent = "";
 
@@ -62,14 +62,21 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
    * @param score
    * @param displayName
    * @param index
-   * @see mitll.langtest.server.scoring.ParseResultJson#getNetPronImageTypeToEndTimes(Map)
+   * @seex mitll.langtest.server.scoring.ParseResultJson#getNetPronImageTypeToEndTimes
    */
   public TranscriptSegment(float s, float e, String name, float score, String displayName, int index) {
     super(name, score);
-    start = toInt(s);
-    end = toInt(e);
+    this.start = toInt(s);
+    this.end = toInt(e);
     this.displayEvent = displayName;
     this.index = index;
+  }
+
+  /**
+   * @param segment
+   */
+  public TranscriptSegment(TranscriptSegment segment) {
+    this(segment.getStart(), segment.getEnd(), segment.getEvent(), segment.getScore(), segment.getDisplayEvent(), segment.index);
   }
 
   public float getStart() {
@@ -105,16 +112,25 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     return displayEvent;
   }
 
-  public void setDisplayEvent(String displayEvent) {
+/*  public TranscriptSegment setDisplayEvent(String displayEvent) {
     this.displayEvent = displayEvent;
+    return this;
+  }*/
+
+  public TranscriptSegment setEvent(String str) {
+    this.event = str;
+    return this;
   }
 
+/*
   public int getIndex() {
     return index;
   }
+*/
 
   public String toString() {
     return "[" + roundToHundredth(getStart()) + "-" + roundToHundredth(getEnd()) + "] " +
         getEvent() + " (" + roundToHundredth(getScore()) + ") @ " + index;
   }
+
 }

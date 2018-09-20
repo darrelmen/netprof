@@ -38,6 +38,8 @@ import com.google.gson.JsonObject;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -114,6 +116,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private final IPronunciationLookup pronunciationLookup;
 
   private final AtomicInteger hydraReqCounter = new AtomicInteger();
+  private TranscriptSegmentGenerator generator;
 
   /**
    * @param deployPath
@@ -131,7 +134,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     decodeAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
     alignAudioToScore = CacheBuilder.newBuilder().maximumSize(1000).build();
     fileToDuration = CacheBuilder.newBuilder().maximumSize(100000).build();
-
+    generator = new TranscriptSegmentGenerator(properties);
     this.project = project;
 
     int port = getWebservicePort();
@@ -524,7 +527,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               prefix1, "", decode, false, jsonObject, reallyUsePhone, imageOptions.isWriteImages());
       Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
 
-      Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = getTypeToEndTimes(eventAndFileInfo);
+      Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes =
+          generator.getTypeToSegments(eventAndFileInfo.typeToEvent, languageEnum);
 
 /*
       logger.info("getPretestScore sTypeToImage" +
@@ -823,53 +827,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * duration differences (mp3 files being typically about 0.1 seconds longer than wav files).
    * The consumer of this map is at {@linkx mitll.langtest.client.scoring.ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)}
    *
-   * @param eventAndFileInfo
+   * @paramx eventAndFileInfo
    * @return
    * @see #getPretestScore
    * @see #scoreRepeatExercise
    */
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
-
-    eventAndFileInfo.typeToEvent.forEach((imageType, eventMap) -> {
-      NetPronImageType netPronImageType = NetPronImageType.valueOf(imageType.toString());
-      boolean isPhone = netPronImageType == NetPronImageType.PHONE_TRANSCRIPT;
-
-      List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(netPronImageType, k2 -> new ArrayList<>());
-      StringBuilder builder = new StringBuilder();
-      eventMap.values()
-          .forEach(value -> {
-            String event = value.getEvent();
-            String displayName = isPhone ? getDisplayName(event) : event;
-            endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event, value.getScore(), displayName, builder.length()));
-
-            if (!isPhone) {
-              builder.append(event);
-            }
-          });
-    });
-
-/*    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
-      typeToEvents
-          .getValue()
-          .values()
-          .forEach(value -> endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score)));
-  *//*    for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        TranscriptEvent value = event.getValue();
-        endTimes.add(new TranscriptSegment(value.start, value.end, value.event, value.score));
-      }*//*
-    }*/
-
-    return typeToEndTimes;
-  }
-
-  private String getDisplayName(String event) {
-    String displayName = phoneToDisplay.get(event);
-    displayName = displayName == null ? event : displayName;
-    return displayName;
-  }
+//  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
+//    return generator.getTypeToSegments(eventAndFileInfo.typeToEvent, languageEnum);
+//  }
 
   private Map<String, Float> getPhoneToScore(Scores scores, Map<String, String> phoneToDisplay) {
     return getTokenToScore(scores, scores.eventScores.get(Scores.PHONES), true, phoneToDisplay);
@@ -916,25 +881,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return pronunciationLookup;
   }
 
-  /**
-   * Filter out sil
-   *
-   * @paramx eventAndFileInfo
-   * @return
-   * @see #getPretestScore
-   */
-/*  private List<String> getRecoPhones(EventAndFileInfo eventAndFileInfo) {
-    List<String> phones = new ArrayList<>();
-
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      if (key == NetPronImageType.PHONE_TRANSCRIPT) {
-        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-        timeToEvent.values().forEach(transcriptEvent -> phones.add(transcriptEvent.getEvent()));
-      }
-    }
-    return phones.stream().filter(p -> !toSkip.contains(p)).collect(Collectors.toList());
-  }*/
   private List<WordAndProns> getRecoPhones(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);

@@ -67,7 +67,9 @@ public class ParseResultJson {
   private static final String W = "w";
   private final ServerProperties props;
   private final Language languageEnum;
-  private Map<String, String> phoneToDisplay;
+//  private Map<String, String> phoneToDisplay;
+
+  private TranscriptSegmentGenerator transcriptSegmentGenerator;
 
   /**
    * @param properties
@@ -76,26 +78,25 @@ public class ParseResultJson {
    */
   public ParseResultJson(ServerProperties properties, Language languageEnum) {
     this.props = properties;
+    this.transcriptSegmentGenerator = new TranscriptSegmentGenerator(properties);
     this.languageEnum = languageEnum;
-    phoneToDisplay = props.getPhoneToDisplay(languageEnum);
+    //phoneToDisplay = props.getPhoneToDisplay(languageEnum);
   }
 
   /**
    * @param typeToEvent
    * @return
-   * @see ASRScoring#getTypeToEndTimes
+   * @seex ASRScoring#getTypeToEndTimes
    * @see #readFromJSON
    * @see #parseJsonAndGetProns
    */
-  private Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(
-      Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
-
+/*
+  private Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       boolean isPhone = key == NetPronImageType.PHONE_TRANSCRIPT;
       List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
-
 
       StringBuilder builder = new StringBuilder();
       for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
@@ -116,8 +117,7 @@ public class ParseResultJson {
     displayName = displayName == null ? event : displayName;
     return displayName;
   }
-
-
+*/
   private Map<NetPronImageType, List<SlimSegment>> slimGetNetPronImageTypeToEndTimes(
       Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     Map<NetPronImageType, List<SlimSegment>> typeToEndTimes = new HashMap<>();
@@ -197,7 +197,7 @@ public class ParseResultJson {
       // logger.warn("json is " + json);
       return emptyMap;
     } else {
-      return getNetPronImageTypeToEndTimes(parseJsonString(json, false, null));
+      return transcriptSegmentGenerator.getTypeToSegments(parseJsonString(json, false, null), languageEnum);
     }
   }
 
@@ -222,7 +222,7 @@ public class ParseResultJson {
    */
   public Map<NetPronImageType, List<TranscriptSegment>> parseJsonAndGetProns(String json,
                                                                              Map<String, List<List<String>>> wordToPronunciations) {
-    return getNetPronImageTypeToEndTimes(parseJsonString(json, false, wordToPronunciations));
+    return transcriptSegmentGenerator.getTypeToSegments(parseJsonString(json, false, wordToPronunciations), languageEnum);
   }
 
   /**
@@ -257,10 +257,7 @@ public class ParseResultJson {
 
           if (wordToPronunciations != null) {
             if (!phones1.isEmpty()) {
-              List<List<String>> lists = wordToPronunciations.get(wordToken);
-              if (lists == null) {
-                wordToPronunciations.put(wordToken, lists = new ArrayList<List<String>>());
-              }
+              List<List<String>> lists = wordToPronunciations.computeIfAbsent(wordToken, k -> new ArrayList<>());
               lists.add(phones1);
               //  logger.info("Adding " + wordToken + " -> " + phones1);
             }

@@ -5,10 +5,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 
 public class SlimSegment implements IsSerializable {
-  private String event;               /// Text to be displayed per event
+  protected String event;               /// Text to be displayed per event
   private int score;                  /// posterior score
 
-  public SlimSegment() {}
+  public SlimSegment() {
+  }
 
   public SlimSegment(String event, float score) {
     this.event = event;
@@ -18,6 +19,7 @@ public class SlimSegment implements IsSerializable {
   protected int toInt(float value) {
     return (int) (value * SCALE);
   }
+
   float fromInt(int value) {
     return ((float) value) / SCALE;
   }

@@ -313,7 +313,6 @@ public abstract class Scoring {
             useWebservice ?
                 transcriptReader.readEventsFromString(o.getValue(), isPhone, phoneToDisplay) :
                 transcriptReader.readEventsFromFile(o.getValue(), isPhone, phoneToDisplay));
-
       }
       return new EventAndFileInfo(new HashMap<>(), typeToEvent);
     } catch (IOException e) {

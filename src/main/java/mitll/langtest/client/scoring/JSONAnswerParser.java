@@ -13,6 +13,10 @@ import java.util.*;
 import java.util.logging.Logger;
 
 class JSONAnswerParser {
+  public static final String EVENT = "event";
+  public static final String START = "start";
+  public static final String END = "end";
+  public static final String SCORE = "score";
   private final Logger logger = Logger.getLogger("JSONAnswerParser");
 
   private static final String PHONE_TRANSCRIPT = "PHONE_TRANSCRIPT";
@@ -112,12 +116,12 @@ class JSONAnswerParser {
     List<TranscriptSegment> pseg = new ArrayList<>();
     for (int i = 0; i < phone_transcript.size(); i++) {
       JSONObject object = phone_transcript.get(i).isObject();
-      String event = getField(object, "event");
+      String event = getField(object, EVENT);
       pseg.add(new TranscriptSegment(
-              getFloatField(object, "start"),
-              getFloatField(object, "end"),
+              getFloatField(object, START),
+              getFloatField(object, END),
               event,
-              getFloatField(object, "score"),
+              getFloatField(object, SCORE),
               event,
               i
           )

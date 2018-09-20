@@ -46,6 +46,7 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.scoring.PrecalcScores;
+import mitll.langtest.server.scoring.TranscriptSegmentGenerator;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -74,11 +75,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   private static final String AUDIO_RECORDING = "audioRecording";
   private static final String WRITE_AUDIO_FILE = "writeAudioFile";
   private static final boolean USE_PHONE_TO_DISPLAY = true;
-  private static final int SLOW_ROUND_TRIP = 3000;
+  // private static final int SLOW_ROUND_TRIP = 3000;
   private static final String RECALC_ALIGNMENTS = "recalc alignments";
 
   private IEnsureAudioHelper ensureAudioHelper;
-
+  private TranscriptSegmentGenerator transcriptSegmentGenerator;
   // private static final boolean DEBUG = true;
 
   /**
@@ -88,6 +89,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   public void init() {
     super.init();
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
+    this.transcriptSegmentGenerator = new TranscriptSegmentGenerator(db.getServerProps());
   }
 
   /**
@@ -142,7 +144,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         } else {
           String audioFilePath = result.getAnswer();
           Project project = db.getProject(projectIDFromUser);
-        //  String language = project.getLanguage();
+          //  String language = project.getLanguage();
 
           // NOTE : actively avoid doing this -
           //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
@@ -385,7 +387,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     PrecalcScores precalcScores = getPrecalcScores(USE_PHONE_TO_DISPLAY, cachedResult, language);
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
         getTypeToTranscriptEvents(precalcScores.getJsonObject(), USE_PHONE_TO_DISPLAY, language);
-    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents, language);
+    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = transcriptSegmentGenerator.getTypeToSegments(typeToTranscriptEvents, language);
 //    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
     idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
   }
@@ -434,53 +436,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return
         new ParseResultJson(db.getServerProps(), language)
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
-  }
-
-  /**
-   * TODO : remove duplicate code
-   *
-   * @param typeToEvent
-   * @param language
-   * @return
-   * @see #getCachedAudioRef
-   */
-  @NotNull
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent,
-                                                                           Language language) {
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
-
-    Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      boolean isPhone = key == NetPronImageType.PHONE_TRANSCRIPT;
-
-      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) {
-        typeToEndTimes.put(key, endTimes = new ArrayList<>());
-      }
-
-      StringBuilder builder = new StringBuilder();
-
-      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        TranscriptEvent value = event.getValue();
-        String event1 = value.getEvent();
-
-        String displayName = isPhone ? getDisplayName(event1, phoneToDisplay) : event1;
-        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName, builder.length()));
-
-        if (!isPhone) {
-          builder.append(event1);
-        }
-      }
-    }
-
-    return typeToEndTimes;
-  }
-
-  private String getDisplayName(String event, Map<String, String> phoneToDisplay) {
-    String displayName = phoneToDisplay.get(event);
-    displayName = displayName == null ? event : displayName;
-    return displayName;
   }
 
   /**

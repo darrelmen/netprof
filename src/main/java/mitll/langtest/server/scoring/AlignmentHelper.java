@@ -19,17 +19,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class AlignmentHelper {
+public class AlignmentHelper extends TranscriptSegmentGenerator {
   private static final Logger logger = LogManager.getLogger(AlignmentHelper.class);
 
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final boolean WARN_MISSING_REF_RESULT = false;
 
-  private ServerProperties serverProps;
   private IRefResultDAO refResultDAO;
 
   public AlignmentHelper(ServerProperties serverProperties, IRefResultDAO refResultDAO) {
-    this.serverProps = serverProperties;
+    super(serverProperties);
     this.refResultDAO = refResultDAO;
   }
 
@@ -187,50 +186,5 @@ public class AlignmentHelper {
     return
         new ParseResultJson(serverProps, language)
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
-  }
-
-  /**
-   * TODO : why four copies!!!
-   *
-   * @param typeToEvent
-   * @param language
-   * @return
-   * @see #getCachedAudioRef
-   */
-  @NotNull
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent, Language language) {
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
-
-    Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      boolean isPhone = key == NetPronImageType.PHONE_TRANSCRIPT;
-
-      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) {
-        typeToEndTimes.put(key, endTimes = new ArrayList<>());
-      }
-
-      StringBuilder builder = new StringBuilder();
-      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        TranscriptEvent value = event.getValue();
-        String event1 = value.getEvent();
-        String displayName = isPhone ? getDisplayName(event1, phoneToDisplay) : event1;
-        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName, builder.length()));
-
-        if (!isPhone) {
-          builder.append(event1);
-        }
-      }
-    }
-
-    return typeToEndTimes;
-  }
-
-
-  private String getDisplayName(String event, Map<String, String> phoneToDisplay) {
-    String displayName = phoneToDisplay.get(event);
-    displayName = displayName == null ? event : displayName;
-    return displayName;
   }
 }
