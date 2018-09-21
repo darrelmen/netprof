@@ -32,14 +32,12 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -51,7 +49,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -65,7 +62,7 @@ public class JsonSupport {
 
   private final ISection<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
-  private final IAudioDAO audioDAO;
+//  private final IAudioDAO audioDAO;
   private final IPhoneDAO phoneDAO;
 
   private String language;
@@ -74,19 +71,17 @@ public class JsonSupport {
   /**
    * @param sectionHelper
    * @param resultDAO
-   * @param audioDAO
    * @param phoneDAO
    * @see IProjectManagement#configureProject
    */
   public JsonSupport(ISection<CommonExercise> sectionHelper,
                      IResultDAO resultDAO,
-                     IAudioDAO audioDAO,
                      IPhoneDAO phoneDAO,
                      Project project) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
 
-    this.audioDAO = audioDAO;
+  //  this.audioDAO = audioDAO;
     this.phoneDAO = phoneDAO;
     this.language = project.getLanguage();
     this.project = project;

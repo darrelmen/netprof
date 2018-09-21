@@ -362,7 +362,7 @@ public class ProjectManagement implements IProjectManagement {
       }
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(),
-        db.getResultDAO(), db.getAudioDAO(),
+        db.getResultDAO(),
         db.getPhoneDAO(),
         project));
 
