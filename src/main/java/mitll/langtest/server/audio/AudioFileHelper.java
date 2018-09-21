@@ -88,12 +88,12 @@ public class AudioFileHelper implements AlignDecode {
   private static final String MESSAGE_NO_SESSION = "{\"message\":\"no session\"}";
   private static final String OGG = "ogg";
 
-  public static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
   private static final String FRENCH = "french";
   private static final double MIN_SCORE_FOR_CORRECT_ALIGN = 0.35;
   private static final String TEST_USER = "demo_";
   private static final String TEST_PASSWORD = "domino22";//"demo";
-  public static final long DAY = 24 * 60 * 60 * 1000L;
+//  /public static final long DAY = 24 * 60 * 60 * 1000L;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -105,8 +105,8 @@ public class AudioFileHelper implements AlignDecode {
 
   private AutoCRT autoCRT;
 
-  private DatabaseServices db;
-  private LogAndNotify logAndNotify;
+  private final DatabaseServices db;
+  private final LogAndNotify logAndNotify;
   private boolean checkedLTS = false;
 
   /**
@@ -114,11 +114,10 @@ public class AudioFileHelper implements AlignDecode {
    */
   private Map<String, Integer> phoneToCount;
 
-  private AudioConversion audioConversion;
-  // private boolean hasModel;
-  private String language;
+  private final AudioConversion audioConversion;
+  private final String language;
 
-  private EnsureAudioHelper ensureAudioHelper;
+  private final EnsureAudioHelper ensureAudioHelper;
 
   private final boolean removeAccents;
   private long dictModified = 0L;
@@ -137,6 +136,7 @@ public class AudioFileHelper implements AlignDecode {
                          DatabaseServices db,
                          LogAndNotify langTestDatabase,
                          Project project) {
+    this.project = project;
     this.pathHelper = pathHelper;
     this.serverProps = serverProperties;
     this.db = db;
@@ -147,9 +147,7 @@ public class AudioFileHelper implements AlignDecode {
 
     this.language = project.getLanguage();
     removeAccents = !language.equalsIgnoreCase(FRENCH);
-    // hasModel = project.hasModel();
     makeASRScoring(project);
-    this.project = project;
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
 
     makeDecodeCorrectnessChecker();
@@ -756,8 +754,9 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @seex RefResultDecoder#recalcStudentAudio
    * @seex RefResultDecoder#recalcStudentAudio
+   * @deprecated
    */
-  public boolean recalcOne(Result result, CommonExercise exercise) {
+  private boolean recalcOne(Result result, CommonExercise exercise) {
     String audioRef = result.getAnswer();
     File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
 
@@ -1662,10 +1661,6 @@ public class AudioFileHelper implements AlignDecode {
     return asrScoring;
   }
 
-  public long getDictModified() {
-    return dictModified;
-  }
-
   /**
    * @see AlignDecode#getASRScoreForAudio
    */
@@ -1680,11 +1675,11 @@ public class AudioFileHelper implements AlignDecode {
       this.installPath = installPath;
     }
 
-    public String getName() {
+    String getName() {
       return testAudioName;
     }
 
-    public String getDir() {
+    String getDir() {
       return testAudioDir;
     }
 
