@@ -368,7 +368,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
         // dcodr can't handle an equals in the file name... duh...
         String wavFile1 = filePath + ".wav";
-        logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to hydra (derived from " + wavFile1 + ")");
+        String hydra = useKaldi ? "kaldi" : "hydra";
+        logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to " + hydra + " (derived from " + wavFile1 + ")");
         boolean wroteIt = AudioConversion.wav2raw(wavFile1, rawAudioPath);
 
         if (!wroteIt) {
@@ -380,7 +381,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         int end = (int) (cachedDuration * 100.0);
 
         if (useKaldi) {
-          cached = runKaldi(getSegmented(sentence), filePath + ".wav", port);
+          cached = runKaldi(getTokensForKaldi(sentence, transliteration), filePath + ".wav", port);
           if (cached == null || cached.getScores() == null) {
             logger.warn("scoreRepeatExercise kaldi didn't run properly....");
           } else {
@@ -705,6 +706,18 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
+  private String getTokensForKaldi(String transcript, String transliteration) {
+    String cleaned = getTranscriptToPost(transcript, false);
+
+    List<WordAndProns> possibleProns = new ArrayList<>();
+
+    // generate dictionary
+    String hydraDict = getHydraDict(cleaned, transliteration, possibleProns);
+    StringBuilder builder = new StringBuilder();
+    possibleProns.forEach(wordAndProns -> builder.append(wordAndProns.getWord()).append(" "));
+    return builder.toString().trim();
+  }
+
   /**
    * @param audioPath
    * @param transcript
@@ -723,23 +736,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               boolean decode,
                               int end) {
     // reference trans
-    String cleaned = getCleanedTranscript(transcript);
-
-    if (isAsianLanguage) {
-      cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
-
-      logger.info("runHydra now for asian language (" + language + "): " +
-          "\n\tdecode     " + decode +
-          "\n\ttranscript " + transcript +
-          "\n\tcleaned    " + cleaned
-      );
-    } else {
-      logger.info("runHydra (" + language + ")" +
-          "\n\tdecode     " + decode +
-          "\n\ttranscript " + transcript +
-          "\n\tcleaned    " + cleaned
-      );
-    }
+    String cleaned = getTranscriptToPost(transcript, decode);
     boolean removeAllPunct = !language.equalsIgnoreCase("french");
 
     List<WordAndProns> possibleProns = new ArrayList<>();
@@ -816,6 +813,28 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           results[2].replaceAll("#", ""),
           possibleProns); // where are the # coming from?
     }
+  }
+
+  @NotNull
+  private String getTranscriptToPost(String transcript, boolean decode) {
+    String cleaned = getCleanedTranscript(transcript);
+
+    if (isAsianLanguage) {
+      cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
+
+      logger.info("runHydra now for asian language (" + language + "): " +
+          "\n\tdecode     " + decode +
+          "\n\ttranscript " + transcript +
+          "\n\tcleaned    " + cleaned
+      );
+    } else {
+      logger.info("runHydra (" + language + ")" +
+          "\n\tdecode     " + decode +
+          "\n\ttranscript " + transcript +
+          "\n\tcleaned    " + cleaned
+      );
+    }
+    return cleaned;
   }
 
 
