@@ -401,7 +401,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     if (byID != null) {
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
 
-      boolean contextAudio = byID.isContextAudio();
+      //boolean contextAudio = byID.isContextAudio();
 
 /*
       if (customOrPredefExercise != null) {
@@ -413,7 +413,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       */
 
       // cover for import bug...
-      if (contextAudio &&
+      if (byID.isContextAudio() &&
           customOrPredefExercise != null &&
           customOrPredefExercise.getDirectlyRelated() != null &&
           !customOrPredefExercise.getDirectlyRelated().isEmpty()) {

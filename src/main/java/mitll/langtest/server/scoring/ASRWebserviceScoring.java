@@ -538,9 +538,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       if (typeToEndTimes.isEmpty()) {
         logger.warn("getPretestScore huh? no segments from words " + result);// + " phones " + phoneLab);
       }
-/*      logger.info("getPretestScore typeToEndTimes" +
+      logger.info("getPretestScore typeToEndTimes" +
           "\n\ttypeToEndTimes " + typeToEndTimes
-      );*/
+      );
 
       Map<String, String> phoneToDisplay = Collections.emptyMap();
       if (reallyUsePhone && this.phoneToDisplay != null) {
@@ -840,6 +840,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return getTokenToScore(scores, scores.eventScores.get(Scores.PHONES), true, phoneToDisplay);
   }
 
+//  private Map<String, Float> getPhoneToScore(Collection<TranscriptSegment> segments) {
+//    return getTokenToScore(scores, scores.eventScores.get(Scores.PHONES), true, phoneToDisplay);
+//  }
+
   /**
    * @param scores
    * @return
@@ -882,7 +886,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   private List<WordAndProns> getRecoPhones(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
-    List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<TranscriptSegment> words  = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
     List<WordAndProns> wordAndProns = new ArrayList<>();
 
@@ -899,8 +903,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               }
             }
           }
-          WordAndProns e = new WordAndProns(wordLabel, builder.toString());
-          wordAndProns.add(e);
+          wordAndProns.add(new WordAndProns(wordLabel, builder.toString()));
         }
       }
 

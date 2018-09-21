@@ -1849,9 +1849,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
       } else {
         logger.info("doReport : not sending email report since this is not Sunday...");
       }
-      //reportHelper.tryTomorrow(this);
     } else {
-      logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
+     // logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
     }
   }
 

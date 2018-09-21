@@ -657,6 +657,10 @@ public class Project implements IPronunciationLookup {
     refResultDecoder.ensure(getLanguage(), toAddAudioTo);
   }
 
+  /**
+   * @see mitll.langtest.server.scoring.AlignmentHelper#addAlignmentOutput(int, Project, Collection)
+   * @return
+   */
   public Map<Integer, AlignmentOutput> getAudioToAlignment() {
     return audioToAlignment;
   }

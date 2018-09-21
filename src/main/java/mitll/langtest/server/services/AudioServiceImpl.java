@@ -73,7 +73,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.moxieapps.gwt.highcharts.client.Lang;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

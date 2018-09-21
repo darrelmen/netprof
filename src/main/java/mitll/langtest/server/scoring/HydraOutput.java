@@ -59,13 +59,11 @@ public class HydraOutput {
   boolean isMatch(List<WordAndProns> reco) {
     if (reco.size() != wordAndProns.size()) {
       logger.warn("isMatch " +
-          "\n\texpecting " + wordAndProns.size() + " words," +
-          "\n\tsaw       " + reco.size());
+          "\n\texpecting " + wordAndProns.size() + " words : " +wordAndProns+
+          "\n\tsaw       " + reco.size() + " : " + reco);
       return false;
     } else {
-      boolean res = doPhoneComparison(reco, wordAndProns); // this is just for fun - it doesn't actually work reliably
-
-
+//      boolean res = doPhoneComparison(reco, wordAndProns); // this is just for fun - it doesn't actually work reliably
       return true; // don't use the result of the phone comparison!
     }
   }

@@ -318,7 +318,7 @@ public class LTSFactory {
     return locale;
   }
 
-  static KoreanLTS koreanLTS = new KoreanLTS();
+  private static KoreanLTS koreanLTS = new KoreanLTS();
 
   static public List<String> getSimpleKorean(String hydraPhone) {
     return koreanLTS.phoneToKoreanJava().get(hydraPhone);

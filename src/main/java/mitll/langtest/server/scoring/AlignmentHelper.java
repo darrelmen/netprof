@@ -23,7 +23,8 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
   private static final Logger logger = LogManager.getLogger(AlignmentHelper.class);
 
   private static final boolean USE_PHONE_TO_DISPLAY = true;
-  private static final boolean WARN_MISSING_REF_RESULT = false;
+  private static final boolean DEBUG = true;
+  private static final boolean WARN_MISSING_REF_RESULT = false || DEBUG;
 
   private IRefResultDAO refResultDAO;
 
@@ -93,7 +94,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
    */
   private Map<Integer, AlignmentOutput> rememberAlignments(int projectID,
                                                            Map<Integer, AudioAttribute> idToAudio, Language language) {
-    if (!idToAudio.isEmpty() && idToAudio.size() > 50)
+    if (!idToAudio.isEmpty() && idToAudio.size() > 50 || DEBUG)
       logger.info("rememberAlignments : asking for " + idToAudio.size() + " alignment outputs from database");
 
     Map<Integer, AlignmentOutput> alignments = getAlignmentsFromDB(projectID, idToAudio.keySet(), language);
@@ -109,6 +110,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       if (alignmentOutput == null) {
         // logger.warn("addAlignmentToAudioAttribute : couldn't get alignment for audio #" + v.getUniqueID());
       } else {
+        logger.info("set alignment output " + alignmentOutput + " on " + v.getUniqueID() + " : " + v.getTranscript());
         v.setAlignmentOutput(alignmentOutput);
       }
     });
@@ -124,13 +126,15 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
    * @see #rememberAlignments
    */
   private Map<Integer, AlignmentOutput> getAlignmentsFromDB(int projid, Set<Integer> audioIDs, Language language) {
-    //logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
+
+    if (DEBUG) logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
+
     if (audioIDs.isEmpty()) {
       logger.warn("getAlignmentsFromDB not asking for any audio ids?");
     }
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(refResultDAO.getAllSlimForProjectIn(projid, audioIDs));
 
-    if (audioIDMap.size() != audioIDs.size()) {
+    if (audioIDMap.size() != audioIDs.size() || DEBUG) {
       logger.info("getAlignmentsFromDB found " + audioIDs.size() + "/" + audioIDMap.size() + " ref result alignments...");
     }
 
@@ -170,7 +174,8 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
         getTypeToTranscriptEvents(precalcScores.getJsonObject(), USE_PHONE_TO_DISPLAY, language);
     Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents, language);
-//    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
+    if (DEBUG)
+      logger.info("getCachedAudioRef : cache HIT (" + language + ") for audio id=" + audioID + " returning " + typeToSegments);
     idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
   }
 

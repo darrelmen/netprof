@@ -46,7 +46,11 @@ import java.util.Map;
 public class TranscriptSegment extends SlimSegment implements IsSerializable, Comparable<TranscriptSegment> {
   private int start;                  // Start time in seconds
   private int end;                    // End time in seconds
-  private int index;                  // character index from start of string
+
+  /**
+   * @deprecated
+   */
+  private transient int index;                  // character index from start of string
 
   private String displayEvent = "";
 
@@ -129,8 +133,10 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
 */
 
   public String toString() {
-    return "[" + roundToHundredth(getStart()) + "-" + roundToHundredth(getEnd()) + "] " +
-        getEvent() + " (" + roundToHundredth(getScore()) + ") @ " + index;
+    return "[" + roundToHundredth(getStart()) + "-" + roundToHundredth(getEnd()) + "] '" +
+        getEvent() + "' (" + roundToHundredth(getScore()) + ")" //+
+        //" @ " + index
+        ;
   }
 
 }
