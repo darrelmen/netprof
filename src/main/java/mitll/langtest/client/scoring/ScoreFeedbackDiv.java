@@ -40,7 +40,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
       "Wonderful!", "Terrific!", "Groovy!", "Adroit!", "First-rate!");
 
 
-  public static final int FIRST_STEP  = 35;
+  public static final int FIRST_STEP = 35;
   public static final int SECOND_STEP = 75;
 
   private final PlayAudioPanel playAudioPanel;
@@ -102,7 +102,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
 
     wordTableContainer.add(getPlayButtonDiv());
 
-    float hydecScore = pretestScore.getHydecScore();
+    float hydecScore = pretestScore != null ? pretestScore.getHydecScore() : 0F;
     //  logger.info("score " + hydecScore);
     if (hydecScore > 0) {
       showScoreFeedback(pretestScore, isRTL, wordTableContainer, hydecScore);

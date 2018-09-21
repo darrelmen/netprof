@@ -218,6 +218,9 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       validAudio = true;
       useResult(result);
       addRT(result, (int) roundtrip);
+      if (!result.getPretestScore().getStatus().isEmpty()) {
+        showPopup("Status " +result.getPretestScore().getStatus());
+      }
     } else {
       validAudio = false;
       useInvalidResult(result);

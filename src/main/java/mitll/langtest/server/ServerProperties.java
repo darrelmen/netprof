@@ -118,6 +118,8 @@ public class ServerProperties {
   private static final String MIRA_DEFAULT = MIRA_LEN;
   @Deprecated
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
+
+
   private static final String MAIL_SERVER = "mail.server";
   private static final String SERVER_NAME = "SERVER_NAME";
   private static final String DEBUG_ONE_PROJECT = "debugOneProject";
@@ -825,17 +827,6 @@ public class ServerProperties {
 
   public String getAppTitle() {
     return props.getProperty(APP_TITLE, "netprof");
-  }
-
-  /**
-   * Not what you want probably...
-   *
-   * @return
-   * @see mitll.langtest.server.rest.RestUserManagement#addUser
-   * @deprecated
-   */
-  public String getAppURL() {
-    return props.getProperty(APP_URL, "https://" + getNPServer() + "/" + "netProf");
   }
 
   /**

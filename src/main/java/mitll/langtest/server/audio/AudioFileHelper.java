@@ -115,7 +115,7 @@ public class AudioFileHelper implements AlignDecode {
   private Map<String, Integer> phoneToCount;
 
   private AudioConversion audioConversion;
-  private boolean hasModel;
+  // private boolean hasModel;
   private String language;
 
   private EnsureAudioHelper ensureAudioHelper;
@@ -147,7 +147,7 @@ public class AudioFileHelper implements AlignDecode {
 
     this.language = project.getLanguage();
     removeAccents = !language.equalsIgnoreCase(FRENCH);
-    hasModel = project.hasModel();
+    // hasModel = project.hasModel();
     makeASRScoring(project);
     this.project = project;
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
@@ -270,7 +270,7 @@ public class AudioFileHelper implements AlignDecode {
       try {
         String fileName = "Project_" + project.getLanguage() + "_" + project.getName() + ".txt";
         File file = new File(fileName);
-        logger.info("writeOOV writing " +oov.size()+ " oov items to " + file.getAbsolutePath());
+        logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
         FileWriter oovTokens = new FileWriter(file);
         ArrayList<String> strings = new ArrayList<>(oov);
         strings.sort(Comparator.naturalOrder());
@@ -302,7 +302,7 @@ public class AudioFileHelper implements AlignDecode {
     boolean validForeignPhrase = exercise.isSafeToDecode();
     if (isStale(exercise) // || exercise.getEnglish().equalsIgnoreCase("teacher")
     ) {
-    //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
+      //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
       // int before = oov.size();
       validForeignPhrase = asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration(), oov);
 //      if (oov.size() > before) {
@@ -403,15 +403,15 @@ public class AudioFileHelper implements AlignDecode {
           "\n\trec        " + recordingInfoInitial +
           "\n\twav        " + wavPath +
           "\n\trelPath    " + relPath +
-          "\n\tpath       " + path +
-          "\n\tabs        " + absolutePath +
+//          "\n\tpath       " + path +
+//          "\n\tabs        " + absolutePath +
           "\n\tvalidity   " + validity +
           "\n\ttranscript " + recordingInfoInitial.getTranscript());
     }
 
     if (options.isRefRecording() && validity.isValid()) {
       // make sure there's a compressed version for later review.
-      new Thread(() -> ensureCompressed(exercise1, audioContext, wavPath),"ensureCompressed").start();
+      new Thread(() -> ensureCompressed(exercise1, audioContext, wavPath), "ensureCompressed").start();
     }
 
     // remember who recorded this audio wavFile.
@@ -441,7 +441,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param absolutePath
    */
   private void rememberWhoRecordedAudio(AudioContext audioContext, String relPath, String absolutePath) {
-    logger.info("rememberWhoRecordedAudio " + audioContext);
+    //logger.info("rememberWhoRecordedAudio " + audioContext);
 
     int userid = audioContext.getUserid();
 
@@ -944,6 +944,11 @@ public class AudioFileHelper implements AlignDecode {
     return project.getModelsDir();
   }
 
+  /**
+   * @param projid
+   * @param answer
+   * @param info
+   */
   private void rememberAnswer(int projid, AudioAnswer answer, AnswerInfo info) {
     long timestamp = System.currentTimeMillis();
     int answerID = db.getAnswerDAO().addAnswer(info, timestamp);
@@ -955,37 +960,8 @@ public class AudioFileHelper implements AlignDecode {
     new Thread(() -> db.recordWordAndPhoneInfo(projid, answer, answerID)).start();
   }
 
-  /**
-   * @return
-   * @paramx exercise1
-   * @paramx reqid
-   * @paramx wavPath
-   * @paramx file
-   * @paramx validity
-   * @paramxx isValid
-   * @see #getAudioAnswerDecoding
-   * @deprecated - no concept of a project here - a project has a model
-   */
-/*
-  private AudioAnswer getAMASAudioAnswer(AmasExerciseImpl exercise1,
-
-                                         int questionID,
-                                         int reqid,
-
-                                         String wavPath, File file,
-                                         AudioCheck.ValidityAndDur validity) {
-    String url = pathHelper.ensureForwardSlashes(wavPath);
-
-    return (validity.isValid() && hasModel()) ?
-        getAMASAudioAnswer(
-            exercise1,
-            questionID,
-            reqid, file, validity, url) :
-        new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, exercise1.getID());
-  }
-*/
   private boolean hasModel() {
-    return hasModel;
+    return project.hasModel();
   }
 
   /**
@@ -1492,6 +1468,8 @@ public class AudioFileHelper implements AlignDecode {
           decoderOptions,
           precalcScores);
 
+      logger.info("for file " + file + " asr score " + asrScoreForAudio);
+
       audioAnswer.setPretestScore(asrScoreForAudio);
       audioAnswer.setCorrect(audioAnswer.getScore() > MIN_SCORE_FOR_CORRECT_ALIGN &&
           audioAnswer.getPretestScore().isFullMatch());
@@ -1595,11 +1573,9 @@ public class AudioFileHelper implements AlignDecode {
    * @see #makeASRScoring
    */
   private HTKDictionary makeDict(String modelsDir) {
-   // logger.info("makeDict :" +        "\n\tmodelsDir    " + modelsDir);
-
-    String scoringDir = Scoring.getScoringDir(serverProps.getDcodrBaseDir());
-    String dictFile = new ConfigFileCreator(serverProps.getProperties(), scoringDir, modelsDir).getDictFile();
-    logger.info("makeDict :" + "\n\tdictFile    " + dictFile);
+    // logger.info("makeDict :" +        "\n\tmodelsDir    " + modelsDir);
+    String dictFile = getDictFile(modelsDir);
+//    logger.info("makeDict :" + "\n\tdictFile    " + dictFile);
 
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();
@@ -1627,6 +1603,14 @@ public class AudioFileHelper implements AlignDecode {
       }
       return new HTKDictionary();
     }
+  }
+
+  private String getDictFile(String modelsDir) {
+    return new ConfigFileCreator(
+        serverProps.getProperties(),
+        Scoring.getScoringDir(serverProps.getDcodrBaseDir()),
+        modelsDir)
+        .getDictFile();
   }
 
   /**

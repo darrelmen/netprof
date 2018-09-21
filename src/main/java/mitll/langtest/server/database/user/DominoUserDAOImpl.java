@@ -567,11 +567,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   private MyUserService.LoginResult loginViaEmail(String url, ClientUserDetail updateUser) {
-    SResult<ClientUserDetail> clientUserDetailSResultOrig = addUserToMongo(updateUser, url, true);
-    MyUserService.LoginResult loginResult1 = new MyUserService.LoginResult(clientUserDetailSResultOrig, "");
-    return loginResult1;
+    return new MyUserService.LoginResult(addUserToMongo(updateUser, url, true), "");
   }
-
 
   /**
    * Need a group - just use the first one.

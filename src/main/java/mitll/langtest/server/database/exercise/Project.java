@@ -316,7 +316,7 @@ public class Project implements IPronunciationLookup {
     return fullTrie;
   }
 
-  public ExerciseTrie<CommonExercise> getFullContextTrie() {
+  ExerciseTrie<CommonExercise> getFullContextTrie() {
     return fullContextTrie;
   }
 
@@ -417,9 +417,14 @@ public class Project implements IPronunciationLookup {
       putAllProps();
 
       String propValue = db.getProjectDAO().getPropValue(getID(), prop);  // blank if miss, not null
-   //   logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
+      //   logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
 
-      propCache.put(prop, propValue);
+      if (propValue == null) {
+        logger.warn("huh? no prop value for " + prop);
+      } else {
+        propCache.put(prop, propValue);
+        logger.info("getProp " + prop + " = " + propValue);
+      }
       return propValue;
     } else {
       return s;

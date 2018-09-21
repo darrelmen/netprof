@@ -70,8 +70,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   private static final String UPDATING_PROJECT_INFO = "updating project info";
 
-  private static final String AUDIO_RECORDING = "audioRecording";
-  private static final String WRITE_AUDIO_FILE = "writeAudioFile";
+//  private static final String AUDIO_RECORDING = "audioRecording";
+//  private static final String WRITE_AUDIO_FILE = "writeAudioFile";
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final int SLOW_ROUND_TRIP = 3000;
   private static final String RECALC_ALIGNMENTS = "recalc alignments";
@@ -554,7 +554,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                        int projID,
                                        int userIDFromSessionOrDB,
                                        String absPath) {
-    if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
+    if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1).setStatus("can't find audio file");
     long then = System.currentTimeMillis();
 
     //String[] split = testAudioFile.split(File.separator);
