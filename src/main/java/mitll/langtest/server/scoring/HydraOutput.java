@@ -9,11 +9,18 @@ import java.util.Set;
 public class HydraOutput {
   private static final Logger logger = LogManager.getLogger(HydraOutput.class);
 
+  enum STATUS_CODES {SUCCESS, ERROR}
+  // public static final String SUCCESS = "SUCCESS";
+
   private Scores scores;
   private String wordLab;
   private String phoneLab;
   private List<WordAndProns> wordAndProns;
-  private String status = "";
+
+  /**
+   * DEFAULT status is success!
+   */
+  private STATUS_CODES status = STATUS_CODES.SUCCESS;
   private String log;
 
   /**
@@ -59,9 +66,7 @@ public class HydraOutput {
           "\n\tsaw       " + reco.size());
       return false;
     } else {
-      boolean res = doPhoneComparison(reco, wordAndProns); // this is just for fun - it doesn't actually work reliably
-
-
+      // boolean res = doPhoneComparison(reco, wordAndProns); // this is just for fun - it doesn't actually work reliably
       return true; // don't use the result of the phone comparison!
     }
   }
@@ -97,15 +102,11 @@ public class HydraOutput {
     return wordAndProns;
   }
 
-  public String toString() {
-    return "status " + status + " log " + log + " " + wordLab + ", " + phoneLab;
-  }
-
-  public String getStatus() {
+  public STATUS_CODES getStatus() {
     return status;
   }
 
-  public HydraOutput setStatus(String status) {
+  public HydraOutput setStatus(STATUS_CODES status) {
     this.status = status;
     return this;
   }
@@ -117,5 +118,9 @@ public class HydraOutput {
   public HydraOutput setLog(String log) {
     this.log = log;
     return this;
+  }
+
+  public String toString() {
+    return "status " + status + "\n\tlog " + log + "\n\twords " + wordLab + "\n\t phones" + phoneLab;
   }
 }

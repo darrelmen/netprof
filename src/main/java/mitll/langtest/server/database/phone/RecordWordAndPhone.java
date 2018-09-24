@@ -84,7 +84,7 @@ public class RecordWordAndPhone {
       if (pretestScore == null) {
         logger.warn(" : recordWordAndPhoneInfo pretest score is null for " + answer + " and result id " + answerID);
       } else {
-        logger.info(" : recordWordAndPhoneInfo pretest score is " + pretestScore + " for " + answer + " and result id " + answerID);
+        logger.info(" : recordWordAndPhoneInfo answer " + answer + " and result id " + answerID);
       }
     }
 

@@ -34,6 +34,7 @@ package mitll.langtest.server.scoring;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -68,6 +69,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
+import static mitll.langtest.server.scoring.HydraOutput.*;
+import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.ERROR;
+import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.SUCCESS;
 
 /**
  * Does ASR scoring using hydra.
@@ -95,7 +99,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   static final int MAX_FROM_ANY_TOKEN = 10;
   public static final boolean DEBUG = false;
   public static final int MSA_PORT = 5000;
-  public static final String SUCCESS = "SUCCESS";
+  // public static final String SUCCESS = "SUCCESS";
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -359,6 +363,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
 
     int processDur = 0;
+    String hydra = useKaldi ? "kaldi" : "hydra";
     if (cached == null) {
       long then = System.currentTimeMillis();
       Path tempDir = null;
@@ -370,7 +375,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
         // dcodr can't handle an equals in the file name... duh...
         String wavFile1 = filePath + ".wav";
-        String hydra = useKaldi ? "kaldi" : "hydra";
         logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to " + hydra + " (derived from " + wavFile1 + ")");
         boolean wroteIt = AudioConversion.wav2raw(wavFile1, rawAudioPath);
 
@@ -423,21 +427,24 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         cleanUpRawFile(rawAudioPath);
       }
     }
-    if (cached == null || !cached.getStatus().equalsIgnoreCase(SUCCESS)) {
-      logger.error("scoreRepeatExercise hydra failed to generate scores : " + cached);
+
+    if (cached == null || cached.getStatus() != SUCCESS) {
+      logger.error("scoreRepeatExercise " +hydra+
+          " failed to generate scores : " + cached);
       PretestScore pretestScore = new PretestScore(-1f);
-      if (cached != null) pretestScore.setStatus(cached.getStatus());
+      if (cached != null) pretestScore.setStatus(cached.getStatus().toString());
+      return pretestScore;
+    } else {
+      PretestScore pretestScore = getPretestScore(
+          imageOutDir,
+          imageOptions,
+          decode, prefix, noSuffix,
+          cached,
+          cachedDuration, processDur, usePhoneToDisplay, jsonObject, useKaldi);
+
+      logger.info("scoreRepeatExercise got " + pretestScore);
       return pretestScore;
     }
-    PretestScore pretestScore = getPretestScore(
-        imageOutDir,
-        imageOptions,
-        decode, prefix, noSuffix,
-        cached,
-        cachedDuration, processDur, usePhoneToDisplay, jsonObject, useKaldi);
-
-    logger.info("scoreRepeatExercise got " + pretestScore);
-    return pretestScore;
   }
 
   /**
@@ -461,11 +468,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       try {
         JsonObject parse = new JsonParser().parse(json).getAsJsonObject();
 
-        String status = parse.get("status").getAsString();
+        STATUS_CODES status = getStatus(parse);
         String log = parse.has("log") ? parse.get("log").getAsString() : "";
         float score = -1F;
 
-        if (status.trim().equalsIgnoreCase(SUCCESS)) {
+        if (status == SUCCESS) {
           score = parse.get("score").getAsFloat();
           logger.info("runKaldi For " + sentence + "\n\tfile " + audioPath + "\n\tstatus " + status + "\n\tscore " + score);
         } else {
@@ -484,14 +491,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             .setLog(log);
       } catch (JsonSyntaxException e) {
         logger.error("got unparseable " +
-            "\n\tjson " + json +
-            "\n\tmesssage " + e.getMessage(),
+                "\n\tjson " + json +
+                "\n\tmesssage " + e.getMessage(),
             e
         );
 
         return new HydraOutput(new Scores(-1F, new HashMap<>(), (int) 0)
             .setKaldiJsonObject(new JsonObject()), null, null, null)
-            .setStatus("ERROR")
+            .setStatus(ERROR)
             .setLog(e.getMessage());
       }
 
@@ -499,11 +506,21 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       logger.error("Got " + e, e);
       return new HydraOutput(new Scores(-1F, new HashMap<>(), (int) 0)
           .setKaldiJsonObject(new JsonObject()), null, null, null)
-          .setStatus("ERROR")
+          .setStatus(ERROR)
           .setLog(e.getMessage());
     }
+  }
 
-//    return new HydraOutput(null, null, null, null);
+  @NotNull
+  private STATUS_CODES getStatus(JsonObject parse) {
+    JsonElement status1 = parse.get("status");
+    String status = status1 == null ? STATUS_CODES.ERROR.toString() : status1.getAsString();
+    try {
+      return STATUS_CODES.valueOf(status);
+    } catch (IllegalArgumentException e) {
+      logger.warn("couldn't parse status " + status);
+      return STATUS_CODES.ERROR;
+    }
   }
 
   private String callKaldi(String sentence, String audioPath, int port) throws IOException {
