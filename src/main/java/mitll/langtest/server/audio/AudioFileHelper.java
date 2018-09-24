@@ -306,8 +306,8 @@ public class AudioFileHelper implements AlignDecode {
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see InDictFilter#isPhraseInDict
    * @seex mitll.langtest.server.services.ScoringServiceImpl#isValidForeignPhrase
+   * @see InDictFilter#isPhraseInDict
    */
   public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration) {
     return asrScoring.validLTS(foreignLanguagePhrase, transliteration);
@@ -323,7 +323,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * Write the wav file given the posted audio in base 64.
-   *
+   * <p>
    * Record an answer entry in the database.<br></br>
    * Write the posted data to a wav and an mp3 file (since all the browser audio works with mp3).
    * <p>
@@ -531,6 +531,7 @@ public class AudioFileHelper implements AlignDecode {
       }
       //  logger.info("getAudioAnswerDecoding recordInResults answer " + answer);// + " " + answer.getTranscript());
       recordInResults(context, recordingInfo, validity, answer);
+
     } else {
       answer.setTranscript(recordingInfo.getTranscript());
     }
@@ -559,7 +560,7 @@ public class AudioFileHelper implements AlignDecode {
     if (hasScore) {
       info.setNormTranscript(pretestScore.getRecoSentence());
     }
-    rememberAnswer(context.getProjid(), answer, info);
+    rememberAnswer(context.getProjid(), answer, info, context.getDialogSessionID());
   }
 
   /**
@@ -892,7 +893,7 @@ public class AudioFileHelper implements AlignDecode {
       answer.setTranscript(exercise.getForeignLanguage());
       answer.setNormTranscript(answer.getPretestScore().getRecoSentence());
 
-      rememberAnswer(info.getProjid(), answer, info);
+      rememberAnswer(info.getProjid(), answer, info, context.getDialogSessionID());
     }
     //logger.info("getAudioAnswerAlignment 2 answer " + answer);
     return answer;
@@ -902,15 +903,19 @@ public class AudioFileHelper implements AlignDecode {
     return project.getModelsDir();
   }
 
-  private void rememberAnswer(int projid, AudioAnswer answer, AnswerInfo info) {
+  private void rememberAnswer(int projid, AudioAnswer answer, AnswerInfo info, int dialogSessionID) {
     long timestamp = System.currentTimeMillis();
     int answerID = db.getAnswerDAO().addAnswer(info, timestamp);
     answer.setResultID(answerID);
     answer.setTimestamp(timestamp);
 
+    if (dialogSessionID > 0) {
+      db.getRelatedResultDAO().add(answerID, dialogSessionID);
+    }
 
     // do this db write later
     new Thread(() -> db.recordWordAndPhoneInfo(projid, answer, answerID), "recordWordAndPhoneInfo").start();
+    //   return answerID;
   }
 
   /**
@@ -1204,7 +1209,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * For laptop dev
-   *
+   * <p>
    * Get session from netprof1-dev for demo/demo or equivalent.
    * We just need some session.
    *
@@ -1427,7 +1432,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * TODO : this whole approach is WAY TOO COMPLICATED - rework so it makes sense.
-   *
+   * <p>
    * Does decoding if doFlashcard is true.
    *
    * @param reqid

@@ -57,6 +57,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.dialog.IDialogSession;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
@@ -142,7 +143,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * This allows us to upload an exercise file.
-   *
+   * <p>
    * This might be helpful if we want to stream audio in a simple way outside a GWT RPC call.
    *
    * @throws ServletException
@@ -224,8 +225,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * TODO : consider how to handle out of order packets
-   *
+   * <p>
    * TODO : wait if saw END but packets out of order...?
+   * <p>
+   * TODO : add an option to just do decoding and return the result when the server decides the final silence has
+   * been reached...
+   * TODO : add a parameter for expected VAD duration
+   * TODO : add a parameter specifying duration of final silence segment
    *
    * @param request
    * @param requestType
@@ -241,7 +247,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                       ScoreServlet.PostRequest requestType,
                                       String deviceType,
                                       String device) throws IOException, DominoSessionException, ExecutionException {
-    int userIDFromSession = -1;
+    int userIDFromSession;
     try {
       userIDFromSession = checkSession(request);
     } catch (DominoSessionException dse) {
@@ -257,11 +263,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int reqid = getReqID(request);
     int projid = getProjectID(request);
 
-    //String postedWordOrPhrase = "";
-
     boolean isRef = isReference(request);
     AudioType audioType = getAudioType(request);
-
+    int dialogSessionID = getDialogSessionID(userIDFromSession);
     if (DEBUG) {
       logger.info("getJSONForStream got" +
           "\n\trequest  " + requestType +
@@ -270,6 +274,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           "\n\texercise text " + realExID +
           "\n\treq      " + reqid +
           "\n\tref      " + isRef +
+          "\n\tsession  " + dialogSessionID +
           "\n\taudio type " + audioType +
           "\n\tdevice   " + deviceType + "/" + device
       );
@@ -284,7 +289,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     byte[] targetArray = IOUtils.toByteArray(request.getInputStream());
     AudioChunk newChunk = new AudioChunk(packet, targetArray);
 
-    long then = System.currentTimeMillis();
+    //  long then = System.currentTimeMillis();
     Validity validity = newChunk.calcValid(audioCheck, isRef, serverProps.isQuietAudioOK());
     //if (validity != Validity.OK)
     logger.info("getJSONForStream : (" + state + ") chunk for exid " + realExID + " " + newChunk + " is " + validity + " : " + newChunk.getValidityAndDur());
@@ -320,7 +325,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       }*/
     } else {  // STOP
       long then2 = System.currentTimeMillis();
-      jsonObject = getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid,
+      jsonObject = getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid, dialogSessionID,
           isRef, audioType,
           audioChunks, jsonObject);
 
@@ -348,11 +353,19 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
-  private JSONObject getJsonObject(String deviceType, String device, int userIDFromSession,
-                                   int realExID, int reqid, int projid,
+  private JSONObject getJsonObject(String deviceType,
+                                   String device,
+                                   int userIDFromSession,
+                                   int realExID,
+                                   int reqid,
+                                   int projid,
+                                   int dialogSessionID,
                                    boolean isReference,
+
                                    AudioType audioType,
-                                   List<AudioChunk> audioChunks, JSONObject jsonObject) throws IOException, DominoSessionException {
+
+                                   List<AudioChunk> audioChunks,
+                                   JSONObject jsonObject) throws IOException, DominoSessionException {
     AudioChunk combined = getCombinedAudioChunk(audioChunks);
 
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(combined.getWavFile());
@@ -371,7 +384,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         language,
         realExID,
         1,
-        audioType);
+        audioType).setDialogSessionID(dialogSessionID);
 
     logger.info("audio context " + audioContext);
 
@@ -381,7 +394,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         .setRecordInResults(true)
         .setRefRecording(isReference)
         .setAllowAlternates(false)
-        .setCompressLater(false);
+        // .setCompressLater(false)
+        ;
 
     AudioAnswer audioAnswer = getAudioAnswer(null, // not doing it!
         audioContext,
@@ -405,7 +419,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * TODO : deal with gaps!
-   *
+   * <p>
    * Wait for arrival?
    *
    * @param audioChunks
@@ -598,6 +612,16 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return 1;
   }
 
+  private int getDialogSessionID(int userid) {
+    List<IDialogSession> currentDialogSessions = getDatabase().getDialogSessionDAO().getCurrentDialogSessions(userid);
+
+    if (!currentDialogSessions.isEmpty()) {
+      IDialogSession next = currentDialogSessions.iterator().next();
+      logger.info("getDialogSessionID current session " + next);
+      return next.getID();
+    } else return -1;
+  }
+
   private int getRealExID(HttpServletRequest request) {
     int realExID = 0;
     try {
@@ -680,6 +704,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
+   * Does alignment!
+   *
    * @param base64EncodedString
    * @param audioContext
    * @param deviceType
@@ -708,9 +734,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (decoderOptions.isRefRecording() && !decoderOptions.isRecordInResults()) { // we have a foreign key from audio into result table - must record in results
       decoderOptions.setRecordInResults(true);
     }
-    boolean amas = serverProps.isAMAS();
+    //boolean amas = serverProps.isAMAS();
 
-    CommonExercise commonExercise = amas || isExistingExercise ?
+    CommonExercise commonExercise = isExistingExercise ?
         db.getCustomOrPredefExercise(projectID, exerciseID) :
         db.getUserExerciseDAO().getTemplateExercise(db.getProjectDAO().getDefault());
 
@@ -722,14 +748,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     Project project1 = db.getProject(audioContextProjid);
     Language language = project1.getLanguageEnum();
 
-    if (!isExistingExercise) {
+    if (!isExistingExercise && commonExercise != null) {
       ((Exercise) commonExercise).setProjectID(audioContextProjid);
       audioContext.setExid(commonExercise.getID());
     }
 
-    CommonShell exercise1 = amas ? db.getAMASExercise(exerciseID) : commonExercise;
+    // CommonShell exercise1 = amas ? db.getAMASExercise(exerciseID) : commonExercise;
 
-    if (exercise1 == null && isExistingExercise) {
+    if (commonExercise == null && isExistingExercise) {
       logger.warn("writeAudioFile " + getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
     String audioTranscript = getAudioTranscript(audioContext.getAudioType(), commonExercise);

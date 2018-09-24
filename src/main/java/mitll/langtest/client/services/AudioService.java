@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -54,6 +55,7 @@ import mitll.langtest.shared.scoring.RecalcRefResponse;
 public interface AudioService extends RemoteService {
   /**
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, String)
    * @param base64EncodedString encoded audio bytes
    * @param audioContext
    * @param deviceType

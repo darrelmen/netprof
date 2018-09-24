@@ -32,32 +32,11 @@
 
 package mitll.langtest.server.database.dialog;
 
-import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.dialog.*;
+import mitll.langtest.shared.dialog.DialogStatus;
 
-import java.util.List;
-
-public interface IDialogSessionDAO extends IDAO {
-  int add(int userid,
-          int projid,
-          int dialogid,
-
-          long modified,
-          long end,
-          INavigation.VIEWS view,
-          DialogStatus status,
-          int numrecordings,
-          float score,
-          float speakingrate
-  );
-
-  // seems like we want a summary of the latest scores
-  List<IDialogSession> getLatestDialogSessions(int projid, int userid);
-
-  List<IDialogSession> getDialogSessions(int userid, int dialog);
-
-  List<IDialogSession> getCurrentDialogSessions(int userid);
+public interface IRelatedResultDAO extends IDAO {
+  int add(int resultid, int dialogsessionid);
 
   /**
    * For when we want to drop the current dialog data and reload
@@ -66,6 +45,4 @@ public interface IDialogSessionDAO extends IDAO {
    * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
    */
   void removeForProject(int id);
-
-  void add(DialogSession dialogSession);
 }
