@@ -304,16 +304,15 @@ public class ParseResultJson {
 
     }
     if (useKaldi) {
-      Collection<TranscriptEvent> values = allwsubs;
       TreeMap<Float, TranscriptEvent> wordEvents2 = new TreeMap<>();
-      values.forEach(transcriptEvent -> wordEvents2.put(transcriptEvent.getStart(), transcriptEvent));
+      allwsubs.forEach(transcriptEvent -> wordEvents2.put(transcriptEvent.getStart(), transcriptEvent));
       typeToEvent.put(ImageType.WORD_TRANSCRIPT, wordEvents2);
 
-      logger.info("readFromJSON word event keys " + wordEvents2.keySet());
-      logger.info("readFromJSON word event values " + wordEvents2.values());
-      wordEvents2.forEach((k, v) -> {
-        logger.info(k + " = " + v);
-      });
+//      logger.info("readFromJSON word event keys " + wordEvents2.keySet());
+//      logger.info("readFromJSON word event values " + wordEvents2.values());
+//      wordEvents2.forEach((k, v) -> {
+//        logger.info(k + " = " + v);
+//      });
     }
     return typeToEvent;
   }

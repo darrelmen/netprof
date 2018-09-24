@@ -109,7 +109,7 @@ public class DecodeCorrectnessChecker {
 
     boolean b1 = language.equalsIgnoreCase(FRENCH);
     boolean removeAllPunct = !b1;
-    logger.info("getDecodeScore : " + language + " : is french " + b1 + " remove all punct " + removeAllPunct);
+//    logger.info("getDecodeScore : " + language + " : is french " + b1 + " remove all punct " + removeAllPunct);
     PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores, b, removeAllPunct);
     // log what happened
     logDecodeOutput(answer, foregroundSentences, commonExercise.getID());

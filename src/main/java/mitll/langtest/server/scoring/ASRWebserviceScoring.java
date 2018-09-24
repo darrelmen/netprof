@@ -864,13 +864,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           "\n\ttranscript " + transcript +
           "\n\tcleaned    " + cleaned
       );
-    } else {
+    }
+/*    else {
       logger.info("runHydra (" + language + ")" +
           "\n\tdecode     " + decode +
           "\n\ttranscript " + transcript +
           "\n\tcleaned    " + cleaned
       );
-    }
+    }*/
     return cleaned;
   }
 

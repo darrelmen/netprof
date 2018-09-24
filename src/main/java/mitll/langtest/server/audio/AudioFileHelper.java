@@ -1322,11 +1322,13 @@ public class AudioFileHelper implements AlignDecode {
     // alignment trumps decoding
     boolean shouldDoDecoding = options.shouldDoDecoding() && !options.shouldDoAlignment();
     logger.info("getASRScoreForAudio (" + getLanguage() + ")" +
-        "\n\t" + (shouldDoDecoding ? " Decoding " : " Aligning ") +
-        "" + testAudioFile +
-        "\n\twith sentence '" + sentence + "'" +
-        "\n\treq# " + reqid +
-        (options.isCanUseCache() ? " check cache" : " NO CACHE") + " prefix " + prefix);
+            "\n\t" + (shouldDoDecoding ? " Decoding " : " Aligning ") +
+            "" + testAudioFile +
+            "\n\twith sentence '" + sentence + "'" +
+//        "\n\treq# " + reqid +
+            //   (options.isCanUseCache() ? " check cache" : " NO CACHE") +
+            (prefix.isEmpty() ? "" : " prefix " + prefix)
+    );
 
     if (testAudioFile == null) {
       logger.warn("getASRScoreForAudio huh? " + getLanguage() + " no test audio file for '" + sentence + "'");
