@@ -32,6 +32,8 @@
 
 package mitll.langtest.client.initial;
 
+import mitll.langtest.client.LangTest;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -40,8 +42,7 @@ package mitll.langtest.client.initial;
  */
 public interface WavEndCallback {
   /**
-   * @see mitll.langtest.client.LangTest#makeFlashContainer
+   * @see LangTest#initBrowserRecording
    */
   void silenceDetected();
-//  void gotStreamResponse();
 }

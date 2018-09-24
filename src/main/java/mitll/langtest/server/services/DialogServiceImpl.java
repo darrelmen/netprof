@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import mitll.langtest.client.banner.RehearseViewHelper;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
@@ -150,9 +151,14 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return db.getDialogSessionDAO().getDialogSessions(userIDFromSessionOrDB, dialogid);
   }
 
+  /**
+   * @see RehearseViewHelper#clearScores
+   * @param dialogSession
+   * @throws DominoSessionException
+   */
   @Override
   public void addSession(DialogSession dialogSession) throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    /*int userIDFromSessionOrDB =*/ getUserIDFromSessionOrDB();
     db.getDialogSessionDAO().add(dialogSession);
   }
 

@@ -115,6 +115,9 @@ public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extend
     return postAudioRecordButton;
   }
 
+  /**
+   * @see SimpleRecordAudioPanel#startRecording
+   */
   @Override
   public void startRecording() {
     //logger.info("startRecording...");

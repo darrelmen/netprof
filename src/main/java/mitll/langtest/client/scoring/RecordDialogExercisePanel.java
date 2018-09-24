@@ -35,13 +35,17 @@ import static mitll.langtest.client.LangTest.RED_X_URL;
 public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
-  public static final boolean DEBUG_PARTIAL = false;
+  private static final boolean DEBUG_PARTIAL = false;
 
   private static final long MOVE_ON_DUR = 3000L;
   private static final long END_SILENCE = 300L;
 
   private static final int DIM = 40;
   private static final long END_DUR_SKEW = 900L;
+
+  /**
+   * @see #startRecording
+   */
   private long start = 0L;
   private long firstVAD = -1L;
 
@@ -61,6 +65,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private float studentSpeechDur = 0F;
 
   private AudioAttribute studentAudioAttribute;
+  private boolean gotStreamStop;
 
   /**
    * @param commonExercise
@@ -130,7 +135,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   @Override
   public void clearScoreInfo() {
     transcriptToHighlight = null;
-
+    gotStreamStop = false;
     emoticon.setVisible(false);
 
     flclickables.forEach(iHighlightSegment -> {
@@ -324,29 +329,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
        */
       @Override
       public void usePartial(StreamResponse response) {
-        if (isRecording()) {
-          Validity validity = response.getValidity();
-          rehearseView.addPacketValidity(validity);
-
-          if (validity == Validity.OK && firstVAD == -1) {
-            firstVAD = response.getStreamTimestamp();//System.currentTimeMillis();
-            if (DEBUG_PARTIAL) {
-              logger.info("usePartial : (" + rehearseView.getNumValidities() +
-                  ") got first vad : " + firstVAD +
-                  " (" + (start - firstVAD) + ")" +
-                  " for " + report() + " diff " + (System.currentTimeMillis() - start));
-            }
-          } else {
-            if (DEBUG_PARTIAL) {
-              logger.info("usePartial : (" + rehearseView.getNumValidities() +
-                  " packets) skip validity " + validity +
-                  " vad " + firstVAD +
-                  " for " + report() + " diff " + (System.currentTimeMillis() - start));
-            }
-          }
-        } else {
-          logger.warning("hmm " + report() + " getting response " + response + " but not recording...?");
-        }
+        RecordDialogExercisePanel.this.usePartial(response);
       }
 
       @Override
@@ -417,6 +400,36 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     super.addWidgets(showFL, showALTFL, phonesChoices);
   }
 
+  private void usePartial(StreamResponse response) {
+    if (isRecording()) {
+      Validity validity = response.getValidity();
+      rehearseView.addPacketValidity(validity);
+
+      if (validity == Validity.OK && firstVAD == -1) {
+        firstVAD = response.getStreamTimestamp();//System.currentTimeMillis();
+        if (DEBUG_PARTIAL) {
+          logger.info("usePartial : (" + rehearseView.getNumValidities() +
+              ") got first vad : " + firstVAD +
+              " (" + (start - firstVAD) + ")" +
+              " for " + report() + " diff " + (System.currentTimeMillis() - start));
+        }
+      } else {
+        if (DEBUG_PARTIAL) {
+          logger.info("usePartial : (" + rehearseView.getNumValidities() +
+              " packets) skip validity " + validity +
+              " vad " + firstVAD +
+              " for " + report() + " diff " + (System.currentTimeMillis() - start));
+        }
+      }
+
+      if (response.isStreamStop()) {
+        gotStreamStop = true;
+      }
+    } else {
+      logger.warning("hmm " + report() + " getting response " + response + " but not recording...?");
+    }
+  }
+
   private String report() {
     return this.toString();
   }
@@ -459,7 +472,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    */
   public void startRecording() {
     start = System.currentTimeMillis();
-    logger.info("startRecording at " + start + " or " + new Date(start));
+    logger.info("startRecording for " + getExID() + " at " + start + " or " + new Date(start));
     firstVAD = -1;
     recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
   }
@@ -477,10 +490,14 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
     long minDurPlusMoveOn = minDur + MOVE_ON_DUR;
     long diffVAD = now - firstVAD;
-    boolean vadCheck = firstVAD > 0 && diffVAD > minDur + END_SILENCE;
+    boolean clientVAD = firstVAD > 0 && diffVAD > minDur + END_SILENCE;
+    boolean vadCheck = clientVAD && gotStreamStop;
+
+
     if (vadCheck || diff > minDurPlusMoveOn) {
       logger.info("stopRecording " + this +
           "\n\tvadCheck  " + vadCheck +
+          "\n\tgotStreamStop " + gotStreamStop +
           "\n\tfirstVAD  " + firstVAD +
           "\n\tVAD delay " + (diffVAD - diff) +
           "\n\tdiffVAD   " + diffVAD +
@@ -491,7 +508,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
       return true;
     } else {
-      logger.info("stopRecording ignore too short " + diff + " vs " + minDur);
+      logger.info("stopRecording for " + getExID() +
+          " : ignore too short " + diffVAD + " vad vs " + minDur + " expected client " + clientVAD + " vs server " + gotStreamStop);
       return false;
     }
   }
@@ -511,8 +529,4 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   public float getStudentSpeechDur() {
     return studentSpeechDur;
   }
-
-/*  public boolean abortRecording() {
-    return recordAudioPanel.getPostAudioRecordButton().stopRecordingSafe();
-  }*/
 }

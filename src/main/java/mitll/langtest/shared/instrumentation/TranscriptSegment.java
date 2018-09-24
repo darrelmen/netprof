@@ -134,7 +134,7 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
 
   public String toString() {
     return "[" + roundToHundredth(getStart()) + "-" + roundToHundredth(getEnd()) + "] '" +
-        getEvent() + "' (" + roundToHundredth(getScore()) + ")" //+
+        getEvent() + "' " + roundToHundredth(getScore()) + "" //+
         //" @ " + index
         ;
   }

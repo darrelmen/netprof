@@ -202,7 +202,7 @@ public class AnswerInfo {
     this.audioFile = audioFile;
     this.valid = validity.isValid();
     this.audioType = audioType;
-    this.durationInMillis = validity.durationInMillis;
+    this.durationInMillis = validity.getDurationInMillis();
     this.deviceType = deviceType;
     this.device = device;
 

@@ -180,6 +180,7 @@ public class ScoreServlet extends DatabaseServlet {
     STREAMSESSION,
     STREAMSTATE,
     STREAMSPACKET,
+    STREAMSTOP,
     STREAMTIMESTAMP;  // when it's sent
 
     String value = null;
@@ -947,7 +948,7 @@ public class ScoreServlet extends DatabaseServlet {
         fullJSON);
   }
 
-  private JSONObject getJSONForStream(HttpServletRequest request,
+/*  private JSONObject getJSONForStream(HttpServletRequest request,
                                       PostRequest requestType,
                                       String deviceType,
                                       String device) throws IOException {
@@ -975,7 +976,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
 
     String user = getUser(request);
-    int userid = userManagement.getUserFromParam(user);
+   // int userid = userManagement.getUserFromParam(user);
     boolean fullJSON = isFullJSON(request);
 
     logger.info("\n\n\ngetJSONForStream got" +
@@ -998,7 +999,7 @@ public class ScoreServlet extends DatabaseServlet {
     //logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
     return new JSONObject();
     // File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
-  }
+  }*/
 
   private boolean isFullJSON(HttpServletRequest request) {
     String fullJSONFormat = getHeader(request, HeaderValue.FULL);

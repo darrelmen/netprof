@@ -92,24 +92,39 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
   }
 
   @Override
-  public List<IDialogSession> getCurrentDialogSessions(int userid ) {
+  public List<IDialogSession> getCurrentDialogSessions(int userid) {
     return getiDialogSessions(dao.byUser(userid));
   }
 
   @NotNull
   private List<IDialogSession> getiDialogSessions(Collection<SlickDialogSession> byProjID) {
-    return byProjID.stream().map(ds -> new DialogSession(ds.id(),
-        ds.userid(),
-        ds.projid(),
-        ds.dialogid(),
-        ds.modified().getTime(),
-        ds.end().getTime(),
-        INavigation.VIEWS.valueOf(ds.view()),
-        DialogStatus.valueOf(ds.status()),
-        ds.numrecordings(),
-        ds.score(),
-        ds.speakingrate()
-    )).collect(Collectors.toList());
+    return byProjID.stream().map(ds -> {
+      INavigation.VIEWS views = getViews(ds);
+      return new DialogSession(ds.id(),
+          ds.userid(),
+          ds.projid(),
+          ds.dialogid(),
+          ds.modified().getTime(),
+          ds.end().getTime(),
+          views,
+          DialogStatus.valueOf(ds.status()),
+          ds.numrecordings(),
+          ds.score(),
+          ds.speakingrate()
+      );
+    }).collect(Collectors.toList());
+  }
+
+  @NotNull
+  private INavigation.VIEWS getViews(SlickDialogSession ds) {
+    INavigation.VIEWS views = null;
+    try {
+      views = INavigation.VIEWS.valueOf(ds.view().toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.warn("can't parse " + ds.view().toUpperCase());
+      views = INavigation.VIEWS.REHEARSE;
+    }
+    return views;
   }
 
   @Override
@@ -170,8 +185,14 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
     ));
   }
 
+  /**
+   * @param ds
+   * @see mitll.langtest.server.services.DialogServiceImpl#addSession
+   */
   @Override
   public void add(DialogSession ds) {
+    logger.info("Add session " + ds);
+
     dao.insert(new SlickDialogSession(
         -1,
         ds.getUserid(),

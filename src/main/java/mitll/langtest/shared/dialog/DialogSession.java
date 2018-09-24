@@ -4,6 +4,8 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Date;
+
 public class DialogSession implements IDialogSession {
   private int id;
   private int userid;
@@ -97,5 +99,10 @@ public class DialogSession implements IDialogSession {
   @Override
   public int getNumRecordings() {
     return numRecordings;
+  }
+
+
+  public String toString() {
+    return "DialogSession #" + getID() + " for dialog " +getDialogid() + " at " + new Date(getModified());
   }
 }

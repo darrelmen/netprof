@@ -53,6 +53,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PLAY_PAUSE = true;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
@@ -908,7 +909,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   @Override
   public boolean doPlayPauseToggle() {
     if (playAudio != null) {
-      if (DEBUG) logger.info("doPlayPauseToggle");
+      if (DEBUG_PLAY_PAUSE) logger.info("doPlayPauseToggle");
       return playAudio.doPlayPauseToggle();
     } else {
       logger.warning("doPlayPauseToggle no play audio???");

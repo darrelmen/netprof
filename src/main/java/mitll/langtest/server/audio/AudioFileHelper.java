@@ -793,7 +793,7 @@ public class AudioFileHelper implements AlignDecode {
     if (alignOutput.isValid()) {
       db.getRefResultDAO().addAnswer(user, exercise1.getProjectID(), exercise1.getID(),
           audioid,
-          validity.durationInMillis,
+          validity.getDurationInMillis(),
 
           decodeOutput.isCorrect(),
 
@@ -997,7 +997,7 @@ public class AudioFileHelper implements AlignDecode {
         getAudioAnswer(
             commonShell,
             reqid, file, validity, url, decoderOptions, userID) :
-        new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, commonShell.getID());
+        new AudioAnswer(url, validity.getValidity(), reqid, validity.getDurationInMillis(), commonShell.getID());
   }
 
   private PretestScore getEasyAlignment(ClientExercise exercise, String testAudioPath) {
@@ -1450,7 +1450,7 @@ public class AudioFileHelper implements AlignDecode {
                                      String url,
                                      DecoderOptions decoderOptions,
                                      int userID) {
-    AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, exercise.getID());
+    AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.getDurationInMillis(), exercise.getID());
     if (decoderOptions.shouldDoAlignment()) {
       PrecalcScores precalcScores =
           checkForWebservice(

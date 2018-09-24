@@ -69,6 +69,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private DivWidget dialogHeader;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PLAY = true;
+  /**
+   *
+   */
   protected int dialogID;
 
   /**
@@ -109,8 +113,13 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return new SelectionState().getDialog();
   }
 
+  /**
+   * @param dialogID can be -1 if we just jump into a rehearse view without choosing a dialog first...
+   * @param dialog
+   * @param child
+   */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
-    this.dialogID =dialogID;
+    this.dialogID = dialog.getID();
     showDialog(dialogID, dialog, child);
     getRefAudio(new ArrayList<RefAudioGetter>(bothTurns).iterator());
   }
@@ -456,7 +465,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   void gotBackward() {
     setPlayButtonToPlay();
 
-    List<T> seq = getSeq();
+    List<T> seq = getPromptSeq();
 
     int i = seq.indexOf(currentTurn);
     int i1 = i - 1;
@@ -487,7 +496,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   void gotForward() {
     setPlayButtonToPlay();
 
-    List<T> seq = getSeq();
+    List<T> seq = getPromptSeq();
 
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
@@ -542,7 +551,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   private boolean isLast(T currentTurn) {
-    List<T> seq = getSeq();
+    List<T> seq = getPromptSeq();
     return seq.indexOf(currentTurn) == seq.size();
   }
 
@@ -588,8 +597,14 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     setCurrentTurn(bothTurns.get(nextIndex));
   }
 
+/*
   boolean onFirstTurn() {
     return bothTurns.indexOf(currentTurn) == 0;
+  }
+*/
+
+  boolean onFirstPromptTurn() {
+    return getPromptSeq().indexOf(currentTurn) == 0;
   }
 
   boolean onLastTurn() {
@@ -602,7 +617,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    *
    * @return
    */
-  List<T> getSeq() {
+  List<T> getPromptSeq() {
     boolean leftSpeaker = isLeftSpeakerSet();
     boolean rightSpeaker = isRightSpeakerSet();
     return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
@@ -633,13 +648,13 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   void playCurrentTurn() {
     if (currentTurn != null) {
-      if (DEBUG) logger.info("playCurrentTurn - turn " + currentTurn);
+      if (DEBUG_PLAY) logger.info("playCurrentTurn - turn " + currentTurn);
       boolean didPause = currentTurn.doPlayPauseToggle();
       if (didPause) {
-        if (DEBUG) logger.info("playCurrentTurn did pause - turn " + currentTurn);
+        if (DEBUG_PLAY) logger.info("playCurrentTurn did pause - turn " + currentTurn);
         setPlayButtonToPlay();
       } else {
-        if (DEBUG) logger.info("playCurrentTurn maybe did play " + currentTurn);
+        if (DEBUG_PLAY) logger.info("playCurrentTurn maybe did play " + currentTurn);
       }
     } else {
       logger.warning("playCurrentTurn no current turn?");
@@ -747,7 +762,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @return null if on last turn
    */
   private T getNext() {
-    List<T> seq = getSeq();
+    List<T> seq = getPromptSeq();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
 
@@ -759,7 +774,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   private T getPrev() {
-    List<T> seq = getSeq();
+    List<T> seq = getPromptSeq();
     int i = seq.indexOf(currentTurn);
     int i1 = i - 1;
 

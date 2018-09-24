@@ -99,6 +99,7 @@ public class AudioConversion extends AudioBase {
    * @return true if audio is valid (not too short, not silence)
    * @seex mitll.langtest.server.audio.AudioFileHelper#getAlignment
    * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
+   * @deprecated using streaming audio currently
    */
   AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString,
                                                       File file,
@@ -114,6 +115,15 @@ public class AudioConversion extends AudioBase {
     return getValidityAndDur(file, useSensitiveTooLoudCheck, quietAudioOK, then);
   }
 
+  /**
+   * @see AudioFileHelper#writeAudioFile
+   * @see #convertBase64ToAudioFiles(String, File, boolean, boolean)
+   * @param file
+   * @param useSensitiveTooLoudCheck
+   * @param quietAudioOK
+   * @param then
+   * @return
+   */
   @NotNull
   AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
     if (DEBUG) logger.debug("getValidityAndDur: wrote wav file " + file.getAbsolutePath());
@@ -130,12 +140,12 @@ public class AudioConversion extends AudioBase {
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
       logger.debug("getValidityAndDur: took " + diff + " millis to write wav file (" + file.getName() +
-          ") " + valid.durationInMillis + " millis long");
+          ") " + valid.getDurationInMillis() + " millis long");
     }
     return valid;
   }
 
-  @NotNull
+/*  @NotNull
   AudioCheck.ValidityAndDur getValidityAndDurStream(String name,
                                                     String fileInfo,
                                                     int length,
@@ -152,7 +162,7 @@ public class AudioConversion extends AudioBase {
           ") " + valid.durationInMillis + " millis long");
     }
     return valid;
-  }
+  }*/
 
   /**
    * Decode Base64 string

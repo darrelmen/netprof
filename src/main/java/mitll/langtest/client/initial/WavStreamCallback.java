@@ -40,7 +40,7 @@ package mitll.langtest.client.initial;
  */
 public interface WavStreamCallback {
   /**
-   * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#stopFlashRecording
+   * @see mitll.langtest.client.recorder.WebAudioRecorder#getStreamResponse
    * @param bytes
    */
   void getResponse(String bytes);

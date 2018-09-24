@@ -452,7 +452,7 @@ public class AudioCheck {
   public static class ValidityAndDur {
     private Validity validity;
     private final boolean isValid;
-    public int durationInMillis;
+    private int durationInMillis;
     private double maxMinRange;
 
     ValidityAndDur() {
@@ -504,6 +504,10 @@ public class AudioCheck {
 
     String dump() {
       return getValidity() + "," + durationInMillis + "," + maxMinRange;
+    }
+
+    public int getDurationInMillis() {
+      return durationInMillis;
     }
 
     public String toString() {

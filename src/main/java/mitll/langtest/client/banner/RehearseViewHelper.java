@@ -5,7 +5,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
@@ -40,6 +39,7 @@ import static com.google.gwt.dom.client.Style.Unit.*;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExercise>>
     extends ListenViewHelper<T>
     implements SessionManager, IRehearseView {
+  public static final int PROGRESS_BAR_WIDTH = 49;
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final String REHEARSE = "Rehearse";
@@ -135,6 +135,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   }
 
   /**
+   * @see #showContent
    * @param dialogID
    * @param dialog
    * @param child
@@ -367,15 +368,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     scoreContainer.addStyleName("rehearseScoreContainer");
     scoreContainer.addStyleName("floatLeft");
 
-    scoreContainer.addStyleName("topMargin");
+    scoreContainer.addStyleName("topFiveMargin");
     scoreContainer.addStyleName("leftFiveMargin");
     scoreContainer.getElement().getStyle().setMarginBottom(0, PX);
     scoreContainer.add(scoreProgress);
-    // speakingRate.addStyleName("topFiveMargin");
-    // scoreContainer.add(speakingRate);
 
     styleProgressBar(scoreProgress);
-    // styleProgressBar(speakingRate);
 
     scoreContainer.setWidth("73%");
     return scoreContainer;
@@ -420,11 +418,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     Style style = progressBar.getElement().getStyle();
     style.setMarginTop(5, PX);
     style.setMarginLeft(5, PX);
+    style.setMarginBottom(0, PX);
 
     style.setHeight(25, PX);
     style.setFontSize(16, PX);
 
-    progressBar.setWidth("49%");
+    progressBar.setWidth(PROGRESS_BAR_WIDTH + "%");
     progressBar.setVisible(false);
   }
 
@@ -434,7 +433,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    * silence analyzer has triggered...
    * Ideally we'd look at packet duration here...
    *
-   * @see RehearseViewHelper#showContent
+   * @see #showContent
    */
   private void mySilenceDetected() {
     //logger.info("mySilenceDetected got silence : " + currentRecordingTurn);
@@ -660,20 +659,22 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
         if (DEBUG) logger.info("gotPlay currentTurn - " + currentTurn);
 
+        // TODO : way too confusing
         if (currentTurn == null || !currentTurn.isPlaying()) {
           setTurnToPromptSide();
+         // currentTurn = getCurrentTurn();
         }
 
         if (currentTurn == null) {
           logger.info("gotPlay no current turn");
-          setCurrentTurn(getSeq().get(0));
+          setCurrentTurn(getPromptSeq().get(0));
         } else {
           if (DEBUG) logger.info("gotPlay (rehearse) Current turn = " + currentTurn);
         }
 
-        if (onFirstTurn()) {  // if got play on the first turn, start a new session -
+        if (onFirstPromptTurn()) {  // if got play on the first turn, start a new session -
           if (currentTurn == null || !currentTurn.isPlaying()) {
-            if (!startOver) { // we already this above!
+            if (!startOver) { // we already did this above!
               sessionStorage.storeSession();
               clearScores();
             }
@@ -682,7 +683,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
           }
         }
 
-        if (getSeq().contains(currentTurn)) {  // is the current turn a prompt? if so play the prompt
+        if (getPromptSeq().contains(currentTurn)) {  // is the current turn a prompt? if so play the prompt
           playCurrentTurn();  // could do play/pause!
         } else { // the current turn is a response, start recording it
           startRecordingTurn(getCurrentTurn()); // advance automatically
@@ -694,7 +695,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   }
 
   private boolean isCurrentTurnAPrompt() {
-    return getSeq().contains(getCurrentTurn());
+    return getPromptSeq().contains(getCurrentTurn());
   }
 
   @Override
@@ -726,24 +727,39 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     bothTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
 
-    dialogSession = new DialogSession(-1, -1,
-        controller.getProjectStartupInfo().getProjectid(), dialogID,
-        System.currentTimeMillis(),
-        System.currentTimeMillis(),
-        getView(),
-        DialogStatus.DEFAULT, 0, 0F, 0F);
+    /**
+     *
+     */
 
-    controller.getDialogService().addSession(dialogSession, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
+//    startSession();
+  }
 
-      }
+  private void startSession() {
+    if (dialogID == -1) {
+      logger.warning("huh? dialog id is  " + dialogID +
+          "???\n\n\n\n");
+    } else {
+      dialogSession = new DialogSession(-1,
+          controller.getUser(),
+          controller.getProjectStartupInfo().getProjectid(), dialogID,
+          System.currentTimeMillis(),
+          System.currentTimeMillis(),
+          getView(),
+          DialogStatus.DEFAULT, 0, 0F, 0F);
 
-      @Override
-      public void onSuccess(Void result) {
-        logger.info("OK, made new session");
-      }
-    });
+
+      controller.getDialogService().addSession(dialogSession, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          logger.info("OK, made new session");
+        }
+      });
+    }
   }
 
   protected INavigation.VIEWS getView() {
@@ -764,7 +780,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
       //     int exID = currentTurn.getExID();
       if (DEBUG) logger.info("currentTurnPlayEnded (rehearse) - turn " + currentTurn.getExID());
-      List<T> seq = getSeq();
+      List<T> seq = getPromptSeq();
 
       boolean isCurrentPrompt = seq.contains(currentTurn);
 
@@ -848,6 +864,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    */
   private void startRecordingTurn(T toStart) {
     if (doRehearse) {
+      if (dialogSession == null) {
+        startSession();
+      }
+
       exStartedRecording.add(toStart.getExID());
 
       toStart.startRecording();
@@ -865,7 +885,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     currentRecordingTurn = toStart;
     if (DEBUG) logger.info("setCurrentRecordingTurn : " + currentRecordingTurn);
   }
-
 
   private void showWaitSpiner() {
     waitCursor.setVisible(doRehearse);
@@ -887,10 +906,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     double total = getTotalScore();
     double studentTotal = getTotal(this.exToStudentDur);
     double refTotal = getTotal(this.exToRefDur);
-    double totalRatio = studentTotal / refTotal;
-    double totalAvgRate = totalRatio / ((float) num);
+    double totalRatio = studentTotal / (5D * refTotal);
+    //double totalAvgRate = totalRatio / ((float) num);
 
-    logger.info("showOverallDialogScore avg rate " + totalAvgRate);
+    logger.info("showOverallDialogScore avg rate " + studentTotal + " vs " + refTotal + " = " + totalRatio);
 
     total = setScoreProgressLevel(total, num);
     setRateProgress(totalRatio);
@@ -899,6 +918,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     overallSmiley.setVisible(true);
     overallSmiley.addStyleName("animation-target");
     hearYourself.setEnabled(true);
+
+    startSession();  // OK, start a new session
   }
 
   /**
@@ -938,7 +959,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     scoreProgress.setText("Speaking Rate " + Math.round(percent) + "%");
 
-    new ScoreProgressBar(false).setColor(scoreProgress, 5F - total, total);
+    double percent1 = 1F - total;
+    logger.info("score to color " + percent1);
+    new ScoreProgressBar(false).setColor(scoreProgress, percent1, total);
 
     scoreProgress.setPercent(percent);
 

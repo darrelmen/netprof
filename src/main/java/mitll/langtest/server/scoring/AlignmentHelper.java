@@ -110,7 +110,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       if (alignmentOutput == null) {
         // logger.warn("addAlignmentToAudioAttribute : couldn't get alignment for audio #" + v.getUniqueID());
       } else {
-        logger.info("set alignment output " + alignmentOutput + " on " + v.getUniqueID() + " : " + v.getTranscript());
+        logger.info("addAlignmentToAudioAttribute set alignment output " + alignmentOutput + " on " + v.getUniqueID() + " : " + v.getTranscript());
         v.setAlignmentOutput(alignmentOutput);
       }
     });

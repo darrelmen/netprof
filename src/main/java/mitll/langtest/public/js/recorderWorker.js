@@ -213,7 +213,7 @@ function sendBlob(framesBeforeRound, audioBlob, isLast, abort, sendMoment) {
 //                console.log(Data.MESSAGE);
                 //  console.log('stopRecordingAndPost completed for ' + framesAfterRound);
             }
-            else if (this.status != 200) {
+            else if (this.status !== 200) {
                 console.log("sendBlob : warning : got response code : " + this.status);
                 var resp = {status: "error", code: this.status, statusText: this.statusText};
                 postSomething(JSON.stringify(resp));

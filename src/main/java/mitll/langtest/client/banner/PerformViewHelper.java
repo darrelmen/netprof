@@ -10,7 +10,6 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -103,7 +102,7 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
   }
 
   private void obscureRespTurns() {
-    getSeq().forEach(RecordDialogExercisePanel::restoreText);
+    getPromptSeq().forEach(RecordDialogExercisePanel::restoreText);
     getRespSeq().forEach(RecordDialogExercisePanel::obscureText);
   }
 }

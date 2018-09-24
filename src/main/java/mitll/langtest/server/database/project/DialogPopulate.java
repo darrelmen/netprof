@@ -349,7 +349,7 @@ public class DialogPopulate {
         REGULAR,
         permanentAudioPath,
         now,
-        valid.durationInMillis,
+        valid.getDurationInMillis(),
         k.getForeignLanguage(),
         (float) valid.getDynamicRange(),
         resultID,

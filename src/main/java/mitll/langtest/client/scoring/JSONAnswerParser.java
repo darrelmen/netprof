@@ -17,6 +17,8 @@ class JSONAnswerParser {
   public static final String START = "start";
   public static final String END = "end";
   public static final String SCORE = "score";
+  public static final String STREAMTIMESTAMP = "STREAMTIMESTAMP";
+  public static final String STREAMSTOP = "STREAMSTOP";
   private final Logger logger = Logger.getLogger("JSONAnswerParser");
 
   private static final String PHONE_TRANSCRIPT = "PHONE_TRANSCRIPT";
@@ -26,7 +28,6 @@ class JSONAnswerParser {
   private static final String VALID = "valid";
 
   /**
-   *
    * @param jsonObject
    * @return
    */
@@ -88,16 +89,19 @@ class JSONAnswerParser {
   }
 
   /**
-   *
    * @param jsonObject
    * @return
    */
   StreamResponse getResponse(JSONObject jsonObject) {
-    return new StreamResponse(getValidity(jsonObject), getStreamTimestamp(jsonObject));
+    return new StreamResponse(getValidity(jsonObject), getStreamTimestamp(jsonObject), getStreamStop(jsonObject));
   }
 
   private long getStreamTimestamp(JSONObject jsonObject) {
-    return getLongField(jsonObject, "STREAMTIMESTAMP".toLowerCase());
+    return getLongField(jsonObject, STREAMTIMESTAMP.toLowerCase());
+  }
+
+  private boolean getStreamStop(JSONObject jsonObject) {
+    return getBoolean(jsonObject, STREAMSTOP.toLowerCase());
   }
 
   @NotNull
