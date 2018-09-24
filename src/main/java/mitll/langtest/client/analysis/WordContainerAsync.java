@@ -251,7 +251,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
             playAudio(visibleItem);
           }
         } else {
-          if (DEBUG) logger.info("gotClickOnReview playAudio " + selected);
+          if (DEBUG) logger.info("gotClickOnReview loadAndPlayOrPlayAudio " + selected);
           playAudio(selected);
         }
       }

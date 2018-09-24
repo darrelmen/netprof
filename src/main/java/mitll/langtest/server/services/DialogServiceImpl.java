@@ -158,7 +158,11 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    */
   @Override
   public void addSession(DialogSession dialogSession) throws DominoSessionException {
-    /*int userIDFromSessionOrDB =*/ getUserIDFromSessionOrDB();
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+
+    if (userIDFromSessionOrDB != dialogSession.getUserid()) {
+      logger.warn("addSession huh? session user " + userIDFromSessionOrDB + " vs dialog session " + dialogSession.getUserid());
+    }
     db.getDialogSessionDAO().add(dialogSession);
   }
 

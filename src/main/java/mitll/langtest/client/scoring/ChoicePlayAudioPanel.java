@@ -332,7 +332,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     doPause();
     listener.audioChanged(mr.getUniqueID(), mr.getDurationInMillis());
 
-    playAudio(mr);
+    loadAndPlayOrPlayAudio(mr);
 
     rememberAudioChoice(isMale, isReg);
 

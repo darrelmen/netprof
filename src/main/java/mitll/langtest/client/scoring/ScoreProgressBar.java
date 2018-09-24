@@ -7,6 +7,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
 import mitll.langtest.client.gauge.SimpleColumnChart;
+import org.jetbrains.annotations.NotNull;
 
 public class ScoreProgressBar {
   //private Logger logger = Logger.getLogger("ScoreProgressBar");
@@ -55,25 +56,33 @@ public class ScoreProgressBar {
    * @param round
    */
   public void setColor(ProgressBar progressBar, double percent, double round) {
-    String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
+   setColor(progressBar, percent);
 
 //    if (showNow) {
 //      setPercentLater(progressBar, percent, round, color);
 //    } else {
     //    logger.info("showScore : color " + color + " for %" + percent + " and " + round);
-    Scheduler.get().scheduleDeferred((Command) () -> setPercentLater(progressBar, percent, round, color));
+    Scheduler.get().scheduleDeferred((Command) () -> setPercentLater(progressBar, percent, round));
 //    }
   }
 
-  private void setPercentLater(ProgressBar progressBar, double percent, double round, String color) {
-    Style style = getStyleWidget(progressBar);
-    style.setBackgroundImage("linear-gradient(to bottom," +
+  public String setColor(ProgressBar progressBar, double percent) {
+    String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
+    setColorGradient(progressBar, color);
+    return color;
+  }
+
+  private void setPercentLater(ProgressBar progressBar, double percent, double round) {
+    setPercent(progressBar, percent, round, getStyleWidget(progressBar));
+  }
+
+  @NotNull
+  private void setColorGradient(ProgressBar progressBar, String color) {
+    getStyleWidget(progressBar).setBackgroundImage("linear-gradient(to bottom," +
         color +
         "," +
         color +
         ")");
-
-    setPercent(progressBar, percent, round, style);
   }
 
   private Style getStyleWidget(ProgressBar progressBar) {

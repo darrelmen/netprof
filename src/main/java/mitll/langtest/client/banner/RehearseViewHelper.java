@@ -135,15 +135,17 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   }
 
   /**
-   * @see #showContent
    * @param dialogID
    * @param dialog
    * @param child
+   * @see #showContent
    */
   @Override
   protected void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
     super.showDialogGetRef(dialogID, dialog, child);
     child.add(overallFeedback = getOverallFeedback());
+
+  //  showOverallDialogScore();
   }
 
   @Override
@@ -538,8 +540,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    * @see ListenViewHelper#currentTurnPlayEnded(boolean)
    */
   private void showScores() {
-    showOverallDialogScore();
-    recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
+    if (!overallSmiley.isVisible()) {
+      showOverallDialogScore();
+      recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
+    }
   }
 
   protected void setRightTurnInitialValue(CheckBox checkBox) {
@@ -647,9 +651,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       getCurrentTurn().cancelRecording();
     } else {
       if (doRehearse) {
-        boolean startOver = overallFeedback.isVisible();
+        boolean showingScoresNow = overallSmiley.isVisible();
 
-        if (startOver) {   // start over
+        if (showingScoresNow) {   // start over
           makeFirstTurnCurrent();
           sessionStorage.storeSession();
           clearScores();
@@ -662,7 +666,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         // TODO : way too confusing
         if (currentTurn == null || !currentTurn.isPlaying()) {
           setTurnToPromptSide();
-         // currentTurn = getCurrentTurn();
+          // currentTurn = getCurrentTurn();
         }
 
         if (currentTurn == null) {
@@ -674,12 +678,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
         if (onFirstPromptTurn()) {  // if got play on the first turn, start a new session -
           if (currentTurn == null || !currentTurn.isPlaying()) {
-            if (!startOver) { // we already did this above!
+            if (!showingScoresNow) { // we already did this above!
               sessionStorage.storeSession();
               clearScores();
             }
           } else {
-            logger.info("gotPlay ignoring turn " + currentTurn);
+            // logger.info("gotPlay ignoring turn " + currentTurn);
           }
         }
 
@@ -906,13 +910,27 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     double total = getTotalScore();
     double studentTotal = getTotal(this.exToStudentDur);
     double refTotal = getTotal(this.exToRefDur);
-    double totalRatio = studentTotal / (5D * refTotal);
-    //double totalAvgRate = totalRatio / ((float) num);
-
-    logger.info("showOverallDialogScore avg rate " + studentTotal + " vs " + refTotal + " = " + totalRatio);
 
     total = setScoreProgressLevel(total, num);
-    setRateProgress(totalRatio);
+    {
+//
+//      studentTotal = 10;
+//      refTotal = 10;
+      double totalRatio = refTotal == 0D ? 0D : studentTotal / (3D * refTotal);
+      //double totalAvgRate = totalRatio / ((float) num);
+
+   //   logger.info("showOverallDialogScore avg rate " + studentTotal + " vs " + refTotal + " = " + totalRatio);
+      setRateProgress(totalRatio);
+    }
+    {
+      double actualRatio = studentTotal / refTotal;
+
+      float v = roundToTens(actualRatio);
+    //  logger.info("showOverallDialogScore rate to show " + v);
+
+      rateProgress.setText("Rate " + v + "x");
+    }
+
     setEmoticon(overallSmiley, total);
 
     overallSmiley.setVisible(true);
@@ -920,6 +938,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     hearYourself.setEnabled(true);
 
     startSession();  // OK, start a new session
+  }
+
+  private float roundToTens(double totalHours) {
+    return ((float) ((Math.round(totalHours * 10d)))) / 10f;
   }
 
   /**
@@ -947,25 +969,17 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private void setRateProgress(double total) {
     ProgressBar scoreProgress = this.rateProgress;
-
-    int num = 5;
-    total /= (float) num;
-    //  logger.info("showOverallDialogScore total   " + total);
-
-    double percent = total * 100;
-//    double round = percent;// Math.max(percent, 30);
-//    if (percent == 0d) round = 100d;
     scoreProgress.setVisible(true);
 
-    scoreProgress.setText("Speaking Rate " + Math.round(percent) + "%");
+    double percent1 = (1F - total);
+    logger.info("setRateProgress score to color " + percent1);
+    new ScoreProgressBar(false).setColor(scoreProgress, percent1);
 
-    double percent1 = 1F - total;
-    logger.info("score to color " + percent1);
-    new ScoreProgressBar(false).setColor(scoreProgress, percent1, total);
-
-    scoreProgress.setPercent(percent);
-
-    // return total;
+    {
+      double percent = total * 100D;
+      logger.info("setRateProgress percent " + total + " vs " + percent);
+      scoreProgress.setPercent(Math.max(33,percent));
+    }
   }
 
   private double getTotalScore() {
@@ -975,7 +989,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private double getTotal(Map<Integer, Float> exToStudentDur) {
     double total = 0D;
     for (Float score : exToStudentDur.values()) {
-      total += score;
+      total += score.doubleValue();
     }
     return total;
   }

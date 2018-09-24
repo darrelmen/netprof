@@ -5,6 +5,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -41,6 +42,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PLAY = false;
   private static final boolean DEBUG_DETAIL = false;
 
   HeadlessPlayAudio(SoundManagerAPI soundManager) {
@@ -100,25 +102,29 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   public boolean doPlayPauseToggle() {
     //logger.info("PlayAudioPanel doPlayPauseToggle " + playing + " " +currentPath);
 
-    if (currentSound != null) {
+    if (hasSound()) {
       if (isPlaying()) {
-        if (DEBUG) logger.info("doPlayPauseToggle pause, is playing = " + playing + " " + currentPath);
+        if (DEBUG_PLAY) logger.info("doPlayPauseToggle pause, is playing = " + playing + " " + currentPath);
         //markNotPlaying();
         pause();  // somehow get exception here?
         return true;
       } else {
-        if (DEBUG) logger.info("doPlayPauseToggle start, is playing = " + playing + " " + currentPath);
+        if (DEBUG_PLAY) logger.info("doPlayPauseToggle start, is playing = " + playing + " " + currentPath);
         startPlaying();
         return false;
       }
     } else {
-      if (DEBUG) {
+      if (DEBUG_PLAY) {
         logger.info("doPlayPauseToggle no current sound, so calling loadAndPlay, is playing = " + playing + " " + currentPath);
       }
 
       loadAndPlay();
       return false;
     }
+  }
+
+  private boolean hasSound() {
+    return currentSound != null;
   }
 
   /**
@@ -168,7 +174,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    */
   @Override
   public void loadAndPlaySegment(float startInSeconds, float endInSeconds) {
-    if (currentSound != null) {
+    if (hasSound()) {
       doPlaySegment(startInSeconds, endInSeconds);
     } else {
       if (DEBUG || currentPath == null) logger.info("loadAndPlaySegment - new path " + currentPath);
@@ -204,9 +210,10 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    *
    * @param startInSeconds
    * @param endInSeconds
+   * @see #doPlaySegment
    */
   private void playSegment(float startInSeconds, float endInSeconds) {
-    if (currentSound != null & soundManager != null) {
+    if (hasSound() & soundManager != null) {
       soundManager.pause(currentSound);
       float start1 = startInSeconds * 1000f;
       float end1 = endInSeconds * 1000f;
@@ -222,7 +229,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see #reinitialize()
    */
   protected void pause() {
-    if (DEBUG) logger.info("HeadlessPlayAudioPanel :pause");
+    if (DEBUG_PLAY) logger.info("HeadlessPlayAudioPanel :pause");
     markNotPlaying();
 
     if (soundManager != null) {
@@ -235,7 +242,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     listeners.forEach(audioControl -> audioControl.update(position));
   }
 
-  protected void playAudio(AudioAttribute audioAttribute) {
+  protected void loadAndPlayOrPlayAudio(AudioAttribute audioAttribute) {
     rememberAudio(audioAttribute);
     loadAndPlay();
   }
@@ -247,7 +254,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     if (currentPath == null) {
       logger.warning("loadAndPlay, current path is null?");
     } else {
-      playAudio(currentPath);
+      loadAndPlayOrPlayAudio(currentPath);
     }
   }
 
@@ -278,12 +285,12 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @param path
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#playAndRemember
    */
-  protected void playAudio(String path) {
-    if (currentPath.equals(path) && currentSound != null) {
-      if (DEBUG) logger.info("playAudio - doPlayPauseToggle " + currentPath);
+  protected void loadAndPlayOrPlayAudio(String path) {
+    if (currentPath.equals(path) && hasSound()) {
+      if (DEBUG) logger.info("loadAndPlayOrPlayAudio - doPlayPauseToggle " + currentPath);
       doPlayPauseToggle();
     } else {
-      if (DEBUG) logger.info("playAudio - new path " + path);
+      if (DEBUG) logger.info("loadAndPlayOrPlayAudio - new path " + path);
 
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
 //      logger.info("logException stack " + exceptionAsString);
@@ -291,17 +298,18 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
       addSimpleListener(new SimpleAudioListener() {
         @Override
         public void songLoaded(double duration) {
-          if (DEBUG) {
-            logger.info("playAudio - songLoaded " + path + " this " + this);
+          if (DEBUG_PLAY) {
+            logger.info("loadAndPlayOrPlayAudio - songLoaded " + path + " this " + this);
           }
-          Scheduler.get().scheduleDeferred(() -> doPlayPauseToggle());
+//          Scheduler.get().scheduleDeferred(() -> doPlayPauseToggle());
+          startPlaying();
         }
 
-        // if (DEBUG) logger.info("playAudio - songLoaded calling doPlayPauseToggle  " + path);
+        // if (DEBUG) logger.info("loadAndPlayOrPlayAudio - songLoaded calling doPlayPauseToggle  " + path);
         @Override
         public void songFinished() {
           if (DEBUG) {
-            logger.info("playAudio - songFinished " + path + " this " + this);
+            logger.info("loadAndPlayOrPlayAudio - songFinished " + path + " this " + this);
           }
         }
       });
@@ -315,7 +323,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    *
    * @param path
    * @see #loadAndPlaySegment(float, float)
-   * @see #playAudio(String)
+   * @see #loadAndPlayOrPlayAudio(String)
    */
   private void loadAudio(String path) {
     if (DEBUG) logger.info("loadAudio - path " + path);
@@ -335,7 +343,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see #loadAudio
    */
   protected String rememberAudio(String path) {
-     if (DEBUG || path == null) {
+     if (DEBUG_PLAY || path == null) {
        logger.info("rememberAudio - path " + path);
      }
     destroySound();
@@ -371,7 +379,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
         //if (DEBUG) logger.info(new Date() + " Sound manager is ready.");
         if (soundManager.isOK()) {
           //  if (DEBUG)
-          if (DEBUG)
+          if (DEBUG_PLAY)
             logger.info("HeadlessPlayAudio : startSong : " + path + " destroy current sound " + currentSound);
 
           destroySound();
@@ -395,8 +403,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     currentSound = new Sound(this);
     String uniqueID = song + "_" + getElement().getId(); // fix bug where multiple npf panels might load the same audio file and not load the second one seemingly
 
-    if (DEBUG) {
-      logger.info("HeadlessPlayAudioPanel.createSound " + uniqueID +
+    if (DEBUG_PLAY) {
+      logger.info("createSound " + uniqueID +
           "" +
           ": (" + getId() + ")" +
           "\n\tfor           " + song +
@@ -415,9 +423,12 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see #startSong(String, boolean)
    */
   public void destroySound() {
-    if (currentSound != null) {
-      if (DEBUG) {
+    if (hasSound()) {
+      if (DEBUG_PLAY) {
         logger.info("HeadlessPlayAudio.destroySound : (" + getId() + ") destroy sound " + currentSound);
+
+//        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got destroy"));
+//        logger.info("logException stack " + exceptionAsString);
       }
       this.soundManager.destroySound(currentSound);
       currentSound = null;
@@ -450,7 +461,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   protected void resetAudio() {
     // setPlayLabel();
     update(0);
-    if (currentSound != null) {
+    if (hasSound()) {
       soundManager.setPosition(currentSound, 0);
     }
   }

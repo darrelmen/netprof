@@ -69,7 +69,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private DivWidget dialogHeader;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY = true;
+  private static final boolean DEBUG_PLAY = false;
   /**
    *
    */
@@ -648,10 +648,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   void playCurrentTurn() {
     if (currentTurn != null) {
-      if (DEBUG_PLAY) logger.info("playCurrentTurn - turn " + currentTurn);
+      if (DEBUG_PLAY) logger.info("playCurrentTurn " + currentTurn);
       boolean didPause = currentTurn.doPlayPauseToggle();
       if (didPause) {
-        if (DEBUG_PLAY) logger.info("playCurrentTurn did pause - turn " + currentTurn);
+        if (DEBUG_PLAY) logger.info("playCurrentTurn did pause " + currentTurn);
         setPlayButtonToPlay();
       } else {
         if (DEBUG_PLAY) logger.info("playCurrentTurn maybe did play " + currentTurn);
