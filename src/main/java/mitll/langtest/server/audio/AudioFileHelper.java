@@ -257,6 +257,8 @@ public class AudioFileHelper implements AlignDecode {
           logger.warn("checkLTSAndCountPhones took " + (now2 - then) + " millis to mark exercises safe/unsafe to decode.");
           if (count > 0) {
             logger.warn("checkLTSAndCountPhones NOTE : out of " + exercises.size() + " dict and LTS fails on " + count);
+          } else {
+            logger.info("checkLTSAndCountPhones out of " + exercises.size() + " dict and LTS fails on " + count);
           }
         }
       }

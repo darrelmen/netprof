@@ -9,7 +9,7 @@ import java.util.Set;
 public class HydraOutput {
   private static final Logger logger = LogManager.getLogger(HydraOutput.class);
 
-  enum STATUS_CODES {SUCCESS, ERROR}
+  enum STATUS_CODES {SUCCESS, OOV_IN_TRANS, ERROR}
   // public static final String SUCCESS = "SUCCESS";
 
   private Scores scores;
