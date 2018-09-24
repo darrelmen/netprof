@@ -392,7 +392,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             logger.warn("scoreRepeatExercise kaldi didn't run properly....");
           } else {
             jsonObject = cached.getScores().getKaldiJsonObject();
-            logger.info("scoreRepeatExercise json obect " + jsonObject);
+            logger.info("scoreRepeatExercise json object " + jsonObject);
           }
         } else {
           cached = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
@@ -410,9 +410,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               }
               cacheHydraResult(decode, filePath, cached);//, scores, phoneLab, wordLab);
             }
-          } else {
-            logger.warn("scoreRepeatExercise skipping invalid response from hydra.");
           }
+          //else {
+          //   logger.warn("scoreRepeatExercise skipping invalid response from " +hydra+ ".");
+          // }
         }
 
       } catch (IOException e) {
@@ -429,7 +430,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
 
     if (cached == null || cached.getStatus() != SUCCESS) {
-      logger.error("scoreRepeatExercise " +hydra+
+      logger.error("scoreRepeatExercise " + hydra +
           " failed to generate scores : " + cached);
       PretestScore pretestScore = new PretestScore(-1f);
       if (cached != null) pretestScore.setStatus(cached.getStatus().toString());
@@ -463,7 +464,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       long now = System.currentTimeMillis();
       long processDur = now - then;
 
-      logger.info("runKaldi response " + json);
+      logger.info("runKaldi took " + processDur + " for " + sentence + " on " + audioPath);
 
       try {
         JsonObject parse = new JsonParser().parse(json).getAsJsonObject();
@@ -478,7 +479,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         } else {
           logger.warn("runKaldi failed " +
               "\n\tstatus " + status +
-              "\n\tlog    " + log
+              "\n\tlog    " + log.trim()
           );
           parse = new JsonObject();
         }
