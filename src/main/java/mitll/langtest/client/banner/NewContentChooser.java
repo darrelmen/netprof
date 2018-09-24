@@ -62,7 +62,7 @@ public class NewContentChooser implements INavigation {
    * @see InitialUI#makeNavigation
    */
   public NewContentChooser(ExerciseController controller, IBanner banner) {
-    learnHelper = new NewLearnHelper(controller, this, LEARN);
+    learnHelper = new NewLearnHelper(controller);
     practiceHelper = new PracticeHelper(controller, this, DRILL);
     quizHelper = new QuizHelper(controller, this, VIEWS.QUIZ, this);
     this.controller = controller;

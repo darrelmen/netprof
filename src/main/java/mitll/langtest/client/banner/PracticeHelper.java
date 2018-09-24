@@ -74,7 +74,7 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
   PracticeHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
-    super(controller, viewContaner, myView);
+    super(controller);
   }
 
   /**

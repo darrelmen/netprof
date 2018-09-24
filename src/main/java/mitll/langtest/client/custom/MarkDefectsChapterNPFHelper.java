@@ -68,7 +68,7 @@ public class MarkDefectsChapterNPFHelper extends SimpleChapterNPFHelper<CommonSh
    * @see
    */
   public MarkDefectsChapterNPFHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
-    super(controller, viewContaner, myView);
+    super(controller);
   }
 
   /**

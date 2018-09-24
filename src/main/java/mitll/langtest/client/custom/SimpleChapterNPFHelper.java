@@ -44,7 +44,6 @@ import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
-import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -72,21 +71,17 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   protected final ExerciseController controller;
   private ExerciseList npfExerciseList;
   protected final FlexListLayout<T, U> flexListLayout;
-//  private   IViewContaner viewContaner;
-//  private INavigation.VIEWS myView;
+
 
   /**
    * @param controller
-   * @param viewContaner
-   * @param myView
    * @see RecorderNPFHelper#RecorderNPFHelper(ExerciseController, boolean, IViewContaner, INavigation.VIEWS)
    */
-  public SimpleChapterNPFHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
+  public SimpleChapterNPFHelper(ExerciseController controller) {
     this.controller = controller;
     final SimpleChapterNPFHelper<T, U> outer = this;
     this.flexListLayout = getMyListLayout(outer);
-//    this.viewContaner = viewContaner;
-//    this.myView = myView;
+
   }
 
   protected abstract FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer);
@@ -98,10 +93,10 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see NewContentChooser#showView
    */
   public void showNPF(DivWidget content, String instanceName) {
-  //   logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
+    //   logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
-    //  logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
+      //  logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
       showContent(content, instanceName, true);
       npfExerciseList.reloadWithCurrent();
     } else {
@@ -140,7 +135,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see ContentView#showContent
    */
   private Panel doNPF(String instanceName) {
-   // logger.info(getClass() + " : doNPF instanceName = " + instanceName);
+    // logger.info(getClass() + " : doNPF instanceName = " + instanceName);
     Panel widgets = flexListLayout.doInternalLayout(-1, instanceName, false);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
