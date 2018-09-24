@@ -8,6 +8,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -704,8 +705,24 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     bothTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
 
-    dialogSession = new DialogSession(-1, -1, controller.getProjectStartupInfo().getProjectid(), dialogID,
-        System.currentTimeMillis(), System.currentTimeMillis(), getView(), DialogStatus.DEFAULT, 0, 0F, 0F);
+    dialogSession = new DialogSession(-1, -1,
+        controller.getProjectStartupInfo().getProjectid(), dialogID,
+        System.currentTimeMillis(),
+        System.currentTimeMillis(),
+        getView(),
+        DialogStatus.DEFAULT, 0, 0F, 0F);
+
+    controller.getDialogService().addSession(dialogSession, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+          logger.info("OK, made new session");
+      }
+    });
   }
 
   protected INavigation.VIEWS getView() {

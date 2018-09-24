@@ -52,7 +52,7 @@ import java.util.Set;
  * Time: 2:52 PM
  * To change this template use File | Settings | File Templates.
  */
-public class DAO {
+public abstract class DAO {
   private static final Logger logger = LogManager.getLogger(DAO.class);
   protected final LogAndNotify logAndNotify;
 
@@ -289,7 +289,7 @@ public class DAO {
 //        if (now - then > i) {
       //        logger.info("finish took " + (now - then) + " millis to close connection - sql " + sql);
       //    }
-    },"DAO.finish.closeConnection").start();
+    }, "DAO.finish.closeConnection").start();
 
   }
 

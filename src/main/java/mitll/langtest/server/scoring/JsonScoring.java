@@ -190,7 +190,7 @@ public class JsonScoring {
     float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
 
     Project project = db.getProject(projid);
-    String language = project.getLanguage();
+  //  String language = project.getLanguage();
 
     jsonForScore = fullJSON ?
         scoreToJSON.getJsonObject(pretestScore) :

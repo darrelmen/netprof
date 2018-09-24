@@ -64,7 +64,6 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
   public DialogSessionDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new DialogSessionDAOWrapper(dbConnection);
-    // this.databaseImpl = databaseImpl;
   }
 
   // TODO : may need this later
@@ -90,6 +89,11 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
   @Override
   public List<IDialogSession> getDialogSessions(int userid, int dialogid) {
     return getiDialogSessions(getByUserAndDialog(userid, dialogid));
+  }
+
+  @Override
+  public List<IDialogSession> getCurrentDialogSessions(int userid ) {
+    return getiDialogSessions(dao.byUser(userid));
   }
 
   @NotNull
@@ -182,12 +186,6 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
         ds.getSpeakingRate()
     ));
   }
-
-  //  @Override
-//  public void markDeleted(int id) {
-//    dao.removeForProject(id);
-//  }
-//
 
   /**
    * FOR REAL
