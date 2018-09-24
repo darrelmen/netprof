@@ -12,8 +12,11 @@ public class ScoreProgressBar {
   //private Logger logger = Logger.getLogger("ScoreProgressBar");
 
   private static final String AUDIO_CUT_OFF = "Audio cut off.";
-    ProgressBar progressBar;
+  ProgressBar progressBar;
 
+  /**
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getProgressBar
+   */
   public ScoreProgressBar() {
     progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
   }
@@ -47,25 +50,24 @@ public class ScoreProgressBar {
   }
 
   /**
-   *
    * @param progressBar
    * @param percent
    * @param round
    */
   public void setColor(ProgressBar progressBar, double percent, double round) {
-     String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
+    String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
 
 //    if (showNow) {
 //      setPercentLater(progressBar, percent, round, color);
 //    } else {
-   //    logger.info("showScore : color " + color + " for %" + percent + " and " + round);
-      Scheduler.get().scheduleDeferred((Command) () -> setPercentLater(progressBar, percent, round, color));
+    //    logger.info("showScore : color " + color + " for %" + percent + " and " + round);
+    Scheduler.get().scheduleDeferred((Command) () -> setPercentLater(progressBar, percent, round, color));
 //    }
   }
 
   private void setPercentLater(ProgressBar progressBar, double percent, double round, String color) {
     Style style = getStyleWidget(progressBar);
-     style.setBackgroundImage("linear-gradient(to bottom," +
+    style.setBackgroundImage("linear-gradient(to bottom," +
         color +
         "," +
         color +

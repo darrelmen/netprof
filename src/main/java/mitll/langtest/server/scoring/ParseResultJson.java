@@ -65,6 +65,7 @@ public class ParseResultJson {
   private static final String PHONES = "phones";
   private static final String WORDS = "words";
   private static final String W = "w";
+  public static final String WORD = "word";
   private final ServerProperties props;
   private final Language languageEnum;
 //  private Map<String, String> phoneToDisplay;
@@ -295,7 +296,7 @@ public class ParseResultJson {
                                JsonObject phone,
                                boolean usePhone) {
     JsonElement jsonElement = phone.get(tokenKey);
-    String token = (jsonElement.isJsonPrimitive()) ? jsonElement.getAsString() : "word";
+    String token = (jsonElement.isJsonPrimitive()) ? jsonElement.getAsString() : WORD;
     double pscore = phone.get(S).getAsDouble();
     double pstart = phone.has(STR) ? phone.get(STR).getAsDouble() : 0d;
     double pend = phone.has(END) ? phone.get(END).getAsDouble() : 0d;

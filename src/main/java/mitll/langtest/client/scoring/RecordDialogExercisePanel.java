@@ -265,11 +265,15 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     clearScoreInfo();
   }
 
-  public float getSpeakingRate() {
+  /**
+   * @see RehearseViewHelper#useResult
+   * @return
+   */
+/*  public float getSpeakingRate() {
     float v = (refSpeechDur == 0F || studentSpeechDur == 0F) ? -1F : (studentSpeechDur / refSpeechDur);
     logger.info("getSpeakingRate " + getExID() + " student " + studentSpeechDur + " ref " + refSpeechDur + " ratio " + v);
     return v;
-  }
+  }*/
 
   /**
    * @see RehearseViewHelper#useInvalidResult
@@ -498,6 +502,14 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    */
   public boolean isRecording() {
     return recordAudioPanel.getPostAudioRecordButton().isRecording();
+  }
+
+  public float getRefSpeechDur() {
+    return refSpeechDur;
+  }
+
+  public float getStudentSpeechDur() {
+    return studentSpeechDur;
   }
 
 /*  public boolean abortRecording() {

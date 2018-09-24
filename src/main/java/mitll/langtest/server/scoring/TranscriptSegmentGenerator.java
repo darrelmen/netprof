@@ -1,11 +1,14 @@
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.KoreanLTS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +24,10 @@ public class TranscriptSegmentGenerator {
   private static final Logger logger = LogManager.getLogger(TranscriptSegmentGenerator.class);
   protected ServerProperties serverProps;
 
+  /**
+   * @see ASRWebserviceScoring#ASRWebserviceScoring
+   * @param serverProperties
+   */
   public TranscriptSegmentGenerator(ServerProperties serverProperties) {
     this.serverProps = serverProperties;
   }
@@ -247,7 +254,6 @@ public class TranscriptSegmentGenerator {
               logger.warn("fall back to " + koreanFragment + " given expected " + new HashSet<>(currentFragments));
               //  builder.append(koreanFragment).append(" ");
               addKoreanSegment(koreanPhones, currentSegment, koreanFragment);
-
             }
           }
         }

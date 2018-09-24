@@ -53,6 +53,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final Logger logger = Logger.getLogger("NewContentChooser");
 
   private static final String CURRENT_VIEW = "CurrentView";
+
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
 
