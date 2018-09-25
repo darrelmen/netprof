@@ -46,6 +46,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.logging.Logger;
 
@@ -218,8 +219,11 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       validAudio = true;
       useResult(result);
       addRT(result, (int) roundtrip);
-      if (!result.getPretestScore().getStatus().isEmpty()) {
-        showPopup("Status " +result.getPretestScore().getStatus());
+      PretestScore pretestScore = result.getPretestScore();
+      if (!pretestScore.getStatus().isEmpty()) {
+        String toShow = "Status " + pretestScore.getStatus();
+        String suffix = pretestScore.getMessage().isEmpty() ? "" : " : " + pretestScore.getMessage();
+        showPopup(toShow +suffix);
       }
     } else {
       validAudio = false;

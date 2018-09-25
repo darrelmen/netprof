@@ -32,10 +32,7 @@ import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
@@ -93,7 +90,7 @@ public class NewContentChooser implements INavigation {
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-   //    logger.info("getCurrentView currentView " + currentView);
+    //    logger.info("getCurrentView currentView " + currentView);
     VIEWS currentStoredView = null;
     try {
       currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
@@ -147,7 +144,7 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-   //  logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+    //  logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
       //  logger.info("showView - already showing " + view);
@@ -209,10 +206,22 @@ public class NewContentChooser implements INavigation {
     }
   }
 
+  /**
+   * Remember to preserve unit chapter selection from history...
+   * @param views
+   */
   private void setInstanceHistory(VIEWS views) {
     if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
+      Map<String, Collection<String>> typeToSection = new SelectionState(History.getToken(), false).getTypeToSection();
       //   logger.info("setInstanceHistory clearing history for instance " + views);
-      History.newItem(SelectionState.INSTANCE + "=" + views.toString());
+      StringBuilder stringBuilder = new StringBuilder();
+      typeToSection.forEach((k, v) -> stringBuilder
+          .append(k)
+          .append("=")
+          .append(v.iterator().next()).append(SelectionState.SECTION_SEPARATOR));
+      String historyToken = SelectionState.INSTANCE + "=" + views.toString();
+      String s = stringBuilder.toString();
+      pushNewItem(historyToken + (s.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + s));
     } else {
       //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
@@ -342,7 +351,7 @@ public class NewContentChooser implements INavigation {
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
     // logger.info("pushUnitOrChapter ");
-    History.newItem(s + "=" + next.getValue());
+    pushNewItem(s + "=" + next.getValue());
   }
 
   /**
@@ -388,7 +397,7 @@ public class NewContentChooser implements INavigation {
    */
   private String getCurrentStoredView() {
     String instance = getCurrentInstance();
-   // logger.info("getCurrentStoredView instance = " + instance);
+    // logger.info("getCurrentStoredView instance = " + instance);
 
     VIEWS views = null;
     try {
@@ -411,7 +420,6 @@ public class NewContentChooser implements INavigation {
 
 
   /**
-   *
    * @return
    */
   private String getCurrentInstance() {
@@ -488,10 +496,8 @@ public class NewContentChooser implements INavigation {
 
       //   logger.info("getShowTab history after - " + History.getToken());
 
-      History.newItem(
-          SelectionState.INSTANCE + "=" + LEARN.toString() +
-              SelectionState.SECTION_SEPARATOR + SelectionState.ITEM + "=" + exid
-      );
+      pushNewItem(SelectionState.INSTANCE + "=" + LEARN.toString() +
+          SelectionState.SECTION_SEPARATOR + SelectionState.ITEM + "=" + exid);
     };
   }
 
@@ -504,9 +510,14 @@ public class NewContentChooser implements INavigation {
 
   private void setHistoryWithList(int listid, VIEWS views) {
     // logger.info("showListIn - " + listid + " " + views);
-    History.newItem(
-        FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
-            SelectionState.INSTANCE + "=" + views.toString());
+    String historyToken = FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
+        SelectionState.INSTANCE + "=" + views.toString();
+    pushNewItem(historyToken);
+  }
+
+  private void pushNewItem(String historyToken) {
+    logger.info("pushNewItem " + historyToken);
+    History.newItem(historyToken);
   }
 
   @Override

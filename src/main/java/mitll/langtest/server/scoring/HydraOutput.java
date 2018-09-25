@@ -9,8 +9,8 @@ import java.util.Set;
 public class HydraOutput {
   private static final Logger logger = LogManager.getLogger(HydraOutput.class);
 
-  enum STATUS_CODES {SUCCESS, OOV_IN_TRANS, ERROR}
-  // public static final String SUCCESS = "SUCCESS";
+
+  enum STATUS_CODES {SUCCESS, OOV_IN_TRANS, FAILURE, ERROR}
 
   private Scores scores;
   private String wordLab;
@@ -21,6 +21,7 @@ public class HydraOutput {
    * DEFAULT status is success!
    */
   private STATUS_CODES status = STATUS_CODES.SUCCESS;
+  private String message = "";
   private String log;
 
   /**
@@ -117,6 +118,15 @@ public class HydraOutput {
 
   public HydraOutput setLog(String log) {
     this.log = log;
+    return this;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public HydraOutput setMessage(String message) {
+    this.message = message;
     return this;
   }
 

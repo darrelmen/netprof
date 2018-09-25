@@ -63,7 +63,8 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
   private String json;
   private transient boolean ranNormally;
   private boolean fullMatch = true;
-  private String status="";
+  private String status = "";
+  private String message = "";
 
   public PretestScore() {
   } // required for serialization
@@ -174,14 +175,28 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
     return status;
   }
 
+  /**
+   *
+   * @param status
+   * @return
+   */
   public PretestScore setStatus(String status) {
     this.status = status;
     return this;
   }
 
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
+  }
+
   public String toString() {
     return "score" +
         "\n\tstatus         " + status +
+        "\n\tmessage        " + message +
         "\n\tscore          " + hydecScore +
         "\n\tphones         " + getPhoneScores() +
         "\n\ttype->image    " + getsTypeToImage() +

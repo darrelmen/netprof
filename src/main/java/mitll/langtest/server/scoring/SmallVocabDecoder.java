@@ -184,8 +184,18 @@ public class SmallVocabDecoder {
 
   public String getSegmented(String longPhrase, boolean removeAllAccents) {
     Collection<String> tokens = getTokens(longPhrase, removeAllAccents);
+    boolean debug = longPhrase.startsWith("sel");
+    if (debug) {
+      tokens.forEach(token -> logger.info("getSegmented " + token));
+    }
     StringBuilder builder = new StringBuilder();
-    tokens.forEach(token -> builder.append(segmentation(token.trim())).append(" "));
+    tokens.forEach(token -> {
+      String segmentation = segmentation(token.trim());
+      if (debug) {
+        logger.info("getSegmented segmentation " + segmentation);
+      }
+      builder.append(segmentation).append(" ");
+    });
     return builder.toString();
   }
 

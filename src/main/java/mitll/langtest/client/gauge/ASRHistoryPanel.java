@@ -288,7 +288,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     Widget row = new DivWidget();
     Map<NetPronImageType, List<TranscriptSegment>> scores = scoreAndPath.getScores();
     if (scores.isEmpty()) {
-      logger.warning("makeColoredTable no segments for " + scoreAndPath);
+      logger.info("makeColoredTable no segments for " + scoreAndPath);
     }
     row.getElement().setInnerHTML(new WordTable().makeColoredTableFull(scores));
     tooltipHelper.createAddTooltip(row, "Score" + (" " + scoreAndPath.getPercentScore() + "%"), Placement.BOTTOM);

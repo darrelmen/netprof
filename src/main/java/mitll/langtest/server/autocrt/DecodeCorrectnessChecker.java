@@ -74,6 +74,7 @@ public class DecodeCorrectnessChecker {
   private final SmallVocabDecoder svd;
   private static final boolean DEBUG = false;
 
+
   /**
    * @param alignDecode
    * @param minPronScore
@@ -302,11 +303,27 @@ public class DecodeCorrectnessChecker {
       // logger.info("raw after   " + rawRefSentence);
     }
 
-    // logger.info("raw (" +language+  ") after   " + rawRefSentence);
+    logger.info("getPhraseToDecode raw (" + language + ") after '" + rawRefSentence + "'");
 
-    return isAsianLanguage(language) && !rawRefSentence.trim().equalsIgnoreCase(UNKNOWN_MODEL) ?
-        svd.getSegmented(rawRefSentence.trim().toUpperCase(), !isFrench(language)) :
-        rawRefSentence.trim().toUpperCase();
+    boolean isKaldi = isKaldi(language);
+    boolean removeAllAccents = !isFrench(language) && !isKaldi;
+    //logger.info("getPhraseToDecode removeAllAccents is " + removeAllAccents);
+    String rawOut = isAsianLanguage(language) && !rawRefSentence.trim().equalsIgnoreCase(UNKNOWN_MODEL) ?
+        svd.getSegmented(rawRefSentence.trim().toUpperCase(), removeAllAccents) :
+        rawRefSentence.trim();
+
+    String uc = rawOut.toUpperCase();
+    String lc = rawOut.toLowerCase();
+
+//    logger.info("getPhraseToDecode rawOut phrase is " + rawOut);
+//    logger.info("getPhraseToDecode lc phrase is " + lc);
+//    logger.info("getPhraseToDecode uc phrase is " + uc);
+
+    return isKaldi ? lc : uc;
+  }
+
+  private boolean isKaldi(String language) {
+    return language.equalsIgnoreCase("Turkish") || language.equalsIgnoreCase("Croatian") || language.equalsIgnoreCase("Serbian");
   }
 
   private boolean isFrench(String language) {

@@ -132,7 +132,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
       //  .concurrencyLevel(4)
       //  .weakKeys()
       .maximumSize(10000)
-      .expireAfterWrite(10, TimeUnit.MINUTES)
+      .expireAfterWrite(30, TimeUnit.SECONDS)
       .build(
           new CacheLoader<Integer, Collection<MonitorResult>>() {
             @Override

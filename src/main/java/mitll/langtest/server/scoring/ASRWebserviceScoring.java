@@ -375,7 +375,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
         // dcodr can't handle an equals in the file name... duh...
         String wavFile1 = filePath + ".wav";
-        logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to " + hydra + " (derived from " + wavFile1 + ")");
+//        logger.info("scoreRepeatExercise : sending " + rawAudioPath + " to " + hydra + " (derived from " + wavFile1 + ")");
+
         boolean wroteIt = AudioConversion.wav2raw(wavFile1, rawAudioPath);
 
         if (!wroteIt) {
@@ -392,7 +393,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             logger.warn("scoreRepeatExercise kaldi didn't run properly....");
           } else {
             jsonObject = cached.getScores().getKaldiJsonObject();
-            logger.info("scoreRepeatExercise json object " + jsonObject);
+//            logger.info("scoreRepeatExercise json object " + jsonObject);
           }
         } else {
           cached = runHydra(rawAudioPath, sentence, transliteration, lmSentences,
@@ -433,7 +434,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       logger.error("scoreRepeatExercise " + hydra +
           " failed to generate scores : " + cached);
       PretestScore pretestScore = new PretestScore(-1f);
-      if (cached != null) pretestScore.setStatus(cached.getStatus().toString());
+      if (cached != null) {
+        pretestScore
+            .setStatus(cached.getStatus().toString())
+            .setMessage(cached.getMessage());
+      }
       return pretestScore;
     } else {
       PretestScore pretestScore = getPretestScore(
@@ -443,7 +448,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           cached,
           cachedDuration, processDur, usePhoneToDisplay, jsonObject, useKaldi);
 
-      logger.info("scoreRepeatExercise got " + pretestScore);
+//      logger.info("scoreRepeatExercise got " + pretestScore);
       return pretestScore;
     }
   }
@@ -508,6 +513,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       return new HydraOutput(new Scores(-1F, new HashMap<>(), (int) 0)
           .setKaldiJsonObject(new JsonObject()), null, null, null)
           .setStatus(ERROR)
+          .setMessage(e.getMessage())
           .setLog(e.getMessage());
     }
   }
@@ -519,11 +525,18 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     try {
       return STATUS_CODES.valueOf(status);
     } catch (IllegalArgumentException e) {
-      logger.warn("couldn't parse status " + status);
+      logger.warn("getStatus : couldn't parse status " + status);
       return STATUS_CODES.ERROR;
     }
   }
 
+  /**
+   * @param sentence
+   * @param audioPath
+   * @param port
+   * @return
+   * @throws IOException
+   */
   private String callKaldi(String sentence, String audioPath, int port) throws IOException {
     HTTPClient httpClient = new HTTPClient();
 
@@ -534,9 +547,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String encode = URLEncoder.encode(jsonRequest, StandardCharsets.UTF_8.name());
     String url = prefix + encode;
     logger.info("runKaldi " +
-        "\n\treq  " + encode +
-        "\n\traw  " + (prefix + jsonRequest) +
-        "\n\tpost " + url);
+        "\n\tsentence  " + sentence +
+        "\n\taudioPath " + audioPath +
+        //"\n\treq       " + encode +
+        "\n\traw       " + (prefix + jsonRequest) +
+        "\n\tpost      " + url);
 
     return httpClient.readFromGET(url);
   }
@@ -544,17 +559,16 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   @NotNull
   private String getPrefix(int port) {
     String localhost = props.isLaptop() ? "hydra-dev" : "localhost";
-    //String localhost =  "localhost";
     return "http://" + localhost + ":" + port + "/score/";
   }
 
   private String getKaldiRequest(String sentence, String audioPath) {
     JsonObject jsonObject = new JsonObject();
 
-    logger.info("KALDI " +
-        "\n\tsentence  " + sentence +
-        "\n\taudioPath " + audioPath
-    );
+//    logger.info("KALDI " +
+//        "\n\tsentence  " + sentence +
+//        "\n\taudioPath " + audioPath
+//    );
     jsonObject.addProperty("reqid", "1234");
     jsonObject.addProperty("request", "decode");
     jsonObject.addProperty("phrase", sentence.trim());

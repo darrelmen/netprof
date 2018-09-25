@@ -423,7 +423,7 @@ public class Project implements IPronunciationLookup {
         logger.warn("huh? no prop value for " + prop);
       } else {
         propCache.put(prop, propValue);
-        logger.info("getProp " + prop + " = " + propValue);
+//        logger.info("getProp " + prop + " = " + propValue);
       }
       return propValue;
     } else {
