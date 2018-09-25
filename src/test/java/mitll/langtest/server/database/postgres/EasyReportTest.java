@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.postgres;
 
+import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
@@ -59,17 +60,26 @@ import java.util.*;
 
 public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);
-  public static final int MAX = 200;
-  public static final int USERID = 1474;
-  public static final int SPANISH = 3;
-  public static final int DEMO_USER = 659;
+  //public static final int MAX = 200;
+  private static final int USERID = 1474;
+  private static final int SPANISH = 3;
+  private static final int DEMO_USER = 659;
+
+  @Test
+
+  public void testTurk() {
+  }
 
   @Test
   public void testKaldi() {
     DatabaseImpl db = getAndPopulate();
-    int projectid = 5;
+    int projectid = 6;
     Project project = db.getProject(projectid);
-  //  project.recalcRefAudio();
+    String phraseToDecode = new DecodeCorrectnessChecker(null, 0, project.getAudioFileHelper().getSmallVocabDecoder()).getPhraseToDecode("selamımı", "turkish");
+
+    logger.info("Got " + phraseToDecode);
+
+    //  project.recalcRefAudio();
   }
 
   @Test
@@ -135,7 +145,7 @@ public class EasyReportTest extends BaseTest {
     Map<String, List<Bigram>> phoneToBigrams = phoneBigramsForPeriod.getPhoneToBigrams();
     phoneToBigrams.forEach((s, bigrams) -> logger.info(s + " -> " + bigrams.size() + " : " + bigrams));
 
-  //  WordsAndTotal wordScoresForUser = slickAnalysis.getWordScoresForUser(DEMO_USER, -1, -1, 0, maxValue, 0, 100, "");
+    //  WordsAndTotal wordScoresForUser = slickAnalysis.getWordScoresForUser(DEMO_USER, -1, -1, 0, maxValue, 0, 100, "");
 
 
     String b = "b";
@@ -156,14 +166,13 @@ public class EasyReportTest extends BaseTest {
     });
 */
 
-    String bigram ="dh-b";
+    String bigram = "dh-b";
     logger.info(b + " " + bigram + "\n\n\n");
     List<WordAndScore> nj = slickAnalysis.getPhoneReportFor(DEMO_USER, -1, b, bigram, 0, fiveYearsFromNow);
 
     if (nj == null) {
       logger.warn("testPhoneReport no results for " + b + " " + bigram);
-    }
-    else {
+    } else {
       nj.forEach(wordAndScore -> logger.info(b + " " + bigram + " : " + wordAndScore.getWord()));
     }
 
@@ -174,7 +183,7 @@ public class EasyReportTest extends BaseTest {
   public void testAnalysis() {
     DatabaseImpl andPopulate = getAndPopulate();
     Project project = andPopulate.getProject(7);
-   //   project.getAnalysis().getPerformanceReportForUser(USERID, 0, -1, 0);
+    //   project.getAnalysis().getPerformanceReportForUser(USERID, 0, -1, 0);
 
     project.getAnalysis().getPhoneReportFor(USERID, -1, "b", "b-rf", 0, System.currentTimeMillis());
     //  andPopulate.sendReport(-1);
