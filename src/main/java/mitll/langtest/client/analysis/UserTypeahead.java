@@ -2,25 +2,18 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.TextBox;
-import com.github.gwtbootstrap.client.ui.Typeahead;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.shared.analysis.UserInfo;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.logging.Logger;
 
 public class UserTypeahead {
   private final Logger logger = Logger.getLogger("UserTypeahead");
 
-  private static final int DISPLAY_ITEMS = 15;
+  //private static final int DISPLAY_ITEMS = 15;
   private static final int BOX_WIDTH = 150;
   private static final String HINT = "user id or name or date";
   private static final int SEARCH_FONT = 14;

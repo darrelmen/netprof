@@ -55,8 +55,8 @@ class PlayAudio {
   private final SoundPlayer soundFeedback;
   private final UIObject playFeedback;
   private Timer t;
-  private ExerciseServiceAsync exerciseService;
-  private ExceptionSupport exceptionSupport;
+  private final ExerciseServiceAsync exerciseService;
+  private final ExceptionSupport exceptionSupport;
 
   /**
    * @param soundFeedback

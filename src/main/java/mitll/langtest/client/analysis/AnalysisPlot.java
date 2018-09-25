@@ -1120,7 +1120,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
     setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
   }
 
-  protected SafeHtml getNoWrapContent(String noWrapContent) {
+/*  protected SafeHtml getNoWrapContent(String noWrapContent) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
     sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
         noWrapContent +
@@ -1128,7 +1128,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
     sb.appendHtmlConstant("</div>");
     return sb.toSafeHtml();
-  }
+  }*/
 
   /**
    * Uses remembered session size.

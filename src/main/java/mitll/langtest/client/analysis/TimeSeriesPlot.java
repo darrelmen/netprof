@@ -35,8 +35,6 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import mitll.langtest.shared.analysis.PhoneSession;
-import mitll.langtest.shared.analysis.UserPerformance;
-import mitll.langtest.shared.exercise.CommonShell;
 import org.moxieapps.gwt.highcharts.client.*;
 
 import java.util.Date;
@@ -144,10 +142,10 @@ class TimeSeriesPlot extends DivWidget {
     DateTimeFormat toUse = sameYear(shortForDate) ? noYearFormat : format;
     return toUse.format(date);
   }
-
-  String getShortDate(long xAsLong) {
-    return getShortDate(xAsLong, true);
-  }
+//
+//  String getShortDate(long xAsLong) {
+//    return getShortDate(xAsLong, true);
+//  }
 
   String getDate(long xAsLong) {
     return getDate(xAsLong, true);

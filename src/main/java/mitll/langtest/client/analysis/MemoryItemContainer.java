@@ -52,7 +52,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.exercise.HasID;
@@ -81,13 +80,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   static final String SELECTED_USER = "selectedUser";
 
   private static final int ID_WIDTH = 90;
-  private int pageSize;
+  private final int pageSize;
   private final String todayYear;
   private final String todaysDate;
 
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
-  private int shortPageSize;// = 8;
+  private final int shortPageSize;// = 8;
 
   /**
    * @param controller

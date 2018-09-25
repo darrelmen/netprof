@@ -9,7 +9,6 @@ import org.moxieapps.gwt.highcharts.client.*;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class PolyglotChart extends BasicTimeSeriesPlot {
   //private final Logger logger = Logger.getLogger("PolyglotChart");
@@ -18,7 +17,7 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
   private static final int HEIGHT = 100;
 
   protected Chart chart = null;
-  private ListInterface listInterface;
+  private final ListInterface listInterface;
 
   /**
    * @param exceptionSupport
@@ -118,9 +117,9 @@ public class PolyglotChart extends BasicTimeSeriesPlot {
     return true;
   }
 
-  boolean showDate() {
-    return false;
-  }
+//  boolean showDate() {
+//    return false;
+//  }
 
   protected boolean gotClickAt(long nearestXAsLong) {
     AudioAnswer audioAnswer = timeToAnswer.get(nearestXAsLong);

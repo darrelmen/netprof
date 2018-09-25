@@ -109,8 +109,8 @@ public class AnalysisTab extends DivWidget {
     MONTH("Month", MONTH_DUR),
     ALL("All", YEARS);
 
-    private String display;
-    private long offset;
+    private final String display;
+    private final long offset;
 
     TIME_HORIZON(String display, long offset) {
       this.display = display;
@@ -236,9 +236,9 @@ public class AnalysisTab extends DivWidget {
   }
 
   public static class ReqInfo {
-    private int userid;
-    private int minRecordings;
-    private int listid;
+    private final int userid;
+    private final int minRecordings;
+    private final int listid;
 
     ReqInfo(int userid, int minRecordings, int listid) {
       this.userid = userid;
@@ -457,9 +457,7 @@ public class AnalysisTab extends DivWidget {
     timeScale.setWidth(160 + "px");
     timeScale.addStyleName("leftTenMargin");
     timeScale.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-    timeScale.addChangeHandler(event -> {
-      gotTimeScaleChange();
-    });
+    timeScale.addChangeHandler(event -> gotTimeScaleChange());
 
     for (TIME_HORIZON horizon : TIME_HORIZON.values()) {
       timeScale.addItem("Time Scale : " + horizon.getDisplay());

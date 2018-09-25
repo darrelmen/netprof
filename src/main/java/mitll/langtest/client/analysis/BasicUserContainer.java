@@ -32,19 +32,14 @@
 
 package mitll.langtest.client.analysis;
 
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.user.SimpleUser;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;

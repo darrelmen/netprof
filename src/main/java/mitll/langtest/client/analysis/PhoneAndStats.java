@@ -35,7 +35,6 @@ package mitll.langtest.client.analysis;
 import com.google.gwt.user.cellview.client.Column;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

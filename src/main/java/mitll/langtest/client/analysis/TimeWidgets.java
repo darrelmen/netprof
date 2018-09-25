@@ -37,9 +37,6 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.google.gwt.user.client.ui.HTML;
 
-import java.util.List;
-import java.util.logging.Logger;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -57,7 +54,7 @@ class TimeWidgets {
   private final Button month;
   private final HTML display;
   private final Heading score;
-  ListBox timeScale;
+  final ListBox timeScale;
 
   /**
    * @param prevButton

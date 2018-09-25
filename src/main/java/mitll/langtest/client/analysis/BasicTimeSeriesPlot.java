@@ -208,6 +208,7 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
 
             "<br/>" +
 
+            dateToShow+
           //  (SHOW_DATE && showDate() ? dateToShow : "") +
 
             (showEx ?

@@ -59,7 +59,6 @@ import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.RangeChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListOptions;
@@ -212,9 +211,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
     learn.setType(ButtonType.SUCCESS);
 
-    learn.addClickHandler(event -> {
-      gotClickOnLearn();
-    });
+    learn.addClickHandler(event -> gotClickOnLearn());
 
     DivWidget wrapper = new DivWidget();
     wrapper.addStyleName("floatRight");

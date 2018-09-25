@@ -2,6 +2,7 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -265,7 +266,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
    * @return
    * @see #getTableWithPager
    */
-  protected Panel getTableWithPagerForHistory(List<PhoneAndStats> sortedHistory) {
+  Panel getTableWithPagerForHistory(List<PhoneAndStats> sortedHistory) {
     Panel tableWithPager = getTableWithPager(new ListOptions());
     table.getElement().getStyle().setProperty("minWidth", PHONE_CONTAINER_MIN_WIDTH + "px");
 
@@ -289,10 +290,16 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     }
   }
 
+  /**
+   * Remember to ask to redraw later
+   * @param sortedHistory
+   */
   private void addPhones(List<PhoneAndStats> sortedHistory) {
     clear();
     sortedHistory.forEach(this::addItem);
     flush();
+
+    Scheduler.get().scheduleDeferred(() -> table.redraw());
   }
 
   /**
