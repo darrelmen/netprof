@@ -1,6 +1,7 @@
 package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -31,25 +32,36 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
                     MySoundFeedback soundFeedback,
                     CommonAnnotatable e,
                     StickyState stickyState,
-                    ListInterface<L, T> exerciseListToUse,
-                    int minPoly,
-                    boolean showAudio) {
-    super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse, minPoly, showAudio);
+                    ListInterface<L, T> exerciseListToUse//,
+  //                  int minPoly,
+    //                boolean showAudio
+  ) {
+    super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse/*, minPoly, showAudio*/);
   }
 
   Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new DivWidget();
     rightColumn.addStyleName("leftTenMargin");
 
-    if (showAudio) {
-      rightColumn.add(getAudioGroup(controlState));
-      addControlsBelowAudio(controlState, rightColumn);
-    } else {
-      if (logger != null) {
-        logger.info("not showing audio for ");
+    controller.getListService().shouldShowAudio(getChosenList(), new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
       }
-    }
-    rightColumn.add(getKeyBinding());
+
+      @Override
+      public void onSuccess(Boolean result) {
+        if (result) {
+          rightColumn.add(getAudioGroup(controlState));
+          addControlsBelowAudio(controlState, rightColumn);
+        } else {
+          if (logger != null) {
+            logger.info("not showing audio for ");
+          }
+        }
+        rightColumn.add(getKeyBinding());
+      }
+    });
+
     return rightColumn;
   }
 

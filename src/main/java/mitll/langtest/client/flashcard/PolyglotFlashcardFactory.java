@@ -58,9 +58,9 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
         soundFeedback,
         e.getCommonAnnotatable(),
         sticky,
-        exerciseList,
+        exerciseList/*,
         getMinScore(),
-        shouldShowAudio());
+        shouldShowAudio()*/);
   }
 
   @NotNull
@@ -139,7 +139,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   /**
    * @param isDry
    */
-  private void startRoundTimer(boolean isDry) {
+/*  private void startRoundTimer(boolean isDry) {
     setBannerVisible(false);
 
     if (!isRoundTimerRunning()) {
@@ -158,8 +158,9 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     } else {
    //   logger.info("startRoundTimer round " + recurringTimer + " " + recurringTimer.isRunning());
     }
-  }
+  }*/
 
+/*
   private void doSessionStart(boolean isDry) {
     int delayMillis = getRoundTimeMinutes(isDry) * 60 * 1000;
     int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
@@ -167,6 +168,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
    // sessionStartMillis = System.currentTimeMillis();
   }
+*/
 
   /**
    * Every second decrement time remaining...
@@ -207,18 +209,20 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     }
   }
 
-  @Override
+/*  @Override
   public int getRoundTimeMinutes(boolean isDry) {
     return isDry ? DRY_RUN_ROUND_TIME : ROUND_TIME;
-  }
+  }*/
 
+/*
   public int getMinScore() {
     return 35;
   }
-
-  public boolean shouldShowAudio() {
-    return false;
-  }
+*/
+//
+//  public boolean shouldShowAudio() {
+//    return false;
+//  }
 
   public void setMode(PolyglotDialog.MODE_CHOICE mode) {
     this.mode = mode;

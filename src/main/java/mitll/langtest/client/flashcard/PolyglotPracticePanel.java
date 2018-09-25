@@ -6,6 +6,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.AnalysisTab;
@@ -14,6 +15,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.SpeedChoices;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.sound.CompressedAudio;
@@ -23,10 +25,10 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExercise> extends StatsPracticePanel<L, T> {
   private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
@@ -40,7 +42,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
       "Or to see your overall score click See Your Scores."
   );
   private static final boolean DO_AUTOLOAD = true;
-  private float minScore;
 
   private static final int FEEDBACK_SLOTS_POLYGLOT = 5;
   private static final int NEXT_EXERCISE_DELAY = 850;
@@ -56,6 +57,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   private final PolyglotFlashcardContainer polyglotFlashcardContainer;
   private int wrongCount = 0;
+  private float minScore;
   private int minPolyScore;
   boolean showAudio;
 
@@ -63,15 +65,32 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
                         ControlState controlState, ExerciseController controller,
                         MySoundFeedback soundFeedback,
                         CommonAnnotatable e, StickyState stickyState,
-                        ListInterface<L, T> exerciseListToUse,
+                        ListInterface<L, T> exerciseListToUse/*,
                         int minPolyScore,
-                        boolean showAudio) {
+                        boolean showAudio*/) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
-    double d = Math.floor((double) minPolyScore) / 100D;
-    this.minScore = Double.valueOf(d).floatValue();
-    this.minPolyScore = minPolyScore;
-    this.showAudio = showAudio;
+
+
+
+    controller.getListService().getMinScore(getChosenList(), new AsyncCallback<Integer>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Integer result) {
+        double d = Math.floor((double) result) / 100D;
+         minScore = Double.valueOf(d).floatValue();
+         minPolyScore = result;
+      }
+    });
+
+
+//    double d = Math.floor((double) minPolyScore) / 100D;
+  //  this.minScore = Double.valueOf(d).floatValue();
+  // this.minPolyScore = minPolyScore;
+  //  this.showAudio = showAudio;
     realAddWidgets(e, controller, controlState);
   }
 
@@ -106,13 +125,25 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
 
   @Override
   protected void addRowBelowPrevNext(DivWidget toAddTo) {
-    toAddTo.add(getChart(getRoundTime()));
-    super.addRowBelowPrevNext(toAddTo);
+    PolyglotPracticePanel outer = this;
+    controller.getListService().getRoundTimeMinutes(getChosenList(), new AsyncCallback<Integer>() {
+      @Override
+      public void onFailure(Throwable caught) {
+      }
+
+      @Override
+      public void onSuccess(Integer result) {
+        toAddTo.add(getChart(result * MINUTE));
+        outer.addRowBelowPrevNext(toAddTo);
+      }
+    });
+
   }
 
-  private int getRoundTime() {
-    return polyglotFlashcardContainer.getRoundTimeMinutes(polyglotFlashcardContainer.getIsDry()) * MINUTE;
-  }
+//  private int getRoundTime() {
+//
+//    return polyglotFlashcardContainer.getRoundTimeMinutes(polyglotFlashcardContainer.getIsDry()) * MINUTE;
+//  }
 
   @Override
   protected void showEnglishOrForeign() {
@@ -123,6 +154,30 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   protected void addControlsBelowAudio(ControlState controlState, Panel rightColumn) {
     speedChoices = new SpeedChoices(getOnSpeedChoiceMade(), true);
     rightColumn.add(speedChoices.getSpeedChoices());
+  }
+
+  private int getChosenList() {
+    Map<String, Collection<String>> typeToSection = new SelectionState(History.getToken(), false).getTypeToSection();
+    // Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
+    // String s = candidate.get(LISTS);
+
+    Collection<String> strings = typeToSection.get(LISTS);
+    if (strings.isEmpty()) return -1;
+    else {
+      String s = strings.iterator().next();
+      //   logger.info("getRoundTimeMinutes iUserList " + s);
+      if (s != null && !s.isEmpty()) {
+        try {
+          return Integer.parseInt(s);
+          // logger.info("setChosenList chosenList " + chosenList);
+        } catch (NumberFormatException e) {
+          logger.warning("couldn't parse list id " + s);
+          return -1;
+        }
+      } else {
+        return -1;
+      }
+    }
   }
 
   /**

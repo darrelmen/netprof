@@ -80,14 +80,14 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
                               UserList.LIST_TYPE listType,
                               int size,
                               int duration, int minScore, boolean showAudio,
-                              Map<String,String> unitChapter) throws DominoSessionException {
+                              Map<String, String> unitChapter) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     IUserListManager userListManager = getUserListManager();
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
 
     return listType == UserList.LIST_TYPE.NORMAL ?
         userListManager.addUserList(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser) :
-        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, duration, minScore, showAudio,unitChapter);
+        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, duration, minScore, showAudio, unitChapter);
   }
 
   @Override
@@ -282,6 +282,24 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       if (DEBUG) logger.debug("\tnewExercise : made user exercise " + userExercise + " on list " + userListID);
       return userExercise;
     }
+  }
+
+  @Override
+  public boolean shouldShowAudio(int userListID) {
+    UserList<CommonExercise> list = db.getUserListManager().getUserListDAO().getList(userListID);
+    return list != null && list.shouldShowAudio();
+  }
+
+  @Override
+  public int getRoundTimeMinutes(int userListID) {
+    UserList<CommonExercise> list = db.getUserListManager().getUserListDAO().getList(userListID);
+    return list != null ? list.getRoundTimeMinutes() : 10;
+  }
+
+  @Override
+  public int getMinScore(int userListID) {
+    UserList<CommonExercise> list = db.getUserListManager().getUserListDAO().getList(userListID);
+    return list != null ? list.getMinScore() : 35;
   }
 
   private CommonExercise getExerciseIfKnown(CommonExercise userExercise) {

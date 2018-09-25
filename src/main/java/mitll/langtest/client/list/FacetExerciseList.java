@@ -703,7 +703,7 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
   }
 
   @NotNull
-  protected ListItem getTypeContainer(String type) {
+  private ListItem getTypeContainer(String type) {
     if (type.isEmpty()) logger.warning("huh? type is empty???");
     boolean hasSelection = typeToSelection.containsKey(type);
     ListItem liForDimensionForType = getLIDimension(hasSelection);

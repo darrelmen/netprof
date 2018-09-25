@@ -68,7 +68,7 @@ public interface ListService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
   UserList addUserList(String name, String description, String dliClass, boolean isPublic, UserList.LIST_TYPE listType,
-                       int size, int duration, int minScore, boolean showAudio, Map<String,String> unitChapter) throws DominoSessionException;
+                       int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter) throws DominoSessionException;
 
   void update(UserList userList) throws DominoSessionException;
 
@@ -133,5 +133,7 @@ public interface ListService extends RemoteService {
    */
   CommonExercise newExercise(int userListID, CommonExercise userExercise) throws DominoSessionException;
 
-
+  boolean shouldShowAudio(int userListID);
+  int getRoundTimeMinutes(int userListID);
+  int getMinScore(int userListID);
 }

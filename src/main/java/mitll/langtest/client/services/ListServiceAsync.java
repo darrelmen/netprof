@@ -91,4 +91,11 @@ public interface ListServiceAsync {
   void update(UserList userList, AsyncCallback<Void> async);
 
   void getReviewList(AsyncCallback<UserList<CommonShell>> async);
+
+
+  void shouldShowAudio(int userListID, AsyncCallback<Boolean> async);
+
+  void getRoundTimeMinutes(int userListID, AsyncCallback<Integer> async);
+
+  void getMinScore(int userListID, AsyncCallback<Integer> async);
 }

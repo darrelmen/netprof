@@ -25,7 +25,11 @@ public class HidePolyglotFactory<L extends CommonShell, T extends CommonExercise
         soundFeedback,
         e.getCommonAnnotatable(),
         sticky,
-        exerciseList,
-        getMinScore(), shouldShowAudio());
+        exerciseList
+//
+//        ,
+//        getMinScore(),
+//        shouldShowAudio()
+    );
   }
 }

@@ -516,7 +516,7 @@ public class NewContentChooser implements INavigation {
   }
 
   private void pushNewItem(String historyToken) {
-    logger.info("pushNewItem " + historyToken);
+    //logger.info("pushNewItem " + historyToken);
     History.newItem(historyToken);
   }
 
