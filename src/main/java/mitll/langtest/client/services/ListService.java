@@ -133,7 +133,9 @@ public interface ListService extends RemoteService {
    */
   CommonExercise newExercise(int userListID, CommonExercise userExercise) throws DominoSessionException;
 
-  boolean shouldShowAudio(int userListID);
+/*  boolean shouldShowAudio(int userListID);
   int getRoundTimeMinutes(int userListID);
-  int getMinScore(int userListID);
+  int getMinScore(int userListID);*/
+
+  QuizInfo getQuizInfo(int userListID);
 }

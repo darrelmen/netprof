@@ -84,7 +84,12 @@ class CheckLTS {
     smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage);
     this.language = languageProperty != null ? languageProperty : "";
     this.isAsianLanguage = isAsianLanguage;
-    removeAllAccents = !language.equalsIgnoreCase("french");
+    removeAllAccents =
+        !language.equalsIgnoreCase("french") &&
+            !language.equalsIgnoreCase("turkish") &&
+            !language.equalsIgnoreCase("croatian") &&
+            !language.equalsIgnoreCase("serbian")
+    ;
 
 //    logger.info("lang " + languageProperty  + " asian " + isAsianLanguage);
 //    if (isAsianLanguage) logger.warn("using mandarin segmentation.");
@@ -144,6 +149,8 @@ class CheckLTS {
       return Collections.emptySet();
     }
 
+//    if (removeAllAccents) logger.info("checkLTS " +foreignLanguagePhrase);
+
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, removeAllAccents);
     Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration, removeAllAccents);
 
@@ -178,7 +185,7 @@ class CheckLTS {
           }
         } else {
           boolean htkEntry = htkDictionary.contains(token) || htkDictionary.contains(token.toLowerCase());
-          if (DEBUG && !htkEntry) logger.info("checkLTS in dict for " + token + " = " + htkEntry);
+          if (DEBUG && !htkEntry) logger.info("checkLTS NOT IN DICT for '" + token + "' and not '" +token.toLowerCase()+  "'");
 
           if (!htkEntry && isSpanish() && token.equalsIgnoreCase("Sί")) {
             htkEntry = htkDictionary.contains("si");

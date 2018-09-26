@@ -23,8 +23,8 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
    * @param e
    * @param stickyState
    * @param exerciseListToUse
-   * @param showAudio
-   * @see HidePolyglotFactory#getCurrentFlashcard
+   * @paramx showAudio
+   * @see HidePolyglotFactory#getFlashcard
    */
   HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
                     ControlState controlState,
@@ -39,28 +39,24 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
     super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse/*, minPoly, showAudio*/);
   }
 
+  /**
+   * @see FlashcardPanel#getThreePartContent
+   * @param controlState
+   * @return
+   */
   Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new DivWidget();
     rightColumn.addStyleName("leftTenMargin");
 
-    controller.getListService().shouldShowAudio(getChosenList(), new AsyncCallback<Boolean>() {
-      @Override
-      public void onFailure(Throwable caught) {
+    if (quizInfo.isShowAudio()) {
+      rightColumn.add(getAudioGroup(controlState));
+      addControlsBelowAudio(controlState, rightColumn);
+    } else {
+      if (logger != null) {
+        logger.info("not showing audio for ");
       }
-
-      @Override
-      public void onSuccess(Boolean result) {
-        if (result) {
-          rightColumn.add(getAudioGroup(controlState));
-          addControlsBelowAudio(controlState, rightColumn);
-        } else {
-          if (logger != null) {
-            logger.info("not showing audio for ");
-          }
-        }
-        rightColumn.add(getKeyBinding());
-      }
-    });
+    }
+    rightColumn.add(getKeyBinding());
 
     return rightColumn;
   }

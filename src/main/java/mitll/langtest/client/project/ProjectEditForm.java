@@ -151,6 +151,9 @@ public class ProjectEditForm extends UserDialog {
    */
   private ListBox language;
   private ListBox dominoProjectsListBox;
+  /**
+   *
+   */
   private ListBox modelTypeBox;
   private FormField model;
   private CheckBox showOniOSBox;
@@ -222,7 +225,9 @@ public class ProjectEditForm extends UserDialog {
    */
   void updateProject() {
     info.setLanguage(language.getSelectedValue());
-    info.setModelType(ModelType.valueOf(modelTypeBox.getSelectedValue()));
+    String selectedValue = modelTypeBox.getSelectedValue();
+    logger.info("value is " + selectedValue);
+    info.setModelType(ModelType.valueOf(selectedValue));
 
     //  logger.info("updateProject get model type " + info.getModelType());
     DominoProject id = dominoToProject.get(dominoProjectsListBox.getSelectedValue());
@@ -569,16 +574,19 @@ public class ProjectEditForm extends UserDialog {
     DivWidget name = getHDivLabel(fieldset, MODEL_TYPE, false);
     name.getElement().getStyle().setMarginTop(0, PX);
 
-    this.modelTypeBox = new ListBox();
-    this.modelTypeBox.addStyleName("leftTenMargin");
+    name.add(this.modelTypeBox = getModelTypeBox(info));
+    return name;
+  }
 
-    name.add(this.modelTypeBox);
+  private ListBox getModelTypeBox(ProjectInfo info) {
+    ListBox modelTypeBox = new ListBox();
 
+    modelTypeBox.addStyleName("leftTenMargin");
     modelTypeBox.addItem(ModelType.HYDRA.toString());
     modelTypeBox.addItem(ModelType.KALDI.toString());
     modelTypeBox.setItemSelected(info.getModelType() == ModelType.KALDI ? 1 : 0, true);
 
-    return name;
+    return modelTypeBox;
   }
 
   /**

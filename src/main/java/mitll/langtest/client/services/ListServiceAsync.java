@@ -93,9 +93,5 @@ public interface ListServiceAsync {
   void getReviewList(AsyncCallback<UserList<CommonShell>> async);
 
 
-  void shouldShowAudio(int userListID, AsyncCallback<Boolean> async);
-
-  void getRoundTimeMinutes(int userListID, AsyncCallback<Integer> async);
-
-  void getMinScore(int userListID, AsyncCallback<Integer> async);
+  void getQuizInfo(int userListID, AsyncCallback<QuizInfo> async);
 }

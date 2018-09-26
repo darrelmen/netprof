@@ -61,6 +61,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
+import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.MutableAnnotationExercise;
@@ -177,6 +178,12 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
     controlState.setStorage(new KeyStorage(controller));
   }
 
+  /**
+   * @see PolyglotPracticePanel#realAddWidgets
+   * @param e
+   * @param controller
+   * @param controlState
+   */
   void addWidgets(T e, ExerciseController controller, ControlState controlState) {
     final DivWidget middleVert = new DivWidget();
     middleVert.getElement().setId("middle_vert_container");
@@ -428,7 +435,7 @@ public class FlashcardPanel<T extends CommonExercise & MutableAnnotationExercise
    * @param contentMiddle
    * @param belowDiv
    * @return
-   * @see #FlashcardPanel
+   * @see #addWidgets
    */
   Panel getThreePartContent(ControlState controlState,
                                     Panel contentMiddle,

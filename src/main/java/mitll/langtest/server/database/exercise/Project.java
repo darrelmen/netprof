@@ -435,6 +435,8 @@ public class Project implements IPronunciationLookup {
     propCache.putAll(db.getProjectDAO().getProps(getID()));
   }
 
+  int spew = 0;
+
   /**
    * @param id
    * @return
@@ -447,7 +449,10 @@ public class Project implements IPronunciationLookup {
     } else {
       CommonExercise exercise = exerciseDAO.getExercise(id);
       if (exercise == null) {
-        logger.info("getExerciseByID project # " + getID() + " : no exercise for #" + id + " in " + exerciseDAO.getNumExercises() + " exercises?");
+        spew++;
+        if (spew < 10 || spew % 100 == 0) {
+          logger.info("getExerciseByID project # " + getID() + " : no exercise for #" + id + " in " + exerciseDAO.getNumExercises() + " exercises?");
+        }
       }
       return exercise;
     }

@@ -35,6 +35,8 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -45,7 +47,8 @@ import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {
@@ -284,22 +287,18 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     }
   }
 
-  @Override
-  public boolean shouldShowAudio(int userListID) {
+  /**
+   * @see mitll.langtest.client.flashcard.PolyglotFlashcardFactory#PolyglotFlashcardFactory(ExerciseController, ListInterface)
+   * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#PolyglotPracticePanel
+   * @param userListID
+   * @return
+   */
+  public QuizInfo getQuizInfo(int userListID) {
     UserList<CommonExercise> list = db.getUserListManager().getUserListDAO().getList(userListID);
-    return list != null && list.shouldShowAudio();
-  }
-
-  @Override
-  public int getRoundTimeMinutes(int userListID) {
-    UserList<CommonExercise> list = db.getUserListManager().getUserListDAO().getList(userListID);
-    return list != null ? list.getRoundTimeMinutes() : 10;
-  }
-
-  @Override
-  public int getMinScore(int userListID) {
-    UserList<CommonExercise> list = db.getUserListManager().getUserListDAO().getList(userListID);
-    return list != null ? list.getMinScore() : 35;
+    if (list == null) logger.warn("no quiz with list id " + userListID);
+    QuizInfo quizInfo = list != null ? new QuizInfo(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio()) : new QuizInfo(10, 35, false);
+    logger.info("Returning " + quizInfo + " for " + userListID);
+    return quizInfo;
   }
 
   private CommonExercise getExerciseIfKnown(CommonExercise userExercise) {

@@ -300,7 +300,7 @@ public class AudioFileHelper implements AlignDecode {
    */
   private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise, Set<String> oov) {
     boolean validForeignPhrase = exercise.isSafeToDecode();
-    if (isStale(exercise) // || exercise.getEnglish().equalsIgnoreCase("teacher")
+    if (isStale(exercise) || true
     ) {
       //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
       // int before = oov.size();
@@ -1084,6 +1084,8 @@ public class AudioFileHelper implements AlignDecode {
         options, isKaldi());
   }
 
+  private boolean noted = false;
+
   /**
    * GOOD for local testing!
    *
@@ -1102,9 +1104,10 @@ public class AudioFileHelper implements AlignDecode {
                                           int projid,
                                           int userid,
                                           File theFile) {
-    boolean available = true;// isHydraAvailable() && true;
+    boolean available = isHydraAvailable();
     String hydraHost = serverProps.getHydraHost();
-    if (!available) {
+    if (!available && !noted) {
+      noted = true;
       logger.info("checkForWebservice local webservice not available" +
           "\n\tfor     " + theFile.getName() +
           "\n\tproject " + projid +
@@ -1207,7 +1210,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private String getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
-    String s = getSmallVocabDecoder().cleanToken(foreignLanguage, removeAccents);
+    String s = getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents);
     String cleaned = getSegmented(s); // segmentation method will filter out the UNK model
     return asrScoring.getHydraDict(cleaned.trim(), "", possibleProns);
   }
@@ -1584,7 +1587,7 @@ public class AudioFileHelper implements AlignDecode {
       long then = System.currentTimeMillis();
       File file = new File(dictFile);
       this.dictModified = file.lastModified();
-    //  logger.info("makeDict read " + file.getAbsolutePath());
+      //  logger.info("makeDict read " + file.getAbsolutePath());
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val

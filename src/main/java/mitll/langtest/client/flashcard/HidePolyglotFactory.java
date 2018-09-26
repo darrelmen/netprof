@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class HidePolyglotFactory<L extends CommonShell, T extends CommonExercise> extends PolyglotFlashcardFactory<L,T>{
   public HidePolyglotFactory(ExerciseController controller, ListInterface<L,T> exerciseList, String instance) {
-    super(controller, exerciseList, instance);
+    super(controller, exerciseList);
   }
 
   @NotNull

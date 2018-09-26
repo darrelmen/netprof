@@ -129,14 +129,15 @@ public class HTTPClient {
    * @return
    */
   public boolean isAvailable(String webserviceIP, int webservicePort, String service) {
+    String url = "http://" + webserviceIP + ":" + webservicePort + "/" + service + "/index.html";
     try {
-      readFromGET("http://" + webserviceIP + ":" + webservicePort + "/" + service + "/index.html");
+      readFromGET(url);
       return true;
     } catch (FileNotFoundException fnf) {
       logger.debug("isAvailable for " + webserviceIP + " " + webservicePort + " " + service + " :" + fnf);
       return true;
     } catch (IOException e) {
-      logger.warn("isAvailable : Got " + e);
+      logger.warn("isAvailable for " +url+ " : Got " + e);
       return false;
     }
   }

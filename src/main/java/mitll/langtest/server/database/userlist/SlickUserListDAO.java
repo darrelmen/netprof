@@ -500,7 +500,15 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
 
   @Override
   public void update(UserList userList) {
-    dao.update(toSlick(userList));
+    int update = dao.update(toSlick(userList));
+    if (update == 0) logger.warn("huh? didn't update " + userList.getID());
+    else {
+      Option<SlickUserExerciseList> slickUserExerciseListOption = dao.byID(userList.getID());
+      if (slickUserExerciseListOption.isDefined()) {
+        UserList<CommonShell> commonShellUserList = fromSlick(slickUserExerciseListOption.get());
+        logger.info("Got back " + commonShellUserList);
+      }
+    }
   }
 
   /**

@@ -32,8 +32,14 @@
 
 package mitll.langtest.client.list;
 
+import com.google.gwt.user.client.History;
+import mitll.langtest.client.custom.INavigation;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,6 +58,7 @@ public class SelectionState {
   public static final String ITEM = "item";
   public static final String SEARCH = "search";
   public static final String PROJECT = "project";
+  public static final String DIALOG = "d";
 
   public static final String SECTION_SEPARATOR = "~";
 
@@ -71,6 +78,11 @@ public class SelectionState {
 
   private static final boolean DEBUG = false;
   private int project = -1;
+  private int dialog = -1;
+
+  public SelectionState() {
+    this(History.getToken(), false);
+  }
 
   /**
    * @param token
@@ -136,6 +148,12 @@ public class SelectionState {
             }
           } else if (isMatch(type, SEARCH)) {
             search = section;
+          } else if (isMatch(type, DIALOG)) {
+            try {
+              setDialog(Integer.parseInt(section));
+            } catch (NumberFormatException e) {
+              e.printStackTrace();
+            }
           } else if (isMatch(type, PROJECT)) {
             try {
               setProject(Integer.parseInt(section));
@@ -231,6 +249,20 @@ public class SelectionState {
     }
   }
 
+  /**
+   * @return the view on the URL or NONE
+   */
+  @NotNull
+  public INavigation.VIEWS getView() {
+    try {
+      instance = instance.replaceAll(" ", "_");
+      return instance.isEmpty() ? INavigation.VIEWS.NONE : INavigation.VIEWS.valueOf(instance.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      logger.warning("getView : hmm, couldn't parse " + instance);
+      return INavigation.VIEWS.NONE;
+    }
+  }
+
   public String getInstance() {
     return instance;
   }
@@ -259,8 +291,37 @@ public class SelectionState {
     this.project = project;
   }
 
+  private void setDialog(int project) {
+    this.dialog = project;
+  }
+
   public int getProject() {
     return project;
+  }
+
+  public int getDialog() {
+    return dialog;
+  }
+
+  public int getList() {
+    Map<String, Collection<String>> typeToSection = getTypeToSection();
+    Collection<String> strings = typeToSection.get(LISTS);
+    if (strings == null || strings.isEmpty()) return -1;
+    else {
+      String s = strings.iterator().next();
+      //   logger.info("getRoundTimeMinutes iUserList " + s);
+      if (s != null && !s.isEmpty()) {
+        try {
+          return Integer.parseInt(s);
+          // logger.info("setChosenList chosenList " + chosenList);
+        } catch (NumberFormatException e) {
+          logger.warning("couldn't parse list id " + s);
+          return -1;
+        }
+      } else {
+        return -1;
+      }
+    }
   }
 
   public String toString() {
@@ -273,11 +334,13 @@ public class SelectionState {
   }
 
   public String getInfo() {
-    return "parseToken : instance " + instance + " : " +
-        "search " + search + ", " +
-        "item " + item + ", " +
-        "project " + project + ", " +
-        "unit->chapter " + getTypeToSection() +
-        " onlyWithAudioDefects=" + isOnlyWithAudioDefects();
+    return "parseToken : " +
+        "\n\tinstance " + instance +
+        "\n\tsearch   " + search +
+        "\n\titem     " + item +
+        "\n\tproject  " + project +
+        "\n\tdialog   " + dialog +
+        "\n\tunit->chapter " + getTypeToSection() +
+        "\n\tonlyWithAudioDefects " + isOnlyWithAudioDefects();
   }
 }

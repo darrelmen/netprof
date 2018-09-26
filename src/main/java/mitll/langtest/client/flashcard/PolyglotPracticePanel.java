@@ -20,6 +20,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.custom.QuizInfo;
 import mitll.langtest.shared.exercise.CommonAnnotatable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -60,6 +61,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   private float minScore;
   private int minPolyScore;
   boolean showAudio;
+  QuizInfo quizInfo;
 
   PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
                         ControlState controlState, ExerciseController controller,
@@ -71,27 +73,40 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
 
+    //  if (polyglotFlashcardContainer)
 
+    if (this.polyglotFlashcardContainer.getQuizInfo() == null) {
 
-    controller.getListService().getMinScore(getChosenList(), new AsyncCallback<Integer>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
+      controller.getListService().getQuizInfo(getChosenList(), new AsyncCallback<QuizInfo>() {
+        @Override
+        public void onFailure(Throwable caught) {
+        }
 
-      @Override
-      public void onSuccess(Integer result) {
-        double d = Math.floor((double) result) / 100D;
-         minScore = Double.valueOf(d).floatValue();
-         minPolyScore = result;
-      }
-    });
-
+        @Override
+        public void onSuccess(QuizInfo result) {
+          gotQuizInfo(result);
+        }
+      });
+    } else {
+      this.quizInfo = this.polyglotFlashcardContainer.getQuizInfo();
+      gotQuizInfo(quizInfo);
+    }
 
 //    double d = Math.floor((double) minPolyScore) / 100D;
-  //  this.minScore = Double.valueOf(d).floatValue();
-  // this.minPolyScore = minPolyScore;
-  //  this.showAudio = showAudio;
-    realAddWidgets(e, controller, controlState);
+    //  this.minScore = Double.valueOf(d).floatValue();
+    // this.minPolyScore = minPolyScore;
+    //  this.showAudio = showAudio;
+  }
+
+  private void gotQuizInfo(QuizInfo result) {
+    //  logger.info("gotQuiz " +result);
+    int minScore = result.getMinScore();
+    double d = Math.floor((double) minScore) / 100D;
+
+    this.minScore = Double.valueOf(d).floatValue();
+    minPolyScore = minScore;
+    this.quizInfo = result;
+    realAddWidgets(exercise, controller, controlState);
   }
 
   @Override
@@ -123,25 +138,17 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
     }
   }
 
+  /**
+   * @param toAddTo
+   * @see #addWidgets(CommonAnnotatable, ExerciseController, ControlState)
+   */
   @Override
   protected void addRowBelowPrevNext(DivWidget toAddTo) {
-    PolyglotPracticePanel outer = this;
-    controller.getListService().getRoundTimeMinutes(getChosenList(), new AsyncCallback<Integer>() {
-      @Override
-      public void onFailure(Throwable caught) {
-      }
-
-      @Override
-      public void onSuccess(Integer result) {
-        toAddTo.add(getChart(result * MINUTE));
-        outer.addRowBelowPrevNext(toAddTo);
-      }
-    });
-
+    toAddTo.add(getChart(quizInfo.getRoundMinutes() * MINUTE));
+    super.addRowBelowPrevNext(toAddTo);
   }
 
 //  private int getRoundTime() {
-//
 //    return polyglotFlashcardContainer.getRoundTimeMinutes(polyglotFlashcardContainer.getIsDry()) * MINUTE;
 //  }
 
@@ -157,27 +164,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends CommonExerci
   }
 
   private int getChosenList() {
-    Map<String, Collection<String>> typeToSection = new SelectionState(History.getToken(), false).getTypeToSection();
-    // Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
-    // String s = candidate.get(LISTS);
-
-    Collection<String> strings = typeToSection.get(LISTS);
-    if (strings.isEmpty()) return -1;
-    else {
-      String s = strings.iterator().next();
-      //   logger.info("getRoundTimeMinutes iUserList " + s);
-      if (s != null && !s.isEmpty()) {
-        try {
-          return Integer.parseInt(s);
-          // logger.info("setChosenList chosenList " + chosenList);
-        } catch (NumberFormatException e) {
-          logger.warning("couldn't parse list id " + s);
-          return -1;
-        }
-      } else {
-        return -1;
-      }
-    }
+    return new SelectionState(History.getToken(), false).getList();
   }
 
   /**

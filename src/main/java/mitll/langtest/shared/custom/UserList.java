@@ -324,7 +324,8 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   @Override
   public String toString() {
     return "UserList #" + getID() + " '" + name + "' by " + getUserID() +
-        " : " + (isReview ? " REVIEW " : "") +
+        "\n\tshow audio " +shouldShowAudio()+
+        "\n\t : " + (isReview ? " REVIEW " : "") +
         " : with " + getNumItems() + " exercises.";
   }
 }

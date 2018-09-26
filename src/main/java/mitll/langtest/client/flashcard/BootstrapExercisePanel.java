@@ -93,7 +93,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    */
   private static final boolean DO_AUTOLOAD = false;
 
-  public static final String IN = "in";
+  //private static final String IN = "in";
 
   private static final int FEEDBACK_LEFT_MARGIN = PROGRESS_LEFT_MARGIN;
   private Panel recoOutput;
@@ -101,7 +101,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   private static final int DELAY_MILLIS_LONG = 3000;
   public static final int HIDE_DELAY = 2500;
   static final int DELAY_MILLIS = 100;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @see #getFeedbackGroup(ControlState)
@@ -473,14 +473,14 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     if (badAudioRecording) {
       onBadRecording(result);
     } else {
-      String prefix = "";
+      //String prefix = "";
       final double score = result.getScore();
 
       if (isCorrect(result.isCorrect(), score)) {
         showCorrectFeedback(score, result.getPretestScore());
       } else {   // incorrect!!
         showIncorrectFeedback(result, score, hasRefAudio());
-        prefix = IN;
+        //prefix = IN;
       }
 /*
       controller.logEvent(button, "Button", exercise.getID(), prefix + "correct response - score " +

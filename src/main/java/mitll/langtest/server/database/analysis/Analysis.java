@@ -103,7 +103,7 @@ public abstract class Analysis extends DAO {
    *
    * @param idToUserInfo
    * @return
-   * @see #getUserInfos
+   * @see #getSortedUserInfos(IUserDAO, Map, boolean)
    */
   @NotNull
   private List<UserInfo> getUserInfos(Map<Integer, UserInfo> idToUserInfo, IUserDAO userDAO) {

@@ -57,7 +57,7 @@ public class SmallVocabDecoder {
 
   /**
    * @see #getTrimmed(String)
-   * @see #cleanToken
+   * @see #lcToken
    * <p>
    * remove latin capital letter i with dot above - 0130
    */
@@ -80,6 +80,7 @@ public class SmallVocabDecoder {
    */
   private static final String FRENCH_PUNCT = "[,.?!]";
   public static final boolean DEBUG = false;
+  public static final String TURKISH_CAP_I = "İ";
 
   private HTKDictionary htkDictionary;
   private boolean isAsianLanguage;
@@ -295,6 +296,7 @@ public class SmallVocabDecoder {
   }
 
   /**
+   * For the moment we replace the Turkish Cap I with I
    * @param sentence
    * @return
    * @see PronunciationLookup#getPronStringForWord(String, Collection, boolean)
@@ -303,25 +305,38 @@ public class SmallVocabDecoder {
     String trim = sentence
         .replaceAll(FRENCH_PUNCT, "")
         .replaceAll(REPLACE_ME_OE, OE)
+        .replaceAll(TURKISH_CAP_I,"I")
+        .replaceAll("\\p{P}", " ")
         //.replaceAll("\\s+", " ")
         .trim();
     //logger.warn("getTrimmedLeaveAccents before " + sentence + " after "+ trim);
     return trim;
   }
 
+  /**
+   * @see PronunciationLookup#addDictMatch
+   * @param text
+   * @return
+   */
   String removeAccents(String text) {
     return text == null ? null :
         Normalizer.normalize(text, Normalizer.Form.NFD)
             .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
   }
 
-  public String cleanToken(String token, boolean removeAllPunct) {
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getHydraDict
+   * @param token
+   * @param removeAllPunct
+   * @return
+   */
+  public String lcToken(String token, boolean removeAllPunct) {
     return removeAllPunct ?
         getTrimmedLeaveLastSpace(token).toLowerCase() :
         getTrimmedLeaveAccents(token).toLowerCase();
   }
 /*
-  private String cleanToken(String token) {
+  private String lcToken(String token) {
 *//*    String s = token
         .replaceAll(REMOVE_ME, " ")
         .replaceAll("\\p{Z}+", " ")

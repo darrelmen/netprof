@@ -33,10 +33,8 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.scoring.ASR;
-import mitll.langtest.server.scoring.Scoring;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -192,7 +190,7 @@ public class SLFFile {
       for (String token : tokens) {
         boolean onLast = ++c == tokens.size();
 //        logger.info("createSimpleSLFFile onLast " + onLast + " c " + c + " '" + token + "' tokens length = " + tokens.size());
-        String cleanedToken = svd.cleanToken(token, removeAllAccents);
+        String cleanedToken = svd.lcToken(token, removeAllAccents);
 
         if (!cleanedToken.isEmpty()) {
           int currentNode = newNodes++;
@@ -267,9 +265,9 @@ public class SLFFile {
    * @return
    * @see AudioFileHelper#
    */
-/*  public String cleanToken(String token, boolean removeAllPunct) {
+/*  public String lcToken(String token, boolean removeAllPunct) {
     return removeAllPunct ?
-        cleanToken(token) :
+        lcToken(token) :
         svd.getTrimmedLeaveAccents(token).toLowerCase();
   }*/
 
@@ -282,7 +280,7 @@ public class SLFFile {
    * @see #createSimpleSLFFile(Collection, boolean, boolean, boolean, boolean)
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra(String, String, String, Collection, String, boolean, int)
    */
-/*  private String cleanToken(String token) {
+/*  private String lcToken(String token) {
 *//*    String s = token
         .replaceAll(REMOVE_ME, " ")
         .replaceAll("\\p{Z}+", " ")

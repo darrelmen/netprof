@@ -289,7 +289,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            boolean usePhoneToDisplay,
                                            boolean useKaldi,
                                            int port) {
-    logger.info("scoreRepeatExercise decode/align '" + sentence + "'");
+//    logger.info("scoreRepeatExercise decode/align '" + sentence + "'");
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + ".wav";
 
@@ -806,7 +806,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     if (decode) {
       String[] slfOut = getDecodeSLF(lmSentences, removeAllPunct);
       smallLM = "[" + slfOut[0] + "]";
-      cleaned = getSmallVocabDecoder().cleanToken(slfOut[1], removeAllPunct);
+      cleaned = getSmallVocabDecoder().lcToken(slfOut[1], removeAllPunct);
     } else {
       smallLM = getSmallLM(cleaned, removeAllPunct);
     }
@@ -868,7 +868,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   @NotNull
   private String getTranscriptToPost(String transcript, boolean decode) {
-    String cleaned = getCleanedTranscript(transcript);
+    String cleaned = getLCTranscript(transcript);
 
     if (isAsianLanguage) {
       cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
@@ -895,16 +895,16 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   public String getHydraTranscriptTest(String transcript) {
-    return pronunciationLookup.getCleanedTranscript(getCleanedTranscript(transcript));
+    return pronunciationLookup.getCleanedTranscript(getLCTranscript(transcript));
   }
 
   @NotNull
-  private String getCleanedTranscript(String transcript) {
-    return getSmallVocabDecoder().cleanToken(transcript, removeAllAccents).trim();
+  private String getLCTranscript(String transcript) {
+    return getSmallVocabDecoder().lcToken(transcript, removeAllAccents).trim();
   }
 
   public String getLM(String transcript, boolean removeAllPunct) {
-    return getSmallLM(getCleanedTranscript(transcript), removeAllPunct);
+    return getSmallLM(getLCTranscript(transcript), removeAllPunct);
   }
 
   @NotNull

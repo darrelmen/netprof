@@ -282,7 +282,7 @@ public class AnalysisTab extends DivWidget {
       phoneSummary = new PhoneSummary();
     }
 
-    if (now - then > 2) {
+/*    if (now - then > 2) {
       logger.info("useReport " +
               "\n\ttook   " + (now - then) + " to get report" +
               "\n\tfor    " + userid + " " + userChosenID +
@@ -291,7 +291,7 @@ public class AnalysisTab extends DivWidget {
           //+
           //"\n\tphones word and score " + phoneSummary.getPhoneToBigrams().values().size()
       );
-    }
+    }*/
     long then2 = now;
 
     Scheduler.get().scheduleDeferred(() -> analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView));

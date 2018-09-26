@@ -195,15 +195,33 @@ function initWebAudio() {
 
     if (gotAudioContext) {
         try {
-            if (navigator.getMedia) {
+            if (navigator.mediaDevices) { // if more modern interface
+                navigator.mediaDevices.getUserMedia({audio: true})
+                    .then(function (stream) {
+                        /* use the stream */
+                        startUserMedia(stream);
+                    })
+                    .catch(function (err) {
+                        /* handle the error */
+                        __log('getUserMedia error: ' + err.name);
+
+                        if (err.name.startsWith("NotAllowedError")) {
+                            webAudioPermissionDenied();
+                        }
+                        webAudioMicNotAvailable();
+                    });
+            }
+            else if (navigator.getMedia) {
                 //   __log('initWebAudio getMedia ...');
-                navigator.getMedia({audio: true}, startUserMedia, function (e) {
-                    __log('initWebAudio No live audio input: ' + e);
-                    __log('initWebAudio name: ' + e.name);
+                navigator.getMedia(
+                    {audio: true},  // only a mic
+                    startUserMedia, // when you get it
+                    function (e) {
+                        __log('initWebAudio (old) No live audio input: ' + e);
+                        __log('initWebAudio (old) error: ' + e.name);
                     if (e.name.startsWith("NotAllowedError")) {
                         webAudioPermissionDenied();
                     }
-                    //console.error(e);
                     webAudioMicNotAvailable();
                 });
             }
@@ -220,63 +238,8 @@ function initWebAudio() {
 
     if (navigator.mediaDevices) {
         navigator.mediaDevices.ondevicechange = function (event) {
-            __log("got device change... ");
+//            __log("got device change... ");
             location.reload();
-            //      initWebAudio();
-            //updateDeviceList();
         };
     }
-//    updateDeviceList();
-}
-
-function updateDeviceList() {
-    navigator.mediaDevices.enumerateDevices()
-        .then(function (devices) {
-
-            var newmics = [];
-            devices.forEach(function (device) {
-                var isMatch = device.kind === "audioinput";
-                // __log("got device " + device.label);
-                //
-                if (isMatch) {
-                    __log("got mic " + device.label);
-                    newmics.push(device.deviceId);
-                    // __log("got kind " + device.kind);
-                    // __log("got groupId " + device.groupId );
-                    //  __log("got deviceId " + device.deviceId );
-                    //  audioList.appendChild(elem);
-                }
-                else {
-                    __log("got not a mic " + device.label);
-                    __log("got kind " + device.kind);
-                    __log("got groupId " + device.groupId);
-                    __log("got deviceId " + device.deviceId);
-
-                }
-                //else if (type === "video") {
-                //     __log("got video " + message);
-                // }
-            });
-
-            newmics.sort();
-
-            if (newmics.length !== mics.length) {
-                __log("got mics " + newmics.length + " before " + mics.length);
-                // initWebAudio();
-            }
-            else {
-                __log("no change mics " + newmics.length + " before " + mics.length);
-            }
-
-            mics = newmics;
-            // else {
-            //     for (i = 0; i < newmics.length; i++) {
-            //         __log("mic " + i + " " + newmics[i]);
-            //         if (newmics[i] !== mics[i]) {
-            //             __log("different mic " + i + " " + newmics[i]);
-            //             break;
-            //         }
-            //     }
-            // }
-        });
 }
