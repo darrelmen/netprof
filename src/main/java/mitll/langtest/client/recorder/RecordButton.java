@@ -90,6 +90,8 @@ public class RecordButton extends Button {
   private RecordingListener recordingListener;
   private final PropertyHandler propertyHandler;
 
+  private static final boolean DEBUG=false;
+
   /**
    * don't actually stop recording until a little while after end of recording
    */
@@ -207,7 +209,7 @@ public class RecordButton extends Button {
    * @see #setupRecordButton
    *
    */
-  protected void doClick() {
+  void doClick() {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
@@ -271,7 +273,13 @@ public class RecordButton extends Button {
     cancelTimer();
     long duration = now - started;
 
-    //logger.info("startOrStopRecording ui time between button clicks = " + duration + " millis, ");
+    int afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();
+
+    if (DEBUG) {
+      logger.info("startOrStopRecording " +
+          "\n\tui time between button clicks = " + duration + " millis, " +
+          "\n\tdelay " + afterStopDelayMillis);
+    }
 
     afterStopTimer = new Timer() {
       @Override
@@ -279,7 +287,7 @@ public class RecordButton extends Button {
         stop(duration);
       }
     };
-    afterStopTimer.schedule(propertyHandler.getAfterStopDelayMillis());
+    afterStopTimer.schedule(afterStopDelayMillis);
   }
 
   private void cancelAfterStopTimer() {
@@ -301,9 +309,15 @@ public class RecordButton extends Button {
    * @see #startOrStopRecording
    */
   protected void stop(long duration) {
-  //  long now = System.currentTimeMillis();
-  //  long duration2 = now - started;
-   // logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
+    long now = System.currentTimeMillis();
+    long duration2 = now - started;
+
+    if (DEBUG) {
+      logger.info("startOrStopRecording " +
+          "\n\tafter stop delay " + duration2 + " millis, " +
+          "\n\tvs               " + duration);
+    }
+
     showStopped();
     recordingListener.stopRecording(duration);
   }

@@ -246,9 +246,17 @@ public class NewContentChooser implements INavigation {
   }
 
   private void setInstanceHistory(VIEWS views) {
-    if (new SelectionState().getView() != views) {
-      if (DEBUG) logger.info("setInstanceHistory clearing history for instance " + views);
-      pushItem(getInstanceParam(views));
+    if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
+      Map<String, Collection<String>> typeToSection = new SelectionState(History.getToken(), false).getTypeToSection();
+      //   logger.info("setInstanceHistory clearing history for instance " + views);
+      StringBuilder stringBuilder = new StringBuilder();
+      typeToSection.forEach((k, v) -> stringBuilder
+          .append(k)
+          .append("=")
+          .append(v.iterator().next()).append(SelectionState.SECTION_SEPARATOR));
+      String historyToken = SelectionState.INSTANCE + "=" + views.toString();
+      String s = stringBuilder.toString();
+      pushItem(historyToken + (s.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + s));
     } else {
       //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
@@ -590,7 +598,7 @@ public class NewContentChooser implements INavigation {
   }
 
   private void pushItem(String url) {
-    //  logger.info("pushItem - " + url);
+    logger.info("pushItem - " + url);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //    logger.info("logException stack " + exceptionAsString);
     History.newItem(url);

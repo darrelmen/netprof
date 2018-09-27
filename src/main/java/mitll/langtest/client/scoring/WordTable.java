@@ -325,7 +325,7 @@ public class WordTable {
       TranscriptSegment word = pair.getKey();
 
       if (!shouldSkipWord(word.getEvent())) {
-        table.add(getDivForWord(audioControl, /*isRTL,*/ words, phoneMap, id, pair.getValue(), word));
+        table.add(getDivForWord(audioControl, words, phoneMap, id, pair.getValue(), word));
         id++;
       }
     }

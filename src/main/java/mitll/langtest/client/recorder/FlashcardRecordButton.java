@@ -257,7 +257,7 @@ public class FlashcardRecordButton extends RecordButton {
     }
     boolean hidden = checkHidden(getElement().getId());
     if (hidden) {
-      logger.info("shouldIgnoreKeyPress : hidden");
+  //    logger.info("shouldIgnoreKeyPress : hidden");
       removeListener();
       stopRecordingSafe();
     }

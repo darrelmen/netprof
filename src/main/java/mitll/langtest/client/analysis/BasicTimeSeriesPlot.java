@@ -119,9 +119,9 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
           try {
             long xAsLong = toolTipData.getXAsLong();
             Integer exerciseID = timeToId.get(xAsLong);
-           // if (exerciseID == null) logger.warning("getToolTip no ex at " + xAsLong);
-            CommonShell commonShell = getCommonShellAtTime(exerciseID, xAsLong);
-            return getTooltip(toolTipData, exerciseID, commonShell);
+            // if (exerciseID == null) logger.warning("getToolTip no ex at " + xAsLong);
+           // CommonShell commonShell = getCommonShellAtTime(exerciseID, xAsLong);
+            return getTooltip(toolTipData, exerciseID, getCommonShellAtTime(exerciseID, xAsLong));
           } catch (Exception e) {
             logger.warning("getToolTip " + e.getMessage());
             exceptionSupport.logException(e);
@@ -133,9 +133,10 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   protected int getHideDelay() {
     return HIDE_DELAY;
   }
+
   protected CommonShell getCommonShellAtTime(Integer exerciseID, long xAsLong) {
     CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
-   // if (commonShell == null) logger.warning("getCommonShellAtTime no ex found " + exerciseID);
+    // if (commonShell == null) logger.warning("getCommonShellAtTime no ex found " + exerciseID);
     return commonShell;
   }
 
@@ -187,14 +188,10 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
 
     // logger.info("getExerciseTooltip for " + showEx + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
     String foreignLanguage = commonShell == null ? "" : commonShell.getFLToShow();
-    String english = commonShell == null ? "" : commonShell.getEnglish();
-    if (english.equalsIgnoreCase(foreignLanguage) &&
-        commonShell != null &&
-        !commonShell.getMeaning().isEmpty())
-      english = commonShell.getMeaning();
+    String english = getEnglish(commonShell, foreignLanguage);
 
     String englishTool = (english == null || english.equals("N/A")) ? "" : "<br/>" + english;
-  String dateToShow = getDateToShow(toolTipData);
+    String dateToShow = getDateToShow(toolTipData);
 
     return
         (showEx ?
@@ -208,8 +205,8 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
 
             "<br/>" +
 
-            dateToShow+
-          //  (SHOW_DATE && showDate() ? dateToShow : "") +
+            dateToShow +
+            //  (SHOW_DATE && showDate() ? dateToShow : "") +
 
             (showEx ?
                 getTooltipHint()
@@ -217,24 +214,28 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
         ;
   }
 
+  private String getEnglish(CommonShell commonShell, String foreignLanguage) {
+    String english = commonShell == null ? "" : commonShell.getEnglish();
+    if (english.equalsIgnoreCase(foreignLanguage) &&
+        commonShell != null &&
+        !commonShell.getMeaning().isEmpty())
+      english = commonShell.getMeaning();
+    return english;
+  }
+
   @NotNull
-  protected String getFLTooltip(String foreignLanguage) {
+  String getFLTooltip(String foreignLanguage) {
     return "<span style='font-size:200%'>" + foreignLanguage + "</span>";
   }
 
   @NotNull
-  String getTooltipHint() {    return "<br/><b>Click to hear vs. reference</b>";
+  String getTooltipHint() {
+    return "<br/><b>Click to hear vs. reference</b>";
   }
 
   boolean shouldShowExercise(String seriesName) {
     return toShowExercise.contains(seriesName);
   }
-
-/*
-  boolean showDate() {
-    return true;
-  }
-*/
 
   /**
    * @return
@@ -252,6 +253,11 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     return idToEx.containsKey(exid);
   }
 
+  /**
+   *
+   * @param time
+   * @param id
+   */
   void addTimeToExID(long time, int id) {
     timeToId.put(time, id);
   }

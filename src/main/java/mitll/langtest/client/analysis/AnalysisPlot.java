@@ -109,7 +109,7 @@ public class AnalysisPlot extends BasicTimeSeriesPlot implements ExerciseLookup 
 
   private static final String NO_RECORDINGS_YET = "No recordings yet to analyze. Please record yourself.";
   private static final String NO_RECORDINGS_YET_FOR_STUDENT = "No recordings yet made by student to analyze.";
-  public static final String LIST = "quiz";
+  private static final String LIST = "quiz";
   public static final String LISTS = LIST + "zes";
   private static final String NO_RECORDINGS_YET_ON_LIST = "No recordings yet for this " + LIST + ". Choose another " + LIST + " or don't filter on " + LISTS + ".";
   private static final String NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST = "No recordings yet for this " + LIST + " by this student. Choose another " + LIST + " or student or don't filter on " + LISTS + ".";

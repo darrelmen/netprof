@@ -86,9 +86,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     hideWaiting();
   }
 
-  private void hideWaiting() {
-    waiting.setVisible(false);
-  }
 
   /**
    * @return
@@ -165,7 +162,11 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
     recordButton.setVisible(true);
   }
 
-  private void showWaiting() {
+  protected void showWaiting() {
     waiting.setVisible(true);
+  }
+
+  protected void hideWaiting() {
+    waiting.setVisible(false);
   }
 }

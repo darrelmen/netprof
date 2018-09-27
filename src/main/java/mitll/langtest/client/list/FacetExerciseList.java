@@ -79,7 +79,7 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 import static mitll.langtest.shared.project.ProjectProperty.SWAP_PRIMARY_AND_ALT;
 
 public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> implements ShowEventListener {
-  public static final String RECORDED = "Recorded";
+  private static final String RECORDED = "Recorded";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final String PRACTICED = " practiced.";

@@ -12,12 +12,12 @@ import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 5/19/17.
@@ -88,12 +88,13 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
    * Horizontal - play audio, score feedback, download widget
    * Shows a little praise message too!
    *
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput(PretestScore)
    * @param pretestScore
    * @param isRTL
    * @return
    */
   @NotNull
-  public DivWidget getWordTableContainer(PretestScore pretestScore, boolean isRTL) {
+  public DivWidget getWordTableContainer(AlignmentAndScore pretestScore, boolean isRTL) {
     DivWidget wordTableContainer = new DivWidget();
     wordTableContainer.getElement().setId("wordTableContainer");
     wordTableContainer.addStyleName("inlineFlex");
@@ -121,16 +122,16 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
     return wordTableContainer;
   }
 
-  private void showScoreFeedback(PretestScore pretestScore, boolean isRTL, DivWidget wordTableContainer,
+  private void showScoreFeedback(AlignmentAndScore pretestScore, boolean isRTL, DivWidget wordTableContainer,
                                  float hydecScore) {
     DivWidget scoreFeedbackDiv = new DivWidget();
     scoreFeedbackDiv.add(progressBar);
 
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = new HashMap<>();
 
-
+    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = pretestScore.getTypeToSegments();
     scoreFeedbackDiv.add(new WordTable()
-        .getDivWord(pretestScore.getTypeToSegments(), playAudioPanel, typeToSegmentToWidget, isRTL));
+        .getDivWord(typeToSegments, playAudioPanel, typeToSegmentToWidget, isRTL));
 
     playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget));
     // so it will play on drill tab...

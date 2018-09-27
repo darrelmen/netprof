@@ -70,7 +70,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   private static final String UPDATING_PROJECT_INFO = "updating project info";
 
-//  private static final String AUDIO_RECORDING = "audioRecording";
+  //  private static final String AUDIO_RECORDING = "audioRecording";
 //  private static final String WRITE_AUDIO_FILE = "writeAudioFile";
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final int SLOW_ROUND_TRIP = 3000;
@@ -435,7 +435,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                                                                 boolean usePhoneToDisplay, String language) {
     return
         new ParseResultJson(db.getServerProps(), language)
-            .readFromJSON(object, "words", "w", usePhoneToDisplay, null,false);
+            .readFromJSON(object, "words", "w", usePhoneToDisplay, null, false);
   }
 
   /**
@@ -554,7 +554,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                        int projID,
                                        int userIDFromSessionOrDB,
                                        String absPath) {
-    if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1).setStatus("can't find audio file");
+    if (testAudioFile.equals(AudioConversion.FILE_MISSING))
+      return new PretestScore(-1).setStatus("can't find audio file");
     long then = System.currentTimeMillis();
 
     //String[] split = testAudioFile.split(File.separator);
@@ -653,18 +654,34 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   @Override
   public void addRoundTrip(int resultID, int roundTrip) {
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
+    warnWhenSlow(resultID, roundTrip);
+  }
 
+  private void warnWhenSlow(int resultID, int roundTrip) {
     if (roundTrip > SLOW_ROUND_TRIP) {
       try {
         int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-        String userChosenID = db.getUserDAO().getUserChosenID(userIDFromSessionOrDB);
-        new Thread(() -> sendEmail("Slow round trip : " + roundTrip,
-            getInfo("Slow round trip (" + roundTrip + ") recording #" + resultID +
-                " by user #" + userIDFromSessionOrDB + "/" + userChosenID))).start();
+        int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+        Project project = getProject(projectIDFromUser);
+        if (project.getModelType() == ModelType.KALDI) {
+          if (roundTrip > 5000) {
+            sendSlowEmail(resultID, roundTrip, userIDFromSessionOrDB);
+          }
+        } else {
+          sendSlowEmail(resultID, roundTrip, userIDFromSessionOrDB);
+        }
+
       } catch (Exception e) {
         logger.warn("addRoundTrip got " + e, e);
       }
     }
+  }
+
+  private void sendSlowEmail(int resultID, int roundTrip, int userIDFromSessionOrDB) {
+    String userChosenID = db.getUserDAO().getUserChosenID(userIDFromSessionOrDB);
+    new Thread(() -> sendEmail("Slow round trip : " + roundTrip,
+        getInfo("Slow round trip (" + roundTrip + ") recording #" + resultID +
+            " by user #" + userIDFromSessionOrDB + "/" + userChosenID))).start();
   }
 
   /**

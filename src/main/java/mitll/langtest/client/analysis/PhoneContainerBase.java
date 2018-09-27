@@ -1,6 +1,5 @@
 package mitll.langtest.client.analysis;
 
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
@@ -14,7 +13,6 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
@@ -41,7 +39,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
    */
   private static final String CURR = "Avg";//"Average";//"Avg. Score";
   private static final int COUNT_COL_WIDTH = 45;
-  private static final String TOOLTIP = "Click to see examples";// and scores over time";
+//  private static final String TOOLTIP = "Click to see examples";// and scores over time";
   private static final int SOUND_WIDTH = 65;
 
 
@@ -173,7 +171,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
 
     table.setWidth("100%", true);
 
-    new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.TOP);
+//    new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.TOP);
   }
 
   protected int getPageSize() {
@@ -246,7 +244,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   }
 
   private void checkForClick(PhoneAndStats object, NativeEvent event) {
-    logger.info("checkForClick : stats " + object);
+   // logger.info("checkForClick : stats " + object);
     if (BrowserEvents.CLICK.equals(event.getType())) {
       //   clickOnPhone(object.getPhone());
       clickOnPhone2(object.getPhone());
@@ -278,7 +276,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     return tableWithPager;
   }
 
-  protected void addItems(List<PhoneAndStats> sortedHistory) {
+   void addItems(List<PhoneAndStats> sortedHistory) {
     addPhones(sortedHistory);
 
     try {

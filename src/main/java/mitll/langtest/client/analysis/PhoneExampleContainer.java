@@ -181,7 +181,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       logger.warning("Got " + e);
     }
 
-    new TooltipHelper().createAddTooltip(table, CLICK_ON, Placement.TOP);
+    //new TooltipHelper().createAddTooltip(table, CLICK_ON, Placement.TOP);
   }
 
   private ColumnSortEvent.ListHandler<WordAndScore> getEnglishSorter(Column<WordAndScore, SafeHtml> englishCol,

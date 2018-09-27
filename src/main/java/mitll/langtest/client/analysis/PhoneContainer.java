@@ -56,8 +56,6 @@ import java.util.logging.Logger;
 class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChangeListener {
   private final Logger logger = Logger.getLogger("PhoneContainer");
 
-  // private static final int MAX_EXAMPLES = 25;
-
   private static final String SOUND = "Sound";
 
   private final BigramContainer bigramContainer;
@@ -82,8 +80,6 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
     this.bigramContainer = bigramContainer;
   }
 
-//  private PhoneSummary phoneReport;
-
   @Override
   protected String getLabel() {
     return SOUND;
@@ -97,7 +93,6 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
   public Panel getTableWithPager(PhoneSummary phoneReport) {
     from = 0;
     to = System.currentTimeMillis();
-    //  this.phoneReport = phoneReport;
     return getTableWithPagerForHistory(getPhoneAndStatsList(phoneReport, from, to));
   }
 
@@ -129,7 +124,7 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
           public void onSuccess(PhoneSummary result) {
             long now = System.currentTimeMillis();
             long total = now - then;
-            logger.info("getPhoneSummary userid " + userid + " req " + reqid +
+            if (DEBUG)    logger.info("getPhoneSummary userid " + userid + " req " + reqid +
                 "\n\ttook   " + total +
                 "\n\tserver " + result.getServerTime() +
                 "\n\tclient " + (total - result.getServerTime()));
@@ -346,7 +341,7 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
 
 
  @Override protected void clickOnPhone2(String phone) {
-    logger.info("clickOnPhone2 : got click on" +
+    if (DEBUG) logger.info("clickOnPhone2 : got click on" +
         "\n\tphone " + phone +
         "\n\tfrom  " + from +
         "\n\tto    " + to +
@@ -373,7 +368,7 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
           public void onSuccess(PhoneBigrams result) {
             long now = System.currentTimeMillis();
             long total = now - then;
-            logger.info("getPhoneBigrams userid " + userid + " req " + reqid +
+            if (DEBUG)  logger.info("getPhoneBigrams userid " + userid + " req " + reqid +
                 "\n\tphone  " + phone +
                 "\n\ttook   " + total +
                 "\n\tserver " + result.getServerTime() +

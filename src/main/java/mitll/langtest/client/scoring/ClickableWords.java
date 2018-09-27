@@ -14,20 +14,17 @@ import mitll.langtest.client.custom.dialog.WordBoundsFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 3/23/17.
  */
-public class ClickableWords<T extends CommonExercise> {
+public class ClickableWords<T extends CommonShell> {
   private final Logger logger = Logger.getLogger("ClickableWords");
   private static final String SEARCHMATCH = "searchmatch";
 
@@ -41,7 +38,7 @@ public class ClickableWords<T extends CommonExercise> {
   private boolean isJapanese = false;
   private boolean isUrdu = false;
 
-  private T exercise;
+  //private T exercise;
   private boolean hasClickableAsian = false;
   private static final String MANDARIN = "Mandarin";
   private static final String JAPANESE = "Japanese";
@@ -52,7 +49,7 @@ public class ClickableWords<T extends CommonExercise> {
 
   private static final boolean DEBUG = false;
   //private boolean showPhones = true;
-
+  private  int exerciseID;
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
    */
@@ -61,14 +58,14 @@ public class ClickableWords<T extends CommonExercise> {
 
   /**
    * @param listContainer
-   * @param exercise
+   * @param exerciseID
    * @param language
    * @param fontSize
-   * @see RefAudioGetter#addWidgets
+   * @see TwoColumnExercisePanel#addWidgets
    */
-  ClickableWords(ListInterface listContainer, T exercise, String language, int fontSize, boolean showPhones) {
+  public ClickableWords(ListInterface listContainer, int exerciseID, String language, int fontSize) {
     this.listContainer = listContainer;
-    this.exercise = exercise;
+    this.exerciseID = exerciseID;
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     isUrdu = language.equalsIgnoreCase("Urdu");
     this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
@@ -104,7 +101,7 @@ public class ClickableWords<T extends CommonExercise> {
 
   @NotNull
   private List<String> getSearchTokens(boolean isChineseCharacter) {
-    return getTokens(listContainer.getTypeAheadText().toLowerCase(), isChineseCharacter);
+    return listContainer == null ? Collections.emptyList() : getTokens(listContainer.getTypeAheadText().toLowerCase(), isChineseCharacter);
   }
 
   /**
@@ -125,22 +122,20 @@ public class ClickableWords<T extends CommonExercise> {
                                     List<IHighlightSegment> clickables,
                                     TwoColumnExercisePanel.FieldType fieldType
   ) {
-    List<IHighlightSegment> segmentsForTokens = getSegmentsForTokens(isSimple, tokens, searchTokens, dir, fieldType);
+    List<IHighlightSegment> segmentsForTokens = getSegmentsForTokens(tokens, searchTokens, dir, fieldType);
     clickables.addAll(segmentsForTokens);
 
     return getClickableDivFromSegments(segmentsForTokens, dir == HasDirection.Direction.RTL);
   }
 
   /**
-   * @param isSimple
    * @param tokens
    * @param searchTokens
    * @param dir
    * @param fieldType
    * @return
    */
-  private List<IHighlightSegment> getSegmentsForTokens(boolean isSimple,
-                                                       List<String> tokens,
+  private List<IHighlightSegment> getSegmentsForTokens(List<String> tokens,
 
                                                        List<String> searchTokens,
 
@@ -154,7 +149,7 @@ public class ClickableWords<T extends CommonExercise> {
     for (String token : tokens) {
       boolean searchMatch = isSearchMatch(token, searchToken);
 
-      segments.add(makeClickableText(dir, token, searchMatch ? searchToken : null, false, id++, fieldType));
+      segments.add(makeClickableText(dir, token, searchMatch ? searchToken : null, false, id++, fieldType, true));
 
       if (searchMatch) {
         if (searchIterator.hasNext()) {
@@ -242,15 +237,14 @@ public class ClickableWords<T extends CommonExercise> {
    * @param contextSentence
    * @param highlight
    * @param clickables
-   * @param isSimple
+   * @param addClickableProps
    * @return
    * @see TwoColumnExercisePanel#getContext
    */
-  DivWidget getClickableWordsHighlight(String contextSentence,
-                                       String highlight,
-                                       TwoColumnExercisePanel.FieldType fieldType,
-                                       List<IHighlightSegment> clickables,
-                                       boolean isSimple) {
+  public DivWidget getClickableWordsHighlight(String contextSentence,
+                                              String highlight,
+                                              TwoColumnExercisePanel.FieldType fieldType,
+                                              List<IHighlightSegment> clickables, boolean addClickableProps) {
     DivWidget horizontal = new DivWidget();
 
     horizontal.getElement().setId("clickableWordsHighlightRow");
@@ -282,11 +276,11 @@ public class ClickableWords<T extends CommonExercise> {
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(contextSentence);
 
     if (DEBUG) {
-      logger.info("getClickableWordsHighlight exercise " + exercise.getID() + " dir " + dir +
+      logger.info("getClickableWordsHighlight exercise " + exerciseID+ " dir " + dir +
           " isfL " + fieldType);
     }
     if ((dir == HasDirection.Direction.RTL) && isFL) {
-      if (DEBUG) logger.info("exercise " + exercise.getID() + " is RTL ");
+      if (DEBUG) logger.info("exercise " + exerciseID + " is RTL ");
       setDirection(horizontal);
     }
     int id = 0;
@@ -317,7 +311,7 @@ public class ClickableWords<T extends CommonExercise> {
           searchMatch ? searchToken : null,
           isHighlightMatch,
           id++,
-          fieldType);
+          fieldType, addClickableProps);
       clickables.add(clickable);
       Widget w = clickable.asWidget();
       horizontal.add(w);
@@ -471,6 +465,7 @@ public class ClickableWords<T extends CommonExercise> {
    * @param html           a token that can be clicked on to search on it
    * @param isContextMatch
    * @param id
+   * @param addClickableProps
    * @return
    * @see #getClickableWords
    * @see #getClickableWordsHighlight
@@ -481,9 +476,9 @@ public class ClickableWords<T extends CommonExercise> {
       String searchToken,
       boolean isContextMatch,
       int id,
-      TwoColumnExercisePanel.FieldType fieldType) {
+      TwoColumnExercisePanel.FieldType fieldType, boolean addClickableProps) {
     final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir,
-        //!isSimple,
+
         false,
         false);
 
@@ -516,15 +511,19 @@ public class ClickableWords<T extends CommonExercise> {
     if (empty) {
       //  logger.info("makeClickableText for '" + html + "' not clickable");
       highlightSegmentDiv.setClickable(false);
-    } else {
-      highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-      highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
-      //highlightSegment.addClickHandler(clickEvent -> putTextInSearchBox(removePunct));
-      highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
-      highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
+    } else if (addClickableProps) {
+      addClickableProperties(highlightSegment, removePunct);
     }
 
     return highlightSegmentDiv;
+  }
+
+  private void addClickableProperties(HTML highlightSegment, String removePunct) {
+    highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+    highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
+    //highlightSegment.addClickHandler(clickEvent -> putTextInSearchBox(removePunct));
+    highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
+    highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
   }
 
   /**

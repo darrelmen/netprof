@@ -39,7 +39,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
   private static final boolean HIDE_UNSAFE = false;
 
-  enum FieldType {FL, TRANSLIT, MEANING, EN}
+ public enum FieldType {FL, TRANSLIT, MEANING, EN}
 
   private static final String N_A = "N/A";
 
@@ -163,7 +163,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
 
     if (projectStartupInfo != null) {
       int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
-      clickableWords = new ClickableWords<>(listContainer, exercise, controller.getLanguage(), fontSize, shouldShowPhones());
+      clickableWords = new ClickableWords<>(listContainer, exercise.getID(), controller.getLanguage(), fontSize);
       this.isRTL = clickableWords.isRTL(exercise);
 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
@@ -972,7 +972,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return flEntry;
   }
 
-  private String getFL(CommonExercise e) {
+  private String getFL(CommonShell e) {
     String flToShow = e.getFLToShow();
     //logger.info("for " + e.getID() + " " + flToShow + " should swap " +e.shouldSwap());
     return flToShow;
@@ -992,16 +992,16 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
-   * @param e
+   * @param parentExercise
    * @param card
    * @paramx rowWidget
    * @see #getItemContent
    */
-  private void addContext(T e, Panel card) {
+  private void addContext(T parentExercise, Panel card) {
     //  int c = 0;
-    String foreignLanguage = getFL(e);
-    String altFL = getAltFL(e);
-    Collection<CommonExercise> directlyRelated = e.getDirectlyRelated();
+    String foreignLanguage = getFL(parentExercise);
+    String altFL = getAltFL(parentExercise);
+    Collection<CommonExercise> directlyRelated = parentExercise.getDirectlyRelated();
     for (CommonExercise contextEx : directlyRelated) {
       DivWidget rowWidget = getRowWidget();
       card.add(rowWidget);
@@ -1015,6 +1015,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
   }
 
   /**
+   * @see #addContext(CommonExercise, Panel)
    * @param rowWidget
    * @param foreignLanguage
    * @param altFL
@@ -1025,34 +1026,37 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
                                 String altFL,
                                 CommonExercise contextEx) {
     AnnotationHelper annotationHelper = new AnnotationHelper(controller, controller.getMessageHelper());
+
     Panel context = getContext(contextEx, foreignLanguage, altFL, annotationHelper);
     if (context != null) {
       rowWidget.add(context);
       context.setWidth("100%");
     }
 
-    String contextTranslation = contextEx.getEnglish();
+    {
+      String contextTranslation = contextEx.getEnglish();
 
-    boolean same = getFL((T) contextEx).equals(contextTranslation);
-    if (!same) {
-      if (context != null && !contextTranslation.isEmpty()) {
-        context.setWidth(LEFT_WIDTH);
-      }
+      boolean same = getFL((T) contextEx).equals(contextTranslation);
+      if (!same) {
+        if (context != null && !contextTranslation.isEmpty()) {
+          context.setWidth(LEFT_WIDTH);
+        }
 
-      Widget contextTransWidget = addContextTranslation(contextEx, contextTranslation, annotationHelper);
+        Widget contextTransWidget = addContextTranslation(contextEx, contextTranslation, annotationHelper);
 
-      if (contextTransWidget != null) {
-        contextTransWidget.addStyleName("rightsidecolor");
-        contextTransWidget.addStyleName("leftFiveMargin");
-        contextTransWidget.setWidth(RIGHT_WIDTH);
-        rowWidget.add(contextTransWidget);
+        if (contextTransWidget != null) {
+          contextTransWidget.addStyleName("rightsidecolor");
+          contextTransWidget.addStyleName("leftFiveMargin");
+          contextTransWidget.setWidth(RIGHT_WIDTH);
+          rowWidget.add(contextTransWidget);
+        }
       }
     }
   }
 
   private Widget getAltContext(String flToHighlight, String altFL, AnnotationHelper annotationHelper, int exid) {
     Panel contentWidget = clickableWords.getClickableWordsHighlight(altFL, flToHighlight,
-        FieldType.FL, new ArrayList<>(), false);
+        FieldType.FL, new ArrayList<>(), true);
 
     CommentBox commentBox = getCommentBox(annotationHelper, exid);
     return commentBox
@@ -1210,7 +1214,7 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
       hp.add(contextPlay);
 
       DivWidget contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
-          FieldType.FL, contextClickables = new ArrayList<>(), false);
+          FieldType.FL, contextClickables = new ArrayList<>(), true);
 
       contextClickableRow = contentWidget;
       contextClickableRowPhones = clickableWords.getClickableDiv(isRTL);
@@ -1265,7 +1269,12 @@ public class TwoColumnExercisePanel<T extends CommonExercise> extends DivWidget 
     return spacer;
   }
 
-  private ChoicePlayAudioPanel getContextPlay(CommonExercise contextExercise) {
+  /**
+   * @see #getContext
+   * @param contextExercise
+   * @return
+   */
+  private ChoicePlayAudioPanel getContextPlay(CommonAudioExercise contextExercise) {
     AudioChangeListener contextAudioChanged = new AudioChangeListener() {
       @Override
       public void audioChanged(int id, long duration) {

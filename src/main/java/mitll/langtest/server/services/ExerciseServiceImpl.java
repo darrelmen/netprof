@@ -55,7 +55,6 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,7 +65,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.Collator;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
@@ -558,7 +556,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
 
     if (exercisesForState.isEmpty() && !prefix.isEmpty()) { // allow lookup by id
-      CommonExercise exercise = getExercise(userID, projID, prefix, incorrectFirst);
+      CommonExercise exercise = getExercise(userID, projID, prefix);
       if (exercise != null) exercisesForState = Collections.singletonList(exercise);
     }
     // why copy???
@@ -1652,7 +1650,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                                                 String language) {
     return
         new ParseResultJson(db.getServerProps(), language)
-            .readFromJSON(object, "words", "w", usePhoneToDisplay, null,false);
+            .readFromJSON(object, "words", "w", usePhoneToDisplay, null, false);
   }
 
   /**
@@ -1737,11 +1735,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private Map<Integer, CorrectAndScore> getScoreHistories(Collection<Integer> exids,
                                                           List<CommonExercise> exercises,
                                                           int userID) {
-    return (exercises.isEmpty()) ? Collections.emptyMap() :
+    return (exercises.isEmpty()) ?
+        Collections.emptyMap() :
         db.getResultDAO().getScoreHistories(userID, exids, getLanguage(exercises.get(0)));
   }
 
-  private <T extends Shell> T getExercise(int userID, int projectID, String exid, boolean isFlashcardReq) {
+  private <T extends Shell> T getExercise(int userID, int projectID, String exid) {
     int exid1 = -1;
     try {
       exid1 = Integer.parseInt(exid);

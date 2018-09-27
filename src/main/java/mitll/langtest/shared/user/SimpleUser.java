@@ -16,6 +16,14 @@ public class SimpleUser implements HasID, Comparable<HasID> {
     this.id = id;
   }
 
+  /**
+   * @see FirstLastUser
+   * @param id
+   * @param userid
+   * @param first
+   * @param last
+   * @param lastChecked
+   */
   SimpleUser(int id, String userid, String first, String last, long lastChecked) {
     this.id = id;
     this.userID = userid;

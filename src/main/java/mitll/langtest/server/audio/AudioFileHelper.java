@@ -269,7 +269,7 @@ public class AudioFileHelper implements AlignDecode {
     if (!oov.isEmpty()) {
       try {
         String fileName = "Project_" + project.getLanguage() + "_" + project.getName() + ".txt";
-        File file = new File(fileName);
+        File file = new File("/tmp/"+fileName);
         logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
         FileWriter oovTokens = new FileWriter(file);
         ArrayList<String> strings = new ArrayList<>(oov);
@@ -283,7 +283,7 @@ public class AudioFileHelper implements AlignDecode {
         }
         oovTokens.close();
       } catch (IOException e) {
-        logger.error("writeOOV got " + e, e);
+        logger.error("writeOOV got " + e);
       }
     } else {
       logger.info("writeOOV oov is empty for " + project);

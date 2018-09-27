@@ -20,6 +20,7 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.CommonAudioExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.user.MiniUser;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +55,7 @@ class ChoicePlayAudioPanel extends PlayAudioPanel {
    */
   ChoicePlayAudioPanel(
       SoundManagerAPI soundManager,
-      CommonExercise exercise,
+      CommonAudioExercise exercise,
       ExerciseController exerciseController,
       boolean includeContext,
       AudioChangeListener listener) {

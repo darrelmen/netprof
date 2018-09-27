@@ -51,9 +51,8 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
  */
-public class PretestScore extends AlignmentOutput implements IsSerializable {
+public class PretestScore extends AlignmentAndScore {
   private int reqid = 0;
-  private float hydecScore = -1f;
   private Map<String, Float> phoneScores;
   private Map<String, Float> wordScores;
   private Map<NetPronImageType, String> sTypeToImage = new HashMap<>();
@@ -62,7 +61,6 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
   private int processDur = 0;
   private String json;
   private transient boolean ranNormally;
-  private boolean fullMatch = true;
   private String status = "";
   private String message = "";
 
@@ -98,20 +96,14 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
                       float wavFileLengthSeconds,
                       int processDur,
                       boolean isFullMatch) {
-    super(sTypeToEndTimes);
+    super(sTypeToEndTimes, hydecScore, isFullMatch);
     this.sTypeToImage = sTypeToImage;
-    this.hydecScore = hydecScore;
     this.phoneScores = phoneScores;
     this.wordScores = wordScores;
     this.recoSentence = recoSentence;
     this.wavFileLengthSeconds = wavFileLengthSeconds;
     this.processDur = processDur;
     this.ranNormally = true;
-    this.fullMatch = isFullMatch;
-  }
-
-  public float getHydecScore() {
-    return hydecScore;
   }
 
   public Map<String, Float> getPhoneScores() {
@@ -167,10 +159,6 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
     return ranNormally;
   }
 
-  public boolean isFullMatch() {
-    return fullMatch;
-  }
-
   public String getStatus() {
     return status;
   }
@@ -197,12 +185,12 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
     return "score" +
         "\n\tstatus         " + status +
         "\n\tmessage        " + message +
-        "\n\tscore          " + hydecScore +
+        "\n\tscore          " + getHydecScore() +
         "\n\tphones         " + getPhoneScores() +
         "\n\ttype->image    " + getsTypeToImage() +
         "\n\ttype->endtimes " + getTypeToSegments() +
         "\n\ttook           " + processDur + " millis" +
-        "\n\tfull match     " + fullMatch
+        "\n\tfull match     " + isFullMatch()
         ;
   }
 }
