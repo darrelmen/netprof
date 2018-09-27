@@ -1,3 +1,4 @@
+package mitll.langtest.shared.project;
 /*
  *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
@@ -30,21 +31,23 @@
  *
  */
 
-package mitll.langtest.client.recorder;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
- * Interface for getting events back from allow/deny Flash mic permission dialog.
- *
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 7/5/12
- * Time: 4:24 PM
- * To change this template use File | Settings | File Templates.
+ * @see mitll.langtest.server.database.project.ProjectDAO#add
  */
-public interface MicPermission {
-  void gotPermission();
+public enum ProjectMode implements IsSerializable {
+  VOCABULARY(true),
+  DIALOG(true),
+  EITHER(false);
 
-  void noRecordingMethodAvailable();
-  void noWebRTCAvailable();
+  private boolean show;
+
+  ProjectMode(boolean show) {
+    this.show = show;
+  }
+
+  public boolean shouldShow() {
+    return show;
+  }
 }

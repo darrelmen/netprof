@@ -37,6 +37,7 @@ import mitll.langtest.server.database.project.ProjectManagement;
 
 import java.util.*;
 import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 /**
  * UI-friendly representation of a project...
@@ -46,6 +47,10 @@ public class SlimProject extends ProjectInfo {
   private boolean hasModel;
   private boolean isRTL;
   private List<SlimProject> children = new ArrayList<>();
+
+  private Map<String, String> props;
+  private ProjectMode mode = ProjectMode.VOCABULARY;
+
 
   public SlimProject() {
   }
@@ -110,6 +115,7 @@ public class SlimProject extends ProjectInfo {
   public boolean hasChildren() {
     return !children.isEmpty();
   }
+
   public boolean hasChild(int projectid) {
     return getChild(projectid) != null;
   }
@@ -119,6 +125,15 @@ public class SlimProject extends ProjectInfo {
       if (child.getID() == projectid) return child;
     }
     return null;
+  }
+
+  public SlimProject getChildByMode(int projectid, ProjectMode mode) {
+    List<SlimProject> collect = children.stream()
+        .filter(slimProject ->
+            slimProject.getID() == projectid &&
+                slimProject.getMode() == mode)
+        .collect(Collectors.toList());
+    return (collect.isEmpty()) ? getChild(projectid) : collect.iterator().next();
   }
 
   public List<SlimProject> getChildren() {
@@ -141,6 +156,13 @@ public class SlimProject extends ProjectInfo {
 /*  public Map<String, String> getProps() {
     return props;
   }*/
+  public ProjectMode getMode() {
+    return mode;
+  }
+
+  public void setMode(ProjectMode mode) {
+    this.mode = mode;
+  }
 
   public String toString() {
     return "SlimProject " + super.toString() + "\n\tnum children " + children.size();

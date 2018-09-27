@@ -61,8 +61,8 @@ import java.util.stream.Collectors;
  * @since 10/21/15.
  */
 public class WordTable {
-  public static final String WHITE_SPACE_NOWRAP = PagerTable.WHITE_SPACE_NOWRAP;
-  private final Logger logger = Logger.getLogger("WordTable");
+//  private final Logger logger = Logger.getLogger("WordTable");
+  private static final String WHITE_SPACE_NOWRAP = PagerTable.WHITE_SPACE_NOWRAP;
 
   private static final String TABLE = "<table>";
   private static final String TABLEEND = "</table>";

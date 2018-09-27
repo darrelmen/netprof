@@ -243,18 +243,19 @@ public class FacetExerciseList extends HistoryExerciseList<CommonShell, CommonEx
     tableWithPager.setWidth("100%");
     tableWithPager.getElement().getStyle().setProperty("minWidth", "250px");
 
-//    DivWidget expander = new DivWidget();
-//    expander.setWidth("100%");
-//    pagerAndSort.add(expander);
-//    expander.addStyleName("floatRight");
     {
       // better name for primary and alternate choices
-      boolean isMandarin = controller.getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
-      boolean shouldSwap = controller.getProjectStartupInfo().isShouldSwap();
-      Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu();
       DivWidget widgets = new DivWidget();
       widgets.addStyleName("topFiveMargin");
-      widgets.add(realViewMenu);
+
+      {
+        ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+        boolean isMandarin = projectStartupInfo != null && projectStartupInfo.getLanguageInfo() == Language.MANDARIN;
+        boolean shouldSwap = projectStartupInfo != null && projectStartupInfo.isShouldSwap();
+        Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu();
+        widgets.add(realViewMenu);
+      }
+
       pagerAndSort.add(widgets);
     }
 

@@ -42,6 +42,8 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -66,11 +68,7 @@ import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.project.ProjectEditForm;
-import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
-import mitll.langtest.client.recorder.MicPermission;
-import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.client.recorder.WebAudioRecorder;
+import mitll.langtest.client.recorder.*;
 import mitll.langtest.client.scoring.AnnotationHelper;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
@@ -83,6 +81,7 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
@@ -239,10 +238,17 @@ public class LangTest implements
 
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
-  public static final String VERSION_INFO = "2.0.7";
+/*
+  public static final String VERSION_INFO = "3.0.3";
+*/
 
   private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
+
+
+  private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
+  public static final SafeUri RED_X_URL = UriUtils.fromSafeConstant(RED_X);
+
   /**
    * @see
    */
@@ -254,7 +260,6 @@ public class LangTest implements
   private static final boolean DEBUG = false;
 
   private UserManager userManager;
-  private FlashRecordPanelHeadless flashRecordPanel;
 
   // services
   private final AudioServiceAsync defaultAudioService = GWT.create(AudioService.class);
@@ -364,6 +369,7 @@ private boolean hasNetworkProblem;
       public void onFailure(Throwable caught) {
         LangTest.this.onFailure(caught, then);
       }
+
       public void onSuccess(StartupInfo startupInfo) {
         rememberStartup(startupInfo, reloadWindow);
       }
@@ -476,7 +482,9 @@ private boolean hasNetworkProblem;
     if (!isDefault(host)) {
       String moduleBaseURL = audioService.getServiceEntryPoint();
       audioService.setServiceEntryPoint(moduleBaseURL + "/" + host);
-      //logger.info("createHostSpecificServices service " + "now at " + audioService.getServiceEntryPoint());
+      //   logger.info("adjustEntryPoint createHostSpecificServices service now at " + audioService.getServiceEntryPoint());
+    } else {
+      // logger.info("adjustEntryPoint createHostSpecificServices service is at " + audioService.getServiceEntryPoint());
     }
   }
 
@@ -555,7 +563,6 @@ private boolean hasNetworkProblem;
   public void getImage(int reqid, final String path, final String type, int toUse, int height, int exerciseID,
                        AsyncCallback<ImageResponse> client) {
     String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
-
     getImage(reqid, key, client);
   }
 
@@ -577,7 +584,7 @@ private boolean hasNetworkProblem;
     //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
-      //logger.info("getImage for key " + key+ " found  " + ifPresent);
+      logger.info("getImage for key " + key + " found  " + ifPresent);
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
@@ -628,27 +635,12 @@ private boolean hasNetworkProblem;
 
     buttonFactory = new ButtonFactory(service, props, this);
 
-    userManager = new UserManager(this, this, userService, openUserService, props);
+    userManager = new UserManager(this, this, userService, props);
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 
-    makeFlashContainer();
+    initBrowserRecording();
 
- /*   if (props.isAMAS()) {
-      final LangTest outer = this;
-      GWT.runAsync(new RunAsyncCallback() {
-        public void onFailure(Throwable caught) {
-          downloadFailedAlert();
-        }
-
-        public void onSuccess() {
-          logger.info("run async to get amas ui");
-          initialUI = new AMASInitialUI(outer, userManager);
-          populateRootPanel();
-        }
-      });
-    } else {
-    */
     this.initialUI = new InitialUI(this, userManager);
     messageHelper = new MessageHelper(initialUI, this);
     annotationHelper = new AnnotationHelper(this, messageHelper);
@@ -730,22 +722,22 @@ private boolean hasNetworkProblem;
    * @see #onModuleLoad2()
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
-  private void makeFlashContainer() {
-    // logger.info("makeFlashContainer - called");
+  private void initBrowserRecording() {
+    // logger.info("initBrowserRecording - called");
     MicPermission micPermission = new MicPermission() {
       /**
        * @see mitll.langtest.client.recorder.WebAudioRecorder
        */
       public void gotPermission() {
-        logger.info("\tmakeFlashContainer - got permission!");
-        hideFlash();
+//        logger.info("initBrowserRecording - got permission!");
+
         checkLogin();
       }
 
       /**
-       * @see FlashRecordPanelHeadless#noMicrophoneFound
+       * @seex FlashRecordPanelHeadless#noMicrophoneFound
        */
-      public void noMicAvailable() {
+ /*     public void noMicAvailable() {
         if (!showingPlugInNotice) {
           showingPlugInNotice = true;
           List<String> messages = Arrays.asList("If you want to record audio, ",
@@ -753,20 +745,20 @@ private boolean hasNetworkProblem;
           new ModalInfoDialog("Plug in microphone", messages, Collections.emptyList(),
               null,
               hiddenEvent -> {
-                hideFlash();
+
                 checkLogin();
                 initialUI.setSplash(RECORDING_DISABLED);
                 isMicConnected = false;
               }, false, true, 600, 400);
         }
-      }
+      }*/
 
       /**
        * @see
        */
       public void noRecordingMethodAvailable() {
-        logger.info("\tmakeFlashContainer - no way to record");
-        hideFlash();
+        logger.info("\tnoRecordingMethodAvailable - no way to record");
+
         new ModalInfoDialog(CAN_T_RECORD_AUDIO, RECORDING_AUDIO_IS_NOT_SUPPORTED, hiddenEvent -> checkLogin());
 
         initialUI.setSplash(RECORDING_DISABLED);
@@ -775,16 +767,21 @@ private boolean hasNetworkProblem;
 
       @Override
       public void noWebRTCAvailable() {
-        flashRecordPanel.initFlash();
+        noRecordingMethodAvailable();
       }
+
+      /**
+       * @see WebAudioRecorder#silenceDetected
+       */
+//      @Override
+//      public void silenceDetected() {
+//        if (wavEndCallback != null) wavEndCallback.silenceDetected();
+//      }
     };
-    flashRecordPanel = new FlashRecordPanelHeadless(micPermission);
+
+    BrowserRecording.init(micPermission);
   }
 
-  private void hideFlash() {
-    flashRecordPanel.hide();
-    flashRecordPanel.hide2(); // must be a separate call!
-  }
 
   public boolean hasModel() {
     return projectStartupInfo != null && getProjectStartupInfo().isHasModel();
@@ -817,9 +814,14 @@ private boolean hasNetworkProblem;
    */
   public void setProjectStartupInfo(User user) {
     projectStartupInfo = user.getStartupInfo();
-//    if (projectStartupInfo == null) {
-//      logger.info("setProjectStartupInfo project startup null for " + user);
-//    }
+
+    if (projectStartupInfo == null) {
+      logger.info("setProjectStartupInfo project startup null for " + user);
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("no startup?"));
+//      logger.info("logException stack " + exceptionAsString);
+    }
+
     initialUI.showCogMenu();
   }
 
@@ -860,13 +862,13 @@ private boolean hasNetworkProblem;
    * Only get the exercises if the user has accepted mic access.
    *
    * @param user
-   * @see #makeFlashContainer
+   * @see #initBrowserRecording
    * @see UserManager#gotNewUser(User)
    * @see UserManager#storeUser
    */
   public void gotUser(User user) {
     setProjectStartupInfo(user);
-    //  logger.info("\ngotUser Got startup info " + projectStartupInfo);
+    if (DEBUG) logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
   }
 
@@ -874,12 +876,12 @@ private boolean hasNetworkProblem;
    * @see #recordingModeSelect()
    */
   private void checkInitFlash() {
-    if (flashRecordPanel.gotPermission()) {
+    if (BrowserRecording.gotPermission()) {
       if (DEBUG) logger.info("checkInitFlash : initFlash - has permission");
       checkLogin();
     } else {
       if (DEBUG) logger.info("checkInitFlash : initFlash - no permission yet");
-      flashRecordPanel.tryWebAudio();
+      BrowserRecording.getWebAudio().initWebaudio();
       if (!WebAudioRecorder.isWebRTCAvailable()) {
         checkLogin();
       }
@@ -961,7 +963,7 @@ private boolean hasNetworkProblem;
    * Called after the user clicks "Yes" in flash mic permission dialog.
    *
    * @see #checkInitFlash()
-   * @see #makeFlashContainer()
+   * @see #initBrowserRecording()
    */
   private void checkLogin() {
     //console("checkLogin");
@@ -1026,6 +1028,10 @@ private boolean hasNetworkProblem;
 
   public String getLanguage() {
     return projectStartupInfo != null ? projectStartupInfo.getLanguage() : "";
+  }
+
+  public Language getLanguageInfo() {
+    return projectStartupInfo != null ? projectStartupInfo.getLanguageInfo() : Language.UNKNOWN;
   }
 
   public boolean isRightAlignContent() {
@@ -1146,11 +1152,6 @@ private boolean hasNetworkProblem;
   }
   // recording methods...
 
-  @Override
-  public Widget getFlashRecordPanel() {
-    return flashRecordPanel;
-  }
-
   /**
    * Recording interface
    *
@@ -1158,7 +1159,7 @@ private boolean hasNetworkProblem;
    * @see PostAudioRecordButton#startRecording()
    */
   public void startRecording() {
-    flashRecordPanel.recordOnClick();
+    BrowserRecording.recordOnClick();
   }
 
   /**
@@ -1169,7 +1170,7 @@ private boolean hasNetworkProblem;
    */
   public void stopRecording(WavCallback wavCallback) {
     // logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
-    flashRecordPanel.stopRecording(wavCallback);
+    BrowserRecording.stopRecording(wavCallback,false);
   }
 
   /**
@@ -1214,12 +1215,7 @@ private boolean hasNetworkProblem;
 
   @Override
   public boolean isRecordingEnabled() {
-    return flashRecordPanel.gotPermission();
-  }
-
-  @Override
-  public boolean usingFlashRecorder() {
-    return flashRecordPanel.usingFlash();
+    return BrowserRecording.gotPermission();
   }
 
   /**
@@ -1251,17 +1247,31 @@ private boolean hasNetworkProblem;
 
   @Override
   public void showListIn(int listID, INavigation.VIEWS views) {
-    initialUI.getNavigation().showListIn(listID, views);
+    getNavigation().showListIn(listID, views);
   }
 
+  /**
+   * @seex WordContainerAsync#gotClickOnLearn
+   * @paramx views
+   * @return
+   */
+//  @Override
+//  public ShowTab getShowTab(INavigation.VIEWS views) {
+//    return getNavigation().getShowTab(views);
+//  }
+
   @Override
-  public ShowTab getShowTab() {
-    return initialUI.getNavigation().getShowTab();
+  public ShowTab getShowTab( ) {
+    return getNavigation().getShowTab();
   }
 
   @Override
   public void setBannerVisible(boolean visible) {
-    initialUI.getNavigation().setBannerVisible(visible);
+    getNavigation().setBannerVisible(visible);
+  }
+
+  public INavigation getNavigation() {
+    return initialUI.getNavigation();
   }
 
   @Override

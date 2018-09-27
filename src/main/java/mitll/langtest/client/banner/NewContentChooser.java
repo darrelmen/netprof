@@ -27,6 +27,7 @@ import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MatchInfo;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.User;
@@ -53,6 +54,9 @@ public class NewContentChooser implements INavigation {
   private final ListView listView;
 
   private VIEWS currentSection = VIEWS.NONE;
+ // private HandlerRegistration handlerRegistration;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -66,7 +70,10 @@ public class NewContentChooser implements INavigation {
     this.listView = new ListView(controller);
     this.banner = banner;
     divWidget.setId("NewContentChooser");
-    divWidget.setHeight("100%");
+
+    divWidget.addStyleName("topFiveMargin");
+
+//    divWidget.setHeight("100%");
   }
 
   /**
@@ -90,15 +97,15 @@ public class NewContentChooser implements INavigation {
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-    //    logger.info("getCurrentView currentView " + currentView);
-    VIEWS currentStoredView = null;
+    if (DEBUG) logger.info("getCurrentView currentView " + currentView);
+    VIEWS currentStoredView;
     try {
       currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
     } catch (IllegalArgumentException e) {
-      logger.warning("hmm, can't figure out view " + currentView);
-      currentStoredView = LEARN;
+      currentStoredView = VIEWS.NONE;
     }
 
+    {
     Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
 
     //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
@@ -107,9 +114,13 @@ public class NewContentChooser implements INavigation {
 
     if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
       logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
-      currentStoredView = LEARN;
+        currentStoredView = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+      }
     }
 
+    if (currentStoredView == NONE) {
+      currentStoredView = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+    }
     return currentStoredView;
   }
 
@@ -132,6 +143,12 @@ public class NewContentChooser implements INavigation {
     return projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT;
   }
 
+
+  @Override
+  public void show(VIEWS views) {
+    banner.show(views);
+  }
+
   /**
    * @param view
    * @see StatsFlashcardFactory#showDrill
@@ -144,20 +161,16 @@ public class NewContentChooser implements INavigation {
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    //  logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+    if (DEBUG) logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 
     if (!currentSection.equals(view)) {
-      //  logger.info("showView - already showing " + view);
+      if (DEBUG) logger.info("showView - showing " + view);
       //} else {
       currentSection = view;
       storeValue(view);
       switch (view) {
         case LEARN:
-          clearAndFixScroll();
-
-          if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
-
-          setInstanceHistory(LEARN);
+          clearAndPush(isFirstTime, currentStoredView, LEARN);
           learnHelper.showContent(divWidget, LEARN.toString(), fromClick);
           break;
         case DRILL:
@@ -206,22 +219,36 @@ public class NewContentChooser implements INavigation {
     }
   }
 
-  /**
-   * Remember to preserve unit chapter selection from history...
-   * @param views
-   */
-  private void setInstanceHistory(VIEWS views) {
-    if (!getCurrentInstance().equalsIgnoreCase(views.toString())) {
-      Map<String, Collection<String>> typeToSection = new SelectionState(History.getToken(), false).getTypeToSection();
+  private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen) {
+    clearAndFixScroll();
+    if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
+    setInstanceHistory(listen);
+  }
+
+  private void clearAndPushKeep(VIEWS views) {
+    clearAndFixScroll();
+
+    SelectionState selectionState = new SelectionState();
+    //String instance = selectionState.getInstance();
+    if (selectionState.getView() != views) {
       //   logger.info("setInstanceHistory clearing history for instance " + views);
-      StringBuilder stringBuilder = new StringBuilder();
-      typeToSection.forEach((k, v) -> stringBuilder
-          .append(k)
-          .append("=")
-          .append(v.iterator().next()).append(SelectionState.SECTION_SEPARATOR));
-      String historyToken = SelectionState.INSTANCE + "=" + views.toString();
-      String s = stringBuilder.toString();
-      pushNewItem(historyToken + (s.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + s));
+      int dialog = selectionState.getDialog();
+      pushItem(getInstanceParam(views) + maybeAddDialogParam(dialog));
+    }
+    //else {
+    //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
+    //}
+  }
+
+  @NotNull
+  private String maybeAddDialogParam(int dialog) {
+    return dialog > 0 ? (SelectionState.SECTION_SEPARATOR + SelectionState.DIALOG + "=" + dialog) : "";
+  }
+
+  private void setInstanceHistory(VIEWS views) {
+    if (new SelectionState().getView() != views) {
+      if (DEBUG) logger.info("setInstanceHistory clearing history for instance " + views);
+      pushItem(getInstanceParam(views));
     } else {
       //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
@@ -229,15 +256,17 @@ public class NewContentChooser implements INavigation {
 
   private void clearAndFixScroll() {
     clear();
-    fixDivToNotScrollUnderHeader();
+    //  fixDivToNotScrollUnderHeader();
   }
 
-  private void fixDivToNotScrollUnderHeader() {
+/*  private void fixDivToNotScrollUnderHeader() {
     divWidget.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
     divWidget.getElement().getStyle().setPosition(Style.Position.FIXED);
-  }
+  }*/
 
-  //  @Override
+  /**
+   * @see #showView(VIEWS, boolean, boolean)
+   */
   private void showDrill() {
     clearAndFixScroll();
 
@@ -351,7 +380,7 @@ public class NewContentChooser implements INavigation {
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
     // logger.info("pushUnitOrChapter ");
-    pushNewItem(s + "=" + next.getValue());
+    pushItem(s + "=" + next.getValue());
   }
 
   /**
@@ -426,6 +455,27 @@ public class NewContentChooser implements INavigation {
     return new SelectionState(History.getToken(), false).getInstance();
   }
 
+  /**
+   * @param mode
+   * @see mitll.langtest.client.project.ProjectChoices#setProjectForUser
+   */
+  @Override
+  public void storeViewForMode(ProjectMode mode) {
+    // logger.info("storeViewForMode " + mode);
+    //pushItem(""); // clear instance in url
+    storeValue(mode == ProjectMode.DIALOG ? DIALOG : LEARN);
+  }
+
+  @NotNull
+  private String getStoredView() {
+    String value = controller.getStorage().getValue(CURRENT_VIEW);
+    if (value == null || value.isEmpty()) return "";
+    else return value.toUpperCase();
+  }
+
+  /**
+   * @param view
+   */
   private void storeValue(VIEWS view) {
     controller.getStorage().storeValue(CURRENT_VIEW, view.name());
   }
@@ -439,7 +489,7 @@ public class NewContentChooser implements INavigation {
     if (getCurrentView() == VIEWS.FIX) {
       divWidget.add(review);
     } else {
-      logger.warning("not adding review since current is " + getCurrentView());
+      logger.warning("showReviewItems not adding since current is " + getCurrentView());
     }
   }
 
@@ -461,10 +511,6 @@ public class NewContentChooser implements INavigation {
    */
   private void clear() {
     divWidget.clear();
-
-    Style style = divWidget.getElement().getStyle();
-    style.clearProperty("overflow");
-    style.clearProperty("position");
   }
 
   /**
@@ -479,25 +525,39 @@ public class NewContentChooser implements INavigation {
   /**
    * Clear any current selection of unit and chapter before choosing an exercise, so we guarantee it will appear.
    *
+   * @paramx views
    * @return
    */
   @NotNull
   public ShowTab getShowTab() {
-    return exid -> {
+    return (exid) -> {
+      int dialog = new SelectionState().getDialog();
+      logger.info("getShowTab Dialog id " + dialog);
+
+
+//      ExerciseListContent learnHelper = views == LEARN ? this.learnHelper : studyHelper;
+
       boolean wasMade = learnHelper.getReloadable() != null;
       //   logger.info("getShowTab history - " + History.getToken());
-      if (!wasMade) {
+    //  logger.info("getShowTab view " + views + " was made " + wasMade);
+
+//      if (!wasMade) {
         banner.show(LEARN);
-      }
-      learnHelper.loadExercise(exid);
-      if (wasMade) {
-        banner.show(LEARN);
-      }
+  //    }
+//      learnHelper.loadExercise(exid);  //??? why - the push should do it
+   //   if (wasMade) {
+  //      banner.show(views);
+    //  }
+
 
       //   logger.info("getShowTab history after - " + History.getToken());
 
-      pushNewItem(SelectionState.INSTANCE + "=" + LEARN.toString() +
-          SelectionState.SECTION_SEPARATOR + SelectionState.ITEM + "=" + exid);
+      pushItem(
+          getInstanceParam(LEARN) +
+              maybeAddDialogParam(dialog) +
+//              (dialog != -1 ? SelectionState.SECTION_SEPARATOR + SelectionState.DIALOG + "=" + dialog : "") +
+              SelectionState.SECTION_SEPARATOR + SelectionState.ITEM + "=" + exid
+      );
     };
   }
 
@@ -510,14 +570,30 @@ public class NewContentChooser implements INavigation {
 
   private void setHistoryWithList(int listid, VIEWS views) {
     // logger.info("showListIn - " + listid + " " + views);
-    String historyToken = FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
-        SelectionState.INSTANCE + "=" + views.toString();
-    pushNewItem(historyToken);
+    pushItem(
+        FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
+            getInstanceParam(views));
   }
 
-  private void pushNewItem(String historyToken) {
-    //logger.info("pushNewItem " + historyToken);
-    History.newItem(historyToken);
+  @NotNull
+  private String getInstanceParam(VIEWS view) {
+    return SelectionState.INSTANCE + "=" + view.toString();
+  }
+
+  //@Override
+  public void showDialogIn(int dialogid, VIEWS view) {
+    logger.info("showDialogIn - " + dialogid + " " + view);
+    pushItem(
+        SelectionState.DIALOG + "=" + dialogid + SelectionState.SECTION_SEPARATOR +
+            getInstanceParam(view));
+    banner.show(view);
+  }
+
+  private void pushItem(String url) {
+    //  logger.info("pushItem - " + url);
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
+//    logger.info("logException stack " + exceptionAsString);
+    History.newItem(url);
   }
 
   @Override

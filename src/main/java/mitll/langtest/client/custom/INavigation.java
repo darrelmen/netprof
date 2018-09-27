@@ -2,6 +2,7 @@ package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.User;
 
 import java.util.Arrays;
@@ -22,6 +23,7 @@ public interface INavigation extends IViewContaner {
     LEARN,
     DRILL,
     QUIZ,
+    DIALOG,
     RECORD(Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     CONTEXT(Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     DEFECTS(Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
@@ -45,6 +47,10 @@ public interface INavigation extends IViewContaner {
       return name().substring(0, 1) + name().substring(1).toLowerCase();
     }
   }
+
+  void storeViewForMode(ProjectMode mode);
+
+  void show(VIEWS views);
 
   void showView(VIEWS view);
 

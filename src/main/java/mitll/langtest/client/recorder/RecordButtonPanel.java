@@ -228,7 +228,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     postedAudio();
     controller.getAudioService().writeAudioFile(base64EncodedWavFile,
         audioContext,
-        controller.usingFlashRecorder(),
+        false,
         getDeviceType(),
         getDevice(),
         decoderOptions,

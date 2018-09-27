@@ -59,6 +59,9 @@ public interface UILifecycle {
 
   void getUserPermissions();
 
+  /**
+   * @see
+   */
   void showInitialState();
 
 
@@ -73,7 +76,6 @@ public interface UILifecycle {
   NavLink makeBreadcrumb(String name);
 
   void clickOnParentCrumb(SlimProject parent);
-
 
   /**
    * @see LangTest#makeFlashContainer()
@@ -90,5 +92,4 @@ public interface UILifecycle {
   INavigation getNavigation();
 
   void showCogMenu();
-
 }

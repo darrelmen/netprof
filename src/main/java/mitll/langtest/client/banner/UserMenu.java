@@ -1,11 +1,9 @@
 package mitll.langtest.client.banner;
 
-import cern.jet.random.StudentT;
 import com.github.gwtbootstrap.client.ui.Modal;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -21,7 +19,6 @@ import mitll.langtest.client.initial.LifecycleSupport;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.instrumentation.EventTable;
-import mitll.langtest.client.recorder.FlashRecordPanelHeadless;
 import mitll.langtest.client.result.ActiveUsersManager;
 import mitll.langtest.client.result.ReportListManager;
 import mitll.langtest.client.result.ResultManager;
@@ -30,7 +27,6 @@ import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.project.StartupInfo;
-import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,6 +38,7 @@ import java.util.logging.Logger;
  */
 public class UserMenu {
   public static final String ARE_YOU_AN_INSTRUCTOR = "Are you an instructor?";
+  public static final String BROWSER_RECORDING = "Browser recording";
   private final Logger logger = Logger.getLogger("UserMenu");
 
   private static final String REQUEST_INSTRUCTOR_STATUS = "Request Instructor Status";
@@ -354,9 +351,8 @@ public class UserMenu {
   private List<String> getPropKeys(Map<String, String> props, int server) {
     List<String> strings = new ArrayList<>();
     try {
-      String recordingInfo = FlashRecordPanelHeadless.usingWebRTC() ? "Browser recording" : "Flash recording";
       if (server == 1) {
-        props.put("Recording type", recordingInfo);
+        props.put("Recording type", BROWSER_RECORDING);
       }
 
       props.remove("domino.url");

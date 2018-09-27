@@ -36,7 +36,6 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
-import mitll.langtest.client.services.OpenUserServiceAsync;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
@@ -62,6 +61,8 @@ public class UserManager {
   private final Logger logger = Logger.getLogger("UserManager");
 
   private static final boolean DEBUG = false;
+
+
   private static final int NO_USER_SET = -1;
   private static final String NO_USER_SET_STRING = "" + NO_USER_SET;
 
@@ -91,11 +92,9 @@ public class UserManager {
   public UserManager(UserNotification lt,
                      UserFeedback userFeedback,
                      UserServiceAsync userServiceAsync,
-                     OpenUserServiceAsync openUserService,
                      PropertyHandler props) {
     this.userNotification = lt;
     this.userServiceAsync = userServiceAsync;
-    // this.openUserService = openUserService;
     this.appTitle = props.getAppTitle();
     this.userFeedback = userFeedback;
   }
@@ -114,11 +113,12 @@ public class UserManager {
   public void checkLogin() {
     final int user = getUser();
     if (user != NO_USER_SET) {
-      //logger.info("UserManager.login : current user : " + user);
+      if (DEBUG) logger.info("UserManager.login : current user : " + user);
       if (current == null) {
         getPermissionsAndSetUser();
       } else {
-        // logger.info("checkLogin : user " + user + " and full info " + current.getUserID() + " " + current.getUserKind());
+        if (DEBUG)
+          logger.info("checkLogin : user " + user + " and full info " + current.getUserID() + " " + current.getUserKind());
       }
     } else {
       userNotification.showLogin();
@@ -231,6 +231,9 @@ public class UserManager {
    * Need these to be prefixed by app title so if we switch webapps, we don't get weird user ids
    *
    * @return
+   * @see #getUserFromStorage
+   * @see #clearUser
+   * @see #rememberUser
    */
   private String getUserIDCookie() {
     return appTitle + ":" + USER_ID;
@@ -248,22 +251,6 @@ public class UserManager {
   }
 
   /**
-   * @see InitialUI#resetState()
-   */
-  public void clearUser() {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      localStorageIfSupported.removeItem(getUserIDCookie());
-      localStorageIfSupported.removeItem(getUserChosenID());
-      localStorageIfSupported.removeItem(getUserPendingID());
-      current = null;
-      //    logger.info("clearUser : removed user id = " + getUserID() + " user now " + getUser());
-    } else {
-      userID = NO_USER_SET;
-    }
-  }
-
-  /**
    * don't store the password hash in local storage :)
    *
    * @param user
@@ -271,7 +258,7 @@ public class UserManager {
    */
   void storeUser(User user) {
     if (Storage.isLocalStorageSupported()) {
-      // logger.info("storeUser : user now " + user);
+      if (DEBUG) logger.info("storeUser : user now " + user);
       rememberUser(user);
       gotNewUser(user);
     } else {  // not sure what we could possibly do here...
@@ -289,7 +276,24 @@ public class UserManager {
     userChosenID = user.getUserID();
     localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
     localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
-    //logger.info("storeUser : user now " + user.getID() + " / " + getUser() + "' expires in " + (DURATION / 1000) + " seconds");
+
+    if (DEBUG) logger.info("storeUser : user now " + user.getID() + " / " + getUser());
+  }
+
+  /**
+   * @see InitialUI#resetState()
+   */
+  public void clearUser() {
+    if (Storage.isLocalStorageSupported()) {
+      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
+      localStorageIfSupported.removeItem(getUserIDCookie());
+      localStorageIfSupported.removeItem(getUserChosenID());
+      localStorageIfSupported.removeItem(getUserPendingID());
+      current = null;
+      if (DEBUG) logger.info("clearUser : removed user id = " + getUserID() + " user now " + getUser());
+    } else {
+      userID = NO_USER_SET;
+    }
   }
 
   /**
@@ -336,6 +340,7 @@ public class UserManager {
 
   /**
    * Only one perm = polyglot
+   *
    * @return
    */
   public boolean isPolyglot() {

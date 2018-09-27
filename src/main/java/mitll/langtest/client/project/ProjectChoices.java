@@ -24,10 +24,8 @@ import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.services.OpenUserServiceAsync;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
-import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
@@ -36,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
 import static mitll.langtest.shared.user.User.Permission.*;
@@ -43,24 +42,30 @@ import static mitll.langtest.shared.user.User.Permission.*;
 /**
  * Created by go22670 on 1/12/17.
  */
-public class ProjectChoices {
-  public static final String GVIDAVER = "gvidaver";
+public class ProjectChoices extends ThumbnailChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
+
+
+  private static final String EDIT_PROJECT = "Edit project.";
+  private static final String MODES = "2 modes";
+
+  private static final String GVIDAVER = "gvidaver";
 
   public static final String PLEASE_WAIT = "Please wait...";
   private static final String SYNCHRONIZE_CONTENT_WITH_DOMINO = "Synchronize content with domino.";
   private static final String START_TO_DELETE_THIS_PROJECT = "Start to delete this project.";
   private static final String DELETE_PROJECT = "delete project";
 
-  //private static final String DO_YOU_WANT_TO_CONTINUE = "Do you want to continue?";
   /**
    * @see #getImportButton(SlimProject)
    */
   private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
 
-
   private static final int DIALOG_HEIGHT = 550;
   private static final String COURSE1 = " course";
+  /**
+   * @see #getLabel
+   */
   private static final String COURSES = COURSE1 + "s";
 
 
@@ -80,12 +85,14 @@ public class ProjectChoices {
    */
   private static final String CREATE_NEW_PROJECT = "Create New Project";
 
-  private static final int CHOICE_WIDTH = 170;//180;//190;//195;
   /**
    * @see #getImageAnchor
    */
-  private static final int MIN_HEIGHT = 125;//100;// 110;//115;//125;
-  private static final int NORMAL_MIN_HEIGHT = 67;
+  private static final int MIN_HEIGHT = 125;
+  /**
+   * ? why 91?
+   */
+  private static final int NORMAL_MIN_HEIGHT = 91;
 
   private static final String NEW_PROJECT = "New Project";
 
@@ -96,6 +103,10 @@ public class ProjectChoices {
    */
   private static final String PLEASE_SELECT_A_LANGUAGE = "Select a language";
   private static final String PLEASE_SELECT_A_COURSE = "Select a course";
+  /**
+   * @see #getHeader(List, int)
+   */
+  private static final String PLEASE_SELECT_A_MODE = "Select a mode";
   /**
    * @see #getHeader(List, int)
    */
@@ -118,6 +129,9 @@ public class ProjectChoices {
   private int sessionUser = -1;
   private boolean isSuperUser = false;
 
+
+  private static final boolean DEBUG = false;
+
   /**
    * @param langTest
    * @param uiLifecycle
@@ -128,7 +142,6 @@ public class ProjectChoices {
     this.sessionUser = langTest.getUser();
     String userID = langTest.getUserManager().getUserID();
     if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
-    //PropertyHandler props = langTest.getProps();
     this.controller = langTest;
     messageHelper = langTest.getMessageHelper();
     this.userNotification = langTest;
@@ -145,10 +158,10 @@ public class ProjectChoices {
    */
   public void showProjectChoices(SlimProject parent, int level) {
     if (parent == null) {
-      // logger.info("show initial " + level);
+      if (DEBUG) logger.info("showProjectChoices show initial " + level);
       showInitialChoices(level);
     } else {
-      // logger.info("show choice for parent " + parent.getName() + " " + level);
+      if (DEBUG) logger.info("showProjectChoices show choice for parent " + parent.getName() + " " + level);
       addProjectChoices(level, parent.getChildren());
     }
   }
@@ -172,6 +185,8 @@ public class ProjectChoices {
    * Admins can see retired sites.
    * Developers can see development sites.
    * Polyglot users can only see polyglot sites.
+   * <p>
+   * TODO: rationalize this - check factor out
    *
    * @param projects
    * @return
@@ -181,11 +196,8 @@ public class ProjectChoices {
   private List<SlimProject> getVisibleProjects(List<SlimProject> projects) {
     List<SlimProject> filtered = new ArrayList<>();
     Collection<Permission> permissions = controller.getPermissions();
-//    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-
     boolean canRecord = isCanRecord(permissions);
     boolean isPoly = permissions.contains(POLYGLOT);
-
 //    logger.info("isPoly " + isPoly + " startup " + projectStartupInfo);
 
     /*    logger.info("getVisibleProjects : Examining  " + projects.size() + " projects," +
@@ -235,7 +247,7 @@ public class ProjectChoices {
 
   /**
    * @param project
-   * @see InitialUI#getLangBreadcrumb
+   * @see InitialUI#resetLanguageSelection
    */
   public void showProject(SlimProject project) {
     int widgetCount = contentRow.getWidgetCount();
@@ -249,14 +261,13 @@ public class ProjectChoices {
    * @param result
    * @param nest
    * @see InitialUI#addProjectChoices
-   * @see #gotClickOnFlag(String, SlimProject, int, int)
+   * @see #gotClickOnFlag
    * @see #showProject(SlimProject)
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
-    // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
-    final Section section = new Section("section");
-    section.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
-    section.setHeight("100%");
+    if (DEBUG) logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+
+    final Section section = getScrollingSection();
     section.add(getHeader(result, nest));
 
     {
@@ -325,7 +336,11 @@ public class ProjectChoices {
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
-    String text = (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
+    List<SlimProject> dialogProjects = getDialogProjects(result);
+
+  //  logger.info("getHeader " + result.size() + " nest  " + nest);
+
+    String text = dialogProjects.size() == result.size() ? PLEASE_SELECT_A_MODE : (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
 
     if (result.isEmpty()) {
       text = NO_LANGUAGES_LOADED_YET;
@@ -360,6 +375,13 @@ public class ProjectChoices {
     }
 
     return header;
+  }
+
+  private List<SlimProject> getDialogProjects(List<SlimProject> projects) {
+    return projects
+        .stream()
+        .filter(slimProject -> slimProject.getProjectType() == ProjectType.DIALOG && !slimProject.hasChildren())
+        .collect(Collectors.toList());
   }
 
   /**
@@ -544,9 +566,7 @@ public class ProjectChoices {
     if (projectForLang.hasChildren() && numVisibleChildren == 0) {
       return null;
     } else {
-      Thumbnail thumbnail = new Thumbnail();
-      thumbnail.setWidth(CHOICE_WIDTH + "px");
-      thumbnail.setSize(2);
+      Thumbnail thumbnail = getThumbnail();
 
       boolean isQC = isQC();
       {
@@ -558,13 +578,13 @@ public class ProjectChoices {
         boolean hasChildren = projectForLang.hasChildren();
         if (isQC) {
           if (!hasChildren) {
-            addPopover(projectForLang, button);
+            addPopover(button, projectForLang);
           }
         } else {
-          if (!projectForLang.getCourse().isEmpty()) {
-            addPopoverUsual(projectForLang, button);
+          if (projectForLang.getCourse().isEmpty()) {
+            addPopover(button, projectForLang);
           } else {
-            addPopover(projectForLang, button);
+            addPopoverUsual(button, projectForLang);
           }
         }
       }
@@ -590,99 +610,85 @@ public class ProjectChoices {
   @NotNull
   private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC, int numVisibleChildren) {
     boolean hasChildren = projectForLang.hasChildren();
+    boolean alldialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
 
     DivWidget container = new DivWidget();
     Heading label;
 
-    container.add(label = getLabel(truncate(name, 23), projectForLang, hasChildren, numVisibleChildren));
+    container.add(label = getLabel(truncate(name, 23), projectForLang, numVisibleChildren));
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
-    if (isQC && !hasChildren) {
+    ProjectType projectType = projectForLang.getProjectType();
+  //  logger.info("project " + projectForLang.getID() + " " + projectForLang.getName() + " " + projectType);
+
+    if (isQC &&
+        (hasChildren && alldialog) || (!hasChildren && projectType != ProjectType.DIALOG)) {
       container.add(getQCButtons(projectForLang, label));
     }
     return container;
   }
 
-  private void addPopoverUsual(SlimProject projectForLang, FocusWidget button) {
+  private void addPopoverUsual(FocusWidget button, SlimProject projectForLang) {
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
-    UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
-    button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
+    UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
+    button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
   }
 
-  private final BasicDialog basicDialog = new BasicDialog();
 
   private void showPopoverUsual(SlimProject projectForLang,
                                 Widget button,
                                 Set<String> typeOrder,
-                                UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper) {
+                                UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper) {
     Map<String, String> value = new HashMap<>();
     value.put(COURSE, projectForLang.getCourse());
-
-    basicDialog.showPopover(
-        button,
-        null,
-        commonExerciseUnitChapterItemHelper.getTypeToValue(typeOrder, value),
-        Placement.RIGHT);
+    showPopover(value, button, typeOrder, ClientExerciseUnitChapterItemHelper, Placement.RIGHT);
   }
 
-  private void addPopover(SlimProject projectForLang, FocusWidget button) {
-    Set<String> typeOrder = getProps(projectForLang).keySet();
-    UnitChapterItemHelper<CommonExercise> commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
-    button.addMouseOverHandler(event -> showPopover(projectForLang, button, typeOrder, commonExerciseUnitChapterItemHelper));
-  }
-
-  private void showPopover(SlimProject projectForLang,
-                           Widget button,
-                           Set<String> typeOrder,
-                           UnitChapterItemHelper<CommonExercise> unitChapterItemHelper) {
-    basicDialog.showPopover(
-        button,
-        null,
-        unitChapterItemHelper.getTypeToValue(typeOrder, getProps(projectForLang)),
-        Placement.RIGHT);
+  private void addPopover(FocusWidget button, SlimProject projectForLang) {
+    addPopover(button, getProps(projectForLang), Placement.RIGHT);
   }
 
   private Map<String, String> getProps(SlimProject projectForLang) {
     return projectForLang.getPropertyValue();
   }
 
-  @NotNull
-  private String truncate(String columnText, int maxLengthId) {
-    if (columnText.length() > maxLengthId) columnText = columnText.substring(0, maxLengthId - 3) + "...";
-    return columnText;
-  }
-
   /**
    * @param name
    * @param projectForLang
-   * @param hasChildren
    * @param numVisibleChildren
    * @return
-   * @see #getImageAnchor
+   * @paramx hasChildren
+   * @see #getContainerWithButtons(String, SlimProject, boolean, int)
    */
   @NotNull
-  private Heading getLabel(String name, SlimProject projectForLang, boolean hasChildren, int numVisibleChildren) {
-    Heading label = new Heading(LANGUAGE_SIZE, name);
-    label.addStyleName("floatLeft");
-    label.setWidth("100%");
-    label.getElement().getStyle().setLineHeight(25, Style.Unit.PX);
+  private Heading getLabel(String name, SlimProject projectForLang, int numVisibleChildren) {
+    ProjectStatus status = projectForLang.getStatus();
+    String statusText = status == ProjectStatus.PRODUCTION ? "" : status.name();
 
-    {
-      Widget subtitle = label.getWidget(0);
-      subtitle.addStyleName("floatLeft");
-      subtitle.setWidth("100%");
-      subtitle.addStyleName("topFiveMargin");
+    boolean alldialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
+    return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText, alldialog);
+  }
+
+  private boolean areAllChildrenDialogChoices(SlimProject projectForLang, int numVisibleChildren) {
+    List<SlimProject> collect = getDialogProjects(projectForLang);
+    return (collect.size() == numVisibleChildren) && collect.size() == 2;
     }
 
-    if (hasChildren) {
-      String suffix = (numVisibleChildren == 1) ? COURSE1 : COURSES;
-      label.setSubtext(numVisibleChildren + suffix);
-    } else {
-      showProjectStatus(projectForLang, label);
+  private List<SlimProject> getDialogProjects(SlimProject projectForLang) {
+    return projectForLang.getChildren().stream().filter(slimProject -> slimProject.getProjectType() == ProjectType.DIALOG).collect(Collectors.toList());
     }
 
-    label.addStyleName("floatLeft");
+  @NotNull
+  private Heading getLabel(String name, boolean hasChildren, int numVisibleChildren,
+                           String statusText, boolean alldialog) {
+    Heading label = getChoiceLabel(LANGUAGE_SIZE, name, true);
+
+    String subtext = alldialog ? MODES : hasChildren ?
+        (numVisibleChildren + ((numVisibleChildren == 1) ? COURSE1 : COURSES)) : statusText;
+
+    label.setSubtext(subtext);
+
     return label;
   }
 
@@ -690,11 +696,11 @@ public class ProjectChoices {
     return getVisibleProjects(projectForLang.getChildren()).size();
   }
 
-  private void showProjectStatus(SlimProject projectForLang, Heading label) {
-    if (projectForLang.getStatus() == ProjectStatus.PRODUCTION) {
+  private void showProjectStatus(ProjectStatus status, Heading label) {
+    if (status == ProjectStatus.PRODUCTION) {
       label.setSubtext("");
     } else {
-      label.setSubtext(projectForLang.getStatus().name());
+      label.setSubtext(status.name());
     }
   }
 
@@ -757,11 +763,17 @@ public class ProjectChoices {
     return buttonContainer;
   }
 
+  /**
+   * @param projectForLang
+   * @param label
+   * @return
+   * @see #getEditButtonContainer(SlimProject, Heading)
+   */
   @NotNull
   private com.github.gwtbootstrap.client.ui.Button getEditButton(SlimProject projectForLang, Heading label) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
     w.setIcon(IconType.PENCIL);
-    addTooltip(w, "Edit project.");
+    addTooltip(w, EDIT_PROJECT);
 
     w.addClickHandler(event -> showEditDialog(projectForLang, label));
     return w;
@@ -809,7 +821,7 @@ public class ProjectChoices {
       @Override
       public boolean gotYes() {
         projectEditForm.updateProject();
-        showProjectStatus(projectForLang, label);
+        showProjectStatus(projectForLang.getStatus(), label);
         return true;
       }
 
@@ -829,6 +841,13 @@ public class ProjectChoices {
         DIALOG_HEIGHT, -1);
   }
 
+  /**
+   * TODO : fix number of items
+   *
+   * @param projectForLang
+   * @param button
+   * @param doChange
+   */
   private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
     //  logger.info("showImport " + doChange);
     String s = getProps(projectForLang).get(NUM_ITEMS);
@@ -972,16 +991,17 @@ public class ProjectChoices {
    */
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     List<SlimProject> children = projectForLang.getChildren();
-//    logger.info("gotClickOnFlag project " + projid + " has " + children);
+    if (DEBUG) logger.info("gotClickOnFlag project " + projid + " has " + children);
     NavLink breadcrumb = makeBreadcrumb(name);
     if (children.size() < 2) {
-/*
-      logger.info("gotClickOnFlag onClick select leaf project " + projid +
-          " current user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
-          */
-      setProjectForUser(projid);
+      if (DEBUG) logger.info("gotClickOnFlag onClick select leaf project " + projid +
+          " " + projectForLang.getMode() +
+          "\n\tcurrent user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
+
+      setProjectForUser(projid, projectForLang.getMode());
     } else { // at this point, the breadcrumb should be empty?
-      //    logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
+      if (DEBUG)
+        logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       breadcrumb.addClickHandler(clickEvent -> {
 //        SlimProject projectForLang1 = projectForLang;
 //        logger.info("gotClickOnFlag Click on crumb " + projectForLang1.getName() + " nest " + nest);
@@ -1005,10 +1025,10 @@ public class ProjectChoices {
   private void addProjectChoices(int nest, List<SlimProject> children) {
     // int widgetCount = contentRow.getWidgetCount();
     // logger.info("addProjectChoices " + widgetCount);
-    if (contentRow.getWidgetCount() == 1) {
+    if (contentRow.getWidgetCount() == 0) {
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     } else {
-      logger.info("addProjectChoices not adding project choices again...");
+      if (DEBUG ||true) logger.info("addProjectChoices not adding project choices again...");
     }
   }
 
@@ -1024,15 +1044,15 @@ public class ProjectChoices {
 
   /**
    * @param projectid
-   * @see #setProjectForUser
+   * @param mode
+   * @see #gotClickOnFlag
    */
-  private void setProjectForUser(int projectid) {
+  private void setProjectForUser(int projectid, ProjectMode mode) {
     // logger.info("setProjectForUser set project for " + projectid);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override
       public void onFailure(Throwable throwable) {
-//        Window.alert("Can't contact server.");
         controller.handleNonFatalError("setting project", throwable);
       }
 
@@ -1045,6 +1065,8 @@ public class ProjectChoices {
           if (aUser.getStartupInfo() == null) { // no project with that project id
             lifecycleSupport.getStartupInfo();
           } else {
+            uiLifecycle.getNavigation().storeViewForMode(mode);
+
             userNotification.setProjectStartupInfo(aUser);
             //     logger.info("setProjectForUser set project for " + aUser + " show initial state " + lifecycleSupport.getProjectStartupInfo());
             uiLifecycle.showInitialState();

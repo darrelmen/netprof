@@ -180,9 +180,10 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
     controller.getAudioService().writeAudioFile(
         base64EncodedWavFile,
+
         audioContext,
 
-        controller.usingFlashRecorder(),
+        false,
         "browser",
         controller.getBrowserInfo(),
         decoderOptions,

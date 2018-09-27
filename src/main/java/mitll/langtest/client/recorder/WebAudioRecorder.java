@@ -135,7 +135,7 @@ public class WebAudioRecorder {
 
     console("webAudioMicAvailable -- connected!");
     webAudioMicAvailable = true;
-    FlashRecordPanelHeadless.micPermission.gotPermission();
+    getMicPermission().gotPermission();
   }
 
   public static void webAudioMicNotAvailable() {
@@ -158,13 +158,16 @@ public class WebAudioRecorder {
 
   private static void noWebRTC() {
     webAudioMicAvailable = false;
-//    FlashRecordPanelHeadless.micPermission.noRecordingMethodAvailable();
-    FlashRecordPanelHeadless.micPermission.noWebRTCAvailable();
+    getMicPermission().noWebRTCAvailable();
+  }
+
+  private static MicPermission getMicPermission() {
+    return BrowserRecording.getMicPermission();
   }
 
   /**
-   * @see #advertise()
    * @param encoded
+   * @see #advertise()
    */
   public static void getBase64(String encoded) {
     if (encoded.length() < 100) {
@@ -172,9 +175,6 @@ public class WebAudioRecorder {
     }
     console("getBase64   bytes = '" + encoded.length() + "'");
 
-/*    if (getAllZero()) {
-      logger.info("Seems like the mic is not plugged in?");
-    }*/
     if (WebAudioRecorder.wavCallback == null) {
       console("getBase64 no callback?");
     } else {
