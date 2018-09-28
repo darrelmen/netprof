@@ -75,7 +75,15 @@ public class EasyReportTest extends BaseTest {
     DatabaseImpl db = getAndPopulate();
     int projectid = 6;
     Project project = db.getProject(projectid);
-    String phraseToDecode = new DecodeCorrectnessChecker(null, 0, project.getAudioFileHelper().getSmallVocabDecoder()).getPhraseToDecode("selamımı", "turkish");
+    DecodeCorrectnessChecker decodeCorrectnessChecker = new DecodeCorrectnessChecker(null, 0, project.getAudioFileHelper().getSmallVocabDecoder());
+    String phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode("selamımı", "turkish");
+
+
+    String iki = "İkizler";
+
+    logger.info("Got " + phraseToDecode);
+
+      phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode(iki, "turkish");
 
     logger.info("Got " + phraseToDecode);
 

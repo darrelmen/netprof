@@ -20,7 +20,6 @@ h1 {
     /*background: -moz-linear-gradient(top,  #ffffff,  #b4b4b4);*/ /* for firefox 3.6+ */
 }
 
-
 html, body{
     height:100%;
 }
@@ -210,6 +209,18 @@ body {
     font-weight: bold;
 }
 
+.black {
+    color: black;
+}
+
+.blueRow {
+    color: black;
+}
+
+.blueRow > h3 > small {
+    color: black;
+}
+
 .bigLink {
     font-size: 1em;
     font-weight: bold;
@@ -271,8 +282,12 @@ body {
     margin-right: 3px;
 }
 
+/**
+ added padding bottom so we don't cut off bottom of turn text
+ */
 .wordSpacerRight {
     margin-right: 4px;
+    padding-bottom: 2px;
 }
 
 .wordSpacerLeft {
@@ -486,10 +501,6 @@ fieldset > legend {
 .Button {
     font-family: Arial Unicode MS, Arial, sans-serif;
 }
-
-/*.clickable {
-  cursor                      :   pointer;
-}*/
 
 .gwt-Button {
     background: none repeat scroll 0 0 #DDDDDD;
@@ -1226,6 +1237,17 @@ body > .dropdown-popup .nav-list > li.active > a {
     height: 200%;
     left: -50%;
     background: rgba(173, 216, 230, 0.26);
+}
+
+.dialogLoginPageBack {
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    left: -50%;
+    background: #2193b0; /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #6dd5ed, #2193b0); /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #6dd5ed, #2193b0); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
 }
 
 .formRounded {
@@ -2121,7 +2143,6 @@ h1, h2, h3, h4, h5, h6 {
     z-index: unset;
 }
 
-
 body .modal-body .bulk-update-modal-content .tabbable {
     position: absolute;
     top: 3.5em;
@@ -2130,9 +2151,11 @@ body .modal-body .bulk-update-modal-content .tabbable {
     right: 0;
     overflow: hidden;
 }
+
 .bulk-update-header-cell .bulk-update-modal-msg-label {
     text-align: center;
 }
+
 body .modal-body .bulk-update-result-detail TD.centered-col {
     text-align: center;
 }
@@ -2140,6 +2163,7 @@ body .modal-body .bulk-update-result-detail TD.centered-col {
 body .modal-body .bulk-update-result-pdiv.narrow {
     display: inline-block;
 }
+
 body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-detail TD:FIRST-CHILD {
     text-align: right;
 }

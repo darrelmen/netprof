@@ -11,19 +11,20 @@
     <meta name="description" content="Netprof pronunciation feedback.">
     <meta name="keywords" content="Pronunciation,Feedback,Language,Learning">
     <meta name="author" content="Gordon Vidaver">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="application-name" content="Netprof">
 
     <meta http-equiv="content-property" content="text/html; charset=UTF-8">
 
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
     <link id="favicon" rel="shortcut icon" href="langtest/images/NewProF1_48x48.png"/>
+
     <!--                                                               -->
     <!-- Consider inlining CSS to reduce the number of requested files -->
     <!--                                                               -->
     <link property="text/css" rel="stylesheet" href="netprof2.css">
-    <!--
-        <link property="text/css" rel="stylesheet" href="amas.css">
-    -->
+
     <link rel="stylesheet" property="text/css" href="langtest/css/mp3-player-button.css"/>
 
     <!--                                           -->
@@ -66,16 +67,11 @@
     <script property="text/javascript" src="langtest/js/webaudiorecorderservice.js"></script>
     <script property="text/javascript" src="langtest/js/recorderWorker.js"></script>
 
-    <!--
-        <script property="text/javascript" src="langtest/js/jquery-1.10.2.min.js"></script>
-    -->
     <script property="text/javascript" src="langtest/js/jquery-3.2.1.min.js"></script>
 
+    <!--
     <script property="text/javascript" src="langtest/js/swfobject.js"></script>
     <script property="text/javascript" src="langtest/js/recorder.js"></script>
-
-    <!--
-        <script property="text/javascript" src="langtest/js/gauge.js"></script>
     -->
 
     <script property="text/javascript" src="langtest/js/highcharts.js"></script>
@@ -97,10 +93,6 @@
         // enable HTML5 audio support, if you're feeling adventurous. iPad/iPhone will always get this.
         soundManager.useHTML5Audio = true;
     </script>
-    <!--     <script property="text/javascript" src="//www.google.com/jsapi"></script>
-         <script property="text/javascript">
-             google.load("visualization", "1", {'packages' : ["corechart"] });
-         </script>-->
 </head>
 
 <!--                                           -->
@@ -109,9 +101,6 @@
 <!-- to create a completely dynamic UI.        -->
 <!--                                           -->
 <body style="overflow-y:hidden">
-<!--
-    <div id='sm2-container'></div>
--->
 <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
 <noscript>
     <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
