@@ -216,22 +216,29 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       logger.info("onPostSuccess ignoring old response " + result);
       return;
     }
-    if (result.getValidity() == Validity.OK || doQuietAudioCheck(result)) {
-      validAudio = true;
+    validAudio = (result.getValidity() == Validity.OK || doQuietAudioCheck(result));
+
+    if (validAudio) {
       useResult(result);
       addRT(result, (int) roundtrip);
-      PretestScore pretestScore = result.getPretestScore();
-      if (!pretestScore.getStatus().isEmpty()) {
-        String toShow = "Status " + pretestScore.getStatus();
-        String suffix = pretestScore.getMessage().isEmpty() ? "" : " : " + pretestScore.getMessage();
-        showPopup(toShow +suffix);
-      }
+
+      maybeShowPopup(result.getPretestScore());
     } else {
-      validAudio = false;
       useInvalidResult(result);
     }
+
     if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
       logRoundtripTime(result, roundtrip);
+    }
+  }
+
+  private void maybeShowPopup(PretestScore pretestScore) {
+    if (pretestScore != null &&
+        pretestScore.getStatus() != null &&
+        !pretestScore.getStatus().isEmpty()) {
+      String toShow = "Status " + pretestScore.getStatus();
+      String suffix = pretestScore.getMessage().isEmpty() ? "" : " : " + pretestScore.getMessage();
+      showPopup(toShow + suffix);
     }
   }
 

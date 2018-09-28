@@ -151,7 +151,10 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.projid(),
         getListType(slick),
         slick.start().getTime(),
-        slick.endtime().getTime(), slick.duration(), slick.minscore(), slick.showaudio());
+        slick.endtime().getTime(),
+        slick.duration(),
+        slick.minscore(),
+        slick.showaudio());
   }
 
   private UserList<CommonExercise> fromSlickEx(SlickUserExerciseList slick) {
@@ -164,11 +167,15 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.classmarker(),
         slick.isprivate(),
         slick.modified().getTime(),
-        slick.contexturl(), slick.richtext(),
+        slick.contexturl(),
+        slick.richtext(),
         slick.projid(),
         getListType(slick),
         slick.start().getTime(),
-        slick.endtime().getTime(), slick.duration(), slick.minscore(), slick.showaudio());
+        slick.endtime().getTime(),
+        slick.duration(),
+        slick.minscore(),
+        slick.showaudio());
   }
 
   @NotNull
@@ -501,12 +508,14 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   @Override
   public void update(UserList userList) {
     int update = dao.update(toSlick(userList));
-    if (update == 0) logger.warn("huh? didn't update " + userList.getID());
+    if (update == 0) {
+      logger.warn("huh? didn't update " + userList.getID());
+    }
     else {
       Option<SlickUserExerciseList> slickUserExerciseListOption = dao.byID(userList.getID());
       if (slickUserExerciseListOption.isDefined()) {
         UserList<CommonShell> commonShellUserList = fromSlick(slickUserExerciseListOption.get());
-        logger.info("Got back " + commonShellUserList);
+        logger.info("update : Got back " + commonShellUserList);
       }
     }
   }

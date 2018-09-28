@@ -35,6 +35,7 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
+import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ListService;
@@ -93,6 +94,11 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
         userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, duration, minScore, showAudio, unitChapter);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#doEdit(UserList, ListContainer)
+   * @param userList
+   * @throws DominoSessionException
+   */
   @Override
   public void update(UserList userList) throws DominoSessionException {
     getUserIDFromSessionOrDB();

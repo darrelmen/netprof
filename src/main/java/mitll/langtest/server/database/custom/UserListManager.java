@@ -1332,6 +1332,11 @@ public class UserListManager implements IUserListManager {
     return visitorDAO;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#doEdit
+   * @see mitll.langtest.server.services.ListServiceImpl#update
+   * @param userList
+   */
   @Override
   public void update(UserList userList) {
     userListDAO.update(userList);
