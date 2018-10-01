@@ -393,7 +393,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
     dominoExerciseDAO = new DominoExerciseDAO(userExerciseDAO);
 
-    reportHelper = new ReportHelper(getProjectManagement(), getProjectDAO(),
+    reportHelper = new ReportHelper(this, getProjectDAO(),
         getUserDAO(), pathHelper, getMailSupport());
   }
 

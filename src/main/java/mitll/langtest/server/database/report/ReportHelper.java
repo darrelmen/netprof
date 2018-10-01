@@ -2,6 +2,7 @@ package mitll.langtest.server.database.report;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IReport;
 import mitll.langtest.server.database.ReportStats;
 import mitll.langtest.server.database.exercise.Project;
@@ -27,21 +28,20 @@ public class ReportHelper {
   private static final int REPORT_THIS_PROJECT = 9;
 
 
-  private final IProjectManagement projectManagement;
-
+  //private final IProjectManagement projectManagement;
+  private final DatabaseServices services;
   private final IProjectDAO projectDAO;
   private final IUserDAO userDAO;
   private final PathHelper pathHelper;
   private final MailSupport mailSupport;
 
 
-  public ReportHelper(IProjectManagement projectManagement,
+  public ReportHelper(DatabaseServices services,
                       IProjectDAO projectDAO,
                       IUserDAO userDAO,
                       PathHelper pathHelper,
                       MailSupport mailSupport) {
-
-    this.projectManagement = projectManagement;
+    this.services = services;
 
     this.projectDAO = projectDAO;
     this.userDAO = userDAO;
@@ -197,7 +197,7 @@ public class ReportHelper {
   }
 
   private Collection<Project> getProjects() {
-    return projectManagement.getProjects();
+    return services.getProjectManagement().getProjects();
   }
 
   @NotNull
