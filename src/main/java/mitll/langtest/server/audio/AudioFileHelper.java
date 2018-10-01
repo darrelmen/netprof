@@ -648,6 +648,8 @@ public class AudioFileHelper implements AlignDecode {
             exercise.getID(),
             precalcScores,
             false);
+
+    logger.info("decodeAndRemember : returning " + alignmentScore);
     DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore, false);
 
     // Do decoding, and record alignment info we just got in the database ...

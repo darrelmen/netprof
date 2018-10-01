@@ -26,12 +26,12 @@ public class HydraOutput {
               String wordLab,
               String phoneLab,
               List<WordAndProns> wordAndProns,
-               TransNormDict transNormDict) {
+              TransNormDict transNormDict) {
     this.scores = scores;
     this.wordLab = wordLab;
     this.phoneLab = phoneLab;
     this.wordAndProns = wordAndProns;
-    this.transNormDict=transNormDict;
+    this.transNormDict = transNormDict;
   }
 
   public Scores getScores() {
@@ -53,13 +53,14 @@ public class HydraOutput {
   /**
    * Does the reco word and phone sequence match any of the possible complete sequences
    * Only make sure the number of words is correct for now...
+   *
    * @param reco
    * @return
    */
   boolean isMatch(List<WordAndProns> reco) {
     if (reco.size() != wordAndProns.size()) {
       logger.warn("isMatch " +
-          "\n\texpecting " + wordAndProns.size() + " words : " +wordAndProns+
+          "\n\texpecting " + wordAndProns.size() + " words : " + wordAndProns +
           "\n\tsaw       " + reco.size() + " : " + reco);
       return false;
     } else {

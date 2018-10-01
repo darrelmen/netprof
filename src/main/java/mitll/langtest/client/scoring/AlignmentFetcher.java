@@ -31,13 +31,13 @@ class AlignmentFetcher {
   private final AudioChangeListener contextChangeListener;
 
   /**
-   * @see DialogExercisePanel#DialogExercisePanel
    * @param exerciseID
    * @param controller
    * @param listContainer
    * @param alignments
    * @param audioChangeListener
    * @param contextChangeListener
+   * @see DialogExercisePanel#DialogExercisePanel
    */
   AlignmentFetcher(final int exerciseID,
                    final ExerciseController controller,
@@ -164,6 +164,7 @@ class AlignmentFetcher {
   public void setReq(int req) {
     this.req = req;
   }
+
   public int getReq() {
     return req;
   }
@@ -198,18 +199,18 @@ class AlignmentFetcher {
   }
 
   /**
-   * @see #addToRequest
    * @param refID
    * @param alignmentOutput
+   * @see #addToRequest
    */
   void rememberAlignment(int refID, AlignmentOutput alignmentOutput) {
     alignments.put(refID, alignmentOutput);
   }
 
   /**
-   * @see DialogExercisePanel#audioChanged(int, long)
    * @param refID
    * @return
+   * @see DialogExercisePanel#audioChanged(int, long)
    */
   public AlignmentOutput getAlignment(int refID) {
     return alignments.get(refID);
@@ -242,6 +243,8 @@ class AlignmentFetcher {
 
             @Override
             public void onSuccess(Map<Integer, AlignmentOutput> result) {
+              result.forEach((k, v) -> logger.info("getAlignments got " + k + " = " + v));
+
               alignments.putAll(result);
 
               if (needToShowRef) {

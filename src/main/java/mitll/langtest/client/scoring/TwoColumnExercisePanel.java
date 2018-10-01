@@ -92,7 +92,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @param alignments
    * @param addPlayer
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
-   * @see mitll.langtest.client.banner.NewLearnHelper#getFactory
+   * @see mitll.langtest.client.banner.LearnHelper#getFactory
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    */

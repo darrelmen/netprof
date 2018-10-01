@@ -277,18 +277,21 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
     //logger.info("getAlignments project " + projid + " asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
-    Project project = getProject(projid);
 
-    if (project.hasProjectSpecificAudio()) {
-      List<CommonExercise> exercisesForAudio =
-          audioIDMap
-              .values()
-              .stream()
-              .map(iSlimResult -> db.getExercise(projid, iSlimResult.getExID()))
-              .collect(Collectors.toList());
+    {
+      Project project = getProject(projid);
 
-      logger.info("ensure compressed audio for " + exercisesForAudio.size() + " exercises");
-      new EnsureAudioHelper(db, pathHelper).ensureCompressedAudio(exercisesForAudio, getLanguageEnum(project));
+      if (project.hasProjectSpecificAudio()) {
+        List<CommonExercise> exercisesForAudio =
+            audioIDMap
+                .values()
+                .stream()
+                .map(iSlimResult -> db.getExercise(projid, iSlimResult.getExID()))
+                .collect(Collectors.toList());
+
+        logger.info("ensure compressed audio for " + exercisesForAudio.size() + " exercises");
+        new EnsureAudioHelper(db, pathHelper).ensureCompressedAudio(exercisesForAudio, getLanguageEnum(project));
+      }
     }
 
     logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
@@ -371,7 +374,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         idToAlignment.put(audioID, pretestScore);
       }
     } else {
-//      logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " + audioID);
+      logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " + audioID);
       getCachedAudioRef(idToAlignment, audioID, cachedResult, db.getProject(projid).getLanguageEnum());  // OK, let's translate the db info into the alignment output
     }
     completed.add(audioID);
@@ -422,7 +425,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         //logger.info("getAlignmentsFromDB using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }
 
-      logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " for exercise #" + byID.getExid() + "...");
+      logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " '" +byID.getTranscript()+ "' for exercise #" + byID.getExid() + "...");
       return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null);
     } else {
       logger.info("recalcRefAudioWithHelper can't find audio id " + audioID);

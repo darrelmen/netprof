@@ -330,16 +330,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       if (cached == null) {
         List<WordAndProns> possibleProns = new ArrayList<>();
         TransNormDict transNormDict = getHydraDict(sentence, "", possibleProns);
-        String hydraDict = transNormDict.getDict();
-
-        logger.info("getProxyScore " +
-            "\n\tdict          " + hydraDict +
+        logger.info("scoreRepeatExercise " +
+            "\n\tdict          " + transNormDict.getDict() +
             "\n\tpossibleProns " + possibleProns.size()
         );
 
         if (DEBUG) possibleProns.forEach(p -> logger.info("\t" + p));
 
-        cached = new HydraOutput(scores, "", "", possibleProns, transNormDict);//getTrie(possibleProns));
+        cached = new HydraOutput(scores, "", "", possibleProns, transNormDict);
       } else {
         cached.setScores(scores);
       }
@@ -406,7 +404,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         imageOptions,
         decode, prefix, noSuffix,
         cached,
-        cachedDuration, processDur, usePhoneToDisplay, jsonObject);
+        cachedDuration,
+        processDur,
+        usePhoneToDisplay,
+        jsonObject);
   }
 
 
@@ -861,6 +862,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       return Collections.emptyMap();
     } else {
       Map<String, Float> phoneToScore = new HashMap<>();
+      logger.info("getTokenToScore " + phones.keySet());
       for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
         String key = phoneScorePair.getKey();
 

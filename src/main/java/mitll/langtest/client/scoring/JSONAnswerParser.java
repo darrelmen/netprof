@@ -28,6 +28,7 @@ class JSONAnswerParser {
   private static final String VALID = "valid";
 
   /**
+   * @see PostAudioRecordButton#gotPacketResponse
    * @param jsonObject
    * @return
    */
