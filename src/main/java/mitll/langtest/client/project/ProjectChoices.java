@@ -338,7 +338,7 @@ public class ProjectChoices extends ThumbnailChoices {
     header.addStyleName("container");
     List<SlimProject> dialogProjects = getDialogProjects(result);
 
-  //  logger.info("getHeader " + result.size() + " nest  " + nest);
+    //  logger.info("getHeader " + result.size() + " nest  " + nest);
 
     String text = dialogProjects.size() == result.size() ? PLEASE_SELECT_A_MODE : (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
 
@@ -620,10 +620,12 @@ public class ProjectChoices extends ThumbnailChoices {
     container.addStyleName("floatLeft");
 
     ProjectType projectType = projectForLang.getProjectType();
-  //  logger.info("project " + projectForLang.getID() + " " + projectForLang.getName() + " " + projectType);
+    //logger.info("getContainerWithButtons project " + projectForLang.getID() + " " + projectForLang.getName() + " " + projectType);
 
     if (isQC &&
-        (hasChildren && alldialog) || (!hasChildren && projectType != ProjectType.DIALOG)) {
+        ((hasChildren && alldialog) ||
+            (!hasChildren && projectType != ProjectType.DIALOG))) {
+     // logger.info("getContainerWithButtons add qc buttons " + isQC);
       container.add(getQCButtons(projectForLang, label));
     }
     return container;
@@ -673,11 +675,11 @@ public class ProjectChoices extends ThumbnailChoices {
   private boolean areAllChildrenDialogChoices(SlimProject projectForLang, int numVisibleChildren) {
     List<SlimProject> collect = getDialogProjects(projectForLang);
     return (collect.size() == numVisibleChildren) && collect.size() == 2;
-    }
+  }
 
   private List<SlimProject> getDialogProjects(SlimProject projectForLang) {
     return projectForLang.getChildren().stream().filter(slimProject -> slimProject.getProjectType() == ProjectType.DIALOG).collect(Collectors.toList());
-    }
+  }
 
   @NotNull
   private Heading getLabel(String name, boolean hasChildren, int numVisibleChildren,
@@ -1028,7 +1030,7 @@ public class ProjectChoices extends ThumbnailChoices {
     if (contentRow.getWidgetCount() == 0) {
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     } else {
-      if (DEBUG ||true) logger.info("addProjectChoices not adding project choices again...");
+      if (DEBUG || true) logger.info("addProjectChoices not adding project choices again...");
     }
   }
 
