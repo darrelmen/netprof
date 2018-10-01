@@ -12,10 +12,6 @@ public interface RefAudioGetter {
 
   void getRefAudio(RefAudioListener listener);
 
-/*
-  Set<Integer> getReqAudio();
-*/
-
   /**
    * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels(Collection, DivWidget, int)
    * @param req
