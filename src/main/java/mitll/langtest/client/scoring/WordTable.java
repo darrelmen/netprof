@@ -52,6 +52,7 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -61,7 +62,7 @@ import java.util.stream.Collectors;
  * @since 10/21/15.
  */
 public class WordTable {
-//  private final Logger logger = Logger.getLogger("WordTable");
+   private final Logger logger = Logger.getLogger("WordTable");
 
   private static final String WHITE_SPACE_NOWRAP = PagerTable.WHITE_SPACE_NOWRAP;
 
@@ -85,6 +86,7 @@ public class WordTable {
   private static final String CLICK_TO_HEAR_WORD = "Click to hear.";
   private static final String SIL = "sil";
   private static final String THEAD = "<thead>";
+  public static final String NBSP = "&nbsp;";
 
   /**
    * @param netPronImageTypeToEndTime
@@ -212,6 +214,7 @@ public class WordTable {
 
   /**
    * From words
+   *
    * @param netPronImageTypeToEndTime
    * @return
    * @see WordContainerAsync#getItemColumn
@@ -245,7 +248,6 @@ public class WordTable {
     List<SlimSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
     return getHTMLForWords(builder, words);
   }*/
-
   public String makeColoredTableFull(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     StringBuilder builder = new StringBuilder();
     List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
@@ -354,6 +356,7 @@ public class WordTable {
    * @param phonesForWord
    * @param word
    * @return
+   * @see #getDivWord
    */
   private Widget getDivForWord(AudioControl audioControl,
                                TreeMap<TranscriptSegment, IHighlightSegment> words,
@@ -415,7 +418,6 @@ public class WordTable {
   ) {
     DivWidget phones = new DivWidget();
     phones.addStyleName("phoneContainer");
-
     addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment/*, isRTL*/);
     return phones;
   }
@@ -513,7 +515,7 @@ public class WordTable {
   }
 
   private String getPhoneEvent(TranscriptSegment phone) {
-    return phone.getDisplayEvent();
+    return phone.getEvent();
   }
 
   /**
@@ -535,26 +537,27 @@ public class WordTable {
                                    TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                    boolean simpleLayout,
                                    TranscriptSegment wordSegment) {
+ //   logger.info("addPhonesBelowWord2 add phones below " + wordSegment);
     Iterator<TranscriptSegment> iterator = phoneSegments.iterator();
+    boolean hasAudioControl = audioControl != null;
+
     while (iterator.hasNext()) {
       TranscriptSegment phoneSegment = iterator.next();
       String phoneLabel = getPhoneEvent(phoneSegment);
       if (!shouldSkipPhone(phoneLabel)) {
-        float v = phoneSegment.getStart() * 100;
-        int vi = (int) v;
-        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel, BLUE);
-        boolean hasAudioControl = audioControl != null;
+        boolean b = iterator.hasNext();
+        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel + (b ? NBSP : ""), BLUE);
         addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
         phoneMap.put(phoneSegment, h);
 
         if (simpleLayout) {
-          if (iterator.hasNext()) {
+          if (b) {
             //  h.getElement().getStyle().setPaddingRight(PHONE_PADDING, Style.Unit.PX);
             h.addStyleName("phoneStyle");
           } else {
-            if (hasAudioControl) addHandStyle(h);
-            alignCenter(h);
-            h.addStyleName("phoneColor");
+//            if (hasAudioControl) addHandStyle(h);
+//            alignCenter(h);
+            h.addStyleName("lastPhoneStyle");
           }
         } else {
           if (hasAudioControl) addHandStyle(h);
@@ -578,7 +581,10 @@ public class WordTable {
    */
   private void addClickHandler(AudioControl audioControl, TranscriptSegment segmentToPlay, Label header) {
     if (audioControl != null) {
-      header.addClickHandler(event -> audioControl.loadAndPlaySegment(segmentToPlay.getStart(), segmentToPlay.getEnd()));
+      header.addClickHandler(event -> {
+        logger.info("click on " + segmentToPlay);
+        audioControl.loadAndPlaySegment(segmentToPlay.getStart(), segmentToPlay.getEnd());
+      });
     }
   }
 

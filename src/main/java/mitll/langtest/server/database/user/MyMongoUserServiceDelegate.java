@@ -19,7 +19,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
   private static final Logger log = LogManager.getLogger(MyMongoUserServiceDelegate.class);
   private static final UserServiceDelegateBase.PasswordEncoding DEFAULT_ENC = UserServiceDelegateBase.PasswordEncoding.common_v1;
 
-  boolean DEBUG = false;
+  private final boolean DEBUG = false;
 //  MyMongoUserServiceDelegate(UserServiceProperties props, Mailer mailer, String appName, Mongo mongoPool) {
 //    super(props, mailer, appName, mongoPool);
 //  }
@@ -35,7 +35,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
     return encodePass(txtPass, salt, DEFAULT_ENC);
   }
 
-  protected byte[] generateUserSalt(UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
+  private byte[] generateUserSalt(UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
     SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
     byte[] salt = new byte[pEnc.saltLength];
     random.nextBytes(salt);

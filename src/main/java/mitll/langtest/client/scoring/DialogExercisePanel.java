@@ -381,6 +381,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
         List<TranscriptSegment> phones = alignmentOutput.getTypeToSegments().get(NetPronImageType.PHONE_TRANSCRIPT);
 
+//        logger.info("phones " +phones.size());
+//        phones.forEach(p->logger.info(p.toString()));
+
         if (transcriptMatchesOneToOne(flclickables, wordSegments)) {
           doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments, wordSegments, clickablePhones);
         } else {
@@ -570,6 +573,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param highlightSegmentIterator
    * @param wordSegments
    * @param clickablePhones
+   * @see #matchSegmentToWidgetForAudio(Integer, long, AlignmentOutput, List, AudioControl, DivWidget, DivWidget)
    */
   private void doOneToOneMatch(List<TranscriptSegment> phones,
                                AudioControl audioControl,

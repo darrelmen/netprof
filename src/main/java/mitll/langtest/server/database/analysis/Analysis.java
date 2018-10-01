@@ -105,7 +105,7 @@ public abstract class Analysis extends DAO {
    *
    * @param idToUserInfo
    * @return
-   * @see #getUserInfos
+   * @see #getSortedUserInfos
    */
   @NotNull
   private List<UserInfo> getUserInfos(Map<Integer, UserInfo> idToUserInfo, IUserDAO userDAO) {
@@ -132,19 +132,6 @@ public abstract class Analysis extends DAO {
     }
     return userInfos;
   }
-
-/*  @NotNull
-  private Set<String> getLincolnAffiliations() {
-    List<Affiliation> affiliations = database.getServerProps().getAffiliations();
-
-    Set<Affiliation> lincolnPeople = affiliations.stream().filter(affiliation -> affiliation.getAbb().contains("incoln") || affiliation.getDisp().contains("incoln")).collect(Collectors.toSet());
-    Set<String> lincoln = new HashSet<>();
-    lincolnPeople.forEach(affiliation -> {
-      lincoln.add(affiliation.getAbb().toLowerCase());
-      lincoln.add(affiliation.getDisp().toLowerCase());
-    });
-    return lincoln;
-  }*/
 
   private void sortUsersByTime(List<UserInfo> userInfos) {
     userInfos.sort((o1, o2) -> -1 * Long.compare(o1.getTimestampMillis(), o2.getTimestampMillis()));
