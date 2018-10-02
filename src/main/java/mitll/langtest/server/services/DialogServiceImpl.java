@@ -46,6 +46,7 @@ import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickRelatedResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -138,23 +139,40 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return i;
   }
 
-  // user implicit -
-/*  @Override
-  public List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    return db.getDialogSessionDAO().getDialogSessions(userIDFromSessionOrDB, dialogid);
-  }*/
-
+  /**
+   * for now, get the latest session with any results in it...
+   *
+   * @param dialogid
+   * @return
+   * @throws DominoSessionException
+   */
   @Override
-  public List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException {
+  public int getLatestDialogSessionID(int dialogid) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+
+//    Map<Integer, List<SlickRelatedResult>> sessionToResults = db.getRelatedResultDAO().getByProjectForDialogForUser(getProjectIDFromUser(userIDFromSessionOrDB), dialogid, userIDFromSessionOrDB);
+    SlickRelatedResult slickRelatedResult = db.getRelatedResultDAO()
+        .latestByProjectForDialogForUser(getProjectIDFromUser(userIDFromSessionOrDB), dialogid, userIDFromSessionOrDB);
+    return slickRelatedResult == null ? -1 : slickRelatedResult.dialogsessionid();
+  }
+
+  // user implicit -
+  //@Override
+  public List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     return db.getDialogSessionDAO().getDialogSessions(userIDFromSessionOrDB, dialogid);
   }
 
+  @Override
+  public List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    return db.getDialogSessionDAO().getDialogSessions(userid, dialogid);
+  }
+
   /**
-   * @see RehearseViewHelper#clearScores
    * @param dialogSession
    * @throws DominoSessionException
+   * @see RehearseViewHelper#clearScores
    */
   @Override
   public void addSession(DialogSession dialogSession) throws DominoSessionException {

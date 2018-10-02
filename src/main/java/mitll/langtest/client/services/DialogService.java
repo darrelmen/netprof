@@ -34,5 +34,13 @@ public interface DialogService extends RemoteService {
 
  // List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException;
 
+  /**
+   * JUST FOR NOW. to show we can get one session worth of analysis data
+   * @param dialogid
+   * @return
+   * @throws DominoSessionException
+   */
+  int getLatestDialogSessionID(int dialogid) throws DominoSessionException;
+
   List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException;
 }

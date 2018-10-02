@@ -34,9 +34,17 @@ package mitll.langtest.server.database.dialog;
 
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.dialog.DialogStatus;
+import mitll.npdata.dao.SlickRelatedResult;
+
+import java.util.List;
+import java.util.Map;
 
 public interface IRelatedResultDAO extends IDAO {
   int add(int resultid, int dialogsessionid);
+
+  Map<Integer, List<SlickRelatedResult>> getByProjectForDialogForUser(int projid, int dialogid, int userid);
+
+  SlickRelatedResult latestByProjectForDialogForUser(int projid, int dialogid, int userid);
 
   /**
    * For when we want to drop the current dialog data and reload
