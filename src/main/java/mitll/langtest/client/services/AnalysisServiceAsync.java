@@ -64,18 +64,6 @@ public interface AnalysisServiceAsync {
   void getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort,
                             AsyncCallback<WordsAndTotal> async);
 
-/*
-  void getPhoneSummary(int userid, int listid, long from, long to, int reqid, AsyncCallback<PhoneReport> async);
-*/
-
-/*
-  void getPerformanceReportForUserForPhoneBigrams(AnalysisRequest analysisRequest, AsyncCallback<List<Bigram>> async);
-*/
-
-/*
-  void getPhoneSummary(int userid, int minRecordings, int listid, int reqid, AsyncCallback<PhoneSummary> async);
-*/
-
   void getPhoneSummary(AnalysisRequest analysisRequest, AsyncCallback<PhoneSummary> async);
 
   void getPhoneBigrams(AnalysisRequest analysisRequest, AsyncCallback<PhoneBigrams> async);

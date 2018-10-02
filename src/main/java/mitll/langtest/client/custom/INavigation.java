@@ -1,7 +1,9 @@
 package mitll.langtest.client.custom;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.User;
 
@@ -36,6 +38,9 @@ public interface INavigation extends IViewContaner {
     LISTEN("Listen", ProjectMode.DIALOG),
     REHEARSE("Rehearse", ProjectMode.DIALOG),
     PERFORM("Perform", ProjectMode.DIALOG),
+    /**
+     * @see mitll.langtest.client.banner.NewContentChooser#showScores(DivWidget, VIEWS, IDialog)
+     */
     SCORES("Scores", ProjectMode.DIALOG),
 
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),

@@ -125,15 +125,18 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
 
     int userid = analysisRequest.getUserid();
-    PhoneSummary phoneSummary = getPhoneSummary(userid, firstUser);
+   // PhoneSummary phoneSummary = getPhoneSummary(userid, firstUser);
     AnalysisReport analysisReport = new AnalysisReport(
         getUserPerformance(userid, bestForUser),
-        phoneSummary,
+        getPhoneSummary(userid, firstUser),
         getCount(userInfos),
         analysisRequest.getReqid());
 
-    long now = System.currentTimeMillis();
-    logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid + " and list " + analysisRequest.getListid());// + analysisReport);
+    {
+      long now = System.currentTimeMillis();
+      logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid +
+          " and list " + analysisRequest.getListid());// + analysisReport);
+    }
     return analysisReport;
   }
 
@@ -506,11 +509,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   /**
    * @param analysisRequest
    * @return
-   * @paramx id
-   * @paramx minRecordings
-   * @paramx listid
    * @see IAnalysis#getPerformanceReportForUser(AnalysisRequest)
-   * @see IAnalysis#getPhoneReportFor(AnalysisRequest)
+   * @seex IAnalysis#getPhoneReportFor
    */
   private Map<Integer, UserInfo> getBestForUser(AnalysisRequest analysisRequest) {
     long then = System.currentTimeMillis();

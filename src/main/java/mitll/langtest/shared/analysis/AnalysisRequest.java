@@ -6,6 +6,7 @@ import java.util.Date;
 public class AnalysisRequest implements Serializable {
   private int userid = -1;
   private int dialogID = -1;
+  private int dialogSessionID = -1;
   private int listid = -1;
 
   private int minRecordings = 0;
@@ -17,23 +18,20 @@ public class AnalysisRequest implements Serializable {
 
   private int reqid = -1;
 
-  public AnalysisRequest() {
-  }
+  public AnalysisRequest() {}
 
+  /**
+   * Mainly for testing.
+   * @param userid
+   * @param listid
+   * @param dialogID
+   * @param minRecordings
+   */
   public AnalysisRequest(int userid, int listid, int dialogID, int minRecordings) {
     this.userid = userid;
     this.listid = listid;
     this.dialogID = dialogID;
     this.minRecordings = minRecordings;
-  }
-
-  public AnalysisRequest(int userid, int listid, int dialogID, int minRecordings, String phone, String bigram, long from, long to, int reqid) {
-    this(userid, listid, dialogID, minRecordings);
-    this.phone = phone;
-    this.bigram = bigram;
-    this.from = from;
-    this.to = to;
-    this.reqid = reqid;
   }
 
   public int getUserid() {
@@ -64,6 +62,10 @@ public class AnalysisRequest implements Serializable {
     return dialogID;
   }
 
+  public int getDialogSessionID() {
+    return dialogSessionID;
+  }
+
   public int getReqid() {
     return reqid;
   }
@@ -80,7 +82,11 @@ public class AnalysisRequest implements Serializable {
   public AnalysisRequest setDialogID(int dialogID) {
     this.dialogID = dialogID;
     return this;
+  }
 
+  public AnalysisRequest setDialogSessionID(int dialogSessionID) {
+    this.dialogSessionID = dialogSessionID;
+    return this;
   }
 
   public AnalysisRequest setListid(int listid) {
@@ -120,14 +126,15 @@ public class AnalysisRequest implements Serializable {
 
   public String toString() {
     return "Request " +
-        "\n\tuser " + userid +
-        "\n\tdialog " + dialogID +
-        "\n\tlist   " + listid +
+        "\n\tuser    " + userid +
+        "\n\tdialog  " + dialogID +
+        "\n\tsession " + dialogSessionID +
+        "\n\tlist    " + listid +
         "\n\tminRecordings " + minRecordings +
-        "\n\tphone  " + phone +
-        "\n\tbigram " + bigram +
-        "\n\tfrom " + from + " " + new Date(from) +
-        "\n\tto   " + to + " " + new Date(to) +
-        "\n\treqid  " + reqid;
+        "\n\tphone   " + phone +
+        "\n\tbigram  " + bigram +
+        "\n\tfrom    " + from + " " + new Date(from) +
+        "\n\tto      " + to + " " + new Date(to) +
+        "\n\treqid   " + reqid;
   }
 }

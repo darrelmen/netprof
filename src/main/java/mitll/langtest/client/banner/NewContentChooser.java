@@ -238,7 +238,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           break;
         case SCORES:
           clearAndPushKeep(SCORES);
-          showScores(divWidget, SCORES);
+          showScores(divWidget);
           break;
         case RECORD_ENTRIES:
           clearAndFixScroll();
@@ -271,31 +271,31 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
-  private void showScores(DivWidget divWidget, VIEWS scores) {
+  private void showScores(DivWidget divWidget) {
     int dialog = new SelectionState().getDialog();
- //   if (dialog == -1) {
-      controller.getDialogService().getDialog(-1, new AsyncCallback<IDialog>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("getting dialogs", caught);
-        }
+    //   if (dialog == -1) {
+    controller.getDialogService().getDialog(dialog, new AsyncCallback<IDialog>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("getting dialogs", caught);
+      }
 
-        @Override
-        public void onSuccess(IDialog dialog) {
-          NewContentChooser.this.showScores(divWidget, scores, dialog );
-        }
-      });
-   // } else {
+      @Override
+      public void onSuccess(IDialog dialog) {
+        NewContentChooser.this.showScores(divWidget, dialog);
+      }
+    });
+    // } else {
     //  NewContentChooser.this.showScores(divWidget, scores, dialog);
     //}
   }
 
-  private void showScores(DivWidget divWidget, VIEWS scores, IDialog dialog) {
-    DivWidget header = new DialogHeader(controller, VIEWS.PERFORM,null).getHeader(dialog);
+  private void showScores(DivWidget divWidget, IDialog dialog) {
+    DivWidget header = new DialogHeader(controller, VIEWS.PERFORM, null).getHeader(dialog);
     header.addStyleName("bottomFiveMargin");
     divWidget.add(header);
     divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, STUDY));
-    currentSection = scores;
+    currentSection = SCORES;
   }
 
   private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen) {
@@ -625,12 +625,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       logger.info("getShowTab view " + views + " was made " + wasMade);
 
 //      if (!wasMade) {
-        banner.show(views);
-  //    }
+      banner.show(views);
+      //    }
 //      learnHelper.loadExercise(exid);  //??? why - the push should do it
-   //   if (wasMade) {
-  //      banner.show(views);
-    //  }
+      //   if (wasMade) {
+      //      banner.show(views);
+      //  }
 
 
       //   logger.info("getShowTab history after - " + History.getToken());

@@ -155,7 +155,8 @@ public class AnalysisTab extends DivWidget {
   public AnalysisTab(ExerciseController controller,
                      boolean isPolyglot,
                      int req,
-                     ReqCounter reqCounter, INavigation.VIEWS jumpView) {
+                     ReqCounter reqCounter,
+                     INavigation.VIEWS jumpView) {
     this(controller,
         1,
         null,
@@ -163,7 +164,9 @@ public class AnalysisTab extends DivWidget {
         controller.getUserManager().getUserID(),
         -1,
         isPolyglot,
-        req, reqCounter, jumpView);
+        req,
+        reqCounter,
+        jumpView);
   }
 
   /**
