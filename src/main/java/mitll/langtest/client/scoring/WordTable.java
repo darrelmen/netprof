@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
 import mitll.langtest.client.analysis.WordContainerAsync;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.AudioControl;
 import mitll.langtest.client.sound.HighlightSegment;
@@ -86,7 +87,7 @@ public class WordTable {
   private static final String CLICK_TO_HEAR_WORD = "Click to hear.";
   private static final String SIL = "sil";
   private static final String THEAD = "<thead>";
-  public static final String NBSP = "&nbsp;";
+  private static final String NBSP = "&nbsp;";
 
   /**
    * @param netPronImageTypeToEndTime
@@ -402,7 +403,7 @@ public class WordTable {
   /**
    * @param audioControl so when clicked, we can play audio
    * @param phoneMap
-   * @param value
+   * @param phoneSegments
    * @param simpleLayout
    * @param wordSegment
    * @return
@@ -412,13 +413,13 @@ public class WordTable {
   @NotNull
   DivWidget getPhoneDivBelowWord(AudioControl audioControl,
                                  TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                                 List<TranscriptSegment> value,
+                                 List<TranscriptSegment> phoneSegments,
                                  boolean simpleLayout,
                                  TranscriptSegment wordSegment
   ) {
     DivWidget phones = new DivWidget();
     phones.addStyleName("phoneContainer");
-    addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment/*, isRTL*/);
+    addPhonesBelowWord2(phoneSegments, phones, audioControl, phoneMap, simpleLayout, wordSegment);
     return phones;
   }
 
@@ -537,7 +538,13 @@ public class WordTable {
                                    TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                    boolean simpleLayout,
                                    TranscriptSegment wordSegment) {
- //   logger.info("addPhonesBelowWord2 add phones below " + wordSegment);
+   logger.info("addPhonesBelowWord2 add phones below " +
+       "\n\tword " + wordSegment +
+       "\n\tsegs " + phoneSegments.size());
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("word " +wordSegment));
+//    logger.info("logException stack " + exceptionAsString);
+
     Iterator<TranscriptSegment> iterator = phoneSegments.iterator();
     boolean hasAudioControl = audioControl != null;
 
@@ -547,8 +554,14 @@ public class WordTable {
       if (!shouldSkipPhone(phoneLabel)) {
         boolean b = iterator.hasNext();
         SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel + (b ? NBSP : ""), BLUE);
-        addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
-        phoneMap.put(phoneSegment, h);
+
+      //  logger.info("\taddPhonesBelowWord2 word " + wordSegment + " phone " + phoneLabel + " : " + h.getContent());
+
+//        if (phoneSegment.isIn(wordSegment)) {
+          addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
+  //      }
+        IHighlightSegment put = phoneMap.put(phoneSegment, h);
+        if (put != null) logger.info("prev for " +phoneSegment +" was " + put);
 
         if (simpleLayout) {
           if (b) {
@@ -581,8 +594,9 @@ public class WordTable {
    */
   private void addClickHandler(AudioControl audioControl, TranscriptSegment segmentToPlay, Label header) {
     if (audioControl != null) {
+      logger.info("addClickHandler add handler for " + segmentToPlay + " when click on " + header.getText());
       header.addClickHandler(event -> {
-        logger.info("click on " + segmentToPlay);
+        logger.info("addClickHandler click on " + segmentToPlay + " header " + header.getText());
         audioControl.loadAndPlaySegment(segmentToPlay.getStart(), segmentToPlay.getEnd());
       });
     }

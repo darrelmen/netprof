@@ -55,7 +55,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PLAY_PAUSE = true;
   private static final boolean DEBUG_DETAIL = false;
-  private static final boolean DEBUG_MATCH = false;
+  private static final boolean DEBUG_MATCH = true;
   private boolean isRTL = false;
 
   final AlignmentFetcher alignmentFetcher;
@@ -162,7 +162,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   void rememberAudio(AudioAttribute next) {
-  //  logger.info("rememberAudio audio for " + this + "  " + next);
+    //  logger.info("rememberAudio audio for " + this + "  " + next);
     playAudio.rememberAudio(next);
     maybeShowAlignment(next);
   }
@@ -369,7 +369,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       List<TranscriptSegment> wordSegments = getWordSegments(alignmentOutput);
 
       if (DEBUG_MATCH) {
-        wordSegments.forEach(transcriptSegment -> logger.info("ex " + getExID() + " " + transcriptSegment));
+        wordSegments.forEach(transcriptSegment -> logger.info("matchSegmentToWidgetForAudio : ex " + getExID() + " " + transcriptSegment));
       }
 
       if (wordSegments == null) {
@@ -384,7 +384,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 //        logger.info("phones " +phones.size());
 //        phones.forEach(p->logger.info(p.toString()));
 
-        if (transcriptMatchesOneToOne(flclickables, wordSegments)) {
+
+        int c = getNumClickable(flclickables);
+        boolean sameNumSegments = c == wordSegments.size();
+
+        if (sameNumSegments) {
           doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments, wordSegments, clickablePhones);
         } else {
           if (DEBUG_MATCH) logger.warning("matchSegmentToWidgetForAudio no match for" +
@@ -392,7 +396,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
               "\n\tto       " + flclickables);
 
           clickableRow.clear();
-          doOneToManyMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments, wordSegments, clickableRow, clickablePhones);
+
+          if (wordSegments.size()>c) {
+
+          }
+          else {
+            doOneToManyMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments,
+                wordSegments, clickableRow, clickablePhones);
+          }
         }
       }
     }
@@ -410,6 +421,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param wordSegments
    * @param clickableRow
    * @param clickablePhones
+   * @see #matchSegmentToWidgetForAudio
    */
   private void doOneToManyMatch(List<TranscriptSegment> phones,
                                 AudioControl audioControl,
@@ -425,14 +437,15 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       TranscriptSegment wordSegment = transcriptSegmentListIterator.next();
 
       if (clickablesIterator.hasNext()) {
-        List<TranscriptSegment> phonesInWord = getSegs(phones, wordSegment);
+        List<TranscriptSegment> phonesInWord = getSegsWithinWordTimeWindow(phones, wordSegment);
 
         if (DEBUG_MATCH)
           logger.info("doOneToManyMatch got segment " + wordSegment);// + " length " + segmentLength);
 
         List<IHighlightSegment> unclickable = new ArrayList<>();
         IHighlightSegment highlightSegment =
-            matchEventSegmentToClickable(clickablesIterator, wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, unclickable);
+            matchEventSegmentToClickable(clickablesIterator, wordSegment, phonesInWord, audioControl, phoneMap,
+                clickablePhones, unclickable);
 
         if (highlightSegment == null) {
           if (DEBUG_MATCH) logger.info("doOneToManyMatch can't find match for wordSegment " + wordSegment);
@@ -447,7 +460,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
             List<TranscriptSegment> phonesInWordAll = new ArrayList<>();
 
             while (!fragment1.isEmpty()) {
-              // boolean fragmentContainsSegment = fragment1.startsWith(lcSegment);
               boolean isFragmentInSegment = fragment1.startsWith(lcSegment) || (
                   isMandarin && fragment1.length() <= lcSegment.length()
               );
@@ -463,7 +475,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                   if (transcriptSegmentListIterator.hasNext()) {
                     wordSegment = transcriptSegmentListIterator.next();
                     lcSegment = removePunct(wordSegment.getEvent().toLowerCase());
-                    phonesInWord = getSegs(phones, wordSegment);
+                    phonesInWord = getSegsWithinWordTimeWindow(phones, wordSegment);
                   }
                 }
               } else {
@@ -480,6 +492,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
               //    logger.info("doOneToManyMatch got matches for " + current + " and " + lcSegment + " fragment1 " + fragment1);
 
               if (shouldShowPhones()) {
+//                logger.info("doOneToManyMatch phones in word " + wordSegment);
+//                String event = wordSegment.getEvent();
+//                phonesInWordAll.forEach(ph -> logger.info(event + " " + ph.toString()));
+
                 DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWordAll, audioControl, phoneMap);
                 addSouthClickable(clickablePhones, current, phoneDivBelowWord);
               }
@@ -504,20 +520,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
           // logger.warning("doOneToManyMatch no match for " + wordSegment);
           boolean hasSpace = false;
           for (IHighlightSegment iHighlightSegment : unclickable) {
- /*           HTML html = new HTML(iHighlightSegment.getContent(), isRTL ? HasDirection.Direction.RTL : HasDirection.Direction.LTR);
-            if (!isRTL) {
-              html.addStyleName("floatLeft");
-            }
-            clickableRow.add(html);*/
-
             if (!iHighlightSegment.getContent().trim().isEmpty()) {
-
               if (!isRTL) {
                 addFloatLeft(iHighlightSegment);
               }
-//              if (iHighlightSegment.getContent().trim().isEmpty()) {
-//                iHighlightSegment.asWidget().setWidth("30px");
-//              }
               clickableRow.add(iHighlightSegment.asWidget());
             } else hasSpace = true;
           }
@@ -538,7 +544,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
           segmentToWord.put(wordSegment, highlightSegment);
           clickableRow.add(highlightSegment.asWidget());
-          //clickableRow.add(new InlineHTML(" "));
         }
       }
     }
@@ -553,9 +558,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       Widget w = next.asWidget();
       if (!isRTL) w.addStyleName("floatLeft");
       clickableRow.add(w);
-//      InlineHTML w1 = new InlineHTML(" ");
-//      if (!isRTL) w1.addStyleName("floatLeft");
-//      clickableRow.add(w1);
     }
   }
 
@@ -585,7 +587,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     clickablePhones.clear();
     for (TranscriptSegment wordSegment : wordSegments) {
       if (highlightSegmentIterator.hasNext()) {
-        List<TranscriptSegment> phonesInWord = getSegs(phones, wordSegment);
+        List<TranscriptSegment> phonesInWord = getSegsWithinWordTimeWindow(phones, wordSegment);
 
         if (DEBUG_MATCH)
           logger.info("doOneToOneMatch got segment " + wordSegment);// + " length " + segmentLength);
@@ -614,13 +616,17 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return wordSegments;
   }
 
-  private List<TranscriptSegment> getSegs(List<TranscriptSegment> phones, TranscriptSegment word) {
+  private List<TranscriptSegment> getSegsWithinWordTimeWindow(List<TranscriptSegment> phones, TranscriptSegment word) {
     List<TranscriptSegment> phonesInWord = new ArrayList<>();
+    float start = word.getStart();
+    float end = word.getEnd();
+
     for (TranscriptSegment phone : phones) {
-      if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
+      if (phone.getStart() >= start && phone.getEnd() <= end) {
         phonesInWord.add(phone);
       }
     }
+
     return phonesInWord;
   }
 
@@ -772,33 +778,42 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   private boolean transcriptMatchesOneToOne(List<IHighlightSegment> clickables, List<TranscriptSegment> segments) {
-    //int i = 0;
+
+    int c = getNumClickable(clickables);
+    boolean b = c == segments.size();
+
+    if (DEBUG_MATCH && !b) {
+      dumpMatchComparison(clickables, segments, c);
+    }
+
+    return b;
+  }
+
+  private void dumpMatchComparison(List<IHighlightSegment> clickables, List<TranscriptSegment> segments, int c) {
+    logger.info("transcriptMatchesOneToOne  clickables " + c + " segments " + segments.size());
+    StringBuilder builder = new StringBuilder();
+    for (IHighlightSegment clickable : clickables) {
+      if (clickable.isClickable()) {
+        builder.append(clickable.getContent()).append(" ");
+      }
+    }
+    logger.info("transcriptMatchesOneToOne clickable : " + builder);
+
+    StringBuilder builder2 = new StringBuilder();
+    for (TranscriptSegment segment : segments) {
+      builder2.append(segment.getEvent()).append(" ");
+    }
+    logger.info("transcriptMatchesOneToOne align    : " + builder2);
+  }
+
+  private int getNumClickable(List<IHighlightSegment> clickables) {
     int c = 0;
     for (IHighlightSegment clickable : clickables) {
       if (clickable.isClickable()) {
         c++;
       }
     }
-    boolean b = c == segments.size();
-
-    if (DEBUG_MATCH && !b) {
-      logger.info("transcriptMatchesOneToOne  clickables " + c + " segments " + segments.size());
-      StringBuilder builder = new StringBuilder();
-      for (IHighlightSegment clickable : clickables) {
-        if (clickable.isClickable()) {
-          builder.append(clickable.getContent()).append(" ");
-        }
-      }
-      logger.info("transcriptMatchesOneToOne clickable : " + builder);
-
-      StringBuilder builder2 = new StringBuilder();
-      for (TranscriptSegment segment : segments) {
-        builder2.append(segment.getEvent()).append(" ");
-      }
-      logger.info("transcriptMatchesOneToOne align    : " + builder2);
-    }
-
-    return b;
+    return c;
   }
 
   /**

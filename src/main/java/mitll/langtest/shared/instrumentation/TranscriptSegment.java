@@ -121,6 +121,10 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     return this;
   }*/
 
+  public boolean isIn(TranscriptSegment other) {
+    return getStart() >= other.getStart() && getEnd() <= other.getEnd();
+  }
+
   public TranscriptSegment setEvent(String str) {
     this.event = str;
     return this;
