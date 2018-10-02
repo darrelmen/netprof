@@ -3,9 +3,11 @@ package mitll.langtest.client.flashcard;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.shared.custom.QuizInfo;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
@@ -26,22 +28,37 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
   private static final String LISTS = "Lists";
 
   private static final int HEARTBEAT_INTERVAL = 1000;
-  private static final int DRY_RUN_MINUTES = 1;
-  private static final int ROUND_MINUTES = 10;
-
-  private static final int DRY_RUN_ROUND_TIME = PolyglotFlashcardFactory.DRY_RUN_MINUTES * 60 * 1000;
-  private static final int ROUND_TIME = PolyglotFlashcardFactory.ROUND_MINUTES * 60 * 1000;
-
   private Timer recurringTimer = null;
   private long roundTimeLeftMillis = -1;
 
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
   private boolean postedAudio;
+  private QuizInfo quizInfo;
+  // private static final boolean DEBUG = false;
 
- // private static final boolean DEBUG = false;
-
-  PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, String instance) {
+  /**
+   * @see HidePolyglotFactory
+   * @param controller
+   * @param exerciseList
+   */
+  PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList) {
     super(controller, exerciseList);
+
+    controller.getListService().getQuizInfo(new SelectionState().getList(), new AsyncCallback<QuizInfo>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(QuizInfo result) {
+        gotQuizInfo(result);
+      }
+    });
+  }
+
+  private void gotQuizInfo(QuizInfo result) {
+    this.quizInfo = result;
   }
 
   /**
@@ -58,9 +75,9 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
         soundFeedback,
         e,
         sticky,
-        exerciseList,
+        exerciseList/*,
         getMinScore(),
-        shouldShowAudio());
+        shouldShowAudio()*/);
   }
 
   @NotNull
@@ -84,7 +101,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     return new StickyState(storage) {
       @Override
       protected boolean isCorrect(boolean correct, double score) {
-        return (score * 100D) >= Integer.valueOf(getMinScore()).doubleValue();
+        return (score * 100D) >= Integer.valueOf(quizInfo.getMinScore()).doubleValue();
       }
     };
   }
@@ -96,7 +113,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
   public void startTimedRun() {
     if (!isRoundTimerRunning()) {
       //inLightningRound = true;
-     // logger.info("startTimedRun ->");
+      // logger.info("startTimedRun ->");
       reset();
       startRoundTimer(getIsDry());
       sticky.storeSession(System.currentTimeMillis());
@@ -120,7 +137,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
    * @see #sessionComplete
    */
   private void stopTimedRun() {
-  //  logger.info("stopTimedRun");
+    //  logger.info("stopTimedRun");
     currentFlashcard.stopRecording();
     setBannerVisible(true);
     //inLightningRound = false;
@@ -146,7 +163,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
       //logger.info("start round timer ");
       clearAnswerMemory();
 
-      doSessionStart(isDry);
+      doSessionStart();
 
       makeTimer();
 
@@ -156,16 +173,16 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
         logger.warning("startRoundTimer : no current flashcard?");
       }
     } else {
-   //   logger.info("startRoundTimer round " + recurringTimer + " " + recurringTimer.isRunning());
+      //   logger.info("startRoundTimer round " + recurringTimer + " " + recurringTimer.isRunning());
     }
   }
 
-  private void doSessionStart(boolean isDry) {
-    int delayMillis = getRoundTimeMinutes(isDry) * 60 * 1000;
+  private void doSessionStart() {
+    int delayMillis = quizInfo.getRoundMinutes() * 60 * 1000;
     int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
     //logger.info("doSessionStart timeRemainingMillis " + timeRemainingMillis);
     roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
-   // sessionStartMillis = System.currentTimeMillis();
+    // sessionStartMillis = System.currentTimeMillis();
   }
 
   /**
@@ -207,18 +224,20 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     }
   }
 
-  @Override
+/*  @Override
   public int getRoundTimeMinutes(boolean isDry) {
     return isDry ? DRY_RUN_ROUND_TIME : ROUND_TIME;
-  }
+  }*/
 
+/*
   public int getMinScore() {
     return 35;
   }
-
-  public boolean shouldShowAudio() {
-    return false;
-  }
+*/
+//
+//  public boolean shouldShowAudio() {
+//    return false;
+//  }
 
   public void setMode(PolyglotDialog.MODE_CHOICE mode) {
     this.mode = mode;
@@ -259,7 +278,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
 
   protected void listChanged(List<L> items, String selectionID) {
     baseListChanged(items, selectionID);
-    logger.info("listChanged : " + selectionID + " got new set of items from list. " + items.size());
+  //  logger.info("listChanged : " + selectionID + " got new set of items from list. " + items.size());
     Scheduler.get().scheduleDeferred(() -> {
       if (sticky.inQuiz() && sticky.getTimeRemainingMillis() > 0 && hasListSelection()) {
         // inLightningRound = true;
@@ -288,7 +307,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
    */
   @Override
   public void cancelRoundTimer() {
-   // logger.info("cancelRoundTimer");
+    // logger.info("cancelRoundTimer");
     sticky.endQuiz();
     // if (roundTimer != null) roundTimer.cancel();
     cancelTimer();
@@ -296,8 +315,8 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     //removeItemFromHistory(-1);
   }
 
-  public void clearTimeRemaining() {
-   // logger.info("clearTimeRemaining");
+  private void clearTimeRemaining() {
+    // logger.info("clearTimeRemaining");
     sticky.clearTimeRemaining();
     roundTimeLeftMillis = 0;
   }
@@ -352,5 +371,9 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
   private void clearAnswerMemory() {
     sticky.clearAnswers();
     // clearTimeRemaining();
+  }
+
+  public QuizInfo getQuizInfo() {
+    return quizInfo;
   }
 }

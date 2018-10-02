@@ -443,7 +443,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     recordWordAndPhone = new RecordWordAndPhone(wordDAO, phoneDAO);
     dominoExerciseDAO = new DominoExerciseDAO(userExerciseDAO);
 
-    reportHelper = new ReportHelper(getServerProps(), getProjectManagement(), getProjectDAO(),
+    reportHelper = new ReportHelper(this, getProjectDAO(),
         getUserDAO(), pathHelper, getMailSupport());
   }
 
@@ -1498,8 +1498,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } catch (Exception e) {
       logger.error("close got " + e, e);
     }
-
-    reportHelper.interrupt();
 
     if (mailSupport != null) {
       mailSupport.stopHeartbeat();

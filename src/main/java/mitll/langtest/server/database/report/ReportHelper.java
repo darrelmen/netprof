@@ -2,13 +2,11 @@ package mitll.langtest.server.database.report;
 
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IReport;
 import mitll.langtest.server.database.ReportStats;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.project.ProjectProperty;
@@ -17,14 +15,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static mitll.langtest.server.database.project.ProjectDAO.DAY;
 
 public class ReportHelper {
   private static final Logger logger = LogManager.getLogger(ReportHelper.class);
@@ -34,24 +26,21 @@ public class ReportHelper {
   private static final boolean SEND_ALL_YEARS = true;
   private static final int REPORT_THIS_PROJECT = 9;
 
-  private final ServerProperties serverProps;
-  private final IProjectManagement projectManagement;
 
+  //private final IProjectManagement projectManagement;
+  private final DatabaseServices services;
   private final IProjectDAO projectDAO;
   private final IUserDAO userDAO;
   private final PathHelper pathHelper;
   private final MailSupport mailSupport;
-  private Thread thread;
 
-  public ReportHelper(ServerProperties serverProperties,
-                      IProjectManagement projectManagement,
+
+  public ReportHelper(DatabaseServices services,
                       IProjectDAO projectDAO,
                       IUserDAO userDAO,
                       PathHelper pathHelper,
                       MailSupport mailSupport) {
-
-    this.projectManagement = projectManagement;
-    serverProps = serverProperties;
+    this.services = services;
     this.projectDAO = projectDAO;
     this.userDAO = userDAO;
     this.pathHelper = pathHelper;
@@ -112,10 +101,6 @@ public class ReportHelper {
   }
 */
 
-  public void interrupt() {
-    if (this.thread != null) this.thread.interrupt();
-  }
-
   public boolean isTodayAGoodDay() {
     return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;
   }
@@ -151,7 +136,6 @@ public class ReportHelper {
         reportEmails,
         receiverNames,
         getReportStats(report, forceSend), pathHelper);
-
   }
 
   private void populateRecipients(int userID, List<String> reportEmails, List<String> receiverNames) {
@@ -212,9 +196,8 @@ public class ReportHelper {
     return filtered;
   }
 
-
   private Collection<Project> getProjects() {
-    return projectManagement.getProjects();
+    return services.getProjectManagement().getProjects();
   }
 
   @NotNull

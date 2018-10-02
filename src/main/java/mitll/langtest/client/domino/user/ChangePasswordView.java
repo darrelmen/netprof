@@ -135,12 +135,18 @@ public class ChangePasswordView extends Composite {
     currPWBox = new PasswordTextBox();
     currPWBox.addKeyPressHandler(uiHandler);
     currentPWDF = new DecoratedFields("Current Password", currPWBox);
-    form.add(currentPWDF.getCtrlGroup());
+    currPWBox.setVisible(false);
+    //form.add(currentPWDF.getCtrlGroup());
 
 
     PasswordTextBox p1Box = new PasswordTextBox();
     p1Box.addKeyPressHandler(uiHandler);
     pass1DF = new DecoratedFields("Password", p1Box);
+
+
+    Scheduler.get().scheduleDeferred(() -> p1Box.setFocus(true));
+
+
     form.add(pass1DF.getCtrlGroup());
     PasswordTextBox p2Box = new PasswordTextBox();
     p2Box.addKeyPressHandler(uiHandler);
@@ -192,7 +198,7 @@ public class ChangePasswordView extends Composite {
   }
 
   private boolean validateAndWarn() {
-    boolean cPassValid = currentPWDF == null || currentPWDF.performBasicValidate();
+    boolean cPassValid = true;//currentPWDF == null || currentPWDF.performBasicValidate();
     boolean pass1Valid = pass1DF.performBasicValidate();
     boolean pass2Valid = pass2DF.performBasicValidate();
 

@@ -38,10 +38,7 @@ import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
@@ -132,14 +129,14 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
 
     {
-      Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
+    Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
 
       //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
       List<User.Permission> requiredPerms = currentStoredView.getPerms();
       userPerms.retainAll(requiredPerms);
 
-      if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
-        logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
+    if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
+      logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
         currentStoredView = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
       }
     }
@@ -326,8 +323,16 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private void setInstanceHistory(VIEWS views) {
     if (new SelectionState().getView() != views) {
-      if (DEBUG) logger.info("setInstanceHistory clearing history for instance " + views);
-      pushItem(getInstanceParam(views));
+      Map<String, Collection<String>> typeToSection = new SelectionState(History.getToken(), false).getTypeToSection();
+      //   logger.info("setInstanceHistory clearing history for instance " + views);
+      StringBuilder stringBuilder = new StringBuilder();
+      typeToSection.forEach((k, v) -> stringBuilder
+          .append(k)
+          .append("=")
+          .append(v.iterator().next()).append(SelectionState.SECTION_SEPARATOR));
+      String historyToken = SelectionState.INSTANCE + "=" + views.toString();
+      String s = stringBuilder.toString();
+      pushItem(historyToken + (s.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + s));
     } else {
       //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }

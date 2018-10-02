@@ -35,6 +35,7 @@ package mitll.langtest.client.banner;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
@@ -73,7 +74,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
   private final Logger logger = Logger.getLogger("QuizHelper");
 
   private static final String QUIZ = "Quiz";
-  private static final int INTDEF_MIN_SCORE = 35;
+//  private static final int INTDEF_MIN_SCORE = 35;
 
   private final INavigation navigation;
   private int chosenList = -1;
@@ -100,7 +101,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
         return POLYGLOT;
       }
 
-      @Override
+/*      @Override
       public int getRoundTimeMinutes(boolean isDry) {
         FacetExerciseList<T, U> exerciseList = getExerciseListTyped();
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
@@ -117,13 +118,9 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
           //   logger.info("getRoundTimeMinutes iUserList " + idToList.keySet());
           return iUserList == null ? 10 : iUserList.getRoundTimeMinutes();
         }
-      }
+      }*/
 
-      private FacetExerciseList<T, U> getExerciseListTyped() {
-        return (FacetExerciseList<T, U>) this.getExerciseList();
-      }
-
-      @Override
+/*      @Override
       public int getMinScore() {
         FacetExerciseList<T, U> exerciseList = getExerciseListTyped();
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
@@ -137,11 +134,33 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
           IUserList iUserList = idToList.get(chosenList);
           return iUserList == null ? INTDEF_MIN_SCORE : iUserList.getMinScore();
         }
-      }
+      }*/
+/*
 
       @Override
       public boolean shouldShowAudio() {
-        FacetExerciseList<T, U> exerciseList = getExerciseListTyped();
+        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
+        if (chosenList == -1) {
+          setChosenList(exerciseList);
+        }
+
+        if (chosenList != -1) {
+          controller.getListService().shouldShowAudio(chosenList, new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+
+            }
+          });
+        }
+*/
+
+/*
+        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
         Map<Integer, IUserList> idToList = exerciseList.getIdToList();
         if (idToList == null) {
           logger.info("shouldShowAudio no user lists yet ");
@@ -152,17 +171,17 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
           }
           IUserList iUserList = idToList.get(chosenList);
           if (iUserList == null) {
-            logger.warning("no user list for " + chosenList);
+            logger.warning("shouldShowAudio : no user list for "+chosenList  + " in " + idToList.size());
           }
-    /*      else {
+    *//*      else {
             logger.info("shouldShowAudio for list " + chosenList + " user list " + iUserList);
             logger.info("for list " + chosenList + " show audio " + iUserList.shouldShowAudio());
-          }*/
+          }*//*
           return iUserList != null && iUserList.shouldShowAudio();
-        }
-      }
+        }*/
+     // }
 
-      private void setChosenList(FacetExerciseList<?, ?> exerciseList) {
+ /*     private void setChosenList(FacetExerciseList exerciseList) {
         Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
         String s = candidate.get(LISTS);
         //   logger.info("getRoundTimeMinutes iUserList " + s);
@@ -175,7 +194,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
           }
         }
       }
-
+*/
       /**
        * @see PolyglotPracticePanel#reallyStartOver
        */

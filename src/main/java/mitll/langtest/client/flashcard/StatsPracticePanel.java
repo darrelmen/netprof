@@ -341,7 +341,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
 
   /**
    * @param toAddTo
-   * @see FlashcardPanel#FlashcardPanel
+   * @see FlashcardPanel#addWidgets(CommonExercise, ExerciseController, ControlState)
    */
   @Override
   void addRowBelowPrevNext(DivWidget toAddTo) {

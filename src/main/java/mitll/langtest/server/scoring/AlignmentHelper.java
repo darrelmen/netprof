@@ -190,6 +190,6 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
                                                                                 Language language) {
     return
         new ParseResultJson(serverProps, language)
-            .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
+            .readFromJSON(object, "words", "w", usePhoneToDisplay, null, false);
   }
 }

@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -62,14 +61,14 @@ public class ThumbnailChoices {
 
   public void addPopover(FocusWidget button, Map<String, String> props, Placement placement) {
     Set<String> typeOrder = props.keySet();
-    UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
+    UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopover(props, button, typeOrder, ClientExerciseUnitChapterItemHelper, placement));
   }
 
   void showPopover(Map<String, String> props,
                    Widget button,
                    Set<String> typeOrder,
-                   UnitChapterItemHelper<ClientExercise> unitChapterItemHelper, Placement placement) {
+                   UnitChapterItemHelper<?> unitChapterItemHelper, Placement placement) {
     basicDialog.showPopover(
         button,
         null,

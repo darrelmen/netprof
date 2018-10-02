@@ -332,9 +332,14 @@ public class PronunciationLookup implements IPronunciationLookup {
     }
   }
 
+  int n = 0;
   private void addUnkPron(String transcript, StringBuilder dict, List<WordAndProns> candidates, String word) {
     String s = emptyLTS ? " with empty LTS" : "";
-    logger.warn("getPronunciationsFromDictOrLTS using unk phone for '" + word + "' in " + transcript + s);
+    n++;
+    if (n < 100 || n % 100 == 0) {
+      logger.warn("getPronunciationsFromDictOrLTS (" +n+
+          ") using unk phone for '" + word + "' in " + transcript + s);
+    }
     dict.append(getUnkPron(word));
     candidates.add(new WordAndProns(word, UNK));
   }

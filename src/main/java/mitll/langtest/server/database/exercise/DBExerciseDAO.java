@@ -76,6 +76,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     this.fullProject = fullProject;
   }
 
+  int spew = 0;
+
   /**
    * so first look in the main id->ex map and then in the context->exercise map
    *
@@ -92,8 +94,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         if (id != userExerciseDAO.getUnknownExerciseID()) {
           commonExercise = idToContextExercise.get(id);
           if (commonExercise == null) {
-            logger.warn(this + " getExercise : couldn't find exercise #" + id +
-                " in " + idToExercise.size() + " exercises and " + idToContextExercise.size() + " context exercises");
+            spew++;
+            if (spew < 10 || spew % 100 == 0) {
+              logger.warn(this + " getExercise : couldn't find exercise #" + id +
+                  " in " + idToExercise.size() + " exercises and " + idToContextExercise.size() + " context exercises");
+            }
           } else {
             //  logger.info("getExercise found context " + commonExercise.getID());
           }
@@ -379,11 +384,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   /**
    * @param safe
    * @param unsafe
+   * @param dictTimestamp
    * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
-  public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe) {
-    getDao().updateCheckedBulk(safe, true);
-    getDao().updateCheckedBulk(unsafe, false);
+  public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp) {
+    getDao().updateCheckedBulk(safe, true, dictTimestamp);
+    getDao().updateCheckedBulk(unsafe, false, dictTimestamp);
   }
 
   /**

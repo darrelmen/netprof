@@ -63,7 +63,7 @@ import java.util.stream.Collectors;
  * @since 10/21/15.
  */
 public class WordTable {
-   private final Logger logger = Logger.getLogger("WordTable");
+  private final Logger logger = Logger.getLogger("WordTable");
 
   private static final String WHITE_SPACE_NOWRAP = PagerTable.WHITE_SPACE_NOWRAP;
 
@@ -339,7 +339,7 @@ public class WordTable {
       TranscriptSegment word = pair.getKey();
 
       if (!shouldSkipWord(word.getEvent())) {
-        table.add(getDivForWord(audioControl, /*isRTL,*/ words, phoneMap, id, pair.getValue(), word));
+        table.add(getDivForWord(audioControl, words, phoneMap, id, pair.getValue(), word));
         id++;
       }
     }

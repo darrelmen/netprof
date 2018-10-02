@@ -39,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -146,6 +147,6 @@ public class InDictFilter {
    * @see #isValid
    */
   private boolean isPhraseInDict(String phrase) {
-    return audioFileHelper.checkLTSOnForeignPhrase(phrase, "");
+    return audioFileHelper.checkLTSOnForeignPhrase(phrase, "", new HashSet<>());
   }
 }

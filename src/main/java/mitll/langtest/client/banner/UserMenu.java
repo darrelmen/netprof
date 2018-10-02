@@ -41,6 +41,7 @@ public class UserMenu {
   public static final String BROWSER_RECORDING = "Browser recording";
   public static final String RECORDING_TYPE = "Recording type";
   public static final String DOMINO_URL = "domino.url";
+
   private final Logger logger = Logger.getLogger("UserMenu");
 
   private static final String REQUEST_INSTRUCTOR_STATUS = "Request Instructor Status";

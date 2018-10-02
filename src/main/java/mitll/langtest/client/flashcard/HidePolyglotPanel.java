@@ -21,7 +21,7 @@ class HidePolyglotPanel<L extends CommonShell, T extends ClientExercise> extends
    * @param e
    * @param stickyState
    * @param exerciseListToUse
-   * @param showAudio
+   * @paramx showAudio
    * @see HidePolyglotFactory#getFlashcard
    */
   HidePolyglotPanel(PolyglotFlashcardContainer statsFlashcardFactory,
@@ -30,17 +30,23 @@ class HidePolyglotPanel<L extends CommonShell, T extends ClientExercise> extends
                     MySoundFeedback soundFeedback,
                     T e,
                     StickyState stickyState,
-                    ListInterface<L, T> exerciseListToUse,
-                    int minPoly,
-                    boolean showAudio) {
-    super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse, minPoly, showAudio);
+                    ListInterface<L, T> exerciseListToUse//,
+  //                  int minPoly,
+    //                boolean showAudio
+  ) {
+    super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse/*, minPoly, showAudio*/);
   }
 
+  /**
+   * @see FlashcardPanel#getThreePartContent
+   * @param controlState
+   * @return
+   */
   Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new DivWidget();
     rightColumn.addStyleName("leftTenMargin");
 
-    if (showAudio) {
+    if (quizInfo.isShowAudio()) {
       rightColumn.add(getAudioGroup(controlState));
       addControlsBelowAudio(controlState, rightColumn);
     } else {
@@ -49,6 +55,7 @@ class HidePolyglotPanel<L extends CommonShell, T extends ClientExercise> extends
       }
     }
     rightColumn.add(getKeyBinding());
+
     return rightColumn;
   }
 

@@ -32,7 +32,8 @@
 
 package mitll.langtest.server.database.postgres;
 
-import lm.K;
+
+import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
@@ -48,6 +49,7 @@ import mitll.langtest.server.scoring.WordAndProns;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.KoreanLTS;
@@ -345,6 +347,70 @@ public class EasyReportTest extends BaseTest {
       }
     }
     return match;
+  }
+  //public static final int MAX = 200;
+//  private static final int USERID = 1474;
+//  private static final int SPANISH = 3;
+//  private static final int DEMO_USER = 659;
+
+  @Test
+
+  public void testTurk() {
+  }
+
+  @Test
+  public void testKaldi() {
+    DatabaseImpl db = getAndPopulate();
+    int projectid = 6;
+    Project project = db.getProject(projectid);
+    DecodeCorrectnessChecker decodeCorrectnessChecker = new DecodeCorrectnessChecker(null, 0, project.getAudioFileHelper().getSmallVocabDecoder());
+    String phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode("selamımı", Language.TURKISH);
+
+
+    String iki = "İkizler";
+
+    logger.info("Got " + phraseToDecode);
+
+      phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode(iki, Language.TURKISH);
+
+    logger.info("Got " + phraseToDecode);
+
+    //  project.recalcRefAudio();
+  }
+
+  @Test
+  public void testTurkish() {
+    DatabaseImpl db = getAndPopulate();
+    int projectid = 6;
+    Project project = db.getProject(projectid);
+    CommonExercise exerciseByID = project.getExerciseByID(33981);
+    String foreignLanguage = exerciseByID.getForeignLanguage();
+    String segmented = project.getAudioFileHelper().getASR().getSegmented(foreignLanguage);
+    logger.info("For " + exerciseByID);
+    logger.info("For '" + foreignLanguage + "' : '" + segmented + "'");
+    // project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
+  }
+
+  @Test
+  public void testCroatian() {
+    DatabaseImpl db = getAndPopulate();
+    int projectid = 7;
+    Project project = db.getProject(projectid);
+    project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
+
+    try {
+      Thread.sleep(20000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testSerbian() {
+    DatabaseImpl db = getAndPopulate();
+    int projectid = 8;
+    Project project = db.getProject(projectid);
+    project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
   }
 
   @Test

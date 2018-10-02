@@ -31,7 +31,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private static final int WORD_SPACER = 7;
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
-  private static final String BLUE = "#2196F3";
+  public static final String BLUE = "#2196F3";
 
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char FULL_WIDTH_NINE = '\uFF10' + 9;
@@ -74,7 +74,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param controller
    * @param alignments
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
-   * @see mitll.langtest.client.banner.LearnHelper#getFactory
+   * @seex mitll.langtest.client.banner.LearnHelper#getFactory
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    * @see mitll.langtest.client.banner.ListenViewHelper#getTurnPanel

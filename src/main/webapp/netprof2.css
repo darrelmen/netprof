@@ -20,8 +20,8 @@ h1 {
     /*background: -moz-linear-gradient(top,  #ffffff,  #b4b4b4);*/ /* for firefox 3.6+ */
 }
 
-html, body {
-    height: 100%;
+html, body{
+    height:100%;
 }
 
 body {

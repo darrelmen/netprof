@@ -116,9 +116,9 @@ public class PolyglotChart<T extends CommonShell>  extends BasicTimeSeriesPlot<T
     return true;
   }
 
-  boolean showDate() {
-    return false;
-  }
+//  boolean showDate() {
+//    return false;
+//  }
 
   protected boolean gotClickAt(long nearestXAsLong) {
     AudioAnswer audioAnswer = timeToAnswer.get(nearestXAsLong);

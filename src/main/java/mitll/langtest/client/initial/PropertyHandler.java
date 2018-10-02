@@ -80,7 +80,7 @@ public class PropertyHandler {
    *
    * @see RecordButton#startOrStopRecording()
    */
-  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 140;//120;//185;//85;
+  private static final int DEFAULT_AFTER_STOP_DELAY_MILLIS = 160;//120;//185;//85;
 
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";

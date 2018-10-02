@@ -81,6 +81,7 @@ public class DecodeCorrectnessChecker {
   private final SmallVocabDecoder svd;
   private static final boolean DEBUG = false;
 
+
   /**
    * @param alignDecode
    * @param minPronScore
@@ -117,7 +118,7 @@ public class DecodeCorrectnessChecker {
 
     boolean b1 = language == Language.FRENCH;
     boolean removeAllPunct = !b1;
-    logger.info("getDecodeScore : " + language + " : is french " + b1 + " remove all punct " + removeAllPunct);
+//    logger.info("getDecodeScore : " + language + " : is french " + b1 + " remove all punct " + removeAllPunct);
     PretestScore decodeScore = getDecodeScore(audioFile, foregroundSentences, answer, decoderOptions, precalcScores, b, removeAllPunct);
     // log what happened
     logDecodeOutput(answer, foregroundSentences, commonExercise.getID());
@@ -225,37 +226,43 @@ public class DecodeCorrectnessChecker {
       logger.debug("isCorrect - expected  '" + expectedAnswers + "' vs heard '" + recoSentence + "', is asian lang = " + isMandarinEtAl);
     }
 
-    for (String answer : expectedAnswers) {
-      String converted = getPunctRemoved(answer);
+    if (recoSentence.isEmpty()) {
+      return false;
+    } else {
+      for (String answer : expectedAnswers) {
+        String converted = getPunctRemoved(answer);
 
-      if (DEBUG && !converted.equalsIgnoreCase(answer)) {
-        logger.debug("isCorrect - converted '" + converted + "' vs '" + answer + "'");
-      }
-
-      List<String> answerTokens = svd.getTokensAllLanguages(isMandarinEtAl, converted, removeAllAccents);
-      List<String> recoTokens = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence, removeAllAccents);
-      if (answerTokens.size() == recoTokens.size()) {
-        boolean same = true;
-        for (int i = 0; i < answerTokens.size() && same; i++) {
-          String expected = answerTokens.get(i);
-          String reco = recoTokens.get(i);
-          if (DEBUG)
-            logger.debug("isCorrect comparing '" + expected + "' " + expected.length() + " to '" + reco + "' " + reco.length());
-          same = expected.equalsIgnoreCase(reco);
-          if (!same) {
-            if (DEBUG || true)
-              logger.debug("isCorrect NO MATCH " +
-                  "\n\tcomparing '" + expected + "' " + expected.length() +
-                  "\n\tto        '" + reco + "' " + reco.length());
-          }
+        if (DEBUG && !converted.equalsIgnoreCase(answer)) {
+          logger.debug("isCorrect - converted '" + converted + "' vs '" + answer + "'");
         }
-        if (same) return true;
-      } else {
-        if (DEBUG) logger.debug("isCorrect not same number of tokens " + answerTokens + " " +
-            answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
+
+
+        List<String> answerTokens = svd.getTokensAllLanguages(isMandarinEtAl, converted, removeAllAccents);
+        List<String> recoTokens = svd.getTokensAllLanguages(isMandarinEtAl, recoSentence, removeAllAccents);
+        if (answerTokens.size() == recoTokens.size()) {
+          boolean same = true;
+          for (int i = 0; i < answerTokens.size() && same; i++) {
+            String expected = answerTokens.get(i);
+            String reco = recoTokens.get(i);
+            if (DEBUG)
+              logger.debug("isCorrect comparing '" + expected + "' " + expected.length() + " to '" + reco + "' " + reco.length());
+            same = expected.equalsIgnoreCase(reco);
+            if (!same) {
+              if (DEBUG || true)
+                logger.debug("isCorrect NO MATCH " +
+                    "\n\tcomparing '" + expected + "' " + expected.length() +
+                    "\n\tto        '" + reco + "' " + reco.length());
+            }
+
+          }
+          if (same) return true;
+        } else {
+          if (DEBUG) logger.debug("isCorrect not same number of tokens " + answerTokens + " " +
+              answerTokens.size() + " vs " + recoTokens + " " + recoTokens.size());
+        }
       }
+      return false;
     }
-    return false;
   }
 
   @NotNull
@@ -308,11 +315,27 @@ public class DecodeCorrectnessChecker {
       // logger.info("raw after   " + rawRefSentence);
     }
 
-    // logger.info("raw (" +language+  ") after   " + rawRefSentence);
+    logger.info("getPhraseToDecode raw (" + language + ") after '" + rawRefSentence + "'");
 
-    return isAsianLanguage(language) && !rawRefSentence.trim().equalsIgnoreCase(UNKNOWN_MODEL) ?
-        svd.getSegmented(rawRefSentence.trim().toUpperCase(), !isFrench(language)) :
-        rawRefSentence.trim().toUpperCase();
+    boolean isKaldi = isKaldi(language);
+    boolean removeAllAccents = !isFrench(language) && !isKaldi;
+    //logger.info("getPhraseToDecode removeAllAccents is " + removeAllAccents);
+    String rawOut = isAsianLanguage(language) && !rawRefSentence.trim().equalsIgnoreCase(UNKNOWN_MODEL) ?
+        svd.getSegmented(rawRefSentence.trim().toUpperCase(), removeAllAccents) :
+        rawRefSentence.trim();
+
+    String uc = rawOut.toUpperCase();
+    String lc = rawOut.toLowerCase();
+
+//    logger.info("getPhraseToDecode rawOut phrase is " + rawOut);
+//    logger.info("getPhraseToDecode lc phrase is " + lc);
+//    logger.info("getPhraseToDecode uc phrase is " + uc);
+
+    return isKaldi ? lc : uc;
+  }
+
+  private boolean isKaldi(Language language) {
+    return language == Language.TURKISH|| language == Language.CROATIAN || language == Language.SERBIAN;
   }
 
   private boolean isFrench(Language language) {

@@ -133,8 +133,6 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   boolean isMicAvailable();
 
-
-
   KeyStorage getStorage();
 
   void showListIn(int listID, INavigation.VIEWS views);

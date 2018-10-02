@@ -39,10 +39,7 @@ import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.custom.IUserList;
-import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.custom.IUserListWithIDs;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -70,7 +67,7 @@ public interface ListService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
   UserList addUserList(String name, String description, String dliClass, boolean isPublic, UserList.LIST_TYPE listType,
-                       int size, int duration, int minScore, boolean showAudio, Map<String,String> unitChapter) throws DominoSessionException;
+                       int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter) throws DominoSessionException;
 
   void update(UserList userList) throws DominoSessionException;
 
@@ -137,5 +134,9 @@ public interface ListService extends RemoteService {
   CommonExercise newExercise(int userListID, CommonExercise userExercise) throws DominoSessionException;
 */
 
+/*  boolean shouldShowAudio(int userListID);
+  int getRoundTimeMinutes(int userListID);
+  int getMinScore(int userListID);*/
 
+  QuizInfo getQuizInfo(int userListID);
 }

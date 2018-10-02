@@ -184,12 +184,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     table.addColumnSortHandler(getUserSorter(userCol, list));
   }
 
-  protected void addDateCol(List<T> list) {
+  protected Column<T, SafeHtml> addDateCol(List<T> list) {
     Column<T, SafeHtml> dateCol = getDateColumn();
     dateCol.setSortable(true);
     addColumn(dateCol, new TextHeader(getDateColHeader()));
     table.setColumnWidth(dateCol, getDateWidth() + "px");
     table.addColumnSortHandler(getDateSorter(dateCol, list));
+    return dateCol;
   }
 
   protected int getDateWidth() {

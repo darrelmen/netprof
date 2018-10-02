@@ -179,6 +179,12 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
     controlState.setStorage(new KeyStorage(controller));
   }
 
+  /**
+   * @see PolyglotPracticePanel#realAddWidgets
+   * @param e
+   * @param controller
+   * @param controlState
+   */
   void addWidgets(T e, ExerciseController controller, ControlState controlState) {
     final DivWidget middleVert = new DivWidget();
     middleVert.getElement().setId("middle_vert_container");
@@ -430,7 +436,7 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
    * @param contentMiddle
    * @param belowDiv
    * @return
-   * @see #FlashcardPanel
+   * @see #addWidgets
    */
   Panel getThreePartContent(ControlState controlState,
                             Panel contentMiddle,

@@ -196,11 +196,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
 
     // logger.info("getExerciseTooltip for " + showEx + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
     String foreignLanguage = commonShell == null ? "" : commonShell.getFLToShow();
-    String english = commonShell == null ? "" : commonShell.getEnglish();
-    if (english.equalsIgnoreCase(foreignLanguage) &&
-        commonShell != null &&
-        !commonShell.getMeaning().isEmpty())
-      english = commonShell.getMeaning();
+    String english = getEnglish(commonShell, foreignLanguage);
 
     String englishTool = (english == null || english.equals("N/A")) ? "" : "<br/>" + english;
     String dateToShow = getDateToShow(toolTipData);
@@ -225,13 +221,23 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
         ;
   }
 
+  private String getEnglish(CommonShell commonShell, String foreignLanguage) {
+    String english = commonShell == null ? "" : commonShell.getEnglish();
+    if (english.equalsIgnoreCase(foreignLanguage) &&
+        commonShell != null &&
+        !commonShell.getMeaning().isEmpty())
+      english = commonShell.getMeaning();
+    return english;
+  }
+
   @NotNull
   String getFLTooltip(String foreignLanguage) {
     return "<span style='font-size:200%'>" + foreignLanguage + "</span>";
   }
 
   @NotNull
-  String getTooltipHint() {    return "<br/><b>Click to hear vs. reference</b>";
+  String getTooltipHint() {
+    return "<br/><b>Click to hear vs. reference</b>";
   }
 
   boolean shouldShowExercise(String seriesName) {
@@ -254,6 +260,11 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
     return idToEx.containsKey(exid);
   }
 
+  /**
+   *
+   * @param time
+   * @param id
+   */
   void addTimeToExID(long time, int id) {
     timeToId.put(time, id);
   }

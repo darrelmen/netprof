@@ -102,7 +102,7 @@ public class ResultTypeAhead {
     Typeahead typeahead = new Typeahead(new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        logger.info(" requestSuggestions got request for " + whichField + " : " + w.getText());
+        //logger.info(" requestSuggestions got request for " + whichField + " : " + w.getText());
         resultServiceAsync.getResultAlternatives(getUnitToValue(), w.getText(), whichField, new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {

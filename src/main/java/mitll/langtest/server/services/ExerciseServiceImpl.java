@@ -75,7 +75,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final String LISTS = "Lists";
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_ID_LOOKUP = true;
+  private static final boolean DEBUG_ID_LOOKUP = false;
 
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final boolean WARN_MISSING_REF_RESULT = false;

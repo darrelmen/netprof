@@ -337,7 +337,7 @@ public class Project implements IPronunciationLookup {
     return fullTrie != null;
   }
 
-  public ExerciseTrie<CommonExercise> getFullContextTrie() {
+  ExerciseTrie<CommonExercise> getFullContextTrie() {
     return fullContextTrie;
   }
 
@@ -440,7 +440,12 @@ public class Project implements IPronunciationLookup {
       String propValue = db.getProjectDAO().getPropValue(getID(), prop);  // blank if miss, not null
       //   logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
 
-      propCache.put(prop, propValue);
+      if (propValue == null) {
+        logger.warn("huh? no prop value for " + prop);
+      } else {
+        propCache.put(prop, propValue);
+//        logger.info("getProp " + prop + " = " + propValue);
+      }
       return propValue;
     } else {
       return s;
@@ -450,6 +455,8 @@ public class Project implements IPronunciationLookup {
   private void putAllProps() {
     propCache.putAll(db.getProjectDAO().getProps(getID()));
   }
+
+  int spew = 0;
 
   /**
    * @param id
@@ -463,7 +470,10 @@ public class Project implements IPronunciationLookup {
     } else {
       CommonExercise exercise = exerciseDAO.getExercise(id);
       if (exercise == null) {
-        logger.info("getExerciseByID project # " + getID() + " : no exercise for #" + id + " in " + exerciseDAO.getNumExercises() + " exercises?");
+        spew++;
+        if (spew < 10 || spew % 100 == 0) {
+          logger.info("getExerciseByID project # " + getID() + " : no exercise for #" + id + " in " + exerciseDAO.getNumExercises() + " exercises?");
+        }
       }
       return exercise;
     }

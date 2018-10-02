@@ -73,7 +73,7 @@ public class BrowserRecording {
    * Handles either state - either we have flash, in which case we ask flash for the wav file,
    * otherwise we ask webRTC to stop recording and post the audio to us.
    *
-   * @see ExerciseController#stopRecording(WavCallback, boolean, boolean)
+   * @see ExerciseController#stopRecording
    */
   public static void stopRecording(final WavCallback wavCallback, boolean abort) {
     if (usingWebRTC()) {

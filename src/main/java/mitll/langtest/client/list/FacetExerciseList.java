@@ -281,17 +281,18 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     {
       // better name for primary and alternate choices
-      boolean isMandarin = controller.getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
-      boolean shouldSwap = controller.getProjectStartupInfo().isShouldSwap();
-      Dropdown realViewMenu =
-          new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu();
+      DivWidget widgets = new DivWidget();
+      widgets.addStyleName("topFiveMargin");
 
       {
-        DivWidget widgets = new DivWidget();
-        widgets.addStyleName("topFiveMargin");
+        ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+        boolean isMandarin = projectStartupInfo != null && projectStartupInfo.getLanguageInfo() == Language.MANDARIN;
+        boolean shouldSwap = projectStartupInfo != null && projectStartupInfo.isShouldSwap();
+        Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu();
         widgets.add(realViewMenu);
-        pagerAndSort.add(widgets);
       }
+
+      pagerAndSort.add(widgets);
     }
 
     addPageSize(pagerAndSort);

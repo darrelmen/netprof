@@ -326,6 +326,9 @@ public class ProjectManagement implements IProjectManagement {
     logger.info("configure START " + projectID + "/" + getProjects().size() + " : " + project.getLanguage());
 
     project.clearPropCache();
+
+    project.getAudioFileHelper().reloadScoring(project);
+
 //    logger.info("configureProject " + project.getProject().name() + " ---- ");
     SlickProject slickProject = project.getProject();
 
@@ -363,7 +366,6 @@ public class ProjectManagement implements IProjectManagement {
     }
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(),
         db.getResultDAO(),
-        db.getAudioDAO(),
         db.getPhoneDAO(),
         project));
 
@@ -383,7 +385,6 @@ public class ProjectManagement implements IProjectManagement {
         new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises),"checkLTSAndCountPhones_"+project.getID()).start();
       }
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
-      //  logMemory();
 
       //Set<Integer> exids = new HashSet<>();
       //for (CommonExercise exercise : rawExercises) exids.add(exercise.getID());

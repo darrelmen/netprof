@@ -39,6 +39,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.list.FacetExerciseList.LISTS;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -256,7 +258,7 @@ public class SelectionState {
   @NotNull
   public INavigation.VIEWS getView() {
     try {
-      instance = instance.replaceAll(" ","_");
+      instance = instance.replaceAll(" ", "_");
       return instance.isEmpty() ? INavigation.VIEWS.NONE : INavigation.VIEWS.valueOf(instance.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.warning("getView : hmm, couldn't parse " + instance);
@@ -298,6 +300,27 @@ public class SelectionState {
 
   public int getDialog() {
     return dialog;
+  }
+
+  public int getList() {
+    Map<String, Collection<String>> typeToSection = getTypeToSection();
+    Collection<String> strings = typeToSection.get(LISTS);
+    if (strings == null || strings.isEmpty()) return -1;
+    else {
+      String s = strings.iterator().next();
+      //   logger.info("getRoundTimeMinutes iUserList " + s);
+      if (s != null && !s.isEmpty()) {
+        try {
+          return Integer.parseInt(s);
+          // logger.info("setChosenList chosenList " + chosenList);
+        } catch (NumberFormatException e) {
+          logger.warning("couldn't parse list id " + s);
+          return -1;
+        }
+      } else {
+        return -1;
+      }
+    }
   }
 
   public String toString() {

@@ -17,10 +17,7 @@ import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -67,7 +64,7 @@ public class ClickableWords {
    * @param highlightColor
    * @see RefAudioGetter#addWidgets
    */
-  ClickableWords(ListInterface listContainer, int exercise, String language, int fontSize, String highlightColor) {
+  public ClickableWords(ListInterface listContainer, int exercise, String language, int fontSize, String highlightColor) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     this.highlightColor = highlightColor;
@@ -107,7 +104,7 @@ public class ClickableWords {
 
   @NotNull
   private List<String> getSearchTokens(boolean isChineseCharacter) {
-    return listContainer == null ? new ArrayList<>() : getTokens(listContainer.getTypeAheadText().toLowerCase(), isChineseCharacter);
+    return listContainer == null ? Collections.emptyList() : getTokens(listContainer.getTypeAheadText().toLowerCase(), isChineseCharacter);
   }
 
   /**
@@ -151,7 +148,7 @@ public class ClickableWords {
     for (String token : tokens) {
       boolean searchMatch = isSearchMatch(token, searchToken);
 
-      segments.add(makeClickableText(dir, token, searchMatch ? searchToken : null, false, id++, fieldType));
+      segments.add(makeClickableText(dir, token, searchMatch ? searchToken : null, false, id++, fieldType, true));
 
       if (searchMatch) {
         if (searchIterator.hasNext()) {
@@ -240,10 +237,10 @@ public class ClickableWords {
    * @return
    * @see TwoColumnExercisePanel#getContext
    */
-  DivWidget getClickableWordsHighlight(String contextSentence,
+ public DivWidget getClickableWordsHighlight(String contextSentence,
                                        String highlight,
                                        FieldType fieldType,
-                                       List<IHighlightSegment> clickables) {
+                                       List<IHighlightSegment> clickables, boolean addClickableProps) {
     DivWidget horizontal = new DivWidget();
 
     horizontal.getElement().setId("clickableWordsHighlightRow");
@@ -310,7 +307,7 @@ public class ClickableWords {
           searchMatch ? searchToken : null,
           isHighlightMatch,
           id++,
-          fieldType);
+          fieldType, addClickableProps);
       clickables.add(clickable);
       Widget w = clickable.asWidget();
       horizontal.add(w);
@@ -396,7 +393,7 @@ public class ClickableWords {
    * @param longer
    * @param shorter
    * @return
-   * @see #getClickableWordsHighlight(String, String, FieldType, List)
+   * @see #getClickableWordsHighlight
    * @see #getMatchingHighlightAll
    * @see #makeClickableText
    */
@@ -472,6 +469,7 @@ public class ClickableWords {
    * @param isContextMatch
    * @param id             to label highlight segment
    * @param fieldType      if meaning, use english font, if FL, choose the font
+   * @param addClickableProps
    * @return
    * @see #getClickableWords
    * @see #getClickableWordsHighlight
@@ -482,7 +480,8 @@ public class ClickableWords {
       String searchToken,
       boolean isContextMatch,
       int id,
-      FieldType fieldType) {
+      FieldType fieldType,
+      boolean addClickableProps) {
     final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir,
         false,
         false,
@@ -508,14 +507,18 @@ public class ClickableWords {
     if (empty) {
       //  logger.info("makeClickableText for '" + html + "' not clickable");
       highlightSegmentDiv.setClickable(false);
-    } else {
-      highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
-      highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
-      highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
-      highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
+    } else if (addClickableProps) {
+      addClickableProperties(highlightSegment, removePunct);
     }
 
     return highlightSegmentDiv;
+  }
+
+  private void addClickableProperties(HTML highlightSegment, String removePunct) {
+    highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
+    highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
+    highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
+    highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
   }
 
   /**

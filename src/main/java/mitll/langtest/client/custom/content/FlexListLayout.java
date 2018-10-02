@@ -82,7 +82,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   public Panel doInternalLayout(int userListID, INavigation.VIEWS instanceName, boolean hasTopRow) {
     Panel twoRows = hasTopRow ? new FlowPanel() : new DivWidget();
     twoRows.getElement().setId("FlexListLayout_twoRows");
-
     Panel exerciseListContainer = new SimplePanel();
     exerciseListContainer.addStyleName("floatLeftAndClear");
     exerciseListContainer.getElement().setId("FlexListLayout_exerciseListContainer");

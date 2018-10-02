@@ -57,7 +57,7 @@ public class SmallVocabDecoder {
 
   /**
    * @see #getTrimmed(String)
-   * @see #cleanToken
+   * @see #lcToken
    * <p>
    * remove latin capital letter i with dot above - 0130
    */
@@ -79,13 +79,15 @@ public class SmallVocabDecoder {
    * @see #getTrimmedLeaveAccents
    */
   private static final String FRENCH_PUNCT = "[,.?!]";
+  public static final boolean DEBUG = false;
+  public static final String TURKISH_CAP_I = "İ";
 
   private HTKDictionary htkDictionary;
   private boolean isAsianLanguage;
 
   private static final int TOO_LONG = 8;
 
-  private static final boolean DEBUG = false;
+  // private static final boolean DEBUG = false;
   private static final boolean DEBUG_PREFIX = false;
   private static final boolean DEBUG_SEGMENT = false;
 
@@ -183,8 +185,18 @@ public class SmallVocabDecoder {
 
   public String getSegmented(String longPhrase, boolean removeAllAccents) {
     Collection<String> tokens = getTokens(longPhrase, removeAllAccents);
+    boolean debug = longPhrase.startsWith("sel");
+    if (debug) {
+      tokens.forEach(token -> logger.info("getSegmented " + token));
+    }
     StringBuilder builder = new StringBuilder();
-    tokens.forEach(token -> builder.append(segmentation(token.trim())).append(" "));
+    tokens.forEach(token -> {
+      String segmentation = segmentation(token.trim());
+      if (debug) {
+        logger.info("getSegmented segmentation " + segmentation);
+      }
+      builder.append(segmentation).append(" ");
+    });
     return builder.toString();
   }
 
@@ -216,7 +228,7 @@ public class SmallVocabDecoder {
     //if (removeAllAccents) {
 
 
-    if (false && !sentence.equalsIgnoreCase(trimmedSent)) {
+    if (DEBUG && !sentence.equalsIgnoreCase(trimmedSent)) {
       logger.info("getTokens " +
           "\n\tbefore     '" + sentence + "'" +
           "\n\tafter trim '" + trimmedSent + "'");
@@ -227,18 +239,22 @@ public class SmallVocabDecoder {
       //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
       String token = untrimedToken.trim();  // necessary?
       if (token.length() > 0) {
-        all.add(toFull(token));
+        String trim = token.trim();
+        if (!trim.equalsIgnoreCase("–") &&
+            !trim.equalsIgnoreCase("؟") &&
+            !trim.equalsIgnoreCase("+"))
+          all.add(toFull(token));
 //        if (!token.equals("UNKNOWNMODEL")) {
 //          logger.debug("\ttoken " + token);
 //        }
       }
     }
 
-/*    logger.info("getTokens " +
+    if (DEBUG) logger.info("getTokens " +
         "\n\tbefore     '" + sentence + "'" +
-        "\n\tafter trim '" + trimmedSent + "'"+
-        "\n\tall        " + all
-    );*/
+        "\n\tafter trim '" + trimmedSent + "'" +
+        "\n\tall        (" + all.size() + ")" + all
+    );
 
     return all;
   }
@@ -280,6 +296,7 @@ public class SmallVocabDecoder {
   }
 
   /**
+   * For the moment we replace the Turkish Cap I with I
    * @param sentence
    * @return
    * @see PronunciationLookup#getPronStringForWord(String, Collection, boolean)
@@ -288,25 +305,38 @@ public class SmallVocabDecoder {
     String trim = sentence
         .replaceAll(FRENCH_PUNCT, "")
         .replaceAll(REPLACE_ME_OE, OE)
+        .replaceAll(TURKISH_CAP_I,"I")
+        .replaceAll("\\p{P}", " ")
         //.replaceAll("\\s+", " ")
         .trim();
     //logger.warn("getTrimmedLeaveAccents before " + sentence + " after "+ trim);
     return trim;
   }
 
+  /**
+   * @see PronunciationLookup#addDictMatch
+   * @param text
+   * @return
+   */
   String removeAccents(String text) {
     return text == null ? null :
         Normalizer.normalize(text, Normalizer.Form.NFD)
             .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
   }
 
-  public String cleanToken(String token, boolean removeAllPunct) {
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getHydraDict
+   * @param token
+   * @param removeAllPunct
+   * @return
+   */
+  public String lcToken(String token, boolean removeAllPunct) {
     return removeAllPunct ?
         getTrimmedLeaveLastSpace(token).toLowerCase() :
         getTrimmedLeaveAccents(token).toLowerCase();
   }
 /*
-  private String cleanToken(String token) {
+  private String lcToken(String token) {
 *//*    String s = token
         .replaceAll(REMOVE_ME, " ")
         .replaceAll("\\p{Z}+", " ")
@@ -332,6 +362,7 @@ public class SmallVocabDecoder {
         .replaceAll(REMOVE_ME, " ")
         //   .replaceAll("", " ")
         .replaceAll(P_Z, " ")  // normalize all whitespace
+
         // .replaceAll(";", " ")
         // .replaceAll("~", " ")
         //  .replaceAll("\\u2191", " ")
@@ -459,7 +490,8 @@ public class SmallVocabDecoder {
         }
       }
     } else {
-      if (DEBUG_PREFIX) logger.debug("longest_prefix : dict doesn't contain " + prefix + " phrase '" + phrase + "' end " + i);
+      if (DEBUG_PREFIX)
+        logger.debug("longest_prefix : dict doesn't contain " + prefix + " phrase '" + phrase + "' end " + i);
     }
     return longest_prefix(phrase, i + 1, phraseToPrefix);
   }

@@ -112,7 +112,7 @@ public class UserPerformance implements Serializable {
 
   /**
    * @param rawBestScores
-   * @see #UserPerformance()
+   * @see #UserPerformance(long, List, String, String)
    */
   private void setRawBestScores(List<BestScore> rawBestScores) {
     // TODO : necessary to sort????

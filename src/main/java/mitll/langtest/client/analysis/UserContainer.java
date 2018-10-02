@@ -463,7 +463,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     List<UserInfo> list = getList();
     addItemID(list, 20);
     addName(list);
-    addDateCol(list);
+    Column<UserInfo, SafeHtml> userInfoSafeHtmlColumn = addDateCol(list);
+    table.getColumnSortList().push(userInfoSafeHtmlColumn);
 
     addNumber(list);
     addCurrent(list);
@@ -473,8 +474,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 */
 
     addPolyNumber(list);
-    //  addLastSession(list);
-    table.getColumnSortList().push(addLastOverallScore(list));
+  //  addLastSession(list);
+    Column<UserInfo, SafeHtml> column = addLastOverallScore(list);
+  //  table.getColumnSortList().push(column);
 
     table.setWidth("100%", true);
 

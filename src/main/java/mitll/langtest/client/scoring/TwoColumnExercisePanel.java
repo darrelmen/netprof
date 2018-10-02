@@ -411,28 +411,30 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       context.setWidth("100%");
     }
 
-    String contextTranslation = contextEx.getEnglish();
+    {
+      String contextTranslation = contextEx.getEnglish();
 
-    boolean same = getFL(contextEx).equals(contextTranslation);
-    if (!same) {
-      if (context != null && !contextTranslation.isEmpty()) {
-        context.setWidth(LEFT_WIDTH);
-      }
+      boolean same = getFL(contextEx).equals(contextTranslation);
+      if (!same) {
+        if (context != null && !contextTranslation.isEmpty()) {
+          context.setWidth(LEFT_WIDTH);
+        }
 
-      Widget contextTransWidget = addContextTranslation(contextEx, contextTranslation, annotationHelper);
+        Widget contextTransWidget = addContextTranslation(contextEx, contextTranslation, annotationHelper);
 
-      if (contextTransWidget != null) {
-        contextTransWidget.addStyleName("rightsidecolor");
-        contextTransWidget.addStyleName("leftFiveMargin");
-        contextTransWidget.setWidth(RIGHT_WIDTH);
-        rowWidget.add(contextTransWidget);
+        if (contextTransWidget != null) {
+          contextTransWidget.addStyleName("rightsidecolor");
+          contextTransWidget.addStyleName("leftFiveMargin");
+          contextTransWidget.setWidth(RIGHT_WIDTH);
+          rowWidget.add(contextTransWidget);
+        }
       }
     }
   }
 
   private Widget getAltContext(String flToHighlight, String altFL, AnnotationHelper annotationHelper, int exid) {
     Panel contentWidget = clickableWords.getClickableWordsHighlight(altFL, flToHighlight,
-        FieldType.FL, new ArrayList<>());
+        FieldType.FL, new ArrayList<>(), true);
 
     CommentBox commentBox = getCommentBox(annotationHelper, exid);
     return commentBox
@@ -573,7 +575,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       hp.add(contextPlay);
 
       DivWidget contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
-          FieldType.FL, contextClickables = new ArrayList<>());
+          FieldType.FL, contextClickables = new ArrayList<>(), true);
 
       contextClickableRow = contentWidget;
       contextClickableRowPhones = clickableWords.getClickableDiv(isRTL);
@@ -628,6 +630,11 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return spacer;
   }
 
+  /**
+   * @param contextExercise
+   * @return
+   * @see #getContext
+   */
   private ChoicePlayAudioPanel getContextPlay(ClientExercise contextExercise) {
     AudioChangeListener contextAudioChanged = new AudioChangeListener() {
       @Override

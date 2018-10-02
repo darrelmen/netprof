@@ -286,13 +286,15 @@ public class JsonScoring {
                                            String transliteration,
                                            boolean usePhoneToDisplay,
                                            int projid) {
-    return getAudioFileHelper(projid)
+    AudioFileHelper audioFileHelper = getAudioFileHelper(projid);
+    return audioFileHelper
         .getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, "" + exerciseID,
             null,
             new DecoderOptions()
                 .setDoDecode(false)
                 .setCanUseCache(db.getServerProps().useScoreCache())
-                .setUsePhoneToDisplay(usePhoneToDisplay));
+                .setUsePhoneToDisplay(usePhoneToDisplay),
+            audioFileHelper.isKaldi());
   }
 
   private AudioFileHelper getAudioFileHelper(int projectid) {

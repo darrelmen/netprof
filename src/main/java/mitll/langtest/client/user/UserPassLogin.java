@@ -83,6 +83,9 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private static final String THIRD_BULLET = "Create and share vocab lists for study and review.";//"Make your own lists of words to study later or to share.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
+  /**
+   *
+   */
   private static final String FORGOT_USERNAME = "Forgot username?";
   private static final String SEND = "Send";
   private static final int BULLET_MARGIN = 25;

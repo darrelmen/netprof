@@ -35,8 +35,10 @@ package mitll.langtest.shared.scoring;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.scoring.AlignDecode;
+import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +52,8 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since
  */
-public class PretestScore extends AlignmentOutput implements IsSerializable {
+public class PretestScore extends AlignmentAndScore {
   private int reqid = 0;
-  private float hydecScore = -1f;
   private Map<String, Float> phoneScores;
   private Map<String, Float> wordScores;
   private Map<NetPronImageType, String> sTypeToImage = new HashMap<>();
@@ -65,14 +66,15 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
 
   private String json;
   private transient boolean ranNormally;
-  private boolean fullMatch = true;
+  private String status = "";
+  private String message = "";
 
   public PretestScore() {
   } // required for serialization
 
   /**
    * @param score
-   * @seex mitll.langtest.server.scoring.ASRScoring#scoreRepeatExercise
+   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
   public PretestScore(float score) {
     this.hydecScore = score;
@@ -99,20 +101,14 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
                       float wavFileLengthSeconds,
                       int processDur,
                       boolean isFullMatch) {
-    super(sTypeToEndTimes);
+    super(sTypeToEndTimes, hydecScore, isFullMatch);
     this.sTypeToImage = sTypeToImage;
-    this.hydecScore = hydecScore;
     this.phoneScores = phoneScores;
     this.wordScores = wordScores;
     this.recoSentence = recoSentence;
     this.wavFileLengthSeconds = wavFileLengthSeconds;
     this.processDur = processDur;
     this.ranNormally = true;
-    this.fullMatch = isFullMatch;
-  }
-
-  public float getHydecScore() {
-    return hydecScore;
   }
 
   /**
@@ -176,18 +172,38 @@ public class PretestScore extends AlignmentOutput implements IsSerializable {
     return ranNormally;
   }
 
-  public boolean isFullMatch() {
-    return fullMatch;
+  public String getStatus() {
+    return status;
+  }
+
+  /**
+   *
+   * @param status
+   * @return
+   */
+  public PretestScore setStatus(String status) {
+    this.status = status;
+    return this;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
   }
 
   public String toString() {
-    return "hydec" +
-        "\n\tscore          " + hydecScore +
+    return "score" +
+        "\n\tstatus         " + status +
+        "\n\tmessage        " + message +
+        "\n\tscore          " + getHydecScore() +
         "\n\tphones         " + getPhoneScores() +
         "\n\ttype->image    " + getsTypeToImage() +
         "\n\ttype->endtimes " + getTypeToSegments() +
         "\n\ttook           " + processDur + " millis" +
-        "\n\tfull match     " + fullMatch
+        "\n\tfull match     " + isFullMatch()
         ;
   }
 }

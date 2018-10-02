@@ -35,14 +35,15 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
+import mitll.langtest.client.custom.userlist.ListContainer;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.custom.IUserList;
-import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.custom.IUserListWithIDs;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.custom.*;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -93,6 +94,11 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
         userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, duration, minScore, showAudio, unitChapter);
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#doEdit(UserList, ListContainer)
+   * @param userList
+   * @throws DominoSessionException
+   */
   @Override
   public void update(UserList userList) throws DominoSessionException {
     getUserIDFromSessionOrDB();
@@ -281,11 +287,23 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 */
 
-/*
-  private CommonExercise getExerciseIfKnown(CommonExercise userExercise) {
-    return getExerciseByVocab(userExercise.getProjectID(), userExercise.getForeignLanguage());
+  /**
+   * @see mitll.langtest.client.flashcard.PolyglotFlashcardFactory#PolyglotFlashcardFactory(ExerciseController, ListInterface)
+   * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#PolyglotPracticePanel
+   * @param userListID
+   * @return
+   */
+  public QuizInfo getQuizInfo(int userListID) {
+    UserList<?> list = db.getUserListManager().getUserListDAO().getList(userListID);
+    if (list == null) logger.warn("no quiz with list id " + userListID);
+    QuizInfo quizInfo = list != null ? new QuizInfo(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio()) : new QuizInfo(10, 35, false);
+    logger.info("Returning " + quizInfo + " for " + userListID);
+    return quizInfo;
   }
-*/
+
+/*  private ClientExercise getExerciseIfKnown(ClientExercise userExercise) {
+    return getExerciseByVocab(userExercise.getProjectID(), userExercise.getForeignLanguage());
+  }*/
 
 /*  private CommonExercise getExerciseByVocab(int projectID, String foreignLanguage) {
     return db.getProject(projectID).getExerciseBySearch(foreignLanguage.trim());

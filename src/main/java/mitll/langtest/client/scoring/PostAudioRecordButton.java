@@ -48,6 +48,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
+import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.logging.Logger;
 
@@ -389,24 +390,31 @@ public abstract class PostAudioRecordButton extends RecordButton
       logger.info("onPostSuccess ignoring old response " + result);
       return;
     }*/
-    if (result.getValidity() == Validity.OK || doQuietAudioCheck(result)) {
-      setValidAudio(true);
-      useResult(result);
 
+    validAudio = (result.getValidity() == Validity.OK || doQuietAudioCheck(result));
+
+    if (validAudio) {
+      useResult(result);
       addRT(result.getResultID(), (int) roundtrip);
+
+      maybeShowPopup(result.getPretestScore());
     } else {
-      setValidAudio(false);
       useInvalidResult(result.getExid(), result.getValidity(), result.getDynamicRange());
     }
-
 
     if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
       logRoundtripTime(result.getDurationInMillis(), roundtrip);
     }
   }
 
-  private void setValidAudio(boolean validAudio) {
-    this.validAudio = validAudio;
+  private void maybeShowPopup(PretestScore pretestScore) {
+    if (pretestScore != null &&
+        pretestScore.getStatus() != null &&
+        !pretestScore.getStatus().isEmpty()) {
+      String toShow = "Status " + pretestScore.getStatus();
+      String suffix = pretestScore.getMessage().isEmpty() ? "" : " : " + pretestScore.getMessage();
+      showPopup(toShow + suffix);
+    }
   }
 
   /**

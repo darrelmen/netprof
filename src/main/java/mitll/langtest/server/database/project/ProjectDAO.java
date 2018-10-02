@@ -255,7 +255,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         }
 
         if (!foundByEXID) {
-          logger.warn("setDominoIDOnExercises missing exercise for " + npid + " and domino " + dominoID);
+//          logger.warn("setDominoIDOnExercises missing exercise for " + npid + " and domino " + dominoID);
           missing.add(npid);
         }
       } else {

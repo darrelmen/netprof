@@ -410,7 +410,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                     selectFirst(result);
                   }
                   Scheduler.get().scheduleDeferred(cellTable::redraw);
-
                 }
               }
             });
@@ -433,7 +432,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   private void selectFirst(WordsAndTotal result) {
-
     List<WordScore> results = result.getResults();
 
     if (!results.isEmpty()) {
@@ -525,7 +523,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
     table.setWidth("100%", true);
 
-    new TooltipHelper().addTooltip(table, PhoneExampleContainer.CLICK_ON);
+ //   new TooltipHelper().addTooltip(table, PhoneExampleContainer.CLICK_ON);
   }
 
   private boolean isPolyglot() {

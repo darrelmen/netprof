@@ -33,10 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.custom.IUserList;
-import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.custom.IUserListWithIDs;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -93,4 +90,7 @@ public interface ListServiceAsync {
   void update(UserList userList, AsyncCallback<Void> async);
 
   void getReviewList(AsyncCallback<UserList<CommonShell>> async);
+
+
+  void getQuizInfo(int userListID, AsyncCallback<QuizInfo> async);
 }

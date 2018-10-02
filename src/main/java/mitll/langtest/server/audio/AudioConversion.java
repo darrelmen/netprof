@@ -106,7 +106,12 @@ public class AudioConversion extends AudioBase {
                                                       boolean useSensitiveTooLoudCheck,
                                                       boolean quietAudioOK) {
     long then = System.currentTimeMillis();
-    file.getParentFile().mkdirs();
+    File parentFile = file.getParentFile();
+    parentFile.mkdirs();
+
+    setPermissions(parentFile);
+    setPermissions(parentFile.getParentFile());
+    setPermissions(parentFile.getParentFile().getParentFile());
 
     if (DEBUG) logger.debug("convertBase64ToAudioFiles: write wav file " + file.getAbsolutePath());
 
@@ -126,6 +131,11 @@ public class AudioConversion extends AudioBase {
    */
   @NotNull
   AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
+    if (DEBUG) logger.debug("getValidityAndDur: wrote wav file " + file.getAbsolutePath());
+    boolean b;
+    b = file.setReadable(true, false);
+    if (!b) logger.warn("getValidityAndDur couldn't make " + file  + " readable?");
+
     if (DEBUG) logger.debug("getValidityAndDur: wrote wav file " + file.getAbsolutePath());
 
     if (!file.exists()) {
@@ -163,6 +173,13 @@ public class AudioConversion extends AudioBase {
     }
     return valid;
   }*/
+
+  private void setPermissions(File parentFile) {
+    boolean b = parentFile.setReadable(true, false);
+    if (!b) logger.warn("couldn't make " + parentFile + " readable?");
+    b =  parentFile.setExecutable(true, false);
+    if (!b) logger.warn("couldn't make " + parentFile + " executable?");
+  }
 
   /**
    * Decode Base64 string
@@ -222,6 +239,8 @@ public class AudioConversion extends AudioBase {
   public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix, long uniqueTimestamp) throws UnsupportedAudioFileException {
     String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + WAV;
     File wavFile = convertTo16Khz(new File(pathname), uniqueTimestamp);
+    boolean b = wavFile.setReadable(true, false);
+    if (!b) logger.warn("couldn't make " +wavFile + " readable?");
     return removeSuffix(wavFile.getName());
   }
 

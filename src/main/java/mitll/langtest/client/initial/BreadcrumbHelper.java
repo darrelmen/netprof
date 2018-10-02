@@ -81,7 +81,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
       if (startupInfo == null) {
         //  logger.info("addCrumbs no project startup info yet for " + current.getUserID());
         if (showOnlyHomeLink) {
-       //   logger.info("\taddCrumbs add all link");
+          //   logger.info("\taddCrumbs add all link");
           addHomeLink(crumbs);
         }
       } else {
@@ -145,7 +145,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
   private void addProjectCrumb(Breadcrumbs crumbs, SlimProject project) {
     NavLink lang = new NavLink(project.getName());
 
-   if (DEBUG) logger.info("addProjectCrumb  for " + project.getName() + " " + project.getMode());
+    if (DEBUG) logger.info("addProjectCrumb  for " + project.getName() + " " + project.getMode());
 
     lang.addClickHandler(clickEvent -> {
       logger.info("addProjectCrumb choose project again for " + project.getName() + " " + project.getMode());
@@ -209,7 +209,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
   @NotNull
   public NavLink makeBreadcrumb(String name) {
     NavLink projectCrumb = new NavLink(name);
- //   logger.info("makeBreadcrumb add " + name + " now " + breadcrumbs.getWidgetCount());
+    //   logger.info("makeBreadcrumb add " + name + " now " + breadcrumbs.getWidgetCount());
     breadcrumbs.add(projectCrumb);
     breadcrumbs.setVisible(true);
     return projectCrumb;

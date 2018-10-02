@@ -79,9 +79,9 @@ public class ServerProperties {
   private static final Logger logger = LogManager.getLogger(ServerProperties.class);
 
   /**
+   * TODO : good idea????
    * ON THIS BRANCH!
    */
-
   private static final String APP_NAME_DEFAULT = "dialog";
 
   /**
@@ -132,6 +132,8 @@ public class ServerProperties {
   private static final String MIRA_DEFAULT = MIRA_LEN;
   @Deprecated
   private static final String MIRA_CLASSIFIER_URL = "miraClassifierURL";
+
+
   private static final String MAIL_SERVER = "mail.server";
   private static final String SERVER_NAME = "SERVER_NAME";
   private static final String DEBUG_ONE_PROJECT = "debugOneProject";
@@ -718,8 +720,8 @@ public class ServerProperties {
    * @see AudioFileHelper#isUsePhoneToDisplay
    * @see AudioFileHelper#getEasyAlignment(ClientExercise, String)
    * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore(PretestScore, boolean, ServerProperties, Language)
-   * @see mitll.langtest.server.scoring.AlignmentHelper#getPrecalcScores(boolean, ISlimResult, String)
-   * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore(String, ImageOptions, boolean, String, String, HydraOutput, double, int, boolean, JsonObject)
+   * @seex mitll.langtest.server.scoring.AlignmentHelper#getPrecalcScores(boolean, ISlimResult, String)
+   * @seex mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore(String, ImageOptions, boolean, String, String, HydraOutput, double, int, boolean, JsonObject)
    *
    * @return
    * @param languageEnum

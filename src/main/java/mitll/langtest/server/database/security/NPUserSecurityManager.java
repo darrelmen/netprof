@@ -231,11 +231,10 @@ public class NPUserSecurityManager implements IUserSecurityManager {
             "",
             modified, modified));
 
-    logSetSession(session, sessionID);
+    if (DEBUG) logSetSession(session, sessionID);
   }
 
   private void logSetSession(HttpSession session1, String sessionID) {
-
     log.info("setSessionUser : Adding user to " +
         "\nsession        " + sessionID +
         "\nlookup user    " + getUserIDFromSession(session1) +
@@ -557,7 +556,8 @@ public class NPUserSecurityManager implements IUserSecurityManager {
 
       return uidI;
     } else if (request != null) {
-      log.info("lookupUserIDFromHttpSession Lookup user from session returning null for null session. Request SID={}", request.getRequestedSessionId());
+      if (DEBUG)
+        log.info("lookupUserIDFromHttpSession Lookup user from session returning null for null session. Request SID={}", request.getRequestedSessionId());
     }
 
     return null;

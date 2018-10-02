@@ -55,6 +55,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ModelType;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.*;
 import mitll.langtest.shared.user.User;
@@ -72,10 +73,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   private static final String UPDATING_PROJECT_INFO = "updating project info";
 
-  private static final String AUDIO_RECORDING = "audioRecording";
-  private static final String WRITE_AUDIO_FILE = "writeAudioFile";
+  //  private static final String AUDIO_RECORDING = "audioRecording";
+//  private static final String WRITE_AUDIO_FILE = "writeAudioFile";
   private static final boolean USE_PHONE_TO_DISPLAY = true;
-  // private static final int SLOW_ROUND_TRIP = 3000;
+  private static final int SLOW_ROUND_TRIP = 3000;
   private static final String RECALC_ALIGNMENTS = "recalc alignments";
 
   private IEnsureAudioHelper ensureAudioHelper;
@@ -161,7 +162,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
               new DecoderOptions()
                   .setDoDecode(false)
                   .setCanUseCache(serverProps.useScoreCache())
-                  .setUsePhoneToDisplay(serverProps.usePhoneToDisplay(project.getLanguageEnum())));
+                  .setUsePhoneToDisplay(serverProps.usePhoneToDisplay(project.getLanguageEnum())), isKaldi(project));
+
         }
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -171,6 +173,10 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     } else {
       throw getRestricted("result asr");
     }
+  }
+
+  private boolean isKaldi(Project project) {
+    return project.getModelType() == ModelType.KALDI;
   }
 
 /*  @Override
@@ -425,7 +431,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         //logger.info("getAlignmentsFromDB using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }
 
-      logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " '" +byID.getTranscript()+ "' for exercise #" + byID.getExid() + "...");
+      logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " '" + byID.getTranscript() + "' for exercise #" + byID.getExid() + "...");
       return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null);
     } else {
       logger.info("recalcRefAudioWithHelper can't find audio id " + audioID);
@@ -438,7 +444,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                                                                 Language language) {
     return
         new ParseResultJson(db.getServerProps(), language)
-            .readFromJSON(object, "words", "w", usePhoneToDisplay, null);
+            .readFromJSON(object, "words", "w", usePhoneToDisplay, null, false);
   }
 
   /**
@@ -512,8 +518,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                        AudioFileHelper audioFileHelper,
                                        int projID,
                                        int userIDFromSessionOrDB,
+
                                        String absPath, Language language) {
-    if (testAudioFile.equals(AudioConversion.FILE_MISSING)) return new PretestScore(-1);
+    if (testAudioFile.equals(AudioConversion.FILE_MISSING))
+      return new PretestScore(-1).setStatus("can't find audio file");
+
     long then = System.currentTimeMillis();
 
     //String[] split = testAudioFile.split(File.separator);
@@ -592,8 +601,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         new DecoderOptions()
             .setDoDecode(false)
             .setCanUseCache(serverProps.useScoreCache())
-            .setUsePhoneToDisplay(usePhoneToDisplay1)
-    );
+            .setUsePhoneToDisplay(usePhoneToDisplay1),
+        audioFileHelper.isKaldi());
   }
 
   @NotNull
@@ -616,19 +625,33 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   @Override
   public void addRoundTrip(int resultID, int roundTrip) {
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
+    warnWhenSlow(resultID, roundTrip);
+  }
 
-  /*  if (roundTrip > SLOW_ROUND_TRIP) {
+  private void warnWhenSlow(int resultID, int roundTrip) {
+    if (roundTrip > SLOW_ROUND_TRIP) {
       try {
         int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-        String userChosenID = db.getUserDAO().getUserChosenID(userIDFromSessionOrDB);
-        new Thread(() -> sendEmail("Slow round trip : " + roundTrip,
-            getInfo("Slow round trip (" + roundTrip + ") recording #" + resultID +
-                " by user #" + userIDFromSessionOrDB + "/" + userChosenID)), "addRoundTrip").start();
-
+        int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+        Project project = getProject(projectIDFromUser);
+        if (project.getModelType() == ModelType.KALDI) {
+          if (roundTrip > 5000) {
+            sendSlowEmail(resultID, roundTrip, userIDFromSessionOrDB);
+          }
+        } else {
+          sendSlowEmail(resultID, roundTrip, userIDFromSessionOrDB);
+        }
       } catch (Exception e) {
         logger.warn("addRoundTrip got " + e, e);
       }
-    }*/
+    }
+  }
+
+  private void sendSlowEmail(int resultID, int roundTrip, int userIDFromSessionOrDB) {
+    String userChosenID = db.getUserDAO().getUserChosenID(userIDFromSessionOrDB);
+    new Thread(() -> sendEmail("Slow round trip : " + roundTrip,
+        getInfo("Slow round trip (" + roundTrip + ") recording #" + resultID +
+            " by user #" + userIDFromSessionOrDB + "/" + userChosenID))).start();
   }
 
   /**
@@ -696,13 +719,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
   }
 
-  private void logEvent(String exid, String device, int projID) {
+/*  private void logEvent(String exid, String device, int projID) {
     try {
       db.logEvent(AUDIO_RECORDING, WRITE_AUDIO_FILE, exid, "Writing audio - got zero duration!", -1, device, projID);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
-  }
+  }*/
 
   /**
    * TODO : remove me - we don't do this anymore.
@@ -716,7 +739,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 /*
   @Override
   public boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
-    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
+    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration, new HashSet<>());
   }
 */
 

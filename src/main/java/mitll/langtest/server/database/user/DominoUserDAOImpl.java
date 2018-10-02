@@ -145,7 +145,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           "@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+" +
           "(?:[A-Z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\\b";
 
-  private static final long STALE_DUR = 5L * 60L * 1000L;
+  private static final long STALE_DUR = 24L * 60L * 60L * 1000L;
   private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
@@ -615,10 +615,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   private MyUserService.LoginResult loginViaEmail(String url, ClientUserDetail updateUser) {
-    logger.info("loginViaEmail " + updateUser);
-
-    SResult<ClientUserDetail> clientUserDetailSResultOrig = addUserToMongo(updateUser, url, true);
-    return new MyUserService.LoginResult(clientUserDetailSResultOrig, "");
+    return new MyUserService.LoginResult(addUserToMongo(updateUser, url, true), "");
   }
 
   /**
@@ -1808,7 +1805,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   @Override
   public boolean forgotPassword(String user, String url) {
+    logger.info("forgotPassword " + user + " url " + url);
     DBUser next = getDBUser(user);
+    logger.info("forgotPassword " + user + " next " + next);
 
     if (next == null) {
       logger.warn("forgotPassword - can't find user " + user);
@@ -1822,18 +1821,22 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
       ClientUserDetail clientUserDetail1 = null;
       try {
-        String email = next.getEmail();
-        if (!isValidAsEmail(email)) {
-          logger.error("forgotPassword huh? email " + email + " not valid?");
+        {
+          String email = next.getEmail();
+          if (!isValidAsEmail(email)) {
+            logger.error("forgotPassword huh? email " + email + " not valid?");
+          }
         }
 
+        ClientUserDetail clientUserDetail = getClientUserDetail(next);
+        logger.info("forgotPassword users clientUserDetail " + clientUserDetail);
         clientUserDetail1 = delegate.forgotPassword(next,
-            getClientUserDetail(next),
+            clientUserDetail,
             url);
 
         logger.info("forgotPassword forgotPassword users for " + user + " : " + clientUserDetail1);
       } catch (Exception e) {
-        logger.error("Got " + e, e);
+        logger.error("forgotPassword Got " + e, e);
       }
 
       return clientUserDetail1 != null;

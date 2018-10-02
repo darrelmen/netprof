@@ -12,6 +12,7 @@ import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SegmentHighlightAudioControl;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
@@ -86,13 +87,14 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
    * Horizontal - play audio, score feedback, download widget
    * Shows a little praise message too!
    *
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput(PretestScore)
    * @param pretestScore
    * @param isRTL
    * @return
    * @see SimpleRecordAudioPanel#scoreAudio
    */
   @NotNull
-  public DivWidget getWordTableContainer(PretestScore pretestScore, boolean isRTL) {
+  public DivWidget getWordTableContainer(AlignmentAndScore pretestScore, boolean isRTL) {
     DivWidget wordTableContainer = new DivWidget();
     wordTableContainer.getElement().setId("wordTableContainer");
     wordTableContainer.addStyleName("inlineFlex");
@@ -101,7 +103,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
 
     wordTableContainer.add(getPlayButtonDiv());
 
-    float hydecScore = pretestScore.getHydecScore();
+    float hydecScore = pretestScore != null ? pretestScore.getHydecScore() : 0F;
     //  logger.info("score " + hydecScore);
     if (hydecScore > 0) {
       showScoreFeedback(pretestScore, isRTL, wordTableContainer, hydecScore);
@@ -120,16 +122,16 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
     return wordTableContainer;
   }
 
-  private void showScoreFeedback(PretestScore pretestScore, boolean isRTL, DivWidget wordTableContainer,
+  private void showScoreFeedback(AlignmentAndScore pretestScore, boolean isRTL, DivWidget wordTableContainer,
                                  float hydecScore) {
     DivWidget scoreFeedbackDiv = new DivWidget();
     scoreFeedbackDiv.add(progressBar);
 
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget = new HashMap<>();
 
-
+    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = pretestScore.getTypeToSegments();
     scoreFeedbackDiv.add(new WordTable()
-        .getDivWord(pretestScore.getTypeToSegments(), playAudioPanel, typeToSegmentToWidget, isRTL));
+        .getDivWord(typeToSegments, playAudioPanel, typeToSegmentToWidget, isRTL));
 
     playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget, 0));
     // so it will play on drill tab...

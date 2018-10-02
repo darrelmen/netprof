@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
@@ -64,7 +63,7 @@ public class JsonSupport {
 
   private final ISection<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
-  private final IAudioDAO audioDAO;
+//  private final IAudioDAO audioDAO;
   private final IPhoneDAO phoneDAO;
 
   private Language language;
@@ -73,19 +72,17 @@ public class JsonSupport {
   /**
    * @param sectionHelper
    * @param resultDAO
-   * @param audioDAO
    * @param phoneDAO
    * @see IProjectManagement#configureProject
    */
   public JsonSupport(ISection<CommonExercise> sectionHelper,
                      IResultDAO resultDAO,
-                     IAudioDAO audioDAO,
                      IPhoneDAO phoneDAO,
                      Project project) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
 
-    this.audioDAO = audioDAO;
+  //  this.audioDAO = audioDAO;
     this.phoneDAO = phoneDAO;
     this.language = project.getLanguageEnum();
     this.project = project;

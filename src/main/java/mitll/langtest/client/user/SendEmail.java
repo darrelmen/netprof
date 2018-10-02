@@ -15,15 +15,13 @@ import mitll.langtest.client.instrumentation.EventRegistration;
  * Created by go22670 on 2/1/17.
  */
 class SendEmail extends UserDialog {
+  public static final String CLICK_THE_BUTTON_TO_RESET = "Click the button to reset.";
   private DecoratedPopupPanel resetEmailPopup;
   private Button sendEmail;
   private final EventRegistration eventRegistration;
-  //private final FormField userField;
 
   private static final String ENTER_YOUR_EMAIL_TO_RESET_YOUR_PASSWORD = "Enter your email to reset your password.";
 
-//  private static final String FORGOT_PASSWORD = "Forgot password?";
-//  private static final String ENTER_A_USER_NAME = "Enter a user name.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
   /**
@@ -36,11 +34,10 @@ class SendEmail extends UserDialog {
   SendEmail(EventRegistration registration) {
     super(null);
     this.eventRegistration = registration;
-   // this.userField = userField;
   }
 
   void showSendEmail(Anchor forgotPassword, final String text, boolean hasEmail) {
-    Heading prompt = new Heading(5, "Click the button to reset.");
+    Heading prompt = new Heading(5, CLICK_THE_BUTTON_TO_RESET);
     resetEmailPopup = new DecoratedPopupPanel(true);
 
     sendEmail = new Button(SEND);
@@ -77,7 +74,7 @@ class SendEmail extends UserDialog {
    */
   private void onSendReset(final String userID) {
     sendEmail.setEnabled(false);
-    //  final String userID = userField.box.getText();
+
     openUserService.resetPassword(userID,
         new AsyncCallback<Boolean>() {
           @Override

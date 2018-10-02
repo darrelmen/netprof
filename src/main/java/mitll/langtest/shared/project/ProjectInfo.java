@@ -188,9 +188,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
 
   public ModelType getModelType() {
     String s = getPropertyValue().get(MODEL_TYPE.toString());
-    if (s == null) {
-      return ModelType.HYDRA;
-    } else return ModelType.valueOf(s);
+    return (s == null) ? ModelType.HYDRA : ModelType.valueOf(s);
   }
 
   public void setModelType(ModelType type) {
@@ -274,10 +272,6 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return audioPerProject;
   }
 
-//  public void setAudioPerProject(boolean audioPerProject) {
-//    this.audioPerProject = audioPerProject;
-//  }
-
   public boolean isMine(int sessionUser) {
     return userID == sessionUser;
   }
@@ -292,7 +286,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
         "\nown audio " + audioPerProject +
         "\nshowOniOS " + showOniOS +
         "\nimported  " + new Date(lastImport) +
-        "\nupdated  " + new Date(lastNetprof)
+        "\nupdated   " + new Date(lastNetprof)
         ;
   }
 }

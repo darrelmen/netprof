@@ -73,6 +73,9 @@ public class CreateListDialog extends BasicDialog {
 
   private static final String ALL = "All";
   private static final String HEAR_ITEMS = "Hear Items";
+  /**
+   * @see #getPlayAudioCheck
+   */
   private static final String PLAY_AUDIO = "Play Audio?";
 
 
@@ -123,6 +126,9 @@ public class CreateListDialog extends BasicDialog {
   private UserList current = null;
   private boolean isEdit;
   private ControlGroup publicPrivateGroup;
+  /**
+   *
+   */
   private boolean playAudio;
 
   private int quizSize = DEFAULT_QUIZ_SIZE;
@@ -140,6 +146,10 @@ public class CreateListDialog extends BasicDialog {
     this(listView, controller);
     this.current = current;
     this.isEdit = isEdit;
+
+    this.minScore = current.getMinScore();
+    this.duration = current.getDuration();
+    this.playAudio = current.shouldShowAudio();
   }
 
   /**
@@ -352,8 +362,9 @@ public class CreateListDialog extends BasicDialog {
     w.addStyleName("leftFiveMargin");
     w.addValueChangeHandler(event -> playAudio = w.getValue());
     if (current != null) {
+      logger.info("got " + current.getID() + " " + current.shouldShowAudio());
       w.setValue(current.shouldShowAudio());
-    }
+    } else logger.warning("getPlayAudioCheck no current list?");
     return w;
   }
 
@@ -660,14 +671,14 @@ public class CreateListDialog extends BasicDialog {
   private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic,
                            UserList.LIST_TYPE listType) {
     final String safeText = titleBox.getSafeText();
-    logger.info("addUserList " + safeText);
+    //  logger.info("addUserList " + safeText);
     Map<String, String> unitToChapter = new LinkedHashMap<>();
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
 
 
     if (allUnitChapter != null) {
       allUnitChapter.forEach(listBox -> unitToChapter.put(typeOrder.get(unitToChapter.size()), listBox.getSelectedValue()));
-      logger.info("addUserList " + unitToChapter);
+      // logger.info("addUserList " + unitToChapter);
     }
     controller.getListService().addUserList(
         safeText,
@@ -691,7 +702,7 @@ public class CreateListDialog extends BasicDialog {
             if (result == null) {
               markError(titleBox, "You already have a list named " + safeText);
             } else {
-              logger.info("addUserList onSuccess " + result);
+              //   logger.info("addUserList onSuccess " + result);
               listView.madeIt(result);
             }
           }
@@ -730,8 +741,10 @@ public class CreateListDialog extends BasicDialog {
     currentSelection.setName(titleBox.getSafeText());
     currentSelection.setDescription(sanitize(theDescription.getText()));
     currentSelection.setClassMarker(sanitize(classBox.getSafeText()));
-    boolean aPrivate = !publicChoice.getValue();
-    currentSelection.setPrivate(aPrivate);
+    {
+      boolean aPrivate = !publicChoice.getValue();
+      currentSelection.setPrivate(aPrivate);
+    }
     UserList.LIST_TYPE listType = getListType();
     currentSelection.setListType(listType);
     currentSelection.setDuration(duration);

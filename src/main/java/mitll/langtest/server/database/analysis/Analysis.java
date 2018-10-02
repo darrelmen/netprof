@@ -65,6 +65,7 @@ public abstract class Analysis extends DAO {
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   static final String EMPTY_JSON = "{}";
+  public static final String D_ADMIN = "d.admin";
   final ParseResultJson parseResultJson;
   private final IPhoneDAO phoneDAO;
 
@@ -150,10 +151,10 @@ public abstract class Analysis extends DAO {
       return new UserPerformance();
     } else {
       if (values.size() > 1) logger.error("getUserPerformance only expecting one user for " + id);
-      UserInfo next = values.iterator().next();
-      if (DEBUG) logger.debug("getUserPerformance results for " + values.size() + "  first  " + next);
-      if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + next.getBestScores().size());
-      UserPerformance userPerformance = new UserPerformance(id, next.getBestScores(), next.getFirst(), next.getLast());
+      UserInfo firstUser = values.iterator().next();
+      if (DEBUG) logger.debug("getUserPerformance results for " + values.size() + "  first  " + firstUser);
+      if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + firstUser.getBestScores().size());
+      UserPerformance userPerformance = new UserPerformance(id, firstUser.getBestScores(), firstUser.getFirst(), firstUser.getLast());
 
       {
         List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
@@ -387,8 +388,8 @@ public abstract class Analysis extends DAO {
    * @param from
    * @param to
    * @return
-   * @see SlickAnalysis#getBigramPhoneReportFor(AnalysisRequest)
-   * @see IAnalysis#getPhoneReportFor(AnalysisRequest)
+   * @seex SlickAnalysis#getBigramPhoneReportFor(AnalysisRequest)
+   * @seex IAnalysis#getPhoneReportFor(AnalysisRequest)
    */
   PhoneReport getPhoneReportForPhone(int userid, UserInfo next, Project project, String phone, long from, long to) {
     if (DEBUG)
@@ -578,7 +579,13 @@ public abstract class Analysis extends DAO {
     Map<Integer, UserInfo> userToUserInfo = new HashMap<>();
     userToBest2.forEach((userID, bestScores) -> {
       if (bestScores.size() >= minRecordings) {
-        userToUserInfo.put(userID, new UserInfo(bestScores, userToEarliest.get(userID)));
+        UserInfo value = new UserInfo(bestScores, userToEarliest.get(userID));
+        if (value.getUserID().equalsIgnoreCase(D_ADMIN)) {
+          logger.info("getUserIDToInfo : skipping " + D_ADMIN);
+        }
+        else {
+          userToUserInfo.put(userID, value);
+        }
       } else {
         if (DEBUG)
           logger.debug("getUserIDToInfo skipping user " + userID + " with just " + bestScores.size() + " scores");

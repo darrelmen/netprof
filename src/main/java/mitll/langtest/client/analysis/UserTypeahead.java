@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 class UserTypeahead {
   private final Logger logger = Logger.getLogger("UserTypeahead");
 
-  private static final int DISPLAY_ITEMS = 15;
+  //private static final int DISPLAY_ITEMS = 15;
   private static final int BOX_WIDTH = 150;
   private static final String HINT = "user id or name or date";
   private static final int SEARCH_FONT = 14;

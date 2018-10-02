@@ -1,7 +1,7 @@
 package mitll.langtest.client.project;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -90,7 +90,10 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #getImageAnchor
    */
   private static final int MIN_HEIGHT = 125;
-  private static final int NORMAL_MIN_HEIGHT = 67;
+  /**
+   * ? why 91?
+   */
+  private static final int NORMAL_MIN_HEIGHT = 91;
 
   private static final String NEW_PROJECT = "New Project";
 
@@ -245,7 +248,11 @@ public class ProjectChoices extends ThumbnailChoices {
 
   /**
    * @param project
+<<<<<<< HEAD
    * @see InitialUI#resetLanguageSelection(int, SlimProject)
+=======
+   * @see InitialUI#resetLanguageSelection
+>>>>>>> development
    */
   public void showProject(SlimProject project) {
     int widgetCount = contentRow.getWidgetCount();
@@ -336,7 +343,7 @@ public class ProjectChoices extends ThumbnailChoices {
     header.addStyleName("container");
     List<SlimProject> dialogProjects = getDialogProjects(result);
 
-  //  logger.info("getHeader " + result.size() + " nest  " + nest);
+    //  logger.info("getHeader " + result.size() + " nest  " + nest);
 
     String text = dialogProjects.size() == result.size() ? PLEASE_SELECT_A_MODE : (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
 
@@ -618,10 +625,12 @@ public class ProjectChoices extends ThumbnailChoices {
     container.addStyleName("floatLeft");
 
     ProjectType projectType = projectForLang.getProjectType();
-  //  logger.info("project " + projectForLang.getID() + " " + projectForLang.getName() + " " + projectType);
+    //logger.info("getContainerWithButtons project " + projectForLang.getID() + " " + projectForLang.getName() + " " + projectType);
 
     if (isQC &&
-        (hasChildren && alldialog) || (!hasChildren && projectType != ProjectType.DIALOG)) {
+        ((hasChildren && alldialog) ||
+            (!hasChildren && projectType != ProjectType.DIALOG))) {
+     // logger.info("getContainerWithButtons add qc buttons " + isQC);
       container.add(getQCButtons(projectForLang, label));
     }
     return container;
@@ -629,7 +638,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
   private void addPopoverUsual(FocusWidget button, SlimProject projectForLang) {
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
-    UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
+    UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
   }
 
@@ -637,7 +646,7 @@ public class ProjectChoices extends ThumbnailChoices {
   private void showPopoverUsual(SlimProject projectForLang,
                                 Widget button,
                                 Set<String> typeOrder,
-                                UnitChapterItemHelper<ClientExercise> ClientExerciseUnitChapterItemHelper) {
+                                UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper) {
     Map<String, String> value = new HashMap<>();
     value.put(COURSE, projectForLang.getCourse());
     showPopover(value, button, typeOrder, ClientExerciseUnitChapterItemHelper, Placement.RIGHT);
@@ -1026,7 +1035,7 @@ public class ProjectChoices extends ThumbnailChoices {
     if (contentRow.getWidgetCount() == 0) {
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     } else {
-      if (DEBUG ||true) logger.info("addProjectChoices not adding project choices again...");
+      if (DEBUG || true) logger.info("addProjectChoices not adding project choices again...");
     }
   }
 

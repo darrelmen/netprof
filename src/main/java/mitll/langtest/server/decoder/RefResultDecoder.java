@@ -703,12 +703,17 @@ public class RefResultDecoder {
 
     int total = 0;
     int context = 0;
+
+  //  int num = 1;
     for (CommonExercise exercise : exercises) {
       if (stopDecode) return new RecalcRefResponse(RecalcResponses.STOPPED);
 
       Stats total1 = queueDecodeExercise(language, decodedFiles, exercise);
       total += total1.vocab;
       context += total1.context;
+
+      // HACK FOR STEVE
+   //   if (num-- == 0) stopDecode = true;
     }
 
     if (consumer == null) {

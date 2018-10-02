@@ -301,15 +301,14 @@ public class ResultManager extends PagerTable {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
-      //  logger.info("createProvider asking for " + start + "->" + end);
+     //   logger.info("createProvider asking for " + start + "->" + end);
 
         StringBuilder builder = tableSortHelper.getColumnSortedState(table);
         final Map<String, String> unitToValue = resultTypeAhead.getUnitToValue();
 
         int currentReq = req++;
         String text = resultTypeAhead.getText();
-
-/*
+  /*
         logger.info("createProvider req " + unitToValue
             +
             //" user " + userID +

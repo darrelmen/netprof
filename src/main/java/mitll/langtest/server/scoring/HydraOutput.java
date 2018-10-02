@@ -9,11 +9,20 @@ import java.util.Set;
 public class HydraOutput {
   private static final Logger logger = LogManager.getLogger(HydraOutput.class);
 
+  enum STATUS_CODES {SUCCESS, OOV_IN_TRANS, FAILURE, ERROR}
+
   private Scores scores;
   private String wordLab;
   private String phoneLab;
   private List<WordAndProns> wordAndProns;
   private TransNormDict transNormDict;
+
+  /**
+   * DEFAULT status is success!
+   */
+  private STATUS_CODES status = STATUS_CODES.SUCCESS;
+  private String message = "";
+  private String log;
 
   /**
    * @param scores
@@ -104,7 +113,34 @@ public class HydraOutput {
     return transNormDict;
   }
 
+  public STATUS_CODES getStatus() {
+    return status;
+  }
+
+  public HydraOutput setStatus(STATUS_CODES status) {
+    this.status = status;
+    return this;
+  }
+
+  public String getLog() {
+    return log;
+  }
+
+  public HydraOutput setLog(String log) {
+    this.log = log;
+    return this;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public HydraOutput setMessage(String message) {
+    this.message = message;
+    return this;
+  }
+
   public String toString() {
-    return wordLab + ", " + phoneLab;
+    return "status " + status + "\n\tlog " + log + "\n\twords " + wordLab + "\n\t phones" + phoneLab;
   }
 }

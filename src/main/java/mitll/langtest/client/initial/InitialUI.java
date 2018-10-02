@@ -98,7 +98,8 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private static final boolean DO_HEARTBEAT = true;
 
 
-  private static final int TOP_OF_ROOT = 48;//58;
+  private static final int TOP_OF_ROOT = 58;//48;//58;
+
   /**
    * Make sure we can talk to the server...
    *
@@ -210,7 +211,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   @Override
   public void populateRootPanel() {
-  //  logger.info("----> populateRootPanel BEGIN ------>");
+    //  logger.info("----> populateRootPanel BEGIN ------>");
     DivWidget verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
     // header/title line
@@ -229,7 +230,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
         logger.warning("got " + e);
       }
     }
-  //  logger.info("----> populateRootPanel END   ------>");
+    //  logger.info("----> populateRootPanel END   ------>");
   }
 
   private void showIOSAd() {

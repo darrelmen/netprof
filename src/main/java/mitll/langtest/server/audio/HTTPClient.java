@@ -44,6 +44,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 
@@ -59,6 +60,7 @@ public class HTTPClient {
   private static final int READ_TIMEOUT = 20000;
   private static final String GET = "GET";
   private static final String POST = "POST";
+  public static final String UTF_8 = "UTF8";
 
   private HttpURLConnection httpConn;
 
@@ -119,14 +121,15 @@ public class HTTPClient {
    * @return
    */
   public boolean isAvailable(String webserviceIP, int webservicePort, String service) {
+    String url = "http://" + webserviceIP + ":" + webservicePort + "/" + service + "/index.html";
     try {
-      readFromGET("http://" + webserviceIP + ":" + webservicePort + "/" + service + "/index.html");
+      readFromGET(url);
       return true;
     } catch (FileNotFoundException fnf) {
       logger.debug("isAvailable for " + webserviceIP + " " + webservicePort + " " + service + " :" + fnf);
       return true;
     } catch (IOException e) {
-      logger.warn("isAvailable : Got " + e);
+      logger.warn("isAvailable for " +url+ " : Got " + e);
       return false;
     }
   }
@@ -136,7 +139,7 @@ public class HTTPClient {
    * @return
    * @see #isAvailable
    */
-  private String readFromGET(String url) throws IOException {
+  public String readFromGET(String url) throws IOException {
     HttpURLConnection httpConn = setupGetHttpConn(url);
     String receive = receive(httpConn);
     httpConn.disconnect();
@@ -168,8 +171,8 @@ public class HTTPClient {
 
   private void setRequestProperties(HttpURLConnection httpConn) {
     httpConn.setRequestProperty("Content-Type", "text/plain; charset=utf-8");
-    httpConn.setRequestProperty("Accept-Charset", "UTF8");
-    httpConn.setRequestProperty("charset", "UTF8");
+    httpConn.setRequestProperty("Accept-Charset", UTF_8);
+    httpConn.setRequestProperty("charset", UTF_8);
   }
 
   private void closeConn() {
@@ -204,8 +207,7 @@ public class HTTPClient {
   }
 
   private BufferedReader getReader(HttpURLConnection httpConn) throws IOException {
-    InputStream inputStream = httpConn.getInputStream();
-    return new BufferedReader(new InputStreamReader(inputStream, "UTF8"));
+    return new BufferedReader(new InputStreamReader(httpConn.getInputStream(), StandardCharsets.UTF_8));
   }
 
   private String receive(HttpURLConnection httpConn, BufferedReader reader) throws IOException {
@@ -234,7 +236,7 @@ public class HTTPClient {
     }
   }
 
-  private String receiveCookie(HttpURLConnection httpConn) throws IOException {
+  private String receiveCookie(HttpURLConnection httpConn) {
     List<String> strings = httpConn.getHeaderFields().get("Set-Cookie");
     if (strings == null) {
       logger.info("no header fields for cookie, got " + httpConn.getHeaderFields());
