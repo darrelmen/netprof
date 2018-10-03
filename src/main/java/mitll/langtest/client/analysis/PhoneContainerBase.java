@@ -17,8 +17,10 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.shared.analysis.AnalysisRequest;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -310,5 +312,15 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     } else {
       clickOnPhone2(list.get(0).getPhone());
     }
+  }
+
+  AnalysisRequest getAnalysisRequest(long from, long to) {
+    return new AnalysisRequest()
+        .setUserid(userid)
+        .setListid(listid)
+        .setFrom(from)
+        .setTo(to)
+        .setDialogID(new SelectionState().getDialog())
+        .setReqid(reqid++);
   }
 }

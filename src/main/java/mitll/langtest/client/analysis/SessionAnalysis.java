@@ -35,12 +35,12 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.banner.NewContentChooser;
-import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.exercise.HasID;
-import org.jetbrains.annotations.NotNull;
+import mitll.langtest.shared.dialog.IDialogSession;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,52 +55,45 @@ import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/27/15.
  */
-public class StudentAnalysis extends TwoColumnAnalysis<UserInfo> {
+public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
   private final Logger logger = Logger.getLogger("StudentAnalysis");
 
   /**
    * @param controller
    * @see NewContentChooser#showProgress
    */
-  public StudentAnalysis(final ExerciseController controller) {
+  public SessionAnalysis(final ExerciseController controller) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
 
-    analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
+    controller.getDialogService().getDialogSessions(controller.getUser(), new SelectionState().getDialog(), new AsyncCallback<List<IDialogSession>>() {
       @Override
-      public void onFailure(Throwable throwable) {
+      public void onFailure(Throwable caught) {
         finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());
-
-        logger.warning("Got " + throwable);
-        controller.handleNonFatalError("Error retrieving user performance!", throwable);
+        controller.handleNonFatalError("Error retrieving user dialog sessions", caught);
       }
 
       @Override
-      public void onSuccess(Collection<UserInfo> users) {
-        showItems(users, pleaseWaitTimer, controller);
+      public void onSuccess(List<IDialogSession> result) {
+        showItems(result, pleaseWaitTimer, controller);
       }
     });
   }
 
-  @Override protected String getStorageKey() {
-    return SELECTED_USER;
+  @Override
+  protected String getStorageKey() {
+    return "selected_session";
   }
 
-  protected DivWidget getTable(Collection<UserInfo> users, ExerciseController controller, DivWidget bottom, DivWidget rightSide) {
-    UserContainer userContainer = new UserContainer(controller, rightSide, bottom, getRememberedSelectedUser(controller));
-    return userContainer.getTable(getUserInfos(users));
-  }
-
-  private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
-    List<UserInfo> filtered = new ArrayList<>();
-    for (UserInfo userInfo : users) {
-      String userID = userInfo.getUserID();
-      if (userID != null && !userID.equals("defectDetector")) {
-        filtered.add(userInfo);
-      } else {
-        //String userID = user == null ? "" :user.getUserID();
-        //logger.warning("skip " + "'" + userID + "' : " +  user);
-      }
+  protected DivWidget getTable(Collection<IDialogSession> users, ExerciseController controller,
+                               DivWidget bottom, DivWidget rightSide) {
+    if (users.isEmpty()) {
+      DivWidget divWidget=new DivWidget();
+      divWidget.add(new HTML("No Sessions yet..."));
+      return divWidget;
     }
-    return filtered;
+    else {
+      SessionContainer<IDialogSession> userContainer = new SessionContainer<>(controller, rightSide, bottom);
+      return userContainer.getTable(users);
+    }
   }
 }

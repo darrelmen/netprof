@@ -88,6 +88,9 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
    */
   @Override
   public List<IDialogSession> getDialogSessions(int userid, int dialogid) {
+    if (dialogid ==-1) {
+
+    }
     return getiDialogSessions(getByUserAndDialog(userid, dialogid));
   }
 

@@ -60,10 +60,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.custom.INavigation.VIEWS.LEARN;
-import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM;
-import static mitll.langtest.client.custom.INavigation.VIEWS.STUDY;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -169,15 +165,6 @@ public class AnalysisTab extends DivWidget {
         jumpView);
   }
 
-  /**
-   * @param controller
-   * @param userid
-   * @param listid
-   * @param isPolyglot
-   * @param req
-   * @see AnalysisTab#AnalysisTab
-   * @see UserContainer#changeSelectedUser
-   */
   public AnalysisTab(final ExerciseController controller,
                      int minRecordings,
                      DivWidget overallBottom,
@@ -188,8 +175,38 @@ public class AnalysisTab extends DivWidget {
                      int req,
                      ReqCounter reqCounter,
                      INavigation.VIEWS jumpView) {
-    this.userid = userid;
-    this.listid = listid;
+    this(
+        controller,
+        overallBottom, userChosenID, isPolyglot,
+        reqCounter, jumpView,
+        new AnalysisRequest()
+            .setUserid(userid)
+            .setMinRecordings(minRecordings)
+            .setListid(listid)
+            .setReqid(req)
+            .setDialogID(new SelectionState().getDialog())
+    );
+  }
+
+  /**
+   * @param controller
+   * @param isPolyglot
+   * @see AnalysisTab#AnalysisTab
+   * @see UserContainer#changeSelectedUser
+   */
+  public AnalysisTab(final ExerciseController controller,
+                     //  int minRecordings,
+                     DivWidget overallBottom,
+                     // int userid,
+                     String userChosenID,
+                     //int listid,
+                     boolean isPolyglot,
+                     // int req,
+                     ReqCounter reqCounter, INavigation.VIEWS jumpView,
+
+                     AnalysisRequest analysisRequest) {
+    this.userid = analysisRequest.getUserid();
+    this.listid = analysisRequest.getListid();
     this.isPolyglot = isPolyglot;
     getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
@@ -224,13 +241,15 @@ public class AnalysisTab extends DivWidget {
     final long then = System.currentTimeMillis();
 
 
-    int dialog = new SelectionState().getDialog();
+/*    int dialog = new SelectionState().getDialog();
     AnalysisRequest analysisRequest = new AnalysisRequest()
         .setUserid(userid)
         .setMinRecordings(minRecordings)
         .setListid(listid)
         .setReqid(req)
-        .setDialogID(dialog);
+        .setDialogID(dialog);*/
+
+    logger.info("request " + analysisRequest);
 
     analysisServiceAsync.getPerformanceReportForUser(analysisRequest, new AsyncCallback<AnalysisReport>() {
       @Override
@@ -242,7 +261,7 @@ public class AnalysisTab extends DivWidget {
       public void onSuccess(AnalysisReport result) {
         long now = System.currentTimeMillis();
         long total = now - then;
-        logger.info("getPerformanceReportForUser userid " + userid + " req " + req +
+        logger.info("getPerformanceReportForUser userid " + userid + " req " + analysisRequest.getReqid() +
             "\n\ttook   " + total +
             "\n\tserver " + result.getServerTime() +
             "\n\tclient " + (total - result.getServerTime()));
@@ -252,7 +271,7 @@ public class AnalysisTab extends DivWidget {
         if (reqCounter.getReq() != result.getReq() + 1) {
           logger.info("getPerformanceReportForUser : skip " + reqCounter.getReq() + " vs " + result.getReq());
         } else {
-          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(userid, minRecordings, listid, dialog));
+          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(analysisRequest));
         }
       }
     });
@@ -264,6 +283,10 @@ public class AnalysisTab extends DivWidget {
     private final int minRecordings;
     private final int listid;
     private final int dialogID;
+
+    public ReqInfo(AnalysisRequest req) {
+      this(req.getUserid(), req.getMinRecordings(), req.getListid(), req.getDialogID());
+    }
 
     /**
      * @param userid

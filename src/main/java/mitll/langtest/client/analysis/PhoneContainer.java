@@ -379,16 +379,6 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
     // bigramContainer.gotNewPhoneSummary(phoneReport, phone, from, to);
   }
 
-  private AnalysisRequest getAnalysisRequest(long from, long to) {
-    return new AnalysisRequest()
-        .setUserid(userid)
-        .setListid(listid)
-        .setFrom(from)
-        .setTo(to)
-        .setDialogID(new SelectionState().getDialog())
-        .setReqid(reqid++);
-  }
-
   @Override
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;

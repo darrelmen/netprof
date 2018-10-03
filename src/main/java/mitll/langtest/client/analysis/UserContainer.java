@@ -61,8 +61,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
-  public static final int SESSION_AVG_WIDTH = 85;
-  private final Logger logger = Logger.getLogger("UserContainer");
+//  private final Logger logger = Logger.getLogger("UserContainer");
+
+  private static final int SESSION_AVG_WIDTH = 85;
 
   private static final int MAX_NAME_LENGTH = 16;
 
@@ -85,11 +86,11 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    * @seex #addLastSession
    */
 //  private static final int COMPLETED_WIDTH = 60;
-  private static final String SCORE_FOR_COMPLETED = "Comp. Avg.";//"Completed Score";
+//  private static final String SCORE_FOR_COMPLETED = "Comp. Avg.";//"Completed Score";
   // private static final int CURRENT_WIDTH = 60;
 
   private static final boolean SHOW_MY_STUDENTS = false;
-  private static final String Y = "Y";
+//  private static final String Y = "Y";
 
 /*
   private static final String MINE = "Mine";
@@ -126,6 +127,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   // private static final String MY_STUDENT = "My Student";
   // private static final int NUM_WIDTH = 50;
 
+  /**
+   * @see #changeSelectedUser(UserInfo)
+   * @see
+   */
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
   /**
@@ -475,7 +480,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     addPolyNumber(list);
   //  addLastSession(list);
-    Column<UserInfo, SafeHtml> column = addLastOverallScore(list);
+    /*Column<UserInfo, SafeHtml> column =*/ addLastOverallScore(list);
   //  table.getColumnSortList().push(column);
 
     table.setWidth("100%", true);
@@ -739,16 +744,18 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     };
   }*/
 
+/*
   private Column<UserInfo, SafeHtml> getLastSession() {
     return getClickableDesc(this::getLastSessionScore);
   }
+*/
 
-  @NotNull
+/*  @NotNull
   private String getLastSessionScore(UserInfo shell) {
     int lastSessionScore = shell.getLastSessionScore() / 10;
     // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
     return "" + lastSessionScore;
-  }
+  }*/
 
   private Column<UserInfo, SafeHtml> getOverall() {
     return getClickableDesc(this::getOverallScore);

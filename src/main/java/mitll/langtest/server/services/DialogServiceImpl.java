@@ -166,7 +166,23 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   @Override
   public List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    return db.getDialogSessionDAO().getDialogSessions(userid, dialogid);
+    logger.info("getDialogSessions session user " + userIDFromSessionOrDB + " req user " + userid + " dialog " + dialogid);
+
+    if (dialogid == -1) {
+      dialogid = getFirstDialog(userIDFromSessionOrDB);
+    }
+    List<IDialogSession> dialogSessions = db.getDialogSessionDAO().getDialogSessions(userid, dialogid);
+    logger.info("getDialogSessions session user " + userIDFromSessionOrDB + " req user " + userid + " got " + dialogSessions.size());
+    return dialogSessions;
+  }
+
+  private int getFirstDialog(int userIDFromSessionOrDB) {
+    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+    if (projectIDFromUser != -1) {
+      List<IDialog> dialogs = getProject(projectIDFromUser).getDialogs();
+      if (!dialogs.isEmpty()) return dialogs.get(0).getID();
+    }
+    return -1;
   }
 
   /**

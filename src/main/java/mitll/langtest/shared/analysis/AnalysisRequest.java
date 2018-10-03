@@ -58,14 +58,6 @@ public class AnalysisRequest implements Serializable {
     return to;
   }
 
-  public int getDialogID() {
-    return dialogID;
-  }
-
-  public int getDialogSessionID() {
-    return dialogSessionID;
-  }
-
   public int getReqid() {
     return reqid;
   }
@@ -79,9 +71,17 @@ public class AnalysisRequest implements Serializable {
     return this;
   }
 
+  public int getDialogID() {
+    return dialogID;
+  }
+
   public AnalysisRequest setDialogID(int dialogID) {
     this.dialogID = dialogID;
     return this;
+  }
+
+  public int getDialogSessionID() {
+    return dialogSessionID;
   }
 
   public AnalysisRequest setDialogSessionID(int dialogSessionID) {

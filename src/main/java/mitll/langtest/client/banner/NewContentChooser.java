@@ -9,6 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.AnalysisTab;
+import mitll.langtest.client.analysis.SessionAnalysis;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.analysis.StudentAnalysis;
 import mitll.langtest.client.custom.ExerciseListContent;
@@ -291,7 +292,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     DivWidget header = new DialogHeader(controller, VIEWS.PERFORM, null).getHeader(dialog);
     header.addStyleName("bottomFiveMargin");
     divWidget.add(header);
-    divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, STUDY));
+//    divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, STUDY));
+    divWidget.add(new SessionAnalysis(controller));
     currentSection = SCORES;
   }
 

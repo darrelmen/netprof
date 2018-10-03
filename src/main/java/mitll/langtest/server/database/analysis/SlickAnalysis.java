@@ -125,7 +125,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
 
     int userid = analysisRequest.getUserid();
-   // PhoneSummary phoneSummary = getPhoneSummary(userid, firstUser);
     AnalysisReport analysisReport = new AnalysisReport(
         getUserPerformance(userid, bestForUser),
         getPhoneSummary(userid, firstUser),
@@ -368,7 +367,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
             String s2 = scoreToFL.get(o2);
             comp = collator.compare(s1, s2);  // remember to do locale aware string sorting.
             if (comp == 0) {
-            //  logger.info("getComparator fall back to time for " + o1 + " vs " + o2);
+              //  logger.info("getComparator fall back to time for " + o1 + " vs " + o2);
               comp = compareTimes(o1, o2);
             }
             break;
@@ -509,8 +508,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   /**
    * @param analysisRequest
    * @return
-   * @see IAnalysis#getPerformanceReportForUser(AnalysisRequest)
    * @seex IAnalysis#getPhoneReportFor
+   * @see IAnalysis#getPerformanceReportForUser(AnalysisRequest)
    */
   private Map<Integer, UserInfo> getBestForUser(AnalysisRequest analysisRequest) {
     long then = System.currentTimeMillis();
@@ -523,12 +522,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     Collection<Integer> dialogExerciseIDs = getDialogExerciseIDs(dialogID);
 
     logger.info("getBestForUser Dialog ids " + dialogExerciseIDs.size());
-
-    Collection<SlickPerfResult> perfForUser = listid == -1 ?
-        (dialogID == -1 ?
-            resultDAO.getPerfForUser(userid, projid) :
-            resultDAO.getPerfForUserInDialog(userid, dialogExerciseIDs)) :
-        resultDAO.getPerfForUserOnList(userid, listid);
+    Collection<SlickPerfResult> perfForUser;
+    if (analysisRequest.getDialogSessionID() == -1) {
+      perfForUser = listid == -1 ?
+          (dialogID == -1 ?
+              resultDAO.getPerfForUser(userid, projid) :
+              resultDAO.getPerfForUserInDialog(userid, dialogID)) :
+          resultDAO.getPerfForUserOnList(userid, listid);
+    } else {
+      perfForUser = resultDAO.getPerfForDialogSession(analysisRequest.getDialogSessionID());
+    }
     long now = System.currentTimeMillis();
 
     if (DEBUG || true) logger.info("getBestForUser best for" +
@@ -767,6 +770,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size() + " (" + skipped.size() +
         " skipped) and project " + projid);
 
-    audioDAO.attachAudioToExercises(exercises, language );
+    audioDAO.attachAudioToExercises(exercises, language);
   }
 }

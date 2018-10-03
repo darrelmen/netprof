@@ -116,6 +116,8 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     if (projectID == -1) {
       return new AnalysisReport();
     } else {
+      logger.info("getPerformanceForUser " + analysisRequest.getUserid() + " vs session user " + userIDFromSessionOrDB);
+
       if (hasTeacherPermOrSelf(analysisRequest.getUserid(), userIDFromSessionOrDB)) {
         long then = System.currentTimeMillis();
         AnalysisReport performanceReportForUser = getSlickAnalysis(projectID)
@@ -127,9 +129,20 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
         logger.info("getPerformanceReportForUser : " + performanceReportForUser + "\n\ttook " + serverTime + " millis");
         return performanceReportForUser;
       } else {
+        logger.info("getPerformanceForUser " + analysisRequest.getUserid() +
+            "(" + getUserID(analysisRequest.getUserid()) +
+            ")" +
+            " vs session user " + userIDFromSessionOrDB + "(" +
+            getUserID(userIDFromSessionOrDB) +
+            ")");
+
         throw getRestricted("performance report");
       }
     }
+  }
+
+  private String getUserID(int userid) {
+        return db.getUserDAO().getUserWhere(userid).getUserID();
   }
 
 /*
@@ -285,7 +298,6 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       }
     }
   }*/
-
   public PhoneSummary getPhoneSummary(AnalysisRequest analysisRequest)
       throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();

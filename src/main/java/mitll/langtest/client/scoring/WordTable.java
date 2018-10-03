@@ -72,6 +72,7 @@ public class WordTable {
 
   private static final String UNKNOWNMODEL = "UNKNOWNMODEL";
   private static final String TEXT_ALIGN_CENTER = "text-align:center;";
+  private static final String FONT_SIZE = "font-size:14pt;";
   private static final String BACKGROUND_COLOR = "background-color";
   private static final String BLUE = "#2196F3";
   /**
@@ -203,6 +204,7 @@ public class WordTable {
                   "";
           builder
               .append("<th style='" + TEXT_ALIGN_CENTER)
+              .append(FONT_SIZE)
               .append(color)
               .append("'>");
         }

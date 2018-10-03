@@ -111,6 +111,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     this.shortPageSize = shortPageSize;
   }
 
+  /**
+   * @see StudentAnalysis#StudentAnalysis(ExerciseController)
+   * @param users
+   * @return
+   */
   DivWidget getTable(Collection<T> users) {
     DivWidget leftSide = new DivWidget();
     leftSide.getElement().setId("studentDiv");
@@ -329,6 +334,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return columnSortHandler;
   }
 
+  /**
+   * FILL ME IN
+   * @param o1
+   * @return
+   */
   protected abstract int getDateCompare(T o1, T o2);
 
   protected SafeHtml getSafeHtml(String columnText) {
@@ -478,6 +488,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     String getSafe(T shell);
   }
 
+  /**
+   * FILL ME IN
+   * @param shell
+   * @return
+   */
   protected abstract String getItemLabel(T shell);
 
   /**
@@ -486,28 +501,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    */
   private Column<T, SafeHtml> getDateColumn() {
     return getClickableDesc(shell -> getNoWrapDate(getItemDate(shell)));
-/*    return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public boolean isDefaultSortAscending() {
-        return false;
-      }
-
-      @Override
-      public SafeHtml getValue(T shell) {
-        return getFormattedDate(getItemDate(shell));
-      }
-    };*/
   }
-
-//  private SafeHtml getFormattedDate(Long itemDate) {
-//    return getSafeHtml(getNoWrapDate(itemDate));
-//  }
 
   @NotNull
   protected String getNoWrapDate(Long itemDate) {
@@ -532,6 +526,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return signedUp;
   }
 
+  /**
+   * FILL ME IN
+   * @param shell
+   * @return
+   */
   protected abstract Long getItemDate(T shell);
 
   protected void checkGotClick(T object, NativeEvent event) {

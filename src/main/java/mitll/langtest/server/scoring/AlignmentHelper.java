@@ -23,7 +23,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
   private static final Logger logger = LogManager.getLogger(AlignmentHelper.class);
 
   private static final boolean USE_PHONE_TO_DISPLAY = true;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean WARN_MISSING_REF_RESULT = false || DEBUG;
 
   private IRefResultDAO refResultDAO;
@@ -110,7 +110,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       if (alignmentOutput == null) {
         // logger.warn("addAlignmentToAudioAttribute : couldn't get alignment for audio #" + v.getUniqueID());
       } else {
-        logger.info("addAlignmentToAudioAttribute set alignment output " + alignmentOutput + " on " + v.getUniqueID() + " : " + v.getTranscript());
+//        logger.info("addAlignmentToAudioAttribute set alignment output " + alignmentOutput + " on " + v.getUniqueID() + " : " + v.getTranscript());
         v.setAlignmentOutput(alignmentOutput);
       }
     });

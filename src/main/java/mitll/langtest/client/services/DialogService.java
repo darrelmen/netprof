@@ -5,6 +5,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
@@ -42,5 +43,12 @@ public interface DialogService extends RemoteService {
    */
   int getLatestDialogSessionID(int dialogid) throws DominoSessionException;
 
+  /**
+   * @see mitll.langtest.client.analysis.SessionAnalysis#SessionAnalysis
+   * @param userid
+   * @param dialogid
+   * @return
+   * @throws DominoSessionException
+   */
   List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException;
 }

@@ -37,9 +37,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.Bigram;
 import mitll.langtest.shared.analysis.PhoneBigrams;
 import mitll.langtest.shared.analysis.WordAndScore;
@@ -121,7 +119,7 @@ class BigramContainer extends PhoneContainerBase {
         logger.warning("no bigrams for phone " + phone);
         phoneAndStatsList = new ArrayList<>();
       } else {
-    //    logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
+        //    logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
         phoneAndStatsList = getPhoneAndStatsListForPeriod(bigrams);
       }
       //   logger.info("gotNewPhoneReport Got " + phoneAndStatsList.size() + " items for " + phone);
@@ -207,17 +205,6 @@ class BigramContainer extends PhoneContainerBase {
           }
         });
   }
-
-  private AnalysisRequest getAnalysisRequest(long from, long to) {
-    return new AnalysisRequest()
-        .setUserid(userid)
-        .setListid(listid)
-        .setFrom(from)
-        .setTo(to)
-        .setDialogID(new SelectionState().getDialog())
-        .setReqid(reqid++);
-  }
-
 
   /**
    * MUST BE PUBLIC

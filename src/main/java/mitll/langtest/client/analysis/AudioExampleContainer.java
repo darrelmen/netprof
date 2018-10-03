@@ -176,7 +176,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   }
 
-  protected void stopAudio() {
+  void stopAudio() {
     soundFeedback.destroySound();
   }
 

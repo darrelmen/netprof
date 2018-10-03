@@ -36,12 +36,22 @@
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 
+.cellTableFirstColumn {
+    padding: 2px 5px;
+    overflow: hidden;
+    text-align: left;
+    font-family: sans-serif;
+    font-size: 14pt;
+    cursor: pointer;
+}
+
 .cellTableCell {
     padding: 2px 5px;
     overflow: hidden;
     text-align: left;
     font-family: sans-serif;
-    cursor:pointer;
+    font-size: 12pt;
+    cursor: pointer;
 }
 
 .cellTableKeyboardSelectedRow {

@@ -194,7 +194,11 @@ public class UserPerformance implements Serializable {
 
   public TimeRange getTimeWindow() {
     List<TimeAndScore> rawBestScores = getRawBestScores();
-    return new TimeRange(rawBestScores.get(0).getTimestamp(), rawBestScores.get(rawBestScores.size() - 1).getTimestamp());
+    if (rawBestScores.isEmpty())
+      return new TimeRange(System.currentTimeMillis() - 60 * 60 * 1000, System.currentTimeMillis());
+    else {
+      return new TimeRange(rawBestScores.get(0).getTimestamp(), rawBestScores.get(rawBestScores.size() - 1).getTimestamp());
+    }
   }
 
   public String toString() {
