@@ -52,7 +52,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private static final boolean DEBUG = false;
   private static final int TOP_TO_USE = 10;
-  private final List<Float> thresholds;
+  //private final List<Float> thresholds;
 
 
   /**
@@ -63,7 +63,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   /**
    *
    */
-  private final Image overallSmiley = new Image();
+  private final Emoticon overallSmiley = new Emoticon();
   private static final SafeUri animated = UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "animated_progress48.gif");
 
   private final Image waitCursor = new Image(animated);
@@ -87,17 +87,18 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private T currentRecordingTurn = null;
   private boolean doRehearse = true;
-  private static final float NATIVE_HARD_CODE = 0.70F;
+  // private static final float NATIVE_HARD_CODE = 0.70F;
 
   private DialogSession dialogSession = null;
   /**
    * 9/13/18 histo from production
    * Did histogram of 85K korean scores, split 6 ways, even 12K piles
    */
-  private static final List<Float> koreanThresholds = new ArrayList<>(Arrays.asList(0.31F, 0.43F, 0.53F, 0.61F, NATIVE_HARD_CODE));
+//  private static final List<Float> koreanThresholds = new ArrayList<>(Arrays.asList(0.31F, 0.43F, 0.53F, 0.61F, NATIVE_HARD_CODE));
   /**
    * Did histogram of 18K english scores, split 6 ways, even 3K piles
    */
+/*
   private static final List<Float> englishThresholds = new ArrayList<>(Arrays.asList(0.23F, 0.36F, 0.47F, 0.58F, NATIVE_HARD_CODE));  // technically last is 72
 
   private static final List<String> emoticons = new ArrayList<>(Arrays.asList(
@@ -109,6 +110,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       "grinningEmoticon.png"
   ));
   private static final String BEST_EMOTICON = emoticons.get(emoticons.size() - 1);
+*/
 
   /**
    * @param controller
@@ -117,7 +119,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   RehearseViewHelper(ExerciseController controller) {
     super(controller);
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
-    this.thresholds = controller.getLanguageInfo() == Language.KOREAN ? koreanThresholds : englishThresholds;
+    //this.thresholds = controller.getLanguageInfo() == Language.KOREAN ? koreanThresholds : englishThresholds;
   }
 
   @Override
@@ -145,7 +147,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     super.showDialogGetRef(dialogID, dialog, child);
     child.add(overallFeedback = getOverallFeedback());
 
-  //  showOverallDialogScore();
+    //  showOverallDialogScore();
   }
 
   @Override
@@ -352,9 +354,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     container.add(getWaitCursor());
     container.add(getOverallEmoticon());
 
-    DivWidget progressBarDiv = getProgressBarDiv(
-        scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT)
-    );
+    DivWidget progressBarDiv = getProgressBarDiv(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
     container.add(progressBarDiv);
     //progressBarDiv.getElement().getStyle().setMarginBottom(0, PX);
     rateProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT);
@@ -919,19 +919,19 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
       double totalRatio = refTotal == 0D ? 0D : studentTotal / (3D * refTotal);
       //double totalAvgRate = totalRatio / ((float) num);
 
-   //   logger.info("showOverallDialogScore avg rate " + studentTotal + " vs " + refTotal + " = " + totalRatio);
+      //   logger.info("showOverallDialogScore avg rate " + studentTotal + " vs " + refTotal + " = " + totalRatio);
       setRateProgress(totalRatio);
     }
     {
       double actualRatio = studentTotal / refTotal;
 
       float v = roundToTens(actualRatio);
-    //  logger.info("showOverallDialogScore rate to show " + v);
+      //  logger.info("showOverallDialogScore rate to show " + v);
 
       rateProgress.setText("Rate " + v + "x");
     }
 
-    setEmoticon(overallSmiley, total);
+    overallSmiley.setEmoticon(total, controller.getLanguageInfo());
 
     overallSmiley.setVisible(true);
     overallSmiley.addStyleName("animation-target");
@@ -978,7 +978,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     {
       double percent = total * 100D;
       logger.info("setRateProgress percent " + total + " vs " + percent);
-      scoreProgress.setPercent(Math.max(33,percent));
+      scoreProgress.setPercent(Math.max(33, percent));
     }
   }
 
@@ -995,7 +995,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   }
 
 
-  @Override
+/*  @Override
   public void setEmoticon(Image smiley, double total) {
     String choice = BEST_EMOTICON;
 
@@ -1007,7 +1007,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
 
     smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
-  }
+  }*/
 
   /**
    * @see RecordDialogExercisePanel#addWidgets

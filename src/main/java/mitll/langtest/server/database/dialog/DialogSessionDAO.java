@@ -88,16 +88,16 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
    */
   @Override
   public List<IDialogSession> getDialogSessions(int userid, int dialogid) {
-    if (dialogid ==-1) {
+    if (dialogid == -1) {
 
     }
     return getiDialogSessions(getByUserAndDialog(userid, dialogid));
   }
 
-  @Override
+/*  @Override
   public List<IDialogSession> getCurrentDialogSessions(int userid) {
     return getiDialogSessions(dao.byUser(userid));
-  }
+  }*/
 
   @NotNull
   private List<IDialogSession> getiDialogSessions(Collection<SlickDialogSession> byProjID) {
@@ -130,15 +130,48 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
     return views;
   }
 
+
   @Override
-  public List<IDialogSession> getLatestDialogSessions(int projid, int userid) {
-    return getiDialogSessions(getByProjAndUser(projid, userid));
+  public Map<Integer, Integer> getLatestDialogSessionScores(int projid, int userid) {
+    Map<Integer, Integer> dialogIDToScore = new HashMap<>();
+
+    dao.byProjAndUser(projid, userid).forEach((k, v) ->
+        {
+          SlickDialogSession candidate = getCandidate(v);
+          if (candidate != null) logger.info("getLatestDialogSessionScores found " + candidate.view() + " " + candidate.score());
+          dialogIDToScore.put(k, candidate == null ? 0 : Math.round(candidate.score() * 100F));
+        }
+    );
+
+    return dialogIDToScore;
+  }
+
+  /**
+   * Take the most recent one, but not if it's a study and we already have a rehearse or a perform
+   *
+   * @param v
+   * @return
+   */
+  private SlickDialogSession getCandidate(List<SlickDialogSession> v) {
+    SlickDialogSession candidate = null;
+    for (SlickDialogSession dialogSession : v) {
+      if (candidate == null) {
+        candidate = dialogSession;
+      } else if (candidate.modified().getTime() < dialogSession.modified().getTime()) {
+        INavigation.VIEWS candidateView = INavigation.VIEWS.valueOf(candidate.view());
+        INavigation.VIEWS currentView = INavigation.VIEWS.valueOf(dialogSession.view());
+        if (currentView != INavigation.VIEWS.STUDY && candidateView == INavigation.VIEWS.STUDY) {  // rehearse or perform trumps STUDY
+          candidate = dialogSession;
+        }
+      }
+    }
+    return candidate;
   }
 
   // helpful in the summary view
-  private Collection<SlickDialogSession> getByProjAndUser(int projid, int userid) {
-    return dao.byProjAndUser(projid, userid);
-  }
+//  private Collection<SlickDialogSession> getByProjAndUser(int projid, int userid) {
+//    return dao.byProjAndUser(projid, userid);
+//  }
 
   private Collection<SlickDialogSession> getByUserAndDialog(int userid, int dialogid) {
     return dao.byUserAndDialog(userid, dialogid);

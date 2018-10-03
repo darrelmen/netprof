@@ -23,10 +23,11 @@ import static mitll.langtest.shared.scoring.NetPronImageType.*;
 public class TranscriptSegmentGenerator {
   private static final Logger logger = LogManager.getLogger(TranscriptSegmentGenerator.class);
   protected ServerProperties serverProps;
+  private static final boolean DEBUG = false;
 
   /**
-   * @see ASRWebserviceScoring#ASRWebserviceScoring
    * @param serverProperties
+   * @see ASRWebserviceScoring#ASRWebserviceScoring
    */
   public TranscriptSegmentGenerator(ServerProperties serverProperties) {
     this.serverProps = serverProperties;
@@ -83,10 +84,12 @@ public class TranscriptSegmentGenerator {
         if (isValid(wordSeg)) {
           List<TranscriptSegment> segs = getSegs(hydraPhoneSegments, wordSeg);
           List<TranscriptSegment> koreanSegments = getKoreanSegments(wordSeg.getEvent(), segs);
-          logger.info("word " + wordSeg +
-              "\n\tphones " + getSeguence(segs) +
-              "\n\tkorean " + getSeguence(koreanSegments)
-          );
+          if (DEBUG) {
+            logger.info("word " + wordSeg +
+                "\n\tphones " + getSeguence(segs) +
+                "\n\tkorean " + getSeguence(koreanSegments)
+            );
+          }
           allKoreanPhones.addAll(koreanSegments);
         }
         //wordToPhoneSeg.put(event, segs);
@@ -96,7 +99,7 @@ public class TranscriptSegmentGenerator {
       //      List<TranscriptSegment> koreanSegments = koreanSegments1;
       String after = getSeguence(allKoreanPhones);
 
-      logger.info("segments : " +
+      if (DEBUG) logger.info("segments : " +
           "\n\tbefore " + before +
           "\n\tafter " + after);
 
@@ -120,9 +123,8 @@ public class TranscriptSegmentGenerator {
 
   private String getSeguence(List<TranscriptSegment> transcriptSegments) {
     StringBuilder builder = new StringBuilder();
-    transcriptSegments.stream().forEach(transcriptSegment -> builder.append(transcriptSegment.getEvent()).append(" "));
-    String compact = builder.toString();
-    return compact;
+    transcriptSegments.forEach(transcriptSegment -> builder.append(transcriptSegment.getEvent()).append(" "));
+    return builder.toString();
   }
 
   private KoreanLTS koreanLTS = new KoreanLTS();
@@ -199,15 +201,15 @@ public class TranscriptSegmentGenerator {
       List<String> compoundKorean = LTSFactory.getCompoundKorean(currentSegment.getEvent(), nextHydraPhone);
 
 
-
       if (compoundKorean == null || compoundKorean.isEmpty()) {
         String event = currentSegment.getEvent();
         List<String> simpleKorean = LTSFactory.getSimpleKorean(event);
-        logger.info("getKoreanFragmentSequence got #" + j + " " + currentSegment.getEvent() + //"+" + nextHydraPhone +
-            " = " + simpleKorean);
+        if (DEBUG)
+          logger.info("getKoreanFragmentSequence got #" + j + " " + currentSegment.getEvent() + //"+" + nextHydraPhone +
+              " = " + simpleKorean);
 
         if (simpleKorean == null) {
-          logger.info("getKoreanFragmentSequence : no korean fragment for '" + event + "' ??? ");
+          if (DEBUG) logger.info("getKoreanFragmentSequence : no korean fragment for '" + event + "' ??? ");
           addKoreanSegment(koreanPhones, currentSegment, event);
         } else if (simpleKorean.size() == 1) {
           // builder.append(koreanFragment).append(" ");
@@ -265,9 +267,9 @@ public class TranscriptSegmentGenerator {
           fragIndex++;
           if (fragIndex < fragmentList.size()) {
             currentFragments = fragmentList.get(fragIndex);
-            logger.info("1 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
+            if (DEBUG) logger.info("1 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
           } else {
-            logger.info("1 frag index NOPE " + fragIndex + " " + new HashSet<>(currentFragments));
+            if (DEBUG) logger.info("1 frag index NOPE " + fragIndex + " " + new HashSet<>(currentFragments));
           }
         } else {
 //            logger.info("1 " + fragCount + " vs " + currentFragments.size());
@@ -277,8 +279,9 @@ public class TranscriptSegmentGenerator {
       } else {
         j++;
 
-        logger.info("getKoreanFragmentSequence got #" + j + " " + currentSegment.getEvent() + "+" + nextHydraPhone +
-            " = " + compoundKorean);
+        if (DEBUG)
+          logger.info("getKoreanFragmentSequence got #" + j + " " + currentSegment.getEvent() + "+" + nextHydraPhone +
+              " = " + compoundKorean);
 
         String match = getMatch(fragIndex, currentFragments, compoundKorean);
 
@@ -331,7 +334,7 @@ public class TranscriptSegmentGenerator {
     for (String candidate : simpleKorean) {
       boolean contains = currentFragments.contains(candidate);
       if (contains)
-        logger.info("getMatch : check " + candidate + " in (" + fragIndex + ")" + new HashSet<>(currentFragments) );
+        logger.info("getMatch : check " + candidate + " in (" + fragIndex + ")" + new HashSet<>(currentFragments));
 
       if (contains) {
         match = candidate;

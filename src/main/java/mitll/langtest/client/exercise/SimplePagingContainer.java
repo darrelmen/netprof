@@ -356,8 +356,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     getList().add(0, item);
   }
 
-  //boolean DEBUG=true;
-
   /**
    * @param i
    * @see ClickablePagingContainer#markCurrent

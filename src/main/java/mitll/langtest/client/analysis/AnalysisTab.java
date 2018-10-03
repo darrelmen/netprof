@@ -195,15 +195,10 @@ public class AnalysisTab extends DivWidget {
    * @see UserContainer#changeSelectedUser
    */
   public AnalysisTab(final ExerciseController controller,
-                     //  int minRecordings,
                      DivWidget overallBottom,
-                     // int userid,
                      String userChosenID,
-                     //int listid,
                      boolean isPolyglot,
-                     // int req,
                      ReqCounter reqCounter, INavigation.VIEWS jumpView,
-
                      AnalysisRequest analysisRequest) {
     this.userid = analysisRequest.getUserid();
     this.listid = analysisRequest.getListid();
@@ -283,9 +278,10 @@ public class AnalysisTab extends DivWidget {
     private final int minRecordings;
     private final int listid;
     private final int dialogID;
+    private final int dialogSessionID;
 
-    public ReqInfo(AnalysisRequest req) {
-      this(req.getUserid(), req.getMinRecordings(), req.getListid(), req.getDialogID());
+     ReqInfo(AnalysisRequest req) {
+      this(req.getUserid(), req.getMinRecordings(), req.getListid(), req.getDialogID(), req.getDialogSessionID());
     }
 
     /**
@@ -293,11 +289,12 @@ public class AnalysisTab extends DivWidget {
      * @param minRecordings
      * @param listid
      */
-    ReqInfo(int userid, int minRecordings, int listid, int dialogID) {
+    ReqInfo(int userid, int minRecordings, int listid, int dialogID, int dialogSessionID) {
       this.userid = userid;
       this.minRecordings = minRecordings;
       this.listid = listid;
       this.dialogID = dialogID;
+      this.dialogSessionID = dialogSessionID;
     }
 
     public int getUserid() {
@@ -314,6 +311,10 @@ public class AnalysisTab extends DivWidget {
 
     public int getDialogID() {
       return dialogID;
+    }
+
+    public int getDialogSessionID() {
+      return dialogSessionID;
     }
   }
 
@@ -599,7 +600,9 @@ public class AnalysisTab extends DivWidget {
       lowerHalf.add(soundsDiv);
       getPhoneReport(phoneReport,
           controller,
-          soundsDiv, analysisPlot);
+          soundsDiv,
+          analysisPlot,
+          reqInfo);
     }
   }
 
@@ -654,17 +657,19 @@ public class AnalysisTab extends DivWidget {
    * @param controller
    * @param lowerHalf
    * @param analysisPlot
+   * @param reqInfo
    * @see #showWordScores
    */
   private void getPhoneReport(PhoneSummary phoneReport,
                               final ExerciseController controller,
                               final Panel lowerHalf,
-                              AnalysisPlot analysisPlot) {
+                              AnalysisPlot analysisPlot,
+                              ReqInfo reqInfo) {
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, exampleHeader);
     final BigramContainer bigramContainer =
-        new BigramContainer(controller, exampleContainer, analysisServiceAsync, listid, userid);
+        new BigramContainer(controller, exampleContainer, analysisServiceAsync, reqInfo);
     final PhoneContainer phoneContainer =
-        new PhoneContainer(controller, bigramContainer, analysisServiceAsync, listid, userid);
+        new PhoneContainer(controller, bigramContainer, analysisServiceAsync, reqInfo);
 
     analysisPlot.addListener(phoneContainer);
 

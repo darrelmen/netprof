@@ -637,7 +637,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @return
    */
   public Collection<SlickPerfResult> getPerfForDialogSession(int dialogsessionid) {
-    return dao.perfByDialogSession(dialogsessionid);
+    Collection<SlickPerfResult> slickPerfResults = dao.perfByDialogSession(dialogsessionid);
+    logger.info("getPerfForDialogSession for " + dialogsessionid);
+
+    slickPerfResults.forEach(slickPerfResult -> logger.info("perf " +slickPerfResult.id() + " by " + slickPerfResult.userid()+ " @ "
+        + slickPerfResult.modified() + " ex " + slickPerfResult.exid() + " answer " + slickPerfResult.answer()));
+
+    return slickPerfResults;
   }
 
   public Collection<SlickPerfResult> getPerfForUserOnList(int userid, int listid) {

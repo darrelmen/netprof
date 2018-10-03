@@ -37,6 +37,7 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.dialog.*;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IDialogSessionDAO extends IDAO {
   int add(int userid,
@@ -53,11 +54,19 @@ public interface IDialogSessionDAO extends IDAO {
   );
 
   // seems like we want a summary of the latest scores
-  List<IDialogSession> getLatestDialogSessions(int projid, int userid);
+  Map<Integer,Integer> getLatestDialogSessionScores(int projid, int userid);
 
+  /**
+   * @see mitll.langtest.server.services.DialogServiceImpl#getDialogSessions(int, int)
+   * @param userid
+   * @param dialog
+   * @return
+   */
   List<IDialogSession> getDialogSessions(int userid, int dialog);
 
+/*
   List<IDialogSession> getCurrentDialogSessions(int userid);
+*/
 
   /**
    * For when we want to drop the current dialog data and reload

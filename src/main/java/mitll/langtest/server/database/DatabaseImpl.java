@@ -1549,7 +1549,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }*/
 
     if (toRet == null) {
-      logger.info("getCustomOrPredefExercise OK - try all projects for exercise #" + id);
+      logger.info("getCustomOrPredefExercise can't find ex in project #" +projid +
+          ", so try all projects for exercise #" + id);
       toRet = projectManagement.getExercise(id);
     }
 

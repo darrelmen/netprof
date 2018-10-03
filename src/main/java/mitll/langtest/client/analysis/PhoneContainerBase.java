@@ -41,22 +41,20 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
    */
   private static final String CURR = "Avg";//"Average";//"Avg. Score";
   private static final int COUNT_COL_WIDTH = 45;
-//  private static final String TOOLTIP = "Click to see examples";// and scores over time";
+  //  private static final String TOOLTIP = "Click to see examples";// and scores over time";
   private static final int SOUND_WIDTH = 65;
 
-
   final AnalysisServiceAsync analysisServiceAsync;
-  protected final int listid;
-  protected final int userid;
+
+  protected final AnalysisTab.ReqInfo reqInfo;
   protected long from;
   protected long to;
   protected int reqid = 0;
 
-  PhoneContainerBase(ExerciseController controller, AnalysisServiceAsync analysisServiceAsync, int listid, int userid) {
+  PhoneContainerBase(ExerciseController controller, AnalysisServiceAsync analysisServiceAsync, AnalysisTab.ReqInfo reqInfo) {
     super(controller);
     this.analysisServiceAsync = analysisServiceAsync;
-    this.listid = listid;
-    this.userid = userid;
+    this.reqInfo = reqInfo;
   }
 
   @Override
@@ -172,7 +170,6 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     }
 
     table.setWidth("100%", true);
-
 //    new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.TOP);
   }
 
@@ -246,7 +243,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   }
 
   private void checkForClick(PhoneAndStats object, NativeEvent event) {
-   // logger.info("checkForClick : stats " + object);
+    // logger.info("checkForClick : stats " + object);
     if (BrowserEvents.CLICK.equals(event.getType())) {
       //   clickOnPhone(object.getPhone());
       clickOnPhone2(object.getPhone());
@@ -278,7 +275,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     return tableWithPager;
   }
 
-   void addItems(List<PhoneAndStats> sortedHistory) {
+  void addItems(List<PhoneAndStats> sortedHistory) {
     addPhones(sortedHistory);
 
     try {
@@ -292,6 +289,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
 
   /**
    * Remember to ask to redraw later
+   *
    * @param sortedHistory
    */
   private void addPhones(List<PhoneAndStats> sortedHistory) {
@@ -316,11 +314,12 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
 
   AnalysisRequest getAnalysisRequest(long from, long to) {
     return new AnalysisRequest()
-        .setUserid(userid)
-        .setListid(listid)
+        .setUserid(reqInfo.getUserid())
+        .setListid(reqInfo.getListid())
         .setFrom(from)
         .setTo(to)
         .setDialogID(new SelectionState().getDialog())
+        .setDialogSessionID(reqInfo.getDialogSessionID())
         .setReqid(reqid++);
   }
 }

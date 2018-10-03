@@ -7,6 +7,7 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.banner.IRehearseView;
 import mitll.langtest.client.banner.RehearseViewHelper;
 import mitll.langtest.client.banner.SessionManager;
@@ -55,7 +56,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    *
    */
   private long minDur;
-  private Image emoticon;
+  private Emoticon emoticon;
   private final SessionManager sessionManager;
 
   private final IRehearseView rehearseView;
@@ -254,7 +255,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     studentAudioAttribute.setAlignmentOutput(result.getPretestScore());
     studentAudioAttribute.setDurationInMillis(result.getDurationInMillis());
 
-    rehearseView.setEmoticon(emoticon, result.getScore());
+    emoticon.setEmoticon(result.getScore(), controller.getLanguageInfo());
   }
 
   @Override
@@ -391,7 +392,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
     flContainer.add(recordPanel.getScoreFeedback());
     {
-      Image w = getEmoticonPlaceholder();
+      Emoticon w = getEmoticonPlaceholder();
       emoticon = w;
       flContainer.add(w);
     }
@@ -446,8 +447,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   @NotNull
-  private Image getEmoticonPlaceholder() {
-    Image w = new Image();
+  private Emoticon getEmoticonPlaceholder() {
+    Emoticon w = new Emoticon();
     w.setVisible(false);
     w.setHeight(DIM + "px");
     w.setWidth(DIM + "px");

@@ -65,7 +65,10 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
   public SessionAnalysis(final ExerciseController controller) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
 
-    controller.getDialogService().getDialogSessions(controller.getUser(), new SelectionState().getDialog(), new AsyncCallback<List<IDialogSession>>() {
+    controller.getDialogService().getDialogSessions(
+        controller.getUser(),
+        new SelectionState().getDialog(),
+        new AsyncCallback<List<IDialogSession>>() {
       @Override
       public void onFailure(Throwable caught) {
         finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());

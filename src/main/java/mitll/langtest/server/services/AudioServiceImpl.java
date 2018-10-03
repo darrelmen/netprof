@@ -252,7 +252,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     boolean isRef = isReference(request);
     AudioType audioType = getAudioType(request);
-    int dialogSessionID = getDialogSessionID(userIDFromSession);
+    int dialogSessionID = getDialogSession(request);
     if (DEBUG) {
       logger.info("getJSONForStream got" +
           "\n\trequest  " + requestType +
@@ -398,7 +398,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     } else return -1;
   }
 
-
+  /**
+   *
+   * @param request
+   * @return
+   */
   @NotNull
   private AudioType getAudioType(HttpServletRequest request) {
     String header = getHeader(request, AUDIOTYPE);
@@ -410,6 +414,23 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
+  /**
+   *
+   * @param deviceType
+   * @param device
+   * @param userIDFromSession
+   * @param realExID
+   * @param reqid
+   * @param projid
+   * @param dialogSessionID
+   * @param isReference
+   * @param audioType
+   * @param audioChunks
+   * @param jsonObject
+   * @return
+   * @throws IOException
+   * @throws DominoSessionException
+   */
   private JSONObject getJsonObject(String deviceType,
                                    String device,
                                    int userIDFromSession,
@@ -441,7 +462,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         language,
         realExID,
         1,
-        audioType).setDialogSessionID(dialogSessionID);
+        audioType)
+        .setDialogSessionID(dialogSessionID);
 
     logger.info("audio context " + audioContext);
 
@@ -681,6 +703,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return 1;
   }
 
+/*
   private int getDialogSessionID(int userid) {
     List<IDialogSession> currentDialogSessions = getDatabase().getDialogSessionDAO().getCurrentDialogSessions(userid);
 
@@ -690,6 +713,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return next.getID();
     } else return -1;
   }
+*/
 
   private int getRealExID(HttpServletRequest request) {
     int realExID = 0;
@@ -715,6 +739,17 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     } catch (NumberFormatException e) {
       logger.error("couldn't parse " + header);
       return System.currentTimeMillis();
+    }
+  }
+
+  private int getDialogSession(HttpServletRequest request) {
+    String header = request.getHeader(DIALOG_SESSION.toString());
+    try {
+      int l = Integer.parseInt(header);
+      return l;
+    } catch (NumberFormatException e) {
+      logger.error("couldn't parse " + header);
+      return -1;
     }
   }
 

@@ -65,8 +65,8 @@ public class SessionContainer<T extends IDialogSession> extends MemoryItemContai
             .setMinRecordings(0)
             .setListid(-1)
             .setReqid(req++)
-            .setDialogID(new SelectionState().getDialog()).
-        setDialogSessionID(selectedUser.getID())));
+            .setDialogID(new SelectionState().getDialog())
+            .setDialogSessionID(selectedUser.getID())));
   }
 
   /**

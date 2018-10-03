@@ -10,7 +10,7 @@ public interface IRehearseView extends IListenView {
 
   void useInvalidResult(int exid);
 
-  void setEmoticon(Image smiley, double total);
+  //void setEmoticon(Image smiley, double total);
 
   void addPacketValidity(Validity validity);
 

@@ -428,7 +428,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
         .setMinRecordings(reqInfo.getMinRecordings())
         .setFrom(from)
         .setTo(to)
-        .setDialogID(reqInfo.getDialogID());
+        .setDialogID(reqInfo.getDialogID())
+        .setDialogSessionID(reqInfo.getDialogSessionID())
+        ;
   }
 
   private void selectFirst(WordsAndTotal result) {

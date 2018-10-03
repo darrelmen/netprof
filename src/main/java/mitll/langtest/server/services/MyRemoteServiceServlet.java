@@ -611,9 +611,13 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   protected List<IDialog> getDialogs(int userIDFromSessionOrDB) {
+    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+    return getDialogsForProject(projectIDFromUser);
+  }
+
+  protected List<IDialog> getDialogsForProject(int projectIDFromUser) {
     List<IDialog> dialogList = new ArrayList<>();
     {
-      int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
       if (projectIDFromUser != -1) {
         dialogList = getProject(projectIDFromUser).getDialogs();
       }

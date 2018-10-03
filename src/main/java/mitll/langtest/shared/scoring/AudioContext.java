@@ -34,6 +34,9 @@ package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.answer.AudioType;
+import net.sf.json.JSONObject;
+
+import java.util.List;
 
 /**
  * reqid               request id from the client, so it can potentially throw away out of order responses
@@ -142,6 +145,11 @@ public class AudioContext implements IsSerializable {
     return dialogSessionID;
   }
 
+  /**
+   * @see mitll.langtest.server.services.AudioServiceImpl#getJsonObject
+   * @param dialogSessionID
+   * @return
+   */
   public AudioContext setDialogSessionID(int dialogSessionID) {
     this.dialogSessionID = dialogSessionID;
     return this;

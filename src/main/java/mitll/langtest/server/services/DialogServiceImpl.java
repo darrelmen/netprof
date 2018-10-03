@@ -33,6 +33,7 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.banner.RehearseViewHelper;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
@@ -45,10 +46,12 @@ import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickRelatedResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -101,13 +104,26 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
         dialogList = getFilteredBySearchTerm(request, dialogList);
         dialogList.sort(this::getDialogComparator);
 
-        return new ExerciseListWrapper<>(request.getReqID(), dialogList, null, new HashMap<>()
-        );
+        Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryForDialogs(userIDFromSessionOrDB, dialogList);
+        return new ExerciseListWrapper<>(request.getReqID(), dialogList, null, scoreHistoryPerExercise);
       } else {
         logger.info("getDialogs no user?");
         return new ExerciseListWrapper<>();
       }
     }
+  }
+
+  @NotNull
+  private Map<Integer, CorrectAndScore> getScoreHistoryForDialogs(int userIDFromSessionOrDB, List<IDialog> dialogList) {
+    Map<Integer, CorrectAndScore> scoreHistoryPerExercise = new HashMap<>();
+
+    if (!dialogList.isEmpty()) {
+      IDialog iDialog = dialogList.get(0);
+      iDialog.getProjid();
+      Map<Integer, Integer> latestDialogSessionScores = db.getDialogSessionDAO().getLatestDialogSessionScores(iDialog.getProjid(), userIDFromSessionOrDB);
+      latestDialogSessionScores.forEach((k, v) -> scoreHistoryPerExercise.put(k, new CorrectAndScore(v, null)));
+    }
+    return scoreHistoryPerExercise;
   }
 
   private List<IDialog> getFilteredBySearchTerm(ExerciseListRequest request, List<IDialog> dialogList) {
@@ -157,12 +173,26 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   }
 
   // user implicit -
-  //@Override
+
+  /**
+   * WHY?
+   *
+   * @param dialogid
+   * @return
+   * @throws DominoSessionException
+   */
   public List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     return db.getDialogSessionDAO().getDialogSessions(userIDFromSessionOrDB, dialogid);
   }
 
+  /**
+   * @param userid
+   * @param dialogid
+   * @return
+   * @throws DominoSessionException
+   * @see mitll.langtest.client.analysis.SessionAnalysis#SessionAnalysis
+   */
   @Override
   public List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
@@ -200,7 +230,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     db.getDialogSessionDAO().add(dialogSession);
   }
 
-  private List<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
+  private List<IDialog> getDialogs(ExerciseListRequest request,
+                                   ISection<IDialog> sectionHelper,
+                                   int userIDFromSessionOrDB) {
     return (request.getTypeToSelection().isEmpty()) ?
         getDialogs(userIDFromSessionOrDB) :
         new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));

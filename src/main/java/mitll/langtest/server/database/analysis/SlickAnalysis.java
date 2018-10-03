@@ -514,22 +514,27 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private Map<Integer, UserInfo> getBestForUser(AnalysisRequest analysisRequest) {
     long then = System.currentTimeMillis();
 
-    int dialogID = analysisRequest.getDialogID();
-    int userid = analysisRequest.getUserid();
-    int listid = analysisRequest.getListid();
 
 
-    Collection<Integer> dialogExerciseIDs = getDialogExerciseIDs(dialogID);
 
-    logger.info("getBestForUser Dialog ids " + dialogExerciseIDs.size());
+//    Collection<Integer> dialogExerciseIDs = getDialogExerciseIDs(dialogID);
+//
+//    logger.info("getBestForUser Dialog ids " + dialogExerciseIDs.size());
+
     Collection<SlickPerfResult> perfForUser;
     if (analysisRequest.getDialogSessionID() == -1) {
+      int dialogID = analysisRequest.getDialogID();
+      int userid = analysisRequest.getUserid();
+      int listid = analysisRequest.getListid();
+
+      logger.info("no session " + analysisRequest);
       perfForUser = listid == -1 ?
           (dialogID == -1 ?
               resultDAO.getPerfForUser(userid, projid) :
               resultDAO.getPerfForUserInDialog(userid, dialogID)) :
           resultDAO.getPerfForUserOnList(userid, listid);
     } else {
+      logger.info("got session " + analysisRequest);
       perfForUser = resultDAO.getPerfForDialogSession(analysisRequest.getDialogSessionID());
     }
     long now = System.currentTimeMillis();
@@ -541,7 +546,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     long diff = now - then;
     if (diff > WARN_THRESH) {
-      logger.warn("getBestForUser best for " + userid + " in " + projid + " took " + diff);
+      logger.warn("getBestForUser best for " + analysisRequest.getUserid() + " in " + projid + " took " + diff);
     }
 
     return getBest(perfForUser, analysisRequest.getMinRecordings(), true);
@@ -629,7 +634,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
     }
 
-    then = System.currentTimeMillis();
+   // then = System.currentTimeMillis();
 
     Map<Integer, MiniUser> idToMini = new HashMap<>();
 

@@ -64,22 +64,19 @@ class BigramContainer extends PhoneContainerBase {
   private static final String SOUND = "Context";
 
   private final PhoneExampleContainer exampleContainer;
-
   //  private static final boolean DEBUG = false;
 
   /**
    * @param controller
    * @param exampleContainer
-   * @param listid
-   * @param userid
+   * @param reqInfo
    * @see AnalysisTab#getPhoneReport
    */
   BigramContainer(ExerciseController controller,
                   PhoneExampleContainer exampleContainer,
                   AnalysisServiceAsync analysisServiceAsync,
-                  int listid,
-                  int userid) {
-    super(controller, analysisServiceAsync, listid, userid);
+                  AnalysisTab.ReqInfo reqInfo) {
+    super(controller, analysisServiceAsync, reqInfo);
     this.exampleContainer = exampleContainer;
   }
 

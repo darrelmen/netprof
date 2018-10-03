@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
@@ -19,6 +20,7 @@ import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -31,8 +33,8 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private static final int CHOICES_WIDTH = 970;
 
   private static final int MAX_LENGTH_ID = 19;
-  private static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID+12;
-  private static final int NORMAL_MIN_HEIGHT = 67;
+  private static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID + 12;
+  private static final int NORMAL_MIN_HEIGHT = 101;// 67;
   private static final int LANGUAGE_SIZE = 6;
   /**
    *
@@ -44,7 +46,10 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false, INavigation.VIEWS.DIALOG);
   }
 
-  @Override protected int getFirstPageSize() {  return 10;  }
+  @Override
+  protected int getFirstPageSize() {
+    return 10;
+  }
 
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
@@ -86,6 +91,8 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
   }
 
+  private Map<Integer, CorrectAndScore> scoreHistoryPerExercise;
+
   @Override
   protected void getFullExercises(Collection<Integer> visibleIDs, int currentReq, Collection<Integer> requested, List<IDialog> alreadyFetched) {
     //  logger.info("getFullExercises " + visibleIDs);
@@ -99,6 +106,7 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
           @Override
           public void onSuccess(ExerciseListWrapper<IDialog> result) {
             List<IDialog> toShow = result.getExercises().stream().filter(iDialog -> visibleIDs.contains(iDialog.getID())).collect(Collectors.toList());
+            scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
             sortDialogs(toShow, visibleIDs);
             showExerciesForCurrentReq(toShow, incrReq());
           }
@@ -126,25 +134,25 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    */
   protected void populatePanels(Collection<IDialog> result, int reqID, DivWidget exerciseContainer) {
     //  long then = System.currentTimeMillis();
-    exerciseContainer.add(showProjectChoices(result));
+    exerciseContainer.add(showProjectChoices(result, scoreHistoryPerExercise));
     //  long now = System.currentTimeMillis();
   }
 
-  private Section showProjectChoices(Collection<IDialog> result) {
+  private Section showProjectChoices(Collection<IDialog> result, Map<Integer, CorrectAndScore> idToScore) {
     // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
     final Section section = thumbnailChoices.getScrollingSection();
 
     {
       final Container flags = new Container();
       flags.setWidth(CHOICES_WIDTH + "px");
-      flags.add(addFlags(result));
+      flags.add(addFlags(result, idToScore));
       section.add(flags);
     }
 
     return section;
   }
 
-  private Thumbnails addFlags(Collection<IDialog> dialogs) {
+  private Thumbnails addFlags(Collection<IDialog> dialogs, Map<Integer, CorrectAndScore> idToScore) {
     Thumbnails current = new Thumbnails();
     current.getElement().getStyle().setMarginBottom(70, Style.Unit.PX);
 
@@ -184,12 +192,16 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
     {
       DivWidget horiz = new DivWidget();
-      horiz.getElement().getStyle().setProperty("minHeight", NORMAL_MIN_HEIGHT + "px"); // so they wrap nicely
+      setMinHeight(horiz, NORMAL_MIN_HEIGHT);
       horiz.add(getContainerWithButtons(dialog));
 
       thumbnail.add(horiz);
     }
     return thumbnail;
+  }
+
+  private void setMinHeight(UIObject horiz1, int normalMinHeight) {
+    horiz1.getElement().getStyle().setProperty("minHeight", normalMinHeight + "px"); // so they wrap nicely
   }
 
   private String getProperty(ExerciseAttribute attr) {
@@ -225,8 +237,14 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
       Heading label1 = getLabel(english);
       label1.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
       label1.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+      setMinHeight(label1, 40);
+
       container.add(label1);
     }
+    Emoticon overallSmiley = getEmoticon(dialog);
+
+    //  ProgressBar w = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+    container.add(overallSmiley);
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
@@ -234,9 +252,35 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   @NotNull
+  private Emoticon getEmoticon(IDialog dialog) {
+    Emoticon overallSmiley = new Emoticon();
+
+    {
+      int percentScore = scoreHistoryPerExercise.getOrDefault(dialog.getID(), new CorrectAndScore(0F, null)).getPercentScore();
+      if (percentScore > 0) {
+        double score = Integer.valueOf(percentScore).doubleValue() / 100D;
+        overallSmiley.setEmoticon(score, controller.getLanguageInfo());
+      }
+    //  else overallSmiley.setEmoticon(0.5,controller.getLanguageInfo());
+
+      styleAnimatedSmiley(overallSmiley);
+    }
+    return overallSmiley;
+  }
+
+  /**
+   * TODO : make this a css entry
+   * @param overallSmiley
+   */
+  private void styleAnimatedSmiley(Emoticon overallSmiley) {
+    overallSmiley.setWidth(24 +        "px");
+    overallSmiley.setHeight(24 +        "px");
+    overallSmiley.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+  }
+
+  @NotNull
   private Heading getLabel(String name) {
     Heading label = thumbnailChoices.getChoiceLabel(LANGUAGE_SIZE, name, false);
-   // label.setSubtext(statusText);
     return label;
   }
 

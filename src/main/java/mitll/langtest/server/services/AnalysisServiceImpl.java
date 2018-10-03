@@ -204,7 +204,8 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider
    */
   @Override
-  public WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort) throws DominoSessionException {
+  public WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort)
+      throws DominoSessionException {
     long then = System.currentTimeMillis();
 
     WordsAndTotal wordScoresForUser = getSlickAnalysis(getProjectIDFromUser())

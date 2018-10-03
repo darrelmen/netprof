@@ -77,13 +77,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_ID_LOOKUP = false;
 
-  private static final boolean USE_PHONE_TO_DISPLAY = true;
-  private static final boolean WARN_MISSING_REF_RESULT = false;
+//  private static final boolean USE_PHONE_TO_DISPLAY = true;
+//  private static final boolean WARN_MISSING_REF_RESULT = false;
   private static final String RECORDED1 = "Recorded";
-  //  private static final String RECORDED = RECORDED1;
   private static final String ANY = "Any";
-
-  // private  AlignmentHelper alignmentHelper=new AlignmentHelper();
 
   /**
    * @param request
