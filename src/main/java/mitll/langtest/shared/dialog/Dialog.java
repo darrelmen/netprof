@@ -15,7 +15,7 @@ import static mitll.langtest.shared.exercise.STATE.UNSET;
  */
 public class Dialog implements IDialog, MutableShell {
 
-  private final transient  Logger logger = Logger.getLogger("Dialog");
+  private final transient Logger logger = Logger.getLogger("Dialog");
 
 
   private static final String SPEAKER = "Speaker".toLowerCase();
@@ -45,7 +45,7 @@ public class Dialog implements IDialog, MutableShell {
   private List<ClientExercise> exercises = new ArrayList<>();
   private List<ClientExercise> coreVocabulary = new ArrayList<>();
 
-  private float score;
+  private float score = -1;
 
   public Dialog() {
   }
@@ -209,7 +209,6 @@ public class Dialog implements IDialog, MutableShell {
   public List<String> getSpeakers() {
     //   List<String> speakers = new ArrayList<>();
     //Set<ExerciseAttribute> speakerAttr = new TreeSet<>();
-
     List<ExerciseAttribute> speakers = attributes
         .stream()
         .filter(exerciseAttribute -> (exerciseAttribute.getProperty().toLowerCase().startsWith(SPEAKER)))
@@ -289,12 +288,10 @@ public class Dialog implements IDialog, MutableShell {
   @Override
   public void setScore(float score) {
     logger.info("setScore " + score);
-    this.score=score;
+    this.score = score;
   }
 
   /**
-   * TODO : fill in
-   *
    * @param scoreTotal
    */
   @Override
@@ -302,25 +299,23 @@ public class Dialog implements IDialog, MutableShell {
     logger.info("got " + scoreTotal);
   }
 
-
   @Override
   public int getRawScore() {
-    logger.info("getRawScore " + score);
-    return Math.round(score);
+    return Math.round(score / 100F);
   }
 
   /**
-   * TODO : fill in
+   * @see mitll.langtest.client.list.FacetExerciseList#setProgressBarScore
    * @return
    */
   @Override
   public float getScore() {
-    return 0;
+    return score / 10000F;
   }
 
   @Override
   public boolean hasScore() {
-    return false;
+    return score > 0F;
   }
 
   @Override

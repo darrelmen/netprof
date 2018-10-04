@@ -534,7 +534,7 @@ public class ProjectTest extends BaseTest {
           logger.info("\tUser list " + userListByID + " : " + de.getID() + " '" + de.getForeignLanguage() + "'\t'" + de.getEnglish() + "'");
         }
       }
-      for (String test : supuesto) {
+    /*  for (String test : supuesto) {
         Collection<CommonExercise> searchMatches = new SearchHelper().getSearchMatches(exercises, test, "french", project.getAudioFileHelper().getSmallVocabDecoder());
 
         if (searchMatches.isEmpty()) logger.error("2 no match for " + test);
@@ -543,9 +543,8 @@ public class ProjectTest extends BaseTest {
             logger.info(test + " : " + exercise.getID() + " '" + exercise.getForeignLanguage() + "'\t'" + exercise.getEnglish() + "'");
           }
         }
-      }
+      }*/
     }
-
   }
 
   @Test

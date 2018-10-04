@@ -100,6 +100,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private static final boolean DEBUG_STALE = true;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_CHOICES = false;
+  private static final boolean DEBUGSCORE = false;
 
   private static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
 
@@ -107,6 +108,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
   protected static final String GETTING_TYPE_VALUES = "getting type->values";
 
+  /**
+   *
+   */
   private static final String NONE_PRACTICED_YET = "None practiced yet.";
   /**
    * @see #showScore
@@ -2055,7 +2059,6 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }
   }
 
-  private static final boolean DEBUGSCORE = false;
 
   /**
    * @param displayed
@@ -2083,6 +2086,9 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
         exerciseToScore.put(exercise.getID(), score);
         if (DEBUGSCORE) logger.info("# " + exercise.getID() + " Score " + score);
         withScore++;
+      }
+      else {
+        if (DEBUGSCORE) logger.info("# " + exercise.getID() + " no score " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
       }
       // if (!isCurrentReq(reqid)) break;
     }
