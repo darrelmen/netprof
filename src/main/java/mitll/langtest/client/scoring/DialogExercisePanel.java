@@ -53,9 +53,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY_PAUSE = true;
+  private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
-  private static final boolean DEBUG_MATCH = true;
+  private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
 
   final AlignmentFetcher alignmentFetcher;
@@ -64,7 +64,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * Mandarin has special rules for the moment so we can match simplified chinese characters to traditional ones...
    */
   private final boolean isMandarin;
-  private final IListenView listenView;
+  protected final IListenView listenView;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -1014,6 +1014,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   public String toString() {
-    return "turn for " + exercise.getID() + " " + exercise.getForeignLanguage();
+    return "turn ex #" + exercise.getID() + " '" + exercise.getForeignLanguage() +"'";
   }
 }

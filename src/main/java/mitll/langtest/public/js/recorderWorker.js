@@ -40,7 +40,7 @@ var myurl;
 var myexid;
 var myreqid;
 var myisreference;
-var myaudiotype;
+var myaudiotype, mydialogsessionid;
 
 var lastSendMoment;
 
@@ -76,7 +76,7 @@ this.onmessage = function (e) {
             clear();
             break;
         case 'startStream':
-            startStream(e.data.url, e.data.exid, e.data.reqid, e.data.isreference, e.data.audiotype);
+            startStream(e.data.url, e.data.exid, e.data.reqid, e.data.isreference, e.data.audiotype, e.data.dialogSessionID);
             break;
         case 'stopStream':
             stopStream(e.data.type, e.data.abort);
@@ -89,13 +89,14 @@ function init(config) {
     sampleRate = config.sampleRate;
 }
 
-function startStream(url, exid, reqid, isreference, audiotype) {
-  //  console.log("worker.startStream " + exid + " req " + reqid);
+function startStream(url, exid, reqid, isreference, audiotype, dialogSessionID) {
+    //  console.log("worker.startStream " + exid + " req " + reqid);
     myurl = new String(url);
     myexid = new String(exid);
     myreqid = new String(reqid);
     myisreference = new String(isreference);
     myaudiotype = new String(audiotype);
+    mydialogsessionid = new String(dialogSessionID);
     lastSendMoment = new Date().getTime();
 }
 
@@ -182,17 +183,18 @@ function sendBlob(framesBeforeRound, audioBlob, isLast, abort, sendMoment) {
         xhr.setRequestHeader("reqid", myreqid);
         xhr.setRequestHeader("ISREFERENCE", myisreference);
         xhr.setRequestHeader("AUDIOTYPE", myaudiotype);
+        xhr.setRequestHeader("DIALOGSESSION", mydialogsessionid);
         xhr.setRequestHeader("STREAMTIMESTAMP", sendMoment);
 
         if (framesBeforeRound === 0) {
             xhr.setRequestHeader("STREAMSTATE", "START");
         }
         else if (abort) {
-            console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "' - abort " +abort);
+            console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "' - abort " + abort);
             xhr.setRequestHeader("STREAMSTATE", "ABORT");
         }
         else if (isLast) {
-      //      console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "' - abort " +abort + " is last " + isLast);
+            //      console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "' - abort " +abort + " is last " + isLast);
             xhr.setRequestHeader("STREAMSTATE", "END");
         }
         else {
@@ -316,7 +318,7 @@ function clear() {
     frameRecBuffersL = [];
 
     session = new Date().getTime();
-   // console.log("clear - session after  " + session);
+    // console.log("clear - session after  " + session);
 }
 
 function getAllZero() {

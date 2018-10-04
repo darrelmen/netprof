@@ -253,7 +253,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     boolean isRef = isReference(request);
     AudioType audioType = getAudioType(request);
     int dialogSessionID = getDialogSession(request);
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getJSONForStream got" +
           "\n\trequest  " + requestType +
           "\n\tprojid   " + projid +
@@ -743,10 +743,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   private int getDialogSession(HttpServletRequest request) {
-    String header = request.getHeader(DIALOG_SESSION.toString());
+    String header = request.getHeader(DIALOGSESSION.toString());
     try {
-      int l = Integer.parseInt(header);
-      return l;
+      return Integer.parseInt(header);
     } catch (NumberFormatException e) {
       logger.error("couldn't parse " + header);
       return -1;

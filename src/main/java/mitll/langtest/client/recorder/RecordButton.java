@@ -94,11 +94,14 @@ public class RecordButton extends Button {
    */
   private Timer afterStopTimer = null;
 
+  private static final boolean DEBUG = false;
+
   public interface RecordingListener {
     /**
      * @see #start()
      */
     void startRecording();
+
     /**
      * @param duration
      * @param abort
@@ -268,7 +271,7 @@ public class RecordButton extends Button {
     stopRecordingFirstStep();
     long duration = now - started;
 
-    logger.info("stopRecording : ui time between button clicks = " + duration + " millis, ");
+    if (DEBUG) logger.info("stopRecording : ui time between button clicks = " + duration + " millis, ");
 
     afterStopTimer = new Timer() {
       @Override
@@ -284,7 +287,7 @@ public class RecordButton extends Button {
   }
 
   protected void stopRecordingFirstStep() {
-   // logger.info("stopRecordingFirstStep : ");
+    // logger.info("stopRecordingFirstStep : ");
     recording = false;
 
     cancelAfterStopTimer();
@@ -307,6 +310,7 @@ public class RecordButton extends Button {
 
   /**
    * Stop with abort so we know when to not expect a result (score or anything) to be returned.
+   *
    * @see RecordDialogExercisePanel#cancelRecording()
    * @see NoFeedbackRecordAudioPanel#cancelRecording
    */
@@ -344,6 +348,7 @@ public class RecordButton extends Button {
       showFirstRecordImage();
     }
   }
+
   /**
    * @see #stop
    */
@@ -365,7 +370,8 @@ public class RecordButton extends Button {
   /**
    * @seex #flipImage()
    */
-  void showFirstRecordImage() {  }
+  void showFirstRecordImage() {
+  }
 
   void hideBothRecordImages() {
     setText(RECORD);

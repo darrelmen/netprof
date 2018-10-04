@@ -152,7 +152,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                      TimeRange timeRange,
                      INavigation.VIEWS jumpView) {
     super(controller, plot);
-    this.jumpView=jumpView;
+    this.jumpView = jumpView;
     this.reqInfo = reqInfo;
     plot.addListener(this);
     this.heading = w;
@@ -367,7 +367,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
         AnalysisRequest analysisRequest = getAnalysisRequest().setReqid(val);
 
-        logger.info("createProvider word scores req " + analysisRequest);
+        if (DEBUG) logger.info("createProvider word scores req " + analysisRequest);
         analysisServiceAsync.getWordScoresForUser(
             analysisRequest,
             start,
@@ -387,7 +387,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
                 long now = System.currentTimeMillis();
                 long total = now - then;
-                logger.info("createProvider userid " + reqInfo.getUserid() + " req " + req +
+                if (DEBUG) logger.info("createProvider userid " + reqInfo.getUserid() + " req " + req +
                     "\n\ttook   " + total +
                     "\n\tserver " + result.getServerTime() +
                     "\n\tnum    " + result.getNumTotal() +
@@ -525,7 +525,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
     table.setWidth("100%", true);
 
- //   new TooltipHelper().addTooltip(table, PhoneExampleContainer.CLICK_ON);
+    //   new TooltipHelper().addTooltip(table, PhoneExampleContainer.CLICK_ON);
   }
 
   private boolean isPolyglot() {

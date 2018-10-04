@@ -5,6 +5,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.initial.WavStreamCallback;
+import mitll.langtest.client.scoring.ClientAudioContext;
 import mitll.langtest.shared.answer.AudioType;
 
 import java.util.logging.Logger;
@@ -49,15 +50,23 @@ public class BrowserRecording {
    * @param wavStreamCallback
    * @see ExerciseController#startStream(int, int, boolean, AudioType, WavStreamCallback)
    */
-  public static void startStream(String url, String exid, String reqid, boolean isReference, AudioType audioType, WavStreamCallback wavStreamCallback) {
+  public static void startStream(String url, ClientAudioContext clientAudioContext, WavStreamCallback wavStreamCallback) {
     if (usingWebRTC()) {
       logger.info("startStream post" +
-          "\n\tto  " + url +
-          "\n\tfor " + exid);
+          "\n\tto      " + url +
+          "\n\tfor     " + clientAudioContext.getExerciseID()+
+          "\n\tsession " + clientAudioContext.getDialogSessionID()
+      );
 
       WebAudioRecorder.setStreamCallback(wavStreamCallback);
 
-      webAudio.startStream(url, exid, reqid, isReference ? "true" : "false", audioType.toString());
+      webAudio.startStream(
+          url,
+          ""+clientAudioContext.getExerciseID(),
+          ""+clientAudioContext.getReqid(),
+          clientAudioContext.isShouldAddToTable() ? "true" : "false",
+          clientAudioContext.getAudioType().toString(),
+          ""+clientAudioContext.getDialogSessionID());
     }
   }
 

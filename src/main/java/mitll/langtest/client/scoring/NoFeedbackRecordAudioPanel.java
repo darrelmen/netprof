@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
-public class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extends DivWidget
+public abstract class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extends DivWidget
     implements RecordingAudioListener {
   private final Logger logger = Logger.getLogger("NoFeedbackRecordAudioPanel");
 

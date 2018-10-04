@@ -78,7 +78,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private Collator collator;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PHONE = true;
+  private static final boolean DEBUG_PHONE = false;
 
   /**
    * @param database
@@ -227,7 +227,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     } else {
       List<WordScore> wordScores = getWordScores(userInfos, from, to, sortInfo);
       int totalSize = wordScores.size();
-      logger.info("getWordScoresForUser got " + totalSize + " word and score ");
+      if (DEBUG) logger.info("getWordScoresForUser got " + totalSize + " word and score ");
       // wordScores.forEach(bestScore -> logger.info("after " + bestScore));
 
       // sublist is not serializable!
@@ -515,8 +515,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
 
 
-
-
 //    Collection<Integer> dialogExerciseIDs = getDialogExerciseIDs(dialogID);
 //
 //    logger.info("getBestForUser Dialog ids " + dialogExerciseIDs.size());
@@ -634,7 +632,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
     }
 
-   // then = System.currentTimeMillis();
+    // then = System.currentTimeMillis();
 
     Map<Integer, MiniUser> idToMini = new HashMap<>();
 

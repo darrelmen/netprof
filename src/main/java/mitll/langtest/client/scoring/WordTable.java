@@ -89,6 +89,7 @@ public class WordTable {
   private static final String SIL = "sil";
   private static final String THEAD = "<thead>";
   private static final String NBSP = "&nbsp;";
+  private static final boolean DEBUG = false;
 
   /**
    * @param netPronImageTypeToEndTime
@@ -403,7 +404,7 @@ public class WordTable {
   }
 
   /**
-   * @param audioControl so when clicked, we can play audio
+   * @param audioControl  so when clicked, we can play audio
    * @param phoneMap
    * @param phoneSegments
    * @param simpleLayout
@@ -540,9 +541,9 @@ public class WordTable {
                                    TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                    boolean simpleLayout,
                                    TranscriptSegment wordSegment) {
-   logger.info("addPhonesBelowWord2 add phones below " +
-       "\n\tword " + wordSegment +
-       "\n\tsegs " + phoneSegments.size());
+    if (DEBUG) logger.info("addPhonesBelowWord2 add phones below " +
+        "\n\tword " + wordSegment +
+        "\n\tsegs " + phoneSegments.size());
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("word " +wordSegment));
 //    logger.info("logException stack " + exceptionAsString);
@@ -557,13 +558,13 @@ public class WordTable {
         boolean b = iterator.hasNext();
         SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel + (b ? NBSP : ""), BLUE);
 
-      //  logger.info("\taddPhonesBelowWord2 word " + wordSegment + " phone " + phoneLabel + " : " + h.getContent());
+        //  logger.info("\taddPhonesBelowWord2 word " + wordSegment + " phone " + phoneLabel + " : " + h.getContent());
 
 //        if (phoneSegment.isIn(wordSegment)) {
-          addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
-  //      }
+        addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
+        //      }
         IHighlightSegment put = phoneMap.put(phoneSegment, h);
-        if (put != null) logger.info("prev for " +phoneSegment +" was " + put);
+        if (put != null) logger.info("prev for " + phoneSegment + " was " + put);
 
         if (simpleLayout) {
           if (b) {
@@ -596,7 +597,7 @@ public class WordTable {
    */
   private void addClickHandler(AudioControl audioControl, TranscriptSegment segmentToPlay, Label header) {
     if (audioControl != null) {
-      logger.info("addClickHandler add handler for " + segmentToPlay + " when click on " + header.getText());
+      if (false) logger.info("addClickHandler add handler for " + segmentToPlay + " when click on " + header.getText());
       header.addClickHandler(event -> {
         logger.info("addClickHandler click on " + segmentToPlay + " header " + header.getText());
         audioControl.loadAndPlaySegment(segmentToPlay.getStart(), segmentToPlay.getEnd());

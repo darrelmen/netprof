@@ -31,7 +31,7 @@ public interface DialogService extends RemoteService {
    */
   IDialog getDialog(int id) throws DominoSessionException;
 
-  void addSession(DialogSession dialogSession) throws DominoSessionException;
+  int addSession(DialogSession dialogSession) throws DominoSessionException;
 
  // List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException;
 

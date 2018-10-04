@@ -7,38 +7,40 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Date;
 
 public class DialogSession implements IDialogSession {
-  private int id;
-  private int userid;
-  private int projid;
-  private int dialogid;
-  private long modified, end;
+  private int id = -1;
+  private int userid =-1;
+  private int projid = -1;
+  private int dialogid = -1;
+  private long modified = 0L, end = 0L;
 
-  private INavigation.VIEWS views;
-  private DialogStatus status;
-  private int numRecordings;
+  private INavigation.VIEWS views = INavigation.VIEWS.STUDY;
+  private DialogStatus status = DialogStatus.DEFAULT;
+  private int numRecordings = 0;
 
-  private float score;
-  private float speakingRate;
-
+  private float score = 0F;
+  private float speakingRate = 0F;
 
   public DialogSession() {
   }
 
-  public DialogSession(int id, int userid, int projid, int dialogid, long modified, long end, INavigation.VIEWS views,
-                       DialogStatus status, int numRecordings, float score, float speakingRate) {
-    this.id = id;
+  public DialogSession(int userid, int projid, int dialogid, INavigation.VIEWS views) {
     this.userid = userid;
     this.projid = projid;
     this.dialogid = dialogid;
+    this.views = views;
+  }
+
+  public DialogSession(int id, int userid, int projid, int dialogid, long modified, long end, INavigation.VIEWS views,
+                       DialogStatus status, int numRecordings, float score, float speakingRate) {
+    this(userid, projid, dialogid, views);
+    this.id = id;
     this.modified = modified;
     this.end = end;
-    this.views = views;
     this.status = status;
     this.numRecordings = numRecordings;
     this.score = score;
     this.speakingRate = speakingRate;
   }
-
 
   @Override
   public int getUserid() {
@@ -75,7 +77,6 @@ public class DialogSession implements IDialogSession {
     return status;
   }
 
-
   @Override
   public float getScore() {
     return score;
@@ -91,6 +92,11 @@ public class DialogSession implements IDialogSession {
     return id;
   }
 
+  public DialogSession setID(int id) {
+    this.id = id;
+    return this;
+  }
+
   @Override
   public int compareTo(@NotNull HasID o) {
     return Integer.compare(id, o.getID());
@@ -101,10 +107,10 @@ public class DialogSession implements IDialogSession {
     return numRecordings;
   }
 
-
   public String toString() {
     return "DialogSession #" + getID() +
-        "\n\tdialog " +getDialogid() + " by " + getUserid()+ " " +getView()+
+        "\n\tdialog " + getDialogid() +
+        " by " + getUserid() + " " + getView() +
         " at " + new Date(getModified());
   }
 }

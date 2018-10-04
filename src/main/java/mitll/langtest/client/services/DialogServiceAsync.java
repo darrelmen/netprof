@@ -50,7 +50,7 @@ public interface DialogServiceAsync {
 
   void getDialog(int id, AsyncCallback<IDialog> async);
 
-  void addSession(DialogSession dialogSession, AsyncCallback<Void> async);
+  void addSession(DialogSession dialogSession, AsyncCallback<Integer> async);
 
   void getDialogSessions(int userid, int dialogid, AsyncCallback<List<IDialogSession>> async);
 

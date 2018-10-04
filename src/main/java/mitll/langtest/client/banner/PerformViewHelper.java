@@ -35,7 +35,6 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
   @NotNull
   @Override
   protected DivWidget getTurns(IDialog dialog) {
-   // List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
     uniqueCoreVocab = dialog.getCoreVocabulary()
         .stream()
         .map(CommonShell::getForeignLanguage)

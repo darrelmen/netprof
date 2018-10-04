@@ -1,12 +1,8 @@
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.banner.IRehearseView;
 import mitll.langtest.client.banner.RehearseViewHelper;
@@ -61,7 +57,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   private final IRehearseView rehearseView;
 
-  // long rawRefSpeechDur = 0L;
   private float refSpeechDur = 0F;
   private float studentSpeechDur = 0F;
 
@@ -370,6 +365,11 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
         super.stopRecording();
         rehearseView.stopRecording();
       }
+
+      @Override
+      public int getDialogSessionID() {
+        return rehearseView.getDialogSessionID();
+      }
     };
 
     this.recordAudioPanel = recordPanel;
@@ -526,7 +526,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   public float getRefSpeechDur() {
     return refSpeechDur;
   }
-
   public float getStudentSpeechDur() {
     return studentSpeechDur;
   }

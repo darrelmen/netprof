@@ -22,4 +22,6 @@ interface RecordingAudioListener {
   void gotAbort();
 
   void onPostFailure();
+
+  int getDialogSessionID();
 }

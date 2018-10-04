@@ -12,6 +12,7 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.list.StudyExerciseList;
+import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -22,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
  * Created by go22670 on 4/5/17.
  */
 class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T> {
-  //  private final Logger logger = Logger.getLogger("LearnHelper");
+  private int dialogSessionID = -1;
 
   /**
    * @param controller
@@ -55,9 +56,28 @@ class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T>
       DivWidget header = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog);
       header.addStyleName("bottomFiveMargin");
       child.add(header);
+      //  private final Logger logger = Logger.getLogger("LearnHelper");
+      int dialogID = dialog.getID();
+
+      controller.getDialogService().addSession(new DialogSession(controller.getUser(),
+          getProjectid(), dialogID, INavigation.VIEWS.STUDY), new AsyncCallback<Integer>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("creating new dialog study session", caught);
+        }
+
+        @Override
+        public void onSuccess(Integer result) {
+          dialogSessionID = result;
+        }
+      });
     }
     super.showContent(child, INavigation.VIEWS.STUDY);
     hideList();
+  }
+
+  private int getProjectid() {
+    return controller.getProjectStartupInfo().getProjectid();
   }
 
   @NotNull
@@ -72,6 +92,12 @@ class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T>
 
   private int getDialogFromURL() {
     return new SelectionState().getDialog();
+  }
+
+
+  @Override
+  public int getDialogSessionID() {
+    return dialogSessionID;
   }
 
   @Override

@@ -2,12 +2,17 @@ package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.dialog.IDialogSession;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
@@ -77,11 +82,52 @@ public class SessionContainer<T extends IDialogSession> extends MemoryItemContai
     List<T> list = getList();
     addItemID(list, 20);
     //addFirstName(list);
-
+    addCurrent(list);
     addDateCol(list);
 
     table.setWidth("100%", true);
   }
+  protected int getIdWidth() {
+    return 45;
+  }
+
+  private void addCurrent(List<T> list) {
+    Column<T, SafeHtml> current = getCurrent();
+    addColumn(current, new TextHeader("Score"));
+    table.setColumnWidth(current, 45 + "px");
+    table.addColumnSortHandler(getCurrentSorter(current, list));
+  }
+
+  private Column<T, SafeHtml> getCurrent() {
+    return getClickable(this::getCurrentText);
+  }
+
+  @NotNull
+  private String getCurrentText(T shell) {
+    return "" + Math.round(shell.getScore() * 100);
+  }
+
+  private ColumnSortEvent.ListHandler<T> getCurrentSorter(Column<T, SafeHtml> englishCol,
+                                                          List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol,
+        (o1, o2) -> {
+          if (o1 == o2) {
+            return 0;
+          }
+
+          // Compare the name columns.
+          if (o1 != null) {
+            if (o2 == null) return 1;
+            else {
+              return Float.compare(o1.getScore(), o2.getScore());
+            }
+          }
+          return -1;
+        });
+    return columnSortHandler;
+  }
+
 
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d h:mm:ss a");
 

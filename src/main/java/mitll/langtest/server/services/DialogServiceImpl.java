@@ -181,10 +181,10 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    * @return
    * @throws DominoSessionException
    */
-  public List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException {
+/*  public List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     return db.getDialogSessionDAO().getDialogSessions(userIDFromSessionOrDB, dialogid);
-  }
+  }*/
 
   /**
    * @param userid
@@ -221,13 +221,13 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    * @see RehearseViewHelper#clearScores
    */
   @Override
-  public void addSession(DialogSession dialogSession) throws DominoSessionException {
+  public int addSession(DialogSession dialogSession) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 
     if (userIDFromSessionOrDB != dialogSession.getUserid()) {
       logger.warn("addSession huh? session user " + userIDFromSessionOrDB + " vs dialog session " + dialogSession.getUserid());
     }
-    db.getDialogSessionDAO().add(dialogSession);
+    return db.getDialogSessionDAO().add(dialogSession);
   }
 
   private List<IDialog> getDialogs(ExerciseListRequest request,

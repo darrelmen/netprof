@@ -30,7 +30,8 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
                                 ExerciseController controller,
                                 ListOptions listOptions,
                                 DivWidget listHeader,
-                                boolean isDrillView, INavigation.VIEWS views) {
+                                boolean isDrillView,
+                                INavigation.VIEWS views) {
     super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView, views);
   }
 
@@ -112,7 +113,6 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
               }
             }
           });
-
     }
   }
 }

@@ -40,6 +40,7 @@ import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
+import mitll.langtest.server.database.dialog.IDialogSessionDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.database.result.Result;
@@ -53,6 +54,8 @@ import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.npdata.dao.SlickDialogSession;
+import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.lts.HTKDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,6 +65,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.Collator;
 import java.util.*;
 
@@ -281,7 +285,7 @@ public class AudioFileHelper implements AlignDecode {
     if (!oov.isEmpty()) {
       try {
         String fileName = "Project_" + project.getLanguage() + "_" + project.getName() + ".txt";
-        File file = new File("/tmp/"+fileName);
+        File file = new File("/tmp/" + fileName);
         logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
         FileWriter oovTokens = new FileWriter(file);
         ArrayList<String> strings = new ArrayList<>(oov);
@@ -976,12 +980,54 @@ public class AudioFileHelper implements AlignDecode {
     answer.setTimestamp(timestamp);
 
     if (dialogSessionID > 0) {
-      db.getRelatedResultDAO().add(answerID, dialogSessionID);
+      new Thread(() -> {
+        db.getRelatedResultDAO().add(answerID, dialogSessionID);
+        updateDialogSessionWithAnswer(dialogSessionID, timestamp);
+      }, "rememberSessionInfo").start();
     }
 
     // do this db write later
     new Thread(() -> db.recordWordAndPhoneInfo(projid, answer, answerID), "recordWordAndPhoneInfo").start();
     //   return answerID;
+  }
+
+  /**
+   * TODO : speaking rate.
+   * @param dialogSessionID
+   * @param timestamp
+   */
+  private void updateDialogSessionWithAnswer(int dialogSessionID, long timestamp) {
+    // find all the results for this session - group by exid, take the latest one in group
+    // then update the num answers, avg score, and maybe speaking rate?
+    // would have to find min, max of word scores for each result id...
+    List<SlickPerfResult> latestResultsForDialogSession = db.getResultDAO().getLatestResultsForDialogSession(dialogSessionID);
+    int size = latestResultsForDialogSession.size();
+    float num = size;
+    float total = 0F;
+    for (SlickPerfResult perfResult : latestResultsForDialogSession) {
+      total += perfResult.pronscore();
+    }
+
+    IDialogSessionDAO dialogSessionDAO = db.getDialogSessionDAO();
+    SlickDialogSession slickDialogSession = dialogSessionDAO.byID(dialogSessionID);
+    if (slickDialogSession == null) {
+      logger.warn("\n\n\nrememberAnswer nothing with " + dialogSessionID);
+    } else {
+      logger.info("now " + dialogSessionID + " num " + size + " score " + total);
+      dialogSessionDAO
+          .update(new SlickDialogSession(
+              slickDialogSession.id(),
+              slickDialogSession.userid(),
+              slickDialogSession.projid(),
+              slickDialogSession.dialogid(),
+              slickDialogSession.modified(),
+              new Timestamp(timestamp),
+              slickDialogSession.view(),
+              slickDialogSession.status(),
+              size,
+              total / num,
+              0F));
+    }
   }
 
   private boolean hasModel() {

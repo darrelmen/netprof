@@ -91,7 +91,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
   static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
   //private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
-
   // private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
 
   final U newUserExercise;
@@ -104,6 +103,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   protected String originalRefAudio;
   protected String originalSlowRefAudio;
+
   /**
    * @see EditableExerciseDialog#setFields
    */
@@ -881,12 +881,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
               showStart();
               otherRAP.setEnabled(false);
             }
-/*
-            @Override
-            public void flip(boolean first) {
-              super.flip(first);
-              flipRecordImages(first);
-            }*/
 
             @Override
             protected AudioType getAudioType() {

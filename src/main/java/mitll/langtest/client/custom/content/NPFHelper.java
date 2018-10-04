@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -68,7 +69,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NPFHelper<T extends CommonShell, U extends ClientExercise> implements RequiresResize {
+public class NPFHelper<T extends CommonShell, U extends ClientExercise> implements RequiresResize, IListenView {
   private final Logger logger = Logger.getLogger("NPFHelper");
 
   public static final String LIST_COMPLETE = "List complete!";
@@ -227,13 +228,23 @@ public class NPFHelper<T extends CommonShell, U extends ClientExercise> implemen
           TwoColumnExercisePanel<U> widgets = new TwoColumnExercisePanel<U>(e,
               controller,
               exerciseList,
-              alignments, true);
+              alignments, true, NPFHelper.this);
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
 
           return widgets;
         }
       }
     };
+  }
+
+  @Override
+  public int getVolume() {
+    return 100;
+  }
+
+  @Override
+  public int getDialogSessionID() {
+    return -1;
   }
 
   @Override

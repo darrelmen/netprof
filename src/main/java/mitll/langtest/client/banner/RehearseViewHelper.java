@@ -39,8 +39,9 @@ import static com.google.gwt.dom.client.Style.Unit.*;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExercise>>
     extends ListenViewHelper<T>
     implements SessionManager, IRehearseView {
-  public static final int PROGRESS_BAR_WIDTH = 49;
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
+
+  public static final int PROGRESS_BAR_WIDTH = 49;
 
   private static final String REHEARSE = "Rehearse";
   private static final String HEAR_YOURSELF = "Hear yourself";
@@ -52,8 +53,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private static final boolean DEBUG = false;
   private static final int TOP_TO_USE = 10;
-  //private final List<Float> thresholds;
-
 
   /**
    * @see #showScoreFeedback
@@ -87,30 +86,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
   private T currentRecordingTurn = null;
   private boolean doRehearse = true;
-  // private static final float NATIVE_HARD_CODE = 0.70F;
 
   private DialogSession dialogSession = null;
-  /**
-   * 9/13/18 histo from production
-   * Did histogram of 85K korean scores, split 6 ways, even 12K piles
-   */
-//  private static final List<Float> koreanThresholds = new ArrayList<>(Arrays.asList(0.31F, 0.43F, 0.53F, 0.61F, NATIVE_HARD_CODE));
-  /**
-   * Did histogram of 18K english scores, split 6 ways, even 3K piles
-   */
-/*
-  private static final List<Float> englishThresholds = new ArrayList<>(Arrays.asList(0.23F, 0.36F, 0.47F, 0.58F, NATIVE_HARD_CODE));  // technically last is 72
-
-  private static final List<String> emoticons = new ArrayList<>(Arrays.asList(
-      "frowningEmoticon.png", // <0.3
-      "confusedEmoticon.png", //0.4
-      "thinkingEmoticon.png", //0.5
-      "neutralEmoticon.png", // 0.6
-      "smilingEmoticon.png", // 0.7
-      "grinningEmoticon.png"
-  ));
-  private static final String BEST_EMOTICON = emoticons.get(emoticons.size() - 1);
-*/
 
   /**
    * @param controller
@@ -146,8 +123,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   protected void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
     super.showDialogGetRef(dialogID, dialog, child);
     child.add(overallFeedback = getOverallFeedback());
-
-    //  showOverallDialogScore();
+    startSession();
   }
 
   @Override
@@ -229,9 +205,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private void gotRehearse() {
     recordDialogTurns.forEach(IRecordDialogTurn::switchAudioToReference);
     doRehearse = true;
-
-    //  logger.info("doRehearse = " + doRehearse);
-
     rehearseChoice.setActive(true);
     hearYourself.setActive(false);
   }
@@ -308,7 +281,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   protected CheckBox addRightSpeaker(DivWidget rowOne, String label) {
     CheckBox checkBox = super.addRightSpeaker(rowOne, label);
     checkBox.getElement().getStyle().setMarginTop(-74, PX);
-
     return checkBox;
   }
 
@@ -356,7 +328,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     DivWidget progressBarDiv = getProgressBarDiv(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
     container.add(progressBarDiv);
-    //progressBarDiv.getElement().getStyle().setMarginBottom(0, PX);
     rateProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT);
 
     container.add(getProgressBarDiv(rateProgress));
@@ -738,32 +709,45 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 //    startSession();
   }
 
+  @Override
+  public int getDialogSessionID() {
+    int i = dialogSession == null ? -1 : dialogSession.getID();
+    logger.info("getDialogSessionID #" + i);
+    return i;
+  }
+
+  /**
+   * @see #startRecordingTurn
+   * @see #showOverallDialogScore
+   */
   private void startSession() {
     if (dialogID == -1) {
       logger.warning("huh? dialog id is  " + dialogID +
           "???\n\n\n\n");
     } else {
-      dialogSession = new DialogSession(-1,
-          controller.getUser(),
-          controller.getProjectStartupInfo().getProjectid(), dialogID,
-          System.currentTimeMillis(),
-          System.currentTimeMillis(),
-          getView(),
-          DialogStatus.DEFAULT, 0, 0F, 0F);
-
-
-      controller.getDialogService().addSession(dialogSession, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-          logger.info("OK, made new session");
-        }
-      });
+      setSession();
     }
+  }
+
+  private void setSession() {
+    dialogSession = new DialogSession(
+        controller.getUser(),
+        controller.getProjectStartupInfo().getProjectid(),
+        dialogID,
+        getView());
+
+    controller.getDialogService().addSession(dialogSession, new AsyncCallback<Integer>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("creating new dialog session", caught);
+      }
+
+      @Override
+      public void onSuccess(Integer result) {
+        logger.info("startSession : made new session = " + result);
+        dialogSession.setID(result);
+      }
+    });
   }
 
   protected INavigation.VIEWS getView() {

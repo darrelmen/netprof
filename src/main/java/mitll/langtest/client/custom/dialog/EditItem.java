@@ -37,6 +37,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -189,7 +190,17 @@ public class EditItem {
         TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
             controller,
             exerciseList,
-            alignments, true);
+            alignments, true, new IListenView() {
+          @Override
+          public int getVolume() {
+            return 100;
+          }
+
+          @Override
+          public int getDialogSessionID() {
+            return -1;
+          }
+        });
         widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
         return widgets;
 

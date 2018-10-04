@@ -60,6 +60,8 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.groupingBy;
+
 public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   private static final Logger logger = LogManager.getLogger(SlickResultDAO.class);
 
@@ -343,7 +345,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
     getResultsForExIDInForUserEasy(ids, userid, language)
         .stream()
-        .collect(Collectors.groupingBy(CorrectAndScore::getExid))
+        .collect(groupingBy(CorrectAndScore::getExid))
         .forEach((k, v) -> exidToMaxScoreEver.put(k,
             v
                 .stream()
@@ -623,6 +625,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   /**
    * All sessions for this user and dialog
+   *
    * @param userid
    * @param dialogID
    * @return
@@ -633,6 +636,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   /**
    * Just this one dialog session, for the moment.
+   *
    * @param dialogsessionid
    * @return
    */
@@ -640,10 +644,27 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     Collection<SlickPerfResult> slickPerfResults = dao.perfByDialogSession(dialogsessionid);
     logger.info("getPerfForDialogSession for " + dialogsessionid);
 
-    slickPerfResults.forEach(slickPerfResult -> logger.info("perf " +slickPerfResult.id() + " by " + slickPerfResult.userid()+ " @ "
+    slickPerfResults.forEach(slickPerfResult -> logger.info("perf " + slickPerfResult.id() + " by " + slickPerfResult.userid() + " @ "
         + slickPerfResult.modified() + " ex " + slickPerfResult.exid() + " answer " + slickPerfResult.answer()));
 
     return slickPerfResults;
+  }
+
+  @Override
+  public List<SlickPerfResult> getLatestResultsForDialogSession(int dialogSessionID) {
+    Map<Integer, List<SlickPerfResult>> collect = getPerfForDialogSession(dialogSessionID).stream().collect(groupingBy(SlickPerfResult::exid));
+
+    List<SlickPerfResult> perfResults = new ArrayList<>();
+    collect.values().forEach(perfs -> {
+      Optional<SlickPerfResult> max = perfs
+          .stream()
+          .filter(p -> p.pronscore() > 0)
+          .max(Comparator.comparingLong(o -> o.modified().getTime()));
+      max.ifPresent(perfResults::add);
+    });
+    perfResults.sort(Comparator.comparingLong(o -> o.modified().getTime()));
+
+    return perfResults;
   }
 
   public Collection<SlickPerfResult> getPerfForUserOnList(int userid, int listid) {

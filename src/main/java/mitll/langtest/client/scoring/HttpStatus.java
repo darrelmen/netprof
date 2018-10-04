@@ -27,7 +27,7 @@ class HttpStatus {
     return code;
   }
 
-  public String getStatusText() {
+  String getStatusText() {
     return statusText;
   }
 

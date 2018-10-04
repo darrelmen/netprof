@@ -261,7 +261,8 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
         double score = Integer.valueOf(percentScore).doubleValue() / 100D;
         overallSmiley.setEmoticon(score, controller.getLanguageInfo());
       }
-    //  else overallSmiley.setEmoticon(0.5,controller.getLanguageInfo());
+      else overallSmiley.setVisible(false);
+      //  else overallSmiley.setEmoticon(0.5,controller.getLanguageInfo());
 
       styleAnimatedSmiley(overallSmiley);
     }
@@ -270,11 +271,12 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   /**
    * TODO : make this a css entry
+   *
    * @param overallSmiley
    */
   private void styleAnimatedSmiley(Emoticon overallSmiley) {
-    overallSmiley.setWidth(24 +        "px");
-    overallSmiley.setHeight(24 +        "px");
+    overallSmiley.setWidth(24 + "px");
+    overallSmiley.setHeight(24 + "px");
     overallSmiley.getElement().getStyle().setPosition(Style.Position.RELATIVE);
   }
 

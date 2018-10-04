@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
@@ -91,6 +92,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @param listContainer
    * @param alignments
    * @param addPlayer
+   * @param listenView
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.banner.LearnHelper#getFactory
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
@@ -100,8 +102,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                                 final ExerciseController controller,
                                 final ListInterface<?, ?> listContainer,
                                 Map<Integer, AlignmentOutput> alignments,
-                                boolean addPlayer) {
-    super(commonExercise, controller, listContainer, alignments, null);
+                                boolean addPlayer,
+                                IListenView listenView) {
+    super(commonExercise, controller, listContainer, alignments, listenView);
 
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;
@@ -241,7 +244,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget, boolean hasEnglish) {
     //  long then = System.currentTimeMillis();
     SimpleRecordAudioPanel<T> recordPanel = //getRecordPanel(e);
-        new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer);
+        new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView);
 
     DivWidget flContainer = getHorizDiv();
 

@@ -43,6 +43,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
+import mitll.npdata.dao.SlickPerfResult;
 
 import java.text.Collator;
 import java.util.Collection;
@@ -143,4 +144,6 @@ public interface IResultDAO extends IDAO {
   <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises);
 
   boolean updateProjectAndEx(int rid, int newprojid, int newEXID);
+
+  List<SlickPerfResult> getLatestResultsForDialogSession(int dialogSessionID);
 }

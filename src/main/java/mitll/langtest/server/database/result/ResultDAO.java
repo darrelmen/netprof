@@ -42,6 +42,7 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
+import mitll.npdata.dao.SlickPerfResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -971,6 +972,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     } catch (SQLException e) {
       logger.warn("addFlashcardColumnsToTable : got " + e);
     }
+  }
+
+  @Override
+  public List<SlickPerfResult> getLatestResultsForDialogSession(int dialogSessionID) {
+    return null;
   }
 
   /**

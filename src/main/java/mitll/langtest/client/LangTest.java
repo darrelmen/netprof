@@ -69,6 +69,7 @@ import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.recorder.*;
 import mitll.langtest.client.scoring.AnnotationHelper;
+import mitll.langtest.client.scoring.ClientAudioContext;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.services.*;
@@ -1178,10 +1179,10 @@ public class LangTest implements
    * @param wavStreamCallback
    * @see PostAudioRecordButton#startRecording
    */
-  public void startStream(int exid, int reqid, boolean isReference, AudioType audioType, WavStreamCallback wavStreamCallback) {
+  public void startStream(ClientAudioContext clientAudioContext, WavStreamCallback wavStreamCallback) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
-    BrowserRecording.startStream(serviceEntryPoint, "" + exid, "" + reqid, isReference, audioType, wavStreamCallback);
+    BrowserRecording.startStream(serviceEntryPoint, clientAudioContext, wavStreamCallback);
   }
 
   /**

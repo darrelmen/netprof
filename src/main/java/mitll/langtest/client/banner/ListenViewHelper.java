@@ -452,6 +452,11 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return slider.getElement().getPropertyInt(VALUE);
   }
 
+  @Override
+  public int getDialogSessionID() {
+    return -1;
+  }
+
   @NotNull
   protected INavigation.VIEWS getPrevView() {
     return INavigation.VIEWS.STUDY;

@@ -27,7 +27,8 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    * @param controller
    * @see NoFeedbackRecordAudioPanel#makePlayAudioPanel
    */
-  FeedbackPostAudioRecordButton(int exid, RecordingAudioListener simpleRecordAudioPanel,
+  FeedbackPostAudioRecordButton(int exid,
+                                RecordingAudioListener simpleRecordAudioPanel,
                                 ExerciseController controller) {
     super(exid,
         controller,
@@ -70,6 +71,11 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   @Override
   protected AudioType getAudioType() {
     return AudioType.LEARN;
+  }
+
+  @Override
+  protected int getDialogSessionID() {
+    return simpleRecordAudioPanel.getDialogSessionID();
   }
 
   /**

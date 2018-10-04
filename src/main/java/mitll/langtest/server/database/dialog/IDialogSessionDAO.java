@@ -35,6 +35,7 @@ package mitll.langtest.server.database.dialog;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.dialog.*;
+import mitll.npdata.dao.SlickDialogSession;
 
 import java.util.List;
 import java.util.Map;
@@ -54,13 +55,13 @@ public interface IDialogSessionDAO extends IDAO {
   );
 
   // seems like we want a summary of the latest scores
-  Map<Integer,Integer> getLatestDialogSessionScores(int projid, int userid);
+  Map<Integer, Integer> getLatestDialogSessionScores(int projid, int userid);
 
   /**
-   * @see mitll.langtest.server.services.DialogServiceImpl#getDialogSessions(int, int)
    * @param userid
    * @param dialog
    * @return
+   * @see mitll.langtest.server.services.DialogServiceImpl#getDialogSessions(int, int)
    */
   List<IDialogSession> getDialogSessions(int userid, int dialog);
 
@@ -76,5 +77,14 @@ public interface IDialogSessionDAO extends IDAO {
    */
   void removeForProject(int id);
 
-  void add(DialogSession dialogSession);
+  /**
+   * @see mitll.langtest.server.services.DialogServiceImpl#addSession
+   * @param dialogSession
+   * @return
+   */
+  int add(DialogSession dialogSession);
+
+  SlickDialogSession byID(int dialogSessionID);
+
+  void update(SlickDialogSession slickDialogSession);
 }

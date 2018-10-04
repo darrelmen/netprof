@@ -156,7 +156,12 @@ public abstract class PostAudioRecordButton extends RecordButton
 
     if (DEBUG) logger.info("startRecording!");
     controller.startRecording();
-    controller.startStream(getExerciseID(), reqid, shouldAddToAudioTable(), getAudioType(), bytes -> gotPacketResponse(bytes, then));
+    controller.startStream(new ClientAudioContext(getExerciseID(),
+            reqid,
+            shouldAddToAudioTable(),
+            getAudioType(),
+            getDialogSessionID()),
+        bytes -> gotPacketResponse(bytes, then));
   }
 
   /**
@@ -453,6 +458,8 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see #postAudioFile(String)
    */
   abstract protected AudioType getAudioType();
+
+  abstract protected int getDialogSessionID();
 
   Widget getPopupTargetWidget() {
     return this;

@@ -22,7 +22,8 @@ import java.util.Map;
 /**
  * Created by go22670 on 4/5/17.
  */
-class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
+class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise>
+    implements IListenView{
   //  private final Logger logger = Logger.getLogger("LearnHelper");
   /**
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
@@ -67,8 +68,18 @@ class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterN
 
       @Override
       public Panel getExercisePanel(ClientExercise e) {
-        return new TwoColumnExercisePanel<>(e, controller, exerciseList, alignments, false);
+        return new TwoColumnExercisePanel<>(e, controller, exerciseList, alignments, false, LearnHelper.this);
       }
     };
+  }
+
+  @Override
+  public int getVolume() {
+    return 100;
+  }
+
+  @Override
+  public int getDialogSessionID() {
+    return -1;
   }
 }

@@ -157,13 +157,18 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     return audioType;
   }
 
+  @Override
+  protected int getDialogSessionID() {
+    return -1;
+  }
+
   /**
    * @param result
    * @see RecordingListener#stopRecording(long, boolean)
    */
   @Override
   public void useResult(AudioAnswer result) {
-    logger.info("useResult -- " + result);
+   // logger.info("useResult -- " + result);
     recordAudioPanel.getImagesForPath(result.getPath());
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordCompleted(recordAudioPanel);

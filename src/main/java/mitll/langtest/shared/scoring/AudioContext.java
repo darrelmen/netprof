@@ -141,6 +141,10 @@ public class AudioContext implements IsSerializable {
     this.exid = exid;
   }
 
+  /**
+   *
+   * @return
+   */
   public int getDialogSessionID() {
     return dialogSessionID;
   }
@@ -158,11 +162,11 @@ public class AudioContext implements IsSerializable {
   public String toString() {
     return
         "AudioContext" +
-            "\n\tuser   " + userid +
-            "\n\tprojid " + projid +
-            "\n\texid   " + exid +
-            "\n\treq    " + reqid +
-            "\n\tsession " + dialogSessionID +
-            "\n\ttype   " + audioType;
+            "\n\tuser           " + userid +
+            "\n\tprojid         " + projid +
+            "\n\texid           " + exid +
+            "\n\treq            " + reqid +
+            "\n\tdialog session " + dialogSessionID +
+            "\n\ttype           " + audioType;
   }
 }

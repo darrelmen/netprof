@@ -68,9 +68,4 @@ public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends L
 
   protected void goGetNextPage() {
   }
-
-/*  @Override
-  protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
-    super.getTypeToValues(typeToSelection, userListID);
-  }*/
 }

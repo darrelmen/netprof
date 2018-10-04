@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * @since 5/27/2014.
  */
 public class WebAudioRecorder {
-   private static final Logger logger = Logger.getLogger("WebAudioRecorder");
+  private static final Logger logger = Logger.getLogger("WebAudioRecorder");
   private static final int DELAY_MILLIS = 4000;
 
   private static boolean webAudioMicAvailable;
@@ -126,10 +126,10 @@ public class WebAudioRecorder {
    * @param exid
    * @param reqid
    * @param audioType
-   * @see BrowserRecording#startStream(String, String, String, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
+   * @see BrowserRecording#startStream
    */
-  public native void startStream(String url, String exid, String reqid, String isreference, String audioType) /*-{
-      $wnd.serviceStartStream(url, exid, reqid, isreference, audioType);
+  public native void startStream(String url, String exid, String reqid, String isreference, String audioType, String dialogSessionID) /*-{
+      $wnd.serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID);
   }-*/;
 
   /**
@@ -241,14 +241,14 @@ public class WebAudioRecorder {
   private static WavCallback wavCallback = null;
 
   /**
-   * @see BrowserRecording#stopWebRTCRecording
    * @param abort
    * @param wavCallback
+   * @see BrowserRecording#stopWebRTCRecording
    */
   public void stopRecording(boolean abort, WavCallback wavCallback) {
     if (USE_STREAMS) {
       logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
-      doStopStream(""+abort);
+      doStopStream("" + abort);
     } else {
       logger.info("WebAudioRecorder.stopRecording - stop and grab wav");
       WebAudioRecorder.wavCallback = wavCallback;
@@ -267,7 +267,7 @@ public class WebAudioRecorder {
   public static void getStreamResponse(String json) {
     //  console("getStreamResponse   bytes = '" + json.length() + "'");
     if (wavStreamCallback != null) {
-    //  console("getStreamResponse got " + json.length() + " " + json);
+      //  console("getStreamResponse got " + json.length() + " " + json);
       wavStreamCallback.getResponse(json);
     } else {
       console("getStreamResponse no callback?");

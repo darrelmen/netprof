@@ -2,6 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
@@ -30,7 +31,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  */
 public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends NoFeedbackRecordAudioPanel<T>
     implements SessionManager {
-   private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
   private static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
@@ -48,21 +49,26 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
   private ScoreFeedbackDiv scoreFeedbackDiv;
   private final boolean addPlayer;
   private Widget scoreHistory;
+  private final IListenView listenView;
 
   /**
    * @param controller
    * @param exercise
    * @param listContainer
    * @param addPlayer
+   * @param listenView
    * @see TwoColumnExercisePanel#makeFirstRow
    */
   SimpleRecordAudioPanel(ExerciseController controller,
                          T exercise,
-                         ListInterface<?, ?> listContainer, boolean addPlayer) {
+                         ListInterface<?, ?> listContainer,
+                         boolean addPlayer,
+                         IListenView listenView) {
     super(exercise, controller, () -> null);
+    this.listenView = listenView;
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;
-    getElement().setId("SimpleRecordAudioPanel_" +exercise.getID());
+    getElement().setId("SimpleRecordAudioPanel_" + exercise.getID());
     this.isRTL = controller.isRightAlignContent();
     setWidth("100%");
     addWidgets();
@@ -72,6 +78,11 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
     showRecordingHistory(scores);
     hasScoreHistory = scores != null && !scores.isEmpty();
     setVisible(hasScoreHistory);
+  }
+
+  @Override
+  public int getDialogSessionID() {
+    return listenView.getDialogSessionID();
   }
 
   /**
