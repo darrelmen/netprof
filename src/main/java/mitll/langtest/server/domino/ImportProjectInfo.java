@@ -14,10 +14,12 @@ public class ImportProjectInfo {
   private int dominoProjectID;
   private String name;
 
+/*
   public ImportProjectInfo(String unitName, String chapterName) {
     this.unitName = unitName;
     this.chapterName = chapterName;
   }
+*/
 
   /**
    * @param dominoProjectID

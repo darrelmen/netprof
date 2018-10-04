@@ -186,25 +186,42 @@ public class DominoImport implements IDominoImport {
                     String longName = metadataSpecification.getLongName();
 
                     if (dbName.equalsIgnoreCase(V_UNIT)) {
-                      importProjectInfo.setUnitName(longName);
+                      importProjectInfo.setUnitName(checkGetCap(longName));
                     } else if (dbName.equalsIgnoreCase(V_CHAPTER)) {
-                      importProjectInfo.setChapterName(longName);
+                      importProjectInfo.setChapterName(checkGetCap(longName));
                     }
                   })));
 
-      String unitName = importProjectInfo.getUnitName();
-      String chapterName = importProjectInfo.getChapterName();
+      {
+        String unitName = importProjectInfo.getUnitName();
+        String chapterName = importProjectInfo.getChapterName();
 
-      if (unitName.isEmpty() && chapterName.isEmpty()) {
-        logger.warn("no unit or chapter info on " + id +
-            "\n\tworkflow " + workflow +
-            "\n\ttasks " + workflow.getTaskSpecs());
-      } else {
+        if (unitName.isEmpty() && chapterName.isEmpty()) {
+          logger.warn("\n\n\nsetUnitAndChapter no unit or chapter info on " + id +
+              "\n\tworkflow " + workflow +
+              "\n\ttasks " + workflow.getTaskSpecs());
+        } else {
 /*        logger.info("unit/chapter info on " + id +
             "\n\tunitName " + unitName +
             "\n\tchapterName " + chapterName);*/
+        }
       }
     }
+  }
+
+  @NotNull
+  private String checkGetCap(String longName) {
+    String cl = getCapitalized(longName);
+    if (!cl.equals(longName)) {
+      logger.warn("checkGetCap use '" + cl + "' instead of '" + longName +"'");
+      longName = cl;
+    }
+    return longName;
+  }
+
+  @NotNull
+  private String getCapitalized(String nameForAnswer) {
+    return nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1);
   }
 
 /*  private String getNPId(MetadataComponentBase vocabularyItem) {
