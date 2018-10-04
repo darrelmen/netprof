@@ -235,7 +235,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     final PagingExerciseList<T, U> exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName,
         listHeader, footer);
     exerciseList.setUserListID(userListID);
-
     exerciseList.setFactory(getFactory(exerciseList));
     Scheduler.get().scheduleDeferred(exerciseList::onResize);
     return exerciseList;

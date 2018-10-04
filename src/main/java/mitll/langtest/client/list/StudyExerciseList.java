@@ -63,7 +63,7 @@ public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends L
 
   private int getDialogFromURL() {
     int dialog = new SelectionState().getDialog();
-    return dialog == -1 ? 0 : dialog;
+    return dialog;
   }
 
   protected void goGetNextPage() {

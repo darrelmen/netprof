@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class SearchHelper {
   private static final Logger logger = LogManager.getLogger(SearchHelper.class);
 
-  @NotNull
+/*  @NotNull
   public Collection<CommonExercise> getSearchMatches(Collection<CommonExercise> exercisesForState,
                                                      String prefix,
                                                      String language,
@@ -60,5 +60,5 @@ public class SearchHelper {
 
     }
     return exercisesForState;
-  }
+  }*/
 }

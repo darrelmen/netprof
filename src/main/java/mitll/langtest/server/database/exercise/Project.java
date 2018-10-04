@@ -43,7 +43,6 @@ import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.scoring.ASRWebserviceScoring;
-import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.dialog.IDialog;
@@ -52,7 +51,6 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.AlignmentOutput;
-import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
@@ -284,7 +282,7 @@ public class Project implements IPronunciationLookup {
   private void makeItemTrie(List<CommonExercise> rawExercises, SmallVocabDecoder smallVocabDecoder) {
     logger.info("buildExerciseTrie : build trie from " + rawExercises.size() + " exercises for " + project);
     long then = System.currentTimeMillis();
-    fullTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, true);
+    fullTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, true, false);
     logger.info("buildExerciseTrie : for " + project.id() + " took " + (System.currentTimeMillis() - then) + " millis to build trie for " + rawExercises.size() + " exercises");
   }
 
@@ -303,7 +301,7 @@ public class Project implements IPronunciationLookup {
       }
 */
     long before = logMemory();
-    fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
+    fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false, false);
     long after = logMemory();
     logger.info("buildExerciseTrie : END context for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() +
         " exercises, used " + (after - before) + " MB");

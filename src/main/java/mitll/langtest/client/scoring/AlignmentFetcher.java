@@ -243,7 +243,9 @@ class AlignmentFetcher {
 
             @Override
             public void onSuccess(Map<Integer, AlignmentOutput> result) {
-              result.forEach((k, v) -> logger.info("getAlignments got " + k + " = " + v));
+              if (DEBUG){
+                result.forEach((k, v) -> logger.info("getAlignments got " + k + " = " + v));
+              }
 
               alignments.putAll(result);
 

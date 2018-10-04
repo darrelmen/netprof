@@ -23,7 +23,7 @@ class DialogHeader {
   /**
    * @see #getHeader
    */
-//  private static final int ROW_WIDTH = 97;
+  private static final int ROW_WIDTH = 98;
 
   private final INavigation.VIEWS prev;
   private final INavigation.VIEWS next;
@@ -50,7 +50,7 @@ class DialogHeader {
 
       //  row.setHeight(HEADER_HEIGHT + "px");
 
-     // row.setWidth(ROW_WIDTH + "%");
+      row.setWidth(ROW_WIDTH + "%");
       row.addStyleName("inlineFlex");
 
       row.add(getLeftArrow());

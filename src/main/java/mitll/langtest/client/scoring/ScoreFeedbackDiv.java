@@ -87,7 +87,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
    * Horizontal - play audio, score feedback, download widget
    * Shows a little praise message too!
    *
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput(PretestScore)
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
    * @param pretestScore
    * @param isRTL
    * @return

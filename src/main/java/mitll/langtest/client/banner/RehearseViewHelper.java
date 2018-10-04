@@ -19,19 +19,18 @@ import mitll.langtest.client.flashcard.SessionStorage;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.client.scoring.ScoreProgressBar;
-import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
 
-import static com.google.gwt.dom.client.Style.Unit.*;
+import static com.google.gwt.dom.client.Style.Unit.PCT;
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * Created by go22670 on 4/5/17.
@@ -39,6 +38,7 @@ import static com.google.gwt.dom.client.Style.Unit.*;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExercise>>
     extends ListenViewHelper<T>
     implements SessionManager, IRehearseView {
+  public static final double MAX_RATE_RATIO = 3D;
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final int PROGRESS_BAR_WIDTH = 49;
@@ -47,7 +47,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
   private static final String HEAR_YOURSELF = "Hear yourself";
   private static final int VALUE = -98;
 
-//  private static final String WIDTH = "97%";
+  //  private static final String WIDTH = "97%";
   private static final String THEY_SPEAK = "Listen to : ";
   private static final String YOU_SPEAK = "Speak : ";
 
@@ -141,7 +141,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     style.setClear(Style.Clear.BOTH);
 
     breadRow.addStyleName("cardBorderShadow");
-   // breadRow.setWidth(WIDTH);  //??? why 97???
+    // breadRow.setWidth(WIDTH);  //??? why 97???
     breadRow.add(showScoreFeedback());
 
     return breadRow;
@@ -701,12 +701,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     bothTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
-}
+  }
 
   @Override
   public int getDialogSessionID() {
     int i = dialogSession == null ? -1 : dialogSession.getID();
- //   logger.info("getDialogSessionID #" + i);
+    //   logger.info("getDialogSessionID #" + i);
     return i;
   }
 
@@ -891,12 +891,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     double studentTotal = getTotal(this.exToStudentDur);
     double refTotal = getTotal(this.exToRefDur);
 
+    logger.info("showOverallDialogScore student total " + studentTotal + " vs ref " +refTotal);
+
     total = setScoreProgressLevel(total, num);
     {
 //
 //      studentTotal = 10;
 //      refTotal = 10;
-      double totalRatio = refTotal == 0D ? 0D : studentTotal / (3D * refTotal);
+      double totalRatio = refTotal == 0D ? 0D : studentTotal / (MAX_RATE_RATIO * refTotal);
       //double totalAvgRate = totalRatio / ((float) num);
 
       //   logger.info("showOverallDialogScore avg rate " + studentTotal + " vs " + refTotal + " = " + totalRatio);
@@ -947,13 +949,22 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     return total;
   }
 
+  /**
+   * @param total
+   * @see #showOverallDialogScore
+   */
   private void setRateProgress(double total) {
     ProgressBar scoreProgress = this.rateProgress;
     scoreProgress.setVisible(true);
 
     double percent1 = (1F - total);
     logger.info("setRateProgress score to color " + percent1);
-    new ScoreProgressBar(false).setColor(scoreProgress, percent1);
+   // new ScoreProgressBar(false).setColor(scoreProgress, percent1);
+
+    if (percent1 < 0.4) scoreProgress.setColor(ProgressBarBase.Color.SUCCESS);
+    else if (percent1 < 0.6) scoreProgress.setColor(ProgressBarBase.Color.INFO);
+    else if (percent1 < 0.8) scoreProgress.setColor(ProgressBarBase.Color.WARNING);
+    else scoreProgress.setColor(ProgressBarBase.Color.DANGER);
 
     {
       double percent = total * 100D;
@@ -973,7 +984,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
     return total;
   }
- 
+
   /**
    * @see RecordDialogExercisePanel#addWidgets
    */

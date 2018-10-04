@@ -377,7 +377,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
         isRight);
   }
 
+  boolean gotTurnClick = false;
+
   void gotTurnClick(T turn) {
+    gotTurnClick = true;
     removeMarkCurrent();
     setCurrentTurn(turn);
     playCurrentTurn();
@@ -604,12 +607,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     setCurrentTurn(bothTurns.get(nextIndex));
   }
 
-/*
-  boolean onFirstTurn() {
-    return bothTurns.indexOf(currentTurn) == 0;
-  }
-*/
-
   boolean onFirstPromptTurn() {
     return getPromptSeq().indexOf(currentTurn) == 0;
   }
@@ -698,6 +695,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
       setPlayButtonToPlay();
       removeMarkCurrent();
       currentTurnPlayEnded(false);
+
     }
   }
 
@@ -706,16 +704,20 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @see #playStopped
    */
   void currentTurnPlayEnded(boolean wasRecording) {
-    if (DEBUG) logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID());
-    T next = getNext();
-    makeNextVisible();
-
-    if (next == null) {
-      if (DEBUG) logger.info("OK stop");
+    if (DEBUG||true) logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
+    if (gotTurnClick) {
+      gotTurnClick = false;
     } else {
-      removeMarkCurrent();
-      setCurrentTurn(next);
-      playCurrentTurn();
+      T next = getNext();
+      makeNextVisible();
+
+      if (next == null) {
+        if (DEBUG) logger.info("OK stop");
+      } else {
+        removeMarkCurrent();
+        setCurrentTurn(next);
+        playCurrentTurn();
+      }
     }
   }
 

@@ -201,7 +201,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
   @Override
   public void useResult(AudioAnswer result) {
     super.useResult(result);
-    logger.info("useScoredResult " + result);
+    //logger.info("useResult " + result);
     waitCursorHelper.showFinished();
     hasScoreHistory = true;
 

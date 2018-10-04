@@ -76,6 +76,7 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
                 logger.info("getFullExercises took " + (now - then) + " to get " + size + " exercises");
               }
 
+          //    result.getExercises().forEach(ex->logger.info("got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage()));
               getFullExercisesSuccess(result, alreadyFetched, visibleIDs);
             } else {
               logger.warning("getFullExercises huh? no exercises from " + requested);

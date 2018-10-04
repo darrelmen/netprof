@@ -52,7 +52,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.moxieapps.gwt.highcharts.client.Lang;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -77,10 +76,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_ID_LOOKUP = false;
 
-//  private static final boolean USE_PHONE_TO_DISPLAY = true;
-//  private static final boolean WARN_MISSING_REF_RESULT = false;
   private static final String RECORDED1 = "Recorded";
   private static final String ANY = "Any";
+  private static final boolean DEBUG_SEARCH = false;
 
   /**
    * @param request
@@ -251,11 +249,14 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   private ExerciseListWrapper<T> getDialogResponse(ExerciseListRequest request, int projectID) throws DominoSessionException {
-    // List<ClientExercise> exercises = getDialog(request.getDialogID()).getExercises();
     List<CommonExercise> collect = getCommonExercises(getDialog(request.getDialogID()).getCoreVocabulary());
     collect.addAll(getCommonExercises(getDialog(request.getDialogID()).getExercises()));
 
-    logger.info("getDialogResponse returning exercises for " + request.getDialogID() + " " + collect.size());
+   // logger.info("request " + request.getPrefix());
+    if (!request.getPrefix().isEmpty()) {
+      collect = new ArrayList<>(getSearchMatches(collect, request.getPrefix(), projectID));
+    }
+    //logger.info("getDialogResponse returning exercises for " + request.getDialogID() + " " + collect.size());
     ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, collect, projectID);
     return exerciseListWrapper;
   }
@@ -602,23 +603,30 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see #getExerciseListWrapperForPrefix(ExerciseListRequest, Collection, int)
    */
   @NotNull
-  private Collection<CommonExercise> getSearchMatches(Collection<CommonExercise> exercisesForState, String prefix, int projID) {
+  private Collection<CommonExercise> getSearchMatches(Collection<CommonExercise> exercisesForState,
+                                                      final String prefix,
+                                                      final int projID) {
     Collection<CommonExercise> originalSet = exercisesForState;
     // logger.info("original set" +originalSet.size());
     long then = System.currentTimeMillis();
     String language = getLanguage(projID);
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder(projID);
-    ExerciseTrie<CommonExercise> trie =
-        new ExerciseTrie<>(exercisesForState, language, smallVocabDecoder, true);
-    long now = System.currentTimeMillis();
-    if (now - then > 20)
-      logger.info("took " + (now - then) + " millis to build trie for " + exercisesForState.size() + " exercises");
-    exercisesForState = trie.getExercises(prefix);
 
-    if (exercisesForState.isEmpty()) {
-      String prefix1 = StringUtils.stripAccents(prefix);
-      exercisesForState = trie.getExercises(prefix1);
-      logger.info("getSearchMatches trying " + prefix1 + " instead of " + prefix + " found " + exercisesForState.size());
+    {
+      ExerciseTrie<CommonExercise> trie =
+          new ExerciseTrie<>(exercisesForState, language, smallVocabDecoder, true, false);
+      long now = System.currentTimeMillis();
+      if (now - then > 20 || DEBUG_SEARCH)
+        logger.info("getSearchMatches took " + (now - then) + " millis to build trie for " + exercisesForState.size() + " exercises");
+      exercisesForState = trie.getExercises(prefix);
+
+      if (exercisesForState.isEmpty()) {
+        String prefix1 = StringUtils.stripAccents(prefix);
+        exercisesForState = trie.getExercises(prefix1);
+        logger.info("getSearchMatches trying '" + prefix1 + "' instead of " + prefix + " found " + exercisesForState.size());
+      } else if (DEBUG_SEARCH) {
+        exercisesForState.forEach(exercise -> logger.info("trie for " + prefix + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage()));
+      }
     }
 
     Set<Integer> unique = new HashSet<>();
@@ -626,22 +634,31 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     {
       then = System.currentTimeMillis();
-      trie = new ExerciseTrie<>(originalSet, language, smallVocabDecoder, false);
-      now = System.currentTimeMillis();
-      if (now - then > 20) {
+      originalSet.forEach(exercise -> {
+        logger.info("ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+        exercise.getDirectlyRelated().forEach(ex -> {
+          logger.info("\tdirect ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+        });
+      });
+      ExerciseTrie<CommonExercise> contextTrie = new ExerciseTrie<>(originalSet, language, smallVocabDecoder, false, false);
+      long now = System.currentTimeMillis();
+      if (now - then > 20 || DEBUG_SEARCH) {
         logger.info("took " + (now - then) + " millis to build trie for " + originalSet.size() + " context exercises");
       }
 
-      List<CommonExercise> contextExercises = trie.getExercises(prefix);
+      List<CommonExercise> contextExercises = contextTrie.getExercises(prefix);
       if (contextExercises.isEmpty()) {
-        contextExercises = trie.getExercises(StringUtils.stripAccents(prefix));
-        logger.info("getSearchMatches context trying " + StringUtils.stripAccents(prefix) + " instead of " + prefix + " found " + contextExercises.size());
+        contextExercises = contextTrie.getExercises(StringUtils.stripAccents(prefix));
+        logger.info("getSearchMatches context " +
+            "trying '" + StringUtils.stripAccents(prefix) + "' instead of " + prefix + " found " + contextExercises.size());
+      } else if (DEBUG_SEARCH) {
+        contextExercises.forEach(exercise -> logger.info("contextExercises trie for '" + prefix + "' = " +
+            "eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "'"));
       }
       exercisesForState.addAll(contextExercises.stream().filter(e -> !unique.contains(e.getID())).collect(Collectors.toList()));
     }
     if (exercisesForState.isEmpty()) {
       logger.info("getSearchMatches neither " + prefix + " nor " + StringUtils.stripAccents(prefix) + " found any matches against " + exercisesForState.size());
-
     }
     return exercisesForState;
   }

@@ -77,11 +77,6 @@ public abstract class PostAudioRecordButton extends RecordButton
   private static final boolean USE_DELAY = false;
   private static final String END = "END";
 
-/*
-  public static final String REQID = "reqid";
-  public static final String VALID = "valid";
-*/
-
   public static final int MIN_DURATION = 250;
 
   private boolean validAudio = false;
@@ -268,7 +263,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    */
   protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
     controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + validity);
-    logger.info("useInvalidResult platform is " + getPlatform());
+    //logger.info("useInvalidResult platform is " + getPlatform());
     if (!checkAndShowTooLoud(validity)) {
       showPopup(validity.getPrompt());
     }
