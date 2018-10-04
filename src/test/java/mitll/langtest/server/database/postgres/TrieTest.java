@@ -56,7 +56,7 @@ public class TrieTest extends BaseTest {
     e.setForeignLanguage("soemthing korean");
     exercises.add(e);
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
-    ExerciseTrie<CommonExercise> korean = new ExerciseTrie<>(exercises, "korean", smallVocabDecoder, true);
+    ExerciseTrie<CommonExercise> korean = new ExerciseTrie<>(exercises, "korean", smallVocabDecoder, true, false);
 
     testAll(test,korean);
     testAll("habit custom", korean);
