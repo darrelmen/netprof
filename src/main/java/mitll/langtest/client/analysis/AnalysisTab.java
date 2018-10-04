@@ -175,8 +175,7 @@ public class AnalysisTab extends DivWidget {
                      int req,
                      ReqCounter reqCounter,
                      INavigation.VIEWS jumpView) {
-    this(
-        controller,
+    this(controller,
         overallBottom, userChosenID, isPolyglot,
         reqCounter, jumpView,
         new AnalysisRequest()
@@ -244,7 +243,7 @@ public class AnalysisTab extends DivWidget {
         .setReqid(req)
         .setDialogID(dialog);*/
 
-    logger.info("request " + analysisRequest);
+  //  logger.info("request " + analysisRequest);
 
     analysisServiceAsync.getPerformanceReportForUser(analysisRequest, new AsyncCallback<AnalysisReport>() {
       @Override
@@ -261,7 +260,7 @@ public class AnalysisTab extends DivWidget {
             "\n\tserver " + result.getServerTime() +
             "\n\tclient " + (total - result.getServerTime()));
 
-        logger.info("result " + result);
+    //    logger.info("result " + result);
 
         if (reqCounter.getReq() != result.getReq() + 1) {
           logger.info("getPerformanceReportForUser : skip " + reqCounter.getReq() + " vs " + result.getReq());
@@ -280,7 +279,7 @@ public class AnalysisTab extends DivWidget {
     private final int dialogID;
     private final int dialogSessionID;
 
-     ReqInfo(AnalysisRequest req) {
+    ReqInfo(AnalysisRequest req) {
       this(req.getUserid(), req.getMinRecordings(), req.getListid(), req.getDialogID(), req.getDialogSessionID());
     }
 

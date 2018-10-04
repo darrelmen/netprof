@@ -156,11 +156,6 @@ class TimeSeriesPlot extends DivWidget {
     return toUse.format(date);
   }
 
-//
-//  String getShortDate(long xAsLong) {
-//    return getShortDate(xAsLong, true);
-//  }
-
   String getDate(long xAsLong) {
     return getDate(xAsLong, true);
   }

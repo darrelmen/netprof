@@ -168,7 +168,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
     }
     return candidate;
   }
- 
+
   private Collection<SlickDialogSession> getByUserAndDialog(int userid, int dialogid) {
     return dao.byUserAndDialog(userid, dialogid, 1);
   }

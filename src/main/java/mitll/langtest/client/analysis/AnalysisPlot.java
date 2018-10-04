@@ -41,6 +41,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.common.MessageHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -79,6 +80,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
 
   private static final boolean DEBUG_TIMECHANGE = false;
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_EXTREMES = false;
 
   /**
    *
@@ -378,16 +380,19 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
       add(chart);
     }
     setRawBestScores(rawBestScores);
-    showSeriesByVisible();
+    //showSeriesByVisible();
 
     if (useSessionTimeHorizon) {
+      logger.info("session time horizon");
       setTimeHorizon(AnalysisTab.TIME_HORIZON.SESSION);
     } else {
-      setTimeHorizon(TIME_HORIZON.ALL);
-    }
+      logger.info("ALL time horizon");
+      //setTimeHorizon(TIME_HORIZON.ALL);
+      //gotExtremes(new AxisSetExtremesEvent(null,chart.getXAxis()));
 
-//    String shortDate = firstTime > 1 ? getShortDate(firstTime, false) : "";
-//    setTimeDisplay(shortDate);
+      showSeriesByVisible();
+
+    }
   }
 
   @NotNull
@@ -414,28 +419,34 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
    *
    */
   private void showSeriesByVisible() {
-    Scheduler.get().scheduleDeferred(() -> {
-      if (chart != null) {
-        //logger.info("showSeriesByVisible : doing deferred ---------- ");
-        seriesToVisible.forEach((series, shouldShow) -> {
-          if (shouldShow) {
-//              logger.info("showSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
-            if (chart.getSeries(series.getId()) == null) {
-              chart.addSeries(series);
-              if (!series.isVisible()) {
-                series.setVisible(true);
-              }
-              // logger.info("\tshowSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
-            }
-          } else {
-            chart.removeSeries(series);
+    Scheduler.get().scheduleDeferred(this::showSeries);
+    //  showSeries();
+  }
+
+  private void showSeries() {
+    if (chart != null) {
+      //logger.info("showSeriesByVisible : doing deferred ---------- ");
+      seriesToVisible.forEach((series, shouldShow) -> {
+        if (shouldShow) {
+          if (DEBUG) {
+            logger.info("showSeriesByVisible defer : series " //+ name + "/"
+                + series + " : " + series.isVisible());
+          }
+          if (chart.getSeries(series.getId()) == null) {
+            chart.addSeries(series);
             if (!series.isVisible()) {
               series.setVisible(true);
             }
+            // logger.info("\tshowSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
           }
-        });
-      }
-    });
+        } else {
+          chart.removeSeries(series);
+          if (!series.isVisible()) {
+            series.setVisible(true);
+          }
+        }
+      });
+    }
   }
 
   /**
@@ -747,41 +758,52 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
    * @see #configureChart
    */
   private void gotExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
+    // logger.info("gotExtremes...");
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got Extremes"));
+//    logger.info("gotExtremes stack " + exceptionAsString);
+
     detailSeries.forEach(series -> series.setVisible(false, false));
 
     try {
       Number min = axisSetExtremesEvent.getMin();
       Number max = axisSetExtremesEvent.getMax();
 
-      if (DEBUG) {
+      if (DEBUG_EXTREMES) {
         logger.info("gotExtremes got" +
             "\n\tmin " + min + " " + (min == null ? "" : new Date(min.longValue())) +
             "\n\tmax " + max + " " + (max == null ? "" : new Date(max.longValue())
         ));
       }
 
-      if (min != null &&
-          min.longValue() > 0) {
+      if (min != null && min.longValue() > 0) {
         long start = min.longValue();
         long end = max.longValue();
-        if (DEBUG) logger.info("gotExtremes 1 now min " + new Date(start) + " max " + new Date(end));
+        if (DEBUG_EXTREMES) logger.info("gotExtremes 1 now min " + new Date(start) + " max " + new Date(end));
         setVisibility(start, end);
         timeChanged(start, end);
-      } else {
-        long end = System.currentTimeMillis();
-        long start = end - ALL.getDuration();
-        if (DEBUG) logger.info("gotExtremes 2 now min " + new Date(start) + " max " + new Date(end));
-        setVisibility(start, end);
-        goToLast(TIME_HORIZON.ALL);
-      }
 
+      } else {
+//        showLastTwentyYears();
+        setVisibility(firstTime, lastTime);
+      }
       showSeriesByVisible();
+
 
     } catch (Exception e) {
       logger.warning("gotExtremes : got " + e);
       exceptionSupport.logException(e);
     }
   }
+
+/*
+  private void showLastTwentyYears() {
+    long end = System.currentTimeMillis();
+    long start = end - ALL.getDuration();
+    if (DEBUG_EXTREMES) logger.info("gotExtremes 2 now min " + new Date(start) + " max " + new Date(end));
+    setVisibility(start, end);
+    goToLast(TIME_HORIZON.ALL);
+  }
+*/
 
   /**
    * Remember time window of data (x-axis).
@@ -834,6 +856,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
    * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    */
   void setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
+    logger.info("setTimeHorizon " + timeHorizon);
     goToLast(this.timeHorizon = timeHorizon);
   }
 
@@ -841,6 +864,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
    * @param timeHorizon
    * @return
    * @see #setTimeHorizon(AnalysisTab.TIME_HORIZON)
+   * @see #gotExtremes
    */
   private void goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
     logger.info("goToLast " +
@@ -908,13 +932,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
 
     int numPeriods = timePeriods.size();
     int lastPeriodIndex = numPeriods - 1;
-    Long lastPeriod = timePeriods.get(lastPeriodIndex);
+//    Long lastPeriod = timePeriods.get(lastPeriodIndex);
     this.index = lastPeriodIndex;
 
     timeWidgets.getPrevButton().setEnabled(numPeriods > 1);
     disableNext();
 
-    setTimeDisplay(getShortDate(lastPeriod, shouldShowHour(duration)));
+    //  setTimeDisplay(getShortDate(lastPeriod, shouldShowHour(duration)));
     setTitleScore(startOfPrevPeriod, lastPlusSlack, index);
 
     return startOfPrevPeriod;
@@ -932,12 +956,18 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
     long[] adjusted = getAdjusted(firstTime, lastPlusSlack);
     xAxis.setExtremes(adjusted[0], adjusted[1]);
     setTimeWindowControlsToAll(adjusted[0]);
-    //return firstTime;
   }
 
   private long[] getAdjusted(long firstW, long lastPlusSlack) {
+    logger.info("getAdjusted " + firstW + " last plus slack " + lastPlusSlack);
+
     long window = lastPlusSlack - firstTime;
-    long hours = window / HOUR_DUR;
+    float windowF = (float) window;
+    float leftRightMargin = windowF * 0.05F;
+    int leftRight = Math.round(leftRightMargin);
+
+  /*  long hours = window / HOUR_DUR;
+
     if (hours < 24) {
       // logger.info("showAll hours " + hours);
       firstW -= HOUR_DUR;
@@ -954,10 +984,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
       // logger.info("showAll month " + (window / MONTH_DUR));
       firstW -= MONTH_DUR;
       lastPlusSlack += MONTH_DUR;
-    }
+    }*/
     long[] adjusted = new long[2];
-    adjusted[0] = firstW;
-    adjusted[1] = lastPlusSlack;
+    adjusted[0] = firstW - leftRight;
+    adjusted[1] = lastPlusSlack + leftRight;
     return adjusted;
   }
 
@@ -968,12 +998,8 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
   private void setTimeWindowControlsToAll(long firstW) {
     timeWidgets.getPrevButton().setEnabled(false);
     disableNext();
-
-    String shortDate = getShortDate(firstW, false);
-    setTimeDisplay(shortDate);
     setTitleScore(-1, -1, index);
     timeWidgets.reset();
-//    timeChanged(firstTime, lastTime);
   }
 
   private void setTimeDisplay(String shortDate) {
@@ -1060,9 +1086,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
    */
   private void showTimePeriod(long offset, List<Long> periods) {
     Long periodStart = periods.get(index);
-    String shortDate = periodStart > 1 ? getShortDate(periodStart, shouldShowHour(offset)) : "";
-    //   logger.info("showTimePeriod short date " + shortDate + " for " + periodStart);
-    setTimeDisplay(shortDate);
     long end = periodStart + offset;
 
 /*    logger.info("showTimePeriod From      " + format.format(new Date(periodStart)));
@@ -1109,6 +1132,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
 //      logger.info("timeChanged stack " + exceptionAsString);
     }
+    setTimeDisplay(getShortDate(from, shouldShowHour((to - from))));
     listeners.forEach(timeChangeListener -> timeChangeListener.timeChanged(from, to));
     setTitleScore(from, to, index);
   }
@@ -1132,16 +1156,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
         "</span>");
     setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
   }
-
-/*  protected SafeHtml getNoWrapContent(String noWrapContent) {
-    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
-        noWrapContent +
-        "</span>");
-
-    sb.appendHtmlConstant("</div>");
-    return sb.toSafeHtml();
-  }*/
 
   /**
    * Uses remembered session size.

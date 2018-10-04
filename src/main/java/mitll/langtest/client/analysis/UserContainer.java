@@ -35,6 +35,7 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
@@ -49,6 +50,7 @@ import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -641,7 +643,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return columnSortHandler;
   }
 
-  private ColumnSortEvent.ListHandler<UserInfo> getLastSessionSorter(Column<UserInfo, SafeHtml> englishCol,
+/*  private ColumnSortEvent.ListHandler<UserInfo> getLastSessionSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                      List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
@@ -660,7 +662,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           return -1;
         });
     return columnSortHandler;
-  }
+  }*/
 
   private ColumnSortEvent.ListHandler<UserInfo> getOverallSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                  List<UserInfo> dataList) {
@@ -844,6 +846,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private UserInfo lastSelected = null;
 
   /**
+   * @see #selectAndClick
+   * @see #checkGotClick
    * @param selectedUser
    */
   public void gotClickOnItem(final UserInfo selectedUser) {

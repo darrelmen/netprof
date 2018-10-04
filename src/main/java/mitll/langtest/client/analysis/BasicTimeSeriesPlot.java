@@ -38,6 +38,8 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
 
   final ExceptionSupport exceptionSupport;
 
+  private static final boolean WARN_ABOUT_MISSING_EXERCISE_ID = false;
+
   BasicTimeSeriesPlot(ExceptionSupport exceptionSupport) {
     this.exceptionSupport = exceptionSupport;
   }
@@ -118,7 +120,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
           try {
             long xAsLong = toolTipData.getXAsLong();
             Integer exerciseID = timeToId.get(xAsLong);
-           // if (exerciseID == null) logger.warning("getToolTip no ex at " + xAsLong);
+            // if (exerciseID == null) logger.warning("getToolTip no ex at " + xAsLong);
             T commonShell = getCommonShellAtTime(exerciseID, xAsLong);
             return getTooltip(toolTipData, exerciseID, commonShell);
           } catch (Exception e) {
@@ -135,7 +137,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
 
   protected T getCommonShellAtTime(Integer exerciseID, long xAsLong) {
     T commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
-    if (commonShell == null) {
+    if (commonShell == null && WARN_ABOUT_MISSING_EXERCISE_ID) {
       logger.info("getCommonShellAtTime no ex found " + exerciseID);
     }
     return commonShell;
@@ -153,11 +155,11 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
   }
 
   /**
-   * @see AnalysisPlot#addCumulativeAverage(Collection, Chart, String, boolean)
    * @param chart
    * @param seriesTitle
    * @param data
    * @return
+   * @see AnalysisPlot#addCumulativeAverage(Collection, Chart, String, boolean)
    */
   Series getSplineSeries(Chart chart, String seriesTitle, Number[][] data) {
     return chart.createSeries()
@@ -186,7 +188,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
    * @see #getToolTip()
    */
   protected String getTooltip(ToolTipData toolTipData, Integer exid, T commonShell) {
- //  logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
+    //  logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
     return getExerciseTooltip(toolTipData, commonShell, toolTipData.getSeriesName());
   }
 
@@ -213,7 +215,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
 
             "<br/>" +
 
-            dateToShow  +
+            dateToShow +
 
             (showEx ?
                 getTooltipHint()
@@ -261,7 +263,6 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
   }
 
   /**
-   *
    * @param time
    * @param id
    */
