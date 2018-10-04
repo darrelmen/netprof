@@ -183,13 +183,14 @@ public class AnalysisTab extends DivWidget {
             .setMinRecordings(minRecordings)
             .setListid(listid)
             .setReqid(req)
-            .setDialogID(new SelectionState().getDialog())
-    );
+            .setDialogID(new SelectionState().getDialog()),
+        1050);
   }
 
   /**
    * @param controller
    * @param isPolyglot
+   * @param maxWidth
    * @see AnalysisTab#AnalysisTab
    * @see UserContainer#changeSelectedUser
    */
@@ -197,12 +198,13 @@ public class AnalysisTab extends DivWidget {
                      DivWidget overallBottom,
                      String userChosenID,
                      boolean isPolyglot,
-                     ReqCounter reqCounter, INavigation.VIEWS jumpView,
-                     AnalysisRequest analysisRequest) {
+                     ReqCounter reqCounter,
+                     INavigation.VIEWS jumpView,
+                     AnalysisRequest analysisRequest, int maxWidth) {
     this.userid = analysisRequest.getUserid();
     this.listid = analysisRequest.getListid();
     this.isPolyglot = isPolyglot;
-    getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+   // getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
     addStyleName("leftFiveMargin");
     this.controller = controller;
@@ -214,7 +216,7 @@ public class AnalysisTab extends DivWidget {
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
         controller.getSoundManager(), playFeedback, controller,
         controller.getMessageHelper(),
-        isPolyglot);
+        isPolyglot, maxWidth);
 
     {
       Panel timeControls = getTimeControls(playFeedback, isTeacherView);

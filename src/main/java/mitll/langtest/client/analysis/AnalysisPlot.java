@@ -41,7 +41,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.common.MessageHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -62,7 +61,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.analysis.AnalysisTab.*;
-import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.ALL;
 import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.SESSION;
 
 /**
@@ -159,6 +157,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
   /**
    * @param service
    * @param userid  either for yourself if you're a student or a selected student if you're a teacher
+   * @param maxWidth
    * @see AnalysisTab#AnalysisTab
    * @see #setRawBestScores
    */
@@ -168,11 +167,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
                       UIObject playFeedback,
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
-                      boolean useSessionTimeHorizon) {
+                      boolean useSessionTimeHorizon, int maxWidth) {
     super(exceptionSupport);
     this.userid = userid;
     this.messageHelper = messageHelper;
     this.useSessionTimeHorizon = useSessionTimeHorizon;
+
+    setMinHeight(this,275);
 
     getElement().setId("AnalysisPlot");
     Style style = getElement().getStyle();
@@ -181,7 +182,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
     style.setMarginBottom(10, Style.Unit.PX);
     addStyleName("cardBorderShadow");
 
-    getElement().getStyle().setProperty("maxWidth", STUDENT_WIDTH + "px");
+    getElement().getStyle().setProperty("maxWidth", maxWidth + "px");
 
     /**
      * setRawBestScores
@@ -191,6 +192,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
 
     this.playAudio = new PlayAudio(new SoundPlayer(soundManagerAPI), playFeedback, service, exceptionSupport);
   }
+
+//  private void setMinWidth(UIObject horiz1, int normalMinHeight) {
+//    horiz1.getElement().getStyle().setProperty("minWidth", 275 + "px"); // so they wrap nicely
+//  }
 
   private long timezoneOffset;
 
@@ -745,6 +750,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
 
     int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
     chart.setHeight(chartHeight + "px");
+  //  chart.setWidth(600);
   }
 
   private boolean isShort() {
@@ -847,7 +853,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
     this.firstTime = rawBestScores.get(0).getTimestamp();
     this.lastTime = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
 
-    logger.info("setTimeRange " + new Date(firstTime) + " - " + new Date(lastTime));
+//    logger.info("setTimeRange " + new Date(firstTime) + " - " + new Date(lastTime));
   }
 
   /**
@@ -856,8 +862,12 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
    * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    */
   void setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
-    logger.info("setTimeHorizon " + timeHorizon);
+   // logger.info("setTimeHorizon " + timeHorizon);
     goToLast(this.timeHorizon = timeHorizon);
+  }
+
+  private void setMinHeight(UIObject horiz1, int normalMinHeight) {
+    horiz1.getElement().getStyle().setProperty("minHeight", normalMinHeight + "px"); // so they wrap nicely
   }
 
   /**

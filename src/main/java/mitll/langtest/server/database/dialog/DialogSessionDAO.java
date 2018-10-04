@@ -138,8 +138,15 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
     dao.byProjAndUser(projid, userid).forEach((k, v) ->
         {
           SlickDialogSession candidate = getCandidate(v);
-          if (candidate != null)
-            logger.info("getLatestDialogSessionScores found " + candidate.view() + " " + candidate.score());
+
+          if (candidate != null) {
+            logger.info("getLatestDialogSessionScores found " +
+                "\n\t#      " + candidate.id() +
+                "\n\tdialog " + candidate.dialogid() +
+                "\n\tview   " + candidate.view() +
+                "\n\tscore  " + candidate.score());
+          }
+
           dialogIDToScore.put(k, candidate == null ? 0 : Math.round(candidate.score() * 100F));
         }
     );

@@ -105,6 +105,18 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
         dialogList.sort(this::getDialogComparator);
 
         Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryForDialogs(userIDFromSessionOrDB, dialogList);
+
+
+        dialogList.forEach(iDialog -> {
+          CorrectAndScore correctAndScore = scoreHistoryPerExercise.get(iDialog.getID());
+          if (correctAndScore != null) {
+            int percentScore = correctAndScore.getPercentScore();
+            logger.info("scores " + iDialog.getID() + " - " + percentScore);
+
+            iDialog.getMutableShell().setScore(percentScore);
+          }
+        });
+
         return new ExerciseListWrapper<>(request.getReqID(), dialogList, null, scoreHistoryPerExercise);
       } else {
         logger.info("getDialogs no user?");

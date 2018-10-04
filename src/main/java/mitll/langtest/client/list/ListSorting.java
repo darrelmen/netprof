@@ -6,6 +6,7 @@ import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Scored;
 import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,6 +46,7 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
   private static final String LIST_BOX_SETTING = "listBoxSetting";
 
   private String language;
+  Language languageInfo;
   private String keyForSorting;
 
   private static final boolean DEBUG = false;
@@ -62,6 +64,7 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
     ProjectStartupInfo projectStartupInfo = exerciseList.controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
       language = exerciseList.controller.getLanguage();
+      languageInfo = exerciseList.controller.getLanguageInfo();
     }
     locale = projectStartupInfo == null ? "" : projectStartupInfo.getLocale();
   }
@@ -74,7 +77,7 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
     ListBox w1 = new ListBox();
 
     if (language != null) {
-      boolean isEnglish = language.equalsIgnoreCase("English");
+      boolean isEnglish = languageInfo == Language.ENGLISH;
       w1.addItem(NATURAL_ORDER);
       w1.addItem(isEnglish ? MEANING_ASC : ENGLISH_ASC);
       w1.addItem(isEnglish ? MEANING_DSC : ENGLISH_DSC);
@@ -246,7 +249,7 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
       return 0;
     } else {
 //    if (rawScore == -1 && rawScore2 -)
-//    logger.info("o1 " +o1.getID() + " " + rawScore + " vs " + o2.getID() + " " + rawScore2);
+     logger.info("compareScores o1 " +o1.getID() + " " + rawScore1 + " vs " + o2.getID() + " " + rawScore2);
       if (rawScore1 == -1 && rawScore2 == 0) return +1;
       else if (rawScore1 == 0 && rawScore2 == -1) return -1;
       else return Integer.compare(rawScore1, rawScore2);

@@ -587,7 +587,7 @@ public class ProjectChoices extends ThumbnailChoices {
           }
         } else {
           if (projectForLang.getCourse().isEmpty()) {
-            addPopover(button, projectForLang);
+           // addPopover(button, projectForLang);
           } else {
             addPopoverUsual(button, projectForLang);
           }
@@ -637,6 +637,8 @@ public class ProjectChoices extends ThumbnailChoices {
   }
 
   private void addPopoverUsual(FocusWidget button, SlimProject projectForLang) {
+    logger.info("addPopoverUsual " + projectForLang);
+
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
     UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
@@ -652,7 +654,15 @@ public class ProjectChoices extends ThumbnailChoices {
     showPopover(value, button, typeOrder, ClientExerciseUnitChapterItemHelper, Placement.RIGHT);
   }
 
+  /**
+   * @see #getImageAnchor
+   * @param button
+   * @param projectForLang
+   */
   private void addPopover(FocusWidget button, SlimProject projectForLang) {
+
+    logger.info("addPopover " + projectForLang);
+
     addPopover(button, getProps(projectForLang), Placement.RIGHT);
   }
 

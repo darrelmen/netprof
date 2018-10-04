@@ -1,6 +1,7 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
@@ -57,21 +58,25 @@ public class SessionContainer<T extends IDialogSession> extends MemoryItemContai
   private void changeSelectedUser(T selectedUser) {
     super.gotClickOnItem(selectedUser);
 
-    rightSide.clear();
+    Scheduler.get().scheduleDeferred(() -> {
+      rightSide.clear();
 
-    rightSide.add(new AnalysisTab(controller,
-        overallBottom,
-        selectedUser.getView().toString(),
-        false,
-        this,
-        INavigation.VIEWS.STUDY,
-        new AnalysisRequest()
-            .setUserid(controller.getUser())
-            .setMinRecordings(0)
-            .setListid(-1)
-            .setReqid(req++)
-            .setDialogID(new SelectionState().getDialog())
-            .setDialogSessionID(selectedUser.getID())));
+      rightSide.add(new AnalysisTab(controller,
+          overallBottom,
+          selectedUser.getView().toString(),
+          false,
+          this,
+          INavigation.VIEWS.STUDY,
+          new AnalysisRequest()
+              .setUserid(controller.getUser())
+              .setMinRecordings(0)
+              .setListid(-1)
+              .setReqid(req++)
+              .setDialogID(new SelectionState().getDialog())
+              .setDialogSessionID(selectedUser.getID()), 850));
+    });
+
+
   }
 
   /**
@@ -83,10 +88,12 @@ public class SessionContainer<T extends IDialogSession> extends MemoryItemContai
     addItemID(list, 20);
     //addFirstName(list);
     addCurrent(list);
-    addDateCol(list);
+
+    table.getColumnSortList().push(addDateCol(list));
 
     table.setWidth("100%", true);
   }
+
   protected int getIdWidth() {
     return 45;
   }

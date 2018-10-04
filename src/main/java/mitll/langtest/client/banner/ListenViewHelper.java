@@ -165,7 +165,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
     setControlRowHeight(rowOne);
 
-    rowOne.setWidth(97 + "%");
+//    rowOne.setWidth(97 + "%");
     style.setMarginTop(10, PX);
     style.setMarginBottom(10, PX);
     style.setZIndex(1000);
@@ -257,7 +257,9 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
 //    turnContainer = rowOne;
     rowOne.getElement().setId("turnContainer");
-    rowOne.setWidth(97 + "%");
+
+    //rowOne.setWidth(97 + "%");
+
     rowOne.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
     rowOne.getElement().getStyle().setMarginTop(10, PX);
     rowOne.addStyleName("cardBorderShadow");
@@ -743,7 +745,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @seex #setPlayButtonIcon
    * @see #playStarted
    */
-  private void setPlayButtonToPause() {
+  void setPlayButtonToPause() {
     playButton.setIcon(IconType.PAUSE);
   }
 

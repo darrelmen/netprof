@@ -5,6 +5,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.shared.exercise.STATE.UNSET;
@@ -13,6 +14,10 @@ import static mitll.langtest.shared.exercise.STATE.UNSET;
  * @see
  */
 public class Dialog implements IDialog, MutableShell {
+
+  private final transient  Logger logger = Logger.getLogger("Dialog");
+
+
   private static final String SPEAKER = "Speaker".toLowerCase();
   public static final String UNIT = "unit";
   private static final String CHAPTER = "chapter";
@@ -40,7 +45,7 @@ public class Dialog implements IDialog, MutableShell {
   private List<ClientExercise> exercises = new ArrayList<>();
   private List<ClientExercise> coreVocabulary = new ArrayList<>();
 
-  float score;
+  private float score;
 
   public Dialog() {
   }
@@ -283,7 +288,8 @@ public class Dialog implements IDialog, MutableShell {
    */
   @Override
   public void setScore(float score) {
-
+    logger.info("setScore " + score);
+    this.score=score;
   }
 
   /**
@@ -293,13 +299,14 @@ public class Dialog implements IDialog, MutableShell {
    */
   @Override
   public void setScores(List<CorrectAndScore> scoreTotal) {
-
+    logger.info("got " + scoreTotal);
   }
 
 
   @Override
   public int getRawScore() {
-    return 0;
+    logger.info("getRawScore " + score);
+    return Math.round(score);
   }
 
   /**

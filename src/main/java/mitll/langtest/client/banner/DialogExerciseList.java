@@ -107,6 +107,8 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
           public void onSuccess(ExerciseListWrapper<IDialog> result) {
             List<IDialog> toShow = result.getExercises().stream().filter(iDialog -> visibleIDs.contains(iDialog.getID())).collect(Collectors.toList());
             scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
+
+        //    toShow.forEach(iDialog -> iDialog.ge);
             sortDialogs(toShow, visibleIDs);
             showExerciesForCurrentReq(toShow, incrReq());
           }

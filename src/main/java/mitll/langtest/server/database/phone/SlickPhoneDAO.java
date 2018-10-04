@@ -154,9 +154,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   /**
    * @param userid
    * @param resultIDs
-   * @paramx project
    * @return
    * @throws SQLException
+   * @paramx project
    * @seex mitll.langtest.server.database.analysis.Analysis#getPhoneReport
    * @seex mitll.langtest.server.database.analysis.Analysis#getPhoneReportForPeriod(int, UserInfo, Project, long, long)
    */
@@ -164,7 +164,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> resultIDs, Project project) {
     return getPhoneReport(getSlickPhoneReports(userid, resultIDs), true, userid, project);
   }*/
-
   @Override
   public PhoneSummary getPhoneSummary(int userid, Collection<Integer> resultIDs) {
     return getPhoneSummary(getSlickPhoneReports(userid, resultIDs));
@@ -177,12 +176,13 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   private Collection<SlickPhoneReport> getSlickPhoneReports(int userid, Collection<Integer> resultIDs) {
     long then = System.currentTimeMillis();
-    logger.info("getPhoneReports " + userid + " project ids " + resultIDs);
-    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, resultIDs);
-    long now = System.currentTimeMillis();
-    if (now - then > 0)
-      logger.info("getWorstPhonesForResults took " + (now - then) + " to get " + phoneReportByResult.size());
+    if (DEBUG) logger.info("getPhoneReports " + userid + " project ids " + resultIDs);
 
+    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, resultIDs);
+
+    long now = System.currentTimeMillis();
+    if (now - then > 0 && DEBUG)
+      logger.info("getWorstPhonesForResults took " + (now - then) + " to get " + phoneReportByResult.size());
 
     return phoneReportByResult;
   }
@@ -411,7 +411,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     phoneToBigramToScore.values().forEach(pair -> pair.values().forEach(Bigram::setScore));
 
-    logger.info("getPhoneBigrams for " + phoneReportByResult.size() + " got " + phoneToBigramToScore.size() + " phones");
+    if (DEBUG) {
+      logger.info("getPhoneBigrams for " + phoneReportByResult.size() + " got " + phoneToBigramToScore.size() + " phones");
+    }
 
     return new MakePhoneReport().getPhoneBigrams(phoneToBigramToScore);
 

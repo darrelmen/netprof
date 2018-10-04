@@ -41,13 +41,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     implements SessionManager, IRehearseView {
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
-  public static final int PROGRESS_BAR_WIDTH = 49;
+  private static final int PROGRESS_BAR_WIDTH = 49;
 
   private static final String REHEARSE = "Rehearse";
   private static final String HEAR_YOURSELF = "Hear yourself";
   private static final int VALUE = -98;
 
-  private static final String WIDTH = "97%";
+//  private static final String WIDTH = "97%";
   private static final String THEY_SPEAK = "Listen to : ";
   private static final String YOU_SPEAK = "Speak : ";
 
@@ -141,7 +141,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     style.setClear(Style.Clear.BOTH);
 
     breadRow.addStyleName("cardBorderShadow");
-    breadRow.setWidth(WIDTH);  //??? why 97???
+   // breadRow.setWidth(WIDTH);  //??? why 97???
     breadRow.add(showScoreFeedback());
 
     return breadRow;
@@ -618,7 +618,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         getCurrentTurn().isRecording()) {
 
       if (DEBUG) logger.info("gotPlay on recording turn - so abort!");
-
+      setPlayButtonToPlay();
       getCurrentTurn().cancelRecording();
     } else {
       if (doRehearse) {
@@ -701,18 +701,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     bothTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
-
-    /**
-     *
-     */
-
-//    startSession();
-  }
+}
 
   @Override
   public int getDialogSessionID() {
     int i = dialogSession == null ? -1 : dialogSession.getID();
-    logger.info("getDialogSessionID #" + i);
+ //   logger.info("getDialogSessionID #" + i);
     return i;
   }
 
@@ -852,6 +846,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    */
   private void startRecordingTurn(T toStart) {
     if (doRehearse) {
+      setPlayButtonToPause();
+
       if (dialogSession == null) {
         startSession();
       }
@@ -977,22 +973,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     }
     return total;
   }
-
-
-/*  @Override
-  public void setEmoticon(Image smiley, double total) {
-    String choice = BEST_EMOTICON;
-
-    for (int i = 0; i < thresholds.size(); i++) {
-      if (total < thresholds.get(i)) {
-        choice = emoticons.get(i);
-        break;
-      }
-    }
-
-    smiley.setUrl(LangTest.LANGTEST_IMAGES + choice);
-  }*/
-
+ 
   /**
    * @see RecordDialogExercisePanel#addWidgets
    */
