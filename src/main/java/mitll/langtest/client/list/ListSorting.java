@@ -249,7 +249,8 @@ class ListSorting<T extends CommonShell & Scored, U extends Shell> {
       return 0;
     } else {
 //    if (rawScore == -1 && rawScore2 -)
-     logger.info("compareScores o1 " +o1.getID() + " " + rawScore1 + " vs " + o2.getID() + " " + rawScore2);
+   //  logger.info("compareScores o1 " +o1.getID() + " " + rawScore1 + " vs " + o2.getID() + " " + rawScore2);
+
       if (rawScore1 == -1 && rawScore2 == 0) return +1;
       else if (rawScore1 == 0 && rawScore2 == -1) return -1;
       else return Integer.compare(rawScore1, rawScore2);

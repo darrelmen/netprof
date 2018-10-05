@@ -253,6 +253,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     scrollIntoView(index);
 
+    makeInitialSelectionFromSet(users, userToSelect);
+  }
+
+  protected void makeInitialSelectionFromSet(Collection<T> users, T userToSelect) {
     if (!users.isEmpty()) {
       makeInitialSelection(users.iterator().next(), userToSelect);
     }
@@ -263,8 +267,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @paramx users
    * @see #getTableWithPager
    */
-  private void makeInitialSelection(T firstUser, T userToSelect) {
-    //logger.info("makeInitialSelection make initial selection : select " + userToSelect);
+  protected void makeInitialSelection(T firstUser, T userToSelect) {
+     logger.info("makeInitialSelection make initial selection : select " + userToSelect);
     Scheduler.get().scheduleDeferred(() -> selectAndClick((userToSelect == null) ? firstUser : userToSelect));
   }
 

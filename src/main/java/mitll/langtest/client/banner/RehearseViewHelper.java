@@ -958,7 +958,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     scoreProgress.setVisible(true);
 
     double percent1 = (1F - total);
-    logger.info("setRateProgress score to color " + percent1);
+ //   logger.info("setRateProgress score to color " + percent1);
    // new ScoreProgressBar(false).setColor(scoreProgress, percent1);
 
     if (percent1 < 0.4) scoreProgress.setColor(ProgressBarBase.Color.SUCCESS);
@@ -968,7 +968,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
     {
       double percent = total * 100D;
-      logger.info("setRateProgress percent " + total + " vs " + percent);
+   //   logger.info("setRateProgress percent " + total + " vs " + percent);
       scoreProgress.setPercent(Math.max(33, percent));
     }
   }

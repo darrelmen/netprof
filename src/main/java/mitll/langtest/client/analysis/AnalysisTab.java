@@ -56,6 +56,7 @@ import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.PhoneSummary;
 import mitll.langtest.shared.custom.TimeRange;
+import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -105,7 +106,6 @@ public class AnalysisTab extends DivWidget {
   static final long YEAR_DUR = 52 * WEEK_DUR;
   private static final long YEARS = 20 * YEAR_DUR;
 
-
   enum TIME_HORIZON {
     SESSION("Session", -1),
     DAY("Day", DAY_DUR),
@@ -130,7 +130,8 @@ public class AnalysisTab extends DivWidget {
     }
   }
 
-  private final AnalysisPlot analysisPlot;
+  private AnalysisPlot analysisPlot = null;
+  private ExerciseLookup<CommonShell> exerciseLookup = null;
   private final ExerciseController controller;
   private TimeWidgets timeWidgets;
   private final Heading exampleHeader = getHeading(WORDS_USING_SOUND);
@@ -140,7 +141,7 @@ public class AnalysisTab extends DivWidget {
   private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
   private ListBox timeScale;
   private INavigation.VIEWS jumpView;
-
+private int itemColumnWidth=-1;
   /**
    * @param controller
    * @param isPolyglot
@@ -184,13 +185,14 @@ public class AnalysisTab extends DivWidget {
             .setListid(listid)
             .setReqid(req)
             .setDialogID(new SelectionState().getDialog()),
-        1050);
+        1050, true);
   }
 
   /**
    * @param controller
    * @param isPolyglot
    * @param maxWidth
+   * @param showPlot
    * @see AnalysisTab#AnalysisTab
    * @see UserContainer#changeSelectedUser
    */
@@ -200,31 +202,25 @@ public class AnalysisTab extends DivWidget {
                      boolean isPolyglot,
                      ReqCounter reqCounter,
                      INavigation.VIEWS jumpView,
-                     AnalysisRequest analysisRequest, int maxWidth) {
+                     AnalysisRequest analysisRequest,
+                     int maxWidth,
+                     boolean showPlot) {
     this.userid = analysisRequest.getUserid();
     this.listid = analysisRequest.getListid();
     this.isPolyglot = isPolyglot;
-   // getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+    // getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
     addStyleName("leftFiveMargin");
     this.controller = controller;
     this.jumpView = jumpView;
 
-    Widget playFeedback = getPlayFeedback();
-
     boolean isTeacherView = overallBottom != null;
-    analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
-        controller.getSoundManager(), playFeedback, controller,
-        controller.getMessageHelper(),
-        isPolyglot, maxWidth);
 
-    {
-      Panel timeControls = getTimeControls(playFeedback, isTeacherView);
-      analysisPlot.setTimeWidgets(timeWidgets);
-      add(timeControls);
+    AnalysisPlot analysisPlot = showPlot ? addAnalysisPlot(controller, isPolyglot, maxWidth, isTeacherView) : null;
+
+    if (!showPlot) {
+      exerciseLookup = new CommonShellCache<>(controller.getMessageHelper());
     }
-
-    add(analysisPlot);
 
     DivWidget bottom = getBottom(isTeacherView);
     if (isTeacherView) { // are we in student or teacher view
@@ -235,17 +231,7 @@ public class AnalysisTab extends DivWidget {
     }
 
     final long then = System.currentTimeMillis();
-
-
-/*    int dialog = new SelectionState().getDialog();
-    AnalysisRequest analysisRequest = new AnalysisRequest()
-        .setUserid(userid)
-        .setMinRecordings(minRecordings)
-        .setListid(listid)
-        .setReqid(req)
-        .setDialogID(dialog);*/
-
-  //  logger.info("request " + analysisRequest);
+    //  logger.info("request " + analysisRequest);
 
     analysisServiceAsync.getPerformanceReportForUser(analysisRequest, new AsyncCallback<AnalysisReport>() {
       @Override
@@ -262,16 +248,37 @@ public class AnalysisTab extends DivWidget {
             "\n\tserver " + result.getServerTime() +
             "\n\tclient " + (total - result.getServerTime()));
 
-    //    logger.info("result " + result);
+        //    logger.info("result " + result);
 
         if (reqCounter.getReq() != result.getReq() + 1) {
           logger.info("getPerformanceReportForUser : skip " + reqCounter.getReq() + " vs " + result.getReq());
         } else {
-          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(analysisRequest));
+          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(analysisRequest), analysisPlot, exerciseLookup);
         }
       }
     });
 
+  }
+
+  void setItemColumnWidth(int itemColumnWidth) {
+    this.itemColumnWidth = itemColumnWidth;
+  }
+
+  private AnalysisPlot addAnalysisPlot(ExerciseController controller, boolean isPolyglot, int maxWidth, boolean isTeacherView) {
+    Widget playFeedback = getPlayFeedback();
+    analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
+        controller.getSoundManager(), playFeedback, controller,
+        controller.getMessageHelper(),
+        isPolyglot, maxWidth);
+    exerciseLookup = analysisPlot;
+    {
+      Panel timeControls = getTimeControls(playFeedback, isTeacherView);
+      analysisPlot.setTimeWidgets(timeWidgets);
+      add(timeControls);
+    }
+
+    add(analysisPlot);
+    return analysisPlot;
   }
 
   public static class ReqInfo {
@@ -333,7 +340,9 @@ public class AnalysisTab extends DivWidget {
                          String userChosenID,
                          boolean isTeacherView,
                          DivWidget bottom,
-                         ReqInfo reqInfo) {
+                         ReqInfo reqInfo,
+                         AnalysisPlot<CommonShell> analysisPlot,
+                         ExerciseLookup<CommonShell> exerciseLookup) {
     long now = System.currentTimeMillis();
 
     PhoneSummary phoneSummary = result.getPhoneSummary();
@@ -354,7 +363,9 @@ public class AnalysisTab extends DivWidget {
     }*/
     long then2 = now;
 
-    Scheduler.get().scheduleDeferred(() -> analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView));
+    if (analysisPlot != null) {
+      Scheduler.get().scheduleDeferred(() -> analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView));
+    }
 
     now = System.currentTimeMillis();
     if (now - then2 > 200) {
@@ -362,13 +373,18 @@ public class AnalysisTab extends DivWidget {
     }
     long then3 = now;
 
-    showWordScores(result.getNumScores(), controller, analysisPlot, bottom, phoneSummary, reqInfo, result.getUserPerformance().getTimeWindow());
+    showWordScores(result.getNumScores(), controller,
+        analysisPlot,
+        bottom, phoneSummary, reqInfo, result.getUserPerformance().getTimeWindow(), exerciseLookup);
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
       logger.info("useReport took " + (now - then3) + " to show word scores");
     }
-    Scheduler.get().scheduleDeferred(() -> analysisPlot.populateExerciseMap(controller.getExerciseService(), userid));
+
+ /*   if (analysisPlot != null) {
+      Scheduler.get().scheduleDeferred(() -> analysisPlot.populateExerciseMap(controller.getExerciseService(), userid));
+    }*/
   }
 
   @NotNull
@@ -391,7 +407,7 @@ public class AnalysisTab extends DivWidget {
    * @see #AnalysisTab
    */
   @NotNull
-  private DivWidget getBottom(boolean isTeacherView) {
+  protected DivWidget getBottom(boolean isTeacherView) {
     DivWidget bottom = new DivWidget();
     bottom.addStyleName("inlineFlex");
     bottom.setWidth("100%");
@@ -415,7 +431,7 @@ public class AnalysisTab extends DivWidget {
 
   /**
    * @return
-   * @see #AnalysisTab
+   * @see #getTimeControls(Widget, boolean)
    */
   private Panel getTimeWindowStepper() {
     Panel stepper = getStepperContainer();
@@ -569,23 +585,27 @@ public class AnalysisTab extends DivWidget {
    * @param lowerHalf
    * @param phoneReport
    * @param timeWindow
+   * @param exerciseLookup
    * @see #useReport
    */
   private void showWordScores(
       int numScores,
       ExerciseController controller,
-      AnalysisPlot analysisPlot,
+      AnalysisPlot<CommonShell> analysisPlot,
       Panel lowerHalf,
       PhoneSummary phoneReport,
       ReqInfo reqInfo,
-      TimeRange timeWindow) {
+      TimeRange timeWindow,
+      ExerciseLookup<CommonShell> exerciseLookup) {
     {
       Heading wordsTitle = getHeading(WORDS);
 
       Panel tableWithPager = getWordContainer(
           reqInfo,
           numScores,
-          controller, analysisPlot,
+          controller,
+          analysisPlot,
+          exerciseLookup,
           wordsTitle,
           timeWindow);
       {
@@ -597,12 +617,13 @@ public class AnalysisTab extends DivWidget {
 
     {
       DivWidget soundsDiv = getSoundsDiv();
-
       lowerHalf.add(soundsDiv);
+
       getPhoneReport(phoneReport,
           controller,
           soundsDiv,
           analysisPlot,
+          exerciseLookup,
           reqInfo);
     }
   }
@@ -619,19 +640,25 @@ public class AnalysisTab extends DivWidget {
    * @param controller
    * @param analysisPlot
    * @param wordsTitle
+   * @paramx itemColumnWidth
    * @return
+   * @see #showWordScores(int, ExerciseController, AnalysisPlot, Panel, PhoneSummary, ReqInfo, TimeRange, ExerciseLookup)
    */
   private Panel getWordContainer(
       ReqInfo reqInfo,
       int numResults,
       ExerciseController controller,
-      AnalysisPlot analysisPlot,
-
+      AnalysisPlot<CommonShell> analysisPlot,
+      ExerciseLookup<CommonShell> exerciseLookup,
       Heading wordsTitle,
 
-      TimeRange timeRange) {
-    WordContainerAsync wordContainer = new WordContainerAsync(reqInfo, controller, analysisPlot, wordsTitle,
-        numResults, analysisServiceAsync, timeRange, jumpView);
+      TimeRange timeRange ) {
+    WordContainerAsync wordContainer =
+        new WordContainerAsync(reqInfo, controller, exerciseLookup, wordsTitle,
+            numResults, analysisServiceAsync, timeRange, jumpView, itemColumnWidth);
+    if (analysisPlot != null) {
+      analysisPlot.addListener(wordContainer);
+    }
     return wordContainer.getTableWithPager();
   }
 
@@ -646,7 +673,7 @@ public class AnalysisTab extends DivWidget {
     return soundsDiv;
   }
 
-  private DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading heading) {
+  protected DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading heading) {
     DivWidget wordsContainer = new DivWidget();
     wordsContainer.getElement().setId(containerID);
     wordsContainer.add(heading);
@@ -665,14 +692,17 @@ public class AnalysisTab extends DivWidget {
                               final ExerciseController controller,
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot,
+                              ExerciseLookup<CommonShell> exerciseLookup,
                               ReqInfo reqInfo) {
-    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, analysisPlot, exampleHeader);
+    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, exerciseLookup, exampleHeader);
     final BigramContainer bigramContainer =
         new BigramContainer(controller, exampleContainer, analysisServiceAsync, reqInfo);
     final PhoneContainer phoneContainer =
         new PhoneContainer(controller, bigramContainer, analysisServiceAsync, reqInfo);
 
-    analysisPlot.addListener(phoneContainer);
+    if (analysisPlot != null) {
+      analysisPlot.addListener(phoneContainer);
+    }
 
     showPhoneReport(phoneReport, phoneContainer, bigramContainer, lowerHalf, exampleContainer);
   }

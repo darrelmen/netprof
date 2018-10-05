@@ -71,7 +71,7 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.SESSION;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/19/15.
  */
-public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
+public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
   private static final int HOUR_DUR = 60 * 60 * 1000;
@@ -156,7 +156,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
 
   /**
    * @param service
-   * @param userid  either for yourself if you're a student or a selected student if you're a teacher
+   * @param userid   either for yourself if you're a student or a selected student if you're a teacher
    * @param maxWidth
    * @see AnalysisTab#AnalysisTab
    * @see #setRawBestScores
@@ -168,12 +168,12 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
                       boolean useSessionTimeHorizon, int maxWidth) {
-    super(exceptionSupport);
+    super(exceptionSupport, messageHelper);
     this.userid = userid;
     this.messageHelper = messageHelper;
     this.useSessionTimeHorizon = useSessionTimeHorizon;
 
-    setMinHeight(this,275);
+    setMinHeight(this, 275);
 
     getElement().setId("AnalysisPlot");
     Style style = getElement().getStyle();
@@ -366,7 +366,8 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
    * @param isTeacherView
    * @see #showUserPerformance
    */
-  private void addChart(UserPerformance userPerformance, String userChosenID, boolean filterOnList, boolean isTeacherView) {
+  private void addChart(UserPerformance userPerformance, String userChosenID, boolean filterOnList,
+                        boolean isTeacherView) {
     clear();
 
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
@@ -464,7 +465,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
    * @param userid
    * @see AnalysisTab#useReport
    */
-  public void populateExerciseMap(ExerciseServiceAsync service, int userid) {
+/*  public void populateExerciseMap(ExerciseServiceAsync service, int userid) {
     // logger.info("populateExerciseMap : get exercises for user " + userid);
     service.getExerciseIds(
         new ExerciseListRequest(1, userid)
@@ -486,7 +487,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
             }
           }
         });
-  }
+  }*/
 
   /**
    * @param title
@@ -750,7 +751,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
 
     int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
     chart.setHeight(chartHeight + "px");
-  //  chart.setWidth(600);
+    //  chart.setWidth(600);
   }
 
   private boolean isShort() {
@@ -822,18 +823,18 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
    * @see #addChart
    */
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
-    Set<Integer> toGet = new HashSet<>();
+    //Set<Integer> toGet = new HashSet<>();
 
     for (TimeAndScore timeAndScore : rawBestScores) {
       Integer id = timeAndScore.getExid();
       addTimeToExID(timeAndScore.getTimestamp(), id);
-      toGet.add(id);
+      //toGet.add(id);
     }
 
     if (!rawBestScores.isEmpty()) {
       setTimeRange(rawBestScores);
 
-      if (!toGet.isEmpty()) {
+  /*    if (!toGet.isEmpty()) {
         service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -842,11 +843,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
 
           @Override
           public void onSuccess(List<CommonShell> commonShells) {
-            commonShells.forEach(commonShell -> rememberExercise(commonShell));
+            commonShells.forEach(commonShell -> rememberExercise((T)commonShell));
           }
         });
-      }
+      }*/
     }
+
+    commonShellCache.useTimeAndScore(service, rawBestScores);
   }
 
   private void setTimeRange(List<TimeAndScore> rawBestScores) {
@@ -862,7 +865,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
    * @see AnalysisTab#getClickHandler(AnalysisTab.TIME_HORIZON)
    */
   void setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
-   // logger.info("setTimeHorizon " + timeHorizon);
+    // logger.info("setTimeHorizon " + timeHorizon);
     goToLast(this.timeHorizon = timeHorizon);
   }
 
@@ -1236,7 +1239,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot {
     void timeChanged(long from, long to);
   }
 
-  protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
+  protected String getTooltip(ToolTipData toolTipData, Integer exid, T commonShell) {
     String seriesName = toolTipData.getSeriesName();
     Collection<String> values = granToLabel.values();
 

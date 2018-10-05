@@ -1,5 +1,6 @@
 package mitll.langtest.client.analysis;
 
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -13,9 +14,11 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot implements ExerciseLookup<T> {
-  private static final int HIDE_DELAY = 5000;
+public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot
+    implements ExerciseLookup<T> {
   private final Logger logger = Logger.getLogger("BasicTimeSeriesPlot");
+
+  private static final int HIDE_DELAY = 5000;
 
   private static final String SCORE = "Score";
 
@@ -34,14 +37,16 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
   private static final int Y_OFFSET_FOR_LEGEND = 25;
 
   private final Map<Long, Integer> timeToId = new TreeMap<>();
-  private Map<Integer, T> idToEx = new TreeMap<>();
+  //private Map<Integer, T> idToEx = new TreeMap<>();
 
   final ExceptionSupport exceptionSupport;
+  protected ICommonShellCache<T> commonShellCache;
 
   private static final boolean WARN_ABOUT_MISSING_EXERCISE_ID = false;
 
-  BasicTimeSeriesPlot(ExceptionSupport exceptionSupport) {
+  BasicTimeSeriesPlot(ExceptionSupport exceptionSupport, MessageHelper messageHelper) {
     this.exceptionSupport = exceptionSupport;
+    this.commonShellCache = new CommonShellCache<>(messageHelper);
   }
 
   /**
@@ -136,7 +141,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
   }
 
   protected T getCommonShellAtTime(Integer exerciseID, long xAsLong) {
-    T commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
+    T commonShell = exerciseID == null ? null : getShell(exerciseID);
     if (commonShell == null && WARN_ABOUT_MISSING_EXERCISE_ID) {
       logger.info("getCommonShellAtTime no ex found " + exerciseID);
     }
@@ -250,16 +255,20 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
    * @return
    * @seex #getShell
    */
+/*
   Map<Integer, T> getIdToEx() {
     return idToEx;
   }
+*/
 
   public void setIdToEx(Map<Integer, T> idToEx) {
-    this.idToEx = idToEx;
+   // this.idToEx = idToEx;
+    commonShellCache.setIdToEx(idToEx);
   }
 
   public boolean isKnown(int exid) {
-    return idToEx.containsKey(exid);
+    //return idToEx.containsKey(exid);
+    return commonShellCache.isKnown(exid);
   }
 
   /**
@@ -271,14 +280,15 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot i
   }
 
   /**
-   * @param commonShell
-   * @see AnalysisPlot#populateExerciseMap
+   * @paramx commonShell
+   * @seex AnalysisPlot#populateExerciseMap
    */
-  void rememberExercise(T commonShell) {
-    idToEx.put(commonShell.getID(), commonShell);
-  }
+/*  void rememberExercise(T commonShell) {
+//    idToEx.put(commonShell.getID(), commonShell);
+    commonShellCache.rememberExercise(commonShell);
+  }*/
 
   public T getShell(int id) {
-    return getIdToEx().get(id);
+    return commonShellCache.getShell(id);//getIdToEx().get(id);
   }
 }

@@ -61,7 +61,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   QuizInfo quizInfo;
 
   /**
-   * @see PolyglotFlashcardFactory#getFlashcard
    * @param statsFlashcardFactory
    * @param controlState
    * @param controller
@@ -71,6 +70,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
    * @param exerciseListToUse
    * @param minPolyScore
    * @param showAudio
+   * @see PolyglotFlashcardFactory#getFlashcard
    */
   PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
                         ControlState controlState, ExerciseController controller,
@@ -181,8 +181,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   /**
    * Get session start...
    *
-   * @see #getAnswerWidget
    * @return
+   * @see #getAnswerWidget
    */
   @Override
   protected String getDeviceValue() {
@@ -286,7 +286,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
 
   @NotNull
   private PolyglotChart getChart(long duration) {
-    PolyglotChart pChart = new PolyglotChart(controller, exerciseList);
+    PolyglotChart pChart = new PolyglotChart(controller, controller.getMessageHelper(), exerciseList);
     pChart.addStyleName("topFiveMargin");
     pChart.addStyleName("bottomFiveMargin");
     pChart.addChart(sticky.getAnswers(), duration);

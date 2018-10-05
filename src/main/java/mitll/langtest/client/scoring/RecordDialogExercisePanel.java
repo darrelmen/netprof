@@ -479,6 +479,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   /**
+   * TODO : simplify this a lot...
    * Check against expected duration to see when to end.
    *
    * @see #startRecording
@@ -509,8 +510,10 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
       return true;
     } else {
+/*
       logger.info("stopRecording for " + getExID() +
           " : ignore too short " + diffVAD + " vad vs " + minDur + " expected client " + clientVAD + " vs server " + gotStreamStop);
+*/
       return false;
     }
   }

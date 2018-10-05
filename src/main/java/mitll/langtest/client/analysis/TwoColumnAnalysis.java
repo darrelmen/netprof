@@ -16,11 +16,12 @@ import static mitll.langtest.client.project.ProjectChoices.PLEASE_WAIT;
 
 /**
  * Left side list, then when selected changes what's shown on the right side...
+ *
  * @param <T>
  */
 public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
   private static final int DELAY_MILLIS = 2000;
-   final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
+  final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
   private Object waitToken = null;
 
   @NotNull
@@ -35,7 +36,7 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
     return pleaseWaitTimer;
   }
 
-   void finishPleaseWait(Timer t, MessageHelper messageHelper) {
+  void finishPleaseWait(Timer t, MessageHelper messageHelper) {
     t.cancel();
     if (waitToken != null) {
       messageHelper.stopWaiting(waitToken);
@@ -43,25 +44,66 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
     }
   }
 
-  void showItems(Collection<T> users, Timer pleaseWaitTimer, ExerciseController controller) {
+  protected void showItems(Collection<T> users, Timer pleaseWaitTimer, ExerciseController controller) {
     finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());
+
+    clear();
 
     DivWidget bottom = new DivWidget();
     bottom.addStyleName("floatLeft");
     bottom.getElement().setId("StudentAnalysis_bottom");
 
-    clear();
+    DivWidget rightSide = addTop(users, controller, bottom);
 
-    {
-      DivWidget rightSide = getRightSide();
-      DivWidget table = getTable(users, controller, bottom, rightSide);
-      add(getTop(table, rightSide));
-    }
+    addBottom(bottom, rightSide);
+  }
+
+  protected void addBottom(DivWidget bottom, DivWidget rightSide) {
     add(bottom);
   }
 
-  abstract DivWidget getTable(Collection<T> users, ExerciseController controller,
-                              DivWidget bottom, DivWidget rightSide);
+  protected DivWidget addTop(Collection<T> users, ExerciseController controller, DivWidget bottom) {
+    DivWidget rightSide = getRightSide();
+    DivWidget table = getTable(users, controller, bottom, rightSide);
+    add(getTop(table, rightSide));
+    return rightSide;
+  }
+
+  @NotNull
+  DivWidget getRightSide() {
+    DivWidget rightSide = new DivWidget();
+    rightSide.getElement().setId("rightSideForPlot");
+    rightSide.setWidth("100%");
+    return rightSide;
+  }
+
+  abstract DivWidget getTable(Collection<T> users,
+                              ExerciseController controller,
+                              DivWidget bottom,
+                              DivWidget rightSide);
+
+  /**
+   * @param leftSide
+   * @param rightSide
+   * @return
+   * @see #addTop(Collection, ExerciseController, DivWidget)
+   */
+   DivWidget getTop(DivWidget leftSide, DivWidget rightSide) {
+    DivWidget top = new DivWidget();
+    top.addStyleName("inlineFlex");
+    top.setWidth("100%");
+    top.getElement().setId("top");
+
+    top.add(leftSide);
+    top.add(rightSide);
+
+    {
+      DivWidget spacer = new DivWidget();
+      spacer.getElement().getStyle().setProperty("minWidth", 5 + "px");
+      top.add(spacer);
+    }
+    return top;
+  }
 
   /**
    * TODO : use common key storage
@@ -72,35 +114,6 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
   @NotNull
   String getRememberedSelectedUser(ExerciseController controller) {
     return getSelectedUserKey(controller, controller.getProps().getAppTitle());
-  }
-
-  @NotNull
-  private DivWidget getRightSide() {
-    DivWidget rightSide = new DivWidget();
-    rightSide.getElement().setId("rightSide");
-    rightSide.setWidth("100%");
-    return rightSide;
-  }
-
-  /**
-   * @param leftSide
-   * @param rightSide
-   * @return
-   */
-  private DivWidget getTop(DivWidget leftSide, DivWidget rightSide) {
-    DivWidget top = new DivWidget();
-    top.addStyleName("inlineFlex");
-    top.setWidth("100%");
-    top.getElement().setId("top");
-    top.add(leftSide);
-    top.add(rightSide);
-
-    {
-      DivWidget spacer = new DivWidget();
-      spacer.getElement().getStyle().setProperty("minWidth", 5 + "px");
-      top.add(spacer);
-    }
-    return top;
   }
 
   private String getSelectedUserKey(ExerciseController controller, String appTitle) {

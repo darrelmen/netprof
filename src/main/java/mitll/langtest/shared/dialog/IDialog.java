@@ -6,6 +6,9 @@ import mitll.langtest.shared.exercise.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @see mitll.langtest.server.services.DialogServiceImpl#getScoreHistoryForDialogs
+ */
 public interface IDialog extends CommonShell, HasUnitChapter, Scored {
   enum METADATA implements IsSerializable {
     UNIT, CHAPTER, PAGE, PRESENTATION, FLPRESENTATION, SPEAKER, FLTITLE;

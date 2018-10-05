@@ -56,7 +56,7 @@ import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;
  * @since 10/27/15.
  */
 public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
-  private final Logger logger = Logger.getLogger("StudentAnalysis");
+  // private final Logger logger = Logger.getLogger("StudentAnalysis");
 
   /**
    * @param controller
@@ -69,17 +69,31 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
         controller.getUser(),
         new SelectionState().getDialog(),
         new AsyncCallback<List<IDialogSession>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());
-        controller.handleNonFatalError("Error retrieving user dialog sessions", caught);
-      }
+          @Override
+          public void onFailure(Throwable caught) {
+            finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());
+            controller.handleNonFatalError("Error retrieving user dialog sessions", caught);
+          }
 
-      @Override
-      public void onSuccess(List<IDialogSession> result) {
-        showItems(result, pleaseWaitTimer, controller);
-      }
-    });
+          @Override
+          public void onSuccess(List<IDialogSession> result) {
+            showItems(result, pleaseWaitTimer, controller);
+          }
+        });
+  }
+
+  @Override
+  protected void addBottom(DivWidget bottom, DivWidget rightSide) {
+//    rightSide.add(bottom);
+    //super.addBottom(bottom);
+  }
+
+  protected DivWidget addTop(Collection<IDialogSession> users,
+                             ExerciseController controller, DivWidget bottom) {
+    DivWidget rightSide = getRightSide();
+    DivWidget table = getTable(users, controller, bottom, rightSide);
+    add(getTop(table, bottom));
+    return rightSide;
   }
 
   @Override
@@ -87,16 +101,20 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
     return "selected_session";
   }
 
-  protected DivWidget getTable(Collection<IDialogSession> users, ExerciseController controller,
-                               DivWidget bottom, DivWidget rightSide) {
+  protected DivWidget getTable(Collection<IDialogSession> users,
+                               ExerciseController controller,
+                               DivWidget bottom,
+                               DivWidget rightSide) {
     if (users.isEmpty()) {
-      DivWidget divWidget=new DivWidget();
+      DivWidget divWidget = new DivWidget();
       divWidget.add(new HTML("No Sessions yet..."));
       return divWidget;
-    }
-    else {
-      SessionContainer<IDialogSession> userContainer = new SessionContainer<>(controller, rightSide, bottom);
-      return userContainer.getTable(users);
+    } else {
+      SessionContainer<IDialogSession> userContainer =
+          new SessionContainer<>(controller, rightSide, bottom);
+      DivWidget table = userContainer.getTable(users);
+      table.addStyleName("cardBorderShadow");
+      return table;
     }
   }
 }

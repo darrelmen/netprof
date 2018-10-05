@@ -125,14 +125,21 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     }
   }
 
+  /**
+   * TODO : get latest session phase - STUDY, REHEARSE, PERFORM
+   *
+   * @param userIDFromSessionOrDB
+   * @param dialogList
+   * @return
+   */
   @NotNull
   private Map<Integer, CorrectAndScore> getScoreHistoryForDialogs(int userIDFromSessionOrDB, List<IDialog> dialogList) {
     Map<Integer, CorrectAndScore> scoreHistoryPerExercise = new HashMap<>();
 
     if (!dialogList.isEmpty()) {
       IDialog iDialog = dialogList.get(0);
-      iDialog.getProjid();
-      Map<Integer, Integer> latestDialogSessionScores = db.getDialogSessionDAO().getLatestDialogSessionScores(iDialog.getProjid(), userIDFromSessionOrDB);
+      Map<Integer, Integer> latestDialogSessionScores =
+          db.getDialogSessionDAO().getLatestDialogSessionScores(iDialog.getProjid(), userIDFromSessionOrDB);
       latestDialogSessionScores.forEach((k, v) -> scoreHistoryPerExercise.put(k, new CorrectAndScore(v, null)));
     }
     return scoreHistoryPerExercise;

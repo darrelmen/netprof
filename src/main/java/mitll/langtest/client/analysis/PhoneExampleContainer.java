@@ -33,7 +33,6 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -43,13 +42,13 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
 import java.util.List;
@@ -90,7 +89,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @param controller
    * @see AnalysisTab#getPhoneReport
    */
-  PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot, Heading heading) {
+  PhoneExampleContainer(ExerciseController controller, ExerciseLookup<CommonShell> plot, Heading heading) {
     super(controller, plot);
     isSpanish = controller.getLanguage().equalsIgnoreCase("Spanish");
     this.heading = heading;

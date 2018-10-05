@@ -1,5 +1,6 @@
 package mitll.langtest.client.analysis;
 
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -10,21 +11,23 @@ import org.moxieapps.gwt.highcharts.client.*;
 import java.util.Collection;
 import java.util.Map;
 
-public class PolyglotChart<T extends CommonShell>  extends BasicTimeSeriesPlot<T> {
+public class PolyglotChart<T extends CommonShell> extends BasicTimeSeriesPlot<T> {
   //private final Logger logger = Logger.getLogger("PolyglotChart");
   private static final String RECORDINGS = "Recordings";
   private static final String AVG_SCORE = "Avg. Score";
   private static final int HEIGHT = 100;
 
   protected Chart chart = null;
-  private final ListInterface<?,?> listInterface;
+  private final ListInterface<?, ?> listInterface;
 
   /**
    * @param exceptionSupport
    * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#getChart
    */
-  public PolyglotChart(ExceptionSupport exceptionSupport, ListInterface<?,?> listInterface) {
-    super(exceptionSupport);
+  public PolyglotChart(ExceptionSupport exceptionSupport,
+                       MessageHelper messageHelper,
+                       ListInterface<?, ?> listInterface) {
+    super(exceptionSupport, messageHelper);
     this.listInterface = listInterface;
   }
 
@@ -137,7 +140,7 @@ public class PolyglotChart<T extends CommonShell>  extends BasicTimeSeriesPlot<T
       AudioAnswer audioAnswer = timeToAnswer.get(xAsLong);
       if (audioAnswer != null) exerciseID = audioAnswer.getExid();
     }
-    return exerciseID == null ? null : getIdToEx().get(exerciseID);
+    return exerciseID == null ? null : getShell(exerciseID);
   }
 
   protected void gotClickOnExercise(int exid, long nearestXAsLong) {

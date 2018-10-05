@@ -62,6 +62,7 @@ import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.TimeRange;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -133,6 +134,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private long from, to;
   private int lastPlayed = -1;
   private final INavigation.VIEWS jumpView;
+  int itemColumnWidth = -1;
 
   /**
    * What sort order do we want?
@@ -145,16 +147,17 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    */
   WordContainerAsync(AnalysisTab.ReqInfo reqInfo,
                      ExerciseController controller,
-                     AnalysisPlot plot,
+                     ExerciseLookup<CommonShell> plot,
                      Heading w,
                      int numWords,
                      AnalysisServiceAsync analysisServiceAsync,
                      TimeRange timeRange,
-                     INavigation.VIEWS jumpView) {
+                     INavigation.VIEWS jumpView,
+                     int itemColumnWidth) {
     super(controller, plot);
+    this.itemColumnWidth = itemColumnWidth;
     this.jumpView = jumpView;
     this.reqInfo = reqInfo;
-    plot.addListener(this);
     this.heading = w;
 
     this.from = timeRange.getStart();
@@ -584,7 +587,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private void addReview() {
     Column<WordScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
-    int itemColWidth = isNarrow() ? ITEM_COL_WIDTH_NARROW : ITEM_COL_WIDTH;
+    int itemColWidth = getItemColWidth();
     table.setColumnWidth(itemCol, itemColWidth + "px");
 
     String language = controller.getLanguage();
@@ -593,6 +596,11 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     addColumn(itemCol, new TextHeader(headerForFL));
 
     tableSortHelper.rememberColumn(itemCol, WORD);
+  }
+
+  private int getItemColWidth() {
+    return itemColumnWidth == -1 ?
+        (isNarrow() ? ITEM_COL_WIDTH_NARROW : ITEM_COL_WIDTH) : itemColumnWidth;
   }
 
   private boolean isNarrow() {

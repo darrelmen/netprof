@@ -32,7 +32,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private static final String NATIVE = "Ref";
   private static final String PLAY = "Play";
 
-  protected final AnalysisPlot plot;
+  protected final ExerciseLookup<CommonShell> plot;
   private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
 
   /**
@@ -40,7 +40,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
    * @param plot
    * @see PhoneExampleContainer#PhoneExampleContainer
    */
-  AudioExampleContainer(ExerciseController controller, AnalysisPlot plot) {
+  AudioExampleContainer(ExerciseController controller, ExerciseLookup<CommonShell> plot) {
     super(controller);
     this.plot = plot;
   }
