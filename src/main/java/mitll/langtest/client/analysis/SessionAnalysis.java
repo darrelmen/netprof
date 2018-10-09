@@ -39,15 +39,10 @@ import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.dialog.IDialogSession;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Logger;
-
-import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -83,7 +78,7 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
   }
 
   @Override
-  protected void addBottom(DivWidget bottom, DivWidget rightSide) {
+  protected void addBottom(DivWidget bottom) {
 //    rightSide.add(bottom);
     //super.addBottom(bottom);
   }

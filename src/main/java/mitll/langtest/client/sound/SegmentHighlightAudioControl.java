@@ -24,7 +24,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
     wordSegments = new SegmentAudioControl(exID, typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT));
 
     TreeMap<TranscriptSegment, IHighlightSegment> phones = typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT);
-    if (phones != null & !phones.isEmpty()) {
+    if (phones != null && !phones.isEmpty()) {
       phoneSegments = new SegmentAudioControl(exID, phones);
      /* logger.info("phoneSegments now has " + phones.size());
       logger.info("wordSegments  now has " + typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT).size());*/

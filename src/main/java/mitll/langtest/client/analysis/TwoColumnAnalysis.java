@@ -44,7 +44,13 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
     }
   }
 
-  protected void showItems(Collection<T> users, Timer pleaseWaitTimer, ExerciseController controller) {
+  /**
+   * @see SessionAnalysis#SessionAnalysis
+   * @param users
+   * @param pleaseWaitTimer
+   * @param controller
+   */
+  void showItems(Collection<T> users, Timer pleaseWaitTimer, ExerciseController controller) {
     finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());
 
     clear();
@@ -53,12 +59,12 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
     bottom.addStyleName("floatLeft");
     bottom.getElement().setId("StudentAnalysis_bottom");
 
-    DivWidget rightSide = addTop(users, controller, bottom);
+    /*DivWidget rightSide =*/ addTop(users, controller, bottom);
 
-    addBottom(bottom, rightSide);
+    addBottom(bottom);
   }
 
-  protected void addBottom(DivWidget bottom, DivWidget rightSide) {
+  protected void addBottom(DivWidget bottom) {
     add(bottom);
   }
 
