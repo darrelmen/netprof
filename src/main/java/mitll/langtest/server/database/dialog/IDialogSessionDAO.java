@@ -41,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface IDialogSessionDAO extends IDAO {
+  List<Integer> getUsersForDialog(int dialogID);
+
   int add(int userid,
           int projid,
           int dialogid,

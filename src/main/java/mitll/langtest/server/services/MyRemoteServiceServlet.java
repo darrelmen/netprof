@@ -600,19 +600,22 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * Return the first dialog if the id is -1 or bogus...
    *
    * @param userIDFromSessionOrDB
-   * @param dialogID
+   * @param dialogID              -1 OK - just return the first dialog
    * @return the first dialog if the id is -1 or bogus...
    */
   @Nullable
-  private IDialog getOneDialog(int userIDFromSessionOrDB, int dialogID) {
+  protected IDialog getOneDialog(int userIDFromSessionOrDB, int dialogID) {
     List<IDialog> iDialogs = getDialogs(userIDFromSessionOrDB);
-    List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == dialogID).collect(Collectors.toList());
-    return collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
+    if (dialogID == -1) {
+      return iDialogs.isEmpty() ? null : iDialogs.get(0);
+    } else {
+      List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == dialogID).collect(Collectors.toList());
+      return collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
+    }
   }
 
   protected List<IDialog> getDialogs(int userIDFromSessionOrDB) {
-    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
-    return getDialogsForProject(projectIDFromUser);
+    return getDialogsForProject(getProjectIDFromUser(userIDFromSessionOrDB));
   }
 
   protected List<IDialog> getDialogsForProject(int projectIDFromUser) {

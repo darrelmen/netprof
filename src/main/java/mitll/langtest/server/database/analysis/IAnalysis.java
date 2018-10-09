@@ -45,8 +45,8 @@ public interface IAnalysis {
 
   List<WordAndScore> getWordAndScoreForPhoneAndBigram(AnalysisRequest analysisRequest);
   List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings);
+  List<UserInfo> getUserInfoForDialog(IUserDAO userDAO, int dialogID);
 
-//  PhoneSummary getPhoneSummary(int userid, int minRecordings, int listid);
   PhoneSummary getPhoneSummaryForPeriod(AnalysisRequest analysisRequest);
   PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest);
 }

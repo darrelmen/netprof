@@ -24,6 +24,9 @@ public interface INavigation extends IViewContaner {
     NONE("", EITHER),
 
     LISTS("Lists", VOCABULARY),
+    /**
+     *
+     */
     PROGRESS("Progress", VOCABULARY),
     LEARN("Learn", VOCABULARY),
     DRILL("Drill", VOCABULARY),

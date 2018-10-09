@@ -154,6 +154,11 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
     return dialogIDToScore;
   }
 
+  @Override
+  public List<Integer> getUsersForDialog(int dialogID) {
+    return dao.uniqueUsersForDialog(dialogID);
+  }
+
   /**
    * Take the most recent one, but not if it's a study and we already have a rehearse or a perform
    *

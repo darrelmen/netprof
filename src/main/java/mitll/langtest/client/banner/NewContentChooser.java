@@ -8,10 +8,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.analysis.AnalysisTab;
-import mitll.langtest.client.analysis.SessionAnalysis;
-import mitll.langtest.client.analysis.ShowTab;
-import mitll.langtest.client.analysis.StudentAnalysis;
+import mitll.langtest.client.analysis.*;
 import mitll.langtest.client.custom.ExerciseListContent;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
@@ -293,7 +290,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     header.addStyleName("bottomFiveMargin");
     divWidget.add(header);
 //    divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, STUDY));
-    divWidget.add(new SessionAnalysis(controller));
+    divWidget.add(isTeacher() ?
+        new StudentScores(controller):
+        new SessionAnalysis(controller));
     currentSection = SCORES;
   }
 
@@ -622,8 +621,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   public ShowTab getShowTab(VIEWS views) {
     return (exid) -> {
       int dialog = new SelectionState().getDialog();
-      logger.info("getShowTab Dialog id " + dialog);
-
+     // logger.info("getShowTab Dialog id " + dialog);
 
       ExerciseListContent learnHelper = views == LEARN ? this.learnHelper : studyHelper;
 

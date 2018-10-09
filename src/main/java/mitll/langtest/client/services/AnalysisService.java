@@ -55,6 +55,8 @@ public interface AnalysisService extends RemoteService {
    */
   Collection<UserInfo> getUsersWithRecordings() throws DominoSessionException;
 
+  Collection<UserInfo> getUsersWithRecordingsForDialog(int dialogID) throws DominoSessionException;
+
   /**
    * TODO : why do we have to do this at all???
    *

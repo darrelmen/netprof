@@ -107,15 +107,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
         Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryForDialogs(userIDFromSessionOrDB, dialogList);
 
 
-        dialogList.forEach(iDialog -> {
-          CorrectAndScore correctAndScore = scoreHistoryPerExercise.get(iDialog.getID());
-          if (correctAndScore != null) {
-            int percentScore = correctAndScore.getPercentScore();
-            logger.info("scores " + iDialog.getID() + " - " + percentScore);
-
-            iDialog.getMutableShell().setScore(percentScore);
-          }
-        });
+        setDialogScores(dialogList, scoreHistoryPerExercise);
 
         return new ExerciseListWrapper<>(request.getReqID(), dialogList, null, scoreHistoryPerExercise);
       } else {
@@ -123,6 +115,18 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
         return new ExerciseListWrapper<>();
       }
     }
+  }
+
+  private void setDialogScores(List<IDialog> dialogList, Map<Integer, CorrectAndScore> scoreHistoryPerExercise) {
+    dialogList.forEach(iDialog -> {
+      CorrectAndScore correctAndScore = scoreHistoryPerExercise.get(iDialog.getID());
+      if (correctAndScore != null) {
+        int percentScore = correctAndScore.getPercentScore();
+        logger.info("scores " + iDialog.getID() + " - " + percentScore);
+
+        iDialog.getMutableShell().setScore(percentScore);
+      }
+    });
   }
 
   /**

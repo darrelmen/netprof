@@ -298,6 +298,11 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
 
+  /**
+   * @param analysisRequest
+   * @return
+   * @see #getPhoneSummaryForPeriod
+   */
   @Nullable
   private UserInfo getUserInfo(AnalysisRequest analysisRequest) {
     Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
@@ -514,7 +519,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private Map<Integer, UserInfo> getBestForUser(AnalysisRequest analysisRequest) {
     long then = System.currentTimeMillis();
 
-
 //    Collection<Integer> dialogExerciseIDs = getDialogExerciseIDs(dialogID);
 //
 //    logger.info("getBestForUser Dialog ids " + dialogExerciseIDs.size());
@@ -559,6 +563,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   /**
    * For the current project id.
    *
+   * TODO : Gets all recordings!!!
+   *
    * @param userDAO
    * @param minRecordings
    * @return
@@ -573,7 +579,24 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     if (now - then > 100)
       logger.info("getUserInfo took " + (now - then) + " to get " + perfForUser.size() + " perf infos for project #" + projid);
 
-    then = now;
+    return getUserInfos(userDAO, minRecordings, perfForUser, now);
+  }
+
+  @Override
+  public List<UserInfo> getUserInfoForDialog(IUserDAO userDAO, int dialogID) {
+    long then = System.currentTimeMillis();
+    Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForDialog(projid);
+    long now = System.currentTimeMillis();
+    if (now - then > 100)
+      logger.info("getUserInfoForDialog took " + (now - then) +
+          "\n\tto get   " + perfForUser.size() + " perf infos for " +
+          "\n\tproject #" + projid + " dialog " + dialogID);
+
+    return getUserInfos(userDAO, 1, perfForUser, now);
+  }
+
+  private List<UserInfo> getUserInfos(IUserDAO userDAO, int minRecordings, Collection<SlickPerfResult> perfForUser, long now) {
+    long then = now;
     Map<Integer, UserInfo> best = getBest(perfForUser, minRecordings, false);
     now = System.currentTimeMillis();
     if (now - then > 100)

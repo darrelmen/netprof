@@ -38,9 +38,9 @@ import java.util.logging.Logger;
  */
 public class UserMenu {
   private static final String ARE_YOU_AN_INSTRUCTOR = "Are you an instructor?";
-  public static final String BROWSER_RECORDING = "Browser recording";
-  public static final String RECORDING_TYPE = "Recording type";
-  public static final String DOMINO_URL = "domino.url";
+  private static final String BROWSER_RECORDING = "Browser recording";
+  private static final String RECORDING_TYPE = "Recording type";
+  private static final String DOMINO_URL = "domino.url";
 
   private final Logger logger = Logger.getLogger("UserMenu");
 

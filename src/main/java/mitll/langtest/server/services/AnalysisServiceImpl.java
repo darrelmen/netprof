@@ -40,6 +40,7 @@ import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
@@ -102,6 +103,41 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   }
 
   /**
+   *
+   * @param dialogID
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
+  @Override
+  public Collection<UserInfo> getUsersWithRecordingsForDialog(int dialogID)
+      throws DominoSessionException, RestrictedOperationException {
+    long then = System.currentTimeMillis();
+    if (hasTeacherPerm()) {
+      int projectIDFromUser = getProjectIDFromUser();
+      logger.info("getUsersWithRecordingsForDialog for project # " + projectIDFromUser + " for dialog " +dialogID);
+
+      if (dialogID == -1) {
+        List<IDialog> dialogs = getDialogsForProject(-1);
+        if (dialogs != null && !dialogs.isEmpty()) {
+          dialogID = dialogs.get(0).getID();
+        }
+      }
+
+      List<UserInfo> userInfo = db
+          .getAnalysis(projectIDFromUser)
+          .getUserInfoForDialog(db.getUserDAO(), dialogID);
+      long now = System.currentTimeMillis();
+      if (now - then > 100) {
+        logger.info("took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
+      }
+      return userInfo;
+    } else {
+      throw getRestricted("getUsersWithRecordings : performance report");
+    }
+  }
+
+  /**
    * @param analysisRequest
    * @return
    * @paramx userid
@@ -142,7 +178,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   }
 
   private String getUserID(int userid) {
-        return db.getUserDAO().getUserWhere(userid).getUserID();
+    return db.getUserDAO().getUserWhere(userid).getUserID();
   }
 
 /*

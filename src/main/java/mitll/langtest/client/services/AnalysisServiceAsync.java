@@ -67,4 +67,6 @@ public interface AnalysisServiceAsync {
   void getPhoneSummary(AnalysisRequest analysisRequest, AsyncCallback<PhoneSummary> async);
 
   void getPhoneBigrams(AnalysisRequest analysisRequest, AsyncCallback<PhoneBigrams> async);
+
+  void getUsersWithRecordingsForDialog(int dialogID, AsyncCallback<Collection<UserInfo>> async);
 }

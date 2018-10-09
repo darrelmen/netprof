@@ -36,11 +36,9 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.banner.NewContentChooser;
-import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.exercise.HasID;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,17 +53,18 @@ import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/27/15.
  */
-public class StudentAnalysis extends TwoColumnAnalysis<UserInfo> {
+public class StudentScores extends TwoColumnAnalysis<UserInfo> {
   private final Logger logger = Logger.getLogger("StudentAnalysis");
 
   /**
    * @param controller
    * @see NewContentChooser#showProgress
    */
-  public StudentAnalysis(final ExerciseController controller) {
+  public StudentScores(final ExerciseController controller) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
 
-    analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
+    analysisServiceAsync.getUsersWithRecordingsForDialog(new SelectionState().getDialog(),
+        new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
         finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());
