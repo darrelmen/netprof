@@ -88,9 +88,9 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
    */
   @Override
   public List<IDialogSession> getDialogSessions(int userid, int dialogid) {
-    if (dialogid == -1) {
+/*    if (dialogid == -1) {
 
-    }
+    }*/
     return getiDialogSessions(getByUserAndDialog(userid, dialogid));
   }
 
@@ -120,7 +120,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
 
   @NotNull
   private INavigation.VIEWS getViews(SlickDialogSession ds) {
-    INavigation.VIEWS views = null;
+    INavigation.VIEWS views;
     try {
       views = INavigation.VIEWS.valueOf(ds.view().toUpperCase());
     } catch (IllegalArgumentException e) {
@@ -132,8 +132,8 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
 
 
   @Override
-  public Map<Integer, Integer> getLatestDialogSessionScores(int projid, int userid) {
-    Map<Integer, Integer> dialogIDToScore = new HashMap<>();
+  public Map<Integer, Float> getLatestDialogSessionScores(int projid, int userid) {
+    Map<Integer, Float> dialogIDToScore = new HashMap<>();
 
     dao.byProjAndUser(projid, userid).forEach((k, v) ->
         {
@@ -147,7 +147,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
                 "\n\tscore  " + candidate.score());
           }
 
-          dialogIDToScore.put(k, candidate == null ? 0 : Math.round(candidate.score() * 100F));
+          dialogIDToScore.put(k, candidate == null ? 0F : candidate.score());
         }
     );
 

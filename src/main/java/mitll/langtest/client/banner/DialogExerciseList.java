@@ -260,7 +260,9 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     {
       int percentScore = scoreHistoryPerExercise.getOrDefault(dialog.getID(), new CorrectAndScore(0F, null)).getPercentScore();
       if (percentScore > 0) {
+       // logger.info("For " + dialog.getID() + " score " +percentScore);
         double score = Integer.valueOf(percentScore).doubleValue() / 100D;
+       // logger.info("overallSmiley For " + dialog.getID() + " score " +score);
         overallSmiley.setEmoticon(score, controller.getLanguageInfo());
       }
       else overallSmiley.setVisible(false);
@@ -284,8 +286,7 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   @NotNull
   private Heading getLabel(String name) {
-    Heading label = thumbnailChoices.getChoiceLabel(LANGUAGE_SIZE, name, false);
-    return label;
+    return thumbnailChoices.getChoiceLabel(LANGUAGE_SIZE, name, false);
   }
 
   /**

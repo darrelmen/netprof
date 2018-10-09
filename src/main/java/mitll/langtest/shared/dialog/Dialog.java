@@ -301,7 +301,7 @@ public class Dialog implements IDialog, MutableShell {
 
   @Override
   public int getRawScore() {
-    return Math.round(score / 100F);
+    return Math.round(score);
   }
 
   /**
@@ -310,7 +310,7 @@ public class Dialog implements IDialog, MutableShell {
    */
   @Override
   public float getScore() {
-    return score / 10000F;
+    return score / 100F;
   }
 
   @Override

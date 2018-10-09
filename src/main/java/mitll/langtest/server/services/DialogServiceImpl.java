@@ -138,7 +138,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
     if (!dialogList.isEmpty()) {
       IDialog iDialog = dialogList.get(0);
-      Map<Integer, Integer> latestDialogSessionScores =
+      Map<Integer, Float> latestDialogSessionScores =
           db.getDialogSessionDAO().getLatestDialogSessionScores(iDialog.getProjid(), userIDFromSessionOrDB);
       latestDialogSessionScores.forEach((k, v) -> scoreHistoryPerExercise.put(k, new CorrectAndScore(v, null)));
     }

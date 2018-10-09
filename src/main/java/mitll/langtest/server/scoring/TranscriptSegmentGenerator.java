@@ -97,11 +97,13 @@ public class TranscriptSegmentGenerator {
       Collections.sort(allKoreanPhones);
 //        List<TranscriptSegment> koreanSegmentsForWord = getKoreanSegments(hydraPhoneSegments);
       //      List<TranscriptSegment> koreanSegments = koreanSegments1;
-      String after = getSeguence(allKoreanPhones);
+      if (DEBUG) {
+        String after = getSeguence(allKoreanPhones);
 
-      if (DEBUG) logger.info("segments : " +
-          "\n\tbefore " + before +
-          "\n\tafter " + after);
+        if (DEBUG) logger.info("segments : " +
+            "\n\tbefore " + before +
+            "\n\tafter " + after);
+      }
 
       typeToEndTimes.put(PHONE_TRANSCRIPT, allKoreanPhones);
     }
@@ -176,8 +178,10 @@ public class TranscriptSegmentGenerator {
       List<String> e = koreanLTS.expectedFragments(aChar);
       fragmentList.add(e);
 
-      e.forEach(f -> logger.info("getKoreanFragments : for '" + foreignLanguage + "' '" + aChar +
-          "'  expected '" + f + "' of " + e.size()));
+      if (DEBUG) {
+        e.forEach(f -> logger.info("getKoreanFragments : for '" + foreignLanguage + "' '" + aChar +
+            "'  expected '" + f + "' of " + e.size()));
+      }
       // logger.info("for " + foreignLanguage + " expected "+fragmentList);
     }
     return fragmentList;

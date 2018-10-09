@@ -83,9 +83,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -118,6 +116,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private PathWriter pathWriter;
   private IEnsureAudioHelper ensureAudioHelper;
   private AudioCheck audioCheck;
+  private final static boolean DEBUG_REF_TRIM = false;
 
   private final LoadingCache<Long, List<AudioChunk>> sessionToChunks = CacheBuilder.newBuilder()
       .maximumSize(10000)
@@ -130,10 +129,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             }
           });
 
-  //  private ConcurrentHashMap<Long, Integer> sessionToStart = new ConcurrentHashMap<>();
   private ConcurrentHashMap<Long, SessionInfo> sessionToInfo = new ConcurrentHashMap<>();
-//  private ConcurrentHashMap<Long, Integer> sessionToExpectedDur = new ConcurrentHashMap<>();
-//  private ConcurrentHashMap<Long, Integer> sessionToQuiet = new ConcurrentHashMap<>();
 
   /**
    * Sanity checks on answers and bestAudio dir
@@ -162,7 +158,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     ServletRequestContext ctx = new ServletRequestContext(request);
     String contentType = ctx.getContentType();
     //  String requestType = getRequestType(request);
-
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
     if (contentType.equalsIgnoreCase("application/wav")) {
       //reportOnHeaders(request);
@@ -253,7 +248,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     boolean isRef = isReference(request);
     AudioType audioType = getAudioType(request);
     int dialogSessionID = getDialogSession(request);
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("getJSONForStream got" +
           "\n\trequest  " + requestType +
           "\n\tprojid   " + projid +
@@ -383,10 +378,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       silenceDur += dur;
     }
 
-//    void clearSilence() {
-//      silenceDur = 0;
-//    }
-
     public String toString() {
       return "Session " + speechDur + " vs " + expectedSpeechDur + " sil " + silenceDur;
     }
@@ -399,7 +390,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   *
    * @param request
    * @return
    */
@@ -415,7 +405,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   *
    * @param deviceType
    * @param device
    * @param userIDFromSession
@@ -444,7 +433,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
                                    List<AudioChunk> audioChunks,
                                    JSONObject jsonObject) throws IOException, DominoSessionException {
-    AudioChunk combined = getCombinedAudioChunk(audioChunks);
+    AudioChunk combined = isReference ? getCombinedRef(audioChunks) : getCombinedAudioChunk(audioChunks);
 
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(combined.getWavFile());
 //      logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
@@ -533,8 +522,133 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
     long now = System.currentTimeMillis();
 
-    logger.info("Stop - finally combine " + combined + " in " + (now - then) + " millis");
+    if (DEBUG_REF_TRIM || (now - then) > 20) {
+      logger.info("getCombinedAudioChunk - finally combine " + combined + " in " + (now - then) + " millis");
+    }
     return combined;
+  }
+
+  /**
+   * @see #getJsonObject
+   * @param audioChunks
+   * @return
+   */
+  private AudioChunk getCombinedRef(List<AudioChunk> audioChunks) {
+    long then = System.currentTimeMillis();
+    //logger.info("Stop - combine " + audioChunks.size());
+
+    audioChunks.sort(AudioChunk::compareTo);
+
+    AudioChunk startChunk = getStartChunk(audioChunks);
+    AudioChunk endChunk = getEndChunk(audioChunks);
+
+    AudioChunk combined = startChunk == null ? audioChunks.get(0) : startChunk;
+
+    if (DEBUG_REF_TRIM) {
+      logger.info("getCombinedRef - " +
+          "\n\tstart " + combined +
+          "\n\tto    " + endChunk);
+    }
+
+    int startIndex = audioChunks.indexOf(combined) + 1;
+    int endIndex = audioChunks.indexOf(endChunk) + 1;
+    for (int i = startIndex; i < endIndex; i++) {
+      AudioChunk next = audioChunks.get(i);
+
+      // ordering check...
+      {
+        int packet = combined.getPacket();
+        int packet1 = next.getPacket();
+        if (packet != packet1 - 1) {
+          logger.warn("getCombinedAudioChunk : hmm current packet " + packet + " vs next " + packet1);
+        }
+      }
+      combined = combined.concat(next);
+
+      if (DEBUG_REF_TRIM) {
+        logger.info("\tgetCombinedAudioChunk after combined " + combined + " with " + next);
+      }
+    }
+
+    if (DEBUG_REF_TRIM) {
+      long now = System.currentTimeMillis();
+      logger.info("getCombinedRef - finally combine " + combined + " in " + (now - then) + " millis");
+    }
+    return combined;
+  }
+
+  /**
+   * Walk forward, looking for last silence chunk before a speech chunk
+   * @param audioChunks
+   * @return
+   */
+  private AudioChunk getStartChunk(List<AudioChunk> audioChunks) {
+    Iterator<AudioChunk> iterator = audioChunks.iterator();
+    AudioChunk prevQuiet = null;
+    AudioChunk start = null;
+
+    while (iterator.hasNext()) {
+      AudioChunk current = iterator.next();
+      Validity validity = current.getValidity();
+      boolean silence = isSilence(validity);
+
+      if (start == null) {
+        start = current;
+        if (!silence) {
+          break;
+        }
+      } else {
+        if (prevQuiet != null && validity == Validity.OK) { // prevQuiet is quiet - too quiet, etc.
+          start = prevQuiet;
+          if (DEBUG_REF_TRIM) logger.info("getCombinedRef start chunk now " + start);
+          break;
+        }
+      }
+
+      if (silence) {
+        prevQuiet = current;
+      }
+    }
+    return start;
+  }
+
+  /**
+   * Walk backwards through chunks, looking for last sequence of silence chunks, keeping the last one.
+   * @param audioChunks
+   * @return
+   */
+  private AudioChunk getEndChunk(List<AudioChunk> audioChunks) {
+    ListIterator<AudioChunk> iterator = audioChunks.listIterator(audioChunks.size());
+
+    AudioChunk nextQuiet = null;
+    AudioChunk end = null;
+
+    while (iterator.hasPrevious()) {
+      AudioChunk current = iterator.previous();
+      Validity validity = current.getValidity();
+      boolean silence = isSilence(validity);
+      if (end == null) {
+        end = current;
+        if (!silence) {
+          break;
+        }
+      } else {
+        if (nextQuiet != null && validity == Validity.OK) { // assume next is not valid - too quiet, etc.
+          end = nextQuiet;
+          if (DEBUG_REF_TRIM) logger.info("getCombinedRef end chunk now " + end);
+          break;
+        }
+      }
+
+      if (silence) {
+        nextQuiet = current;
+      }
+    }
+    return end;
+  }
+
+  private boolean isSilence(Validity validity) {
+    return validity == Validity.MIC_DISCONNECTED || validity == Validity.TOO_QUIET;// || validity == Validity.SNR_TOO_LOW;
   }
 
   private static class AudioChunk implements Comparable<AudioChunk> {
@@ -560,6 +674,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       this.packet = packet;
       this.combined = combined;
       this.wavFile = wavFile;
+    }
+
+    Validity getValidity() {
+      return getValidityAndDur().getValidity();
     }
 
     /**

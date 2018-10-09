@@ -39,14 +39,13 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   /**
    *
    */
-  private static final String CURR = "Avg";//"Average";//"Avg. Score";
+  private static final String CURR = "Avg";
   private static final int COUNT_COL_WIDTH = 45;
-  //  private static final String TOOLTIP = "Click to see examples";// and scores over time";
   private static final int SOUND_WIDTH = 65;
 
   final AnalysisServiceAsync analysisServiceAsync;
 
-  protected final AnalysisTab.ReqInfo reqInfo;
+  final AnalysisTab.ReqInfo reqInfo;
   protected long from;
   protected long to;
   protected int reqid = 0;

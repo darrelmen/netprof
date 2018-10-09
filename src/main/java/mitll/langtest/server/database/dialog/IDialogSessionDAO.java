@@ -55,7 +55,7 @@ public interface IDialogSessionDAO extends IDAO {
   );
 
   // seems like we want a summary of the latest scores
-  Map<Integer, Integer> getLatestDialogSessionScores(int projid, int userid);
+  Map<Integer, Float> getLatestDialogSessionScores(int projid, int userid);
 
   /**
    * @param userid
@@ -64,10 +64,6 @@ public interface IDialogSessionDAO extends IDAO {
    * @see mitll.langtest.server.services.DialogServiceImpl#getDialogSessions(int, int)
    */
   List<IDialogSession> getDialogSessions(int userid, int dialog);
-
-/*
-  List<IDialogSession> getCurrentDialogSessions(int userid);
-*/
 
   /**
    * For when we want to drop the current dialog data and reload
