@@ -68,7 +68,7 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
-  private static final int MIN_WIDTH = 2560;
+  private static final int MIN_WIDTH = 250;
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
   private static final String WORD_EXAMPLES = "WordExamples";

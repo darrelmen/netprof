@@ -104,11 +104,11 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   }
 
   /**
-   * @see mitll.langtest.client.analysis.StudentScores#StudentScores(ExerciseController)
    * @param dialogID
    * @return
    * @throws DominoSessionException
    * @throws RestrictedOperationException
+   * @see mitll.langtest.client.analysis.StudentScores#StudentScores(ExerciseController)
    */
   @Override
   public Collection<UserInfo> getUsersWithRecordingsForDialog(int dialogID)
@@ -116,16 +116,10 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     long then = System.currentTimeMillis();
     if (hasTeacherPerm()) {
       int projectIDFromUser = getProjectIDFromUser();
-      logger.info("getUsersWithRecordingsForDialog for project # " + projectIDFromUser + " for dialog " +dialogID);
+      logger.info("getUsersWithRecordingsForDialog for project # " + projectIDFromUser + " for dialog " + dialogID);
 
       if (dialogID == -1) {
-        List<IDialog> dialogs = getDialogsForProject(-1);
-        if (dialogs != null && !dialogs.isEmpty()) {
-          dialogID = dialogs.get(0).getID();
-        }
-        logger.info("\tgetUsersWithRecordingsForDialog for project # " + projectIDFromUser + " (" +
-                dialogs.size()+
-            ") for dialog " +dialogID);
+        dialogID = getFirstDialogID(projectIDFromUser);
       }
 
       List<UserInfo> userInfo = db
@@ -139,6 +133,18 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     } else {
       throw getRestricted("getUsersWithRecordings : performance report");
     }
+  }
+
+  private int getFirstDialogID(int projectIDFromUser) {
+    int dialogID = -1;
+    List<IDialog> dialogs = getDialogsForProject(projectIDFromUser);
+    if (dialogs != null && !dialogs.isEmpty()) {
+      dialogID = dialogs.get(0).getID();
+    }
+    logger.info("\tgetUsersWithRecordingsForDialog for project # " + projectIDFromUser + " (" +
+        dialogs.size() +
+        ") for dialog " + dialogID);
+    return dialogID;
   }
 
   /**

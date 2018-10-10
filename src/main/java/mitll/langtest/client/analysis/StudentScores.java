@@ -94,6 +94,9 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
 
       }
 
+      @Override
+      protected void addItemID(List<UserInfo> list, int maxLength){}
+
       @NotNull
       @Override
       protected String getLifetimeCountTitle() {
