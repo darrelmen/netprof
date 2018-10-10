@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.exercise.Project;
@@ -103,7 +104,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   }
 
   /**
-   *
+   * @see mitll.langtest.client.analysis.StudentScores#StudentScores(ExerciseController)
    * @param dialogID
    * @return
    * @throws DominoSessionException
@@ -122,6 +123,9 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
         if (dialogs != null && !dialogs.isEmpty()) {
           dialogID = dialogs.get(0).getID();
         }
+        logger.info("\tgetUsersWithRecordingsForDialog for project # " + projectIDFromUser + " (" +
+                dialogs.size()+
+            ") for dialog " +dialogID);
       }
 
       List<UserInfo> userInfo = db

@@ -308,4 +308,9 @@ class H2Analysis extends Analysis implements IAnalysis {
     finish(connection, statement, rs);
     return userToBest;
   }
+
+  @Override
+  public List<UserInfo> getUserInfoForDialog(IUserDAO userDAO, int dialogID) {
+    return null;
+  }
 }

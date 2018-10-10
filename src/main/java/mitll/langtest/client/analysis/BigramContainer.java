@@ -78,6 +78,7 @@ class BigramContainer extends PhoneContainerBase {
                   AnalysisTab.ReqInfo reqInfo) {
     super(controller, analysisServiceAsync, reqInfo);
     this.exampleContainer = exampleContainer;
+
   }
 
   @Override

@@ -394,6 +394,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see RecordButton.RecordingListener#stopRecording
    * @see RecordButton.RecordingListener#stopRecording
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
+   * @see mitll.langtest.server.services.AudioServiceImpl#getAudioAnswer
    */
   public AudioAnswer writeAudioFile(String base64EncodedString,
                                     File fileInstead,
@@ -921,6 +922,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param pretestScore
    * @return
    * @see #getAnswer
+   * @see mitll.langtest.server.scoring.JsonScoring#getAnswer
    */
   private AudioAnswer getAudioAnswerAlignment(ClientExercise exercise,
 
@@ -973,6 +975,14 @@ public class AudioFileHelper implements AlignDecode {
     return project.getModelsDir();
   }
 
+  /**
+   * @see #recordInResults
+   * @see #getAudioAnswerAlignment
+   * @param projid
+   * @param answer
+   * @param info
+   * @param dialogSessionID
+   */
   private void rememberAnswer(int projid, AudioAnswer answer, AnswerInfo info, int dialogSessionID) {
     long timestamp = System.currentTimeMillis();
     int answerID = db.getAnswerDAO().addAnswer(info, timestamp);

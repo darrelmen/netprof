@@ -45,6 +45,13 @@ public interface IAnalysis {
 
   List<WordAndScore> getWordAndScoreForPhoneAndBigram(AnalysisRequest analysisRequest);
   List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings);
+
+  /**
+   * @see mitll.langtest.server.services.AnalysisServiceImpl#getUsersWithRecordingsForDialog
+   * @param userDAO
+   * @param dialogID
+   * @return
+   */
   List<UserInfo> getUserInfoForDialog(IUserDAO userDAO, int dialogID);
 
   PhoneSummary getPhoneSummaryForPeriod(AnalysisRequest analysisRequest);

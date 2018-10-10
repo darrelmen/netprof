@@ -266,7 +266,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param prefix                on the names of the image files, if they are written
    * @param precalcScores
    * @param usePhoneToDisplay
-   * @param useKaldi
+   * @param useKaldi              true if using the new kaldi protocol!
    * @param port
    * @return score info coming back from alignment/reco
    * @seex ASR#scoreRepeat
@@ -836,9 +836,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     long then = System.currentTimeMillis();
 
-    HTTPClient dcodr = getDcodr();
-
-    String resultsStr = runHydra(hydraInput, dcodr);
+    String resultsStr = runHydra(hydraInput, getDcodr());
     if (resultsStr.startsWith("ERROR")) {
       String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
       message = "hydra said " + resultsStr + " : " + message;

@@ -33,6 +33,8 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.ToggleType;
@@ -41,10 +43,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -69,6 +68,7 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
+  private static final int MIN_WIDTH = 2560;
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
   private static final String WORD_EXAMPLES = "WordExamples";
@@ -141,7 +141,8 @@ public class AnalysisTab extends DivWidget {
   private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
   private ListBox timeScale;
   private INavigation.VIEWS jumpView;
-private int itemColumnWidth=-1;
+  private int itemColumnWidth = -1;
+
   /**
    * @param controller
    * @param isPolyglot
@@ -243,8 +244,9 @@ private int itemColumnWidth=-1;
       public void onSuccess(AnalysisReport result) {
         long now = System.currentTimeMillis();
         long total = now - then;
+        String took = total > 20 ? "\n\ttook   " + total : "";
         logger.info("getPerformanceReportForUser userid " + userid + " req " + analysisRequest.getReqid() +
-            "\n\ttook   " + total +
+            took +
             "\n\tserver " + result.getServerTime() +
             "\n\tclient " + (total - result.getServerTime()));
 
@@ -260,8 +262,9 @@ private int itemColumnWidth=-1;
 
   }
 
-  void setItemColumnWidth(int itemColumnWidth) {
+  AnalysisTab setItemColumnWidth(int itemColumnWidth) {
     this.itemColumnWidth = itemColumnWidth;
+    return this;
   }
 
   private AnalysisPlot addAnalysisPlot(ExerciseController controller, boolean isPolyglot, int maxWidth, boolean isTeacherView) {
@@ -333,7 +336,7 @@ private int itemColumnWidth=-1;
    * @param isTeacherView
    * @param bottom
    * @param reqInfo
-   * @seex #AnalysisTab(ExerciseController, int, DivWidget, int, String, int, boolean, int, ReqCounter)
+   * @see #AnalysisTab(ExerciseController, DivWidget, String, boolean, ReqCounter, INavigation.VIEWS, AnalysisRequest, int, boolean)
    */
   private void useReport(AnalysisReport result,
                          long then,
@@ -375,7 +378,9 @@ private int itemColumnWidth=-1;
 
     showWordScores(result.getNumScores(), controller,
         analysisPlot,
-        bottom, phoneSummary, reqInfo, result.getUserPerformance().getTimeWindow(), exerciseLookup);
+        bottom,
+        phoneSummary, reqInfo,
+        result.getUserPerformance().getTimeWindow(), exerciseLookup);
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
@@ -640,8 +645,8 @@ private int itemColumnWidth=-1;
    * @param controller
    * @param analysisPlot
    * @param wordsTitle
-   * @paramx itemColumnWidth
    * @return
+   * @paramx itemColumnWidth
    * @see #showWordScores(int, ExerciseController, AnalysisPlot, Panel, PhoneSummary, ReqInfo, TimeRange, ExerciseLookup)
    */
   private Panel getWordContainer(
@@ -652,7 +657,7 @@ private int itemColumnWidth=-1;
       ExerciseLookup<CommonShell> exerciseLookup,
       Heading wordsTitle,
 
-      TimeRange timeRange ) {
+      TimeRange timeRange) {
     WordContainerAsync wordContainer =
         new WordContainerAsync(reqInfo, controller, exerciseLookup, wordsTitle,
             numResults, analysisServiceAsync, timeRange, jumpView, itemColumnWidth);
@@ -694,6 +699,8 @@ private int itemColumnWidth=-1;
                               AnalysisPlot analysisPlot,
                               ExerciseLookup<CommonShell> exerciseLookup,
                               ReqInfo reqInfo) {
+   // logger.info("GetPhoneReport " + phoneReport);
+
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, exerciseLookup, exampleHeader);
     final BigramContainer bigramContainer =
         new BigramContainer(controller, exampleContainer, analysisServiceAsync, reqInfo);
@@ -728,6 +735,7 @@ private int itemColumnWidth=-1;
   }
 
   private DivWidget getBigramContainer(Panel phones) {
+
     return getContainer(phones, "BigramContainer", "Context");
   }
 
@@ -737,8 +745,15 @@ private int itemColumnWidth=-1;
     sounds.getElement().setId(bigramContainer);
     sounds.add(getHeading(context));
     sounds.add(phones);
+    setMinWidth(sounds);
+
     return sounds;
   }
+
+  private void setMinWidth(UIObject horiz1) {
+    horiz1.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px"); // so they wrap nicely
+  }
+
 
   private DivWidget getWordExamples(Panel examples) {
     DivWidget wordExamples = getWordContainerDiv(examples, WORD_EXAMPLES, exampleHeader);

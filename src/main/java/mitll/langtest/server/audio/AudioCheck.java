@@ -80,7 +80,7 @@ public class AudioCheck {
   private final int MIN_DYNAMIC_RANGE;
 
   // TODO :make a server prop
-  private final float FORGIVING_MIN_DNR = 18F;
+  private static final float FORGIVING_MIN_DNR = 18F;
   private final boolean trimAudio;
 
   /**
@@ -479,7 +479,7 @@ public class AudioCheck {
     }
 
     public boolean isValid() {
-      return isValid; // == AudioAnswer.Validity.OK;
+      return isValid;
     }
 
     public Validity getValidity() {

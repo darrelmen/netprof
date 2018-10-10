@@ -52,16 +52,19 @@ import java.util.List;
  */
 public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
   // private final Logger logger = Logger.getLogger("StudentAnalysis");
+  int user;
 
   /**
    * @param controller
+   * @param user
    * @see NewContentChooser#showProgress
    */
-  public SessionAnalysis(final ExerciseController controller) {
+  public SessionAnalysis(final ExerciseController controller, int user) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
 
+    this.user=user;
     controller.getDialogService().getDialogSessions(
-        controller.getUser(),
+        user,
         new SelectionState().getDialog(),
         new AsyncCallback<List<IDialogSession>>() {
           @Override
@@ -106,7 +109,7 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
       return divWidget;
     } else {
       SessionContainer<IDialogSession> userContainer =
-          new SessionContainer<>(controller, rightSide, bottom);
+          new SessionContainer<>(controller, rightSide, bottom, user);
       DivWidget table = userContainer.getTable(users);
       table.addStyleName("cardBorderShadow");
       return table;

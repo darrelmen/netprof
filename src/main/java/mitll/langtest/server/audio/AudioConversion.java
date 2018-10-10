@@ -121,20 +121,20 @@ public class AudioConversion extends AudioBase {
   }
 
   /**
-   * @see AudioFileHelper#writeAudioFile
-   * @see #convertBase64ToAudioFiles(String, File, boolean, boolean)
    * @param file
    * @param useSensitiveTooLoudCheck
    * @param quietAudioOK
    * @param then
    * @return
+   * @see AudioFileHelper#writeAudioFile
+   * @see #convertBase64ToAudioFiles(String, File, boolean, boolean)
    */
   @NotNull
-  AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
+  public AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
     if (DEBUG) logger.debug("getValidityAndDur: wrote wav file " + file.getAbsolutePath());
     boolean b;
     b = file.setReadable(true, false);
-    if (!b) logger.warn("getValidityAndDur couldn't make " + file  + " readable?");
+    if (!b) logger.warn("getValidityAndDur couldn't make " + file + " readable?");
 
     if (DEBUG) logger.debug("getValidityAndDur: wrote wav file " + file.getAbsolutePath());
 
@@ -177,7 +177,7 @@ public class AudioConversion extends AudioBase {
   private void setPermissions(File parentFile) {
     boolean b = parentFile.setReadable(true, false);
     if (!b) logger.warn("couldn't make " + parentFile + " readable?");
-    b =  parentFile.setExecutable(true, false);
+    b = parentFile.setExecutable(true, false);
     if (!b) logger.warn("couldn't make " + parentFile + " executable?");
   }
 
@@ -240,7 +240,7 @@ public class AudioConversion extends AudioBase {
     String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + WAV;
     File wavFile = convertTo16Khz(new File(pathname), uniqueTimestamp);
     boolean b = wavFile.setReadable(true, false);
-    if (!b) logger.warn("couldn't make " +wavFile + " readable?");
+    if (!b) logger.warn("couldn't make " + wavFile + " readable?");
     return removeSuffix(wavFile.getName());
   }
 
@@ -517,11 +517,11 @@ public class AudioConversion extends AudioBase {
       List<Boolean> results = new ArrayList<>(2);
 
       Thread mp3Thread = new Thread(() -> results.add(
-          writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)),"writeCompressedVersionsMP3");
+          writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)), "writeCompressedVersionsMP3");
       mp3Thread.start();
 
       Thread oggThread = new Thread(() -> results.add(new ConvertToOGG()
-          .writeOGG(absolutePathToWav, overwrite, trackInfo)),"writeCompressedVersionsOGG");
+          .writeOGG(absolutePathToWav, overwrite, trackInfo)), "writeCompressedVersionsOGG");
       oggThread.start();
 
       if (waitToFinish) {

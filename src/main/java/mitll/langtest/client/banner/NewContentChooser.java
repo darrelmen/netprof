@@ -292,7 +292,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 //    divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, STUDY));
     divWidget.add(isTeacher() ?
         new StudentScores(controller):
-        new SessionAnalysis(controller));
+        new SessionAnalysis(controller, controller.getUser()));
     currentSection = SCORES;
   }
 

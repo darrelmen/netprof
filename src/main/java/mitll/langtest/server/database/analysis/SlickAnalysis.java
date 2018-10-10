@@ -585,9 +585,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   @Override
   public List<UserInfo> getUserInfoForDialog(IUserDAO userDAO, int dialogID) {
     long then = System.currentTimeMillis();
-    Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForDialog(projid);
+    Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForDialog(dialogID);
     long now = System.currentTimeMillis();
-    if (now - then > 100)
+    if (now - then > 100  || true)
       logger.info("getUserInfoForDialog took " + (now - then) +
           "\n\tto get   " + perfForUser.size() + " perf infos for " +
           "\n\tproject #" + projid + " dialog " + dialogID);

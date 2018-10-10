@@ -12,6 +12,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
@@ -61,6 +62,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     selectionModel = new SingleSelectionModel<>();
     table.setSelectionModel(selectionModel);
   }
+
 
   @Override
   protected void setMaxWidth() {
@@ -271,6 +273,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     tableWithPager.addStyleName("leftTenMargin");
 
     addItems(sortedHistory);
+
     return tableWithPager;
   }
 

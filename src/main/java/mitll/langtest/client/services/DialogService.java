@@ -5,7 +5,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;

@@ -427,7 +427,7 @@ public class EasyReportTest extends BaseTest {
         projectid,
         project.getKind() == ProjectType.POLYGLOT);
 
-    AnalysisRequest analysisRequest = new AnalysisRequest(DEMO_USER, -1, -1, 0);
+    AnalysisRequest analysisRequest = new AnalysisRequest(/*DEMO_USER, -1, -1, 0*/);
     AnalysisReport performanceReportForUser = slickAnalysis.getPerformanceReportForUser(analysisRequest);
 
     logger.info("Got " + performanceReportForUser);

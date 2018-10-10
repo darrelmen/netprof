@@ -32,6 +32,7 @@
 
 package mitll.langtest.server;
 
+import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
@@ -795,9 +796,9 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   /**
+   * @param response
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    * @see #doPost(HttpServletRequest, HttpServletResponse)
-   * @param response
    */
   private void configureResponse(HttpServletResponse response) {
     response.setContentType("application/json; charset=UTF-8");
@@ -921,6 +922,10 @@ public class ScoreServlet extends DatabaseServlet {
     File saveFile = new FileSaver().writeAudioFile(
         pathHelper, request.getInputStream(), realExID, userid, getProject(projid).getLanguage(), true);
 
+    long then = System.currentTimeMillis();
+    new AudioConversion(false, db.getServerProps().getMinDynamicRange())
+        .getValidityAndDur(saveFile, false, db.getServerProps().isQuietAudioOK(), then);
+
     logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath());
     // TODO : put back trim silence? or is it done somewhere else
 //    new AudioConversion(null).trimSilence(saveFile);
@@ -948,59 +953,6 @@ public class ScoreServlet extends DatabaseServlet {
             .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
         fullJSON);
   }
-
-/*  private JSONObject getJSONForStream(HttpServletRequest request,
-                                      PostRequest requestType,
-                                      String deviceType,
-                                      String device) throws IOException {
-    try {
-      checkSession(request);
-    } catch (DominoSessionException dse) {
-      logger.info("getJsonForAudio got " + dse);
-      JSONObject jsonObject = new JSONObject();
-      jsonObject.put(MESSAGE, NO_SESSION);
-      return jsonObject;
-    }
-
-
-    int realExID = getRealExID(request);
-    int reqid = getReqID(request);
-    int projid = getProjid(request);
-
-
-    String postedWordOrPhrase = "";
-    // language overrides user id mapping...
-    {
-      ExAndText exerciseIDFromText = getExerciseIDFromText(request, realExID, projid);
-      realExID = exerciseIDFromText.exid;
-      postedWordOrPhrase = exerciseIDFromText.text;
-    }
-
-    String user = getUser(request);
-   // int userid = userManagement.getUserFromParam(user);
-    boolean fullJSON = isFullJSON(request);
-
-    logger.info("\n\n\ngetJSONForStream got" +
-        "\n\trequest  " + requestType +
-        "\n\tfor user " + user +
-        "\n\tprojid   " + projid +
-        "\n\texid     " + realExID +
-        //"\n\texercise text " + realExID +
-        "\n\treq      " + reqid +
-        "\n\tfull     " + fullJSON +
-        "\n\tdevice   " + deviceType + "/" + device);
-
-    int session = getStreamSession(request);
-    int packet = getStreamPacket(request);
-    String state = getHeader(request, HeaderValue.STREAMSTATE);
-
-    logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
-    //File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
-
-    //logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
-    return new JSONObject();
-    // File saveFile = writeAudioFile(request.getInputStream(), projid, realExID, userid);
-  }*/
 
   private boolean isFullJSON(HttpServletRequest request) {
     String fullJSONFormat = getHeader(request, HeaderValue.FULL);

@@ -35,7 +35,6 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
@@ -44,17 +43,16 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.IUserListLight;
-import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -335,12 +333,16 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     filterContainer.add(userTypeahead.getSearch());
 
+    addListChoiceBox(filterContainer);
+    return filterContainer;
+  }
+
+  protected void addListChoiceBox(DivWidget filterContainer) {
     DivWidget c = new DivWidget();
     c.addStyleName("leftFiveMargin");
     c.addStyleName("floatRight");
     c.add(getListBox());
     filterContainer.add(c);
-    return filterContainer;
   }
 
 /*
@@ -480,10 +482,15 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
       if (SHOW_MY_STUDENTS) addMine(list);
 */
 
+    addLastTwoColumns(list);
+  }
+
+  protected void addLastTwoColumns(List<UserInfo> list) {
     addPolyNumber(list);
-  //  addLastSession(list);
-    /*Column<UserInfo, SafeHtml> column =*/ addLastOverallScore(list);
-  //  table.getColumnSortList().push(column);
+    //  addLastSession(list);
+    /*Column<UserInfo, SafeHtml> column =*/
+    addLastOverallScore(list);
+    //  table.getColumnSortList().push(column);
 
     table.setWidth("100%", true);
 
@@ -506,9 +513,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   private void addCurrent(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getCurrent();
-    addColumn(current, new TextHeader(LIFETIME_AVG));
+    addColumn(current, new TextHeader(getLifetimeAvgTitle()));
     table.setColumnWidth(current, LIFETIME_AVG_WIDTH + "px");
     table.addColumnSortHandler(getCurrentSorter(current, list));
+  }
+
+  @NotNull
+  protected String getLifetimeAvgTitle() {
+    return LIFETIME_AVG;
   }
 
 /*  private Column<UserInfo, SafeHtml> addLastSession(List<UserInfo> list) {
@@ -539,9 +551,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   private void addNumber(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> num = getNum();
-    addColumn(num, new TextHeader(LIFETIME));
+    addColumn(num, new TextHeader(getLifetimeCountTitle()));
     table.addColumnSortHandler(getNumSorter(num, list));
     table.setColumnWidth(num, LIFETIME_WIDTH + "px");
+  }
+
+  @NotNull
+  protected String getLifetimeCountTitle() {
+    return LIFETIME;
   }
 
   private void addPolyNumber(List<UserInfo> list) {
@@ -863,15 +880,28 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     enableButtons();
     rightSide.clear();
 
-    rightSide.add(new AnalysisTab(controller,
+    addRightSideContent(selectedUser);
+  }
+
+  protected void addRightSideContent(UserInfo selectedUser) {
+    rightSide.add(getAnalysisTab(selectedUser));
+  }
+
+  @NotNull
+  protected Widget getAnalysisTab(UserInfo selectedUser) {
+    return new AnalysisTab(controller,
         listid == -1 ? MIN_RECORDINGS : 0,
         overallBottom,
         selectedUser.getID(),
         selectedUser.getUserID(),
         listid,
         listid != -1,
-        req++,
-        this, INavigation.VIEWS.LEARN));
+        incrReq(),
+        this, INavigation.VIEWS.LEARN);
+  }
+
+  int incrReq() {
+    return req++;
   }
 
 /*  public Button getAdd() {

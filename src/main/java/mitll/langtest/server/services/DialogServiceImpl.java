@@ -33,11 +33,8 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.banner.RehearseViewHelper;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
@@ -47,7 +44,6 @@ import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickRelatedResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

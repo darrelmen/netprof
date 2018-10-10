@@ -35,10 +35,13 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.analysis.UserInfo;
+import mitll.langtest.shared.dialog.IDialogSession;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,8 +88,52 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
   }
 
   protected DivWidget getTable(Collection<UserInfo> users, ExerciseController controller, DivWidget bottom, DivWidget rightSide) {
-    UserContainer userContainer = new UserContainer(controller, rightSide, bottom, getRememberedSelectedUser(controller));
-    return userContainer.getTable(getUserInfos(users));
+    UserContainer userContainer = new UserContainer(controller, rightSide, bottom, getRememberedSelectedUser(controller)) {
+      @Override
+      protected void addLastTwoColumns(List<UserInfo> list) {
+
+      }
+
+      @NotNull
+      @Override
+      protected String getLifetimeCountTitle() {
+        return "#";
+      }
+
+      @NotNull
+      @Override
+      protected String getLifetimeAvgTitle() {
+        return "Avg.";
+      }
+
+
+      @Override protected void addListChoiceBox(DivWidget filterContainer) {
+
+      }
+
+
+  /*    @Override
+      protected void addRightSideContent(UserInfo selectedUser) {
+        return new DialogSessionAnalysisTab<T>(this.controller,
+            selectedUser,
+            overallBottom,
+            this,
+            req++
+        ).setItemColumnWidth(485);
+      }*/
+
+      @NotNull
+      @Override
+      protected Widget getAnalysisTab(UserInfo selectedUser) {
+        SessionAnalysis widgets = new SessionAnalysis(controller, selectedUser.getID());
+        widgets.addStyleName("leftFiveMargin");
+        return widgets;
+      }
+    };
+
+    DivWidget table = userContainer.getTable(getUserInfos(users));
+    table.addStyleName("cardBorderShadow");
+    return table;
   }
 
   private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
