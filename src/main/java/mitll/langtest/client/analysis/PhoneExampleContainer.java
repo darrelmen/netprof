@@ -42,6 +42,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
@@ -49,6 +50,7 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.Language;
 
 import java.util.Collection;
 import java.util.List;
@@ -87,11 +89,12 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
   /**
    * @param controller
+   * @param jumpView
    * @see AnalysisTab#getPhoneReport
    */
-  PhoneExampleContainer(ExerciseController controller, ExerciseLookup<CommonShell> plot, Heading heading) {
-    super(controller, plot);
-    isSpanish = controller.getLanguage().equalsIgnoreCase("Spanish");
+  PhoneExampleContainer(ExerciseController controller, ExerciseLookup<CommonShell> plot, Heading heading, INavigation.VIEWS jumpView) {
+    super(controller, plot, jumpView);
+    isSpanish = controller.getLanguageInfo() == Language.SPANISH;
     this.heading = heading;
   }
 
@@ -151,10 +154,14 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     clear();
 
     if (sortedHistory != null) {
-      StringBuffer buffer = new StringBuffer();
-      sortedHistory.forEach(wordAndScore -> buffer.append(wordAndScore.getPronScore()).append(", "));
-  //    logger.info("PhoneExampleContainer Scores " + buffer);
+      // StringBuffer buffer = new StringBuffer();
+      // sortedHistory.forEach(wordAndScore -> buffer.append(wordAndScore.getPronScore()).append(", "));
+      //    logger.info("PhoneExampleContainer Scores " + buffer);
+
       sortedHistory.forEach(this::addItem);
+      if (!sortedHistory.isEmpty()) {
+        setSelected(sortedHistory.iterator().next());
+      }
     } else {
       logger.warning("PhoneExampleContainer.addItems null items");
     }
@@ -162,6 +169,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     flush();
     addPlayer();
   }
+
 
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {

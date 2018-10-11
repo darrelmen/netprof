@@ -32,14 +32,18 @@
 
 package mitll.langtest.client.analysis;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.dialog.IDialogSession;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -51,6 +55,7 @@ import java.util.List;
  * @since 10/27/15.
  */
 public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
+  public static final String SESSION = "Session";
   // private final Logger logger = Logger.getLogger("StudentAnalysis");
   int user;
 
@@ -62,7 +67,7 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
   public SessionAnalysis(final ExerciseController controller, int user) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
 
-    this.user=user;
+    this.user = user;
     controller.getDialogService().getDialogSessions(
         user,
         new SelectionState().getDialog(),
@@ -110,9 +115,28 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
     } else {
       SessionContainer<IDialogSession> userContainer =
           new SessionContainer<>(controller, rightSide, bottom, user);
-      DivWidget table = userContainer.getTable(users);
-      table.addStyleName("cardBorderShadow");
-      return table;
+      DivWidget sessions = getContainerDiv(userContainer.getTable(users));
+      sessions.addStyleName("cardBorderShadow");
+      return sessions;
     }
+  }
+
+  private DivWidget getContainerDiv(DivWidget table) {
+    return getContainerDiv(table, getHeading(SESSION));
+  }
+
+  private DivWidget getContainerDiv(Panel tableWithPager, Heading heading) {
+    DivWidget wordsContainer = new DivWidget();
+    wordsContainer.add(heading);
+    wordsContainer.add(tableWithPager);
+    return wordsContainer;
+  }
+
+  @NotNull
+  private Heading getHeading(String words) {
+    Heading wordsTitle = new Heading(3, words);
+    wordsTitle.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    wordsTitle.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    return wordsTitle;
   }
 }

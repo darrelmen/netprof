@@ -68,7 +68,7 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
-  private static final int MIN_WIDTH = 250;
+  private static final int MIN_WIDTH = 252;
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
   private static final String WORD_EXAMPLES = "WordExamples";
@@ -701,7 +701,7 @@ public class AnalysisTab extends DivWidget {
                               ReqInfo reqInfo) {
    // logger.info("GetPhoneReport " + phoneReport);
 
-    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, exerciseLookup, exampleHeader);
+    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, exerciseLookup, exampleHeader, jumpView);
     final BigramContainer bigramContainer =
         new BigramContainer(controller, exampleContainer, analysisServiceAsync, reqInfo);
     final PhoneContainer phoneContainer =

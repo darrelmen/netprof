@@ -126,6 +126,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     table.addStyleName("floatLeftAndClear");
   }
 
+
+
   public Map<Integer, T> getIdToExercise() {
     return Collections.emptyMap();
   }
