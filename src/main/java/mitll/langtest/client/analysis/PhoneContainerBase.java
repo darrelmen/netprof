@@ -41,8 +41,8 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
    *
    */
   private static final String CURR = "Avg";
-  private static final int COUNT_COL_WIDTH = 45;
-  private static final int SOUND_WIDTH = 65;
+  private static final int COUNT_COL_WIDTH = 30;
+  private static final int SOUND_WIDTH = 50;
 
   final AnalysisServiceAsync analysisServiceAsync;
 
@@ -171,7 +171,6 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     }
 
     table.setWidth("100%", true);
-//    new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.TOP);
   }
 
   protected int getPageSize() {
@@ -215,7 +214,10 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     return "<span style='margin-left:10px;'>" + score + "</span>";
   }
 
-
+  /**
+   * @see #addColumnsToTable(boolean)
+   * @param label
+   */
   private void addPhones(String label) {
     Column<PhoneAndStats, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
@@ -265,7 +267,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
    * @see #getTableWithPager
    */
   Panel getTableWithPagerForHistory(List<PhoneAndStats> sortedHistory) {
-    Panel tableWithPager = getTableWithPager(new ListOptions());
+    Panel tableWithPager = getTableWithPager(new ListOptions().setCompact(true));
     table.getElement().getStyle().setProperty("minWidth", PHONE_CONTAINER_MIN_WIDTH + "px");
 
     //  tableWithPager.getElement().setId("PhoneContainerTableScoreHistory");

@@ -100,11 +100,12 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    *
    * @param listOptions
    * @return
+   * @see mitll.langtest.client.analysis.WordContainerAsync#getTableWithPager
    */
   @NotNull
   protected Panel getTable(ListOptions listOptions) {
     final SimplePager pager =
-        new SimplePager(SimplePager.TextLocation.CENTER, true, true);
+        new SimplePager(SimplePager.TextLocation.CENTER, !listOptions.isCompact(), !listOptions.isCompact());
 
     this.pager = pager;
     pager.addStyleName("simplePager");

@@ -146,7 +146,7 @@ dependencies {
     compile('org.apache.xmlbeans:xmlbeans:2.6.0')
 
     compile 'net.sf.uadetector:uadetector-core:0.9.22'
-    compile 'net.sf.uadetector:uadetector-resources:2013.04'
+    compile 'net.sf.uadetector:uadetector-resources:2014.10'
 
     // TODO : use gson instead
     compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'

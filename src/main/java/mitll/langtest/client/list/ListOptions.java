@@ -15,6 +15,7 @@ public class ListOptions {
   private boolean showFirstNotCompleted = false;
   private ActivityType activityType = UNSET;
   private boolean showPager = true;
+  private boolean compact = false;
 
   public ListOptions() {
   }
@@ -40,6 +41,11 @@ public class ListOptions {
 
   public ListOptions setShowFirstNotCompleted(boolean val) {
     this.showFirstNotCompleted = val;
+    return this;
+  }
+
+  public ListOptions setCompact(boolean val) {
+    this.compact = val;
     return this;
   }
 
@@ -78,5 +84,9 @@ public class ListOptions {
 
   public boolean isShowPager() {
     return showPager;
+  }
+
+  public boolean isCompact() {
+    return compact;
   }
 }

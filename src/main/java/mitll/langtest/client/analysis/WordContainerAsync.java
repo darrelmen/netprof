@@ -33,7 +33,6 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Scheduler;
@@ -86,7 +85,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   private static final int ROWS_TO_SHOW = 6;
 
-  private static final int ITEM_COL_WIDTH = 210;//250;
+  private static final int ITEM_COL_WIDTH = 250;
   private static final int ITEM_COL_WIDTH_NARROW = 190;
 
   private static final String SCORE = "Score";
@@ -124,6 +123,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    *
    */
   private long from, to;
+  /**
+   * @see #getItemColWidth
+   */
   private int itemColumnWidth = -1;
 
   private int req = 0;
@@ -147,7 +149,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
                      TimeRange timeRange,
                      INavigation.VIEWS jumpView,
                      int itemColumnWidth) {
-    super(controller, plot, jumpView);
+    super(controller, jumpView);
     this.itemColumnWidth = itemColumnWidth;
     this.reqInfo = reqInfo;
     this.heading = w;
@@ -162,6 +164,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     this.analysisServiceAsync = analysisServiceAsync;
   }
 
+  protected void setMaxWidth() {
+  //  table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
+  }
   protected int getPageSize() {
     return ROWS_TO_SHOW;
   }
@@ -283,21 +288,22 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    */
   public Panel getTableWithPager() {
     // logger.info("getTableWithPager " +listOptions);
-    CellTable<WordScore> wordScoreCellTable = makeCellTable(new ListOptions().isSort());
+    ListOptions listOptions = new ListOptions().setCompact(true);
+    CellTable<WordScore> wordScoreCellTable = makeCellTable(listOptions.isSort());
 
     wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(SCORE), true));
 
     createProvider(numWords, wordScoreCellTable);
 
     // Create a SimplePager.
-    Panel tableWithPager = getTable(new ListOptions());
+    Panel tableWithPager = getTable(listOptions);
 
     tableWithPager.getElement().setId("WordContainerScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
 
     wordScoreCellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(wordScoreCellTable));
 
-    addPlayer();
+  //  addPlayer();
 
     return tableWithPager;
   }
@@ -334,7 +340,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       tableSortHelper.rememberColumn(scoreColumn, SCORE);
     }
 
-    addAudioColumns();
+  //  addAudioColumns();
 
     table.setWidth("100%", true);
 

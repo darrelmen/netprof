@@ -216,13 +216,18 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see StudentAnalysis#StudentAnalysis
    */
   public Panel getTableWithPager(final Collection<T> users) {
-    Panel tableWithPager = getTableWithPager(new ListOptions());
+    Panel tableWithPager = getTableWithPager(getListOptions());
 
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
 
     populateTable(users);
     return tableWithPager;
+  }
+
+  @NotNull
+  protected ListOptions getListOptions() {
+    return new ListOptions();
   }
 
   /**

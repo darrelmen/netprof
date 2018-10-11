@@ -55,6 +55,7 @@ import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.PhoneSummary;
 import mitll.langtest.shared.custom.TimeRange;
+import mitll.langtest.shared.dialog.IDialogSession;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
@@ -68,14 +69,16 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
-  private static final int MIN_WIDTH = 252;
+  public static final int MIN_HEIGHT = 325;
   private final Logger logger = Logger.getLogger("AnalysisTab");
+
+  private static final int MIN_WIDTH = 240;
 
   private static final String WORD_EXAMPLES = "WordExamples";
 
   private static final String REPORT_FOR_USER = "getting performance report for user";
   private static final int TIME_WINDOW_WIDTH = 92;
-  private static final int MIN_HEIGHT = 325;
+  // private static final int MIN_HEIGHT = 325;
 
   /**
    * Got be the width to fit on a laptop screen for progress view - otherwise the phone plot
@@ -101,8 +104,8 @@ public class AnalysisTab extends DivWidget {
 
   static final long TENMIN_DUR = 10 * MINUTE;
   static final long DAY_DUR = 24 * HOUR;
-  static final long WEEK_DUR = 7 * DAY_DUR;
-  static final long MONTH_DUR = 4 * WEEK_DUR;
+  private static final long WEEK_DUR = 7 * DAY_DUR;
+  private static final long MONTH_DUR = 4 * WEEK_DUR;
   static final long YEAR_DUR = 52 * WEEK_DUR;
   private static final long YEARS = 20 * YEAR_DUR;
 
@@ -262,6 +265,11 @@ public class AnalysisTab extends DivWidget {
 
   }
 
+  /**
+   * @see SessionContainer#getAnalysisTab
+   * @param itemColumnWidth
+   * @return
+   */
   AnalysisTab setItemColumnWidth(int itemColumnWidth) {
     this.itemColumnWidth = itemColumnWidth;
     return this;
@@ -699,7 +707,7 @@ public class AnalysisTab extends DivWidget {
                               AnalysisPlot analysisPlot,
                               ExerciseLookup<CommonShell> exerciseLookup,
                               ReqInfo reqInfo) {
-   // logger.info("GetPhoneReport " + phoneReport);
+    // logger.info("GetPhoneReport " + phoneReport);
 
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, exerciseLookup, exampleHeader, jumpView);
     final BigramContainer bigramContainer =
@@ -731,18 +739,17 @@ public class AnalysisTab extends DivWidget {
   }
 
   private DivWidget getSoundsContainer(Panel phones) {
-    return getContainer(phones, "SoundsContainer", SOUNDS);
+    return getContainer(phones, /*"SoundsContainer",*/ SOUNDS);
   }
 
   private DivWidget getBigramContainer(Panel phones) {
-
-    return getContainer(phones, "BigramContainer", "Context");
+    return getContainer(phones, /*"BigramContainer",*/ "Context");
   }
 
   @NotNull
-  private DivWidget getContainer(Panel phones, String bigramContainer, String context) {
+  private DivWidget getContainer(Panel phones, /*String bigramContainer,*/ String context) {
     DivWidget sounds = new DivWidget();
-    sounds.getElement().setId(bigramContainer);
+    //  sounds.getElement().setId(bigramContainer);
     sounds.add(getHeading(context));
     sounds.add(phones);
     setMinWidth(sounds);
@@ -758,7 +765,7 @@ public class AnalysisTab extends DivWidget {
   private DivWidget getWordExamples(Panel examples) {
     DivWidget wordExamples = getWordContainerDiv(examples, WORD_EXAMPLES, exampleHeader);
     wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
-    wordExamples.getElement().getStyle().setProperty("minHeight", 325, Style.Unit.PX);
+    wordExamples.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
     return wordExamples;
   }
 }

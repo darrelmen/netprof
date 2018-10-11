@@ -76,7 +76,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    */
   private static final String WORDS_USING = "Vocabulary with ";
 
-  private static final int ITEM_WIDTH = 250;
+  private static final int ITEM_WIDTH = 400;
   /**
    * @see #getItemColumn()
    * @see #addItems(String, String, Collection, int)
@@ -92,10 +92,15 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @param jumpView
    * @see AnalysisTab#getPhoneReport
    */
-  PhoneExampleContainer(ExerciseController controller, ExerciseLookup<CommonShell> plot, Heading heading, INavigation.VIEWS jumpView) {
-    super(controller, plot, jumpView);
+  PhoneExampleContainer(ExerciseController controller, ExerciseLookup<CommonShell> plot, Heading heading,
+                        INavigation.VIEWS jumpView) {
+    super(controller, jumpView);
     isSpanish = controller.getLanguageInfo() == Language.SPANISH;
     this.heading = heading;
+  }
+
+  @Override
+  protected void setMaxWidth() {
   }
 
   /**
@@ -108,7 +113,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   }
 
   Panel getTableWithPager() {
-    return getTableWithPager(new ListOptions());
+    return getTableWithPager(new ListOptions().setCompact(true));
   }
 
   /**
@@ -133,31 +138,42 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @see BigramContainer#clickOnPhone2
    */
   void addItems(String phone, String bigram, Collection<WordAndScore> sortedHistory, int maxExamples) {
+    stopAll();
+
     this.phone = phone;
 
     heading.setText(WORDS_USING + bigram);
 
-    String[] split = bigram.split("-");
-    if (split[0].equalsIgnoreCase(phone)) {
-      first = true;
-      this.bigram = split[1];
-    } else {
-      first = false;
-      this.bigram = split[0];
+    {
+      String[] split = bigram.split("-");
+      if (split[0].equalsIgnoreCase(phone)) {
+        first = true;
+        this.bigram = split[1];
+      } else {
+        first = false;
+        this.bigram = split[0];
+      }
     }
 
     {
       boolean onlyFirstFew = sortedHistory != null && sortedHistory.size() > maxExamples;
-      String subtext = sortedHistory == null ? "" : sortedHistory.size() > maxExamples ? "first " + maxExamples : "" + sortedHistory.size();
-      if (onlyFirstFew) heading.setSubtext(subtext);
+      if (onlyFirstFew) {
+        String subtext = sortedHistory == null ? "" : sortedHistory.size() > maxExamples ? "first " + maxExamples : "" + sortedHistory.size();
+        heading.setSubtext(subtext);
+      }
     }
     clear();
 
+    addItemsToTable(sortedHistory);
+
+    flush();
+  }
+
+  private void addItemsToTable(Collection<WordAndScore> sortedHistory) {
     if (sortedHistory != null) {
       // StringBuffer buffer = new StringBuffer();
       // sortedHistory.forEach(wordAndScore -> buffer.append(wordAndScore.getPronScore()).append(", "));
       //    logger.info("PhoneExampleContainer Scores " + buffer);
-
       sortedHistory.forEach(this::addItem);
       if (!sortedHistory.isEmpty()) {
         setSelected(sortedHistory.iterator().next());
@@ -165,9 +181,6 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
     } else {
       logger.warning("PhoneExampleContainer.addItems null items");
     }
-
-    flush();
-    addPlayer();
   }
 
 
@@ -180,15 +193,11 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       addColumn(itemCol, header);
       table.addColumnSortHandler(getEnglishSorter(itemCol, getList()));
     }
-
     try {
-      addAudioColumns();
       table.setWidth("100%", true);
     } catch (Exception e) {
       logger.warning("Got " + e);
     }
-
-    //new TooltipHelper().createAddTooltip(table, CLICK_ON, Placement.TOP);
   }
 
   private ColumnSortEvent.ListHandler<WordAndScore> getEnglishSorter(Column<WordAndScore, SafeHtml> englishCol,

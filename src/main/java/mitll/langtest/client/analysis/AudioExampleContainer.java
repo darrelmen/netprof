@@ -4,17 +4,14 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.SafeHtmlHeader;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -23,10 +20,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.MySoundFeedback;
 import mitll.langtest.client.sound.CompressedAudio;
-import mitll.langtest.client.sound.PlayAudioWidget;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.analysis.WordScore;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,117 +34,29 @@ import java.util.logging.Logger;
 public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T> {
   private final Logger logger = Logger.getLogger("AudioExampleContainer");
 
-
+  private static final String REFERENCE = "Reference";
   private static final String REVIEW1 = "Review";
   private static final String REVIEW = REVIEW1;
   private static final String PLAY = "Play";
   protected static final boolean DEBUG = false;
-  private static final int PLAY_WIDTH = 42;
-  private static final int NATIVE_WIDTH = PLAY_WIDTH;
-  private static final String NATIVE = "Ref";
-  //private static final String PLAY = "Play";
+
   private static final int TABLE_HEIGHT = 215;
   private static final String PAUSE = "Pause";
 
-  private final ExerciseLookup<CommonShell> plot;
   private final INavigation.VIEWS jumpView;
   private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
   private int lastPlayed = -1;
   private boolean isReview = false;
-  private Button play;
+  private Button play, refAudio;
   private Button review;
 
   /**
    * @param controller
-   * @param plot
    * @see PhoneExampleContainer#PhoneExampleContainer
    */
-  AudioExampleContainer(ExerciseController controller, ExerciseLookup<CommonShell> plot, INavigation.VIEWS jumpView) {
+  AudioExampleContainer(ExerciseController controller, INavigation.VIEWS jumpView) {
     super(controller);
-    this.plot = plot;
     this.jumpView = jumpView;
-  }
-
-  void addAudioColumns() {
-/*
-    Column<T, SafeHtml> column = getPlayAudio();
-*/
-
-/*    {
-      SafeHtmlHeader header = new SafeHtmlHeader((SafeHtml) () -> "<span style=\"text-align:left;\">" + PLAY + "</span>");
-
-      table.addColumn(column, header);
-      table.setColumnWidth(column, PLAY_WIDTH + "px");
-      column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-    }*/
-
-    {
-      Column<T, SafeHtml> column = getPlayNativeAudio();
-      table.addColumn(column, NATIVE);
-      table.setColumnWidth(column, NATIVE_WIDTH + "px");
-      column.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-    }
-  }
-
-  /**
-   * TODO : buggy - make sure the exercise is there before asking for it...
-   *
-   * @return
-   * @see #addColumnsToTable
-   */
-/*
-  private Column<T, SafeHtml> getPlayAudio() {
-    return new Column<T, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(T shell) {
-        if (shell == null) return getSafeHtml("");
-        CommonShell exercise = getShell(shell.getExid());
-        // logger.info("getPlayAudio : Got " + shell.getId() + "  : " + shell.getFileRef());
-        return PlayAudioWidget.getAudioTagHTML(shell.getAnswerAudio(), getTitle(exercise));
-      }
-    };
-  }
-*/
-
-
-  /**
-   * @return
-   * @see #addColumnsToTable
-   */
-  private Column<T, SafeHtml> getPlayNativeAudio() {
-    return new Column<T, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(T shell) {
-        if (shell == null) return getSafeHtml("");
-
-        //   logger.info("getPlayNativeAudio : Got " +  shell.getId() + "  : " + shell.getNativeAudio());
-        if (shell.getRefAudio() != null) {
-          CommonShell exercise = getShell(shell.getExid());
-          return PlayAudioWidget.getAudioTagHTML(shell.getRefAudio(), getTitle(exercise));
-        } else {
-          //if  (exercise != null) logger.info("no native audio for " + exercise.getOldID());
-          return new SafeHtmlBuilder().toSafeHtml();
-        }
-      }
-    };
-  }
-
-  @NotNull
-  private String getTitle(CommonShell exercise) {
-    return exercise == null ? "play" : exercise.getFLToShow() + "/" + exercise.getEnglish();
-  }
-
-  /**
-   * @param id
-   * @return
-   * @see #getPlayAudio
-   */
-  private CommonShell getShell(int id) {
-    return plot.getShell(id);
-  }
-
-  void addPlayer() {
-    Scheduler.get().scheduleDeferred(PlayAudioWidget::addPlayer);
   }
 
   /**
@@ -184,18 +91,22 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   private void gotClickOnItem(final T wordScore) {
-    gotClickOnPlay(play);
+    gotClickOnPlay(play, true);
   }
 
   private boolean isPlayingStudentAudio() {
-    return !play.getText().equals(PLAY);
+    return !play.getText().trim().equals(PLAY);
   }
 
+  private boolean isPlayingReferenceAudio() {
+    return !refAudio.getText().trim().equals(PLAY);
+  }
 
-  private void playAudio(T wordScore) {
+  private void playAudio(T wordScore, boolean playYourAudio) {
     lastPlayed = wordScore.getExid();
 
-    soundFeedback.queueSong(CompressedAudio.getPath(wordScore.getAnswerAudio()), new SoundFeedback.EndListener() {
+    if (soundFeedback == null) logger.warning("no sound feedback???");
+    soundFeedback.queueSong(CompressedAudio.getPath(playYourAudio ? wordScore.getAnswerAudio() : wordScore.getRefAudio()), new SoundFeedback.EndListener() {
       @Override
       public void songStarted() {
 //        logger.info("started " + CompressedAudio.getPath(wordScore.getAnswerAudio()));
@@ -222,24 +133,19 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private DivWidget getButtonRow() {
     DivWidget wrapper = new DivWidget();
     wrapper.addStyleName("floatRight");
+    wrapper.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
+    {
+      int width = 55;
+      Button play = getPlayButton(width, true);
+      wrapper.add(play);
+
+      this.play = play;
+    }
 
     {
-      Button play = new Button(PLAY) {
-        @Override
-        protected void onDetach() {
-          super.onDetach();
-          stopAudio();
-        }
-
-        ;
-      };
-      play.setWidth("55px");
-      styleButton(play);
-
-      play.setIcon(IconType.PLAY);
-      play.addClickHandler(event -> gotClickOnPlay(play));
+      Button play = getPlayButton(80, false);
       wrapper.add(play);
-      this.play = play;
+      this.refAudio = play;
     }
 
     {
@@ -273,6 +179,25 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     return child;
   }
 
+  @NotNull
+  private Button getPlayButton(int width, boolean playYourAudio) {
+    Button play = new Button(playYourAudio ? PLAY : REFERENCE) {
+      @Override
+      protected void onDetach() {
+        super.onDetach();
+        stopAudio();
+      }
+    };
+
+    play.setWidth(width + "px");
+    styleButton(play);
+
+    play.setIcon(IconType.PLAY);
+    play.addClickHandler(event -> gotClickOnPlay(play, playYourAudio));
+
+    return play;
+  }
+
   private void styleButton(Button review) {
     review.addStyleName("topFiveMargin");
     review.addStyleName("leftFiveMargin");
@@ -286,44 +211,49 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     }
   }
 
-  private void gotClickOnPlay(Button play) {
+  private void gotClickOnPlay(Button play, boolean playYourAudio) {
     if (isReview) {
-      gotClickOnReview();
+      stopReview();
     }
 
-    String text = play.getText().trim();
-    logger.info("text " + text);
-    boolean isPlaying = text.equals(PLAY);
+    Button otherButton = play == this.play ? refAudio : this.play;
+    if (playYourAudio && isPlayingReferenceAudio() ||
+        (!playYourAudio && isPlayingStudentAudio())) {
+      stopPlay(otherButton, !playYourAudio);
+    }
+
     T selected = getSelected();
 
-    if (isPlaying) {
+    if (isPlaying(play, playYourAudio)) {
       play.setText(PAUSE);
       play.setIcon(IconType.PAUSE);
 
       if (selected != null) {
-        playAudio(selected);
+        playAudio(selected, playYourAudio);
       }
     } else {
+      stopPlay(play, playYourAudio);
 
-      stopPlay(play);
       if (selected != null) {
         if (lastPlayed != -1 && lastPlayed != selected.getExid()) {
-          gotClickOnPlay(play);
+          gotClickOnPlay(play, playYourAudio);
         }
       }
     }
   }
 
-  private void stopPlay(Button play) {
-    stopAudio();
-
-    play.setText(PLAY);
-    play.setIcon(IconType.PLAY);
+  private boolean isPlaying(Button play, boolean playYourAudio) {
+    String text = play.getText().trim();
+    logger.info("isPlaying text " + text + " playYourAudio " + playYourAudio);
+    return text.equals(playYourAudio ? PLAY : REFERENCE);
   }
 
   private void gotClickOnReview() {
     if (isPlayingStudentAudio()) {
-      stopPlay(play);
+      reallyStopPlay();
+    }
+    if (isPlayingReferenceAudio()) {
+      reallyStopRef();
     }
 
     isReview = !isReview;
@@ -344,21 +274,45 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
           if (!didScroll) {
             T visibleItem = table.getVisibleItem(0);
             setSelected(visibleItem);
-            playAudio(visibleItem);
+            playAudio(visibleItem, true);
           }
         } else {
           if (DEBUG) logger.info("gotClickOnReview loadAndPlayOrPlayAudio " + selected);
-          playAudio(selected);
+          playAudio(selected, true);
         }
       }
     } else {
-      stopAudio();
-      resetReview();
+      stopReview();
     }
   }
 
+  private void stopPlay(Button play, boolean isYourAudio) {
+    stopAudio();
+    play.setText(isYourAudio ? PLAY : REFERENCE);
+    play.setIcon(IconType.PLAY);
+  }
 
-  private void stopAudio() {
+  private void stopReview() {
+    stopAudio();
+    resetReview();
+  }
+
+  protected void stopAll() {
+    if (isReview) stopReview();
+    else if (isPlayingStudentAudio()) reallyStopPlay();
+    else if (isPlayingReferenceAudio()) reallyStopRef();
+  }
+
+  private void reallyStopRef() {
+    stopPlay(refAudio, false);
+  }
+
+  private void reallyStopPlay() {
+    stopPlay(play, true);
+  }
+
+
+  protected void stopAudio() {
     soundFeedback.destroySound();
   }
 
@@ -366,14 +320,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
-  /**
-   * @paramx wordScore
-   */
-//  @Override
-//  protected void playAudio(WordScore wordScore) {
-//    lastPlayed = wordScore.getExid();
-//    playAudio(wordScore);
-//  }
   private boolean onLast() {
     int visibleItemCount = table.getVisibleItemCount();
     if (visibleItemCount == 0) return true;
@@ -392,7 +338,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     isReview = false;
   }
 
-  protected void selectFirstItem(List<T> results) {
+  void selectFirstItem(List<T> results) {
     int next = -1;
 
     for (int i = 0; i < results.size(); i++) {
@@ -411,7 +357,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     //logger.info("Select " + next + " " + toSelect.getExid());
     setSelected(toSelect);
     if (isReview) {
-      Scheduler.get().scheduleDeferred(() -> playAudio(toSelect));
+      Scheduler.get().scheduleDeferred(() -> playAudio(toSelect, true));
     }
   }
 
@@ -454,7 +400,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
             if (DEBUG) logger.info("studentAudioEnded next " + (i + 1));
             T wordScore = visibleItems.get(i + 1);
             setSelected(wordScore);
-            playAudio(getSelected());
+            playAudio(getSelected(), true);
           }
         }
       }
@@ -462,6 +408,9 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
       if (isPlayingStudentAudio()) {
         play.setText(PLAY);
         play.setIcon(IconType.PLAY);
+      } else if (isPlayingReferenceAudio()) {
+        refAudio.setText(REFERENCE);
+        refAudio.setIcon(IconType.PLAY);
       } else {
         resetReview();
       }

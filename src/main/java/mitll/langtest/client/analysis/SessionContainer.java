@@ -9,6 +9,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.dialog.IDialogSession;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,6 +22,7 @@ public class SessionContainer<T extends IDialogSession>
   // private final Logger logger = Logger.getLogger("SessionContainer");
 
   public static final String SCORE = "Score";
+  public static final int ITEM_COLUMN_WIDTH = 450;
 
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
@@ -48,6 +50,12 @@ public class SessionContainer<T extends IDialogSession>
     this.rightSide = rightSide;
     this.overallBottom = overallBottom;
     this.user = user;
+  }
+
+  @NotNull
+  @Override
+  protected ListOptions getListOptions() {
+    return super.getListOptions().setCompact(true);
   }
 
   @Override
@@ -88,7 +96,7 @@ public class SessionContainer<T extends IDialogSession>
         this,
         req++,
         user
-    ).setItemColumnWidth(485);
+    ).setItemColumnWidth(ITEM_COLUMN_WIDTH);
   }
 
   /**

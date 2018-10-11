@@ -167,7 +167,8 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
                       UIObject playFeedback,
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
-                      boolean useSessionTimeHorizon, int maxWidth) {
+                      boolean useSessionTimeHorizon,
+                      int maxWidth) {
     super(exceptionSupport, messageHelper);
     this.userid = userid;
     this.messageHelper = messageHelper;
