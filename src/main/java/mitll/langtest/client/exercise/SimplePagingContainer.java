@@ -67,6 +67,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   private static final float DEFAULT_PAGE_SIZE = 15f;
   protected final ExerciseController controller;
   private final ListDataProvider<T> dataProvider;
+  /**
+   *
+   */
   protected CellTable<T> table;
   protected SingleSelectionModel<T> selectionModel;
   int verticalUnaccountedFor = 100;

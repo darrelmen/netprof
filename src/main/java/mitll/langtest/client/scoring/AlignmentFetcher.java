@@ -7,6 +7,7 @@ import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.HashSet;
@@ -235,14 +236,14 @@ class AlignmentFetcher {
       controller.getScoringService().getAlignments(
           projectid,
           req,
-          new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+          new AsyncCallback<Map<Integer, AlignmentAndScore>>() {
             @Override
             public void onFailure(Throwable caught) {
               controller.handleNonFatalError("get alignments", caught);
             }
 
             @Override
-            public void onSuccess(Map<Integer, AlignmentOutput> result) {
+            public void onSuccess(Map<Integer, AlignmentAndScore> result) {
               if (DEBUG){
                 result.forEach((k, v) -> logger.info("getAlignments got " + k + " = " + v));
               }
@@ -279,14 +280,14 @@ class AlignmentFetcher {
       ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
-            req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+            req, new AsyncCallback<Map<Integer, AlignmentAndScore>>() {
               @Override
               public void onFailure(Throwable caught) {
                 controller.handleNonFatalError("cacheOthers get alignments", caught);
               }
 
               @Override
-              public void onSuccess(Map<Integer, AlignmentOutput> result) {
+              public void onSuccess(Map<Integer, AlignmentAndScore> result) {
                 alignments.putAll(result);
                 listener.refAudioComplete();
               }

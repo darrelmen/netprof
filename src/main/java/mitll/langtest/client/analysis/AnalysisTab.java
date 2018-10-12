@@ -271,6 +271,14 @@ public class AnalysisTab extends DivWidget {
 
   }
 
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+
+    if (wordContainer != null) wordContainer.onUnload();
+    if (exampleContainer != null) exampleContainer.onUnload();
+  }
+
   /**
    * @param itemColumnWidth
    * @return
@@ -694,6 +702,7 @@ public class AnalysisTab extends DivWidget {
     WordContainerAsync wordContainer =
         new WordContainerAsync(reqInfo, controller, wordsTitle,
             numResults, analysisServiceAsync, timeRange, jumpView, itemColumnWidth);
+    this.wordContainer = wordContainer;
     if (analysisPlot != null) {
       analysisPlot.addListener(wordContainer);
     }
@@ -721,6 +730,9 @@ public class AnalysisTab extends DivWidget {
     return wordsContainer;
   }
 
+  PhoneExampleContainer exampleContainer;
+  WordContainerAsync wordContainer;
+
   /**
    * @param controller
    * @param lowerHalf
@@ -737,6 +749,8 @@ public class AnalysisTab extends DivWidget {
     // logger.info("GetPhoneReport " + phoneReport);
 
     final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, exerciseLookup, exampleHeader, jumpView);
+    this.exampleContainer = exampleContainer;
+
     final BigramContainer bigramContainer =
         new BigramContainer(controller, exampleContainer, analysisServiceAsync, reqInfo);
     final PhoneContainer phoneContainer =

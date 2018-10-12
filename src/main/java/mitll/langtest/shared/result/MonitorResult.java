@@ -38,8 +38,6 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.npdata.dao.SlickResult;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.*;
 
 /**
@@ -102,7 +100,7 @@ public class MonitorResult implements IsSerializable, UserAndTime {
    * @param roundTripDur
    * @param withFlash
    * @param exid
-   * @see ResultDAO#getMonitorResultsForQuery(Connection, PreparedStatement)
+   * @see ResultDAO#getMonitorResultsForQuery
    * @see mitll.langtest.server.database.result.SlickResultDAO#fromSlickToMonitorResult(SlickResult)
    */
   public MonitorResult(int uniqueID, int userid, String answer,

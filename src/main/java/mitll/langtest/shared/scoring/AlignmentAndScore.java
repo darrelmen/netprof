@@ -1,15 +1,20 @@
 package mitll.langtest.shared.scoring;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @see mitll.langtest.client.scoring.ScoreFeedbackDiv#showScoreFeedback
+ */
 public class AlignmentAndScore extends AlignmentOutput {
   protected float hydecScore = -1f;
   private boolean fullMatch = true;
 
-  public AlignmentAndScore() {}
+  public AlignmentAndScore() {
+  }
 
   public AlignmentAndScore(Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes, float hydecScore, boolean isFullMatch) {
     super(sTypeToEndTimes);

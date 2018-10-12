@@ -12,17 +12,21 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.MySoundFeedback;
-import mitll.langtest.client.sound.CompressedAudio;
-import mitll.langtest.client.sound.SoundFeedback;
+import mitll.langtest.client.scoring.ScoreFeedbackDiv;
+import mitll.langtest.client.sound.*;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -31,7 +35,8 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 1/20/17.
  */
-public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T> {
+public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T>
+    implements PlayListener {
   private final Logger logger = Logger.getLogger("AudioExampleContainer");
 
   private static final String REFERENCE = "Reference";
@@ -57,6 +62,24 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   AudioExampleContainer(ExerciseController controller, INavigation.VIEWS jumpView) {
     super(controller);
     this.jumpView = jumpView;
+  }
+
+  public void onUnload() {
+    if (headlessPlayAudio != null) {
+      headlessPlayAudio.destroySound();
+    }
+  }
+
+  private Button getPlay() {
+    return play;
+  }
+
+  private Button getRef() {
+    return refAudio;
+  }
+
+  private Button getReview() {
+    return review;
   }
 
   /**
@@ -91,7 +114,8 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   private void gotClickOnItem(final T wordScore) {
-    gotClickOnPlay(play, true);
+   // gotClickOnPlay(play, true);
+    showRecoOutputLater(wordScore, false);
   }
 
   private boolean isPlayingStudentAudio() {
@@ -105,19 +129,27 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private void playAudio(T wordScore, boolean playYourAudio) {
     lastPlayed = wordScore.getExid();
 
-    if (soundFeedback == null) logger.warning("no sound feedback???");
-    soundFeedback.queueSong(CompressedAudio.getPath(playYourAudio ? wordScore.getAnswerAudio() : wordScore.getRefAudio()), new SoundFeedback.EndListener() {
-      @Override
-      public void songStarted() {
+    if (playYourAudio) {
+      if (headlessPlayAudio != null) {
+        headlessPlayAudio.doPlayPauseToggle();
+      }
+    } else {
+      if (soundFeedback == null) logger.warning("no sound feedback???");
+      soundFeedback.queueSong(CompressedAudio.getPath(playYourAudio ? wordScore.getAnswerAudio() : wordScore.getRefAudio()), new SoundFeedback.EndListener() {
+        @Override
+        public void songStarted() {
 //        logger.info("started " + CompressedAudio.getPath(wordScore.getAnswerAudio()));
-      }
+        }
 
-      @Override
-      public void songEnded() {
-        studentAudioEnded();
-      }
-    });
+        @Override
+        public void songEnded() {
+          studentAudioEnded();
+        }
+      });
+    }
   }
+
+  private DivWidget recoOutput = new DivWidget();
 
   @Override
   protected void addTable(Panel column) {
@@ -126,6 +158,9 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     tableC.setHeight(getTableHeight() + "px");
     tableC.getElement().getStyle().setProperty("minWidth", "502px");  // helps safari in layout
     column.add(tableC);
+    column.add(recoOutput);
+    recoOutput.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+    recoOutput.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
     column.add(getButtonRow());
   }
 
@@ -137,7 +172,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private DivWidget getButtonRow() {
     DivWidget wrapper = new DivWidget();
     wrapper.addStyleName("floatRight");
-    wrapper.getElement().getStyle().setMarginTop(25, Style.Unit.PX);
+    wrapper.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     {
       int width = 55;
       Button play = getPlayButton(width, true);
@@ -157,7 +192,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
         @Override
         protected void onDetach() {
           super.onDetach();
-          stopAudio();
+          stopAudio(getReview());
         }
       };
 
@@ -185,11 +220,12 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   @NotNull
   private Button getPlayButton(int width, boolean playYourAudio) {
+
     Button play = new Button(playYourAudio ? PLAY : REFERENCE) {
       @Override
       protected void onDetach() {
         super.onDetach();
-        stopAudio();
+        stopAudio(getPlay());
       }
     };
 
@@ -277,34 +313,20 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
           boolean didScroll = scrollToVisible(0);
           if (!didScroll) {
             T visibleItem = table.getVisibleItem(0);
-            setSelected(visibleItem);
-            playAudio(visibleItem, true);
+            setSelectedAndShowReco(visibleItem, true);
+//            playAudio(visibleItem, true);
+          }
+          else {
+            logger.info("Did scroll");
           }
         } else {
-          if (DEBUG) logger.info("gotClickOnReview loadAndPlayOrPlayAudio " + selected);
+          if (DEBUG || true) logger.info("gotClickOnReview loadAndPlayOrPlayAudio " + selected);
           playAudio(selected, true);
         }
       }
     } else {
       stopReview();
     }
-  }
-
-  private void stopPlay(Button play, boolean isYourAudio) {
-    stopAudio();
-    play.setText(isYourAudio ? PLAY : REFERENCE);
-    play.setIcon(IconType.PLAY);
-  }
-
-  private void stopReview() {
-    stopAudio();
-    resetReview();
-  }
-
-  protected void stopAll() {
-    if (isReview) stopReview();
-    else if (isPlayingStudentAudio()) reallyStopPlay();
-    else if (isPlayingReferenceAudio()) reallyStopRef();
   }
 
   private void reallyStopRef() {
@@ -315,9 +337,53 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     stopPlay(play, true);
   }
 
+  private void stopPlay(Button play, boolean isYourAudio) {
+//    if (play == refAudio) {
+//      stopAudio(refAudio);
+//    } else if (headlessPlayAudio != null){
+//      headlessPlayAudio.doPause();
+//    }
+    stopAudio(play);
 
-  protected void stopAudio() {
-    soundFeedback.destroySound();
+    play.setText(isYourAudio ? PLAY : REFERENCE);
+    play.setIcon(IconType.PLAY);
+  }
+
+  private void stopReview() {
+    stopAudio(review);
+
+    //headlessPlayAudio.doPause();
+
+    resetReview();
+  }
+
+  void stopAll() {
+    if (isReview) stopReview();
+    else if (isPlayingStudentAudio()) reallyStopPlay();
+    else if (isPlayingReferenceAudio()) reallyStopRef();
+  }
+
+  @Override
+  public void playStarted() {
+
+  }
+
+  @Override
+  public void playStopped() {
+//
+//    resetReview();
+//    play.setText(PLAY);
+//    play.setIcon(IconType.PLAY);
+
+    studentAudioEnded();
+  }
+
+  private void stopAudio(Button button) {
+    if (button == refAudio) {
+      soundFeedback.destroySound();
+    } else if (headlessPlayAudio != null) {
+      headlessPlayAudio.doPause();
+    }
   }
 
   SafeHtml getSafeHtml(String columnText) {
@@ -358,10 +424,82 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
     next = Math.min(results.size() - 1, next + 1);
     T toSelect = results.get(next);
-    //logger.info("Select " + next + " " + toSelect.getExid());
-    setSelected(toSelect);
+    logger.info("selectFirstItem Select " + next + " " + toSelect.getExid());
+    setSelectedAndShowReco(toSelect, isReview);
+
+//    scoreFeedback.add(new ScoreFeedbackDiv(new PlayAudioPanel(),
+//        new DownloadContainer(), false));
     if (isReview) {
       Scheduler.get().scheduleDeferred(() -> playAudio(toSelect, true));
+    }
+  }
+
+  void setSelectedAndShowReco(T toSelect, boolean playAfterLoad) {
+    setSelected(toSelect);
+    showRecoOutputLater(toSelect, playAfterLoad);
+  }
+
+  private void showRecoOutputLater(T toSelect, boolean playAfterLoad) {
+    controller.getScoringService().getStudentAlignment(controller.getProjectStartupInfo().getProjectid(),
+        (int) toSelect.getResultID(), new AsyncCallback<AlignmentAndScore>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(AlignmentAndScore result) {
+            if (result == null) {
+              logger.warning("no result for " + toSelect.getResultID());
+            } else {
+              showRecoOutput(result, toSelect.getExid(), toSelect.getAnswerAudio(), playAfterLoad);
+            }
+          }
+        });
+  }
+
+  private DownloadContainer downloadContainer = new DownloadContainer();
+  private HeadlessPlayAudio headlessPlayAudio;
+
+  private void showRecoOutput(AlignmentAndScore pretestScore, int exid, String answerAudio,
+                              boolean playAfterLoad) {
+    recoOutput.clear();
+
+    if (headlessPlayAudio != null) {
+      headlessPlayAudio.destroySound();
+    }
+
+//    Hearle// playAudioPanel = new PlayAudioPanel(null, controller, exid);
+    headlessPlayAudio = new HeadlessPlayAudio(controller.getSoundManager(), new IListenView() {
+      @Override
+      public int getVolume() {
+        return 100;
+      }
+
+      @Override
+      public int getDialogSessionID() {
+        return 0;
+      }
+    });
+
+    addPlayListener(this);
+
+    ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(headlessPlayAudio, null, downloadContainer, false);
+    headlessPlayAudio.rememberAudio(answerAudio);
+    downloadContainer.getDownloadContainer().setVisible(false);
+    recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, controller.getProjectStartupInfo().getLanguageInfo().isRTL()));
+
+    if (playAfterLoad) {
+      playAudio(getSelected(), true);
+    }
+    else {
+     // logger.warning("not playing after load of " + pretestScore);
+    }
+  }
+
+  private void addPlayListener(PlayListener playListener) {
+    if (headlessPlayAudio != null) {
+      headlessPlayAudio.addPlayListener(playListener);
     }
   }
 
@@ -381,7 +519,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
         int i = visibleItems == null ? -1 : visibleItems.indexOf(selected);
 
         if (i > -1) {
-          if (DEBUG) logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
+          if (DEBUG || true) logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
           if (i == visibleItems.size() - 1) {
             Range visibleRange = table.getVisibleRange();
             int i1 = visibleRange.getStart() + visibleRange.getLength();
@@ -395,16 +533,26 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
               if (i1 == rowCount) {
                 resetReview();
               } else {
-                if (DEBUG) logger.info("studentAudioEnded scrollToVisible " + i1 + " row " + rowCount);
+                if (DEBUG || true) logger.info("studentAudioEnded scrollToVisible " + i1 + " row " + rowCount);
 
                 scrollToVisible(i1);
+
+                List<T> visibleItems1 = table.getVisibleItems();
+                if (visibleItems1.isEmpty()) {
+
+                }
+                else {
+                  T toSelect = visibleItems1.get(0);
+                  logger.info("OK select new first row " + toSelect);
+                  setSelectedAndShowReco(toSelect, true);
+                }
               }
             }
           } else {
-            if (DEBUG) logger.info("studentAudioEnded next " + (i + 1));
+            if (DEBUG || true) logger.info("studentAudioEnded next " + (i + 1));
             T wordScore = visibleItems.get(i + 1);
-            setSelected(wordScore);
-            playAudio(getSelected(), true);
+            setSelectedAndShowReco(wordScore, true);
+            //      playAudio(getSelected(), true);
           }
         }
       }

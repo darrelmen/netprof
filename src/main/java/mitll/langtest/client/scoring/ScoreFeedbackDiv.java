@@ -8,13 +8,10 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadContainer;
-import mitll.langtest.client.sound.IHighlightSegment;
-import mitll.langtest.client.sound.PlayAudioPanel;
-import mitll.langtest.client.sound.SegmentHighlightAudioControl;
+import mitll.langtest.client.sound.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -33,6 +30,11 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
    */
   private static final String SCORE_LOW_TRY_AGAIN = "Score low, try again.";
 
+  /**
+   * TODO : replace with emoticons
+   *
+   * @see #getPraiseMessage
+   */
   private static final List<String> praise = Arrays.asList(
       "Fantastic!", "Outstanding!", "Great!", "Well done!", "Good Job!",
       "Two thumbs up!", "Awesome!", "Fabulous!", "Splendid!", "Amazing!",
@@ -44,19 +46,26 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
   public static final int SECOND_STEP = 75;
 
   private final PlayAudioPanel playAudioPanel;
+  private final HeadlessPlayAudio headlessPlayAudio;
   private final DownloadContainer downloadContainer;
+  private boolean addPraise;
 
   /**
+   * @param headlessPlayAudio
    * @param playAudioPanel
    * @param downloadContainer
+   * @param addPraise
    * @see SimpleRecordAudioPanel#addWidgets
    */
-  public ScoreFeedbackDiv(PlayAudioPanel playAudioPanel, DownloadContainer downloadContainer) {
+  public ScoreFeedbackDiv(HeadlessPlayAudio headlessPlayAudio,
+                          PlayAudioPanel playAudioPanel, DownloadContainer downloadContainer, boolean addPraise) {
     super();
     styleTheProgressBar(progressBar);
     addTooltip(progressBar, OVERALL_SCORE);
+    this.headlessPlayAudio=headlessPlayAudio;
     this.playAudioPanel = playAudioPanel;
     this.downloadContainer = downloadContainer;
+    this.addPraise = addPraise;
   }
 
   private void addTooltip(Widget w, String tip) {
@@ -87,10 +96,10 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
    * Horizontal - play audio, score feedback, download widget
    * Shows a little praise message too!
    *
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
    * @param pretestScore
    * @param isRTL
    * @return
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
    * @see SimpleRecordAudioPanel#scoreAudio
    */
   @NotNull
@@ -101,7 +110,9 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
     wordTableContainer.addStyleName("floatLeft");
     wordTableContainer.addStyleName("scoringFeedback");
 
-    wordTableContainer.add(getPlayButtonDiv());
+    if(playAudioPanel !=null) {
+      wordTableContainer.add(getPlayButtonDiv());
+    }
 
     float hydecScore = pretestScore != null ? pretestScore.getHydecScore() : 0F;
     //  logger.info("score " + hydecScore);
@@ -122,8 +133,8 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
     return wordTableContainer;
   }
 
-  private void showScoreFeedback(AlignmentAndScore pretestScore, boolean isRTL, DivWidget wordTableContainer,
-                                 float hydecScore) {
+  protected void showScoreFeedback(AlignmentAndScore pretestScore, boolean isRTL, DivWidget wordTableContainer,
+                                   float hydecScore) {
     DivWidget scoreFeedbackDiv = new DivWidget();
     scoreFeedbackDiv.add(progressBar);
 
@@ -131,22 +142,24 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
 
     Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = pretestScore.getTypeToSegments();
     scoreFeedbackDiv.add(new WordTable()
-        .getDivWord(typeToSegments, playAudioPanel, typeToSegmentToWidget, isRTL));
+        .getDivWord(typeToSegments, (AudioControl)headlessPlayAudio, typeToSegmentToWidget, isRTL));
 
-    playAudioPanel.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget, 0));
+    headlessPlayAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget, 0));
     // so it will play on drill tab...
     enablePlayAudio();
 
     wordTableContainer.add(scoreFeedbackDiv);
 
 //    logger.info("showScoreFeedback hydec score " + hydecScore);
-    if (hydecScore > NATIVE_THRSHOLD && pretestScore.isFullMatch()) {
+    if (addPraise && hydecScore > NATIVE_THRSHOLD && pretestScore.isFullMatch()) {
       wordTableContainer.add(getPraise());
     }
   }
 
   private void enablePlayAudio() {
-    playAudioPanel.setEnabled(true);
+    if (playAudioPanel != null) {
+      playAudioPanel.setEnabled(true);
+    }
   }
 
   private DivWidget getPraise() {
@@ -160,15 +173,18 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
 
   private final Random rand = new Random();
 
+  /**
+   * @return
+   */
   @NotNull
   private String getPraiseMessage() {
     return praise.get(rand.nextInt(praise.size()));
   }
 
- /* public void setDownloadHref(String audioPathToUse, int id, int user, String host) {
-    downloadContainer.setDownloadHref(audioPathToUse, id, user, host);
-  }*/
-
+  /**
+   * @see #getWordTableContainer(AlignmentAndScore, boolean)
+   * @return
+   */
   @NotNull
   private DivWidget getPlayButtonDiv() {
     DivWidget divForPlay = new DivWidget();

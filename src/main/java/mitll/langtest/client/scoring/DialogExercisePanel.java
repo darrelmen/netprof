@@ -182,12 +182,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return candidate == null ? e.getAudioAttributes().iterator().next() : candidate;
   }
 
-  @Override
-  protected void onUnload() {
-    if (playAudio != null) {
-      playAudio.destroySound();
-    }
-  }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
     clickableWords = new ClickableWords(listContainer, exercise.getID(),
@@ -1041,6 +1035,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
   }
 
+  /**
+   * @see ListenViewHelper#getTurnPanel
+   * @param playListener
+   */
   public void addPlayListener(PlayListener playListener) {
     if (playAudio != null) {
       playAudio.addPlayListener(playListener);
@@ -1056,15 +1054,22 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return playAudio.isPlaying();
   }
 
+  public void resetAudio() {
+    playAudio.reinitialize();
+  }
+
+  @Override
+  protected void onUnload() {
+    if (playAudio != null) {
+      playAudio.destroySound();
+    }
+  }
+
   /**
    * @see ListenViewHelper#clearHighlightAndRemoveMark
    */
   public void clearHighlight() {
     flclickables.forEach(IHighlightSegment::clearHighlight);
-  }
-
-  public void resetAudio() {
-    playAudio.reinitialize();
   }
 
   public String toString() {

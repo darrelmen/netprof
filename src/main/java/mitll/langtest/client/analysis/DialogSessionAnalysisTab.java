@@ -55,12 +55,4 @@ class DialogSessionAnalysisTab<T extends IDialogSession> extends AnalysisTab {
     wordContainerDiv.addStyleName("bottomFiveMargin");
     return wordContainerDiv;
   }
-
-/*  @NotNull
-  @Override
-  protected DivWidget getBottom(boolean isTeacherView) {
-    DivWidget bottom = super.getBottom(isTeacherView);
-    bottom.removeStyleName("inlineFlex");
-    return bottom;
-  }*/
 }

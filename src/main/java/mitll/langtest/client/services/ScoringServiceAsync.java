@@ -33,6 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -58,11 +59,13 @@ public interface ScoringServiceAsync {
 
   void isHydraRunning(int projid, AsyncCallback<Boolean> async);
 
-  void getAlignments(int projid, Set<Integer> audioIDs, AsyncCallback<Map<Integer, AlignmentOutput>> async);
+  void getAlignments(int projid, Set<Integer> audioIDs, AsyncCallback<Map<Integer, AlignmentAndScore>> async);
 
   void recalcAlignments(int projid, AsyncCallback<Void> async);
 
   void configureAndRefresh(int projID, AsyncCallback<Void> async);
 
   void ensureAudio(int resultID, AsyncCallback<Void> async);
+
+  void getStudentAlignment(int projid, int resultID, AsyncCallback<AlignmentAndScore> async);
 }

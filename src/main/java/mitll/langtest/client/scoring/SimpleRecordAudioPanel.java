@@ -114,7 +114,7 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
 
     getScoreFeedback().add(recordFeedback);
 
-    this.scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel.getRealDownloadContainer());
+    this.scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel, playAudioPanel.getRealDownloadContainer(), true);
 
     add(col);
     // long now = System.currentTimeMillis();

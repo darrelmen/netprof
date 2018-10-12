@@ -665,12 +665,15 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     recoOutput.clear();
 
     playAudioPanel = new PlayAudioPanel(null, controller, exercise.getID());
-    ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, downloadContainer);
+    ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel, downloadContainer, true);
     downloadContainer.getDownloadContainer().setVisible(true);
     recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, new ClickableWords().isRTL(exercise.getForeignLanguage())));
   }
 
   PlayAudioPanel playAudioPanel;
+  /**
+   * @see #BootstrapExercisePanel
+   */
   private final DownloadContainer downloadContainer;
 
   private void setDownloadHref(String audioPath) {

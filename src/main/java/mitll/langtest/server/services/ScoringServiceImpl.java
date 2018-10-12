@@ -53,6 +53,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
@@ -280,7 +281,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @see mitll.langtest.client.scoring.AlignmentFetcher#cacheOthers
    */
   @Override
-  public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
+  public Map<Integer, AlignmentAndScore> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
     //logger.info("getAlignments project " + projid + " asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
 
@@ -301,16 +302,22 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
 
     logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
-    Map<Integer, AlignmentOutput> audioIDToAlignment = recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
+    Map<Integer, AlignmentAndScore> audioIDToAlignment = recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
     return audioIDToAlignment;
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
   }
 
-  private Map<Integer, AlignmentOutput> recalcAlignments(int projid,
-                                                         Collection<Integer> audioIDs,
-                                                         int userIDFromSession,
-                                                         Map<Integer, ISlimResult> audioToResult,
-                                                         boolean hasModel) {
+  public AlignmentAndScore getStudentAlignment(int projid, int resultID) {
+    CorrectAndScore correctAndScoreForResult = db.getResultDAO().getCorrectAndScoreForResult(resultID, getProject(projid).getLanguageEnum());
+    return correctAndScoreForResult == null ? null :
+        new AlignmentAndScore(correctAndScoreForResult.getScores(), correctAndScoreForResult.getScore(), true);
+  }
+
+  private Map<Integer, AlignmentAndScore> recalcAlignments(int projid,
+                                                           Collection<Integer> audioIDs,
+                                                           int userIDFromSession,
+                                                           Map<Integer, ISlimResult> audioToResult,
+                                                           boolean hasModel) {
     return recalcAlignments(projid, audioIDs, getAudioFileHelper(projid), userIDFromSession, audioToResult, hasModel);
   }
 
@@ -323,13 +330,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param hasModel
    * @return
    */
-  private Map<Integer, AlignmentOutput> recalcAlignments(int projid,
-                                                         Collection<Integer> audioIDs,
-                                                         AudioFileHelper audioFileHelper,
-                                                         int userIDFromSession,
-                                                         Map<Integer, ISlimResult> audioToResult,
-                                                         boolean hasModel) {
-    Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
+  private Map<Integer, AlignmentAndScore> recalcAlignments(int projid,
+                                                           Collection<Integer> audioIDs,
+                                                           AudioFileHelper audioFileHelper,
+                                                           int userIDFromSession,
+                                                           Map<Integer, ISlimResult> audioToResult,
+                                                           boolean hasModel) {
+    Map<Integer, AlignmentAndScore> idToAlignment = new HashMap<>();
 
     if (hasModel) {
       logger.info("recalcAlignments recalc " + audioIDs.size() + " audio ids for project #" + projid);
@@ -360,7 +367,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                     AudioFileHelper audioFileHelper,
                                     int userIDFromSession,
                                     ISlimResult cachedResult,
-                                    Map<Integer, AlignmentOutput> idToAlignment,
+                                    Map<Integer, AlignmentAndScore> idToAlignment,
                                     Set<Integer> completed,
                                     int total) {
     if (cachedResult == null) { // nope, ask the database
@@ -392,13 +399,22 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
   }
 
-  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult, Language language) {
+  /**
+   * TODO : mark full match true for now - also see other call!
+   *
+   * @param idToAlignment
+   * @param audioID
+   * @param cachedResult
+   * @param language
+   */
+  private void getCachedAudioRef(Map<Integer, AlignmentAndScore> idToAlignment,
+                                 Integer audioID, ISlimResult cachedResult, Language language) {
     PrecalcScores precalcScores = getPrecalcScores(USE_PHONE_TO_DISPLAY, cachedResult, language);
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
         getTypeToTranscriptEvents(precalcScores.getJsonObject(), USE_PHONE_TO_DISPLAY, language);
     Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = transcriptSegmentGenerator.getTypeToSegments(typeToTranscriptEvents, language);
 //    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
-    idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
+    idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments, cachedResult.getPronScore(), true));
   }
 
 

@@ -176,7 +176,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       //    logger.info("PhoneExampleContainer Scores " + buffer);
       sortedHistory.forEach(this::addItem);
       if (!sortedHistory.isEmpty()) {
-        setSelected(sortedHistory.iterator().next());
+        setSelectedAndShowReco(sortedHistory.iterator().next(),false);
       }
     } else {
       logger.warning("PhoneExampleContainer.addItems null items");

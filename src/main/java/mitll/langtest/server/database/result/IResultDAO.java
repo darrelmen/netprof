@@ -124,6 +124,8 @@ public interface IResultDAO extends IDAO {
 
   List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language);
 
+  CorrectAndScore getCorrectAndScoreForResult(int id, Language language);
+
   int getNumResults(int projid);
 
   int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID);

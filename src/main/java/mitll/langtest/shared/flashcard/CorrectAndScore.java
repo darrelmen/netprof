@@ -36,8 +36,10 @@ import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.answer.SimpleAudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.npdata.dao.result.SlickCorrectAndScore;
 
 import java.util.List;
 import java.util.Map;
@@ -68,6 +70,10 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
     this.path = path;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#scoreAudio
+   * @param result
+   */
   public CorrectAndScore(SimpleAudioAnswer result) {
     this(result.getPretestScore().getHydecScore(), result.getPath());
 
@@ -123,6 +129,10 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
     return scores;
   }
 
+  /**
+   * @see mitll.langtest.server.database.result.SlickResultDAO#fromSlickCorrectAndScoreWithRelPath
+   * @param scores
+   */
   public void setScores(Map<NetPronImageType, List<TranscriptSegment>> scores) {
     this.scores = scores;
   }

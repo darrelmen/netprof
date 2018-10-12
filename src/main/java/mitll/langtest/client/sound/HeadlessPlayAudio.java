@@ -285,7 +285,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @param path
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#playAndRemember
    */
-  protected void loadAndPlayOrPlayAudio(String path) {
+  private void loadAndPlayOrPlayAudio(String path) {
     if (currentPath.equals(path) && hasSound()) {
       if (DEBUG) logger.info("loadAndPlayOrPlayAudio - doPlayPauseToggle " + currentPath);
       doPlayPauseToggle();
@@ -342,7 +342,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices
    * @see #loadAudio
    */
-  protected String rememberAudio(String path) {
+  public String rememberAudio(String path) {
      if (DEBUG_PLAY || path == null) {
        logger.info("rememberAudio - path " + path);
      }

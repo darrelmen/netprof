@@ -979,6 +979,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return null;
   }
 
+  @Override
+  public CorrectAndScore getCorrectAndScoreForResult(int id, Language language) {
+    return null;
+  }
+
   /**
    * Just for import
    *

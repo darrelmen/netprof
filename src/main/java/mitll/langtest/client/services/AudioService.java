@@ -104,5 +104,4 @@ public interface AudioService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   void editItem(ClientExercise userExercise, boolean keepAudio) throws DominoSessionException, RestrictedOperationException;
-
 }

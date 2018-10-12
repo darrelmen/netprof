@@ -384,6 +384,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
+  public CorrectAndScore getCorrectAndScoreForResult(int id, Language language) {
+    List<CorrectAndScore> correctAndScores = getCorrectAndScores(dao.correctAndScoreByID(id), language);
+    return correctAndScores.isEmpty() ? null : correctAndScores.get(0);
+  }
+
+  @Override
   public int getNumResults(int projid) {
     return dao.numRowsForProject(projid);
   }
