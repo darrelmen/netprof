@@ -39,16 +39,17 @@ public class SessionContainer<T extends IDialogSession>
 
   /**
    * @param controller
-   * @param rightSide
    * @param overallBottom
-   * @see SessionAnalysis#getTable
+   * @param rightSide
+   * @see TwoColumnAnalysis#getTable
    */
   SessionContainer(ExerciseController controller,
+                   DivWidget overallBottom,
                    DivWidget rightSide,
-                   DivWidget overallBottom, int user) {
+                   int user) {
     super(controller, "dialogSession", "Session", 10, 10);
-    this.rightSide = rightSide;
     this.overallBottom = overallBottom;
+    this.rightSide = rightSide;
     this.user = user;
   }
 
@@ -78,6 +79,10 @@ public class SessionContainer<T extends IDialogSession>
     }
   }
 
+  /**
+   * Change the session the right side changes.
+   * @param selectedItem
+   */
   private void changeSelectedUser(T selectedItem) {
     //   logger.info("changeSelectedUser " + selectedUser);
     super.gotClickOnItem(selectedItem);

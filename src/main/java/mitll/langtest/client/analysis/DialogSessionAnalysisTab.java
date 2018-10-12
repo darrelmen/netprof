@@ -9,12 +9,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.dialog.IDialogSession;
-import org.jetbrains.annotations.NotNull;
 
 class DialogSessionAnalysisTab<T extends IDialogSession> extends AnalysisTab {
-
-//  private SessionContainer sessionContainer;
-
   /**
    * @param controller
    * @param selectedUser
@@ -24,11 +20,11 @@ class DialogSessionAnalysisTab<T extends IDialogSession> extends AnalysisTab {
    * @param userID
    * @see SessionContainer#getAnalysisTab
    */
-  public DialogSessionAnalysisTab(ExerciseController controller,
-                                  T selectedUser,
-                                  DivWidget overallBottom,
-                                  ReqCounter reqCounter,
-                                  int reqID, int userID) {
+  DialogSessionAnalysisTab(ExerciseController controller,
+                           T selectedUser,
+                           DivWidget overallBottom,
+                           ReqCounter reqCounter,
+                           int reqID, int userID) {
     super(controller, overallBottom,
         selectedUser.getView().toString(), false, reqCounter, INavigation.VIEWS.STUDY, new AnalysisRequest()
             .setUserid(userID)
@@ -37,26 +33,34 @@ class DialogSessionAnalysisTab<T extends IDialogSession> extends AnalysisTab {
             .setReqid(reqID)
             .setDialogID(new SelectionState().getDialog())
             .setDialogSessionID(selectedUser.getID()), 850, false);
-    // this.sessionContainer = sessionContainer;
   }
 
+  /**
+   * @param tableWithPager
+   * @param containerID
+   * @param heading
+   * @param addLeftMargin
+   * @return
+   */
   @Override
-  protected DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading heading) {
-    DivWidget wordContainerDiv = super.getWordContainerDiv(tableWithPager, containerID, heading);
+  protected DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading heading, boolean addLeftMargin) {
+    DivWidget wordContainerDiv = super.getWordContainerDiv(tableWithPager, containerID, heading, addLeftMargin);
     wordContainerDiv.setWidth(97 + "%");
     Style style = wordContainerDiv.getElement().getStyle();
     style.setClear(Style.Clear.BOTH);
     style.setOverflow(Style.Overflow.HIDDEN);
-    wordContainerDiv.addStyleName("leftFiveMargin");
+    if (addLeftMargin) {
+      wordContainerDiv.addStyleName("leftFiveMargin");
+    }
     wordContainerDiv.addStyleName("bottomFiveMargin");
     return wordContainerDiv;
   }
 
-  @NotNull
+/*  @NotNull
   @Override
   protected DivWidget getBottom(boolean isTeacherView) {
     DivWidget bottom = super.getBottom(isTeacherView);
     bottom.removeStyleName("inlineFlex");
     return bottom;
-  }
+  }*/
 }

@@ -32,12 +32,9 @@
 
 package mitll.langtest.client.analysis;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -48,6 +45,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 
+import static mitll.langtest.client.analysis.BasicUserContainer.MIN_HEIGHT;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -55,19 +54,25 @@ import java.util.List;
  * @since 10/27/15.
  */
 public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
-  public static final String SESSION = "Session";
   // private final Logger logger = Logger.getLogger("StudentAnalysis");
-  int user;
+
+  private static final String SESSION = "Session";
+  private static final String NO_SESSIONS_YET = "No Sessions yet...";
+  private final int user;
+  DivWidget userContainerBottom;
 
   /**
    * @param controller
    * @param user
+   * @param userContainerBottom
    * @see NewContentChooser#showProgress
    */
-  public SessionAnalysis(final ExerciseController controller, int user) {
+  public SessionAnalysis(final ExerciseController controller, int user, DivWidget userContainerBottom) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
 
     this.user = user;
+    this.userContainerBottom = userContainerBottom;
+
     controller.getDialogService().getDialogSessions(
         user,
         new SelectionState().getDialog(),
@@ -85,18 +90,43 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
         });
   }
 
+/*
   @Override
   protected void addBottom(DivWidget bottom) {
 //    rightSide.add(bottom);
     //super.addBottom(bottom);
   }
+*/
 
-  protected DivWidget addTop(Collection<IDialogSession> users,
-                             ExerciseController controller, DivWidget bottom) {
-    DivWidget rightSide = getRightSide();
-    DivWidget table = getTable(users, controller, bottom, rightSide);
-    add(getTop(table, bottom));
+  /*
+    protected DivWidget addTop(Collection<IDialogSession> users,
+                               ExerciseController controller, DivWidget bottom) {
+      DivWidget rightSide = getRightSide();
+      DivWidget table = getTable(users, controller, bottom, rightSide);
+      add(getTop(table, bottom));
+      return rightSide;
+    }
+  */
+
+/*
+  protected DivWidget addTop(Collection<IDialogSession> users, ExerciseController controller, DivWidget bottom) {
+   DivWidget rightSide = getRightSide();
+    DivWidget leftSide = getTable(users, controller, bottom, rightSide, getNoDataYetMessage());
+    leftSide.addStyleName("cardBorderShadow");
+    leftSide.addStyleName("bottomFiveMargin");
+    add(leftSide);
+  //  add(getTop(leftSide, rightSide));
     return rightSide;
+  }
+*/
+
+
+  @Override
+  protected DivWidget getContainerDiv(DivWidget table) {
+    DivWidget containerDiv = super.getContainerDiv(table);
+    containerDiv.getElement().getStyle().setProperty("maxHeight", 425 + "px");
+
+    return containerDiv;
   }
 
   @Override
@@ -104,39 +134,27 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
     return "selected_session";
   }
 
-  protected DivWidget getTable(Collection<IDialogSession> users,
-                               ExerciseController controller,
-                               DivWidget bottom,
-                               DivWidget rightSide) {
-    if (users.isEmpty()) {
-      DivWidget divWidget = new DivWidget();
-      divWidget.add(new HTML("No Sessions yet..."));
-      return divWidget;
-    } else {
-      SessionContainer<IDialogSession> userContainer =
-          new SessionContainer<>(controller, rightSide, bottom, user);
-      DivWidget sessions = getContainerDiv(userContainer.getTable(users));
-      sessions.addStyleName("cardBorderShadow");
-      return sessions;
-    }
+  @NotNull
+  @Override
+  protected String getNoDataYetMessage() {
+    return NO_SESSIONS_YET;
   }
 
-  private DivWidget getContainerDiv(DivWidget table) {
-    return getContainerDiv(table, getHeading(SESSION));
-  }
-
-  private DivWidget getContainerDiv(Panel tableWithPager, Heading heading) {
-    DivWidget wordsContainer = new DivWidget();
-    wordsContainer.add(heading);
-    wordsContainer.add(tableWithPager);
-    return wordsContainer;
+  protected String getHeaderLabel() {
+    return SESSION;
   }
 
   @NotNull
-  private Heading getHeading(String words) {
-    Heading wordsTitle = new Heading(3, words);
-    wordsTitle.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    wordsTitle.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
-    return wordsTitle;
+  protected MemoryItemContainer<IDialogSession> getItemContainer(ExerciseController controller,
+                                                                 DivWidget bottom,
+                                                                 DivWidget rightSide) {
+    return new SessionContainer<IDialogSession>(controller, userContainerBottom == null ? bottom : userContainerBottom, rightSide, user) {
+      @Override
+      public Panel getTableWithPager(Collection<IDialogSession> users) {
+        Panel tableWithPager = super.getTableWithPager(users);
+        setMinHeight(tableWithPager, 290);
+        return tableWithPager;
+      }
+    };
   }
 }

@@ -57,8 +57,8 @@ import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.WordScore;
 import mitll.langtest.shared.custom.TimeRange;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.instrumentation.SlimSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
@@ -85,7 +85,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   private static final int ROWS_TO_SHOW = 6;
 
-  private static final int ITEM_COL_WIDTH = 250;
+  private static final int ITEM_COL_WIDTH = 750;//250;
   private static final int ITEM_COL_WIDTH_NARROW = 190;
 
   private static final String SCORE = "Score";
@@ -135,14 +135,12 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    * What sort order do we want?
    *
    * @param controller
-   * @param plot
    * @param timeRange
    * @param jumpView
    * @see AnalysisTab#getWordContainer
    */
   WordContainerAsync(AnalysisTab.ReqInfo reqInfo,
                      ExerciseController controller,
-                     ExerciseLookup<CommonShell> plot,
                      Heading w,
                      int numWords,
                      AnalysisServiceAsync analysisServiceAsync,
@@ -162,6 +160,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     todayYear = todaysDate.substring(todaysDate.length() - 2);
 
     this.analysisServiceAsync = analysisServiceAsync;
+  }
+
+  int getTableHeight() {
+    return 180;
   }
 
   protected void setMaxWidth() {
@@ -285,10 +287,11 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    *
    * @return
    * @see AnalysisTab#getWordContainer
+   * @param useCompactPager
    */
-  public Panel getTableWithPager() {
+  public Panel getTableWithPager(boolean useCompactPager) {
     // logger.info("getTableWithPager " +listOptions);
-    ListOptions listOptions = new ListOptions().setCompact(true);
+    ListOptions listOptions = new ListOptions().setCompact(useCompactPager);
     CellTable<WordScore> wordScoreCellTable = makeCellTable(listOptions.isSort());
 
     wordScoreCellTable.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tableSortHelper.getColumn(SCORE), true));
@@ -406,9 +409,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     int itemColWidth = getItemColWidth();
     table.setColumnWidth(itemCol, itemColWidth + "px");
 
-    String language = controller.getLanguage();
-
-    String headerForFL = language.equals("English") ? "Meaning" : language;
+    String headerForFL = controller.getLanguageInfo() == Language.ENGLISH ? "Meaning" : controller.getLanguage();
     addColumn(itemCol, new TextHeader(headerForFL));
 
     tableSortHelper.rememberColumn(itemCol, WORD);

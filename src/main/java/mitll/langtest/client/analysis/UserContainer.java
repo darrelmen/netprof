@@ -151,13 +151,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    * @see StudentAnalysis#StudentAnalysis
    */
   UserContainer(ExerciseController controller,
-                DivWidget rightSide,
                 DivWidget overallBottom,
+                DivWidget rightSide,
                 String selectedUserKey
   ) {
     super(controller, selectedUserKey, STUDENT);
-    this.rightSide = rightSide;
     this.overallBottom = overallBottom;
+    this.rightSide = rightSide;
     myStudents = new HashSet<>();
   }
 

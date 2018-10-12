@@ -123,10 +123,14 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   protected void addTable(Panel column) {
     DivWidget tableC = new DivWidget();
     tableC.add(table);
-    tableC.setHeight(TABLE_HEIGHT + "px");
+    tableC.setHeight(getTableHeight() + "px");
     tableC.getElement().getStyle().setProperty("minWidth", "502px");  // helps safari in layout
     column.add(tableC);
     column.add(getButtonRow());
+  }
+
+  int getTableHeight() {
+    return TABLE_HEIGHT;
   }
 
   @NotNull

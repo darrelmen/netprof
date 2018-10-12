@@ -38,6 +38,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -112,9 +113,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   /**
-   * @see StudentAnalysis#StudentAnalysis(ExerciseController)
    * @param users
    * @return
+   * @see StudentAnalysis#StudentAnalysis(ExerciseController)
    */
   DivWidget getTable(Collection<T> users) {
     DivWidget leftSide = new DivWidget();
@@ -169,6 +170,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return Window.getClientHeight() < 822;
   }
 
+  protected void setMinHeight(Panel tableWithPager, int minHeight) {
+    tableWithPager.getElement().getStyle().setProperty("minHeight", minHeight + "px");
+  }
+
   /**
    */
   @Override
@@ -220,7 +225,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
-
+    tableWithPager.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
     populateTable(users);
     return tableWithPager;
   }
@@ -273,7 +278,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #getTableWithPager
    */
   protected void makeInitialSelection(T firstUser, T userToSelect) {
-     logger.info("makeInitialSelection make initial selection : select " + userToSelect);
+    logger.info("makeInitialSelection make initial selection : select " + userToSelect);
     Scheduler.get().scheduleDeferred(() -> selectAndClick((userToSelect == null) ? firstUser : userToSelect));
   }
 
@@ -345,6 +350,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * FILL ME IN
+   *
    * @param o1
    * @return
    */
@@ -395,7 +401,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     new TooltipHelper().addTooltip(table, "Click on a " + header + ".");
   }
 
-  private Column<T, SafeHtml> getItemColumn(int maxLength) {  return getTruncatedCol(maxLength, this::getItemLabel);  }
+  private Column<T, SafeHtml> getItemColumn(int maxLength) {
+    return getTruncatedCol(maxLength, this::getItemLabel);
+  }
 
   protected Column<T, SafeHtml> getNoWrapCol(GetSafe<T> getSafe) {
     Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
@@ -418,6 +426,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * Is sortable.
+   *
    * @param maxLength
    * @param getSafe
    * @return
@@ -442,6 +451,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * Is sortable.
+   *
    * @param getSafe
    * @return
    */
@@ -466,6 +476,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * Is sortable.
+   *
    * @param getSafe
    * @return
    */
@@ -499,6 +510,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * FILL ME IN
+   *
    * @param shell
    * @return
    */
@@ -537,6 +549,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * FILL ME IN
+   *
    * @param shell
    * @return
    */

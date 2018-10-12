@@ -65,7 +65,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
   @Override
   public Panel getTableWithPager(Collection<T> users) {
     Panel tableWithPager = super.getTableWithPager(users);
-    tableWithPager.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT + "px");
+    setMinHeight(tableWithPager, MIN_HEIGHT);
     return tableWithPager;
   }
 

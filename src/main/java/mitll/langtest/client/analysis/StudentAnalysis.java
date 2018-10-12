@@ -36,10 +36,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.banner.NewContentChooser;
-import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -64,7 +62,6 @@ public class StudentAnalysis extends TwoColumnAnalysis<UserInfo> {
    */
   public StudentAnalysis(final ExerciseController controller) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
-
     analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
@@ -85,11 +82,37 @@ public class StudentAnalysis extends TwoColumnAnalysis<UserInfo> {
     return SELECTED_USER;
   }
 
-  protected DivWidget getTable(Collection<UserInfo> users, ExerciseController controller, DivWidget bottom, DivWidget rightSide) {
-    UserContainer userContainer = new UserContainer(controller, rightSide, bottom, getRememberedSelectedUser(controller));
-    return userContainer.getTable(getUserInfos(users));
+  @NotNull
+  @Override
+  protected String getNoDataYetMessage() {
+    return "No Users Yet...";
   }
 
+  @NotNull
+  @Override
+  protected MemoryItemContainer<UserInfo> getItemContainer(ExerciseController controller, DivWidget bottom, DivWidget rightSide) {
+    return new UserContainer(controller, bottom, rightSide, getRememberedSelectedUser(controller));
+  }
+
+  @Override
+  protected String getHeaderLabel() {
+    return null;
+  }
+
+  /**
+   * @see TwoColumnAnalysis#addTop
+   * @param users
+   * @param controller
+   * @param bottom
+   * @param rightSide
+   * @param noDataMessage
+   * @return
+   */
+/*  protected DivWidget getTable(Collection<UserInfo> users, ExerciseController controller, DivWidget bottom, DivWidget rightSide, String noDataMessage) {
+    UserContainer userContainer = new UserContainer(controller, bottom, rightSide, getRememberedSelectedUser(controller));
+    return userContainer.getTable(getUserInfos(users));
+  }*/
+/*
   private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
     List<UserInfo> filtered = new ArrayList<>();
     for (UserInfo userInfo : users) {
@@ -99,5 +122,5 @@ public class StudentAnalysis extends TwoColumnAnalysis<UserInfo> {
       }
     }
     return filtered;
-  }
+  }*/
 }

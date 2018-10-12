@@ -55,7 +55,6 @@ import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.PhoneSummary;
 import mitll.langtest.shared.custom.TimeRange;
-import mitll.langtest.shared.dialog.IDialogSession;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,8 +68,10 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
-  public static final int MIN_HEIGHT = 325;
   private final Logger logger = Logger.getLogger("AnalysisTab");
+
+  private static final int MIN_HEIGHT = 325;
+  private static final int MAX_WIDTH = 1050;
 
   private static final int MIN_WIDTH = 240;
 
@@ -78,7 +79,6 @@ public class AnalysisTab extends DivWidget {
 
   private static final String REPORT_FOR_USER = "getting performance report for user";
   private static final int TIME_WINDOW_WIDTH = 92;
-  // private static final int MIN_HEIGHT = 325;
 
   /**
    * Got be the width to fit on a laptop screen for progress view - otherwise the phone plot
@@ -189,11 +189,12 @@ public class AnalysisTab extends DivWidget {
             .setListid(listid)
             .setReqid(req)
             .setDialogID(new SelectionState().getDialog()),
-        1050, true);
+        MAX_WIDTH, true);
   }
 
   /**
    * @param controller
+   * @param overallBottom non-null for teacher view
    * @param isPolyglot
    * @param maxWidth
    * @param showPlot
@@ -212,25 +213,30 @@ public class AnalysisTab extends DivWidget {
     this.userid = analysisRequest.getUserid();
     this.listid = analysisRequest.getListid();
     this.isPolyglot = isPolyglot;
-    // getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setWidth("100%");
     addStyleName("leftFiveMargin");
     this.controller = controller;
     this.jumpView = jumpView;
+    setMinWidth(this, 950);
 
     boolean isTeacherView = overallBottom != null;
 
-    AnalysisPlot analysisPlot = showPlot ? addAnalysisPlot(controller, isPolyglot, maxWidth, isTeacherView) : null;
+    AnalysisPlot analysisPlot = showPlot ? addAnalysisPlot(controller, isPolyglot, isTeacherView ? 700 : maxWidth, isTeacherView) : null;
 
     if (!showPlot) {
       exerciseLookup = new CommonShellCache<>(controller.getMessageHelper());
     }
 
     DivWidget bottom = getBottom(isTeacherView);
+
     if (isTeacherView) { // are we in student or teacher view
       overallBottom.clear();
       overallBottom.add(bottom); // teacher
     } else {
+      //setMinWidth(bottom,950);
+      // bottom.getElement().getStyle().setProperty("maxWidth", maxWidth + "px");
+      setMaxWidth(bottom, maxWidth);
+
       add(bottom); // student
     }
 
@@ -266,15 +272,23 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @see SessionContainer#getAnalysisTab
    * @param itemColumnWidth
    * @return
+   * @see SessionContainer#getAnalysisTab
    */
   AnalysisTab setItemColumnWidth(int itemColumnWidth) {
     this.itemColumnWidth = itemColumnWidth;
     return this;
   }
 
+  /**
+   * @param controller
+   * @param isPolyglot
+   * @param maxWidth
+   * @param isTeacherView
+   * @return
+   * @see #AnalysisTab(ExerciseController, DivWidget, String, boolean, ReqCounter, INavigation.VIEWS, AnalysisRequest, int, boolean)
+   */
   private AnalysisPlot addAnalysisPlot(ExerciseController controller, boolean isPolyglot, int maxWidth, boolean isTeacherView) {
     Widget playFeedback = getPlayFeedback();
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
@@ -422,11 +436,19 @@ public class AnalysisTab extends DivWidget {
   @NotNull
   protected DivWidget getBottom(boolean isTeacherView) {
     DivWidget bottom = new DivWidget();
-    bottom.addStyleName("inlineFlex");
+    //  bottom.addStyleName("inlineFlex");
     bottom.setWidth("100%");
-    bottom.getElement().setId("bottom");
-    if (!isTeacherView) bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
+    bottom.getElement().setId("analysisTabBottom");
+    setMaxWidth(bottom, MAX_WIDTH);
+
+    if (!isTeacherView) {
+      bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
+    }
     return bottom;
+  }
+
+  private void setMaxWidth(DivWidget bottom, int max) {
+    bottom.getElement().getStyle().setProperty("maxWidth", max + "px");
   }
 
   /**
@@ -622,14 +644,17 @@ public class AnalysisTab extends DivWidget {
           wordsTitle,
           timeWindow);
       {
-        DivWidget wordsContainer = getWordContainerDiv(tableWithPager, "WordsContainer", wordsTitle);
+        DivWidget wordsContainer =
+            getWordContainerDiv(tableWithPager, "WordsContainer", wordsTitle, analysisPlot != null);
         wordsContainer.addStyleName("cardBorderShadow");
+        wordsContainer.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+        wordsContainer.addStyleName("bottomFiveMargin");
         lowerHalf.add(wordsContainer);
       }
     }
 
     {
-      DivWidget soundsDiv = getSoundsDiv();
+      DivWidget soundsDiv = getSoundsDiv(analysisPlot == null);
       lowerHalf.add(soundsDiv);
 
       getPhoneReport(phoneReport,
@@ -667,26 +692,28 @@ public class AnalysisTab extends DivWidget {
 
       TimeRange timeRange) {
     WordContainerAsync wordContainer =
-        new WordContainerAsync(reqInfo, controller, exerciseLookup, wordsTitle,
+        new WordContainerAsync(reqInfo, controller, wordsTitle,
             numResults, analysisServiceAsync, timeRange, jumpView, itemColumnWidth);
     if (analysisPlot != null) {
       analysisPlot.addListener(wordContainer);
     }
-    return wordContainer.getTableWithPager();
+    return wordContainer.getTableWithPager(numResults < 50);
   }
 
-  private DivWidget getSoundsDiv() {
+  private DivWidget getSoundsDiv(boolean addLeftRightMargin) {
     DivWidget soundsDiv = new DivWidget();
     soundsDiv.getElement().setId("soundsDiv");
     soundsDiv.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
     soundsDiv.addStyleName("cardBorderShadow");
-    soundsDiv.addStyleName("leftFiveMargin");
-    soundsDiv.addStyleName("rightFiveMargin");
+ /*   if (addLeftRightMargin) {
+      soundsDiv.addStyleName("leftFiveMargin");
+      soundsDiv.addStyleName("rightFiveMargin");
+    }*/
     soundsDiv.addStyleName("inlineFlex");
     return soundsDiv;
   }
 
-  protected DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading heading) {
+  protected DivWidget getWordContainerDiv(Panel tableWithPager, String containerID, Heading heading, boolean addLeftMargin) {
     DivWidget wordsContainer = new DivWidget();
     wordsContainer.getElement().setId(containerID);
     wordsContainer.add(heading);
@@ -752,18 +779,18 @@ public class AnalysisTab extends DivWidget {
     //  sounds.getElement().setId(bigramContainer);
     sounds.add(getHeading(context));
     sounds.add(phones);
-    setMinWidth(sounds);
+    setMinWidth(sounds, MIN_WIDTH);
 
     return sounds;
   }
 
-  private void setMinWidth(UIObject horiz1) {
-    horiz1.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px"); // so they wrap nicely
+  private void setMinWidth(UIObject horiz1, int min) {
+    horiz1.getElement().getStyle().setProperty("minWidth", min + "px"); // so they wrap nicely
   }
 
 
   private DivWidget getWordExamples(Panel examples) {
-    DivWidget wordExamples = getWordContainerDiv(examples, WORD_EXAMPLES, exampleHeader);
+    DivWidget wordExamples = getWordContainerDiv(examples, WORD_EXAMPLES, exampleHeader, true);
     wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     wordExamples.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
     return wordExamples;

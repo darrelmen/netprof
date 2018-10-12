@@ -40,10 +40,8 @@ import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.dialog.IDialogSession;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
@@ -68,34 +66,52 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
 
     analysisServiceAsync.getUsersWithRecordingsForDialog(new SelectionState().getDialog(),
         new AsyncCallback<Collection<UserInfo>>() {
-      @Override
-      public void onFailure(Throwable throwable) {
-        finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());
+          @Override
+          public void onFailure(Throwable throwable) {
+            finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());
 
-        logger.warning("Got " + throwable);
-        controller.handleNonFatalError("Error retrieving user performance!", throwable);
-      }
+            logger.warning("Got " + throwable);
+            controller.handleNonFatalError("Error retrieving user performance!", throwable);
+          }
 
-      @Override
-      public void onSuccess(Collection<UserInfo> users) {
-        showItems(users, pleaseWaitTimer, controller);
-      }
-    });
+          @Override
+          public void onSuccess(Collection<UserInfo> users) {
+            showItems(users, pleaseWaitTimer, controller);
+          }
+        });
   }
 
-  @Override protected String getStorageKey() {
+  @Override
+  protected String getStorageKey() {
     return SELECTED_USER;
   }
 
-  protected DivWidget getTable(Collection<UserInfo> users, ExerciseController controller, DivWidget bottom, DivWidget rightSide) {
-    UserContainer userContainer = new UserContainer(controller, rightSide, bottom, getRememberedSelectedUser(controller)) {
+  @NotNull
+  @Override
+  protected String getNoDataYetMessage() {
+    return "No Students Yet";
+  }
+
+  @Override
+  protected DivWidget getContainerDiv(DivWidget table) {
+    DivWidget containerDiv = super.getContainerDiv(table);
+    containerDiv.getElement().getStyle().setProperty("maxHeight", 425 + "px");
+    return containerDiv;
+  }
+
+  @NotNull
+  @Override
+  protected MemoryItemContainer<UserInfo> getItemContainer(ExerciseController controller,
+                                                           DivWidget bottom,
+                                                           DivWidget rightSide) {
+    return new UserContainer(controller, bottom, rightSide, getRememberedSelectedUser(controller)) {
       @Override
       protected void addLastTwoColumns(List<UserInfo> list) {
-
       }
 
       @Override
-      protected void addItemID(List<UserInfo> list, int maxLength){}
+      protected void addItemID(List<UserInfo> list, int maxLength) {
+      }
 
       @NotNull
       @Override
@@ -109,11 +125,9 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
         return "Avg.";
       }
 
-
-      @Override protected void addListChoiceBox(DivWidget filterContainer) {
-
+      @Override
+      protected void addListChoiceBox(DivWidget filterContainer) {
       }
-
 
   /*    @Override
       protected void addRightSideContent(UserInfo selectedUser) {
@@ -128,6 +142,70 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
       @NotNull
       @Override
       protected Widget getAnalysisTab(UserInfo selectedUser) {
+        SessionAnalysis widgets = new SessionAnalysis(controller, selectedUser.getID(), bottom);
+        widgets.addStyleName("leftFiveMargin");
+        return widgets;
+      }
+    };
+  }
+
+  @Override
+  protected String getHeaderLabel() {
+    return "Students";
+  }
+
+  /**
+   * @paramx users
+   * @paramx controller
+   * @paramx bottom
+   * @paramx rightSide
+   * @paramx noDataMessage
+   * @return
+   * @see #addTop
+   */
+/*
+  protected DivWidget getTable(Collection<UserInfo> users,
+                               ExerciseController controller, DivWidget bottom, DivWidget rightSide, String noDataMessage) {
+    UserContainer userContainer = new UserContainer(controller, bottom, rightSide, getRememberedSelectedUser(controller)) {
+      @Override
+      protected void addLastTwoColumns(List<UserInfo> list) {
+      }
+
+      @Override
+      protected void addItemID(List<UserInfo> list, int maxLength) {
+      }
+
+      @NotNull
+      @Override
+      protected String getLifetimeCountTitle() {
+        return "#";
+      }
+
+      @NotNull
+      @Override
+      protected String getLifetimeAvgTitle() {
+        return "Avg.";
+      }
+
+      @Override
+      protected void addListChoiceBox(DivWidget filterContainer) {
+      }
+
+  */
+/*    @Override
+      protected void addRightSideContent(UserInfo selectedUser) {
+        return new DialogSessionAnalysisTab<T>(this.controller,
+            selectedUser,
+            overallBottom,
+            this,
+            req++
+        ).setItemColumnWidth(485);
+      }*//*
+
+
+      @NotNull
+      @Override
+      protected Widget getAnalysisTab(UserInfo selectedUser) {
         SessionAnalysis widgets = new SessionAnalysis(controller, selectedUser.getID());
         widgets.addStyleName("leftFiveMargin");
         return widgets;
@@ -138,8 +216,9 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
     table.addStyleName("cardBorderShadow");
     return table;
   }
+*/
 
-  private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
+/*  private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
     List<UserInfo> filtered = new ArrayList<>();
     for (UserInfo userInfo : users) {
       String userID = userInfo.getUserID();
@@ -148,5 +227,5 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
       }
     }
     return filtered;
-  }
+  }*/
 }
