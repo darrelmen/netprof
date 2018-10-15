@@ -43,7 +43,6 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -247,9 +246,10 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @throws DominoSessionException
    * @throws RestrictedOperationException
    * @see NewContentChooser#getReviewList
+   * @param isContext
    */
   @Override
-  public UserList<CommonShell> getReviewList() throws DominoSessionException, RestrictedOperationException {
+  public UserList<CommonShell> getReviewList(boolean isContext) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasQCPerm(userIDFromSessionOrDB)) {
       return getUserListManager().getCommentedList(getProjectIDFromUser(userIDFromSessionOrDB));
@@ -259,6 +259,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   /**
+   * TODO: Tamas wants this back in.
+   *
    * Put the new item in the database,
    * copy the audio under bestAudio ??
    * assign the item to a user list

@@ -10,9 +10,7 @@ import mitll.langtest.shared.project.ProjectStartupInfo;
 
 class NPExerciseListContainer<T extends CommonShell, U extends Shell> extends PagingContainer<T> {
 //  private final Logger logger = Logger.getLogger("NPExerciseListContainer");
-
   private final NPExerciseList<T, U> exerciseList;
-  //private final PagingExerciseList<?, ?> outer;
 
   NPExerciseListContainer(NPExerciseList<T, U> exerciseList,
                           boolean isRecorder,

@@ -48,11 +48,15 @@ public interface INavigation extends IViewContaner {
 
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     RECORD_CONTEXT("Record Context", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    QC("QC", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    FIX("Fix", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN));
+    QC("QC", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false),
+    FIX("Fix", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true),
+    QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false),
+    FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true);
 
     private List<User.Permission> perms;
     private ProjectMode mode;
+    private boolean isQC;
+    private boolean isFix;
 
     String display;
 
@@ -60,6 +64,14 @@ public interface INavigation extends IViewContaner {
       this.display = display;
       this.perms = perms;
       this.mode = EITHER;
+    }
+
+    VIEWS(String display, List<User.Permission> perms, boolean isQC, boolean isFix) {
+      this.display = display;
+      this.perms = perms;
+      this.mode = EITHER;
+      this.isQC = isQC;
+      this.isFix = isFix;
     }
 
     VIEWS(String display, ProjectMode mode) {
@@ -79,6 +91,17 @@ public interface INavigation extends IViewContaner {
     public String toString() {
       return display;
     }
+
+    public boolean isQC() {
+      return isQC;
+    }
+
+
+
+    public boolean isFix() {
+      return isFix;
+    }
+
   }
 
   void storeViewForMode(ProjectMode mode);
@@ -96,7 +119,6 @@ public interface INavigation extends IViewContaner {
   void showDialogIn(int dialogid, VIEWS view);
 
   /**
-   *
    * @param views
    * @return
    */

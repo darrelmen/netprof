@@ -66,9 +66,6 @@ import mitll.langtest.shared.user.MiniUser;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.custom.INavigation.VIEWS.FIX;
-import static mitll.langtest.client.custom.INavigation.VIEWS.QC;
-
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -142,7 +139,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
   }
 
   @Override
-  protected void makeScorePanel(T e, INavigation.VIEWS instance) {
+  protected void makeScorePanel(T e) {
     if (audioWasPlayed == null) {
       initAudioWasPlayed();
     }
@@ -202,7 +199,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
         CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED :
         UNINSPECTED_TOOLTIP);
 
-    if (getInstance() == FIX) {
+    if (getInstance().isFix()) {
       approvedButton = addApprovedButton(listContainer, navHelper);
     }
 
@@ -302,9 +299,9 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
 
     column.add(row);
 
-    column.add(getEntry(e, FOREIGN_LANGUAGE, VOCABULARY, e.getFLToShow(), exercise.getID()));
-    column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration(), exercise.getID()));
-    column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish(), exercise.getID()));
+    column.add(getEntry(e, FOREIGN_LANGUAGE, VOCABULARY, e.getFLToShow(), getExerciseID()));
+    column.add(getEntry(e, TRANSLITERATION, ExerciseFormatter.TRANSLITERATION, e.getTransliteration(), getExerciseID()));
+    column.add(getEntry(e, ENGLISH, ExerciseFormatter.ENGLISH_PROMPT, e.getEnglish(), getExerciseID()));
 
     if (e.hasContext()) {
       ClientExercise next = e.getDirectlyRelated().iterator().next();
@@ -318,7 +315,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
   }
 
   private Heading getComment() {
-    boolean isComment = getInstance() == INavigation.VIEWS.QC;
+    boolean isComment = getInstance().isQC();
     String columnLabel = isComment ? COMMENT : DEFECT;
     Heading heading = new Heading(4, columnLabel);
     heading.addStyleName("borderBottomQC");
@@ -343,20 +340,26 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       //    logger.info("no : audio attr on " + e.getID() + " " + e.getAudioAttributes());
       return addNoRefAudio(e);
     } else {
-      //  logger.info("yes : audio attr on " + e.getID() + " " + e.getAudioAttributes());
       boolean context = e.isContext();
-      Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getUserMap(true, context);
-      Map<MiniUser, List<AudioAttribute>> femalesMap = exercise.getUserMap(false, context);
+
+      ClientExercise toShow = this.exercise;
+      if (options.getInstance() == INavigation.VIEWS.QC_SENTENCES) {
+        context = true;
+        toShow = this.exercise.getDirectlyRelated().iterator().next();
+      }
+      logger.info("getScoringAudioPanel : audio attr on " + e.getID() + " " + e.getAudioAttributes() + " context " + context);
+      Map<MiniUser, List<AudioAttribute>> malesMap = toShow.getUserMap(true, context);
+      Map<MiniUser, List<AudioAttribute>> femalesMap = toShow.getUserMap(false, context);
       //logger.info("malesMap : "+malesMap.size());
       //logger.info("femalesMap : "+femalesMap.size());
 
-      List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
-      List<MiniUser> femaleUsers = exercise.getSortedUsers(femalesMap);
+      List<MiniUser> maleUsers = toShow.getSortedUsers(malesMap);
+      List<MiniUser> femaleUsers = toShow.getSortedUsers(femalesMap);
 
       tabs = new ArrayList<>();
       TabPanel tabPanel = new TabPanel();
-      addTabsForUsers(e, tabPanel, malesMap, maleUsers);
-      addTabsForUsers(e, tabPanel, femalesMap, femaleUsers);
+      addTabsForUsers(toShow, tabPanel, malesMap, maleUsers);
+      addTabsForUsers(toShow, tabPanel, femalesMap, femaleUsers);
 
       if (!maleUsers.isEmpty() || !femaleUsers.isEmpty()) {
         tabPanel.selectTab(0);
@@ -377,13 +380,13 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    * For all the users, show a tab for each audio cut they've recorded (regular and slow speed).
    * Special logic included for default users so a QC person can set the gender.
    *
-   * @param e
+   * @param exerciseWithAudio
    * @param tabPanel
    * @param malesMap
    * @param maleUsers
    * @see #getScoringAudioPanel
    */
-  private void addTabsForUsers(T e, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
+  private void addTabsForUsers(ClientExercise exerciseWithAudio, TabPanel tabPanel, Map<MiniUser, List<AudioAttribute>> malesMap, List<MiniUser> maleUsers) {
     if (logger == null) logger = Logger.getLogger("QCNPFExercise");
     int me = controller.getUser();
     UserTitle userTitle = new UserTitle();
@@ -403,9 +406,9 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
 
       List<AudioAttribute> audioAttributes = malesMap.get(user);
       for (AudioAttribute audio : audioAttributes) {
-        //    logger.info("addTabsForUsers for " + e.getID() + " got " + audio);
+        //    logger.info("addTabsForUsers for " + exerciseWithAudio.getID() + " got " + audio);
         if (!audio.isHasBeenPlayed()) allHaveBeenPlayed = false;
-        Pair panelForAudio1 = getPanelForAudio(e, audio);
+        Pair panelForAudio1 = getPanelForAudio(exerciseWithAudio, audio);
 
         Widget panelForAudio = panelForAudio1.entry;
         tabAndContent.addWidget(panelForAudio1.audioPanel);
@@ -481,7 +484,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     final Button male = makeGroupButton(buttonGroup, "MALE");
 
     if (audio.getExid() == -1) {
-      audio.setExid(exercise.getID());
+      audio.setExid(getExerciseID());
     }
     male.addClickHandler(event -> markGender(DEFAULT_MALE, male, audio, tabAndContent, allByUser, next, true));
 
@@ -577,7 +580,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
   private Button makeGroupButton(ButtonGroup buttonGroup, String title) {
     Button onButton = new Button(title);
     onButton.getElement().setId("MaleFemale" + "_" + title);
-    controller.register(onButton, exercise.getID());
+    controller.register(onButton, getExerciseID());
     buttonGroup.add(onButton);
     return onButton;
   }
@@ -612,7 +615,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    * @return both the comment widget and the audio panel
    * @see #addTabsForUsers
    */
-  private Pair getPanelForAudio(final T e, final AudioAttribute audio) {
+  private Pair getPanelForAudio(final ClientExercise e, final AudioAttribute audio) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       // if (logger == null) logger = Logger.getLogger("QCNPFExercise");
@@ -778,7 +781,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    */
   private CheckBox makeCheckBox(final String field, final Panel commentRow, final FocusWidget commentEntry,
                                 boolean alreadyMarkedCorrect) {
-    boolean isComment = getInstance() == QC;
+    boolean isComment = getInstance().isQC();
 
     final CheckBox checkBox = new CheckBox("");
     checkBox.getElement().setId("CheckBox_" + field);
@@ -806,15 +809,19 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       incorrectFields.add(field);
     } else {
       incorrectFields.remove(field);
-      addCorrectComment(exercise.getID(), field);
+      addCorrectComment(getExerciseID(), field);
     }
 
     STATE state = incorrectFields.isEmpty() ? STATE.UNSET : STATE.DEFECT;
     exercise.setState(state);
-    listContainer.setState(exercise.getID(), state);
+    listContainer.setState(getExerciseID(), state);
     listContainer.redraw();
     setApproveButtonState();
     markReviewed(exercise);
+  }
+
+  private int getExerciseID() {
+    return exercise.getID();
   }
 
   /**

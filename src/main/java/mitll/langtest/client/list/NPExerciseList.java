@@ -82,11 +82,9 @@ public class NPExerciseList<T extends CommonShell, U extends Shell> extends Hist
    * @see mitll.langtest.client.list.PagingExerciseList#addComponents
    */
   protected ClickablePagingContainer<T> makePagingContainer() {
-   // final PagingExerciseList<?, ?> outer = this;
     if (logger == null) {
       logger = Logger.getLogger("NPExerciseList");
     }
-
 /*
     logger.info("makePagingContainer : for" +
         "\n\tinstance " + getInstance() +

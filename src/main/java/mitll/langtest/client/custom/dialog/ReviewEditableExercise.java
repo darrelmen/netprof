@@ -45,6 +45,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.ListInterface;
@@ -124,14 +125,14 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * @param originalList
    * @param exerciseList
    * @paramx predefinedContent   - this should be a reference to the Learn tab exercise list, but it's not getting set.
-   * @see mitll.langtest.client.custom.content.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @see mitll.langtest.client.custom.content.ReviewItemHelper#doInternalLayout
    */
   public ReviewEditableExercise(ExerciseController controller,
                                 U changedUserExercise,
 
                                 int originalList,
                                 PagingExerciseList<T, U> exerciseList,
-                                String instanceName) {
+                                INavigation.VIEWS instanceName) {
     super(controller,
         changedUserExercise,
         originalList,
@@ -253,7 +254,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
   private final List<MyRecordAudioPanel> panels = new ArrayList<>();
 
   private Panel getRecordAudioWithAnno(DivWidget widget, AudioType audioTypeRegular) {
-    MyRecordAudioPanel w = new MyRecordAudioPanel(widget, audioTypeRegular, instance);
+    MyRecordAudioPanel w = new MyRecordAudioPanel(widget, audioTypeRegular);
 
     panels.add(w);
 
@@ -489,7 +490,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
         public void onSuccess(Void result) {
           widgets.getParent().setVisible(false);
           //   reloadLearnList();
-          LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+          LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
           // TODO : need to update other lists too?
         }
       });
@@ -619,7 +620,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
                                final Panel toAddTo,
                                boolean onClick) {
     super.afterValidForeignPhrase(exerciseList, toAddTo, onClick);
-    LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
+    LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance.toString()));
   }
 
 /*  private Button getRemove() {
@@ -846,7 +847,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     private Button deleteButton;
     private Widget comment;
 
-    MyRecordAudioPanel(DivWidget widget, AudioType audioType, String instance) {
+    MyRecordAudioPanel(DivWidget widget, AudioType audioType) {
       super(ReviewEditableExercise.this.newUserExercise, ReviewEditableExercise.this.controller, widget,
           0, false, audioType);
       this.audioType = audioType;
@@ -865,13 +866,14 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
             newUserExercise.getMutableAudio().addAudio(result.getAudioAttribute());
             deleteButton.setEnabled(true);
 
-            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
           }
         }
       };
     }
 
     /**
+     * TODO reconsider audio changed event...
      * @return
      * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String)
      */
@@ -894,7 +896,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
             if (comment != null) {
               comment.setVisible(false);
             }
-            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
           }
         });
       };

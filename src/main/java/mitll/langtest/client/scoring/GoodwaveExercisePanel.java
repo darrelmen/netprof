@@ -51,11 +51,13 @@ import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.project.Language;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -68,7 +70,7 @@ import java.util.List;
 public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-  //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
   /**
    *
    */
@@ -101,10 +103,10 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
   protected final ExerciseController controller;
 
   protected final NavigationHelper navigationHelper;
-  private boolean hasClickable = false;
-  private boolean isJapanese = false;
-  private boolean isUrdu = false;
-  private final ExerciseOptions options;
+  private boolean hasClickable;
+  private boolean isJapanese;
+  private boolean isUrdu;
+ protected   final ExerciseOptions options;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -123,11 +125,11 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     this.options = options;
     this.exercise = clientExercise;
     this.controller = controller;
-    String language = controller.getLanguage();
+    Language language = controller.getLanguageInfo();
 
-    isJapanese = language.equalsIgnoreCase(JAPANESE);
-    isUrdu = language.equalsIgnoreCase("urdu");
-    this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
+    isJapanese = language == Language.JAPANESE;
+    isUrdu = language == Language.URDU;
+    this.hasClickable = language == Language.MANDARIN || language == Language.KOREAN || isJapanese;
     setWidth("100%");
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, options.isAddKeyHandler(), options.isIncludeListButtons());
@@ -149,7 +151,7 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     center.addStyleName("floatLeftAndClear");
     // attempt to left justify
 
-    makeScorePanel(exercise, options.getInstance());
+    makeScorePanel(exercise);
 
     addQuestionContentRow(exercise, center);
 
@@ -169,7 +171,7 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
                                                           final ListInterface<?, ?> listContainer,
                                                           boolean addKeyHandler, boolean includeListButtons);
 
-  protected abstract void makeScorePanel(T e, INavigation.VIEWS instance);
+  protected abstract void makeScorePanel(T e);
 
   protected void loadNext() {
     listContainer.loadNextExercise(exercise.getID());
@@ -181,6 +183,8 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
   }
 
   protected void addQuestionContentRow(T e, Panel hp) {
+    logger.info("Add question row for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage() + " is context " + e.isContext());
+
     hp.add(getQuestionContent(e));
   }
 
@@ -274,7 +278,8 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
           }
 
           @Override
-          public void onSuccess(Void result) {}
+          public void onSuccess(Void result) {
+          }
         });
   }
 

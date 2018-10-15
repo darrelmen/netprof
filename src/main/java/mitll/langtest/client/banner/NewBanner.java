@@ -197,6 +197,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     rememberViewAndLink(nav, VIEWS.QC);
     rememberViewAndLink(nav, VIEWS.FIX);
 
+    rememberViewAndLink(nav, VIEWS.QC_SENTENCES);
+    rememberViewAndLink(nav, VIEWS.FIX_SENTENCES);
+
     return rnav;
   }
 

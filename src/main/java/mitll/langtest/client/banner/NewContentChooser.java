@@ -248,12 +248,22 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case QC:
           clear();
           setInstanceHistory(QC);
-          new MarkDefectsChapterNPFHelper(controller, this, QC).showNPF(divWidget, QC);
+          new MarkDefectsChapterNPFHelper(controller, false).showNPF(divWidget, QC);
           break;
         case FIX:
           clear();
           setInstanceHistory(FIX);
-          getReviewList();
+          getReviewList(false,FIX);
+          break;
+        case QC_SENTENCES:
+          clear();
+          setInstanceHistory(QC_SENTENCES);
+          new MarkDefectsChapterNPFHelper(controller, true).showNPF(divWidget, QC_SENTENCES);
+          break;
+        case FIX_SENTENCES:
+          clear();
+          setInstanceHistory(FIX_SENTENCES);
+          getReviewList(true, FIX_SENTENCES);
           break;
         case NONE:
           logger.info("showView skipping choice " + view);
@@ -490,8 +500,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
-  private void getReviewList() {
-    controller.getListService().getReviewList(new AsyncCallback<UserList<CommonShell>>() {
+  private void getReviewList(boolean isContext, VIEWS fix) {
+    controller.getListService().getReviewList(isContext, new AsyncCallback<UserList<CommonShell>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting defect list", caught);
@@ -499,7 +509,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
       @Override
       public void onSuccess(UserList<CommonShell> result) {
-        showReviewItems(result);
+        showReviewItems(result,fix);
       }
     });
   }
@@ -569,13 +579,13 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     controller.getStorage().storeValue(CURRENT_VIEW, view.name());
   }
 
-  private void showReviewItems(UserList<CommonShell> result) {
+  private void showReviewItems(UserList<CommonShell> result, VIEWS fix) {
     List<CommonShell> exercises = result.getExercises();
     // logger.info("got back " + result.getNumItems() + " exercises");
     CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
     Panel review = new ReviewItemHelper<CommonShell, CommonExercise>(controller)
-        .doNPF(result, VIEWS.FIX, true, toSelect);
-    if (getCurrentView() == VIEWS.FIX) {
+        .doNPF(result, fix, true, toSelect);
+    if (getCurrentView() == fix) {
       divWidget.add(review);
     } else {
       logger.warning("showReviewItems not adding since current is " + getCurrentView());

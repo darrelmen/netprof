@@ -38,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.list.ListInterface;
@@ -60,12 +61,13 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/28/2014.
  */
-class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> extends NewUserExercise<T,U> {
+class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> extends NewUserExercise<T, U> {
+  private final Logger logger = Logger.getLogger("EditableExerciseDialog");
+
   public static final String FOREIGN_LANGUAGE = "foreignLanguage";
   public static final String TRANSLITERATION = "transliteration";
   public static final String MEANING = "meaning";
   public static final String ENGLISH = "english";
-  private final Logger logger = Logger.getLogger("EditableExerciseDialog");
 
   private static final String ITEM = "Item";
 
@@ -73,6 +75,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   private final HTML slowAnno = new HTML();
 
   private final PagingExerciseList<T, U> exerciseList;
+  final INavigation.VIEWS instance;
 
   private static final boolean DEBUG = false;
 
@@ -83,12 +86,13 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    * @see EditItem#setFactory
    */
   EditableExerciseDialog(ExerciseController controller,
-                                U changedUserExercise,
-                                int originalListID,
+                         U changedUserExercise,
+                         int originalListID,
 
-                                PagingExerciseList<T, U> exerciseList,
-                                String instanceName) {
-    super(controller, changedUserExercise, instanceName, originalListID);
+                         PagingExerciseList<T, U> exerciseList,
+                         INavigation.VIEWS instanceName) {
+    super(controller, changedUserExercise, originalListID);
+    this.instance = instanceName;
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
     this.exerciseList = exerciseList;
@@ -150,7 +154,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    */
   @Override
   protected ControlGroup makeRegularAudioPanel(Panel row) {
-    rap = makeRecordAudioPanel(row, true, instance);
+    rap = makeRecordAudioPanel(row, true);
     fastAnno.addStyleName("topFiveMargin");
     return addControlGroupEntrySimple(row, NORMAL_SPEED_REFERENCE_RECORDING, rap, fastAnno);
   }
@@ -160,7 +164,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    */
   @Override
   protected ControlGroup makeSlowAudioPanel(Panel row) {
-    rapSlow = makeRecordAudioPanel(row, false, instance);
+    rapSlow = makeRecordAudioPanel(row, false);
     slowAnno.addStyleName("topFiveMargin");
     return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow, slowAnno);
   }
@@ -176,7 +180,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
                                final Panel toAddTo,
                                boolean onClick) {
     //  if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
-   // checkForForeignChange();
+    // checkForForeignChange();
     postChangeIfDirty(exerciseList, onClick);
   }
 
@@ -264,41 +268,46 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     setContextTrans(newUserExercise);
 
     if (rap != null) {
-      // regular speed audio
-      int id = newUserExercise.getID();
-      rap.getPostAudioButton().setExerciseID(id);
-      String refAudio = newUserExercise.getRefAudio();
 
-      if (refAudio != null) {
-        ExerciseAnnotation annotation = newUserExercise.getAnnotation(refAudio);
-        if (annotation == null) {
-          useAnnotation(newUserExercise.getAnnotation("refAudio"), fastAnno);
-        } else {
-          useAnnotation(newUserExercise, refAudio, fastAnno);
-        }
-        rap.getImagesForPath(refAudio);
-        originalRefAudio = refAudio;
-      }
+      addAudio(instance == INavigation.VIEWS.FIX_SENTENCES ? newUserExercise.getDirectlyRelated().iterator().next() : newUserExercise);
+    }
+  }
 
-      // slow speed audio
-      rapSlow.getPostAudioButton().setExerciseID(id);
-      String slowAudioRef = newUserExercise.getSlowAudioRef();
+  private void addAudio(ClientExercise newUserExercise) {
+    // regular speed audio
+    int id = newUserExercise.getID();
+    rap.getPostAudioButton().setExerciseID(id);
+    String refAudio = newUserExercise.getRefAudio();
 
-      if (slowAudioRef != null) {
-        useAnnotation(newUserExercise, slowAudioRef, slowAnno);
-        rapSlow.getImagesForPath(slowAudioRef);
-        originalSlowRefAudio = slowAudioRef;
+    if (refAudio != null) {
+      ExerciseAnnotation annotation = newUserExercise.getAnnotation(refAudio);
+      if (annotation == null) {
+        useAnnotation(newUserExercise.getAnnotation("refAudio"), fastAnno);
+      } else {
+        useAnnotation(newUserExercise, refAudio, fastAnno);
       }
-      if (!newUserExercise.hasRefAudio()) {
-        useAnnotation(newUserExercise, "refAudio", fastAnno);
-      }
+      rap.getImagesForPath(refAudio);
+      originalRefAudio = refAudio;
+    }
+
+    // slow speed audio
+    rapSlow.getPostAudioButton().setExerciseID(id);
+    String slowAudioRef = newUserExercise.getSlowAudioRef();
+
+    if (slowAudioRef != null) {
+      useAnnotation(newUserExercise, slowAudioRef, slowAnno);
+      rapSlow.getImagesForPath(slowAudioRef);
+      originalSlowRefAudio = slowAudioRef;
+    }
+    if (!newUserExercise.hasRefAudio()) {
+      useAnnotation(newUserExercise, "refAudio", fastAnno);
     }
   }
 
   protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row,
                                                              boolean recordRegularSpeed,
                                                              String instance) {
-    return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed, instance) {
+    return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed) {
       @Override
       protected int getImageWidth() {
         return 600;
@@ -330,6 +339,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
 
   /**
    * Only the first context sentence...
+   *
    * @param newUserExercise
    */
   private void setContext(U newUserExercise) {
@@ -347,7 +357,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   private void setContextTrans(U newUserExercise) {
     String originalContextTrans;
     contextTrans.box.setText(originalContextTrans = newUserExercise.getContextTranslation().trim());
-    if (!useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno)){
+    if (!useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno)) {
       List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
 
       if (!directlyRelated.isEmpty()) {
@@ -376,14 +386,13 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    */
   @Override
   boolean useAnnotation(AnnotationExercise userExercise, String field, HTML annoField) {
-  //  logger.info("useAnnotation " + userExercise.getID() + " : " + field);
+    //  logger.info("useAnnotation " + userExercise.getID() + " : " + field);
     ExerciseAnnotation annotation = userExercise.getAnnotation(field);
-  //   logger.info("useAnnotation annotation " + annotation);
+    //   logger.info("useAnnotation annotation " + annotation);
     return useAnnotation(annotation, annoField);
   }
 
   /**
-   *
    * @param anno
    * @param annoField
    * @return

@@ -49,8 +49,10 @@ import mitll.langtest.shared.exercise.ExerciseListRequest;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.QC;
+import static mitll.langtest.client.custom.INavigation.VIEWS.QC_SENTENCES;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -58,19 +60,21 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.QC;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends ClientExercise>  extends SimpleChapterNPFHelper<T, U> {
-  //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
+public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends ClientExercise> extends SimpleChapterNPFHelper<T, U> {
+  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
+
   private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
   private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
+  private boolean forSentences;
 
   /**
    * @param controller
-   * @param viewContaner
-   * @param myView
+   * @param forSentences
    * @see
    */
-  public MarkDefectsChapterNPFHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
+  public MarkDefectsChapterNPFHelper(ExerciseController controller, boolean forSentences) {
     super(controller);
+    this.forSentences = forSentences;
   }
 
   /**
@@ -99,7 +103,7 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends Client
                                                           DivWidget listHeader,
                                                           DivWidget footer) {
 
-        return new NPExerciseList<T,U>(currentExercisePanel, controller,
+        return new NPExerciseList<T, U>(currentExercisePanel, controller,
             new ListOptions()
                 .setInstance(instanceName)
                 .setShowFirstNotCompleted(true)
@@ -119,16 +123,22 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends Client
            */
           @Override
           protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
-                                                               String prefix, boolean onlyWithAudioAnno, boolean onlyDefaultUser, boolean onlyUninspected) {
+                                                               String prefix,
+                                                               boolean onlyWithAudioAnno,
+                                                               boolean onlyDefaultUser,
+                                                               boolean onlyUninspected) {
+
             ExerciseListRequest exerciseListRequest = super
                 .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected)
                 .setQC(true)
-                .setAddContext(true);
+                .setAddContext(forSentences);
+
+            logger.info("getExerciseListRequest req " + exerciseListRequest);
             return exerciseListRequest;
           }
 
           protected ExerciseListRequest getExerciseListRequest(String prefix) {
-            return super.getExerciseListRequest(prefix).setQC(true);
+            return super.getExerciseListRequest(prefix).setQC(true).setAddContext(forSentences);
           }
 
           @Override
@@ -189,10 +199,12 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends Client
   }
 
   protected ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList) {
-    final PagingExerciseList<T, U> outerExerciseList =exerciseList;
+    final PagingExerciseList<T, U> outerExerciseList = exerciseList;
     return new ExercisePanelFactory<T, U>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(U e) { return new QCNPFExercise<U>(e, controller, outerExerciseList, QC); }
+      public Panel getExercisePanel(U e) {
+        return new QCNPFExercise<U>(e, controller, outerExerciseList, forSentences ? QC_SENTENCES : QC);
+      }
     };
   }
 }

@@ -695,14 +695,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       // ensureMP3s(firstExercise, pathHelper.getInstallPath());
       if (request.shouldAddContext()) { // add the context exercises
         //  logger.info("adding context exercises...");
-        List<CommonExercise> withContext = new ArrayList<>();
-        exercises.forEach(commonExercise -> {
-          withContext.add(commonExercise);
-          //  logger.info("\t" + commonExercise.getID() + " " + commonExercise.getDirectlyRelated().size());
-          commonExercise.getDirectlyRelated().forEach(clientExercise -> withContext.add(clientExercise.asCommon()));
-          // withContext.addAll(commonExercise.getDirectlyRelated());
-        });
-        exercises = withContext;
+        exercises = getParentChildPairs(exercises);
       }
     }
     List<T> exerciseShells = getExerciseShells(exercises, request.isQC());
@@ -734,6 +727,29 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper + " in " + (System.currentTimeMillis() - then) + " millis");
     return exerciseListWrapper;
+  }
+
+  /**
+   * Make pairs of parent exercise to child context sentence exercise
+   * @param exercises
+   * @return
+   */
+  @NotNull
+  private List<CommonExercise> getParentChildPairs(Collection<CommonExercise> exercises) {
+    List<CommonExercise> withContext = new ArrayList<>();
+    exercises.forEach(commonExercise -> {
+      //  logger.info("\t" + commonExercise.getID() + " " + commonExercise.getDirectlyRelated().size());
+      commonExercise.getDirectlyRelated().forEach(clientExercise -> {
+        //withContext.add(commonExercise);
+        Exercise copy = new Exercise(commonExercise);
+        withContext.add(copy);
+        copy.getDirectlyRelated().clear();
+        copy.getDirectlyRelated().add(clientExercise.asCommon());
+//            withContext.add(clientExercise.asCommon());
+      });
+      // withContext.addAll(commonExercise.getDirectlyRelated());
+    });
+    return withContext;
   }
 
   /**

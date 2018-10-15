@@ -122,7 +122,7 @@ public interface ListService extends RemoteService {
    */
   void addItemToUserList(int userListID, int exID) throws DominoSessionException;
 
-  UserList<CommonShell> getReviewList() throws DominoSessionException, RestrictedOperationException;
+  UserList<CommonShell> getReviewList(boolean isContext) throws DominoSessionException, RestrictedOperationException;
 
   /**
    * @param userListID

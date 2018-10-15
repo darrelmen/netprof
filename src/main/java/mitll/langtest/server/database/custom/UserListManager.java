@@ -703,6 +703,7 @@ public class UserListManager implements IUserListManager {
     logger.info("getCommented for " + projID + " found " + exercisesWithIncorrectAnnotations.size());
     List<CommonExercise> defectExercises = getDefectExercises(projID, exercisesWithIncorrectAnnotations);
     logger.info("getCommented for " + projID + " found " + defectExercises.size() + " exercises");
+    defectExercises.forEach(exercise -> logger.info("\tdefect "+exercise.getID()+ " " + exercise.getForeignLanguage() + " context " + exercise.isContext()));
     UserList<CommonShell> reviewList = getReviewList(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
     logger.info("getCommented for " + projID + " list has " + reviewList.getNumItems() + " exercises");
     return reviewList;

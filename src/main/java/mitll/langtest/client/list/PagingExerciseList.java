@@ -69,8 +69,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   private ITypeAhead typeAhead;
   int userListID = -1;
   private int unaccountedForVertical = 160;
-  //private boolean onlyExamples;
-
   private static final boolean DEBUG = false;
 
   /**
@@ -146,7 +144,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @return
    */
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
-    // logger.info("isOnlyExamples " + isOnlyExamples());
+    logger.info("getExerciseListRequest prefix " + prefix);
     return new ExerciseListRequest(incrRequest(),
         controller.getUserState().getUser())
         .setPrefix(prefix)

@@ -12,33 +12,14 @@ public class ExerciseOptions {
   private final boolean allowRecording = true;
   private final boolean includeListButtons = true;
 
-/*
-  public ExerciseOptions() {
-  }
-*/
-
   public ExerciseOptions(INavigation.VIEWS instance) {
     this.instance = instance;
   }
 
-/*
-  public ExerciseOptions(float screenPortion,
-                         boolean addKeyHandler,
-                         INavigation.VIEWS instance,
-                         boolean allowRecording,
-                         boolean includeListButtons) {
-    this.screenPortion = screenPortion;
-    this.addKeyHandler = addKeyHandler;
-    this.includeListButtons = includeListButtons;
-    this.instance = instance;
-    this.allowRecording = allowRecording;
-  }
-*/
-
   float getScreenPortion() {
     return screenPortion;
   }
-  public boolean isAddKeyHandler() {
+  boolean isAddKeyHandler() {
     return addKeyHandler;
   }
   public INavigation.VIEWS getInstance() {

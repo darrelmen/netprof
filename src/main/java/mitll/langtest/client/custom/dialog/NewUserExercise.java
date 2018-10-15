@@ -41,6 +41,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
@@ -135,25 +136,24 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   ListInterface<T, U> listInterface;
   private Panel toAddTo;
   private boolean clickedCreate = false;
-  final String instance;
 
   private static final boolean DEBUG = false;
 
   /**
    * @param controller
    * @param newExercise
-   * @param instance
+   * @paramx instance
    * @param listID
    * @see EditableExerciseDialog#EditableExerciseDialog
    */
   public NewUserExercise(
       ExerciseController controller,
       U newExercise,
-      String instance,
+
       int listID) {
     this.controller = controller;
     this.newUserExercise = newExercise;
-    this.instance = instance;
+
     this.listID = listID;
   }
 
@@ -297,12 +297,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #addFields
    */
   ControlGroup makeRegularAudioPanel(Panel row) {
-    rap = makeRecordAudioPanel(row, true, instance);
+    rap = makeRecordAudioPanel(row, true);
     return addControlGroupEntrySimple(row, NORMAL_SPEED_REFERENCE_RECORDING, rap);
   }
 
   ControlGroup makeSlowAudioPanel(Panel row) {
-    rapSlow = makeRecordAudioPanel(row, false, instance);
+    rapSlow = makeRecordAudioPanel(row, false);
     return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow);
   }
 
@@ -803,15 +803,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * @param row
    * @param recordRegularSpeed
-   * @param instance
    * @return
    * @see #makeRegularAudioPanel
    * @see #makeSlowAudioPanel
    */
   protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row,
-                                                             boolean recordRegularSpeed,
-                                                             String instance) {
-    return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed, instance);
+                                                             boolean recordRegularSpeed) {
+    return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed);
   }
 
   class CreateFirstRecordAudioPanel extends RecordAudioPanel<U> {
@@ -823,11 +821,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
      * @param newExercise
      * @param row
      * @param recordRegularSpeed
-     * @param instance
      * @see #makeRecordAudioPanel
      */
     CreateFirstRecordAudioPanel(U newExercise, Panel row,
-                                boolean recordRegularSpeed, String instance) {
+                                boolean recordRegularSpeed) {
       super(newExercise, NewUserExercise.this.controller, row, 0, false,
           recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW);
       this.recordRegularSpeed = recordRegularSpeed;

@@ -33,6 +33,7 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
@@ -75,6 +76,9 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   boolean doNormalRecording;
 
   /**
+   * Includes fix for
+   * <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/331'>Levantine: English translations</a>
+   *
    * @param e
    * @param controller
    * @param exerciseList
@@ -95,12 +99,19 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     this.instance = instance;
     this.doNormalRecording = doNormalRecording;
 
-    /*    logger.info("for " + e.getID() + " instance " + instance +
-        " doNormal " + doNormalRecording);*/
+    logger.info("ExercisePanel for " + e.getID() + " instance " + instance +
+        " doNormal " + doNormalRecording);
 
     this.navigationHelper = getNavigationHelper(controller, enableNextOnlyWhenBothCompleted);
 
     addInstructions();
+  //  if (e.getEnglish().isEmpty()) logger.warning("no english for " + e.getID() + " " + e.getForeignLanguage() + " " + e.getMeaning());
+    HTML maybeRTLContent = getMaybeRTLContent(e.getEnglish());
+    maybeRTLContent.addStyleName("topFiveMargin");
+    maybeRTLContent.addStyleName("bottomFiveMargin");
+    maybeRTLContent.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+
+    add(maybeRTLContent);
     add(getQuestionContentRTL(e));
 
     addQuestions(e, controller);

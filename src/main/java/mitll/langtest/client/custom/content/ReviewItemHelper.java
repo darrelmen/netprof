@@ -45,6 +45,7 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
@@ -70,11 +71,12 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
    */
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
   private FlexListLayout<T, U> flexListLayout;
+  INavigation.VIEWS views;
 
   /**
    * @param controller
-   * @seex mitll.langtest.client.custom.Navigation#Navigation
    * @seex ListManager#ListManager
+   * @see mitll.langtest.client.banner.NewContentChooser#showReviewItems
    */
   public ReviewItemHelper(final ExerciseController controller) {
     super(controller, true, false);
@@ -91,7 +93,9 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
   @Override
   protected Panel doInternalLayout(final int userListID, INavigation.VIEWS instanceName) {
     logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + userListID);
-   // int id = userListID.getID();
+    // int id = userListID.getID();
+
+    this.views = instanceName;
     this.flexListLayout = new ReviewFlexListLayout(userListID);
     Panel widgets = flexListLayout.doInternalLayout(userListID, instanceName, true);
     npfExerciseList = flexListLayout.npfExerciseList;
@@ -134,7 +138,7 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
                   exercise,
                   ulID,
                   pagingExerciseList,
-                  "ReviewEditableExercise"
+                  views
               );
           Panel widgets = reviewEditableExercise.addFields(npfExerciseList, new SimplePanel());
           reviewEditableExercise.setFields(exercise);
@@ -149,19 +153,30 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
                                                         INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
       FlexListLayout outer = this;
       return new NPExerciseList<T, U>(currentExercisePanel, outer.getController(),
-          new ListOptions(instanceName).setActivityType(QUALITY_CONTROL), -1) {
+          new ListOptions(instanceName)
+              .setActivityType(QUALITY_CONTROL), -1) {
         com.github.gwtbootstrap.client.ui.CheckBox checkBox;
 
         @Override
         protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                              String prefix,
                                                              boolean onlyWithAudioAnno,
-                                                             boolean onlyDefaultUser, boolean onlyUninspected) {
+                                                             boolean onlyDefaultUser,
+                                                             boolean onlyUninspected) {
           ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser,
               onlyUninspected)
               .setQC(true)
-              .setAddContext(false);
-          //    logger.info("making request "  + exerciseListRequest);
+              .setAddContext(instanceName == INavigation.VIEWS.FIX_SENTENCES);
+          logger.info("getExerciseListRequest making request " + exerciseListRequest);
+          return exerciseListRequest;
+        }
+
+        protected ExerciseListRequest getExerciseListRequest(String prefix) {
+          ExerciseListRequest exerciseListRequest = super
+              .getExerciseListRequest(prefix)
+              .setQC(true)
+              .setAddContext(instanceName == INavigation.VIEWS.FIX_SENTENCES);
+          logger.info("getExerciseListRequest req is " + exerciseListRequest);
           return exerciseListRequest;
         }
 
