@@ -24,6 +24,7 @@ public class TranscriptSegmentGenerator {
   private static final Logger logger = LogManager.getLogger(TranscriptSegmentGenerator.class);
   protected ServerProperties serverProps;
   private static final boolean DEBUG = false;
+  private static final boolean WARN_ABOUT_FALLBACK = false;
 
   /**
    * @param serverProperties
@@ -114,10 +115,10 @@ public class TranscriptSegmentGenerator {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.DialogExercisePanel#getSegsWithinWordTimeWindow
    * @param phones
    * @param word
    * @return
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#getSegsWithinWordTimeWindow
    */
   private List<TranscriptSegment> getSegs(List<TranscriptSegment> phones, TranscriptSegment word) {
     List<TranscriptSegment> phonesInWord = new ArrayList<>();
@@ -282,7 +283,8 @@ public class TranscriptSegmentGenerator {
             } else {
               //match = getMatch(fragIndex, currentFragments, prevSimple);
               String koreanFragment = simpleKorean.get(0);
-              logger.warn("getKoreanFragmentSequence (" + word + ") fall back to " + koreanFragment + " given expected " + new HashSet<>(currentFragments));
+              if (WARN_ABOUT_FALLBACK)
+                logger.warn("getKoreanFragmentSequence (" + word + ") fall back to " + koreanFragment + " given expected " + new HashSet<>(currentFragments));
               //  builder.append(koreanFragment).append(" ");
               addKoreanSegment(koreanPhones, currentSegment, koreanFragment);
             }
@@ -319,9 +321,9 @@ public class TranscriptSegmentGenerator {
           addCombinedKoreanSegment(koreanPhones, currentSegment, nextSegment, match);
         } else {
           String s = compoundKorean.get(0);
-          logger.info("getKoreanFragmentSequence (" + word + ") 2 fall back to '" + s + "' given " + new HashSet<>(currentFragments));
+          if (WARN_ABOUT_FALLBACK)
+            logger.info("getKoreanFragmentSequence (" + word + ") 2 fall back to '" + s + "' given " + new HashSet<>(currentFragments));
           //     builder.append(s).append(" ");
-
           addCombinedKoreanSegment(koreanPhones, currentSegment, nextSegment, s);
         }
         fragCount++;
@@ -337,7 +339,6 @@ public class TranscriptSegmentGenerator {
 
       }
 //        logger.info("got " + i + " " + j + " " + currentSegment + " = " + simpleKorean + " - " + compoundKorean);
-
     }
 //    return builder.toString();
     //ret.add(e);
