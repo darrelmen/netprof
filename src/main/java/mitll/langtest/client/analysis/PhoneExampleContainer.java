@@ -49,7 +49,6 @@ import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordAndScore;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.Language;
 
 import java.util.Collection;
@@ -92,8 +91,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @param jumpView
    * @see AnalysisTab#getPhoneReport
    */
-  PhoneExampleContainer(ExerciseController controller, ExerciseLookup<CommonShell> plot, Heading heading,
-                        INavigation.VIEWS jumpView) {
+  PhoneExampleContainer(ExerciseController controller, Heading heading, INavigation.VIEWS jumpView) {
     super(controller, jumpView);
     isSpanish = controller.getLanguageInfo() == Language.SPANISH;
     this.heading = heading;
@@ -176,7 +174,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       //    logger.info("PhoneExampleContainer Scores " + buffer);
       sortedHistory.forEach(this::addItem);
       if (!sortedHistory.isEmpty()) {
-        setSelectedAndShowReco(sortedHistory.iterator().next(),false);
+        setSelectedAndShowReco(sortedHistory.iterator().next(), false);
       }
     } else {
       logger.warning("PhoneExampleContainer.addItems null items");
@@ -229,11 +227,13 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
       @Override
       public SafeHtml getValue(WordAndScore shell) {
+//        logger.info("for " + phone + " bigram " + bigram + " first " + first +
+//            " full " + shell.getFullTranscript());
         String columnText = new WordTable().toHTML(shell.getFullTranscript(), phone, bigram, first);
+//        logger.info("textx " + columnText);
         if (columnText.isEmpty()) {
           String foreignLanguage = shell.getWord();
           if (isSpanish) foreignLanguage = foreignLanguage.toUpperCase();
-
 
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
         }

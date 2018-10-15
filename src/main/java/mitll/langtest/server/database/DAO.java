@@ -73,7 +73,6 @@ public abstract class DAO {
     this.logAndNotify = database.getLogAndNotify();
   }
 
-
   public boolean updateProject(int oldID, int newprojid) {
     return false;
   }

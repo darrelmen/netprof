@@ -721,6 +721,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       if (phone.getStart() >= start && phone.getEnd() <= end) {
         phonesInWord.add(phone);
       }
+
+      if (phone.getStart() > end) {
+        break;
+      }
     }
 
     return phonesInWord;
@@ -1036,8 +1040,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   /**
-   * @see ListenViewHelper#getTurnPanel
    * @param playListener
+   * @see ListenViewHelper#getTurnPanel
    */
   public void addPlayListener(PlayListener playListener) {
     if (playAudio != null) {

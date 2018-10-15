@@ -68,7 +68,7 @@ public interface IPhoneDAO<T> extends IDAO {
 
   void removeForResult(int resultid);
 
-  void deleteForProject(int projID);
+  int deleteForProject(int projID);
 
   boolean updateProjectForRID(int rid, int newprojid);
 

@@ -40,7 +40,7 @@ import java.text.NumberFormat;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
-public class TranscriptEvent implements Comparable<TranscriptEvent> {
+public class TranscriptEvent implements Comparable<TranscriptEvent>, ITranscriptEvent {
   private static final NumberFormat format = new DecimalFormat("#.#####");
 
   public TranscriptEvent(float s, float e, String name) {
@@ -73,18 +73,22 @@ public class TranscriptEvent implements Comparable<TranscriptEvent> {
     return Float.compare(start, o.start);
   }
 
+  @Override
   public float getStart() {
     return start;
   }
 
+  @Override
   public float getEnd() {
     return end;
   }
 
+  @Override
   public String getEvent() {
     return event;
   }
 
+  @Override
   public float getScore() {
     return score;
   }

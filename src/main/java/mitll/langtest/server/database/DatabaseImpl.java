@@ -1965,6 +1965,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  public RecordWordAndPhone getRecordWordAndPhone() { return recordWordAndPhone; }
+
   /**
    * @param language
    * @param path

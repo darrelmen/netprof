@@ -148,4 +148,6 @@ public interface IResultDAO extends IDAO {
   boolean updateProjectAndEx(int rid, int newprojid, int newEXID);
 
   List<SlickPerfResult> getLatestResultsForDialogSession(int dialogSessionID);
+
+  Map<Integer,String> getResultIDToJSON(int projid);
 }

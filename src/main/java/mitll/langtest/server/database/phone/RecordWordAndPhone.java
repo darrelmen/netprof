@@ -32,14 +32,19 @@
 
 package mitll.langtest.server.database.phone;
 
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.database.word.IWordDAO;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.server.scoring.ASR;
+import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.SimpleAudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -49,6 +54,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RecordWordAndPhone {
   private static final Logger logger = LogManager.getLogger(RecordWordAndPhone.class);
@@ -76,7 +82,7 @@ public class RecordWordAndPhone {
    * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, AnswerInfo.RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
    * @see DatabaseImpl#recordWordAndPhoneInfo
    */
-  public void recordWordAndPhoneInfo(int projID, AudioAnswer answer, int answerID) {
+  public void recordWordAndPhoneInfo(int projID, SimpleAudioAnswer answer, int answerID) {
     PretestScore pretestScore = answer.getPretestScore();
 
     if (DEBUG) {
@@ -100,9 +106,37 @@ public class RecordWordAndPhone {
                                      int answerID,
                                      PretestScore pretestScore) {
     if (pretestScore != null) {
-      Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = pretestScore.getTypeToSegments();
-      recordWordAndPhoneInfo(projID, answerID, typeToSegments);
+      recordWordAndPhoneInfo(projID, answerID, pretestScore.getTypeToSegments());
     }
+  }
+
+  /**
+   * Blow away old phones and words, rewrite with remapped words and phones
+   * Take awhile!
+   * @param projid
+   * @param dao
+   * @param serverProperties
+   * @param lang
+   */
+  public void remapPhones(int projid, IResultDAO dao, ServerProperties serverProperties, Language lang) {
+    int i = phoneDAO.deleteForProject(projid);
+    logger.info("remapPhones " + projid + " removed " + i + " phones");
+
+    int i1 = wordDAO.deleteForProject(projid);
+    logger.info("remapPhones " + projid + " removed " + i1 + " words");
+
+    //TranscriptSegmentGenerator generator = new TranscriptSegmentGenerator(serverProperties);
+    Map<Integer, String> resultIDToJSON = dao.getResultIDToJSON(projid);
+    logger.info("remapPhones " + projid + " found " + resultIDToJSON.size() + " to remap");
+
+    ParseResultJson parseResultJson = new ParseResultJson(serverProperties, lang);
+
+    AtomicInteger atomicInteger=new AtomicInteger();
+    resultIDToJSON.forEach((k, v) -> {
+      recordWordAndPhoneInfo(projid, k, parseResultJson.readFromJSON(v));
+      int andIncrement = atomicInteger.getAndIncrement();
+      if (andIncrement % 1000 == 0) logger.info("remapPhones did " + andIncrement);
+    });
   }
 
   /**
@@ -122,7 +156,7 @@ public class RecordWordAndPhone {
       int pindex = 0;
 
       List<Phone> toAdd = new ArrayList<>();
-     // logger.info("recordWordAndPhoneInfo : " + words.size() + " words for answer " + answerID + " in project " + projID);
+      // logger.info("recordWordAndPhoneInfo : " + words.size() + " words for answer " + answerID + " in project " + projID);
 
       List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);
 

@@ -83,6 +83,8 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     this(segment.getStart(), segment.getEnd(), segment.getEvent(), segment.getScore(), segment.getDisplayEvent(), segment.index);
   }
 
+  public SlimSegment toSlim() { return new SlimSegment(getEvent(),getScore()); }
+
   public float getStart() {
     return fromInt(start);
   }
@@ -116,10 +118,7 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     return displayEvent;
   }
 
-/*  public TranscriptSegment setDisplayEvent(String displayEvent) {
-    this.displayEvent = displayEvent;
-    return this;
-  }*/
+
 
   public boolean isIn(TranscriptSegment other) {
     return getStart() >= other.getStart() && getEnd() <= other.getEnd();

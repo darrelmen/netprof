@@ -75,7 +75,7 @@ public class TranscriptSegmentGenerator {
     List<TranscriptSegment> hydraPhoneSegments = typeToEndTimes.get(PHONE_TRANSCRIPT);
 
     if (hydraPhoneSegments != null) {
-      String before = getSeguence(hydraPhoneSegments);
+      String before = DEBUG ? getSeguence(hydraPhoneSegments) : "";
       //  List<TranscriptSegment> hydraWordSegments = typeToEndTimes.get(WORD_TRANSCRIPT);
 //        Map<String, List<TranscriptSegment>> wordToPhoneSeg = new HashMap<>();
 
@@ -113,11 +113,24 @@ public class TranscriptSegmentGenerator {
     return !IGNORE_TOKENS.contains(wordSeg.getEvent());
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#getSegsWithinWordTimeWindow
+   * @param phones
+   * @param word
+   * @return
+   */
   private List<TranscriptSegment> getSegs(List<TranscriptSegment> phones, TranscriptSegment word) {
     List<TranscriptSegment> phonesInWord = new ArrayList<>();
+
+    float start = word.getStart();
+    float end = word.getEnd();
+
     for (TranscriptSegment phone : phones) {
-      if (phone.getStart() >= word.getStart() && phone.getEnd() <= word.getEnd()) {
+      if (phone.getStart() >= start && phone.getEnd() <= end) {
         phonesInWord.add(phone);
+      }
+      if (phone.getStart() > end) {
+        break;
       }
     }
     return phonesInWord;
@@ -131,9 +144,14 @@ public class TranscriptSegmentGenerator {
 
   private KoreanLTS koreanLTS = new KoreanLTS();
 
+  /**
+   * @param word
+   * @param hydraPhones
+   * @return
+   * @see #doKoreanPhoneTranslation(Map)
+   */
   private List<TranscriptSegment> getKoreanSegments(String word, List<TranscriptSegment> hydraPhones) {
-    //List<List<String>> fragmentList = getKoreanFragments(word, koreanLTS);
-    return getKoreanFragmentSequence(getKoreanFragments(word, koreanLTS), hydraPhones);
+    return getKoreanFragmentSequence(word, getKoreanFragments(word, koreanLTS), hydraPhones);
   }
 
   private String getDisplayName(String event, Map<String, String> phoneToDisplay) {
@@ -187,8 +205,15 @@ public class TranscriptSegmentGenerator {
     return fragmentList;
   }
 
-
-  private List<TranscriptSegment> getKoreanFragmentSequence(List<List<String>> fragmentList, List<TranscriptSegment> hydraPhoneSequence) {
+  /**
+   * @param fragmentList
+   * @param hydraPhoneSequence
+   * @return
+   * @see #getKoreanSegments(String, List)
+   */
+  private List<TranscriptSegment> getKoreanFragmentSequence(String word,
+                                                            List<List<String>> fragmentList,
+                                                            List<TranscriptSegment> hydraPhoneSequence) {
     int length = hydraPhoneSequence.size();
 
     int fragIndex = 0;
@@ -257,7 +282,7 @@ public class TranscriptSegmentGenerator {
             } else {
               //match = getMatch(fragIndex, currentFragments, prevSimple);
               String koreanFragment = simpleKorean.get(0);
-              logger.warn("fall back to " + koreanFragment + " given expected " + new HashSet<>(currentFragments));
+              logger.warn("getKoreanFragmentSequence (" + word + ") fall back to " + koreanFragment + " given expected " + new HashSet<>(currentFragments));
               //  builder.append(koreanFragment).append(" ");
               addKoreanSegment(koreanPhones, currentSegment, koreanFragment);
             }
@@ -294,7 +319,7 @@ public class TranscriptSegmentGenerator {
           addCombinedKoreanSegment(koreanPhones, currentSegment, nextSegment, match);
         } else {
           String s = compoundKorean.get(0);
-          logger.warn("2 fall back to '" + s + "' given " + new HashSet<>(currentFragments));
+          logger.info("getKoreanFragmentSequence (" + word + ") 2 fall back to '" + s + "' given " + new HashSet<>(currentFragments));
           //     builder.append(s).append(" ");
 
           addCombinedKoreanSegment(koreanPhones, currentSegment, nextSegment, s);
@@ -305,7 +330,7 @@ public class TranscriptSegmentGenerator {
           fragIndex++;
           if (fragIndex < fragmentList.size()) {
             currentFragments = fragmentList.get(fragIndex);
-            logger.info("2 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
+            if (DEBUG) logger.info("2 frag index now " + fragIndex + " " + new HashSet<>(currentFragments));
           }
         }
         //else logger.info("2 " + fragCount + " vs " + currentFragments.size());
@@ -321,16 +346,17 @@ public class TranscriptSegmentGenerator {
   }
 
   private void addKoreanSegment(List<TranscriptSegment> koreanPhones, TranscriptSegment currentSegment, String str) {
-    logger.info("addKoreanSegment from '" + currentSegment.getEvent() + "' to " + str);
+    if (DEBUG) logger.info("addKoreanSegment from '" + currentSegment.getEvent() + "' to " + str);
     koreanPhones.add(new TranscriptSegment(currentSegment).setEvent(str));
   }
 
-  private void addCombinedKoreanSegment(List<TranscriptSegment> koreanPhones, TranscriptSegment currentSegment, TranscriptSegment nextSegment, String str) {
-    logger.info("from " + currentSegment.getEvent() + " to " + str);
+  private void addCombinedKoreanSegment(List<TranscriptSegment> koreanPhones,
+                                        TranscriptSegment currentSegment,
+                                        TranscriptSegment nextSegment, String str) {
+    if (DEBUG) logger.info("addCombinedKoreanSegment from " + currentSegment.getEvent() + " to " + str);
     float avg = (currentSegment.getScore() + nextSegment.getScore()) / 2F;
     koreanPhones.add(new TranscriptSegment(currentSegment.getStart(), nextSegment.getEnd(), str, avg, str, str.length()).setEvent(str));
   }
-
 
   @Nullable
   private String getMatch(int fragIndex, List<String> currentFragments, List<String> simpleKorean) {
@@ -338,7 +364,8 @@ public class TranscriptSegmentGenerator {
     for (String candidate : simpleKorean) {
       boolean contains = currentFragments.contains(candidate);
       if (contains)
-        logger.info("getMatch : check " + candidate + " in (" + fragIndex + ")" + new HashSet<>(currentFragments));
+        if (DEBUG)
+          logger.info("getMatch : check " + candidate + " in (" + fragIndex + ")" + new HashSet<>(currentFragments));
 
       if (contains) {
         match = candidate;

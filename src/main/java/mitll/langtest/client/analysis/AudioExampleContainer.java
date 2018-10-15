@@ -45,7 +45,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private static final String PLAY = "Play";
   protected static final boolean DEBUG = false;
 
-  private static final int TABLE_HEIGHT = 215;
+  private static final int TABLE_HEIGHT = 225;
   private static final String PAUSE = "Pause";
 
   private final INavigation.VIEWS jumpView;
@@ -64,7 +64,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     this.jumpView = jumpView;
   }
 
-  public void onUnload() {
+  void onUnload() {
     if (headlessPlayAudio != null) {
       headlessPlayAudio.destroySound();
     }
@@ -246,8 +246,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   private void gotClickOnLearn() {
     if (getSelected() != null) {
-      int exid = getSelected().getExid();
-      controller.getShowTab(jumpView).showLearnAndItem(exid);
+      controller.getShowTab(jumpView).showLearnAndItem(getSelected().getExid());
     }
   }
 
@@ -284,7 +283,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   private boolean isPlaying(Button play, boolean playYourAudio) {
     String text = play.getText().trim();
-    logger.info("isPlaying text " + text + " playYourAudio " + playYourAudio);
+ //   logger.info("isPlaying text " + text + " playYourAudio " + playYourAudio);
     return text.equals(playYourAudio ? PLAY : REFERENCE);
   }
 
@@ -320,7 +319,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
             logger.info("Did scroll");
           }
         } else {
-          if (DEBUG || true) logger.info("gotClickOnReview loadAndPlayOrPlayAudio " + selected);
+          if (DEBUG) logger.info("gotClickOnReview loadAndPlayOrPlayAudio " + selected);
           playAudio(selected, true);
         }
       }
@@ -424,7 +423,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
     next = Math.min(results.size() - 1, next + 1);
     T toSelect = results.get(next);
-    logger.info("selectFirstItem Select " + next + " " + toSelect.getExid());
+    if (DEBUG) logger.info("selectFirstItem Select " + next + " " + toSelect.getExid());
     setSelectedAndShowReco(toSelect, isReview);
 
 //    scoreFeedback.add(new ScoreFeedbackDiv(new PlayAudioPanel(),

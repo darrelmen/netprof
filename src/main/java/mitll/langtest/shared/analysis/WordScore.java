@@ -77,7 +77,8 @@ public class WordScore implements Serializable, Comparable<WordScore> {
    * @param transcript
    * @see mitll.langtest.server.database.analysis.Analysis#getWordScore
    */
-  public WordScore(BestScore bs, Map<NetPronImageType, List<SlimSegment>> transcript) {
+  public WordScore(BestScore bs,
+                   Map<NetPronImageType, List<SlimSegment>> transcript) {
     this(bs.getExId(),
         bs.getScore(),
         bs.getTimestamp(),
@@ -149,7 +150,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   /**
    * @return
    * @see PhoneExampleContainer#getItemColumn
-   * @see WordContainer#getItemColumn
+   * @see mitll.langtest.client.analysis.WordContainerAsync#getItemColumn
    */
   public Map<NetPronImageType, List<SlimSegment>> getTranscript() {
     return transcript;
@@ -169,7 +170,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
 
   /**
    * @return
-   * @see mitll.langtest.client.analysis.WordContainer#getPlayNativeAudio
+   * @see mitll.langtest.client.analysis.AudioExampleContainer#playAudio
    */
   public String getRefAudio() {
     return refAudio;

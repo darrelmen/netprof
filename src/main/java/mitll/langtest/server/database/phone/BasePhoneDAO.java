@@ -49,19 +49,17 @@ import java.util.Map;
 class BasePhoneDAO extends DAO {
   //private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
 
-
   static final String PHONE = "phone";
   static final String SEQ = "seq";
   static final String SCORE = "score";
   static final String DURATION = "duration";
   static final String RID1 = "RID";
 
-  protected Map<String, Long> sessionToLong = new HashMap<>();
+  Map<String, Long> sessionToLong = new HashMap<>();
 
   BasePhoneDAO(Database database) {
     super(database);
   }
-
 
   /**
    * @param jsonToTranscript
@@ -70,7 +68,7 @@ class BasePhoneDAO extends DAO {
    * @param languageEnum
    * @see SlickPhoneDAO#getPhoneReport
    */
-  void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript,
+  Map<NetPronImageType, List<TranscriptSegment>> addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript,
                      String scoreJson,
                      WordAndScore wordAndScore,
                      Language languageEnum) {
@@ -78,6 +76,8 @@ class BasePhoneDAO extends DAO {
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
         jsonToTranscript.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
     setTranscript(wordAndScore, netPronImageTypeListMap);
+
+    return netPronImageTypeListMap;
   }
 
   /**
@@ -154,7 +154,7 @@ class BasePhoneDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSessionTime
    */
-  protected Long getSessionTime(Map<String, Long> sessionToLong, String device) {
+  Long getSessionTime(Map<String, Long> sessionToLong, String device) {
     Long parsedTime = sessionToLong.get(device);
 
     if (parsedTime == null) {

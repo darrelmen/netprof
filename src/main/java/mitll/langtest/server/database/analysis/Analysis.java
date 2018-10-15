@@ -65,7 +65,7 @@ public abstract class Analysis extends DAO {
 
   private static final int FIVE_MINUTES = 5 * 60 * 1000;
   static final String EMPTY_JSON = "{}";
-  public static final String D_ADMIN = "d.admin";
+  private static final String D_ADMIN = "d.admin";
   final ParseResultJson parseResultJson;
   private final IPhoneDAO phoneDAO;
 

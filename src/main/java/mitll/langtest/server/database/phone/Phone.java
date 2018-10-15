@@ -28,8 +28,8 @@ public class Phone {
    * @param seq
    * @param score
    * @param duration
-   * @see DatabaseServices#recordWordAndPhoneInfo
-   * @see SlickPhoneDAO#fromSlick(SlickPhone)
+   * @see RecordWordAndPhone#recordWordAndPhoneInfo
+   * @seex SlickPhoneDAO#fromSlick
    */
   public Phone(int projid, int rid, int wid, String phone, int seq, float score, int duration) {
     this.projid = projid;

@@ -1,11 +1,12 @@
 package mitll.langtest.shared.instrumentation;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.audio.image.ITranscriptEvent;
 
 import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 
 public class SlimSegment implements IsSerializable {
-  protected String event;               /// Text to be displayed per event
+  protected String event = "";               /// Text to be displayed per event
   private int score;                  /// posterior score
 
   public SlimSegment() {

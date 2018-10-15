@@ -72,6 +72,11 @@ public class WordTable {
 
   private static final String UNKNOWNMODEL = "UNKNOWNMODEL";
   private static final String TEXT_ALIGN_CENTER = "text-align:center;";
+  private static final String COLORED_SPAN_STYLE = "padding:3px; " +
+      "margin-left:3px; " +
+      TEXT_ALIGN_CENTER + " " +
+      "font-family:sans-serif; " +
+      WHITE_SPACE_NOWRAP + " ";
   private static final String FONT_SIZE = "font-size:14pt;";
   private static final String BACKGROUND_COLOR = "background-color";
   private static final String BLUE = "#2196F3";
@@ -113,7 +118,7 @@ public class WordTable {
     {
       builder.append("<tr>");
 
-      //logger.info("show " + filter + " and " + bigram);
+      //    logger.info("show " + filter + " and " + bigram + " phones " + wordToPhones.values());
 
       for (List<TranscriptSegment> phones : wordToPhones.values()) {
         builder.append("<td>");
@@ -137,9 +142,14 @@ public class WordTable {
   private void addWordColHeaders(StringBuilder builder, Collection<? extends SlimSegment> transcriptSegments) {
     transcriptSegments.forEach(word -> {
       // float score = word.getScore();
-      String color = getColor(word.getScore());
+      float score = word.getScore();
+      String color = getColor(score);
       //   logger.warning("addWordColHeaders : word " + word.getEvent() + " score " + score + " = " + color);
-      builder.append(HEADER).append(color).append("'>");
+      builder.append(HEADER)
+          .append(color)
+          .append(";")
+          .append(getForeground(score))
+          .append("'>");
       builder.append(word.getEvent());
       builder.append("</th>");
     });
@@ -165,10 +175,10 @@ public class WordTable {
       TranscriptSegment prev = phones.get(i);
       TranscriptSegment next = i + 1 < phones.size() ? phones.get(i + 1) : new TranscriptSegment();
 
-      String prevCandidate = prev.getDisplayEvent();
-      String nextCandidate = next.getDisplayEvent();
+      String prevCandidate = prev.getEvent();
+      String nextCandidate = next.getEvent();
 
-//      logger.info("addPhones at " + i + " prev " + prevCandidate + " next " + nextCandidate);
+      // logger.info("addPhones at " + i + " prev " + prevCandidate + " next " + nextCandidate);
 
       if (!first && (prevCandidate.equalsIgnoreCase(contextPhone)) &&
           nextCandidate.equalsIgnoreCase(filter)
@@ -176,14 +186,14 @@ public class WordTable {
         toMark.add(prev);
         toColor.add(next);
       } else {
-
+        boolean prevMatchFilter = prevCandidate.equalsIgnoreCase(filter);
         if (isUnder) {
           // first phone
-          if (i == 0 && prevCandidate.equalsIgnoreCase(filter)) {
+          if (i == 0 && prevMatchFilter) {
             toColor.add(prev);
           }
         } else if (
-            (first && prevCandidate.equalsIgnoreCase(filter)) &&
+            (first && prevMatchFilter) &&
                 (nextCandidate.equalsIgnoreCase(contextPhone))
         ) {
           toColor.add(prev);
@@ -192,26 +202,36 @@ public class WordTable {
       }
     }
 
-    for (TranscriptSegment phone : phones) {
-      String event = phone.getDisplayEvent();
-      boolean match = toColor.contains(phone);
-      boolean contextMatch = toMark.contains(phone);
+    boolean found = !toColor.isEmpty();
+    if (found) {
+      for (TranscriptSegment phone : phones) {
+        String event = phone.getEvent();
+        boolean match = toColor.contains(phone);
+        boolean contextMatch = toMark.contains(phone);
 
-      if (!event.equals(SIL)) {
-        {
-          String color = match ?
-              (" " + BACKGROUND_COLOR + ":" + getColor(phone)) :
-              contextMatch ? (" " + BACKGROUND_COLOR + ":" + "#C0C0C0") :
-                  "";
-          builder
-              .append("<th style='" + TEXT_ALIGN_CENTER)
-              .append(FONT_SIZE)
-              .append(color)
-              .append("'>");
+        if (!event.equals(SIL)) {
+          {
+            builder
+                .append("<th style='" + TEXT_ALIGN_CENTER)
+                .append(FONT_SIZE);
+
+            if (match) {
+              builder.append(getForeground(phone.getScore()));
+            }
+
+            {
+              String color = match ?
+                  (" " + BACKGROUND_COLOR + ":" + getColor(phone)) :
+                  contextMatch ? (" " + BACKGROUND_COLOR + ":" + "#C0C0C0") :
+                      "";
+              builder.append(color)
+                  .append("'>");
+            }
+          }
+
+          builder.append(event);
+          builder.append("</th>");
         }
-
-        builder.append(event);
-        builder.append("</th>");
       }
     }
   }
@@ -290,19 +310,23 @@ public class WordTable {
    */
   public String getColoredSpan(String event, float score) {
     StringBuilder builder = new StringBuilder();
+    String foreground = getForeground(score);
     builder.append("<span " +
         //"class='scoringStyle'" +
         "style='" +
-        "padding:3px; " +
-        "margin-left:3px; " +
-        TEXT_ALIGN_CENTER + " " +
-        "font-family:sans-serif; " +
-        WHITE_SPACE_NOWRAP + " " +
+        COLORED_SPAN_STYLE +
+        foreground +
         BACKGROUND_COLOR + ":" + getColor(score) +
         "'>");
     builder.append(event);
+    // logger.info("getColoredSpan Return " + builder + " for " + event + " at " + score);
     builder.append("</span>");
     return builder.toString();
+  }
+
+  @NotNull
+  private String getForeground(float score) {
+    return score < 0.4F ? "color:white; " : "";
   }
 
   /**
@@ -374,6 +398,7 @@ public class WordTable {
 
     // String color =
     setColorClickable(word, header);
+    setForegroundColor(word, header);
     //   logger.info("getDivForWord : color for " + word.getEvent() + " score " + word.getScore() + " = " + color);
 
     new TooltipHelper().addTooltip(header, CLICK_TO_HEAR_WORD);
@@ -383,6 +408,12 @@ public class WordTable {
 
     header.setSouthScore(phones);
     return header;
+  }
+
+  private void setForegroundColor(TranscriptSegment word, UIObject header) {
+    if (word.getScore() < 0.4F) {
+      header.getElement().getStyle().setColor("white");
+    }
   }
 
   /**
@@ -579,6 +610,8 @@ public class WordTable {
           if (hasAudioControl) addHandStyle(h);
           alignCenter(h);
           setColorClickable(phoneSegment, h);
+          setForegroundColor(phoneSegment, h);
+
           h.addStyleName("phoneWidth");
         }
         scoreRow.add(h);

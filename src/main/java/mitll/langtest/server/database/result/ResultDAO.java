@@ -987,8 +987,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * Just for import
    *
-   * @param isRegular
-   * @param userDAO
+   * @paramx isRegular
+   * @paramx userDAO
    * @return
    */
 /*  public Map<Integer, Map<String, Result>> getUserToResults(boolean isRegular, IUserDAO userDAO) {
@@ -1019,4 +1019,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return userToResult;
   }*/
 
+  @Override
+  public Map<Integer, String> getResultIDToJSON(int projid) {
+    return null;
+  }
 }

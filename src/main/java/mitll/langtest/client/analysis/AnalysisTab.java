@@ -748,7 +748,7 @@ public class AnalysisTab extends DivWidget {
                               ReqInfo reqInfo) {
     // logger.info("GetPhoneReport " + phoneReport);
 
-    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, exerciseLookup, exampleHeader, jumpView);
+    final PhoneExampleContainer exampleContainer = new PhoneExampleContainer(controller, exampleHeader, jumpView);
     this.exampleContainer = exampleContainer;
 
     final BigramContainer bigramContainer =

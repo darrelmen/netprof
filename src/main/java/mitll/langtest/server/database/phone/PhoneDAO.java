@@ -62,7 +62,8 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   @Override
-  public void deleteForProject(int projID) {
+  public int deleteForProject(int projID) {
+    return 0;
   }
 
   @Override
@@ -188,7 +189,6 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     }
   }
 */
-
   @Override
   public PhoneReport getWorstPhonesForResultsForPhone(int userid, Collection<Integer> ids, Project project, String phone, long from, long to) {
     return null;
@@ -368,6 +368,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * For old h2 world we don't have phone duration.
    *
    * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyPhone
    */
   public Collection<Phone> getAll(int projid) {
     Connection connection = getConnection();

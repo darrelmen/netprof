@@ -695,6 +695,10 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return slickPerfResults;
   }
 
+  public Map<Integer, String> getResultIDToJSON(int projid) {
+    return dao.idToJSON(projid);
+  }
+
   public Collection<Integer> getPracticedByUser(int userid, int projid) {
     return dao.practicedByUser(userid, projid);
   }

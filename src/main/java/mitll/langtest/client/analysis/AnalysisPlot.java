@@ -149,7 +149,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private int index = 0;
 
   private TimeWidgets timeWidgets;
-  private final MessageHelper messageHelper;
+  //private final MessageHelper messageHelper;
   private Chart chart = null;
   private final boolean useSessionTimeHorizon;
   private SortedSet<TimeAndScore> rawBestScores;
@@ -171,7 +171,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
                       int maxWidth) {
     super(exceptionSupport, messageHelper);
     this.userid = userid;
-    this.messageHelper = messageHelper;
+    //this.messageHelper = messageHelper;
     this.useSessionTimeHorizon = useSessionTimeHorizon;
 
     setMinHeight(this, 275);
@@ -193,10 +193,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
     this.playAudio = new PlayAudio(new SoundPlayer(soundManagerAPI), playFeedback, service, exceptionSupport);
   }
-
-//  private void setMinWidth(UIObject horiz1, int normalMinHeight) {
-//    horiz1.getElement().getStyle().setProperty("minWidth", 275 + "px"); // so they wrap nicely
-//  }
 
   private long timezoneOffset;
 
@@ -393,12 +389,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       logger.info("session time horizon");
       setTimeHorizon(AnalysisTab.TIME_HORIZON.SESSION);
     } else {
-      logger.info("ALL time horizon");
+     // logger.info("ALL time horizon");
       //setTimeHorizon(TIME_HORIZON.ALL);
       //gotExtremes(new AxisSetExtremesEvent(null,chart.getXAxis()));
-
       showSeriesByVisible();
-
     }
   }
 

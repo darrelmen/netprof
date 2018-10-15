@@ -33,6 +33,7 @@
 package mitll.langtest.shared.analysis;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -97,6 +98,11 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
     return resultID;
   }
 
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getWordScore
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getTranscriptFromJSON
+   * @return
+   */
   public String getJson() {
     return json;
   }
@@ -105,7 +111,7 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
     return isiPad;
   }
 
-  public String getFileRef() {
+  String getFileRef() {
     return fileRef;
   }
 

@@ -8,6 +8,6 @@ import mitll.langtest.server.database.IDAO;
 public interface IWordDAO  extends IDAO  {
   int addWord(Word word);
   void removeForResult(int resultid);
-  void deleteForProject(int projID);
+  int deleteForProject(int projID);
   boolean updateProjectForRID(int rid, int newprojid);
 }

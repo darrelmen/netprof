@@ -43,6 +43,7 @@ import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
+import mitll.langtest.server.database.phone.RecordWordAndPhone;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
 import mitll.langtest.server.database.project.DialogPopulate;
 import mitll.langtest.server.database.project.IProjectDAO;
@@ -127,6 +128,7 @@ public class CopyToPostgres<T extends CommonShell> {
     DIALOG("g"),
     CLEANDIALOG("n"),
     LIST("p"),
+    REMAP("e"),
     UNKNOWN("k");
 
     private String value;
@@ -1484,6 +1486,10 @@ public class CopyToPostgres<T extends CommonShell> {
       to = Integer.parseInt(cmd.getOptionValue(CLEANDIALOG.toLower()));
     } else if (cmd.hasOption(LIST.toLower())) {
       action = LIST;
+    } else if (cmd.hasOption(REMAP.toLower())) {
+      action = REMAP;
+      to = Integer.parseInt(cmd.getOptionValue(REMAP.toLower()));
+
     } else if (cmd.hasOption(NORM.toLower())) {
       action = NORM;
       String optionValue = cmd.getOptionValue(NORM.toLower());
@@ -1669,6 +1675,10 @@ public class CopyToPostgres<T extends CommonShell> {
         listProjects();
         doExit(true);  // ?
         break;
+      case REMAP:
+        remap(to);
+        doExit(true);  // ?
+        break;
  /*       case MERGEDAY:
         logger.info("merge project from into project to");
         copyToPostgres.merge(from, to, onDay);
@@ -1720,6 +1730,31 @@ public class CopyToPostgres<T extends CommonShell> {
     if (database != null) database.close();
   }
 
+  /**
+   * Only for Korean.
+   * @param to
+   */
+  private static void remap(int to) {
+    database = getDatabase();
+    if (to == -1) logger.error("remember to set the project id");
+    else {
+      Project project = database.getProject(to);
+      if (project == null) logger.error("no project with id " + to);
+      else {
+
+        RecordWordAndPhone recordWordAndPhone = database.getRecordWordAndPhone();
+
+        long then = System.currentTimeMillis();
+        recordWordAndPhone.remapPhones(to,database.getResultDAO(),database.getServerProps(),project.getLanguageEnum());
+        long now = System.currentTimeMillis();
+        logger.info("took " + (now-then));
+
+
+      }
+    }
+    if (database != null) database.close();
+  }
+
   private static void listProjects() {
     database = getDatabase();
     database.getProject(1);
@@ -1747,7 +1782,7 @@ public class CopyToPostgres<T extends CommonShell> {
         }
       }
       List<ClientExercise> rawExercises = new ArrayList<>(project.getRawExercises());
-      project.getRawExercises().forEach(commonExercise-> rawExercises.addAll(commonExercise.getDirectlyRelated()));
+      project.getRawExercises().forEach(commonExercise -> rawExercises.addAll(commonExercise.getDirectlyRelated()));
 
       rawExercises.sort(Comparator.comparingInt(HasID::getID));
       rawExercises
@@ -1866,6 +1901,12 @@ public class CopyToPostgres<T extends CommonShell> {
       ACTION act2 = CLEANDIALOG;
       mapFile = new Option(act2.getValue(), act2.toLower(), true, "clean dialogs from project id");
       options.addOption(mapFile);
+
+      {
+        ACTION act3 = REMAP;
+        mapFile = new Option(act3.getValue(), act3.toLower(), true, "remap phone labels for project id");
+        options.addOption(mapFile);
+      }
 
       {
         ACTION act3 = LIST;
