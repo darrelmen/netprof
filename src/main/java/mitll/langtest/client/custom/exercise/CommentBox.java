@@ -267,6 +267,7 @@ public class CommentBox extends PopupContainerFactory {
 
   private DivWidget getCommentAndButtonsRow(String field, Widget content, Button commentButton, Button clearButton, boolean isRTL) {
     DivWidget row = new DivWidget();
+    row.addStyleName("inlineFlex");
     row.getElement().setId("comment_and_clear_container_for_" + field);
     if (content != null) {
       row.add(content);
@@ -282,11 +283,12 @@ public class CommentBox extends PopupContainerFactory {
       row.addStyleName("floatLeft");
     }
 
-    row.add(commentButton);
-    commentButton.addStyleName("floatLeft");
+    DivWidget buttons=new DivWidget();
+    row.add(buttons);
+    row.addStyleName("floatLeft");
 
-    row.add(clearButton);
-    clearButton.addStyleName("floatLeft");
+    buttons.add(commentButton);
+    buttons.add(clearButton);
 
     return row;
   }
