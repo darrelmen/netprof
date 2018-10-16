@@ -61,7 +61,7 @@ public class AnnoTest extends BaseTest {
     logger.info("got " + size + " first " + first);
     for (Integer exid : exids) logger.info("got " + exid);
 
-    Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID);
+    Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID, false);
     logger.info("incorrect : got " + incorrectAnnotations.size() + " first " + incorrectAnnotations.iterator().next());
 
     AnnotationDAO dao = new AnnotationDAO(database, new UserDAO(database));
@@ -70,7 +70,7 @@ public class AnnoTest extends BaseTest {
     logger.info("got " + audioAnnos.size() + " first " + audioAnnos.iterator().next());
     for (Integer exid : audioAnnos) logger.info("truth " + exid);
 
-    Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations(projID);
+    Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations(projID, false);
     logger.info("incorrect truth: got " + incorrectAnnotations2.size() + " first " + incorrectAnnotations2.iterator().next());
   }
 
@@ -85,12 +85,12 @@ public class AnnoTest extends BaseTest {
 
     IAnnotationDAO annotationDAO = spanish.getAnnotationDAO();
     int projID = getProjID(spanish);
-    Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID);
+    Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID, false);
     logger.info("incorrect : got " + incorrectAnnotations.size() + " first " + incorrectAnnotations.iterator().next());
 
     AnnotationDAO dao = new AnnotationDAO(spanish, new UserDAO(spanish));
 
-    Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations(projID);
+    Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations(projID, false);
     logger.info("incorrect truth: got " + incorrectAnnotations2.size() + " first " + incorrectAnnotations2.iterator().next());
   }
 

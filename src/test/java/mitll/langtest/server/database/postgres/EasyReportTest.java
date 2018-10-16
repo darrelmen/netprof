@@ -44,8 +44,6 @@ import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.scoring.LTSFactory;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.server.scoring.WordAndProns;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
@@ -53,7 +51,6 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.KoreanLTS;
-import mitll.npdata.dao.lts.LTS;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -77,7 +74,11 @@ public class EasyReportTest extends BaseTest {
   String longer = "대폭강화하기로";
 
   @Test
-  public void testPhoneReport2() {
+  public void testComment() {
+    DatabaseImpl english = getDatabase();
+    english.getProject(4);
+    english.getUserListManager().getCommentedList(4, false);
+    english.getUserListManager().getCommentedList(4, true);
   }
 
   @Test
