@@ -125,7 +125,7 @@ public class UserListManager implements IUserListManager {
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     this.annotationDAO = annotationDAO;
-   // this.pathHelper = pathHelper;
+    // this.pathHelper = pathHelper;
     this.visitorDAO = visitorDAO;
     this.stateManager = stateManager;
     this.databaseServices = databaseServices;
@@ -694,16 +694,17 @@ public class UserListManager implements IUserListManager {
    * annotations - only if the latest is incorrect should the item appear on the comment or defect list.
    *
    * @param projID
+   * @param isContext
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#getReviewList
    */
   @Override
-  public UserList<CommonShell> getCommentedList(int projID) {
-    Set<Integer> exercisesWithIncorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID);
-    logger.info("getCommented for " + projID + " found " + exercisesWithIncorrectAnnotations.size());
-    List<CommonExercise> defectExercises = getDefectExercises(projID, exercisesWithIncorrectAnnotations);
+  public UserList<CommonShell> getCommentedList(int projID, boolean isContext) {
+    Set<Integer> exercisesWithIncorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID, isContext);
+    logger.info("getCommented for " + projID + " found " + exercisesWithIncorrectAnnotations.size() + " is context " + isContext);
+    List<CommonExercise> defectExercises = getDefectExercises(projID, exercisesWithIncorrectAnnotations, isContext);
     logger.info("getCommented for " + projID + " found " + defectExercises.size() + " exercises");
-    defectExercises.forEach(exercise -> logger.info("\tdefect "+exercise.getID()+ " " + exercise.getForeignLanguage() + " context " + exercise.isContext()));
+    defectExercises.forEach(exercise -> logger.info("\tgetCommented : defect " + exercise.getID() + " " + exercise.getForeignLanguage() + " context " + exercise.isContext()));
     UserList<CommonShell> reviewList = getReviewList(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
     logger.info("getCommented for " + projID + " list has " + reviewList.getNumItems() + " exercises");
     return reviewList;
@@ -711,17 +712,24 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @param projID
+   * @param isContext
    * @return
    * @seex IUserListManager#getUserListByIDExercises
    */
   @Override
-  public UserList<CommonExercise> getCommentedListEx(int projID) {
-    List<CommonExercise> defectExercises = getDefectExercises(projID, annotationDAO.getExercisesWithIncorrectAnnotations(projID));
+  public UserList<CommonExercise> getCommentedListEx(int projID, boolean isContext) {
+    List<CommonExercise> defectExercises = getDefectExercises(projID, annotationDAO.getExercisesWithIncorrectAnnotations(projID, isContext), isContext);
     return getReviewListEx(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
   }
 
+  /**
+   * @param projID
+   * @param exerciseIDs
+   * @param isContext
+   * @return
+   */
   @NotNull
-  private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> exerciseIDs) {
+  private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> exerciseIDs, boolean isContext) {
     List<CommonExercise> defectExercises = new ArrayList<>();
 
     IProjectManagement projectManagement = databaseServices.getProjectManagement();
@@ -731,25 +739,8 @@ public class UserListManager implements IUserListManager {
       exerciseIDs.forEach(id -> {
         CommonExercise byExID = projectManagement.getExercise(projID, id);
         if (byExID == null) {
-          logger.warn("can't find exercise " + id + " in project " + projID);
-        } else {
-          if (byExID.isContext()) {
-            int parentExerciseID = byExID.getParentExerciseID();
-            logger.warn("parentExerciseID for " + id + " = " + parentExerciseID);
-            if (parentExerciseID < 1) {  // super defensive
-              parentExerciseID = databaseServices.getExerciseDAO(projID).getParentFor(id);
-              logger.warn("\tparentExerciseID for " + id + " = " + parentExerciseID);
-            }
-            if (parentExerciseID > 0) {
-              CommonExercise parent = projectManagement.getExercise(projID, parentExerciseID);
-              if (parent == null) {
-                logger.warn("couldn't find parent " + parentExerciseID);
-              } else {
-                byExID = parent;
-              }
-            }
-          }
-
+          logger.warn("getDefectExercises can't find exercise " + id + " in project " + projID);
+        } else if ((byExID.isContext() && isContext) || (!byExID.isContext() && !isContext)) {
           defectExercises.add(byExID);
         }
       });
@@ -763,7 +754,7 @@ public class UserListManager implements IUserListManager {
    * @param description
    * @param userListID
    * @return
-   * @see IUserListManager#getCommentedList(int)
+   * @see IUserListManager#getCommentedList(int, boolean)
    */
   private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
                                               String name,
@@ -836,14 +827,13 @@ public class UserListManager implements IUserListManager {
    * @paramx userExercise notional until now!
    * @paramx mediaDir
    * @seex mitll.langtest.server.services.AudioServiceImpl#newExercise
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    * @seex mitll.langtest.server.services.ListServiceImpl#newExercise
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
 /*  @Override
   public void newExercise(int userListID, CommonExercise userExercise, String mediaDir) {
     newExerciseOnList(getUserListNoExercises(userListID), userExercise);
   }*/
-
   public UserList getUserListNoExercises(int userListID) {
     logger.info("getUserListNoExercises for " + userListID);
     return userListDAO.getWhere(userListID, true);
@@ -875,17 +865,16 @@ public class UserListManager implements IUserListManager {
 //    fixAudioPaths(userExercise, true, mediaDir);
   }
 */
-
   private Collection<String> getTypeOrder(int projectID) {
     return userDAO.getDatabase().getTypeOrder(projectID);
   }
 
   /**
+   * @return
    * @seex #newExerciseOnList(UserList, CommonExercise)
    * @paramx userExercise
    * @paramx newExerciseID
    * @paramx projectID
-   * @return
    */
 /*
   private int makeContextExercise(CommonExercise userExercise, int newExerciseID, int projectID) {
@@ -896,8 +885,6 @@ public class UserListManager implements IUserListManager {
     return contextID;
   }
 */
-
-
   private void addItemToList(int userListID, int exid) {
     addItemToList(userListID, "", exid);
   }
@@ -1349,9 +1336,9 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
+   * @param userList
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doEdit
    * @see mitll.langtest.server.services.ListServiceImpl#update
-   * @param userList
    */
   @Override
   public void update(UserList userList) {

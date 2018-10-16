@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.npdata.dao.DBConnection;
@@ -133,9 +134,15 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
     return getFieldToAnnotationMapSlick(latestByExerciseID);
   }
 
+  /**
+   * @param projID
+   * @param isContext
+   * @return
+   * @see IUserListManager#getCommentedList
+   */
   @Override
-  public Set<Integer> getExercisesWithIncorrectAnnotations(int projID) {
-    Collection<Tuple4<Integer, String, String, Timestamp>> annoToCreator = dao.getAnnosGrouped(projID);
+  public Set<Integer> getExercisesWithIncorrectAnnotations(int projID, boolean isContext) {
+    Collection<Tuple4<Integer, String, String, Timestamp>> annoToCreator = dao.getAnnosGrouped(projID, isContext);
 
     logger.info("getExercisesWithIncorrectAnnotations " + annoToCreator.size());
 
@@ -149,7 +156,7 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
       String field = tuple4._2();
       String status = tuple4._3();
 //      logger.info("getExercisesWithIncorrectAnnotations Got " + tuple4);
-//      logger.info("getExercisesWithIncorrectAnnotations " + exid + " : " + field +" : " + status);
+      logger.info("getExercisesWithIncorrectAnnotations ex " + exid + " : " + field + " : " + status);
       if (prevExid == -1) {
         prevExid = exid;
       } else if (!prevExid.equals(exid)) {

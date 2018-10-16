@@ -607,7 +607,7 @@ public class AudioExercise extends ExerciseShell {
    */
   public List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
     List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
-    maleUsers.sort(Comparator.comparingInt(MiniUser::getAge));
+    maleUsers.sort((o1, o2) -> o1.getUserID().compareTo(o2.getUserID()));
     return maleUsers;
   }
 

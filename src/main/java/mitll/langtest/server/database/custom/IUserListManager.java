@@ -89,12 +89,13 @@ public interface IUserListManager {
 
   /**
    * @param projID
+   * @param isContext
    * @return
    * @see ListServiceImpl#getReviewList
    */
-  UserList<CommonShell> getCommentedList(int projID);
+  UserList<CommonShell> getCommentedList(int projID, boolean isContext);
 
-  UserList<CommonExercise> getCommentedListEx(int projID);
+  UserList<CommonExercise> getCommentedListEx(int projID, boolean isContext);
 
   @Deprecated
   UserList<CommonShell> getUserListByID(int id);

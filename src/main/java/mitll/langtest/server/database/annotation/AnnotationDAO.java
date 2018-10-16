@@ -317,7 +317,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   }
 
   @Override
-  public Set<Integer> getExercisesWithIncorrectAnnotations(int projID) {
+  public Set<Integer> getExercisesWithIncorrectAnnotations(int projID, boolean isContext) {
     return getAnnotationExToCreator(true).keySet();
   }
 

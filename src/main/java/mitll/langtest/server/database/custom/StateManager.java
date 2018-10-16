@@ -145,7 +145,7 @@ public class StateManager implements IStateManager {
    *
    * @param skipUnset
    * @return
-   * @see IUserListManager#getCommentedList(int)
+   * @see IUserListManager#getCommentedList(int, boolean)
    */
   @Override
   public Map<Integer, StateCreator> getExerciseToState(boolean skipUnset) {

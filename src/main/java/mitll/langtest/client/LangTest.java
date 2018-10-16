@@ -608,7 +608,11 @@ public class LangTest implements
             public void onSuccess(ImageResponse result) {
               imageCache.put(key, result);
               //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
-              client.onSuccess(result);
+              if (client != null) {
+                Scheduler.get().scheduleDeferred(() -> {
+                  client.onSuccess(result);
+                });
+              }
             }
           });
     }
@@ -1284,9 +1288,9 @@ public class LangTest implements
   }
 
   /**
-   * @see WordContainerAsync#gotClickOnLearn
    * @param views
    * @return
+   * @see WordContainerAsync#gotClickOnLearn
    */
   @Override
   public ShowTab getShowTab(INavigation.VIEWS views) {

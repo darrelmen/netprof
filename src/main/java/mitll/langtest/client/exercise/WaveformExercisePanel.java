@@ -143,15 +143,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     if (flow != null) {
       flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
-    add(new Heading(4, doNormalRecording ? RECORD_PROMPT2 : RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
-  }
-
-  /**
-   * @return
-   * @seex #getAnswerWidget(CommonExercise, ExerciseController, int)
-   */
-  private boolean isNormalRecord() {
-    return doNormalRecording;
+    add(new Heading(4, isNormalRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
   /**
@@ -167,13 +159,23 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
       logger = Logger.getLogger("WaveformExercisePanel");
     }
 //    logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord());
+    return ExerciseFormatter.getArabic(getRecordPrompt(e), controller.getLanguage());
+  }
 
-    String context = isNormalRecord() ? e.getFLToShow() : hasContext(exercise) ? getFLToShow() : NO_AUDIO_TO_RECORD;
-    return ExerciseFormatter.getArabic(context, controller.getLanguage());
+  private String getRecordPrompt(T e) {
+    return isNormalRecord() ? e.getFLToShow() : hasContext(exercise) ? getFLToShow() : NO_AUDIO_TO_RECORD;
   }
 
   private String getFLToShow() {
     return exercise.isContext() ? exercise.getFLToShow() : exercise.getDirectlyRelated().iterator().next().getFLToShow();
+  }
+
+  protected String getEnglishToShow() {
+    return isNormalRecord() ?
+        exercise.getEnglish() :
+        exercise.getDirectlyRelated().isEmpty() ?
+            "" :
+            exercise.getDirectlyRelated().iterator().next().getEnglish();
   }
 
   /**

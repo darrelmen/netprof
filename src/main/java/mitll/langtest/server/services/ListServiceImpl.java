@@ -252,7 +252,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public UserList<CommonShell> getReviewList(boolean isContext) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasQCPerm(userIDFromSessionOrDB)) {
-      return getUserListManager().getCommentedList(getProjectIDFromUser(userIDFromSessionOrDB));
+      return getUserListManager().getCommentedList(getProjectIDFromUser(userIDFromSessionOrDB), isContext);
     } else {
       throw getRestricted("getting review lists");
     }

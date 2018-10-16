@@ -1791,6 +1791,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * Sort by english if normal list
    *
+   * TODO : when would we want the commented list???
+   *
    * @param listid
    * @param projectid
    * @return
@@ -1813,7 +1815,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       return list;
     } else {
-      return getUserListManager().getCommentedListEx(projectid);
+      logger.warn("getUserListByIDExercises returning commented list? " + listid);
+      return getUserListManager().getCommentedListEx(projectid, false);
     }
   }
 

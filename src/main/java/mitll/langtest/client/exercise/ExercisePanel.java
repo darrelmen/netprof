@@ -42,6 +42,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -73,7 +74,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   final ListInterface<L, T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
   protected final String instance;
-  boolean doNormalRecording;
+  private boolean doNormalRecording;
 
   /**
    * Includes fix for
@@ -102,16 +103,12 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     logger.info("ExercisePanel for " + e.getID() + " instance " + instance +
         " doNormal " + doNormalRecording);
 
-    this.navigationHelper = getNavigationHelper(controller, enableNextOnlyWhenBothCompleted);
+    this.navigationHelper = getNavigationHelper(controller);
 
     addInstructions();
-  //  if (e.getEnglish().isEmpty()) logger.warning("no english for " + e.getID() + " " + e.getForeignLanguage() + " " + e.getMeaning());
-    HTML maybeRTLContent = getMaybeRTLContent(e.getEnglish());
-    maybeRTLContent.addStyleName("topFiveMargin");
-    maybeRTLContent.addStyleName("bottomFiveMargin");
-    maybeRTLContent.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
 
-    add(maybeRTLContent);
+    add(addEnglish(e));
+
     add(getQuestionContentRTL(e));
 
     addQuestions(e, controller);
@@ -119,8 +116,25 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     // add next and prev buttons
     add(navigationHelper);
     navigationHelper.addStyleName("topMargin");
-    //getElement().setId("ExercisePanel");
   }
+
+  @NotNull
+  private HTML addEnglish(T e) {
+/*    if (e.getEnglish().isEmpty()) {
+      //logger.warning("no english for " + e.getID() + " " + e.getForeignLanguage() + " " + e.getMeaning());
+    } else {
+      logger.info("english for " + e.getID() + " " + e.getForeignLanguage() + " " + e.getMeaning() +
+          "\n\t context " + e.getRefSentences());
+    }*/
+    HTML maybeRTLContent = new HTML(getEnglishToShow());
+    stylePrompt(maybeRTLContent);
+    maybeRTLContent.addStyleName("topFiveMargin");
+    maybeRTLContent.addStyleName("bottomFiveMargin");
+    maybeRTLContent.getElement().getStyle().setColor("gray");
+    return maybeRTLContent;
+  }
+
+  protected abstract String getEnglishToShow();
 
   /**
    * Worry about RTL
@@ -133,6 +147,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     HorizontalPanel hp = new HorizontalPanel();
     hp.getElement().setId("QuestionContentRTL");
     hp.setWidth("100%");
+    hp.getElement().getStyle().setProperty("minHeight","114px");
     boolean isRTL = isRTL(e);
     if (isRTL) {
       setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -144,11 +159,17 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     return hp;
   }
 
-  private NavigationHelper getNavigationHelper(ExerciseController controller, boolean enableNextOnlyWhenBothCompleted) {
+  /**
+   * Next button always enabled.
+   * Fix for <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/274'>Add comment bubble to recording views</a>
+   * @param controller
+   * @return
+   */
+  private NavigationHelper getNavigationHelper(ExerciseController controller) {
     return new NavigationHelper(exercise, controller, this, exerciseList,
         true,
         true,
-        enableNextOnlyWhenBothCompleted,
+        false,
         showPrevButton());
   }
 
@@ -175,6 +196,14 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     return (content.length() > 200) ? getContentScroller(maybeRTLContent) : maybeRTLContent;
   }
 
+  /**
+   * @return
+   * @see #getAnswerWidget
+   */
+  protected boolean isNormalRecord() {
+    return doNormalRecording;
+  }
+
   protected abstract String getExerciseContent(T e);
 
   Widget getContentScroller(HTML maybeRTLContent) {
@@ -199,13 +228,17 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
       html.addStyleName("rightAlign");
     }
 
+    stylePrompt(html);
+    return html;
+  }
+
+  private void stylePrompt(HTML html) {
     html.addStyleName("wrapword");
     if (isPashto()) {
       html.addStyleName("pashtofont");
     } else {
       html.addStyleName("xlargeFont");
     }
-    return html;
   }
 
   protected boolean isRTL(T exercise) {
