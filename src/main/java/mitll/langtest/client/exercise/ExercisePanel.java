@@ -127,7 +127,8 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
       logger.info("english for " + e.getID() + " " + e.getForeignLanguage() + " " + e.getMeaning() +
           "\n\t context " + e.getRefSentences());
     }*/
-    HTML maybeRTLContent = getMaybeRTLContent(getEnglishToShow());
+    HTML maybeRTLContent = new HTML(getEnglishToShow());
+    stylePrompt(maybeRTLContent);
     maybeRTLContent.addStyleName("topFiveMargin");
     maybeRTLContent.addStyleName("bottomFiveMargin");
     maybeRTLContent.getElement().getStyle().setColor("gray");
@@ -228,13 +229,17 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
       html.addStyleName("rightAlign");
     }
 
+    stylePrompt(html);
+    return html;
+  }
+
+  private void stylePrompt(HTML html) {
     html.addStyleName("wrapword");
     if (isPashto()) {
       html.addStyleName("pashtofont");
     } else {
       html.addStyleName("xlargeFont");
     }
-    return html;
   }
 
   protected boolean isRTL(T exercise) {
