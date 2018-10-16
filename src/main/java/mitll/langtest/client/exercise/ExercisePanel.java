@@ -33,14 +33,17 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -75,6 +78,9 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   boolean doNormalRecording;
 
   /**
+   * Includes fix for
+   * <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/331'>Levantine: English translations</a>
+   *
    * @param e
    * @param controller
    * @param exerciseList
@@ -90,16 +96,20 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
-    //String message = instructionMessage;
     this.instance = instance;
     this.doNormalRecording = doNormalRecording;
 
-    /*    logger.info("for " + e.getID() + " instance " + instance +
-        " doNormal " + doNormalRecording);*/
+/*
+    logger.info("for " + e.getID() + " instance " + instance +
+        " doNormal " + doNormalRecording);
+*/
 
     this.navigationHelper = getNavigationHelper(controller);
 
     addInstructions();
+
+    add(addEnglish(e));
+
     add(getQuestionContentRTL(e));
 
     addQuestions(e, controller);
@@ -107,8 +117,24 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     // add next and prev buttons
     add(navigationHelper);
     navigationHelper.addStyleName("topMargin");
-    //getElement().setId("ExercisePanel");
   }
+
+  @NotNull
+  private HTML addEnglish(T e) {
+/*    if (e.getEnglish().isEmpty()) {
+      //logger.warning("no english for " + e.getID() + " " + e.getForeignLanguage() + " " + e.getMeaning());
+    } else {
+      logger.info("english for " + e.getID() + " " + e.getForeignLanguage() + " " + e.getMeaning() +
+          "\n\t context " + e.getRefSentences());
+    }*/
+    HTML maybeRTLContent = getMaybeRTLContent(getEnglishToShow());
+    maybeRTLContent.addStyleName("topFiveMargin");
+    maybeRTLContent.addStyleName("bottomFiveMargin");
+    maybeRTLContent.getElement().getStyle().setColor("gray");
+    return maybeRTLContent;
+  }
+
+  protected abstract String getEnglishToShow();
 
   /**
    * Worry about RTL
@@ -121,6 +147,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     HorizontalPanel hp = new HorizontalPanel();
     hp.getElement().setId("QuestionContentRTL");
     hp.setWidth("100%");
+    hp.getElement().getStyle().setProperty("minHeight","114px");
     boolean isRTL = isRTL(e);
     if (isRTL) {
       setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -132,11 +159,17 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     return hp;
   }
 
+  /**
+   * Next button always enabled.
+   * Fix for <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/274'>Add comment bubble to recording views</a>
+   * @param controller
+   * @return
+   */
   private NavigationHelper<L> getNavigationHelper(ExerciseController controller) {
     return new NavigationHelper<>(exercise, controller, this, exerciseList,
         true,
         true,
-        true,
+        false,
         showPrevButton());
   }
 
@@ -161,6 +194,14 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     maybeRTLContent.addStyleName("topMargin");
 
     return (content.length() > 200) ? getContentScroller(maybeRTLContent) : maybeRTLContent;
+  }
+
+  /**
+   * @return
+   * @see #getAnswerWidget(CommonExercise, ExerciseController, int)
+   */
+  protected boolean isNormalRecord() {
+    return doNormalRecording;
   }
 
   protected abstract String getExerciseContent(T e);
@@ -236,7 +277,9 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * @param e
    * @param controller used in subclasses for audio control
    */
-  private void addQuestions(T e, ExerciseController controller) { add(getQuestionPanel(e, controller, 1));  }
+  private void addQuestions(T e, ExerciseController controller) {
+    add(getQuestionPanel(e, controller, 1));
+  }
 
   private Panel getQuestionPanel(T exercise, ExerciseController controller, int questionNumber) {
     Panel vp = new VerticalPanel();
