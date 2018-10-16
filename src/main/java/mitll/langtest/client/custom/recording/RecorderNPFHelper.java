@@ -117,7 +117,7 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
                                                                                  DivWidget listHeader,
                                                                                  DivWidget footer) {
         return new RecordingFacetExerciseList(controller,
-            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.CONTEXT){
+            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.CONTEXT) {
 
         };
       }
@@ -154,6 +154,8 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
   private class RecordRefAudioPanel extends WaveformExercisePanel<CommonShell, CommonExercise> implements CommentAnnotator {
     //    private final Logger logger = Logger.getLogger("RecordRefAudioPanel");
 
+    private boolean addedComment = false;
+
     /**
      * @param e
      * @param controller1
@@ -176,6 +178,11 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
       if (isCompleted()) {
         showRecordedState(exercise);
       }
+    }
+
+    @Override
+    protected boolean isCompleted() {
+      return super.isCompleted() || addedComment;
     }
 
     @Override
@@ -225,7 +232,6 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
       return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
     }
 
-
     /**
      * @param e
      * @param field
@@ -235,7 +241,12 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
      * @see GoodwaveExercisePanel#getQuestionContent
      */
     private Widget getEntry(AnnotationExercise e, final String field, Widget contentWidget, boolean isRTL) {
-      return getEntry(field, e.getAnnotation(field), contentWidget, isRTL);
+      ExerciseAnnotation annotation = e.getAnnotation(field);
+      if (annotation != null && annotation.isDefect()) {
+        addedComment = true;
+        enableNext();
+      }
+      return getEntry(field, annotation, contentWidget, isRTL);
     }
 
     /**
@@ -282,6 +293,9 @@ public class RecorderNPFHelper extends SimpleChapterNPFHelper<CommonShell, Commo
 
             @Override
             public void onSuccess(Void result) {
+            //  logger.info("added annotation " + commentToPost + " for " + field + " status " + status);
+              addedComment = status == ExerciseAnnotation.TYPICAL.INCORRECT;
+              enableNext();
             }
           });
     }

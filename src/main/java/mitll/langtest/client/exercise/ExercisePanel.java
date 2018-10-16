@@ -130,7 +130,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     HTML maybeRTLContent = new HTML(getEnglishToShow());
     stylePrompt(maybeRTLContent);
     maybeRTLContent.addStyleName("topFiveMargin");
-    maybeRTLContent.addStyleName("bottomFiveMargin");
+    maybeRTLContent.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
     maybeRTLContent.getElement().getStyle().setColor("gray");
     return maybeRTLContent;
   }
@@ -170,7 +170,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     return new NavigationHelper<>(exercise, controller, this, exerciseList,
         true,
         true,
-        false,
+        true,
         showPrevButton());
   }
 

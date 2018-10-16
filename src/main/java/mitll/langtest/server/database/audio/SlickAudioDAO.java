@@ -60,7 +60,7 @@ import static mitll.langtest.shared.user.MiniUser.Gender.Male;
 public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final Logger logger = LogManager.getLogger(SlickAudioDAO.class);
   private static final String BEST_AUDIO = "bestAudio";
-  public static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
 
   private final AudioDAOWrapper dao;
   private final long now = System.currentTimeMillis();
@@ -326,10 +326,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       Set<Integer> exIDs = getExIDs(tuple2s.iterator());
 
       if (userDAO.isMale(userID)) {
-//        logger.info("male   user " + userID +  " = " + exIDs.size());
+        if (DEBUG) logger.info("getCountForGender male   user " + userID +  " = " + exIDs.size());
         idsOfRecordedExercisesForMales.addAll(exIDs);
       } else {
-        //      logger.info("female user " + userID +  " = " + exIDs.size());
+        if (DEBUG) logger.info("getCountForGender female user " + userID +  " = " + exIDs.size());
         idsOfRecordedExercisesForFemales.addAll(exIDs);
       }
     }

@@ -66,7 +66,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final String TRANSCRIPT = "transcript";
   private static final String DNR = "dnr";
 
-  private final boolean DEBUG = true;
+  private final boolean DEBUG = false;
   private final Connection connection;
   private final IUserDAO userDAO;
 

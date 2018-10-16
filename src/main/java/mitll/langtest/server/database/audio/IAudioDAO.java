@@ -95,9 +95,11 @@ public interface IAudioDAO extends IDAO {
    * @return
    * @see
    */
+/*
   boolean attachAudio(CommonExercise firstExercise,
                       Collection<AudioAttribute> audioAttributes,
                       String language, boolean debug);
+*/
 
   /**
    * @param userid

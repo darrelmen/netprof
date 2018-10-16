@@ -67,8 +67,8 @@ public abstract class BaseAudioDAO extends DAO {
   public static final String MALE = "male";
   public static final String FEMALE = "female";
 
-  public static final String CMALE = "cmale";
-  public static final String CFEMALE = "cfemale";
+  private static final String CMALE = "cmale";
+  private static final String CFEMALE = "cfemale";
 
   public static final String MALE_FAST = "maleFast";
   public static final String MALE_SLOW = "maleSlow";
@@ -76,9 +76,9 @@ public abstract class BaseAudioDAO extends DAO {
   public static final String FEMALE_SLOW = "femaleSlow";
 
   public static final String CMALE_FAST = "cmaleFast";
-  public static final String CMALE_SLOW = "cmaleSlow";
+  private static final String CMALE_SLOW = "cmaleSlow";
   public static final String CFEMALE_FAST = "cfemaleFast";
-  public static final String CFEMALE_SLOW = "cfemaleSlow";
+  private static final String CFEMALE_SLOW = "cfemaleSlow";
 
   private static final String TRANSLITERATION = "transliteration";
   private static final int WARN_DURATION = 25;
@@ -155,7 +155,7 @@ public abstract class BaseAudioDAO extends DAO {
    * <p>
    * Concurrent since could be multiple threads coming through.
    */
-  protected Map<Integer, MiniUser> idToMini = new ConcurrentHashMap<>();
+  protected final Map<Integer, MiniUser> idToMini = new ConcurrentHashMap<>();
 
   /**
    * TODO : consider why doing this all the time
@@ -330,10 +330,10 @@ public abstract class BaseAudioDAO extends DAO {
    * @see mitll.langtest.server.json.JsonExport#getJsonArray
    * @see
    */
-  public boolean attachAudio(CommonExercise firstExercise,
-                             Collection<AudioAttribute> audioAttributes,
-                             String language,
-                             boolean debug) {
+  private boolean attachAudio(CommonExercise firstExercise,
+                              Collection<AudioAttribute> audioAttributes,
+                              String language,
+                              boolean debug) {
     boolean allSucceeded = true;
 
     Collection<Integer> currentIDs = getAudioIDs(firstExercise);
@@ -484,7 +484,7 @@ public abstract class BaseAudioDAO extends DAO {
     return StringUtils.stripAccents(normArabic(foreignLanguage, normalizer));
   }
 
-  private ArabicNormalizer normalizer = new ArabicNormalizer();
+  private final ArabicNormalizer normalizer = new ArabicNormalizer();
 
   private String normArabic(String f, ArabicNormalizer normalizer) {
     char[] s2 = f.toCharArray();
@@ -519,6 +519,12 @@ public abstract class BaseAudioDAO extends DAO {
     );
   }
 
+  /**
+   * @see DatabaseImpl#getMaleFemaleProgress(int)
+   * @param projectid
+   * @param exercises
+   * @return
+   */
   public Map<String, Float> getMaleFemaleProgress(int projectid, Collection<CommonExercise> exercises) {
     float total = exercises.size();
     Set<Integer> uniqueIDs = new HashSet<>();
