@@ -124,8 +124,7 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
     this.audioType = audioType;
     AudioAttribute attribute = getAudioAttribute();
 
-    /*
-    logger.info("RecordAudioPanel for " + exercise.getID() +
+/*    logger.info("RecordAudioPanel for " + exercise.getID() +
         "\n\taudio type " + audioType +
         "\n\tref        " + exercise.getRefAudio() +
         "\n\tpath       " + attribute);*/

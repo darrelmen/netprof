@@ -164,7 +164,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   public AudioAttribute addOrUpdate(AudioInfo info) {
     MiniUser miniUser = userDAO.getMiniUser(info.getUserid());
 
-    return toAudioAttribute(
+    AudioAttribute audioAttribute = toAudioAttribute(
         dao.addOrUpdate(
             info.getUserid(),
             info.getExerciseID(),
@@ -179,6 +179,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
             miniUser.getRealGenderInt()),
         miniUser,
         info.isHasProjectSpecificAudio());
+
+//    logger.info("addOrUpdate Add or update after  " + audioAttribute);
+
+  //  Collection<SlickAudio> byID = dao.getByID(audioAttribute.getUniqueID());
+
+//    byID.forEach(slickAudio -> logger.info("addOrUpdate Got " + slickAudio));
+//    logger.info("Add or update exists " + audioAttribute);
+    return audioAttribute;
   }
 
   /**
@@ -393,7 +401,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return getExercises(genderMatch);
   }
 
-
+  /**
+   *
+   * @param projid
+   * @param isMale
+   * @param exToTranscript
+   * @return
+   */
   @Override
   Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
                                                     boolean isMale,

@@ -409,6 +409,17 @@ public abstract class BaseAudioDAO extends DAO {
     boolean isMatch = forgiving ? isMatchExToAudioArabic(attr, exerciseText) : matchTranscriptAttr(exerciseText, transcript);
     if (isMatch) {
       // add to both if context???
+      if (DEBUG_ATTACH) {
+        logger.info("attachAudioAndFixPath \n\tforgiving " + forgiving +
+            "\n\texercise text '" + exerciseText + "'" +
+            "\n\ttranscript    '" + transcript + "'" +
+            "\n\tpath           " + attr.getAudioRef() +
+            "\n\tuserid         " + attr.getUserid()+
+            "\n\tuser           " + attr.getUser().getUserID()+
+            "\n\taudio id       " + attr.getUniqueID()
+        );
+      }
+
       firstExercise.getMutableAudio().addAudio(attr);
 
       if (isContext) {
