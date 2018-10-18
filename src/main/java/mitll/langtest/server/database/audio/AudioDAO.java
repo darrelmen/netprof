@@ -409,7 +409,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    */
   protected void getCountForGender(int projid, AudioType audioSpeed, Set<Integer> uniqueIDs,
                                    Map<Integer, String> exToTranscript,
-                                   Set<Integer> idsOfRecordedExercisesForMales, Set<Integer> idsOfRecordedExercisesForFemales) {
+                                   Set<Integer> idsOfRecordedExercisesForMales,
+                                   Set<Integer> idsOfRecordedExercisesForFemales) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(Collections.EMPTY_SET);

@@ -326,10 +326,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       Set<Integer> exIDs = getExIDs(tuple2s.iterator());
 
       if (userDAO.isMale(userID)) {
-        if (DEBUG) logger.info("getCountForGender male   user " + userID +  " = " + exIDs.size());
+        if (DEBUG) logger.info("getCountForGender male   user " + userID + " = " + exIDs.size());
         idsOfRecordedExercisesForMales.addAll(exIDs);
       } else {
-        if (DEBUG) logger.info("getCountForGender female user " + userID +  " = " + exIDs.size());
+        if (DEBUG) logger.info("getCountForGender female user " + userID + " = " + exIDs.size());
         idsOfRecordedExercisesForFemales.addAll(exIDs);
       }
     }
@@ -341,6 +341,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           "\n\tfemales " + idsOfRecordedExercisesForFemales.size());
     }
   }
+
+/*
+  public boolean isNoAccentMatch(String transcript, String exerciseFL) {
+    return dao.isNoAccentMatch(transcript, exerciseFL);
+  }*/
 
   @Override
   Set<Integer> getValidAudioOfType(int userid, AudioType audioType) {

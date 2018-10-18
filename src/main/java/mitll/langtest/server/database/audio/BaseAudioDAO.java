@@ -402,14 +402,18 @@ public abstract class BaseAudioDAO extends DAO {
     String exerciseText = isContext && !directlyRelated.isEmpty() ?
         directlyRelated.iterator().next().getForeignLanguage() :
         firstExercise.getForeignLanguage();
+    String transcript = attr.getTranscript();
 
-    if (isMatchExToAudio(attr, exerciseText)) {
+    boolean forgiving = !language.equalsIgnoreCase("levantine");
+
+    boolean isMatch = forgiving ? isMatchExToAudioArabic(attr, exerciseText) : matchTranscriptAttr(exerciseText, transcript);
+    if (isMatch) {
       // add to both if context???
       firstExercise.getMutableAudio().addAudio(attr);
 
       if (isContext) {
         for (CommonExercise dir : directlyRelated) {
-          if (isMatchExToAudio(attr, dir)) {
+          if (isMatchExToAudio(attr, dir, true)) {
             firstExercise.getMutableAudio().addAudio(attr);
             break;
           }
@@ -463,21 +467,24 @@ public abstract class BaseAudioDAO extends DAO {
     }
   }
 
-  private boolean isMatchExToAudio(AudioAttribute attr, CommonExercise dir) {
-    return isMatchExToAudio(attr, dir.getForeignLanguage());
+  private boolean isMatchExToAudio(AudioAttribute attr, CommonShell dir, boolean forgivingMatch) {
+    String foreignLanguage = dir.getForeignLanguage();
+    String transcript = attr.getTranscript();
+    return forgivingMatch ? isMatchExToAudioArabic(attr, foreignLanguage) : isNoAccentMatch(foreignLanguage, transcript);
+//    return isMatchExToAudio(attr, foreignLanguage);
   }
 
   /**
    * Todo : check if language is arabic before doing normArabic.
    *
-   * @param attr
    * @param foreignLanguage
    * @return
+   * @paramx attr
    */
-  private boolean isMatchExToAudio(AudioAttribute attr, String foreignLanguage) {
+  private boolean isMatchExToAudioArabic(AudioAttribute attr, String foreignLanguage) {
     String normFL = getNorm(removePunct(foreignLanguage));
     String normT = getNorm(removePunct(attr.getTranscript()));
-    return attr.matchTranscript(normFL, normT);
+    return matchTranscriptAttr(normFL, normT);
   }
 
   private String getNorm(String foreignLanguage) {
@@ -520,10 +527,10 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   /**
-   * @see DatabaseImpl#getMaleFemaleProgress(int)
    * @param projectid
    * @param exercises
    * @return
+   * @see DatabaseImpl#getMaleFemaleProgress(int)
    */
   public Map<String, Float> getMaleFemaleProgress(int projectid, Collection<CommonExercise> exercises) {
     float total = exercises.size();
@@ -895,7 +902,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param transcript
    * @param exerciseFL
    * @return
-   * @see #getCountForGender
+   * @see SlickAudioDAO#getCountForGender
    */
   boolean isNoAccentMatch(String transcript, String exerciseFL) {
     if (exerciseFL == null) return false;
@@ -919,6 +926,30 @@ public abstract class BaseAudioDAO extends DAO {
         foreignLanguage.isEmpty() ||
         transcript.isEmpty() ||
         removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
+  }
+
+  /**
+   * TODO : don't duplicate code
+   * remove punct before we get here.
+   *
+   * @return
+   * @paramx foreignLanguage
+   * @paramx transcript
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#isMatchExToAudio
+   */
+  private boolean matchTranscriptAttr(String foreignLanguage, String transcript) {
+    foreignLanguage = foreignLanguage.trim();
+    if (transcript != null) {
+      transcript = transcript.trim();
+    }
+
+    return transcript == null ||
+        foreignLanguage.isEmpty() ||
+        transcript.isEmpty() ||
+        transcript.toLowerCase()
+            .equals(
+                foreignLanguage
+                    .toLowerCase());
   }
 
   /**

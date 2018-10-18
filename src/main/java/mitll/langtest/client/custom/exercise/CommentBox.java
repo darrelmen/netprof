@@ -389,10 +389,10 @@ public class CommentBox extends PopupContainerFactory {
       this.field = field;
     }
 
-    @Override
+    /*@Override
     protected void onLoad() {
       logger.info("got load on " + getElement().getId());
-    }
+    }*/
 
     /**
      * @param commentBox
@@ -501,8 +501,8 @@ public class CommentBox extends PopupContainerFactory {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.isEmpty();
 
-      logger.info("commentComplete ex #" + exerciseID +
-          " field " + field + " comment '" + comment + "' correct = " + isCorrect);
+/*      logger.info("commentComplete ex #" + exerciseID +
+          " field " + field + " comment '" + comment + "' correct = " + isCorrect);*/
 
       addToolTip(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);

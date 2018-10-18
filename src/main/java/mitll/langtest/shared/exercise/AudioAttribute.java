@@ -324,28 +324,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return uniqueID;
   }
 
-  /**
-   * remove punct before we get here.
-   *
-   * @param foreignLanguage
-   * @param transcript
-   * @return
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#isMatchExToAudio(AudioAttribute, String)
-   */
-  public boolean matchTranscript(String foreignLanguage, String transcript) {
-    foreignLanguage = foreignLanguage.trim();
-    if (transcript != null) {
-      transcript = transcript.trim();
-    }
 
-    return transcript == null ||
-        foreignLanguage.isEmpty() ||
-        transcript.isEmpty() ||
-        transcript.toLowerCase()
-            .equals(
-                foreignLanguage
-                .toLowerCase());
-  }
 
   public String getTranscript() {
     return transcript == null ? "" : transcript;
