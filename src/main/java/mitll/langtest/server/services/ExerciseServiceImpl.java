@@ -86,30 +86,89 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see mitll.langtest.client.list.FacetExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
+    int userFromSessionID = getUserIDFromSessionOrDB();
+    return db.getTypeToValues(request, getProjectIDFromUser(userFromSessionID), userFromSessionID);
+
+ /*
+    logger.info("getTypeToValues " + request);
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
     } else {
-      FilterResponse response = sectionHelper.getTypeToValues(request, false);
-      addUserListFacet(request, response);
-      int userFromSessionID = getUserIDFromSessionOrDB();
-      if (userFromSessionID != -1) {
-//        logger.info("getTypeToValues got " + userFromSession);
-        //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
+      if (request.isRecordRequest()) { //how no user???
+        return getFilterResponseForRecording(request, getUserIDFromSessionOrDB());
+      } else {
+        FilterResponse response = sectionHelper.getTypeToValues(request, false);
+        addUserListFacet(request, response);
+//        int userFromSessionID = getUserIDFromSessionOrDB();
+//        if (userFromSessionID != -1) {
+////        logger.info("getTypeToValues got " + userFromSession);
+//          //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
+//
+//
+//        }
 
-        if (request.isRecordRequest()) { //how no user???
-          response = getFilterResponseForRecording(request, response, userFromSessionID);
-        }
+        return response;
       }
-
-      return response;
-    }
+    }*/
   }
 
-  private FilterResponse getFilterResponseForRecording(FilterRequest request, FilterResponse response, int userFromSessionID) {
+  /**
+   * @param request
+   * @return
+   * @paramx userFromSessionID
+   * @paramx response
+   */
+/*  private FilterResponse getFilterResponseForRecording(FilterRequest request, int userFromSessionID) {
     int projectID = getProjectIDFromUser(userFromSessionID);
 
+    Map<String, Collection<String>> typeToSelection = getTypeToSelection(request);
+
+
+    List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
+
+    //  List<String> typeOrder = getProject(projectID).getTypeOrder();
+//    if (typeOrder.isEmpty()) {
+//
+//    } else {
+    //   String firstType = typeOrder.get(0);
+    //   List<CommonExercise> rec = filterByUnrecorded(request1.setOnlyUnrecordedByMe(false).setOnlyRecordedByMatchingGender(true), exercisesForState, projectID);
+
+    ExerciseListRequest request1 = new ExerciseListRequest()
+        .setOnlyUnrecordedByMe(true)
+        .setOnlyExamples(request.isExampleRequest())
+        .setUserID(userFromSessionID);
+
+    List<CommonExercise> unRec = filterByUnrecorded(request1, exercisesForState, projectID);
+
+    logger.info("build section helper from " + unRec);
+    SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelper(getProjectIDFromUser(userFromSessionID)).getCopy(unRec);
+
+    return unrecordedSectionHelper.getTypeToValues(request, false);
+
+*//*    //   logger.info("found " + unRec.size() + " unrecorded");
+
+    Map<String, Long> collect = unRec.stream().collect(Collectors.groupingBy(ex -> ex.getUnitToValue().get(firstType) == null ? "Unknown" : ex.getUnitToValue().get(firstType), Collectors.counting()));
+
+    // logger.info("map is " + collect);
+
+    Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
+
+    Set<MatchInfo> matches = new TreeSet<>();
+    collect.forEach((k, v) -> matches.add(new MatchInfo(k, v.intValue())));
+    //    logger.info("matches is " + matches);
+    typeToValues.put(firstType, matches);
+
+    HashSet<String> typesToInclude = new HashSet<>();
+    typesToInclude.add(firstType);
+
+    FilterResponse response = new FilterResponse(request.getReqID(), typeToValues, typesToInclude, -1);
+    // }
+    return response;*//*
+  }*/
+  /*@NotNull
+  private Map<String, Collection<String>> getTypeToSelection(FilterRequest request) {
     Map<String, Collection<String>> typeToSelection = new HashMap<>();
     request.getTypeToSelection().forEach(pair -> {
       String value1 = pair.getValue();
@@ -117,45 +176,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
         typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
       }
     });
+    return typeToSelection;
+  }*/
 
-
-    List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
-
-    ExerciseListRequest request1 = new ExerciseListRequest()
-        .setOnlyUnrecordedByMe(true)
-        .setOnlyExamples(request.isExampleRequest())
-        .setUserID(userFromSessionID);
-
-    List<String> typeOrder = getProject(projectID).getTypeOrder();
-    if (typeOrder.isEmpty()) {
-
-    } else {
-      String firstType = typeOrder.get(0);
-      //   List<CommonExercise> rec = filterByUnrecorded(request1.setOnlyUnrecordedByMe(false).setOnlyRecordedByMatchingGender(true), exercisesForState, projectID);
-      List<CommonExercise> unRec = filterByUnrecorded(request1, exercisesForState, projectID);
-
-      //   logger.info("found " + unRec.size() + " unrecorded");
-
-      Map<String, Long> collect = unRec.stream().collect(Collectors.groupingBy(ex -> ex.getUnitToValue().get(firstType) == null ? "Unknown" : ex.getUnitToValue().get(firstType), Collectors.counting()));
-
-      // logger.info("map is " + collect);
-
-      Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
-
-      Set<MatchInfo> matches = new TreeSet<>();
-      collect.forEach((k, v) -> matches.add(new MatchInfo(k, v.intValue())));
-      //    logger.info("matches is " + matches);
-      typeToValues.put(firstType, matches);
-
-      HashSet<String> typesToInclude = new HashSet<>();
-      typesToInclude.add(firstType);
-
-      response = new FilterResponse(request.getReqID(), typeToValues, typesToInclude, -1);
-    }
-    return response;
-  }
-
-  private void addUserListFacet(FilterRequest request, FilterResponse typeToValues) {
+/*  private void addUserListFacet(FilterRequest request, FilterResponse typeToValues) {
     int userListID = request.getUserListID();
     UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
 
@@ -166,7 +190,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
       typeToValues.getTypeToValues().put(LISTS, value);
     }
-  }
+  }*/
 
   /**
    * Complicated.
@@ -253,7 +277,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     List<CommonExercise> collect = getCommonExercises(getDialog(dialogID).getCoreVocabulary());
     collect.addAll(getCommonExercises(getDialog(dialogID).getExercises()));
 
-   // logger.info("request " + request.getPrefix());
+    // logger.info("request " + request.getPrefix());
     if (!request.getPrefix().isEmpty()) {
       collect = new ArrayList<>(getSearchMatches(collect, request.getPrefix(), projectID));
     }
@@ -534,6 +558,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return getExerciseListWrapperForPrefix(request, exercisesForState, projid);
   }
 
+  /**
+   * Ask section helper for matching item to type -> value
+   *
+   * @param projid
+   * @param typeToSelection
+   * @return
+   */
   private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     typeToSelection.remove(RECORDED1);
@@ -731,6 +762,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
   /**
    * Make pairs of parent exercise to child context sentence exercise
+   *
    * @param exercises
    * @return
    */
@@ -1229,31 +1261,32 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param userListByID
    * @param
    * @return
+   * @see #getExerciseIds
    */
   private <U extends CommonExercise> Collection<U> getExercisesFromUserListFiltered(
       Map<String, Collection<String>> typeToSelection,
       UserList<U> userListByID) {
-    Collection<U> exercises2 = getCommonExercises(userListByID);
+    Collection<U> listExercises = getCommonExercises(userListByID);
     typeToSelection.remove(LISTS);
     if (typeToSelection.isEmpty()) {
       logger.info("getExercisesFromUserListFiltered returning  " + userListByID.getExercises().size() +
           " exercises for " + userListByID.getID());
-      return exercises2;
+      return listExercises;
     } else {
       SectionHelper<U> helper = new SectionHelper<>();
 
-      logger.info("getExercisesFromUserListFiltered found " + exercises2.size() + " for list " + userListByID);
+      logger.info("getExercisesFromUserListFiltered found " + listExercises.size() + " for list " + userListByID);
       long then = System.currentTimeMillis();
-      exercises2.forEach(helper::addExercise);
+      listExercises.forEach(helper::addExercise);
       long now = System.currentTimeMillis();
 
       if (now - then > 100) {
-        logger.debug("getExercisesFromUserListFiltered used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
+        logger.debug("getExercisesFromUserListFiltered used " + listExercises.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
       }
       //helper.report();
       Collection<U> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
       logger.debug("\tgetExercisesFromUserListFiltered after found " + exercisesForState.size() + " matches to " + typeToSelection);
-      return /*typeToSelection.isEmpty() ? exercises2 :*/ exercisesForState;
+      return /*typeToSelection.isEmpty() ? listExercises :*/ exercisesForState;
     }
   }
 

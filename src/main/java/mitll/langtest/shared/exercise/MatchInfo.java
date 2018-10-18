@@ -30,6 +30,11 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
     this.count = node.getCount();
   }
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getFilterResponseForRecording(FilterRequest, FilterResponse, int)
+   * @param value
+   * @param count
+   */
   public MatchInfo(String value, int count) {
     this(value, count, -1, false, "");
   }

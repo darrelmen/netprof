@@ -2,6 +2,8 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.FilterRequest;
+import mitll.langtest.shared.exercise.FilterResponse;
 import mitll.langtest.shared.project.Language;
 
 import java.util.List;
@@ -12,7 +14,6 @@ import java.util.Set;
  */
 public interface ExerciseServices {
   /**
-   *
    * @param userExercise
    * @param keepAudio
    * @return
@@ -28,5 +29,8 @@ public interface ExerciseServices {
   ExerciseDAO<CommonExercise> getExerciseDAO(int projectid);
 
   String getLanguage(CommonExercise ex);
+
   Language getLanguageEnum(CommonExercise ex);
+
+  FilterResponse getTypeToValues(FilterRequest request, int projid, int userid);
 }

@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.exercise.CommentBox;
@@ -79,14 +78,10 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
   /**
    * @param controller
    * @param doNormalRecording
-   * @param viewContaner
    * @param myView
    * @see mitll.langtest.client.banner.NewContentChooser#showView
    */
-  public RecorderNPFHelper(ExerciseController controller,
-                           boolean doNormalRecording,
-                           IViewContaner viewContaner,
-                           INavigation.VIEWS myView) {
+  public RecorderNPFHelper(ExerciseController controller, boolean doNormalRecording, INavigation.VIEWS myView) {
     super(controller);
     this.myView = myView;
     this.doNormalRecording = doNormalRecording;
@@ -113,9 +108,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
                                                                        DivWidget listHeader,
                                                                        DivWidget footer) {
         return new RecordingFacetExerciseList<T>(controller,
-            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.RECORD_CONTEXT) {
-
-        };
+            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.RECORD_CONTEXT);
       }
     };
   }
@@ -149,7 +142,6 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
    */
   private class RecordRefAudioPanel extends WaveformExercisePanel<T, ClientExercise> implements CommentAnnotator {
     //    private final Logger logger = Logger.getLogger("RecordRefAudioPanel");
-
     /**
      * @param e
      * @param controller1

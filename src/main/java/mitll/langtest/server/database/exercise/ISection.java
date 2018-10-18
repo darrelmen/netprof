@@ -10,14 +10,16 @@ import java.util.Set;
 /**
  * Created by go22670 on 3/9/17.
  */
-public interface ISection<T> {
+public interface ISection<T extends HasID & HasUnitChapter> {
+  SectionHelper<T> getCopy(List<T> exercises);
+
   void clear();
 
   List<String> getTypeOrder();
 
   /**
-   * @see ExcelImport#readExercises
    * @return
+   * @see ExcelImport#readExercises
    */
   boolean allKeysValid();
 
@@ -25,8 +27,9 @@ public interface ISection<T> {
 
   /**
    * Initial map of facet to all possible values for facet
-   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfo
+   *
    * @return
+   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfo
    */
   Map<String, Set<MatchInfo>> getTypeToDistinct();
 
@@ -43,19 +46,26 @@ public interface ISection<T> {
   Pair addExerciseToLesson(T exercise, String type, String unitName);
 
   /**
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
    * @param exercise
    * @param pair
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
    */
   void addPairs(T exercise, List<Pair> pair);
+
+  List<Pair> getPairs(Collection<String> typeOrder, int id, String unit, String lesson, boolean ispredef);
+
+  void addPairs(T t,
+                CommonExercise exercise,
+                Collection<String> attrTypes,
+                List<Pair> pairs);
 
   boolean removeExercise(T exercise);
 
   void refreshExercise(T exercise);
 
   /**
-   * @see DBExerciseDAO#setRootTypes
    * @param predefinedTypeOrder
+   * @see DBExerciseDAO#setRootTypes
    */
   void setPredefinedTypeOrder(List<String> predefinedTypeOrder);
 
@@ -64,47 +74,47 @@ public interface ISection<T> {
   Collection<T> getFirst();
 
   /**
-  * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
-  * @param predefinedTypeOrder
-  * @param seen
-  */
+   * @param predefinedTypeOrder
+   * @param seen
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
+   */
   void rememberTypesInOrder(final List<String> predefinedTypeOrder, List<List<Pair>> seen);
 
   /**
-   * @see DBExerciseDAO#getTypeOrderFromProject
    * @param types
+   * @see DBExerciseDAO#getTypeOrderFromProject
    */
   void reorderTypes(List<String> types);
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfo
    * @return
+   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfo
    */
   Set<String> getRootTypes();
 
   /**
-   * @see DBExerciseDAO#setRootTypes
    * @param rootTypes
+   * @see DBExerciseDAO#setRootTypes
    */
   void setRootTypes(Set<String> rootTypes);
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfoOnUser
    * @return
+   * @see mitll.langtest.server.database.project.ProjectManagement#setStartupInfoOnUser
    */
   Map<String, String> getParentToChildTypes();
 
   /**
-   * @see DBExerciseDAO#setRootTypes
    * @param parentToChildTypes
+   * @see DBExerciseDAO#setRootTypes
    */
   void setParentToChildTypes(Map<String, String> parentToChildTypes);
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
    * @param request
    * @param debug
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getTypeToValues
    */
   FilterResponse getTypeToValues(FilterRequest request, boolean debug);
 }

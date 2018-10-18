@@ -70,7 +70,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   /**
    * @param controller
-   * @see RecorderNPFHelper#RecorderNPFHelper(ExerciseController, boolean, IViewContaner, INavigation.VIEWS)
+   * @see RecorderNPFHelper#RecorderNPFHelper(ExerciseController, boolean, INavigation.VIEWS)
    */
   public SimpleChapterNPFHelper(ExerciseController controller) {
     this.controller = controller;

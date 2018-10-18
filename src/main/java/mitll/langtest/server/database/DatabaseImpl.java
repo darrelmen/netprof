@@ -1549,7 +1549,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }*/
 
     if (toRet == null) {
-      logger.info("getCustomOrPredefExercise can't find ex in project #" +projid +
+      logger.info("getCustomOrPredefExercise can't find ex in project #" + projid +
           ", so try all projects for exercise #" + id);
       toRet = projectManagement.getExercise(id);
     }
@@ -1703,6 +1703,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return serverProps.getLanguage();
   }
 
+  public FilterResponse getTypeToValues(FilterRequest request, int projid, int userid) {
+    return new FilterResponseHelper(this).getTypeToValues(request, projid, userid);
+  }
+
   /**
    * For downloading a user list.
    *
@@ -1815,7 +1819,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       return list;
     } else {
-      logger.warn("getUserListByIDExercises returning commented list? " + listid);
+      logger.warn("getUserListByIDExercises returning commented list? " + listid + " vs " + COMMENT_MAGIC_ID);
       return getUserListManager().getCommentedListEx(projectid, false);
     }
   }
@@ -1852,7 +1856,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         logger.info("doReport : not sending email report since this is not Sunday...");
       }
     } else {
-     // logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
+      // logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
     }
   }
 
@@ -1968,7 +1972,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  public RecordWordAndPhone getRecordWordAndPhone() { return recordWordAndPhone; }
+  public RecordWordAndPhone getRecordWordAndPhone() {
+    return recordWordAndPhone;
+  }
 
   /**
    * @param language

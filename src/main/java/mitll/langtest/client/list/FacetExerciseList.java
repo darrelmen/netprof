@@ -98,7 +98,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    */
   private static final boolean DEBUG_STALE = true;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_CHOICES = false;
   private static final boolean DEBUGSCORE = false;
 
@@ -558,6 +558,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }*/
 
   /**
+   * Populate the filter choices on the left.
+   *
    * structure
    * nav
    * header (optional)
@@ -582,6 +584,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * li - choice - with span (qty)
    *
    * @see #getTypeToValues
+   * @see #gotFilterResponse
    */
   private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
     if (DEBUG) {
@@ -1084,10 +1087,15 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private Widget getParentAnchor(String type, String value, String childType) {
     Panel span = getSpan();
     span.addStyleName(MENU_ITEM);
-    Anchor typeSection = getAnchor(value); // li
-    addRemoveClickHandler(childType, typeSection);
-    span.add(typeSection);
+
+    {
+      Anchor typeSection = getAnchor(value); // li
+      addRemoveClickHandler(childType, typeSection);
+      span.add(typeSection);
+    }
+
     addTooltip(type, value, span);
+
     return span;
   }
 
@@ -1102,7 +1110,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       Map<String, String> candidate = new HashMap<>(typeToSelection);
       boolean removed = removeSelection(type, candidate);
       if (!removed) {
-        logger.warning("didn't remove" +
+        logger.warning("addRemoveClickHandler didn't remove" +
             "\n\tselection " + type +
             "\n\tstill     " + candidate);
       }
@@ -1155,9 +1163,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   @NotNull
   private ClickHandler getChoiceHandler(final String type, final String key, int newUserListID) {
     return event -> {
-      Map<String, String> candidate = new HashMap<>(typeToSelection);
-      String value = getChoiceHandlerValue(type, key, newUserListID);
-      candidate.put(type, value);
+      Map<String, String> candidate = new HashMap<>(typeToSelection);  // existing set is in type->selection
+      //String value = getChoiceHandlerValue(type, key, newUserListID);
+      candidate.put(type, getChoiceHandlerValue(type, key, newUserListID));
       //    logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
       setHistory(candidate);
     };
@@ -1201,8 +1209,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
 
-    //List<Pair> pairs = getPairs(typeToSelection);
-    //  logger.info("getTypeToValues request " + pairs + " list " + userListID);
+    List<Pair> pairs = getPairs(typeToSelection);
+    logger.info("getTypeToValues request " + pairs + " list " + userListID);
 
     final long then = System.currentTimeMillis();
 
@@ -1270,10 +1278,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     gotSelection();
   }
 
-  protected boolean isThereALoggedInUser() {
-    return controller.getUser() > 0;
-  }
-
   private void changeSelection(Set<String> typesToInclude, Map<String, String> typeToSelection) {
     // boolean removed = false;
     for (String selectedType : new ArrayList<>(typeToSelection.keySet())) {
@@ -1285,6 +1289,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       }
     }
     //return removed;
+  }
+
+  protected boolean isThereALoggedInUser() {
+    return controller.getUser() > 0;
   }
 
   /**
@@ -1313,9 +1321,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   private void updateDownloadLinks() {
-    SelectionState selectionState = getSelectionState(getHistoryToken());
+  //  SelectionState selectionState = getSelectionState(getHistoryToken());
     // keep the download link info in sync with the selection
-    downloadHelper.updateDownloadLinks(selectionState, typeOrder);
+    downloadHelper.updateDownloadLinks(getSelectionState(getHistoryToken()), typeOrder);
   }
 
   /**

@@ -78,7 +78,6 @@ public interface ListServiceAsync {
 
  // void newExercise(int userListID, ClientExercise userExercise, AsyncCallback<ClientExercise> async);
 
-
   void deleteList(int id, AsyncCallback<Boolean> async);
 
   void deleteItemFromList(int listid, int exid, AsyncCallback<Boolean> async);
@@ -90,7 +89,6 @@ public interface ListServiceAsync {
   void update(UserList userList, AsyncCallback<Void> async);
 
   void getReviewList(boolean isContext, AsyncCallback<UserList<CommonShell>> async);
-
 
   void getQuizInfo(int userListID, AsyncCallback<QuizInfo> async);
 }

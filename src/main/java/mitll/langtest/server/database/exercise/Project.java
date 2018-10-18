@@ -221,6 +221,21 @@ public class Project implements IPronunciationLookup {
     return types;
   }
 
+  @NotNull
+  public List<String> getBaseTypeOrder( ) {
+    List<String> typeOrder = new ArrayList<>();
+    SlickProject project1 = getProject();
+    if (!project1.first().isEmpty()) {
+      typeOrder.add(project1.first());
+    } else {
+      logger.error("huh? project " + project + " first type is empty?");
+    }
+    if (!project1.second().isEmpty()) {
+      typeOrder.add(project1.second());
+    }
+    return typeOrder;
+  }
+
   /**
    * @param exerciseDAO
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO

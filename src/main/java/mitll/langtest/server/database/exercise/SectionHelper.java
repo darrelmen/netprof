@@ -75,6 +75,9 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private static final String LISTS = "Lists";
   private static final String RECORDED = "Recorded";
   private List<String> predefinedTypeOrder = new ArrayList<>();
+  private static final String UNIT = "Unit";
+  private static final String DEFAULT_FOR_EMPTY = "Any";  // TODO : ???
+  private static final String BLANK = "Blank";  // TODO : remove????
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
   // e.g. "week"->"week 5"->[unit->["unit A","unit B"]],[chapter->["chapter 3","chapter 5"]]
@@ -92,11 +95,37 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
   private final boolean DEBUG = false;
-  private final boolean DEBUG_TYPE_ORDER = false;
+  private final boolean DEBUG_TYPE_ORDER = true;
   private final boolean DEBUG_OR_MERGE = false;
 
   public SectionHelper() {
     makeRoot();
+  }
+
+//  public SectionHelper(SectionHelper<T> toCopy, List<T> exercises) {
+//    this();
+//    exercises.forEach(this::addExercise);
+//  }
+
+  @Override
+  public SectionHelper<T> getCopy(List<T> exercises) {
+
+    report();
+
+    SectionHelper<T> tSectionHelper = new SectionHelper<>();
+
+    tSectionHelper.predefinedTypeOrder = predefinedTypeOrder;
+    tSectionHelper.rootTypes = rootTypes;
+    tSectionHelper.parentToChildTypes = parentToChildTypes;
+
+
+    tSectionHelper.report();
+
+    exercises.forEach(this::addExercise);
+
+    tSectionHelper.report();
+
+    return tSectionHelper;
   }
 
   /**
@@ -694,6 +723,99 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     return pair;
   }
 
+  private int c = 0;
+
+  public List<Pair> getPairs(Collection<String> typeOrder, int id, String unit, String lesson, boolean ispredef) {
+    boolean firstEmpty = unit.isEmpty();
+
+    List<Pair> pairs = new ArrayList<>();
+    Iterator<String> iterator = typeOrder.iterator();
+
+    String first = iterator.hasNext() ? iterator.next() : UNIT;
+    String second = iterator.hasNext() ? iterator.next() : "";
+
+
+    if (firstEmpty && ispredef) {
+      pairs.add(getPair(first, DEFAULT_FOR_EMPTY));
+//      unitToValue.put(first, "1");
+      if (c++ < 100 || c % 100 == 0) logger.warn("getUnitToValue (" + c +
+          ") got empty " + first + " for " + id + " type order " + typeOrder);
+
+    } else {
+      pairs.add(getPair(first, unit));
+    }
+
+    if (!second.isEmpty()) {
+      if (ispredef) {
+        boolean empty = lesson.trim().isEmpty();
+
+        if (empty) {
+          pairs.add(getPair(second, DEFAULT_FOR_EMPTY));
+        } else {
+          pairs.add(getPair(second, lesson));
+        }
+        if (empty) {
+          if (c++ < 100) {
+            logger.warn("getUnitToValue got empty " + second + " for " + id);
+          }
+        }
+      }
+    }
+    return pairs;
+  }
+
+
+  @NotNull
+  private Pair getPair(String first, String value) {
+    if (first.isEmpty()) logger.error("huh type is empty " + value, new Exception());
+    return new Pair(first, value);
+  }
+
+  int spew;
+
+  public void addPairs(T t,
+                        CommonExercise exercise,
+                        Collection<String> attrTypes,
+                        List<Pair> pairs) {
+    if (exercise.getAttributes() == null) {
+      if (spew++ < 10) {
+        logger.warn("addPhoneInfo : no exercise attributes for " + exercise.getID());
+      }
+    } else {
+      addBlanksForMissingInfo(exercise, attrTypes, pairs);
+    }
+
+    // logger.info("pairs for " + exercise.getID() + " " + exercise.getOldID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
+    addPairs(t, pairs);
+  }
+
+  /**
+   * SectionHelper gets confused if we don't have a complete tree - same number of nodes on path to root
+   *
+   * @param exercise
+   * @param attrTypes
+   * @param pairs
+   */
+  private void addBlanksForMissingInfo(ClientExercise exercise, Collection<String> attrTypes, List<Pair> pairs) {
+    Map<String, ExerciseAttribute> typeToAtrr = new HashMap<>();
+    exercise.getAttributes().forEach(attribute -> typeToAtrr.put(attribute.getProperty(), attribute));
+
+    for (String attrType : attrTypes) {
+      ExerciseAttribute attribute = typeToAtrr.get(attrType);
+      if (attribute == null) {
+        // missing info for this type, so map it to BLANK
+        pairs.add(new ExerciseAttribute(attrType, BLANK));
+      } else {
+        if (attribute.isFacet()) {
+          pairs.add(attribute);
+        } else {
+          logger.info("Skip attribute not a facet " + attribute);
+        }
+      }
+    }
+  }
+
+
   /**
    * @param exercise
    * @param pairs
@@ -706,7 +828,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   /**
    * @param exercise
    * @param pair
-   * @see #addPairs(Shell, List)
+   * @see #addPairs(T, List)
    */
   private void addExerciseToLesson(T exercise, Pair pair) {
     addPairEntry(exercise, pair);
@@ -730,7 +852,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @param exercise
    * @param unitName
    * @param sectionToLesson within a type, what groups are there - e.g. chapters
-   * @see #getPairForExerciseAndLesson(Shell, String, String)
+   * @see #getPairForExerciseAndLesson
    */
   private void addUnitNameEntry(T exercise, String unitName, Map<String, Lesson<T>> sectionToLesson) {
     Lesson<T> unitForName = sectionToLesson.get(unitName);
@@ -775,7 +897,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @param type
    * @param unitName
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#editItem(CommonExercise, boolean)
+   * @see mitll.langtest.server.database.DatabaseImpl#editItem
    */
   private boolean removeExerciseToLesson(T exercise, String type, String unitName) {
     Map<String, Lesson<T>> unit = getSectionToLesson(type);
@@ -796,7 +918,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   /**
    * @param section
    * @return
-   * @see #addExerciseToLesson(Shell, String, String)
+   * @see #addExerciseToLesson
    */
   private Map<String, Lesson<T>> getSectionToLesson(String section) {
     if (section.isEmpty()) {
@@ -856,6 +978,11 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     //   }
   }
 
+  /**
+   * @param key
+   * @return
+   * @see #getExercisesForSection(String, Collection)
+   */
   private Map<String, Lesson<T>> getCategoryToLesson(String key) {
     return typeToUnitToLesson.get(key);
   }
@@ -1092,6 +1219,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     boolean someEmpty = checkIfAnyTypesAreEmpty(typesInOrder, typesToInclude1, typeToMatches);
 
     int userListID = request.getUserListID();
+    int reqID = request.getReqID();
     if (someEmpty) {
       List<Pair> typeToSelection2 = new ArrayList<>();
       if (b) logger.info("getTypeToValues back off including  " + typesToInclude1);
@@ -1106,11 +1234,11 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
       if (b) logger.info("getTypeToValues try search again with " + typeToSelection2);
 
       Map<String, Set<MatchInfo>> typeToMatches1 = getTypeToMatches(typeToSelection2, b);
-      return new FilterResponse(request.getReqID(), typeToMatches1, typesToInclude1, userListID);
+      return new FilterResponse(reqID, typeToMatches1, typesToInclude1, userListID);
     } else {
       if (b) logger.info("getTypeToValues typeToMatches " + typeToMatches + " to include " + typesToInclude1);
 
-      return new FilterResponse(request.getReqID(), typeToMatches, typesToInclude1, userListID);
+      return new FilterResponse(reqID, typeToMatches, typesToInclude1, userListID);
     }
   }
 

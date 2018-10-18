@@ -13,12 +13,15 @@ import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * @see RecorderNPFHelper#getMyListLayout
  */
 class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends LearnFacetExerciseList<T> {
-  //private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
+
+
+  private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
 
   private static final String RECORD = "Record";
   private static final String UNRECORD = "Unrecord";
@@ -45,7 +48,6 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
         currentExercisePanel,
         controller,
         new ListOptions(instanceName)
-            .setInstance(instanceName)
             .setShowFirstNotCompleted(true)
             .setActivityType(ActivityType.RECORDER)
         , listHeader, true, isContext ? INavigation.VIEWS.RECORD_CONTEXT : INavigation.VIEWS.RECORD_ENTRIES);
@@ -60,6 +62,12 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     return exerciseListRequest;
   }
 
+  /**
+   * @see #getTypeToValues
+   * @param userListID
+   * @param pairs
+   * @return
+   */
   @NotNull
   @Override
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
@@ -68,6 +76,10 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
         .setExampleRequest(isContext);
   }
 
+  /**
+   * @see #addWidgets()
+   * @return
+   */
   @NotNull
   @Override
   protected String getDynamicFacet() {
@@ -78,12 +90,18 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     return false;
   }
 
+  /**
+   *
+   * @param exerciseID
+   * @param searchIfAny
+   */
   @Override
   protected void pushFirstSelection(int exerciseID, String searchIfAny) {
     askServerForExercise(-1);
   }
 
   /**
+   * @see #getExercises
    * @param prefix
    * @return
    */
@@ -94,15 +112,23 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
       String s = getTypeToSelection().get(RECORDED);
       request.setOnlyUnrecordedByMe(s.startsWith(UNRECORD));
       request.setOnlyRecordedByMatchingGender(s.startsWith(RECORD));
+       logger.info("getExerciseListRequest selection is " + s);
 
     } else {
       //logger.info("getExerciseListRequest no recorded selection in " + getTypeToSelection().keySet());
     }
-    //   logger.info("getExerciseListRequest req     " + request);
+    logger.info("getExerciseListRequest req     " + request);
     request.setOnlyExamples(isContext);
     return request;
   }
 
+  /**
+   * @see #getChoiceHandler
+   * @param type
+   * @param key
+   * @param newUserListID
+   * @return
+   */
   @Override
   protected String getChoiceHandlerValue(String type, String key, int newUserListID) {
     return key;
@@ -110,7 +136,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
 
   /**
    * No list facet or special facet.
-   *
+   * @see #addFacetsForReal
    * @param typeToValues
    * @return
    */
@@ -119,6 +145,12 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     return null;
   }
 
+  /**
+   * @see #reallyGetExercises
+   * @param visibleIDs
+   * @param alreadyFetched
+   * @return
+   */
   @NotNull
   @Override
   protected Set<Integer> getRequested(Collection<Integer> visibleIDs, List<ClientExercise> alreadyFetched) {

@@ -78,19 +78,18 @@ public class NPFHelper<T extends CommonShell, U extends ClientExercise> implemen
   final ExerciseController controller;
 
   PagingExerciseList<T, U> npfExerciseList = null;
-  private final boolean showQC;
+  //private final boolean showQC;
   private final boolean showFirstNotCompleted;
 
   /**
    * TODO : remove showQC
    *
    * @param controller
-   * @param showQC
    * @see ReviewItemHelper#ReviewItemHelper(ExerciseController)
    */
-  NPFHelper(ExerciseController controller, boolean showQC, boolean showFirstNotCompleted) {
+  NPFHelper(ExerciseController controller, boolean showFirstNotCompleted) {
     this.controller = controller;
-    this.showQC = showQC;
+    // this.showQC = showQC;
     this.showFirstNotCompleted = showFirstNotCompleted;
   }
 
@@ -169,7 +168,7 @@ public class NPFHelper<T extends CommonShell, U extends ClientExercise> implemen
     //  logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
     final PagingExerciseList<T, U> exerciseList =
         makeExerciseList(right, new ListOptions().setInstance(instanceName).setShowFirstNotCompleted(showFirstNotCompleted));
-    setFactory(exerciseList, instanceName, showQC);
+    setFactory(exerciseList, instanceName);
     Scheduler.get().scheduleDeferred(exerciseList::onResize);
     return exerciseList;
   }
@@ -187,7 +186,7 @@ public class NPFHelper<T extends CommonShell, U extends ClientExercise> implemen
     List<T> copy = new ArrayList<>(ul.getExercises());
 
     int id = toSelect == null ? -1 : toSelect.getID();
-   // logger.info("rememberAndLoadFirstFromUserList " + copy.size() + " exercises for " + id);
+    // logger.info("rememberAndLoadFirstFromUserList " + copy.size() + " exercises for " + id);
     npfExerciseList.rememberAndLoadFirst(copy, "", "", id);
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
@@ -206,33 +205,17 @@ public class NPFHelper<T extends CommonShell, U extends ClientExercise> implemen
   /**
    * @param exerciseList
    * @param instanceName
-   * @param showQC
    * @see #makeNPFExerciseList(Panel, String, boolean)
    */
-  private void setFactory(final PagingExerciseList<T, U> exerciseList, final INavigation.VIEWS instanceName, boolean showQC) {
-    exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC));
+  private void setFactory(final PagingExerciseList<T, U> exerciseList, final INavigation.VIEWS instanceName) {
+    exerciseList.setFactory(getFactory(exerciseList, instanceName));
   }
 
-  private ExercisePanelFactory<T, U> getFactory(
-      final PagingExerciseList<T, U> exerciseList,
-      final INavigation.VIEWS instanceName,
-      final boolean showQC) {
+  private ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList, final INavigation.VIEWS instanceName) {
     return new ExercisePanelFactory<T, U>(controller, exerciseList) {
-      private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
-
       @Override
       public Panel getExercisePanel(U e) {
-        if (showQC) {
-          return new QCNPFExercise<U>(e, controller, exerciseList, instanceName);
-        } else {
-          TwoColumnExercisePanel<U> widgets = new TwoColumnExercisePanel<U>(e,
-              controller,
-              exerciseList,
-              alignments, true, NPFHelper.this);
-          widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
-
-          return widgets;
-        }
+        return new QCNPFExercise<U>(e, controller, exerciseList, instanceName);
       }
     };
   }
@@ -251,8 +234,9 @@ public class NPFHelper<T extends CommonShell, U extends ClientExercise> implemen
   public void onResize() {
     if (npfExerciseList != null) {
       npfExerciseList.onResize();
-    } else {
-      //logger.info("no exercise list " +instanceName + "  for " + getClass());
     }
+    //else {
+      //logger.info("no exercise list " +instanceName + "  for " + getClass());
+    //}
   }
 }

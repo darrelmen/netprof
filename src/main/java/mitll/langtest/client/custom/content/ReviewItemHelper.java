@@ -45,7 +45,6 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
@@ -71,7 +70,7 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
    */
   private static final String ONLY_WITH_AUDIO_DEFECTS = "Only with audio defects";
   private FlexListLayout<T, U> flexListLayout;
-  INavigation.VIEWS views;
+  private  INavigation.VIEWS views;
 
   /**
    * @param controller
@@ -79,7 +78,7 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
    * @see mitll.langtest.client.banner.NewContentChooser#showReviewItems
    */
   public ReviewItemHelper(final ExerciseController controller) {
-    super(controller, true, false);
+    super(controller, false);
   }
 
   /**
@@ -142,7 +141,6 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
               );
           Panel widgets = reviewEditableExercise.addFields(npfExerciseList, new SimplePanel());
           reviewEditableExercise.setFields(exercise);
-
           return widgets;
         }
       };

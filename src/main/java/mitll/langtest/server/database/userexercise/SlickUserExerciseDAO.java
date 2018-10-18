@@ -638,24 +638,32 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
                                   ISection<CommonExercise> sectionHelper,
                                   Exercise exercise,
                                   Collection<String> attrTypes) {
-    List<Pair> pairs = getUnitToValue(slick, baseTypeOrder);
+    List<Pair> pairs = getUnitToValue(slick, baseTypeOrder, sectionHelper);
 
     if (slick.ispredef() && !slick.iscontext()) {
-      if (exercise.getAttributes() == null) {
-        if (spew++ < 10) {
-          logger.warn("addPhoneInfo : no exercise attributes for " + exercise.getID());
-        }
-      } else {
-        addBlanksForMissingInfo(exercise, attrTypes, pairs);
-      }
-
-      // logger.info("pairs for " + exercise.getID() + " " + exercise.getOldID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
-      sectionHelper.addPairs(exercise, pairs);
+      //addPairsToSectionHelper(sectionHelper, exercise, attrTypes, pairs);
+      sectionHelper.addPairs(exercise, exercise, attrTypes, pairs);
     } else {
       exercise.setPairs(pairs);
     }
     return pairs;
   }
+
+ /* private void addPairsToSectionHelper(ISection<CommonExercise> sectionHelper,
+                                       CommonExercise exercise,
+                                       Collection<String> attrTypes,
+                                       List<Pair> pairs) {
+    if (exercise.getAttributes() == null) {
+      if (spew++ < 10) {
+        logger.warn("addPhoneInfo : no exercise attributes for " + exercise.getID());
+      }
+    } else {
+      addBlanksForMissingInfo(exercise, attrTypes, pairs);
+    }
+
+    // logger.info("pairs for " + exercise.getID() + " " + exercise.getOldID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
+    sectionHelper.addPairs(exercise, pairs);
+  }*/
 
   /**
    * SectionHelper gets confused if we don't have a complete tree - same number of nodes on path to root
@@ -664,7 +672,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param attrTypes
    * @param pairs
    */
-  private void addBlanksForMissingInfo(CommonExercise exercise, Collection<String> attrTypes, List<Pair> pairs) {
+/*  private void addBlanksForMissingInfo(ClientExercise exercise, Collection<String> attrTypes, List<Pair> pairs) {
     Map<String, ExerciseAttribute> typeToAtrr = new HashMap<>();
     exercise.getAttributes().forEach(attribute -> typeToAtrr.put(attribute.getProperty(), attribute));
 
@@ -681,7 +689,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         }
       }
     }
-  }
+  }*/
 
   private int c = 0;
 
@@ -693,40 +701,54 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    * @see #addPhoneInfo
    */
-  private List<Pair> getUnitToValue(SlickExercise slick, Collection<String> typeOrder) {
+  private List<Pair> getUnitToValue(SlickExercise slick, Collection<String> typeOrder, ISection<CommonExercise> sectionHelper) {
+    int id = slick.id();
+    String unit = slick.unit();
+    String lesson = slick.lesson();
+    boolean ispredef = slick.ispredef();
+
+    return sectionHelper.getPairs(typeOrder, id, unit, lesson, ispredef);
+  }
+
+/*  @NotNull
+  private List<Pair> getPairs(Collection<String> typeOrder, int id, String unit, String lesson, boolean ispredef) {
+    boolean firstEmpty = unit.isEmpty();
+
     List<Pair> pairs = new ArrayList<>();
     Iterator<String> iterator = typeOrder.iterator();
 
     String first = iterator.hasNext() ? iterator.next() : UNIT;
     String second = iterator.hasNext() ? iterator.next() : "";
-    boolean firstEmpty = slick.unit().isEmpty();
 
-    if (firstEmpty && slick.ispredef()) {
+
+    if (firstEmpty && ispredef) {
       pairs.add(getPair(first, DEFAULT_FOR_EMPTY));
 //      unitToValue.put(first, "1");
       if (c++ < 100 || c % 100 == 0) logger.warn("getUnitToValue (" + c +
-          ") got empty " + first + " for " + slick + " type order " + typeOrder);
+          ") got empty " + first + " for " + id + " type order " + typeOrder);
 
     } else {
-      pairs.add(getPair(first, slick.unit()));
+      pairs.add(getPair(first, unit));
     }
 
     if (!second.isEmpty()) {
-      if (slick.ispredef()) {
-        boolean empty = slick.lesson().trim().isEmpty();
+      if (ispredef) {
+        boolean empty = lesson.trim().isEmpty();
 
         if (empty) {
           pairs.add(getPair(second, DEFAULT_FOR_EMPTY));
         } else {
-          pairs.add(getPair(second, slick.lesson()));
+          pairs.add(getPair(second, lesson));
         }
         if (empty) {
-          if (c++ < 100) logger.warn("getUnitToValue got empty " + second + " for " + slick);
+          if (c++ < 100) {
+            logger.warn("getUnitToValue got empty " + second + " for " + id);
+          }
         }
       }
     }
     return pairs;
-  }
+  }*/
 
   @NotNull
   private Pair getPair(String first, String value) {
@@ -780,7 +802,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
                                             boolean addTypesToSection) {
     List<List<Pair>> allAttributes = new ArrayList<>();
 
-    List<String> baseTypeOrder = getBaseTypeOrder(lookup);
+    List<String> baseTypeOrder = lookup.getBaseTypeOrder();
 
     List<CommonExercise> copy = new ArrayList<>();
 
@@ -1020,7 +1042,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   /**
    * Niche feature for alt chinese to swap primary and alternate...
    *
-   *  It's back on! 7/13/18 GWFV
+   * It's back on! 7/13/18 GWFV
    *
    * @param projid
    * @return
@@ -1063,7 +1085,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         exToAttrs,
         true);
   }
-
+/*
   @NotNull
   private List<String> getBaseTypeOrder(Project project) {
     List<String> typeOrder = new ArrayList<>();
@@ -1077,7 +1099,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       typeOrder.add(project1.second());
     }
     return typeOrder;
-  }
+  }*/
 
   /**
    * @param typeOrder

@@ -50,6 +50,7 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.SimpleUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserExerciseList;
@@ -723,6 +724,7 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
+   * @see #getCommentedList
    * @param projID
    * @param exerciseIDs
    * @param isContext
@@ -765,7 +767,7 @@ public class UserListManager implements IUserListManager {
 
   @NotNull
   private UserList<CommonShell> getQCList(String name, String description, int userListID) {
-    User qcUser = getQCUser();
+    SimpleUser qcUser = getQCUser();
     long modified = System.currentTimeMillis();
     return new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
         false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10, 30, false);
@@ -781,7 +783,7 @@ public class UserListManager implements IUserListManager {
   private UserList<CommonExercise> getReviewListEx(List<CommonExercise> allKnown,
                                                    String name, String description,
                                                    int userListID) {
-    User qcUser = getQCUser();
+    SimpleUser qcUser = getQCUser();
     long modified = System.currentTimeMillis();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
         false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10, 30, false);
@@ -813,7 +815,7 @@ public class UserListManager implements IUserListManager {
    *
    * @return
    */
-  private User getQCUser() {
+  private SimpleUser getQCUser() {
     List<User.Permission> permissions = new ArrayList<>();
     permissions.add(User.Permission.QUALITY_CONTROL);
     return new User(-1, 89, 0, MiniUser.Gender.Unspecified, 0, "", "", false, permissions);
@@ -915,146 +917,6 @@ public class UserListManager implements IUserListManager {
     userExerciseDAO.update(userExercise, false, typeOrder);
   }
 
-
-  /**
-   * TODOx : why all this foolishness with the id?
-   * TODOx : put this back?
-   *
-   * @param userExercise
-   * @return
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise
-   */
-/*  @Override
-  public CommonExercise duplicate(CommonExercise userExercise) {
-    logger.error("should call domino instead");
-    return userExercise;
-*//*    String newid = getDupID(userExercise);
-
-    logger.debug("duplicating " + userExercise + " with id " + newid);
-    userExercise.getCombinedMutableUserExercise().setOldID(newid);
-    userExerciseDAO.add(userExercise, true);
-    String assignedID = userExercise.getOldID();
-
-    // copy the annotations
-    for (Map.Entry<String, ExerciseAnnotation> pair : userExercise.getFieldToAnnotation().entrySet()) {
-      ExerciseAnnotation value = pair.getValue();
-      addAnnotation(assignedID, pair.getKey(), value.getStatus(), value.getComment(), userExercise.getCombinedMutableUserExercise().getCreator());
-    }
-
-    return userExercise;*//*
-  }*/
-
-/*  private String getDupID(CommonExercise userExercise) {
-    String id = userExercise.getOldID();
-    String newid;
-    if (id.contains("dup")) {
-      newid = id.split("dup")[0] + DUP + System.currentTimeMillis();
-    } else {
-      newid = id + DUP + System.currentTimeMillis();
-    }
-    return newid;
-  }*/
-
-  /**
-   * TODO : Why is this needed?
-   * <p>
-   * Remember to copy the audio from the posted location to a more permanent location.
-   * <p>
-   * If it's already under a media directory -- don't change it.
-   *
-   * @param userExercise
-   * @param overwrite
-   * @param mediaDir
-   * @seex IUserListManager#newExercise
-   * @see UserListManager#editItem
-   */
-/*  private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
-    AudioAttribute regularSpeed = userExercise.getRegularSpeed();
-    if (regularSpeed == null) {
-      logger.info("fixAudioPaths no audio yet for " + userExercise);
-      return;
-    }
-    long now = System.currentTimeMillis();
-    logger.info("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" + mediaDir + "'");
-
-    // String foreignLanguage = userExercise.getForeignLanguage();
-    int id = userExercise.getID();
-    int projectID = userExercise.getProjectID();
-
-    if (!regularSpeed.getAudioRef().contains(mediaDir)) {
-      fixAudioPathOfAttribute(userExercise, overwrite, regularSpeed, now, id, projectID, FAST);
-      logger.info("fixAudioPaths : for " + userExercise.getOldID() + " fast is " + regularSpeed.getAudioRef());
-    }
-
-    AudioAttribute slowSpeed = userExercise.getSlowSpeed();
-    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() &&
-        !slowSpeed.getAudioRef().contains(mediaDir)) {
-      fixAudioPathOfAttribute(userExercise, overwrite, slowSpeed, now, id, projectID, SLOW);
-    }
-  }*/
-
-  /**
-   * @param userExercise
-   * @param overwrite
-   * @param regularSpeed
-   * @param now
-   * @param id
-   * @param projectID
-   * @param prefix
-   */
-/*  private void fixAudioPathOfAttribute(CommonExercise userExercise,
-                                       boolean overwrite,
-                                       AudioAttribute regularSpeed,
-                                       long now,
-                                       int id,
-                                       int projectID,
-                                       String prefix) {
-    File fileRef = pathHelper.getAbsoluteAudioFile(regularSpeed.getAudioRef());
-
-    String fast = prefix + "_" + now + "_by_" + userExercise.getCreator() + ".wav";
-    String artist = regularSpeed.getUser().getUserID();
-    String refAudio = getRefAudioPath(
-        projectID,
-        id,
-        fileRef,
-        fast,
-        overwrite,
-        new TrackInfo(userExercise.getForeignLanguage(), artist, userExercise.getEnglish(), ""));
-    regularSpeed.setAudioRef(refAudio);
-  }*/
-
-  /**
-   * Copying audio from initial recording location to new location.
-   * <p>
-   * Also normalizes the audio level.
-   *
-   * @param projid
-   * @param id
-   * @param fileRef
-   * @param destFileName
-   * @param overwrite
-   * @param trackInfo
-   * @return new, permanent audio path
-   * @see #fixAudioPaths
-   */
-/*  private String getRefAudioPath(int projid,
-                                 int id,
-                                 File fileRef,
-                                 String destFileName,
-                                 boolean overwrite,
-                                 TrackInfo trackInfo) {
-    Database database = userDAO.getDatabase();
-    ServerProperties serverProps = database.getServerProps();
-    Project project = database.getProject(projid);
-    return new PathWriter(serverProps).getPermanentAudioPath(
-        fileRef,
-        destFileName,
-        overwrite,
-        project.getLanguage(),
-        id,
-        serverProps,
-        trackInfo);
-  }*/
 
   /**
    * @param userExerciseDAO
