@@ -47,6 +47,8 @@ import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
+import mitll.langtest.shared.exercise.FilterRequest;
+import mitll.langtest.shared.exercise.FilterResponse;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.lts.HTKDictionary;
@@ -76,8 +78,19 @@ public class EasyReportTest extends BaseTest {
   @Test
   public void testComment() {
     DatabaseImpl english = getDatabase();
+    Project project = english.getProject(4);
+
+    FilterResponse typeToValues = english.getTypeToValues(new FilterRequest().setRecordRequest(true), 4, 6);
+    logger.info("Got " + typeToValues);
+//    english.getUserListManager().getCommentedList(4, false);
+    // english.getUserListManager().getCommentedList(4, true);
+  }
+
+  @Test
+  public void testCommentContext() {
+    DatabaseImpl english = getDatabase();
     english.getProject(4);
-    english.getUserListManager().getCommentedList(4, false);
+    // english.getUserListManager().getCommentedList(4, false);
     english.getUserListManager().getCommentedList(4, true);
   }
 
@@ -372,7 +385,7 @@ public class EasyReportTest extends BaseTest {
 
     logger.info("Got " + phraseToDecode);
 
-      phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode(iki, Language.TURKISH);
+    phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode(iki, Language.TURKISH);
 
     logger.info("Got " + phraseToDecode);
 
