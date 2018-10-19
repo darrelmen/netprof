@@ -149,9 +149,13 @@ public class ServerProperties {
   private static final String LOG_MAILFROM = "log.mailfrom";
   private static final String MAIL_FROM = "mail.from";
 
-  private static final String IMAGE = "image";
+  //  private static final String IMAGE = "image";
   private static final String NETPROF = "netprof";
+
+  private static final String POSTGRES_HYDRA = "postgresHydra";
   private static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
+
+
   public static final String ADD_USER_VIA_EMAIL = "addUserViaEmail";
   public static final String SEND_HEARTBEAT = "sendHeartbeat";
   public static final String HEARTBEAT_PERIOD = "heartbeatPeriod";
@@ -172,7 +176,6 @@ public class ServerProperties {
 
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   private static final String DB_CONFIG = "dbConfig";
-  //private static final String POSTGRES_HYDRA = "postgresHydra";
   private static final String POSTGRES = "postgres";
 
   /**
@@ -282,6 +285,7 @@ public class ServerProperties {
   private String configFileFullPath;
 
   public ServerProperties() {
+
     Map<String, String> value = new HashMap<>();
 
     // ā	á	ǎ	à	ē	é	ě	è	ī	í	ǐ	ì	ō	ó	ǒ	ò	ū	ú	ǔ	ù	ǖ	ǘ	ǚ	ǜ
@@ -717,14 +721,13 @@ public class ServerProperties {
   }
 
   /**
+   * @param languageEnum
+   * @return
+   * @seex mitll.langtest.server.scoring.AlignmentHelper#getPrecalcScores(boolean, ISlimResult, String)
+   * @seex mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore(String, ImageOptions, boolean, String, String, HydraOutput, double, int, boolean, JsonObject)
    * @see AudioFileHelper#isUsePhoneToDisplay
    * @see AudioFileHelper#getEasyAlignment(ClientExercise, String)
    * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore(PretestScore, boolean, ServerProperties, Language)
-   * @seex mitll.langtest.server.scoring.AlignmentHelper#getPrecalcScores(boolean, ISlimResult, String)
-   * @seex mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore(String, ImageOptions, boolean, String, String, HydraOutput, double, int, boolean, JsonObject)
-   *
-   * @return
-   * @param languageEnum
    */
   public boolean usePhoneToDisplay(Language languageEnum) {
     return languageEnum == Language.KOREAN;
@@ -853,9 +856,13 @@ public class ServerProperties {
    * @return
    */
   public String getDBConfig() {
-    return dbConfig;
+    return props.getProperty(DB_CONFIG, POSTGRES_HYDRA);
   }
 
+  /**
+   * @param optDatabase
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight
+   */
   public void setDBConfig(String optDatabase) {
     this.dbConfig = optDatabase;
   }

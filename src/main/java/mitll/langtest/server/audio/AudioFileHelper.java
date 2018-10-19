@@ -1647,7 +1647,7 @@ public class AudioFileHelper implements AlignDecode {
   // TODO: gross
   private void makeASRScoring(Project project) {
     if (asrScoring == null) {
-      logger.info("\n\n\n\nmakeASRScoring for " + project.getName(), new Exception());
+      logger.info("makeASRScoring for " + project.getName());
       String installPath = pathHelper.getInstallPath();
       asrScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify,
           readDictionary(project),

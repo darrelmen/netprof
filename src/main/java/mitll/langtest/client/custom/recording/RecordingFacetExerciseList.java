@@ -18,15 +18,13 @@ import java.util.logging.Logger;
 /**
  * @see RecorderNPFHelper#getMyListLayout
  */
-class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends LearnFacetExerciseList<T> {
-
-
+class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
 
   private static final String RECORD = "Record";
   private static final String UNRECORD = "Unrecord";
-
   private static final String RECORDED = "Recorded";
+
   private boolean isContext;
 
   /**
@@ -44,18 +42,18 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
                              DivWidget listHeader,
                              boolean isContext) {
     super(
+        controller,
         topRow,
         currentExercisePanel,
-        controller,
-        new ListOptions(instanceName)
-            .setShowFirstNotCompleted(true)
-            .setActivityType(ActivityType.RECORDER)
-        , listHeader, true, isContext ? INavigation.VIEWS.RECORD_CONTEXT : INavigation.VIEWS.RECORD_ENTRIES);
+        instanceName,
+        listHeader,
+        isContext ? INavigation.VIEWS.RECORD_CONTEXT : INavigation.VIEWS.RECORD_ENTRIES);
     this.isContext = isContext;
   }
 
   @Override
-  protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix, boolean onlyWithAudioAnno, boolean onlyDefaultUser, boolean onlyUninspected) {
+  protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix,
+                                                       boolean onlyWithAudioAnno, boolean onlyDefaultUser, boolean onlyUninspected) {
     ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected);
     exerciseListRequest.setOnlyRecordedByMatchingGender(true);
     exerciseListRequest.setOnlyUnrecordedByMe(true);
@@ -63,10 +61,10 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   }
 
   /**
-   * @see #getTypeToValues
    * @param userListID
    * @param pairs
    * @return
+   * @see #getTypeToValues
    */
   @NotNull
   @Override
@@ -77,8 +75,8 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   }
 
   /**
-   * @see #addWidgets()
    * @return
+   * @see #addWidgets()
    */
   @NotNull
   @Override
@@ -91,19 +89,9 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   }
 
   /**
-   *
-   * @param exerciseID
-   * @param searchIfAny
-   */
-  @Override
-  protected void pushFirstSelection(int exerciseID, String searchIfAny) {
-    askServerForExercise(-1);
-  }
-
-  /**
-   * @see #getExercises
    * @param prefix
    * @return
+   * @see #getExercises
    */
   @Override
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
@@ -112,7 +100,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
       String s = getTypeToSelection().get(RECORDED);
       request.setOnlyUnrecordedByMe(s.startsWith(UNRECORD));
       request.setOnlyRecordedByMatchingGender(s.startsWith(RECORD));
-       logger.info("getExerciseListRequest selection is " + s);
+      logger.info("getExerciseListRequest selection is " + s);
 
     } else {
       //logger.info("getExerciseListRequest no recorded selection in " + getTypeToSelection().keySet());
@@ -122,46 +110,8 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     return request;
   }
 
-  /**
-   * @see #getChoiceHandler
-   * @param type
-   * @param key
-   * @param newUserListID
-   * @return
-   */
-  @Override
-  protected String getChoiceHandlerValue(String type, String key, int newUserListID) {
-    return key;
-  }
 
-  /**
-   * No list facet or special facet.
-   * @see #addFacetsForReal
-   * @param typeToValues
-   * @return
-   */
-  @Override
-  protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
-    return null;
-  }
-
-  /**
-   * @see #reallyGetExercises
-   * @param visibleIDs
-   * @param alreadyFetched
-   * @return
-   */
-  @NotNull
-  @Override
-  protected Set<Integer> getRequested(Collection<Integer> visibleIDs, List<ClientExercise> alreadyFetched) {
-    return new HashSet<>(visibleIDs);
-  }
-
-  @Override
-  protected void goGetNextAndCacheIt(int itemID) {
-  }
-
-  void restoreUI(SelectionState selectionState) {
-    restoreUIState(selectionState);
-  }
+//  void restoreUI(SelectionState selectionState) {
+//    restoreUIState(selectionState);
+//  }
 }

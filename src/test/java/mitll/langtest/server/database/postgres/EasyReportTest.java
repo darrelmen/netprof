@@ -39,16 +39,14 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.shared.analysis.*;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.lts.HTKDictionary;
@@ -82,6 +80,53 @@ public class EasyReportTest extends BaseTest {
 
     FilterResponse typeToValues = english.getTypeToValues(new FilterRequest().setRecordRequest(true), 4, 6);
     logger.info("Got " + typeToValues);
+//    english.getUserListManager().getCommentedList(4, false);
+    // english.getUserListManager().getCommentedList(4, true);
+  }
+
+  @Test
+  public void testCommentKorean() {
+    DatabaseImpl english = getDatabase();
+    Project project2 = english.getProject(4);
+
+    Project project = english.getProjectByName("Korean");
+
+    {
+      FilterRequest request = new FilterRequest().setRecordRequest(true);
+      project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+
+      logger.info("Request is " + request);
+
+      FilterResponse typeToValues = english.getTypeToValues(request, project.getID(), 6);
+      logger.info("Got " + typeToValues);
+    }
+
+    {
+      FilterRequest request = new FilterRequest().setRecordRequest(true);
+      project.getTypeOrder().forEach(type ->
+          request.addPair(new Pair(
+              type,
+              type.equals("Unit") ? "1" : SectionHelper.ANY)));
+
+      logger.info("Request is " + request);
+
+      FilterResponse typeToValues = english.getTypeToValues(request, project.getID(), 6);
+      logger.info("Got " + typeToValues);
+    }
+
+
+    {
+      FilterRequest request = new FilterRequest().setRecordRequest(true);
+      project.getTypeOrder().forEach(type ->
+          request.addPair(new Pair(
+              type,
+              type.equals("Unit") ? "2" : SectionHelper.ANY)));
+
+      logger.info("Request is " + request);
+
+      FilterResponse typeToValues = english.getTypeToValues(request, project.getID(), 6);
+      logger.info("Got " + typeToValues);
+    }
 //    english.getUserListManager().getCommentedList(4, false);
     // english.getUserListManager().getCommentedList(4, true);
   }
