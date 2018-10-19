@@ -158,7 +158,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     if (logger == null) {
       logger = Logger.getLogger("WaveformExercisePanel");
     }
-//    logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord());
+ //    logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord());
     return ExerciseFormatter.getArabic(getRecordPrompt(e), controller.getLanguage());
   }
 

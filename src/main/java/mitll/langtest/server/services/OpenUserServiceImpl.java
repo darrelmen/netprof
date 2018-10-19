@@ -72,7 +72,8 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       HttpServletRequest request = getThreadLocalRequest();
       String remoteAddr = getRemoteAddr(request);
       String userAgent = request.getHeader(USER_AGENT);
-      String localAddr = request.getLocalAddr();
+
+/*      String localAddr = request.getLocalAddr();
       String localName = request.getLocalName();
       String serverName = request.getServerName();
       int localPort = request.getLocalPort();
@@ -85,8 +86,12 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           "\n\tlocalPort   " + localPort +
           "\n\tserverPort  " + serverPort +
           "\n\tcontextPath " + contextPath
-      );
-      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, createSession(), true);
+      );*/
+
+      LoginResult loginResult = securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, createSession(), true);
+
+      return loginResult;
+
     } catch (Exception e) {
       logger.error("got " + e, e);
       logAndNotifyServerException(e);

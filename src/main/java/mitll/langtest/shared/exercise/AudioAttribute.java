@@ -113,7 +113,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param transcript       what the speaker read at the time of recording
    * @param actualPath
    * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getResultsForQuery
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
+   * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
    */
   public AudioAttribute(int uniqueID,
                         int userid,
@@ -326,29 +326,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return uniqueID;
   }
 
-  /**
-   * remove punct before we get here.
-   *
-   * @param foreignLanguage
-   * @param transcript
-   * @return
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#isMatchExToAudio(AudioAttribute, String)
-   */
-  public boolean matchTranscript(String foreignLanguage, String transcript) {
-    foreignLanguage = foreignLanguage.trim();
-    if (transcript != null) {
-      transcript = transcript.trim();
-    }
-
-    return transcript == null ||
-        foreignLanguage.isEmpty() ||
-        transcript.isEmpty() ||
-        transcript.toLowerCase()
-            .equals(
-                foreignLanguage
-                    .toLowerCase());
-  }
-
   public String getTranscript() {
     return transcript == null ? "" : transcript;
   }
@@ -379,7 +356,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)
+   * @seex mitll.langtest.server.database.audio.BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)
    * @deprecated - do we ever set this properly???
    */
   public String getActualPath() {
@@ -404,7 +381,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @param alignmentOutput
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#setAlignmentInfo
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#setAlignmentInfo
    */
   public void setAlignmentOutput(AlignmentOutput alignmentOutput) {
     this.alignmentOutput = alignmentOutput;

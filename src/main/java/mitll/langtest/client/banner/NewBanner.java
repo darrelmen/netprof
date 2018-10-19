@@ -52,7 +52,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private static final List<VIEWS> POLY_VIEWS = Arrays.asList(VIEWS.LEARN, VIEWS.DRILL, VIEWS.PROGRESS);
 
-  private static final String NETPROF = "dialog" + (PropertyHandler.IS_BETA ? "BETA" : "");
+  public static final String appNameToUse = "netprof";
+  private static final String NETPROF = appNameToUse + (PropertyHandler.IS_BETA ? "BETA" : "");
 
   private static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
 

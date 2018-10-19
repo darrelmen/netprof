@@ -123,7 +123,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
    * @see RecordRefAudioPanel#onLoad
    */
   private void getProgressInfo() {
-//    logger.info("getProgressInfo Get progress info for " + getClass());
+    //    logger.info("getProgressInfo Get progress info for " + getClass());
     controller.getService().getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -142,6 +142,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
    */
   private class RecordRefAudioPanel extends WaveformExercisePanel<T, ClientExercise> implements CommentAnnotator {
     //    private final Logger logger = Logger.getLogger("RecordRefAudioPanel");
+    private boolean addedComment = false;
     /**
      * @param e
      * @param controller1
@@ -160,10 +161,15 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
 
     @Override
     protected void enableNext() {
-      navigationHelper.enableNextButton(true);
+      super.enableNext();
       if (isCompleted()) {
         showRecordedState(exercise);
       }
+    }
+
+    @Override
+    protected boolean isCompleted() {
+      return super.isCompleted() || addedComment;
     }
 
     @Override
@@ -213,7 +219,6 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
       return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
     }
 
-
     /**
      * @param e
      * @param field
@@ -223,7 +228,12 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
      * @see GoodwaveExercisePanel#getQuestionContent
      */
     private Widget getEntry(AnnotationExercise e, final String field, Widget contentWidget, boolean isRTL) {
-      return getEntry(field, e.getAnnotation(field), contentWidget, isRTL);
+      ExerciseAnnotation annotation = e.getAnnotation(field);
+      if (annotation != null && annotation.isDefect()) {
+        addedComment = true;
+        enableNext();
+      }
+      return getEntry(field, annotation, contentWidget, isRTL);
     }
 
     /**
@@ -270,6 +280,9 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
 
             @Override
             public void onSuccess(Void result) {
+              //  logger.info("added annotation " + commentToPost + " for " + field + " status " + status);
+              addedComment = status == ExerciseAnnotation.TYPICAL.INCORRECT;
+              enableNext();
             }
           });
     }

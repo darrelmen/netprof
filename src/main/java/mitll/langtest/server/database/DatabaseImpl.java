@@ -699,7 +699,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
 
     DBConnection dbConnection = new DBConnection(dbConfig);
-    //   dbConnection.addColumn();
+        dbConnection.addColumn();
 //    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
     return dbConnection;
   }

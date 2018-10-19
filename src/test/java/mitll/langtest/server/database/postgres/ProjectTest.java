@@ -450,6 +450,14 @@ public class ProjectTest extends BaseTest {
     logger.info(maleFemaleProgress.toString());
   }
 
+  @Test
+  public void testMaleFemaleLev() {
+    DatabaseImpl database = getAndPopulate();
+    Project project = database.getProjectByName("Levantine");
+    database.getMaleFemaleProgress(project.getID());
+
+  }
+
 /*
   @Test
   public void testMaleFemaleFilterBySameGender() {

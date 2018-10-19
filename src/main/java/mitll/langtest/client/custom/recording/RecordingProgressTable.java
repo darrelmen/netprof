@@ -50,18 +50,16 @@ public class RecordingProgressTable extends FlexTable {
   private static final String FEMALE_SLOW = BaseAudioDAO.FEMALE_SLOW;
   private static final String FEMALE_FAST = BaseAudioDAO.FEMALE_FAST;
 
-//  private static final String MALE_CONTEXT = BaseAudioDAO.MALE_CONTEXT;
-//  private static final String FEMALE_CONTEXT = BaseAudioDAO.FEMALE_CONTEXT;
-
   private static final String FEMALE = BaseAudioDAO.FEMALE;
   private static final String MALE_SLOW = BaseAudioDAO.MALE_SLOW;
   private static final String MALE = BaseAudioDAO.MALE;
   private static final String MALE_FAST = BaseAudioDAO.MALE_FAST;
-  public static final String REGULAR = "regular";
-  public static final String SLOW = "slow";
-  public static final String TOTAL = "Total";
+  private static final String REGULAR = "regular";
+  private static final String SLOW = "slow";
+  private static final String TOTAL = "Total";
 
   /**
+   * Adds fix for <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/267'>Remove unused columns from context chart</a>
    * 4 cols for male
    * 3 for female
    *
@@ -69,14 +67,14 @@ public class RecordingProgressTable extends FlexTable {
    * @see RecorderNPFHelper#getProgressInfo
    */
   public void populate(Map<String, Float> result) {
-    float total  = result.get(BaseAudioDAO.TOTAL);
+    float total = result.get(BaseAudioDAO.TOTAL);
     //getElement().setId("RecordingProgressTable");
 
     int r = 0;
     int col;
 
     List<String> labels = Arrays.asList("Male ", REGULAR, SLOW);
-    List<String> keys   = Arrays.asList(MALE, MALE_FAST, MALE_SLOW);
+    List<String> keys = Arrays.asList(MALE, MALE_FAST, MALE_SLOW);
     col = addCols(result, total, 0, 0, labels, keys);
 
     // fourth col
@@ -90,23 +88,21 @@ public class RecordingProgressTable extends FlexTable {
 
     float ctotal = result.get(BaseAudioDAO.TOTAL_CONTEXT);
 
-    //labels = Arrays.<String>asList("Context Male ", "Female");
-    labels = Arrays.asList("Context Male ", REGULAR, SLOW);
-    keys   = Arrays.asList(BaseAudioDAO.CMALE, BaseAudioDAO.CMALE_FAST, BaseAudioDAO.CMALE_SLOW);
+    labels = Arrays.asList("Context Male ", "", "");
+    keys = Arrays.asList(BaseAudioDAO.CMALE_FAST, "", "");
 
     r++;
     col = addCols(result, ctotal, r, 0, labels, keys);
     setLabelAndVal(result, total, r, col, TOTAL, BaseAudioDAO.TOTAL_CONTEXT, false);
 
-    labels = Arrays.asList("Context Female ", REGULAR, SLOW);
-    keys   = Arrays.asList(BaseAudioDAO.CFEMALE, BaseAudioDAO.CFEMALE_FAST, BaseAudioDAO.CFEMALE_SLOW);
+    labels = Arrays.asList("Context Female ", "", "");
+    keys = Arrays.asList(BaseAudioDAO.CFEMALE_FAST, "", "");
 
     r++;
     addCols(result, ctotal, r, 0, labels, keys);
 
 //    col += 3;
-  //  col = setLabelAndVal(result, total, r, col, TOTAL, BaseAudioDAO.TOTAL_CONTEXT, false);
-
+    //  col = setLabelAndVal(result, total, r, col, TOTAL, BaseAudioDAO.TOTAL_CONTEXT, false);
   }
 
   private int addCols(Map<String, Float> result, float total, int r, int col, List<String> labels, List<String> keys) {
@@ -127,12 +123,20 @@ public class RecordingProgressTable extends FlexTable {
     String p = "<b>";
     String s = "</b>" + sp;
 
-    setHTML(r, col++, sp + result.get(male).intValue() + "");
-    int percent = getPercent(result.get(male), total);
+    Float aFloat = result.get(male);
 
-    setHTML(r, col++, p +
-        (addPercent ? getPercent(percent) : "")
-        + s);
+    if (aFloat == null) {
+      setHTML(r, col++, "");
+      setHTML(r, col++, "");
+    } else {
+      setHTML(r, col++, sp + aFloat.intValue() + "");
+      int percent = getPercent(aFloat, total);
+
+      setHTML(r, col++, p +
+          (addPercent ? getPercent(percent) : "")
+          + s);
+    }
+
     return col;
   }
 

@@ -61,7 +61,7 @@ import static mitll.langtest.shared.user.MiniUser.Gender.Male;
 public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final Logger logger = LogManager.getLogger(SlickAudioDAO.class);
   private static final String BEST_AUDIO = "bestAudio";
-  public static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
 
   private final AudioDAOWrapper dao;
   private final long now = System.currentTimeMillis();
@@ -165,7 +165,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   public AudioAttribute addOrUpdate(AudioInfo info) {
     MiniUser miniUser = userDAO.getMiniUser(info.getUserid());
 
-    return toAudioAttribute(
+    AudioAttribute audioAttribute = toAudioAttribute(
         dao.addOrUpdate(
             info.getUserid(),
             info.getExerciseID(),
@@ -180,6 +180,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
             miniUser.getRealGenderInt()),
         miniUser,
         info.isHasProjectSpecificAudio());
+
+//    logger.info("addOrUpdate Add or update after  " + audioAttribute);
+
+  //  Collection<SlickAudio> byID = dao.getByID(audioAttribute.getUniqueID());
+
+//    byID.forEach(slickAudio -> logger.info("addOrUpdate Got " + slickAudio));
+//    logger.info("Add or update exists " + audioAttribute);
+    return audioAttribute;
   }
 
   /**
@@ -327,10 +335,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       Set<Integer> exIDs = getExIDs(tuple2s.iterator());
 
       if (userDAO.isMale(userID)) {
-//        logger.info("male   user " + userID +  " = " + exIDs.size());
+        if (DEBUG) logger.info("getCountForGender male   user " + userID + " = " + exIDs.size());
         idsOfRecordedExercisesForMales.addAll(exIDs);
       } else {
-        //      logger.info("female user " + userID +  " = " + exIDs.size());
+        if (DEBUG) logger.info("getCountForGender female user " + userID + " = " + exIDs.size());
         idsOfRecordedExercisesForFemales.addAll(exIDs);
       }
     }
@@ -342,6 +350,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           "\n\tfemales " + idsOfRecordedExercisesForFemales.size());
     }
   }
+
+/*
+  public boolean isNoAccentMatch(String transcript, String exerciseFL) {
+    return dao.isNoAccentMatch(transcript, exerciseFL);
+  }*/
 
   @Override
   Set<Integer> getValidAudioOfType(int userid, AudioType audioType) {
@@ -389,7 +402,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return getExercises(genderMatch);
   }
 
-
+  /**
+   *
+   * @param projid
+   * @param isMale
+   * @param exToTranscript
+   * @return
+   */
   @Override
   Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
                                                     boolean isMale,

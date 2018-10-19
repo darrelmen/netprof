@@ -67,7 +67,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final String TRANSCRIPT = "transcript";
   private static final String DNR = "dnr";
 
-  private final boolean DEBUG = true;
+  private final boolean DEBUG = false;
   private final Connection connection;
   private final IUserDAO userDAO;
 
@@ -410,7 +410,8 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    */
   protected void getCountForGender(int projid, AudioType audioSpeed, Set<Integer> uniqueIDs,
                                    Map<Integer, String> exToTranscript,
-                                   Set<Integer> idsOfRecordedExercisesForMales, Set<Integer> idsOfRecordedExercisesForFemales) {
+                                   Set<Integer> idsOfRecordedExercisesForMales,
+                                   Set<Integer> idsOfRecordedExercisesForFemales) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
       String s = getInClause(Collections.EMPTY_SET);

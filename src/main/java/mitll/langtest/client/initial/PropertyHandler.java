@@ -59,8 +59,10 @@ import static mitll.langtest.client.user.ResetPassword.SHOW_ADVERTISED_IOS;
 public class PropertyHandler {
   private final Logger logger = Logger.getLogger("PropertyHandler");
 
-
-  public static final boolean IS_BETA=true;
+  /**
+   *
+   */
+  public static final boolean IS_BETA=false;
 
 
   private static final String AFTER_STOP_DELAY_MILLIS = "afterStopDelayMillis";

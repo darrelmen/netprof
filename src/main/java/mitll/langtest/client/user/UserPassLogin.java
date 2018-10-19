@@ -161,6 +161,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   public void setSignInHasFocus() {
     signInHasFocus = true;
   }
+
   public void setSignInPasswordFocus() {
     signInForm.setFocusPassword();
   }
@@ -213,9 +214,11 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
       DivWidget child = new DivWidget();
       container.add(child);
 
-      if (ADD_WATERMARK) addWatermark(container);
+      if (ADD_WATERMARK) {
+        addWatermark(container);
+      }
 
-      child.addStyleName(LOGIN_PAGE_BACK);
+      child.addStyleName(ADD_WATERMARK ? "dialogLoginPageBack" : "loginPageBack");
     }
 
     {

@@ -127,14 +127,14 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
 
     {
-    Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
+      Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
 
       //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
       List<User.Permission> requiredPerms = currentStoredView.getPerms();
       userPerms.retainAll(requiredPerms);
 
-    if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
-      logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
+      if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
+        logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
         currentStoredView = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
       }
     }
@@ -253,7 +253,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case FIX:
           clear();
           setInstanceHistory(FIX);
-          getReviewList(false,FIX);
+          getReviewList(false, FIX);
           break;
         case QC_SENTENCES:
           clear();
@@ -301,7 +301,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     divWidget.add(header);
 //    divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, STUDY));
     divWidget.add(isTeacher() ?
-        new StudentScores(controller):
+        new StudentScores(controller) :
         new SessionAnalysis(controller, controller.getUser(), null));
     currentSection = SCORES;
   }
@@ -509,7 +509,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
       @Override
       public void onSuccess(UserList<CommonShell> result) {
-        showReviewItems(result,fix);
+        showReviewItems(result, fix);
       }
     });
   }
@@ -631,7 +631,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   public ShowTab getShowTab(VIEWS views) {
     return (exid) -> {
       int dialog = new SelectionState().getDialog();
-     // logger.info("getShowTab Dialog id " + dialog);
+      // logger.info("getShowTab Dialog id " + dialog);
 
       ExerciseListContent learnHelper = views == LEARN ? this.learnHelper : studyHelper;
 

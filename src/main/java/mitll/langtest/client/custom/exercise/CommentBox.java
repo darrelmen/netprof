@@ -269,6 +269,7 @@ public class CommentBox extends PopupContainerFactory {
 
   private DivWidget getCommentAndButtonsRow(String field, Widget content, Button commentButton, Button clearButton, boolean isRTL) {
     DivWidget row = new DivWidget();
+    row.addStyleName("inlineFlex");
     row.getElement().setId("comment_and_clear_container_for_" + field);
     if (content != null) {
       row.add(content);
@@ -284,11 +285,12 @@ public class CommentBox extends PopupContainerFactory {
       row.addStyleName("floatLeft");
     }
 
-    row.add(commentButton);
-    commentButton.addStyleName("floatLeft");
+    DivWidget buttons=new DivWidget();
+    row.add(buttons);
+    row.addStyleName("floatLeft");
 
-    row.add(clearButton);
-    clearButton.addStyleName("floatLeft");
+    buttons.add(commentButton);
+    buttons.add(clearButton);
 
     return row;
   }
@@ -389,10 +391,10 @@ public class CommentBox extends PopupContainerFactory {
       this.field = field;
     }
 
-    @Override
+    /*@Override
     protected void onLoad() {
       logger.info("got load on " + getElement().getId());
-    }
+    }*/
 
     /**
      * @param commentBox
@@ -501,8 +503,8 @@ public class CommentBox extends PopupContainerFactory {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.isEmpty();
 
-      logger.info("commentComplete ex #" + exerciseID +
-          " field " + field + " comment '" + comment + "' correct = " + isCorrect);
+/*      logger.info("commentComplete ex #" + exerciseID +
+          " field " + field + " comment '" + comment + "' correct = " + isCorrect);*/
 
       addToolTip(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);

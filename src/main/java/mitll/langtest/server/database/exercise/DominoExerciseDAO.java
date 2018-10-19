@@ -155,6 +155,7 @@ public class DominoExerciseDAO {
     String npID = getNPId(vocabularyItem);
     Exercise ex = getExerciseFromVocabularyItem(projid, docID, npID, vocabularyItem, creator, time, exID);
     addAttributes(unitName, chapterName, vocabularyItem, ex);
+    logger.info("getExerciseFromVocab ex for netprof id " + npID + " unit and chapter = " + ex.getUnitToValue());
 //        logger.info("Got " + ex.getUnitToValue());
     addContextSentences(projid, creator, docID, npID, vocabularyItem.getSamples(), ex);
 

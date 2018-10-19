@@ -100,10 +100,10 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   /**
-   * @see #update
    * @param userIDFromSessionOrDB
    * @param projID
    * @param update
+   * @see #update
    */
   private void configureAndRefresh(int userIDFromSessionOrDB, int projID, boolean update) {
     if (update) {
@@ -150,15 +150,19 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
       logger.info("setDefaultsIfMissing examing " + productionProjects.size() + " production projects.");
 
-      Project mostRecent = productionProjects.stream()
+      Optional<Project> max = productionProjects.stream()
           .filter(project -> project.getLanguage().equalsIgnoreCase(language) && project.getModelsDir() != null)
-          .max(Comparator.comparingLong(p -> p.getProject().modified().getTime()))
-          .get();
+          .max(Comparator.comparingLong(p -> p.getProject().modified().getTime()));
 
-      newProject.setModelsDir(mostRecent.getModelsDir());
+      if (max.isPresent()) {
+        Project mostRecent = max.get();
+        newProject.setModelsDir(mostRecent.getModelsDir());
 
-      if (newProject.getPort() == -1) {
-        newProject.setPort(mostRecent.getWebservicePort());
+        if (newProject.getPort() == -1) {
+          newProject.setPort(mostRecent.getWebservicePort());
+        }
+      } else {
+        logger.warn("setDefaultsIfMissing NO project for " + language);
       }
     } catch (Exception e) {
       logger.info("Got " + e, e);

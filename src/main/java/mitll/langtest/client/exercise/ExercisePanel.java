@@ -39,6 +39,7 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.Shell;
@@ -96,12 +97,13 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
-    //String message = instructionMessage;
     this.instance = instance;
     this.doNormalRecording = doNormalRecording;
 
-    logger.info("ExercisePanel for " + e.getID() + " instance " + instance +
+/*
+    logger.info("for " + e.getID() + " instance " + instance +
         " doNormal " + doNormalRecording);
+*/
 
     this.navigationHelper = getNavigationHelper(controller);
 
@@ -129,7 +131,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     HTML maybeRTLContent = new HTML(getEnglishToShow());
     stylePrompt(maybeRTLContent);
     maybeRTLContent.addStyleName("topFiveMargin");
-    maybeRTLContent.addStyleName("bottomFiveMargin");
+    maybeRTLContent.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
     maybeRTLContent.getElement().getStyle().setColor("gray");
     return maybeRTLContent;
   }
@@ -169,7 +171,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     return new NavigationHelper(exercise, controller, this, exerciseList,
         true,
         true,
-        false,
+        true,
         showPrevButton());
   }
 

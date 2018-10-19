@@ -52,6 +52,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.analysis.ar.ArabicNormalizer;
+import org.moxieapps.gwt.highcharts.client.Lang;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -68,8 +69,8 @@ public abstract class BaseAudioDAO extends DAO {
   public static final String MALE = "male";
   public static final String FEMALE = "female";
 
-  public static final String CMALE = "cmale";
-  public static final String CFEMALE = "cfemale";
+  private static final String CMALE = "cmale";
+  private static final String CFEMALE = "cfemale";
 
   public static final String MALE_FAST = "maleFast";
   public static final String MALE_SLOW = "maleSlow";
@@ -77,9 +78,9 @@ public abstract class BaseAudioDAO extends DAO {
   public static final String FEMALE_SLOW = "femaleSlow";
 
   public static final String CMALE_FAST = "cmaleFast";
-  public static final String CMALE_SLOW = "cmaleSlow";
+  private static final String CMALE_SLOW = "cmaleSlow";
   public static final String CFEMALE_FAST = "cfemaleFast";
-  public static final String CFEMALE_SLOW = "cfemaleSlow";
+  private static final String CFEMALE_SLOW = "cfemaleSlow";
 
   private static final String TRANSLITERATION = "transliteration";
   private static final int WARN_DURATION = 25;
@@ -331,10 +332,10 @@ public abstract class BaseAudioDAO extends DAO {
    * @see mitll.langtest.server.json.JsonExport#getJsonArray
    * @see
    */
-  public boolean attachAudio(ClientExercise firstExercise,
-                             Collection<AudioAttribute> audioAttributes,
-                             Language language,
-                             boolean debug) {
+  private boolean attachAudio(ClientExercise firstExercise,
+                              Collection<AudioAttribute> audioAttributes,
+                              Language language,
+                              boolean debug) {
     boolean allSucceeded = true;
 
     Collection<Integer> currentIDs = getAudioIDs(firstExercise);
@@ -406,14 +407,30 @@ public abstract class BaseAudioDAO extends DAO {
     String exerciseText = isContext && !directlyRelated.isEmpty() ?
         directlyRelated.iterator().next().getForeignLanguage() :
         firstExercise.getForeignLanguage();
+    String transcript = attr.getTranscript();
 
-    if (isMatchExToAudio(attr, exerciseText)) {
+    boolean forgiving = language != Language.LEVANTINE;
+
+    boolean isMatch = forgiving ? isMatchExToAudioArabic(attr, exerciseText) : matchTranscriptAttr(exerciseText, transcript);
+    if (isMatch) {
       // add to both if context???
+      if (DEBUG_ATTACH) {
+        logger.info("attachAudioAndFixPath \n\tforgiving " + forgiving +
+            "\n\texercise text '" + exerciseText + "'" +
+            "\n\ttranscript    '" + transcript + "'" +
+            "\n\tpath           " + attr.getAudioRef() +
+            "\n\tuserid         " + attr.getUserid()+
+            "\n\tuser           " + attr.getUser().getUserID()+
+            "\n\taudio id       " + attr.getUniqueID()
+        );
+      }
+
       firstExercise.getMutableAudio().addAudio(attr);
 
       if (isContext) {
+
         for (ClientExercise dir : directlyRelated) {
-          if (isMatchExToAudio(attr, dir)) {
+          if (isMatchExToAudio(attr, dir, true)) {
             firstExercise.getMutableAudio().addAudio(attr);
             break;
           }
@@ -467,21 +484,24 @@ public abstract class BaseAudioDAO extends DAO {
     }
   }
 
-  private boolean isMatchExToAudio(AudioAttribute attr, CommonShell dir) {
-    return isMatchExToAudio(attr, dir.getForeignLanguage());
+  private boolean isMatchExToAudio(AudioAttribute attr, CommonShell dir, boolean forgivingMatch) {
+    String foreignLanguage = dir.getForeignLanguage();
+    String transcript = attr.getTranscript();
+    return forgivingMatch ? isMatchExToAudioArabic(attr, foreignLanguage) : isNoAccentMatch(foreignLanguage, transcript);
+//    return isMatchExToAudio(attr, foreignLanguage);
   }
 
   /**
    * Todo : check if language is arabic before doing normArabic.
    *
-   * @param attr
    * @param foreignLanguage
    * @return
+   * @paramx attr
    */
-  private boolean isMatchExToAudio(AudioAttribute attr, String foreignLanguage) {
+  private boolean isMatchExToAudioArabic(AudioAttribute attr, String foreignLanguage) {
     String normFL = getNorm(removePunct(foreignLanguage));
     String normT = getNorm(removePunct(attr.getTranscript()));
-    return attr.matchTranscript(normFL, normT);
+    return matchTranscriptAttr(normFL, normT);
   }
 
   private String getNorm(String foreignLanguage) {
@@ -523,6 +543,12 @@ public abstract class BaseAudioDAO extends DAO {
     );
   }
 
+  /**
+   * @param projectid
+   * @param exercises
+   * @return
+   * @see DatabaseImpl#getMaleFemaleProgress(int)
+   */
   public Map<String, Float> getMaleFemaleProgress(int projectid, Collection<CommonExercise> exercises) {
     float total = exercises.size();
     Set<Integer> uniqueIDs = new HashSet<>();
@@ -871,7 +897,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param transcript
    * @param exerciseFL
    * @return
-   * @see #getCountForGender
+   * @see SlickAudioDAO#getCountForGender
    */
   boolean isNoAccentMatch(String transcript, String exerciseFL) {
     if (exerciseFL == null) return false;
@@ -895,6 +921,30 @@ public abstract class BaseAudioDAO extends DAO {
         foreignLanguage.isEmpty() ||
         transcript.isEmpty() ||
         removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
+  }
+
+  /**
+   * TODO : don't duplicate code
+   * remove punct before we get here.
+   *
+   * @return
+   * @paramx foreignLanguage
+   * @paramx transcript
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#isMatchExToAudio
+   */
+  private boolean matchTranscriptAttr(String foreignLanguage, String transcript) {
+    foreignLanguage = foreignLanguage.trim();
+    if (transcript != null) {
+      transcript = transcript.trim();
+    }
+
+    return transcript == null ||
+        foreignLanguage.isEmpty() ||
+        transcript.isEmpty() ||
+        transcript.toLowerCase()
+            .equals(
+                foreignLanguage
+                    .toLowerCase());
   }
 
   /**

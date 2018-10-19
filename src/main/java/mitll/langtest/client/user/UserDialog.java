@@ -64,8 +64,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class UserDialog extends BasicDialog {
   //public static final String LOGIN_PAGE_BACK = "loginPageBack";
-  public static final String LOGIN_PAGE_BACK = "dialogLoginPageBack";
-  public static final String AUTOCOMPLETE = "autocomplete";
+  static final String LOGIN_PAGE_BACK = "dialogLoginPageBack";
+  static final String AUTOCOMPLETE = "autocomplete";
   static final String NO_SERVER = "Can't communicate with server - check network connection.";
   static final String USER_ID = "User ID";
   static final String VALID_EMAIL = "Please enter a valid email address.";
@@ -288,7 +288,7 @@ public class UserDialog extends BasicDialog {
   }
 
   @NotNull
-  protected Panel getLoginContainer(Fieldset fieldset) {
+  Panel getLoginContainer(Fieldset fieldset) {
     Panel container = new DivWidget();
     container.getElement().setId("ResetPassswordContent");
 
