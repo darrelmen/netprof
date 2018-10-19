@@ -32,23 +32,17 @@
 
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.*;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.*;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.QC;
@@ -60,11 +54,11 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.QC_SENTENCES;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends ClientExercise> extends SimpleChapterNPFHelper<T, U> {
+public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
   private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
 
-  private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
-  private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
+  //  private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
+//  private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
   private boolean forSentences;
 
   /**
@@ -85,8 +79,8 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends Client
    * @return
    */
   @Override
-  protected FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer) {
-    return new MyFlexListLayout<T, U>(controller, outer) {
+  protected FlexListLayout<T, ClientExercise> getMyListLayout(SimpleChapterNPFHelper<T, ClientExercise> outer) {
+    return new MyFlexListLayout<T, ClientExercise>(controller, outer) {
       protected void styleTopRow(Panel twoRows, Panel topRow) {
         twoRows.add(topRow);
       }
@@ -97,114 +91,27 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell, U extends Client
       }
 
       @Override
-      protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
-                                                          Panel currentExercisePanel,
-                                                          INavigation.VIEWS instanceName,
-                                                          DivWidget listHeader,
-                                                          DivWidget footer) {
+      protected PagingExerciseList<T, ClientExercise> makeExerciseList(Panel topRow,
+                                                                       Panel currentExercisePanel,
+                                                                       INavigation.VIEWS instanceName,
+                                                                       DivWidget listHeader,
+                                                                       DivWidget footer) {
 
-        return new NPExerciseList<T, U>(currentExercisePanel, controller,
-            new ListOptions()
-                .setInstance(instanceName)
-                .setShowFirstNotCompleted(true)
-                .setActivityType(ActivityType.MARK_DEFECTS),
-            -1) {
-          //Logger logger = Logger.getLogger("NPExerciseList_Defects");
-          private CheckBox filterOnly, uninspectedOnly;
-
-          /**
-           * @see HistoryExerciseList#loadExercisesUsingPrefix
-           * @param typeToSection
-           * @param prefix
-           * @param onlyWithAudioAnno
-           * @param onlyDefaultUser
-           * @param onlyUninspected
-           * @return
-           */
-          @Override
-          protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
-                                                               String prefix,
-                                                               boolean onlyWithAudioAnno,
-                                                               boolean onlyDefaultUser,
-                                                               boolean onlyUninspected) {
-
-            ExerciseListRequest exerciseListRequest = super
-                .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected)
-                .setQC(true)
-                .setAddContext(forSentences);
-
-            logger.info("getExerciseListRequest req " + exerciseListRequest);
-            return exerciseListRequest;
-          }
-
-          protected ExerciseListRequest getExerciseListRequest(String prefix) {
-            return super.getExerciseListRequest(prefix).setQC(true).setAddContext(forSentences);
-          }
-
-          @Override
-          protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
-            // row 1
-            Panel column = new FlowPanel();
-            add(column);
-            addTypeAhead(column);
-
-            // row 2
-            add(uninspectedOnly = getUninspectedCheckbox());
-            add(filterOnly = getFilterCheckbox());
-
-            // row 3
-            add(pagingContainer.getTableWithPager(new ListOptions()));
-          }
-
-          /**
-           * @see  PagingExerciseList#addTableWithPager
-           */
-          private CheckBox getFilterCheckbox() {
-            return addFilter(SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER);
-          }
-
-          private CheckBox addFilter(String title) {
-            CheckBox filterOnly = new CheckBox(title);
-            filterOnly.addClickHandler(event -> pushNewSectionHistoryToken());
-            filterOnly.addStyleName("leftFiveMargin");
-            return filterOnly;
-          }
-
-          private CheckBox getUninspectedCheckbox() {
-            return addFilter(SHOW_ONLY_UNINSPECTED_ITEMS);
-          }
-
-          /**
-           * @see mitll.langtest.client.list.HistoryExerciseList#getHistoryToken
-           * @param search
-           * @param id
-           * @return
-           */
-          protected String getHistoryTokenFromUIState(String search, int id) {
-            return
-                super.getHistoryTokenFromUIState(search, id) + SelectionState.SECTION_SEPARATOR +
-                    SelectionState.ONLY_DEFAULT + "=" + filterOnly.getValue() + SelectionState.SECTION_SEPARATOR +
-                    SelectionState.ONLY_UNINSPECTED + "=" + uninspectedOnly.getValue();
-          }
-
-          @Override
-          protected void restoreUIState(SelectionState selectionState) {
-            super.restoreUIState(selectionState);
-            filterOnly.setValue(selectionState.isOnlyDefault());
-            uninspectedOnly.setValue(selectionState.isOnlyUninspected());
-          }
-        };
+        return new DefectsExerciseList<T>(controller,
+            topRow, currentExercisePanel, instanceName, listHeader, instanceName == INavigation.VIEWS.QC_SENTENCES);
       }
     };
   }
 
-  protected ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList) {
-    final PagingExerciseList<T, U> outerExerciseList = exerciseList;
-    return new ExercisePanelFactory<T, U>(controller, exerciseList) {
+
+  protected ExercisePanelFactory<T, ClientExercise> getFactory(PagingExerciseList<T, ClientExercise> exerciseList) {
+    final PagingExerciseList<T, ClientExercise> outerExerciseList = exerciseList;
+    return new ExercisePanelFactory<T, ClientExercise>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(U e) {
-        return new QCNPFExercise<U>(e, controller, outerExerciseList, forSentences ? QC_SENTENCES : QC);
+      public Panel getExercisePanel(ClientExercise e) {
+        return new QCNPFExercise<ClientExercise>(e, controller, outerExerciseList, forSentences ? QC_SENTENCES : QC);
       }
     };
   }
+
 }

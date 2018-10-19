@@ -167,7 +167,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       int projid = project.id();
 
-   //   IRefResultDAO refResultDAO = userExerciseDAO.getRefResultDAO();
+      //   IRefResultDAO refResultDAO = userExerciseDAO.getRefResultDAO();
 
 //      logger.info("Ref result dao " + refResultDAO);
 //      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
@@ -175,7 +175,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       Map<Integer, ExerciseAttribute> allAttributesByProject = userExerciseDAO.getExerciseAttribute().getIDToPair(projid);
       logger.info("readExercises" +
-    //      "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
+          //      "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\ttype order     " + typeOrder +
           "\n\tnum attributes " + allAttributesByProject.size()
       );
@@ -199,11 +199,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           "\n\tfor        " + projid +
           "\n\tproject    " + project.name() +
           "\n\ttype order " + typeOrder +
-         // "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
+          // "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\tgot        " + allNonContextExercises.size() + " predef exercises");
 
 
-//      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
+      logger.info("readExercises got " + typeOrder + " typeOrder");
+
       Map<Integer, CommonExercise> idToContext =
           getIDToExercise(userExerciseDAO.getContextByProject(
               typeOrder,
@@ -304,8 +305,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   /**
-   * @see #readExercises
    * @param typeOrder
+   * @see #readExercises
    */
   private void setRootTypes(List<String> typeOrder) {
     Collection<String> attributeTypes = getAttributeTypes();
@@ -368,9 +369,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   /**
+   * @return
    * @see #getTypeOrderFromProject
    * @see #setRootTypes
-   * @return
    */
   private Collection<String> getAttributeTypes() {
     return userExerciseDAO.getExerciseAttribute().getAttributeTypes(project.id());

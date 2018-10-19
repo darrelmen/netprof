@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> extends LearnFacetExerciseList<T> {
-  NoListFacetExerciseList(ExerciseController controller,
+  public NoListFacetExerciseList(ExerciseController controller,
                           Panel topRow,
                           Panel currentExercisePanel,
                           INavigation.VIEWS instanceName,

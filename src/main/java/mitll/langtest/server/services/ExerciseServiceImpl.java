@@ -149,7 +149,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
           Collection<CommonExercise> exercisesForState =
               getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
           ExerciseListWrapper<T> exerciseListWrapperForPrefix = getExerciseListWrapperForPrefix(request,
-              filterExercises(request, new ArrayList<>(exercisesForState), projectID), projectID);
+              db.filterExercises(request, new ArrayList<>(exercisesForState), projectID), projectID);
 
           logger.info("getExerciseIds : 2 req  " + request + " took " + (System.currentTimeMillis() - then) +
               " millis to get " + exerciseListWrapperForPrefix.getSize());
@@ -224,7 +224,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     }
 
     if (DEBUG_ID_LOOKUP) logger.info("triple resp       " + exercisesForSearch);
-    exercisesForSearch.setByExercise(filterExercises(request, exercisesForSearch.getByExercise(), projectID));
+    exercisesForSearch.setByExercise(db.filterExercises(request, exercisesForSearch.getByExercise(), projectID));
     if (DEBUG_ID_LOOKUP) logger.info("after triple resp " + exercisesForSearch);
 
     // TODO : I don't think we need this?
@@ -453,7 +453,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, typeToSelection);
 
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
-    exercisesForState = filterExercises(request, copy, projid);
+    exercisesForState = db.filterExercises(request, copy, projid);
     return getExerciseListWrapperForPrefix(request, exercisesForState, projid);
   }
 
@@ -821,7 +821,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @return
    * @see #getExerciseIds
    */
-  private List<CommonExercise> filterExercises(ExerciseListRequest request,
+/*  private List<CommonExercise> filterExercises(ExerciseListRequest request,
                                                List<CommonExercise> exercises,
                                                int projid) {
 //    logger.info("filter req " + request);
@@ -840,8 +840,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       exercises = filterOnlyPracticedByUser(request, exercises, projid);
     }
     return exercises;
-  }
+  }*/
 
+/*
   @NotNull
   private List<CommonExercise> filterOnlyPracticedByUser(ExerciseListRequest request, List<CommonExercise> exercises, int projid) {
     Collection<Integer> practicedByUser = db.getResultDAO().getPracticedByUser(request.getUserID(), projid);
@@ -858,6 +859,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     }
     return copy;
   }
+*/
 
   /**
    * TODO : slow?
@@ -960,7 +962,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see #getExercisesForSelectionState
    * @see #filterExercises
    */
-  private List<CommonExercise> filterByUnrecorded(
+/*  private List<CommonExercise> filterByUnrecorded(
       ExerciseListRequest request,
       List<CommonExercise> exercises,
       int projid) {
@@ -973,7 +975,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     } else {
       return request.isOnlyExamples() ? getExercisesWithContext(exercises) : exercises;
     }
-  }
+  }*/
 
   /**
    * TODO : way too much work here... why go through all exercises?
@@ -986,7 +988,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param onlyRecorded
    * @return
    */
-  @NotNull
+/*  @NotNull
   private List<CommonExercise> getRecordFilterExercisesMatchingGender(int userID,
                                                                       Collection<CommonExercise> exercises,
                                                                       int projid,
@@ -1050,16 +1052,16 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     logger.info("getRecordFilterExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
 
     return unrecordedExercises;
-  }
+  }*/
 
   /**
    * @param userID
    * @param projid
    * @param onlyExamples
    * @return
-   * @see #getRecordFilterExercisesMatchingGender
+   * @seex #getRecordFilterExercisesMatchingGender
    */
-  private Collection<Integer> getRecordedByMatchingGender(int userID,
+/*  private Collection<Integer> getRecordedByMatchingGender(int userID,
                                                           int projid,
                                                           boolean onlyExamples,
                                                           Map<Integer, String> exToTranscript) {
@@ -1069,14 +1071,14 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return onlyExamples ?
         db.getAudioDAO().getRecordedBySameGenderContext(userID, projid, exToTranscript) :
         db.getAudioDAO().getRecordedBySameGender(userID, projid, exToTranscript);
-  }
+  }*/
 
   /**
-   * @param exercises
+   * @paramx exercises
    * @return
-   * @see #filterByUnrecorded
+   * @seex #filterByUnrecorded
    */
-  @NotNull
+/*  @NotNull
   private List<CommonExercise> getExercisesWithContext(Collection<CommonExercise> exercises) {
     List<CommonExercise> copy = new ArrayList<>();
     Set<Integer> seen = new HashSet<>();
@@ -1092,7 +1094,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     //   logger.debug("ONLY EXAMPLES - to be recorded " + copy.size() + " from " + exercises.size());
 
     return copy;
-  }
+  }*/
 
   private <X extends CommonExercise> boolean hasContext(X exercise) {
     return !exercise.getDirectlyRelated().isEmpty();//.getContext() != null && !exercise.getContext().isEmpty();
@@ -1104,6 +1106,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @return
    * @see #getExerciseIds
    */
+/*
   private List<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
                                                      List<CommonExercise> exercises) {
     if (onlyAudioAnno) {
@@ -1117,8 +1120,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       return exercises;
     }
   }
+*/
 
-  private List<CommonExercise> filterByOnlyDefaultAudio(boolean onlyDefault,
+ /* private List<CommonExercise> filterByOnlyDefaultAudio(boolean onlyDefault,
                                                         List<CommonExercise> exercises) {
     if (onlyDefault) {
       List<CommonExercise> copy = new ArrayList<>();
@@ -1134,7 +1138,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     } else {
       return exercises;
     }
-  }
+  }*/
 
   /**
    * Remove any items that have been inspected already.
@@ -1142,6 +1146,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param exercises
    * @return
    */
+/*
   private List<CommonExercise> filterByUninspected(Collection<CommonExercise> exercises) {
     Collection<Integer> inspected = db.getStateManager().getInspectedExercises();
     // logger.info("found " + inspected.size());
@@ -1153,6 +1158,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     }
     return copy;
   }
+*/
 
   /**
    * On the fly we make a new section helper to do filtering of user list.

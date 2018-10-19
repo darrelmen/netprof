@@ -699,7 +699,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
 
     DBConnection dbConnection = new DBConnection(dbConfig);
-        dbConnection.addColumn();
+    dbConnection.addColumn();
 //    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
     return dbConnection;
   }
@@ -1705,6 +1705,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   public FilterResponse getTypeToValues(FilterRequest request, int projid, int userid) {
     return new FilterResponseHelper(this).getTypeToValues(request, projid, userid);
+  }
+
+  public List<CommonExercise> filterExercises(ExerciseListRequest request,
+                                              List<CommonExercise> exercises,
+                                              int projid) {
+    return new FilterResponseHelper(this).filterExercises(request, exercises, projid);
   }
 
   /**

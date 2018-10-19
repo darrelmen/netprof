@@ -1,9 +1,6 @@
 package mitll.langtest.server.database.exercise;
 
-import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 
 import java.util.List;
@@ -33,4 +30,8 @@ public interface ExerciseServices {
   Language getLanguageEnum(CommonExercise ex);
 
   FilterResponse getTypeToValues(FilterRequest request, int projid, int userid);
+
+  List<CommonExercise> filterExercises(ExerciseListRequest request,
+                                      List<CommonExercise> exercises,
+                                      int projid);
 }

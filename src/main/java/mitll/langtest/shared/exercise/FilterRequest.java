@@ -51,6 +51,7 @@ public class FilterRequest implements IsSerializable {
   private int userListID = -1;
   private boolean recordRequest = false;
   private boolean exampleRequest = false;
+  private boolean onlyUninspected = false;
 
   public FilterRequest() {
   }
@@ -67,7 +68,9 @@ public class FilterRequest implements IsSerializable {
     this.userListID = userListID;
   }
 
-  public void addPair(Pair pair) { this.typeToSelection.add(pair);}
+  public void addPair(Pair pair) {
+    this.typeToSelection.add(pair);
+  }
 
   public boolean isNoFilter() {
     return limit == -1 &&
@@ -132,9 +135,9 @@ public class FilterRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getFilterRequest
    * @param recordRequest
    * @return
+   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getFilterRequest
    */
   public FilterRequest setRecordRequest(boolean recordRequest) {
     this.recordRequest = recordRequest;
@@ -146,12 +149,21 @@ public class FilterRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getFilterRequest
    * @param exampleRequest
    * @return
+   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getFilterRequest
    */
   public FilterRequest setExampleRequest(boolean exampleRequest) {
     this.exampleRequest = exampleRequest;
+    return this;
+  }
+
+  public boolean isOnlyUninspected() {
+    return onlyUninspected;
+  }
+
+  public FilterRequest setOnlyUninspected(boolean onlyDefaultAudio) {
+    this.onlyUninspected = onlyDefaultAudio;
     return this;
   }
 

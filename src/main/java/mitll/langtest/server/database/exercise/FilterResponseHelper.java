@@ -1,12 +1,9 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseServices;
-import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
+import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
-import mitll.npdata.dao.SlickExercise;
-import mitll.npdata.dao.SlickExerciseAttributeJoin;
-import mitll.npdata.dao.SlickExercisePhone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class FilterResponseHelper {
   private static final Logger logger = LogManager.getLogger(FilterResponseHelper.class);
-  private static final String ANY = "Any";
+  //private static final String ANY = "Any";
   private static final String LISTS = "Lists";
 
 
@@ -25,8 +22,7 @@ public class FilterResponseHelper {
   /**
    * TODO : remove?
    */
-  private static final String RECORDED1 = "Recorded";
-
+  //private static final String RECORDED1 = "Recorded";
   public FilterResponseHelper(DatabaseServices databaseServices) {
     this.databaseServices = databaseServices;
   }
@@ -40,6 +36,13 @@ public class FilterResponseHelper {
     } else {
       if (request.isRecordRequest()) { //how no user???
         return getFilterResponseForRecording(request, projid, userID);
+      } else if (request.isOnlyUninspected()) {
+        ExerciseListRequest request1 = new ExerciseListRequest()
+            .setOnlyUninspected(true)
+            .setOnlyExamples(request.isExampleRequest())
+            .setUserID(userID);
+
+        return getFilterResponse(request, projid, request1);
       } else {
         FilterResponse response = sectionHelper.getTypeToValues(request, false);
         addUserListFacet(request, response);
@@ -176,6 +179,10 @@ public class FilterResponseHelper {
     Iterator<String> iterator = typeOrder.iterator();
     String unit = slick.getUnitToValue().get(iterator.next());
     String lesson = iterator.hasNext() ? slick.getUnitToValue().get(iterator.next()) : "";
+    if (lesson == null) {
+      logger.warn("hmm no lesson value on " + slick.getUnitToValue() + " for " +slick.getID() + " " + slick.getEnglish());
+      lesson = "";
+    }
     boolean ispredef = slick.isPredefined();
 
     return sectionHelper.getPairs(typeOrder, id, unit, lesson, ispredef);
@@ -196,6 +203,10 @@ public class FilterResponseHelper {
         .setOnlyExamples(request.isExampleRequest())
         .setUserID(userFromSessionID);
 
+    return getFilterResponse(request, projectID, request1);
+  }
+
+  private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest request1) {
     logger.info("req " + request1);
 
     List<CommonExercise> unRec = filterByUnrecorded(request1, getExercises(projectID), projectID);
@@ -206,11 +217,11 @@ public class FilterResponseHelper {
     List<String> typeOrder = sectionHelper.getTypeOrder();
     SectionHelper<CommonExercise> unrecordedSectionHelper = sectionHelper.getCopy(unRec);
 
-    logger.info("types " + unrecordedSectionHelper.getTypeOrder());
+    logger.info("types " + unrecordedSectionHelper.getTypeOrder() + " vs " + typeOrder);
     logger.info("type->distinct " + unrecordedSectionHelper.getTypeToDistinct());
     populate(projectID, unRec, unrecordedSectionHelper, typeOrder);
 
-   // unrecordedSectionHelper.report();
+    // unrecordedSectionHelper.report();
 
     FilterResponse typeToValues = unrecordedSectionHelper.getTypeToValues(request, false);
 
@@ -243,6 +254,84 @@ public class FilterResponseHelper {
     }
 
     return exercises;
+  }
+
+  public List<CommonExercise> filterExercises(ExerciseListRequest request,
+                                              List<CommonExercise> exercises,
+                                              int projid) {
+//    logger.info("filter req " + request);
+    exercises = filterByUnrecorded(request, exercises, projid);
+
+    if (request.isOnlyWithAudioAnno()) {
+      exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
+    }
+    if (request.isOnlyDefaultAudio()) {
+      exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
+    }
+    if (request.isOnlyUninspected()) {
+      exercises = filterByUninspected(exercises);
+    }
+ /*   if (request.isOnlyForUser()) {
+      exercises = filterOnlyPracticedByUser(request, exercises, projid);
+    }*/
+    return exercises;
+  }
+
+
+  /**
+   * @param onlyAudioAnno
+   * @param exercises
+   * @return
+   * @seex #getExerciseIds
+   */
+  private List<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
+                                                     List<CommonExercise> exercises) {
+    if (onlyAudioAnno) {
+      Collection<Integer> audioAnnos = databaseServices.getUserListManager().getAudioAnnos();
+      List<CommonExercise> copy = new ArrayList<>();
+      for (CommonExercise exercise : exercises) {
+        if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
+      }
+      return copy;
+    } else {
+      return exercises;
+    }
+  }
+
+  private List<CommonExercise> filterByOnlyDefaultAudio(boolean onlyDefault,
+                                                        List<CommonExercise> exercises) {
+    if (onlyDefault) {
+      List<CommonExercise> copy = new ArrayList<>();
+      for (CommonExercise exercise : exercises) {
+        for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+          if (audioAttribute.getUserid() == BaseUserDAO.DEFAULT_USER_ID) {
+            copy.add(exercise);
+            break;
+          }
+        }
+      }
+      return copy;
+    } else {
+      return exercises;
+    }
+  }
+
+  /**
+   * Remove any items that have been inspected already.
+   *
+   * @param exercises
+   * @return
+   */
+  private List<CommonExercise> filterByUninspected(Collection<CommonExercise> exercises) {
+    Collection<Integer> inspected = databaseServices.getStateManager().getInspectedExercises();
+    // logger.info("found " + inspected.size());
+    List<CommonExercise> copy = new ArrayList<>();
+    for (CommonExercise exercise : exercises) {
+      if (!inspected.contains(exercise.getID())) {
+        copy.add(exercise);
+      }
+    }
+    return copy;
   }
 
 

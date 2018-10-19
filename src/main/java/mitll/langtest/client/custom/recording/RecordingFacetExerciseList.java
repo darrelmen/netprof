@@ -47,7 +47,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
         currentExercisePanel,
         instanceName,
         listHeader,
-        isContext ? INavigation.VIEWS.RECORD_CONTEXT : INavigation.VIEWS.RECORD_ENTRIES);
+        instanceName);
     this.isContext = isContext;
   }
 
@@ -109,8 +109,6 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     request.setOnlyExamples(isContext);
     return request;
   }
-
-
 //  void restoreUI(SelectionState selectionState) {
 //    restoreUIState(selectionState);
 //  }

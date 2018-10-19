@@ -337,63 +337,23 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
 //  private final VocabFactory factory = new VocabFactory();
 
-  /**
-   * @param slick
-   * @param shouldSwap
-   * @return
-   * @see #getUserExercises
-   */
-  private Exercise fromSlick(SlickExercise slick, boolean shouldSwap) {
-    Map<String, String> unitToValue = getUnitToValue(slick);
-
-//    logger.info("from slick " + slick.id() + " " + slick.exid() + " domino " + slick.legacyid());
-    String english = slick.english();
-    if (english.length() > MAX_LENGTH) {
-      english = english.substring(0, MAX_LENGTH) + "...";
-      logger.warn("toSlick " + slick.id() + " truncate english " + english);
-    }
-
-    String altfl = slick.altfl();
-    String foreignlanguage = slick.foreignlanguage();
-
-    Exercise userExercise = new Exercise(
-        slick.id(),
-        slick.exid(),
-        slick.userid(),
-        english,
-        foreignlanguage,
-        StringUtils.stripAccents(foreignlanguage),
-        altfl,
-        slick.transliteration(),
-        slick.isoverride(),
-        unitToValue,
-        slick.modified().getTime(),
-        slick.projid(),
-        slick.candecode(),
-        slick.candecodechecked().getTime(),
-        slick.iscontext(),
-        slick.numphones(),
-        slick.legacyid(),
-        shouldSwap);
-
-/*    logger.info("fromSlick " +
-        "\n\tfrom    " + slick+
-        "\n\tcreated " + userExercise+
-        "\n\tcontext " + userExercise.isContext()
-    );*/
-    return userExercise;
-  }
 
   /**
    * @param slick
    * @return
+   * @see #fromSlick
    */
   @NotNull
   private Map<String, String> getUnitToValue(SlickExercise slick) {
-    Map<String, String> unitToValue = new HashMap<>();
     boolean isDefault = slick.projid() == DEFAULT_PROJECT;
     Collection<String> typeOrder = isDefault ? Collections.emptyList() : userDAO.getDatabase().getTypeOrder(slick.projid());
+    return getUnitToValue(slick, typeOrder);
+  }
 
+  @NotNull
+  private Map<String, String> getUnitToValue(SlickExercise slick, Collection<String> typeOrder) {
+    boolean isDefault = slick.projid() == DEFAULT_PROJECT;
+    Map<String, String> unitToValue = new HashMap<>();
     if (typeOrder == null || typeOrder.isEmpty()) {
       logger.warn("getUnitToValue no types for exercise " + (isDefault ? " DEFAULT PROJECT " : "") + slick);
     }
@@ -462,15 +422,67 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param slick
    * @param shouldSwap
    * @return
+   * @see #getUserExercises
+   */
+  private Exercise fromSlick(SlickExercise slick, boolean shouldSwap) {
+    Map<String, String> unitToValue = getUnitToValue(slick);
+
+//    logger.info("from slick " + slick.id() + " " + slick.exid() + " domino " + slick.legacyid());
+    String english = slick.english();
+    if (english.length() > MAX_LENGTH) {
+      english = english.substring(0, MAX_LENGTH) + "...";
+      logger.warn("toSlick " + slick.id() + " truncate english " + english);
+    }
+
+    String altfl = slick.altfl();
+    String foreignlanguage = slick.foreignlanguage();
+
+    Exercise userExercise = new Exercise(
+        slick.id(),
+        slick.exid(),
+        slick.userid(),
+        english,
+        foreignlanguage,
+        StringUtils.stripAccents(foreignlanguage),
+        altfl,
+        slick.transliteration(),
+        slick.isoverride(),
+        unitToValue,
+        slick.modified().getTime(),
+        slick.projid(),
+        slick.candecode(),
+        slick.candecodechecked().getTime(),
+        slick.iscontext(),
+        slick.numphones(),
+        slick.legacyid(),
+        shouldSwap);
+
+/*    logger.info("fromSlick " +
+        "\n\tfrom    " + slick+
+        "\n\tcreated " + userExercise+
+        "\n\tcontext " + userExercise.isContext()
+    );*/
+    return userExercise;
+  }
+
+  /**
+   * TODO : why two almost the same ways to make an exercise?????
+   *
+   * @param slick
+   * @param shouldSwap
+   * @return
    * @see #getExercises(Collection, List, ISection, Project, Map, Map, boolean)
    */
   @NotNull
-  private Exercise makeExercise(SlickExercise slick, boolean shouldSwap) {
+  private Exercise makeExercise(SlickExercise slick, boolean shouldSwap, List<String> typeOrder) {
     int id = slick.id();
     String foreignlanguage = getTruncated(slick.foreignlanguage());
     String noAccentFL = StringUtils.stripAccents(foreignlanguage);
     String english = getTruncated(slick.english());
     String meaning = getTruncated(slick.meaning());
+
+    Map<String, String> unitToValue = getUnitToValue(slick, typeOrder);
+
     Exercise exercise = new Exercise(
         id,
         slick.exid(),
@@ -489,6 +501,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.legacyid(), // i.e. dominoID
         shouldSwap);
 
+    exercise.setUnitToValue(unitToValue);
     {
       List<String> translations = new ArrayList<>();
       if (!foreignlanguage.isEmpty()) {
@@ -513,19 +526,19 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * If the number of phones on an exercise has not been calculated yet, look it up.
    *
    * @param slick
-   * @paramx exToPhones
    * @param lookup
    * @return
+   * @paramx exToPhones
    * @see #addExerciseToSectionHelper
    */
   @NotNull
   private ExercisePhoneInfo getExercisePhoneInfo(SlickExercise slick,
-                                               //  Map<Integer, ExercisePhoneInfo> exToPhones,
+                                                 //  Map<Integer, ExercisePhoneInfo> exToPhones,
                                                  IPronunciationLookup lookup,
                                                  List<SlickExercisePhone> pairs) {
     ExercisePhoneInfo exercisePhoneInfo = new ExercisePhoneInfo();
     exercisePhoneInfo.setNumPhones(refResultDAO.getNumPhonesForEx(slick.id()));
-  //  ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(slick.id());
+    //  ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(slick.id());
 
     if (exercisePhoneInfo.getNumPhones() < 1) {
 /*      if (exercisePhoneInfo == null) {
@@ -790,7 +803,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param addTypesToSection
    * @return
    * @see #getByProject
-   * @see IUserExerciseDAO#getContextByProject
+   * @see #getContextByProject
    */
   private List<CommonExercise> getExercises(Collection<SlickExercise> all,
                                             List<String> typeOrder,
@@ -827,7 +840,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       int n = 0;
       boolean shouldSwap = getShouldSwap(lookup.getID());
       for (SlickExercise slickExercise : all) {
-        Exercise exercise = makeExercise(slickExercise, shouldSwap);
+        Exercise exercise = makeExercise(slickExercise, shouldSwap, typeOrder);
 
         if (WARN_ABOUT_MISSING_PHONES) {
           if (exercise.getNumPhones() == 0 && n++ < 10) {
@@ -839,11 +852,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 //      logger.info("Attr for " + exercise.getID() + " " + exercise.getAttributes());
         List<Pair> e = addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, lookup, exercise,
             allFacetTypes, pairs);
-        e.forEach(pair -> {
+
+ /*       e.forEach(pair -> {
           if (pair.getProperty().startsWith("Speaker")) {
             logger.info("got speaker attr " + pair);
           }
-        });
+        });*/
 
         allAttributes.add(e);
         copy.add(exercise);
