@@ -183,15 +183,22 @@ public interface IUserExerciseDAO extends IDAO {
   List<CommonExercise> getByProject(
       List<String> typeOrder,
       ISection<CommonExercise> sectionHelper,
-      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject,
       Project theProject,
       Map<Integer, ExerciseAttribute> allByProject,
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs);
 
+  /**
+   *
+   * @param typeOrder
+   * @param sectionHelper
+   * @param lookup
+   * @param allByProject
+   * @param exToAttrs
+   * @return
+   */
   List<CommonExercise> getContextByProject(
       List<String> typeOrder,
       ISection<CommonExercise> sectionHelper,
-      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject,
       Project lookup,
       Map<Integer, ExerciseAttribute> allByProject,
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs

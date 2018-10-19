@@ -40,7 +40,11 @@ public class PronunciationLookup implements IPronunciationLookup {
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
   private final LTS lts;
-  private boolean korean, russian, french, german, removeAllPunct, isAsianLanguage;
+  private boolean korean;
+  private boolean russian;
+  private boolean french;
+  private boolean removeAllPunct;
+  private boolean isAsianLanguage;
   private boolean hasLTS;
   private boolean emptyLTS;
 
@@ -59,8 +63,8 @@ public class PronunciationLookup implements IPronunciationLookup {
     Language language = project.getLanguageEnum();
     korean = language == Language.KOREAN;
     russian = language == Language.RUSSIAN;
-    french =language == Language.FRENCH;
-    german = language == Language.GERMAN;
+    french = language == Language.FRENCH;
+    //boolean german = language == Language.GERMAN;
     removeAllPunct = language != Language.FRENCH;
     this.isAsianLanguage = isAsianLanguage(language);
 
@@ -75,8 +79,8 @@ public class PronunciationLookup implements IPronunciationLookup {
 
   private boolean isAsianLanguage(Language language) {
     return language == Language.MANDARIN ||
-    language == Language.JAPANESE ||
-    language == Language.KOREAN;
+        language == Language.JAPANESE ||
+        language == Language.KOREAN;
   }
 
   /**
@@ -213,7 +217,7 @@ public class PronunciationLookup implements IPronunciationLookup {
         if ((easyMatch = htkDictionary.contains(word)) ||
             (lowerMatch = htkDictionary.contains(word.toLowerCase())) ||
             (russian && (stripMatch = htkDictionary.contains(getSmallVocabDecoder().removeAccents(word))))
-            ) {
+        ) {
           candidates.add(addDictMatch(justPhones, dict, word, easyMatch, lowerMatch, stripMatch));
         } else if (!removeAllPunct && !(wordProns = hasParts(word)).isEmpty()) {
           if (DEBUG || true) logger.info("getPronunciationsFromDictOrLTS add parts for '" + word + "'");
@@ -333,11 +337,12 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   int n = 0;
+
   private void addUnkPron(String transcript, StringBuilder dict, List<WordAndProns> candidates, String word) {
     String s = emptyLTS ? " with empty LTS" : "";
     n++;
     if (n < 100 || n % 100 == 0) {
-      logger.warn("getPronunciationsFromDictOrLTS (" +n+
+      logger.warn("getPronunciationsFromDictOrLTS (" + n +
           ") using unk phone for '" + word + "' in " + transcript + s);
     }
     dict.append(getUnkPron(word));
@@ -383,7 +388,7 @@ public class PronunciationLookup implements IPronunciationLookup {
    */
   private List<List<String>> hasParts(String token) {
     String[] split = token.split("['\\-]");
-   // logger.info("hasParts for '" + token + "' found " + split.length + " parts.");
+    // logger.info("hasParts for '" + token + "' found " + split.length + " parts.");
 
     boolean match = true;
 
@@ -392,7 +397,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
     if (split.length > 1) {
       for (String part : split) {
-   //     logger.info("hasParts for '" + token + "' found " + part);
+        //     logger.info("hasParts for '" + token + "' found " + part);
         boolean easyMatch;
         match &=
             (easyMatch = htkDictionary.contains(part)) ||

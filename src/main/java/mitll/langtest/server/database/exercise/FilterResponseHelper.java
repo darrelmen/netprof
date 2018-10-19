@@ -71,9 +71,10 @@ public class FilterResponseHelper {
 
   private void populate(int projid,
                         Collection<CommonExercise> all,
-                        ISection<CommonExercise> sectionHelper) {
+                        ISection<CommonExercise> sectionHelper,
+                        List<String> typeOrder) {
     Map<Integer, ExerciseAttribute> allAttributesByProject = databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
-    getExercises(all, sectionHelper.getTypeOrder(), sectionHelper, databaseServices.getProject(projid), allAttributesByProject);
+    getExercises(all, typeOrder, sectionHelper, databaseServices.getProject(projid), allAttributesByProject);
   }
 
   /**
@@ -81,8 +82,8 @@ public class FilterResponseHelper {
    * @param typeOrder
    * @param sectionHelper
    * @param lookup
-   * @paramx addTypesToSection
    * @return
+   * @paramx addTypesToSection
    * @seex #getByProject
    * @seex #getContextByProject
    */
@@ -181,95 +182,45 @@ public class FilterResponseHelper {
   }
 
   /**
+   * So make a new SectionHelper from the results of the filter for unrecorded.
+   * Want to do similar thing with other filtered lists - items that need to be fixed, for instance.
+   *
    * @param request
    * @param userFromSessionID
    * @return
    * @paramx response
    */
   private FilterResponse getFilterResponseForRecording(FilterRequest request, int projectID, int userFromSessionID) {
-    // int projectID = getProjectIDFromUser(userFromSessionID);
-
-    Map<String, Collection<String>> typeToSelection = getTypeToSelection(request);
-
-
-  //  List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
-    List<CommonExercise> exercisesForState = getExercises(projectID);
-    //  List<String> typeOrder = getProject(projectID).getTypeOrder();
-//    if (typeOrder.isEmpty()) {
-//
-//    } else {
-    //   String firstType = typeOrder.get(0);
-    //   List<CommonExercise> rec = filterByUnrecorded(request1.setOnlyUnrecordedByMe(false).setOnlyRecordedByMatchingGender(true), exercisesForState, projectID);
-
     ExerciseListRequest request1 = new ExerciseListRequest()
         .setOnlyUnrecordedByMe(true)
         .setOnlyExamples(request.isExampleRequest())
         .setUserID(userFromSessionID);
 
-    List<CommonExercise> unRec = filterByUnrecorded(request1, exercisesForState, projectID);
+    logger.info("req " + request1);
+
+    List<CommonExercise> unRec = filterByUnrecorded(request1, getExercises(projectID), projectID);
 
     logger.info("build section helper from " + unRec.size());
 
-    SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelper(projectID).getCopy(unRec);
+    ISection<CommonExercise> sectionHelper = getSectionHelper(projectID);
+    List<String> typeOrder = sectionHelper.getTypeOrder();
+    SectionHelper<CommonExercise> unrecordedSectionHelper = sectionHelper.getCopy(unRec);
 
-    populate(projectID, unRec, unrecordedSectionHelper);
+    logger.info("types " + unrecordedSectionHelper.getTypeOrder());
+    logger.info("type->distinct " + unrecordedSectionHelper.getTypeToDistinct());
+    populate(projectID, unRec, unrecordedSectionHelper, typeOrder);
 
-    unrecordedSectionHelper.report();
+   // unrecordedSectionHelper.report();
 
-    return unrecordedSectionHelper.getTypeToValues(request, false);
+    FilterResponse typeToValues = unrecordedSectionHelper.getTypeToValues(request, false);
 
-/*    //   logger.info("found " + unRec.size() + " unrecorded");
+    logger.info("resp " + typeToValues);
 
-    Map<String, Long> collect = unRec.stream().collect(Collectors.groupingBy(ex -> ex.getUnitToValue().get(firstType) == null ? "Unknown" : ex.getUnitToValue().get(firstType), Collectors.counting()));
-
-    // logger.info("map is " + collect);
-
-    Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
-
-    Set<MatchInfo> matches = new TreeSet<>();
-    collect.forEach((k, v) -> matches.add(new MatchInfo(k, v.intValue())));
-    //    logger.info("matches is " + matches);
-    typeToValues.put(firstType, matches);
-
-    HashSet<String> typesToInclude = new HashSet<>();
-    typesToInclude.add(firstType);
-
-    FilterResponse response = new FilterResponse(request.getReqID(), typeToValues, typesToInclude, -1);
-    // }
-    return response;*/
+    return typeToValues;
   }
-
 
   protected ISection<CommonExercise> getSectionHelper(int projectID) {
     return databaseServices.getSectionHelper(projectID);
-  }
-
-  @NotNull
-  private Map<String, Collection<String>> getTypeToSelection(FilterRequest request) {
-    Map<String, Collection<String>> typeToSelection = new HashMap<>();
-    request.getTypeToSelection().forEach(pair -> {
-      String value1 = pair.getValue();
-      if (!value1.equalsIgnoreCase(ANY)) {
-        typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
-      }
-    });
-    return typeToSelection;
-  }
-
-
-  /**
-   * Ask section helper for matching item to type -> value
-   *
-   * @param projid
-   * @param typeToSelection
-   * @return
-   */
-  private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
-    ISection<CommonExercise> sectionHelper = databaseServices.getSectionHelper(projid);
-    typeToSelection.remove(RECORDED1);
-
-    return typeToSelection.isEmpty() ? getExercises(projid) :
-        sectionHelper.getExercisesForSelectionState(typeToSelection);
   }
 
   /**

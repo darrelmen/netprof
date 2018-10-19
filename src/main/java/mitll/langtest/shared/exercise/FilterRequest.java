@@ -67,6 +67,8 @@ public class FilterRequest implements IsSerializable {
     this.userListID = userListID;
   }
 
+  public void addPair(Pair pair) { this.typeToSelection.add(pair);}
+
   public boolean isNoFilter() {
     return limit == -1 &&
         typeToSelection.isEmpty() &&

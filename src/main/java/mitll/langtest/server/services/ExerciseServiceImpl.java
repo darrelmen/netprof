@@ -73,12 +73,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final int MIN_WARN_DURATION = 1000;
   private static final String LISTS = "Lists";
 
+  public static final boolean DEBUG_SEARCH = false;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_ID_LOOKUP = false;
 
   private static final String RECORDED1 = "Recorded";
   private static final String ANY = "Any";
-  private static final boolean DEBUG_SEARCH = false;
+//  /private static final boolean DEBUG_SEARCH = false;
 
   /**
    * @param request
@@ -88,109 +89,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
     int userFromSessionID = getUserIDFromSessionOrDB();
     return db.getTypeToValues(request, getProjectIDFromUser(userFromSessionID), userFromSessionID);
-
- /*
-    logger.info("getTypeToValues " + request);
-    ISection<CommonExercise> sectionHelper = getSectionHelper();
-    if (sectionHelper == null) {
-      logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
-      return new FilterResponse();
-    } else {
-      if (request.isRecordRequest()) { //how no user???
-        return getFilterResponseForRecording(request, getUserIDFromSessionOrDB());
-      } else {
-        FilterResponse response = sectionHelper.getTypeToValues(request, false);
-        addUserListFacet(request, response);
-//        int userFromSessionID = getUserIDFromSessionOrDB();
-//        if (userFromSessionID != -1) {
-////        logger.info("getTypeToValues got " + userFromSession);
-//          //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
-//
-//
-//        }
-
-        return response;
-      }
-    }*/
   }
-
-  /**
-   * @param request
-   * @return
-   * @paramx userFromSessionID
-   * @paramx response
-   */
-/*  private FilterResponse getFilterResponseForRecording(FilterRequest request, int userFromSessionID) {
-    int projectID = getProjectIDFromUser(userFromSessionID);
-
-    Map<String, Collection<String>> typeToSelection = getTypeToSelection(request);
-
-
-    List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
-
-    //  List<String> typeOrder = getProject(projectID).getTypeOrder();
-//    if (typeOrder.isEmpty()) {
-//
-//    } else {
-    //   String firstType = typeOrder.get(0);
-    //   List<CommonExercise> rec = filterByUnrecorded(request1.setOnlyUnrecordedByMe(false).setOnlyRecordedByMatchingGender(true), exercisesForState, projectID);
-
-    ExerciseListRequest request1 = new ExerciseListRequest()
-        .setOnlyUnrecordedByMe(true)
-        .setOnlyExamples(request.isExampleRequest())
-        .setUserID(userFromSessionID);
-
-    List<CommonExercise> unRec = filterByUnrecorded(request1, exercisesForState, projectID);
-
-    logger.info("build section helper from " + unRec);
-    SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelper(getProjectIDFromUser(userFromSessionID)).getCopy(unRec);
-
-    return unrecordedSectionHelper.getTypeToValues(request, false);
-
-*//*    //   logger.info("found " + unRec.size() + " unrecorded");
-
-    Map<String, Long> collect = unRec.stream().collect(Collectors.groupingBy(ex -> ex.getUnitToValue().get(firstType) == null ? "Unknown" : ex.getUnitToValue().get(firstType), Collectors.counting()));
-
-    // logger.info("map is " + collect);
-
-    Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
-
-    Set<MatchInfo> matches = new TreeSet<>();
-    collect.forEach((k, v) -> matches.add(new MatchInfo(k, v.intValue())));
-    //    logger.info("matches is " + matches);
-    typeToValues.put(firstType, matches);
-
-    HashSet<String> typesToInclude = new HashSet<>();
-    typesToInclude.add(firstType);
-
-    FilterResponse response = new FilterResponse(request.getReqID(), typeToValues, typesToInclude, -1);
-    // }
-    return response;*//*
-  }*/
-  /*@NotNull
-  private Map<String, Collection<String>> getTypeToSelection(FilterRequest request) {
-    Map<String, Collection<String>> typeToSelection = new HashMap<>();
-    request.getTypeToSelection().forEach(pair -> {
-      String value1 = pair.getValue();
-      if (!value1.equalsIgnoreCase(ANY)) {
-        typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
-      }
-    });
-    return typeToSelection;
-  }*/
-
-/*  private void addUserListFacet(FilterRequest request, FilterResponse typeToValues) {
-    int userListID = request.getUserListID();
-    UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
-
-    if (next != null) {  // echo it back
-      //logger.info("\tgetTypeToValues " + request + " include list " + next);
-      typeToValues.getTypesToInclude().add(LISTS);
-      Set<MatchInfo> value = new HashSet<>();
-      value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
-      typeToValues.getTypeToValues().put(LISTS, value);
-    }
-  }*/
 
   /**
    * Complicated.
@@ -666,12 +565,16 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     {
       then = System.currentTimeMillis();
-      originalSet.forEach(exercise -> {
-        logger.info("ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
-        exercise.getDirectlyRelated().forEach(ex -> {
-          logger.info("\tdirect ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+
+      if (DEBUG_SEARCH) {
+        originalSet.forEach(exercise -> {
+          logger.info("ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+          exercise.getDirectlyRelated().forEach(ex -> {
+            logger.info("\tdirect ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+          });
         });
-      });
+      }
+
       ExerciseTrie<CommonExercise> contextTrie = new ExerciseTrie<>(originalSet, language, smallVocabDecoder, false, false);
       long now = System.currentTimeMillis();
       if (now - then > 20 || DEBUG_SEARCH) {

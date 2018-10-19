@@ -174,6 +174,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return WEBSERVICE_HOST_DEFAULT;
   }
 
+  @Override
   public void setAvailable() {
     new Thread(() -> {
       available = isAvailableCheckNow();
@@ -189,6 +190,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return available;
   }
 
+  @Override
   public boolean isAvailableCheckNow() {
     return new HTTPClient().isAvailable(getWebserviceIP(), getWebservicePort(), DCODR);
   }
@@ -790,6 +792,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    * @see #scoreRepeatExercise
    */
+  @Override
   public HydraOutput runHydra(String audioPath,
                               String transcript,
                               String transliteration,
@@ -914,6 +917,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return getSmallVocabDecoder().lcToken(transcript, removeAllAccents).trim();
   }
 
+  //@Override
   public String getLM(String transcript, boolean removeAllPunct) {
     return getSmallLM(getLCTranscript(transcript), removeAllPunct);
   }
@@ -1087,6 +1091,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
+  @Override
   public IPronunciationLookup getPronunciationLookup() {
     return pronunciationLookup;
   }

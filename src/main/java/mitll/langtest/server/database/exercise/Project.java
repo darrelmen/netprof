@@ -283,6 +283,7 @@ public class Project implements IPronunciationLookup {
    */
   private <T extends CommonShell> void buildExerciseTrie() {
     final List<CommonExercise> rawExercises = getRawExercises();
+
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
 
     new Thread(() -> makeItemTrie(rawExercises, smallVocabDecoder), "makeFullTrie_" + getID()).start();

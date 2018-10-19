@@ -114,12 +114,12 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
-  public List<CommonExercise> getByProject(List<String> typeOrder, ISection<CommonExercise> sectionHelper, Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject, Project theProject, Map<Integer, ExerciseAttribute> allByProject, Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
+  public List<CommonExercise> getByProject(List<String> typeOrder, ISection<CommonExercise> sectionHelper, Project theProject, Map<Integer, ExerciseAttribute> allByProject, Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
     return null;
   }
 
   @Override
-  public List<CommonExercise> getContextByProject(List<String> typeOrder, ISection<CommonExercise> sectionHelper, Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject, Project lookup, Map<Integer, ExerciseAttribute> allByProject, Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
+  public List<CommonExercise> getContextByProject(List<String> typeOrder, ISection<CommonExercise> sectionHelper, Project lookup, Map<Integer, ExerciseAttribute> allByProject, Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
     return null;
   }
 

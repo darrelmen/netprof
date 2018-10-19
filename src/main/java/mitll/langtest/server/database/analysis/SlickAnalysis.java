@@ -104,8 +104,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     this.projid = projid;
     this.audioDAO = audioDAO;
     project = database.getProject(projid);
-    collator = project.getAudioFileHelper().getCollator();
     this.sortByPolyScore = sortByPolyScore;
+  }
+
+  private Collator getCollator() {
+    if (collator == null) {
+      collator = project.getAudioFileHelper().getCollator();
+    }
+    return collator;
   }
 
   /**
@@ -370,7 +376,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
           case WORD:
             String s1 = scoreToFL.get(o1);
             String s2 = scoreToFL.get(o2);
-            comp = collator.compare(s1, s2);  // remember to do locale aware string sorting.
+            comp = getCollator().compare(s1, s2);  // remember to do locale aware string sorting.
             if (comp == 0) {
               //  logger.info("getComparator fall back to time for " + o1 + " vs " + o2);
               comp = compareTimes(o1, o2);
@@ -587,7 +593,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
     Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForDialog(dialogID);
     long now = System.currentTimeMillis();
-    if (now - then > 100  || true)
+    if (now - then > 100 || true)
       logger.info("getUserInfoForDialog took " + (now - then) +
           "\n\tto get   " + perfForUser.size() + " perf infos for " +
           "\n\tproject #" + projid + " dialog " + dialogID);

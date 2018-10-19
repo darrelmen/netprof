@@ -34,8 +34,6 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.refaudio.IRefResultDAO;
-import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -172,12 +170,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    //   IRefResultDAO refResultDAO = userExerciseDAO.getRefResultDAO();
 
 //      logger.info("Ref result dao " + refResultDAO);
-      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
-          userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
+//      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
+//          userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
 
       Map<Integer, ExerciseAttribute> allAttributesByProject = userExerciseDAO.getExerciseAttribute().getIDToPair(projid);
       logger.info("readExercises" +
-          "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
+    //      "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\ttype order     " + typeOrder +
           "\n\tnum attributes " + allAttributesByProject.size()
       );
@@ -191,7 +189,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           userExerciseDAO.getByProject(
               typeOrder,
               getSectionHelper(),
-              exerciseToPhoneForProject,
               fullProject,
 
               allAttributesByProject,
@@ -202,7 +199,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           "\n\tfor        " + projid +
           "\n\tproject    " + project.name() +
           "\n\ttype order " + typeOrder +
-          "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
+         // "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\tgot        " + allNonContextExercises.size() + " predef exercises");
 
 
@@ -211,7 +208,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           getIDToExercise(userExerciseDAO.getContextByProject(
               typeOrder,
               getSectionHelper(),
-              exerciseToPhoneForProject, fullProject, allAttributesByProject, exToAttrs
+              fullProject, allAttributesByProject, exToAttrs
           ));
 //      logger.info("readExercises project " + project + " idToContext " + idToContext.size());
 

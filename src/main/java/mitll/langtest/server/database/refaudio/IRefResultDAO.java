@@ -87,6 +87,7 @@ public interface IRefResultDAO extends IDAO {
   List<Result> getResults();
 
   Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
+  int getNumPhonesForEx(int exid);
 
   /**
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore

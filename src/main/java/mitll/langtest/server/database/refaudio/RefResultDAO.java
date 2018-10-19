@@ -697,4 +697,9 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     statement.execute();
     statement.close();
   }
+
+  @Override
+  public int getNumPhonesForEx(int exid) {
+    return 0;
+  }
 }

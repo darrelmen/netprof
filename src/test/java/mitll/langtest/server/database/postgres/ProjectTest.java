@@ -144,9 +144,10 @@ public class ProjectTest extends BaseTest {
         logger.warn("For " +
             "\n\ten " + exercise.getEnglish() +
             "\n\tfl " + exercise.getForeignLanguage() +
-            "\n\t   " + pronunciationsFromDictOrLTS+
-            "\n\tLM " + audioFileHelper.getLM(foreignLanguage,false)+
-            "\n\tTR " + audioFileHelper.getHydraTranscript(foreignLanguage)
+            "\n\t   " + pronunciationsFromDictOrLTS
+//            +
+//            "\n\tLM " + audioFileHelper.getLM(foreignLanguage,false)+
+//            "\n\tTR " + audioFileHelper.getHydraTranscript(foreignLanguage)
         );
       }
     });

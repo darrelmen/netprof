@@ -34,6 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,7 +68,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   /**
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
-  private static final String ANY = "any";
+  public static final String ANY = "any";
   /**
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
@@ -95,22 +96,16 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
   private final boolean DEBUG = false;
-  private final boolean DEBUG_TYPE_ORDER = true;
+  private final boolean DEBUG_TYPE_ORDER = false;
   private final boolean DEBUG_OR_MERGE = false;
 
   public SectionHelper() {
     makeRoot();
   }
 
-//  public SectionHelper(SectionHelper<T> toCopy, List<T> exercises) {
-//    this();
-//    exercises.forEach(this::addExercise);
-//  }
-
   @Override
   public SectionHelper<T> getCopy(List<T> exercises) {
-
-    report();
+//    report();
 
     SectionHelper<T> tSectionHelper = new SectionHelper<>();
 
@@ -118,12 +113,11 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     tSectionHelper.rootTypes = rootTypes;
     tSectionHelper.parentToChildTypes = parentToChildTypes;
 
-
-    tSectionHelper.report();
+  //  tSectionHelper.report();
 
     exercises.forEach(this::addExercise);
 
-    tSectionHelper.report();
+  //  tSectionHelper.report();
 
     return tSectionHelper;
   }
@@ -713,7 +707,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @param unitName for this unit or chapter
    * @return
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getExercisesFromFiltered
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getByProject
+   * @see IUserExerciseDAO#getByProject
    * @see mitll.langtest.server.database.exercise.ExcelImport#recordUnitChapterWeek
    */
   @Override
@@ -774,9 +768,9 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   int spew;
 
   public void addPairs(T t,
-                        CommonExercise exercise,
-                        Collection<String> attrTypes,
-                        List<Pair> pairs) {
+                       CommonExercise exercise,
+                       Collection<String> attrTypes,
+                       List<Pair> pairs) {
     if (exercise.getAttributes() == null) {
       if (spew++ < 10) {
         logger.warn("addPhoneInfo : no exercise attributes for " + exercise.getID());

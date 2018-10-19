@@ -239,7 +239,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param isContext
    * @param typeOrder
    * @return
-   * @see #add(CommonExercise, boolean, boolean, Collection)
+   * @seex #add
    * @see #update(CommonExercise, boolean, Collection)
    */
   private SlickExercise toSlick(CommonExercise shared,
@@ -419,7 +419,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param slick
    * @param baseTypeOrder
    * @param sectionHelper
-   * @param exToPhones
    * @param lookup
    * @param exercise
    * @param attrTypes
@@ -430,7 +429,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private List<Pair> addExerciseToSectionHelper(SlickExercise slick,
                                                 Collection<String> baseTypeOrder,
                                                 ISection<CommonExercise> sectionHelper,
-                                                Map<Integer, ExercisePhoneInfo> exToPhones,
                                                 IPronunciationLookup lookup,
                                                 Exercise exercise,
                                                 Collection<String> attrTypes,
@@ -440,7 +438,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         (hostName.startsWith(HYDRA) ||
             hostName.contains("MITLL"))) {  // for local testing
 //      logger.info("addExerciseToSectionHelper ex " + slick.id() + " = " + exercise.getNumPhones());
-      ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, exToPhones, lookup, pairs);
+      ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, lookup, pairs);
 
       int numToUse = exercisePhoneInfo.getNumPhones();
       if (numToUse == 0) {
@@ -464,7 +462,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param slick
    * @param shouldSwap
    * @return
-   * @see #getExercises(Collection, List, ISection, Map, Project, Map, Map, boolean)
+   * @see #getExercises(Collection, List, ISection, Project, Map, Map, boolean)
    */
   @NotNull
   private Exercise makeExercise(SlickExercise slick, boolean shouldSwap) {
@@ -515,19 +513,21 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * If the number of phones on an exercise has not been calculated yet, look it up.
    *
    * @param slick
-   * @param exToPhones
+   * @paramx exToPhones
    * @param lookup
    * @return
    * @see #addExerciseToSectionHelper
    */
   @NotNull
   private ExercisePhoneInfo getExercisePhoneInfo(SlickExercise slick,
-                                                 Map<Integer, ExercisePhoneInfo> exToPhones,
+                                               //  Map<Integer, ExercisePhoneInfo> exToPhones,
                                                  IPronunciationLookup lookup,
                                                  List<SlickExercisePhone> pairs) {
-    ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(slick.id());
+    ExercisePhoneInfo exercisePhoneInfo = new ExercisePhoneInfo();
+    exercisePhoneInfo.setNumPhones(refResultDAO.getNumPhonesForEx(slick.id()));
+  //  ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(slick.id());
 
-    if (exercisePhoneInfo == null || exercisePhoneInfo.getNumPhones() < 1) {
+    if (exercisePhoneInfo.getNumPhones() < 1) {
 /*      if (exercisePhoneInfo == null) {
         logger.info("getExercisePhoneInfo : no phone info for " + slick.id() + " in " + exToPhones.size());
       } else {
@@ -559,7 +559,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param slick
    * @param lookup
    * @return
-   * @see #getExercisePhoneInfo(SlickExercise, Map, IPronunciationLookup, List)
+   * @see #getExercisePhoneInfo
    */
   @NotNull
   private ExercisePhoneInfo getExercisePhoneInfoFromDict(SlickExercise slick, IPronunciationLookup lookup) {
@@ -790,12 +790,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param addTypesToSection
    * @return
    * @see #getByProject
-   * @see #getContextByProject
+   * @see IUserExerciseDAO#getContextByProject
    */
   private List<CommonExercise> getExercises(Collection<SlickExercise> all,
                                             List<String> typeOrder,
                                             ISection<CommonExercise> sectionHelper,
-                                            Map<Integer, ExercisePhoneInfo> exToPhones,
                                             Project lookup,
                                             Map<Integer, ExerciseAttribute> allByProject,
                                             Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs,
@@ -838,7 +837,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
         addAttributeToExercise(allByProject, exToAttrs, exercise);
 //      logger.info("Attr for " + exercise.getID() + " " + exercise.getAttributes());
-        List<Pair> e = addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, exToPhones, lookup, exercise,
+        List<Pair> e = addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, lookup, exercise,
             allFacetTypes, pairs);
         e.forEach(pair -> {
           if (pair.getProperty().startsWith("Speaker")) {
@@ -1063,7 +1062,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   public List<CommonExercise> getByProject(
       List<String> typeOrder,
       ISection<CommonExercise> sectionHelper,
-      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject,
       Project theProject,
       Map<Integer, ExerciseAttribute> allByProject,
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
@@ -1079,7 +1077,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return getExercises(allPredefByProject,
         typeOrder,
         sectionHelper,
-        exerciseToPhoneForProject,
         theProject,
         allByProject,
         exToAttrs,
@@ -1104,7 +1101,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   /**
    * @param typeOrder
    * @param sectionHelper
-   * @param exerciseToPhoneForProject
    * @param lookup
    * @return
    * @paramx attributeTypes
@@ -1114,7 +1110,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   public List<CommonExercise> getContextByProject(
       List<String> typeOrder,
       ISection<CommonExercise> sectionHelper,
-      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject,
       Project lookup,
       Map<Integer, ExerciseAttribute> allByProject,
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs
@@ -1123,7 +1118,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     List<SlickExercise> allContextPredefByProject = dao.getAllContextByProject(projectid);
 //    logger.info("getContextByProject For " + projectid + " got " + allContextPredefByProject.size() + " context predef ");
     return getExercises(allContextPredefByProject, typeOrder, sectionHelper,
-        exerciseToPhoneForProject, lookup, allByProject, exToAttrs, /*attributeTypes,*/ false);
+        lookup, allByProject, exToAttrs, /*attributeTypes,*/ false);
   }
 
   @Override
