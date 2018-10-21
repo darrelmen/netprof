@@ -37,12 +37,12 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.*;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.shared.exercise.*;
-import org.jetbrains.annotations.NotNull;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ScoredExercise;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.QC;
@@ -64,6 +64,7 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
   /**
    * @param controller
    * @param forSentences
+   * @see mitll.langtest.client.banner.NewContentChooser#showView(INavigation.VIEWS, boolean, boolean)
    * @see
    */
   public MarkDefectsChapterNPFHelper(ExerciseController controller, boolean forSentences) {
@@ -81,13 +82,21 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
   @Override
   protected FlexListLayout<T, ClientExercise> getMyListLayout(SimpleChapterNPFHelper<T, ClientExercise> outer) {
     return new MyFlexListLayout<T, ClientExercise>(controller, outer) {
-      protected void styleTopRow(Panel twoRows, Panel topRow) {
-        twoRows.add(topRow);
-      }
+//      protected void styleTopRow(Panel twoRows, Panel topRow) {
+//        twoRows.add(topRow);
+//      }
 
+      //      protected void styleBottomRow(Panel bottomRow) {
+//        bottomRow.setWidth("100%");
+//        bottomRow.addStyleName("inlineFlex");
+//      }
+
+      /**
+       *
+       * @param bottomRow
+       */
       protected void styleBottomRow(Panel bottomRow) {
-        bottomRow.setWidth("100%");
-        bottomRow.addStyleName("inlineFlex");
+        bottomRow.addStyleName("centerPractice");
       }
 
       @Override
@@ -109,7 +118,7 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
     return new ExercisePanelFactory<T, ClientExercise>(controller, exerciseList) {
       @Override
       public Panel getExercisePanel(ClientExercise e) {
-        return new QCNPFExercise<ClientExercise>(e, controller, outerExerciseList, forSentences ? QC_SENTENCES : QC);
+        return new QCNPFExercise<>(e, controller, outerExerciseList, forSentences ? QC_SENTENCES : QC);
       }
     };
   }

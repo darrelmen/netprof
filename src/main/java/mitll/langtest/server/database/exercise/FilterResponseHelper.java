@@ -206,28 +206,43 @@ public class FilterResponseHelper {
     return getFilterResponse(request, projectID, request1);
   }
 
+  /**
+   * First make an exercise list of just what you're looking for, then build a type hierarchy on the fly from it.
+   * @param request
+   * @param projectID
+   * @param request1
+   * @return
+   */
   private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest request1) {
-    logger.info("req " + request1);
+    logger.info("getFilterResponse exercise req " + request1);
 
-    List<CommonExercise> unRec = filterByUnrecorded(request1, getExercises(projectID), projectID);
-
-    logger.info("build section helper from " + unRec.size());
-
-    ISection<CommonExercise> sectionHelper = getSectionHelper(projectID);
-    List<String> typeOrder = sectionHelper.getTypeOrder();
-    SectionHelper<CommonExercise> unrecordedSectionHelper = sectionHelper.getCopy(unRec);
-
-    logger.info("types " + unrecordedSectionHelper.getTypeOrder() + " vs " + typeOrder);
-    logger.info("type->distinct " + unrecordedSectionHelper.getTypeToDistinct());
-    populate(projectID, unRec, unrecordedSectionHelper, typeOrder);
+    SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelperFromFiltered(projectID, request1);
 
     // unrecordedSectionHelper.report();
 
     FilterResponse typeToValues = unrecordedSectionHelper.getTypeToValues(request, false);
 
-    logger.info("resp " + typeToValues);
+    logger.info("getFilterResponse resp " + typeToValues);
 
     return typeToValues;
+  }
+
+  @NotNull
+  private SectionHelper<CommonExercise> getSectionHelperFromFiltered(int projectID, ExerciseListRequest request1) {
+    List<CommonExercise> filtered = filterExercises(request1, getExercises(projectID), projectID);
+
+    logger.info("getFilterResponse build section helper from " + filtered.size());
+
+    ISection<CommonExercise> sectionHelper = getSectionHelper(projectID);
+    List<String> typeOrder = sectionHelper.getTypeOrder();
+
+
+    SectionHelper<CommonExercise> unrecordedSectionHelper = sectionHelper.getCopy(filtered);
+
+    logger.info("getFilterResponse types " + unrecordedSectionHelper.getTypeOrder() + " vs " + typeOrder);
+    logger.info("getFilterResponse type->distinct " + unrecordedSectionHelper.getTypeToDistinct());
+    populate(projectID, filtered, unrecordedSectionHelper, typeOrder);
+    return unrecordedSectionHelper;
   }
 
   protected ISection<CommonExercise> getSectionHelper(int projectID) {
@@ -256,6 +271,13 @@ public class FilterResponseHelper {
     return exercises;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#filterExercises
+   * @param request
+   * @param exercises
+   * @param projid
+   * @return
+   */
   public List<CommonExercise> filterExercises(ExerciseListRequest request,
                                               List<CommonExercise> exercises,
                                               int projid) {
@@ -323,8 +345,10 @@ public class FilterResponseHelper {
    * @return
    */
   private List<CommonExercise> filterByUninspected(Collection<CommonExercise> exercises) {
+    long then = System.currentTimeMillis();
     Collection<Integer> inspected = databaseServices.getStateManager().getInspectedExercises();
-    // logger.info("found " + inspected.size());
+    long now = System.currentTimeMillis();
+    logger.info("filterByUninspected found " + inspected.size() + " in "+(now-then));
     List<CommonExercise> copy = new ArrayList<>();
     for (CommonExercise exercise : exercises) {
       if (!inspected.contains(exercise.getID())) {

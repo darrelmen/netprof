@@ -1,3 +1,8 @@
 package mitll.langtest.client.scoring;
 
-public enum FieldType {FL, TRANSLIT, MEANING, EN}
+public enum FieldType {
+  /**
+   * @see TwoColumnExercisePanel#getFLEntry
+   */
+  FL, TRANSLIT, MEANING, EN
+}

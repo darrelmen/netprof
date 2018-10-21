@@ -175,7 +175,8 @@ public class FilterRequest implements IsSerializable {
         (userListID == -1 ? "" : "userListID =" + userListID) +
             (limit == -1 ? "" : "limit '" + limit + "'") +
             (prefix.isEmpty() ? "" : "prefix '" + prefix + "'") +
-            (recordRequest ? "" : "recordRequest") +
+            (recordRequest ? "recordRequest" : "") +
+            (onlyUninspected ? "onlyUninspected" : "") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection " + getTypeToSelection());
   }
 }

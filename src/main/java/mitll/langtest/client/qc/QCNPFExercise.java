@@ -93,7 +93,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
 
   private static final String REF_AUDIO = "refAudio";
   /**
-   * @see #addApprovedButton
+   * @see #addMarkInspected
    */
   private static final String APPROVED = "Mark Inspected";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
@@ -199,9 +199,9 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
         CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED :
         UNINSPECTED_TOOLTIP);
 
-    if (getInstance().isFix()) {
-      approvedButton = addApprovedButton(listContainer, navHelper);
-    }
+   // if (getInstance().isFix()) {
+      approvedButton = addMarkInspected(listContainer, navHelper);
+    //}
 
     setApproveButtonState();
     return navHelper;
@@ -213,7 +213,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    * @return
    * @see GoodwaveExercisePanel#getNavigationHelper(ExerciseController, ListInterface, boolean, boolean)
    */
-  private Button addApprovedButton(final ListInterface listContainer, NavigationHelper widgets) {
+  private Button addMarkInspected(final ListInterface listContainer, NavigationHelper widgets) {
     Button approved = new Button(APPROVED);
     approved.getElement().setId("approve");
     approved.addStyleName("leftFiveMargin");
@@ -233,7 +233,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
   /**
    * @param listContainer
    * @param completedExercise
-   * @see #addApprovedButton(mitll.langtest.client.list.ListInterface, mitll.langtest.client.exercise.NavigationHelper)
+   * @see #addMarkInspected(mitll.langtest.client.list.ListInterface, mitll.langtest.client.exercise.NavigationHelper)
    * @see #nextWasPressed
    */
   private void markReviewed(ListInterface<?, ?> listContainer, HasID completedExercise) {
@@ -253,7 +253,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    */
   private void markReviewed(final HasID completedExercise) {
     boolean allCorrect = incorrectFields.isEmpty();
-    //System.out.println("markReviewed : exercise " + completedExercise.getOldID() + " instance " + instance + " allCorrect " + allCorrect);
+    logger.info("markReviewed : exercise " + completedExercise.getID() +   " allCorrect " + allCorrect);
 
     controller.getQCService().markReviewed(completedExercise.getID(), allCorrect,
         new AsyncCallback<Void>() {
@@ -264,7 +264,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
 
           @Override
           public void onSuccess(Void result) {
-            //System.out.println("\tmarkReviewed.onSuccess exercise " + completedExercise.getOldID() + " marked reviewed!");
+            logger.info("\tmarkReviewed.onSuccess exercise " + completedExercise.getID() + " marked reviewed!");
           }
         }
     );
@@ -315,11 +315,17 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
   }
 
   private Heading getComment() {
-    boolean isComment = getInstance().isQC();
-    String columnLabel = isComment ? COMMENT : DEFECT;
+   // boolean isComment = getInstance().isQC();
+
+    if (logger == null) logger=  Logger.getLogger("QCNPFExercise");
+    logger.info("inst "+getInstance());
+    logger.info("isQC "+getInstance().isQC());
+
+    String columnLabel =  DEFECT;
+
     Heading heading = new Heading(4, columnLabel);
     heading.addStyleName("borderBottomQC");
-    if (isComment) heading.setWidth("90px");
+   // if (isComment) heading.setWidth("90px");
     return heading;
   }
 

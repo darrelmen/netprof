@@ -184,9 +184,10 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
         getParent().removeStyleName("floatLeftAndClear");
         ((Panel) parent).add(c);
         added = true;
-      } else {
-        //getProgressInfo();
       }
+      //else {
+        //getProgressInfo();
+      //}
     }
 
     /**

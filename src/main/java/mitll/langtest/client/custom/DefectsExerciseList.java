@@ -1,14 +1,11 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.CheckBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.recording.NoListFacetExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.list.*;
-import mitll.langtest.shared.answer.ActivityType;
+import mitll.langtest.client.list.HistoryExerciseList;
+import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +22,7 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   // private CheckBox filterOnly, uninspectedOnly;
   private boolean isContext;
 
-  public DefectsExerciseList(ExerciseController controller,
+   DefectsExerciseList(ExerciseController controller,
                              Panel topRow,
                              Panel currentExercisePanel,
                              INavigation.VIEWS instanceName,
@@ -83,7 +80,7 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   @Override
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
     return new FilterRequest(incrReqID(), pairs, userListID)
-        .setRecordRequest(true)
+        .setOnlyUninspected(true)
         .setExampleRequest(isContext);
   }
 
