@@ -1074,7 +1074,7 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void markState(CommonExercise exercise, STATE state, int creatorID) {
-    logger.info("markState mark state " + exercise + " = " + state + " by " + creatorID);
+    logger.info("markState mark state " + exercise.getID() + " = " + state + " by " + creatorID);
 
     stateManager.setState(exercise, state, creatorID);
 

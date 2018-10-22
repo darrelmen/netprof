@@ -18,11 +18,11 @@ import java.util.*;
 
 public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> extends LearnFacetExerciseList<T> {
   public NoListFacetExerciseList(ExerciseController controller,
-                          Panel topRow,
-                          Panel currentExercisePanel,
-                          INavigation.VIEWS instanceName,
-                          DivWidget listHeader,
-                          INavigation.VIEWS views) {
+                                 Panel topRow,
+                                 Panel currentExercisePanel,
+                                 INavigation.VIEWS instanceName,
+                                 DivWidget listHeader,
+                                 INavigation.VIEWS views) {
     super(
         topRow,
         currentExercisePanel,
@@ -82,4 +82,30 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> ext
   protected void goGetNextAndCacheIt(int itemID) {
   }
 
+  @Override
+  protected void hidePrevNext() {
+    // hidePrevNextWidgets();
+    setProgressVisible(true);
+  }
+
+  @Override
+  protected void setProgressVisible(boolean visible) {
+    practicedProgress.setVisible(true);
+    scoreProgress.setVisible(visible);
+  }
+
+  @Override
+  protected void showDrill(Collection<ClientExercise> result) {
+    super.showDrill(result);
+    // logger.info("showDrill result size " + result.size());
+    int num = getIndex(getCurrentExercise().getID()) + 1;
+    // showNumberPracticed(num, pagingContainer.getSize());
+    showProgress(num, pagingContainer.getSize(), practicedProgress,
+        "None Inspected", "All inspected or visited", "", false);
+  }
+
+  @NotNull
+  protected String getPracticedText(int num, int denom, String suffix) {
+    return " " + num + "/" + denom;
+  }
 }

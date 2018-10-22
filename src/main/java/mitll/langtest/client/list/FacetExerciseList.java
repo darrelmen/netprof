@@ -51,7 +51,6 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.QuizHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -98,7 +97,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    */
   private static final boolean DEBUG_STALE = true;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_CHOICES = false;
   private static final boolean DEBUGSCORE = false;
 
@@ -113,7 +112,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   private static final String NONE_PRACTICED_YET = "None practiced yet.";
   /**
-   * @see #showScore
+   * @see #showNumberPracticed
    */
   private static final String ALL_PRACTICED = "All practiced!";
 
@@ -149,9 +148,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private static final String MENU_ITEM = "menuItem";
 
   /**
-   *
+   * @see #FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, boolean, INavigation.VIEWS)
+   * @see #setProgressVisible
    */
-  private final ProgressBar practicedProgress, scoreProgress;
+  protected ProgressBar practicedProgress, scoreProgress;
   private final DivWidget pagerAndSortRow;
 
   private List<String> typeOrder;
@@ -210,19 +210,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     downloadHelper = new DownloadHelper();
 
-    DivWidget breadRow = new DivWidget();
-    breadRow.setWidth("100%");
-    breadRow.getElement().setId("breadRow");
-    //    breadRow.addStyleName("floatLeftList");
-
-    {
-      breadRow.add(practicedProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
-      breadRow.add(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
-      styleProgressBarContainer(practicedProgress);
-      practicedProgress.addStyleName("floatLeft");
-      styleProgressBarContainer(scoreProgress);
-      scoreProgress.addStyleName("floatRight");
-    }
+    DivWidget breadRow = getBreadcrumbRow();
     // Todo : add this?
     // breadRow.add(new HTML("breadcrumbs go here"));
     {
@@ -240,6 +228,24 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost()));
   }
 
+  @NotNull
+  private DivWidget getBreadcrumbRow() {
+    DivWidget breadRow = new DivWidget();
+    breadRow.setWidth("100%");
+    breadRow.getElement().setId("breadRow");
+    //    breadRow.addStyleName("floatLeftList");
+
+    {
+      breadRow.add(practicedProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
+      breadRow.add(scoreProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
+      styleProgressBarContainer(practicedProgress);
+      practicedProgress.addStyleName("floatLeft");
+      styleProgressBarContainer(scoreProgress);
+      scoreProgress.addStyleName("floatRight");
+    }
+    return breadRow;
+  }
+
   public void hideSectionPanel() {
     sectionPanel
         .getParent()
@@ -254,7 +260,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
 //    logger.info("parent is " + parent.getElement().getId());
     Iterator<Widget> iterator = ((HasWidgets) parent).iterator();
-    /*Widget sibling =*/ iterator.next();
+    /*Widget sibling =*/
+    iterator.next();
 //    logger.info("sibling is " + sibling.getElement().getId());
 //
     Widget next = iterator.next();
@@ -453,7 +460,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
            */
           @Override
           protected void gotRangeChanged(final Range newRange) {
-           if (DEBUG) logger.info("gotRangeChanged event for " + newRange);
+            if (DEBUG) logger.info("gotRangeChanged event for " + newRange);
             if (!isDrillView()) {
               askServerForExercise(-1);
             }
@@ -559,7 +566,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   /**
    * Populate the filter choices on the left.
-   *
+   * <p>
    * structure
    * nav
    * header (optional)
@@ -1187,7 +1194,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #addRemoveClickHandler
    */
   private void setHistory(Map<String, String> candidate) {
-  //  logger.info("setHistory "+candidate);
+    //  logger.info("setHistory "+candidate);
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
 
@@ -1321,7 +1328,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   private void updateDownloadLinks() {
-  //  SelectionState selectionState = getSelectionState(getHistoryToken());
+    //  SelectionState selectionState = getSelectionState(getHistoryToken());
     // keep the download link info in sync with the selection
     downloadHelper.updateDownloadLinks(getSelectionState(getHistoryToken()), typeOrder);
   }
@@ -1425,10 +1432,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         .append("=")
         .append(getInstance());*/
 
-  // keepSearchItem(builder);
+    // keepSearchItem(builder);
     String s = builder.toString();
 
-  //     logger.info("getHistoryToken token '" + s + "'");
+    //     logger.info("getHistoryToken token '" + s + "'");
     return s;
   }
 
@@ -1497,9 +1504,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       logger.info("pushFirstSelection " + exerciseID + " " + searchIfAny);
       super.pushFirstSelection(exerciseID, searchIfAny);
     } else {*/
-      updateDownloadLinks();
-      askServerForExercise(exerciseID);
-   // }
+    updateDownloadLinks();
+    askServerForExercise(exerciseID);
+    // }
   }
 
   /**
@@ -1508,7 +1515,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   @Override
   public void flushWith(Comparator<T> comparator) {
-   //  logger.info("flushWith ");
+    //  logger.info("flushWith ");
     super.flushWith(comparator);
     askServerForExercise(-1);
   }
@@ -1588,7 +1595,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return !isCurrentReq(reqID);
   }
 
-  private void hidePrevNext() {
+  protected void hidePrevNext() {
     hidePrevNextWidgets();
     setProgressVisible(false);
   }
@@ -1596,7 +1603,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    * @see #gotFullExercises
    */
-  private void hidePrevNextWidgets() {
+  protected void hidePrevNextWidgets() {
     pageSizeContainer.setVisible(false);
     sortBox.setVisible(false);
     pagerAndSortRow.setVisible(false);
@@ -1846,7 +1853,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
           logger.info("showExercises Skip stale req " + reqID + " vs current " + getCurrentExerciseReq());
       } else {
         if (DEBUG) logger.info("showExercises show req " + reqID + " exercises " + getIDs(result));
-        Scheduler.get().scheduleDeferred((Command) () -> showExerciesForCurrentReq(result, reqID));
+        Scheduler.get().scheduleDeferred((Command) () -> showExercisesForCurrentReq(result, reqID));
       }
     }
   }
@@ -1886,7 +1893,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return result.stream().map(HasID::getID).collect(Collectors.toList());
   }
 
-  protected void showExerciesForCurrentReq(Collection<U> result, int reqID) {
+  protected void showExercisesForCurrentReq(Collection<U> result, int reqID) {
     if (isCurrentReq(reqID)) {
       reallyShowExercises(result, reqID);
       if (isCurrentReq(reqID)) {
@@ -1909,10 +1916,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    * @param result
    * @param reqID
-   * @see #showExercises
+   * @see #showExercisesForCurrentReq
    */
   private void reallyShowExercises(Collection<U> result, int reqID) {
-    //logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
+    logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
     DivWidget exerciseContainer = new DivWidget();
     populatePanels(result, reqID, exerciseContainer);
 
@@ -2024,7 +2031,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
    * @param result
    * @see #showExercises
    */
-  private void showDrill(Collection<U> result) {
+  protected void showDrill(Collection<U> result) {
     U next = result.iterator().next();
     //logger.info("showDrill " + next.getID());
     markCurrentExercise(next.getID());
@@ -2070,7 +2077,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
   /**
    * @param displayed
-   * @see #showExercises
+   * @see #showExercisesForCurrentReq(Collection, int)
    */
   private void setProgressBarScore(Collection<T> displayed, final int reqid) {
     //exercisesWithScores.clear();
@@ -2094,9 +2101,9 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
         exerciseToScore.put(exercise.getID(), score);
         if (DEBUGSCORE) logger.info("# " + exercise.getID() + " Score " + score);
         withScore++;
-      }
-      else {
-        if (DEBUGSCORE) logger.info("# " + exercise.getID() + " no score " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+      } else {
+        if (DEBUGSCORE)
+          logger.info("# " + exercise.getID() + " no score " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
       }
       // if (!isCurrentReq(reqid)) break;
     }
@@ -2107,9 +2114,8 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }*/
 
     if (isCurrentReq(reqid)) {
-      showScore(exerciseToScore.size(), displayed.size());
+      showNumberPracticed(exerciseToScore.size(), displayed.size());
       if (DEBUGSCORE) logger.info("setProgressBarScore total " + total + " denom " + withScore);
-
       showAvgScore(total, withScore);
     }
   }
@@ -2131,7 +2137,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     } else {
       logger.info("skipping low score for " + id);
     }
-    showScore(exerciseToScore.size(), pagingContainer.getSize());
+    showNumberPracticed(exerciseToScore.size(), pagingContainer.getSize());
     showAvgScore();
   }
 
@@ -2161,7 +2167,12 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     showAvgScore(Math.round(avg * 100));
   }
 
-  private void showScore(int num, int denom) {
+  /**
+   * @param num
+   * @param denom
+   * @see #setProgressBarScore
+   */
+  protected void showNumberPracticed(int num, int denom) {
     showProgress(num, denom, practicedProgress, NONE_PRACTICED_YET, ALL_PRACTICED, PRACTICED, false);
   }
 
@@ -2169,18 +2180,28 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     showProgress(num, 100, scoreProgress, NO_SCORE, PERFECT, AVG_SCORE, true);
   }
 
-  private void setProgressVisible(boolean visible) {
+  protected void setProgressVisible(boolean visible) {
     practicedProgress.setVisible(visible);
     scoreProgress.setVisible(visible);
   }
 
-  private void showProgress(int num,
-                            int denom,
-                            ProgressBar practicedProgress,
-                            String zeroPercent,
-                            String oneHundredPercent,
-                            String suffix,
-                            boolean useColorGradient) {
+  /**
+   * @param num
+   * @param denom
+   * @param practicedProgress
+   * @param zeroPercent
+   * @param oneHundredPercent
+   * @param suffix
+   * @param useColorGradient
+   * @see #showAvgScore(int)
+   */
+  protected void showProgress(int num,
+                              int denom,
+                              ProgressBar practicedProgress,
+                              String zeroPercent,
+                              String oneHundredPercent,
+                              String suffix,
+                              boolean useColorGradient) {
     float fnumer = (float) num;
     float fdenom = (float) denom;
 
@@ -2192,10 +2213,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     boolean allDone = num == denom;
 
     {
-      String text =
-          num == 0 ? zeroPercent :
-              allDone ? oneHundredPercent : (num + suffix);
-
+      String text = getPracticedText(num, denom, zeroPercent, oneHundredPercent, suffix);
       practicedProgress.setText(text);
     }
 
@@ -2215,6 +2233,17 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
       practicedProgress.getWidget(0).getElement().getStyle().setColor("black");
     }
     practicedProgress.setVisible(true);
+  }
+
+  private String getPracticedText(int num, int denom, String zeroPercent, String oneHundredPercent, String suffix) {
+    boolean allDone = num == denom;
+    return num == 0 ? zeroPercent :
+        allDone ? oneHundredPercent : getPracticedText(num, denom, suffix);
+  }
+
+  @NotNull
+  protected String getPracticedText(int num, int denom, String suffix) {
+    return num + suffix;
   }
 
   /**

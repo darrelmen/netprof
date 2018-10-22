@@ -15,8 +15,7 @@ import java.util.Set;
  * Created by go22670 on 7/5/17.
  */
 public interface IStateManager {
-  @NotNull
-  Set<Integer> getAttentionIDs();
+
 
   @NotNull
   Set<Integer> getDefectIDs();

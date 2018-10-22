@@ -181,7 +181,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
   private void styleBottomRowDiv(DivWidget bottomRowDiv, DivWidget listHeader) {
     bottomRowDiv.addStyleName("floatLeft");
-    bottomRowDiv.addStyleName("mainBlock");
+    //bottomRowDiv.addStyleName("mainBlock");
     bottomRowDiv.getElement().setId("rightSideDiv");
     bottomRowDiv.setWidth("100%");
     //bottomRowDiv.setWidth(RIGHT_SIDE_DIV_WIDTH +    "%");

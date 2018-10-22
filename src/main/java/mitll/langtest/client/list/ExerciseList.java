@@ -76,7 +76,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final boolean DEBUG_STALE = true;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final String SERVER_ERROR = "Server error";
   private static final String GETTING_EXERCISE = "getting exercise";
@@ -302,7 +302,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
       this.exerciseID = exerciseID;
       this.request = request;
 //      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
-//
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
 //      logger.info("logException stack " + exceptionAsString);
     }

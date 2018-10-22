@@ -197,7 +197,7 @@ public class StateManager implements IStateManager {
   }
 
 
-  @Override
+/*  @Override
   @NotNull
   public Set<Integer> getAttentionIDs() {
     Map<Integer, StateCreator> exerciseToState = secondStateDAO.getExerciseToState(false);
@@ -210,7 +210,7 @@ public class StateManager implements IStateManager {
       }
     }
     return defectIds;
-  }
+  }*/
 
   @Override
   @NotNull
@@ -234,7 +234,7 @@ public class StateManager implements IStateManager {
    * @param creatorID
    * @seex mitll.langtest.server.database.DatabaseImpl#duplicateExercise
    * @see mitll.langtest.server.services.AudioServiceImpl#setExerciseState
-   * @see mitll.langtest.server.database.custom.UserListManager#markState(java.util.Collection)
+   * @see mitll.langtest.server.database.custom.UserListManager#markState
    */
   @Override
   public void setState(Shell shell, STATE state, long creatorID) {

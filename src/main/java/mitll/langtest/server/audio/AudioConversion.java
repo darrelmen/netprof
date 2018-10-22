@@ -709,6 +709,7 @@ public class AudioConversion extends AudioBase {
           }
         } catch (IOException e) {
           logger.error("convertToMP3FileAndCheck for " + lameProc + " got " + e, e);
+          logger.warn("consider on mac : brew install lame");
         }
 
       }

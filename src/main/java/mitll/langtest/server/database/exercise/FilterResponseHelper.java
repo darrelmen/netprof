@@ -180,7 +180,7 @@ public class FilterResponseHelper {
     String unit = slick.getUnitToValue().get(iterator.next());
     String lesson = iterator.hasNext() ? slick.getUnitToValue().get(iterator.next()) : "";
     if (lesson == null) {
-      logger.warn("hmm no lesson value on " + slick.getUnitToValue() + " for " +slick.getID() + " " + slick.getEnglish());
+      logger.warn("hmm no lesson value on " + slick.getUnitToValue() + " for " + slick.getID() + " " + slick.getEnglish());
       lesson = "";
     }
     boolean ispredef = slick.isPredefined();
@@ -208,6 +208,7 @@ public class FilterResponseHelper {
 
   /**
    * First make an exercise list of just what you're looking for, then build a type hierarchy on the fly from it.
+   *
    * @param request
    * @param projectID
    * @param request1
@@ -239,8 +240,8 @@ public class FilterResponseHelper {
 
     SectionHelper<CommonExercise> unrecordedSectionHelper = sectionHelper.getCopy(filtered);
 
-    logger.info("getFilterResponse types " + unrecordedSectionHelper.getTypeOrder() + " vs " + typeOrder);
-    logger.info("getFilterResponse type->distinct " + unrecordedSectionHelper.getTypeToDistinct());
+  //  logger.info("getFilterResponse types " + unrecordedSectionHelper.getTypeOrder() + " vs " + typeOrder);
+//    logger.info("getFilterResponse type->distinct " + unrecordedSectionHelper.getTypeToDistinct());
     populate(projectID, filtered, unrecordedSectionHelper, typeOrder);
     return unrecordedSectionHelper;
   }
@@ -272,16 +273,16 @@ public class FilterResponseHelper {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#filterExercises
    * @param request
    * @param exercises
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#filterExercises
    */
   public List<CommonExercise> filterExercises(ExerciseListRequest request,
                                               List<CommonExercise> exercises,
                                               int projid) {
-//    logger.info("filter req " + request);
+     logger.info("filterExercises filter req " + request);
     exercises = filterByUnrecorded(request, exercises, projid);
 
     if (request.isOnlyWithAudioAnno()) {
@@ -348,8 +349,8 @@ public class FilterResponseHelper {
     long then = System.currentTimeMillis();
     Collection<Integer> inspected = databaseServices.getStateManager().getInspectedExercises();
     long now = System.currentTimeMillis();
-    logger.info("filterByUninspected found " + inspected.size() + " in "+(now-then));
-    List<CommonExercise> copy = new ArrayList<>();
+    logger.info("filterByUninspected found " + inspected.size() + " in " + (now - then));
+    List<CommonExercise> copy = new ArrayList<>(inspected.size());
     for (CommonExercise exercise : exercises) {
       if (!inspected.contains(exercise.getID())) {
         copy.add(exercise);

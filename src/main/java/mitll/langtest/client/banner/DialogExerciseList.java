@@ -110,7 +110,7 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
         //    toShow.forEach(iDialog -> iDialog.ge);
             sortDialogs(toShow, visibleIDs);
-            showExerciesForCurrentReq(toShow, incrReq());
+            showExercisesForCurrentReq(toShow, incrReq());
           }
         });
   }

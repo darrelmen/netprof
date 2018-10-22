@@ -82,7 +82,7 @@ public class ServerProperties {
    * TODO : good idea????
    * ON THIS BRANCH!
    */
-  private static final String APP_NAME_DEFAULT = "dialog";
+  private static final String APP_NAME_DEFAULT = "netprof";//dialog";
 
   /**
    * As of 8/2/17 we have these languages on the hydra2 server:

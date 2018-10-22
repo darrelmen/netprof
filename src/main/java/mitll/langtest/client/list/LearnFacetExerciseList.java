@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -25,6 +26,16 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
 
   private static final boolean DEBUG = false;
 
+  /**
+   * @see mitll.langtest.client.banner.LearnHelper#getMyListLayout(SimpleChapterNPFHelper)
+   * @param secondRow
+   * @param currentExerciseVPanel
+   * @param controller
+   * @param listOptions
+   * @param listHeader
+   * @param isDrillView
+   * @param views
+   */
   public LearnFacetExerciseList(Panel secondRow,
                                 Panel currentExerciseVPanel,
                                 ExerciseController controller,

@@ -78,6 +78,7 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   public void insert(SlickReviewed word) {
+    logger.info("insert " + word);
     dao.insert(word);
   }
   public void addBulk(List<SlickReviewed> bulk) {
@@ -92,6 +93,8 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
 
   @Override
   public void setState(int exerciseID, STATE state, long creatorID) {
+    logger.info("setState " + exerciseID + " state " + state + " by " +creatorID);
+
     dao.insert(toSlick(exerciseID, state, (int) creatorID));
   }
 

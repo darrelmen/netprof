@@ -53,8 +53,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class NavigationHelper extends HorizontalPanel {
-  private final Logger logger = Logger.getLogger("NavigationHelper");
-
+  //private final Logger logger = Logger.getLogger("NavigationHelper");
 
   private static final String PREVIOUS = "Previous";
   private static final String NEXT = "Next";
@@ -152,7 +151,7 @@ public class NavigationHelper extends HorizontalPanel {
    * @param exercise
    * @see #makeNextButton(HasID, ExerciseController, boolean)
    */
-  protected void enableNext(HasID exercise) {
+  public void enableNext(HasID exercise) {
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
       // logger.info("enableNextOnlyWhenAllCompleted true");
       next.setEnabled(false);
