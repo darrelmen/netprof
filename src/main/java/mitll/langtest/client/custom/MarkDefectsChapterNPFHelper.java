@@ -58,7 +58,6 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
   private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
 
   //  private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
-//  private static final String SHOW_ONLY_AUDIO_BY_UNKNOWN_GENDER = "Show Only Audio by Unknown Gender";
   private boolean forSentences;
 
   /**
@@ -82,15 +81,6 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
   @Override
   protected FlexListLayout<T, ClientExercise> getMyListLayout(SimpleChapterNPFHelper<T, ClientExercise> outer) {
     return new MyFlexListLayout<T, ClientExercise>(controller, outer) {
-//      protected void styleTopRow(Panel twoRows, Panel topRow) {
-//        twoRows.add(topRow);
-//      }
-
-      //      protected void styleBottomRow(Panel bottomRow) {
-//        bottomRow.setWidth("100%");
-//        bottomRow.addStyleName("inlineFlex");
-//      }
-
       /**
        *
        * @param bottomRow

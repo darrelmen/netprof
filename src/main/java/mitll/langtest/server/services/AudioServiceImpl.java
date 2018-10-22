@@ -397,9 +397,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private AudioType getAudioType(HttpServletRequest request) {
     String header = getHeader(request, AUDIOTYPE);
     try {
+      if (header.contains("=")) header = header.replaceAll("=","_");
       return AudioType.valueOf(header.toUpperCase());
     } catch (IllegalArgumentException e) {
-      logger.warn("getAudioType " + header);
+      logger.warn("getAudioType : can't parse '" + header + "' as audio type");
       return AudioType.LEARN;
     }
   }

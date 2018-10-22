@@ -828,7 +828,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
    *
    * @param message
    */
-  protected void showEmptyExercise(String message) {
+  private void showEmptyExercise(String message) {
     createdPanel = new SimplePanel(new Heading(3, message));
     createdPanel.addStyleName("leftFiveMargin");
     createdPanel.getElement().setId(EMPTY_PANEL);
@@ -897,7 +897,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
   }
 
   /**
-   * @see ListInterface#loadNextExercise
+   * @see #loadNextExercise
    */
   protected void onLastItem() {
     new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> reloadExercises());

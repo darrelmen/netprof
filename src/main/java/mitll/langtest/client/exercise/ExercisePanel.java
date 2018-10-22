@@ -71,7 +71,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   private final Set<Widget> completed = new HashSet<>();
   protected T exercise = null;
   final ExerciseController controller;
-  protected final NavigationHelper navigationHelper;
+  private final NavigationHelper navigationHelper;
   final ListInterface<L, T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
   protected final String instance;
@@ -100,10 +100,14 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     this.instance = instance;
     this.doNormalRecording = doNormalRecording;
 
-/*
-    logger.info("for " + e.getID() + " instance " + instance +
+
+    logger.info("for " + e.getID() +
+
+        " eng  " + e.getEnglish()+
+        " fl   " + e.getForeignLanguage()+
+        " instance " + instance +
         " doNormal " + doNormalRecording);
-*/
+
 
     this.navigationHelper = getNavigationHelper(controller);
 
@@ -202,7 +206,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
    * @return
    * @see #getAnswerWidget
    */
-  protected boolean isNormalRecord() {
+   boolean isNormalRecord() {
     return doNormalRecording;
   }
 

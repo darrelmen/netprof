@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.LearnFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
@@ -15,13 +16,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
+import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
+
 /**
  * @see RecorderNPFHelper#getMyListLayout
  */
 class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
 
-  private static final String RECORD = "Record";
+ // private static final String RECORD = "Record";
   private static final String UNRECORD = "Unrecord";
   private static final String RECORDED = "Recorded";
 
@@ -51,12 +55,37 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     this.isContext = isContext;
   }
 
+  @NotNull
+  @Override
+  protected String getNoneDoneMessage() {
+    return "None Recorded Yet";
+  }
+
+  @Override
+  @NotNull
+  protected String getAllDoneMessage() {
+    return "All Recorded.";
+  }
+
+  @Override
+  protected void onLastItem() {
+    new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> showEmptySelection());
+  }
+
+  @Override protected String getEmptySearchMessage() {
+    return "<b>You've completed recording for this selection.</b>" +
+        "<p>Please clear one of your selections and select a different unit or chapter.</p>";
+  }
+
   @Override
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix,
                                                        boolean onlyWithAudioAnno, boolean onlyDefaultUser, boolean onlyUninspected) {
     ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected);
-    exerciseListRequest.setOnlyRecordedByMatchingGender(true);
+    //  exerciseListRequest.setOnlyRecordedByMatchingGender(true);
     exerciseListRequest.setOnlyUnrecordedByMe(true);
+
+
+    logger.info("getExerciseListRequest req " + exerciseListRequest);
     return exerciseListRequest;
   }
 
@@ -99,8 +128,8 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     if (getTypeToSelection().containsKey(RECORDED)) {
       String s = getTypeToSelection().get(RECORDED);
       request.setOnlyUnrecordedByMe(s.startsWith(UNRECORD));
-      request.setOnlyRecordedByMatchingGender(s.startsWith(RECORD));
-      logger.info("getExerciseListRequest selection is " + s);
+      //   request.setOnlyRecordedByMatchingGender(s.startsWith(RECORD));
+      logger.warning("getExerciseListRequest selection is " + s);
 
     } else {
       //logger.info("getExerciseListRequest no recorded selection in " + getTypeToSelection().keySet());

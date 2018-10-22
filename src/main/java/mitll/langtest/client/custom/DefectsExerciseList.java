@@ -56,8 +56,8 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
 
     ExerciseListRequest exerciseListRequest = super
         .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected)
-        .setQC(true)
         .setOnlyUninspected(true)
+        .setQC(true)
         .setAddContext(isContext);
 
     logger.info("getExerciseListRequest req " + exerciseListRequest);
@@ -65,7 +65,11 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   }
 
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
-    ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(prefix).setQC(true).setAddContext(isContext);
+    ExerciseListRequest exerciseListRequest =
+        super.getExerciseListRequest(prefix)
+            .setOnlyUninspected(true)
+            .setQC(true)
+            .setAddContext(isContext);
     logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
     return exerciseListRequest;
   }
@@ -83,7 +87,4 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
         .setOnlyUninspected(true)
         .setExampleRequest(isContext);
   }
-
-
-
 }

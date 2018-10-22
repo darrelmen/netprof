@@ -77,7 +77,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private static final String RECORDED = "Recorded";
   private List<String> predefinedTypeOrder = new ArrayList<>();
   private static final String UNIT = "Unit";
-  private static final String DEFAULT_FOR_EMPTY = "Any";  // TODO : ???
+  public static final String DEFAULT_FOR_EMPTY = "Any";  // TODO : ???
   private static final String BLANK = "Blank";  // TODO : remove????
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
@@ -105,8 +105,6 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
   @Override
   public SectionHelper<T> getCopy(List<T> exercises) {
-//    report();
-
     SectionHelper<T> tSectionHelper = new SectionHelper<>();
 
     tSectionHelper.predefinedTypeOrder = predefinedTypeOrder;
@@ -115,7 +113,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
   //  tSectionHelper.report();
 
-    exercises.forEach(this::addExercise);
+    exercises.forEach(ex->tSectionHelper.addExercise(ex));
 
   //  tSectionHelper.report();
 

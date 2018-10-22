@@ -237,6 +237,9 @@ public class LangTest implements
 
   private static final String GOT_BROWSER_EXCEPTION = "got browser exception : ";
 
+  /**
+   * @see #setPageTitle
+   */
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
 /*

@@ -32,8 +32,11 @@
 
 package mitll.langtest.shared.exercise;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.AnalysisPlot;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
 import mitll.langtest.client.custom.dialog.SearchTypeahead;
 import mitll.langtest.client.list.HistoryExerciseList;
@@ -43,6 +46,7 @@ import mitll.langtest.shared.answer.ActivityType;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,7 +67,7 @@ public class ExerciseListRequest implements IsSerializable {
 
   // TODO : which of these are mutually exclusive???
   private boolean onlyUnrecordedByMe = false;
-  private boolean onlyRecordedByMatchingGender = false;
+  //private boolean onlyRecordedByMatchingGender = false;
   private boolean onlyExamples = false;
   private boolean incorrectFirstOrder = false;
   private boolean onlyWithAudioAnno = false;
@@ -93,7 +97,7 @@ public class ExerciseListRequest implements IsSerializable {
         prefix.isEmpty() &&
         !isFilterActivity(activityType) &&
         !onlyUnrecordedByMe &&
-        !onlyRecordedByMatchingGender &&
+        //   !onlyRecordedByMatchingGender &&
         !onlyExamples &&
         !incorrectFirstOrder &&
         !onlyWithAudioAnno &&
@@ -116,7 +120,7 @@ public class ExerciseListRequest implements IsSerializable {
     return prefix.equals(other.getPrefix()) &&
         typeToSelection.equals(other.getTypeToSelection()) &&
         onlyUnrecordedByMe == other.onlyUnrecordedByMe &&
-        onlyRecordedByMatchingGender == other.onlyRecordedByMatchingGender &&
+        //  onlyRecordedByMatchingGender == other.onlyRecordedByMatchingGender &&
         onlyExamples == other.onlyExamples &&
         incorrectFirstOrder == other.incorrectFirstOrder &&
         onlyWithAudioAnno == other.onlyWithAudioAnno &&
@@ -163,7 +167,7 @@ public class ExerciseListRequest implements IsSerializable {
 
   /**
    * @return
-   * @see ExerciseServiceImpl#filterByUnrecorded
+   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#filterExercises
    */
   public int getUserID() {
     return userID;
@@ -189,7 +193,7 @@ public class ExerciseListRequest implements IsSerializable {
 
   /**
    * @return
-   * @see ExerciseServiceImpl#filterByUnrecorded
+   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#filterExercises
    */
   public boolean isOnlyUnrecordedByMe() {
     return onlyUnrecordedByMe;
@@ -200,14 +204,14 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
-  public boolean isOnlyRecordedByMatchingGender() {
+/*  public boolean isOnlyRecordedByMatchingGender() {
     return onlyRecordedByMatchingGender;
-  }
+  }*/
 
-  public ExerciseListRequest setOnlyRecordedByMatchingGender(boolean onlyRecordedByMatchingGender) {
+/*  public ExerciseListRequest setOnlyRecordedByMatchingGender(boolean onlyRecordedByMatchingGender) {
     this.onlyRecordedByMatchingGender = onlyRecordedByMatchingGender;
     return this;
-  }
+  }*/
 
   /**
    * @return
@@ -219,7 +223,7 @@ public class ExerciseListRequest implements IsSerializable {
   /**
    * @param onlyExamples
    * @return
-   * @see PagingExerciseList#getExerciseListRequest
+   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getExerciseListRequest
    */
   public ExerciseListRequest setOnlyExamples(boolean onlyExamples) {
     this.onlyExamples = onlyExamples;
@@ -237,7 +241,7 @@ public class ExerciseListRequest implements IsSerializable {
 
   /**
    * @return
-   * @see ExerciseServiceImpl#filterExercises
+   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#filterExercises
    */
   public boolean isOnlyWithAudioAnno() {
     return onlyWithAudioAnno;
@@ -250,12 +254,17 @@ public class ExerciseListRequest implements IsSerializable {
 
   /**
    * @return
-   * @see ExerciseServiceImpl#filterExercises
+   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#filterExercises
    */
   public boolean isOnlyDefaultAudio() {
     return onlyDefaultAudio;
   }
 
+  /**
+   * @param onlyDefaultAudio
+   * @return
+   * @deprecated
+   */
   public ExerciseListRequest setOnlyDefaultAudio(boolean onlyDefaultAudio) {
     this.onlyDefaultAudio = onlyDefaultAudio;
     return this;
@@ -265,24 +274,34 @@ public class ExerciseListRequest implements IsSerializable {
     return onlyUninspected;
   }
 
+  /**
+   * @param onlyDefaultAudio
+   * @return
+   * @see mitll.langtest.client.custom.DefectsExerciseList#getExerciseListRequest(String)
+   */
   public ExerciseListRequest setOnlyUninspected(boolean onlyDefaultAudio) {
     this.onlyUninspected = onlyDefaultAudio;
     return this;
   }
 
+  /**
+   * Not sure what this would be good for - maybe for when we just filter down to my students???
+   */
+/*
   public boolean isOnlyForUser() {
     return onlyForUser;
   }
+*/
 
   /**
    * @param onlyForUser
    * @return
    * @see AnalysisPlot#populateExerciseMap
    */
-  public ExerciseListRequest setOnlyForUser(boolean onlyForUser) {
+ /* public ExerciseListRequest setOnlyForUser(boolean onlyForUser) {
     this.onlyForUser = onlyForUser;
     return this;
-  }
+  }*/
 
   /**
    * @return
@@ -319,10 +338,6 @@ public class ExerciseListRequest implements IsSerializable {
     return QC;
   }
 
-  public boolean shouldAddContext() {
-    return addContext;
-  }
-
   /**
    * @param QC
    * @return
@@ -333,6 +348,16 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  public boolean shouldAddContext() {
+    return addContext;
+  }
+
+  /**
+   * @param QC
+   * @return
+   * @see mitll.langtest.client.custom.DefectsExerciseList#getExerciseListRequest
+   * @see mitll.langtest.client.custom.content.ReviewItemHelper.ReviewFlexListLayout#makeExerciseList(Panel, Panel, INavigation.VIEWS, DivWidget, DivWidget)
+   */
   public ExerciseListRequest setAddContext(boolean QC) {
     this.addContext = QC;
     return this;
@@ -370,13 +395,13 @@ public class ExerciseListRequest implements IsSerializable {
             (limit == -1 ? "" : "\n\tlimit                  '" + limit + "'") +
             (prefix.isEmpty() ? "" : "\n\tprefix                  '" + prefix + "'") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection           " + getTypeToSelection()) +
-            "\n\tuser list id        " + userListID +
+            (userListID != -1 ? "\n\tuser list id        " + userListID : "") +
             "\n\tuser                " + userID +
-            "\n\tdialog              " + dialogID +
+            (dialogID != -1 ? "\n\tdialog              " + dialogID : "") +
             (activityType == ActivityType.UNSET ? "" :
                 "\n\tactivity             " + activityType) +
             (onlyUnrecordedByMe ? "\n\tonly recorded by me" : "") +
-            (onlyRecordedByMatchingGender ? "\n\tonly recorded by matching gender" : "") +
+            //  (onlyRecordedByMatchingGender ? "\n\tonly recorded by matching gender" : "") +
             (onlyExamples ? "\n\tonly examples       " : "") +
             (onlyWithAudioAnno ? "\n\tonly with audio     " : "") +
             (onlyDefaultAudio ? "\n\tonlyDefaultAudio     " : "") +

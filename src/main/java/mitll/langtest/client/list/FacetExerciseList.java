@@ -97,7 +97,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    */
   private static final boolean DEBUG_STALE = true;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_CHOICES = false;
   private static final boolean DEBUGSCORE = false;
 

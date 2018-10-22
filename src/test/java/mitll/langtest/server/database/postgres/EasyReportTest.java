@@ -35,6 +35,7 @@ package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.BaseTest;
+import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.exercise.ISection;
@@ -58,10 +59,10 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
-//import scala.collection.Iterator;
-//import scala.collection.immutable.List;
 
 import java.util.*;
+
+import static java.lang.Thread.sleep;
 
 public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);
@@ -85,11 +86,82 @@ public class EasyReportTest extends BaseTest {
   }
 
   @Test
-  public void testCommentKorean() {
+  public void testSimpleRec() {
     DatabaseImpl english = getDatabase();
-    Project project2 = english.getProject(4);
+    /*Project project2 = */
+    english.getProject(4);
 
-    Project project = english.getProjectByName("Korean");
+    Project project = english.getProjectByName("Levantine");
+
+    waitUntilDelegate(english, project);
+  }
+
+  private void waitUntilDelegate(DatabaseImpl db, Project project) {
+    //new Thread(() -> {
+    while (db.getUserDAO().getDefaultUser() < 1) {
+      try {
+        sleep(1000);
+        logger.info("waitUntilDelegate ---> no default user yet.....");
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+
+
+    {
+        {
+          FilterRequest request = new FilterRequest().setRecordRequest(true);
+          project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+          FilterResponse typeToValues = db.getTypeToValues(request, project.getID(), 6);
+        }
+
+
+      FilterRequest request = new FilterRequest().setRecordRequest(true);
+
+      {
+        project.getTypeOrder().forEach(type ->
+            request.addPair(new Pair(
+                type,
+                type.equals("Unit") ? "8" : SectionHelper.DEFAULT_FOR_EMPTY)));
+      }
+
+      logger.info("Request is " + request);
+
+      FilterResponse typeToValues = db.getTypeToValues(request, project.getID(), 6);
+      logger.info("\n\n\nGot " + typeToValues);
+
+      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6);
+      request1.setOnlyUnrecordedByMe(true);
+      {
+        Map<String, Collection<String>> typeToSelection = new HashMap<>();
+        typeToSelection.put("Unit",Collections.singleton("8"));
+
+//        project.getTypeOrder().forEach(type ->
+//            typeToSelection.put(
+//                type,
+//                Collections.singleton(type.equals("Unit") ? "8" : SectionHelper.DEFAULT_FOR_EMPTY)));
+////              type.equals("Unit") ? "8" : SectionHelper.ANY)));
+
+        request1.setTypeToSelection(typeToSelection);
+      }
+
+      List<CommonExercise> exercisesForSelectionState =
+          db.getFilterResponseHelper().getExercisesForSelectionState(request1, project.getID());
+
+      logger.info("Got back " + exercisesForSelectionState.size());
+      exercisesForSelectionState.forEach(exercise -> logger.info("got " + exercise.getID() + " " + exercise.getForeignLanguage() + " context " +exercise.isContext()));
+    }
+    //}//, "waitUntilDelegate_" + projectID).start();
+  }
+
+
+  @Test
+  public void testSimpleRecRequest() {
+    DatabaseImpl english = getDatabase();
+    /*Project project2 = */
+    english.getProject(4);
+
+    Project project = english.getProjectByName("Spanish");
 
     {
       FilterRequest request = new FilterRequest().setRecordRequest(true);
@@ -127,8 +199,54 @@ public class EasyReportTest extends BaseTest {
       FilterResponse typeToValues = english.getTypeToValues(request, project.getID(), 6);
       logger.info("Got " + typeToValues);
     }
-//    english.getUserListManager().getCommentedList(4, false);
-    // english.getUserListManager().getCommentedList(4, true);
+
+  }
+
+  @Test
+  public void testContextRecRequest() {
+    DatabaseImpl english = getDatabase();
+    /*Project project2 = */
+    english.getProject(4);
+
+    Project project = english.getProjectByName("Spanish");
+
+    {
+      FilterRequest request = new FilterRequest().setRecordRequest(true).setExampleRequest(true);
+      project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+
+      logger.info("\n\n\n - Request is " + request);
+
+      FilterResponse typeToValues = english.getTypeToValues(request, project.getID(), 6);
+      logger.info("Got " + typeToValues);
+    }
+
+    {
+      FilterRequest request = new FilterRequest().setRecordRequest(true).setExampleRequest(true);
+      project.getTypeOrder().forEach(type ->
+          request.addPair(new Pair(
+              type,
+              type.equals("Unit") ? "1" : SectionHelper.ANY)));
+
+      logger.info("\n\n\n -  Request is " + request);
+
+      FilterResponse typeToValues = english.getTypeToValues(request, project.getID(), 6);
+      logger.info("Got " + typeToValues);
+    }
+
+
+    {
+      FilterRequest request = new FilterRequest().setRecordRequest(true).setExampleRequest(true);
+      project.getTypeOrder().forEach(type ->
+          request.addPair(new Pair(
+              type,
+              type.equals("Unit") ? "2" : SectionHelper.ANY)));
+
+      logger.info("\n\n\n -  Request is " + request);
+
+      FilterResponse typeToValues = english.getTypeToValues(request, project.getID(), 6);
+      logger.info("Got " + typeToValues);
+    }
+
   }
 
   @Test

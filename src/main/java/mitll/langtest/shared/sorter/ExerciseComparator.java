@@ -42,7 +42,7 @@ import mitll.langtest.shared.exercise.STATE;
  * @since 10/9/15.
  */
 public class ExerciseComparator extends SimpleExerciseComparator {
-  private static final String A_SPACE = "a ";
+ // private static final String A_SPACE = "a ";
 
   public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean sortByFL, String searchTerm) {
     if (recordedLast) {
