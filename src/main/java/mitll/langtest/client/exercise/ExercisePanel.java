@@ -100,13 +100,13 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     this.instance = instance;
     this.doNormalRecording = doNormalRecording;
 
-
+/*
     logger.info("for " + e.getID() +
-
         " eng  " + e.getEnglish()+
         " fl   " + e.getForeignLanguage()+
         " instance " + instance +
         " doNormal " + doNormalRecording);
+*/
 
 
     this.navigationHelper = getNavigationHelper(controller);

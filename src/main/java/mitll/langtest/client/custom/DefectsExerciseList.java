@@ -3,6 +3,7 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.recording.NoListFacetExerciseList;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -61,6 +62,7 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
         .setAddContext(isContext);
 
     logger.info("getExerciseListRequest req " + exerciseListRequest);
+
     return exerciseListRequest;
   }
 
@@ -71,6 +73,10 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
             .setQC(true)
             .setAddContext(isContext);
     logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
+
+    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
+    logger.info("logException stack " + exceptionAsString);
+
     return exerciseListRequest;
   }
 

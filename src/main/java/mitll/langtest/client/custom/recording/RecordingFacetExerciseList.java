@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.LearnFacetExerciseList;
@@ -86,6 +87,11 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
 
 
     logger.info("getExerciseListRequest req " + exerciseListRequest);
+
+
+    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest"));
+    logger.info("logException stack " + exceptionAsString);
+
     return exerciseListRequest;
   }
 
