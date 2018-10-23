@@ -76,10 +76,40 @@ public class EasyReportTest extends BaseTest {
   @Test
   public void testComment() {
     DatabaseImpl english = getDatabase();
-    Project project = english.getProject(4);
+    Project project = english.getProject(2);
 
-    FilterResponse typeToValues = english.getTypeToValues(new FilterRequest().setRecordRequest(true), 4, 6);
-    logger.info("Got " + typeToValues);
+    {
+      FilterResponse typeToValues = english.getTypeToValues(new FilterRequest().setRecordRequest(true), 2, 6);
+      logger.info("Got " + typeToValues);
+
+    }
+    {
+      FilterResponse typeToValues = english.getTypeToValues(new FilterRequest().setOnlyUninspected(true), 2, 6);
+      logger.info("Got " + typeToValues);
+    }
+//    english.getUserListManager().getCommentedList(4, false);
+    // english.getUserListManager().getCommentedList(4, true);
+  }
+
+  @Test
+  public void testToInspect() {
+
+    FilterRequest filterRequest1 = new FilterRequest();
+    logger.info("for req 1 " + filterRequest1);
+
+    FilterRequest filterRequest = filterRequest1.setOnlyUninspected(true);
+    {
+      logger.info("for req 2 " + filterRequest);
+      logger.info("for is uninspected " + filterRequest.isOnlyUninspected());
+      logger.info("for is record      " + filterRequest.isRecordRequest());
+
+      DatabaseImpl english = getDatabase();
+      Project project = english.getProject(2);
+
+      filterRequest.addPair(new Pair(project.getTypeOrder().iterator().next(), SectionHelper.ANY));
+      FilterResponse typeToValues = english.getTypeToValues(filterRequest, 2, 6);
+      logger.info("Got " + typeToValues);
+    }
 //    english.getUserListManager().getCommentedList(4, false);
     // english.getUserListManager().getCommentedList(4, true);
   }
