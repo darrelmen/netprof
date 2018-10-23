@@ -327,7 +327,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       flContainer.add(playAudio = getPlayAudioPanel());
       alignmentFetcher.setPlayAudio(playAudio);
     } else {
-      logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+     // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
     }
   }
 

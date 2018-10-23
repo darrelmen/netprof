@@ -77,7 +77,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private static final String RECORDED = "Recorded";
   private List<String> predefinedTypeOrder = new ArrayList<>();
   private static final String UNIT = "Unit";
-  private static final String DEFAULT_FOR_EMPTY = "Any";  // TODO : ???
+  public static final String DEFAULT_FOR_EMPTY = "Any";  // TODO : ???
   private static final String BLANK = "Blank";  // TODO : remove????
 
   private final Map<String, Map<String, Lesson<T>>> typeToUnitToLesson = new HashMap<>();
@@ -103,24 +103,22 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     makeRoot();
   }
 
-  @Override
+ /* @Override
   public SectionHelper<T> getCopy(List<T> exercises) {
-//    report();
-
     SectionHelper<T> tSectionHelper = new SectionHelper<>();
 
     tSectionHelper.predefinedTypeOrder = predefinedTypeOrder;
     tSectionHelper.rootTypes = rootTypes;
     tSectionHelper.parentToChildTypes = parentToChildTypes;
 
-  //  tSectionHelper.report();
+    //  tSectionHelper.report();
 
-    exercises.forEach(this::addExercise);
+    exercises.forEach(tSectionHelper::addExercise);
 
-  //  tSectionHelper.report();
+    //  tSectionHelper.report();
 
     return tSectionHelper;
-  }
+  }*/
 
   /**
    * @see BaseExerciseDAO#reload()
@@ -693,7 +691,6 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
       pairs.add(addExerciseToLesson(exercise, pair.getKey(), pair.getValue()));
     }
-    //  addAssociations(pairs);
     if (predefinedTypeOrder.isEmpty()) {
       rememberOne(root, pairs);
     } else {
@@ -950,6 +947,10 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
           Lesson<T> tLesson = categoryToLesson.get(section);
           String message1 = "\t\t" + section + " : " + tLesson.size();
           logger.debug(message1);
+//          if (section.equals("8")) {
+//            logger.debug("\n\n\n");
+//            tLesson.getExercises().forEach(ex -> logger.debug("(" + section + ") ex " + ex.getID() + " " + ((ClientExercise) ex).isContext()));
+//          }
           //  writer.write(message1);
 
         }

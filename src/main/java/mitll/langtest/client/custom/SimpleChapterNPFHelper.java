@@ -87,12 +87,12 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see NewContentChooser#showView
    */
   public void showNPF(DivWidget content, INavigation.VIEWS instanceName) {
-  //   logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
+    //   logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
-    //  logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
+      logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
       showContent(content, instanceName);
-      npfExerciseList.reloadWithCurrent();
+    //  npfExerciseList.reloadWithCurrent();
     } else {
       logger.warning("showNPF not doing anything for " + instanceName);
     }
@@ -128,7 +128,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @see ContentView#showContent
    */
   private Panel doNPF(INavigation.VIEWS instanceName) {
-   // logger.info(getClass() + " : doNPF instanceName = " + instanceName);
+    // logger.info(getClass() + " : doNPF instanceName = " + instanceName);
     Panel widgets = flexListLayout.doInternalLayout(-1, instanceName, false);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;
@@ -152,7 +152,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   @Override
   public void hideList() {
-  //  logger.info("hideList on exercise list : " + npfExerciseList.getElement().getId());
+    //  logger.info("hideList on exercise list : " + npfExerciseList.getElement().getId());
     npfExerciseList.hide();
   }
 
@@ -180,6 +180,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonShell> extends FlexListLayout<T, U> {
     private final SimpleChapterNPFHelper<T, U> outer;
+
     /**
      * @param controller
      * @param outer

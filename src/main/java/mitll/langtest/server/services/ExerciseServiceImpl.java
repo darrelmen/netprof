@@ -74,7 +74,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final String LISTS = "Lists";
 
   public static final boolean DEBUG_SEARCH = false;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_ID_LOOKUP = false;
 
   private static final String RECORDED1 = "Recorded";
@@ -449,12 +449,14 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see #getExerciseIds
    */
   private ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
-    Map<String, Collection<String>> typeToSelection = request.getTypeToSelection();
-    Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, typeToSelection);
-
-    List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
-    exercisesForState = db.filterExercises(request, copy, projid);
-    return getExerciseListWrapperForPrefix(request, exercisesForState, projid);
+//    Map<String, Collection<String>> typeToSelection = request.getTypeToSelection();
+//    Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, typeToSelection);
+//
+//    List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
+//    exercisesForState = db.filterExercises(request, copy, projid);
+    // db.getFilterResponseHelper().getExercisesForSelectionState(request, projid);
+    return getExerciseListWrapperForPrefix(request,
+        db.getFilterResponseHelper().getExercisesForSelectionState(request, projid), projid);
   }
 
   /**
@@ -464,13 +466,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param typeToSelection
    * @return
    */
-  private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
+ /* private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     typeToSelection.remove(RECORDED1);
 
     return typeToSelection.isEmpty() ? getExercises(projid) :
         sectionHelper.getExercisesForSelectionState(typeToSelection);
-  }
+  }*/
 
   /**
    * Always sort the result
@@ -484,23 +486,25 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private ExerciseListWrapper<T> getExerciseListWrapperForPrefix(ExerciseListRequest request,
                                                                  Collection<CommonExercise> exercisesForState,
                                                                  int projID) {
+    logger.info("getExerciseListWrapperForPrefix initially found " + exercisesForState.size());
+
     String prefix = request.getPrefix();
     int userID = request.getUserID();
     boolean incorrectFirst = request.isIncorrectFirstOrder();
 
     boolean hasPrefix = !prefix.isEmpty();
     if (hasPrefix) {
-      logger.debug("getExerciseListWrapperForPrefix" +
+      logger.info("getExerciseListWrapperForPrefix" +
           "\n\tuserID   " + userID +
           "\n\tprefix   '" + prefix + "'" +
           (request.getActivityType() != ActivityType.UNSET ? "" : "\n\tactivity " + request.getActivityType()));
     }
 
     int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
-    logger.debug("getExerciseListWrapperForPrefix marked " + i + " as recorded");
+    logger.info("getExerciseListWrapperForPrefix marked " + i + " as recorded");
 
     if (hasPrefix) {
-      //logger.info("check for prefix match over " + exercisesForState.size());
+      logger.info("getExerciseListWrapperForPrefix check for prefix match over " + exercisesForState.size());
       exercisesForState = getSearchMatches(exercisesForState, prefix, projID);
     }
 
@@ -519,6 +523,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       sortExercises(request.getActivityType() == ActivityType.RECORDER, copy, false, request.getPrefix());
       //    }
     }
+    logger.info("getExerciseListWrapperForPrefix returning " + copy.size());
 
     return makeExerciseListWrapper(request, copy, projID);
   }
@@ -628,7 +633,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
       // ensureMP3s(firstExercise, pathHelper.getInstallPath());
       if (request.shouldAddContext()) { // add the context exercises
-        //  logger.info("adding context exercises...");
+        logger.info("makeExerciseListWrapper adding context exercises...");
         exercises = getParentChildPairs(exercises);
       }
     }
@@ -668,6 +673,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    *
    * @param exercises
    * @return
+   * @see #makeExerciseListWrapper
    */
   @NotNull
   private List<CommonExercise> getParentChildPairs(Collection<CommonExercise> exercises) {
@@ -1074,8 +1080,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }*/
 
   /**
-   * @paramx exercises
    * @return
+   * @paramx exercises
    * @seex #filterByUnrecorded
    */
 /*  @NotNull
@@ -1095,7 +1101,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     return copy;
   }*/
-
   private <X extends CommonExercise> boolean hasContext(X exercise) {
     return !exercise.getDirectlyRelated().isEmpty();//.getContext() != null && !exercise.getContext().isEmpty();
   }

@@ -29,6 +29,8 @@ public interface ExerciseServices {
 
   Language getLanguageEnum(CommonExercise ex);
 
+  FilterResponseHelper getFilterResponseHelper();
+
   FilterResponse getTypeToValues(FilterRequest request, int projid, int userid);
 
   List<CommonExercise> filterExercises(ExerciseListRequest request,

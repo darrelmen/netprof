@@ -48,6 +48,7 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -126,6 +127,20 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
   protected void addInstructions() {
 
     if (logger == null) logger = Logger.getLogger("WaveformExercisePanel");
+    List<String> typeOrder = getTypeOrder();
+
+
+    Panel flow = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, this);
+    if (flow != null) {
+      flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
+    }
+    boolean normalRecord = isNormalRecord();
+  //  logger.info("addInstructions normal  "+normalRecord);
+    add(new Heading(4, normalRecord ? RECORD_PROMPT2 : RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
+  }
+
+  @NotNull
+  private List<String> getTypeOrder() {
     List<String> typeOrder = new ArrayList<>(controller.getTypeOrder());
 
     if (exercise != null && exercise.getAttributes() != null) {
@@ -137,13 +152,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
         }
       });
     }
-
-
-    Panel flow = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, this);
-    if (flow != null) {
-      flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
-    }
-    add(new Heading(4, isNormalRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
+    return typeOrder;
   }
 
   /**
@@ -158,8 +167,10 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     if (logger == null) {
       logger = Logger.getLogger("WaveformExercisePanel");
     }
- //    logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord());
-    return ExerciseFormatter.getArabic(getRecordPrompt(e), controller.getLanguage());
+    String recordPrompt = getRecordPrompt(e);
+  /*  logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord() +
+        "\n\tprompt " +recordPrompt);*/
+    return ExerciseFormatter.getArabic(recordPrompt, controller.getLanguage());
   }
 
   private String getRecordPrompt(T e) {

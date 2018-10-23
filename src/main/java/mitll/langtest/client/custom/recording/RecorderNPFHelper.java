@@ -55,6 +55,7 @@ import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Sets up recording both ref recordings and context ref recordings.
@@ -141,8 +142,10 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
    * @see #getFactory(PagingExerciseList)
    */
   private class RecordRefAudioPanel extends WaveformExercisePanel<T, ClientExercise> implements CommentAnnotator {
-    //    private final Logger logger = Logger.getLogger("RecordRefAudioPanel");
+    private  Logger logger = Logger.getLogger("RecordRefAudioPanel");
+
     private boolean addedComment = false;
+
     /**
      * @param e
      * @param controller1
@@ -152,6 +155,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
      */
     RecordRefAudioPanel(ClientExercise e, ExerciseController controller1, ListInterface<T, ClientExercise> exerciseList1, String instance) {
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance, false);
+    //  logger.info("RecordRefAudioPanel : Do normal recording " + doNormalRecording);
     }
 
     @Override
@@ -186,7 +190,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
         added = true;
       }
       //else {
-        //getProgressInfo();
+      //getProgressInfo();
       //}
     }
 
@@ -210,7 +214,9 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
       boolean rtlContent = isRTLContent(e.getFLToShow());
       Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, contentWidget, rtlContent);
 
-      //   logger.info("rtl " + rtlContent + " for " + content);
+      if (logger == null) logger = Logger.getLogger("RecordRefAudioPanel");
+     // logger.info("getQuestionContent rtl " + rtlContent + " for " + content);
+
       entry.addStyleName(rtlContent ? "floatRight" : "floatLeftAndClear");
 
       return entry;

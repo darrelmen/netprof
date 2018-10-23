@@ -98,10 +98,26 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> ext
   protected void showDrill(Collection<ClientExercise> result) {
     super.showDrill(result);
     // logger.info("showDrill result size " + result.size());
-    int num = getIndex(getCurrentExercise().getID()) + 1;
+    int num = getIndex(getCurrentExercise().getID());
     // showNumberPracticed(num, pagingContainer.getSize());
     showProgress(num, pagingContainer.getSize(), practicedProgress,
-        "None Inspected", "All inspected or visited", "", false);
+        getNoneDoneMessage(), getAllDoneMessage(), "", false);
+  }
+
+  @NotNull
+  protected String getAllDoneMessage() {
+    return "All inspected or visited";
+  }
+
+  @NotNull
+  protected String getNoneDoneMessage() {
+    return "None Inspected";
+  }
+
+  protected String getPracticedText(int num, int denom, String zeroPercent, String oneHundredPercent, String suffix) {
+    boolean allDone = num == denom;
+    return num == 0 ? getPracticedText(num, denom, suffix) :
+        allDone ? oneHundredPercent : getPracticedText(num, denom, suffix);
   }
 
   @NotNull

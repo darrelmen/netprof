@@ -3,6 +3,7 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.recording.NoListFacetExerciseList;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -56,17 +57,26 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
 
     ExerciseListRequest exerciseListRequest = super
         .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected)
-        .setQC(true)
         .setOnlyUninspected(true)
+        .setQC(true)
         .setAddContext(isContext);
 
     logger.info("getExerciseListRequest req " + exerciseListRequest);
+
     return exerciseListRequest;
   }
 
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
-    ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(prefix).setQC(true).setAddContext(isContext);
+    ExerciseListRequest exerciseListRequest =
+        super.getExerciseListRequest(prefix)
+            .setOnlyUninspected(true)
+            .setQC(true)
+            .setAddContext(isContext);
     logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
+
+    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
+    logger.info("logException stack " + exceptionAsString);
+
     return exerciseListRequest;
   }
 
@@ -83,7 +93,4 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
         .setOnlyUninspected(true)
         .setExampleRequest(isContext);
   }
-
-
-
 }

@@ -237,12 +237,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           break;
         case RECORD_ENTRIES:
           clearAndFixScroll();
-          setInstanceHistory(RECORD_ENTRIES);
+          setInstanceHistory(RECORD_ENTRIES, false);
           new RecorderNPFHelper(controller, true, RECORD_ENTRIES).showNPF(divWidget, RECORD_ENTRIES);
           break;
         case RECORD_CONTEXT:
           clearAndFixScroll();
-          setInstanceHistory(RECORD_CONTEXT);
+          setInstanceHistory(RECORD_CONTEXT, false);
           new RecorderNPFHelper(controller, false, RECORD_CONTEXT).showNPF(divWidget, RECORD_CONTEXT);
           break;
         case QC:
@@ -333,20 +333,30 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void setInstanceHistory(VIEWS views) {
+    setInstanceHistory(views, true);
+  }
+
+  private void setInstanceHistory(VIEWS views, boolean keepTypeToSelection) {
     if (new SelectionState().getView() != views) {
-      Map<String, Collection<String>> typeToSection = new SelectionState(History.getToken(), false).getTypeToSection();
-      //   logger.info("setInstanceHistory clearing history for instance " + views);
-      StringBuilder stringBuilder = new StringBuilder();
-      typeToSection.forEach((k, v) -> stringBuilder
-          .append(k)
-          .append("=")
-          .append(v.iterator().next()).append(SelectionState.SECTION_SEPARATOR));
-      String historyToken = SelectionState.INSTANCE + "=" + views.toString();
-      String s = stringBuilder.toString();
-      pushItem(historyToken + (s.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + s));
+      String s = keepTypeToSelection ? getTypeToSelection() : "";
+
+      //String historyToken = getInstanceParam(views); //SelectionState.INSTANCE + "=" + views.toString();
+      pushItem(getInstanceParam(views) + (s.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + s));
     } else {
       //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
+  }
+
+  @NotNull
+  private String getTypeToSelection() {
+    Map<String, Collection<String>> typeToSection = new SelectionState(History.getToken(), false).getTypeToSection();
+    //   logger.info("setInstanceHistory clearing history for instance " + views);
+    StringBuilder stringBuilder = new StringBuilder();
+    typeToSection.forEach((k, v) -> stringBuilder
+        .append(k)
+        .append("=")
+        .append(v.iterator().next()).append(SelectionState.SECTION_SEPARATOR));
+    return stringBuilder.toString();
   }
 
   private void clearAndFixScroll() {

@@ -1704,13 +1704,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   public FilterResponse getTypeToValues(FilterRequest request, int projid, int userid) {
-    return new FilterResponseHelper(this).getTypeToValues(request, projid, userid);
+    return getFilterResponseHelper().getTypeToValues(request, projid, userid);
   }
 
   public List<CommonExercise> filterExercises(ExerciseListRequest request,
                                               List<CommonExercise> exercises,
                                               int projid) {
-    return new FilterResponseHelper(this).filterExercises(request, exercises, projid);
+    return getFilterResponseHelper().filterExercises(request, exercises, projid);
+  }
+
+  public FilterResponseHelper getFilterResponseHelper() {
+    return new FilterResponseHelper(this);
   }
 
   /**

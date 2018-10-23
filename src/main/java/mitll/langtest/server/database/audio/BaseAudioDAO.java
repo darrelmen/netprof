@@ -873,7 +873,8 @@ public abstract class BaseAudioDAO extends DAO {
    * @param projid
    * @param exToTranscript
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getRecordedByMatchingGender
+   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getRecordedByMatchingGender
+   * @see SlickAudioDAO#getContextAudioExercises
    */
   public Set<Integer> getRecordedBySameGenderContext(int userid, int projid, Map<Integer, String> exToTranscript) {
     return getContextAudioExercises(projid, userDAO.isMale(userid), exToTranscript);

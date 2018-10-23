@@ -12,6 +12,12 @@ class NPExerciseListContainer<T extends CommonShell, U extends Shell> extends Pa
 //  private final Logger logger = Logger.getLogger("NPExerciseListContainer");
   private final NPExerciseList<T, U> exerciseList;
 
+  /**
+   * @see NPExerciseList#makePagingContainer
+   * @param exerciseList
+   * @param isRecorder
+   * @param showFirstNotCompleted
+   */
   NPExerciseListContainer(NPExerciseList<T, U> exerciseList,
                           boolean isRecorder,
                           boolean showFirstNotCompleted) {

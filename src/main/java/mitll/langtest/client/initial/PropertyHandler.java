@@ -74,7 +74,7 @@ public class PropertyHandler {
   private static final String CPW_TOKEN = "CPWtoken";
   public static final String CPW_TOKEN_2 = "CPW-token";
 
-  private static final String FONT_FAMILY = "fontFamily";
+ // private static final String FONT_FAMILY = "fontFamily";
   private static final String IS_AMAS = "isAMAS";
 
   /**
@@ -164,10 +164,6 @@ public class PropertyHandler {
     return isAMAS;
   }
 
-/*  public boolean isBeta() {
-    return true;
-  }*/
-
   /**
    * Typically 50 or 100 milliseconds.
    *
@@ -176,19 +172,6 @@ public class PropertyHandler {
   public int getAfterStopDelayMillis() {
     return afterStopDelayMillis;
   }
-
-  /**
-   * ONLY AMAS
-   *
-   * @return
-   */
-/*  public String getFontFamily() {
-    return fontFamily;
-  }*/
-/*
-  public void setFontFamily(String fontFamily) {
-    this.fontFamily = fontFamily;
-  }*/
 
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
@@ -207,12 +190,8 @@ public class PropertyHandler {
   private boolean demoMode;
 
   private boolean logClientMessages = false;
-  private String nameForItem = "Item";
   private String nameForAnswer = "Recording";
-  private String nameForRecorder = "Speaker";
-  private String dialog = "";
 
-  private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
 
   private String splashTitle = null;
@@ -249,9 +228,6 @@ public class PropertyHandler {
         case APP_TITLE:
           appTitle = value;
           break;
-        case RELEASE_DATE:
-          releaseDate = value;
-          break;
         case BKG_COLOR_FOR_REF:
           bkgColorForRef = getBoolean(value);
           break;
@@ -261,14 +237,8 @@ public class PropertyHandler {
         case RECORD_TIMEOUT:
           recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
           break;
-        case NAME_FOR_ITEM:
-          nameForItem = value;
-          break;
         case NAME_FOR_ANSWER:
           nameForAnswer = value;
-          break;
-        case NAME_FOR_RECORDER:
-          nameForRecorder = value;
           break;
         case LOG_CLIENT_MESSAGES:
           logClientMessages = getBoolean(value);
@@ -284,9 +254,6 @@ public class PropertyHandler {
           break;
         case SHOW_SPECTROGRAM1:
           spectrogram = getBoolean(value);
-          break;
-        case DIALOG:
-          dialog = value;
           break;
         case QUIET_AUDIO_OK:
           quietAudioOK = getBoolean(value);
@@ -449,7 +416,7 @@ public class PropertyHandler {
 //    String substring = path.substring(0, path.lastIndexOf("/"));
 //    logger.info("candidate " +substring);
 //    logger.info("path      " +path);
-    return DIALOG1;
+    return appTitle;
   }
 
   private static native String getAppName() /*-{
@@ -461,34 +428,17 @@ public class PropertyHandler {
     return demoMode;
   }
 
- /* public String getReleaseDate() {
-    return releaseDate;
-  }
-*/
   public int getRecordTimeout() {
     return recordTimeout;
   }
-
-  /*
-  public String getNameForItem() {
-    return nameForItem;
-  }*/
 
   public String getNameForAnswer() {
     return nameForAnswer;
   }
 
- /* public String getNameForRecorder() {
-    return nameForRecorder;
-  }*/
-
   public boolean isLogClientMessages() {
     return logClientMessages;
   }
-
-/*  public boolean hasDialog() {
-    return !dialog.isEmpty();
-  }*/
 
   public boolean shouldAllowPlusInURL() {
     return allowPlusInURL;
@@ -534,16 +484,6 @@ public class PropertyHandler {
       }
     }
   }
-/*
-  public String getResponseType() {
-    return responseType;
-  }*/
-
-/*
-  public void setResponseType(String responseType) {
-    this.responseType = responseType;
-  }
-*/
 
   @Deprecated
   public boolean isOdaMode() {
@@ -585,18 +525,4 @@ public class PropertyHandler {
     return helpEmail;
   }
 
-/*  public String getAMASHelpMessage() {
-    return
-        "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)<br/>" +
-            "<br/>" +
-            "If you are a first-time user of this site, or an existing user of an earlier version of AMAS you will need " +
-            "to use the \"Sign Up\" box to add/update a password and an email address to your account. Your email is " +
-            "only used if you ever forget your password.<br/>" +
-            "<br/>" +
-            "Once you create/update your Username, Email, and Password, click on “sign up” and you will be taken to " +
-            "the site. For future access, use the Login box to access the AMAS site.<br/>" +
-            "<br/>" +
-            "The site will remember your login information on this computer for up to one year. You will need to login " +
-            "with your username and password again if you access AMAS from a different machine.";
-  }*/
 }
