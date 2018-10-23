@@ -182,6 +182,9 @@ public class FilterResponseHelper {
   private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest request1) {
     logger.info("getFilterResponse exercise req " + request1);
     SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelperFromFiltered(projectID, request1);
+
+    unrecordedSectionHelper.report();
+
     FilterResponse typeToValues = unrecordedSectionHelper.getTypeToValues(request, false);
     logger.info("getFilterResponse resp " + typeToValues);
 
@@ -191,13 +194,13 @@ public class FilterResponseHelper {
   @NotNull
   private SectionHelper<CommonExercise> getSectionHelperFromFiltered(int projectID, ExerciseListRequest request) {
 //    request.shouldAddContext() && request.
-    List<CommonExercise> exercises = getExercises(projectID);
-    List<CommonExercise> filtered = filterExercises(request, exercises, projectID);
+    // List<CommonExercise> exercises = getExercises(projectID);
+    List<CommonExercise> filtered = filterExercises(request, getExercises(projectID), projectID);
 
     logger.info("getFilterResponse build section helper from " + filtered.size());
 
     ISection<CommonExercise> sectionHelper = getSectionHelper(projectID);
-    SectionHelper<CommonExercise> unrecordedSectionHelper = sectionHelper.getCopy(filtered);
+    SectionHelper<CommonExercise> unrecordedSectionHelper = new SectionHelper<>();
     populate(projectID, filtered, unrecordedSectionHelper, sectionHelper.getTypeOrder());
     return unrecordedSectionHelper;
   }
@@ -241,24 +244,17 @@ public class FilterResponseHelper {
                                               int projid) {
     logger.info("filterExercises filter " +
         "\n\treq       " + request +
-        "\n\texercises " + exercises.size(), new Exception());
-
-    //exercises = filterByUnrecordedOrGetContext(request, exercises, projid);
+        "\n\texercises " + exercises.size());
 
     if (request.isOnlyUnrecordedByMe()) {
       if (request.isOnlyExamples()) {
-        logger.info("\n\n\n\filterExercises OK doing examples");
+        logger.info("\n\n\nfilterExercises OK doing examples");
 
         exercises = getContextExercises(exercises);
       }
       logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded");
       exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples());
     }
-//    else if (request.isOnlyRecordedByMatchingGender()) {
-//      logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded!");
-//      exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples(), true);
-//    }
-
 
     if (request.isOnlyWithAudioAnno()) {
       exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
@@ -277,16 +273,16 @@ public class FilterResponseHelper {
         "\n\tfilter req " + request +
         "\n\treturn     " + exercises.size());
 
-    Set<Integer> seen = new HashSet<>();
+/*    Set<Integer> seen = new HashSet<>();
     for (CommonExercise exercise : exercises) {
       int id = exercise.getID();
       if (seen.add(id)) {
 
+      } else {
+        logger.info("WARN : dup! " + id + " ex " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
       }
-      else {
-        logger.info("WARN : dup! " + id + " ex " + exercise.getEnglish()+ " " + exercise.getForeignLanguage());
-      }
-    }
+    }*/
+
     return exercises;
   }
 
@@ -536,21 +532,28 @@ public class FilterResponseHelper {
   private List<CommonExercise> getContextExercises(Collection<CommonExercise> exercises) {
     List<CommonExercise> copy = new ArrayList<>();
     Set<Integer> seen = new HashSet<>();
-    for (CommonExercise exercise : exercises) {
-      if (seen.contains(exercise.getID())) logger.warn("saw " + exercise.getID() + " " + exercise + " again!");
-      if (hasContext(exercise)) {
-        seen.add(exercise.getID());
+    for (ClientExercise parent : exercises) {
+      //if (seen.contains(exercise.getID())) logger.warn("getContextExercises saw " + exercise.getID() + " " + exercise + " again!");
+      if (hasContext(parent)) {
         //    copy.add(exercise);
-        exercise.getDirectlyRelated().forEach(clientExercise -> copy.add(clientExercise.asCommon()));
+        parent.getDirectlyRelated().forEach(clientExercise -> {
+          if (seen.contains(clientExercise.getID())) {
+            logger.warn("getContextExercises saw " + clientExercise.getID() + " " + clientExercise + " again!");
+          } else {
+            copy.add(clientExercise.asCommon());
+          }
+          seen.add(clientExercise.getID());
+        });
         //copy.addAll(exercise.getDirectlyRelated());
       }
     }
-    logger.info("getContextExercises - to be recorded " + copy.size() + " from " + exercises.size());
+    logger.info("getContextExercises - to be recorded " + copy.size() + "(" + seen.size() +
+        ") from " + exercises.size());
 
     return copy;
   }
 
-  private <X extends CommonExercise> boolean hasContext(X exercise) {
+  private <X extends ClientExercise> boolean hasContext(X exercise) {
     return !exercise.getDirectlyRelated().isEmpty();//.getContext() != null && !exercise.getContext().isEmpty();
   }
 
@@ -579,7 +582,8 @@ public class FilterResponseHelper {
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     typeToSelection.remove(RECORDED1);
 
-    return typeToSelection.isEmpty() ? getExercises(projid) :
+    return typeToSelection.isEmpty() ?
+        getExercises(projid) :
         sectionHelper.getExercisesForSelectionState(typeToSelection);
   }
 }

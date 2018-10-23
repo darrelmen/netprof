@@ -97,7 +97,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    */
   private static final boolean DEBUG_STALE = true;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_CHOICES = false;
   private static final boolean DEBUGSCORE = false;
 
@@ -2235,7 +2235,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     practicedProgress.setVisible(true);
   }
 
-  private String getPracticedText(int num, int denom, String zeroPercent, String oneHundredPercent, String suffix) {
+  protected String getPracticedText(int num, int denom, String zeroPercent, String oneHundredPercent, String suffix) {
     boolean allDone = num == denom;
     return num == 0 ? zeroPercent :
         allDone ? oneHundredPercent : getPracticedText(num, denom, suffix);

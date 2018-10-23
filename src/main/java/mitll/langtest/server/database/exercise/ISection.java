@@ -11,7 +11,7 @@ import java.util.Set;
  * Created by go22670 on 3/9/17.
  */
 public interface ISection<T extends HasID & HasUnitChapter> {
-  SectionHelper<T> getCopy(List<T> exercises);
+  //SectionHelper<T> getCopy(List<T> exercises);
 
   void clear();
 

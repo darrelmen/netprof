@@ -34,10 +34,8 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.HasID;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created with IntelliJ IDEA.
@@ -49,45 +47,58 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 class Lesson<T extends HasID> {
+  private final Logger logger = Logger.getLogger("Lesson");
   private final List<T> exerciseList = new ArrayList<>();
   private final String unit;
+//  Set<Integer> unique = new HashSet<>();
 
   /**
-   * @see SectionHelper#addUnitNameEntry
    * @param unit
-   */
-  Lesson(String unit) { this.unit = unit; }
-
-  /**
    * @see SectionHelper#addUnitNameEntry
-   * @param e
    */
-  public void addExercise(T e) { exerciseList.add(e); }
+  Lesson(String unit) {
+    this.unit = unit;
+  }
 
   /**
-   * @see SectionHelper#removeExerciseToLesson
+   * @param e
+   * @see SectionHelper#addUnitNameEntry
+   */
+  public void addExercise(T e) {
+    exerciseList.add(e);
+//    boolean add = unique.add(e.getID());
+//    if (!add) logger.warning("addExercise got duplicate " + e.getID());
+  }
+
+  /**
    * @param exercise
    * @return
+   * @see SectionHelper#removeExerciseToLesson
    */
   public boolean remove(T exercise) {
     return exerciseList.remove(exercise);
   }
 
   /**
-   * @see SectionHelper#getExercisesForSection(String, Collection)
    * @return
+   * @see SectionHelper#getExercisesForSection(String, Collection)
    */
-  public Collection<T> getExercises() { return Collections.unmodifiableList(exerciseList); }
+  public Collection<T> getExercises() {
+    return Collections.unmodifiableList(exerciseList);
+  }
 
   /**
    * see SectionHelper#report
+   *
    * @return
    */
-  public int size() { return exerciseList.size(); }
+  public int size() {
+    return exerciseList.size();
+  }
 
   public String toString() {
     return "Lesson '" + unit + "' " + exerciseList.size() + " exercises" +
         (exerciseList.isEmpty() ? "" :
-        ", first is " + exerciseList.iterator().next());
+            ", first is " + exerciseList.iterator().next());
   }
 }

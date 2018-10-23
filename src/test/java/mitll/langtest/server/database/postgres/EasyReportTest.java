@@ -88,11 +88,8 @@ public class EasyReportTest extends BaseTest {
   @Test
   public void testSimpleRec() {
     DatabaseImpl english = getDatabase();
-    /*Project project2 = */
     english.getProject(4);
-
     Project project = english.getProjectByName("Levantine");
-
     waitUntilDelegate(english, project);
   }
 
@@ -107,14 +104,13 @@ public class EasyReportTest extends BaseTest {
       }
     }
 
-
     {
-        {
-          FilterRequest request = new FilterRequest().setRecordRequest(true);
-          project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
-          FilterResponse typeToValues = db.getTypeToValues(request, project.getID(), 6);
-        }
-
+      {
+        FilterRequest request = new FilterRequest().setRecordRequest(true);
+        project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+        /*FilterResponse typeToValues =*/
+        db.getTypeToValues(request, project.getID(), 6);
+      }
 
       FilterRequest request = new FilterRequest().setRecordRequest(true);
 
@@ -134,24 +130,33 @@ public class EasyReportTest extends BaseTest {
       request1.setOnlyUnrecordedByMe(true);
       {
         Map<String, Collection<String>> typeToSelection = new HashMap<>();
-        typeToSelection.put("Unit",Collections.singleton("8"));
-
-//        project.getTypeOrder().forEach(type ->
-//            typeToSelection.put(
-//                type,
-//                Collections.singleton(type.equals("Unit") ? "8" : SectionHelper.DEFAULT_FOR_EMPTY)));
-////              type.equals("Unit") ? "8" : SectionHelper.ANY)));
-
+        typeToSelection.put("Unit", Collections.singleton("8"));
         request1.setTypeToSelection(typeToSelection);
       }
 
       List<CommonExercise> exercisesForSelectionState =
           db.getFilterResponseHelper().getExercisesForSelectionState(request1, project.getID());
 
-      logger.info("Got back " + exercisesForSelectionState.size());
-      exercisesForSelectionState.forEach(exercise -> logger.info("got " + exercise.getID() + " " + exercise.getForeignLanguage() + " context " +exercise.isContext()));
+      dumpExercises(exercisesForSelectionState);
+
+
+      request.setExampleRequest(true);
+      typeToValues = db.getTypeToValues(request, project.getID(), 6);
+      logger.info("\n\n\nGot examples " + typeToValues);
+
+      request1.setOnlyExamples(true);
+
+      exercisesForSelectionState =
+          db.getFilterResponseHelper().getExercisesForSelectionState(request1, project.getID());
+
+      dumpExercises(exercisesForSelectionState);
     }
     //}//, "waitUntilDelegate_" + projectID).start();
+  }
+
+  private void dumpExercises(List<CommonExercise> exercisesForSelectionState) {
+    logger.info("Got back " + exercisesForSelectionState.size());
+    exercisesForSelectionState.forEach(exercise -> logger.info("got " + exercise.getID() + " " + exercise.getForeignLanguage() + " context " + exercise.isContext()));
   }
 
 

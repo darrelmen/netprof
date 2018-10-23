@@ -135,7 +135,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
       flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
     boolean normalRecord = isNormalRecord();
-    logger.info("addInstructions normal  "+normalRecord);
+  //  logger.info("addInstructions normal  "+normalRecord);
     add(new Heading(4, normalRecord ? RECORD_PROMPT2 : RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
@@ -168,8 +168,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
       logger = Logger.getLogger("WaveformExercisePanel");
     }
     String recordPrompt = getRecordPrompt(e);
-    logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord() +
-        "\n\tprompt " +recordPrompt);
+  /*  logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord() +
+        "\n\tprompt " +recordPrompt);*/
     return ExerciseFormatter.getArabic(recordPrompt, controller.getLanguage());
   }
 

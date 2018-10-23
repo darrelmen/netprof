@@ -155,8 +155,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
      */
     RecordRefAudioPanel(ClientExercise e, ExerciseController controller1, ListInterface<T, ClientExercise> exerciseList1, String instance) {
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance, false);
-
-      logger.info("RecordRefAudioPanel : Do normal recording " + doNormalRecording);
+    //  logger.info("RecordRefAudioPanel : Do normal recording " + doNormalRecording);
     }
 
     @Override
@@ -216,7 +215,8 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
       Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, contentWidget, rtlContent);
 
       if (logger == null) logger = Logger.getLogger("RecordRefAudioPanel");
-      logger.info("getQuestionContent rtl " + rtlContent + " for " + content);
+     // logger.info("getQuestionContent rtl " + rtlContent + " for " + content);
+
       entry.addStyleName(rtlContent ? "floatRight" : "floatLeftAndClear");
 
       return entry;

@@ -114,6 +114,12 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> ext
     return "None Inspected";
   }
 
+  protected String getPracticedText(int num, int denom, String zeroPercent, String oneHundredPercent, String suffix) {
+    boolean allDone = num == denom;
+    return num == 0 ? getPracticedText(num, denom, suffix) :
+        allDone ? oneHundredPercent : getPracticedText(num, denom, suffix);
+  }
+
   @NotNull
   protected String getPracticedText(int num, int denom, String suffix) {
     return " " + num + "/" + denom;

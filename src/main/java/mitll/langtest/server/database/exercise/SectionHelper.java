@@ -103,7 +103,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     makeRoot();
   }
 
-  @Override
+ /* @Override
   public SectionHelper<T> getCopy(List<T> exercises) {
     SectionHelper<T> tSectionHelper = new SectionHelper<>();
 
@@ -111,14 +111,14 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     tSectionHelper.rootTypes = rootTypes;
     tSectionHelper.parentToChildTypes = parentToChildTypes;
 
-  //  tSectionHelper.report();
+    //  tSectionHelper.report();
 
-    exercises.forEach(ex->tSectionHelper.addExercise(ex));
+    exercises.forEach(tSectionHelper::addExercise);
 
-  //  tSectionHelper.report();
+    //  tSectionHelper.report();
 
     return tSectionHelper;
-  }
+  }*/
 
   /**
    * @see BaseExerciseDAO#reload()
@@ -691,7 +691,6 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     for (Map.Entry<String, String> pair : exercise.getUnitToValue().entrySet()) {
       pairs.add(addExerciseToLesson(exercise, pair.getKey(), pair.getValue()));
     }
-    //  addAssociations(pairs);
     if (predefinedTypeOrder.isEmpty()) {
       rememberOne(root, pairs);
     } else {
@@ -948,6 +947,10 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
           Lesson<T> tLesson = categoryToLesson.get(section);
           String message1 = "\t\t" + section + " : " + tLesson.size();
           logger.debug(message1);
+//          if (section.equals("8")) {
+//            logger.debug("\n\n\n");
+//            tLesson.getExercises().forEach(ex -> logger.debug("(" + section + ") ex " + ex.getID() + " " + ((ClientExercise) ex).isContext()));
+//          }
           //  writer.write(message1);
 
         }
