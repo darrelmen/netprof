@@ -655,19 +655,17 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param typeToSection
    * @param prefix
    * @param onlyWithAudioAnno
-   * @param onlyDefaultUser
    * @param onlyUninspected
    * @return
    */
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
                                                        boolean onlyWithAudioAnno,
-                                                       boolean onlyDefaultUser,
                                                        boolean onlyUninspected) {
     ExerciseListRequest exerciseListRequest = getExerciseListRequest(prefix)
         .setTypeToSelection(typeToSection)
-        .setOnlyWithAudioAnno(onlyWithAudioAnno)
-        .setOnlyDefaultAudio(onlyDefaultUser)
+        // .setOnlyWithAudioAnno(onlyWithAudioAnno)
+        //.setOnlyDefaultAudio(onlyDefaultUser)
         .setOnlyUninspected(onlyUninspected)
         .setAddFirst(false);
 
@@ -840,10 +838,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   private void addListChoice(String type, Panel choices, String selectionForType) {
-
     try {
       String listName = selectionForType;
-      if (isDynamicFacetInteger()) {
+      boolean dynamicFacetInteger = isDynamicFacetInteger();
+      if (dynamicFacetInteger) {
         int userListID = Integer.parseInt(selectionForType);
         listName = idToListName.get(userListID);
       }
@@ -852,8 +850,19 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         //      logger.info("addListChoice selected : adding " + listName + " " + type);
         choices.add(getSelectedAnchor(type, listName));
       } else {
-        logger.info("addListChoice couldn't find list " + userListID + " in known lists...");
-        addVisitor(type, choices, userListID);
+
+        int toUse = -1;
+        try {
+          toUse = this.userListID == -1 ?
+              dynamicFacetInteger ?
+                  Integer.parseInt(selectionForType) :
+                  -1 :
+              -1;
+        } catch (NumberFormatException e) {
+          logger.info("addListChoice couldn't parse " + selectionForType);
+        }
+        logger.info("addListChoice couldn't find list " + toUse + " in known lists...");
+        addVisitor(type, choices, toUse);
       }
     } catch (NumberFormatException e) {
       logger.warning("addListChoice couldn't parse " + selectionForType);
@@ -1398,7 +1407,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       }
 
       /**
-       * @see HistoryExerciseList#getHistoryTokenFromUIState
+       * @see PagingExerciseList#getHistoryTokenFromUIState
        * @return
        */
       @Override

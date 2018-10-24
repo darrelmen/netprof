@@ -74,7 +74,7 @@ public class EditItem {
    * @see #makeExerciseList
    */
   private static final int NEW_EXERCISE_ID = -100;
-  private static final String EDIT_ITEM = "editItem";
+  //private static final String EDIT_ITEM = "editItem";
 
   private final ExerciseController controller;
   private PagingExerciseList<CommonShell, ClientExercise> exerciseList;

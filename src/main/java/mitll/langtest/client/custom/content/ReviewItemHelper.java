@@ -61,6 +61,7 @@ import static mitll.langtest.shared.answer.ActivityType.QUALITY_CONTROL;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @seex ListManager#ListManager
  * @since 3/26/2014.
+ * @deprecated
  */
 public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> extends NPFHelper<T, U> {
   private final Logger logger = Logger.getLogger("ReviewItemHelper");
@@ -75,7 +76,7 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
   /**
    * @param controller
    * @seex ListManager#ListManager
-   * @see mitll.langtest.client.banner.NewContentChooser#showReviewItems
+   * @seex mitll.langtest.client.banner.NewContentChooser#showReviewItems
    */
   public ReviewItemHelper(final ExerciseController controller) {
     super(controller, false);
@@ -105,8 +106,8 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
   public void onResize() {
     if (flexListLayout != null) {
       flexListLayout.onResize();
-    } else if (npfExerciseList != null) {
-      npfExerciseList.onResize();
+    } else  {
+      super.onResize();
     }
   }
 
@@ -159,9 +160,8 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
         protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                              String prefix,
                                                              boolean onlyWithAudioAnno,
-                                                             boolean onlyDefaultUser,
                                                              boolean onlyUninspected) {
-          ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser,
+          ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno,
               onlyUninspected)
               .setQC(true)
               .setAddContext(instanceName == INavigation.VIEWS.FIX_SENTENCES);
@@ -185,8 +185,8 @@ public class ReviewItemHelper<T extends CommonShell, U extends ClientExercise> e
          * @return
          */
         @Override
-        protected String getHistoryTokenFromUIState(String search, int id) {
-          String s = super.getHistoryTokenFromUIState(search, id) +
+        protected String getHistoryTokenFromUIState(String search, int id, int listID) {
+          String s = super.getHistoryTokenFromUIState(search, id, listID) +
               SelectionState.SECTION_SEPARATOR +
               SelectionState.ONLY_WITH_AUDIO_DEFECTS +
               "=" + checkBox.getValue();

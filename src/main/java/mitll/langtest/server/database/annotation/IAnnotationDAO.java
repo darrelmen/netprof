@@ -44,7 +44,7 @@ public interface IAnnotationDAO extends IDAO {
 
   boolean hasDefect(int exerciseID, String field, String status, String comment);
 
-  Collection<Integer> getAudioAnnos();
+ // Collection<Integer> getAudioAnnos();
 
   Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID);
 

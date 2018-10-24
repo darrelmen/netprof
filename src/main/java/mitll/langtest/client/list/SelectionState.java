@@ -34,6 +34,7 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.History;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.server.database.exercise.Facet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -56,6 +57,7 @@ public class SelectionState {
   private static final String POUND = "#";
 
   public static final String ITEM = "item";
+  public static final String LIST = FacetExerciseList.LISTS;
   public static final String SEARCH = "search";
   public static final String PROJECT = "project";
   public static final String DIALOG = "d";

@@ -1286,9 +1286,7 @@ public class LangTest implements
   }
 
   @Override
-  public void showListIn(int listID, INavigation.VIEWS views) {
-    getNavigation().showListIn(listID, views);
-  }
+  public void showListIn(int listID, INavigation.VIEWS views) {  getNavigation().showListIn(listID, views);  }
 
   /**
    * @param views

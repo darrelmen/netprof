@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.*;
 import mitll.langtest.client.custom.ExerciseListContent;
+import mitll.langtest.client.custom.FixNPFHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
 import mitll.langtest.client.custom.content.ReviewItemHelper;
@@ -253,7 +254,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case FIX:
           clear();
           setInstanceHistory(FIX);
-          getReviewList(false, FIX);
+        //  getReviewList(false, FIX);
+          new FixNPFHelper(controller,false, FIX).showNPF(divWidget,FIX);
+
           break;
         case QC_SENTENCES:
           clear();
@@ -263,7 +266,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case FIX_SENTENCES:
           clear();
           setInstanceHistory(FIX_SENTENCES);
-          getReviewList(true, FIX_SENTENCES);
+          new FixNPFHelper(controller,true, FIX_SENTENCES).showNPF(divWidget,FIX_SENTENCES);
           break;
         case NONE:
           logger.info("showView skipping choice " + view);
@@ -510,7 +513,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
-  private void getReviewList(boolean isContext, VIEWS fix) {
+/*  private void getReviewList(boolean isContext, VIEWS fix) {
     controller.getListService().getReviewList(isContext, new AsyncCallback<UserList<CommonShell>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -522,7 +525,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         showReviewItems(result, fix);
       }
     });
-  }
+  }*/
 
   /**
    * So an view specified in the url trumps a stored one in storage, but if there's none in storage, use it.
@@ -589,7 +592,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     controller.getStorage().storeValue(CURRENT_VIEW, view.name());
   }
 
-  private void showReviewItems(UserList<CommonShell> result, VIEWS fix) {
+/*  private void showReviewItems(UserList<CommonShell> result, VIEWS fix) {
     List<CommonShell> exercises = result.getExercises();
     // logger.info("got back " + result.getNumItems() + " exercises");
     CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
@@ -600,7 +603,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     } else {
       logger.warning("showReviewItems not adding since current is " + getCurrentView());
     }
-  }
+  }*/
 
   private void showProgress() {
     boolean polyglotProject = isPolyglotProject();
@@ -643,11 +646,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       int dialog = new SelectionState().getDialog();
       // logger.info("getShowTab Dialog id " + dialog);
 
-      ExerciseListContent learnHelper = views == LEARN ? this.learnHelper : studyHelper;
+   //   ExerciseListContent learnHelper = views == LEARN ? this.learnHelper : studyHelper;
 
-      boolean wasMade = learnHelper.getReloadable() != null;
+    //  boolean wasMade = learnHelper.getReloadable() != null;
       //   logger.info("getShowTab history - " + History.getToken());
-      logger.info("getShowTab view " + views + " was made " + wasMade);
+    //  logger.info("getShowTab view " + views + " was made " + wasMade);
 
 //      if (!wasMade) {
       banner.show(views);
@@ -671,13 +674,13 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   @Override
   public void showListIn(int listid, VIEWS view) {
-    // logger.info("showListIn - " + listid + " " + view);
+   // logger.info("showListIn - " + listid + " " + view);
     setHistoryWithList(listid, view);
     banner.show(view);
   }
 
   private void setHistoryWithList(int listid, VIEWS views) {
-    // logger.info("showListIn - " + listid + " " + views);
+  //  logger.info("showListIn - " + listid + " " + views);
     pushItem(
         FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
             getInstanceParam(views));
@@ -690,7 +693,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   @Override
   public void showDialogIn(int dialogid, VIEWS view) {
-    logger.info("showDialogIn - " + dialogid + " " + view);
+   // logger.info("showDialogIn - " + dialogid + " " + view);
     pushItem(
         SelectionState.DIALOG + "=" + dialogid + SelectionState.SECTION_SEPARATOR +
             getInstanceParam(view));

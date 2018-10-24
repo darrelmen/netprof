@@ -1829,8 +1829,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       return list;
     } else {
-      logger.warn("getUserListByIDExercises returning commented list? " + listid + " vs " + COMMENT_MAGIC_ID);
-      return getUserListManager().getCommentedListEx(projectid, false);
+      logger.error("getUserListByIDExercises returning commented list? " + listid + " vs " + COMMENT_MAGIC_ID);
+      //return getUserListManager().getCommentedListEx(projectid, false);
+      return new UserList<>();
     }
   }
 

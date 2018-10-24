@@ -36,25 +36,36 @@ public class FilterResponseHelper {
         return getFilterResponseForRecording(request, projid, userID);
       } else if (request.isOnlyUninspected()) {
         return getFilterResponse(request, projid, getRequestForUninspected(request, userID));
+      } else if (request.isOnlyWithAnno()) {
+        return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyWithAnno(true));
       } else {
         FilterResponse response = sectionHelper.getTypeToValues(request, false);
         addUserListFacet(request, response);
-//        int userFromSessionID = getUserIDFromSessionOrDB();
-//        if (userFromSessionID != -1) {
-////        logger.info("getTypeToValues got " + userFromSession);
-//          //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
-//
-//
-//        }
-
         return response;
       }
     }
   }
 
+  /**
+   * So make a new SectionHelper from the results of the filter for unrecorded.
+   * Want to do similar thing with other filtered lists - items that need to be fixed, for instance.
+   *
+   * @param request
+   * @param userFromSessionID
+   * @return
+   * @paramx response
+   */
+  private FilterResponse getFilterResponseForRecording(FilterRequest request, int projectID, int userFromSessionID) {
+    return getFilterResponse(request, projectID,
+        getExerciseListRequest(request, userFromSessionID).setOnlyUnrecordedByMe(true));
+  }
+
   private ExerciseListRequest getRequestForUninspected(FilterRequest request, int userID) {
+    return getExerciseListRequest(request, userID).setOnlyUninspected(true);
+  }
+
+  private ExerciseListRequest getExerciseListRequest(FilterRequest request, int userID) {
     return new ExerciseListRequest()
-        .setOnlyUninspected(true)
         .setOnlyExamples(request.isExampleRequest())
         .setUserID(userID);
   }
@@ -153,35 +164,18 @@ public class FilterResponseHelper {
     return sectionHelper.getPairs(typeOrder, id, unit, lesson, ispredef);
   }
 
-  /**
-   * So make a new SectionHelper from the results of the filter for unrecorded.
-   * Want to do similar thing with other filtered lists - items that need to be fixed, for instance.
-   *
-   * @param request
-   * @param userFromSessionID
-   * @return
-   * @paramx response
-   */
-  private FilterResponse getFilterResponseForRecording(FilterRequest request, int projectID, int userFromSessionID) {
-    ExerciseListRequest request1 = new ExerciseListRequest()
-        .setOnlyUnrecordedByMe(true)
-        .setOnlyExamples(request.isExampleRequest())
-        .setUserID(userFromSessionID);
-
-    return getFilterResponse(request, projectID, request1);
-  }
 
   /**
    * First make an exercise list of just what you're looking for, then build a type hierarchy on the fly from it.
    *
    * @param request
    * @param projectID
-   * @param request1
+   * @param exerciseListRequest
    * @return
    */
-  private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest request1) {
-    logger.info("getFilterResponse exercise req " + request1);
-    SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelperFromFiltered(projectID, request1);
+  private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest exerciseListRequest) {
+    logger.info("getFilterResponse exercise req " + exerciseListRequest);
+    SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelperFromFiltered(projectID, exerciseListRequest);
 
     unrecordedSectionHelper.report();
 
@@ -239,29 +233,34 @@ public class FilterResponseHelper {
    * @see #getSectionHelperFromFiltered
    * @see mitll.langtest.server.database.DatabaseImpl#filterExercises
    */
-  public List<CommonExercise> filterExercises(ExerciseListRequest request,
-                                              List<CommonExercise> exercises,
-                                              int projid) {
+  public List<CommonExercise> filterExercises(ExerciseListRequest request, List<CommonExercise> exercises, int projid) {
     logger.info("filterExercises filter " +
         "\n\treq       " + request +
         "\n\texercises " + exercises.size());
 
     if (request.isOnlyUnrecordedByMe()) {
       if (request.isOnlyExamples()) {
-        logger.info("\n\n\nfilterExercises OK doing examples");
-
+        logger.info("filterExercises OK doing examples");
         exercises = getContextExercises(exercises);
       }
       logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded");
       exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples());
     }
 
-    if (request.isOnlyWithAudioAnno()) {
-      exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
+//    if (request.isOnlyWithAudioAnno()) {
+//      exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
+//    }
+
+    if (request.isOnlyWithAnno()) {
+      if (request.isOnlyExamples()) {
+        logger.info("filterExercises OK doing examples 2");
+        exercises = getContextExercises(exercises);
+      }
+      exercises = filterByOnlyAnno(exercises, projid, request.shouldAddContext());
     }
-    if (request.isOnlyDefaultAudio()) {
-      exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
-    }
+//    if (request.isOnlyDefaultAudio()) {
+//      exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
+//    }
     if (request.isOnlyUninspected()) {
       exercises = filterByUninspected(exercises);
     }
@@ -288,12 +287,12 @@ public class FilterResponseHelper {
 
 
   /**
-   * @param onlyAudioAnno
-   * @param exercises
-   * @return
+   * @paramx onlyAudioAnno
+   * @paramx exercises
+   * @returnx
    * @seex #getExerciseIds
    */
-  private List<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
+/*  private List<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
                                                      List<CommonExercise> exercises) {
     if (onlyAudioAnno) {
       Collection<Integer> audioAnnos = databaseServices.getUserListManager().getAudioAnnos();
@@ -305,8 +304,19 @@ public class FilterResponseHelper {
     } else {
       return exercises;
     }
+  }*/
+
+  private List<CommonExercise> filterByOnlyAnno(List<CommonExercise> exercises, int projID, boolean isContext) {
+    Collection<Integer> audioAnnos = databaseServices.getUserListManager().getAnnotationDAO().getExercisesWithIncorrectAnnotations(projID, isContext);
+    List<CommonExercise> copy = new ArrayList<>(audioAnnos.size());
+    for (CommonExercise exercise : exercises) {
+      if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
+    }
+    logger.info("from " + exercises.size() + " to " + copy.size());
+    return copy;
   }
 
+/*
   private List<CommonExercise> filterByOnlyDefaultAudio(boolean onlyDefault,
                                                         List<CommonExercise> exercises) {
     if (onlyDefault) {
@@ -323,7 +333,7 @@ public class FilterResponseHelper {
     } else {
       return exercises;
     }
-  }
+  }*/
 
   /**
    * Remove any items that have been inspected already.

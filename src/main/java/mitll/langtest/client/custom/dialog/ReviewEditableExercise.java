@@ -102,7 +102,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 //  private static final String COPY_THIS_ITEM = "Copy this item.";
   private static final String REGULAR_SPEED = " Regular speed";
   private static final String SLOW_SPEED = " Slow speed";
-  private static final int DELAY_MILLIS = 5000;
+  // private static final int DELAY_MILLIS = 5000;
 
   /**
    * @see #makeAudioRow
@@ -564,15 +564,13 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * <p>
    * Add a fixed button, so we know when to clear the comments and remove this item from the reviewed list.
    *
-   * @param pagingContainer
    * @param toAddTo
    * @param normalSpeedRecording
    * @return
    * @see #addFields
    */
   @Override
-  protected Panel getCreateButton(final ListInterface<T, U> pagingContainer,
-                                  final Panel toAddTo,
+  protected Panel getCreateButton(final Panel toAddTo,
                                   final ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
@@ -587,7 +585,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
       row.add(getDuplicate());
     }
 */
-    row.add(getFixedButton(pagingContainer, toAddTo, normalSpeedRecording));
+    row.add(getFixedButton(toAddTo, normalSpeedRecording));
     boolean keepAudioSelection = getKeepAudioSelection();
 
     //   logger.info("value is  " + keepAudioSelection);
@@ -600,26 +598,21 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     return row;
   }
 
-  private Button getFixedButton(final ListInterface<T, U> pagingContainer,
-                                final Panel toAddTo,
-                                final ControlGroup normalSpeedRecording) {
+  private Button getFixedButton(final Panel toAddTo, final ControlGroup normalSpeedRecording) {
     final Button fixed = makeFixedButton();
-    fixed.addClickHandler(event -> validateThenPost(rap, normalSpeedRecording, pagingContainer, toAddTo, true));
+    fixed.addClickHandler(event -> validateThenPost(rap, normalSpeedRecording, toAddTo, true));
     return fixed;
   }
 
   /**
-   * @param exerciseList
    * @param toAddTo
    * @param onClick
    * @seex mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
-   * @see #validateThenPost(RecordAudioPanel, ControlGroup, ListInterface, Panel, boolean)
+   * @see NewUserExercise#validateThenPost(RecordAudioPanel, ControlGroup, Panel, boolean)
    */
   @Override
-  void afterValidForeignPhrase(final ListInterface<T, U> exerciseList,
-                               final Panel toAddTo,
-                               boolean onClick) {
-    super.afterValidForeignPhrase(exerciseList, toAddTo, onClick);
+  void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {
+    super.afterValidForeignPhrase(toAddTo, onClick);
     LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance.toString()));
   }
 
@@ -714,7 +707,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
   /**
    * @return
-   * @see NewUserExercise#getCreateButton(ListInterface, Panel, ControlGroup)
+   * @see NewUserExercise#getCreateButton(Panel, ControlGroup)
    */
   private Button makeFixedButton() {
     Button fixed = new Button(FIXED);
@@ -734,7 +727,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    */
   @Override
   protected void audioPosted() {
-    reallyChange(listInterface, false, getKeepAudio());
+    reallyChange(false, getKeepAudio());
   }
 
   /**
@@ -784,15 +777,14 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
   /**
    * TODOx : why do we have to do a sequence of server calls -- how about just one???
    *
-   * @param pagingContainer
    * @param buttonClicked
    * @seex #doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    * @seex #postEditItem
    * @see #reallyChange
    */
   @Override
-  protected void doAfterEditComplete(ListInterface<T, U> pagingContainer, boolean buttonClicked) {
-    super.doAfterEditComplete(pagingContainer, buttonClicked);
+  protected void doAfterEditComplete(boolean buttonClicked) {
+    super.doAfterEditComplete(buttonClicked);
     //changeTooltip(pagingContainer);
     if (buttonClicked) {
       userSaidExerciseIsFixed();
@@ -874,6 +866,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
     /**
      * TODO reconsider audio changed event...
+     *
      * @return
      * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String)
      */

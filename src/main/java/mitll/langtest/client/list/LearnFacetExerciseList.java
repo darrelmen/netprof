@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> extends FacetExerciseList<T, ClientExercise> {
   private final Logger logger = Logger.getLogger("LearnFacetExerciseList");
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @see mitll.langtest.client.banner.LearnHelper#getMyListLayout(SimpleChapterNPFHelper)

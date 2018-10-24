@@ -79,11 +79,11 @@ public class UserListManager implements IUserListManager {
   private static final String INCORRECT = "incorrect";
   private static final String FIXED = "fixed";
 
-  private static final String FAST = "regular";
-  private static final String SLOW = "slow";
+//  private static final String FAST = "regular";
+//  private static final String SLOW = "slow";
   private static final String MY_FAVORITES = "My Favorites";
-  private static final String COMMENTS = "Comments";
-  private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
+//  private static final String COMMENTS = "Comments";
+//  private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
 
 
   private static final boolean DEBUG = false;
@@ -102,7 +102,7 @@ public class UserListManager implements IUserListManager {
   private final IUserExerciseListVisitorDAO visitorDAO;
   private final IUserListExerciseJoinDAO userListExerciseJoinDAO;
   private final IAnnotationDAO annotationDAO;
-  //private final PathHelper pathHelper;
+
   private final IStateManager stateManager;
   private final DatabaseServices databaseServices;
 
@@ -697,9 +697,9 @@ public class UserListManager implements IUserListManager {
    * @param projID
    * @param isContext
    * @return
-   * @see mitll.langtest.server.services.ListServiceImpl#getReviewList
+   * @seex mitll.langtest.server.services.ListServiceImpl#getReviewList
    */
-  @Override
+/*  @Override
   public UserList<CommonShell> getCommentedList(int projID, boolean isContext) {
     Set<Integer> exercisesWithIncorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID, isContext);
     logger.info("getCommented for " + projID + " found " + exercisesWithIncorrectAnnotations.size() + " is context " + isContext);
@@ -709,7 +709,7 @@ public class UserListManager implements IUserListManager {
     UserList<CommonShell> reviewList = getReviewList(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
     logger.info("getCommented for " + projID + " list has " + reviewList.getNumItems() + " exercises");
     return reviewList;
-  }
+  }*/
 
   /**
    * @param projID
@@ -717,19 +717,22 @@ public class UserListManager implements IUserListManager {
    * @return
    * @seex IUserListManager#getUserListByIDExercises
    */
+/*
   @Override
   public UserList<CommonExercise> getCommentedListEx(int projID, boolean isContext) {
     List<CommonExercise> defectExercises = getDefectExercises(projID, annotationDAO.getExercisesWithIncorrectAnnotations(projID, isContext), isContext);
     return getReviewListEx(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
   }
+*/
 
   /**
-   * @see #getCommentedList
-   * @param projID
-   * @param exerciseIDs
-   * @param isContext
-   * @return
+   * @seex #getCommentedList
+   * @paramx xprojID
+   * @paramx exerciseIDs
+   * @paramx isContext
+   * @returnx
    */
+/*
   @NotNull
   private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> exerciseIDs, boolean isContext) {
     List<CommonExercise> defectExercises = new ArrayList<>();
@@ -749,22 +752,24 @@ public class UserListManager implements IUserListManager {
     }
     return defectExercises;
   }
+*/
 
   /**
-   * @param allKnown
-   * @param name
-   * @param description
-   * @param userListID
+   * @paramx allKnown
+   * @paramx name
+   * @paramx description
+   * @paramx userListID
    * @return
-   * @see IUserListManager#getCommentedList(int, boolean)
+   * @seex IUserListManager#getCommentedList(int, boolean)
    */
-  private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
+/*  private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
                                               String name,
                                               String description,
                                               int userListID) {
     return getCommonUserList(getQCList(name, description, userListID), getShells(allKnown));
-  }
+  }*/
 
+/*
   @NotNull
   private UserList<CommonShell> getQCList(String name, String description, int userListID) {
     SimpleUser qcUser = getQCUser();
@@ -772,6 +777,7 @@ public class UserListManager implements IUserListManager {
     return new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
         false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10, 30, false);
   }
+*/
 
   @NotNull
   private List<CommonShell> getShells(Collection<CommonExercise> allKnown) {
@@ -780,6 +786,7 @@ public class UserListManager implements IUserListManager {
     return commonShells;
   }
 
+/*
   private UserList<CommonExercise> getReviewListEx(List<CommonExercise> allKnown,
                                                    String name, String description,
                                                    int userListID) {
@@ -789,18 +796,19 @@ public class UserListManager implements IUserListManager {
         false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10, 30, false);
     return getCommonUserList(userList, allKnown);
   }
+*/
 
   /**
    * TODO : should we worry about sort order for english?
    *
-   * @param <T>
-   * @param userList
-   * @param copy
+   * @paramx <T>
+   * @paramx userList
+   * @paramx copy
    * @return
-   * @see #getReviewList(Collection, String, String, int)
-   * @see #getReviewListEx(List, String, String, int)
+   * @sexe #getReviewList(Collection, String, String, int)
+   * @sexe #getReviewListEx(List, String, String, int)
    */
-  @NotNull
+ /* @NotNull
   private <T extends CommonShell> UserList<T> getCommonUserList(UserList<T> userList, List<T> copy) {
     userList.setReview(true);
     new ExerciseSorter().getSorted(copy, false, false, "");
@@ -808,18 +816,18 @@ public class UserListManager implements IUserListManager {
     stateManager.markState(copy);
     logger.debug("getCommonUserList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
-  }
+  }*/
 
   /**
    * Need a bogus user for the list.
    *
    * @return
    */
-  private SimpleUser getQCUser() {
+/*  private SimpleUser getQCUser() {
     List<User.Permission> permissions = new ArrayList<>();
     permissions.add(User.Permission.QUALITY_CONTROL);
     return new User(-1, 89, 0, MiniUser.Gender.Unspecified, 0, "", "", false, permissions);
-  }
+  }*/
 
   /**
    * Really create a new exercise and associated context exercise in database.
@@ -867,9 +875,11 @@ public class UserListManager implements IUserListManager {
 //    fixAudioPaths(userExercise, true, mediaDir);
   }
 */
+/*
   private Collection<String> getTypeOrder(int projectID) {
     return userDAO.getDatabase().getTypeOrder(projectID);
   }
+*/
 
   /**
    * @return
@@ -1140,12 +1150,12 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByOnlyAudioAnno
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#filterByOnlyAudioAnno
    */
-  @Override
+/*  @Override
   public Collection<Integer> getAudioAnnos() {
     return annotationDAO.getAudioAnnos();
-  }
+  }*/
 
   @Override
   public IAnnotationDAO getAnnotationDAO() {

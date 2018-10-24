@@ -452,7 +452,7 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void showLearnList(ListContainer container) {
-    controller.showListIn(getListID(container), INavigation.VIEWS.LEARN);
+    controller.getNavigation().showListIn(getListID(container), INavigation.VIEWS.LEARN);
   }
 
   private void showQuiz(ListContainer container) {

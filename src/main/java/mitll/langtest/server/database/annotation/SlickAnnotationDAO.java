@@ -111,10 +111,10 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
     return copy;
   }
 
-  @Override
+/*  @Override
   public Collection<Integer> getAudioAnnos() {
     return dao.getOnlyAudioAnnos();
-  }
+  }*/
 
   @Override
   public Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID) {
@@ -183,6 +183,8 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
       }*/
 
 //      finish(connection, statement, rs);
+
+    logger.info("getExercisesWithIncorrectAnnotations from " + annoToCreator.size() + " returning " + incorrect.size());
 
     return incorrect;
   }

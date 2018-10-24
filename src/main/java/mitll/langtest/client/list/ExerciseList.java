@@ -33,6 +33,7 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -71,12 +72,12 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList<T extends CommonShell, U extends Shell> extends VerticalPanel
+public abstract class ExerciseList<T extends CommonShell, U extends Shell>  extends DivWidget
     implements ListInterface<T, U>, ProvidesResize {
   private final Logger logger = Logger.getLogger("ExerciseList");
 
   private static final boolean DEBUG_STALE = true;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private static final String SERVER_ERROR = "Server error";
   private static final String GETTING_EXERCISE = "getting exercise";
@@ -140,7 +141,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
     this.userState = controller.getUserState();
     this.controller = controller;
     addWidgets(currentExerciseVPanel);
-    //getElement().setId("ExerciseList_" + listOptions.getInstance());
+
+    getElement().setId("ExerciseList_" + listOptions.getInstance());
   }
 
   /**
@@ -168,7 +170,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
 
   /**
    * @param factory
-   * @see mitll.langtest.client.custom.content.NPFHelper#setFactory(PagingExerciseList, String, boolean)
+   * @see mitll.langtest.client.custom.content.NPFHelper#setFactory
    */
   public void setFactory(ExercisePanelFactory<T, U> factory) {
     this.factory = factory;
@@ -247,7 +249,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
    * @see #pushFirstSelection(int, String)
    * @see HistoryExerciseList#onValueChange(ValueChangeEvent)
    */
-  abstract void pushNewItem(String search, int exerciseID);
+  abstract void pushNewItem(String search, int exerciseID, int listID);
 
   /**
    * @return
@@ -649,7 +651,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell> exten
    */
   public void loadExercise(int itemID) {
 //   if (DEBUG) logger.info("ExerciseList.loadExercise itemID " + itemID);
-    pushNewItem("" + itemID, itemID);
+    pushNewItem("" + itemID, itemID, -1);
   }
 
   /**

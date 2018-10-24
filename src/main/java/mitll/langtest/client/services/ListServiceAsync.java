@@ -88,7 +88,9 @@ public interface ListServiceAsync {
 
   void update(UserList userList, AsyncCallback<Void> async);
 
+/*
   void getReviewList(boolean isContext, AsyncCallback<UserList<CommonShell>> async);
+*/
 
   void getQuizInfo(int userListID, AsyncCallback<QuizInfo> async);
 }

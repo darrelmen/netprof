@@ -277,8 +277,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @paramx users
    * @see #getTableWithPager
    */
-  protected void makeInitialSelection(T firstUser, T userToSelect) {
-    logger.info("makeInitialSelection make initial selection : select " + userToSelect);
+  void makeInitialSelection(T firstUser, T userToSelect) {
+  //  logger.info("makeInitialSelection make initial selection : select " + userToSelect);
     Scheduler.get().scheduleDeferred(() -> selectAndClick((userToSelect == null) ? firstUser : userToSelect));
   }
 

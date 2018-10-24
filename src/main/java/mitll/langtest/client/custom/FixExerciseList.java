@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
+class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("DefectsExerciseList");
 
   //  private MarkDefectsChapterNPFHelper markDefectsChapterNPFHelper;
@@ -22,12 +22,12 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   // private CheckBox filterOnly, uninspectedOnly;
   private boolean isContext;
 
-  DefectsExerciseList(ExerciseController controller,
-                      Panel topRow,
-                      Panel currentExercisePanel,
-                      INavigation.VIEWS instanceName,
-                      DivWidget listHeader,
-                      boolean isContext) {
+  FixExerciseList(ExerciseController controller,
+                  Panel topRow,
+                  Panel currentExercisePanel,
+                  INavigation.VIEWS instanceName,
+                  DivWidget listHeader,
+                  boolean isContext) {
     super(
         controller,
         topRow,
@@ -54,7 +54,7 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
 
     ExerciseListRequest exerciseListRequest = super
         .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUninspected)
-        .setOnlyUninspected(true)
+        .setOnlyWithAnno(true)
         .setQC(true)
         .setAddContext(isContext);
 
@@ -66,7 +66,7 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
     ExerciseListRequest exerciseListRequest =
         super.getExerciseListRequest(prefix)
-            .setOnlyUninspected(true)
+            .setOnlyWithAnno(true)
             .setQC(true)
             .setAddContext(isContext);
     logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
@@ -87,7 +87,7 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   @Override
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
     return new FilterRequest(incrReqID(), pairs, userListID)
-        .setOnlyUninspected(true)
+        .setOnlyWithAnno(true)
         .setExampleRequest(isContext);
   }
 }

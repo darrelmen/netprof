@@ -88,14 +88,18 @@ public interface IUserListManager {
   void createFavorites(int userid, int projid);
 
   /**
-   * @param projID
-   * @param isContext
+   * @paramx projID
+   * @paramx isContext
    * @return
-   * @see ListServiceImpl#getReviewList
+   * @seex ListServiceImpl#getReviewList
    */
+/*
   UserList<CommonShell> getCommentedList(int projID, boolean isContext);
+*/
 
+/*
   UserList<CommonExercise> getCommentedListEx(int projID, boolean isContext);
+*/
 
   @Deprecated
   UserList<CommonShell> getUserListByID(int id);
@@ -106,9 +110,9 @@ public interface IUserListManager {
 
   /**
    * @seexx ListServiceImpl#newExercise(int, CommonExercise)
-   * @param userListID
-   * @param userExercise
-   * @param mediaDir
+   * @paramx userListID
+   * @paramx userExercise
+   * @paramx mediaDir
    */
  // void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
 
@@ -135,7 +139,9 @@ public interface IUserListManager {
 
   boolean deleteItemFromList(int listid, int exid);
 
+/*
   Collection<Integer> getAudioAnnos();
+*/
 
   IAnnotationDAO getAnnotationDAO();
 
