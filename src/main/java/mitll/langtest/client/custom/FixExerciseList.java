@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.recording.NoListFacetExerciseList;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.shared.exercise.*;
@@ -13,6 +14,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
+import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
 
 class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("FixExerciseList");
@@ -89,4 +93,15 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
         .setOnlyWithAnno(true)
         .setExampleRequest(isContext);
   }
+
+  @Override
+  protected void onLastItem() {
+    new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> showEmptySelection());
+  }
+
+  @Override protected String getEmptySearchMessage() {
+    return "<b>You've completed fixing defects for this selection.</b>" +
+        "<p>Please clear one of your selections and select a different unit or chapter.</p>";
+  }
+
 }

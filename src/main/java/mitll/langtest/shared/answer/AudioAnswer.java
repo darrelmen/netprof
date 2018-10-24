@@ -191,7 +191,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
 
   /**
    * Audio information that is attached to the exercise.
-   *
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise.MyRecordAudioPanel#makePostAudioRecordButton
    * @return
    */
   public AudioAttribute getAudioAttribute() {

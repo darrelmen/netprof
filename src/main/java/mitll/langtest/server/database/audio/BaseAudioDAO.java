@@ -233,6 +233,9 @@ public abstract class BaseAudioDAO extends DAO {
         .filter(AudioAttribute::isContextAudio)
         .collect(Collectors.toList());
 
+    if (doDEBUG)
+      logger.warn("addContextAudio for " + id + " found " + onlyContextFromParent.size() + " from parent to attach ");
+
     for (ClientExercise contextSentence : exercise.getDirectlyRelated()) {
       int contextID = contextSentence.getID();
       List<AudioAttribute> audioAttributes = audioAttributesForExercises.get(contextID);
@@ -344,8 +347,13 @@ public abstract class BaseAudioDAO extends DAO {
     String mediaDir = database.getServerProps().getMediaDir();
     boolean doDebug = debug || DEBUG_ATTACH;
 
+    logger.info("attachAudio for "+firstExercise.getID() + " " + firstExercise.getEnglish() + " " + firstExercise.getForeignLanguage() +
+        " found " + currentIDs.size() + " vs " + audioAttributes.size());
+
+    int n=0;
     for (AudioAttribute attr : audioAttributes) {
       if (!currentIDs.contains(attr.getUniqueID())) {
+        n++;
         boolean didIt = attachAudioAndFixPath(firstExercise, mediaDir, attr, language, debug);
         if (didIt) {
 //          logger.debug("\tadding path '" + attr.getAudioRef() + "' " + attr + " to " + firstExercise.getOldID());
@@ -371,6 +379,7 @@ public abstract class BaseAudioDAO extends DAO {
         }
       }
     }
+    if (n == 0) logger.info("didn't attempt any for " + firstExercise.getID());
 
     return allSucceeded;
   }
@@ -465,7 +474,7 @@ public abstract class BaseAudioDAO extends DAO {
         }
       }
       return true;
-    } else {
+    } else {  // no text match
       boolean doDebug = debug || DEBUG_ATTACH;
 
       if (doDebug) {
@@ -529,14 +538,9 @@ public abstract class BaseAudioDAO extends DAO {
    * @param projid
    * @param exToTranscript
    * @return ids with both regular and slow speed recordings
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
+   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getRecordedByMatchingGender(int, int, boolean, Map)
    */
   public Collection<Integer> getRecordedBySameGender(int userid, int projid, Map<Integer, String> exToTranscript) {
-  /*  return getAudioExercisesForGenderBothSpeeds(
-        projid, userDAO.isMale(userid),
-        AudioType.REGULAR.toString(),
-        AudioType.SLOW.toString()
-    );   */
     return getAudioExercisesForGenderBothSpeeds(
         projid,
         userDAO.isMale(userid),

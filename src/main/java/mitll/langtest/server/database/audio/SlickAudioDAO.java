@@ -183,7 +183,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
 //    logger.info("addOrUpdate Add or update after  " + audioAttribute);
 
-  //  Collection<SlickAudio> byID = dao.getByID(audioAttribute.getUniqueID());
+    //  Collection<SlickAudio> byID = dao.getByID(audioAttribute.getUniqueID());
 
 //    byID.forEach(slickAudio -> logger.info("addOrUpdate Got " + slickAudio));
 //    logger.info("Add or update exists " + audioAttribute);
@@ -267,16 +267,16 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDsThatExist(exids);
     long now = System.currentTimeMillis();
 
-    if (now - then > 30) {
+    if (now - then > 30 || true) {
       logger.info("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() +
           " attr for " + exids.size());
     }
 
     Map<Integer, List<AudioAttribute>> copy = new HashMap<>(byExerciseID.size());
     byExerciseID.forEach((k, v) -> copy.put(k, toAudioAttributes(v, idToMini)));
-//    for (Map.Entry<Integer, List<SlickAudio>> pair : byExerciseID.entrySet()) {
-//      copy.put(pair.getKey(), toAudioAttributes(pair.getValue(), idToMini));
-//    }
+
+    copy.forEach((k, v) -> logger.info(" getAudioAttributesForExercises " + k + " - " + v));
+
     if (copy.size() != exids.size()) {
       String suffix = copy.size() < 10 ? " : " + copy.keySet() : "";
       logger.info("getAudioAttributesForExercises asked for " + exids.size() + " exercises, but only found " +
@@ -403,7 +403,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
-   *
    * @param projid
    * @param isMale
    * @param exToTranscript

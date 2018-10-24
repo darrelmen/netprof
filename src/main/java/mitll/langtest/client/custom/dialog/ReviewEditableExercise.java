@@ -61,9 +61,7 @@ import mitll.langtest.shared.user.MiniUser;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.shared.answer.AudioType.CONTEXT_REGULAR;
-import static mitll.langtest.shared.answer.AudioType.REGULAR;
-import static mitll.langtest.shared.answer.AudioType.SLOW;
+import static mitll.langtest.shared.answer.AudioType.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -159,23 +157,23 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     if (newUserExercise.hasContext()) {
       exerciseWithAudio = newUserExercise.getDirectlyRelated().iterator().next();
 
-      logger.info("makeAudioRow (" + instance +
-          ") exerciseWithAudio " + exerciseWithAudio.getID() + " is exerciseWithAudio " + exerciseWithAudio.isContext() + " " + exerciseWithAudio.getEnglish() + " " + exerciseWithAudio.getForeignLanguage());
-      logger.info("makeAudioRow exerciseWithAudio " + exerciseWithAudio.getID() + " " + exerciseWithAudio.getAudioAttributes().size());
+//      logger.info("makeAudioRow (" + instance +
+//          ") exerciseWithAudio " + exerciseWithAudio.getID() + " is exerciseWithAudio " + exerciseWithAudio.isContext() + " " + exerciseWithAudio.getEnglish() + " " + exerciseWithAudio.getForeignLanguage());
+//      logger.info("makeAudioRow exerciseWithAudio " + exerciseWithAudio.getID() + " " + exerciseWithAudio.getAudioAttributes().size());
     } else {
       exerciseWithAudio = newUserExercise;
     }
 
-    logger.info("makeAudioRow make audio row for " + newUserExercise.getID() + " is exerciseWithAudio " + newUserExercise.isContext());
+    //  logger.info("makeAudioRow make audio row for " + newUserExercise.getID() + " is exerciseWithAudio " + newUserExercise.isContext());
     tabs = new ArrayList<>();
 
     TabPanel tabPanel = new TabPanel();
     tabLinks.clear();
 
     Collection<AudioAttribute> maleDisplayed = getDisplayedAudio(audioAttributeExercise, true);
-    logger.info("makeAudioRow male   audio has " + maleDisplayed.size());
+//    logger.info("makeAudioRow male   audio has " + maleDisplayed.size());
     Collection<AudioAttribute> femaleDisplayed = getDisplayedAudio(audioAttributeExercise, false);
-    logger.info("makeAudioRow female audio has " + femaleDisplayed.size());
+//    logger.info("makeAudioRow female audio has " + femaleDisplayed.size());
 
     AudioAttribute audioAttribute = getAudioAttribute(audioAttributeExercise, isContext() ? CONTEXT_REGULAR : REGULAR);
     if (audioAttribute == null) {
@@ -184,7 +182,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
     if (audioAttribute != null) {
       boolean isDisplayed = maleDisplayed.contains(audioAttribute) || femaleDisplayed.contains(audioAttribute);
-      logger.info("makeAudioRow isDisplayed " + isDisplayed);
+      //  logger.info("makeAudioRow isDisplayed " + isDisplayed);
       addNewOrYourRecordingTab(exerciseWithAudio, tabPanel, audioAttribute, isDisplayed);
     }
 
@@ -248,7 +246,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
                                 Collection<AudioAttribute> displayed) {
     Map<MiniUser, List<AudioAttribute>> malesMap = audioAttributeExercise.getUserMap(isMale, isContext());
 
-    logger.info("isMale " +isMale + " " + malesMap.size());
+    logger.info("isMale " + isMale + " " + malesMap.size());
     malesMap.forEach((k, v) -> logger.info("addAudioByGender got " + k + "-" + v));
 
     List<MiniUser> maleUsers = audioAttributeExercise.getSortedUsers(malesMap);
@@ -263,8 +261,12 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
     panels.clear();
 
-    widget.add(getRecordAudioWithAnno(widget, REGULAR, newUserExercise));
-    widget.add(getRecordAudioWithAnno(widget, SLOW, newUserExercise));
+    if (isContext()) {
+      widget.add(getRecordAudioWithAnno(widget, CONTEXT_REGULAR, newUserExercise));
+    } else {
+      widget.add(getRecordAudioWithAnno(widget, REGULAR, newUserExercise));
+      widget.add(getRecordAudioWithAnno(widget, SLOW, newUserExercise));
+    }
 
     return widget;
   }
@@ -335,14 +337,8 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
                                                                                List<MiniUser> users,
                                                                                Collection<AudioAttribute> displayed) {
     int me = controller.getUser();
-//    UserTitle userTitle = new UserTitle();
     for (MiniUser user : users) {
-      logger.info("addTabsForUsers user " + user);
-//      boolean byMe = (user.getID() == me);
-//      if (!byMe) {
-//        String tabTitle = userTitle.getUserTitle(me, user);
-//
-//        RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, tabTitle, true, true);
+//      logger.info("addTabsForUsers user " + user);
       boolean byMe = (user.getID() == me);
       if (!byMe) {
         List<AudioAttribute> audioAttributes = userToAudio.get(user);
@@ -381,12 +377,10 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
           if (allHaveBeenPlayed) {
             tabAndContent.getTab().setIcon(IconType.CHECK_SIGN);
           }
-        }
-        else {
+        } else {
           logger.warning("no audio for " + user);
         }
-      }
-      else {
+      } else {
         logger.info("it's by me");
       }
     }
@@ -831,6 +825,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
       public void onSuccess(Void result) {
         logger.info("doAfterEditComplete : forgetting exercise " + id);
         exerciseList.forgetExercise(id);
+        exerciseList.loadNext();
       }
     });
   }
@@ -887,7 +882,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
         public void useResult(AudioAnswer result) {
           super.useResult(result);
           if (result.isValid()) {
-            exercise.getMutableAudio().addAudio(result.getAudioAttribute());
+          //  exercise.getMutableAudio().addAudio(result.getAudioAttribute());
             deleteButton.setEnabled(true);
 
             /**

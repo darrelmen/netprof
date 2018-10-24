@@ -97,7 +97,7 @@ public class AudioExercise extends ExerciseShell {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#fixAudioPaths
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#getRegularSpeedIfAvailable
    */
   public synchronized AudioAttribute getRegularSpeed() {
     return getAudio(SPEED, REGULAR);
@@ -113,13 +113,19 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
+   * Latest recording by a user wins.
+   *
    * @param audioAttribute
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#attachAudioAndFixPath
    */
   public synchronized void addAudio(AudioAttribute audioAttribute) {
     if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
     else {
-      audioAttributes.put(audioAttribute.getKey(), audioAttribute);
+      String key = audioAttribute.getKey();
+      AudioAttribute currentByKey = audioAttributes.get(key);
+      if (currentByKey == null || currentByKey.getTimestamp() < audioAttribute.getTimestamp()) {
+        audioAttributes.put(key, audioAttribute);
+      }
     }
   }
 
@@ -446,6 +452,10 @@ public class AudioExercise extends ExerciseShell {
           continue;
         }
 
+        if (audioAttribute.getExid() == 9444) {
+          logger.info("got " + audioAttribute);
+        }
+
         if (audioAttribute.isRegularSpeed()) reg = true;
         if (audioAttribute.isSlow()) slow = true;
 
@@ -459,6 +469,11 @@ public class AudioExercise extends ExerciseShell {
         if (reg) {
           if (latestReg == null || latestReg.getTimestamp() < candidateTimestamp) {
             latestReg = audioAttribute;
+
+
+            if (audioAttribute.getExid() == 9444) {
+              logger.info("\tnew latest  " + latestReg);
+            }
           }
         }
         if (slow) {
@@ -474,6 +489,9 @@ public class AudioExercise extends ExerciseShell {
       ret = new ArrayList<>();
       if (latestReg != null) {
         ret.add(latestReg);
+        if (latestReg.getExid() == 9444) {
+          logger.info("\t latest reg  " + latestReg);
+        }
       }
       // else logger.warning("getMostRecentAudioEasy no reg  speed audio for " + getID());
       if (latestSlow != null) {

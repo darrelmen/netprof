@@ -40,9 +40,6 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   private static final String IS_MALE = "isMale";
   private static final String IS_REG = "isReg";
 
-//  public static final String MALE = "male";
-//  public static final String SLOW = "slow";
-
   private final boolean includeContext;
 
   /**
@@ -161,8 +158,9 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     List<AudioAttribute> maleAudio = exercise.getMostRecentAudioEasy(true, includeContext);
     List<AudioAttribute> femaleAudio = exercise.getMostRecentAudioEasy(false, includeContext);
 
-/*    if (exercise.getID() == 8729) {
-      logger.info("addChoices for exercise " + exercise.getID() + " eng '" + exercise.getEnglish() + "' = '" + exercise.getForeignLanguage() +
+    if (exercise.getID() == 9444) {
+      logger.info("addChoices for exercise " + exercise.getID() +
+          //" eng '" + exercise.getEnglish() + "' = '" + exercise.getForeignLanguage() +
           "'" +
           "\n\tmale       " + isMale +
           "\n\tis reg     " + isReg +
@@ -171,7 +169,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
       );
       exercise.getAudioAttributes().forEach(audioAttribute -> logger.info("\t" + audioAttribute));
-    }*/
+    }
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;

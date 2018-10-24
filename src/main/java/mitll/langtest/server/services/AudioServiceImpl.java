@@ -956,7 +956,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (decoderOptions.isRefRecording() && !decoderOptions.isRecordInResults()) { // we have a foreign key from audio into result table - must record in results
       decoderOptions.setRecordInResults(true);
     }
-    //boolean amas = serverProps.isAMAS();
 
     CommonExercise commonExercise = isExistingExercise ?
         db.getCustomOrPredefExercise(projectID, exerciseID) :
@@ -997,6 +996,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //    logger.info("writeAudioFile recording audioAnswer transcript '" + audioAnswer.getTranscript() + "'");
     int user = audioContext.getUserid();
 
+    logger.info("getAudioAnswer " + decoderOptions + " valid " + audioAnswer.isValid());
     if (decoderOptions.isRefRecording() && audioAnswer.isValid()) {
       audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(),
           commonExercise, exerciseID, audioAnswer, hasProjectSpecificAudio));
