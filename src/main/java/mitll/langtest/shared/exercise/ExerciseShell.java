@@ -32,6 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
@@ -160,6 +161,11 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
     return numPhones;
   }
 
+  /**
+   * @see ExerciseList#setScore
+   * @see mitll.langtest.client.list.FacetExerciseList#setScores
+   * @param score
+   */
   @Override
   public void setScore(float score) {
     this.score = toInt(score);

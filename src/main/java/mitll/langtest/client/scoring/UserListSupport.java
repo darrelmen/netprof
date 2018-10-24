@@ -21,6 +21,7 @@ import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.IUserListWithIDs;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -308,7 +309,8 @@ public class UserListSupport {
   }
 
   private String getFullName() {
-    return controller.getUserManager().getCurrent().getFullName();
+    User current = controller.getUserManager().getCurrent();
+    return current == null ? "" : current.getFullName();
   }
 
   private String getURL() {

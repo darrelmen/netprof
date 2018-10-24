@@ -87,6 +87,8 @@ public class ResultManager extends PagerTable {
   private static final String YES = "Yes";
   private static final String NO = "No";
 
+  private static final int MIN_TO_SHOW = 4;
+
   private static final int PAGE_SIZE = 7;
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "Score";
@@ -107,7 +109,7 @@ public class ResultManager extends PagerTable {
   private static final String CLOSE = "Close";
   private static final int MAX_TO_SHOW = PAGE_SIZE;
 
-  private static final boolean DEBUG = false;
+ // private static final boolean DEBUG = false;
 
   private final EventRegistration eventRegistration;
   private final ResultServiceAsync resultServiceAsync = GWT.create(ResultService.class);
@@ -233,7 +235,7 @@ public class ResultManager extends PagerTable {
 
     addColumnsToTable(cellTable);
     cellTable.setRowCount(numResults, true);
-    int maxToShow = Window.getClientHeight() > 850 ? MAX_TO_SHOW : 5;
+    int maxToShow = Window.getClientHeight() > 850 ? MAX_TO_SHOW : MIN_TO_SHOW;
     cellTable.setVisibleRange(0, maxToShow);
 
     createProvider(numResults, cellTable, resultTypeAhead);
@@ -614,15 +616,15 @@ public class ResultManager extends PagerTable {
     table.addColumn(type, DEVICE);
     rememberColumn(type, DEVICE);
 
-    TextColumn<MonitorResult> wFlash = new TextColumn<MonitorResult>() {
-      @Override
-      public String getValue(MonitorResult answer) {
-        return answer.isWithFlash() ? YES : NO;
-      }
-    };
-    wFlash.setSortable(true);
-    table.addColumn(wFlash, "w/Flash");
-    rememberColumn(wFlash, "withFlash");
+//    TextColumn<MonitorResult> wFlash = new TextColumn<MonitorResult>() {
+//      @Override
+//      public String getValue(MonitorResult answer) {
+//        return answer.isWithFlash() ? YES : NO;
+//      }
+//    };
+//    wFlash.setSortable(true);
+//    table.addColumn(wFlash, "w/Flash");
+//    rememberColumn(wFlash, "withFlash");
 
     {
       TextColumn<MonitorResult> processDur = new TextColumn<MonitorResult>() {

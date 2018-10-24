@@ -295,12 +295,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param userListID
    * @return
    */
-  public QuizInfo getQuizInfo(int userListID) {
+  public QuizSpec getQuizInfo(int userListID) {
     UserList<?> list = db.getUserListManager().getUserListDAO().getList(userListID);
     if (list == null) logger.warn("no quiz with list id " + userListID);
-    QuizInfo quizInfo = list != null ? new QuizInfo(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio()) : new QuizInfo(10, 35, false);
-    logger.info("Returning " + quizInfo + " for " + userListID);
-    return quizInfo;
+    QuizSpec quizSpec = list != null ? new QuizSpec(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio()) : new QuizSpec(10, 35, false);
+    logger.info("Returning " + quizSpec + " for " + userListID);
+    return quizSpec;
   }
 
 /*  private ClientExercise getExerciseIfKnown(ClientExercise userExercise) {

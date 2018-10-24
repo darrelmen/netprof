@@ -13,13 +13,14 @@ import java.util.*;
 import java.util.logging.Logger;
 
 class JSONAnswerParser {
-  public static final String EVENT = "event";
-  public static final String START = "start";
-  public static final String END = "end";
-  public static final String SCORE = "score";
-  public static final String STREAMTIMESTAMP = "STREAMTIMESTAMP";
-  public static final String STREAMSTOP = "STREAMSTOP";
   private final Logger logger = Logger.getLogger("JSONAnswerParser");
+
+  private static final String EVENT = "event";
+  private static final String START = "start";
+  private static final String END = "end";
+  private static final String SCORE = "score";
+  private static final String STREAMTIMESTAMP = "STREAMTIMESTAMP";
+  private static final String STREAMSTOP = "STREAMSTOP";
 
   private static final String PHONE_TRANSCRIPT = "PHONE_TRANSCRIPT";
   private static final String WORD_TRANSCRIPT = "WORD_TRANSCRIPT";
@@ -83,7 +84,7 @@ class JSONAnswerParser {
 
       converted.setPretestScore(pretestScore);
     } else {
-      logger.info("gotResponse Got " + jsonObject);
+      logger.info("getAudioAnswer invalid : " + jsonObject);
     }
 
     return converted;

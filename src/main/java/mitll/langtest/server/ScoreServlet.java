@@ -176,6 +176,7 @@ public class ScoreServlet extends DatabaseServlet {
     RESULT_ID("resultID"),
     ROUND_TRIP1("roundTrip"),
     DIALOGSESSION,
+    RECORDINGSESSION,
 
     AUDIOTYPE,
     ISREFERENCE,

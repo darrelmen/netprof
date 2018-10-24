@@ -331,7 +331,8 @@ public class UserManager {
   }
 
   public boolean hasPermission(User.Permission permission) {
-    return getPermissions().contains(permission);
+    Collection<User.Permission> permissions = getPermissions();
+    return permissions != null && permissions.contains(permission);
   }
 
   public Collection<User.Permission> getPermissions() {

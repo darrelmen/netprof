@@ -44,6 +44,7 @@ import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -71,7 +72,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList<T extends CommonShell, U extends HasID>  extends DivWidget
+public abstract class ExerciseList<T extends CommonShell, U extends HasID> extends DivWidget
     implements ListInterface<T, U>, ProvidesResize {
   private final Logger logger = Logger.getLogger("ExerciseList");
 
@@ -181,7 +182,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
    * @return true if we asked the server for exercises
    * @see HistoryExerciseList#noSectionsGetExercises(int)
    */
-  public boolean getExercises() {
+  boolean getExercises() {
     if (DEBUG) logger.info("\n\n\nExerciseList.getExercises");// instance " + getInstance());
     ExerciseListRequest request = getExerciseListRequest("");
 //    logger.info("request is " +request);
@@ -272,7 +273,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
     return createdPanel;
   }
 
-  public INavigation.VIEWS getInstance() {
+  INavigation.VIEWS getInstance() {
     return listOptions.getInstance();
   }
 
@@ -302,9 +303,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
       this.searchIfAny = searchIfAny;
       this.exerciseID = exerciseID;
       this.request = request;
+
 //      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
-//      logger.info("logException stack " + exceptionAsString);
+//       String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
+//       logger.info("logException stack " + exceptionAsString);
     }
 
     public void onFailure(Throwable caught) {
@@ -332,7 +334,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
 
       if (isStaleResponse(result)) {
         if (DEBUG_STALE) {
-          logger.info("SetExercisesCallback.onSuccess ignoring" +
+          logger.warning("SetExercisesCallback.onSuccess ignoring" +
               "\n\tresult " + result.getReqID() + " b/c before" +
               "\n\tlatest " + lastReqID);
         }
@@ -358,7 +360,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
    * @param result
    * @see ExerciseList.SetExercisesCallback#onSuccess
    */
-  protected void setScores(ExerciseListWrapper<T> result) {
+  void setScores(ExerciseListWrapper<T> result) {
   }
 
   /**
@@ -481,10 +483,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
   /**
    * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onSuccess(ExerciseListWrapper)
    */
-  protected void gotEmptyExerciseList() {
+  void gotEmptyExerciseList() {
   }
 
-  public void rememberAndLoadFirst(List<T> exercises) {
+  private void rememberAndLoadFirst(List<T> exercises) {
     rememberAndLoadFirst(exercises, "All", "", -1);
   }
 
@@ -611,7 +613,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
    *
    * @return
    */
-  T findFirstExercise() {
+  private T findFirstExercise() {
     return getFirst();
   }
 
@@ -688,7 +690,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
     } else {
       pendingReq = true;
       if (DEBUG) logger.info("ExerciseList.askServerForExercise id = " + itemID);// + " instance " + getInstance());
-      service.getExercise(itemID, false, new ExerciseAsyncCallback());
+      service.getExercise(itemID, new ExerciseAsyncCallback());
     }
 
     // go get next and cache it
@@ -701,7 +703,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
       T next = getAt(i + 1);
 
       if (controller.getUser() > 0) {
-        service.getExercise(next.getID(), false, new AsyncCallback<U>() {
+        service.getExercise(next.getID(), new AsyncCallback<U>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError(GETTING_EXERCISE, caught);
@@ -1024,6 +1026,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
 
   @Override
   public void setScore(int id, float hydecScore) {
-    byID(id).getMutableShell().setScore(hydecScore);
+    T t = byID(id);
+    if (t == null) {
+      logger.warning("setScore no exercise found for id " + id + " score " + hydecScore);
+    } else {
+      t.getMutableShell().setScore(hydecScore);
+    }
   }
 }

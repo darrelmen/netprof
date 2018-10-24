@@ -58,7 +58,27 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminPerm(userIDFromSessionOrDB)) {
       return securityManager.getActiveSince(when);
-    } else return Collections.emptyList();
+    } else {
+      return Collections.emptyList();
+    }
+  }
+
+  @Override
+  public List<ActiveUser> getActiveTeachers() throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return securityManager.getActiveTeachers();
+    } else {
+      return Collections.emptyList();
+    }
+  }
+
+  @Override
+  public List<ActiveUser> getTeachers() throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return securityManager.getTeachers();
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   /**
@@ -88,7 +108,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return
         userWhereResetKey != null &&
             (db.getUserDAO().changePasswordWithCurrent(userIDFromSession, currentHashedPassword, newHashedPassword, getBaseURL()));
-
   }
 
   /**
@@ -99,13 +118,14 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   @Override
   public void sendTeacherRequest() throws DominoSessionException {
     User userFromSession = getUserFromSession();
+    int id = userFromSession.getID();
     getMailSupport().sendHTMLEmail(serverProps.getHelpEmail(), serverProps.getMailReplyTo(),
         "Instructor Status Request",
         "Hi,<br/>" +
             " A Netprof user<br/>" +
-            "<br/> * named <b>" + userFromSession.getName() + "</b>" +
-            "<br/> * user id <b>" + userFromSession.getID() + "</b>" +
-            "<br/> * email <b>" + userFromSession.getEmail() + "</b>" +
+            "<br/> * named   <b>" + userFromSession.getName() + "</b>" +
+            "<br/> * user id <b>" + id + "</b>" +
+            "<br/> * email   <b>" + userFromSession.getEmail() + "</b>" +
             " has requested instructor permissions in Netprof." +
             "<br/><br/>If this person is an instructor, please go to " +
 
@@ -116,6 +136,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
             "<br/>Finally, perhaps consider sending them a confirmation email." +
             "<br/>Thanks,<br/> Netprof Administrator"
     );
+
+    db.getPendingUserDAO().insert(id, getProjectIDFromUser(id));
   }
 
   private String getBaseURL() {

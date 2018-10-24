@@ -51,11 +51,12 @@ public interface ExerciseService<T extends CommonShell & ScoredExercise> extends
 
   /**
    * @param exid
-   * @param isFlashcardReq
    * @return
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise(int)
    */
-  T getExercise(int exid, boolean isFlashcardReq) throws DominoSessionException;
+  T getExercise(int exid) throws DominoSessionException;
+
+  int getExerciseIDOrParent(int exid) throws DominoSessionException;
 
   ExerciseListWrapper<ClientExercise> getFullExercises(ExerciseListRequest request, Collection<Integer> ids) throws DominoSessionException;
 

@@ -141,8 +141,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * @param controller
    * @param newExercise
-   * @paramx instance
    * @param listID
+   * @paramx instance
    * @see EditableExerciseDialog#EditableExerciseDialog
    */
   public NewUserExercise(
@@ -453,7 +453,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #reallyChange(boolean, boolean)
    */
   protected void doAfterEditComplete(boolean buttomClicked) {
-   // changeTooltip(pagingContainer);
+    // changeTooltip(pagingContainer);
   }
 
   /**
@@ -796,8 +796,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #makeRegularAudioPanel
    * @see #makeSlowAudioPanel
    */
-  CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row,
-                                                             boolean recordRegularSpeed) {
+  CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, boolean recordRegularSpeed) {
     return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed);
   }
 
@@ -917,6 +916,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     void setOtherRAP(RecordAudioPanel otherRAP) {
       this.otherRAP = otherRAP;
     }
+
     WaveformPostAudioRecordButton getPostAudioButton() {
       return postAudioButton;
     }

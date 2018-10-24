@@ -98,7 +98,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    */
   private static final String APPROVED = "Mark Inspected";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
- // private static final String COMMENT = "Comment";
+  // private static final String COMMENT = "Comment";
 
   private static final String COMMENT_TOOLTIP = "Comments are optional.";
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
@@ -250,8 +250,8 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
 
   /**
    * @param completedExercise
-   * @see #addMarkInspected
    * @seex #nextWasPressed
+   * @see #addMarkInspected
    */
   private void markReviewedAndClick(HasID completedExercise) {
     markReviewed(completedExercise);
@@ -662,11 +662,11 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       @Override
       public void playStarted() {
         audioWasPlayed.add(audioPanel);
-        logger.info("getPanelForAudio playing audio " + audio.getAudioRef() + " has " + tabs.size() + " tabs, now " + audioWasPlayed.size() + " played");
-        //if (audioWasPlayed.size() == toResize.size()) {
-        // all components played
+
+        //   logger.info("getPanelForAudio playing audio " + audio.getAudioRef() + " has " + tabs.size() + " tabs, now " + audioWasPlayed.size() + " played");
+
         setApproveButtonState();
-        // }
+
         for (RememberTabAndContent tabAndContent : tabs) {
           tabAndContent.checkAllPlayed(audioWasPlayed);
         }
@@ -805,10 +805,12 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     commentEntry.addStyleName("leftFiveMargin");
     commentEntry.addBlurHandler(event -> {
 
-      logger.info("makeCommentEntry comment on " +
-          "\n\tex      " + exerciseID +
-          "\n\tfield   " + field +
-          "\n\tcomment " + commentEntry.getText());
+      if (false) {
+        logger.info("makeCommentEntry comment on " +
+            "\n\tex      " + exerciseID +
+            "\n\tfield   " + field +
+            "\n\tcomment " + commentEntry.getText());
+      }
 
       addIncorrectComment(exerciseID, field, sanitize(commentEntry.getText()));
     });

@@ -112,6 +112,36 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     }
   }
 
+  protected Column<UserList<CommonShell>, SafeHtml> getItemColumn(int maxLength) {
+    return getTruncatedCol2(maxLength, this::getItemLabel);
+  }
+
+  /**
+   * Is sortable.
+   *
+   * @param maxLength
+   * @param getSafe
+   * @return
+   */
+  protected Column<UserList<CommonShell>, SafeHtml> getTruncatedCol2(int maxLength, GetSafe<UserList<CommonShell>> getSafe) {
+    Column<UserList<CommonShell>, SafeHtml> column = new Column<UserList<CommonShell>, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(UserList<CommonShell> shell) {
+        String truncate = truncate(getSafe.getSafe(shell), maxLength);
+        return shell.getListType() == UserList.LIST_TYPE.QUIZ ? getNoWrapContentBlue(truncate) : getNoWrapContent(truncate);
+      }
+    };
+    column.setSortable(true);
+
+    return column;
+  }
+
   private boolean canMakeQuiz() {
     Collection<User.Permission> permissions = controller.getPermissions();
     return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);

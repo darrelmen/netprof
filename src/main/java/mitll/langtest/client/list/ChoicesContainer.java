@@ -8,9 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Set;
 
-public interface ChoicesContainer {
+interface ChoicesContainer {
   @NotNull
-  ListItem getTypeContainer(String type);
+  ListItem getTypeContainer(String type, boolean hasSelection);
 
-  Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type);
+  Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type, boolean addTypePrefix);
 }

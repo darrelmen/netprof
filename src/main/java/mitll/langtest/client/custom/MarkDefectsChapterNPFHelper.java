@@ -43,7 +43,7 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 
-import static mitll.langtest.client.custom.INavigation.VIEWS.QC;
+import static mitll.langtest.client.custom.INavigation.VIEWS.QC_ENTRIES;
 import static mitll.langtest.client.custom.INavigation.VIEWS.QC_SENTENCES;
 
 /**
@@ -103,7 +103,7 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
     return new ExercisePanelFactory<T, ClientExercise>(controller, exerciseList) {
       @Override
       public Panel getExercisePanel(ClientExercise e) {
-        return new QCNPFExercise<>(e, controller, outerExerciseList, forSentences ? QC_SENTENCES : QC);
+        return new QCNPFExercise<>(e, controller, outerExerciseList, forSentences ? QC_SENTENCES : QC_ENTRIES);
       }
     };
   }

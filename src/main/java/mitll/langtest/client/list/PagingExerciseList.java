@@ -66,6 +66,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
 
   protected ClickablePagingContainer<T> pagingContainer;
 
+  /**
+   * @see #addTypeAhead
+   */
   private ITypeAhead typeAhead;
   int userListID = -1;
   private int unaccountedForVertical = 160;
@@ -112,17 +115,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
     pushFirstSelection(getFirstID(), getTypeAheadText());
   }
 
-/*
-  @Override
-  public void setState(int id, STATE state) {
-    T t = byID(id);
-    if (t == null) logger.warning("can't find ex " + id);
-    else {
-      t.setState(state);
-    }
-  }
-*/
-
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
   }
@@ -132,7 +124,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    *
    * @see #PagingExerciseList
    */
-  void addComponents() {
+  private void addComponents() {
     addTableWithPager(makePagingContainer());
   }
 
@@ -151,18 +143,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
         controller.getUserState().getUser())
         .setPrefix(prefix)
         .setUserListID(userListID)
-        .setActivityType(getActivityType())
-        //.setOnlyUnrecordedByMe(false)
-        // .setOnlyDefaultAudio(false)
-        //.setOnlyUninspected(false)
-        ;
+        .setActivityType(getActivityType());
   }
 
   /**
    * @return
    * @see FacetExerciseList#noSectionsGetExercises
    */
-  protected String getPrefix() {
+  String getPrefix() {
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
@@ -173,17 +161,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   abstract protected ClickablePagingContainer<T> makePagingContainer();
 
   public abstract void gotClickOnItem(final T e);
-
-  /**
-   * Skip to first not completed or just go to the first item.
-   *
-   * @return
-   * @see #loadFirstExercise
-   */
- /* @Override
-  protected T findFirstExercise() {
-    return listOptions.isShowFirstNotCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
-  }*/
 
   /**
    * Sometimes we want to not respect if there's an item selection in the url.
@@ -200,22 +177,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
       super.goToFirst(searchIfAny, exerciseID);
     }
   }
-
-  /**
-   * @deprecated
-   * @return
-   * @see #findFirstExercise
-   */
- /* private T getFirstNotCompleted() {
-    for (T es : pagingContainer.getItems()) {
-      STATE state = es.getState();
-      if (state != null && state.equals(STATE.UNSET)) {
-        // logger.info("first unset is " + es.getID() + " state " + state);
-        return es;
-      }
-    }
-    return super.findFirstExercise();
-  }*/
 
   /**
    * TODO : Not sure if this is needed anymore
@@ -242,7 +203,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    * @param pagingContainer
    * @see #addComponents
    */
-  protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
+  void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
     // row 1
     Panel column = new FlowPanel();
     add(column);
@@ -264,12 +225,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    * @param column
    * @see mitll.langtest.client.list.PagingExerciseList#addTableWithPager
    */
-  protected void addTypeAhead(Panel column) {
+  void addTypeAhead(Panel column) {
     if (listOptions.isShowTypeAhead()) {
       typeAhead = new TypeAhead(column, waitCursorHelper, SEARCH, true) {
         @Override
         public void gotTypeAheadEntry(String text) {
 //          gotTypeAheadEvent(text, false);
+
+          logger.info("gotTypeAheadEntry " + text);
           pushNewItem(text, -1, -1);
 
           controller.logEvent(getTypeAheadBox(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
@@ -298,46 +261,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
       logger.warning("skipping searchBoxEntry ");
     }
   }
-/*
-  private com.google.gwt.user.client.Timer fireTimer = null;
-
-  private void scheduleTimer() {
-    cancelTimer();
-    fireTimer = new Timer() {
-      @Override
-      public void run() {
-        logger.info("scheduleTimer timer expired...");
-        pushNewItem(currentText, -1);
-      }
-    };
-    fireTimer.schedule(100);
-  }
-
-  private void cancelTimer() {
-    if (fireTimer != null) {
-      fireTimer.cancel();
-    }
-  }*/
-
-//  private String currentText = "";
-
-//  private Stack<Long> pendingRequests = new Stack<>();
-
-  // Map<String, Set<Long>> textToWhen = new HashMap<>();
-
-  /*private void gotTypeAheadEvent(String text, boolean setTypeAheadText) {
-    // logger.info("gotTypeAheadEvent got type ahead '" + text + "' set text '" + setTypeAheadText + "'");// + "' at " + new Date(keypressTimestamp));
-    if (!setTypeAheadText) {
-      long now = System.currentTimeMillis();
-      //pendingRequests.add(now);
-      Set<Long> longs = textToWhen.get(text);
-      if (longs == null) textToWhen.put(text, longs = new HashSet<>());
-      longs.add(now);
-    }
-//    currentText = text;
-    //  scheduleTimer();
-    pushNewItem(text, -1);
-  }*/
 
   private void alwaysSetTypeAhead(String t) {
     //if (getTypeAheadText().isEmpty()) {
@@ -356,49 +279,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    * @see HistoryExerciseList#restoreUIState
    */
   void setTypeAheadText(String t) {
-/*    if (typeAhead != null) {
-      Set<Long> history = textToWhen.get(t);
-      long now = System.currentTimeMillis();
-      if (history == null) {
-        //logger.info("setTypeAheadText Set type ahead to '" + t + "'");
-        String current = typeAhead.getText();
-        if (current.equals(t)) {
-        } else {
-          logger.info("\n\nsetTypeAheadText Set type ahead to '" + t + "' vs '" + current +
-              "' , text->when " + textToWhen.size());
-          typeAhead.setText(t);
-        }
-      } else if (now - aLong > TEN_SECONDS) {
-        String current = typeAhead.getText();
-        if (current.equals(t)) {
-        } else {
-          logger.info("\n\nsetTypeAheadText Set type ahead to '" + t + "' since old, now " + textToWhen.size());
-          typeAhead.setText(t);
-        }
-        textToWhen.remove(t);
-      } else {
-        // logger.fine("setTypeAheadText NOT SETTING '" + t + "' since new");
-        textToWhen.remove(t);
-        if (textToWhen.size() > 2) {
-          logger.fine("setTypeAheadText NOT SETTING '" + t + "' since new, now " + textToWhen.size());
-        }
-      }
-    }*/
+
 
     String typeAheadText = getTypeAheadText();
-
-/*
-    if (typeAheadText.isEmpty()) {
-      logger.info("\n\n\n\nsetTypeAheadText set type ahead to '" + t + "'");
-      if (typeAhead != null) {
-        typeAhead.setText(t);
-      }
-      else {
-        logger.warning("huh? no type ahead box?");
-      }
-    } else if (typeAheadText.equals(t)) {
-      logger.warning("\n\n\nsetTypeAheadText not setting text from  '" + typeAheadText + "' to '" + t + "'");
-    }*/
 
     if (typeAheadText.equals(t)) {
       //logger.warning("\n\n\nsetTypeAheadText not setting text from  '" + typeAheadText + "' to '" + t + "'");
@@ -410,15 +293,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
       }
     }
 
-/*    if (pendingRequests.isEmpty()) {
-      if (typeAhead != null) {
-        logger.info("setTypeAheadText Set type ahead to '" + t + "'");
-        typeAhead.setText(t);
-      }
-    } else {
-      popRequest();
-      logger.info("setTypeAheadText pendingRequests now" + pendingRequests);
-    }*/
   }
 
   /**
@@ -461,7 +335,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
     pagingContainer.clear();
   }
 
-  public void flush() {
+  private void flush() {
     pagingContainer.flush();
     onResize();
   }
@@ -511,7 +385,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
     return toRemember;
   }
 
-  protected List<T> resort(List<T> toRemember) {
+  List<T> resort(List<T> toRemember) {
     return toRemember;
   }
 

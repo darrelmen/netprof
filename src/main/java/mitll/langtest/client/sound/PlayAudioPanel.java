@@ -64,6 +64,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends HeadlessPlayAudio {
+  public static final String PLAY_AUDIO_PANEL = "PlayAudioPanel_";
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
   private static final boolean DEBUG = false;
@@ -109,7 +110,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
       pauseLabel = "";
     }
 
-    getElement().setId("PlayAudioPanel_" + (doSlow ? "slow" : "") + id);
+    getElement().setId(PLAY_AUDIO_PANEL + (doSlow ? "slow" : "") + id);
 
     isSlow = doSlow;
 
@@ -123,18 +124,20 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
     /**
      * If another play widget on the page is playing - stop!
      */
-    LangTest.EVENT_BUS.addHandler(PlayAudioEvent.TYPE, authenticationEvent -> {
-      if (authenticationEvent.getId() != id) {
-        //logger.info("this " + getClass() + " got play audio event " + authenticationEvent.getSource());
-        if (isPlaying()) {
-          if (DEBUG) {
-            logger.info("\t PAUSE : this " + getClass() + " got play audio event " + authenticationEvent.getSource());
-          }
-          pause();
-          reinitialize();
+    LangTest.EVENT_BUS.addHandler(PlayAudioEvent.TYPE, this::gotPlayAudioEvent);
+  }
+
+  private void gotPlayAudioEvent(PlayAudioEvent authenticationEvent) {
+    if (authenticationEvent.getId() != id) {
+      //logger.info("this " + getClass() + " got play audio event " + authenticationEvent.getSource());
+      if (isPlaying()) {
+        if (DEBUG) {
+          logger.info("\t PAUSE : this " + getClass() + " got play audio event " + authenticationEvent.getSource());
         }
+        pause();
+        reinitialize();
       }
-    });
+    }
   }
 
   /**
@@ -247,7 +250,8 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   private void stylePlayButton(Button playButton) {
     playButton.setType(ButtonType.INFO);
     playButton.getElement().getStyle().setProperty("minWidth", "15px");
-    playButton.getElement().setId("PlayAudioPanel_playButton");
+    playButton.getElement().setId(PLAY_AUDIO_PANEL +
+        "playButton");
     playButton.addStyleName("leftFiveMargin");
     playButton.addStyleName("floatLeft");
     playButton.setEnabled(false);
@@ -290,23 +294,23 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   private void setPlayButtonText() {
     boolean playing1 = isPlaying();
 
-
     playButton.setText(playing1 ? pauseLabel : playLabel);
     setIcon(playing1);
   }
 
   private void setIcon(boolean playing1) {
     if (playing1) {
-      logger.info("setPlayButtonText playing1 " + playing1 + " so pause");
+     // logger.info("setPlayButtonText playing1 " + playing1 + " so pause");
       setButtonIconToPause();
     } else {
-      logger.info("setPlayButtonText icon to play ");
+     // logger.info("setPlayButtonText icon to play ");
       showPlayIcon(playButton);
     }
   }
 
   /**
    * TODO : Don't call twice - once from resetAudio --
+   *
    * @see #pause
    * @see #resetAudio
    */
@@ -324,18 +328,18 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
       playButton.setBaseIcon(MyCustomIconType.turtle);
       styleSlowIcon(playButton);
     } else {
-      logger.info("showPlayIcon ");
+      if (DEBUG) logger.info("showPlayIcon ");
       setButtonIconToPlay(playButton);
     }
   }
 
   private void setButtonIconToPause() {
-    logger.info("setButtonIconToPause set icon to pause ");
+    if (DEBUG) logger.info("setButtonIconToPause set icon to pause ");
     playButton.setIcon(IconType.PAUSE);
   }
 
   private void setButtonIconToPlay(IconAnchor playButton) {
-    logger.info("setButtonIconToPlay set icon to play ");
+    if (DEBUG) logger.info("setButtonIconToPlay set icon to play ");
     playButton.setIcon(PLAY);
   }
 
@@ -386,10 +390,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   @Override
   protected void pause() {
     super.pause();
-
     setPlayLabel();
-
-    //setPlayButtonText();
   }
 
   public String toString() {

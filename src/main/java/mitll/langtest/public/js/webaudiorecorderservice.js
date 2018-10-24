@@ -144,7 +144,7 @@
         };
 
         // see webaudiorecorder serviceStartStream
-        this.serviceStartStream = function (url, exid, reqid, isreference, audiotype, dialogSessionID, cb) {
+        this.serviceStartStream = function (url, exid, reqid, isreference, audiotype, dialogSessionID, recordingSession, cb) {
             currCallback = cb || config.callback;
 
             if (url) {
@@ -163,7 +163,8 @@
                 reqid: reqid,
                 isreference: isreference,
                 audiotype: audiotype,
-                dialogSessionID : dialogSessionID
+                dialogSessionID: dialogSessionID,
+                recordingSession: recordingSession
             });
         };
 
@@ -175,7 +176,7 @@
                 didStream = false;
                 currCallback = cb || config.callback;
 
-              //  console.log("serviceStopStream " + " abort " + abort + " at " + new Date().getTime());
+                //  console.log("serviceStopStream " + " abort " + abort + " at " + new Date().getTime());
 
                 if (!currCallback) throw new Error('Callback not set');
                 worker.postMessage({

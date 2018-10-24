@@ -44,6 +44,7 @@ import mitll.langtest.client.initial.WavStreamCallback;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.scoring.ClientAudioContext;
 import mitll.langtest.client.scoring.CommentAnnotator;
+import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
@@ -79,10 +80,8 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   int getUser();
 
-  void startRecording();
-
   /**
-   *
+   * @see PostAudioRecordButton#startRecording
    * @param clientAudioContext
    * @param wavStreamCallback
    */

@@ -41,7 +41,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.AudioType;
 
 
 /**
@@ -54,22 +53,17 @@ import mitll.langtest.shared.answer.AudioType;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
-//  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
+  //  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
   private final AudioAnswerListener exercisePanel;
   private IconAnchor waiting;
 
   /**
    * @param exercisePanel
    * @param controller
-   * @param exerciseID
-   * @param index
    * @see BootstrapExercisePanel#getAnswerWidget
    */
-  public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel,
-                                    ExerciseController controller,
-                                    int exerciseID,
-                                    int index) {
-    super(controller, exerciseID, index, true, AudioType.PRACTICE, "Record", true);
+  public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, ExerciseController controller) {
+    super(controller, "Record");
     this.exercisePanel = exercisePanel;
   }
 
@@ -109,6 +103,8 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   @Override
   protected abstract RecordButton makeRecordButton(ExerciseController controller, String title);
 
+  @Override protected abstract String getDevice();
+
   @Override
   protected void postedAudio() {
     exercisePanel.postedAudio();
@@ -123,11 +119,10 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * And then move on to the next item.
    *
    * @param result response from server
-   * @param outer  ignored here
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#onPostSuccess
+   * @see BootstrapExercisePanel#getAnswerWidget
    */
   @Override
-  protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {
+  protected void receivedAudioAnswer(final AudioAnswer result) {
     hideWaiting();
     showRecord();
     exercisePanel.receivedAudioAnswer(result);

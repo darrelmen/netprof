@@ -401,7 +401,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     new TooltipHelper().addTooltip(table, "Click on a " + header + ".");
   }
 
-  private Column<T, SafeHtml> getItemColumn(int maxLength) {
+  protected Column<T, SafeHtml> getItemColumn(int maxLength) {
     return getTruncatedCol(maxLength, this::getItemLabel);
   }
 

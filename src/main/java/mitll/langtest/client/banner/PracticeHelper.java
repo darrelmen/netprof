@@ -44,6 +44,7 @@ import mitll.langtest.client.flashcard.HidePolyglotFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -57,15 +58,13 @@ import mitll.langtest.shared.project.ProjectType;
  */
 class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends SimpleChapterNPFHelper<T, U> {
   // private final Logger logger = Logger.getLogger("PracticeHelper");
-  private static final String PRACTICE = "practice";
 
   StatsFlashcardFactory<T, U> statsFlashcardFactory;
   PolyglotFlashcardFactory<T, U> polyglotFlashcardFactory = null;
   Widget outerBottomRow;
   private PolyglotDialog.MODE_CHOICE mode;
-  private PolyglotDialog.PROMPT_CHOICE promptChoice;
   private INavigation navigation;
-  final INavigation.VIEWS instance;
+  private final INavigation.VIEWS instance;
 
   /**
    * @param controller
@@ -104,9 +103,13 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
       @Override
       protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
                                                           Panel currentExercisePanel,
-                                                          INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
-        return new PracticeFacetExerciseList(controller,
-            PracticeHelper.this, topRow, currentExercisePanel, listHeader, instanceName);
+                                                          INavigation.VIEWS instanceName,
+                                                          DivWidget listHeader,
+                                                          DivWidget footer) {
+        return new PracticeFacetExerciseList(
+            topRow, currentExercisePanel, controller,
+            new ListOptions().setInstance(instanceName), listHeader, instanceName, PracticeHelper.this
+        );
       }
 
       @Override
@@ -117,9 +120,8 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
     };
   }
 
-  void setMode(PolyglotDialog.MODE_CHOICE mode, PolyglotDialog.PROMPT_CHOICE promptChoice) {
+  void setMode(PolyglotDialog.MODE_CHOICE mode) {
     this.mode = mode;
-    this.promptChoice = promptChoice;
     if (polyglotFlashcardFactory != null) {
       polyglotFlashcardFactory.setMode(mode);
     }

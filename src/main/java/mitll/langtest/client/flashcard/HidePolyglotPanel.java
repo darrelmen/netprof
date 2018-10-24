@@ -45,7 +45,7 @@ class HidePolyglotPanel<L extends CommonShell, T extends ClientExercise> extends
     Panel rightColumn = new DivWidget();
     rightColumn.addStyleName("leftTenMargin");
 
-    if (quizInfo.isShowAudio()) {
+    if (quizSpec.isShowAudio()) {
       rightColumn.add(getAudioGroup(controlState));
       addControlsBelowAudio(controlState, rightColumn);
     } else {

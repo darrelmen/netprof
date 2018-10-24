@@ -33,18 +33,39 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
 
 public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
+  /**
+   * @see ExerciseList#getExercises
+   * @param request
+   * @param async
+   */
   void getExerciseIds(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<T>> async);
 
-  void getExercise(int exid, boolean isFlashcardReq, AsyncCallback<T> async);
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
+   * @param exid
+   * @param async
+   */
+  void getExercise(int exid, AsyncCallback<T> async);
 
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
 
-  void getFullExercises(ExerciseListRequest request, Collection<Integer> ids, AsyncCallback<ExerciseListWrapper<ClientExercise>> async);
+  void getFullExercises(ExerciseListRequest request, Collection<Integer> ids,
+                        AsyncCallback<ExerciseListWrapper<ClientExercise>> async);
 
+  /**
+   * @see mitll.langtest.client.analysis.PlayAudio#playLast
+   * @param userID
+   * @param exid
+   * @param nearTime
+   * @param async
+   */
   void getLatestScoreAudioPath(int userID, int exid, long nearTime, AsyncCallback<Pair> async);
+
+  void getExerciseIDOrParent(int exid, AsyncCallback<Integer> async);
 }

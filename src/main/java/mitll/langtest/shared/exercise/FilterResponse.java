@@ -88,6 +88,7 @@ public class FilterResponse implements IsSerializable {
     return typesToInclude;
   }
 
+  public void addTypeToInclude(String type) {typesToInclude.add(type);}
   public int getReqid() {
     return reqid;
   }

@@ -7,19 +7,30 @@ public class ClientAudioContext {
   private final int reqid;
   private final boolean shouldAddToTable;
   private final int dialogSessionID;
+  private final String recordingSessionID;
 
   private final AudioType audioType;
 
-  public ClientAudioContext(int exerciseID,
+  /**
+   * @param exerciseID
+   * @param reqid
+   * @param shouldAddToTable
+   * @param audioType
+   * @param dialogSessionID
+   * @param recordingSessionID
+   * @see PostAudioRecordButton#startRecording
+   */
+  ClientAudioContext(int exerciseID,
                      int reqid,
                      boolean shouldAddToTable,
                      AudioType audioType,
-                     int dialogSessionID) {
+                     int dialogSessionID, String recordingSessionID) {
     this.exerciseID = exerciseID;
     this.reqid = reqid;
     this.shouldAddToTable = shouldAddToTable;
     this.audioType = audioType;
     this.dialogSessionID = dialogSessionID;
+    this.recordingSessionID = recordingSessionID;
   }
 
   public int getExerciseID() {
@@ -38,7 +49,20 @@ public class ClientAudioContext {
     return dialogSessionID;
   }
 
+  /**
+   * For quiz!
+   *
+   * @return
+   */
+  public String getRecordingSessionID() {
+    return recordingSessionID;
+  }
+
   public AudioType getAudioType() {
     return audioType;
+  }
+
+  public String toString() {
+    return "ex " + exerciseID + " req " + reqid + " add " + shouldAddToTable + " dialog " + dialogSessionID + " session " + recordingSessionID + " type " + audioType;
   }
 }

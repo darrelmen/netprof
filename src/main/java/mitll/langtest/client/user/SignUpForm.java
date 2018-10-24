@@ -48,20 +48,18 @@ import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.*;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.hlt.domino.shared.Constants.RESET_PW_HASH;
 import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 
 public class SignUpForm extends UserDialog implements SignUp {
-  public static final String USERNAME1 = "username";
-  public static final String DLIFLC_COM = "dliflc.com";
   private final Logger logger = Logger.getLogger("SignUpForm");
 
+  private static final String USERNAME1 = "username";
   private static final String DLIFLC_EDU = "dliflc.edu";
 
   // out of 1630 instances on 6/8/18
@@ -81,6 +79,24 @@ public class SignUpForm extends UserDialog implements SignUp {
           "outlook.com" // 5
       );
 
+  /**
+   *
+   * Go ahead and automatically replace them.
+   */
+  private static final Set<String> DLI_TYPOS = new HashSet<>(Arrays.asList("dflic.edu",
+      "DILFLC.edu".toLowerCase(),
+      "dli.edu",
+      "dli.flc.edu",
+      "dlif.c.edu",
+      "dlifc.edu",
+      "dlifcl.edu",
+      "dlifcu.edu",
+      "dliflc.com",
+
+      "dliflc.org",
+      "dliflflc.edu",
+      "dliflic.edu",
+      "dlifllc.edu"));
 
   private static final int MIN_EMAIL_LENGTH = 7;
   private static final String BAD_PASS = "Your password is incorrect. Please try again.";
@@ -133,6 +149,9 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String SIGN_UP_SUBTEXT = "Sign up";
   private static final String USERNAME = "Username";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
+  /**
+   *
+   */
   private static final String INVALID_EMAIL = "Please enter a valid email address.";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final int USERNAME_WIDTH = 25;
@@ -479,32 +498,29 @@ public class SignUpForm extends UserDialog implements SignUp {
    */
   private void gotEmailBlur() {
     final TextBoxBase box = signUpEmail.box;
-    String value = box.getValue();
+    String value = box.getValue().trim();
     if (isValidEmail(value)) {
       String[] split = value.split("@");
-      if (value.endsWith(DLIFLC_COM)) {
-        didYouMean(split, DLIFLC_EDU);
+      if (hasDLIFLCEmail(value)) {
+
+        if (split.length == 2) {
+          String server = split[1];
+          String text = value.replaceAll(server, DLIFLC_EDU);
+          logger.info("replace with " + text);
+          signUpEmail.box.setText(text);
+        } else {
+          didYouMean(split, DLIFLC_EDU);
+        }
+
       } else {
         if (split.length == 2) {
           String server = split[1];
 
           // check for popular domain typos
-          boolean anyNear = false;
-
-          for (String domain : DOMAINS) {
-            int ed = ed(server, domain);
-            boolean isNear = ed > 0 && ed < 3;
-            if (isNear) {
-              didYouMean(split, domain);
-              anyNear = true;
-              break;
-            }
-          }
-
-
-          if (!anyNear) {
+          if (!checkForCloseEditDistance(split, server)) {
             warnIfAlreadyHasAccount(box, value);
           }
+          warnIfDNSMiss(server);
         } else {
           warnIfAlreadyHasAccount(box, value);
         }
@@ -514,6 +530,48 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
   }
 
+  private void warnIfDNSMiss(String server) {
+    openUserService.isValidServer(server, new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        if (!result)
+          markWarn(signUpEmail, "Typo in email?", "The server seems wrong.");
+      }
+    });
+  }
+
+  /**
+   * True if 2 or less edit distance away from another valid server name
+   * @param split
+   * @param server
+   * @return
+   */
+  private boolean checkForCloseEditDistance(String[] split, String server) {
+    boolean anyNear = false;
+
+    for (String domain : DOMAINS) {
+      int ed = ed(server, domain);
+      boolean isNear = ed > 0 && ed < 3;
+      if (isNear) {
+        didYouMean(split, domain);
+        anyNear = true;
+        break;
+      }
+    }
+    return anyNear;
+  }
+
+  @NotNull
+  private boolean hasDLIFLCEmail(String email) {
+    String lc = email.toLowerCase();
+    return DLI_TYPOS.stream().anyMatch(lc::endsWith);
+  }
+
   private void didYouMean(String[] split, String server) {
     String suffix = "@" + server;
     if (split.length == 2) {
@@ -521,7 +579,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
     String message = "Did you mean " + suffix + "?";
 
-    // markErrorBlur(signUpEmail, message);
     markWarn(signUpEmail, "Did you mean?", message);
   }
 
@@ -865,8 +922,8 @@ public class SignUpForm extends UserDialog implements SignUp {
    * - user should provide password, otherwise anyone could take over an account
    * - user is new and needs to be added
    *
-   * @see #gotSignUp(String, String)
    * @param result
+   * @see #gotSignUp(String, String)
    */
   private void handleAddUserResponse(LoginResult result, String user) {
     LoginResult.ResultType resultType = result.getResultType();

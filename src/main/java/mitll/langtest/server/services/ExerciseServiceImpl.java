@@ -809,12 +809,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguageEnum(firstExercise), new HashMap<>());
   }
 
-/*
-  private String getLanguage(CommonExercise firstExercise) {
-    return db.getLanguage(firstExercise);
-  }
-*/
-
   /**
    * Only add the played markings if doing QC.
    * <p>
@@ -827,53 +821,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private void addPlayedMarkings(int userID, CommonExercise firstExercise) {
     db.getEventDAO().addPlayedMarkings(userID, firstExercise);
   }
-
-  /**
-   * @param request
-   * @param exercises
-   * @param projid
-   * @return
-   * @see #getExerciseIds
-   */
-/*  private List<CommonExercise> filterExercises(ExerciseListRequest request,
-                                               List<CommonExercise> exercises,
-                                               int projid) {
-//    logger.info("filter req " + request);
-    exercises = filterByUnrecorded(request, exercises, projid);
-
-    if (request.isOnlyWithAudioAnno()) {
-      exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
-    }
-    if (request.isOnlyDefaultAudio()) {
-      exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
-    }
-    if (request.isOnlyUninspected()) {
-      exercises = filterByUninspected(exercises);
-    }
-    if (request.isOnlyForUser()) {
-      exercises = filterOnlyPracticedByUser(request, exercises, projid);
-    }
-    return exercises;
-  }*/
-
-/*
-  @NotNull
-  private List<CommonExercise> filterOnlyPracticedByUser(ExerciseListRequest request, List<CommonExercise> exercises, int projid) {
-    Collection<Integer> practicedByUser = db.getResultDAO().getPracticedByUser(request.getUserID(), projid);
-    List<CommonExercise> copy = new ArrayList<>();
-
-    // TODO:  gosh - wasteful most of the time....
-    long then = System.currentTimeMillis();
-    for (CommonExercise ex : exercises) {
-      if (practicedByUser.contains(ex.getID())) copy.add(ex);
-    }
-    long now = System.currentTimeMillis();
-    if (now - then > 100) {
-      logger.info("filterExercises : took " + (now - then));
-    }
-    return copy;
-  }
-*/
 
   /**
    * TODO : slow?
@@ -971,218 +918,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   /**
-   * For all the exercises the user has not recorded, do they have the required reg and slow speed recordings by a matching gender.
-   * <p>
-   * Or if looking for example audio, find ones missing examples.
-   *
-   * @param exercises to filter
-   * @param projid
-   * @return exercises missing audio, what we want to record
-   * @paramx userID                   exercise not recorded by this user and matching the user's gender
-   * @paramx onlyUnrecordedByMyGender do we filter by gender
-   * @paramx onlyExamples             only example audio
-   * @see #getExerciseIds
-   * @see #getExercisesForSelectionState
-   * @see #filterExercises
-   */
-/*  private List<CommonExercise> filterByUnrecorded(
-      ExerciseListRequest request,
-      List<CommonExercise> exercises,
-      int projid) {
-    if (request.isOnlyUnrecordedByMe()) {
-      logger.info("filterByUnrecorded : Filter for matching gender to " + request.getUserID());
-      return getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples(), false);
-    } else if (request.isOnlyRecordedByMatchingGender()) {
-      logger.info("filterByUnrecorded : Filter for matching gender to " + request.getUserID());
-      return getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples(), true);
-    } else {
-      return request.isOnlyExamples() ? getExercisesWithContext(exercises) : exercises;
-    }
-  }*/
-
-  /**
-   * TODO : way too much work here... why go through all exercises?
-   * TODO : why return all exercises?
-   *
-   * @param userID
-   * @param exercises
-   * @param projid
-   * @param onlyExamples
-   * @param onlyRecorded
-   * @return
-   */
-/*  @NotNull
-  private List<CommonExercise> getRecordFilterExercisesMatchingGender(int userID,
-                                                                      Collection<CommonExercise> exercises,
-                                                                      int projid,
-                                                                      boolean onlyExamples,
-                                                                      boolean onlyRecorded) {
-
-    Set<Integer> unrecordedIDs = new HashSet<>(exercises.size());
-
-    Map<Integer, String> exToTranscript = new HashMap<>();
-
-    for (CommonExercise exercise : exercises) {
-      if (onlyExamples) {
-        exercise.getDirectlyRelated().forEach(dir -> {
-          int id = dir.getID();
-          unrecordedIDs.add(id);
-          exToTranscript.put(id, dir.getForeignLanguage());
-        });
-      } else {
-        int id = exercise.getID();
-        unrecordedIDs.add(id);
-        exToTranscript.put(id, exercise.getForeignLanguage());
-      }
-    }
-
-    logger.info("getRecordFilterExercisesMatchingGender " + onlyExamples +
-        "\n\texToTranscript " + exToTranscript.size());
-    Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples, exToTranscript);
-
-    logger.info("getRecordFilterExercisesMatchingGender" +
-        "\n\tall exercises " + unrecordedIDs.size() +
-        "\n\tfor project # " + projid +
-        "\n\tuserid #      " + userID +
-        "\n\tremoving      " + recordedBySameGender.size() +
-        "\n\tretain        " + onlyRecorded
-    );
-
-    if (onlyRecorded) {
-      unrecordedIDs.retainAll(recordedBySameGender);
-    } else {
-      unrecordedIDs.removeAll(recordedBySameGender);
-    }
-
-    logger.info("getRecordFilterExercisesMatchingGender after removing recorded exercises " + unrecordedIDs.size());
-
-    List<CommonExercise> unrecordedExercises = new ArrayList<>();
-
-    for (CommonExercise exercise : exercises) {
-      if (onlyExamples) {
-        for (ClientExercise dir : exercise.getDirectlyRelated()) {
-          if (unrecordedIDs.contains(dir.getID())) {
-            unrecordedExercises.add(dir.asCommon());
-          }
-        }
-      } else {
-        if (unrecordedIDs.contains(exercise.getID())) {
-          unrecordedExercises.add(exercise);
-        }
-      }
-    }
-
-    logger.info("getRecordFilterExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
-
-    return unrecordedExercises;
-  }*/
-
-  /**
-   * @param userID
-   * @param projid
-   * @param onlyExamples
-   * @return
-   * @seex #getRecordFilterExercisesMatchingGender
-   */
-/*  private Collection<Integer> getRecordedByMatchingGender(int userID,
-                                                          int projid,
-                                                          boolean onlyExamples,
-                                                          Map<Integer, String> exToTranscript) {
-    logger.debug("getRecordedByMatchingGender : for " + userID +
-        " only by same gender examples only " + onlyExamples);// + " from " + exercises.size());
-
-    return onlyExamples ?
-        db.getAudioDAO().getRecordedBySameGenderContext(userID, projid, exToTranscript) :
-        db.getAudioDAO().getRecordedBySameGender(userID, projid, exToTranscript);
-  }*/
-
-  /**
-   * @return
-   * @paramx exercises
-   * @seex #filterByUnrecorded
-   */
-/*  @NotNull
-  private List<CommonExercise> getExercisesWithContext(Collection<CommonExercise> exercises) {
-    List<CommonExercise> copy = new ArrayList<>();
-    Set<Integer> seen = new HashSet<>();
-    for (CommonExercise exercise : exercises) {
-      if (seen.contains(exercise.getID())) logger.warn("saw " + exercise.getID() + " " + exercise + " again!");
-      if (hasContext(exercise)) {
-        seen.add(exercise.getID());
-        //    copy.add(exercise);
-        exercise.getDirectlyRelated().forEach(clientExercise -> copy.add(clientExercise.asCommon()));
-        //copy.addAll(exercise.getDirectlyRelated());
-      }
-    }
-    //   logger.debug("ONLY EXAMPLES - to be recorded " + copy.size() + " from " + exercises.size());
-
-    return copy;
-  }*/
-  private <X extends CommonExercise> boolean hasContext(X exercise) {
-    return !exercise.getDirectlyRelated().isEmpty();//.getContext() != null && !exercise.getContext().isEmpty();
-  }
-
-  /**
-   * @param onlyAudioAnno
-   * @param exercises
-   * @return
-   * @see #getExerciseIds
-   */
-/*
-  private List<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
-                                                     List<CommonExercise> exercises) {
-    if (onlyAudioAnno) {
-      Collection<Integer> audioAnnos = getUserListManager().getAudioAnnos();
-      List<CommonExercise> copy = new ArrayList<>();
-      for (CommonExercise exercise : exercises) {
-        if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
-      }
-      return copy;
-    } else {
-      return exercises;
-    }
-  }
-*/
-
- /* private List<CommonExercise> filterByOnlyDefaultAudio(boolean onlyDefault,
-                                                        List<CommonExercise> exercises) {
-    if (onlyDefault) {
-      List<CommonExercise> copy = new ArrayList<>();
-      for (CommonExercise exercise : exercises) {
-        for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-          if (audioAttribute.getUserid() == BaseUserDAO.DEFAULT_USER_ID) {
-            copy.add(exercise);
-            break;
-          }
-        }
-      }
-      return copy;
-    } else {
-      return exercises;
-    }
-  }*/
-
-  /**
-   * Remove any items that have been inspected already.
-   *
-   * @param exercises
-   * @return
-   */
-/*
-  private List<CommonExercise> filterByUninspected(Collection<CommonExercise> exercises) {
-    Collection<Integer> inspected = db.getStateManager().getInspectedExercises();
-    // logger.info("found " + inspected.size());
-    List<CommonExercise> copy = new ArrayList<>();
-    for (CommonExercise exercise : exercises) {
-      if (!inspected.contains(exercise.getID())) {
-        copy.add(exercise);
-      }
-    }
-    return copy;
-  }
-*/
-
-  /**
    * On the fly we make a new section helper to do filtering of user list.
    * <p>
    * TODO : include lists as just another facet for the purpose of filtering
@@ -1254,14 +989,28 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * Joins with annotation data when doing QC.
    *
    * @param exid
-   * @param isFlashcardReq
    * @return
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    * @see mitll.langtest.client.list.ExerciseList#goGetNextAndCacheIt
    * @see mitll.langtest.client.analysis.PlayAudio#playLast
    */
-  public T getExercise(int exid, boolean isFlashcardReq) throws DominoSessionException {
+  public T getExercise(int exid) throws DominoSessionException {
     return (T) getAnnotatedExercise(getUserIDFromSessionOrDB(), getProjectIDFromUser(), exid);
+  }
+
+  public int getExerciseIDOrParent(int exid) throws DominoSessionException {
+    int projectIDFromUser = getProjectIDFromUser();
+    CommonExercise exerciseByID = getProject(projectIDFromUser).getExerciseByID(exid);
+    if (exerciseByID.isContext()) {
+      int parentExerciseID = exerciseByID.getParentExerciseID();
+      if (parentExerciseID == -1) {
+        parentExerciseID = getParentExerciseID(projectIDFromUser,exid,exerciseByID);
+      }
+      return parentExerciseID;
+    }
+    else {
+      return exid;
+    }
   }
 
   /**
@@ -1518,10 +1267,18 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
                                                                    List<ClientExercise> exercises,
                                                                    int userID, Language language) {
     long then = System.currentTimeMillis();
-    Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(ids, exercises, userID, language);
+
+    Set<Integer> contextIDs = new HashSet<>();
+    exercises.forEach(exercise->exercise.getDirectlyRelated().forEach(dir->contextIDs.add(dir.getID())));
+    contextIDs.addAll(ids);
+
+    Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(contextIDs, exercises.isEmpty(), userID, language);
+
     long now = System.currentTimeMillis();
-    if (now - then > 50)
-      logger.info("getScoreHistoryPerExercise took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
+    if (now - then > 0) {
+      logger.info("getScoreHistoryPerExercise took " + (now - then) + " to get score histories for " + exercises.size() +
+          "\n\t exercises: " + scoreHistories.keySet());
+    }
 
     return scoreHistories;
   }
@@ -1557,17 +1314,18 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
   /**
    * @param exids
-   * @param exercises
+   * @param empty
    * @param userID
    * @param language
    * @return
    * @see #getScoreHistoryPerExercise
    */
   private Map<Integer, CorrectAndScore> getScoreHistories(Collection<Integer> exids,
-                                                          List<ClientExercise> exercises,
+                                                          boolean empty,
                                                           int userID,
                                                           Language language) {
-    return (exercises.isEmpty()) ? Collections.emptyMap() :
+  //  boolean empty = exercises.isEmpty();
+    return empty ? Collections.emptyMap() :
         db.getResultDAO().getScoreHistories(userID, exids, language);
   }
 

@@ -80,6 +80,9 @@ public class CreateListDialog extends BasicDialog {
 
 
   private static final String QUIZ_SIZE = "# Items";
+  /**
+   * @see #getDurationLabel
+   */
   private static final String DURATION_MINUTES = "Duration (Min.)";
   private static final int DEFAULT_QUIZ_SIZE = 10;
 
@@ -135,6 +138,9 @@ public class CreateListDialog extends BasicDialog {
   private int minScore = DEFAULT_MIN_SCORE;
   private int duration = DEFAULT_DURATION;
 
+  private Heading modeDep;
+  private boolean isQuiz = false;
+
   /**
    * @param listView
    * @param controller
@@ -147,6 +153,7 @@ public class CreateListDialog extends BasicDialog {
     this.current = current;
     this.isEdit = isEdit;
 
+    this.isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
     this.minScore = current.getMinScore();
     this.duration = current.getDuration();
     this.playAudio = current.shouldShowAudio();
@@ -160,6 +167,11 @@ public class CreateListDialog extends BasicDialog {
   public CreateListDialog(CreateListComplete listView, ExerciseController controller) {
     this.listView = listView;
     this.controller = controller;
+  }
+
+  public CreateListDialog setIsQuiz(boolean isQuiz) {
+    this.isQuiz = isQuiz;
+    return this;
   }
 
   /**
@@ -209,10 +221,20 @@ public class CreateListDialog extends BasicDialog {
     }
 
     if (canMakeQuiz()) {
-      addQuizOptions(child);
+      if (isQuiz) {
+        if (isEdit) {
+          child.add(getQuizChoices());
+          addEditOptions(child);
+        } else {
+          addQuizOptions(child);
+        }
+      } else {
+        if (isEdit) {
+          child.add(getQuizChoices());
+          addEditOptions(child);
+        }
+      }
     }
-
-    addEditOptions(child);
 
     child.add(getPrivacyChoices());
 
@@ -224,13 +246,23 @@ public class CreateListDialog extends BasicDialog {
   private void addQuizOptions(Panel child) {
     child.add(getQuizChoices());
 
-    quizOptions = new DivWidget();
-    styleQuizOptions(quizOptions);
+    createQuizOptions = new DivWidget();
+    styleQuizOptions(createQuizOptions);
     checkQuizOptionsVisible();
-    child.add(quizOptions);
+    child.add(createQuizOptions);
 
-    quizOptions.add(getChoices(true));
+    createQuizOptions.add(getQuizChoices(true));
   }
+
+  private void addEditOptions(Panel child) {
+    editQuizOptions = new DivWidget();
+    styleQuizOptions(editQuizOptions);
+    editQuizOptions.add(getQuizChoices(false));
+    child.add(editQuizOptions);
+
+    editQuizOptions.setVisible(isQuiz);
+  }
+
 
   private void styleQuizOptions(DivWidget quizOptions) {
     quizOptions.addStyleName("leftFiveMargin");
@@ -241,7 +273,7 @@ public class CreateListDialog extends BasicDialog {
   private List<ListBox> allUnitChapter;
 
   @NotNull
-  private Grid getChoices(boolean isCreate) {
+  private Grid getQuizChoices(boolean isCreate) {
     Grid grid = new Grid(isCreate ? 4 : 2, 4);
 
 
@@ -276,12 +308,13 @@ public class CreateListDialog extends BasicDialog {
 
       }
 
+
       row++;
       col = 0;
-    }
-    if (isCreate) {
+
       grid.setWidget(row, col++, getQuizSizeLabel());
     }
+
     grid.setWidget(row, col++, getDurationLabel());
     grid.setWidget(row, col++, getLabel(MIN_SCORE1));
     grid.setWidget(row, col++, getHearLabel());
@@ -368,15 +401,6 @@ public class CreateListDialog extends BasicDialog {
     return w;
   }
 
-  private void addEditOptions(Panel child) {
-    quizOptions2 = new DivWidget();
-    styleQuizOptions(quizOptions2);
-    quizOptions2.add(getChoices(false));
-    child.add(quizOptions2);
-
-    quizOptions2.setVisible(isQuiz);
-  }
-
   private boolean isEditing() {
     return current != null;
   }
@@ -455,9 +479,9 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private void checkQuizOptionsVisible() {
-    quizOptions.setVisible(isQuiz && current == null);
-    if (quizOptions2 != null) {
-      quizOptions2.setVisible(isQuiz && isEditing());
+   // createQuizOptions.setVisible(isQuiz && current == null);
+    if (editQuizOptions != null) {
+      editQuizOptions.setVisible(isQuiz && isEditing());
     }
   }
 
@@ -495,7 +519,7 @@ public class CreateListDialog extends BasicDialog {
     minScore = Integer.parseInt(value);
   }
 
-  private DivWidget quizOptions, quizOptions2;
+  private DivWidget createQuizOptions, editQuizOptions;
 
   private void addWarningField(Panel child) {
     FluidRow row;
@@ -510,28 +534,28 @@ public class CreateListDialog extends BasicDialog {
     row.add(modeDep);
   }
 
-  private Heading modeDep;
-  private boolean isQuiz = false;
 
   @NotNull
   private Widget getQuizChoices() {
     FluidRow row = new FluidRow();
 
+    logger.info("getQuizChoices edit = " +isEdit);
     CheckBox checkBox = new CheckBox(isEdit ? SHOW_AS_QUIZ : CREATE_A_NEW_QUIZ);
     checkBox.addValueChangeHandler(event -> {
       isQuiz = checkBox.getValue();
       checkQuizOptionsVisible();
     });
+    checkBox.setValue(isQuiz);
 
     Panel hp = new HorizontalPanel();
     checkBox.addStyleName("leftFiveMargin");
     hp.add(checkBox);
 
-    if (isEditing()) {
-      boolean isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
-      checkBox.setValue(isQuiz);
-      this.isQuiz = isQuiz;
-    }
+//    if (isEditing()) {
+//      boolean isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
+//      checkBox.setValue(isQuiz);
+//      this.isQuiz = isQuiz;
+//    }
 
     row.add(addControlGroupEntry(row, isEdit ? IS_A_QUIZ : MAKE_A_QUIZ, hp, ""));
     return row;

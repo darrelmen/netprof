@@ -43,6 +43,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -51,17 +52,16 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.QuizHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -78,12 +78,17 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
 import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
-public abstract class FacetExerciseList<T extends CommonShell & Scored, U extends CommonShell>
+/**
+ * A facet list display - facets on the left that when you click on them
+ * changes the content on the right.
+ *
+ * @param <T>
+ * @param <U>
+ */
+public abstract class FacetExerciseList<T extends CommonShell & Scored, U extends HasID & CommonShell>
     extends HistoryExerciseList<T, U>
     implements ShowEventListener, ChoicesContainer {
-  public static final String CONTENT = "Content";
-  public static final String SENTENCES_ONLY = "Sentences Only";
-  private final Logger logger = Logger.getLogger("FacetExerciseList");
+  private Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final String RECORDED = "Recorded";
 
@@ -98,14 +103,13 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    *
    */
-  private static final boolean DEBUG_STALE = true;
+  static final boolean DEBUG_STALE = true;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_CHOICES = false;
   private static final boolean DEBUGSCORE = false;
 
   private static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
 
-  private static final String ADDING_VISITOR = "adding visitor";
   protected static final String GETTING_TYPE_VALUES = "getting type->values";
 
   /**
@@ -145,11 +149,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   private static final String SHOW_LESS = "<i>View fewer</i>";
 
-  private static final String ANY = "Any";
+  static final String ANY = "Any";
   private static final String MENU_ITEM = "menuItem";
 
   /**
-   * @see #FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, boolean, INavigation.VIEWS)
+   * @see #FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, INavigation.VIEWS)
    * @see #setProgressVisible
    */
   protected ProgressBar practicedProgress, scoreProgress;
@@ -159,7 +163,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private final Panel sectionPanel;
   private final DownloadHelper downloadHelper;
   private Panel tableWithPager;
-  private final boolean isDrill;
+
   /**
    * for now only single selection
    */
@@ -174,11 +178,15 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private DivWidget pageSizeContainer;
   private Panel typeOrderContainer;
 
+  /**
+   * @see #setProgressBarScore
+   * @see #setScore
+   * @see #showAvgScore
+   */
   private final Map<Integer, Float> exerciseToScore = new HashMap<>();
   private final Map<Integer, U> fetched = new ConcurrentHashMap<>();
-  protected final INavigation.VIEWS views;
+  private final INavigation.VIEWS views;
   private final String pageSizeSelected;
-  private final ListFacetHelper listFacetHelper;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -186,7 +194,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param controller
    * @param listOptions
    * @param listHeader
-   * @param isDrillView           hack - should not have drill stuff in here... although eventually there won't be a drill view
    * @param views
    * @seex mitll.langtest.client.custom.content.NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
@@ -195,17 +202,15 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
                               ExerciseController controller,
                               ListOptions listOptions,
                               DivWidget listHeader,
-                              boolean isDrillView,
                               INavigation.VIEWS views) {
     super(currentExerciseVPanel, controller, listOptions);
     this.views = views;
     this.pageSizeSelected = PAGE_SIZE_SELECTED + "_" + views.toString();
-    this.isDrill = isDrillView;
     sectionPanel = new DivWidget();
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
 
-    this.listFacetHelper = getListFacetHelper(controller);
+//    this.listFacetHelper = getListFacetHelper(controller);
     secondRow.add(sectionPanel);
     setUnaccountedForVertical(0);
 
@@ -225,14 +230,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     // TODO : don't do it - will keep around reference to dead components.
     // so for instance if in TwoColumnExercisePanel there's an addList, removeList, newList
-    LangTest.EVENT_BUS.addHandler(ListChangedEvent.TYPE, authenticationEvent -> listFacetHelper.gotListChanged());
+    // LangTest.EVENT_BUS.addHandler(ListChangedEvent.TYPE, authenticationEvent -> listFacetHelper.gotListChanged());
     LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost()));
   }
-
-  @NotNull
-  protected ListFacetHelper getListFacetHelper(ExerciseController controller) {
-    return new ListFacetHelper(controller, getDynamicFacet(), getListType(), this, true);
-  }
+//
+//  @NotNull
+//  protected ListFacetHelper getListFacetHelper(ExerciseController controller) {
+//    return new ListFacetHelper(controller, getDynamicFacet(), getListType(), this, true);
+//  }
 
   @NotNull
   private DivWidget getBreadcrumbRow() {
@@ -391,8 +396,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return getPageSizeChoiceValues().get((getChosenPageIndex()));
   }
 
-  private int getPageIndex() {
-    return isDrill ? 0 : controller.getStorage().getInt(pageSizeSelected);
+  protected int getPageIndex() {
+    return controller.getStorage().getInt(pageSizeSelected);
   }
 
   private void onPageSizeChange(ListBox pagesize) {
@@ -467,9 +472,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
           @Override
           protected void gotRangeChanged(final Range newRange) {
             if (DEBUG) logger.info("gotRangeChanged event for " + newRange);
-            if (!isDrillView()) {
-              askServerForExercise(-1);
-            }
+            FacetExerciseList.this.gotRangeChanged();
           }
 
           @Override
@@ -479,7 +482,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
             return pageSize;
           }
         };
+
+//    if (logger == null) logger = Logger.getLogger("FacetExerciseList");
+//    logger.info("makePagingContainer -");
     return pagingContainer;
+  }
+
+  protected void gotRangeChanged() {
+    askServerForExercise(-1);
   }
 
   /**
@@ -509,8 +519,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     INavigation.VIEWS instance = selectionState.getView();
     if (instance != getInstance()) {
-      Collection<String> remove = selectionState.getTypeToSection().remove(getDynamicFacet());
-      logger.info("addWidgets selection '" + instance + "' != " + getInstance() + " so removing " + remove);
+      // Collection<String> remove = selectionState.getTypeToSection().remove(getDynamicFacet());
+      logger.warning("addWidgets selection '" + instance + "' != " + getInstance());// + " so removing " + remove);
     }
 
     restoreUIState(selectionState);
@@ -526,10 +536,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
 //     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest for " + prefix));
 //   logger.info("logException stack " + exceptionAsString);
-    ExerciseListRequest request = super.getExerciseListRequest(prefix)
+    return super.getExerciseListRequest(prefix)
         .setAddFirst(false)
         .setOnlyExamples(views.isContext());
-    return request;
   }
 
   /**
@@ -551,7 +560,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
       typeOrder = getTypeOrderSimple();
-      //    logger.info("getTypeOrder type order " + typeOrder);
+      //logger.info("\n\n\ngetTypeOrder type order " + typeOrder);
       this.rootNodesInOrder = new ArrayList<>(typeOrder);
       this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
     }
@@ -612,112 +621,78 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       // nav
       //  ul
       //   li - dimension
-      ListItem liForDimensionForType = getTypeContainer(type);
-      allTypesContainer.add(liForDimensionForType);
+      boolean hasChoices = typeToValues.containsKey(type);
 
-      // nav
-      //  ul
-      //   li
-      //    ul
-      //
-      // logger.info("addChoices --- " + type);
-      liForDimensionForType.add(addChoices(typeToValues, type));
+      if (hasChoices) {
+        // logger.info("addDim " + type + " = " + keys);
+
+
+        ListItem liForDimensionForType = getTypeContainer(type, typeToSelection.containsKey(type));
+        allTypesContainer.add(liForDimensionForType);
+
+        // nav
+        //  ul
+        //   li
+        //    ul
+        //
+//        logger.info("addChoices --- " + type);
+
+        // only the first two get a marking
+        boolean addTypePrefix = typeOrder.indexOf(type) < 2;
+
+        liForDimensionForType.add(addChoices(typeToValues, type, addTypePrefix));
+      }
     }
 
-    listFacetHelper.reallyAddListFacet(typeToValues, allTypesContainer);
-
-    contentFacet = addContentFacet(allTypesContainer);
+    addDynamicFacets(typeToValues, allTypesContainer);
   }
 
-  // TODO: show on dialog??
-  private ListItem contentFacet;
-
-  /**
-   * Only for practice view
-   *
-   * @param allTypesContainer
-   */
-  private ListItem addContentFacet(UnorderedList allTypesContainer) {
-    ListItem widgets = addContentFacet();
-    if (widgets != null) {
-      allTypesContainer.add(widgets);
-    }
-    return widgets;
+  void addDynamicFacets(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
   }
 
-  protected ListItem addContentFacet() {
-    return getTypeContainer(CONTENT);
-  }
-
-  private void addExerciseChoices(String dynamicFacet, ListItem liForDimensionForType) {
-    Set<MatchInfo> value = new HashSet<>();
-//    value.add(new MatchInfo("Entries", numEx));
-    value.add(new MatchInfo(SENTENCES_ONLY, numContext));
-    Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
-    typeToValues.put(dynamicFacet, value);
-
-    liForDimensionForType.clear();
-    //  logger.info("populateListChoices --- for " + result.size() + " lists ");
-    liForDimensionForType.add(addChoices(typeToValues, dynamicFacet));
-  }
 
   /**
    * @param typeToSection
    * @param prefix
-   * @param onlyWithAudioAnno
    * @param onlyUninspected
    * @return
    */
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
-                                                       boolean onlyWithAudioAnno,
                                                        boolean onlyUninspected) {
     ExerciseListRequest exerciseListRequest = getExerciseListRequest(prefix)
         .setTypeToSelection(typeToSection)
         .setOnlyUninspected(onlyUninspected)
         .setAddFirst(false);
 
-    //logger.info("Type->sel " + typeToSection);
-    String dynamicFacet = getDynamicFacet();
-    if (typeToSection.containsKey(dynamicFacet)) {
-      Collection<String> strings = typeToSection.get(dynamicFacet);
-
-      if (isDynamicFacetInteger()) {
-        //only one user list can be selected, and they don't nest
-        String next = strings.iterator().next();
-        try {
-          exerciseListRequest.setUserListID(Integer.parseInt(next));
-          //   logger.info("getExerciseListRequest userlist = " + userListID);
-        } catch (NumberFormatException e) {
-          logger.warning("getExerciseListRequest couldn't parse " + next);
-        }
-      }
-    }
     return exerciseListRequest;
   }
 
-  private int numEx;
-  private int numContext;
+//  private int numEx;
+//  private int numContext;
 
+  /**
+   * @param result
+   * @see ExerciseList.SetExercisesCallback#onSuccess
+   */
   @Override
   protected void setScores(ExerciseListWrapper<T> result) {
     Map<Integer, Float> idToScore = result.getIdToScore();
-    numEx = 0;
-    numContext = 0;
+//    numEx = 0;
+//    numContext = 0;
     for (T ex : result.getExercises()) {
       int id = ex.getID();
       if (idToScore.containsKey(id)) {
         ex.getMutableShell().setScore(idToScore.get(id));
       }
-      if (ex.isContext()) {
-        numContext++;
-      } else {
-        numEx++;
-        numContext += ex.getNumContext();
-      }
-    }
 
-    addExerciseChoices(CONTENT, contentFacet);
+//      if (ex.isContext()) {
+//        numContext++;
+//      } else {
+//        numEx++;
+//        numContext += ex.getNumContext();
+//      }
+    }
   }
 
   protected UserList.LIST_TYPE getListType() {
@@ -726,9 +701,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   @Override
   @NotNull
-  public ListItem getTypeContainer(String type) {
+  public ListItem getTypeContainer(String type, boolean hasSelection) {
     if (type.isEmpty()) logger.warning("getTypeContainer huh? type is empty???");
-    boolean hasSelection = typeToSelection.containsKey(type);
+
     ListItem liForDimensionForType = getLIDimension(hasSelection);
     liForDimensionForType.add(hasSelection ? getTypeHeader(type) : getSimpleHeader(type));
     return liForDimensionForType;
@@ -753,11 +728,12 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    * @param typeToValues
    * @param type
+   * @param addTypePrefix
    * @return
    * @see #addFacetsForReal
    */
   @Override
-  public Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type) {
+  public Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type, boolean addTypePrefix) {
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
 
@@ -770,7 +746,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         if (type.equalsIgnoreCase(RECORDED)) {
           keys = new TreeSet<>(keys);
         }
-        addChoicesForType(typeToValues, type, choices, keys);
+        addChoicesForType(typeToValues, type, choices, keys, addTypePrefix);
       }
     } else {
       String childType = getChildForParent(type);
@@ -779,8 +755,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         {
           Widget parentAnchor =
               typeToSelection.containsKey(childType) ?
-                  getParentAnchor(type, selectionForType, childType) :
-                  getSelectedAnchor(type, selectionForType);
+                  getParentAnchor(type, selectionForType, childType, addTypePrefix) :
+                  getSelectedAnchor(type, selectionForType, addTypePrefix);
           choices.add(parentAnchor);
         }
 
@@ -791,15 +767,26 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
           liForDimension.addStyleName("refinement");
           choices.add(liForDimension);
 
-          liForDimension.add(addChoices(typeToValues, childType));
+          liForDimension.add(addChoices(typeToValues, childType, addTypePrefix));
         }
       } else {
         if (isListType(type)) {
           if (DEBUG_CHOICES) logger.info("addChoices addListChoice " + type + "=" + selectionForType);
-          addListChoice(type, choices, selectionForType);
+          addListChoice(type, choices, selectionForType, addTypePrefix);
         } else {
-          if (DEBUG_CHOICES) logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType);
-          choices.add(getSelectedAnchor(type, selectionForType));
+          Set<MatchInfo> matchInfos = typeToValues.get(type);
+          int num = -1;
+          if (matchInfos != null) {
+            Optional<MatchInfo> first = matchInfos.stream().filter(matchInfo -> matchInfo.getValue().equalsIgnoreCase(selectionForType)).findFirst();
+            if (first.isPresent()) num = first.get().getCount();
+          }
+          if (DEBUG_CHOICES) {
+            logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType +
+                "\n\tkeys " + typeToValues.get(type));
+
+          }
+          String numberSuffix = num != -1 ? " (" + num + ")" : "";
+          choices.add(getSelectedAnchor(type, selectionForType + numberSuffix, addTypePrefix));
         }
       }
     }
@@ -807,77 +794,29 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   /**
+   * TODO : refactor to do something saner.
+   *
    * @param type
    * @param choices
    * @param selectionForType
-   * @see #addChoices(Map, String)
+   * @param addTypePrefix
    */
-  private void addListChoice(String type, Panel choices, String selectionForType) {
-    try {
-      String listName = selectionForType;
-      boolean dynamicFacetInteger = isDynamicFacetInteger();
-      if (dynamicFacetInteger) {
-        int userListID = Integer.parseInt(selectionForType);
-        listName = listFacetHelper.getListName(userListID);
-      }
-
-      if (listName != null) {
-        //      logger.info("addListChoice selected : adding " + listName + " " + type);
-        choices.add(getSelectedAnchor(type, listName));
-      } else {
-
-        int toUse = -1;
-        try {
-          toUse = this.userListID == -1 ?
-              dynamicFacetInteger ?
-                  Integer.parseInt(selectionForType) :
-                  -1 :
-              -1;
-        } catch (NumberFormatException e) {
-          logger.info("addListChoice couldn't parse " + selectionForType);
-        }
-        logger.info("addListChoice couldn't find list " + toUse + " in known lists...");
-        addVisitor(type, choices, toUse);
-      }
-    } catch (NumberFormatException e) {
-      logger.warning("addListChoice couldn't parse " + selectionForType);
-    }
+  void addListChoice(String type, Panel choices, String selectionForType, boolean addTypePrefix) {
   }
 
-  private void addVisitor(String type, Panel choices, int userListID) {
-    //logger.info("addVisitor " + type + " : " + userListID);
-    controller.getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<UserList>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError(ADDING_VISITOR, caught);
-      }
-
-      @Override
-      public void onSuccess(UserList result) {
-        if (result == null) {
-          logger.info("addVisitor list " + userListID + " is a quiz or it doesn't exist any more.");
-        } else {
-          if (result.getProjid() != getCurrentProject()) {
-            logger.warning("addVisitor list " + result.getName() + " is NOT in the project #" + result.getProjid());
-          } else {
-            choices.add(getSelectedAnchor(type, result.getName()));
-          }
-        }
-      }
-    });
-  }
 
   /**
    * @param typeToValues
    * @param type
    * @param choices
    * @param keys
+   * @param addTypePrefix
    * @see #addChoices
    */
   private void addChoicesForType(Map<String, Set<MatchInfo>> typeToValues,
                                  String type,
                                  Panel choices,
-                                 Set<MatchInfo> keys) {
+                                 Set<MatchInfo> keys, boolean addTypePrefix) {
     int j = 0;
 
     int toShow = getToShow(rootNodesInOrder.size() + 1);
@@ -886,19 +825,21 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     boolean hasMore = shouldShowMore(keysSize, toShow);
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
 
-/*
-    logger.info("addChoices" +
-        "\n\ttype    " + type +
-        "\n\tsize    " + size +// "(" +types+
-        "\n\tto show " + toShow +
-        "\n\tkeys    " + keys.size() +
-        "\n\thasMore " + hasMore +
-        "\n\tshowAll " + showAll
-    );
-    */
+
+    if (DEBUG_CHOICES) {
+      logger.info("addChoicesForType" +
+          "\n\ttype    " + type +
+          "\n\tsize    " + keysSize +// "(" +types+
+          "\n\tto show " + toShow +
+          "\n\tkeys    " + keys.size() +
+          "\n\thasMore " + hasMore +
+          "\n\tshowAll " + showAll +
+          "\n\tshowAll " + showAll
+      );
+    }
 
     for (MatchInfo key : keys) {
-      addLIChoice(choices, getAnchor(type, key, key.getUserListID(), key.isItalic()));
+      addLIChoice(choices, getAnchor(type, key, key.getUserListID(), key.isItalic(), addTypePrefix));
 
       // add final "View all" link if we're not supposed to show all
       if (hasMore && !showAll && ++j == toShow) {
@@ -941,8 +882,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   @NotNull
   private Anchor getShowMoreAnchor(final Map<String, Set<MatchInfo>> typeToValues, final String type, int remaining) {
     Anchor anchor = new Anchor();
-    String showMore = "<i>View all (" + remaining +
-        ")</i>";// SHOW_MORE;
+    String showMore = "<i>View all " + type + "s (" + remaining + ")</i>";
     anchor.setHTML(showMore);
     anchor.addClickHandler(event -> {
       typeToShowAll.put(type, true);
@@ -954,13 +894,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    * @param type
    * @param selectionForType
+   * @param addTypePrefix
    * @return
-   * @see #addChoices(Map, String)
+   * @see #addChoices(Map, String, boolean)
    */
   @NotNull
-  private Widget getSelectedAnchor(String type, String selectionForType) {
+  Widget getSelectedAnchor(String type, String selectionForType, boolean addTypePrefix) {
     Panel anchor = getSpan();
-    anchor.getElement().setInnerHTML(selectionForType);
+    anchor.getElement().setInnerHTML((addTypePrefix ? type + " " : "") + selectionForType);
     anchor.addStyleName("selected");
     addTooltip(type, selectionForType, anchor);
     return anchor;
@@ -1006,9 +947,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param key
    * @param newUserListID
    * @param italic        true if list is not mine - I don't own it
+   * @param addTypePrefix
    * @return
    */
-  private Widget getAnchor(String type, MatchInfo key, int newUserListID, boolean italic) {
+  private Widget getAnchor(String type, MatchInfo key, int newUserListID, boolean italic, boolean addTypePrefix) {
     Panel span = getSpan();
     span.addStyleName(MENU_ITEM);
 
@@ -1016,7 +958,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     String choiceName = key.getValue();
 
-    Anchor anchor = getAnchor(choiceName);
+    String nameToUse = (addTypePrefix ? type + " " : "") + choiceName;
+    Anchor anchor = getAnchor(nameToUse);
     ClickHandler choiceHandler = getChoiceHandler(type, choiceName, newUserListID);
     anchor.addClickHandler(choiceHandler);
     anchor.addStyleName("choice");
@@ -1071,16 +1014,17 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param type
    * @param value
    * @param childType
+   * @param addTypePrefix
    * @return
    * @see #addChoices
    */
   @NotNull
-  private Widget getParentAnchor(String type, String value, String childType) {
+  private Widget getParentAnchor(String type, String value, String childType, boolean addTypePrefix) {
     Panel span = getSpan();
     span.addStyleName(MENU_ITEM);
 
     {
-      Anchor typeSection = getAnchor(value); // li
+      Anchor typeSection = getAnchor((addTypePrefix ? type + " " : "") + value); // li
       addRemoveClickHandler(childType, typeSection);
       span.add(typeSection);
     }
@@ -1155,19 +1099,20 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private ClickHandler getChoiceHandler(final String type, final String key, int newUserListID) {
     return event -> {
       Map<String, String> candidate = new HashMap<>(typeToSelection);  // existing set is in type->selection
-      //String value = getChoiceHandlerValue(type, key, newUserListID);
       candidate.put(type, getChoiceHandlerValue(type, key, newUserListID));
-      //    logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
+
+      // logger.info("getChoiceHandler click on " + type + "=" + key + ", list = " + newUserListID);
+
       setHistory(candidate);
     };
   }
 
-  protected String getChoiceHandlerValue(String type, String key, int newUserListID) {
-    return isListType(type) ? "" + newUserListID : key;
+  String getChoiceHandlerValue(String type, String key, int newUserListID) {
+    return key;
   }
 
-  private boolean isListType(String type) {
-    return type.equalsIgnoreCase(getDynamicFacet());
+  boolean isListType(String type) {
+    return false;
   }
 
   /**
@@ -1177,7 +1122,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #getChoiceHandler
    * @see #addRemoveClickHandler
    */
-  private void setHistory(Map<String, String> candidate) {
+  void setHistory(Map<String, String> candidate) {
     //  logger.info("setHistory "+candidate);
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
@@ -1198,36 +1143,42 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #getSectionWidgetContainer
    */
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
-    if (!isThereALoggedInUser()) return;
+    if (isThereALoggedInUser()) {
+      doOpacityFeedback();
 
-    // List<Pair> pairs = getPairs(typeToSelection);
-    //logger.info("getTypeToValues request " + pairs + " list " + userListID);
+      {
+        List<Pair> pairs = getPairs(typeToSelection);
+        logger.info("getTypeToValues request " + pairs + " list " + userListID);
+      }
 
-    final long then = System.currentTimeMillis();
+      final long then = System.currentTimeMillis();
 
-    service.getTypeToValues(getFilterRequest(userListID, getPairs(typeToSelection)),
-        new AsyncCallback<FilterResponse>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            if (caught instanceof DominoSessionException) {
-              logger.info("getTypeToValues : got " + caught);
+      service.getTypeToValues(getFilterRequest(userListID, getPairs(typeToSelection)),
+          new AsyncCallback<FilterResponse>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              if (caught instanceof DominoSessionException) {
+                logger.info("getTypeToValues : got " + caught);
+              }
+              controller.handleNonFatalError(GETTING_TYPE_VALUES, caught);
             }
-            controller.handleNonFatalError(GETTING_TYPE_VALUES, caught);
-          }
 
-          /**
-           * fixes downstream selections that no longer make sense.
-           * @param response
-           */
-          @Override
-          public void onSuccess(FilterResponse response) {
-            gotFilterResponse(response, then, typeToSelection);
-          }
-        });
+            /**
+             * fixes downstream selections that no longer make sense.
+             * @param response
+             */
+            @Override
+            public void onSuccess(FilterResponse response) {
+              gotFilterResponse(response, then, typeToSelection);
+            }
+          });
+    }
   }
 
 
   /**
+   * TODO : push down the part about CONTENT and maybe list.
+   *
    * @param typeToSelection
    * @return
    * @see #getTypeToValues
@@ -1240,11 +1191,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       String s = typeToSelection.get(type);
       pairs.add(new Pair(type, (s == null) ? ANY : s));
     }
-    if (typeToSelection.containsKey(getDynamicFacet())) {
-      pairs.add(new Pair(getDynamicFacet(), typeToSelection.get(getDynamicFacet())));
-    }
+
+
     return pairs;
   }
+
 
   @NotNull
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
@@ -1256,27 +1207,41 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
           "\n\ttype to selection " + typeToSelection +
           "\n\ttype to values    " + response.getTypeToValues().size()
       );
     }
 
-    changeSelection(response.getTypesToInclude(), typeToSelection);
+    boolean didChange = changeSelection(response.getTypesToInclude(), typeToSelection);
     setTypeToSelection(typeToSelection);
     addFacetsForReal(response.getTypeToValues(), typeOrderContainer);
-    gotSelection();
+
+    if (didChange) {
+      gotSelection();
+    } else {
+      //   logger.info("gotFilterResponse - no change. ");
+      restoreUIAndLoadExercises(History.getToken(), didChange);
+    }
   }
 
-  private void changeSelection(Set<String> typesToInclude, Map<String, String> typeToSelection) {
+  /**
+   * @param typesToInclude
+   * @param typeToSelection
+   * @return true if we did actually change the currently visible selection state as a result of asking the server for the type-selection hierarchy
+   */
+  private boolean changeSelection(Set<String> typesToInclude, Map<String, String> typeToSelection) {
+    boolean changed = false;
     for (String selectedType : new ArrayList<>(typeToSelection.keySet())) {
       boolean clearSelection = !typesToInclude.contains(selectedType);
       if (clearSelection) {
         if (removeSelection(selectedType, typeToSelection)) {
+          changed = true;
         }
       }
     }
+    return changed;
   }
 
   protected boolean isThereALoggedInUser() {
@@ -1291,12 +1256,20 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   /**
+   * TODO: figure out a way to not do multiple restores when jumping from progress.
    * @param selectionState
    * @see HistoryExerciseList#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-    if (DEBUG) logger.info("restoreListBoxState = '" + selectionState + "'");
+    if (DEBUG) {
+      logger.info("restoreListBoxState = '" + selectionState + "' " +
+          "\n\t" + selectionState.getInfo());
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("here for " + selectionState));
+//      logger.info("logException stack:\n" + exceptionAsString);
+
+    }
     super.restoreListBoxState(selectionState);
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
   }
@@ -1351,29 +1324,18 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
        */
       @Override
       public void restoreListBoxState(SelectionState selectionState, Collection<String> typeOrder) {
-        if (DEBUG) logger.info("restoreListBoxState t->sel " + selectionState + " typeOrder " + typeOrder);
+        if (DEBUG) logger.info("restoreListBoxState " +
+            "\n\tt->sel " + selectionState +
+            "\n\ttypeOrder " + typeOrder);
         Map<String, String> newTypeToSelection = getNewTypeToSelection(selectionState, typeOrder);
         if (typeToSelection.equals(newTypeToSelection) &&
             typeOrderContainer != null &&
             typeOrderContainer.iterator().hasNext()) {
-//          logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);
+          if (DEBUG)
+            logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);
+
         } else {
-          int userListID = isDynamicFacetInteger() ? getUserListID(newTypeToSelection) : -1;
-          if (userListID != -1) {
-            int projid = selectionState.getProject();
-            int currentProject = getCurrentProject();
-            boolean isForSameProject = projid == -1 || projid == currentProject;
-            userListID = isForSameProject ? userListID : -1;
-
-            if (!isForSameProject) {
-              logger.warning("getProjectIDForList : list is for project " + projid + " but current is " + currentProject);
-/*
-              new ModalInfoDialog(LINK_FOR_CONTENT, PLEASE_CHANGE);
-*/
-            }
-
-          }
-          getTypeToValues(newTypeToSelection, userListID);
+          getTypeToValues(newTypeToSelection, getUserListID(selectionState, newTypeToSelection));
         }
       }
 
@@ -1391,6 +1353,34 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         return 0;
       }
     };
+  }
+
+  @NotNull
+  Map<String, String> getNewTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
+//    typeOrder = new ArrayList<>(typeOrder);
+//    typeOrder.add(getDynamicFacet());
+//    typeOrder.add(CONTENT);
+
+    return getTypeToSelection(selectionState, typeOrder);
+  }
+
+  @NotNull
+  Map<String, String> getTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
+    Map<String, String> newTypeToSelection = new HashMap<>();
+    for (String type : typeOrder) {
+      Collection<String> selections = selectionState.getTypeToSection().get(type);
+      if (selections != null && !selections.isEmpty()) {
+        newTypeToSelection.put(type, selections.iterator().next());
+      }
+    }
+
+    // logger.info("getTypeToSelection " + newTypeToSelection);
+
+    return newTypeToSelection;
+  }
+
+  int getUserListID(SelectionState selectionState, Map<String, String> newTypeToSelection) {
+    return -1;
   }
 
   /**
@@ -1413,10 +1403,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   private String keepSearchItem() {
     SelectionState selectionState = getSelectionState(getHistoryToken());
-    String search = selectionState.getSearch();
-    if (!search.isEmpty()) {
-      return selectionState.getSearchEntry();
-    } else return "";
+    return selectionState.getSearch().isEmpty() ? "" : selectionState.getSearchEntry();
   }
 
   @NotNull
@@ -1437,6 +1424,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     controller.reallySetTheProject(project);
   }
 
+  /*
   private int getUserListID(Map<String, String> newTypeToSelection) {
     int userListID = -1;
     try {
@@ -1445,22 +1433,32 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       logger.warning("getUserListID can't parse " + newTypeToSelection.get(getDynamicFacet()));
     }
     return userListID;
-  }
+  }*/
 
-  private int getCurrentProject() {
+  int getCurrentProject() {
     return getStartupInfo().getProjectid();
   }
 
-  @NotNull
+  /**
+   * From the selection state in the URL.
+   *
+   * @return
+   * @paramx selectionState
+   * @paramx typeOrder
+   * @see #getSectionWidgetContainer
+   */
+ /* @NotNull
   private Map<String, String> getNewTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
     typeOrder = new ArrayList<>(typeOrder);
     typeOrder.add(getDynamicFacet());
+    typeOrder.add(CONTENT);
 
     return getTypeToSelection(selectionState, typeOrder);
-  }
+  }*/
+/*
 
   @NotNull
-  private Map<String, String> getTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
+  protected Map<String, String> getTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
     Map<String, String> newTypeToSelection = new HashMap<>();
     for (String type : typeOrder) {
       Collection<String> selections = selectionState.getTypeToSection().get(type);
@@ -1468,9 +1466,12 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         newTypeToSelection.put(type, selections.iterator().next());
       }
     }
+
+    // logger.info("getTypeToSelection " + newTypeToSelection);
+
     return newTypeToSelection;
   }
-
+*/
   protected void pushFirstSelection(int exerciseID, String searchIfAny) {
     updateDownloadLinks();
     askServerForExercise(exerciseID);
@@ -1499,6 +1500,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see ExerciseList#checkAndAskServer
    */
   protected void askServerForExercise(int itemID) {
+    if (itemID > 0) pagingContainer.markCurrentExercise(itemID);
+
     Collection<Integer> visibleIDs = pagingContainer.getVisibleIDs();
 
     if (visibleIDs.isEmpty()) {
@@ -1517,7 +1520,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #askServerForExercise
    */
   private void askServerForVisibleExercises(int itemID, Collection<Integer> visibleIDs, final int currentReq) {
-    // logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
+    // logger.info("askServerForVisibleExercises ask for single -- " + itemID + " and " + visibleIDs.size());
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
       if (DEBUG) logger.info("askServerForVisibleExercises show empty -- ");
     } else {
@@ -1526,11 +1529,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     }
   }
 
-  private Collection<Integer> getVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
-    if (isDrillView() && itemID > 0) {
-      visibleIDs = new ArrayList<>();
-      visibleIDs.add(itemID);
-    }
+  protected Collection<Integer> getVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
     return visibleIDs;
   }
 
@@ -1539,7 +1538,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return reqID == -1 || reqID == getCurrentExerciseReq();
   }
 
-  private int getCurrentExerciseReq() {
+  int getCurrentExerciseReq() {
     return freqid;
   }
 
@@ -1570,7 +1569,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    * @see #gotFullExercises
    */
-  private void hidePrevNextWidgets() {
+  protected void hidePrevNextWidgets() {
     pageSizeContainer.setVisible(false);
     sortBox.setVisible(false);
     pagerAndSortRow.setVisible(false);
@@ -1588,13 +1587,22 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param currentReq
    * @see #askServerForVisibleExercises(int, Collection, int)
    */
-  private void getVisibleExercises(final Collection<Integer> visibleIDs, final int currentReq) {
-    if (!isDrillView()) { // no blink
-      Widget widget = innerContainer.getWidget();
-      if (widget != null) {
-        widget.getElement().getStyle().setOpacity(0.2);
-      }
+  protected void getVisibleExercises(final Collection<Integer> visibleIDs, final int currentReq) {
+    doOpacityFeedback();
+    checkAndGetExercises(visibleIDs, currentReq);
+  }
+
+  private void doOpacityFeedback() {
+    Widget widget = innerContainer.getWidget();
+    if (widget != null) {
+      widget.getElement().getStyle().setOpacity(0.2);
+      // logger.info("set opacity ");
+    } else {
+      //     logger.warning("not setting opacity...");
     }
+  }
+
+  protected void checkAndGetExercises(Collection<Integer> visibleIDs, int currentReq) {
     if (isCurrentReq(currentReq)) {
       if (DEBUG) logger.info("getVisibleExercises  req " + currentReq + " vs current " + getCurrentExerciseReq());
       reallyGetExercises(visibleIDs, currentReq);
@@ -1610,37 +1618,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param currentReq
    * @see #getVisibleExercises(Collection, int)
    */
-  private void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
+  protected void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
     if (DEBUG) {
       logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs + " currentReq " + currentReq);
     }
-    //long then = System.currentTimeMillis();
-    if (isDrillView() && visibleIDs.isEmpty()) {
-      CommonShell currentExercise = getCurrentExercise();
-      if (currentExercise != null) {
-        int id = currentExercise.getID();
-        if (!visibleIDs.contains(id)) {
-          visibleIDs.add(id);
-          logger.warning("reallyGetExercises added current ex to visible " + id);
-/*
-          int c = 0;
-          for (Integer id2 : visibleIDs) {
-            logger.info("#" + c++ + " : " + id2);
-          }
-*/
-        }
-      }
-
-      logger.info("\n\n\treallyGetExercises now " + visibleIDs.size() + " visible ids : " + visibleIDs + " currentReq " + currentReq);
-
-    }
-
-/*
-    int c = 0;
-    for (Integer id2 : visibleIDs) {
-      logger.info("reallyGetExercises #" + c++ + " : " + id2);
-    }
-*/
 
     List<U> alreadyFetched = new ArrayList<>();
     Set<Integer> requested = getRequested(visibleIDs, alreadyFetched);
@@ -1688,41 +1669,28 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   /**
+   * TODO : how to avoid forced cast here?
+   *
    * @param result
    * @param alreadyFetched
-   * @param visibleIDs
-   * @see #reallyGetExercises
+   * @return
    */
-  void getFullExercisesSuccess(ExerciseListWrapper<U> result,
-                               List<U> alreadyFetched,
-                               Collection<Integer> visibleIDs) {
-    // long now = System.currentTimeMillis();
-//    int size = result.getVisibleExercises().isEmpty() ? 0 : result.getVisibleExercises().size();
-    //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
-    int reqID = result.getReqID();
-
-    Map<Integer, U> idToEx = rememberFetched(result, alreadyFetched);
-
-    if (DEBUG) logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs.size());
-
-    if (isCurrentReq(reqID)) {
-      gotFullExercises(reqID, getVisibleExercises(visibleIDs, idToEx));
-    } else {
-      if (DEBUG_STALE)
-        logger.info("getFullExercisesSuccess : ignoring req " + reqID + " vs current " + getCurrentExerciseReq());
-    }
-  }
-
   @NotNull
-  private Map<Integer, U> rememberFetched(ExerciseListWrapper<U> result, List<U> alreadyFetched) {
-    Map<Integer, U> idToEx = setScoreHistory(result.getScoreHistoryPerExercise(), result.getExercises());
+  Map<Integer, ClientExercise> rememberFetched(ExerciseListWrapper<ClientExercise> result, List<ClientExercise> alreadyFetched) {
+    Map<Integer, ClientExercise> idToEx = setScoreHistory(result.getScoreHistoryPerExercise(), result.getExercises());
     alreadyFetched.forEach(exercise -> idToEx.put(exercise.getID(), exercise));
 
-    result.getExercises().forEach(this::addExerciseToCached);
+    result.getExercises().forEach(clientEx -> addExerciseToCached((U) clientEx));
     return idToEx;
   }
 
-  private List<U> getVisibleExercises(Collection<Integer> visibleIDs, Map<Integer, U> idToEx) {
+  /**
+   * @see #getFullExercises(Collection, int, Collection, List)
+   * @param visibleIDs
+   * @param idToEx
+   * @return
+   */
+/*  List<U> getVisibleExercises(Collection<Integer> visibleIDs, Map<Integer, U> idToEx) {
     List<U> toShow = new ArrayList<>();
     for (int id : visibleIDs) {
       U e = idToEx.get(id);
@@ -1734,7 +1702,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       }
     }
     return toShow;
-  }
+  }*/
 
   /**
    * TODO : why? ?>
@@ -1745,58 +1713,46 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #goGetNextPage
    */
   @NotNull
-  Map<Integer, U> setScoreHistory(Map<Integer, CorrectAndScore> scoreHistoryPerExercise,
-                                  List<U> exercises
-                                  //                                    ExerciseListWrapper<U> result
-  ) {
-    Map<Integer, U> idToEx = new HashMap<>();
-    //  Map<Integer, CorrectAndScore> scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
-    for (U ex : exercises) {
+  Map<Integer, ClientExercise> setScoreHistory(Map<Integer, CorrectAndScore> scoreHistoryPerExercise, List<ClientExercise> exercises) {
+    Map<Integer, ClientExercise> idToEx = new HashMap<>();
+    for (ClientExercise ex : exercises) {
       //   logger.info("setScoreHistory " + ex.getID() +  " " + ex);
       int id = ex.getID();
       idToEx.put(id, ex);
 
-      {
-        CorrectAndScore correctAndScore = scoreHistoryPerExercise.get(id);
+      CorrectAndScore correctAndScore = scoreHistoryPerExercise.get(id);
+      setScoreOnExercise(ex, correctAndScore);
 
-        // make sure we make a real exercise list here even if it's empty since we'll want to add to it later
-        List<CorrectAndScore> scoreTotal = new ArrayList<>();
-        if (correctAndScore != null) scoreTotal.add(correctAndScore);
-        // List<CorrectAndScore> scoreTotal = correctAndScores == null ? new ArrayList<>() : correctAndScores;
-        //  logger.info("attach score history " + scoreTotal.size() + " to exercise "+ id);
-        ex.getMutableShell().setScores(scoreTotal);
-      }
+      // remember scores for context sentences too!
+      ex.getDirectlyRelated().forEach(dir -> setScoreOnExercise(dir, scoreHistoryPerExercise.get(dir.getID())));
     }
     //logger.info("setScoreHistory now " + idToEx.size());
 
     return idToEx;
   }
 
+  private void setScoreOnExercise(ClientExercise ex, CorrectAndScore correctAndScore) {
+    // make sure we make a real exercise list here even if it's empty since we'll want to add to it later
+    List<CorrectAndScore> scoreTotal = new ArrayList<>();
+    if (correctAndScore != null) scoreTotal.add(correctAndScore);
+    // List<CorrectAndScore> scoreTotal = correctAndScores == null ? new ArrayList<>() : correctAndScores;
+    //  logger.info("attach score history " + scoreTotal.size() + " to exercise "+ id);
+    ex.getMutableShell().setScores(scoreTotal);
+  }
+
   /**
    * @param reqID
    * @param toShow
    * @see #reallyGetExercises
-   * @see #getFullExercisesSuccess
+   * @see ClientExerciseFacetExerciseList#getFullExercisesSuccess
    */
-  private void gotFullExercises(final int reqID, Collection<U> toShow) {
+  void gotFullExercises(final int reqID, Collection<U> toShow) {
     if (DEBUG) logger.info("gotFullExercises show req " + reqID + " exercises " + getIDs(toShow));
     if (isCurrentReq(reqID)) {
       if (toShow.isEmpty()) {
         hidePrevNext();
       } else {
-        if (isDrillView()) { // hack for avp
-          hidePrevNextWidgets();
-        }
-//        logger.info("gotFullExercises : showing " + toShow.size() + " exercises : " + getIDs(toShow));
-//
-//        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-//        logger.info("gotFullExercises showing logException stack " + exceptionAsString);
-
         showExercises(toShow, reqID);
-
-        if (isDrillView()) { // hack for avp
-          setProgressVisible(false);
-        }
       }
     } else {
       if (DEBUG_STALE) {
@@ -1810,18 +1766,13 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param reqID
    * @see #gotFullExercises
    */
-  private void showExercises(final Collection<U> result, final int reqID) {
-    if (isDrillView()) { // drill/avp/flashcard
-      showDrill(result);
-      goGetNextPage();
+  protected void showExercises(final Collection<U> result, final int reqID) {
+    if (isStale(reqID)) {
+      if (DEBUG_STALE)
+        logger.info("showExercises Skip stale req " + reqID + " vs current " + getCurrentExerciseReq());
     } else {
-      if (isStale(reqID)) {
-        if (DEBUG_STALE)
-          logger.info("showExercises Skip stale req " + reqID + " vs current " + getCurrentExerciseReq());
-      } else {
-        if (DEBUG) logger.info("showExercises show req " + reqID + " exercises " + getIDs(result));
-        Scheduler.get().scheduleDeferred((Command) () -> showExercisesForCurrentReq(result, reqID));
-      }
+      if (DEBUG) logger.info("showExercises show req " + reqID + " exercises " + getIDs(result));
+      Scheduler.get().scheduleDeferred((Command) () -> showExercisesForCurrentReq(result, reqID));
     }
   }
 
@@ -1874,10 +1825,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         logger.info("showExercises (2) skip stale req " + reqID + " vs current " + getCurrentExerciseReq());
 
     }
-  }
-
-  private boolean isDrillView() {
-    return isDrill;
   }
 
   /**
@@ -1996,17 +1943,6 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
   }
 
   /**
-   * @param result
-   * @see #showExercises
-   */
-  protected void showDrill(Collection<U> result) {
-    U next = result.iterator().next();
-    //logger.info("showDrill " + next.getID());
-    markCurrentExercise(next.getID());
-    addExerciseWidget(next);
-  }
-
-  /**
    * Don't recurse...
    *
    * @param iterator
@@ -2048,7 +1984,6 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
    * @see #showExercisesForCurrentReq(Collection, int)
    */
   private void setProgressBarScore(Collection<T> displayed, final int reqid) {
-    //exercisesWithScores.clear();
     exerciseToScore.clear();
 
     if (displayed == null) {
@@ -2098,10 +2033,14 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
   public void setScore(int id, float hydecScore) {
     super.setScore(id, hydecScore);
     if (hydecScore > -1f) {
-      // exercisesWithScores.add(id);
       if (DEBUGSCORE) logger.info("setScore # " + id + " Score " + hydecScore);
 
-      exerciseToScore.put(id, hydecScore);
+      T t = byID(id);
+      if (t == null) {
+        logger.info("setScore not adding score for " + id + " since likely a context sentence ");
+      } else {
+        exerciseToScore.put(id, hydecScore);
+      }
     } else {
       logger.info("skipping low score for " + id);
     }
@@ -2117,6 +2056,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     int withScore = exerciseToScore.size();
     // long then = System.currentTimeMillis();
     if (DEBUGSCORE) logger.info("showAvgScore checking " + withScore + " exercises ");
+
     for (Map.Entry<Integer, Float> pair : exerciseToScore.entrySet()) {
       total += pair.getValue();
       if (DEBUGSCORE) logger.info("\tshowAvgScore ex " + pair.getKey() + " = " + pair.getValue());
@@ -2235,9 +2175,6 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     simpleLoadExercises(getHistoryToken(), getPrefix(), exerciseID);
   }
 
-  protected Map<Integer, IUserList> getIdToList() {
-    return listFacetHelper.getIdToList();
-  }
 
   protected Map<String, String> getTypeToSelection() {
     return typeToSelection;
@@ -2246,14 +2183,14 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
   /**
    * @see QuizHelper#clearListSelection
    */
-  public void clearListSelection() {
+/*  public void clearListSelection() {
     //logger.info("in list ---> clearListSelection ");
     Map<String, String> candidate = new HashMap<>(getTypeToSelection());
     candidate.remove(getDynamicFacet());
     setHistory(candidate);
-  }
+  }*/
 
-  @NotNull
+/*  @NotNull
   protected String getDynamicFacet() {
     return LISTS;
   }
@@ -2261,5 +2198,5 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
   @NotNull
   protected boolean isDynamicFacetInteger() {
     return true;
-  }
+  }*/
 }

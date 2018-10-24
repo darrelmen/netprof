@@ -7,7 +7,8 @@ import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.LearnFacetExerciseList;
+import mitll.langtest.client.list.ClientExerciseFacetExerciseList;
+import mitll.langtest.client.list.ListFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
@@ -53,13 +54,12 @@ class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterN
                                                                        INavigation.VIEWS instanceName,
                                                                        DivWidget listHeader,
                                                                        DivWidget footer) {
-        return new LearnFacetExerciseList<T>(
+        return new ListFacetExerciseList<T>(
             topRow,
             currentExercisePanel,
             controller,
             new ListOptions(instanceName),
             listHeader,
-            false,
             instanceName);
       }
     };
@@ -77,7 +77,7 @@ class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterN
             alignments,
             false,
             LearnHelper.this,
-            views.isContext());
+            e.isContext());
       }
     };
   }

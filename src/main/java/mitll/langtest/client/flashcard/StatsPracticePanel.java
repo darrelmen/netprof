@@ -201,6 +201,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
       rememberCurrentExercise();
     }
 
+    logger.info("onSetComplete - show charts!");
     showFeedbackCharts();
   }
 
@@ -340,7 +341,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
 
   /**
    * @param toAddTo
-   * @see FlashcardPanel#addWidgets(CommonExercise, ExerciseController, ControlState)
+   * @see FlashcardPanel#addWidgets
    */
   @Override
   void addRowBelowPrevNext(DivWidget toAddTo) {
@@ -374,10 +375,14 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
       @Override
       public void run() {
         //logger.warning("waited " + (System.currentTimeMillis() - then) + " for a response");
-        if (controller.isHasNetworkProblem()) {
-          logger.info("check - " + controller.isHasNetworkProblem());
+        boolean hasNetworkProblem = controller.isHasNetworkProblem();
+        if (hasNetworkProblem) {
+          logger.info("getWifiTimer network problem?");
         }
-        wifiStatus.setVisible(controller.isHasNetworkProblem());
+
+        if (wifiStatus != null) {
+          wifiStatus.setVisible(hasNetworkProblem);
+        }
       }
     };
     timer.scheduleRepeating(1000);

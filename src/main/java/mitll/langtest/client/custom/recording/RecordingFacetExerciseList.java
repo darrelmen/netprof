@@ -15,12 +15,13 @@ import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
 import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
 
 /**
+ * For recording items.
+ *
  * @see RecorderNPFHelper#getMyListLayout
  */
 class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
 
- // private static final String RECORD = "Record";
   private static final String UNRECORD = "Unrecord";
   private static final String RECORDED = "Recorded";
 
@@ -75,13 +76,12 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   @Override
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
-                                                       boolean onlyWithAudioAnno,
                                                        boolean onlyUninspected) {
-    ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUninspected);
+    ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyUninspected);
     //  exerciseListRequest.setOnlyRecordedByMatchingGender(true);
     exerciseListRequest.setOnlyUnrecordedByMe(true);
 
-    logger.info("getExerciseListRequest req " + exerciseListRequest);
+ //   logger.info("getExerciseListRequest req " + exerciseListRequest);
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest"));
 //    logger.info("logException stack " + exceptionAsString);
@@ -107,15 +107,17 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
    * @return
    * @see #addWidgets()
    */
-  @NotNull
+ /* @NotNull
   @Override
   protected String getDynamicFacet() {
     return RECORDED;
-  }
+  }*/
 
+/*
   protected boolean isDynamicFacetInteger() {
     return false;
   }
+*/
 
   /**
    * @param prefix

@@ -609,8 +609,10 @@ public class LangTest implements
 
             public void onSuccess(ImageResponse result) {
               imageCache.put(key, result);
-              //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
+            //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
               if (client != null) {
+              //  logger.info("getImage client "+ client.getClass());
+
                 Scheduler.get().scheduleDeferred(() -> {
                   client.onSuccess(result);
                 });
@@ -1168,22 +1170,13 @@ public class LangTest implements
   // recording methods...
 
   /**
-   * Recording interface
-   *
-   * @see RecordButtonPanel#startRecording()
-   * @see PostAudioRecordButton#startRecording()
-   */
-  public void startRecording() {
-    BrowserRecording.recordOnClick();
-  }
-
-  /**
    * @param wavStreamCallback
    * @see PostAudioRecordButton#startRecording
    */
   public void startStream(ClientAudioContext clientAudioContext, WavStreamCallback wavStreamCallback) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
+    BrowserRecording.recordOnClick();
     BrowserRecording.startStream(serviceEntryPoint, clientAudioContext, wavStreamCallback);
   }
 
@@ -1193,7 +1186,11 @@ public class LangTest implements
    * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
   public void stopRecording(boolean useDelay, boolean abort) {
-    logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis, abort = " + abort);
+   logger.info("stopRecording : " +
+       "\n\ttime recording in UI " + (System.currentTimeMillis() - then) + " millis, " +
+       "\n\tabort                " + abort +
+       "\n\tuse delay            " + useDelay);
+
     if (useDelay) {
       BrowserRecording.stopRecording(abort);
     } else {
@@ -1279,7 +1276,9 @@ public class LangTest implements
   }
 
   @Override
-  public void showListIn(int listID, INavigation.VIEWS views) {  getNavigation().showListIn(listID, views);  }
+  public void showListIn(int listID, INavigation.VIEWS views) {
+    getNavigation().showListIn(listID, views);
+  }
 
   /**
    * @param views

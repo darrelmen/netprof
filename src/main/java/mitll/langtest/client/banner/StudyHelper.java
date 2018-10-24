@@ -123,8 +123,8 @@ class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T>
             currentExercisePanel,
             controller,
             new ListOptions(instanceName),
-            listHeader,
-            false);
+            listHeader
+        );
         widgets.hideSectionPanel();
         return widgets;
       }

@@ -79,11 +79,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   /**
    * @param currentExerciseVPanel
    * @param controller
-   * @see FacetExerciseList#FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, boolean, INavigation.VIEWS)
+   * @see FacetExerciseList#FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, INavigation.VIEWS)
    */
-  protected HistoryExerciseList(Panel currentExerciseVPanel,
-                                ExerciseController controller,
-                                ListOptions options) {
+  HistoryExerciseList(Panel currentExerciseVPanel,
+                      ExerciseController controller,
+                      ListOptions options) {
     super(currentExerciseVPanel, null, controller, options);
     sectionWidgetContainer = getSectionWidgetContainer();
     addHistoryListener();
@@ -104,7 +104,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @see ExerciseList#pushNewItem
    * @see #pushNewSectionHistoryToken
    */
-  protected String getHistoryTokenFromUIState(String search, int id, int listID) {
+  String getHistoryTokenFromUIState(String search, int id, int listID) {
     //   String unitAndChapterSelection = sectionWidgetContainer.getHistoryToken();
     //logger.info("\tgetHistoryToken for " + id + " is '" +unitAndChapterSelection.toString() + "'");
     if (logger == null) {
@@ -151,7 +151,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     removeHistoryListener();
   }
 
-  protected ProjectStartupInfo getStartupInfo() {
+  ProjectStartupInfo getStartupInfo() {
     return controller.getProjectStartupInfo();
   }
 
@@ -172,7 +172,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   void pushFirstSelection(int exerciseID, String searchIfAny) {
     String token = getHistoryToken();
     logger.info("pushFirstSelection : (" + getInstance() + ") current token " + token);
-   // int exidFromToken = getIDFromToken(token);
+    // int exidFromToken = getIDFromToken(token);
     SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
 
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
@@ -279,7 +279,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   /**
    * @see FacetExerciseList#gotSelection
    */
-  protected void pushNewSectionHistoryToken() {
+  void pushNewSectionHistoryToken() {
     String currentToken = getHistoryToken();
     SelectionState selectionState = getSelectionState(currentToken);
     String historyToken = getHistoryTokenFromUIState(getTypeAheadText(), selectionState.getItem(), selectionState.getList());
@@ -310,7 +310,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     }
   }
 
-  protected String getHistoryToken() {
+  String getHistoryToken() {
     return History.getToken();
   }
 
@@ -319,8 +319,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @see #pushNewItem
    */
   void setHistoryItem(String historyToken) {
-   // String token = History.getToken();
-  //logger.info("before " + token);
+    // String token = History.getToken();
+    //logger.info("before " + token);
     if (DEBUG_PUSH) {
       logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     }
@@ -372,7 +372,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @see #onValueChange
    * @see #restoreUIState
    */
-  protected void restoreListBoxState(SelectionState selectionState) {
+  void restoreListBoxState(SelectionState selectionState) {
     if (DEBUG) logger.info("restoreListBoxState restore '" + selectionState + "'");
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
@@ -401,43 +401,43 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       return;
     }
 
-    String value = event.getValue();
-    SelectionState selectionState = getSelectionState(value);
+    //  String value = event.getValue();
+    restoreUIAndLoadExercises(event.getValue(), true);
+  }
 
-    maybeSwitchProject(selectionState, controller.getProjectStartupInfo().getProjectid());
+  void restoreUIAndLoadExercises(String value, boolean didChange) {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
-    if (DEBUG_ON_VALUE_CHANGE) {
-      logger.info("onValueChange got '" + value + "' sel '" + selectionState + "' '" + selectionState.getInfo() +"'");
-    }
-    INavigation.VIEWS instance1 = selectionState.getView();
+    if (projectStartupInfo != null) {
+      SelectionState selectionState = getSelectionState(value);
 
-    if (instance1 != getInstance()) {
+      maybeSwitchProject(selectionState, projectStartupInfo.getProjectid());
+
       if (DEBUG_ON_VALUE_CHANGE) {
-        logger.info("onValueChange : MAYBE skipping event " + value + " for instance '" + instance1 +
-            "' that is not mine '" + getInstance() + "'");
+        logger.info("onValueChange got '" + value + "' sel '" + selectionState + "' '" + selectionState.getInfo() + "'");
+
+//        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got change"));
+//        logger.info("HistoryExerciseList.selectionStateChanged logException stack " + exceptionAsString);
       }
 
-    /*  if (getCreatedPanel() == null) {
-        popRequest();
-        noSectionsGetExercises(selectionState.getItem());
+      if (DEBUG_ON_VALUE_CHANGE) {
+        logger.info("HistoryExerciseList.onValueChange : " +
+            "\n\toriginalValue '" + value + "'" +
+            // " token is '" + value + "' " +
+            "for " + selectionState.getView() + " vs my instance " + getInstance());
       }
-      return;*/
-    }
-    if (DEBUG_ON_VALUE_CHANGE) {
-      logger.info("HistoryExerciseList.onValueChange : " +
-          "\n\toriginalValue '" + value +          "'" +
-         // " token is '" + value + "' " +
-          "for " + instance1 + " vs my instance " + getInstance());
-    }
 
-    restoreUIState(selectionState);
+      restoreUIState(selectionState);
 
-    try {
-      loadFromSelectionState(selectionState, selectionState);
-    } catch (Exception e) {
-      logger.warning("HistoryExerciseList.selectionStateChanged " + value + " badly formed. Got " + e);
-      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(e);
-      logger.info("HistoryExerciseList.selectionStateChanged logException stack " + exceptionAsString);
+      try {
+        if (didChange || isEmpty() ) {
+          loadFromSelectionState(selectionState, selectionState);
+        }
+      } catch (Exception e) {
+        logger.warning("HistoryExerciseList.selectionStateChanged " + value + " badly formed. Got " + e);
+        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(e);
+        logger.info("HistoryExerciseList.selectionStateChanged logException stack " + exceptionAsString);
+      }
     }
   }
 
@@ -460,7 +460,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @param selectionState
    * @return true if we're just clicking on a different item in the list and don't need to reload the exercise list
    */
-  protected void restoreUIState(SelectionState selectionState) {
+  void restoreUIState(SelectionState selectionState) {
     restoreListBoxState(selectionState);
 
     if (DEBUG_ON_VALUE_CHANGE) {
@@ -516,7 +516,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
                                           boolean onlyDefaultUser,
                                           boolean onlyUninspected) {
     ExerciseListRequest request =
-        getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUninspected);
+        getExerciseListRequest(typeToSection, prefix, onlyUninspected);
 
     if (DEBUG) {
       logger.info("loadExercisesUsingPrefix got" +
@@ -557,12 +557,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
 
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
-                                                       boolean onlyWithAudioAnno,
                                                        boolean onlyUninspected) {
     return getExerciseListRequest(prefix)
         .setTypeToSelection(typeToSection)
-     //   .setOnlyWithAudioAnno(onlyWithAudioAnno)
-        //.setOnlyDefaultAudio(onlyDefaultUser)
         .setOnlyUninspected(onlyUninspected);
   }
 
@@ -582,9 +579,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID +
           "\n\tfor " + request);
 
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-//      logger.info("logException stack " + exceptionAsString);
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseIDs"));
+//       logger.info("logException stack " + exceptionAsString);
     }
+
     if (controller.getUser() > 0) {
       // final long then = System.currentTimeMillis();
       service.getExerciseIds(
@@ -617,7 +615,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @see #onValueChange
    * @see #pushNewSectionHistoryToken
    */
-  protected void noSectionsGetExercises(int exerciseID) {
+  void noSectionsGetExercises(int exerciseID) {
     // logger.info("noSectionsGetExercises " +userID);
     super.getExercises();
   }

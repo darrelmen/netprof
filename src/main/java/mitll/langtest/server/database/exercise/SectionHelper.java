@@ -69,11 +69,11 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
   public static final String ANY = "any";
-  private static final String ALL1 = "all";
+  //private static final String ALL1 = "all";
   /**
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
-  private static final String ALL = ALL1;
+  private static final String ALL = "all";
   private static final String LISTS = "Lists";
   private static final String RECORDED = "Recorded";
   private List<String> predefinedTypeOrder = new ArrayList<>();
@@ -338,6 +338,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @param node
    * @param debug
    * @return
+   * @see #getTypeToMatches(Collection, boolean)
    */
   @NotNull
   private Map<String, Map<String, MatchInfo>> getTypeToMatchPairs(List<Pair> pairs, SectionNode node, boolean debug) {
@@ -467,7 +468,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   }
 
   private boolean isDynamicFacet(String type) {
-    return type.equals(LISTS) || type.equals(RECORDED);
+    return type.equals(LISTS) || type.equals(RECORDED) || type.equals("Content");
   }
 
   /**
@@ -1207,11 +1208,12 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     if (someEmpty) {
       List<Pair> typeToSelection2 = new ArrayList<>();
       if (b) logger.info("getTypeToValues back off including  " + typesToInclude1);
+
       for (Pair pair : typeToSelection) {
         if (typesToInclude1.contains(pair.getProperty())) {
           typeToSelection2.add(pair);
         } else {
-          typeToSelection2.add(new Pair(pair.getProperty(), ALL1));
+          typeToSelection2.add(new Pair(pair.getProperty(), ALL));
         }
       }
 

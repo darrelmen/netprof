@@ -52,6 +52,12 @@ public interface ScoringServiceAsync {
                            boolean usePhonemeMap,
                            AsyncCallback<PretestScore> async);
 
+  /**
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
+   * @param resultid
+   * @param roundTrip
+   * @param async
+   */
   void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 
   void getResultASRInfo(int resultID, ImageOptions imageOptions, AsyncCallback<PretestScore> async);

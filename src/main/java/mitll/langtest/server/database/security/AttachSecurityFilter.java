@@ -72,7 +72,7 @@ public class AttachSecurityFilter implements Filter {
   private ServletContext servletContext;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_RESPONSE = true;
+  private static final boolean DEBUG_RESPONSE = false;
   private static final boolean DEBUG_RESPONSE_DETAIL = false;
 
   public void init(FilterConfig filterConfig) {

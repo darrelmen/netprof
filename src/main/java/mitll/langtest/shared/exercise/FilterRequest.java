@@ -73,6 +73,10 @@ public class FilterRequest implements IsSerializable {
     this.typeToSelection.add(pair);
   }
 
+  public void addPair(String p, String v) {
+    addPair(new Pair(p, v));
+  }
+
   public boolean isNoFilter() {
     return limit == -1 &&
         typeToSelection.isEmpty() &&
@@ -146,6 +150,17 @@ public class FilterRequest implements IsSerializable {
   }
 
   public boolean isExampleRequest() {
+    boolean exampleRequest = this.exampleRequest;
+  /*  if (!exampleRequest) {
+      for (Pair pair : typeToSelection) {
+        if (pair.getProperty().equalsIgnoreCase("CONTENT")) {
+          exampleRequest = pair.getValue().startsWith("Sentences");
+
+          break;
+        }
+      }
+      ;
+    }*/
     return exampleRequest;
   }
 

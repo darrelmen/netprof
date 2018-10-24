@@ -40,6 +40,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.common.MessageHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -71,6 +72,8 @@ import static mitll.langtest.client.analysis.AnalysisTab.TIME_HORIZON.SESSION;
 public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> {
   private final Logger logger = Logger.getLogger("AnalysisPlot");
 
+  private static final String ALL = "All";
+
   private static final int HOUR_DUR = 60 * 60 * 1000;
 
   private static final boolean DEBUG_TIMECHANGE = false;
@@ -86,7 +89,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private static final String MONTH = "Month";
   private static final String YEAR = "Year";
 
-  private static final int STUDENT_WIDTH = 1050;
+  //private static final int STUDENT_WIDTH = 1050;
   /**
    * @see #configureChart
    */
@@ -146,7 +149,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private int index = 0;
 
   private TimeWidgets timeWidgets;
-  //private final MessageHelper messageHelper;
   private Chart chart = null;
   private final boolean useSessionTimeHorizon;
   private SortedSet<TimeAndScore> rawBestScores;
@@ -168,7 +170,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
                       int maxWidth) {
     super(exceptionSupport, messageHelper);
     this.userid = userid;
-    //this.messageHelper = messageHelper;
     this.useSessionTimeHorizon = useSessionTimeHorizon;
 
     setMinHeight(this, 275);
@@ -200,10 +201,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     granToLabel.put(TIME_HORIZON.WEEK.getDuration(), WEEK);
     granToLabel.put(TIME_HORIZON.MONTH.getDuration(), MONTH);
     granToLabel.put(AnalysisTab.YEAR_DUR, YEAR);
-    granToLabel.put(-1L, "All");
+    granToLabel.put(-1L, ALL);
 
     timezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
-    //   logger.info("timezone offset " + timezoneOffset);
+    //  logger.info("populateGranToLabel timezone offset " + timezoneOffset);
   }
 
   /**
@@ -339,13 +340,24 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
   /**
    * Worry about time zone offset - all the rounding is done in UTC (?) unix time...
+   * Rounding not super great --
    *
    * @param lastTime
    * @param granularity
    * @return
    */
   private long getRoundedTo(long lastTime, long granularity) {
-    return (((lastTime) / granularity) * granularity) + timezoneOffset;
+    long l = (((lastTime) / granularity) * granularity) + timezoneOffset;
+
+    if (l > lastTime) {
+      //logger.info("back to before lastTime ");
+
+      l -= granularity;
+
+      if (l > lastTime)
+        logger.warning("hmm? rounded to later than last time " + new Date(l) + " vs last " + new Date(lastTime));
+    }
+    return l;
   }
 
   private SortedSet<Long> getEasyPeriods(List<PhoneSession> sessions) {
@@ -386,7 +398,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       logger.info("session time horizon");
       setTimeHorizon(AnalysisTab.TIME_HORIZON.SESSION);
     } else {
-     // logger.info("ALL time horizon");
+      // logger.info("ALL time horizon");
       //setTimeHorizon(TIME_HORIZON.ALL);
       //gotExtremes(new AxisSetExtremesEvent(null,chart.getXAxis()));
       showSeriesByVisible();
@@ -446,40 +458,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       });
     }
   }
-
-  /**
-   * Only get exercises this person has practiced.
-   * Use this to get info for tooltips, etc.
-   * Too heavy?
-   * Why not get that info on demand?
-   *
-   * @param service
-   * @param userid
-   * @see AnalysisTab#useReport
-   */
-/*  public void populateExerciseMap(ExerciseServiceAsync service, int userid) {
-    // logger.info("populateExerciseMap : get exercises for user " + userid);
-    service.getExerciseIds(
-        new ExerciseListRequest(1, userid)
-            .setOnlyForUser(true),
-        new AsyncCallback<ExerciseListWrapper<T>>() {
-          @Override
-          public void onFailure(Throwable throwable) {
-            logger.warning("\n\n\n-> getExerciseIds " + throwable);
-            messageHelper.handleNonFatalError("problem getting exercise ids", throwable);
-          }
-
-          @Override
-          public void onSuccess(ExerciseListWrapper<T> exerciseListWrapper) {
-            if (exerciseListWrapper != null && exerciseListWrapper.getExercises() != null) {
-              //       Map<Integer, CommonShell> idToEx = getIdToEx();
-//              logger.info("populateExerciseMap : got back " + exerciseListWrapper.getExercises().size() +
-//                  "  exercises for user " + userid);
-              exerciseListWrapper.getExercises().forEach(commonShell -> rememberExercise(commonShell));
-            }
-          }
-        });
-  }*/
 
   /**
    * @param title
@@ -757,10 +735,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @see #configureChart
    */
   private void gotExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
-    // logger.info("gotExtremes...");
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got Extremes"));
-//    logger.info("gotExtremes stack " + exceptionAsString);
-
     detailSeries.forEach(series -> series.setVisible(false, false));
 
     try {
@@ -772,6 +746,9 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
             "\n\tmin " + min + " " + (min == null ? "" : new Date(min.longValue())) +
             "\n\tmax " + max + " " + (max == null ? "" : new Date(max.longValue())
         ));
+
+//        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got Extremes"));
+//        logger.info("gotExtremes stack " + exceptionAsString);
       }
 
       if (min != null && min.longValue() > 0) {
@@ -780,9 +757,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
         if (DEBUG_EXTREMES) logger.info("gotExtremes 1 now min " + new Date(start) + " max " + new Date(end));
         setVisibility(start, end);
         timeChanged(start, end);
-
       } else {
-//        showLastTwentyYears();
         setVisibility(firstTime, lastTime);
       }
       showSeriesByVisible();
@@ -793,16 +768,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       exceptionSupport.logException(e);
     }
   }
-
-/*
-  private void showLastTwentyYears() {
-    long end = System.currentTimeMillis();
-    long start = end - ALL.getDuration();
-    if (DEBUG_EXTREMES) logger.info("gotExtremes 2 now min " + new Date(start) + " max " + new Date(end));
-    setVisibility(start, end);
-    goToLast(TIME_HORIZON.ALL);
-  }
-*/
 
   /**
    * Remember time window of data (x-axis).
@@ -815,30 +780,12 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @see #addChart
    */
   private void setRawBestScores(List<TimeAndScore> rawBestScores) {
-    //Set<Integer> toGet = new HashSet<>();
-
     for (TimeAndScore timeAndScore : rawBestScores) {
-      Integer id = timeAndScore.getExid();
-      addTimeToExID(timeAndScore.getTimestamp(), id);
-      //toGet.add(id);
+      addTimeToExID(timeAndScore.getTimestamp(), timeAndScore.getExid());
     }
 
     if (!rawBestScores.isEmpty()) {
       setTimeRange(rawBestScores);
-
-  /*    if (!toGet.isEmpty()) {
-        service.getShells(toGet, new AsyncCallback<List<CommonShell>>() {
-          @Override
-          public void onFailure(Throwable throwable) {
-            messageHelper.handleNonFatalError("problem getting exercise shells", throwable);
-          }
-
-          @Override
-          public void onSuccess(List<CommonShell> commonShells) {
-            commonShells.forEach(commonShell -> rememberExercise((T)commonShell));
-          }
-        });
-      }*/
     }
 
     commonShellCache.useTimeAndScore(service, rawBestScores);
@@ -887,7 +834,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     switch (timeHorizon) {
       case SESSION:
         Long lastSessionStart = sessions.get(sessions.size() - 1);
-        showLastTimePeriod(xAxis, SESSION.getDuration(), this.sessions, lastSessionStart, lastPlusSlack);
+        showLastTimePeriod(xAxis, this.sessions, lastSessionStart, lastPlusSlack);
         return;
       case DAY:
         showLastDay(xAxis, lastPlusSlack);
@@ -918,15 +865,28 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
   @NotNull
   private Long showLastPeriod(XAxis xAxis, long lastPlusSlack, long duration, List<Long> timePeriods) {
+    //  logger.info("last " + new Date(lastPlusSlack));
     long startOfPrevPeriod = getRoundedTo(lastPlusSlack, duration);
+
+    //logger.info("startOfPrevPeriod " + new Date(startOfPrevPeriod));
     long endOfPeriod = startOfPrevPeriod + duration;
-    return showLastTimePeriod(xAxis, duration, timePeriods, startOfPrevPeriod, endOfPeriod);
+    //logger.info("endOfPeriod " + new Date(endOfPeriod));
+
+    return showLastTimePeriod(xAxis, timePeriods, startOfPrevPeriod, endOfPeriod);
   }
 
 
+  /**
+   * TODO : worry about making a time period that puts the latest points to close to right side of plot
+   *
+   * @param xAxis
+   * @param timePeriods
+   * @param startOfPrevPeriod
+   * @param lastPlusSlack
+   * @return
+   */
   @NotNull
   private Long showLastTimePeriod(XAxis xAxis,
-                                  long duration,
                                   List<Long> timePeriods,
                                   long startOfPrevPeriod,
                                   long lastPlusSlack) {
@@ -971,25 +931,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     float leftRightMargin = windowF * 0.05F;
     int leftRight = Math.round(leftRightMargin);
 
-  /*  long hours = window / HOUR_DUR;
-
-    if (hours < 24) {
-      // logger.info("showAll hours " + hours);
-      firstW -= HOUR_DUR;
-      lastPlusSlack += HOUR_DUR;
-    } else if (window / DAY_DUR < 7) {
-      // logger.info("showAll days " + (window / DAY_DUR));
-      firstW -= DAY_DUR;
-      lastPlusSlack += DAY_DUR;
-    } else if (window / WEEK_DUR < 4) {
-      // logger.info("showAll week " + (window / WEEK_DUR));
-      firstW -= WEEK_DUR;
-      lastPlusSlack += WEEK_DUR;
-    } else {//if (window / MONTH_DUR < 12) {
-      // logger.info("showAll month " + (window / MONTH_DUR));
-      firstW -= MONTH_DUR;
-      lastPlusSlack += MONTH_DUR;
-    }*/
     long[] adjusted = new long[2];
     adjusted[0] = firstW - leftRight;
     adjusted[1] = lastPlusSlack + leftRight;
@@ -1008,7 +949,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   }
 
   private void setTimeDisplay(String shortDate) {
-//
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
 //    logger.info("setTimeDisplay stack " + exceptionAsString);
     timeWidgets.setDisplay(shortDate);
@@ -1129,7 +1069,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @param from
    * @param to
    * @see #gotExtremes
-   * @see #showLastTimePeriod(XAxis, long, List, long, long)
+   * @see #showLastTimePeriod
    */
   private void timeChanged(long from, long to) {
     if (DEBUG_TIMECHANGE) {
@@ -1147,7 +1087,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private String debugFormat(long first) {
     return debugShortFormat.format(new Date(first));
   }
-
 
   private void setTitleScore(long from, long to, int index) {
     SortedSet<TimeAndScore> timeAndScoresInRange = getTimeAndScoresInRange(from, to);

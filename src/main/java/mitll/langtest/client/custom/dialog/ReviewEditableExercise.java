@@ -246,17 +246,14 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
                                 Collection<AudioAttribute> displayed) {
     Map<MiniUser, List<AudioAttribute>> malesMap = audioAttributeExercise.getUserMap(isMale, isContext());
 
-    logger.info("isMale " + isMale + " " + malesMap.size());
-    malesMap.forEach((k, v) -> logger.info("addAudioByGender got " + k + "-" + v));
+/*    logger.info("isMale " + isMale + " " + malesMap.size());
+    malesMap.forEach((k, v) -> logger.info("addAudioByGender got " + k + "-" + v));*/
 
     List<MiniUser> maleUsers = audioAttributeExercise.getSortedUsers(malesMap);
     addTabsForUsers(newUserExercise, tabPanel, malesMap, maleUsers, displayed);
   }
 
   private DivWidget getRecordingWidget(ClientExercise newUserExercise) {
-//    DivWidget widget = new DivWidget();
-//    widget.add(getRecordAudioWithAnno(widget, AudioType.REGULAR));
-//    widget.add(getRecordAudioWithAnno(widget, AudioType.SLOW));
     DivWidget widget = new MyDivWidget();
 
     panels.clear();

@@ -53,10 +53,10 @@ import java.util.Map;
 public interface ListInterface<T extends HasID, U extends HasID> extends RequiresResize, Reloadable {
   /**
    * @seex Navigation#showLearnAndItem
-   * @param name
+   * @param id
    * @return
    */
-  T byID(int name);
+  T byID(int id);
 
   void loadByID(int id);
 
@@ -114,8 +114,6 @@ public interface ListInterface<T extends HasID, U extends HasID> extends Require
   boolean isPendingReq();
 
   void hide();
-
-//  void setState(int id, STATE state);
 
   void addListChangedListener(ListChangeListener<T> listener);
 

@@ -8,7 +8,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
@@ -27,6 +29,7 @@ import mitll.langtest.client.services.LangTestDatabaseAsync;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.user.ActiveUser;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -108,6 +111,8 @@ public class UserMenu {
     choices.add(new LinkAndTitle(MANAGE_USERS, props.getDominoURL()));
     choices.add(new LinkAndTitle(ACTIVE_USERS, new SuccessClickHandler(() -> showActiveUsers(24))));
     choices.add(new LinkAndTitle(ACTIVE_USERS_WEEK, new SuccessClickHandler(() -> showActiveUsers(7 * 24))));
+    choices.add(new LinkAndTitle("Active Teachers", new SuccessClickHandler(this::showActiveTeachers)));
+    choices.add(new LinkAndTitle("All Teachers", new SuccessClickHandler(this::showAllTeachers)));
 
     //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     addSendReport(choices);
@@ -197,52 +202,57 @@ public class UserMenu {
    * @return
    * @see NewBanner#addUserMenu
    */
-  List<LinkAndTitle> getStandardUserMenuChoices() {
+  List<LinkAndTitle> getStandardUserMenuChoices(List<LinkAndTitle> teacherReq) {
     List<LinkAndTitle> choices = new ArrayList<>();
 
     choices.add(getChangePassword());
 
-    maybeAddReqInstructor(choices);
+    LinkAndTitle linkAndTitle = maybeAddReqInstructor(choices);
+    if (linkAndTitle != null) teacherReq.add(linkAndTitle);
+
+    choices.add(getLogOut());
 
     return choices;
   }
 
-  private void maybeAddReqInstructor(List<LinkAndTitle> choices) {
+  private LinkAndTitle maybeAddReqInstructor(List<LinkAndTitle> choices) {
     User current = userManager.getCurrent();
 
     if (current != null && !current.isTeacher() && !current.getPermissions().contains(User.Permission.TEACHER_PERM)) {
-      choices.add(new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS,
+      LinkAndTitle e = new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS,
           new SuccessClickHandler(() -> new DialogHelper(true)
               .show(ARE_YOU_AN_INSTRUCTOR,
-          REQ_MESSAGE, new DialogHelper.CloseListener() {
-            @Override
-            public boolean gotYes() {
-              //logger.info("Sending request.");
-              controller.getUserService().sendTeacherRequest(new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                }
+                  REQ_MESSAGE, new DialogHelper.CloseListener() {
+                    @Override
+                    public boolean gotYes() {
+                      //logger.info("Sending request.");
+                      controller.getUserService().sendTeacherRequest(new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
 
-                @Override
-                public void onSuccess(Void result) {
-                }
-              });
-              return true;
-            }
+                        @Override
+                        public void onSuccess(Void result) {
+                        }
+                      });
+                      return true;
+                    }
 
-            @Override
-            public void gotNo() {
+                    @Override
+                    public void gotNo() {
 
-            }
+                    }
 
-            @Override
-            public void gotHidden() {
+                    @Override
+                    public void gotHidden() {
 
-            }
-          }, "OK", "Cancel"))));
+                    }
+                  }, "OK", "Cancel")));
+      choices.add(e);
+      return e;
     }
+    else return null;
 
-    choices.add(getLogOut());
 
   }
 
@@ -287,7 +297,43 @@ public class UserMenu {
   }
 
   private void showActiveUsers(int hours) {
-    new ActiveUsersManager(controller).show(hours);
+    new ActiveUsersManager(controller).show("Active Users", hours);
+  }
+
+  private void showActiveTeachers() {
+    new ActiveUsersManager(controller) {
+      protected void getUsers(int hours, DialogBox dialogBox, Panel dialogVPanel) {
+        controller.getUserService().getActiveTeachers(new AsyncCallback<List<ActiveUser>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.getMessageHelper().handleNonFatalError("getting active users", caught);
+          }
+
+          @Override
+          public void onSuccess(List<ActiveUser> result) {
+            gotUsers(result, dialogVPanel, dialogBox);
+          }
+        });
+      }
+    }.show("Active Teachers", 0);
+  }
+
+  private void showAllTeachers() {
+    new ActiveUsersManager(controller) {
+      protected void getUsers(int hours, DialogBox dialogBox, Panel dialogVPanel) {
+        controller.getUserService().getTeachers(new AsyncCallback<List<ActiveUser>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.getMessageHelper().handleNonFatalError("getting active users", caught);
+          }
+
+          @Override
+          public void onSuccess(List<ActiveUser> result) {
+            gotUsers(result, dialogVPanel, dialogBox);
+          }
+        });
+      }
+    }.show("All Teachers", 0);
   }
 
   private void downloadFailedAlert() {

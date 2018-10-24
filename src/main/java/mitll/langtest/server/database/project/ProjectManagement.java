@@ -419,9 +419,6 @@ public class ProjectManagement implements IProjectManagement {
   private void addDialogInfo(Project project) {
     if (project.getKind() == ProjectType.DIALOG || true) {
       if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
-        //configureProject(project, false, true);
-
-        //project.getSectionHelper().report();
       }
     }
   }
@@ -448,8 +445,6 @@ public class ProjectManagement implements IProjectManagement {
       db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
     },"ProjectManagement.rememberUsers_"+projectID).start();
   }
-
-
 
   @Override
   public int getUserForFile(String requestURI) {

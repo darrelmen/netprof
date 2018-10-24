@@ -188,6 +188,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
   @NotNull
   private DivWidget getPlayButtonDiv() {
     DivWidget divForPlay = new DivWidget();
+    divForPlay.setWidth("60px");  // so when we go play to pause the button doesn't seem to expand
 
     Widget playButton = playAudioPanel.getPlayButton();
     playButton.addStyleName("topFiveMargin");

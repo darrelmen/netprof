@@ -84,7 +84,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
   private static final int NARROW_THRESHOLD = 1450;
 
-  private static final int ROWS_TO_SHOW = 6;
+  private static final int ROWS_TO_SHOW = 5;
 
   private static final int ITEM_COL_WIDTH = 750;//250;
   private static final int ITEM_COL_WIDTH_NARROW = 500;//190;
@@ -166,8 +166,14 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     this.analysisServiceAsync = analysisServiceAsync;
   }
 
+  /**
+   * Consistent with number of rows
+   *
+   * @see #ROWS_TO_SHOW
+   * @return
+   */
   int getTableHeight() {
-    return 180;
+    return 155;//180;
   }
 
   protected void setMaxWidth() {
@@ -404,7 +410,8 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     Column<WordScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
     int itemColWidth = getItemColWidth();
-    logger.info("addReview itemColWidth " + itemColWidth);
+
+  //  logger.info("addReview itemColWidth " + itemColWidth);
 
     table.setColumnWidth(itemCol, itemColWidth + "px");
 

@@ -43,6 +43,7 @@ import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

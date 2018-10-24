@@ -45,9 +45,7 @@ import mitll.langtest.client.flashcard.HidePolyglotFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.flashcard.QuizIntro;
-import mitll.langtest.client.list.FacetExerciseList;
-import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.list.*;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -67,9 +65,6 @@ import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLO
  */
 public class QuizHelper<T extends CommonShell & ScoredExercise, U extends ClientExercise> extends PracticeHelper<T, U> {
   private final Logger logger = Logger.getLogger("QuizHelper");
-
-  private static final String QUIZ = "Quiz";
-//  private static final int INTDEF_MIN_SCORE = 35;
 
   private final INavigation navigation;
   private int chosenList = -1;
@@ -95,101 +90,6 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
       public PolyglotDialog.MODE_CHOICE getMode() {
         return POLYGLOT;
       }
-
-/*      @Override
-      public int getRoundTimeMinutes(boolean isDry) {
-        FacetExerciseList<T, U> exerciseList = getExerciseListTyped();
-        Map<Integer, IUserList> idToList = exerciseList.getIdToList();
-        if (idToList == null) {
-          logger.info("getRoundTimeMinutes no user lists yet ");
-          return 10;
-        } else {
-          if (chosenList == -1) {
-            setChosenList(exerciseList);
-          }
-
-          IUserList iUserList = idToList.get(chosenList);
-          //   logger.info("getRoundTimeMinutes iUserList " + iUserList + " for " + chosenList);
-          //   logger.info("getRoundTimeMinutes iUserList " + idToList.keySet());
-          return iUserList == null ? 10 : iUserList.getRoundTimeMinutes();
-        }
-      }*/
-
-/*      @Override
-      public int getMinScore() {
-        FacetExerciseList<T, U> exerciseList = getExerciseListTyped();
-        Map<Integer, IUserList> idToList = exerciseList.getIdToList();
-        if (idToList == null) {
-          logger.info("getMinScore no user lists yet ");
-          return INTDEF_MIN_SCORE;
-        } else {
-          if (chosenList == -1) {
-            setChosenList(exerciseList);
-          }
-          IUserList iUserList = idToList.get(chosenList);
-          return iUserList == null ? INTDEF_MIN_SCORE : iUserList.getMinScore();
-        }
-      }*/
-/*
-
-      @Override
-      public boolean shouldShowAudio() {
-        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
-        if (chosenList == -1) {
-          setChosenList(exerciseList);
-        }
-
-        if (chosenList != -1) {
-          controller.getListService().shouldShowAudio(chosenList, new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {
-
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-
-            }
-          });
-        }
-*/
-
-/*
-        FacetExerciseList exerciseList = (FacetExerciseList) this.getExerciseList();
-        Map<Integer, IUserList> idToList = exerciseList.getIdToList();
-        if (idToList == null) {
-          logger.info("shouldShowAudio no user lists yet ");
-          return false;
-        } else {
-          if (chosenList == -1) {
-            setChosenList(exerciseList);
-          }
-          IUserList iUserList = idToList.get(chosenList);
-          if (iUserList == null) {
-            logger.warning("shouldShowAudio : no user list for "+chosenList  + " in " + idToList.size());
-          }
-    *//*      else {
-            logger.info("shouldShowAudio for list " + chosenList + " user list " + iUserList);
-            logger.info("for list " + chosenList + " show audio " + iUserList.shouldShowAudio());
-          }*//*
-          return iUserList != null && iUserList.shouldShowAudio();
-        }*/
-      // }
-
- /*     private void setChosenList(FacetExerciseList exerciseList) {
-        Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
-        String s = candidate.get(LISTS);
-        //   logger.info("getRoundTimeMinutes iUserList " + s);
-        if (s != null && !s.isEmpty()) {
-          try {
-            chosenList = Integer.parseInt(s);
-            // logger.info("setChosenList chosenList " + chosenList);
-          } catch (NumberFormatException e) {
-            logger.warning("couldn't parse list id " + s);
-          }
-        }
-      }
-*/
 
       /**
        * @see PolyglotPracticePanel#reallyStartOver
@@ -226,7 +126,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
                                                           Panel currentExercisePanel,
                                                           INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
         rememberedTopRow = topRow;
-        return (PagingExerciseList<T, U>) new QuizPracticeFacetExerciseList(topRow, currentExercisePanel, instanceName, listHeader);
+        return (PagingExerciseList<T, U>) new QuizPracticeFacetExerciseList(topRow, currentExercisePanel, listHeader);
       }
 
       @Override
@@ -241,7 +141,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
    * @see QuizPracticeFacetExerciseList#getQuizIntro
    */
   private void showQuizForReal() {
-    setMode(POLYGLOT, PolyglotDialog.PROMPT_CHOICE.NOT_YET);
+    setMode(POLYGLOT);
     setNavigation(navigation);
     hideList();
   }
@@ -257,13 +157,16 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
   }
 
   private void clearListSelection() {
-    FacetExerciseList exerciseList = (FacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
+    ListFacetExerciseList exerciseList = (ListFacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
     exerciseList.clearListSelection();
   }
 
   private class QuizPracticeFacetExerciseList extends PracticeFacetExerciseList<T, U> {
-    QuizPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader) {
-      super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, listHeader, INavigation.VIEWS.QUIZ);
+    QuizPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, DivWidget listHeader) {
+      super(topRow, currentExercisePanel, QuizHelper.this.controller,
+          new ListOptions().setInstance(INavigation.VIEWS.QUIZ).setShowPager(false),
+          listHeader, INavigation.VIEWS.QUIZ, QuizHelper.this
+      );
     }
 
 
@@ -310,6 +213,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
     }
 
     @Override
+    @NotNull
     protected DivWidget getPagerAndSort(ExerciseController controller) {
       DivWidget pagerAndSort = super.getPagerAndSort(controller);
       pagerAndSort.setVisible(false);

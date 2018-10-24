@@ -366,7 +366,7 @@ public class BasicDialog {
       logger.info("markError on '" + "" + "' with " + header + "/" + message + " grab " + grabFocus + " warng " + isWarning);
 
     if (isWarning) {
-      dialectGroup.setType(ControlGroupType.WARNING);
+      dialectGroup.setType(ControlGroupType.ERROR);
     } else {
       markErrorOnGroup(dialectGroup);
     }

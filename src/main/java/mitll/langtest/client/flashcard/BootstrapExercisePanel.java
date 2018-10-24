@@ -199,7 +199,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     scoreFeedbackRow.setHeight("52px");
 
 
-
     toAddTo.add(scoreFeedbackRow);
 
     DivWidget wrapper = new DivWidget();
@@ -309,8 +308,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     recordButton.addStyleName("alignCenter");
   }
 
-//  private FlashcardRecordButton toGrab;
-
   /**
    * @param exerciseID
    * @param controller
@@ -322,11 +319,11 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
                                             ExerciseController controller,
                                             final boolean addKeyBinding) {
     AudioAnswerListener exercisePanel = this;
-    return new FlashcardRecordButtonPanel(exercisePanel, controller, exerciseID, 1) {
+    return new FlashcardRecordButtonPanel(exercisePanel, controller) {
       final FlashcardRecordButtonPanel outer = this;
       private Timer waitTimer = null;
 
-      @Override
+ /*     @Override
       protected void showWaiting() {
         if (contextSentenceWhileWaiting != null) {
           scheduleWaitTimer();
@@ -334,17 +331,18 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
           super.showWaiting();
         }
       }
+*/
 
-      @Override
+   /*   @Override
       protected void hideWaiting() {
         super.hideWaiting();
         cancelTimer();
         if (contextSentenceWhileWaiting != null) {
           contextSentenceWhileWaiting.setVisible(false);
         }
-      }
+      }*/
 
-      void scheduleWaitTimer() {
+  /*    private void scheduleWaitTimer() {
         cancelTimer();
 
         waitTimer = new Timer() {
@@ -356,17 +354,14 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
           }
         };
         waitTimer.schedule(500);
-      }
+      }*/
 
-      private void cancelTimer() {
+   /*   private void cancelTimer() {
         if (waitTimer != null) {
-          // logger.info("cancelTimer --- " + this);
-          waitTimer.cancel();
+           waitTimer.cancel();
         }
-        //else {
-        //  logger.info("cancelTimer waitTimer is null " +this);
-        // }
-      }
+
+      }*/
 
       @NotNull
       protected String getDeviceType() {
@@ -439,6 +434,11 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
             }
           }
 
+          @Override
+          protected String getDevice() {
+            return getDeviceValue();
+          }
+
           /**
            * @see FlashcardRecordButton#checkKeyDown
            */
@@ -456,13 +456,18 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
 
           @Override
           public void useResult(AudioAnswer result) {
-            receivedAudioAnswer(result,this);
+            receivedAudioAnswer(result);
+          }
+
+          @Override
+          protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+          //  super.useInvalidResult(exid, validity, dynamicRange);
+            receivedAudioAnswer(new AudioAnswer("", validity, -1, 0, exid));
           }
         };
 
         // without this, the arrow keys may go to the chapter selector
         grabFocus(widgets);
-        //   toGrab = widgets;
         return widgets;
       }
     };
@@ -487,6 +492,8 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   }
 
   String getDeviceValue() {
+//    logger.warning("getDeviceValue default ");
+
     return controller.getBrowserInfo();
   }
 
@@ -510,7 +517,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   }
 
   /**
-   * TODO : use same as in learn tab or vice versa
+   * use same as in learn tab or vice versa
    *
    * @param score
    * @param isFullMatch
@@ -649,10 +656,10 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   }
 
   /**
-   * @see #showCorrectFeedback
    * @param score
    * @param pretestScore
    * @param correct
+   * @see #showCorrectFeedback
    */
   void showRecoFeedback(double score, AlignmentAndScore pretestScore, boolean correct) {
     showPronScoreFeedback(correct, score, pretestScore.isFullMatch());

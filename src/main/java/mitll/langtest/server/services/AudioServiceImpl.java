@@ -86,6 +86,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
 
@@ -232,7 +233,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     try {
       userIDFromSession = checkSession(request);
     } catch (DominoSessionException dse) {
-      logger.info("getJsonForAudio got " + dse);
+      logger.info("getJSONForStream got " + dse);
       JSONObject jsonObject = new JSONObject();
       jsonObject.put(MESSAGE, NO_SESSION);
       return jsonObject;
@@ -266,6 +267,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     String state = getHeader(request, STREAMSTATE);
     String timestamp = getHeader(request, STREAMTIMESTAMP);
+
+    String header = getHeader(request, RECORDINGSESSION);
+    // logger.info("getJSONForStream recording session " + header);
+    device = header == null ? device : header;
 
     byte[] targetArray = IOUtils.toByteArray(request.getInputStream());
     AudioChunk newChunk = new AudioChunk(packet, targetArray);
@@ -315,7 +320,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           audioChunks, jsonObject);
 
       long now2 = System.currentTimeMillis();
-      logger.info("getJsonObject took " + (now2 - then2) + " for  " + realExID + " req " + reqid);
+      logger.info("getJSONForStream END chunk took " + (now2 - then2) + " for ex " + realExID + " req " + reqid + " # chunks " + audioChunks.size());
     }
     // so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
     // otherwise, we'll have to make a list and combine them...
@@ -398,7 +403,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private AudioType getAudioType(HttpServletRequest request) {
     String header = getHeader(request, AUDIOTYPE);
     try {
-      if (header.contains("=")) header = header.replaceAll("=","_");
+      if (header.contains("=")) header = header.replaceAll("=", "_");
       return AudioType.valueOf(header.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.warn("getAudioType : can't parse '" + header + "' as audio type");
@@ -500,10 +505,21 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     long then = System.currentTimeMillis();
     //logger.info("Stop - combine " + audioChunks.size());
 
+    List<Integer> before = audioChunks.stream().map(audioChunk -> audioChunk.getPacket()).collect(Collectors.toList());
     audioChunks.sort(AudioChunk::compareTo);
+    List<Integer> after = audioChunks.stream().map(audioChunk -> audioChunk.getPacket()).collect(Collectors.toList());
+
+    if (!after.equals(before)) {
+      logger.warn("getCombinedAudioChunk before " + before);
+      logger.warn("getCombinedAudioChunk after  " + after);
+    }
 
     AudioChunk combined = audioChunks.get(0);
-    //    logger.info("Stop - combine " + combined);
+    logger.info("getCombinedAudioChunk Stop - combine " + combined);
+
+    if (combined.getPacket() != 0) {
+      logger.warn("\n\n\n\n\n\n getCombinedAudioChunk huh? first packet is " + combined);
+    }
 
     for (int i = 1; i < audioChunks.size(); i++) {
       AudioChunk next = audioChunks.get(i);
@@ -515,7 +531,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         int packet = combined.getPacket();
         int packet1 = next.getPacket();
         if (packet != packet1 - 1) {
-          logger.warn("getCombinedAudioChunk : hmm current packet " + packet + " vs next " + packet1);
+          logger.warn("\n\n\ngetCombinedAudioChunk : hmm current packet " + packet + " vs next " + packet1);
         }
       }
       combined = combined.concat(next);
@@ -524,20 +540,20 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
     long now = System.currentTimeMillis();
 
-    if (DEBUG_REF_TRIM || (now - then) > 20) {
+    if (DEBUG_REF_TRIM || (now - then) > 0) {
       logger.info("getCombinedAudioChunk - finally combine " + combined + " in " + (now - then) + " millis");
     }
     return combined;
   }
 
   /**
-   * @see #getJsonObject
    * @param audioChunks
    * @return
+   * @see #getJsonObject
    */
   private AudioChunk getCombinedRef(List<AudioChunk> audioChunks) {
     long then = System.currentTimeMillis();
-    //logger.info("Stop - combine " + audioChunks.size());
+    logger.info("getCombinedRef stop - combine " + audioChunks.size());
 
     audioChunks.sort(AudioChunk::compareTo);
 
@@ -581,6 +597,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * Walk forward, looking for last silence chunk before a speech chunk
+   *
    * @param audioChunks
    * @return
    */
@@ -616,6 +633,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * Walk backwards through chunks, looking for last sequence of silence chunks, keeping the last one.
+   *
    * @param audioChunks
    * @return
    */
@@ -726,10 +744,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return packet;
     }
 
-  /*  public boolean isCombined() {
-      return combined;
-    }*/
-
     byte[] getWavFile() {
       return wavFile;
     }
@@ -797,10 +811,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
-/*  private String getRequestType(HttpServletRequest request) {
-    return getHeader(request, ScoreServlet.HeaderValue.REQUEST);
-  }*/
-
   private int getMostRecentProjectByUser(int id) {
     return getDatabase().getUserProjectDAO().getCurrentProjectForUser(id);
   }
@@ -822,18 +832,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
     return 1;
   }
-
-/*
-  private int getDialogSessionID(int userid) {
-    List<IDialogSession> currentDialogSessions = getDatabase().getDialogSessionDAO().getCurrentDialogSessions(userid);
-
-    if (!currentDialogSessions.isEmpty()) {
-      IDialogSession next = currentDialogSessions.iterator().next();
-      logger.info("getDialogSessionID current session " + next);
-      return next.getID();
-    } else return -1;
-  }
-*/
 
   private int getRealExID(HttpServletRequest request) {
     int realExID = 0;
@@ -974,8 +972,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       ((Exercise) commonExercise).setProjectID(audioContextProjid);
       audioContext.setExid(commonExercise.getID());
     }
-
-    // CommonShell exercise1 = amas ? db.getAMASExercise(exerciseID) : commonExercise;
 
     if (commonExercise == null && isExistingExercise) {
       logger.warn("writeAudioFile " + getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");

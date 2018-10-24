@@ -32,12 +32,10 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
                                 ExerciseController controller) {
     super(exid,
         controller,
-        DEFAULT_INDEX,
-        true,
         "",
         controller.getProps().doClickAndHold() ? "" : STOP,
-        -1,
-        true);
+        -1
+    );
     this.simpleRecordAudioPanel = simpleRecordAudioPanel;
     setSize(ButtonSize.LARGE);
 

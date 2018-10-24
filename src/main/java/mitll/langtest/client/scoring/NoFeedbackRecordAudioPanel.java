@@ -37,7 +37,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     this.controller = controller;
     this.sessionManager = sessionManager;
 
-    getElement().setId("NoFeedbackRecordAudioPanel_" + exercise.getID());
+    // getElement().setId("NoFeedbackRecordAudioPanel_" + exercise.getID());
   }
 
   /**
@@ -73,11 +73,12 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     NoFeedbackRecordAudioPanel outer = this;
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller) {
       /**
-       * @see RecordButtonPanel#postAudioFile
+       * @see PostAudioRecordButton#startRecording()
        * @return
        */
       @Override
       protected String getDevice() {
+        logger.info("no feedback device");
         return getDeviceValue();
       }
 
@@ -104,7 +105,8 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   }
 
   private String getDeviceValue() {
-    return sessionManager.getSession();
+    String session = sessionManager.getSession();
+    return session == null ? controller.getBrowserInfo() : session;
   }
 
   /**
@@ -137,7 +139,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
    */
   @Override
   public void stopRecording() {
-  //  logger.info("stopRecording on " + exercise.getID());
+    //  logger.info("stopRecording on " + exercise.getID());
     playAudioPanel.setEnabled(true);
     playAudioPanel.hideRecord();
   }

@@ -48,6 +48,7 @@ import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface IUserDAO extends IDAO, AutoCloseable {
   /**
@@ -55,7 +56,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   void ensureDefaultUsers();
 
-  //void addRunnable(Runnable runnable);
+  boolean isValidServer(String server);
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
@@ -212,12 +213,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
   boolean forgotPassword(String user, String url);
 
-  /**
-   * @param key
-   * @return
-   * @@deprecated
-   */
-  User getUserWithResetKey(String key);
+
 
   /**
    * @return
@@ -248,7 +244,9 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   DBUser getDominoAdminUser();
 
   void setProjectManagement(IProjectManagement projectManagement);
-
+ // List<DBUser> getTeachers();
+  Set<Integer> getTeacherIDs();
+  <T> Map<Integer, T> getJustTeachers(Map<Integer, T> activeSince);
 
   class ReportUsers {
     private final List<ReportUser> allUsers;

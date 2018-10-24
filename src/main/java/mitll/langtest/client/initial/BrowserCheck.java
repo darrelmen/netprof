@@ -97,16 +97,6 @@ public class BrowserCheck {
     return this;
   }
 
-/*  public boolean isIE7() {
-    return getBrowserAndVersion().equals("IE 7");
-  }*/
-
-/*
-  public boolean isIE() {
-    return browser.equals("IE");
-  }
-*/
-
   public static boolean isIPad() {
     String userAgent = getUserAgent();
     boolean b = userAgent.contains("ipad") || userAgent.contains("iphone") || userAgent.contains("ipod");

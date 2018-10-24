@@ -30,22 +30,24 @@
  *
  */
 
-package mitll.langtest.client.flashcard;
+package mitll.langtest.server.database.user;
 
-import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.server.database.IDAO;
+import mitll.npdata.dao.SlickPendingUser;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 2/11/14.
- */
-public interface AudioAnswerListener {
-  void postedAudio();
+import java.util.List;
+
+public interface IPendingUserDAO extends IDAO {
+  enum PENDING {REQUESTED, APPROVED, DENIED}
+
+  void insert(int userid, int projid);
+
   /**
-   * @see RecordButtonPanel#receivedAudioAnswer
-   * @param result
+
+   * @see
    */
-  void receivedAudioAnswer(AudioAnswer result);
+  void update(int id, PENDING state, int byUser);
+
+  List<SlickPendingUser> pendingOnProject(int projid);
+
 }

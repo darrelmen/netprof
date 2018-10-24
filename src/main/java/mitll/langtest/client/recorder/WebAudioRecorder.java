@@ -126,8 +126,8 @@ public class WebAudioRecorder {
    * @param audioType
    * @see BrowserRecording#startStream
    */
-  public native void startStream(String url, String exid, String reqid, String isreference, String audioType, String dialogSessionID) /*-{
-      $wnd.serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID);
+  public native void startStream(String url, String exid, String reqid, String isreference, String audioType, String dialogSessionID, String recordingSession) /*-{
+      $wnd.serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID, recordingSession);
   }-*/;
 
   /**
@@ -138,7 +138,7 @@ public class WebAudioRecorder {
   }-*/;
 
   /**
-   *
+   * @see #stopRecording(boolean)
    */
   public native void doStopStream(String abort) /*-{
       $wnd.serviceStopStream(abort);
@@ -174,11 +174,6 @@ public class WebAudioRecorder {
     // console("silenceDetected -- now!");
     getMicPermission().silenceDetected();
   }
-
- /* public static void gotFrame() {
-    //  console("silenceDetected -- now!");
-    FlashRecordPanelHeadless.micPermission.gotStreamResponse();
-  }*/
 
   public static void webAudioMicAvailable() {
     gotResponse = true;
@@ -247,7 +242,6 @@ public class WebAudioRecorder {
     // logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
     doStopStream("" + abort);
   /*  }
-
     else {
       logger.info("WebAudioRecorder.stopRecording - stop and grab wav");
       WebAudioRecorder.wavCallback = wavCallback;

@@ -7,20 +7,20 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.*;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * Full exercises returns CommonExercise - so we're kinda stuck with it...
+ * A facet exercise list that gets client exercises for those that are currently visible.
+ *
+ * Full exercises returns ClientExercise
  *
  * @param <T>
  */
-public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> extends FacetExerciseList<T, ClientExercise> {
-  private final Logger logger = Logger.getLogger("LearnFacetExerciseList");
+public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExercise>
+    extends FacetExerciseList<T, ClientExercise> {
+  private final Logger logger = Logger.getLogger("ClientExerciseFacetExerciseList");
 
   private static final boolean DEBUG = false;
 
@@ -30,32 +30,16 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
    * @param controller
    * @param listOptions
    * @param listHeader
-   * @param isDrillView
    * @param views
    * @see mitll.langtest.client.banner.LearnHelper#getMyListLayout(SimpleChapterNPFHelper)
    */
-  public LearnFacetExerciseList(Panel secondRow,
-                                Panel currentExerciseVPanel,
-                                ExerciseController controller,
-                                ListOptions listOptions,
-                                DivWidget listHeader,
-                                boolean isDrillView,
-                                INavigation.VIEWS views) {
-    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView, views);
-  }
-
-  /**
-   * @param userListID
-   * @param pairs
-   * @return
-   * @see #getTypeToValues
-   */
-  @NotNull
-  @Override
-  protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
-    boolean exampleRequest = views == INavigation.VIEWS.LEARN_SENTENCES;
-//    logger.info("getFilterReq " + exampleRequest);
-    return new FilterRequest(incrReqID(), pairs, userListID).setExampleRequest(exampleRequest);
+  public ClientExerciseFacetExerciseList(Panel secondRow,
+                                         Panel currentExerciseVPanel,
+                                         ExerciseController controller,
+                                         ListOptions listOptions,
+                                         DivWidget listHeader,
+                                         INavigation.VIEWS views) {
+    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, views);
   }
 
   /**
@@ -108,8 +92,59 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
         });
   }
 
+  /**
+   * @param result
+   * @param alreadyFetched
+   * @param visibleIDs
+   * @see #reallyGetExercises
+   */
+  private void getFullExercisesSuccess(ExerciseListWrapper<ClientExercise> result,
+                                       List<ClientExercise> alreadyFetched,
+                                       Collection<Integer> visibleIDs) {
+    // long now = System.currentTimeMillis();
+//    int size = result.getVisibleExercises().isEmpty() ? 0 : result.getVisibleExercises().size();
+    //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
+    int reqID = result.getReqID();
+
+
+    if (DEBUG) logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs.size());
+
+    if (isCurrentReq(reqID)) {
+      Map<Integer, ClientExercise> idToEx = rememberFetched(result, alreadyFetched);
+
+      gotFullExercises(reqID, getVisibleExercises(visibleIDs, idToEx));
+    } else {
+      if (DEBUG_STALE)
+        logger.info("getFullExercisesSuccess : ignoring req " + reqID + " vs current " + getCurrentExerciseReq());
+    }
+  }
+
+  /**
+   * @param visibleIDs
+   * @param idToEx
+   * @return
+   * @see #getFullExercises(Collection, int, Collection, List)
+   */
+  List<ClientExercise> getVisibleExercises(Collection<Integer> visibleIDs, Map<Integer, ClientExercise> idToEx) {
+    List<ClientExercise> toShow = new ArrayList<>();
+    for (int id : visibleIDs) {
+      ClientExercise e = idToEx.get(id);
+      if (e == null) {
+        logger.warning("\n\ngetVisibleExercises : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
+      } else {
+        //   logger.info("getFullExercisesSuccess : show id " + id + " = " + e.getID() + " : " + e.getEnglish());
+        toShow.add(e);
+      }
+    }
+    return toShow;
+  }
+
+
   private int nextPageReq = 0;
 
+  /**
+   * Cache the next page so we don't have to wait for it.
+   */
   protected void goGetNextPage() {
     Set<Integer> toAskFor = getNextPageIDs();
     if (toAskFor.isEmpty()) {

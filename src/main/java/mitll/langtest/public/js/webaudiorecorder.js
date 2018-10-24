@@ -45,7 +45,7 @@ var start = new Date().getTime();
 // called from initWebAudio
 function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
-    // __log('Media stream created.');
+    __log('Media stream created : ' + input);
 
     recorder = new Recorder(input);
 //    __log('Recorder initialised.');
@@ -89,19 +89,19 @@ function startRecording() {
     recorder && recorder.record();
 
     //  && audio_context.state === 'suspended'
-   /*     if (audio_context) {
-            __log('webaudiorecorder.startRecording 1 Start Recording. ' +  audio_context.state);
+    /*     if (audio_context) {
+             __log('webaudiorecorder.startRecording 1 Start Recording. ' +  audio_context.state);
 
-            audio_context.resume().then(function () {
-                __log('webaudiorecorder.startRecording resumed recording...');
-            //    rememberedInput.start();
+             audio_context.resume().then(function () {
+                 __log('webaudiorecorder.startRecording resumed recording...');
+             //    rememberedInput.start();
 
-                recorder && recorder.clear();
-                recorder && recorder.record();
-            });
-        }*/
+                 recorder && recorder.clear();
+                 recorder && recorder.record();
+             });
+         }*/
 
-  //  __log('webaudiorecorder.startRecording 1 Start Recording.  state =' + audio_context.state);
+    //  __log('webaudiorecorder.startRecording 1 Start Recording.  state =' + audio_context.state);
 }
 
 // called from FlashRecordPanelHeadless.stopRecording
@@ -109,20 +109,20 @@ function stopRecording() {
     recorder && recorder.stop();
     // audio_context && audio_context.suspend();
 
- /*   if (audio_context) {
-        __log('webaudiorecorder.stopRecording : state = ' + audio_context.state);
+    /*   if (audio_context) {
+           __log('webaudiorecorder.stopRecording : state = ' + audio_context.state);
 
-        //} && audio_context.state === 'running')
-        // {
-        audio_context.suspend().then(function () {
-            __log('webaudiorecorder.stopRecording suspended recording...');
-         //   rememberedInput.stop();
+           //} && audio_context.state === 'running')
+           // {
+           audio_context.suspend().then(function () {
+               __log('webaudiorecorder.stopRecording suspended recording...');
+            //   rememberedInput.stop();
 
 
-            recorder && recorder.clear();
+               recorder && recorder.clear();
 
-        });
-    }*/
+           });
+       }*/
 
     __log('webaudiorecorder.stopRecording');
 
@@ -133,11 +133,11 @@ function stopRecording() {
 }
 
 // see WebAudioRecorder.startStream
-function serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID) {
+function serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID, recordingSession) {
     __log('webaudiorecorder.startStream ');
-  //  __log('webaudiorecorder.startStream calling recorder');
+    //  __log('webaudiorecorder.startStream calling recorder');
 
-    recorder && recorder.serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID,
+    recorder && recorder.serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID, recordingSession,
         function (blob) {
             //      __log('startStream getStreamResponse.');
             getStreamResponse(blob);
@@ -148,14 +148,14 @@ function serviceStopStream(abort) {
     recorder && recorder.stop();
     //recorder && recorder.clear();
 
-/*    if (audio_context) {//} && audio_context.state === 'running') {
-        __log('webaudiorecorder.serviceStopStream state = ' + audio_context.state);
-        audio_context.suspend().then(function () {
-            __log('webaudiorecorder.serviceStopStream suspended recording...');
+    /*    if (audio_context) {//} && audio_context.state === 'running') {
+            __log('webaudiorecorder.serviceStopStream state = ' + audio_context.state);
+            audio_context.suspend().then(function () {
+                __log('webaudiorecorder.serviceStopStream suspended recording...');
 
-            recorder && recorder.clear();
-        });
-    }*/
+                recorder && recorder.clear();
+            });
+        }*/
 
     recorder && recorder.serviceStopStream(abort, function (blob) {
         //  __log('serviceStopStream getStreamResponse.');
@@ -283,7 +283,7 @@ function initWebAudio() {
                     });
             }
             else if (navigator.getMedia) {
-                //   __log('initWebAudio getMedia ...');
+                __log('initWebAudio (old) getMedia ...');
                 navigator.getMedia(
                     {audio: true},  // only a mic
                     startUserMedia, // when you get it

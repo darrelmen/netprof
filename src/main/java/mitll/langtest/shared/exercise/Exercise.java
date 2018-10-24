@@ -94,6 +94,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private String noAccentFL;
 
+  /**
+   *
+   */
   private int parentExerciseID = -1;
 
   // for serialization

@@ -190,6 +190,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IDialogSessionDAO dialogSessionDAO;
   private IRelatedResultDAO relatedResultDAO;
   private IImageDAO imageDAO;
+  private IPendingUserDAO pendingUserDAO;
 
   public DatabaseImpl() {
   }
@@ -380,7 +381,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
-
+    pendingUserDAO = new PendingUserDAO(dbConnection);
     finalSetup(slickAudioDAO);
   }
 
@@ -927,6 +928,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param userid
    * @param projectid
+   * @see mitll.langtest.server.rest.RestUserManagement#tryToLogin
    * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
    */
   @Override
@@ -1364,7 +1366,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
           dialogDAO.getDialogAttributeJoinHelper(),
           dialogSessionDAO,
           relatedResultDAO,
-          imageDAO
+          imageDAO,
+          pendingUserDAO
       ).forEach(idao -> {
         if (createIfNotThere(idao, known)) {
           created.add(idao.getName());
@@ -2115,6 +2118,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public IDLIClassJoinDAO getDliClassJoinDAO() {
     return dliClassJoinDAO;
+  }
+
+  @Override
+  public IPendingUserDAO getPendingUserDAO() {
+    return pendingUserDAO;
   }
 
   @Override

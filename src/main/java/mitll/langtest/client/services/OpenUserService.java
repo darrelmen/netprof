@@ -115,4 +115,6 @@ public interface OpenUserService extends RemoteService {
   HeartbeatStatus setCurrentUserToProject(int projid, String implVersion);
 
   HeartbeatStatus checkHeartbeat(String implVersion);
+
+  boolean isValidServer(String server);
 }

@@ -112,7 +112,10 @@ public class ASRScoringAudioPanel<T extends HasID> extends ScoringAudioPanel<T> 
                             int height,
                             final int reqid) {
     if (path == null || path.equals("FILE_MISSING")) return;
-    logger.info("scoreAudio : scoring audio " + path + " with ref sentence " + refSentence + " reqid " + reqid);
+
+    if (false)
+      logger.info("scoreAudio : scoring audio " + path + " with ref sentence " + refSentence + " reqid " + reqid);
+
     boolean wasVisible = wordTranscript.isVisible();
 
     // only show the spinning icon if it's going to take awhile

@@ -189,7 +189,8 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
 
     logger.info("getExercisesWithIncorrectAnnotations from " + annoToCreator.size() + " returning " + incorrect.size());
 
-    if (incorrect.size()<20) incorrect.forEach(ex->logger.info("getExercisesWithIncorrectAnnotations return " + ex));
+//    if (incorrect.size()<20) incorrect.forEach(ex->logger.info("getExercisesWithIncorrectAnnotations return " + ex));
+
     return incorrect;
   }
 

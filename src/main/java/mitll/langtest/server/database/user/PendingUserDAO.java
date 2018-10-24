@@ -32,76 +32,71 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.project.ProjectServices;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickPendingUser;
 import mitll.npdata.dao.SlickUserProject;
+import mitll.npdata.dao.project.PendingUserDAOWrapper;
+import mitll.npdata.dao.project.UserProjectDAOWrapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import scala.Tuple2;
 
+import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-public interface IUserProjectDAO extends IDAO {
-  /**
-   * @param userid
-   * @param projid
-   * @see mitll.langtest.server.database.DatabaseImpl#rememberUsersCurrentProject
-   * @see UserProjectDAO#setCurrentProjectForUser
-   * @see
-   */
-  void upsert(int userid, int projid);
+/**
+ * @see DatabaseImpl#initializeDAOs
+ */
+public class PendingUserDAO  implements IPendingUserDAO {
+  private static final Logger logger = LogManager.getLogger(PendingUserDAO.class);
+  private final PendingUserDAOWrapper dao;
 
-  /**
-   * @param bulk
-   * @see mitll.langtest.server.database.copy.UserCopy#addUserProjectBinding
-   */
-  void addBulk(Collection<SlickUserProject> bulk);
 
   /**
-   * @see mitll.langtest.server.database.copy.UserCopy#addUserProjectBinding
-   * @param bulk
+   * @param dbConnection
+   * @see DatabaseImpl#initializeDAOs
    */
-  void forgetUsersBulk(Collection<Integer> bulk);
+  public PendingUserDAO(DBConnection dbConnection) {
 
-  /**
-   * @param user
-   * @return -1 if has no project
-   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getProjectIDFromUser(int)
-   */
-  int getCurrentProjectForUser(int user);
 
-  /**
-   * @see mitll.langtest.server.services.OpenUserServiceImpl#setCurrentUserToProject
-   * @param userid
-   * @param projid
-   * @return
-   */
-  int setCurrentProjectForUser(int userid, int projid);
+    dao = new PendingUserDAOWrapper(dbConnection);
+  }
 
-  /**
-   * @param userid
-   * @see mitll.langtest.server.services.OpenUserServiceImpl#forgetProject
-   */
-  void forget(int userid);
+  @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
+  }
 
-  /**
-   * @see DatabaseImpl#getReport
-   * @return
-   */
-  Map<Integer, Integer> getUserToProject();
+  public void createTable() {
+    dao.createTable();
+  }
 
-  /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#rememberUsers
-   * @param projid
-   * @return
-   */
-  Collection<Integer> getUsersForProject(int projid);
 
-  /**
-   * @see SlickUserSessionDAOImpl#getActiveSince
-   * @param userids
-   * @return
-   */
-  Map<Integer, Integer> getUsersToProject(Collection<Integer> userids);
+  @Override
+  public String getName() {
+    return dao.dao().name();
+  }
 
-  Map<Integer, Tuple2<Integer, Long>> getUsersToProjectAndTime(Collection<Integer> userids);
+
+  @Override
+  public void insert(int userid, int projid) {
+    Timestamp modified = new Timestamp(System.currentTimeMillis());
+    dao.insert(new SlickPendingUser(-1, userid, projid, modified, PENDING.REQUESTED.toString(), modified, -1));
+  }
+
+  @Override
+  public void update(int id, PENDING state, int byUser) {
+    dao.update(id, state.toString(), byUser);
+  }
+
+  @Override
+  public List<SlickPendingUser> pendingOnProject(int projid) {
+    return dao.pendingOnProject(projid);
+  }
 }

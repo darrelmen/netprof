@@ -27,6 +27,9 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+/**
+ * A facet list display of dialogs.
+ */
 class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
@@ -43,7 +46,7 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   DialogExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader,
                      ExerciseController controller) {
-    super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false, INavigation.VIEWS.DIALOG);
+    super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, INavigation.VIEWS.DIALOG);
   }
 
   @Override

@@ -2,9 +2,11 @@ package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.banner.PracticeFacetExerciseList;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.LearnFacetExerciseList;
+import mitll.langtest.client.list.ClientExerciseFacetExerciseList;
+import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListFacetHelper;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.answer.ActivityType;
@@ -15,7 +17,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> extends LearnFacetExerciseList<T> {
+/**
+ * Only show one item at a time, no lists.
+ *
+ * @param <T>
+ */
+public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise>
+    // extends PracticeFacetExerciseList<T, ClientExercise> {
+    extends ClientExerciseFacetExerciseList<T> {
+
+  private static final String ALL_INSPECTED_OR_VISITED = "All inspected or visited";
+  private static final String NONE_INSPECTED = "None Inspected";
+
   public NoListFacetExerciseList(ExerciseController controller,
                                  Panel topRow,
                                  Panel currentExercisePanel,
@@ -26,10 +39,13 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> ext
         topRow,
         currentExercisePanel,
         controller,
+
         new ListOptions(instanceName)
             .setShowFirstNotCompleted(true)
             .setActivityType(ActivityType.RECORDER)
-        , listHeader, true, views);
+        ,
+        listHeader,
+        views);
   }
 
   /**
@@ -39,36 +55,6 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> ext
   @Override
   protected void pushFirstSelection(int exerciseID, String searchIfAny) {
     askServerForExercise(-1);
-  }
-
-  /**
-   * @param type
-   * @param key
-   * @param newUserListID
-   * @return
-   * @see #getChoiceHandler
-   */
-  @Override
-  protected String getChoiceHandlerValue(String type, String key, int newUserListID) {
-    return key;
-  }
-
-  /**
-   * No list facet or special facet.
-   *
-   * @paramx typeToValues
-   * @return
-   * @see #addFacetsForReal
-   */
-//  @Override
-//  protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
-//    return null;
-//  }
-
-  @NotNull
-  @Override
-  protected ListFacetHelper getListFacetHelper(ExerciseController controller) {
-    return new ListFacetHelper(controller, getDynamicFacet(), getListType(), this, true);
   }
 
   /**
@@ -100,9 +86,28 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> ext
   }
 
   @Override
-  protected void showDrill(Collection<ClientExercise> result) {
-    super.showDrill(result);
-    // logger.info("showDrill result size " + result.size());
+  protected Collection<Integer> getVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
+    if (itemID > 0) {
+      visibleIDs = new ArrayList<>();
+      visibleIDs.add(itemID);
+    }
+    return visibleIDs;
+  }
+
+  @Override
+  protected void showExercises(final Collection<ClientExercise> result, final int reqID) {
+    hidePrevNextWidgets();
+    showOnlyOneExercise(result);
+    goGetNextPage();
+    setProgressVisible(false);
+  }
+
+  //@Override
+  protected void showOnlyOneExercise(Collection<ClientExercise> result) {
+    ClientExercise next = result.iterator().next();
+    markCurrentExercise(next.getID());
+    addExerciseWidget(next);
+    // logger.info("showOnlyOneExercise result size " + result.size());
     int num = getIndex(getCurrentExercise().getID());
     // showNumberPracticed(num, pagingContainer.getSize());
     showProgress(num, pagingContainer.getSize(), practicedProgress,
@@ -111,12 +116,12 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> ext
 
   @NotNull
   protected String getAllDoneMessage() {
-    return "All inspected or visited";
+    return ALL_INSPECTED_OR_VISITED;
   }
 
   @NotNull
   protected String getNoneDoneMessage() {
-    return "None Inspected";
+    return NONE_INSPECTED;
   }
 
   protected String getPracticedText(int num, int denom, String zeroPercent, String oneHundredPercent, String suffix) {
