@@ -82,12 +82,10 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     //  exerciseListRequest.setOnlyRecordedByMatchingGender(true);
     exerciseListRequest.setOnlyUnrecordedByMe(true);
 
-
     logger.info("getExerciseListRequest req " + exerciseListRequest);
 
-
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest"));
-    logger.info("logException stack " + exceptionAsString);
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest"));
+//    logger.info("logException stack " + exceptionAsString);
 
     return exerciseListRequest;
   }

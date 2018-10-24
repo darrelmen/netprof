@@ -57,7 +57,7 @@ public interface ExerciseService<T extends CommonShell & ScoredExercise> extends
    */
   T getExercise(int exid, boolean isFlashcardReq) throws DominoSessionException;
 
-  ExerciseListWrapper<ClientExercise> getFullExercises(int reqid, Collection<Integer> ids) throws DominoSessionException;
+  ExerciseListWrapper<ClientExercise> getFullExercises(ExerciseListRequest request, Collection<Integer> ids) throws DominoSessionException;
 
   FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException;
 

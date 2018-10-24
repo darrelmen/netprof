@@ -728,6 +728,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param projID
    * @seex LoadTesting#getExercise(String, long, boolean)
    * @see #makeExerciseListWrapper
+   * @see #getAnnotatedExercise(int, int, int)
    */
   private void addAnnotationsAndAudio(int userID, CommonExercise firstExercise, boolean isQC, int projID) {
     long then = System.currentTimeMillis();
@@ -786,10 +787,11 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   /**
+   * Add annotations to parent exercise and any child exercise.
    * @param byID
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, int)
    */
-  private void addAnnotations(CommonExercise byID) {
+  private void addAnnotations(ClientExercise byID) {
     IUserListManager userListManager = db.getUserListManager();
     userListManager.addAnnotations(byID);
     byID.getDirectlyRelated().forEach(userListManager::addAnnotations);
@@ -803,9 +805,11 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguageEnum(firstExercise), new HashMap<>());
   }
 
+/*
   private String getLanguage(CommonExercise firstExercise) {
     return db.getLanguage(firstExercise);
   }
+*/
 
   /**
    * Only add the played markings if doing QC.
@@ -1331,13 +1335,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   /**
-   * @param reqid
+   * @param request
    * @param ids
    * @return
    * @see mitll.langtest.client.list.FacetExerciseList#getExercises
    */
   @Override
-  public ExerciseListWrapper<ClientExercise> getFullExercises(int reqid, Collection<Integer> ids) throws DominoSessionException {
+  public ExerciseListWrapper<ClientExercise> getFullExercises(ExerciseListRequest request, Collection<Integer> ids) throws DominoSessionException {
     List<ClientExercise> exercises = new ArrayList<>();
 
     int userID = getUserIDFromSessionOrDB();
@@ -1402,8 +1406,18 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
 */
 
+    if (request.isOnlyUninspected()) {
+      exercises.forEach(firstExercise -> {
+        addAnnotations(firstExercise); // todo do this in a better way
+
+        if (request.isQC()) {
+          addPlayedMarkings(userID, firstExercise.asCommon());
+        }
+      });
+    }
+
     // for (CommonExercise exercise : exercises) logger.info("\treturning " + exercise.getID());
-    return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistoryPerExercise);
+    return new ExerciseListWrapper<>(request.getReqID(), exercises, null, scoreHistoryPerExercise);
   }
 
   /**

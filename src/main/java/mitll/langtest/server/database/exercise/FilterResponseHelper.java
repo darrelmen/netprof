@@ -176,9 +176,7 @@ public class FilterResponseHelper {
   private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest exerciseListRequest) {
     logger.info("getFilterResponse exercise req " + exerciseListRequest);
     SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelperFromFiltered(projectID, exerciseListRequest);
-
-    unrecordedSectionHelper.report();
-
+    // unrecordedSectionHelper.report();
     FilterResponse typeToValues = unrecordedSectionHelper.getTypeToValues(request, false);
     logger.info("getFilterResponse resp " + typeToValues);
 
@@ -252,11 +250,17 @@ public class FilterResponseHelper {
 //    }
 
     if (request.isOnlyWithAnno()) {
-      if (request.isOnlyExamples()) {
+      boolean isContext = request.isOnlyExamples() || request.shouldAddContext();
+      if (isContext) {
         logger.info("filterExercises OK doing examples 2");
         exercises = getContextExercises(exercises);
       }
-      exercises = filterByOnlyAnno(exercises, projid, request.shouldAddContext());
+
+      exercises = filterByOnlyAnno(exercises, projid, isContext);
+
+      if (isContext) {
+        exercises = getParentChildPairs(exercises, projid);
+      }
     }
 //    if (request.isOnlyDefaultAudio()) {
 //      exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
@@ -285,6 +289,21 @@ public class FilterResponseHelper {
     return exercises;
   }
 
+  private List<CommonExercise> getParentChildPairs(List<CommonExercise> exercises, int projid) {
+    List<CommonExercise> pairs = new ArrayList<>();
+    exercises.forEach(contextEx -> {
+      int parentExerciseID = contextEx.getParentExerciseID();
+      if (parentExerciseID < 0) logger.warn("no parent for " + contextEx.getID());
+      else {
+        Exercise parent = new Exercise(databaseServices.getExercise(projid, parentExerciseID));
+        pairs.add(parent);
+        parent.getDirectlyRelated().clear();
+        parent.getDirectlyRelated().add(contextEx);
+      }
+    });
+    return pairs;
+  }
+
 
   /**
    * @paramx onlyAudioAnno
@@ -305,14 +324,17 @@ public class FilterResponseHelper {
       return exercises;
     }
   }*/
-
   private List<CommonExercise> filterByOnlyAnno(List<CommonExercise> exercises, int projID, boolean isContext) {
     Collection<Integer> audioAnnos = databaseServices.getUserListManager().getAnnotationDAO().getExercisesWithIncorrectAnnotations(projID, isContext);
     List<CommonExercise> copy = new ArrayList<>(audioAnnos.size());
     for (CommonExercise exercise : exercises) {
-      if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
+      if (audioAnnos.contains(exercise.getID())) {
+        copy.add(exercise);
+        logger.info("filterByOnlyAnno for " + exercise.getID() +
+            " parent is " + exercise.getParentExerciseID());
+      }
     }
-    logger.info("from " + exercises.size() + " to " + copy.size());
+    logger.info("filterByOnlyAnno from " + exercises.size() + " to " + copy.size());
     return copy;
   }
 

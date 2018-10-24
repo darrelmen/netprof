@@ -503,8 +503,11 @@ public class CommentBox extends PopupContainerFactory {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.isEmpty();
 
-/*      logger.info("commentComplete ex #" + exerciseID +
-          " field " + field + " comment '" + comment + "' correct = " + isCorrect);*/
+      logger.info("commentComplete " +
+          "\n\tex #    " + exerciseID +
+          "\n\tfield   " + field +
+          "\n\tcomment '" + comment + "' " +
+          "\n\tcorrect " + isCorrect);
 
       addToolTip(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);

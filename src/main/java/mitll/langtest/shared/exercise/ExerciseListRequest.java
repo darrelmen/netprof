@@ -427,4 +427,9 @@ public class ExerciseListRequest implements IsSerializable {
             (QC ? "\n\tqc request    " : "")
         ;
   }
+
+  public ExerciseListRequest setReqID(int currentReq) {
+    this.reqID=currentReq;
+    return this;
+  }
 }

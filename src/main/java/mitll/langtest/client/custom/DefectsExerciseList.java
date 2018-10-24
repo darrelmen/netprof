@@ -71,8 +71,8 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
             .setAddContext(isContext);
     logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
 
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
-    logger.info("logException stack " + exceptionAsString);
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
+//    logger.info("logException stack " + exceptionAsString);
 
     return exerciseListRequest;
   }

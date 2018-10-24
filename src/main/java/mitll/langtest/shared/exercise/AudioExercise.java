@@ -75,7 +75,7 @@ public class AudioExercise extends ExerciseShell {
    * @param projectid
    * @paramx shouldSwap
    */
-  AudioExercise(int id, int projectid ) {
+  AudioExercise(int id, int projectid) {
     super(id);
     this.projectid = projectid;
   }
@@ -113,8 +113,8 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#attachAudioAndFixPath
    * @param audioAttribute
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#attachAudioAndFixPath
    */
   public synchronized void addAudio(AudioAttribute audioAttribute) {
     if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
@@ -133,7 +133,7 @@ public class AudioExercise extends ExerciseShell {
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
-  public synchronized AudioAttribute getSlowSpeed() {
+  private synchronized AudioAttribute getSlowSpeed() {
     return getAudio(SPEED, SLOW);
   }
 
@@ -228,7 +228,7 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @param isMale
    * @return
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay(CommonExercise)
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay
    */
   public synchronized AudioAttribute getAudioAttrPrefGender(boolean isMale) {
     Collection<AudioAttribute> audioPrefGender = getAudioPrefGender(isMale);
@@ -271,7 +271,7 @@ public class AudioExercise extends ExerciseShell {
     for (AudioAttribute audioAttribute : getAudioAttributes()) {
       if (audioAttribute.getAudioType() == AudioType.CONTEXT_REGULAR &&
           ((isMale && audioAttribute.isMale()) || (!isMale && !audioAttribute.isMale()))
-          ) {
+      ) {
         if (audioAttribute.getTimestamp() >= latestTime) {
           latest = audioAttribute;
           latestTime = audioAttribute.getTimestamp();

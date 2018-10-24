@@ -89,7 +89,7 @@ public abstract class BaseAudioDAO extends DAO {
   private final int netProfDurLength;
 
   private static final boolean DEBUG_AUDIO_REPORT = false;
-  private static final boolean DEBUG_ATTACH = false;
+  private static final boolean DEBUG_ATTACH = true;
   private static final boolean DEBUG_ATTACH_PATH = false;
 
   /**
@@ -171,8 +171,9 @@ public abstract class BaseAudioDAO extends DAO {
     logger.info("attachAudioToExercises to " + exercises.size() + " exercises for " +
         language + " : " + exerciseIDs.size());
 
-    exercises.forEach(exercise -> exercise.getDirectlyRelated()
-        .forEach(exercise1 -> exerciseIDs.add(exercise1.getID())));
+    exercises
+        .forEach(exercise -> exercise.getDirectlyRelated()
+            .forEach(exercise1 -> exerciseIDs.add(exercise1.getID())));
 
     if (DEBUG_ATTACH) logger.info("attachAudioToExercises getting audio for " + new TreeSet<>(exerciseIDs));
 
@@ -419,8 +420,8 @@ public abstract class BaseAudioDAO extends DAO {
             "\n\texercise text '" + exerciseText + "'" +
             "\n\ttranscript    '" + transcript + "'" +
             "\n\tpath           " + attr.getAudioRef() +
-            "\n\tuserid         " + attr.getUserid()+
-            "\n\tuser           " + attr.getUser().getUserID()+
+            "\n\tuserid         " + attr.getUserid() +
+            "\n\tuser           " + attr.getUser().getUserID() +
             "\n\taudio id       " + attr.getUniqueID()
         );
       }

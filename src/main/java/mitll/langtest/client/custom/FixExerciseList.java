@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
-  private final Logger logger = Logger.getLogger("DefectsExerciseList");
+  private final Logger logger = Logger.getLogger("FixExerciseList");
 
   //  private MarkDefectsChapterNPFHelper markDefectsChapterNPFHelper;
   //Logger logger = Logger.getLogger("NPExerciseList_Defects");
@@ -70,9 +70,8 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
             .setQC(true)
             .setAddContext(isContext);
     logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
-
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
-    logger.info("logException stack " + exceptionAsString);
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
+//    logger.info("logException stack " + exceptionAsString);
 
     return exerciseListRequest;
   }

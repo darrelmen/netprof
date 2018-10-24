@@ -49,7 +49,7 @@ public interface AudioRefExercise {
   boolean hasRefAudio();
 
   /**
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#hasAudio
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#hasAudio
    * @param vocab
    * @return
    */
@@ -59,9 +59,19 @@ public interface AudioRefExercise {
 
   String getSlowAudioRef();
 
+  /**
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#getRegularSpeedIfAvailable
+   * @return
+   */
   AudioAttribute getRegularSpeed();
 
+  /**
+   *
+   * @return
+   */
+/*
   AudioAttribute getSlowSpeed();
+*/
 
   Collection<AudioAttribute> getAudioAttributes();
 

@@ -44,7 +44,7 @@ public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
 
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
 
-  void getFullExercises(int reqid, Collection<Integer> ids, AsyncCallback<ExerciseListWrapper<ClientExercise>> async);
+  void getFullExercises(ExerciseListRequest request, Collection<Integer> ids, AsyncCallback<ExerciseListWrapper<ClientExercise>> async);
 
   void getLatestScoreAudioPath(int userID, int exid, long nearTime, AsyncCallback<Pair> async);
 }

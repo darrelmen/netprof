@@ -90,7 +90,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     //   logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
-      logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
+    //  logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
       showContent(content, instanceName);
     //  npfExerciseList.reloadWithCurrent();
     } else {

@@ -27,7 +27,6 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
   private static final boolean DEBUG = false;
 
   /**
-   * @see mitll.langtest.client.banner.LearnHelper#getMyListLayout(SimpleChapterNPFHelper)
    * @param secondRow
    * @param currentExerciseVPanel
    * @param controller
@@ -35,6 +34,7 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
    * @param listHeader
    * @param isDrillView
    * @param views
+   * @see mitll.langtest.client.banner.LearnHelper#getMyListLayout(SimpleChapterNPFHelper)
    */
   public LearnFacetExerciseList(Panel secondRow,
                                 Panel currentExerciseVPanel,
@@ -47,11 +47,11 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
   }
 
   /**
-   * @see #reallyGetExercises
    * @param visibleIDs
    * @param currentReq
    * @param requested
    * @param alreadyFetched
+   * @see #reallyGetExercises
    */
   protected void getFullExercises(Collection<Integer> visibleIDs,
                                   int currentReq,
@@ -66,7 +66,7 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
           "\n\talready   " + getIDs(alreadyFetched));
     }
 
-    service.getFullExercises(currentReq,
+    service.getFullExercises(getExerciseListRequest("").setReqID(currentReq),
         requested,
         new AsyncCallback<ExerciseListWrapper<ClientExercise>>() {
           @Override
@@ -87,7 +87,7 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
                 logger.info("getFullExercises took " + (now - then) + " to get " + size + " exercises");
               }
 
-          //    result.getExercises().forEach(ex->logger.info("got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage()));
+              //    result.getExercises().forEach(ex->logger.info("got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage()));
               getFullExercisesSuccess(result, alreadyFetched, visibleIDs);
             } else {
               logger.warning("getFullExercises huh? no exercises from " + requested);
@@ -96,6 +96,8 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
         });
   }
 
+  private int nextPageReq = 0;
+
   protected void goGetNextPage() {
     Set<Integer> toAskFor = getNextPageIDs();
     if (toAskFor.isEmpty()) {
@@ -103,7 +105,8 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
     } else {
       long then = System.currentTimeMillis();
       //     logger.info("goGetNextPage toAskFor " + toAskFor.size() + " exercises.");
-      service.getFullExercises(-1, toAskFor,
+      int currentReq = nextPageReq++;
+      service.getFullExercises(getExerciseListRequest("").setReqID(currentReq), toAskFor,
           new AsyncCallback<ExerciseListWrapper<ClientExercise>>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -112,16 +115,20 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
 
             @Override
             public void onSuccess(final ExerciseListWrapper<ClientExercise> result) {
-              if (result.getExercises() != null) {
-                long now = System.currentTimeMillis();
-                int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
-                if (now - then > 150 || DEBUG) {
-                  logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
-                }
-                setScoreHistory(result.getScoreHistoryPerExercise(), result.getExercises());
-                result.getExercises().forEach(ex -> addExerciseToCached(ex));
+              if (result.getReqID() != currentReq) {
+                logger.info("goGetNextPage skip stale req " + result.getReqID());
               } else {
-                logger.warning("getFullExercises huh? no exercises");
+                if (result.getExercises() != null) {
+                  long now = System.currentTimeMillis();
+                  int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
+                  if (now - then > 150 || DEBUG) {
+                    logger.info("getFullExercisesSuccess took " + (now - then) + " to get " + size + " exercises");
+                  }
+                  setScoreHistory(result.getScoreHistoryPerExercise(), result.getExercises());
+                  result.getExercises().forEach(ex -> addExerciseToCached(ex));
+                } else {
+                  logger.warning("getFullExercises huh? no exercises");
+                }
               }
             }
           });
