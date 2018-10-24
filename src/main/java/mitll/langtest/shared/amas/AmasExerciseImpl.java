@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.amas;
 
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
@@ -206,9 +205,10 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
    * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    */
 
-  public void addUnitToValue(String unit, String value) {
-    if (value == null) return;
+  public boolean addUnitToValue(String unit, String value) {
+    if (value == null) return false;
     this.getUnitToValue().put(unit, value);
+    return true;
   }
 
   @Override
@@ -229,14 +229,19 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     return realID;
   }
 
-  @Override
-  public STATE getState() {
-    return state;
-  }
+//  @Override
+//  public STATE getState() {
+//    return state;
+//  }
+//
+//  @Override
+//  public void setState(STATE state) {
+//    this.state = state;
+//  }
 
   @Override
-  public void setState(STATE state) {
-    this.state = state;
+  public boolean isContext() {
+    return false;
   }
 
   /**
@@ -244,14 +249,15 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
    *
    * @return
    */
-  @Override
-  public STATE getSecondState() {
-    return null;
-  }
+//  @Override
+//  public STATE getSecondState() {
+//    return null;
+//  }
+//
+//  @Override
+//  public void setSecondState(STATE state) {
+//  }
 
-  @Override
-  public void setSecondState(STATE state) {
-  }
 
   public String toString() {
     return "Exercise " + getOldID() + (getAltID().isEmpty() ? "" : "/" + getAltID()) +
@@ -312,6 +318,11 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     return false;
   }*/
 
+  @Override
+  public int getNumContext() {
+    return 0;
+  }
+
   public String getOrient() {
     return orient;
   }
@@ -322,7 +333,7 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
 
   /**
    * @return
-   * @see mitll.langtest.client.amas.AudioExerciseContent#addAudioRow(AmasExerciseImpl, String, boolean, Panel, int, int)
+   * @seex mitll.langtest.client.amas.AudioExerciseContent#addAudioRow(AmasExerciseImpl, String, boolean, Panel, int, int)
    */
   public String getAudioURL() {
     return audioURL;

@@ -2,9 +2,7 @@ package mitll.langtest.shared.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.project.Language;
 
 import java.util.HashMap;
 import java.util.List;

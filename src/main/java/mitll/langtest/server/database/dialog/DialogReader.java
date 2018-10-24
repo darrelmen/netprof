@@ -280,7 +280,7 @@ class DialogReader {
   }
 
   class CVMatch {
-    private Set<CommonExercise> netprofEntries;
+    private final Set<CommonExercise> netprofEntries;
     private Map<String, CommonExercise> tokenToEx;
 
     CVMatch(Set<CommonExercise> netprofEntries) {//}, Map<String, CommonExercise> tokenToEx) {

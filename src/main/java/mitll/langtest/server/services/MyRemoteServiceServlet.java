@@ -337,7 +337,6 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       return Language.UNKNOWN;
     } else {
       return getProject(projectID).getLanguageEnum();
-      //return toEnum(project.getProject().language());
     }
   }
 

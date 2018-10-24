@@ -417,7 +417,7 @@ import java.util.*;
       "Custom_463\n" +
       "Custom_464";
 
-  String mandarinAlt = "今天天气比昨天好，不下雪了。\n" +
+  final String mandarinAlt = "今天天气比昨天好，不下雪了。\n" +
       "我约了朋友明天去滑冰，不知道天气会怎么样，冷不冷？\n" +
       "我刚才看了网上的天气预报，明天天气比今天更好。\n" +
       "不但不会下雪，而且会暖和一点。\n" +
@@ -804,7 +804,7 @@ import java.util.*;
       "爷爷、奶奶在烤鸭店等我们呢！\n" +
       "烤鸭店";
 
-  String altLesson = "L11\n" +
+  final String altLesson = "L11\n" +
       "L11\n" +
       "L11\n" +
       "L11\n" +
@@ -1191,9 +1191,9 @@ import java.util.*;
       "L20\n" +
       "L20";
 
-  private List<String> specialIDs = Arrays.asList(mandarinSpecial.split("\n"));
-  private List<String> altMandarin = Arrays.asList(mandarinAlt.split("\n"));
-  private List<String> altLessonList = Arrays.asList(altLesson.split("\n"));
+  private final List<String> specialIDs = Arrays.asList(mandarinSpecial.split("\n"));
+  private final List<String> altMandarin = Arrays.asList(mandarinAlt.split("\n"));
+  private final List<String> altLessonList = Arrays.asList(altLesson.split("\n"));
 
 
   private boolean isConvertable(Exercise exercise) {

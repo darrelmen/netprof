@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.user.FormField;
@@ -102,7 +101,6 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    * @param foreignLang
    * @param rap
    * @param normalSpeedRecording
-   * @param pagingContainer
    * @param toAddTo
    * @see
    */
@@ -110,9 +108,8 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   protected void gotBlur(FormField foreignLang,
                          RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording,
-                         ListInterface<T, U> pagingContainer,
                          Panel toAddTo) {
-    validateThenPost(rap, normalSpeedRecording, pagingContainer, toAddTo, false);
+    validateThenPost(rap, normalSpeedRecording, toAddTo, false);
   }
 
   /**
@@ -132,15 +129,13 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   /**
    * Add remove from list button
    *
-   * @param pagingContainer
    * @param toAddTo
    * @param normalSpeedRecording
    * @return
    * @see NewUserExercise#addFields
    */
   @Override
-  protected Panel getCreateButton(ListInterface<T, U> pagingContainer,
-                                  Panel toAddTo,
+  protected Panel getCreateButton(Panel toAddTo,
                                   ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
@@ -170,23 +165,20 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   }
 
   /**
-   * @param exerciseList
    * @param toAddTo
    * @param onClick
-   * @see NewUserExercise#validateThenPost(RecordAudioPanel, ControlGroup, ListInterface, Panel, boolean)
+   * @see NewUserExercise#validateThenPost(RecordAudioPanel, ControlGroup, Panel, boolean)
    */
   @Override
-  void afterValidForeignPhrase(final ListInterface<T, U> exerciseList,
-                               final Panel toAddTo,
-                               boolean onClick) {
+  void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {
     //  if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
     // checkForForeignChange();
-    postChangeIfDirty(exerciseList, onClick);
+    postChangeIfDirty(onClick);
   }
 
   @Override
   protected void formInvalid() {
-    postChangeIfDirty(exerciseList, false);
+    postChangeIfDirty(false);
   }
 
   /**
@@ -194,7 +186,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    * If the translation is new but the audio isn't, ask and clear
    *
    * @return
-   * @see NewUserExercise#afterValidForeignPhrase(ListInterface, Panel, boolean)
+   * @see NewUserExercise#afterValidForeignPhrase(Panel, boolean)
    */
 /*  boolean checkForForeignChange() {
     boolean didChange = false;//foreignChanged();

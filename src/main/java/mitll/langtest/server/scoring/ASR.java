@@ -61,7 +61,7 @@ public interface ASR {
 
   SmallVocabDecoder getSmallVocabDecoder();
 
-  String getUsedTokens(Collection<String> lmSentences, List<String> background);
+ // String getUsedTokens(Collection<String> lmSentences, List<String> background);
 
   boolean isAvailableCheckNow();
 

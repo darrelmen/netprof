@@ -33,12 +33,8 @@
 package mitll.langtest.client.gauge;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.IconAnchor;
-import com.github.gwtbootstrap.client.ui.constants.IconSize;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -61,8 +57,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
 /**
  * ASR Scoring panel -- shows phonemes.
@@ -89,7 +83,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   private final DateTimeFormat format = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat todayTimeFormat = DateTimeFormat.getFormat("h:mm a");
   private final String todaysDate, todayYear;
-  private boolean addPlayer;
+  private final boolean addPlayer;
 
   /**
    * @see SimpleRecordAudioPanel#getScoreHistory

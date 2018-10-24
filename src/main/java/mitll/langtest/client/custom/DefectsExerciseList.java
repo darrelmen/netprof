@@ -3,10 +3,8 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.recording.NoListFacetExerciseList;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.HistoryExerciseList;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +19,7 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   //  private MarkDefectsChapterNPFHelper markDefectsChapterNPFHelper;
   //Logger logger = Logger.getLogger("NPExerciseList_Defects");
   // private CheckBox filterOnly, uninspectedOnly;
-  private boolean isContext;
+  private final boolean isContext;
 
   DefectsExerciseList(ExerciseController controller,
                       Panel topRow,
@@ -43,7 +41,6 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
    * @param typeToSection
    * @param prefix
    * @param onlyWithAudioAnno
-   * @param onlyDefaultUser
    * @param onlyUninspected
    * @return
    * @see HistoryExerciseList#loadExercisesUsingPrefix
@@ -52,11 +49,10 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
                                                        boolean onlyWithAudioAnno,
-                                                       boolean onlyDefaultUser,
                                                        boolean onlyUninspected) {
 
     ExerciseListRequest exerciseListRequest = super
-        .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected)
+        .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUninspected)
         .setOnlyUninspected(true)
         .setQC(true)
         .setAddContext(isContext);
@@ -74,8 +70,8 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
             .setAddContext(isContext);
     logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
 
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
-    logger.info("logException stack " + exceptionAsString);
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
+//    logger.info("logException stack " + exceptionAsString);
 
     return exerciseListRequest;
   }

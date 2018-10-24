@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -21,6 +22,7 @@ import mitll.langtest.client.custom.dialog.CreateListComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.custom.UserList;
@@ -39,6 +41,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
+  public static final String PRACTICE_THE_LIST = "Practice the list.";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
@@ -452,7 +455,7 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void showLearnList(ListContainer container) {
-    controller.showListIn(getListID(container), INavigation.VIEWS.LEARN);
+    controller.getNavigation().showListIn(getListID(container), INavigation.VIEWS.LEARN);
   }
 
   private void showQuiz(ListContainer container) {
@@ -464,9 +467,8 @@ public class ListView implements ContentView, CreateListComplete {
     Button drill = getSuccessButton(DRILL);
     drill.setType(ButtonType.INFO);
 
-    drill.addClickHandler(event -> controller.showListIn(getListID(container), INavigation.VIEWS.DRILL));
-    addTooltip(drill, "Drill the list.");
-    // drill.setEnabled(!container.isEmpty());
+    drill.addClickHandler(event -> controller.showListIn(getListID(container), INavigation.VIEWS.PRACTICE));
+    addTooltip(drill, PRACTICE_THE_LIST);
     container.addButton(drill);
 
     return drill;
@@ -687,14 +689,31 @@ public class ListView implements ContentView, CreateListComplete {
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setIcon(IconType.PLUS);
 
+/*    {
+      KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
+        @Override
+        public String getName() {
+          logger.info("getName ");
+          return null;
+        }
+
+        @Override
+        public void gotPress(NativeEvent ne, boolean isKeyDown) {
+          logger.info("gotPress " + isKeyDown);
+
+          closeButton.click();
+          controller.removeKeyListener(myListener);
+        }
+      };
+      this.myListener = listener;
+      controller.addKeyListener(listener);
+    }*/
+
     return dialogHelper;
   }
 
-  //  private boolean canMakeQuiz() {
-//    Collection<User.Permission> permissions = controller.getPermissions();
-//    return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
-//  }
-//
+  // TODO :  text box has focus... - need to be a little smarter
+ // private KeyPressHelper.KeyListener myListener;
   private CreateListDialog editDialog;
 
   private void doEdit() {

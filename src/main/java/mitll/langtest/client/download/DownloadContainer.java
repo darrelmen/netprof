@@ -10,12 +10,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.instrumentation.EventRegistration;
-import mitll.langtest.server.database.DatabaseImpl;
 import org.jetbrains.annotations.NotNull;
-
-import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 
 /**
  * Created by go22670 on 5/19/17.

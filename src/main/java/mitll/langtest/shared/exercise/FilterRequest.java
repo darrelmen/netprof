@@ -52,6 +52,7 @@ public class FilterRequest implements IsSerializable {
   private boolean recordRequest = false;
   private boolean exampleRequest = false;
   private boolean onlyUninspected = false;
+  private boolean onlyWithAnno = false;
 
   public FilterRequest() {
   }
@@ -167,6 +168,15 @@ public class FilterRequest implements IsSerializable {
     return this;
   }
 
+  public boolean isOnlyWithAnno() {
+    return onlyWithAnno;
+  }
+
+  public FilterRequest setOnlyWithAnno(boolean onlyWithAnno) {
+    this.onlyWithAnno = onlyWithAnno;
+    return this;
+  }
+
   /**
    * @return
    */
@@ -174,9 +184,10 @@ public class FilterRequest implements IsSerializable {
     return
         (userListID == -1 ? "" : "userListID =" + userListID) +
             (limit == -1 ? "" : "limit '" + limit + "'") +
-            (prefix.isEmpty() ? "" : "prefix '" + prefix + "'") +
-            (recordRequest ? "recordRequest" : "") +
-            (onlyUninspected ? "onlyUninspected" : "") +
+            (prefix.isEmpty() ? "" : "prefix '" + prefix + "' ") +
+            (recordRequest ? "recordRequest " : "") +
+            (onlyUninspected ? "onlyUninspected " : "") +
+            (onlyWithAnno ? "onlyWithAnno " : "") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection " + getTypeToSelection());
   }
 }

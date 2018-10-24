@@ -33,7 +33,6 @@
 package mitll.langtest.server.database.dialog;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.npdata.dao.SlickRelatedResult;
 
 import java.util.List;

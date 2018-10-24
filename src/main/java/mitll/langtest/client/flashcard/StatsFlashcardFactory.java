@@ -49,7 +49,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -64,7 +63,7 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExercise>
     extends ExercisePanelFactory<L, T>
     implements FlashcardContainer {
-  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  //private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   final ControlState controlState;
   private List<L> allExercises;
@@ -84,16 +83,17 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
 
   protected final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
   //  private static final boolean DEBUG = false;
-
+  final INavigation.VIEWS instance;
   /**
    * @param controller
    * @param exerciseList
+   * @param instance
    * @see mitll.langtest.client.banner.PracticeHelper#getFactory
    */
-  public StatsFlashcardFactory(ExerciseController controller,
-                               ListInterface<L, T> exerciseList) {
+  public StatsFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, INavigation.VIEWS instance) {
     super(controller, exerciseList);
     controlState = new ControlState();
+    this.instance =instance;
 
     if (exerciseList != null) { // TODO ? can this ever happen?
       exerciseList.addListChangedListener(new ListChangeListener<L>() {
@@ -248,7 +248,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   }
 
   public void showDrill() {
-    navigation.showView(INavigation.VIEWS.DRILL);
+    navigation.showView(instance);
   }
 
   public void showQuiz() {

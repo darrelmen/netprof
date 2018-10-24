@@ -60,10 +60,10 @@ public interface IUserSessionDAO extends IDAO {
   Map<Integer, ActiveInfo> getActiveSince(long when);
 
   class ActiveInfo {
-    private int userid;
-    private long when;
-    private long visited;
-    private int projid;
+    private final int userid;
+    private final long when;
+    private final long visited;
+    private final int projid;
 
     /**
      * @param userid

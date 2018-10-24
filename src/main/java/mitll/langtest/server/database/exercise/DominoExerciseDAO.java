@@ -16,9 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Read export from domino!
@@ -38,7 +36,7 @@ public class DominoExerciseDAO {
   public static final String EDIT = "edit";
   public static final String UNKNOWN = "unknown";
   private boolean shouldSwap;
-  private IUserExerciseDAO userExerciseDAO;
+  private final IUserExerciseDAO userExerciseDAO;
 
   public DominoExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
@@ -59,11 +57,18 @@ public class DominoExerciseDAO {
     this.shouldSwap = shouldSwap;
 
     Map<Integer, Integer> dominoIDToExID = userExerciseDAO.getDominoIDToExID(projid);
+    String unitName = projectInfo.getUnitName();
+    String chapterName = projectInfo.getChapterName();
+
+    logger.info("readExercises for project " + projid +
+        "\n\tunit    " + unitName +
+        "\n\tchapter " + chapterName);
+
     List<CommonExercise> addedCommonExercises = getAddedCommonExercises(
         projid,
         projectInfo.getCreatorID(),
-        projectInfo.getUnitName(),
-        projectInfo.getChapterName(),
+        unitName,
+        chapterName,
 
         importDocs, dominoIDToExID
     );
@@ -72,8 +77,8 @@ public class DominoExerciseDAO {
         getChangedCommonExercises(
             projid,
             projectInfo.getCreatorID(),
-            projectInfo.getUnitName(),
-            projectInfo.getChapterName(),
+            unitName,
+            chapterName,
 
             importDocs, dominoIDToExID
         );
@@ -90,7 +95,8 @@ public class DominoExerciseDAO {
   }
 
   @NotNull
-  private List<CommonExercise> getAddedCommonExercises(int projid, int creator, String unitName, String chapterName,
+  private List<CommonExercise> getAddedCommonExercises(int projid, int creator,
+                                                       String unitName, String chapterName,
                                                        DominoImport.ChangedAndDeleted changedAndDeleted, Map<Integer, Integer> dominoToExID) {
     return getExerciseFromImport(projid, creator, unitName, chapterName, changedAndDeleted.getAdded(), dominoToExID);
   }
@@ -116,7 +122,8 @@ public class DominoExerciseDAO {
     List<CommonExercise> exercises = new ArrayList<>(changed.size());
 
     changed.forEach(docObj -> exercises.add(getExerciseFromVocab(projid,
-        creator, unitName, chapterName,
+        creator,
+        unitName, chapterName,
         docObj.getDocID(),
         docObj.getTimestamp(),
         docObj.getVocabularyItem(),
@@ -165,6 +172,7 @@ public class DominoExerciseDAO {
 
   private void addAttributes(String unitName, String chapterName, MetadataComponentBase vocabularyItem, Exercise ex) {
     List<IMetadataField> metadataFields = vocabularyItem.getMetadataFields();
+    Set<String> skipped = new HashSet<>();
     for (IMetadataField field : metadataFields) {
       String name = field.getName();
       String displayValue = field.getDisplayValue();
@@ -175,20 +183,28 @@ public class DominoExerciseDAO {
 //        logger.info("addAttributes for ex " + ex.getID() + " unit " + unitName + " chapter " + chapterName +
 //            "\n\tfield " + name + " = " + displayValue);
 
-        addAttribute(unitName, chapterName, name, displayValue, ex);
+        if (!addAttribute(unitName, chapterName, name, displayValue, ex)) {
+          skipped.add(name + "=" + displayValue);
+        }
       }
+    }
+    if (!skipped.isEmpty()) {
+      logger.warn("skipped vocab attributes " + skipped + " for " + ex.getID() + " old " + ex.getOldID() + " domino " +ex.getDominoID());
     }
   }
 
-  private void addAttribute(String unitName, String chapterName, String name, String displayValue, Exercise ex) {
+  private boolean addAttribute(String unitName, String chapterName, String name, String displayValue, Exercise ex) {
     if (name.equals(UNIT)) {
-      ex.addUnitToValue(unitName, displayValue);
+      return ex.addUnitToValue(unitName, displayValue);
     } else if (name.equals(CHAPTER)) {
-      ex.addUnitToValue(chapterName, displayValue);
+      return ex.addUnitToValue(chapterName, displayValue);
     } else {
       if (!displayValue.trim().isEmpty()) {
 //            logger.info("addAttribute : for " + ex.getID() + " adding " + name + " = " + displayValue);
         ex.addAttribute(new ExerciseAttribute(getNormName(name), displayValue));
+        return true;
+      } else {
+        return false;
       }
     }
   }
@@ -292,7 +308,7 @@ public class DominoExerciseDAO {
     context.setDominoContextIndex(sample.getNum());
 
     context.setUnitToValue(unitToValue);
-    context.setParentDominoID(parentDominoID);
+  //  context.setParentDominoID(parentDominoID);
     return context;
   }
 
@@ -382,7 +398,7 @@ public class DominoExerciseDAO {
         0,
         isContext,
         0,
-        dominoID, shouldSwap);
+        dominoID);
 
 
     logger.info("getExerciseFromVocabularyItem : made ex" +

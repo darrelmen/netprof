@@ -145,7 +145,7 @@ public class RecordButton extends Button {
     this.setRecordingListener(recordingListener);
   }
 
-  void removeImage() {
+  protected void removeImage() {
     StyleHelper.removeStyle(icon, icon.getBaseIconType());
   }
 
@@ -211,7 +211,7 @@ public class RecordButton extends Button {
    *
    * @see #setupRecordButton
    */
-  void doClick() {
+  protected  void doClick() {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }

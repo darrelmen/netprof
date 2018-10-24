@@ -270,10 +270,10 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
    * A play button that controls the state of the record button.
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
-    public MyPlayAudioPanel(Image recordImage1,
-                            //Image recordImage2,
-                            final Panel panel,
-                            String suffix, Widget toTheRightWidget, ExerciseController controller, HasID exercise) {
+    MyPlayAudioPanel(Image recordImage1,
+                     //Image recordImage2,
+                     final Panel panel,
+                     String suffix, Widget toTheRightWidget, ExerciseController controller, HasID exercise) {
       super(
           new PlayListener() {
             public void playStarted() {

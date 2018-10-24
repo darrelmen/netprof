@@ -43,8 +43,6 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 
-import java.util.logging.Logger;
-
 import static mitll.langtest.client.custom.INavigation.VIEWS.QC;
 import static mitll.langtest.client.custom.INavigation.VIEWS.QC_SENTENCES;
 
@@ -55,10 +53,8 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.QC_SENTENCES;
  * @since 3/30/16.
  */
 public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
-  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
-
-  //  private static final String SHOW_ONLY_UNINSPECTED_ITEMS = "Show Only Uninspected Items.";
-  private boolean forSentences;
+//  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
+  private final boolean forSentences;
 
   /**
    * @param controller
@@ -102,7 +98,6 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
     };
   }
 
-
   protected ExercisePanelFactory<T, ClientExercise> getFactory(PagingExerciseList<T, ClientExercise> exerciseList) {
     final PagingExerciseList<T, ClientExercise> outerExerciseList = exerciseList;
     return new ExercisePanelFactory<T, ClientExercise>(controller, exerciseList) {
@@ -112,5 +107,4 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
       }
     };
   }
-
 }

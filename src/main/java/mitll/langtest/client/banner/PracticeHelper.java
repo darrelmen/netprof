@@ -65,13 +65,15 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
   private PolyglotDialog.MODE_CHOICE mode;
   private PolyglotDialog.PROMPT_CHOICE promptChoice;
   private INavigation navigation;
+  final INavigation.VIEWS instance;
 
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  PracticeHelper(ExerciseController controller) {
+  PracticeHelper(ExerciseController controller, INavigation.VIEWS instance) {
     super(controller);
+    this.instance = instance;
   }
 
   /**
@@ -82,10 +84,10 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
   @Override
   protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
     if (controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT) {
-      polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, PRACTICE);
+      polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, instance);
       statsFlashcardFactory = polyglotFlashcardFactory;
     } else {
-      statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList);
+      statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, instance);
     }
 
     statsFlashcardFactory.setContentPanel(outerBottomRow);
@@ -104,7 +106,7 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
                                                           Panel currentExercisePanel,
                                                           INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
         return new PracticeFacetExerciseList(controller,
-            PracticeHelper.this, topRow, currentExercisePanel, instanceName, listHeader, INavigation.VIEWS.DRILL);
+            PracticeHelper.this, topRow, currentExercisePanel, listHeader, instanceName);
       }
 
       @Override

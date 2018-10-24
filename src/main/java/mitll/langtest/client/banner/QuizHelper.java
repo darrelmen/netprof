@@ -35,7 +35,6 @@ package mitll.langtest.client.banner;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
@@ -49,7 +48,6 @@ import mitll.langtest.client.flashcard.QuizIntro;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -57,12 +55,9 @@ import mitll.langtest.shared.exercise.ScoredExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLOT;
-import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -84,7 +79,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
   QuizHelper(ExerciseController controller, INavigation navigation) {
-    super(controller);
+    super(controller, INavigation.VIEWS.QUIZ);
     this.navigation = navigation;
   }
 
@@ -94,7 +89,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
 
   @Override
   protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
-    polyglotFlashcardFactory = new HidePolyglotFactory<T, U>(controller, exerciseList, QUIZ) {
+    polyglotFlashcardFactory = new HidePolyglotFactory<T, U>(controller, exerciseList, INavigation.VIEWS.QUIZ) {
 
       @Override
       public PolyglotDialog.MODE_CHOICE getMode() {
@@ -179,7 +174,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
           }*//*
           return iUserList != null && iUserList.shouldShowAudio();
         }*/
-     // }
+      // }
 
  /*     private void setChosenList(FacetExerciseList exerciseList) {
         Map<String, String> candidate = new HashMap<>(exerciseList.getTypeToSelection());
@@ -195,6 +190,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
         }
       }
 */
+
       /**
        * @see PolyglotPracticePanel#reallyStartOver
        */
@@ -202,7 +198,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
       public void showQuiz() {
         super.showQuiz();
         clearListSelection();
-        MyPracticeFacetExerciseList exerciseList = (MyPracticeFacetExerciseList) this.getExerciseList();
+        QuizPracticeFacetExerciseList exerciseList = (QuizPracticeFacetExerciseList) this.getExerciseList();
         exerciseList.showQuizIntro();
       }
     };
@@ -218,6 +214,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
   /**
    * TODO : why can't compiler figure this out????
    * What am I doing wrong?
+   *
    * @param outer
    * @return
    */
@@ -229,7 +226,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
                                                           Panel currentExercisePanel,
                                                           INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
         rememberedTopRow = topRow;
-        return (PagingExerciseList<T, U>) new MyPracticeFacetExerciseList (topRow, currentExercisePanel, instanceName, listHeader);
+        return (PagingExerciseList<T, U>) new QuizPracticeFacetExerciseList(topRow, currentExercisePanel, instanceName, listHeader);
       }
 
       @Override
@@ -241,7 +238,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
   }
 
   /**
-   * @see MyPracticeFacetExerciseList#getQuizIntro
+   * @see QuizPracticeFacetExerciseList#getQuizIntro
    */
   private void showQuizForReal() {
     setMode(POLYGLOT, PolyglotDialog.PROMPT_CHOICE.NOT_YET);
@@ -264,9 +261,9 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
     exerciseList.clearListSelection();
   }
 
-  private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList<T,U> {
-    MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel,  INavigation.VIEWS instanceName, DivWidget listHeader) {
-      super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader, INavigation.VIEWS.QUIZ);
+  private class QuizPracticeFacetExerciseList extends PracticeFacetExerciseList<T, U> {
+    QuizPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader) {
+      super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, listHeader, INavigation.VIEWS.QUIZ);
     }
 
 

@@ -165,9 +165,9 @@ public class MiraClassifier {
   }
 
   public static class Info {
-    private double grade;
-    private double regressed;
-    private int answerKeySize;
+    private final double grade;
+    private final double regressed;
+    private final int answerKeySize;
 
     public Info(double grade, double regressed, int answerKeySize) {
       this.grade = grade;

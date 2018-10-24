@@ -79,10 +79,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   private boolean isOverride;
 
-  /**
-   *
-   */
-  private boolean isContext;
 
   /**
    * TODO : why do we need to carry this around?
@@ -120,7 +116,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int projectid,
                   long updateTime,
                   String noAccentFL) {
-    super(-1, projectid);
+    super(-1, projectid, false);
     this.oldid = id;
     this.meaning = meaning;
     this.updateTime = updateTime;
@@ -156,7 +152,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   @Deprecated
   private Exercise(String id, String context, String altcontext, String contextTranslation, String noAccentFL, int projectid) {
-    super(-1, projectid);
+    super(-1, projectid, true);
     this.foreignLanguage = context;
     this.altfl = altcontext;
     this.english = contextTranslation;
@@ -180,7 +176,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param lastChecked
    * @param isContext
    * @param dominoID
-   * @param shouldSwap
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#makeExercise
    */
   public Exercise(int exid,
@@ -197,9 +192,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   long lastChecked,
                   boolean isContext,
                   int numPhones,
-                  int dominoID,
-                  boolean shouldSwap) {
-    super(exid, projectid);
+                  int dominoID) {
+    super(exid, projectid, isContext);
     this.oldid = oldid;
     this.creator = creator;
     setEnglishSentence(englishSentence);
@@ -210,7 +204,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setAltFL(altFL);
     this.safeToDecode = candecode;
     safeToDecodeLastChecked = lastChecked;
-    this.isContext = isContext;
+
     this.numPhones = numPhones;
     this.dominoID = dominoID;
   }
@@ -253,7 +247,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int dominoID,
                   boolean shouldSwap) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration,
-        projectid, candecode, lastChecked, isContext, numPhones, dominoID, shouldSwap);
+        projectid, candecode, lastChecked, isContext, numPhones, dominoID);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
@@ -269,9 +263,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> Exercise(T exercise) {
-    super(exercise.getID(), exercise.getProjectID());
+    super(exercise.getID(), exercise.getProjectID(), exercise.isContext());
     this.isPredef = exercise.isPredefined();
-    this.isContext = exercise.isContext();
+//    this.isContext = exercise.isContext();
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
     this.transliteration = exercise.getTransliteration();
@@ -281,8 +275,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
-    setState(exercise.getState());
-    setSecondState(exercise.getSecondState());
+    //   setState(exercise.getState());
+    //setSecondState(exercise.getSecondState());
 
     setAttributes(exercise.getAttributes());
 
@@ -292,9 +286,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.creator = exercise.getCreator();
   }
 
-  @Override
+//  @Override
+//  public CommonShell getShell() {
+//    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, isContext);
+//  }
+
+
   public CommonShell getShell() {
-    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones);
+    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, isContext(), getDirectlyRelated().size());
   }
 
   public CommonShell asShell() {
@@ -517,47 +516,18 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return unitToValue;
   }
 
-  public String toString() {
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
-
-    // warn about attr that have no user
-    StringBuilder builder = new StringBuilder();
-    for (AudioAttribute attr : audioAttributes1) {
-      if (attr.getUser() == null) {
-        builder.append("\t").append(attr.toString()).append("\n");
-      }
-    }
-
-    return "Exercise #" +
-
-        getID() +
-        ", domino # " + getDominoID() +
-        " np id '" + getOldID() + "'" +
-        " context index " + dominoContextIndex +
-        " project " + projectid +
-
-        (shouldSwap() ? "\n\tshouldSwap = " + shouldSwap() : "") +
-
-        "'" + getEnglish() +
-        "'/'" + getForeignLanguage() + "' " +
-        (getAltFL().isEmpty() ? "" : getAltFL()) +
-        "meaning '" + getMeaning() +
-        "' transliteration '" + getTransliteration() +
-        "' context " + getDirectlyRelated() +
-        " audio childCount = " + audioAttributes1.size() +
-        (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
-        " unit->lesson " + getUnitToValue() +
-        " attr " + getAttributes();
-  }
-
   /**
    * @param unit
    * @param value
    * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    */
-  public void addUnitToValue(String unit, String value) {
-    if (value == null) return;
-    unitToValue.put(unit, value);
+  public boolean addUnitToValue(String unit, String value) {
+    if (value == null) {
+      return false;
+    } else {
+      unitToValue.put(unit, value);
+      return true;
+    }
   }
 
   public void addPair(Pair pair) {
@@ -601,10 +571,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.isPredef = isPredef;
   }
 
-  @Override
-  public boolean isContext() {
-    return isContext;
-  }
 
   @Override
   public int getParentExerciseID() {
@@ -620,23 +586,12 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @return
-   * @see mitll.langtest.server.domino.ProjectSync#addPending
-   */
- /* @Override
-  public int getParentDominoID() {
-    return parentDominoID;
-  }*/
-
-  /**
    * @param parentDominoID
    * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#addContextSentences
    */
-  @Override
-  public void setParentDominoID(int parentDominoID) {
-
-    //this.parentDominoID = parentDominoID;
-  }
+//  @Override
+//  public void setParentDominoID(int parentDominoID) {
+//  }
 
   /**
    * @return
@@ -653,6 +608,39 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   public void setDominoContextIndex(int dominoContextIndex) {
     this.dominoContextIndex = dominoContextIndex;
+  }
+
+  public String toString() {
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+
+    // warn about attr that have no user
+    StringBuilder builder = new StringBuilder();
+    for (AudioAttribute attr : audioAttributes1) {
+      if (attr.getUser() == null) {
+        builder.append("\t").append(attr.toString()).append("\n");
+      }
+    }
+
+    return "Exercise #" +
+
+        getID() +
+        ", domino # " + getDominoID() +
+        " np id '" + getOldID() + "'" +
+        " context index " + dominoContextIndex +
+        " project " + projectid +
+
+        (shouldSwap() ? "\n\tshouldSwap = " + shouldSwap() : "") +
+
+        "'" + getEnglish() +
+        "'/'" + getForeignLanguage() + "' " +
+        (getAltFL().isEmpty() ? "" : getAltFL()) +
+        "meaning '" + getMeaning() +
+        "' transliteration '" + getTransliteration() +
+        "' context " + getDirectlyRelated() +
+        " audio childCount = " + audioAttributes1.size() +
+        (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
+        " unit->lesson " + getUnitToValue() +
+        " attr " + getAttributes();
   }
 
 }

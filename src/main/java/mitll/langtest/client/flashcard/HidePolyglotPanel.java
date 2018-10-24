@@ -3,6 +3,7 @@ package mitll.langtest.client.flashcard;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -30,17 +31,15 @@ class HidePolyglotPanel<L extends CommonShell, T extends ClientExercise> extends
                     MySoundFeedback soundFeedback,
                     T e,
                     StickyState stickyState,
-                    ListInterface<L, T> exerciseListToUse//,
-  //                  int minPoly,
-    //                boolean showAudio
+                    ListInterface<L, T> exerciseListToUse, INavigation.VIEWS instance
   ) {
-    super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse/*, minPoly, showAudio*/);
+    super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse, instance);
   }
 
   /**
-   * @see FlashcardPanel#getThreePartContent
    * @param controlState
    * @return
+   * @see FlashcardPanel#getThreePartContent
    */
   Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new DivWidget();

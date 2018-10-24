@@ -9,37 +9,49 @@ import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.LearnFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ScoredExercise;
+import mitll.langtest.shared.exercise.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise>
     extends LearnFacetExerciseList<T> {
-   private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
+ // private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
   private final PracticeHelper<T, U> practiceHelper;
   private ControlState controlState;
 
   PracticeFacetExerciseList(ExerciseController controller,
                             PracticeHelper<T, U> practiceHelper,
                             Panel topRow, Panel currentExercisePanel,
-                            INavigation.VIEWS instanceName,
                             DivWidget listHeader,
                             INavigation.VIEWS views) {
     super(
         topRow,
         currentExercisePanel,
         controller,
-        new ListOptions(instanceName)
+        new ListOptions(views)
             .setShowPager(false).
             setShowTypeAhead(false),
         listHeader,
         true,
         views);
     this.practiceHelper = practiceHelper;
+  }
+
+  /**
+   * @param userListID
+   * @param pairs
+   * @return
+   * @see #getTypeToValues
+   */
+  @NotNull
+  @Override
+  protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
+    boolean exampleRequest = views == INavigation.VIEWS.PRACTICE_SENTENCES;
+//    logger.info("getFilterReq " + exampleRequest);
+    return new FilterRequest(incrReqID(), pairs, userListID).setExampleRequest(exampleRequest);
   }
 
   public void setControlState(ControlState state) {
@@ -102,6 +114,7 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
 
   /**
    * No one call this...
+   *
    * @param selectionState
    */
   @Deprecated

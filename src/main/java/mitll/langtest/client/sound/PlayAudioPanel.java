@@ -218,7 +218,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   /**
    * @param toAddTo
    * @return
-   * @see PlayAudioPanel#addButtons
+   * @see #addButtons
    */
   protected IconAnchor makePlayButton(DivWidget toAddTo) {
     Button playButton = new Button(playLabel);
@@ -289,26 +289,32 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
   private void setPlayButtonText() {
     boolean playing1 = isPlaying();
+
+
     playButton.setText(playing1 ? pauseLabel : playLabel);
+    setIcon(playing1);
+  }
+
+  private void setIcon(boolean playing1) {
     if (playing1) {
-      playButton.setIcon(IconType.PAUSE);
+      logger.info("setPlayButtonText playing1 " + playing1 + " so pause");
+      setButtonIconToPause();
     } else {
-//      logger.info("setPlayButtonText set cursor to play ");
+      logger.info("setPlayButtonText icon to play ");
       showPlayIcon(playButton);
     }
   }
 
   /**
+   * TODO : Don't call twice - once from resetAudio --
    * @see #pause
    * @see #resetAudio
    */
   private void setPlayLabel() {
-    // markNotPlaying();
-
     if (DEBUG) logger.info(new Date() + " setPlayLabel playing " + isPlaying());
     setText();
 
-    showPlayIcon(playButton);
+    setIcon(isPlaying());
 
     playListeners.forEach(PlayListener::playStopped);
   }
@@ -318,9 +324,19 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
       playButton.setBaseIcon(MyCustomIconType.turtle);
       styleSlowIcon(playButton);
     } else {
-      //logger.info("showPlayIcon ");
-      playButton.setIcon(PLAY);
+      logger.info("showPlayIcon ");
+      setButtonIconToPlay(playButton);
     }
+  }
+
+  private void setButtonIconToPause() {
+    logger.info("setButtonIconToPause set icon to pause ");
+    playButton.setIcon(IconType.PAUSE);
+  }
+
+  private void setButtonIconToPlay(IconAnchor playButton) {
+    logger.info("setButtonIconToPlay set icon to play ");
+    playButton.setIcon(PLAY);
   }
 
   // --- playing audio ---
@@ -370,7 +386,10 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   @Override
   protected void pause() {
     super.pause();
+
     setPlayLabel();
+
+    //setPlayButtonText();
   }
 
   public String toString() {

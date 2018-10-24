@@ -62,6 +62,7 @@ import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -97,7 +98,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    */
   private static final String APPROVED = "Mark Inspected";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
-  private static final String COMMENT = "Comment";
+ // private static final String COMMENT = "Comment";
 
   private static final String COMMENT_TOOLTIP = "Comments are optional.";
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
@@ -164,12 +165,6 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     div.addStyleName("buttonGroupInset7");
   }
 
-//  @Override
-//  protected void addQuestionContentRow(T e, Panel hp) {
-//    super.addQuestionContentRow(e, hp);
-//    hp.addStyleName("questionContentPadding");
-//  }
-
   /**
    * @param controller
    * @param listContainer
@@ -193,7 +188,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
         if (audioWasPlayed == null) {
           initAudioWasPlayed();
         }
-        boolean allPlayed = audioWasPlayed.size() == toResize.size();
+        boolean allPlayed = allAudioHasBeenPlayed();
         next.setEnabled(allPlayed);
       }
     };
@@ -213,9 +208,13 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
   }
 
   private void setNextTooltip(NavigationHelper navHelper) {
-    nextTooltip = addTooltip(navHelper.getNext(), audioWasPlayed.size() == toResize.size() ?
+    nextTooltip = addTooltip(navHelper.getNext(), allAudioHasBeenPlayed() ?
         CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED :
         UNINSPECTED_TOOLTIP);
+  }
+
+  private boolean allAudioHasBeenPlayed() {
+    return audioWasPlayed.size() == toResize.size();
   }
 
   /**
@@ -252,7 +251,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
   /**
    * @param completedExercise
    * @see #addMarkInspected
-   * @see #nextWasPressed
+   * @seex #nextWasPressed
    */
   private void markReviewedAndClick(HasID completedExercise) {
     markReviewed(completedExercise);
@@ -370,9 +369,8 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       if (options.getInstance() == INavigation.VIEWS.QC_SENTENCES) {
         context = true;
         if (this.exercise.getDirectlyRelated().isEmpty()) {
-          logger.warning("no context sentences for " + e.getID() + " " +e.getEnglish());
-        }
-        else {
+          logger.warning("no context sentences for " + e.getID() + " " + e.getEnglish());
+        } else {
           toShow = this.exercise.getDirectlyRelated().iterator().next();
         }
       }
@@ -422,7 +420,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     for (MiniUser user : maleUsers) {
       String tabTitle = userTitle.getUserTitle(me, user);
 
-      logger.info("addTabsForUsers for user " + user + " got " + tabTitle);
+      if (false) logger.info("addTabsForUsers for user " + user + " got " + tabTitle);
 
       RememberTabAndContent tabAndContent = new RememberTabAndContent(IconType.QUESTION_SIGN, tabTitle, true);
       tabPanel.add(tabAndContent.getTab().asTabLink());
@@ -679,6 +677,8 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       public void playStopped() {
       }
     });
+
+    logger.info("getPanelForAudio : comment widget for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage() + " context " + e.isContext());
     return
         new Pair(getCommentWidget(audio.getAudioRef(), audioPanel, e.getAnnotation(audio.getAudioRef()), e.getID()), audioPanel);
   }
@@ -717,6 +717,8 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    * @param annotation
    * @param exerciseID
    * @return
+   * @see #getPanelForAudio
+   * @see #getEntry(String, String, String, ExerciseAnnotation, int)
    */
   private Widget getCommentWidget(final String field, Widget content, ExerciseAnnotation annotation, int exerciseID) {
     final FocusWidget commentEntry = makeCommentEntry(field, annotation, exerciseID);
@@ -729,36 +731,46 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     commentRow.getElement().setId("QCNPFExercise_commentRow_" + field);
 
     final Widget qcCol = getQCCheckBox(field, commentEntry, alreadyMarkedCorrect, commentRow);
-    qcCol.getElement().setId("QCNPFExercise_qcCol_" + field);
 
     populateCommentRow(commentEntry, alreadyMarkedCorrect, commentRow);
 
     // comment to left, content to right
+    //Panel rowWithCheckBox = getRowWithCheckbox(field, content, qcCol);
+    return getRowContainer(field, commentRow, getRowWithCheckbox(field, content, qcCol));
+  }
 
-    Panel row = new DivWidget();
-    row.getElement().setId("QCNPFExercise_row_" + field);
+  @NotNull
+  private Panel getRowWithCheckbox(String field, Widget content, Widget qcCol) {
+    Panel rowWithCheckBox = new DivWidget();
+    rowWithCheckBox.getElement().setId("QCNPFExercise_row_" + field);
 
-    //  row.addStyleName("trueInlineStyle");
-    row.addStyleName("inlineFlex");
-    qcCol.addStyleName("floatLeftAndClear");
-    row.add(qcCol);
+    //  rowWithCheckBox.addStyleName("trueInlineStyle");
+    rowWithCheckBox.addStyleName("inlineFlex");
+    rowWithCheckBox.add(qcCol);
 //    if (addLeftMargin) {
 //      content.getElement().getStyle().setMarginLeft(80, Style.Unit.PX);
 //    }
-    row.add(content);
+    rowWithCheckBox.add(content);
+    return rowWithCheckBox;
+  }
 
+  @NotNull
+  private Panel getRowContainer(String field, Panel commentRow, Panel row) {
     Panel rowContainer = new FlowPanel();
     rowContainer.getElement().setId("QCNPFExercise_rowContainer_" + field);
     rowContainer.addStyleName("topFiveMargin");
     // rowContainer.addStyleName("blockStyle");
     rowContainer.add(row);
     rowContainer.add(commentRow);
-
     return rowContainer;
   }
 
   private Widget getQCCheckBox(String field, FocusWidget commentEntry, boolean alreadyMarkedCorrect, Panel commentRow) {
-    return makeCheckBox(field, commentRow, commentEntry, alreadyMarkedCorrect);
+    CheckBox checkBox = makeCheckBox(field, commentRow, commentEntry, alreadyMarkedCorrect);
+    checkBox.addStyleName("floatLeftAndClear");
+    checkBox.getElement().setId("QCNPFExercise_qcCol_" + field);
+
+    return checkBox;
   }
 
   /**
@@ -792,7 +804,12 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
 
     commentEntry.addStyleName("leftFiveMargin");
     commentEntry.addBlurHandler(event -> {
-      //  logger.info("makeCommentEntry comment on " + exerciseID + " field " + field + " comment " + commentEntry.getText());
+
+      logger.info("makeCommentEntry comment on " +
+          "\n\tex      " + exerciseID +
+          "\n\tfield   " + field +
+          "\n\tcomment " + commentEntry.getText());
+
       addIncorrectComment(exerciseID, field, sanitize(commentEntry.getText()));
     });
     addTooltip(commentEntry, COMMENT_TOOLTIP);
@@ -845,11 +862,11 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     }
 
     STATE state = hasNoDefects() ? STATE.UNSET : STATE.DEFECT;
-    exercise.setState(state);
-    listContainer.setState(getExerciseID(), state);
+//    exercise.setState(state);
+//    listContainer.setState(getExerciseID(), state);
     listContainer.redraw();
     setApproveButtonState();
-    markReviewed(exercise);
+    //markReviewed(exercise);
   }
 
   private int getExerciseID() {
@@ -860,13 +877,12 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    * @see #checkBoxWasClicked(boolean, String, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.FocusWidget)
    */
   private void setApproveButtonState() {
-    boolean allCorrect = hasNoDefects();
-    boolean allPlayed = audioWasPlayed.size() == toResize.size();
+    boolean allPlayed = allAudioHasBeenPlayed();
     //System.out.println("\tsetApproveButtonState : allPlayed= '" +allPlayed +"' allCorrect " + allCorrect + " audio played " + audioWasPlayed.size() + " total " + toResize.size());
 
-    String tooltipText = !allPlayed ? "Not all audio has been reviewed" : allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2;
+    String tooltipText = !allPlayed ? "Not all audio has been reviewed" : hasNoDefects() ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2;
     if (approvedButton != null) {   // comment tab doesn't have it...!
-      approvedButton.setEnabled(allCorrect && allPlayed);
+      approvedButton.setEnabled(allPlayed);
       approvedTooltip.setText(tooltipText);
       approvedTooltip.reconfigure();
     }

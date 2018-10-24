@@ -44,7 +44,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -55,7 +55,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/28/2014.
  */
-public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize, IVisible {
+public abstract class FlexListLayout<T extends CommonShell, U extends HasID> implements RequiresResize, IVisible {
   private final Logger logger = Logger.getLogger("FlexListLayout");
 
   public PagingExerciseList<T, U> npfExerciseList;
@@ -179,9 +179,16 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   }
 
 
+  /**
+   * mainBlock sometimes helpful, sometimes not...
+   * when do we need it when do we need to remove it...
+   *
+   * @param bottomRowDiv
+   * @param listHeader
+   */
   private void styleBottomRowDiv(DivWidget bottomRowDiv, DivWidget listHeader) {
     bottomRowDiv.addStyleName("floatLeft");
-    //bottomRowDiv.addStyleName("mainBlock");
+    bottomRowDiv.addStyleName("mainBlock");
     bottomRowDiv.getElement().setId("rightSideDiv");
     bottomRowDiv.setWidth("100%");
     //bottomRowDiv.setWidth(RIGHT_SIDE_DIV_WIDTH +    "%");

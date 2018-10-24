@@ -12,10 +12,9 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
@@ -180,7 +179,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   protected abstract String getLabel();
 
   private Column<PhoneAndStats, SafeHtml> getCountColumn() {
-    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<PhoneAndStats, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -195,7 +194,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   }
 
   private Column<PhoneAndStats, SafeHtml> getCurrentCol() {
-    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<PhoneAndStats, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -228,7 +227,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   }
 
   private Column<PhoneAndStats, SafeHtml> getItemColumn() {
-    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<PhoneAndStats, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);

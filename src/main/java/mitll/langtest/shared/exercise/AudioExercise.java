@@ -73,10 +73,11 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @param id
    * @param projectid
+   * @param isContext
    * @paramx shouldSwap
    */
-  AudioExercise(int id, int projectid ) {
-    super(id);
+  AudioExercise(int id, int projectid, boolean isContext) {
+    super(id, isContext);
     this.projectid = projectid;
   }
 
@@ -97,10 +98,11 @@ public class AudioExercise extends ExerciseShell {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#fixAudioPaths
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#getRegularSpeedIfAvailable
    */
   public synchronized AudioAttribute getRegularSpeed() {
-    return getAudio(SPEED, REGULAR);
+    AudioAttribute audio = getAudio(SPEED, REGULAR);
+    return audio == null ? getAudio(CONTEXT, REGULAR) : audio;
   }
 
   private AudioAttribute getRegularSpeedWithPrefs(Collection<Integer> prefs) {
@@ -113,13 +115,20 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#attachAudioAndFixPath
+   * Latest recording by a user wins.
+   *
    * @param audioAttribute
+   * @see mitll.langtest.server.database.audio.BaseAudioDAO#attachAudioAndFixPath
    */
-  public synchronized void addAudio(AudioAttribute audioAttribute) {
+  public synchronized boolean addAudio(AudioAttribute audioAttribute) {
     if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
     else {
-      audioAttributes.put(audioAttribute.getKey(), audioAttribute);
+      String key = audioAttribute.getKey();
+      AudioAttribute currentByKey = audioAttributes.get(key);
+      if (currentByKey == null || currentByKey.getTimestamp() < audioAttribute.getTimestamp()) {
+        audioAttributes.put(key, audioAttribute);
+        return true;
+      } else return false;
     }
   }
 
@@ -133,7 +142,7 @@ public class AudioExercise extends ExerciseShell {
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
-  public synchronized AudioAttribute getSlowSpeed() {
+  private synchronized AudioAttribute getSlowSpeed() {
     return getAudio(SPEED, SLOW);
   }
 
@@ -182,6 +191,12 @@ public class AudioExercise extends ExerciseShell {
         .anyMatch(audioAttribute -> (vocab == !audioAttribute.isContextAudio()));
   }
 
+  public synchronized boolean hasContextAudio() {
+    return getAudioAttributes()
+        .stream()
+        .anyMatch(AudioAttribute::isContextAudio);
+  }
+
   /**
    * @return
    */
@@ -191,8 +206,7 @@ public class AudioExercise extends ExerciseShell {
 
   public synchronized Collection<Integer> getAudioIDs() {
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
-    Set<Integer> collect = audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
-    return collect;
+    return audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
   }
 
   /**
@@ -228,7 +242,7 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @param isMale
    * @return
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay(CommonExercise)
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay
    */
   public synchronized AudioAttribute getAudioAttrPrefGender(boolean isMale) {
     Collection<AudioAttribute> audioPrefGender = getAudioPrefGender(isMale);
@@ -271,7 +285,7 @@ public class AudioExercise extends ExerciseShell {
     for (AudioAttribute audioAttribute : getAudioAttributes()) {
       if (audioAttribute.getAudioType() == AudioType.CONTEXT_REGULAR &&
           ((isMale && audioAttribute.isMale()) || (!isMale && !audioAttribute.isMale()))
-          ) {
+      ) {
         if (audioAttribute.getTimestamp() >= latestTime) {
           latest = audioAttribute;
           latestTime = audioAttribute.getTimestamp();
@@ -446,6 +460,10 @@ public class AudioExercise extends ExerciseShell {
           continue;
         }
 
+        if (audioAttribute.getExid() == 9444) {
+          logger.info("got " + audioAttribute);
+        }
+
         if (audioAttribute.isRegularSpeed()) reg = true;
         if (audioAttribute.isSlow()) slow = true;
 
@@ -459,6 +477,11 @@ public class AudioExercise extends ExerciseShell {
         if (reg) {
           if (latestReg == null || latestReg.getTimestamp() < candidateTimestamp) {
             latestReg = audioAttribute;
+
+
+            if (audioAttribute.getExid() == 9444) {
+              logger.info("\tnew latest  " + latestReg);
+            }
           }
         }
         if (slow) {
@@ -474,6 +497,9 @@ public class AudioExercise extends ExerciseShell {
       ret = new ArrayList<>();
       if (latestReg != null) {
         ret.add(latestReg);
+        if (latestReg.getExid() == 9444) {
+          logger.info("\t latest reg  " + latestReg);
+        }
       }
       // else logger.warning("getMostRecentAudioEasy no reg  speed audio for " + getID());
       if (latestSlow != null) {

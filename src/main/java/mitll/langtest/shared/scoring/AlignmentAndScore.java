@@ -1,6 +1,5 @@
 package mitll.langtest.shared.scoring;
 
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
 import java.util.List;

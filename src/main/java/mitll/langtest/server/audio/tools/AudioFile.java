@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class AudioFile {
-  private static Logger logger = Logger.getLogger("AudioFile");
+  private static final Logger logger = Logger.getLogger("AudioFile");
 
   // Audio data/metadata
   private static final AudioFormat DEFAULT_FORMAT = new AudioFormat(16000.0f, 16, 1, true, false); /// Default Audio format

@@ -1,16 +1,10 @@
 package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.LearnFacetExerciseList;
-import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +24,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   private static final String UNRECORD = "Unrecord";
   private static final String RECORDED = "Recorded";
 
-  private boolean isContext;
+  private final boolean isContext;
 
   /**
    * @param controller
@@ -79,18 +73,18 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   }
 
   @Override
-  protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection, String prefix,
-                                                       boolean onlyWithAudioAnno, boolean onlyDefaultUser, boolean onlyUninspected) {
-    ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected);
+  protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
+                                                       String prefix,
+                                                       boolean onlyWithAudioAnno,
+                                                       boolean onlyUninspected) {
+    ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUninspected);
     //  exerciseListRequest.setOnlyRecordedByMatchingGender(true);
     exerciseListRequest.setOnlyUnrecordedByMe(true);
 
-
     logger.info("getExerciseListRequest req " + exerciseListRequest);
 
-
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest"));
-    logger.info("logException stack " + exceptionAsString);
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest"));
+//    logger.info("logException stack " + exceptionAsString);
 
     return exerciseListRequest;
   }

@@ -20,22 +20,6 @@ public class AnalysisRequest implements Serializable {
 
   public AnalysisRequest() {}
 
-  /**
-   * Mainly for testing.
-   * @paraxmx userid
-   * @paramx listid
-   * @paramx dialogID
-   * @paramx minRecordings
-   */
-/*
-  public AnalysisRequest(int userid, int listid, int dialogID, int minRecordings) {
-    this.userid = userid;
-    this.listid = listid;
-    this.dialogID = dialogID;
-    this.minRecordings = minRecordings;
-  }
-*/
-
   public int getUserid() {
     return userid;
   }

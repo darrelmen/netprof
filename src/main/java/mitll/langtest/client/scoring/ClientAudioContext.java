@@ -3,14 +3,14 @@ package mitll.langtest.client.scoring;
 import mitll.langtest.shared.answer.AudioType;
 
 public class ClientAudioContext {
-  private int exerciseID;
-  private int reqid;
-  private boolean shouldAddToTable;
-  private int dialogSessionID;
+  private final int exerciseID;
+  private final int reqid;
+  private final boolean shouldAddToTable;
+  private final int dialogSessionID;
 
-  private AudioType audioType;
+  private final AudioType audioType;
 
-  ClientAudioContext(int exerciseID,
+  public ClientAudioContext(int exerciseID,
                      int reqid,
                      boolean shouldAddToTable,
                      AudioType audioType,

@@ -4,6 +4,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
@@ -36,13 +37,14 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
   private QuizInfo quizInfo;
   // private static final boolean DEBUG = false;
 
+
   /**
-   * @see HidePolyglotFactory
    * @param controller
    * @param exerciseList
+   * @see HidePolyglotFactory
    */
-  PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList) {
-    super(controller, exerciseList);
+  PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, INavigation.VIEWS instance) {
+    super(controller, exerciseList, instance);
 
     controller.getListService().getQuizInfo(new SelectionState().getList(), new AsyncCallback<QuizInfo>() {
       @Override
@@ -75,9 +77,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
         soundFeedback,
         e,
         sticky,
-        exerciseList/*,
-        getMinScore(),
-        shouldShowAudio()*/);
+        exerciseList, instance);
   }
 
   @NotNull
@@ -278,7 +278,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
 
   protected void listChanged(List<L> items, String selectionID) {
     baseListChanged(items, selectionID);
-  //  logger.info("listChanged : " + selectionID + " got new set of items from list. " + items.size());
+    //  logger.info("listChanged : " + selectionID + " got new set of items from list. " + items.size());
     Scheduler.get().scheduleDeferred(() -> {
       if (sticky.inQuiz() && sticky.getTimeRemainingMillis() > 0 && hasListSelection()) {
         // inLightningRound = true;

@@ -8,14 +8,14 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
-public abstract class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercise> extends DivWidget
+public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercise> extends DivWidget
     implements RecordingAudioListener {
   private final Logger logger = Logger.getLogger("NoFeedbackRecordAudioPanel");
 
@@ -137,7 +137,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercis
    */
   @Override
   public void stopRecording() {
-    logger.info("stopRecording on " + exercise.getID());
+  //  logger.info("stopRecording on " + exercise.getID());
     playAudioPanel.setEnabled(true);
     playAudioPanel.hideRecord();
   }
@@ -168,12 +168,10 @@ public abstract class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercis
 
   @Override
   public void usePartial(StreamResponse validity) {
-
   }
 
   @Override
   public void gotAbort() {
-
   }
 
   /**

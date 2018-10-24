@@ -51,7 +51,7 @@ import java.util.Map;
 public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   private static final Logger logger = LogManager.getLogger(SlickUserSessionDAOImpl.class);
   private final UserSessionDAOWrapper dao;
-  private IUserProjectDAO userProjectDAO;
+  private final IUserProjectDAO userProjectDAO;
 
   /**
    * @param database

@@ -41,6 +41,7 @@ import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -175,24 +176,24 @@ public abstract class Analysis extends DAO {
    * @paramx best
    * @see IAnalysis#getPerformanceReportForUser
    */
-  List<WordScore> getWordScores(Collection<UserInfo> values) {
+/*  List<WordScore> getWordScores(Collection<UserInfo> values, int projID) {
     //Collection<UserInfo> values = best.values();
     logger.info("getWordScores " + values.size() + " users.");
     if (values.isEmpty()) {
       //logger.warn("no best values for " + id);
-      return getWordScore(Collections.emptyList(), true);
+      return getWordScore(Collections.emptyList(), true, projID);
     } else {
       List<BestScore> resultsForQuery = values.iterator().next().getBestScores();
       if (DEBUG) logger.warn("resultsForQuery " + resultsForQuery.size());
 
-      List<WordScore> wordScore = getWordScore(resultsForQuery, true);
+      List<WordScore> wordScore = getWordScore(resultsForQuery, true, projID);
       if (DEBUG) {
         logger.warn("getWordScoresForUser wordScore " + wordScore.size());
       }
 
       return wordScore;
     }
-  }
+  }*/
 
   /**
    * @param userid
@@ -212,20 +213,20 @@ public abstract class Analysis extends DAO {
   }*/
 
   /**
-   *
    * @param analysisRequest
    * @param next
    * @return
    * @see IAnalysis#getPhoneSummaryForPeriod(AnalysisRequest)
    */
   PhoneSummary getPhoneSummaryForPeriod(AnalysisRequest analysisRequest, UserInfo next) {
-  //  List<Integer> resultIDs = getResultIDsInTimeWindow(next, from, to, Collections.emptySet());
+    //  List<Integer> resultIDs = getResultIDsInTimeWindow(next, from, to, Collections.emptySet());
 
     List<Integer> resultIDs = getResultIDsForRequest(analysisRequest, next);
-    logger.info("getPhoneSummaryForPeriod " +
-        "\n\treq                 " +analysisRequest +
-        "\n\tuser                " +next +
-        "\n\tresultIDs " +resultIDs.size()
+
+    if (DEBUG) logger.info("getPhoneSummaryForPeriod " +
+        "\n\treq                 " + analysisRequest +
+        "\n\tuser                " + next +
+        "\n\tresultIDs " + resultIDs.size()
     );
 
     PhoneSummary phoneReport = phoneDAO.getPhoneSummary(analysisRequest.getUserid(), resultIDs);
@@ -235,13 +236,15 @@ public abstract class Analysis extends DAO {
   }
 
   PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest, UserInfo next) {
-   // List<Integer> resultIDs = getResultIDsForRequest(analysisRequest, next);
+    // List<Integer> resultIDs = getResultIDsForRequest(analysisRequest, next);
     List<Integer> resultIDsForRequest = getResultIDsForRequest(analysisRequest, next);
-    logger.info("getPhoneBigramsForPeriod " +
-            "\n\treq                 " +analysisRequest +
-            "\n\tuser                " +next +
-            "\n\tresultIDsForRequest " +resultIDsForRequest.size()
-        );
+
+    if (DEBUG) logger.info("getPhoneBigramsForPeriod " +
+        "\n\treq                 " + analysisRequest +
+        "\n\tuser                " + next +
+        "\n\tresultIDsForRequest " + resultIDsForRequest.size()
+    );
+
     return phoneDAO.getPhoneBigrams(analysisRequest.getUserid(), resultIDsForRequest);
   }
 
@@ -250,7 +253,7 @@ public abstract class Analysis extends DAO {
     return getResultIDsInTimeWindow(next,
         analysisRequest.getFrom(),
         analysisRequest.getTo(),
-          getDialogExerciseIDs(analysisRequest.getDialogID()));
+        getDialogExerciseIDs(analysisRequest.getDialogID()));
   }
 
   protected abstract Collection<Integer> getDialogExerciseIDs(int dialogID);
@@ -267,9 +270,11 @@ public abstract class Analysis extends DAO {
           .filter(bestScore -> exids.contains(bestScore.getExId()))
           .collect(Collectors.toList());
 
-      logger.info("getResultIDsInTimeWindow " +
-          "\n\tbefore " + before +
-          "\n\tafter  " + resultsForQuery.size() + " scores ");
+      if (DEBUG) {
+        logger.info("getResultIDsInTimeWindow " +
+            "\n\tbefore " + before +
+            "\n\tafter  " + resultsForQuery.size() + " scores ");
+      }
     }
 
     List<Integer> resultIDs = new ArrayList<>();
@@ -278,17 +283,16 @@ public abstract class Analysis extends DAO {
       long timestamp = bs.getTimestamp();
       if (timestamp > from && timestamp <= to) {
         resultIDs.add(bs.getResultID());
-      }
-      else {
+      } else {
 //        logger.info("getResultIDsInTimeWindow : skip " + bs.getResultID() + " at " + new Date(timestamp));
       }
     });
 
-    if (DEBUG || true)
+    if (DEBUG)
       logger.info("getResultIDsInTimeWindow " +
           "\n\tfrom  " + resultsForQuery.size() +
-          "\n\ttime from  " + from + " " + new Date(from)+
-          "\n\ttime to    " + to +" " + new Date(to)+
+          "\n\ttime from  " + from + " " + new Date(from) +
+          "\n\ttime to    " + to + " " + new Date(to) +
           "\n\tadded " + resultIDs.size() + " resultIDs ");
 
     return resultIDs;
@@ -344,7 +348,7 @@ public abstract class Analysis extends DAO {
       long start = then;
       long now;
       List<Integer> resultIDs = getResultIDsForUser(next.getBestScores());
-      logger.info("getPhoneSummary for " + userid +  " " + resultIDs.size());
+      if (DEBUG) logger.info("getPhoneSummary for " + userid + " " + resultIDs.size());
 
       then = System.currentTimeMillis();
       PhoneSummary phoneReport = phoneDAO.getPhoneSummary(userid, resultIDs);
@@ -391,7 +395,7 @@ public abstract class Analysis extends DAO {
    * @seex SlickAnalysis#getBigramPhoneReportFor(AnalysisRequest)
    * @seex IAnalysis#getPhoneReportFor(AnalysisRequest)
    */
-  PhoneReport getPhoneReportForPhone(int userid, UserInfo next, Project project, String phone, long from, long to) {
+/*  PhoneReport getPhoneReportForPhone(int userid, UserInfo next, Project project, String phone, long from, long to) {
     if (DEBUG)
       logger.debug(" getPhoneReportForPhone " + userid + " got " + next + " from " + new Date(from) + " to " + new Date(to));
 
@@ -416,13 +420,13 @@ public abstract class Analysis extends DAO {
       long diff2 = System.currentTimeMillis() - start;
       if (DEBUG || diff2 > 100) {
         logger.debug(" getPhonesForUser " + userid + " took " + diff2 + " millis to get " +
-            /*phonesForUser.size() +*/ " phones");
+            *//*phonesForUser.size() +*//* " phones");
       }
       // setSessions(phoneReport.getPhoneToAvgSorted());
 
       return phoneReport;
     }
-  }
+  }*/
 
   /**
    * @param userid
@@ -582,8 +586,7 @@ public abstract class Analysis extends DAO {
         UserInfo value = new UserInfo(bestScores, userToEarliest.get(userID));
         if (value.getUserID().equalsIgnoreCase(D_ADMIN)) {
           logger.info("getUserIDToInfo : skipping " + D_ADMIN);
-        }
-        else {
+        } else {
           userToUserInfo.put(userID, value);
         }
       } else {
@@ -618,11 +621,12 @@ public abstract class Analysis extends DAO {
    *
    * @param bestScores
    * @param doDefaultSort
+   * @param projID
    * @return
    * @see #getWordScores
    */
-  protected List<WordScore> getWordScore(List<BestScore> bestScores, boolean doDefaultSort) {
-    // logger.warn("getWordScore got " + bestScores.size());
+  protected List<WordScore> getWordScore(List<BestScore> bestScores, boolean doDefaultSort, int projID) {
+    logger.info("getWordScore got " + bestScores.size());
     List<WordScore> results = new ArrayList<>();
 
     long then = System.currentTimeMillis();
@@ -639,8 +643,11 @@ public abstract class Analysis extends DAO {
         if (json.isEmpty()) logger.warn("no json for " + bs);
         Map<NetPronImageType, List<SlimSegment>> netPronImageTypeListMap = parseResultJson.slimReadFromJSON(json);
         netPronImageTypeListMap.remove(NetPronImageType.PHONE_TRANSCRIPT);
-        //WordScore wordScore = new WordScore(bs, netPronImageTypeListMap);
-        results.add(new WordScore(bs, netPronImageTypeListMap));
+        WordScore e = new WordScore(bs, netPronImageTypeListMap);
+        int exid = e.getExid();
+        CommonExercise exerciseByID = getDatabase().getProject(projID).getExerciseByID(exid);
+        if (exerciseByID != null) e.setIsContext(exerciseByID.isContext());
+        results.add(e);
       } else {
 //        logger.warn("getWordScore score " + bs.getScore()  + " is below threshold.");
         //     skipped++;

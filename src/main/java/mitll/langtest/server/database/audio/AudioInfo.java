@@ -8,18 +8,18 @@ import mitll.langtest.shared.user.MiniUser;
  * Created by go22670 on 1/23/17.
  */
 public class AudioInfo {
-  private int userid;
-  private int resultID;
-  private int exerciseID;
-  private int projid;
-  private AudioType audioType;
-  private String audioRef;
-  private long timestamp;
-  private long durationInMillis;
-  private String transcript;
-  private float dnr;
-  private int gender;
-  private boolean hasProjectSpecificAudio;
+  private final int userid;
+  private final int resultID;
+  private final int exerciseID;
+  private final int projid;
+  private final AudioType audioType;
+  private final String audioRef;
+  private final long timestamp;
+  private final long durationInMillis;
+  private final String transcript;
+  private final float dnr;
+  private final int gender;
+  private final boolean hasProjectSpecificAudio;
 
   /**
    * @see BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)

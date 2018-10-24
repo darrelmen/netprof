@@ -67,6 +67,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   protected final ExerciseController controller;
   private ExerciseList npfExerciseList;
   protected final FlexListLayout<T, U> flexListLayout;
+  protected INavigation.VIEWS views;
 
   /**
    * @param controller
@@ -90,9 +91,9 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     //   logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
-      logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
+      //  logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
       showContent(content, instanceName);
-    //  npfExerciseList.reloadWithCurrent();
+      //  npfExerciseList.reloadWithCurrent();
     } else {
       logger.warning("showNPF not doing anything for " + instanceName);
     }
@@ -114,6 +115,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
         " adding " + child.getElement().getId() + " to " + listContent.getElement().getId() + " with " + listContent.getElement().getChildCount());
 */
 
+    this.views = views;
     listContent.add(doNPF(views));
  /*   if (fromClick) {
       logger.info(getClass() + " : END showContent views = " + views);//+ " loadExercises " + loadExercises);

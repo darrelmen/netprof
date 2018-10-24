@@ -5,7 +5,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.IListenView;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -548,6 +547,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     playing = true;
   }
 
+  /**
+   * @see #pause
+   */
   private void markNotPlaying() {
     playing = false;
   }

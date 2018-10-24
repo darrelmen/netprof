@@ -132,7 +132,7 @@ public class QuizIntro extends DivWidget {
   }
 
   private int listID = -1;
-  private List<IUserList> choicesAdded = new ArrayList<>();
+  private final List<IUserList> choicesAdded = new ArrayList<>();
 
   private Widget addModeChoices(Heading modeDep, Heading modeDep2, Map<Integer, IUserList> idToList) {
     DivWidget choiceDiv = new DivWidget();

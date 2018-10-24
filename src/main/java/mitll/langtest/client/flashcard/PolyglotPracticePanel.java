@@ -59,8 +59,11 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   private int minPolyScore;
   boolean showAudio;
   QuizInfo quizInfo;
+  final INavigation.VIEWS instance;
 
   /**
+   * @param minPolyScore
+   * @param showAudio
    * @param statsFlashcardFactory
    * @param controlState
    * @param controller
@@ -68,8 +71,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
    * @param e
    * @param stickyState
    * @param exerciseListToUse
-   * @param minPolyScore
-   * @param showAudio
+   * @param instance
    * @see PolyglotFlashcardFactory#getFlashcard
    */
   PolyglotPracticePanel(PolyglotFlashcardContainer statsFlashcardFactory,
@@ -77,11 +79,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
                         MySoundFeedback soundFeedback,
                         T e,
                         StickyState stickyState,
-                        ListInterface<L, T> exerciseListToUse) {
+                        ListInterface<L, T> exerciseListToUse, INavigation.VIEWS instance) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
-
-    //  if (polyglotFlashcardContainer)
+    this.instance = instance;
 
     if (this.polyglotFlashcardContainer.getQuizInfo() == null) {
 
@@ -243,11 +244,13 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   @Override
   String getRefAudioToPlay() {
     if (speedChoices == null) {
-      //     logger.info("getRefAudioToPlay no speed choices ");
+      //logger.info("getRefAudioToPlay no speed choices ");
       return null;
     } else {
       boolean regular = speedChoices.isRegular();
+
       String path = regular ? exercise.getRefAudio() : exercise.getSlowAudioRef();
+    //  logger.info("getRefAudioToPlay play audio " + path);
       if (path == null) {
         path = regular ? exercise.getSlowAudioRef() : exercise.getRefAudio(); // fall back to slow audio
       }
@@ -309,7 +312,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   }
 
   void reallyStartOver() {
-    if (instance.equalsIgnoreCase(INavigation.VIEWS.DRILL.toString())) {
+    if (instance == INavigation.VIEWS.PRACTICE || instance == INavigation.VIEWS.PRACTICE_SENTENCES) {
       polyglotFlashcardContainer.showDrill();
       super.reallyStartOver();
     } else {

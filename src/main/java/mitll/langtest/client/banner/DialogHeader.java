@@ -11,8 +11,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.dialog.IDialog;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.logging.Logger;
-
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
 class DialogHeader {

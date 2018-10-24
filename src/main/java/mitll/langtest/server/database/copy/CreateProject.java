@@ -391,8 +391,8 @@ public class CreateProject {
   }
 
   private static class Pair {
-    String language;
-    String cc;
+    final String language;
+    final String cc;
 
     public Pair(String language, String cc) {
       this.language = language;

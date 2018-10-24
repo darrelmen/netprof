@@ -53,10 +53,7 @@ import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.Language;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -70,7 +67,7 @@ import java.util.logging.Logger;
 public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  private final Logger logger = Logger.getLogger("GoodwaveExercisePanel");
   /**
    *
    */
@@ -103,10 +100,10 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
   protected final ExerciseController controller;
 
   protected final NavigationHelper navigationHelper;
-  private boolean hasClickable;
-  private boolean isJapanese;
-  private boolean isUrdu;
- protected   final ExerciseOptions options;
+  private final boolean hasClickable;
+  private final boolean isJapanese;
+  private final boolean isUrdu;
+  protected final ExerciseOptions options;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -182,9 +179,8 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     listContainer.loadNextExercise(completedExercise.getID());
   }
 
-  protected void addQuestionContentRow(T e, Panel hp) {
-    logger.info("Add question row for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage() + " is context " + e.isContext());
-
+  private void addQuestionContentRow(T e, Panel hp) {
+  //  logger.info("Add question row for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage() + " is context " + e.isContext());
     hp.add(getQuestionContent(e));
   }
 
@@ -269,18 +265,31 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     addAnnotation(field, ExerciseAnnotation.TYPICAL.CORRECT, "", exid);
   }
 
-  private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost, int exid) {
-    controller.getQCService().addAnnotation(exid, field, status.toString(), commentToPost,
-        new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("adding annotation", caught);
-          }
+  final Map<String, String> uniqToComment = new HashMap<>();
 
-          @Override
-          public void onSuccess(Void result) {
-          }
-        });
+  private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost, int exid) {
+    logger.info("addAnnotation on field " + field + " ex " + exid + " comment " + commentToPost);
+
+    String key = exid + "_" + field + "_" + status;
+
+    String lastPost = uniqToComment.get(key);
+
+    if (lastPost != null && lastPost.equals(commentToPost)) {
+      logger.info("addAnnotation Skip since same as last post " + lastPost);
+    } else {
+      controller.getQCService().addAnnotation(exid, field, status.toString(), commentToPost,
+          new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("adding annotation", caught);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              uniqToComment.put(key, commentToPost);
+            }
+          });
+    }
   }
 
   /**

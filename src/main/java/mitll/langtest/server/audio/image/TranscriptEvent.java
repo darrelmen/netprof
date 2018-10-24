@@ -65,8 +65,8 @@ public class TranscriptEvent implements Comparable<TranscriptEvent>, ITranscript
   // Data Members
   private float start;                  /// Start time in seconds
   private float end;                    /// End time in seconds
-  private String event;                 /// Text to be displayed per event
-  private float score;                  /// posterior score
+  private final String event;                 /// Text to be displayed per event
+  private final float score;                  /// posterior score
 
   @Override
   public int compareTo(TranscriptEvent o) {

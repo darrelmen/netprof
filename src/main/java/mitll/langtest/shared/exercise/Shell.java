@@ -32,31 +32,30 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.client.exercise.PagingContainer;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/4/16.
+ * @deprecated
  */
-public interface Shell extends HasID {
+interface Shell extends HasID {
   /**
-   * @see PagingContainer#getEnglishColumn
+   * @seex PagingContainer#getEnglishColumn
    * @return
    */
   STATE getState();
   void setState(STATE state);
 
   /**
-   * @see PagingContainer#getEnglishColumn
+   * @seex PagingContainer#getEnglishColumn
    * @return
    */
-  STATE getSecondState();
+ // STATE getSecondState();
 
   /**
-   * @see mitll.langtest.server.database.custom.StateManager#setSecondState(Shell, STATE, long)
+   * @seex mitll.langtest.server.database.custom.StateManager#setSecondState(Shell, STATE, long)
    * @param state
    */
-  void setSecondState(STATE state);
+//  void setSecondState(STATE state);
 }

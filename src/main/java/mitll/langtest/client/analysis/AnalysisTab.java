@@ -143,7 +143,7 @@ public class AnalysisTab extends DivWidget {
   private final boolean isPolyglot;
   private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
   private ListBox timeScale;
-  private INavigation.VIEWS jumpView;
+  private final INavigation.VIEWS jumpView;
   private int itemColumnWidth = -1;
 
   /**
@@ -648,7 +648,6 @@ public class AnalysisTab extends DivWidget {
           numScores,
           controller,
           analysisPlot,
-          exerciseLookup,
           wordsTitle,
           timeWindow);
       {
@@ -669,7 +668,6 @@ public class AnalysisTab extends DivWidget {
           controller,
           soundsDiv,
           analysisPlot,
-          exerciseLookup,
           reqInfo);
     }
   }
@@ -695,10 +693,12 @@ public class AnalysisTab extends DivWidget {
       int numResults,
       ExerciseController controller,
       AnalysisPlot<CommonShell> analysisPlot,
-      ExerciseLookup<CommonShell> exerciseLookup,
       Heading wordsTitle,
 
       TimeRange timeRange) {
+
+    //logger.info("getWordContainer item width " + itemColumnWidth);
+
     WordContainerAsync wordContainer =
         new WordContainerAsync(reqInfo, controller, wordsTitle,
             numResults, analysisServiceAsync, timeRange, jumpView, itemColumnWidth);
@@ -744,7 +744,6 @@ public class AnalysisTab extends DivWidget {
                               final ExerciseController controller,
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot,
-                              ExerciseLookup<CommonShell> exerciseLookup,
                               ReqInfo reqInfo) {
     // logger.info("GetPhoneReport " + phoneReport);
 

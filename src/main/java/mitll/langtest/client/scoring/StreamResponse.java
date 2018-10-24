@@ -8,7 +8,7 @@ import mitll.langtest.shared.answer.Validity;
 class StreamResponse {
   private final Validity validity;
   private final long streamTimestamp;
-  private boolean streamStop;
+  private final boolean streamStop;
 
   /**
    * @param validity

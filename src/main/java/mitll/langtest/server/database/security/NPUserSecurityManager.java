@@ -69,7 +69,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   private final IUserSessionDAO userSessionDAO;
   private IProjectManagement projectManagement;
 
-  private static boolean DEBUG = false;
+  private static final boolean DEBUG = false;
 
   /**
    * Only made once but shared with servlets.
@@ -216,22 +216,21 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @see #setSessionUser(HttpSession, User, boolean)
    */
   private void setSessionUserAndRemember(HttpSession session, int id1) {
-    log.info("setSessionUserAndRemember : set session user to " + id1);
-
+  //  log.info("setSessionUserAndRemember : set session user to " + id1);
     session.setAttribute(USER_SESSION_ATT, id1);
-    String sessionID = session.getId();
-
 
     Timestamp modified = new Timestamp(System.currentTimeMillis());
     userSessionDAO.add(
         new SlickUserSession(-1,
             id1,
-            sessionID,
+            session.getId(),
             "",
             "",
             modified, modified));
 
-    if (DEBUG) logSetSession(session, sessionID);
+    if (DEBUG) {
+      logSetSession(session, session.getId());
+    }
   }
 
   private void logSetSession(HttpSession session1, String sessionID) {

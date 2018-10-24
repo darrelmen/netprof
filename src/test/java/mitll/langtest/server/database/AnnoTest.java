@@ -55,20 +55,20 @@ public class AnnoTest extends BaseTest {
     int projID = getProjID(database);
     IAnnotationDAO annotationDAO = database.getAnnotationDAO();
 
-    Collection<Integer> exids = annotationDAO.getAudioAnnos();
+ /*   Collection<Integer> exids = annotationDAO.getAudioAnnos();
     int size = exids.size();
     Integer first = exids.iterator().next();
     logger.info("got " + size + " first " + first);
     for (Integer exid : exids) logger.info("got " + exid);
-
+*/
     Set<Integer> incorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID, false);
     logger.info("incorrect : got " + incorrectAnnotations.size() + " first " + incorrectAnnotations.iterator().next());
 
     AnnotationDAO dao = new AnnotationDAO(database, new UserDAO(database));
 
-    Collection<Integer> audioAnnos = dao.getAudioAnnos();
+/*    Collection<Integer> audioAnnos = dao.getAudioAnnos();
     logger.info("got " + audioAnnos.size() + " first " + audioAnnos.iterator().next());
-    for (Integer exid : audioAnnos) logger.info("truth " + exid);
+    for (Integer exid : audioAnnos) logger.info("truth " + exid);*/
 
     Set<Integer> incorrectAnnotations2 = dao.getExercisesWithIncorrectAnnotations(projID, false);
     logger.info("incorrect truth: got " + incorrectAnnotations2.size() + " first " + incorrectAnnotations2.iterator().next());

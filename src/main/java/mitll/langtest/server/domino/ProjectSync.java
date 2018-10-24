@@ -46,12 +46,12 @@ public class ProjectSync implements IProjectSync {
 
   private final ProjectServices projectServices;
   private final IProjectManagement projectManagement;
-  private IUserExerciseDAO userExerciseDAO;
+  private final IUserExerciseDAO userExerciseDAO;
   private final DAOContainer daoContainer;
-  private ExerciseServices exerciseServices;
-  private IUserExerciseDAO slickUEDAO;
+  private final ExerciseServices exerciseServices;
+  private final IUserExerciseDAO slickUEDAO;
 
-  private AudioCopy audioCopy;
+  private final AudioCopy audioCopy;
 
   /**
    * @param projectServices
@@ -293,7 +293,7 @@ public class ProjectSync implements IProjectSync {
                                    List<CommonExercise> importUpdateEx,
                                    Map<CommonExercise, Integer> importToKnownID) {
     dominoIDToChangedExercise.forEach((dominoID, importEx) -> {
-      logger.info("addPending import" +
+      logger.info("addChangedExercises import" +
           "\n\tcontext   " + importEx.isContext() +
           "\n\tdomino id " + dominoID +
           "\n\teng       " + importEx.getEnglish() +
@@ -306,7 +306,7 @@ public class ProjectSync implements IProjectSync {
       SlickExercise currentKnownExercise = dominoToNonContextEx.get(dominoID);
 
       if (currentKnownExercise == null) {  // how can this happen???
-        logger.warn("\n\n\naddPending found new CHANGED ex for domino id " + dominoID + //" / " + npID +
+        logger.warn("\n\n\naddChangedExercises found new CHANGED ex for domino id " + dominoID + //" / " + npID +
             " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
         //    newEx.add(importEx);
       } else {
@@ -317,16 +317,16 @@ public class ProjectSync implements IProjectSync {
           int id = currentKnownExercise.id();
 
           if (id == -1) {
-            logger.error("huh? no id on " + currentKnownExercise);
+            logger.error("addChangedExercises huh? no id on " + currentKnownExercise);
           } else {
-            logger.info("\tbefore " + id + "/" + importEx.getID() + "/" + importEx.getOldID() + " domino " + importEx.getDominoID());
+            logger.info("addChangedExercises : before " + id + "/" + importEx.getID() + "/" + importEx.getOldID() + " domino " + importEx.getDominoID());
             mutable.setID(currentKnownExercise.id());
             importToKnownID.put(importEx, id);
-            logger.info("\tafter  " + id + "/" + importEx.getID() + " domino " + importEx.getDominoID());
+            logger.info("addChangedExercises : after  " + id + "/" + importEx.getID() + " domino " + importEx.getDominoID());
           }
         } else { // impossible?
           newEx.add(importEx);
-          logger.warn("\n\n\n addPending 2 found new ex for domino id " + dominoID +// " / " + npID +
+          logger.warn("\n\n\n addChangedExercises 2 found new ex for domino id " + dominoID +// " / " + npID +
               " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
         }
       }
@@ -397,9 +397,9 @@ public class ProjectSync implements IProjectSync {
           "\n\tcontext : " + dominoIDToContextChangedExercise.keySet());
 
       // three piles:
-      // currentIDs exercises for the project that are not in the import should be deleted
-      // import exercises not in the currentIDs set are new and need to be added
-      // matching exercises need to be checked to see if they have changed
+      // 1) currentIDs exercises for the project that are not in the import should be deleted
+      // 2) import exercises not in the currentIDs set are new and need to be added
+      // 3) matching exercises need to be checked to see if they have changed
 
       importToKnownID.forEach((importEx, id) -> {
         logger.info("getNewAndChangedContextExercises " +
@@ -410,7 +410,6 @@ public class ProjectSync implements IProjectSync {
 
         CommonExercise currentParent = exerciseServices.getExercise(projectid, id);
 
-        //List<CommonExercise> importContext = importEx.getDirectlyRelated();
         int importCount = importEx.getDirectlyRelated().size();
         if (currentParent == null) {
           logger.info("getNewAndChangedContextExercises import  " + importEx.getID() + "/" + importEx.getDominoID() +
@@ -418,7 +417,7 @@ public class ProjectSync implements IProjectSync {
         } else {
           List<ClientExercise> currentContextOnParent = new ArrayList<>(currentParent.getDirectlyRelated());
 
-          logger.info("getNewAndChangedContextExercises current " + currentParent.getID() + " has " + currentContextOnParent.size());
+          logger.info("getNewAndChangedContextExercises current " + currentParent.getID() + " has " + currentContextOnParent.size() + " context sentences");
           logger.info("getNewAndChangedContextExercises import  " + importEx.getID() + "/" + importEx.getDominoID() + " has " + importCount + " context");
 
           // first figure out matching sentences, regardless of order
@@ -427,7 +426,6 @@ public class ProjectSync implements IProjectSync {
 
 
           for (ClientExercise importC : importEx.getDirectlyRelated()) {
-            //CommonExercise commonImportC = importC.asCommon();
             ClientExercise knownContextMatch = null;
             for (ClientExercise knownContext : currentContextOnParent) {
               if (!didChange(importC, knownContext)) {
@@ -452,7 +450,6 @@ public class ProjectSync implements IProjectSync {
               if (!currentContextOnParent.remove(knownContextMatch)) {
                 logger.warn("huh? " + knownContextMatch);
               }
-              ;
             }
           }
           if (DEBUG)
@@ -469,7 +466,7 @@ public class ProjectSync implements IProjectSync {
 
           Iterator<CommonExercise> changedOrNewIter = changedOrNew.iterator();
 
-          logger.info("comparing current num = " + currentContextOnParent.size() + " vs import changed or new " + changedOrNew.size());
+          logger.info("getNewAndChangedContextExercises comparing current num = " + currentContextOnParent.size() + " vs import changed or new " + changedOrNew.size());
 
           // go one-by-one comparing them
           while (currentSentences.hasNext() && changedOrNewIter.hasNext()) {
@@ -477,10 +474,13 @@ public class ProjectSync implements IProjectSync {
             CommonExercise importSentence = changedOrNewIter.next();
 
             if (didChange(importSentence, currentSentence)) {   // how can this be false?
-              logger.info("\tchanged for       " + currentSentence);
-              logger.info("\tchanged import is " + importSentence);
+              logger.info("\tgetNewAndChangedContextExercises changed for       " + currentSentence);
+              logger.info("\tgetNewAndChangedContextExercises changed import is " + importSentence);
               updateItems.add(getChanged(currentSentence, importSentence));
               rememberExID(importUpdateEx, importSentence, currentSentence.getID());
+            }
+            else {
+              logger.info("\tgetNewAndChangedContextExercises NO CHANGE for changed import " + importSentence);
             }
           }
 

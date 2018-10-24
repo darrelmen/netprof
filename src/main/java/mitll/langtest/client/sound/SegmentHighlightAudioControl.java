@@ -12,7 +12,8 @@ import java.util.logging.Logger;
  */
 public class SegmentHighlightAudioControl implements AudioControl {
   private final Logger logger = Logger.getLogger("SegmentHighlightAudioControl");
-  private SegmentAudioControl wordSegments, phoneSegments = null;
+  private final SegmentAudioControl wordSegments;
+  private SegmentAudioControl phoneSegments = null;
 
 
   /**

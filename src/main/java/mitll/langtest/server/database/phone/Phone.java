@@ -1,8 +1,5 @@
 package mitll.langtest.server.database.phone;
 
-import mitll.langtest.server.database.DatabaseServices;
-import mitll.npdata.dao.SlickPhone;
-
 /**
  * Created by go22670 on 3/29/16.
  */

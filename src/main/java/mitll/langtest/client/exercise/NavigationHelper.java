@@ -39,8 +39,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.HasID;
 
-import java.util.logging.Logger;
-
 /**
  * A row with prev/next buttons.  Key bindings for keys too.
  * Has confirm dialog appear on next button in some modes.
@@ -62,7 +60,7 @@ public class NavigationHelper extends HorizontalPanel {
 
   private Button prev;
   protected Button next;
-  private boolean enableNextOnlyWhenAllCompleted;
+  private final boolean enableNextOnlyWhenAllCompleted;
   private final PostAnswerProvider provider;
   private final ListInterface<?, ?> listContainer;
 

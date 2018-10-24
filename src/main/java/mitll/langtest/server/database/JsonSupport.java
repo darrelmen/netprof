@@ -66,8 +66,8 @@ public class JsonSupport {
 //  private final IAudioDAO audioDAO;
   private final IPhoneDAO phoneDAO;
 
-  private Language language;
-  private Project project;
+  private final Language language;
+  private final Project project;
 
   /**
    * @param sectionHelper

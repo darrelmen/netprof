@@ -32,19 +32,15 @@
 
 package mitll.langtest.server;
 
-import com.google.gson.JsonObject;
 import com.typesafe.config.ConfigFactory;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
-import mitll.langtest.server.scoring.HydraOutput;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectProperty;
-import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.Affiliation;
 import org.apache.logging.log4j.LogManager;
@@ -161,7 +157,7 @@ public class ServerProperties {
   public static final String HEARTBEAT_PERIOD = "heartbeatPeriod";
   public static final String HEARTBEAT_REC1 = "heartbeatRec";
 
-  private String dbConfig = POSTGRES_DATA2_DIALOG;
+ // private String dbConfig = POSTGRES_DATA2_DIALOG;
 
   private static final String SCORING_MODEL = "scoringModel";
   private static final String TALKS_TO_DOMINO = "talksToDomino";
@@ -278,7 +274,7 @@ public class ServerProperties {
   /**
    * @see mitll.langtest.server.database.copy.CreateProject#createProject
    */
-  public static List<ProjectProperty> CORE_PROPERTIES = Arrays.asList(
+  public static final List<ProjectProperty> CORE_PROPERTIES = Arrays.asList(
       MODELS_DIR,
       WEBSERVICE_HOST_PORT
   );
@@ -864,7 +860,7 @@ public class ServerProperties {
    * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight
    */
   public void setDBConfig(String optDatabase) {
-    this.dbConfig = optDatabase;
+    //this.dbConfig = optDatabase;
   }
 
   /**

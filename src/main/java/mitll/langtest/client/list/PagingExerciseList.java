@@ -58,7 +58,7 @@ import java.util.logging.Logger;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
+public abstract class PagingExerciseList<T extends CommonShell, U extends HasID> extends ExerciseList<T, U> {
   private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   static final String SEARCH = "Search";
@@ -84,7 +84,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     super(currentExerciseVPanel, factory, controller, listOptions);
     this.waitCursorHelper = new WaitCursorHelper();
     addComponents();
-   // getElement().setId("PagingExerciseList_" + getInstance());
+    // getElement().setId("PagingExerciseList_" + getInstance());
   }
 
   public Map<Integer, T> getIdToExercise() {
@@ -112,6 +112,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pushFirstSelection(getFirstID(), getTypeAheadText());
   }
 
+/*
   @Override
   public void setState(int id, STATE state) {
     T t = byID(id);
@@ -120,6 +121,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       t.setState(state);
     }
   }
+*/
 
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
@@ -130,7 +132,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    *
    * @see #PagingExerciseList
    */
-   void addComponents() {
+  void addComponents() {
     addTableWithPager(makePagingContainer());
   }
 
@@ -139,20 +141,21 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see #getExercises
    * @param prefix
    * @return
+   * @see #getExercises
    */
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
-   // logger.info("getExerciseListRequest prefix " + prefix);
+    // logger.info("getExerciseListRequest prefix " + prefix);
     return new ExerciseListRequest(incrRequest(),
         controller.getUserState().getUser())
         .setPrefix(prefix)
         .setUserListID(userListID)
         .setActivityType(getActivityType())
-        .setOnlyUnrecordedByMe(false)
-        .setOnlyDefaultAudio(false)
-        .setOnlyUninspected(false);
+        //.setOnlyUnrecordedByMe(false)
+        // .setOnlyDefaultAudio(false)
+        //.setOnlyUninspected(false)
+        ;
   }
 
   /**
@@ -177,10 +180,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @return
    * @see #loadFirstExercise
    */
-  @Override
+ /* @Override
   protected T findFirstExercise() {
     return listOptions.isShowFirstNotCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
-  }
+  }*/
 
   /**
    * Sometimes we want to not respect if there's an item selection in the url.
@@ -199,10 +202,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   * @see #findFirstExercise
+   * @deprecated
    * @return
+   * @see #findFirstExercise
    */
-  private T getFirstNotCompleted() {
+ /* private T getFirstNotCompleted() {
     for (T es : pagingContainer.getItems()) {
       STATE state = es.getState();
       if (state != null && state.equals(STATE.UNSET)) {
@@ -211,7 +215,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       }
     }
     return super.findFirstExercise();
-  }
+  }*/
 
   /**
    * TODO : Not sure if this is needed anymore
@@ -266,7 +270,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
         @Override
         public void gotTypeAheadEntry(String text) {
 //          gotTypeAheadEvent(text, false);
-          pushNewItem(text, -1);
+          pushNewItem(text, -1, -1);
 
           controller.logEvent(getTypeAheadBox(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
         }
@@ -288,7 +292,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       // why would this be a bad idea?
       //setTypeAheadText(text);
       alwaysSetTypeAhead(text);
-      pushNewItem(text, -1);
+      pushNewItem(text, -1, -1);
       //gotTypeAheadEvent(text, true);
     } else {
       logger.warning("skipping searchBoxEntry ");
@@ -436,11 +440,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     waitCursorHelper.showFinished();
   }
 
-  String getHistoryTokenFromUIState(String search, int id) {
+  String getHistoryTokenFromUIState(String search, int id, int listID) {
+    String listParam = listID > -1 ? (SelectionState.SECTION_SEPARATOR +
+        SelectionState.LIST + "=" + listID) : "";
+
     return
         getSearchTerm(search) +
             SelectionState.SECTION_SEPARATOR +
-            SelectionState.ITEM + "=" + id;
+            SelectionState.ITEM + "=" + id +
+            listParam
+        ;
   }
 
   @NotNull
@@ -458,7 +467,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
-   *
    * @param comparator if null use original order
    */
   @Override
@@ -468,7 +476,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       comparator = (o1, o2) -> {
         int i = inOrderResult.indexOf(o1);
         int j = inOrderResult.indexOf(o2);
-        return Integer.compare(i,j);
+        return Integer.compare(i, j);
       };
     }
     pagingContainer.setComparator(comparator);

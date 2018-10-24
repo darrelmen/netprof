@@ -39,7 +39,6 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.PropertyHandler;
-import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.initial.WavEndCallback;
 import mitll.langtest.client.initial.WavStreamCallback;
 import mitll.langtest.client.recorder.RecordButton;
@@ -49,7 +48,6 @@ import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -82,16 +80,21 @@ public interface ExerciseController extends Services, ExceptionSupport {
   int getUser();
 
   void startRecording();
+
+  /**
+   *
+   * @param clientAudioContext
+   * @param wavStreamCallback
+   */
   void startStream(ClientAudioContext clientAudioContext, WavStreamCallback wavStreamCallback);
 
   /**
    * @see RecordButton.RecordingListener#stopRecording
    * @see RecordButton.RecordingListener#stopRecording(long, boolean)
-   * @param wavCallback
    * @param useDelay
    * @param abort
    */
-  void stopRecording(WavCallback wavCallback, boolean useDelay, boolean abort);
+  void stopRecording(boolean useDelay, boolean abort);
   void registerStopDetected(WavEndCallback wavEndCallback);
   int getRecordTimeout();
 

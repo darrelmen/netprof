@@ -54,7 +54,7 @@ public interface HasUnitChapter extends IsSerializable {
    * @param value
    * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    */
-  void addUnitToValue(String unit, String value);
+  boolean addUnitToValue(String unit, String value);
 
   /**
    * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson

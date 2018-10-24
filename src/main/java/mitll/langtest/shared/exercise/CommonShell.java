@@ -40,7 +40,7 @@ package mitll.langtest.shared.exercise;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/21/2014.
  */
-public interface CommonShell extends Shell {
+public interface CommonShell extends HasID {
   /**
    * @return
    * @see mitll.langtest.client.list.ListSorting#compEnglish
@@ -77,4 +77,8 @@ public interface CommonShell extends Shell {
    * @return
    */
   int getNumPhones();
+
+  boolean isContext();
+
+  int getNumContext();
 }

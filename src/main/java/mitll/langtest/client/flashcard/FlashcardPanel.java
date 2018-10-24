@@ -61,10 +61,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
-import mitll.langtest.shared.exercise.MutableAnnotationExercise;
+import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -77,10 +74,12 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/26/2014.
  */
-public class FlashcardPanel<L extends CommonShell, T extends CommonShell & MutableAnnotationExercise & AudioRefExercise> // CommonExercise & MutableAnnotationExercise>
+public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//CommonShell & MutableAnnotationExercise & AudioRefExercise> // CommonExercise & MutableAnnotationExercise>
     extends DivWidget implements TimerListener {
-  private static final String MEANING = "Meaning";
+  public static final int HEADING_SIZE = 2;
   private final Logger logger = Logger.getLogger("FlashcardPanel");
+
+  private static final String MEANING = "Meaning";
 
   static final int PROGRESS_LEFT_MARGIN = 20;
   private static final int ADVANCE_DELAY = 2000;
@@ -88,7 +87,7 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
   private static final int KEY_PRESS_WIDTH = 125;
   private static final String RIGHT_ARROW_KEY = "Right Arrow Key";
 
-  private static final int CARD_HEIGHT = 362;
+  private static final int CARD_HEIGHT = 385;//362;
 
   /**
    * @see #addPlayingHighlight
@@ -135,8 +134,8 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
   private Panel leftState;
   private Panel rightColumn;
   private final SoundFeedback.EndListener endListener;
-  final String instance;
-  protected final ListInterface<L,T> exerciseList;
+  //  final String instance;
+  protected final ListInterface<L, T> exerciseList;
   private DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
 
@@ -153,7 +152,6 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
    * @param controller
    * @param soundFeedback
    * @param endListener
-   * @param instance
    * @param exerciseList
    * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    */
@@ -163,14 +161,14 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
                  final ControlState controlState,
                  MySoundFeedback soundFeedback,
                  SoundFeedback.EndListener endListener,
-                 String instance,
-                 ListInterface<L,T> exerciseList) {
+                 ListInterface<L, T> exerciseList) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
+
     this.controller = controller;
     this.controlState = controlState;
     this.endListener = endListener;
-    this.instance = instance;
+
     this.exerciseList = exerciseList;
     this.timer = new FlashcardTimer(this);
     this.soundFeedback = soundFeedback;
@@ -180,10 +178,10 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
   }
 
   /**
-   * @see PolyglotPracticePanel#realAddWidgets
    * @param e
    * @param controller
    * @param controlState
+   * @see PolyglotPracticePanel#realAddWidgets
    */
   void addWidgets(T e, ExerciseController controller, ControlState controlState) {
     final DivWidget middleVert = new DivWidget();
@@ -496,7 +494,9 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
   private Panel getCardContent() {
     final ClickableSimplePanel contentMiddle = new ClickableSimplePanel();
 
-    contentMiddle.setHeight(CARD_HEIGHT + "px");
+    //  contentMiddle.setHeight(CARD_HEIGHT + "px");
+    contentMiddle.getElement().getStyle().setProperty("minHeight", CARD_HEIGHT + "px");
+
     contentMiddle.getElement().setId("Focusable_content");
 
     contentMiddle.addClickHandler(event -> gotCardClick(contentMiddle));
@@ -1072,14 +1072,16 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
 
       englishPhrase.setWidth("100%");
 
-      div.add(englishPhrase);
+      if (!usedForeign) {
+        div.add(englishPhrase);
+      }
     }
 
-    foreign = getForeignLanguageContent(foreignSentence, e.hasRefAudio());
+    foreign = getForeignLanguageContent(foreignSentence, e.hasRefAudio(), !usedForeign);
 
-    if (!usedForeign) {
-      div.add(foreign);
-    }
+    // if (!usedForeign) {
+    div.add(foreign);
+    // }
     showEnglishOrForeign();
 
     return div;
@@ -1090,12 +1092,16 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
   }
 
   private Widget makeEnglishPhrase(String englishSentence) {
-    Heading englishHeading = new Heading(1, englishSentence);
+    Heading englishHeading = new Heading(getHeadingSize(), englishSentence);
     englishHeading.getElement().setId("EnglishPhrase");
     DivWidget widgets = new DivWidget();
     widgets.add(englishHeading);
     widgets.getElement().setId("EnglishPhrase_container");
     return widgets;
+  }
+
+  private int getHeadingSize() {
+    return exercise.isContext() ? HEADING_SIZE : 1;
   }
 
   private boolean isSiteEnglish() {
@@ -1107,14 +1113,15 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
    *
    * @param foreignSentence
    * @param hasRefAudio
+   * @param usedForeign
    * @return
    * @see #getQuestionContent
    */
-  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
+  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio, boolean usedForeign) {
     Panel hp = new DivWidget();
     hp.addStyleName("inlineFlex");
     hp.setWidth("100%");
-    Widget flContainer = getFLContainer(foreignSentence);
+    Widget flContainer = getFLContainer(foreignSentence, usedForeign);
     DivWidget flDiv = new DivWidget();
     flDiv.add(flContainer);
     hp.add(flDiv);
@@ -1152,8 +1159,15 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
   }
 
   @NotNull
-  private Widget getFLContainer(String foreignSentence) {
-    Heading foreignLanguageContent = new Heading(1, foreignSentence);
+  private Widget getFLContainer(String foreignSentence, boolean hasEnglish) {
+    int headingSize = getHeadingSize();
+    Heading foreignLanguageContent = new Heading(headingSize, foreignSentence);
+
+    if (headingSize == 2 && hasEnglish) {
+      foreignLanguageContent.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+      foreignLanguageContent.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    }
+
     Style style = foreignLanguageContent.getElement().getStyle();
     style.setTextAlign(Style.TextAlign.CENTER);
     if (isUrdu) {
@@ -1271,6 +1285,9 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
     if (isValid(refAudioToPlay)) {
       playRef(refAudioToPlay);
     }
+//    else {
+//      logger.info("playRef : NOPE : audio " + refAudioToPlay + " is not valid...");
+//    }
   }
 
   /**
@@ -1280,6 +1297,7 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
   String getRefAudioToPlay() {
     String path = exercise.getRefAudio();
     if (path == null) {
+      //  logger.info("attr " + exercise.getAudioAttributes());
       path = exercise.getSlowAudioRef(); // fall back to slow audio
     }
     return path;

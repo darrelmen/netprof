@@ -16,7 +16,7 @@ import java.util.List;
 public class Search<T extends CommonExercise> {
   private static final Logger logger = LogManager.getLogger(Search.class);
 
-  private ProjectServices projectServices;
+  private final ProjectServices projectServices;
 
   public Search(ProjectServices projectServices) {
     this.projectServices = projectServices;
@@ -94,18 +94,7 @@ public class Search<T extends CommonExercise> {
           "\n\tprefix    " + prefix +
           "\n\tmatches   " + basicExercises.size());
     }
- /*   int exid = getExid(prefix);
 
-
-    List<T> byID = new ArrayList<>();
-
-    if (exid != -1) {
-      T customOrPredefExercise = (T) database.getCustomOrPredefExercise(projectID, exid);
-      if (customOrPredefExercise != null) {
-        byID.add(customOrPredefExercise);
-      }
-      else logger.warn("getExercisesForSearchWithTrie no ex for " +projectID + " = " + exid);
-    }*/
     return new TripleExercises<T>(
         Collections.emptyList(),
         basicExercises,

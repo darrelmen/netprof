@@ -35,8 +35,6 @@ package mitll.langtest.shared.instrumentation;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

@@ -39,10 +39,8 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -61,7 +59,7 @@ import java.util.logging.Logger;
  * Time: 1:39 PM
  * To change this template use File | Settings | File Templates.
  */
-abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends VerticalPanel implements
+abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends VerticalPanel implements
     BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
   private final Logger logger = Logger.getLogger("ExercisePanel");
 
@@ -74,8 +72,8 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
   private final NavigationHelper navigationHelper;
   final ListInterface<L, T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
-  protected final String instance;
-  private boolean doNormalRecording;
+  final String instance;
+  private final boolean doNormalRecording;
 
   /**
    * Includes fix for
@@ -247,7 +245,7 @@ abstract class ExercisePanel<L extends Shell, T extends CommonShell> extends Ver
     }
   }
 
-  protected boolean isRTL(T exercise) {
+  private boolean isRTL(T exercise) {
     return isRTLContent(exercise.getFLToShow());
   }
 

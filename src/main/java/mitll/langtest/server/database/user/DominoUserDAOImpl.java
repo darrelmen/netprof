@@ -35,7 +35,6 @@ package mitll.langtest.server.database.user;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.gwt.user.client.DOM;
 import com.mongodb.MongoTimeoutException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
@@ -187,7 +186,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private IProjectManagement projectManagement;
   private Group primaryGroup = null;
 
-  private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
+  private final LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
@@ -202,7 +201,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           });
 
 
-  private LoadingCache<Integer, User> idToUser = CacheBuilder.newBuilder()
+  private final LoadingCache<Integer, User> idToUser = CacheBuilder.newBuilder()
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(

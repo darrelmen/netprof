@@ -101,7 +101,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final int WARN_RID_MISSING_THRESHOLD = 10;
   private static final int WARN_MISSING_THRESHOLD = 50;
   private static final String QUIZLET_PROPERTIES = "quizlet.properties";
-  private static final String NETPROF_PROPERTIES = "netprof.properties";
+  public static final String DEFAULT_PROPERTIES_FILE = "netprof.properties";
   private static final String CONFIG = "config";
   private static final String NO_TRANSCRIPT_FOUND = "no transcript found";
   private static final boolean ALLOW_DELETE = false;
@@ -131,7 +131,7 @@ public class CopyToPostgres<T extends CommonShell> {
     REMAP("e"),
     UNKNOWN("k");
 
-    private String value;
+    private final String value;
 
     ACTION(String value) {
       this.value = value;
@@ -154,10 +154,11 @@ public class CopyToPostgres<T extends CommonShell> {
     SKIPREFRESULT("s", "skip loading ref result table (if you want to recalculate reference audio alignment)"),
     TO("t", "to project id"),
     ONDAY("w", "on day"),
-    DATABASE("d", "into database");
+    DATABASE("d", "into database"),
+    PROPERTIES("i", "optional properties file to read from within /opt/netprof/config, one-to-one for each deployed webapp");
 
-    private String value;
-    private String desc;
+    private final String value;
+    private final String desc;
 
     OPTIONS(String value, String desc) {
       this.value = value;
@@ -178,7 +179,8 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   private static final String OPT_NETPROF_ROOT = DEFAULT_NETPROF_AUDIO_DIR;
-  private static final String NETPROF_PROPERTIES_FULL = OPT_NETPROF_ROOT + File.separator + "config/netprof.properties";
+  private static final String NETPROF_CONFIG_DIR = OPT_NETPROF_ROOT + File.separator + "config/";
+  //private static final String NETPROF_PROPERTIES_FULL = NETPROF_CONFIG_DIR + DEFAULT_PROPERTIES_FILE;
   private static final String OPT_NETPROF = OPT_NETPROF_ROOT + File.separator + "import";
 
   private long getImportDate(String config, String optionalProperties) {
@@ -195,6 +197,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param doUpdate
    * @param doLatest
    * @param doSinceCreated
+   * @param propertiesFile
    * @see #main
    */
   private boolean copyOneConfigCommand(String config,
@@ -205,7 +208,9 @@ public class CopyToPostgres<T extends CommonShell> {
                                        boolean skipRefResult,
                                        boolean doUpdate,
                                        boolean doLatest,
-                                       boolean doSinceCreated, String optDatabase) {
+                                       boolean doSinceCreated,
+                                       String optDatabase,
+                                       String propertiesFile) {
     CopyToPostgres copyToPostgres = new CopyToPostgres();
 
     // previous update from h2...
@@ -215,7 +220,7 @@ public class CopyToPostgres<T extends CommonShell> {
       sinceWhen = getSinceWhenFromOldConfig(config, optionalProperties, false);
     }
 
-    try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, CONFIG, optDatabase)) {
+    try (DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, CONFIG, optDatabase, propertiesFile)) {
       while (getDefaultUser(databaseLight) < 1) {
         try {
           sleep(1000);
@@ -271,7 +276,8 @@ public class CopyToPostgres<T extends CommonShell> {
   private long getSinceWhenFromOldConfig(String config, String optionalProperties, boolean closeDB) {
     long sinceWhen = 0;
 
-    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties, OPT_NETPROF, "oldConfig", null);
+    DatabaseImpl databaseLight = getDatabaseLight(config, true, false, optionalProperties,
+        OPT_NETPROF, "oldConfig", null, DEFAULT_PROPERTIES_FILE);
 
     if (databaseLight == null) logger.warn("no old config under " + OPT_NETPROF);
     else {
@@ -348,8 +354,8 @@ public class CopyToPostgres<T extends CommonShell> {
     database.close();
   }*/
 
-  private void merge(int from, int to) {
-    database = getDatabase();
+  private void merge(int from, int to, String propertiesFile) {
+    database = getDatabase(propertiesFile);
     Project fProject = database.getProject(from);
     Project tProject = database.getProject(to);
     logger.info("merging " +
@@ -372,8 +378,8 @@ public class CopyToPostgres<T extends CommonShell> {
     database.close();
   }
 
-  private void mergeRecordings(int from, int to, Date onDay) {
-    database = getDatabase();
+  private void mergeRecordings(int from, int to, Date onDay, String propertiesFile) {
+    database = getDatabase(propertiesFile);
     Project fProject = database.getProject(from);
     Project tProject = database.getProject(to);
     logger.info("merging " +
@@ -404,10 +410,10 @@ public class CopyToPostgres<T extends CommonShell> {
     all.forEach(project -> logger.info("\t" + project));
   }
 
-  private static DatabaseImpl getDatabase() {
-    ServerProperties serverProps = getProps();
+  private static DatabaseImpl getDatabase(String propertiesFile) {
+    ServerProperties serverProps = getProps(propertiesFile);
     String war = "war";
-    return new DatabaseImpl(getProps(), getPathHelper(war, serverProps), null, null);
+    return new DatabaseImpl(getProps(propertiesFile), getPathHelper(war, serverProps), null, null);
   }
 
   @NotNull
@@ -415,12 +421,12 @@ public class CopyToPostgres<T extends CommonShell> {
     return new PathHelper(war, serverProps);
   }
 
-  public static DatabaseImpl getSimpleDatabase() {
-    return new DatabaseImpl(getProps());
+  private static DatabaseImpl getSimpleDatabase() {
+    return new DatabaseImpl(getProps(DEFAULT_PROPERTIES_FILE));
   }
 
-  private static ServerProperties getProps() {
-    File file = new File(NETPROF_PROPERTIES_FULL);
+  private static ServerProperties getProps(String propertiesFile) {
+    File file = new File(NETPROF_CONFIG_DIR, propertiesFile);
     if (!file.exists()) logger.error("can't find " + file.getAbsolutePath());
     String parent = file.getParentFile().getAbsolutePath();
     return new ServerProperties(parent, file.getName());
@@ -432,6 +438,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param optPropsFile
    * @param installPath
    * @param optDatabase
+   * @param propertiesFile
    * @return null if can't find the config file
    * @see #copyOneConfigCommand
    */
@@ -441,7 +448,7 @@ public class CopyToPostgres<T extends CommonShell> {
                                               String optPropsFile,
                                               String installPath,
                                               String rootConfigDir,
-                                              String optDatabase) {
+                                              String optDatabase, String propertiesFile) {
     // logger.info("getDatabaseLight db " + config + " optional props " + optPropsFile);
     String propsFile = optPropsFile != null ? optPropsFile : QUIZLET_PROPERTIES;
 
@@ -457,7 +464,8 @@ public class CopyToPostgres<T extends CommonShell> {
       return null;
     }
 
-    readProps(serverProps, getServerProperties("", NETPROF_PROPERTIES, OPT_NETPROF_ROOT));
+    // String propertiesFile = DEFAULT_PROPERTIES_FILE;
+    readProps(serverProps, getServerProperties("", propertiesFile, OPT_NETPROF_ROOT));
 
     if (useLocal) {
       serverProps.setLocalPostgres();
@@ -1426,6 +1434,7 @@ public class CopyToPostgres<T extends CommonShell> {
     String optName = null;
     String optConfigValue = null;
     String optDatabase = null;
+    String propertiesFile = DEFAULT_PROPERTIES_FILE;
     int displayOrderValue = 0;
     boolean isEval, skipRefResult;
 
@@ -1552,6 +1561,10 @@ public class CopyToPostgres<T extends CommonShell> {
       optConfigValue = cmd.getOptionValue(OPTCONFIG.toLower());
     }
 
+    if (cmd.hasOption(PROPERTIES.toLower())) {
+      propertiesFile = cmd.getOptionValue(PROPERTIES.toLower());
+    }
+
     if (cmd.hasOption(ORDER.toLower())) {
       String optionValue = "";
       try {
@@ -1608,7 +1621,7 @@ public class CopyToPostgres<T extends CommonShell> {
         );
         try {
           boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue,
-              isEval, skipRefResult, false, false, false, optDatabase);
+              isEval, skipRefResult, false, false, false, optDatabase, propertiesFile);
           //  if (!b) {
           doExit(b);  // ?
           // }
@@ -1618,26 +1631,26 @@ public class CopyToPostgres<T extends CommonShell> {
         break;
       case UPDATEUSER:
         logger.info("map old user ids to new user ids");
-        doUpdateUser(updateUsersFile);
+        doUpdateUser(updateUsersFile, propertiesFile);
         doExit(true);  // ?
         break;
       case UPDATE:
         logger.info("import netprof 1 content into existing netprof project");
-        boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, false, optDatabase);
+        boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, false, optDatabase, propertiesFile);
         // if (!b) {
         doExit(b);  // ?
         // }
         break;
       case LATEST:
         logger.info("import netprof 1 content into existing netprof project given latest target project date");
-        boolean c = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, true, false, optDatabase);
+        boolean c = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, true, false, optDatabase, propertiesFile);
         // if (!b) {
         doExit(c);  // ?
         // }
         break;
       case CREATED:
         logger.info("import netprof 1 content into existing netprof project given latest target project date");
-        boolean d = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, true, optDatabase);
+        boolean d = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, true, optDatabase, propertiesFile);
         // if (!b) {
         doExit(d);  // ?
         // }
@@ -1650,33 +1663,33 @@ public class CopyToPostgres<T extends CommonShell> {
         break;
       case MERGE:
         logger.info("merge project from into project to");
-        copyToPostgres.merge(from, to);
+        copyToPostgres.merge(from, to, propertiesFile);
         logger.info("merge project '" + from + "' into '" + to);
         doExit(true);  // ?
         break;
       case SEND:
         logger.info("send reports");
-        copyToPostgres.sendReports();
+        copyToPostgres.sendReports(propertiesFile);
         logger.info("sent reports");
         doExit(true);  //
       case NORM:
-        copyToPostgres.dumpNorm(projID);
+        copyToPostgres.dumpNorm(projID, propertiesFile);
         doExit(true);  // ?
         break;
       case DIALOG:
-        copyDialog(to);
+        copyDialog(to, propertiesFile);
         doExit(true);  // ?
         break;
       case CLEANDIALOG:
-        cleanDialog(to);
+        cleanDialog(to, propertiesFile);
         doExit(true);  // ?
         break;
       case LIST:
-        listProjects();
+        listProjects(propertiesFile);
         doExit(true);  // ?
         break;
       case REMAP:
-        remap(to);
+        remap(to, propertiesFile);
         doExit(true);  // ?
         break;
  /*       case MERGEDAY:
@@ -1687,7 +1700,7 @@ public class CopyToPostgres<T extends CommonShell> {
         break;*/
       case RECORDINGS:
         logger.info("merge recordings for project from into project to " + onDay);
-        copyToPostgres.mergeRecordings(from, to, onDay);
+        copyToPostgres.mergeRecordings(from, to, onDay, propertiesFile);
         logger.info("merge recordings for project '" + from + "' into '" + to);
         doExit(true);  // ?
         break;
@@ -1696,8 +1709,8 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
-  private static void copyDialog(int to) {
-    database = getDatabase();
+  private static void copyDialog(int to, String propertiesFile) {
+    database = getDatabase(propertiesFile);
     if (to == -1) logger.error("remember to set the project id");
     else {
       Project project = database.getProject(to);
@@ -1716,8 +1729,8 @@ public class CopyToPostgres<T extends CommonShell> {
     return getPathHelper("war", database.getServerProps());
   }
 
-  private static void cleanDialog(int to) {
-    database = getDatabase();
+  private static void cleanDialog(int to, String propertiesFile) {
+    database = getDatabase(propertiesFile);
     if (to == -1) logger.error("remember to set the project id");
     else {
       Project project = database.getProject(to);
@@ -1732,10 +1745,12 @@ public class CopyToPostgres<T extends CommonShell> {
 
   /**
    * Only for Korean.
+   *
    * @param to
+   * @param propertiesFile
    */
-  private static void remap(int to) {
-    database = getDatabase();
+  private static void remap(int to, String propertiesFile) {
+    database = getDatabase(propertiesFile);
     if (to == -1) logger.error("remember to set the project id");
     else {
       Project project = database.getProject(to);
@@ -1745,9 +1760,9 @@ public class CopyToPostgres<T extends CommonShell> {
         RecordWordAndPhone recordWordAndPhone = database.getRecordWordAndPhone();
 
         long then = System.currentTimeMillis();
-        recordWordAndPhone.remapPhones(to,database.getResultDAO(),database.getServerProps(),project.getLanguageEnum());
+        recordWordAndPhone.remapPhones(to, database.getResultDAO(), database.getServerProps(), project.getLanguageEnum());
         long now = System.currentTimeMillis();
-        logger.info("took " + (now-then));
+        logger.info("took " + (now - then));
 
 
       }
@@ -1755,8 +1770,8 @@ public class CopyToPostgres<T extends CommonShell> {
     if (database != null) database.close();
   }
 
-  private static void listProjects() {
-    database = getDatabase();
+  private static void listProjects(String propertiesFile) {
+    database = getDatabase(propertiesFile);
     database.getProject(1);
     Collection<Project> projects = database.getProjects();
     logger.info("known projects in " + database.getDbConfig() + " = " + projects.size());
@@ -1764,8 +1779,8 @@ public class CopyToPostgres<T extends CommonShell> {
     if (database != null) database.close();
   }
 
-  private void dumpNorm(int projid) {
-    DatabaseImpl database = getDatabase();
+  private void dumpNorm(int projid, String propertiesFile) {
+    DatabaseImpl database = getDatabase(propertiesFile);
     Project project = database.getProject(projid);
 
     try {
@@ -1824,8 +1839,8 @@ public class CopyToPostgres<T extends CommonShell> {
     fileWriter.write(commonExercise.isContext() + "\n");
   }
 
-  private void sendReports() {
-    database = getDatabase();
+  private void sendReports(String propertiesFile) {
+    database = getDatabase(propertiesFile);
     database.getProject(2);
     database.sendReports();
     if (database != null) database.close();
@@ -1861,6 +1876,7 @@ public class CopyToPostgres<T extends CommonShell> {
     addDeleteOptions(options);
 
     addNonRequiredArg(options, OPTCONFIG);
+    addNonRequiredArg(options, PROPERTIES);
     addNonRequiredArg(options, NAME);
     addNonRequiredNoArg(options, EVAL);
     addNonRequiredArg(options, ORDER);
@@ -1992,11 +2008,11 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
-  private static void doUpdateUser(String filename) {
+  private static void doUpdateUser(String filename, String propertiesFile) {
     DatabaseImpl database = null;
     try {
       logger.warn("Mapping old user ids to new user ids.");
-      database = getDatabase();
+      database = getDatabase(propertiesFile);
       long then = System.currentTimeMillis();
 
       Map<Integer, Integer> oldToNew = getUserMapFromFile(filename);

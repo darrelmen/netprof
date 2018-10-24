@@ -49,26 +49,31 @@ public interface AudioRefExercise {
   boolean hasRefAudio();
 
   /**
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#hasAudio
    * @param vocab
    * @return
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#hasAudio
    */
   boolean hasAudioNonContext(boolean vocab);
+
+  boolean hasContextAudio();
 
   String getRefAudio();
 
   String getSlowAudioRef();
 
+  /**
+   * @return
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#getRegularSpeedIfAvailable
+   */
   AudioAttribute getRegularSpeed();
-
-  AudioAttribute getSlowSpeed();
 
   Collection<AudioAttribute> getAudioAttributes();
 
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
 
   /**
-   * Sorted by user age. Gotta choose something...
+   * TODO :  Sorted by user age. Gotta choose something... ???
+   *
    * @param malesMap
    * @return
    */
@@ -78,14 +83,16 @@ public interface AudioRefExercise {
 
   /**
    * CLIENT
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay
+   *
    * @param isMale
    * @return
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay
    */
   AudioAttribute getAudioAttrPrefGender(boolean isMale);
 
   /**
    * CLIENT
+   *
    * @param isMale
    * @param preferredUsers
    * @param includeContext

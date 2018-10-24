@@ -282,13 +282,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    */
   @Override
   public Map<Integer, AlignmentAndScore> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
-    //logger.info("getAlignments project " + projid + " asking for " + audioIDs);
+    logger.info("getAlignments project " + projid + " asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
 
     {
       Project project = getProject(projid);
 
-      if (project.hasProjectSpecificAudio()) {
+      if (project != null && project.hasProjectSpecificAudio()) {
         List<CommonExercise> exercisesForAudio =
             audioIDMap
                 .values()

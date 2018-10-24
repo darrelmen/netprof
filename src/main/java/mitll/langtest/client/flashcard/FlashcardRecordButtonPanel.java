@@ -54,7 +54,7 @@ import mitll.langtest.shared.answer.AudioType;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
-  //  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
+//  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
   private final AudioAnswerListener exercisePanel;
   private IconAnchor waiting;
 
@@ -124,7 +124,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    *
    * @param result response from server
    * @param outer  ignored here
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#onPostSuccess
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {

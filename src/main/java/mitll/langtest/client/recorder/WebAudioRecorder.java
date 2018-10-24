@@ -39,8 +39,6 @@ import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.initial.WavStreamCallback;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 
-import java.util.logging.Logger;
-
 /**
  * Tries to do initWebaudio, and if no response has been received in 5 seconds, tries again.
  *
@@ -50,13 +48,13 @@ import java.util.logging.Logger;
  * @since 5/27/2014.
  */
 public class WebAudioRecorder {
-  private static final Logger logger = Logger.getLogger("WebAudioRecorder");
-  private static final int DELAY_MILLIS = 4000;
+//  private static final Logger logger = Logger.getLogger("WebAudioRecorder");
+ // private static final int DELAY_MILLIS = 4000;
 
   private static boolean webAudioMicAvailable;
-  private static boolean tried = false;
+ // private static boolean tried = false;
   private static boolean gotResponse = false;
-  private static boolean USE_STREAMS = true;
+  //private static boolean USE_STREAMS = true;
 
   private Timer theTimer = null;
 
@@ -133,7 +131,7 @@ public class WebAudioRecorder {
   }-*/;
 
   /**
-   * @see #stopRecording(boolean, WavCallback)
+   * @see #stopRecording(boolean)
    */
   public native void stopRecording() /*-{
       $wnd.stopRecording();
@@ -236,24 +234,25 @@ public class WebAudioRecorder {
   }
 
   /**
-   * @see ExerciseController#stopRecording(WavCallback, boolean, boolean)
+   * @see ExerciseController#stopRecording(boolean, boolean)
    */
   private static WavCallback wavCallback = null;
 
   /**
    * @param abort
-   * @param wavCallback
    * @see BrowserRecording#stopWebRTCRecording
    */
-  public void stopRecording(boolean abort, WavCallback wavCallback) {
-    if (USE_STREAMS) {
-      logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
-      doStopStream("" + abort);
-    } else {
+  public void stopRecording(boolean abort) {
+    //if (USE_STREAMS) {
+    // logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
+    doStopStream("" + abort);
+  /*  }
+
+    else {
       logger.info("WebAudioRecorder.stopRecording - stop and grab wav");
       WebAudioRecorder.wavCallback = wavCallback;
       stopRecording();
-    }
+    }*/
   }
 
   private static WavStreamCallback wavStreamCallback = null;
@@ -277,8 +276,8 @@ public class WebAudioRecorder {
   /**
    * @param wavStreamCallback
    * @see PostAudioRecordButton#startRecording
-   * @see ExerciseController#startStream(int, int, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
-   * @see BrowserRecording#startStream(String, String, String, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
+   * @see ExerciseController#startStream
+   * @see BrowserRecording#startStream
    */
   static void setStreamCallback(WavStreamCallback wavStreamCallback) {
     WebAudioRecorder.wavStreamCallback = wavStreamCallback;

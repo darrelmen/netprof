@@ -74,10 +74,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     return play;
   }
 
-  private Button getRef() {
-    return refAudio;
-  }
-
   private Button getReview() {
     return review;
   }
@@ -114,7 +110,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   private void gotClickOnItem(final T wordScore) {
-   // gotClickOnPlay(play, true);
     showRecoOutputLater(wordScore, false);
   }
 
@@ -149,7 +144,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     }
   }
 
-  private DivWidget recoOutput = new DivWidget();
+  private final DivWidget recoOutput = new DivWidget();
 
   @Override
   protected void addTable(Panel column) {
@@ -174,10 +169,8 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     wrapper.addStyleName("floatRight");
     wrapper.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     {
-      int width = 55;
-      Button play = getPlayButton(width, true);
+      Button play = getPlayButton(60, true);
       wrapper.add(play);
-
       this.play = play;
     }
 
@@ -244,9 +237,22 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     review.setType(ButtonType.SUCCESS);
   }
 
+  /**
+   * If the item is for a context sentence, jump to the learn sentences view.
+   */
   private void gotClickOnLearn() {
-    if (getSelected() != null) {
-      controller.getShowTab(jumpView).showLearnAndItem(getSelected().getExid());
+    T selected = getSelected();
+    if (selected != null) {
+//
+//      logger.info("jumpView " + jumpView);
+//      logger.info("selected " + selected);
+//      logger.info("selected " + selected.getIsContext());
+
+      INavigation.VIEWS toUse =
+          this.jumpView == INavigation.VIEWS.LEARN ?
+              selected.getIsContext() ? INavigation.VIEWS.LEARN_SENTENCES : this.jumpView : this.jumpView;
+
+      controller.getShowTab(toUse).showLearnAndItem(selected.getExid());
     }
   }
 
@@ -283,7 +289,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   private boolean isPlaying(Button play, boolean playYourAudio) {
     String text = play.getText().trim();
- //   logger.info("isPlaying text " + text + " playYourAudio " + playYourAudio);
+    //   logger.info("isPlaying text " + text + " playYourAudio " + playYourAudio);
     return text.equals(playYourAudio ? PLAY : REFERENCE);
   }
 
@@ -314,8 +320,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
             T visibleItem = table.getVisibleItem(0);
             setSelectedAndShowReco(visibleItem, true);
 //            playAudio(visibleItem, true);
-          }
-          else {
+          } else {
             logger.info("Did scroll");
           }
         } else {
@@ -457,7 +462,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
         });
   }
 
-  private DownloadContainer downloadContainer = new DownloadContainer();
+  private final DownloadContainer downloadContainer = new DownloadContainer();
   private HeadlessPlayAudio headlessPlayAudio;
 
   private void showRecoOutput(AlignmentAndScore pretestScore, int exid, String answerAudio,
@@ -468,7 +473,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
       headlessPlayAudio.destroySound();
     }
 
-//    Hearle// playAudioPanel = new PlayAudioPanel(null, controller, exid);
     headlessPlayAudio = new HeadlessPlayAudio(controller.getSoundManager(), new IListenView() {
       @Override
       public int getVolume() {
@@ -490,9 +494,8 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
     if (playAfterLoad) {
       playAudio(getSelected(), true);
-    }
-    else {
-     // logger.warning("not playing after load of " + pretestScore);
+    } else {
+      // logger.warning("not playing after load of " + pretestScore);
     }
   }
 
@@ -518,7 +521,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
         int i = visibleItems == null ? -1 : visibleItems.indexOf(selected);
 
         if (i > -1) {
-          if (DEBUG || true) logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
+          if (DEBUG) logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
           if (i == visibleItems.size() - 1) {
             Range visibleRange = table.getVisibleRange();
             int i1 = visibleRange.getStart() + visibleRange.getLength();
@@ -532,15 +535,14 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
               if (i1 == rowCount) {
                 resetReview();
               } else {
-                if (DEBUG || true) logger.info("studentAudioEnded scrollToVisible " + i1 + " row " + rowCount);
+                if (DEBUG) logger.info("studentAudioEnded scrollToVisible " + i1 + " row " + rowCount);
 
                 scrollToVisible(i1);
 
                 List<T> visibleItems1 = table.getVisibleItems();
                 if (visibleItems1.isEmpty()) {
 
-                }
-                else {
+                } else {
                   T toSelect = visibleItems1.get(0);
                   logger.info("OK select new first row " + toSelect);
                   setSelectedAndShowReco(toSelect, true);
@@ -548,7 +550,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
               }
             }
           } else {
-            if (DEBUG || true) logger.info("studentAudioEnded next " + (i + 1));
+            if (DEBUG) logger.info("studentAudioEnded next " + (i + 1));
             T wordScore = visibleItems.get(i + 1);
             setSelectedAndShowReco(wordScore, true);
             //      playAudio(getSelected(), true);

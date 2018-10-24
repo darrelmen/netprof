@@ -10,7 +10,7 @@ public class AudioExportOptions {
   private boolean justRegularSpeed = true;
   private boolean justContext = false;
   private boolean isUserList = false;
-  private boolean hasProjectSpecificAudio = false;
+//  private boolean hasProjectSpecificAudio = false;
   private String search = "";
   private boolean includeAudio;
 
@@ -19,7 +19,7 @@ public class AudioExportOptions {
    * @see DownloadServlet#getAudioExportOptions
    */
   public AudioExportOptions(boolean hasProjectSpecificAudio) {
-    this.hasProjectSpecificAudio = hasProjectSpecificAudio;
+    /*this.hasProjectSpecificAudio = hasProjectSpecificAudio;*/
   }
 
   public void setJustMale(boolean justMale) {
@@ -57,6 +57,7 @@ public class AudioExportOptions {
     this.isUserList = userList;
   }
 
+/*
   public boolean isHasProjectSpecificAudio() {
     return hasProjectSpecificAudio;
   }
@@ -64,6 +65,7 @@ public class AudioExportOptions {
   public void setHasProjectSpecificAudio(boolean hasProjectSpecificAudio) {
     this.hasProjectSpecificAudio = hasProjectSpecificAudio;
   }
+*/
 
   public void setSearch(String search) {
     this.search = search;

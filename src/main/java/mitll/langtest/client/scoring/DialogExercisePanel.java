@@ -1008,7 +1008,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see #makePlayAudio(ClientExercise, DivWidget)
    */
   boolean hasAudio(T e) {
-    return e.hasAudioNonContext(true);
+    return e.isContext() ? e.hasContextAudio() : e.hasAudioNonContext(true);
   }
 
   void contextAudioChanged(int id, long duration) {

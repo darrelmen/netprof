@@ -33,7 +33,6 @@
 package mitll.langtest.shared.sorter;
 
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.STATE;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -44,23 +43,21 @@ import mitll.langtest.shared.exercise.STATE;
 public class ExerciseComparator extends SimpleExerciseComparator {
  // private static final String A_SPACE = "a ";
 
-  public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean sortByFL, String searchTerm) {
-    if (recordedLast) {
+  public int simpleCompare(CommonShell o1, CommonShell o2, boolean sortByFL, String searchTerm) {
+/*    if (recordedLast) {
       Integer x = getRecordedOrder(o1, o2);
       if (x != null) return x;
-    }
+    }*/
 
     return sortByFL ? compareByFL(o1, o2, searchTerm) : compareByEnglish(o1, o2, searchTerm);
   }
-
-  private Integer getRecordedOrder(CommonShell o1, CommonShell o2) {
+/*  private Integer getRecordedOrder(CommonShell o1, CommonShell o2) {
     if (o1.getState() != STATE.RECORDED && o2.getState() == STATE.RECORDED) {
       return +1;
     } else if (o1.getState() == STATE.RECORDED && o2.getState() != STATE.RECORDED) {
       return -1;
     }
     return null;
-  }
-
+  }*/
 
 }

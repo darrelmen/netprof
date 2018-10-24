@@ -87,13 +87,13 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     implements AudioAnswerListener {
   private final Logger logger = Logger.getLogger("BootstrapExercisePanel");
 
+  private static final int RECO_OUTPUT_WIDTH = 725;
+
   /**
    * Auto fetch their response as a compressed version.
    * TODO :  Bug - first time you click it, button returns to play state too early...
    */
   private static final boolean DO_AUTOLOAD = false;
-
-  //private static final String IN = "in";
 
   private static final int FEEDBACK_LEFT_MARGIN = PROGRESS_LEFT_MARGIN;
   private Panel recoOutput;
@@ -114,7 +114,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
    * @param controller
    * @param soundFeedback
    * @param endListener
-   * @param instance
    * @param exerciseList
    * @see StatsPracticePanel#StatsPracticePanel
    */
@@ -124,9 +123,8 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
                          final ControlState controlState,
                          MySoundFeedback soundFeedback,
                          SoundFeedback.EndListener endListener,
-                         String instance,
                          ListInterface exerciseList) {
-    super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
+    super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, exerciseList);
     downloadContainer = new DownloadContainer();
     //logger.info("Bootstrap instance " + instance);
   }
@@ -199,12 +197,17 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     scoreFeedbackRow = new DivWidget();
     scoreFeedbackRow.addStyleName("bottomFiveMargin");
     scoreFeedbackRow.setHeight("52px");
+
+
+
     toAddTo.add(scoreFeedbackRow);
 
     DivWidget wrapper = new DivWidget();
     wrapper.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
 
     recoOutput = new DivWidget();
+    recoOutput.getElement().getStyle().setProperty("maxWidth", RECO_OUTPUT_WIDTH + "px");
+
     wrapper.add(recoOutput);
 
     recoOutput.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
@@ -306,7 +309,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     recordButton.addStyleName("alignCenter");
   }
 
-  FlashcardRecordButton toGrab;
+//  private FlashcardRecordButton toGrab;
 
   /**
    * @param exerciseID
@@ -325,8 +328,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
 
       @Override
       protected void showWaiting() {
-        //super.showWaiting();
-
         if (contextSentenceWhileWaiting != null) {
           scheduleWaitTimer();
         } else {
@@ -344,18 +345,14 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
       }
 
       void scheduleWaitTimer() {
-        //  WaitCursorHelper outer = this;
-        // logger.info("scheduleWaitTimer --- " + outer);
         cancelTimer();
 
         waitTimer = new Timer() {
           @Override
           public void run() {
-            //   logger.info("scheduleWaitTimer timer expired..." + outer);
             if (contextSentenceWhileWaiting != null) {
               contextSentenceWhileWaiting.setVisible(true);
             }
-
           }
         };
         waitTimer.schedule(500);
@@ -371,14 +368,13 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
         // }
       }
 
-
       @NotNull
       protected String getDeviceType() {
         return getDeviceTypeValue();
       }
 
       /**
-       * @see RecordButtonPanel#postAudioFile
+       * @seex RecordButtonPanel#postAudioFile
        * @return
        */
       @Override
@@ -389,12 +385,17 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
         // logger.info("makeRecordButton : using " + instance);
+        FlashcardRecordButtonPanel recordingListener = this;
         final FlashcardRecordButton widgets = new FlashcardRecordButton(
-            controller.getRecordTimeout(),
-            this,
-            addKeyBinding,
+            exerciseID,
             controller,
-            BootstrapExercisePanel.this.instance) {
+            recordingListener,
+            addKeyBinding
+        ) {
+
+          /**
+           * @see RecordButton#startRecordingWithTimer
+           */
           @Override
           protected void start() {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Start_Recording");
@@ -410,7 +411,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
             //logger.info("BootstrapExercisePlugin : stop recording " + duration);
             super.stop(duration, abort);
           }
-
 
           /**
            * @see FlashcardRecordButton#checkKeyDown
@@ -453,11 +453,16 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
             //   if (b) logger.info("ignore key press?");
             return b;
           }
+
+          @Override
+          public void useResult(AudioAnswer result) {
+            receivedAudioAnswer(result,this);
+          }
         };
 
         // without this, the arrow keys may go to the chapter selector
         grabFocus(widgets);
-        toGrab = widgets;
+        //   toGrab = widgets;
         return widgets;
       }
     };
@@ -496,7 +501,8 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
    * @param correct
    * @param score
    * @param isFullMatch
-   * @see
+   * @see #showCorrectFeedback
+   * @see #showRecoFeedback
    */
   private void showPronScoreFeedback(boolean correct, double score, boolean isFullMatch) {
     scoreFeedbackRow.clear();
@@ -579,7 +585,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
         showCorrectFeedback(score, result.getPretestScore());
       } else {   // incorrect!!
         showIncorrectFeedback(result, score, hasRefAudio());
-        //prefix = IN;
       }
 /*
       controller.logEvent(button, "Button", exercise.getID(), prefix + "correct response - score " +
@@ -643,6 +648,12 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     maybeAdvance(score, pretestScore.isFullMatch());
   }
 
+  /**
+   * @see #showCorrectFeedback
+   * @param score
+   * @param pretestScore
+   * @param correct
+   */
   void showRecoFeedback(double score, AlignmentAndScore pretestScore, boolean correct) {
     showPronScoreFeedback(correct, score, pretestScore.isFullMatch());
     showRecoOutput(pretestScore);
@@ -735,12 +746,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     }
   }
 
-/*
-  boolean showScoreFeedback(AudioAnswer result) {
-    return result.isSaidAnswer();
-  }
-*/
-
   /**
    * @see #showIncorrectFeedback
    */
@@ -780,11 +785,11 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
         });
   }
 
-  void disableRecord() {
+  private void disableRecord() {
     realRecordButton.setEnabled(false);
   }
 
-  void enableRecord() {
+  private void enableRecord() {
     realRecordButton.setEnabled(true);
   }
 

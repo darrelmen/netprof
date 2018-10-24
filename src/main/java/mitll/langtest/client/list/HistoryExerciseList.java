@@ -42,10 +42,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Collection;
@@ -64,7 +61,7 @@ import java.util.logging.Logger;
  * Time: 3:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell>
+public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID>
     extends PagingExerciseList<T, U>
     implements ValueChangeHandler<String> {
   private Logger logger = Logger.getLogger("HistoryExerciseList");
@@ -96,17 +93,18 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
 
   protected String getInitialHistoryToken() {
     //  logger.info("\tgetInitialHistoryToken ");
-    return getHistoryTokenFromUIState(getTypeAheadText(), -1);
+    return getHistoryTokenFromUIState(getTypeAheadText(), -1, -1);
   }
 
   /**
    * @param search
    * @param id
+   * @param listID
    * @return
    * @see ExerciseList#pushNewItem
    * @see #pushNewSectionHistoryToken
    */
-  protected String getHistoryTokenFromUIState(String search, int id) {
+  protected String getHistoryTokenFromUIState(String search, int id, int listID) {
     //   String unitAndChapterSelection = sectionWidgetContainer.getHistoryToken();
     //logger.info("\tgetHistoryToken for " + id + " is '" +unitAndChapterSelection.toString() + "'");
     if (logger == null) {
@@ -120,7 +118,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
         getInstance() == INavigation.VIEWS.NONE ? "" : SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();
 
     String s = (hasItemID ?
-        super.getHistoryTokenFromUIState(search, id) :
+        super.getHistoryTokenFromUIState(search, id, listID) :
         getSearchTerm(search)) +
 
         SECTION_SEPARATOR +
@@ -174,11 +172,13 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   void pushFirstSelection(int exerciseID, String searchIfAny) {
     String token = getHistoryToken();
     logger.info("pushFirstSelection : (" + getInstance() + ") current token " + token);
-    int exidFromToken = getIDFromToken(token);
+   // int exidFromToken = getIDFromToken(token);
+    SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
+
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
         "' vs new exercise " + exerciseID + " instance " + getInstance());*/
 
-    if (exidFromToken == exerciseID) {
+    if (selectionState.getItem() == exerciseID) {
       if (DEBUG)
         logger.info("pushFirstSelection : (" + getInstance() + ") " +
             "\n\tcurrent token " + token + " same as new " + exerciseID);
@@ -186,8 +186,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
     } else {
       if (DEBUG)
         logger.info("pushFirstSelection : (" + getInstance() + ") " +
-            "\n\tpushNewItem " + exerciseID + " vs " + exidFromToken);
-      pushNewItem(searchIfAny, getValidExerciseID(exerciseID));
+            "\n\tpushNewItem " + exerciseID + " vs " + selectionState.getItem());
+      pushNewItem(searchIfAny, getValidExerciseID(exerciseID), selectionState.getList());
     }
   }
 
@@ -218,7 +218,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @param exerciseID
    * @see #loadExercisesUsingPrefix
    * @see ExerciseList#pushFirstSelection(int, String)
-   * @see ExerciseList#pushNewItem(String, int)
+   * @see ExerciseList#pushNewItem
    */
   private void checkAndAskOrFirst(int exerciseID) {
     int toUse = getValidExerciseID(exerciseID);
@@ -246,11 +246,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #loadExercise
    * @see #pushFirstSelection
    */
-  void pushNewItem(String search, int exerciseID) {
+  void pushNewItem(String search, int exerciseID, int listID) {
     if (DEBUG_PUSH) {
       logger.info(getInstance() + " HistoryExerciseList.pushNewItem : search '" + search + "' : item '" + exerciseID + "'");
     }
-    String historyToken = getHistoryTokenFromUIState(search, exerciseID);
+    String historyToken = getHistoryTokenFromUIState(search, exerciseID, listID);
     String trimmedToken = getTrimmedToken(historyToken);
     if (DEBUG_PUSH) {
       logger.info(getInstance() + " HistoryExerciseList.pushNewItem : push history '" + historyToken + "' search '" + search + "' : " + exerciseID);
@@ -282,7 +282,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   protected void pushNewSectionHistoryToken() {
     String currentToken = getHistoryToken();
     SelectionState selectionState = getSelectionState(currentToken);
-    String historyToken = getHistoryTokenFromUIState(getTypeAheadText(), selectionState.getItem());
+    String historyToken = getHistoryTokenFromUIState(getTypeAheadText(), selectionState.getItem(), selectionState.getList());
 
     if (DEBUG_PUSH) {
       logger.info("pushNewSectionHistoryToken " +
@@ -319,7 +319,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * @see #pushNewItem
    */
   void setHistoryItem(String historyToken) {
-    String token = History.getToken();
+   // String token = History.getToken();
   //logger.info("before " + token);
     if (DEBUG_PUSH) {
       logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
@@ -358,7 +358,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   public void loadExercise(int itemID) {
-    pushNewItem(getTypeAheadText(), itemID);
+    pushNewItem(getTypeAheadText(), itemID, new SelectionState().getList());
   }
 
   protected void ignoreStaleRequest(ExerciseListWrapper<T> result) {
@@ -390,7 +390,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
    * Respond to push of a history token.
    *
    * @param event
-   * @see #pushNewItem(String, int)
+   * @see #pushNewItem
    * @see #setHistoryItem(String)
    */
   @Override
@@ -516,7 +516,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
                                           boolean onlyDefaultUser,
                                           boolean onlyUninspected) {
     ExerciseListRequest request =
-        getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected);
+        getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUninspected);
 
     if (DEBUG) {
       logger.info("loadExercisesUsingPrefix got" +
@@ -552,18 +552,17 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell
   }
 
   public SelectionState getSelectionState() {
-    return getSelectionState(getHistoryTokenFromUIState(getTypeAheadText(), -1));
+    return getSelectionState(getHistoryTokenFromUIState(getTypeAheadText(), -1, -1));
   }
 
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
                                                        boolean onlyWithAudioAnno,
-                                                       boolean onlyDefaultUser,
                                                        boolean onlyUninspected) {
     return getExerciseListRequest(prefix)
         .setTypeToSelection(typeToSection)
-        .setOnlyWithAudioAnno(onlyWithAudioAnno)
-        .setOnlyDefaultAudio(onlyDefaultUser)
+     //   .setOnlyWithAudioAnno(onlyWithAudioAnno)
+        //.setOnlyDefaultAudio(onlyDefaultUser)
         .setOnlyUninspected(onlyUninspected);
   }
 

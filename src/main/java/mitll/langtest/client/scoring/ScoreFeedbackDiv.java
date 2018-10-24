@@ -48,7 +48,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
   private final PlayAudioPanel playAudioPanel;
   private final HeadlessPlayAudio headlessPlayAudio;
   private final DownloadContainer downloadContainer;
-  private boolean addPraise;
+  private final boolean addPraise;
 
   /**
    * @param headlessPlayAudio

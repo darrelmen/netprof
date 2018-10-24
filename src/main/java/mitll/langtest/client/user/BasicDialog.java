@@ -357,7 +357,7 @@ public class BasicDialog {
     markWarn(signUpEmail.group, signUpEmail.box, header, message);
   }
 
-  void markWarn(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
+  private void markWarn(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
     markError(dialectGroup, dialect, header, message, TOP, false, true, false);
   }
 
@@ -424,7 +424,7 @@ public class BasicDialog {
     setupPopover(w, heading, message, placement, DELAY_MILLIS, false, requestFocus);
   }
 
-  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, boolean isHTML, boolean requestFocus) {
+  private Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, boolean isHTML, boolean requestFocus) {
     return setupPopover(w, heading, message, placement, delayMillis, new MyPopover(), isHTML, requestFocus);
   }
 

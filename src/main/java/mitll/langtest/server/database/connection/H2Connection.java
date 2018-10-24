@@ -64,7 +64,7 @@ public class H2Connection implements DatabaseConnection {
   private static final int MAX_MEMORY_ROWS = 1000000;
   private static final int maxMemoryRows = MAX_MEMORY_ROWS;
   private static final boolean USE_MVCC = false;
-  private LogAndNotify logAndNotify;
+  private final LogAndNotify logAndNotify;
 
   /**
    *

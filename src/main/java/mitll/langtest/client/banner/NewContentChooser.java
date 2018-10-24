@@ -6,13 +6,12 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.*;
 import mitll.langtest.client.custom.ExerciseListContent;
+import mitll.langtest.client.custom.FixNPFHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
-import mitll.langtest.client.custom.content.ReviewItemHelper;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -25,10 +24,7 @@ import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -50,7 +46,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private static final String CURRENT_VIEW = "CurrentView";
 
   private final DivWidget divWidget = new DivWidget();
-  private final ExerciseListContent learnHelper;
+  private final ExerciseListContent learnHelper, learnSentencesHelper;
 
   private final ExerciseListContent studyHelper;
 
@@ -59,7 +55,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final ListenViewHelper rehearseHelper;
   private final ListenViewHelper performHelper;
 
-  private final PracticeHelper practiceHelper;
+  private final PracticeHelper practiceHelper, practiceSentenceHelper;
   private final QuizHelper quizHelper;
   private final ExerciseController controller;
   private final IBanner banner;
@@ -76,7 +72,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   public NewContentChooser(ExerciseController controller, IBanner banner) {
     learnHelper = new LearnHelper(controller);
-    practiceHelper = new PracticeHelper(controller);
+    learnSentencesHelper = new LearnHelper(controller);
+    practiceHelper = new PracticeHelper(controller, PRACTICE);
+    practiceSentenceHelper = new PracticeHelper(controller, PRACTICE_SENTENCES);
     quizHelper = new QuizHelper(controller, this);
 
     dialogHelper = new DialogViewHelper(controller);
@@ -156,7 +154,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   @NotNull
   private VIEWS getInitialView(boolean npqUser) {
-    return npqUser ? VIEWS.QUIZ : isPolyglotProject() ? DRILL : LEARN;
+    return npqUser ? VIEWS.QUIZ : isPolyglotProject() ? PRACTICE : LEARN;
   }
 
   private boolean isPolyglotProject() {
@@ -194,9 +192,17 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           clearAndPush(isFirstTime, currentStoredView, LEARN);
           learnHelper.showContent(divWidget, LEARN);
           break;
-        case DRILL:
-          setInstanceHistory(DRILL);
-          showDrill();
+        case LEARN_SENTENCES:
+          clearAndPush(isFirstTime, currentStoredView, LEARN_SENTENCES);
+          learnSentencesHelper.showContent(divWidget, LEARN_SENTENCES);
+          break;
+        case PRACTICE:
+          setInstanceHistory(PRACTICE);
+          showDrill(practiceHelper, PRACTICE);
+          break;
+        case PRACTICE_SENTENCES:
+          setInstanceHistory(PRACTICE_SENTENCES);
+          showDrill(practiceSentenceHelper, PRACTICE_SENTENCES);
           break;
         case QUIZ:
           showQuiz(fromClick);
@@ -253,7 +259,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case FIX:
           clear();
           setInstanceHistory(FIX);
-          getReviewList(false, FIX);
+          new FixNPFHelper(controller, false, FIX).showNPF(divWidget, FIX);
           break;
         case QC_SENTENCES:
           clear();
@@ -263,7 +269,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case FIX_SENTENCES:
           clear();
           setInstanceHistory(FIX_SENTENCES);
-          getReviewList(true, FIX_SENTENCES);
+          new FixNPFHelper(controller, true, FIX_SENTENCES).showNPF(divWidget, FIX_SENTENCES);
           break;
         case NONE:
           logger.info("showView skipping choice " + view);
@@ -372,13 +378,13 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   /**
    * @see #showView(VIEWS, boolean, boolean)
    */
-  private void showDrill() {
+  private void showDrill(PracticeHelper practiceHelper, VIEWS views) {
     clearAndFixScroll();
 
     if (isPolyglotProject()) {
       showPolyDialog();
     } else {
-      showPractice();
+      showPractice(practiceHelper, views);
     }
   }
 
@@ -426,7 +432,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
               practiceHelper.setVisible(false);
             }
 //        logger.info("mode is " + mode);
-            showPractice();
+            showPractice(practiceHelper, PRACTICE);
           }
         },
         new PolyglotDialog.ModeChoiceListener() {
@@ -443,11 +449,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     );
   }
 
-  private void showPractice() {
-    practiceHelper.setMode(mode, prompt);
-    practiceHelper.setNavigation(this);
-    practiceHelper.showContent(divWidget, DRILL);
-    practiceHelper.hideList();
+  private void showPractice(PracticeHelper toUse, VIEWS views) {
+    toUse.setMode(mode, prompt);
+    toUse.setNavigation(this);
+    toUse.showContent(divWidget, views);
+    toUse.hideList();
   }
 
   /**
@@ -510,7 +516,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
-  private void getReviewList(boolean isContext, VIEWS fix) {
+/*  private void getReviewList(boolean isContext, VIEWS fix) {
     controller.getListService().getReviewList(isContext, new AsyncCallback<UserList<CommonShell>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -522,7 +528,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         showReviewItems(result, fix);
       }
     });
-  }
+  }*/
 
   /**
    * So an view specified in the url trumps a stored one in storage, but if there's none in storage, use it.
@@ -589,19 +595,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     controller.getStorage().storeValue(CURRENT_VIEW, view.name());
   }
 
-  private void showReviewItems(UserList<CommonShell> result, VIEWS fix) {
-    List<CommonShell> exercises = result.getExercises();
-    // logger.info("got back " + result.getNumItems() + " exercises");
-    CommonShell toSelect = exercises.isEmpty() ? null : exercises.get(0);
-    Panel review = new ReviewItemHelper<CommonShell, CommonExercise>(controller)
-        .doNPF(result, fix, true, toSelect);
-    if (getCurrentView() == fix) {
-      divWidget.add(review);
-    } else {
-      logger.warning("showReviewItems not adding since current is " + getCurrentView());
-    }
-  }
-
   private void showProgress() {
     boolean polyglotProject = isPolyglotProject();
     divWidget.add(isTeacher() ?
@@ -643,11 +636,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       int dialog = new SelectionState().getDialog();
       // logger.info("getShowTab Dialog id " + dialog);
 
-      ExerciseListContent learnHelper = views == LEARN ? this.learnHelper : studyHelper;
+      //   ExerciseListContent learnHelper = views == LEARN ? this.learnHelper : studyHelper;
 
-      boolean wasMade = learnHelper.getReloadable() != null;
+      //  boolean wasMade = learnHelper.getReloadable() != null;
       //   logger.info("getShowTab history - " + History.getToken());
-      logger.info("getShowTab view " + views + " was made " + wasMade);
+      //  logger.info("getShowTab view " + views + " was made " + wasMade);
 
 //      if (!wasMade) {
       banner.show(views);
@@ -677,7 +670,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void setHistoryWithList(int listid, VIEWS views) {
-    // logger.info("showListIn - " + listid + " " + views);
+    //  logger.info("showListIn - " + listid + " " + views);
     pushItem(
         FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
             getInstanceParam(views));
@@ -690,7 +683,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   @Override
   public void showDialogIn(int dialogid, VIEWS view) {
-    logger.info("showDialogIn - " + dialogid + " " + view);
+    // logger.info("showDialogIn - " + dialogid + " " + view);
     pushItem(
         SelectionState.DIALOG + "=" + dialogid + SelectionState.SECTION_SEPARATOR +
             getInstanceParam(view));

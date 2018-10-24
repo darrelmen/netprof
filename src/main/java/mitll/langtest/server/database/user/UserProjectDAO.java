@@ -49,7 +49,7 @@ import java.util.Map;
  */
 public class UserProjectDAO implements IUserProjectDAO {
   private static final Logger logger = LogManager.getLogger(UserProjectDAO.class);
-  private UserProjectDAOWrapper dao;
+  private final UserProjectDAOWrapper dao;
 
   /**
    * @param dbConnection

@@ -90,7 +90,7 @@ function init(config) {
 }
 
 function startStream(url, exid, reqid, isreference, audiotype, dialogSessionID) {
-    //  console.log("worker.startStream " + exid + " req " + reqid);
+    console.log("worker.startStream " + exid + " req " + reqid);
     myurl = new String(url);
     myexid = new String(exid);
     myreqid = new String(reqid);
@@ -165,7 +165,7 @@ function record(inputBuffer, type) {
 // isLast is a boolean
 // doesn't anyone care about types???
 function sendBlob(framesBeforeRound, audioBlob, isLast, abort, sendMoment) {
-//    console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "'");
+  //  console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "'");
 
     try {
         var xhr = new XMLHttpRequest();

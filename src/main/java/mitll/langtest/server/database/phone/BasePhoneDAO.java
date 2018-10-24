@@ -55,7 +55,7 @@ class BasePhoneDAO extends DAO {
   static final String DURATION = "duration";
   static final String RID1 = "RID";
 
-  Map<String, Long> sessionToLong = new HashMap<>();
+  final Map<String, Long> sessionToLong = new HashMap<>();
 
   BasePhoneDAO(Database database) {
     super(database);

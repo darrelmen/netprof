@@ -164,7 +164,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#addAnnotation(int, String, String, String, int)
+   * @seex UserListManager#addAnnotation
    */
   @Override
   public void add(UserAnnotation annotation) {
@@ -253,20 +253,20 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * @return
    * @see mitll.langtest.server.database.custom.UserListManager#getAudioAnnos
    */
-  @Override
+/*  @Override
   public Collection<Integer> getAudioAnnos() {
-/*    String sql = "SELECT " +
+*//*    String sql = "SELECT " +
         EXERCISEID+ "," +
         FIELD+ "," +
         STATUS+
         " from " + ANNOTATION + " where " +
         FIELD +
-        " like'%.wav' order by field,modified desc";*/
+        " like'%.wav' order by field,modified desc";*//*
 
-/*    String sql2 = "select a.exerciseid, a.field, a.status, r.MaxTime \n" +
+*//*    String sql2 = "select a.exerciseid, a.field, a.status, r.MaxTime \n" +
         "from (\n" +
         "select exerciseid, field, MAX(modified) as MaxTime from annotation where field like'%.wav' group by exerciseid, field) r \n" +
-        "inner join annotation a on a.exerciseid = r.exerciseid AND a.modified = r.MaxTime order by a.exerciseid, a.field";*/
+        "inner join annotation a on a.exerciseid = r.exerciseid AND a.modified = r.MaxTime order by a.exerciseid, a.field";*//*
 
     String sql3 = "select a.exerciseid, a.status, r.MaxTime \n" +
         "from (\n" +
@@ -295,13 +295,13 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       logger.error("got " + e, e);
     }
     return new HashSet<>();
-  }
+  }*/
 
   /**
    * @param exerciseID
    * @return
    * @seex UserListManager#addAnnotations
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
    */
   @Override
   public Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID) {

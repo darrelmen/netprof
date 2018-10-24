@@ -62,7 +62,7 @@ public class PropertyHandler {
   /**
    *
    */
-  public static final boolean IS_BETA=false;
+  public static final boolean IS_BETA=true;
 
 
   private static final String AFTER_STOP_DELAY_MILLIS = "afterStopDelayMillis";
@@ -116,15 +116,12 @@ public class PropertyHandler {
   private static final String HELP_EMAIL = "helpEmail";
   private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
 
-  //private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
-  // private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
-  private static final String INITIAL_PROMPT = "Practice dialogs to improve pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
-  //private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
+  private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
+  //private static final String INITIAL_PROMPT = "Practice dialogs to improve pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
 
   private boolean isAMAS;
 
   private boolean usePhoneToDisplay;
-  //private String fontFamily = "";
 
   private int afterStopDelayMillis = DEFAULT_AFTER_STOP_DELAY_MILLIS;
 

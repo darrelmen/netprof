@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
+public class ExerciseListWrapper<T extends HasID> implements IsSerializable {
   public ExerciseListWrapper() {
   } // req for serialization
 

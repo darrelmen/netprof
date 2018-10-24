@@ -45,8 +45,8 @@ public class DialogPopulate {
   private static final Logger logger = LogManager.getLogger(DialogPopulate.class);
 
   private final DatabaseImpl db;
-  private PathWriter pathWriter;
-  protected PathHelper pathHelper;
+  private final PathWriter pathWriter;
+  protected final PathHelper pathHelper;
 
 
   public DialogPopulate(DatabaseImpl db, PathHelper pathHelper) {

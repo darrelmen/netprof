@@ -79,8 +79,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
-import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -935,7 +934,7 @@ public class LangTest implements
   }
 
   @Override
-  public void logEvent(UIObject button, String widgetType, Shell ex, String context) {
+  public void logEvent(UIObject button, String widgetType, HasID ex, String context) {
     //logger.info("logEvent START ex " + ex + " in " + context);
     buttonFactory.logEvent(button, widgetType, new EventContext("" + ex.getID(), context, getUser()));
     //logger.info("logEvent END   ex " + ex + " in " + context);
@@ -1179,10 +1178,6 @@ public class LangTest implements
   }
 
   /**
-   * @param exid
-   * @param reqid
-   * @param isReference
-   * @param audioType
    * @param wavStreamCallback
    * @see PostAudioRecordButton#startRecording
    */
@@ -1196,15 +1191,13 @@ public class LangTest implements
    * Recording interface
    *
    * @see RecordButton.RecordingListener#stopRecording(long, boolean)
-   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
-   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
-  public void stopRecording(WavCallback wavCallback, boolean useDelay, boolean abort) {
+  public void stopRecording(boolean useDelay, boolean abort) {
     logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis, abort = " + abort);
     if (useDelay) {
-      BrowserRecording.stopRecording(wavCallback, abort);
+      BrowserRecording.stopRecording(abort);
     } else {
-      BrowserRecording.stopWebRTCRecording(abort, wavCallback);
+      BrowserRecording.stopWebRTCRecording(abort);
     }
   }
 
@@ -1229,7 +1222,7 @@ public class LangTest implements
 
   /**
    * @param listener
-   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, RecordButton.RecordingListener, boolean, ExerciseController, String)
+   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton
    */
   @Override
   public void addKeyListener(KeyPressHelper.KeyListener listener) {
@@ -1286,9 +1279,7 @@ public class LangTest implements
   }
 
   @Override
-  public void showListIn(int listID, INavigation.VIEWS views) {
-    getNavigation().showListIn(listID, views);
-  }
+  public void showListIn(int listID, INavigation.VIEWS views) {  getNavigation().showListIn(listID, views);  }
 
   /**
    * @param views

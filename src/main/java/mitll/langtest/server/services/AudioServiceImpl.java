@@ -57,7 +57,6 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.dialog.IDialogSession;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
@@ -129,7 +128,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             }
           });
 
-  private ConcurrentHashMap<Long, SessionInfo> sessionToInfo = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Long, SessionInfo> sessionToInfo = new ConcurrentHashMap<>();
 
   /**
    * Sanity checks on answers and bestAudio dir
@@ -356,8 +355,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   private class SessionInfo {
-    private int speechDur, silenceDur, expectedSpeechDur;
-    private boolean knownExpected;
+    private int speechDur;
+    private int silenceDur;
+    private final int expectedSpeechDur;
+    private final boolean knownExpected;
 
     SessionInfo(int expectedSpeechDur) {
       this.expectedSpeechDur = expectedSpeechDur;
@@ -725,9 +726,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return packet;
     }
 
-    public boolean isCombined() {
+  /*  public boolean isCombined() {
       return combined;
-    }
+    }*/
 
     byte[] getWavFile() {
       return wavFile;
@@ -956,7 +957,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (decoderOptions.isRefRecording() && !decoderOptions.isRecordInResults()) { // we have a foreign key from audio into result table - must record in results
       decoderOptions.setRecordInResults(true);
     }
-    //boolean amas = serverProps.isAMAS();
 
     CommonExercise commonExercise = isExistingExercise ?
         db.getCustomOrPredefExercise(projectID, exerciseID) :
@@ -997,6 +997,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //    logger.info("writeAudioFile recording audioAnswer transcript '" + audioAnswer.getTranscript() + "'");
     int user = audioContext.getUserid();
 
+    logger.info("getAudioAnswer " + decoderOptions + " valid " + audioAnswer.isValid());
     if (decoderOptions.isRefRecording() && audioAnswer.isValid()) {
       audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(),
           commonExercise, exerciseID, audioAnswer, hasProjectSpecificAudio));
@@ -1170,7 +1171,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param user
    * @param exercise1
    */
-  private void setExerciseState(int exercise, int user, Shell exercise1) {
+  private void setExerciseState(int exercise, int user, HasID exercise1) {
     if (exercise1 != null) {
       STATE currentState = db.getStateManager().getCurrentState(exercise);
       if (currentState == STATE.APPROVED) { // clear approved on new audio -- we need to review it again

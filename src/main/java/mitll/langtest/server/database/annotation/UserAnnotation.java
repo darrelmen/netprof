@@ -40,7 +40,7 @@ public class UserAnnotation {
   private final String status;
   private final String comment;
   private long creatorID;
-  private long timestamp;
+  private final long timestamp;
   private final String oldExID;
 
   public UserAnnotation(int exerciseID, String field, String status, String comment, long userID, long timestamp) {

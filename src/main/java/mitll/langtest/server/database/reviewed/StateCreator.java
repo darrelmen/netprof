@@ -37,9 +37,9 @@ import mitll.langtest.shared.exercise.STATE;
 import java.util.Date;
 
 public class StateCreator implements Comparable<StateCreator> {
-  private STATE state;
+  private final STATE state;
   private long creatorID;
-  private long when;
+  private final long when;
   private int exerciseID =-1;
   private String oldExID;
 

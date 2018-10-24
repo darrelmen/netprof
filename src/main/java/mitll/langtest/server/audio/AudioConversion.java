@@ -73,7 +73,7 @@ public class AudioConversion extends AudioBase {
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_DETAIL = false;
-  private boolean trimAudio;
+  private final boolean trimAudio;
   private static final boolean WARN_MISSING_FILE = false;
 
   /**

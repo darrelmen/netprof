@@ -173,7 +173,7 @@ public class Project implements IPronunciationLookup {
   }
 
   public boolean isEnglish() {
-    return getLanguage().equalsIgnoreCase("english");
+    return getLanguageEnum() == Language.ENGLISH;//getLanguage().equalsIgnoreCase("english");
   }
 
   private SmallVocabDecoder getSmallVocabDecoder() {
@@ -222,7 +222,7 @@ public class Project implements IPronunciationLookup {
   }
 
   @NotNull
-  public List<String> getBaseTypeOrder( ) {
+  public List<String> getBaseTypeOrder() {
     List<String> typeOrder = new ArrayList<>();
     SlickProject project1 = getProject();
     if (!project1.first().isEmpty()) {
@@ -425,7 +425,7 @@ public class Project implements IPronunciationLookup {
     return getProp(SWAP_PRIMARY_AND_ALT).equalsIgnoreCase(TRUE);
   }
 
-  private Map<String, String> propCache = new HashMap<>();
+  private final Map<String, String> propCache = new HashMap<>();
 
   /**
    * Re populate cache really.
@@ -682,8 +682,8 @@ public class Project implements IPronunciationLookup {
   }
 
   /**
-   * @see mitll.langtest.server.scoring.AlignmentHelper#addAlignmentOutput(int, Project, Collection)
    * @return
+   * @see mitll.langtest.server.scoring.AlignmentHelper#addAlignmentOutput(int, Project, Collection)
    */
   public Map<Integer, AlignmentOutput> getAudioToAlignment() {
     return audioToAlignment;

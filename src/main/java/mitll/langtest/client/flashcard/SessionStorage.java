@@ -3,7 +3,7 @@ package mitll.langtest.client.flashcard;
 import mitll.langtest.client.custom.KeyStorage;
 
 public class SessionStorage {
-  private String key;
+  private final String key;
   protected final KeyStorage storage;
 
   public SessionStorage(KeyStorage storage, String key) {

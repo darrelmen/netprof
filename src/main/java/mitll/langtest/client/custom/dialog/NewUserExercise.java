@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
-import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
@@ -133,7 +132,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * TODO : What is this for???
    */
-  ListInterface<T, U> listInterface;
+  private ListInterface<T, U> listInterface;
   private Panel toAddTo;
   private boolean clickedCreate = false;
 
@@ -200,7 +199,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     this.toAddTo = toAddTo;
     this.listInterface = listInterface;
 
-    Panel buttonRow = getCreateButton(listInterface, toAddTo, normalSpeedRecording);
+    Panel buttonRow = getCreateButton(toAddTo, normalSpeedRecording);
     if (buttonRow != null) {
       container.add(buttonRow);
     }
@@ -282,13 +281,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   abstract void addItemsAtTop(Panel container);
 
   private void gotBlur() {
-    gotBlur(foreignLang, rap, normalSpeedRecording, listInterface, toAddTo);
+    gotBlur(foreignLang, rap, normalSpeedRecording, toAddTo);
   }
 
   abstract void gotBlur(FormField foreignLang,
                         RecordAudioPanel rap,
                         ControlGroup normalSpeedRecording,
-                        ListInterface<T, U> pagingContainer,
                         Panel toAddTo);
 
   /**
@@ -325,7 +323,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @param container
    * @return
    */
-  private FormField makeForeignLangRow(Panel container) {
+  private void makeForeignLangRow(Panel container) {
     //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
     Panel row = new FluidRow();
     container.add(row);
@@ -339,7 +337,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
     setFontSize(foreignLang);
     setMarginBottom(foreignLang);
-    return foreignLang;
   }
 
   private void setFontSize(FormField foreignLang) {
@@ -426,12 +423,11 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   abstract boolean useAnnotation(AnnotationExercise userExercise, String field, HTML annoField);
 
   /**
-   * @param pagingContainer
    * @param buttonClicked
    * @param keepAudio
    * @see #reallyChange
    */
-  private void editItem(final ListInterface<T, U> pagingContainer, final boolean buttonClicked, boolean keepAudio) {
+  private void editItem(final boolean buttonClicked, boolean keepAudio) {
     controller.getAudioService().editItem(newUserExercise, keepAudio, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -446,7 +442,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         originalRefAudio = newUserExercise.getRefAudio();
         originalSlowRefAudio = newUserExercise.getSlowAudioRef();
         // if (DEBUG) logger.info("postEditItem : onSuccess " + newUserExercise.getTooltip());
-        doAfterEditComplete(pagingContainer, buttonClicked);
+        doAfterEditComplete(buttonClicked);
       }
     });
   }
@@ -454,11 +450,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * Tell predefined list to update itself... since maybe a pre def item changed...
    *
-   * @param pagingContainer
-   * @see #reallyChange(ListInterface, boolean, boolean)
+   * @see #reallyChange(boolean, boolean)
    */
-  protected void doAfterEditComplete(ListInterface<T, U> pagingContainer, boolean buttomClicked) {
-    changeTooltip(pagingContainer);
+  protected void doAfterEditComplete(boolean buttomClicked) {
+   // changeTooltip(pagingContainer);
   }
 
   /**
@@ -468,6 +463,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @param pagingContainer
    * @see #doAfterEditComplete
    */
+/*
   private void changeTooltip(ListInterface<T, U> pagingContainer) {
     T byID = pagingContainer.byID(newUserExercise.getID());
     if (DEBUG) logger.info("changeTooltip " + byID);
@@ -482,15 +478,15 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       pagingContainer.redraw();   // show change to tooltip!
     }
   }
+*/
 
   /**
    * Don't post anything to server unless text actually changed - could get lots of blur events that should be ignored.
    *
-   * @param exerciseList
    * @param onClick
    * @see #afterValidForeignPhrase
    */
-  void postChangeIfDirty(ListInterface<T, U> exerciseList, boolean onClick) {
+  void postChangeIfDirty(boolean onClick) {
     if (anyFieldsDirty() || onClick) {
       if (DEBUG) {
         logger.info("postChangeIfDirty:  change" +
@@ -500,7 +496,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         );
       }
       //    logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
-      reallyChange(exerciseList, onClick, getKeepAudio());
+      reallyChange(onClick, getKeepAudio());
     }
   }
 
@@ -535,7 +531,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * @return
    * @seex #checkForForeignChange
-   * @see #postChangeIfDirty(ListInterface, boolean)
+   * @see #postChangeIfDirty(boolean)
    */
 /*  protected boolean translitChanged() {
     String transliteration = newUserExercise.getTransliteration();
@@ -543,12 +539,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     //  logger.info("translitChanged : translit '" + transliteration + "' vs original '" + originalTransliteration + "' changed  = " + changed);
     return !transliteration.equals(originalTransliteration);
   }*/
-  protected boolean refAudioChanged() {
+  private boolean refAudioChanged() {
     String refAudio = newUserExercise.getRefAudio();
     return (refAudio == null && originalRefAudio != null) || (refAudio != null && !refAudio.equals(originalRefAudio));
   }
 
-  protected boolean slowRefAudioChanged() {
+  private boolean slowRefAudioChanged() {
     String slowAudioRef = newUserExercise.getSlowAudioRef();
     return
         (slowAudioRef == null && originalSlowRefAudio != null) ||
@@ -556,16 +552,15 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   /**
-   * @param pagingContainer
    * @param markFixedClicked
    * @param keepAudio
-   * @see #postChangeIfDirty(ListInterface, boolean)
+   * @see #postChangeIfDirty(boolean)
    * @see #audioPosted
    */
-  void reallyChange(final ListInterface<T, U> pagingContainer, final boolean markFixedClicked, boolean keepAudio) {
+  void reallyChange(final boolean markFixedClicked, boolean keepAudio) {
 //    newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
 //    grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
-    editItem(pagingContainer, markFixedClicked, keepAudio);
+    editItem(markFixedClicked, keepAudio);
   }
 
   /**
@@ -608,20 +603,17 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   /**
-   * @param pagingContainer
    * @param toAddTo
    * @param normalSpeedRecording
    * @return
    * @see #addFields
    */
-  abstract Panel getCreateButton(ListInterface<T, U> pagingContainer,
-                                 Panel toAddTo,
+  abstract Panel getCreateButton(Panel toAddTo,
                                  ControlGroup normalSpeedRecording);
 
   /**
    * @param rap
    * @param normalSpeedRecording
-   * @param pagingContainer
    * @param toAddTo
    * @param onClick
    * @seex #makeCreateButton
@@ -629,11 +621,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   void validateThenPost(RecordAudioPanel rap,
                         ControlGroup normalSpeedRecording,
-                        ListInterface<T, U> pagingContainer,
                         Panel toAddTo,
                         boolean onClick) {
     if (validateForm(rap, normalSpeedRecording)) {
-      afterValidForeignPhrase(pagingContainer, toAddTo, onClick);
+      afterValidForeignPhrase(toAddTo, onClick);
       //isValidForeignPhrase(pagingContainer, toAddTo, onClick);
     } else {
       formInvalid();
@@ -685,7 +676,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * @param mutableExercise
    * @see #isValidForeignPhrase(ListInterface, Panel, boolean)
-   * @see #reallyChange(ListInterface, boolean, boolean)
+   * @see #reallyChange(boolean, boolean)
    */
 /*
   private void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
@@ -791,13 +782,11 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   /**
-   * @param exerciseList
    * @param toAddTo
    * @param onClick
-   * @see #validateThenPost(RecordAudioPanel, ControlGroup, ListInterface, Panel, boolean)
+   * @see #validateThenPost(RecordAudioPanel, ControlGroup, Panel, boolean)
    */
-  abstract void afterValidForeignPhrase(final ListInterface<T, U> exerciseList,
-                                        final Panel toAddTo,
+  abstract void afterValidForeignPhrase(final Panel toAddTo,
                                         boolean onClick);
 
   /**
@@ -807,7 +796,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #makeRegularAudioPanel
    * @see #makeSlowAudioPanel
    */
-  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row,
+  CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row,
                                                              boolean recordRegularSpeed) {
     return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed);
   }
@@ -928,8 +917,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     void setOtherRAP(RecordAudioPanel otherRAP) {
       this.otherRAP = otherRAP;
     }
-
-    public WaveformPostAudioRecordButton getPostAudioButton() {
+    WaveformPostAudioRecordButton getPostAudioButton() {
       return postAudioButton;
     }
   }
@@ -937,7 +925,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   void audioPosted() {
     if (clickedCreate) {
       clickedCreate = false;
-      validateThenPost(rap, normalSpeedRecording, listInterface, toAddTo, false);
+      validateThenPost(rap, normalSpeedRecording, toAddTo, false);
     }
 
     gotBlur();

@@ -248,7 +248,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see NewContentChooser#getReviewList
    * @param isContext
    */
-  @Override
+/*  @Override
   public UserList<CommonShell> getReviewList(boolean isContext) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasQCPerm(userIDFromSessionOrDB)) {
@@ -256,7 +256,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     } else {
       throw getRestricted("getting review lists");
     }
-  }
+  }*/
 
   /**
    * TODO: Tamas wants this back in.

@@ -47,7 +47,7 @@ public class DisplayMenu {
 
   private final KeyStorage storage;
   private final ShowEventListener showEventListener;
-  private boolean shouldSwap;
+  private final boolean shouldSwap;
 
   DisplayMenu(KeyStorage storage, ShowEventListener showEventListener, boolean isMandarin, boolean shouldSwap) {
     this.storage = storage;
