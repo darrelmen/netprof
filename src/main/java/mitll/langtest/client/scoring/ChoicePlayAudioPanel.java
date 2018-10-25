@@ -30,8 +30,9 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/5/17.
  */
 class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudioPanel {
-  private static final String REG = "Reg";
   private final Logger logger = Logger.getLogger("ChoicePlayAudioPanel");
+
+  private static final String REG = "Reg";
 
   private static final String FAST = "Fast";
   private static final String SLOW2 = "Slow";
@@ -43,13 +44,11 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   private final boolean includeContext;
 
   /**
-   * TODO : Sorta redundant...
    *
    * @see #playAndRemember
    * @see #addChoices(SplitDropdownButton, boolean, Button, boolean)
    * @see AlignmentFetcher#getRefAudio
    */
-  //private AudioAttribute currentAudioAttr = null;
   private final AudioChangeListener listener;
   private Set<AudioAttribute> allPossible;
   private final int exid;
@@ -91,7 +90,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
-    //  logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
+      //  logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
       addChoices(null, includeContext, null, true);
     }
   }
@@ -158,7 +157,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     List<AudioAttribute> maleAudio = exercise.getMostRecentAudioEasy(true, includeContext);
     List<AudioAttribute> femaleAudio = exercise.getMostRecentAudioEasy(false, includeContext);
 
-    if (exercise.getID() == 9444) {
+/*    if (exercise.getID() == 9444) {
       logger.info("addChoices for exercise " + exercise.getID() +
           //" eng '" + exercise.getEnglish() + "' = '" + exercise.getForeignLanguage() +
           "'" +
@@ -169,7 +168,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
       );
       exercise.getAudioAttributes().forEach(audioAttribute -> logger.info("\t" + audioAttribute));
-    }
+    }*/
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
@@ -269,7 +268,6 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   private void addAudioChoice(SplitDropdownButton playButton, boolean isMale1, boolean isReg, AudioAttribute mr) {
     NavLink widgets = addAudioChoice(isMale1, isReg, mr);
     playButton.add(widgets);
-
     widgets.addClickHandler(getChoiceHandler(mr, isMale1, isReg));
   }
 
@@ -322,9 +320,10 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   }
 
   private void playAndRemember(boolean isMale, boolean isReg, AudioAttribute mr) {
-    logger.info("playAndRemember " + mr.getUniqueID() +
+/*    logger.info("playAndRemember " + mr.getUniqueID() +
         "\n\tref    " + mr.getAudioRef() +
-        "\n\tisMale " + isMale + " isReg " + isReg + " durationInMillis " + mr.getDurationInMillis());
+        "\n\tisMale " + isMale + " isReg " + isReg + " durationInMillis " + mr.getDurationInMillis());*/
+
     markCurrentAudio(mr);
 
     doPause();
@@ -360,15 +359,6 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     LangTest.EVENT_BUS.fireEvent(new AudioSelectedEvent(exercise == null ? -1 : exercise.getID()));
   }
 
-/*  private AudioAttribute getAtSpeed(Collection<List<AudioAttribute>> audioAttrs, boolean isReg) {
-  //  Collection<List<AudioAttribute>> audioAttrs = malesMap.values();
-    for (List<AudioAttribute> attrs : audioAttrs) {
-      AudioAttribute audioAttribute = simpleGetAtSpeed(isReg, attrs);
-      if (audioAttribute != null) return audioAttribute;
-    }
-    return null;
-  }*/
-
   @Nullable
   private AudioAttribute simpleGetAtSpeed(List<AudioAttribute> attrs, boolean isReg) {
     for (AudioAttribute audioAttribute : attrs) {
@@ -383,18 +373,6 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     }
     return null;
   }
-
-/*
-  public void hidePlayButton() {
-    playButton.setVisible(false);
-  }
-*/
-
-/*
-  public void showPlayButton() {
-    playButton.setVisible(true);
-  }
-*/
 
   /**
    * @return

@@ -1654,7 +1654,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     if (options.getIncludeAudio()) {
       Language languageEnum = project.getLanguageEnum();
-      audioDAO.attachAudioToExercises(exercisesForSelectionState, languageEnum);
+      audioDAO.attachAudioToExercises(exercisesForSelectionState, languageEnum, projectid);
       ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, languageEnum);
     }
 
@@ -1781,7 +1781,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Project project = getProject(projectid);
     String language = project.getLanguage();
 
-    getAudioDAO().attachAudioToExercises(exercises, project.getLanguageEnum());
+    getAudioDAO().attachAudioToExercises(exercises, project.getLanguageEnum(), project.getID());
 
     {
       String name = project.getName();

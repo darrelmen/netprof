@@ -802,6 +802,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size() + " (" + skipped.size() +
         " skipped) and project " + projid);
 
-    audioDAO.attachAudioToExercises(exercises, language);
+    audioDAO.attachAudioToExercises(exercises, language, projid);
   }
 }

@@ -118,14 +118,16 @@ public class AudioExercise extends ExerciseShell {
    * @param audioAttribute
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#attachAudioAndFixPath
    */
-  public synchronized void addAudio(AudioAttribute audioAttribute) {
+  public synchronized boolean addAudio(AudioAttribute audioAttribute) {
     if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
     else {
       String key = audioAttribute.getKey();
       AudioAttribute currentByKey = audioAttributes.get(key);
       if (currentByKey == null || currentByKey.getTimestamp() < audioAttribute.getTimestamp()) {
         audioAttributes.put(key, audioAttribute);
+        return true;
       }
+      else return false;
     }
   }
 

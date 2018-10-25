@@ -98,7 +98,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    */
   private static final String APPROVED = "Mark Inspected";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
-  private static final String COMMENT = "Comment";
+ // private static final String COMMENT = "Comment";
 
   private static final String COMMENT_TOOLTIP = "Comments are optional.";
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
@@ -188,7 +188,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
         if (audioWasPlayed == null) {
           initAudioWasPlayed();
         }
-        boolean allPlayed = audioWasPlayed.size() == toResize.size();
+        boolean allPlayed = allAudioHasBeenPlayed();
         next.setEnabled(allPlayed);
       }
     };
@@ -208,9 +208,13 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
   }
 
   private void setNextTooltip(NavigationHelper navHelper) {
-    nextTooltip = addTooltip(navHelper.getNext(), audioWasPlayed.size() == toResize.size() ?
+    nextTooltip = addTooltip(navHelper.getNext(), allAudioHasBeenPlayed() ?
         CLICK_TO_INDICATE_ITEM_HAS_BEEN_REVIEWED :
         UNINSPECTED_TOOLTIP);
+  }
+
+  private boolean allAudioHasBeenPlayed() {
+    return audioWasPlayed.size() == toResize.size();
   }
 
   /**
@@ -873,13 +877,12 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    * @see #checkBoxWasClicked(boolean, String, com.google.gwt.user.client.ui.Panel, com.google.gwt.user.client.ui.FocusWidget)
    */
   private void setApproveButtonState() {
-    boolean allCorrect = hasNoDefects();
-    boolean allPlayed = audioWasPlayed.size() == toResize.size();
+    boolean allPlayed = allAudioHasBeenPlayed();
     //System.out.println("\tsetApproveButtonState : allPlayed= '" +allPlayed +"' allCorrect " + allCorrect + " audio played " + audioWasPlayed.size() + " total " + toResize.size());
 
-    String tooltipText = !allPlayed ? "Not all audio has been reviewed" : allCorrect ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2;
+    String tooltipText = !allPlayed ? "Not all audio has been reviewed" : hasNoDefects() ? APPROVED_BUTTON_TOOLTIP : APPROVED_BUTTON_TOOLTIP2;
     if (approvedButton != null) {   // comment tab doesn't have it...!
-      approvedButton.setEnabled(allCorrect && allPlayed);
+      approvedButton.setEnabled(allPlayed);
       approvedTooltip.setText(tooltipText);
       approvedTooltip.reconfigure();
     }

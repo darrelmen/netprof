@@ -111,7 +111,6 @@ public class RestUserManagement {
   private static final String DIALECT = "dialect";
   private static final String KIND = "kind";
 
-  public static final String USERS = "users";
   private static final String DLIFLC = "DLIFLC";
   private static final String MALE = "male";
   private static final String FIRST = "First";
@@ -122,7 +121,6 @@ public class RestUserManagement {
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
-  protected String configDir;
 
   /**
    * @param db
@@ -212,16 +210,6 @@ public class RestUserManagement {
 
   private String getArg(String first) {
     return first.split("=")[1];
-  }
-
-  private void reply(HttpServletResponse response, String x) {
-    try {
-      PrintWriter writer = response.getWriter();
-      writer.println(x);
-      writer.close();
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-    }
   }
 
   /**
@@ -316,67 +304,6 @@ public class RestUserManagement {
 
   private HttpSession createSession(HttpServletRequest request) {
     return request.getSession(true);
-  }
-
-  /**
-   * @param token
-   * @return
-   * @see #doGet
-   * @deprecated
-   */
-  private long getUserIDForToken(String token) {
-    User user = db.getUserDAO().getUserWithResetKey(token);
-    return (user == null) ? -1 : user.getID();
-  }
-
-  /**
-   * @param message
-   * @return
-   * @see #doGet
-   */
-  private String getHTML(String message, String title) {
-    return "<html>" +
-        "<head>" +
-        "<title>" +
-        title +
-        "</title>" +
-        "</head>" +
-
-        "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
-        "<div align=center>" +
-        "<table>" +
-        (message.length() > 0 ?
-            "<tr>" +
-                "    <td colspan=2 style='padding:.75pt .75pt .75pt .75pt'>\n" +
-                "    <p ><span style='font-size:13.0pt;font-family:\"Georgia\",\"serif\";\n" +
-                "    color:#333333'>" +
-                message +
-                "<p></p></span></p>\n" +
-                "    </td>" +
-                "</tr>" : "") +
-        "     <tr >\n" +
-        "      <td style='border:none;padding:10.5pt 10.5pt 10.5pt 10.5pt'>\n" +
-        "      <h1 style='margin-top:0in;margin-right:0in;margin-bottom:3.0pt;\n" + "      margin-left:0in'>" +
-        "<span style='font-size:12.5pt;font-family:\"Georgia\",\"serif\";\n" + "      font-weight:normal'>" +
-        "<p></p>" +
-        "</span>" +
-        "</h1>\n" +
-        "      </td>\n" +
-        "     </tr>" +
-
-        "   <tr>\n" +
-        "    <td style='padding:0in 0in 0in 0in'>\n" +
-        "    <p>" +
-        "<p></p></span>" +
-        "</p>\n" +
-        "    </td>\n" +
-        //     "    <td style='padding:.75pt .75pt .75pt .75pt'></td>\n" +
-        "   </tr>" +
-
-        "</table>" +
-        "</div>" +
-        "</body>" +
-        "</html>";
   }
 
   /**

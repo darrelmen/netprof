@@ -258,24 +258,26 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
+   * @param projID
    * @param exids
    * @return
    * @see BaseAudioDAO#attachAudioToExercises
    */
-  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids, Map<Integer, MiniUser> idToMini) {
+  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(int projID, Set<Integer> exids, Map<Integer, MiniUser> idToMini) {
     long then = System.currentTimeMillis();
-    Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDsThatExist(exids);
+    Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDsThatExist(projID, exids);
     long now = System.currentTimeMillis();
 
-    if (now - then > 30 || true) {
-      logger.info("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() +
-          " attr for " + exids.size());
+    if (now - then > 30) {
+      logger.info("getAudioAttributesForExercise took " + (now - then) +
+          "\n\tto get " + byExerciseID.size() + " attr" +
+          "\n\tfor    " + exids.size());
     }
 
     Map<Integer, List<AudioAttribute>> copy = new HashMap<>(byExerciseID.size());
     byExerciseID.forEach((k, v) -> copy.put(k, toAudioAttributes(v, idToMini)));
 
-    copy.forEach((k, v) -> logger.info(" getAudioAttributesForExercises " + k + " - " + v));
+    if (DEBUG) copy.forEach((k, v) -> logger.info(" getAudioAttributesForExercises " + k + " - " + v));
 
     if (copy.size() != exids.size()) {
       String suffix = copy.size() < 10 ? " : " + copy.keySet() : "";
@@ -350,11 +352,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           "\n\tfemales " + idsOfRecordedExercisesForFemales.size());
     }
   }
-
-/*
-  public boolean isNoAccentMatch(String transcript, String exerciseFL) {
-    return dao.isNoAccentMatch(transcript, exerciseFL);
-  }*/
 
   @Override
   Set<Integer> getValidAudioOfType(int userid, AudioType audioType) {

@@ -395,14 +395,14 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public String toString() {
     return "Audio" +
         "\n\tid         " + uniqueID +
-        "\n\texid         " + exid +
+        "\n\texid       " + exid +
         // "\n\tfor ex     " + getID()+
-        " (old ex " + getOldexid() + ") :" +
+        (getOldexid() == null ? "" : " (old ex " + getOldexid() + ") :") +
         "\n\tpath       " + audioRef +
-        "\n\tactual     " + actualPath +
+        // "\n\tactual     " + actualPath +
         "\n\tattrs      " + attributes +
         "\n\tby         " + userid + "/" + user +
-        "\n\ttranscript '" + transcript +
-        "'\n\tdnr\t" + dnr;
+        "\n\ttranscript '" + transcript + "'" +
+        "\n\tdnr        " + dnr;
   }
 }

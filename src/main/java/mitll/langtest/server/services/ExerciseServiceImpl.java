@@ -36,7 +36,6 @@ import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.*;
-import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -1370,7 +1369,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
 //    if (!toAddAudioTo.isEmpty()) {
     then = System.currentTimeMillis();
-    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language);
+    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language, projectID);
     now = System.currentTimeMillis();
 
     if (now - then > 10)
@@ -1470,7 +1469,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     if (byID == null) {
       logger.warn("getRefAudio can't find ex id " + exid);
     } else {
-      db.getAudioDAO().attachAudioToExercises(Collections.singleton(byID), getLanguageEnum(projectIDFromUser));
+      db.getAudioDAO().attachAudioToExercises(Collections.singleton(byID), getLanguageEnum(projectIDFromUser), projectIDFromUser);
       AudioAttribute audioAttributePrefGender = byID.getAudioAttributePrefGender(db.getUserDAO().isMale(userID), true);
       if (audioAttributePrefGender == null) {
         logger.warn("getRefAudio : no audio on ex " + exid + " ?");

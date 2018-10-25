@@ -80,11 +80,12 @@ public interface IAudioDAO extends IDAO {
   /**
    * @param exercises
    * @param language
+   * @param projID
    * @see mitll.langtest.server.database.DatabaseImpl#attachAllAudio
    * @see mitll.langtest.server.database.DatabaseImpl#writeZip
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
- <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, Language language);
+ <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, Language language, int projID);
 
   /**
    * @param firstExercise

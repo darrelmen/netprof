@@ -676,7 +676,7 @@ public class RefResultDecoder {
       return new RecalcRefResponse(RecalcResponses.ERROR);
     }
 
-    db.getAudioDAO().attachAudioToExercises(exercises, language);
+    db.getAudioDAO().attachAudioToExercises(exercises, language, projid);
 
 //    int numResults = db.getRefResultDAO().getNumResults();
 //    logger.debug("writeRefDecode : " +

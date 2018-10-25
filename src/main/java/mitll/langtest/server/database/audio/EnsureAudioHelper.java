@@ -106,7 +106,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     if (now - then > WARN_THRESH)
       logger.info("ensureAudio for " + projectid + " - took " + (now - then) + " millis to get exercises");
 
-    ensureAudioForExercises(exercises, db.getLanguageEnum(projectid));
+    ensureAudioForExercises(exercises, db.getLanguageEnum(projectid), projectid);
   }
 
   /**
@@ -114,9 +114,9 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * @param language
    * @see #ensureAudio(int)
    */
-  private void ensureAudioForExercises(List<CommonExercise> exercises, Language language) {
+  private void ensureAudioForExercises(List<CommonExercise> exercises, Language language, int projID) {
     long then = System.currentTimeMillis();
-    db.getAudioDAO().attachAudioToExercises(exercises, language);
+    db.getAudioDAO().attachAudioToExercises(exercises, language, projID);
     long now = System.currentTimeMillis();
 
     if (now - then > WARN_THRESH)
