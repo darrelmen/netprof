@@ -39,7 +39,7 @@ public class TripleExercises<T extends CommonExercise> {
 
   /**
    * @return
-   * @seex #getSortedExercise
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getSortedContext
    */
   public List<T> getByContext() {
     return byContext;

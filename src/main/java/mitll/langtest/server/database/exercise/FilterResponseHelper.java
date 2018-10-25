@@ -269,9 +269,7 @@ public class FilterResponseHelper {
       exercises = filterByUninspected(exercises);
     }
     else if (request.isOnlyExamples()) {
-
       logger.info("filterExercises OK doing examples 3");
-
       exercises = getContextExercises(exercises);
     }
  /*   if (request.isOnlyForUser()) {
@@ -567,7 +565,7 @@ public class FilterResponseHelper {
    * @see #filterExercises
    */
   @NotNull
-  private List<CommonExercise> getContextExercises(Collection<CommonExercise> exercises) {
+  public List<CommonExercise> getContextExercises(Collection<CommonExercise> exercises) {
     List<CommonExercise> copy = new ArrayList<>();
     Set<Integer> seen = new HashSet<>();
     for (ClientExercise parent : exercises) {
@@ -585,7 +583,7 @@ public class FilterResponseHelper {
         //copy.addAll(exercise.getDirectlyRelated());
       }
     }
-    logger.info("getContextExercises - to be recorded " + copy.size() + "(" + seen.size() +
+    logger.info("getContextExercises - return " + copy.size() + " (" + seen.size() +
         ") from " + exercises.size());
 
     return copy;

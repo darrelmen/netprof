@@ -74,10 +74,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
   public static final boolean DEBUG_SEARCH = false;
   private static final boolean DEBUG = true;
-  private static final boolean DEBUG_ID_LOOKUP = false;
+  private static final boolean DEBUG_ID_LOOKUP = true;
 
-  private static final String RECORDED1 = "Recorded";
-  private static final String ANY = "Any";
+//  private static final String RECORDED1 = "Recorded";
+//  private static final String ANY = "Any";
 //  /private static final boolean DEBUG_SEARCH = false;
 
   /**
@@ -222,9 +222,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       }
     }
 
-    if (DEBUG_ID_LOOKUP) logger.info("triple resp       " + exercisesForSearch);
+    if (DEBUG_ID_LOOKUP) logger.info("getExerciseWhenNoUnitChapter triple resp       " + exercisesForSearch);
     exercisesForSearch.setByExercise(db.filterExercises(request, exercisesForSearch.getByExercise(), projectID));
-    if (DEBUG_ID_LOOKUP) logger.info("after triple resp " + exercisesForSearch);
+    if (DEBUG_ID_LOOKUP) logger.info("getExerciseWhenNoUnitChapter after triple resp " + exercisesForSearch);
 
     // TODO : I don't think we need this?
 /*        if (!isUserListReq) {
@@ -232,7 +232,21 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
         }*/
 
     // now sort : everything gets sorted the same way
-    List<CommonExercise> commonExercises = getSortedExercises(request, exercisesForSearch, predefExercises, request.getUserID(), projectID);
+    List<CommonExercise> commonExercises;
+
+    if (request.isOnlyExamples() && !request.getPrefix().isEmpty()) {
+      boolean sortByFL = getProject(projectID).isEnglish();
+      String searchTerm = request.getPrefix();
+      commonExercises = new ArrayList<>();
+
+      // make sure we only return the context exercises...
+      exercisesForSearch.getByContext().forEach(ex -> ex.getDirectlyRelated().forEach(dir -> commonExercises.add(dir.asCommon())));
+      getSortedExercises(sortByFL, searchTerm, commonExercises);
+
+      logger.info("getExerciseWhenNoUnitChapter OK only return context " + commonExercises.size());
+    } else {
+      commonExercises = getSortedExercises(request, exercisesForSearch, predefExercises, request.getUserID(), projectID);
+    }
 
     long now = System.currentTimeMillis();
 
@@ -249,52 +263,50 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * Complicated -- put the vocab matches first, then context matches second
    *
    * @param request
-   * @param exercises
+   * @param tripleExercises
    * @param predefExercises
    * @param userID
    * @return
    * @see #getExerciseWhenNoUnitChapter
    */
   private List<CommonExercise> getSortedExercises(ExerciseListRequest request,
-                                                  TripleExercises<CommonExercise> exercises,
+                                                  TripleExercises<CommonExercise> tripleExercises,
                                                   boolean predefExercises,
                                                   int userID,
                                                   int projID) {
     Project projectForUser = getProject(projID);
 
-    List<CommonExercise> commonExercises = exercises.getByExercise();
+    List<CommonExercise> commonExercises = tripleExercises.getByExercise();
     if (commonExercises.isEmpty()) {
-      commonExercises = exercises.getByID();
+      commonExercises = tripleExercises.getByID();
     }
     if (request.isIncorrectFirstOrder()) {
       if (DEBUG)
-        logger.info("getSortedExercises adding isIncorrectFirstOrder " + exercises.getByExercise().size() + " basicExercises");
+        logger.info("getSortedExercises adding isIncorrectFirstOrder " + tripleExercises.getByExercise().size() + " basicExercises");
       commonExercises =
-          db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID,
+          db.getResultDAO().getExercisesSortedIncorrectFirst(tripleExercises.getByExercise(), userID,
               getAudioFileHelper(projID).getCollator(), getLanguageEnum(projectForUser));
     } else {
       if (predefExercises) {
-        commonExercises = new ArrayList<>(exercises.getByID());
-        List<CommonExercise> basicExercises = new ArrayList<>(exercises.getByExercise());
+        commonExercises = new ArrayList<>(tripleExercises.getByID());
+        List<CommonExercise> basicExercises = new ArrayList<>(tripleExercises.getByExercise());
         boolean sortByFL = projectForUser.isEnglish();
         String searchTerm = request.getPrefix();
-        boolean hasSearch = !searchTerm.isEmpty();
 
         {
           // only do this if we control the sort in the facet exercise list drop down
-          //     sortByFL = isSortByFL(basicExercises, sortByFL, searchTerm);
-
-          sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises, sortByFL, searchTerm);
+          sortExercises(basicExercises, sortByFL, searchTerm);
         }
 
         Set<Integer> unique = new HashSet<>();
-        if (DEBUG) logger.info("getSortedExercises adding " + exercises.getByID().size() + " by id exercises");
+        if (DEBUG)
+          logger.info("getSortedExercises adding " + tripleExercises.getByID().size() + " by id tripleExercises");
 
         // 1) first add any exact by id matches - should only be one
-        if (exercises.getByID().size() > 1)
-          logger.error("expecting only 0 or 1 matches for by id " + exercises.getByID().size());
+        if (tripleExercises.getByID().size() > 1)
+          logger.error("expecting only 0 or 1 matches for by id " + tripleExercises.getByID().size());
 
-        exercises.getByID().forEach(e -> unique.add(e.getID()));
+        tripleExercises.getByID().forEach(e -> unique.add(e.getID()));
         if (DEBUG) logger.info("getSortedExercises adding " + basicExercises.size() + " basicExercises");
 
         basicExercises
@@ -306,15 +318,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
         // last come context matches
         {
-          List<CommonExercise> contextExercises = new ArrayList<>(exercises.getByContext());
-          {
-            if (!contextExercises.isEmpty() && hasSearch) {
-              // if the search term is in the fl, sort by fl
-              sortByFL = contextExercises.iterator().next().getForeignLanguage().contains(searchTerm);
-              if (DEBUG) logger.info("getSortedExercises found search term " + searchTerm + " = " + sortByFL);
-            }
-            sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises, sortByFL, searchTerm);
-          }
+          List<CommonExercise> contextExercises = getSortedContext(tripleExercises, sortByFL, searchTerm);
           if (DEBUG)
             logger.info("getSortedExercises adding " + contextExercises.size() + " contextExercises, " + unique.size() + " unique");
 
@@ -326,6 +330,28 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       }
     }
     return commonExercises;
+  }
+
+  @NotNull
+  private List<CommonExercise> getSortedContext(TripleExercises<CommonExercise> tripleExercises, boolean sortByFL, String searchTerm) {
+    List<CommonExercise> byContext = tripleExercises.getByContext();
+    return getSortedExercises(sortByFL, searchTerm, byContext);
+  }
+
+  @NotNull
+  private List<CommonExercise> getSortedExercises(boolean sortByFL, String searchTerm, List<CommonExercise> byContext) {
+    boolean hasSearch = !searchTerm.isEmpty();
+
+    List<CommonExercise> contextExercises = new ArrayList<>(byContext);
+    {
+      if (!contextExercises.isEmpty() && hasSearch) {
+        // if the search term is in the fl, sort by fl
+        sortByFL = contextExercises.iterator().next().getForeignLanguage().contains(searchTerm);
+        if (DEBUG) logger.info("getSortedExercises found search term " + searchTerm + " = " + sortByFL);
+      }
+      sortExercises(contextExercises, sortByFL, searchTerm);
+    }
+    return contextExercises;
   }
 
 
@@ -448,30 +474,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see #getExerciseIds
    */
   private ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
-//    Map<String, Collection<String>> typeToSelection = request.getTypeToSelection();
-//    Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, typeToSelection);
-//
-//    List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
-//    exercisesForState = db.filterExercises(request, copy, projid);
-    // db.getFilterResponseHelper().getExercisesForSelectionState(request, projid);
     return getExerciseListWrapperForPrefix(request,
         db.getFilterResponseHelper().getExercisesForSelectionState(request, projid), projid);
   }
 
-  /**
-   * Ask section helper for matching item to type -> value
-   *
-   * @param projid
-   * @param typeToSelection
-   * @return
-   */
- /* private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
-    ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
-    typeToSelection.remove(RECORDED1);
-
-    return typeToSelection.isEmpty() ? getExercises(projid) :
-        sectionHelper.getExercisesForSelectionState(typeToSelection);
-  }*/
 
   /**
    * Always sort the result
@@ -519,7 +525,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     } else {
       copy = new ArrayList<>(exercisesForState);
 //      if (!request.isQuiz()) {
-      sortExercises(request.getActivityType() == ActivityType.RECORDER, copy, false, request.getPrefix());
+      sortExercises(copy, false, request.getPrefix());
       //    }
     }
     logger.info("getExerciseListWrapperForPrefix returning " + copy.size());
@@ -632,7 +638,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
       // ensureMP3s(firstExercise, pathHelper.getInstallPath());
       if (request.shouldAddContext()) { // add the context exercises
-        logger.info("makeExerciseListWrapper adding context exercises...");
+        logger.info("\n\n\n makeExerciseListWrapper adding context exercises - parent/child pairs\n\n\n");
         exercises = getParentChildPairs(exercises);
       }
     }
@@ -787,6 +793,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
   /**
    * Add annotations to parent exercise and any child exercise.
+   *
    * @param byID
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, int)
    */
@@ -880,11 +887,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see #getExerciseListWrapperForPrefix(ExerciseListRequest, Collection, int)
    * @see #getSortedExercises
    */
-  private <U extends CommonShell> void sortExercises(boolean isRecorder,
-                                                     List<U> commonExercises,
+  private <U extends CommonShell> void sortExercises(List<U> commonExercises,
                                                      boolean sortByFL,
                                                      String searchTerm) {
-    new ExerciseSorter<U>().getSorted(commonExercises, isRecorder, sortByFL, searchTerm);
+    new ExerciseSorter<U>().getSorted(commonExercises, sortByFL, searchTerm);
   }
 
 
@@ -907,7 +913,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
                                                                 Collection<CommonExercise> exercises,
                                                                 boolean predefExercises,
                                                                 int projectID,
-                                                                int userID, boolean matchOnContext) {
+                                                                int userID,
+                                                                boolean matchOnContext) {
     Search<CommonExercise> search = new Search<CommonExercise>(db);
     TripleExercises<CommonExercise> exercisesForSearch =
         search.getExercisesForSearch(prefix, exercises, predefExercises, projectID, matchOnContext);
@@ -916,44 +923,53 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     {
       int exid = search.getID(prefix.trim());
       if (exid != -1 && exid != 1) {
-        if (DEBUG_ID_LOOKUP) logger.info("getExercisesForSearch looking for exercise in " + projectID + " = " + exid);
-        CommonExercise exercise = getAnnotatedExercise(userID, projectID, exid);
-
-        if (exercise != null && exercise.isContext()) {
-          if (DEBUG_ID_LOOKUP)
-            logger.info("\tgetExercisesForSearch found context sentence in " + projectID + " = " + exid);
-          int parentExerciseID1 = exercise.getParentExerciseID();
-          int parentExerciseID = parentExerciseID1 > 0 ? parentExerciseID1 : db.getExerciseDAO(projectID).getParentFor(exid);
-
-          if (parentExerciseID > 0) {
-            exercise = getAnnotatedExercise(userID, projectID, parentExerciseID);
-            if (exercise != null) {
-              exid = parentExerciseID;
-              if (DEBUG_ID_LOOKUP)
-                logger.info("\tgetExercisesForSearch found parent for sentence in " + projectID + " = " + exid);
-            }
-          }
-        }
-        if (exercise == null) {
-          if (DEBUG_ID_LOOKUP)
-            logger.info("getExercisesForSearch looking for exercise in " + projectID + " with domino id " + exid);
-          exid = db.getExerciseDAO(projectID).getExIDForDominoID(projectID, exid);
-          if (exid > 0) {
-            if (DEBUG_ID_LOOKUP)
-              logger.info("getExercisesForSearch got match for domino - exercise in " + projectID + " = " + exid);
-            exercise = getAnnotatedExercise(userID, projectID, exid);
-          }
-        }
-
-        if (exercise != null && exercise.getProjectID() == projectID) {
-          exercisesForSearch.setByID(Collections.singletonList(exercise));
-        } else {
-          logger.info("getExercisesForSearch no exercise with " + projectID + " " + exid);
-        }
+        getSpecialExerciseByID(projectID, userID, exercisesForSearch, exid);
       }
     }
 
     return exercisesForSearch;
+  }
+
+  private void getSpecialExerciseByID(int projectID, int userID, TripleExercises<CommonExercise> exercisesForSearch, int exid) {
+    if (DEBUG_ID_LOOKUP) logger.info("getExercisesForSearch looking for exercise in " + projectID + " = " + exid);
+    CommonExercise exercise = getAnnotatedExercise(userID, projectID, exid);
+
+    if (exercise != null && exercise.isContext()) {
+      if (DEBUG_ID_LOOKUP)
+        logger.info("\tgetExercisesForSearch found context sentence in " + projectID + " = " + exid);
+      int parentExerciseID = getParentExerciseID(projectID, exid, exercise);
+
+      if (parentExerciseID > 0) {
+        exercise = getAnnotatedExercise(userID, projectID, parentExerciseID);
+        if (exercise != null) {
+          exid = parentExerciseID;
+          if (DEBUG_ID_LOOKUP)
+            logger.info("\tgetExercisesForSearch found parent for sentence in " + projectID + " = " + exid);
+        }
+      }
+    }
+
+    if (exercise == null) {
+      if (DEBUG_ID_LOOKUP)
+        logger.info("getExercisesForSearch looking for exercise in " + projectID + " with domino id " + exid);
+      exid = db.getExerciseDAO(projectID).getExIDForDominoID(projectID, exid);
+      if (exid > 0) {
+        if (DEBUG_ID_LOOKUP)
+          logger.info("getExercisesForSearch got match for domino - exercise in " + projectID + " = " + exid);
+        exercise = getAnnotatedExercise(userID, projectID, exid);
+      }
+    }
+
+    if (exercise != null && exercise.getProjectID() == projectID) {
+      exercisesForSearch.setByID(Collections.singletonList(exercise));
+    } else {
+      logger.info("getExercisesForSearch no exercise with " + projectID + " " + exid);
+    }
+  }
+
+  private int getParentExerciseID(int projectID, int exid, CommonExercise exercise) {
+    int parentExerciseID1 = exercise.getParentExerciseID();
+    return parentExerciseID1 > 0 ? parentExerciseID1 : db.getExerciseDAO(projectID).getParentFor(exid);
   }
 
   /**
@@ -1520,7 +1536,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param exercises
    * @param projectID
    * @return
-   * @see #getFullExercises(int, Collection)
+   * @see #getFullExercises
    */
   @NotNull
   private Set<ClientExercise> getCommonExercisesWithoutAudio(Collection<Integer> ids,

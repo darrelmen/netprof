@@ -2276,7 +2276,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     simpleLoadExercises(getHistoryToken(), getPrefix(), exerciseID);
   }
 
-  public Map<Integer, IUserList> getIdToList() {
+  protected Map<Integer, IUserList> getIdToList() {
     return idToList;
   }
 

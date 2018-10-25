@@ -232,18 +232,6 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#filterExercises
-   */
-/*  public boolean isOnlyWithAudioAnno() {
-    return onlyWithAudioAnno;
-  }*/
-
-/*  public ExerciseListRequest setOnlyWithAudioAnno(boolean onlyWithAudioAnno) {
-    this.onlyWithAudioAnno = onlyWithAudioAnno;
-    return this;
-  }*/
 
   public boolean isOnlyWithAnno() {
     return onlyWithAnno;
@@ -253,26 +241,6 @@ public class ExerciseListRequest implements IsSerializable {
     this.onlyWithAnno = onlyWithAnno;
     return this;
   }
-
-  /**
-   * @return
-   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#filterExercises
-   */
-/*
-  public boolean isOnlyDefaultAudio() {
-    return onlyDefaultAudio;
-  }
-*/
-
-  /**
-   * @paramx onlyDefaultAudio
-   * @return
-   *
-   */
- /* public ExerciseListRequest setOnlyDefaultAudio(boolean onlyDefaultAudio) {
-    this.onlyDefaultAudio = onlyDefaultAudio;
-    return this;
-  }*/
 
   public boolean isOnlyUninspected() {
     return onlyUninspected;
@@ -287,26 +255,6 @@ public class ExerciseListRequest implements IsSerializable {
     this.onlyUninspected = onlyDefaultAudio;
     return this;
   }
-
-  /**
-   * Not sure what this would be good for - maybe for when we just filter down to my students???
-   */
-/*
-  public boolean isOnlyForUser() {
-    return onlyForUser;
-  }
-*/
-
-  /**
-   * @param onlyForUser
-   * @return
-   * @see AnalysisPlot#populateExerciseMap
-   */
- /* public ExerciseListRequest setOnlyForUser(boolean onlyForUser) {
-    this.onlyForUser = onlyForUser;
-    return this;
-  }*/
-
   /**
    * @return
    * @see ExerciseServiceImpl#getFirstFew

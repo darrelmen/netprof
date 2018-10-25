@@ -47,26 +47,27 @@ import java.util.List;
  * @since 10/9/15.
  */
 public class SimpleSorter<T extends CommonShell> extends ExerciseComparator {
-  private  boolean sortByEnglishOnly;
+  private boolean sortByEnglishOnly;
 
-  SimpleSorter(boolean sortByEnglishOnly) {  this.sortByEnglishOnly = sortByEnglishOnly;  }
+  SimpleSorter(boolean sortByEnglishOnly) {
+    this.sortByEnglishOnly = sortByEnglishOnly;
+  }
 
   /**
    * what if the item has no unit/chapter info?
    * what if we have a mixed list of user and predef items?
    *
    * @param toSort
-   * @param recordedLast
    * @param sortByFL
    * @param searchTerm
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
    */
-  public void getSorted(List<T> toSort, final boolean recordedLast, boolean sortByFL, String searchTerm) {
+  public void getSorted(List<T> toSort, boolean sortByFL, String searchTerm) {
     if (sortByEnglishOnly) {
       sortByEnglish(toSort, searchTerm);
     } else {
-      toSort.sort((Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, recordedLast, sortByFL, searchTerm));
+      toSort.sort((Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, sortByFL, searchTerm));
     }
   }
 

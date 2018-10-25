@@ -189,7 +189,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
           // Compare the name columns.
           if (o1 != null) {
-            return (o2 == null) ? 1 : sorter.simpleCompare(o1, o2, isRecorder, isEnglish, "");
+            return (o2 == null) ? 1 : sorter.simpleCompare(o1, o2, isEnglish, "");
           }
 
           return -1;

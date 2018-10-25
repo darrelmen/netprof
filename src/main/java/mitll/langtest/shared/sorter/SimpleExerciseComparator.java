@@ -45,7 +45,7 @@ import org.jetbrains.annotations.NotNull;
 public class SimpleExerciseComparator implements IExerciseComparator {
   private static final String A_SPACE = "a ";
 
-  public int simpleCompare(CommonShell o1, CommonShell o2, boolean recordedLast, boolean sortByFL, String searchTerm) {
+  public int simpleCompare(CommonShell o1, CommonShell o2, boolean sortByFL, String searchTerm) {
     return sortByFL ? compareByFL(o1, o2, searchTerm) : compareByEnglish(o1, o2, searchTerm);
   }
 

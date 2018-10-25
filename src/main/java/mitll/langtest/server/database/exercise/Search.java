@@ -94,18 +94,7 @@ public class Search<T extends CommonExercise> {
           "\n\tprefix    " + prefix +
           "\n\tmatches   " + basicExercises.size());
     }
- /*   int exid = getExid(prefix);
 
-
-    List<T> byID = new ArrayList<>();
-
-    if (exid != -1) {
-      T customOrPredefExercise = (T) database.getCustomOrPredefExercise(projectID, exid);
-      if (customOrPredefExercise != null) {
-        byID.add(customOrPredefExercise);
-      }
-      else logger.warn("getExercisesForSearchWithTrie no ex for " +projectID + " = " + exid);
-    }*/
     return new TripleExercises<T>(
         Collections.emptyList(),
         basicExercises,

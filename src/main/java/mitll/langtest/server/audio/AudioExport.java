@@ -136,7 +136,7 @@ public class AudioExport {
                                                   Collection<CommonExercise> exercisesForSelectionState,
                                                   boolean isEnglish) {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
-    new ExerciseSorter().getSorted(copy, false, isEnglish, "");
+    new ExerciseSorter().getSorted(copy, isEnglish, "");
     return copy;
   }
 
