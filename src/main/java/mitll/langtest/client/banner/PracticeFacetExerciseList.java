@@ -19,21 +19,20 @@ import java.util.logging.Logger;
 
 public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise>
     extends LearnFacetExerciseList<T> {
-   private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
+  private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
   private final PracticeHelper<T, U> practiceHelper;
   private ControlState controlState;
 
   PracticeFacetExerciseList(ExerciseController controller,
                             PracticeHelper<T, U> practiceHelper,
                             Panel topRow, Panel currentExercisePanel,
-                            INavigation.VIEWS instanceName,
                             DivWidget listHeader,
                             INavigation.VIEWS views) {
     super(
         topRow,
         currentExercisePanel,
         controller,
-        new ListOptions(instanceName)
+        new ListOptions(views)
             .setShowPager(false).
             setShowTypeAhead(false),
         listHeader,
@@ -102,6 +101,7 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
 
   /**
    * No one call this...
+   *
    * @param selectionState
    */
   @Deprecated

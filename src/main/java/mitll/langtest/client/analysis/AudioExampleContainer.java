@@ -74,10 +74,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     return play;
   }
 
-  private Button getRef() {
-    return refAudio;
-  }
-
   private Button getReview() {
     return review;
   }
@@ -114,7 +110,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   private void gotClickOnItem(final T wordScore) {
-   // gotClickOnPlay(play, true);
     showRecoOutputLater(wordScore, false);
   }
 
@@ -244,9 +239,22 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     review.setType(ButtonType.SUCCESS);
   }
 
+  /**
+   * If the item is for a context sentence, jump to the learn sentences view.
+   */
   private void gotClickOnLearn() {
-    if (getSelected() != null) {
-      controller.getShowTab(jumpView).showLearnAndItem(getSelected().getExid());
+    T selected = getSelected();
+    if (selected != null) {
+//
+//      logger.info("jumpView " + jumpView);
+//      logger.info("selected " + selected);
+//      logger.info("selected " + selected.getIsContext());
+
+      INavigation.VIEWS toUse =
+          this.jumpView == INavigation.VIEWS.LEARN ?
+              selected.getIsContext() ? INavigation.VIEWS.LEARN_SENTENCES : this.jumpView : this.jumpView;
+
+      controller.getShowTab(toUse).showLearnAndItem(selected.getExid());
     }
   }
 
@@ -283,7 +291,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   private boolean isPlaying(Button play, boolean playYourAudio) {
     String text = play.getText().trim();
- //   logger.info("isPlaying text " + text + " playYourAudio " + playYourAudio);
+    //   logger.info("isPlaying text " + text + " playYourAudio " + playYourAudio);
     return text.equals(playYourAudio ? PLAY : REFERENCE);
   }
 
@@ -314,8 +322,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
             T visibleItem = table.getVisibleItem(0);
             setSelectedAndShowReco(visibleItem, true);
 //            playAudio(visibleItem, true);
-          }
-          else {
+          } else {
             logger.info("Did scroll");
           }
         } else {
@@ -468,7 +475,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
       headlessPlayAudio.destroySound();
     }
 
-//    Hearle// playAudioPanel = new PlayAudioPanel(null, controller, exid);
     headlessPlayAudio = new HeadlessPlayAudio(controller.getSoundManager(), new IListenView() {
       @Override
       public int getVolume() {
@@ -490,9 +496,8 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
     if (playAfterLoad) {
       playAudio(getSelected(), true);
-    }
-    else {
-     // logger.warning("not playing after load of " + pretestScore);
+    } else {
+      // logger.warning("not playing after load of " + pretestScore);
     }
   }
 
@@ -539,8 +544,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
                 List<T> visibleItems1 = table.getVisibleItems();
                 if (visibleItems1.isEmpty()) {
 
-                }
-                else {
+                } else {
                   T toSelect = visibleItems1.get(0);
                   logger.info("OK select new first row " + toSelect);
                   setSelectedAndShowReco(toSelect, true);

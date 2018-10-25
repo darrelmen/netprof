@@ -190,6 +190,12 @@ public class AudioExercise extends ExerciseShell {
         .anyMatch(audioAttribute -> (vocab == !audioAttribute.isContextAudio()));
   }
 
+  public synchronized boolean hasContextAudio() {
+    return getAudioAttributes()
+        .stream()
+        .anyMatch(AudioAttribute::isContextAudio);
+  }
+
   /**
    * @return
    */
@@ -199,8 +205,7 @@ public class AudioExercise extends ExerciseShell {
 
   public synchronized Collection<Integer> getAudioIDs() {
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
-    Set<Integer> collect = audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
-    return collect;
+    return audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
   }
 
   /**

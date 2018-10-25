@@ -32,7 +32,11 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.client.analysis.AudioExampleContainer;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
+import mitll.langtest.client.analysis.WordContainerAsync;
+import mitll.langtest.server.database.analysis.Analysis;
+
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
@@ -44,7 +48,7 @@ import java.util.Map;
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @see mitll.langtest.client.analysis.WordContainerAsync#getTableWithPager
+ * @see WordContainerAsync#getTableWithPager
  * @since 10/21/15.
  */
 public class WordScore implements Serializable, Comparable<WordScore> {
@@ -64,21 +68,17 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   public static final String ASC = "ASC";
 
   private Map<NetPronImageType, List<SlimSegment>> transcript;
+  private boolean isContext;
 
   public WordScore() {
-  }
-
-  public WordScore(long timestamp) {
-    this.timestamp = timestamp;
   }
 
   /**
    * @param bs
    * @param transcript
-   * @see mitll.langtest.server.database.analysis.Analysis#getWordScore
+   * @see Analysis#getWordScore
    */
-  public WordScore(BestScore bs,
-                   Map<NetPronImageType, List<SlimSegment>> transcript) {
+  public WordScore(BestScore bs, Map<NetPronImageType, List<SlimSegment>> transcript) {
     this(bs.getExId(),
         bs.getScore(),
         bs.getTimestamp(),
@@ -115,6 +115,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
 
   /**
    * By score
+   *
    * @param o
    * @return
    */
@@ -150,7 +151,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
   /**
    * @return
    * @see PhoneExampleContainer#getItemColumn
-   * @see mitll.langtest.client.analysis.WordContainerAsync#getItemColumn
+   * @see WordContainerAsync#getItemColumn
    */
   public Map<NetPronImageType, List<SlimSegment>> getTranscript() {
     return transcript;
@@ -158,7 +159,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
 
   /**
    * @param transcript
-   * @see mitll.langtest.server.database.phone.BasePhoneDAO#setTranscript(WordAndScore, Map)
+   * @seex BasePhoneDAO#setTranscript(WordAndScore, Map)
    */
   public void setTranscript(Map<NetPronImageType, List<SlimSegment>> transcript) {
     this.transcript = transcript;
@@ -170,7 +171,7 @@ public class WordScore implements Serializable, Comparable<WordScore> {
 
   /**
    * @return
-   * @see mitll.langtest.client.analysis.AudioExampleContainer#playAudio
+   * @see AudioExampleContainer#playAudio
    */
   public String getRefAudio() {
     return refAudio;
@@ -178,6 +179,14 @@ public class WordScore implements Serializable, Comparable<WordScore> {
 
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
+  }
+
+  public void setIsContext(boolean isContext) {
+    this.isContext = isContext;
+  }
+
+  public boolean getIsContext() {
+    return isContext;
   }
 
   public String toString() {

@@ -23,11 +23,12 @@ import java.util.Map;
  * Created by go22670 on 4/5/17.
  */
 class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise>
-    implements IListenView{
+    implements IListenView {
   //  private final Logger logger = Logger.getLogger("LearnHelper");
+
   /**
-   * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    * @param controller
+   * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
   LearnHelper(ExerciseController controller) {
     super(controller);
@@ -35,6 +36,7 @@ class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterN
 
   @Override
   protected FlexListLayout<T, ClientExercise> getMyListLayout(SimpleChapterNPFHelper<T, ClientExercise> outer) {
+
     return new MyFlexListLayout<T, ClientExercise>(controller, outer) {
       /**
        * @see FlexListLayout#makeNPFExerciseList
@@ -58,7 +60,7 @@ class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterN
             new ListOptions(instanceName),
             listHeader,
             false,
-            INavigation.VIEWS.LEARN);
+            instanceName);
       }
     };
   }
@@ -69,7 +71,13 @@ class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterN
 
       @Override
       public Panel getExercisePanel(ClientExercise e) {
-        return new TwoColumnExercisePanel<>(e, controller, exerciseList, alignments, false, LearnHelper.this);
+        return new TwoColumnExercisePanel<>(e,
+            controller,
+            exerciseList,
+            alignments,
+            false,
+            LearnHelper.this,
+            views.isContext());
       }
     };
   }

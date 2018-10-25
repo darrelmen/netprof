@@ -273,9 +273,10 @@ public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends No
         miniScoreListener.addScore(score);
       }
       setVisible(hasScoreHistory);
-    } else {
-      //logger.warning("scores is null?");
     }
+    //else {
+      //logger.warning("scores is null?");
+   // }
 
     miniScoreListener.showChart(controller.getHost());
   }

@@ -81,7 +81,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   private final ItemMenu itemMenu;
   private final boolean addPlayer;
-
+  boolean isContext;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -93,6 +93,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @param alignments
    * @param addPlayer
    * @param listenView
+   * @param isContext
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.banner.LearnHelper#getFactory
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
@@ -103,10 +104,12 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                                 final ListInterface<?, ?> listContainer,
                                 Map<Integer, AlignmentOutput> alignments,
                                 boolean addPlayer,
-                                IListenView listenView) {
+                                IListenView listenView,
+                                boolean isContext) {
     super(commonExercise, controller, listContainer, alignments, listenView);
 
     this.listContainer = listContainer;
+    this.isContext = isContext;
     this.addPlayer = addPlayer;
     addStyleName("twoColumnStyle");
     annotationHelper = controller.getCommentAnnotator();
@@ -243,7 +246,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget, boolean hasEnglish) {
     //  long then = System.currentTimeMillis();
-    SimpleRecordAudioPanel<T> recordPanel = //getRecordPanel(e);
+    SimpleRecordAudioPanel<T> recordPanel =
         new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView);
 
     DivWidget flContainer = getHorizDiv();
@@ -327,7 +330,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       flContainer.add(playAudio = getPlayAudioPanel());
       alignmentFetcher.setPlayAudio(playAudio);
     } else {
-     // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+      // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
     }
   }
 
@@ -447,11 +450,11 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   /**
    * @return
-   * @see #makeFirstRow
+   * @see #makePlayAudio
    */
   @NotNull
   private ChoicePlayAudioPanel<T> getPlayAudioPanel() {
-    return new ChoicePlayAudioPanel<T>(exercise, controller, false, this);
+    return new ChoicePlayAudioPanel<T>(exercise, controller, isContext, this);
   }
 
   /**

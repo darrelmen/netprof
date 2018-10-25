@@ -39,6 +39,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
+  public static final String PRACTICE_THE_LIST = "Practice the list.";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
@@ -464,9 +465,8 @@ public class ListView implements ContentView, CreateListComplete {
     Button drill = getSuccessButton(DRILL);
     drill.setType(ButtonType.INFO);
 
-    drill.addClickHandler(event -> controller.showListIn(getListID(container), INavigation.VIEWS.DRILL));
-    addTooltip(drill, "Drill the list.");
-    // drill.setEnabled(!container.isEmpty());
+    drill.addClickHandler(event -> controller.showListIn(getListID(container), INavigation.VIEWS.PRACTICE));
+    addTooltip(drill, PRACTICE_THE_LIST);
     container.addButton(drill);
 
     return drill;

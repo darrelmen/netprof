@@ -104,7 +104,7 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
                                                           Panel currentExercisePanel,
                                                           INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
         return new PracticeFacetExerciseList(controller,
-            PracticeHelper.this, topRow, currentExercisePanel, instanceName, listHeader, INavigation.VIEWS.DRILL);
+            PracticeHelper.this, topRow, currentExercisePanel, listHeader, instanceName);
       }
 
       @Override

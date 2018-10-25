@@ -261,6 +261,10 @@ public class SelectionState {
   public INavigation.VIEWS getView() {
     try {
       instance = instance.replaceAll(" ", "_");
+
+      if (instance.equalsIgnoreCase("Drill")) instance = "Practice".toUpperCase();
+     // if (instance.equalsIgnoreCase("Practice")) instance = "Drill".toUpperCase();
+
       return instance.isEmpty() ? INavigation.VIEWS.NONE : INavigation.VIEWS.valueOf(instance.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.warning("getView : hmm, couldn't parse " + instance);

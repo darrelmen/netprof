@@ -74,7 +74,6 @@ public class EditItem {
    * @see #makeExerciseList
    */
   private static final int NEW_EXERCISE_ID = -100;
-  //private static final String EDIT_ITEM = "editItem";
 
   private final ExerciseController controller;
   private PagingExerciseList<CommonShell, ClientExercise> exerciseList;
@@ -97,8 +96,7 @@ public class EditItem {
   public Panel editItem(UserList<CommonShell> originalList) {
     DivWidget div = new DivWidget();
     Panel hp = new HorizontalPanel();
-
-    hp.getElement().setId("EditItem_for_" + originalList.getName());
+//    hp.getElement().setId("EditItem_for_" + originalList.getName());
 
     Panel pagerOnLeft = new SimplePanel();
     hp.add(pagerOnLeft);
@@ -138,7 +136,7 @@ public class EditItem {
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());
     Scheduler.get().scheduleDeferred(() -> this.exerciseList.onResize());
-  //  Scheduler.get().scheduleDeferred(() -> exerciseList.getTypeAheadGrabFocus());
+    //  Scheduler.get().scheduleDeferred(() -> exerciseList.getTypeAheadGrabFocus());
     return this.exerciseList;
   }
 
@@ -200,10 +198,10 @@ public class EditItem {
           public int getDialogSessionID() {
             return -1;
           }
-        });
+        },
+            false);
         widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
         return widgets;
-
       }
     });
   }

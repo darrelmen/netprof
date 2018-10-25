@@ -840,25 +840,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         return audioAttributePrefGender.getAudioRef();
       }
 
-/*
-      Map<MiniUser, List<AudioAttribute>> userMap = exercise.getUserMap(genderOfUser == MiniUser.Gender.Male,false);
-      Collection<List<AudioAttribute>> audioByMatchingGender = userMap.values();
-
-      if (audioByMatchingGender.isEmpty()) { // ok, no audio with matching gender, fall back to other audio
-        userMap = exercise.getUserMap(genderOfUser != MiniUser.Gender.Male,false);
-        audioByMatchingGender = userMap.values();
-      }
-
-      if (audioByMatchingGender.isEmpty()) {
-        // logger.warn("no audio for " + userid + " and " + exercise.getID());
-        //missing++;
-      } else {
-        nativeAudio = getRegularSpeedFromARecorder(audioByMatchingGender);
-
-        if (nativeAudio == null) {
-          nativeAudio = getSlowSpeedFromARecorder(audioByMatchingGender);
-        }
-      }*/
     } else {
       return null;
     }

@@ -223,19 +223,20 @@ class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param userid
    * @param listid
+   * @param projID
    * @return
    * @paramx projid
    * @seez mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
-  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid) {
+/*  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid, int projID) {
     try {
       Map<Integer, UserInfo> best = getBest(getPerfSQL(userid), minRecordings);
-      return getWordScores(best.values());
+      return getWordScores(best.values(), projID);
     } catch (Exception ee) {
       logException(ee);
     }
     return new ArrayList<>();
-  }
+  }*/
 
   /**
    * @param connection

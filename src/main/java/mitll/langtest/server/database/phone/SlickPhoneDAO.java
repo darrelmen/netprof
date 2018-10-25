@@ -34,6 +34,7 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.audio.NativeAudioResult;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -471,7 +472,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     int num = 0;
     Map<Integer, String> exidToRef = new HashMap<>();
-
+Set<Integer> isContextEx=new HashSet<>();
     // first by phone,
     // then by bigram, then examples per bigram
     Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS = new HashMap<>();
@@ -505,8 +506,14 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       }*/
 
       String refAudioForExercise = exidToRef.get(exid);
+
       if (refAudioForExercise == null) {
-        refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
+        NativeAudioResult nativeAudio = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
+        refAudioForExercise = nativeAudio.getNativeAudioRef();
+        if (nativeAudio.isContext()) {
+          isContextEx.add(exid);
+          logger.info("getPhoneReport add context for " + exid);
+        }
         exidToRef.put(exid, refAudioForExercise);
       }
 
@@ -592,7 +599,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           prevScore,
           phoneScore,
           language);
+      wordAndScore.setIsContext(isContextEx.contains(exid));
 
+//      if (wordAndScore.getIsContext()) {
+//        logger.info("getPhoneReport exid " + exid + " is context");
+//      }
       prevScore = phoneScore;
 
       // right thing to do?
@@ -606,7 +617,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 //        }
       }
 
-
       if (DEBUG) {
         logger.info("getPhoneReport adding " +
             "\n\tanswer " + report.answer() +
@@ -614,7 +624,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       }
 
       if (addTranscript) {
-        Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = addTranscript(jsonToTranscript, scoreJson, wordAndScore, project.getLanguageEnum());
+        /*Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =*/
+        addTranscript(jsonToTranscript, scoreJson, wordAndScore, project.getLanguageEnum());
 //        logger.info("For " + wordAndScore+
 //            "\n\tGot back " + netPronImageTypeListMap);
         num++;

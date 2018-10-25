@@ -206,15 +206,6 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
-/*  public boolean isOnlyRecordedByMatchingGender() {
-    return onlyRecordedByMatchingGender;
-  }*/
-
-/*  public ExerciseListRequest setOnlyRecordedByMatchingGender(boolean onlyRecordedByMatchingGender) {
-    this.onlyRecordedByMatchingGender = onlyRecordedByMatchingGender;
-    return this;
-  }*/
-
   /**
    * @return
    */

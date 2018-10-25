@@ -33,7 +33,6 @@
 package mitll.langtest.shared.analysis;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

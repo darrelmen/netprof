@@ -34,6 +34,7 @@ package mitll.langtest.server.database.analysis;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.audio.NativeAudioResult;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.project.ProjectServices;
@@ -286,7 +287,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     inTime.sort(getComparator(project, Arrays.asList(sortInfo.split(",")), inTime));
 
     // inTime.forEach(bestScore -> logger.info("sorted " + bestScore));
-    return getWordScore(inTime, false);
+    return getWordScore(inTime, false, projid);
   }
 
   @NotNull
@@ -701,7 +702,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       String nativeAudio = null;
       if (addNativeAudio) {
-        nativeAudio = database.getNativeAudio(userToGender, perf.userid(), exid, project, idToMini);
+        NativeAudioResult nativeAudio1 = database.getNativeAudio(userToGender, perf.userid(), exid, project, idToMini);
+        nativeAudio = nativeAudio1.getNativeAudioRef();
         if (nativeAudio == null) {
 //        if (exid.startsWith("Custom")) {
 ////          logger.debug("missing audio for " + exid);
@@ -739,6 +741,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     return userToBest;
   }
 
+  /**
+   * TODO : also in basePhoneDAO.
+   *
+   * @param sessionToLong
+   * @param device
+   * @return
+   */
   private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
     Long parsedTime = sessionToLong.get(device);
 

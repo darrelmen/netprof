@@ -521,8 +521,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
 //     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest for " + prefix));
 //   logger.info("logException stack " + exceptionAsString);
-    ExerciseListRequest request = super.getExerciseListRequest(prefix);
-    request.setAddFirst(false);
+    ExerciseListRequest request = super.getExerciseListRequest(prefix)
+        .setAddFirst(false)
+        .setOnlyExamples(views.isContext());
     return request;
   }
 
@@ -664,8 +665,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
                                                        boolean onlyUninspected) {
     ExerciseListRequest exerciseListRequest = getExerciseListRequest(prefix)
         .setTypeToSelection(typeToSection)
-        // .setOnlyWithAudioAnno(onlyWithAudioAnno)
-        //.setOnlyDefaultAudio(onlyDefaultUser)
         .setOnlyUninspected(onlyUninspected)
         .setAddFirst(false);
 
@@ -1225,8 +1224,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
 
-    List<Pair> pairs = getPairs(typeToSelection);
-    logger.info("getTypeToValues request " + pairs + " list " + userListID);
+   // List<Pair> pairs = getPairs(typeToSelection);
+    //logger.info("getTypeToValues request " + pairs + " list " + userListID);
 
     final long then = System.currentTimeMillis();
 
@@ -1928,7 +1927,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #showExercisesForCurrentReq
    */
   private void reallyShowExercises(Collection<U> result, int reqID) {
-    logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
+   // logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
+
     DivWidget exerciseContainer = new DivWidget();
     populatePanels(result, reqID, exerciseContainer);
 

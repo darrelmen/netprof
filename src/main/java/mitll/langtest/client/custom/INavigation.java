@@ -29,7 +29,9 @@ public interface INavigation extends IViewContaner {
      */
     PROGRESS("Progress", VOCABULARY),
     LEARN("Learn", VOCABULARY),
-    DRILL("Drill", VOCABULARY),
+    LEARN_SENTENCES("Learn Sentences", VOCABULARY, true),
+    PRACTICE("Practice", VOCABULARY),
+    PRACTICE_SENTENCES("Practice Sentences", VOCABULARY, true),
     QUIZ("Quiz", VOCABULARY),
 
     DIALOG("Dialog", ProjectMode.DIALOG),
@@ -48,15 +50,16 @@ public interface INavigation extends IViewContaner {
 
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     RECORD_CONTEXT("Record Context", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    QC("QC", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false),
-    FIX("Fix", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true),
-    QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false),
-    FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true);
+    QC("QC", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, false),
+    FIX("Fix", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, false),
+    QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, true),
+    FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, true);
 
     private List<User.Permission> perms;
     private ProjectMode mode;
     private boolean isQC;
     private boolean isFix;
+    private boolean isContext;
 
     String display;
 
@@ -66,18 +69,26 @@ public interface INavigation extends IViewContaner {
       this.mode = EITHER;
     }
 
-    VIEWS(String display, List<User.Permission> perms, boolean isQC, boolean isFix) {
+    VIEWS(String display, List<User.Permission> perms, boolean isQC, boolean isFix, boolean isContext) {
       this.display = display;
       this.perms = perms;
       this.mode = EITHER;
       this.isQC = isQC;
       this.isFix = isFix;
+      this.isContext = isContext;
     }
 
     VIEWS(String display, ProjectMode mode) {
       this.display = display;
       this.perms = Collections.emptyList();
       this.mode = mode;
+    }
+
+    VIEWS(String display, ProjectMode mode, boolean isContext) {
+      this.display = display;
+      this.perms = Collections.emptyList();
+      this.mode = mode;
+      this.isContext = isContext;
     }
 
     public List<User.Permission> getPerms() {
@@ -97,9 +108,12 @@ public interface INavigation extends IViewContaner {
     }
 
 
-
     public boolean isFix() {
       return isFix;
+    }
+
+    public boolean isContext() {
+      return isContext;
     }
 
   }

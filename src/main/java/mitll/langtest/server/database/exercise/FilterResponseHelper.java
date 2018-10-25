@@ -268,6 +268,12 @@ public class FilterResponseHelper {
     if (request.isOnlyUninspected()) {
       exercises = filterByUninspected(exercises);
     }
+    else if (request.isOnlyExamples()) {
+
+      logger.info("filterExercises OK doing examples 3");
+
+      exercises = getContextExercises(exercises);
+    }
  /*   if (request.isOnlyForUser()) {
       exercises = filterOnlyPracticedByUser(request, exercises, projid);
     }*/

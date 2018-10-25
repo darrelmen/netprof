@@ -248,7 +248,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   }
 
   public void showDrill() {
-    navigation.showView(INavigation.VIEWS.DRILL);
+    navigation.showView(INavigation.VIEWS.PRACTICE);
   }
 
   public void showQuiz() {

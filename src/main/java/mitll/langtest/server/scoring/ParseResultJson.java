@@ -39,8 +39,6 @@ import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
-import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;

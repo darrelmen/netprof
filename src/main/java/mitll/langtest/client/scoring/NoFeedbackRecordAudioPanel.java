@@ -137,7 +137,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercis
    */
   @Override
   public void stopRecording() {
-    logger.info("stopRecording on " + exercise.getID());
+  //  logger.info("stopRecording on " + exercise.getID());
     playAudioPanel.setEnabled(true);
     playAudioPanel.hideRecord();
   }

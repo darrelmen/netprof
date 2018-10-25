@@ -309,7 +309,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   }
 
   void reallyStartOver() {
-    if (instance.equalsIgnoreCase(INavigation.VIEWS.DRILL.toString())) {
+    if (instance.equalsIgnoreCase(INavigation.VIEWS.PRACTICE.toString())) {
       polyglotFlashcardContainer.showDrill();
       super.reallyStartOver();
     } else {

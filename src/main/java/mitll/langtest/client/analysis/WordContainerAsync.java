@@ -78,7 +78,6 @@ import static mitll.langtest.shared.analysis.WordScore.WORD;
  * @since 10/20/15.
  */
 public class WordContainerAsync extends AudioExampleContainer<WordScore> implements AnalysisPlot.TimeChangeListener {
-
   private final Logger logger = Logger.getLogger("WordContainerAsync");
 
   private static final int NARROW_THRESHOLD = 1450;
@@ -86,10 +85,13 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private static final int ROWS_TO_SHOW = 6;
 
   private static final int ITEM_COL_WIDTH = 750;//250;
-  private static final int ITEM_COL_WIDTH_NARROW = 190;
+  private static final int ITEM_COL_WIDTH_NARROW = 500;//190;
 
   private static final String SCORE = "Score";
   private static final int SCORE_WIDTH = 70;
+  /**
+   *
+   */
   private static final int DATE_WIDTH = 150;
   private static final int WIDE_DATE_WIDTH = 160;
 
@@ -169,6 +171,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   protected void setMaxWidth() {
   //  table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
   }
+
   protected int getPageSize() {
     return ROWS_TO_SHOW;
   }
@@ -306,11 +309,8 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
     wordScoreCellTable.addColumnSortHandler(new ColumnSortEvent.AsyncHandler(wordScoreCellTable));
 
-  //  addPlayer();
-
     return tableWithPager;
   }
-
 
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
@@ -342,12 +342,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       //    table.addColumnSortHandler(getScoreSorter(scoreColumn, getList()));
       tableSortHelper.rememberColumn(scoreColumn, SCORE);
     }
-
-  //  addAudioColumns();
-
     table.setWidth("100%", true);
-
-    //   new TooltipHelper().addTooltip(table, PhoneExampleContainer.CLICK_ON);
   }
 
   private boolean isPolyglot() {
@@ -407,6 +402,8 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     Column<WordScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
     int itemColWidth = getItemColWidth();
+    logger.info("addReview itemColWidth " + itemColWidth);
+
     table.setColumnWidth(itemCol, itemColWidth + "px");
 
     String headerForFL = controller.getLanguageInfo() == Language.ENGLISH ? "Meaning" : controller.getLanguage();
@@ -499,9 +496,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       }
 
       redraw();
-    } else {
-      logger.info("ignoring redraw for same time period as current.");
     }
+//    else {
+//      logger.info("ignoring redraw for same time period as current.");
+//    }
   }
 
   private void redraw() {

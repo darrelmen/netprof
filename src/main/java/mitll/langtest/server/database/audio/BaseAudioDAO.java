@@ -355,13 +355,15 @@ public abstract class BaseAudioDAO extends DAO {
     boolean allSucceeded = true;
 
     // unfortunately we update existing records, so the id will not change, but the path will
-  //  Collection<Integer> currentIDs = getAudioIDs(firstExercise);
+    //  Collection<Integer> currentIDs = getAudioIDs(firstExercise);
     Collection<String> currentPaths = getAudioPaths(firstExercise);
 
     boolean doDebug = debug || DEBUG_ATTACH;
 
-    logger.info("attachAudio for " + firstExercise.getID() + " " + firstExercise.getEnglish() + " " + firstExercise.getForeignLanguage() +
-        " found " + currentPaths.size() + " vs " + audioAttributes.size());
+    if (doDebug) {
+      logger.info("attachAudio for " + firstExercise.getID() + " " + firstExercise.getEnglish() + " " + firstExercise.getForeignLanguage() +
+          " found " + currentPaths.size() + " vs " + audioAttributes.size());
+    }
 
     int n = 0;
     for (AudioAttribute candidate : audioAttributes) {
@@ -394,7 +396,7 @@ public abstract class BaseAudioDAO extends DAO {
         }
       }
     }
-    if (n == 0) logger.info("attachAudio didn't attempt any for " + firstExercise.getID());
+    if (doDebug && n == 0) logger.info("attachAudio didn't attempt any for " + firstExercise.getID());
 
     return allSucceeded;
   }
@@ -453,8 +455,13 @@ public abstract class BaseAudioDAO extends DAO {
       }
 
       boolean didIt = firstExercise.getMutableAudio().addAudio(attr);
-      if (!didIt) logger.info("1 didn't attach " + attr.getUniqueID() + " " + attr.getAudioRef() +
-          " to " + firstExercise.getID() + " " + firstExercise.getEnglish());
+
+      if (DEBUG_ATTACH) {
+        if (!didIt) {
+          logger.info("1 didn't attach " + attr.getUniqueID() + " " + attr.getAudioRef() +
+              " to " + firstExercise.getID() + " " + firstExercise.getEnglish());
+        }
+      }
 
       if (isContext) {
         for (ClientExercise dir : directlyRelated) {

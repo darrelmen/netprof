@@ -42,10 +42,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
-import mitll.langtest.server.database.audio.AudioDAO;
-import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.audio.IEnsureAudioHelper;
-import mitll.langtest.server.database.audio.SlickAudioDAO;
+import mitll.langtest.server.database.audio.*;
 import mitll.langtest.server.database.copy.CopyToPostgres;
 import mitll.langtest.server.database.custom.IStateManager;
 import mitll.langtest.server.database.custom.IUserListManager;
@@ -1579,11 +1576,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see SlickPhoneDAO#getPhoneReport
    */
   @Nullable
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender,
-                               int userid,
-                               int exid,
-                               Project project,
-                               Map<Integer, MiniUser> idToMini) {
+  public NativeAudioResult getNativeAudio(Map<Integer, MiniUser.Gender> userToGender,
+                                          int userid,
+                                          int exid,
+                                          Project project,
+                                          Map<Integer, MiniUser> idToMini) {
     CommonExercise exercise = project.getExerciseByID(exid);
 
     if (exercise == null && exid != getUserExerciseDAO().getUnknownExerciseID()) {
@@ -1596,7 +1593,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
       exercise = getUserExerciseByExID(exid, swap);
     }
 
-    return audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguageEnum(), idToMini);
+    String nativeAudio = audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguageEnum(), idToMini);
+    return new NativeAudioResult(nativeAudio, exercise != null && exercise.isContext());
+    // return nativeAudio;
   }
 
   /**

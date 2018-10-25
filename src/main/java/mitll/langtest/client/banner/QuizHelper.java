@@ -35,7 +35,6 @@ package mitll.langtest.client.banner;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
@@ -49,7 +48,6 @@ import mitll.langtest.client.flashcard.QuizIntro;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -57,12 +55,9 @@ import mitll.langtest.shared.exercise.ScoredExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLOT;
-import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -266,7 +261,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
 
   private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList<T,U> {
     MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel,  INavigation.VIEWS instanceName, DivWidget listHeader) {
-      super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, instanceName, listHeader, INavigation.VIEWS.QUIZ);
+      super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, listHeader, INavigation.VIEWS.QUIZ);
     }
 
 

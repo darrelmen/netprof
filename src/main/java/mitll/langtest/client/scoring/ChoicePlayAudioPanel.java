@@ -157,7 +157,8 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     List<AudioAttribute> maleAudio = exercise.getMostRecentAudioEasy(true, includeContext);
     List<AudioAttribute> femaleAudio = exercise.getMostRecentAudioEasy(false, includeContext);
 
-/*    if (exercise.getID() == 9444) {
+/*
+    if (exercise.getID() == 8159 ) {
       logger.info("addChoices for exercise " + exercise.getID() +
           //" eng '" + exercise.getEnglish() + "' = '" + exercise.getForeignLanguage() +
           "'" +
@@ -168,7 +169,8 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
       );
       exercise.getAudioAttributes().forEach(audioAttribute -> logger.info("\t" + audioAttribute));
-    }*/
+    }
+*/
 
     AudioAttribute toUse = null;
     AudioAttribute fallback = null;
@@ -244,7 +246,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
       }
       rememberAudio(toUse.getAudioRef());
     } else {
-      // logger.info("addChoices has no audio for " + exercise.getID() + " context " + includeContext);
+       logger.info("addChoices has no audio for " + exercise.getID() + " context " + includeContext);
     }
   }
 

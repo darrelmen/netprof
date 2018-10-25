@@ -34,6 +34,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.audio.NativeAudioResult;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -103,5 +104,5 @@ public interface Database extends AutoCloseable {
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserToResults
    * @see mitll.langtest.server.database.phone.SlickPhoneDAO#getPhoneReport
    */
-  String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project, Map<Integer, MiniUser> idToMini);
+  NativeAudioResult getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, int exid, Project project, Map<Integer, MiniUser> idToMini);
 }
