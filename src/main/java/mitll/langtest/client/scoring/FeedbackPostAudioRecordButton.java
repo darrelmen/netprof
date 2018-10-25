@@ -129,5 +129,4 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   protected void gotShortDurationRecording() {
     simpleRecordAudioPanel.gotShortDurationRecording();
   }
-
 }

@@ -40,6 +40,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.initial.PopupHelper;
+import mitll.langtest.client.scoring.ClientAudioContext;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
@@ -72,15 +73,15 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
   protected final RecordButton recordButton;
   private final ExerciseController controller;
-  private final int exerciseID;
-  private final int index;
-  private int reqid = 0;
+//  private final int exerciseID;
+//  private final int index;
+//  private int reqid = 0;
   private Panel panel;
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
 
-  private boolean doFlashcardAudio, doAlignment;
-  private boolean allowAlternates = false;
-  private final AudioType audioType;
+//  private boolean doFlashcardAudio, doAlignment;
+//  private boolean allowAlternates = false;
+//  private final AudioType audioType;
 
   /**
    * Has three parts -- record/stop button, audio validity feedback icon, and the audio control widget that allows playback.
@@ -95,11 +96,11 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
                               String recordButtonTitle,
                               boolean doAlignment) {
     this.controller = controller;
-    this.exerciseID = exerciseID;
-    this.index = index;
-    this.doFlashcardAudio = doFlashcardAudio;
-    this.doAlignment = doAlignment;
-    this.audioType = audioType;
+//    this.exerciseID = exerciseID;
+//    this.index = index;
+//    this.doFlashcardAudio = doFlashcardAudio;
+//    this.doAlignment = doAlignment;
+//    this.audioType = audioType;
     layoutRecordButton(recordButton = makeRecordButton(controller, recordButtonTitle));
   }
 
@@ -133,9 +134,11 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
    * @return
    * @seex FeedbackRecordPanel#getAnswerWidget
    */
+/*
   private Panel getPanel() {
     return this.panel;
   }
+*/
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#start()
@@ -143,7 +146,14 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   public void startRecording() {
     if (tooltip != null) tooltip.hide();
     recordImage1.setVisible(true);
-    controller.startRecording();
+/*    controller.startRecording();
+
+    controller.startStream(new ClientAudioContext(exerciseID,
+            reqid,
+            false,
+            audioType,
+            -1),
+        bytes -> gotPacketResponse(bytes, then));*/
   }
 
   /**
@@ -167,7 +177,8 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
     // logger.info("stopRecording : got stop recording " + duration);
     if (duration > MIN_DURATION) {
-      controller.stopRecording(bytes -> postAudioFile(getPanel(), bytes), true, abort);
+    //  logger.warning("not supposed to call...");
+    //  controller.stopRecording(bytes -> postAudioFile(getPanel(), bytes), true, abort);
       return true;
     } else {
       initRecordButton();
@@ -185,12 +196,12 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   /**
    * TODO : add timeSpent, typeToSelection
    *
-   * @param outer
-   * @param base64EncodedWavFile
-   * @see #postAudioFile
+   * @paramx outer
+   * @paramx base64EncodedWavFile
+   * @seex #postAudioFile
    * @seex RecordButton.RecordingListener#stopRecording
    */
-  private void postAudioFile(final Panel outer, final String base64EncodedWavFile) {
+ /* private void postAudioFile(final Panel outer, final String base64EncodedWavFile) {
     reqid++;
 
     final int len = base64EncodedWavFile.length();
@@ -226,7 +237,7 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
             onPostSuccess(result, then, outer, len);
           }
         });
-  }
+  }*/
 
 
   @NotNull
@@ -235,19 +246,17 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   }
 
   protected String getDevice() {
-    //String browserInfo = controller.getBrowserInfo();
-    // logger.info("GetDevice " + browserInfo);
     return controller.getBrowserInfo();
   }
 
   /**
    * @param result
-   * @param then
-   * @param outer
-   * @param len
-   * @see #postAudioFile
+   * @paramx then
+   * @paramx outer
+   * @paramx len
+   * @seex #postAudioFile
    */
-  private void onPostSuccess(AudioAnswer result, long then, Panel outer, int len) {
+/*  private void onPostSuccess(AudioAnswer result, long then, Panel outer, int len) {
     if (reqid != result.getReqid()) {
       return;
     }
@@ -262,8 +271,9 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     if (diff > 1000) {
       Scheduler.get().scheduleDeferred(() -> logMessage("long round trip : posted " + getLog(then, len), false));
     }
-  }
+  }*/
 
+/*
   private void addRoundTrip(AudioAnswer result, int diff) {
     controller.getScoringService().addRoundTrip(result.getResultID(), diff, new AsyncCallback<Void>() {
       @Override
@@ -277,7 +287,9 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
       }
     });
   }
+*/
 
+/*
   private void logMessage(String message, boolean sendEmail) {
     controller.getService().logMessage(message, sendEmail, new AsyncCallback<Void>() {
       @Override
@@ -290,13 +302,15 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
       }
     });
   }
+*/
 
   /**
-   * @param caught
-   * @param then
-   * @param len
-   * @see #postAudioFile
+   * @paramx caught
+   * @paramx then
+   * @paramx len
+   * @seex #postAudioFile
    */
+/*
   private void onPostFailure(Throwable caught, long then, int len) {
     controller.logException(caught);
     recordButton.setEnabled(true);
@@ -306,14 +320,15 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
     //  new ExceptionHandlerDialog(caught);
     receivedAudioAnswer(new AudioAnswer(), getPanel());
   }
+*/
 
 
-  private String getLog(long then, int len) {
+ /* private String getLog(long then, int len) {
     long now = System.currentTimeMillis();
     long diff = now - then;
     return "audio for user " + controller.getUser() + " for exercise " + exerciseID + " took " + diff + " millis to post " +
         len + " characters or " + (len / diff) + " char/milli";
-  }
+  }*/
 
   public Widget getRecordButton() {
     return recordButton;
@@ -329,11 +344,11 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
   /**
    * @param result
    * @param outer
-   * @see #onPostSuccess
+   * @seex #onPostSuccess
    */
   protected abstract void receivedAudioAnswer(AudioAnswer result, final Panel outer);
 
   public void setAllowAlternates(boolean allowAlternates) {
-    this.allowAlternates = allowAlternates;
+    /*this.allowAlternates = allowAlternates;*/
   }
 }

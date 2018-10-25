@@ -167,7 +167,9 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see RecordButton#stop
    */
   public boolean stopRecording(long duration, boolean abort) {
-    controller.stopRecording(this::postAudioFile, USE_DELAY, abort);
+    logger.warning("stopRecording ");
+
+    controller.stopRecording(USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {
       logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
@@ -349,7 +351,6 @@ public abstract class PostAudioRecordButton extends RecordButton
 
     logMessage("failed to post audio for " + user + " exercise " + getExerciseID(), true);
   }
-
 
   /**
    * TODO : don't do this...

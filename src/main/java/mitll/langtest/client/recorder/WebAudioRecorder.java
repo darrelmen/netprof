@@ -133,7 +133,7 @@ public class WebAudioRecorder {
   }-*/;
 
   /**
-   * @see #stopRecording(boolean, WavCallback)
+   * @see #stopRecording(boolean)
    */
   public native void stopRecording() /*-{
       $wnd.stopRecording();
@@ -236,24 +236,25 @@ public class WebAudioRecorder {
   }
 
   /**
-   * @see ExerciseController#stopRecording(WavCallback, boolean, boolean)
+   * @see ExerciseController#stopRecording(boolean, boolean)
    */
   private static WavCallback wavCallback = null;
 
   /**
    * @param abort
-   * @param wavCallback
    * @see BrowserRecording#stopWebRTCRecording
    */
-  public void stopRecording(boolean abort, WavCallback wavCallback) {
-    if (USE_STREAMS) {
+  public void stopRecording(boolean abort) {
+    //if (USE_STREAMS) {
       logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
       doStopStream("" + abort);
-    } else {
+  /*  }
+
+    else {
       logger.info("WebAudioRecorder.stopRecording - stop and grab wav");
       WebAudioRecorder.wavCallback = wavCallback;
       stopRecording();
-    }
+    }*/
   }
 
   private static WavStreamCallback wavStreamCallback = null;

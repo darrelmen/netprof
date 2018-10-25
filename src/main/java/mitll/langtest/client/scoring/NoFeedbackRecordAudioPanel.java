@@ -168,12 +168,10 @@ public abstract class NoFeedbackRecordAudioPanel<T extends Shell & ScoredExercis
 
   @Override
   public void usePartial(StreamResponse validity) {
-
   }
 
   @Override
   public void gotAbort() {
-
   }
 
   /**

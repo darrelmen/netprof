@@ -10,7 +10,7 @@ public class ClientAudioContext {
 
   private AudioType audioType;
 
-  ClientAudioContext(int exerciseID,
+  public ClientAudioContext(int exerciseID,
                      int reqid,
                      boolean shouldAddToTable,
                      AudioType audioType,

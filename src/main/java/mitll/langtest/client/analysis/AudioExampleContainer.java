@@ -169,10 +169,8 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     wrapper.addStyleName("floatRight");
     wrapper.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     {
-      int width = 55;
-      Button play = getPlayButton(width, true);
+      Button play = getPlayButton(60, true);
       wrapper.add(play);
-
       this.play = play;
     }
 

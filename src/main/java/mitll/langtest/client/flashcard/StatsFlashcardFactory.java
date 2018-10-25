@@ -64,7 +64,7 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExercise>
     extends ExercisePanelFactory<L, T>
     implements FlashcardContainer {
-  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  //private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   final ControlState controlState;
   private List<L> allExercises;
@@ -90,8 +90,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
    * @param exerciseList
    * @see mitll.langtest.client.banner.PracticeHelper#getFactory
    */
-  public StatsFlashcardFactory(ExerciseController controller,
-                               ListInterface<L, T> exerciseList) {
+  public StatsFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList) {
     super(controller, exerciseList);
     controlState = new ControlState();
 
