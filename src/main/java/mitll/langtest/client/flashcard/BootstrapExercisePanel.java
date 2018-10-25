@@ -112,7 +112,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
    * @param controller
    * @param soundFeedback
    * @param endListener
-   * @param instance
    * @param exerciseList
    * @see StatsPracticePanel#StatsPracticePanel
    */
@@ -122,9 +121,8 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
                          final ControlState controlState,
                          MySoundFeedback soundFeedback,
                          SoundFeedback.EndListener endListener,
-                         String instance,
                          ListInterface exerciseList) {
-    super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
+    super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, exerciseList);
     downloadContainer = new DownloadContainer();
     //logger.info("Bootstrap instance " + instance);
   }
@@ -197,12 +195,17 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     scoreFeedbackRow = new DivWidget();
     scoreFeedbackRow.addStyleName("bottomFiveMargin");
     scoreFeedbackRow.setHeight("52px");
+
+
+
     toAddTo.add(scoreFeedbackRow);
 
     DivWidget wrapper = new DivWidget();
     wrapper.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
 
     recoOutput = new DivWidget();
+    recoOutput.getElement().getStyle().setProperty("maxWidth", 675 + "px");
+
     wrapper.add(recoOutput);
 
     recoOutput.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);

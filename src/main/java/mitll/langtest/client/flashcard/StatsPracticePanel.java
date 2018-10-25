@@ -90,7 +90,6 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
         controlState,
         soundFeedback,
         null,
-        "",
         exerciseListToUse
     );
     this.sticky = stickyState;

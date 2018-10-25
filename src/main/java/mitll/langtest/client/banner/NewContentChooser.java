@@ -73,8 +73,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   public NewContentChooser(ExerciseController controller, IBanner banner) {
     learnHelper = new LearnHelper(controller);
     learnSentencesHelper = new LearnHelper(controller);
-    practiceHelper = new PracticeHelper(controller);
-    practiceSentenceHelper = new PracticeHelper(controller);
+    practiceHelper = new PracticeHelper(controller, PRACTICE);
+    practiceSentenceHelper = new PracticeHelper(controller, PRACTICE_SENTENCES);
     quizHelper = new QuizHelper(controller, this);
 
     dialogHelper = new DialogViewHelper(controller);

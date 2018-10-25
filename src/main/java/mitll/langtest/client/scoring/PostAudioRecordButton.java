@@ -167,8 +167,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see RecordButton#stop
    */
   public boolean stopRecording(long duration, boolean abort) {
-    logger.warning("stopRecording ");
-
+    //logger.warning("stopRecording ");
     controller.stopRecording(USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {

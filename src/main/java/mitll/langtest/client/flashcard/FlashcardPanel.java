@@ -61,10 +61,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.exercise.AudioRefExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
-import mitll.langtest.shared.exercise.MutableAnnotationExercise;
+import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -77,10 +74,12 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/26/2014.
  */
-public class FlashcardPanel<L extends CommonShell, T extends CommonShell & MutableAnnotationExercise & AudioRefExercise> // CommonExercise & MutableAnnotationExercise>
+public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//CommonShell & MutableAnnotationExercise & AudioRefExercise> // CommonExercise & MutableAnnotationExercise>
     extends DivWidget implements TimerListener {
-  private static final String MEANING = "Meaning";
+  public static final int HEADING_SIZE = 2;
   private final Logger logger = Logger.getLogger("FlashcardPanel");
+
+  private static final String MEANING = "Meaning";
 
   static final int PROGRESS_LEFT_MARGIN = 20;
   private static final int ADVANCE_DELAY = 2000;
@@ -88,7 +87,7 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
   private static final int KEY_PRESS_WIDTH = 125;
   private static final String RIGHT_ARROW_KEY = "Right Arrow Key";
 
-  private static final int CARD_HEIGHT = 362;
+  private static final int CARD_HEIGHT = 385;//362;
 
   /**
    * @see #addPlayingHighlight
@@ -135,7 +134,7 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
   private Panel leftState;
   private Panel rightColumn;
   private final SoundFeedback.EndListener endListener;
-  final String instance;
+//  final String instance;
   protected final ListInterface<L,T> exerciseList;
   private DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
@@ -153,7 +152,6 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
    * @param controller
    * @param soundFeedback
    * @param endListener
-   * @param instance
    * @param exerciseList
    * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
    */
@@ -163,14 +161,14 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
                  final ControlState controlState,
                  MySoundFeedback soundFeedback,
                  SoundFeedback.EndListener endListener,
-                 String instance,
-                 ListInterface<L,T> exerciseList) {
+                 ListInterface<L, T> exerciseList) {
     this.addKeyBinding = addKeyBinding;
     this.exercise = e;
+
     this.controller = controller;
     this.controlState = controlState;
     this.endListener = endListener;
-    this.instance = instance;
+
     this.exerciseList = exerciseList;
     this.timer = new FlashcardTimer(this);
     this.soundFeedback = soundFeedback;
@@ -1090,12 +1088,16 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
   }
 
   private Widget makeEnglishPhrase(String englishSentence) {
-    Heading englishHeading = new Heading(1, englishSentence);
+    Heading englishHeading = new Heading(getHeadingSize(), englishSentence);
     englishHeading.getElement().setId("EnglishPhrase");
     DivWidget widgets = new DivWidget();
     widgets.add(englishHeading);
     widgets.getElement().setId("EnglishPhrase_container");
     return widgets;
+  }
+
+  private int getHeadingSize() {
+    return exercise.isContext()?HEADING_SIZE:1;
   }
 
   private boolean isSiteEnglish() {
@@ -1153,7 +1155,7 @@ public class FlashcardPanel<L extends CommonShell, T extends CommonShell & Mutab
 
   @NotNull
   private Widget getFLContainer(String foreignSentence) {
-    Heading foreignLanguageContent = new Heading(1, foreignSentence);
+    Heading foreignLanguageContent = new Heading(getHeadingSize(), foreignSentence);
     Style style = foreignLanguageContent.getElement().getStyle();
     style.setTextAlign(Style.TextAlign.CENTER);
     if (isUrdu) {
