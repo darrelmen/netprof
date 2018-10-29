@@ -536,19 +536,19 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       int userid = analysisRequest.getUserid();
       int listid = analysisRequest.getListid();
 
-      logger.info("no session " + analysisRequest);
+      //logger.info("no session " + analysisRequest);
       perfForUser = listid == -1 ?
           (dialogID == -1 ?
               resultDAO.getPerfForUser(userid, projid) :
               resultDAO.getPerfForUserInDialog(userid, dialogID)) :
           resultDAO.getPerfForUserOnList(userid, listid);
     } else {
-      logger.info("got session " + analysisRequest);
+      if (DEBUG) logger.info("got session " + analysisRequest);
       perfForUser = resultDAO.getPerfForDialogSession(analysisRequest.getDialogSessionID());
     }
     long now = System.currentTimeMillis();
 
-    if (DEBUG || true) logger.info("getBestForUser best for" +
+    if (DEBUG) logger.info("getBestForUser best for" +
         analysisRequest +
 //        " user " + userid + " in project " + projid + " and list " + listid +
         "\n\twere " + perfForUser.size());
@@ -594,7 +594,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
     Collection<SlickPerfResult> perfForUser = resultDAO.getPerfForDialog(dialogID);
     long now = System.currentTimeMillis();
-    if (now - then > 100 || true)
+    if (now - then > 100)
       logger.info("getUserInfoForDialog took " + (now - then) +
           "\n\tto get   " + perfForUser.size() + " perf infos for " +
           "\n\tproject #" + projid + " dialog " + dialogID);
@@ -787,9 +787,10 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @see #getUserToResults
    */
   private void getNativeAudio(Collection<SlickPerfResult> perfs) {
+    long then = System.currentTimeMillis();
     List<CommonExercise> exercises = new ArrayList<>();
 
-    logger.info("getNativeAudio getting exercises for " + perfs.size() + " recordings in project " + projid);
+    if (DEBUG) logger.info("getNativeAudio getting exercises for " + perfs.size() + " recordings in project " + projid);
 
     List<Integer> skipped = new ArrayList<>();
 
@@ -807,9 +808,13 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         }
       }
     });
+    long now = System.currentTimeMillis();
 
-    logger.info("getNativeAudio attachAudioToExercises to exercises for " + exercises.size() + " (" + skipped.size() +
-        " skipped) and project " + projid);
+    if (now - then > 30) {
+      logger.info("getNativeAudio attachAudioToExercises (" + (now - then) +
+          " millis) to exercises for " + exercises.size() + " (" + skipped.size() +
+          " skipped) and project " + projid);
+    }
 
     audioDAO.attachAudioToExercises(exercises, language, projid);
   }

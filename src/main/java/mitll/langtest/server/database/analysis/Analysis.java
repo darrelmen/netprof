@@ -222,7 +222,8 @@ public abstract class Analysis extends DAO {
     //  List<Integer> resultIDs = getResultIDsInTimeWindow(next, from, to, Collections.emptySet());
 
     List<Integer> resultIDs = getResultIDsForRequest(analysisRequest, next);
-    logger.info("getPhoneSummaryForPeriod " +
+
+    if (DEBUG) logger.info("getPhoneSummaryForPeriod " +
         "\n\treq                 " + analysisRequest +
         "\n\tuser                " + next +
         "\n\tresultIDs " + resultIDs.size()
@@ -237,11 +238,13 @@ public abstract class Analysis extends DAO {
   PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest, UserInfo next) {
     // List<Integer> resultIDs = getResultIDsForRequest(analysisRequest, next);
     List<Integer> resultIDsForRequest = getResultIDsForRequest(analysisRequest, next);
-    logger.info("getPhoneBigramsForPeriod " +
+
+    if (DEBUG) logger.info("getPhoneBigramsForPeriod " +
         "\n\treq                 " + analysisRequest +
         "\n\tuser                " + next +
         "\n\tresultIDsForRequest " + resultIDsForRequest.size()
     );
+
     return phoneDAO.getPhoneBigrams(analysisRequest.getUserid(), resultIDsForRequest);
   }
 
@@ -267,9 +270,11 @@ public abstract class Analysis extends DAO {
           .filter(bestScore -> exids.contains(bestScore.getExId()))
           .collect(Collectors.toList());
 
-      logger.info("getResultIDsInTimeWindow " +
-          "\n\tbefore " + before +
-          "\n\tafter  " + resultsForQuery.size() + " scores ");
+      if (DEBUG) {
+        logger.info("getResultIDsInTimeWindow " +
+            "\n\tbefore " + before +
+            "\n\tafter  " + resultsForQuery.size() + " scores ");
+      }
     }
 
     List<Integer> resultIDs = new ArrayList<>();
@@ -283,7 +288,7 @@ public abstract class Analysis extends DAO {
       }
     });
 
-    if (DEBUG || true)
+    if (DEBUG)
       logger.info("getResultIDsInTimeWindow " +
           "\n\tfrom  " + resultsForQuery.size() +
           "\n\ttime from  " + from + " " + new Date(from) +
@@ -343,7 +348,7 @@ public abstract class Analysis extends DAO {
       long start = then;
       long now;
       List<Integer> resultIDs = getResultIDsForUser(next.getBestScores());
-      logger.info("getPhoneSummary for " + userid + " " + resultIDs.size());
+      if (DEBUG) logger.info("getPhoneSummary for " + userid + " " + resultIDs.size());
 
       then = System.currentTimeMillis();
       PhoneSummary phoneReport = phoneDAO.getPhoneSummary(userid, resultIDs);
