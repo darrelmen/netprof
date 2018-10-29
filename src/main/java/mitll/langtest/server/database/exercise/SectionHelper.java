@@ -778,7 +778,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
       ExerciseAttribute attribute = typeToAtrr.get(attrType);
       if (attribute == null) {
         // missing info for this type, so map it to BLANK
-       // pairs.add(new ExerciseAttribute(attrType, BLANK));
+        pairs.add(new ExerciseAttribute(attrType, BLANK));
       } else {
         if (attribute.isFacet()) {
           pairs.add(attribute);
