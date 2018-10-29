@@ -6,10 +6,8 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.ScoredExercise;
+import mitll.langtest.shared.exercise.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +42,20 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
                                 boolean isDrillView,
                                 INavigation.VIEWS views) {
     super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView, views);
+  }
+
+  /**
+   * @param userListID
+   * @param pairs
+   * @return
+   * @see #getTypeToValues
+   */
+  @NotNull
+  @Override
+  protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
+    boolean exampleRequest = views == INavigation.VIEWS.LEARN_SENTENCES;
+//    logger.info("getFilterReq " + exampleRequest);
+    return new FilterRequest(incrReqID(), pairs, userListID).setExampleRequest(exampleRequest);
   }
 
   /**

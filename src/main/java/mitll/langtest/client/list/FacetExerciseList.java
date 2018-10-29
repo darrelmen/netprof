@@ -177,7 +177,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   private final Map<Integer, Float> exerciseToScore = new HashMap<>();
   private final Map<Integer, U> fetched = new ConcurrentHashMap<>();
-  private final INavigation.VIEWS views;
+  protected final INavigation.VIEWS views;
   private final String pageSizeSelected;
 
   /**

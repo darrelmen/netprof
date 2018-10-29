@@ -1,7 +1,6 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseServices;
-import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
@@ -38,9 +37,11 @@ public class FilterResponseHelper {
         return getFilterResponse(request, projid, getRequestForUninspected(request, userID));
       } else if (request.isOnlyWithAnno()) {
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyWithAnno(true));
+      } else if (request.isExampleRequest()) {
+        return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyExamples(true));
       } else {
         FilterResponse response = sectionHelper.getTypeToValues(request, false);
-        addUserListFacet(request, response);
+        maybeAddUserListFacet(request, response);
         return response;
       }
     }
@@ -70,7 +71,7 @@ public class FilterResponseHelper {
         .setUserID(userID);
   }
 
-  private void addUserListFacet(FilterRequest request, FilterResponse typeToValues) {
+  private void maybeAddUserListFacet(FilterRequest request, FilterResponse typeToValues) {
     int userListID = request.getUserListID();
     UserList<CommonShell> next = userListID != -1 ? databaseServices.getUserListManager().getSimpleUserListByID(userListID) : null;
 
