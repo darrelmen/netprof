@@ -95,30 +95,13 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private Set<String> rootTypes = new HashSet<>();
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
-  private final boolean DEBUG = false;
-  private final boolean DEBUG_TYPE_ORDER = false;
-  private final boolean DEBUG_OR_MERGE = false;
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_TYPE_ORDER = false;
+  private static final boolean DEBUG_OR_MERGE = false;
 
   public SectionHelper() {
     makeRoot();
   }
-
- /* @Override
-  public SectionHelper<T> getCopy(List<T> exercises) {
-    SectionHelper<T> tSectionHelper = new SectionHelper<>();
-
-    tSectionHelper.predefinedTypeOrder = predefinedTypeOrder;
-    tSectionHelper.rootTypes = rootTypes;
-    tSectionHelper.parentToChildTypes = parentToChildTypes;
-
-    //  tSectionHelper.report();
-
-    exercises.forEach(tSectionHelper::addExercise);
-
-    //  tSectionHelper.report();
-
-    return tSectionHelper;
-  }*/
 
   /**
    * @see BaseExerciseDAO#reload()
@@ -762,7 +745,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     return new Pair(first, value);
   }
 
-  int spew;
+  private int spew;
 
   public void addPairs(T t,
                        CommonExercise exercise,
@@ -795,7 +778,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
       ExerciseAttribute attribute = typeToAtrr.get(attrType);
       if (attribute == null) {
         // missing info for this type, so map it to BLANK
-        pairs.add(new ExerciseAttribute(attrType, BLANK));
+       // pairs.add(new ExerciseAttribute(attrType, BLANK));
       } else {
         if (attribute.isFacet()) {
           pairs.add(attribute);
@@ -893,12 +876,12 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private boolean removeExerciseToLesson(T exercise, String type, String unitName) {
     Map<String, Lesson<T>> unit = getSectionToLesson(type);
     if (unit == null) {
-      logger.error("no unit for " + type + " in " + typeToUnitToLesson.keySet());
+      logger.error("removeExerciseToLesson no unit for " + type + " in " + typeToUnitToLesson.keySet());
       return false;
     } else {
       Lesson<T> tLesson = unit.get(unitName);
       if (tLesson == null) {
-        logger.error("no lesson for " + type + "/" + unitName + " in " + unit.keySet());
+        logger.error("removeExerciseToLesson no lesson for " + type + "/" + unitName + " in " + unit.keySet());
         return false;
       } else {
         return tLesson.remove(exercise);
@@ -913,7 +896,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    */
   private Map<String, Lesson<T>> getSectionToLesson(String section) {
     if (section.isEmpty()) {
-      logger.error("huh? section is empty ", new Exception());
+      logger.error("getSectionToLesson huh? section is empty ", new Exception());
     }
     return typeToUnitToLesson.computeIfAbsent(section, k -> new HashMap<>());
   }

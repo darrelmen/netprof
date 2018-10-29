@@ -80,7 +80,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    *
    * @see SlickUserExerciseDAO#addPhoneInfo
    */
-  private static final String BLANK = "Blank";
+//  private static final String BLANK = "Blank";
   private static final String UNIT = "Unit";
 
   private final long lastModified = System.currentTimeMillis();
