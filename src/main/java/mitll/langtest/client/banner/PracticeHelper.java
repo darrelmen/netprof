@@ -73,7 +73,7 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
    */
   PracticeHelper(ExerciseController controller, INavigation.VIEWS instance) {
     super(controller);
-    this.instance=instance;
+    this.instance = instance;
   }
 
   /**
