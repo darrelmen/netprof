@@ -50,13 +50,13 @@ import java.util.logging.Logger;
  * @since 5/27/2014.
  */
 public class WebAudioRecorder {
-  private static final Logger logger = Logger.getLogger("WebAudioRecorder");
-  private static final int DELAY_MILLIS = 4000;
+//  private static final Logger logger = Logger.getLogger("WebAudioRecorder");
+ // private static final int DELAY_MILLIS = 4000;
 
   private static boolean webAudioMicAvailable;
-  private static boolean tried = false;
+ // private static boolean tried = false;
   private static boolean gotResponse = false;
-  private static boolean USE_STREAMS = true;
+  //private static boolean USE_STREAMS = true;
 
   private Timer theTimer = null;
 
@@ -246,8 +246,8 @@ public class WebAudioRecorder {
    */
   public void stopRecording(boolean abort) {
     //if (USE_STREAMS) {
-      logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
-      doStopStream("" + abort);
+    // logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
+    doStopStream("" + abort);
   /*  }
 
     else {
@@ -278,8 +278,8 @@ public class WebAudioRecorder {
   /**
    * @param wavStreamCallback
    * @see PostAudioRecordButton#startRecording
-   * @see ExerciseController#startStream(int, int, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
-   * @see BrowserRecording#startStream(String, String, String, boolean, mitll.langtest.shared.answer.AudioType, WavStreamCallback)
+   * @see ExerciseController#startStream
+   * @see BrowserRecording#startStream
    */
   static void setStreamCallback(WavStreamCallback wavStreamCallback) {
     WebAudioRecorder.wavStreamCallback = wavStreamCallback;

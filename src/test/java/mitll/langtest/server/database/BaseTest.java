@@ -72,7 +72,8 @@ public class BaseTest {
                                                  boolean useH2,
                                                  boolean useLocal,
                                                  String optPropsFile) {
-    return CopyToPostgres.getDatabaseLight(config, useH2, useLocal, optPropsFile, "war", "config", null);
+    return CopyToPostgres.getDatabaseLight(config, useH2, useLocal, optPropsFile, "war",
+        "config", null, CopyToPostgres.DEFAULT_PROPERTIES_FILE);
   }
 
   protected static DatabaseImpl getDatabaseVeryLight(String config, String propsFile, boolean useH2) {

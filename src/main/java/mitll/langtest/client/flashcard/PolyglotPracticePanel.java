@@ -82,7 +82,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
                         ListInterface<L, T> exerciseListToUse, INavigation.VIEWS instance) {
     super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse);
     this.polyglotFlashcardContainer = statsFlashcardFactory;
-    this.instance=instance;
+    this.instance = instance;
 
     if (this.polyglotFlashcardContainer.getQuizInfo() == null) {
 
@@ -244,11 +244,13 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   @Override
   String getRefAudioToPlay() {
     if (speedChoices == null) {
-      //     logger.info("getRefAudioToPlay no speed choices ");
+      //logger.info("getRefAudioToPlay no speed choices ");
       return null;
     } else {
       boolean regular = speedChoices.isRegular();
+
       String path = regular ? exercise.getRefAudio() : exercise.getSlowAudioRef();
+    //  logger.info("getRefAudioToPlay play audio " + path);
       if (path == null) {
         path = regular ? exercise.getSlowAudioRef() : exercise.getRefAudio(); // fall back to slow audio
       }

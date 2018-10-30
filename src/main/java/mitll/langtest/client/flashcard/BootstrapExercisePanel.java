@@ -87,6 +87,8 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     implements AudioAnswerListener {
   private final Logger logger = Logger.getLogger("BootstrapExercisePanel");
 
+  private static final int RECO_OUTPUT_WIDTH = 725;
+
   /**
    * Auto fetch their response as a compressed version.
    * TODO :  Bug - first time you click it, button returns to play state too early...
@@ -204,7 +206,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     wrapper.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
 
     recoOutput = new DivWidget();
-    recoOutput.getElement().getStyle().setProperty("maxWidth", 675 + "px");
+    recoOutput.getElement().getStyle().setProperty("maxWidth", RECO_OUTPUT_WIDTH + "px");
 
     wrapper.add(recoOutput);
 

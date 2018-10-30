@@ -120,6 +120,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
     if (isAudioOn()) {
       playRef();
     }
+//    else logger.info("audio set to off - so not playing.");
   }
 
   @Override

@@ -100,7 +100,8 @@ public class AudioExercise extends ExerciseShell {
    * @see mitll.langtest.client.scoring.DialogExercisePanel#getRegularSpeedIfAvailable
    */
   public synchronized AudioAttribute getRegularSpeed() {
-    return getAudio(SPEED, REGULAR);
+    AudioAttribute audio = getAudio(SPEED, REGULAR);
+    return audio == null ? getAudio(CONTEXT, REGULAR) : audio;
   }
 
   private AudioAttribute getRegularSpeedWithPrefs(Collection<Integer> prefs) {
@@ -126,8 +127,7 @@ public class AudioExercise extends ExerciseShell {
       if (currentByKey == null || currentByKey.getTimestamp() < audioAttribute.getTimestamp()) {
         audioAttributes.put(key, audioAttribute);
         return true;
-      }
-      else return false;
+      } else return false;
     }
   }
 

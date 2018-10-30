@@ -134,8 +134,8 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//Co
   private Panel leftState;
   private Panel rightColumn;
   private final SoundFeedback.EndListener endListener;
-//  final String instance;
-  protected final ListInterface<L,T> exerciseList;
+  //  final String instance;
+  protected final ListInterface<L, T> exerciseList;
   private DivWidget prevNextRow;
   boolean showOnlyEnglish = false;
 
@@ -178,10 +178,10 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//Co
   }
 
   /**
-   * @see PolyglotPracticePanel#realAddWidgets
    * @param e
    * @param controller
    * @param controlState
+   * @see PolyglotPracticePanel#realAddWidgets
    */
   void addWidgets(T e, ExerciseController controller, ControlState controlState) {
     final DivWidget middleVert = new DivWidget();
@@ -494,7 +494,9 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//Co
   private Panel getCardContent() {
     final ClickableSimplePanel contentMiddle = new ClickableSimplePanel();
 
-    contentMiddle.setHeight(CARD_HEIGHT + "px");
+    //  contentMiddle.setHeight(CARD_HEIGHT + "px");
+    contentMiddle.getElement().getStyle().setProperty("minHeight", CARD_HEIGHT + "px");
+
     contentMiddle.getElement().setId("Focusable_content");
 
     contentMiddle.addClickHandler(event -> gotCardClick(contentMiddle));
@@ -1070,14 +1072,16 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//Co
 
       englishPhrase.setWidth("100%");
 
-      div.add(englishPhrase);
+      if (!usedForeign) {
+        div.add(englishPhrase);
+      }
     }
 
-    foreign = getForeignLanguageContent(foreignSentence, e.hasRefAudio());
+    foreign = getForeignLanguageContent(foreignSentence, e.hasRefAudio(), !usedForeign);
 
-    if (!usedForeign) {
-      div.add(foreign);
-    }
+    // if (!usedForeign) {
+    div.add(foreign);
+    // }
     showEnglishOrForeign();
 
     return div;
@@ -1097,7 +1101,7 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//Co
   }
 
   private int getHeadingSize() {
-    return exercise.isContext()?HEADING_SIZE:1;
+    return exercise.isContext() ? HEADING_SIZE : 1;
   }
 
   private boolean isSiteEnglish() {
@@ -1109,14 +1113,15 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//Co
    *
    * @param foreignSentence
    * @param hasRefAudio
+   * @param usedForeign
    * @return
    * @see #getQuestionContent
    */
-  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio) {
+  private Widget getForeignLanguageContent(String foreignSentence, boolean hasRefAudio, boolean usedForeign) {
     Panel hp = new DivWidget();
     hp.addStyleName("inlineFlex");
     hp.setWidth("100%");
-    Widget flContainer = getFLContainer(foreignSentence);
+    Widget flContainer = getFLContainer(foreignSentence, usedForeign);
     DivWidget flDiv = new DivWidget();
     flDiv.add(flContainer);
     hp.add(flDiv);
@@ -1154,8 +1159,15 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//Co
   }
 
   @NotNull
-  private Widget getFLContainer(String foreignSentence) {
-    Heading foreignLanguageContent = new Heading(getHeadingSize(), foreignSentence);
+  private Widget getFLContainer(String foreignSentence, boolean hasEnglish) {
+    int headingSize = getHeadingSize();
+    Heading foreignLanguageContent = new Heading(headingSize, foreignSentence);
+
+    if (headingSize == 2 && hasEnglish) {
+      foreignLanguageContent.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+      foreignLanguageContent.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    }
+
     Style style = foreignLanguageContent.getElement().getStyle();
     style.setTextAlign(Style.TextAlign.CENTER);
     if (isUrdu) {
@@ -1273,6 +1285,9 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//Co
     if (isValid(refAudioToPlay)) {
       playRef(refAudioToPlay);
     }
+//    else {
+//      logger.info("playRef : NOPE : audio " + refAudioToPlay + " is not valid...");
+//    }
   }
 
   /**
@@ -1282,6 +1297,7 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//Co
   String getRefAudioToPlay() {
     String path = exercise.getRefAudio();
     if (path == null) {
+      //  logger.info("attr " + exercise.getAudioAttributes());
       path = exercise.getSlowAudioRef(); // fall back to slow audio
     }
     return path;

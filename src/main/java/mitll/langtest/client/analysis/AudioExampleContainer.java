@@ -521,7 +521,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
         int i = visibleItems == null ? -1 : visibleItems.indexOf(selected);
 
         if (i > -1) {
-          if (DEBUG || true) logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
+          if (DEBUG) logger.info("studentAudioEnded index " + i + " in " + visibleItems.size());
           if (i == visibleItems.size() - 1) {
             Range visibleRange = table.getVisibleRange();
             int i1 = visibleRange.getStart() + visibleRange.getLength();
@@ -535,7 +535,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
               if (i1 == rowCount) {
                 resetReview();
               } else {
-                if (DEBUG || true) logger.info("studentAudioEnded scrollToVisible " + i1 + " row " + rowCount);
+                if (DEBUG) logger.info("studentAudioEnded scrollToVisible " + i1 + " row " + rowCount);
 
                 scrollToVisible(i1);
 
@@ -550,7 +550,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
               }
             }
           } else {
-            if (DEBUG || true) logger.info("studentAudioEnded next " + (i + 1));
+            if (DEBUG) logger.info("studentAudioEnded next " + (i + 1));
             T wordScore = visibleItems.get(i + 1);
             setSelectedAndShowReco(wordScore, true);
             //      playAudio(getSelected(), true);

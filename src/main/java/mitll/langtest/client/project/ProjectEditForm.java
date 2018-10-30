@@ -77,8 +77,6 @@ public class ProjectEditForm extends UserDialog {
   private static final String GVIDAVER = "gvidaver";
   private static final String CHECKING_AUDIO = "Checking audio and making mp3's...";
 
-  private static final String IN_PROGRESS = "In progress...";
-
   private static final String PROJECT_TYPE = "Project Type";
   private static final boolean SHOW_PROJECT_TYPE = true;
 
@@ -169,7 +167,7 @@ public class ProjectEditForm extends UserDialog {
 
   /**
    * @param lifecycleSupport
-   * @see ProjectChoices#getCreateNewButton(DivWidget)
+   * @see ProjectChoices#getCreateNewButton
    */
   ProjectEditForm(LifecycleSupport lifecycleSupport, ExerciseController controller) {
     super(controller.getProps());

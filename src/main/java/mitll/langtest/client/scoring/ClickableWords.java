@@ -553,7 +553,10 @@ public class ClickableWords {
     WordBounds wordBounds = factory.findNextWord(html.toLowerCase(), toFind, 0);
 
     if (wordBounds == null) {
-      logger.warning("\n\n\nshowSearchMatch can't find  '" + searchToken + "' in '" + html + "'");
+      logger.warning("showSearchMatch can't find " +
+          "\n\ttoken '" + searchToken + "' " +
+          "\n\tin    '" + html + "'");
+
       w.addStyleName(SEARCHMATCH);
     } else {
       // logger.info("showSearchMatch word bounds " + wordBounds + " for '" + searchToken + "' in '" + html + "'");

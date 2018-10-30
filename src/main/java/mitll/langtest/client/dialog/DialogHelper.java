@@ -61,7 +61,9 @@ public class DialogHelper {
 
   public interface CloseListener {
     boolean gotYes();
+
     void gotNo();
+
     void gotHidden();
   }
 
@@ -127,7 +129,7 @@ public class DialogHelper {
                             CloseListener listener, int maxHeight, int width, Button closeButton,
                             boolean isBig) {
     dialogBox = new Modal();
-    if (width>900) {
+    if (width > 900) {
       DOM.setStyleAttribute(dialogBox.getElement(), "left", 310 + "px");
     }
 
