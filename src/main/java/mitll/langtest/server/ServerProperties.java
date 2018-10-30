@@ -32,19 +32,15 @@
 
 package mitll.langtest.server;
 
-import com.google.gson.JsonObject;
 import com.typesafe.config.ConfigFactory;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
-import mitll.langtest.server.scoring.HydraOutput;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectProperty;
-import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.Affiliation;
 import org.apache.logging.log4j.LogManager;
