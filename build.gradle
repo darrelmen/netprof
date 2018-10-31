@@ -162,12 +162,12 @@ dependencies {
 
     compile 'com.github.gwtbootstrap:gwt-bootstrap:latest.release'
 
+    // TODO : REMOVE
     // just for AMAS support
     compile name: 'mira'
 
-    compile 'org.moxieapps.gwt:highcharts:1.7.0'
-
-//    compile name: "org.moxieapps.gwt.highcharts-1.7.0"
+ //   compile 'org.moxieapps.gwt:highcharts:1.7.0'
+    compile name: "org.moxieapps.gwt.highcharts-1.7.0"
 
     // the only way I can get war to accept my explicit command to include these jars
     //compile name: 'commons-codec-1.10'
