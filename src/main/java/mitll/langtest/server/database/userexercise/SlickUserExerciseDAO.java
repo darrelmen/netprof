@@ -498,8 +498,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.candecodechecked().getTime(),
         slick.iscontext(),
         slick.numphones(),
-        slick.legacyid(), // i.e. dominoID
-        shouldSwap);
+        slick.legacyid() // i.e. dominoID
+    );
 
     exercise.setUnitToValue(unitToValue);
     {

@@ -33,9 +33,11 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ExerciseService;
-import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.Search;
+import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.TripleExercises;
 import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -429,7 +431,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @return
    * @see #getExerciseIds
    */
-  private int markRecordedState(int userID,
+ /* private int markRecordedState(int userID,
                                 ActivityType activityType,
                                 Collection<? extends Shell> exercises,
                                 boolean onlyExample) {
@@ -454,7 +456,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       logger.info("\tmarkRecordedState marked " + c + "  recorded for activity '" + activityType + "' and user " + userID + " on " + exercises.size());
     }
     return c;
-  }
+  }*/
 
   /**
    * Copies the exercises....?
@@ -505,8 +507,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
           (request.getActivityType() != ActivityType.UNSET ? "" : "\n\tactivity " + request.getActivityType()));
     }
 
-    int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
-    logger.info("getExerciseListWrapperForPrefix marked " + i + " as recorded");
+//    int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
+ //   logger.info("getExerciseListWrapperForPrefix marked " + i + " as recorded");
 
     if (hasPrefix) {
       logger.info("getExerciseListWrapperForPrefix check for prefix match over " + exercisesForState.size());
@@ -645,7 +647,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     List<T> exerciseShells = getExerciseShells(exercises, request.isQC());
 
 //    logger.debug("makeExerciseListWrapper : userID " + userID + " Role is " + request.getActivityType());
-    markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
+   // markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
 
     // TODO : do this the right way vis-a-vis type safe collection...
 
@@ -705,7 +707,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param activityType
    * @see #makeExerciseListWrapper(ExerciseListRequest, Collection, int)
    */
-  private void markStateForActivity(boolean onlyExamples, int userID, List<T> exerciseShells, ActivityType activityType) {
+/*  private void markStateForActivity(boolean onlyExamples, int userID, List<T> exerciseShells, ActivityType activityType) {
     switch (activityType) {
       case RECORDER:
         markRecordedState(userID, activityType, exerciseShells, onlyExamples);
@@ -718,7 +720,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       default:
         break;
     }
-  }
+  }*/
 
 
   /**

@@ -23,13 +23,12 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
 /**
- * @see ExercisePanelFactory#getExercisePanel(Shell)
+ * @see ExercisePanelFactory#getExercisePanel
  */
 class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extends BootstrapExercisePanel<L, T> {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");

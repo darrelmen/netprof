@@ -72,7 +72,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList<T extends CommonShell, U extends Shell>  extends DivWidget
+public abstract class ExerciseList<T extends CommonShell, U extends HasID>  extends DivWidget
     implements ListInterface<T, U>, ProvidesResize {
   private final Logger logger = Logger.getLogger("ExerciseList");
 
@@ -779,7 +779,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends Shell>  exte
       );
     } else {
       int i1 = i + 1;
-      Shell next = getAt(i1);
+      HasID next = getAt(i1);
       if (DEBUG) logger.info("ExerciseList.getNextExercise " + next.getID() + " at next index " + i1);
       loadExercise(next.getID());
     }

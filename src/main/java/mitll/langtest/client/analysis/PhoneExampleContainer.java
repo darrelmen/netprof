@@ -43,8 +43,8 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
@@ -218,7 +218,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @see #addColumnsToTable
    */
   private Column<WordAndScore, SafeHtml> getItemColumn() {
-    return new Column<WordAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<WordAndScore, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, WordAndScore object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);

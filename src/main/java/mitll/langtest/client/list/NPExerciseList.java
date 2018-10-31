@@ -37,7 +37,7 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public class NPExerciseList<T extends CommonShell, U extends Shell> extends HistoryExerciseList<T, U> {
+public class NPExerciseList<T extends CommonShell, U extends HasID> extends HistoryExerciseList<T, U> {
   private Logger logger = Logger.getLogger("NPExerciseList");
   private final int pageSize;
 

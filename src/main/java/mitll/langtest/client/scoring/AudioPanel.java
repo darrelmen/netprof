@@ -40,7 +40,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
@@ -75,7 +75,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   private static final String RECORD = "Record";
   private static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
 
-  private static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
+  private static final int LEFT_COLUMN_WIDTH = SimplePagingContainer.MAX_WIDTH;
 
   static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 80f;//96;

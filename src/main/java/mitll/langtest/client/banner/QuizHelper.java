@@ -198,7 +198,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
       public void showQuiz() {
         super.showQuiz();
         clearListSelection();
-        MyPracticeFacetExerciseList exerciseList = (MyPracticeFacetExerciseList) this.getExerciseList();
+        QuizPracticeFacetExerciseList exerciseList = (QuizPracticeFacetExerciseList) this.getExerciseList();
         exerciseList.showQuizIntro();
       }
     };
@@ -226,7 +226,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
                                                           Panel currentExercisePanel,
                                                           INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
         rememberedTopRow = topRow;
-        return (PagingExerciseList<T, U>) new MyPracticeFacetExerciseList(topRow, currentExercisePanel, instanceName, listHeader);
+        return (PagingExerciseList<T, U>) new QuizPracticeFacetExerciseList(topRow, currentExercisePanel, instanceName, listHeader);
       }
 
       @Override
@@ -238,7 +238,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
   }
 
   /**
-   * @see MyPracticeFacetExerciseList#getQuizIntro
+   * @see QuizPracticeFacetExerciseList#getQuizIntro
    */
   private void showQuizForReal() {
     setMode(POLYGLOT, PolyglotDialog.PROMPT_CHOICE.NOT_YET);
@@ -261,8 +261,8 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
     exerciseList.clearListSelection();
   }
 
-  private class MyPracticeFacetExerciseList extends PracticeFacetExerciseList<T, U> {
-    MyPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader) {
+  private class QuizPracticeFacetExerciseList extends PracticeFacetExerciseList<T, U> {
+    QuizPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader) {
       super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel, listHeader, INavigation.VIEWS.QUIZ);
     }
 

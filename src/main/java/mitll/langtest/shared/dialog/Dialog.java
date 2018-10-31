@@ -333,22 +333,27 @@ public class Dialog implements IDialog, MutableShell {
     return 0;
   }
 
-  @Override
-  public STATE getState() {
-    return UNSET;
-  }
+//  @Override
+//  public STATE getState() {
+//    return UNSET;
+//  }
+//
+//  @Override
+//  public void setState(STATE state) {
+//  }
+//
+//  @Override
+//  public STATE getSecondState() {
+//    return UNSET;
+//  }
+//
+//  @Override
+//  public void setSecondState(STATE state) {
+//  }
 
   @Override
-  public void setState(STATE state) {
-  }
-
-  @Override
-  public STATE getSecondState() {
-    return UNSET;
-  }
-
-  @Override
-  public void setSecondState(STATE state) {
+  public boolean isContext() {
+    return false;
   }
 
   public int getImageid() {

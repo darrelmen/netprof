@@ -41,7 +41,6 @@ import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -214,7 +213,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   /**
    * @param exercise
-   * @see ListInterface#addExercise(Shell)
+   * @see ListInterface#addExercise
    * @see mitll.langtest.client.list.PagingExerciseList#addExercise(CommonShell)
    */
   public void addExercise(T exercise) {

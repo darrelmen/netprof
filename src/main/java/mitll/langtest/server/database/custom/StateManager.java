@@ -1,18 +1,12 @@
 package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.reviewed.IReviewedDAO;
-import mitll.langtest.server.database.reviewed.StateCreator;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by go22670 on 7/5/17.
@@ -145,12 +139,12 @@ public class StateManager implements IStateManager {
    *
    * @param skipUnset
    * @return
-   * @see IUserListManager#getCommentedList(int, boolean)
+   * @see IUserListManager#getCommentedList
    */
-  @Override
+/*  @Override
   public Map<Integer, StateCreator> getExerciseToState(boolean skipUnset) {
     return reviewedDAO.getExerciseToState(skipUnset);
-  }
+  }*/
 
   /**
    * Mark the exercise with its states - but not if you're a recorder...
@@ -159,7 +153,7 @@ public class StateManager implements IStateManager {
    * @seex #getReviewList
    * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    */
-  @Override
+ /* @Override
   public void markState(Collection<? extends CommonShell> shells) {
     Map<Integer, StateCreator> exerciseToState = reviewedDAO.getExerciseToState(false);
 
@@ -180,7 +174,7 @@ public class StateManager implements IStateManager {
     // does this help anyone???
     // want to know if we have a new recording AFTER it's been inspected - why did the thing that I fixed now change back to needs inspection
     // maybe turn off for now???
-/*    if (false) {
+*//*    if (false) {
       logger.debug("markState - first state " + c);
       exerciseToState = secondStateDAO.getExerciseToState(false);
 
@@ -193,9 +187,9 @@ public class StateManager implements IStateManager {
         }
       }
       logger.debug("markState - sec state " + n);
-    }*/
+    }*//*
   }
-
+*/
 
 /*  @Override
   @NotNull
@@ -212,7 +206,7 @@ public class StateManager implements IStateManager {
     return defectIds;
   }*/
 
-  @Override
+/*  @Override
   @NotNull
   public Set<Integer> getDefectIDs() {
     Set<Integer> defectIds = new HashSet<>();
@@ -225,7 +219,7 @@ public class StateManager implements IStateManager {
       }
     }
     return defectIds;
-  }
+  }*/
 
 
   /**
@@ -237,8 +231,8 @@ public class StateManager implements IStateManager {
    * @see mitll.langtest.server.database.custom.UserListManager#markState
    */
   @Override
-  public void setState(Shell shell, STATE state, long creatorID) {
-    shell.setState(state);
+  public void setState(HasID shell, STATE state, long creatorID) {
+   // shell.setState(state);
     reviewedDAO.setState(shell.getID(), state, creatorID);
   }
 
@@ -250,8 +244,8 @@ public class StateManager implements IStateManager {
    * @see IUserListManager#markState
    */
   @Override
-  public void setSecondState(Shell shell, STATE state, long creatorID) {
-    shell.setSecondState(state);
+  public void setSecondState(HasID shell, STATE state, long creatorID) {
+    //shell.setSecondState(state);
     secondStateDAO.setState(shell.getID(), state, creatorID);
   }
 
@@ -269,23 +263,25 @@ public class StateManager implements IStateManager {
    * @param exerciseid
    * @seex mitll.langtest.server.database.DatabaseImpl#deleteItem(int, int)
    */
-  @Override
+ /* @Override
   public void removeReviewed(int exerciseid) {
     reviewedDAO.remove(exerciseid);
-  }
+  }*/
 
 
   /**
    * @return
    * @see IUserListManager#getCommentedList
    */
+/*
   public Collection<Integer> getDefectExercises() {
     return reviewedDAO.getDefectExercises();
   }
+*/
 
   /**
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUninspected(Collection)
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#filterByUninspected
    */
   public Collection<Integer> getInspectedExercises() {
     return reviewedDAO.getInspectedExercises();

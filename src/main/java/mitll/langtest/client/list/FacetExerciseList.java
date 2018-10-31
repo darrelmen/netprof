@@ -502,7 +502,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     }
 
     INavigation.VIEWS instance = selectionState.getView();
-    //   if (!instance.isEmpty() && !instance.equalsIgnoreCase(getInstance())) {
     if (instance != getInstance()) {
       Collection<String> remove = selectionState.getTypeToSection().remove(getDynamicFacet());
       logger.info("addWidgets selection '" + instance + "' != " + getInstance() + " so removing " + remove);
@@ -624,6 +623,15 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       liForDimensionForType.add(addChoices(typeToValues, type));
     }
 
+    reallyAddListFacet(typeToValues, allTypesContainer);
+
+    ListItem widgets = addContentFacet();
+    if (widgets != null) {
+      allTypesContainer.add(widgets);
+    }
+  }
+
+  private void reallyAddListFacet(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
     liForDimensionForList = addListFacet(typeToValues);
     if (liForDimensionForList != null) {
       allTypesContainer.add(liForDimensionForList);
@@ -652,6 +660,22 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return liForDimensionForType;
   }
 
+  private ListItem addContentFacet() {
+    String dynamicFacet = "Content";
+    ListItem liForDimensionForType = getTypeContainer(dynamicFacet);
+
+    Set<MatchInfo> value = new HashSet<>();
+    value.add(new MatchInfo("Entries", 1));
+    value.add(new MatchInfo("Sentences", 1));
+    Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
+    typeToValues.put(dynamicFacet, value);
+
+    //  logger.info("populateListChoices --- for " + result.size() + " lists ");
+    liForDimensionForType.add(addChoices(typeToValues, dynamicFacet));
+
+    return liForDimensionForType;
+  }
+
   /**
    * @param typeToSection
    * @param prefix
@@ -669,8 +693,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         .setAddFirst(false);
 
     //logger.info("Type->sel " + typeToSection);
-    if (typeToSection.containsKey(getDynamicFacet())) {
-      Collection<String> strings = typeToSection.get(getDynamicFacet());
+    String dynamicFacet = getDynamicFacet();
+    if (typeToSection.containsKey(dynamicFacet)) {
+      Collection<String> strings = typeToSection.get(dynamicFacet);
 
       if (isDynamicFacetInteger()) {
         //only one user list can be selected, and they don't nest
@@ -717,7 +742,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
       @Override
       public void onSuccess(Collection<IUserList> result) {
-        addListsAsLinks(result, then, finalTypeToValues, liForDimensionForType);
+        long l = System.currentTimeMillis();
+        if (l - then > 250) {
+          logger.info("addListsAsLinks : took " + (l - then) + " to get lists for user.");
+        }
+        addListsAsLinks(result, finalTypeToValues, liForDimensionForType);
       }
     });
   }
@@ -726,20 +755,18 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return UserList.LIST_TYPE.NORMAL;
   }
 
-  private void addListsAsLinks(Collection<IUserList> result, long then,
+  private void addListsAsLinks(Collection<IUserList> result,
                                Map<String, Set<MatchInfo>> finalTypeToValues,
                                ListItem liForDimensionForType) {
-    long l = System.currentTimeMillis();
-    if (l - then > 250) {
-      logger.info("addListsAsLinks : took " + (l - then) + " to get lists for user.");
-    }
-    finalTypeToValues.put(getDynamicFacet(), getMatchInfoForEachList(result));
+    String dynamicFacet = getDynamicFacet();
+
+    finalTypeToValues.put(dynamicFacet, getMatchInfoForEachList(result));
 
     Widget favorites = liForDimensionForType.getWidget(0);
     liForDimensionForType.clear();
     liForDimensionForType.add(favorites);
     //  logger.info("populateListChoices --- for " + result.size() + " lists ");
-    liForDimensionForType.add(addChoices(finalTypeToValues, getDynamicFacet()));
+    liForDimensionForType.add(addChoices(finalTypeToValues, dynamicFacet));
   }
 
   /**
@@ -764,7 +791,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   @NotNull
   private ListItem getTypeContainer(String type) {
-    if (type.isEmpty()) logger.warning("huh? type is empty???");
+    if (type.isEmpty()) logger.warning("getTypeContainer huh? type is empty???");
     boolean hasSelection = typeToSelection.containsKey(type);
     ListItem liForDimensionForType = getLIDimension(hasSelection);
     liForDimensionForType.add(hasSelection ? getTypeHeader(type) : getSimpleHeader(type));
@@ -836,6 +863,12 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return choices;
   }
 
+  /**
+   * @param type
+   * @param choices
+   * @param selectionForType
+   * @see #addChoices(Map, String)
+   */
   private void addListChoice(String type, Panel choices, String selectionForType) {
     try {
       String listName = selectionForType;
@@ -1224,7 +1257,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
 
-   // List<Pair> pairs = getPairs(typeToSelection);
+    // List<Pair> pairs = getPairs(typeToSelection);
     //logger.info("getTypeToValues request " + pairs + " list " + userListID);
 
     final long then = System.currentTimeMillis();
@@ -1294,16 +1327,13 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   private void changeSelection(Set<String> typesToInclude, Map<String, String> typeToSelection) {
-    // boolean removed = false;
     for (String selectedType : new ArrayList<>(typeToSelection.keySet())) {
       boolean clearSelection = !typesToInclude.contains(selectedType);
       if (clearSelection) {
         if (removeSelection(selectedType, typeToSelection)) {
-          //     removed = true;
         }
       }
     }
-    //return removed;
   }
 
   protected boolean isThereALoggedInUser() {
@@ -1336,7 +1366,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   private void updateDownloadLinks() {
-    //  SelectionState selectionState = getSelectionState(getHistoryToken());
     // keep the download link info in sync with the selection
     downloadHelper.updateDownloadLinks(getSelectionState(getHistoryToken()), typeOrder);
   }
@@ -1434,15 +1463,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     }
     builder.append(getProjectParam());
 
-/*     builder
-        .append(SECTION_SEPARATOR)
-        .append(SelectionState.INSTANCE)
-        .append("=")
-        .append(getInstance());*/
-
-    // keepSearchItem(builder);
     String s = builder.toString();
-
     //     logger.info("getHistoryToken token '" + s + "'");
     return s;
   }
@@ -1508,13 +1529,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   protected void pushFirstSelection(int exerciseID, String searchIfAny) {
- /*   if (isDrillView()) {
-      logger.info("pushFirstSelection " + exerciseID + " " + searchIfAny);
-      super.pushFirstSelection(exerciseID, searchIfAny);
-    } else {*/
     updateDownloadLinks();
     askServerForExercise(exerciseID);
-    // }
   }
 
   /**
@@ -1563,7 +1579,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       if (DEBUG) logger.info("askServerForVisibleExercises show empty -- ");
     } else {
       if (DEBUG) logger.info("askServerForVisibleExercises item " + itemID + " and " + visibleIDs.size());
-      getExercises(getVisibleForDrill(itemID, visibleIDs), currentReq);
+      getVisibleExercises(getVisibleForDrill(itemID, visibleIDs), currentReq);
     }
   }
 
@@ -1629,7 +1645,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param currentReq
    * @see #askServerForVisibleExercises(int, Collection, int)
    */
-  private void getExercises(final Collection<Integer> visibleIDs, final int currentReq) {
+  private void getVisibleExercises(final Collection<Integer> visibleIDs, final int currentReq) {
     if (!isDrillView()) { // no blink
       Widget widget = innerContainer.getWidget();
       if (widget != null) {
@@ -1637,10 +1653,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       }
     }
     if (isCurrentReq(currentReq)) {
-      if (DEBUG) logger.info("getExercises  req " + currentReq + " vs current " + getCurrentExerciseReq());
+      if (DEBUG) logger.info("getVisibleExercises  req " + currentReq + " vs current " + getCurrentExerciseReq());
       reallyGetExercises(visibleIDs, currentReq);
     } else {
-      logger.warning("getExercises skip stale req " + currentReq + " vs current " + getCurrentExerciseReq());
+      logger.warning("getVisibleExercises skip stale req " + currentReq + " vs current " + getCurrentExerciseReq());
     }
   }
 
@@ -1649,7 +1665,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    * @param visibleIDs
    * @param currentReq
-   * @see #getExercises(Collection, int)
+   * @see #getVisibleExercises(Collection, int)
    */
   private void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
     if (DEBUG) {
@@ -1738,7 +1754,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
                                List<U> alreadyFetched,
                                Collection<Integer> visibleIDs) {
     // long now = System.currentTimeMillis();
-//    int size = result.getExercises().isEmpty() ? 0 : result.getExercises().size();
+//    int size = result.getVisibleExercises().isEmpty() ? 0 : result.getVisibleExercises().size();
     //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
     int reqID = result.getReqID();
 
@@ -1927,7 +1943,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #showExercisesForCurrentReq
    */
   private void reallyShowExercises(Collection<U> result, int reqID) {
-   // logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
+    // logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
 
     DivWidget exerciseContainer = new DivWidget();
     populatePanels(result, reqID, exerciseContainer);

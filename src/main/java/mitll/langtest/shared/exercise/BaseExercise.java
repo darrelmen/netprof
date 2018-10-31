@@ -33,7 +33,6 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.PagingExerciseList;
 
 /**
@@ -46,7 +45,7 @@ public class BaseExercise implements IsSerializable, Shell {
   protected int id = -1;
 
   private STATE state = STATE.UNSET;
-  private STATE secondState = STATE.UNSET;
+ // private STATE secondState = STATE.UNSET;
 
   protected BaseExercise() {
   }
@@ -59,7 +58,7 @@ public class BaseExercise implements IsSerializable, Shell {
   public int getID() {  return id;  }
 
   /**
-   * @see PagingContainer#getEnglishColumn
+   * @seex PagingContainer#getEnglishColumn
    * @see PagingExerciseList#getFirstNotCompleted
    * @return
    */
@@ -72,18 +71,18 @@ public class BaseExercise implements IsSerializable, Shell {
   public void setState(STATE state) { this.state = state;  }
 
   /**
-   * @see PagingContainer#getEnglishColumn
+   * @seex PagingContainer#getEnglishColumn
    * @return
    */
-  @Override
-  public STATE getSecondState() {
-    return secondState;
-  }
+//  @Override
+//  public STATE getSecondState() {
+//    return secondState;
+//  }
 
-  @Override
-  public void setSecondState(STATE state) {
-    this.secondState = state;
-  }
+//  @Override
+//  public void setSecondState(STATE state) {
+//    this.secondState = state;
+//  }
 
   @Override
   public int compareTo(HasID o) {

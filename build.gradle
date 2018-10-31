@@ -80,9 +80,6 @@ dependencies {
     // our modules
     def dominoVers = '2.7.10'
 
-    compile name: "jtds-1.3.1"
-    compile name: "Selection-1_1"
-
     // compile(group: 'net.jthink', name: 'jaudiotagger', version: '2.2.6-20170905.193146-1')
 //    compile('mitll.hlt:domino-core:' + dcVers) { changing = true; }
     //compile('mitll.hlt:domino:' + dominoVers) { changing = true; }

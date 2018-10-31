@@ -862,8 +862,8 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     }
 
     STATE state = hasNoDefects() ? STATE.UNSET : STATE.DEFECT;
-    exercise.setState(state);
-    listContainer.setState(getExerciseID(), state);
+//    exercise.setState(state);
+//    listContainer.setState(getExerciseID(), state);
     listContainer.redraw();
     setApproveButtonState();
     //markReviewed(exercise);

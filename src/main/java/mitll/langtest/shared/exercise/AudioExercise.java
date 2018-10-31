@@ -73,10 +73,11 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @param id
    * @param projectid
+   * @param isContext
    * @paramx shouldSwap
    */
-  AudioExercise(int id, int projectid) {
-    super(id);
+  AudioExercise(int id, int projectid, boolean isContext) {
+    super(id, isContext);
     this.projectid = projectid;
   }
 

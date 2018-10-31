@@ -229,14 +229,19 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     return realID;
   }
 
-  @Override
-  public STATE getState() {
-    return state;
-  }
+//  @Override
+//  public STATE getState() {
+//    return state;
+//  }
+//
+//  @Override
+//  public void setState(STATE state) {
+//    this.state = state;
+//  }
 
   @Override
-  public void setState(STATE state) {
-    this.state = state;
+  public boolean isContext() {
+    return false;
   }
 
   /**
@@ -244,14 +249,15 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
    *
    * @return
    */
-  @Override
-  public STATE getSecondState() {
-    return null;
-  }
+//  @Override
+//  public STATE getSecondState() {
+//    return null;
+//  }
+//
+//  @Override
+//  public void setSecondState(STATE state) {
+//  }
 
-  @Override
-  public void setSecondState(STATE state) {
-  }
 
   public String toString() {
     return "Exercise " + getOldID() + (getAltID().isEmpty() ? "" : "/" + getAltID()) +
@@ -322,7 +328,7 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
 
   /**
    * @return
-   * @see mitll.langtest.client.amas.AudioExerciseContent#addAudioRow(AmasExerciseImpl, String, boolean, Panel, int, int)
+   * @seex mitll.langtest.client.amas.AudioExerciseContent#addAudioRow(AmasExerciseImpl, String, boolean, Panel, int, int)
    */
   public String getAudioURL() {
     return audioURL;

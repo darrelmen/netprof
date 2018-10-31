@@ -58,7 +58,7 @@ import java.util.logging.Logger;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class PagingExerciseList<T extends CommonShell, U extends Shell> extends ExerciseList<T, U> {
+public abstract class PagingExerciseList<T extends CommonShell, U extends HasID> extends ExerciseList<T, U> {
   private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   static final String SEARCH = "Search";
@@ -112,6 +112,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
     pushFirstSelection(getFirstID(), getTypeAheadText());
   }
 
+/*
   @Override
   public void setState(int id, STATE state) {
     T t = byID(id);
@@ -120,6 +121,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       t.setState(state);
     }
   }
+*/
 
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
@@ -178,10 +180,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
    * @return
    * @see #loadFirstExercise
    */
-  @Override
+ /* @Override
   protected T findFirstExercise() {
     return listOptions.isShowFirstNotCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
-  }
+  }*/
 
   /**
    * Sometimes we want to not respect if there's an item selection in the url.
@@ -200,10 +202,11 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
   }
 
   /**
+   * @deprecated
    * @return
    * @see #findFirstExercise
    */
-  private T getFirstNotCompleted() {
+ /* private T getFirstNotCompleted() {
     for (T es : pagingContainer.getItems()) {
       STATE state = es.getState();
       if (state != null && state.equals(STATE.UNSET)) {
@@ -212,7 +215,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends Shell>
       }
     }
     return super.findFirstExercise();
-  }
+  }*/
 
   /**
    * TODO : Not sure if this is needed anymore

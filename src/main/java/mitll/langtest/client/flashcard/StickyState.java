@@ -35,7 +35,7 @@ package mitll.langtest.client.flashcard;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
 
 import java.util.*;
 
@@ -74,10 +74,10 @@ public class StickyState extends SessionStorage {
 
   /**
    * @param e
-   * @see ExercisePanelFactory#getExercisePanel(Shell)
+   * @see ExercisePanelFactory#getExercisePanel
    * @see StatsPracticePanel#rememberCurrentExercise
    */
-  void storeCurrent(Shell e) {
+  void storeCurrent(HasID e) {
     // logger.info("StickyState.storeCurrent store current " + e.getID());
     storage.storeValue(CURRENT_EXERCISE, "" + e.getID());
   }

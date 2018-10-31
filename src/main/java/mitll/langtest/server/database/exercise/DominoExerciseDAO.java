@@ -292,7 +292,7 @@ public class DominoExerciseDAO {
     context.setDominoContextIndex(sample.getNum());
 
     context.setUnitToValue(unitToValue);
-    context.setParentDominoID(parentDominoID);
+  //  context.setParentDominoID(parentDominoID);
     return context;
   }
 
@@ -382,7 +382,7 @@ public class DominoExerciseDAO {
         0,
         isContext,
         0,
-        dominoID, shouldSwap);
+        dominoID);
 
 
     logger.info("getExerciseFromVocabularyItem : made ex" +

@@ -12,8 +12,8 @@ import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.SimpleAudioAnswer;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
-import mitll.langtest.shared.exercise.Shell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -29,7 +29,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
 /**
  * An ASR scoring panel with a record button.
  */
-public class SimpleRecordAudioPanel<T extends Shell & ScoredExercise> extends NoFeedbackRecordAudioPanel<T>
+public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends NoFeedbackRecordAudioPanel<T>
     implements SessionManager {
   private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
   private static final String MP3 = ".mp3";

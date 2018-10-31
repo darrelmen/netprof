@@ -57,7 +57,6 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.dialog.IDialogSession;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
@@ -1170,7 +1169,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param user
    * @param exercise1
    */
-  private void setExerciseState(int exercise, int user, Shell exercise1) {
+  private void setExerciseState(int exercise, int user, HasID exercise1) {
     if (exercise1 != null) {
       STATE currentState = db.getStateManager().getCurrentState(exercise);
       if (currentState == STATE.APPROVED) { // clear approved on new audio -- we need to review it again

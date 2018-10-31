@@ -79,7 +79,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -934,7 +934,7 @@ public class LangTest implements
   }
 
   @Override
-  public void logEvent(UIObject button, String widgetType, Shell ex, String context) {
+  public void logEvent(UIObject button, String widgetType, HasID ex, String context) {
     //logger.info("logEvent START ex " + ex + " in " + context);
     buttonFactory.logEvent(button, widgetType, new EventContext("" + ex.getID(), context, getUser()));
     //logger.info("logEvent END   ex " + ex + " in " + context);

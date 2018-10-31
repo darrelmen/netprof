@@ -63,7 +63,7 @@ import java.util.logging.Logger;
  * Time: 7:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
+abstract class PagingContainer<T extends CommonShell> extends ClickablePagingContainer<T> {
   private final Logger logger = Logger.getLogger("PagingContainer");
 
   private static final double FIFTY = 50.0;
@@ -71,11 +71,11 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   private static final int JAPANESE_LENGTH = 9;
   private static final String TRUNCATED = "...";
 
-  private final boolean isRecorder;
+ // private final boolean isRecorder;
   private final IExerciseComparator sorter;
   private static final String ENGLISH = "English";
   private final boolean english;
-  private final boolean showExerciseState;
+  //private final boolean showExerciseState;
   private int FLLength = MAX_LENGTH_ID;
 
   /**
@@ -100,10 +100,10 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     if (japanese) FLLength = JAPANESE_LENGTH;
 
     this.verticalUnaccountedFor = verticalUnaccountedFor;
-    this.isRecorder = isRecorder;
+ //   this.isRecorder = isRecorder;
     english = controller.getLanguage().equals(ENGLISH);
 
-    this.showExerciseState = showExerciseState;
+   // this.showExerciseState = showExerciseState;
     //  logger.info("PagingContainer  show " + showExerciseState + " for recorder " + isRecorder);
   }
 
@@ -115,40 +115,45 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
   /**
    * @see #configureTable
    */
+/*
   protected void addColumnsToTable(boolean sortEnglish) {
     Column<T, SafeHtml> flColumn = addFLColumn();
 
-    Column<T, SafeHtml> englishCol = getEnglishColumn();
+ */
+/*   Column<T, SafeHtml> englishCol = getEnglishColumn();
     if (sortEnglish) {
       //logger.warning("sorting " + this);
       englishCol.setSortable(true);
     }
     addColumn(englishCol, new TextHeader(ENGLISH));
+*//*
 
     List<T> dataList = getList();
 
-    ColumnSortEvent.ListHandler<T> columnSortHandler = getEnglishSorter(englishCol, dataList);
-    table.addColumnSortHandler(columnSortHandler);
+//    ColumnSortEvent.ListHandler<T> columnSortHandler = getEnglishSorter(englishCol, dataList);
+//    table.addColumnSortHandler(columnSortHandler);
 
     ColumnSortEvent.ListHandler<T> columnSortHandler2 = getFLSorter(flColumn, dataList);
     table.addColumnSortHandler(columnSortHandler2);
 
     // We know that the data is sorted alphabetically by default.
-    if (sortEnglish) {
-      table.getColumnSortList().push(englishCol);
-    }
+//    if (sortEnglish) {
+//      table.getColumnSortList().push(englishCol);
+//    }
 
     table.setWidth("100%", true);
 
     // Set the width of each column.
-    table.setColumnWidth(englishCol, FIFTY, Style.Unit.PCT);
+   // table.setColumnWidth(englishCol, FIFTY, Style.Unit.PCT);
     table.setColumnWidth(flColumn, FIFTY, Style.Unit.PCT);
   }
+*/
 
   /**
-   * @see #addColumnsToTable
    * @return
+   * @see #addColumnsToTable
    */
+/*
   @NotNull
   private Column<T, SafeHtml> addFLColumn() {
     Column<T, SafeHtml> flColumn = getFLColumn();
@@ -159,6 +164,8 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
     addColumn(flColumn, new TextHeader(headerForFL));
     return flColumn;
   }
+*/
+/*
 
   private ColumnSortEvent.ListHandler<T> getFLSorter(Column<T, SafeHtml> flColumn, List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler2 = new ColumnSortEvent.ListHandler<>(dataList);
@@ -177,8 +184,9 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
         });
     return columnSortHandler2;
   }
+*/
 
-  private ColumnSortEvent.ListHandler<T> getEnglishSorter(Column<T, SafeHtml> englishCol, List<T> dataList) {
+/*  private ColumnSortEvent.ListHandler<T> getEnglishSorter(Column<T, SafeHtml> englishCol, List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     final boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
     columnSortHandler.setComparator(englishCol,
@@ -195,15 +203,16 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
           return -1;
         });
     return columnSortHandler;
-  }
+  }*/
 
 
   /**
    * TODO: remove me
+   *
    * @return
    * @see SimplePagingContainer#addColumnsToTable
    */
-  private Column<T, SafeHtml> getEnglishColumn() {
+/*  private Column<T, SafeHtml> getEnglishColumn() {
     return new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
@@ -228,10 +237,10 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
 
             boolean isDefect = state == STATE.DEFECT;
             boolean isFixed = state == STATE.FIXED;
-           // boolean isLL = shell.getSecondState() == STATE.ATTN_LL;
-            boolean isRerecord = shell.getSecondState() == STATE.RECORDED;
+            // boolean isLL = shell.getSecondState() == STATE.ATTN_LL;
+            //boolean isRerecord = shell.getSecondState() == STATE.RECORDED;
 
-            boolean hasSecondState =  isRerecord;
+            // boolean hasSecondState =  isRerecord;
             boolean recorded = state == STATE.RECORDED;
             boolean approved = state == STATE.APPROVED || recorded;
 
@@ -251,13 +260,13 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
                     icon +
                     "'></i>" +
 
-                    "&nbsp;" : "") + columnText + (hasSecondState ?
+                    "&nbsp;" : "") + columnText + *//*(false ?
                 "&nbsp;<i " +
                    // (isLL ? "style='color:gold'" : "") +
                     " class='" +
                    // (isLL ? "icon-warning-sign" :
                         "icon-microphone" +
-                    "'></i>" : "");
+                    "'></i>" : *//*"";
 
           }
           return new SafeHtmlBuilder().appendHtmlConstant(html).toSafeHtml();
@@ -269,13 +278,13 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
         return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
       }
     };
-  }
+  }*/
 
-  private String truncate(String columnText) {
+ /* private String truncate(String columnText) {
     int lengthToUse = MAX_LENGTH_ID;
     if (columnText.length() > lengthToUse) columnText = columnText.substring(0, lengthToUse - 3) + TRUNCATED;
     return columnText;
-  }
+  }*/
 
   private String truncateFL(String columnText) {
     if (columnText.length() > FLLength) columnText = columnText.substring(0, FLLength - 3) + TRUNCATED;
@@ -286,6 +295,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
    * @return
    * @see #addFLColumn
    */
+/*
   private Column<T, SafeHtml> getFLColumn() {
     return new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
@@ -303,6 +313,7 @@ public abstract class PagingContainer<T extends CommonShell> extends ClickablePa
       }
     };
   }
+*/
 
   private boolean isClick(NativeEvent event) {
     return BrowserEvents.CLICK.equals(event.getType());

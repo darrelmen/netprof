@@ -44,7 +44,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -55,7 +55,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/28/2014.
  */
-public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize, IVisible {
+public abstract class FlexListLayout<T extends CommonShell, U extends HasID> implements RequiresResize, IVisible {
   private final Logger logger = Logger.getLogger("FlexListLayout");
 
   public PagingExerciseList<T, U> npfExerciseList;

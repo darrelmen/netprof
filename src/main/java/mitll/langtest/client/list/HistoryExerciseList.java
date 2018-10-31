@@ -42,10 +42,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 
 import java.util.Collection;
@@ -64,7 +61,7 @@ import java.util.logging.Logger;
  * Time: 3:21 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class HistoryExerciseList<T extends CommonShell, U extends Shell>
+public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID>
     extends PagingExerciseList<T, U>
     implements ValueChangeHandler<String> {
   private Logger logger = Logger.getLogger("HistoryExerciseList");

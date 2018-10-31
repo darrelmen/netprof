@@ -47,7 +47,6 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.STATE;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -277,7 +276,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
   protected void showRecordedState(HasID completedExercise) {
     int id = completedExercise.getID();
     // logger.info("showRecordedState setting state on " + id);
-    exerciseList.setState(id, STATE.RECORDED);
+    //exerciseList.setState(id, STATE.RECORDED);
     //L l = exerciseList.byID(id);
     //logger.info("after recording " +l.getState());
     LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));

@@ -35,7 +35,6 @@ package mitll.langtest.server.database.reviewed;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickReviewed;
 import mitll.npdata.dao.reviewed.ReviewedDAOWrapper;

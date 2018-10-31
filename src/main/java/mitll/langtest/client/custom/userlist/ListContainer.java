@@ -11,8 +11,8 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.custom.ContentView;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
@@ -186,7 +186,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   private Column<UserList<CommonShell>, SafeHtml> getNum() {
-    return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<UserList<CommonShell>, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -202,7 +202,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
 
   private Column<UserList<CommonShell>, SafeHtml> getDescription() {
-    return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<UserList<CommonShell>, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -222,7 +222,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   private Column<UserList<CommonShell>, SafeHtml> getListClass() {
-    return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<UserList<CommonShell>, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -237,7 +237,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   private Column<UserList<CommonShell>, SafeHtml> getOwner() {
-    return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<UserList<CommonShell>, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -252,7 +252,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   private Column<UserList<CommonShell>, SafeHtml> getPublic() {
-    return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<UserList<CommonShell>, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -267,7 +267,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   private Column<UserList<CommonShell>, SafeHtml> getQuiz() {
-    return new Column<UserList<CommonShell>, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<UserList<CommonShell>, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);

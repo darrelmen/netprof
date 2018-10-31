@@ -45,10 +45,12 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.view.client.*;
+import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.RangeChangeEvent;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.result.TableSortHelper;
 import mitll.langtest.client.scoring.WordTable;
@@ -350,7 +352,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   private Column<WordScore, SafeHtml> getDateColumn() {
-    return new Column<WordScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<WordScore, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, WordScore object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -426,7 +428,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
    * @see #addReview
    */
   private Column<WordScore, SafeHtml> getItemColumn() {
-    return new Column<WordScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<WordScore, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, WordScore object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);

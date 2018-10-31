@@ -47,9 +47,6 @@ public interface MutableExercise extends CommonShell, MutableShell {
 
   void setTransliteration(String transliteration);
 
-
-//  void setScores(List<CorrectAndScore> scoreTotal);
-
   void setRefSentences(Collection<String> orDefault);
 
   /**
@@ -59,8 +56,6 @@ public interface MutableExercise extends CommonShell, MutableShell {
   void setSafeToDecode(boolean isSafeToDecode);
 
   void addContextExercise(ClientExercise contextExercise);
-
-//  Collection<CommonExercise> getDirectlyRelated();
 
   void setOldID(String id);
 
@@ -87,5 +82,5 @@ public interface MutableExercise extends CommonShell, MutableShell {
 
   void setParentExerciseID(int parentExerciseID);
 
-  void setParentDominoID(int parentDominoID);
+//  void setParentDominoID(int parentDominoID);
 }
