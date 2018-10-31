@@ -359,14 +359,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
    * @param result
    * @see ExerciseList.SetExercisesCallback#onSuccess
    */
-  private void setScores(ExerciseListWrapper<T> result) {
-    Map<Integer, Float> idToScore = result.getIdToScore();
-    for (T ex : result.getExercises()) {
-      int id = ex.getID();
-      if (idToScore.containsKey(id)) {
-        ex.getMutableShell().setScore(idToScore.get(id));
-      }
-    }
+  protected void setScores(ExerciseListWrapper<T> result) {
   }
 
   /**

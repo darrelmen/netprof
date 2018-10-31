@@ -80,7 +80,7 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 
 public abstract class FacetExerciseList<T extends CommonShell & Scored, U extends CommonShell>
     extends HistoryExerciseList<T, U>
-    implements ShowEventListener {
+    implements ShowEventListener, ChoicesContainer {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final String RECORDED = "Recorded";
@@ -168,8 +168,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   private final Map<String, Boolean> typeToShowAll = new HashMap<>();
   private List<String> rootNodesInOrder = new ArrayList<>();
-  private final Map<Integer, String> idToListName = new HashMap<>();
-  private final Map<Integer, IUserList> idToList = new LinkedHashMap<>();
+  //  private final Map<Integer, String> idToListName = new HashMap<>();
+//  private final Map<Integer, IUserList> idToList = new LinkedHashMap<>();
   private int freqid = 0;
   private DivWidget sortBox;
   private DivWidget pageSizeContainer;
@@ -179,6 +179,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private final Map<Integer, U> fetched = new ConcurrentHashMap<>();
   protected final INavigation.VIEWS views;
   private final String pageSizeSelected;
+  private ListFacetHelper listFacetHelper;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -205,6 +206,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
 
+    this.listFacetHelper = getListFacetHelper(controller);
     secondRow.add(sectionPanel);
     setUnaccountedForVertical(0);
 
@@ -224,8 +226,13 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     // TODO : don't do it - will keep around reference to dead components.
     // so for instance if in TwoColumnExercisePanel there's an addList, removeList, newList
-    LangTest.EVENT_BUS.addHandler(ListChangedEvent.TYPE, authenticationEvent -> gotListChanged());
+    LangTest.EVENT_BUS.addHandler(ListChangedEvent.TYPE, authenticationEvent -> listFacetHelper.gotListChanged());
     LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost()));
+  }
+
+  @NotNull
+  protected ListFacetHelper getListFacetHelper(ExerciseController controller) {
+    return new ListFacetHelper(controller, getDynamicFacet(), getListType(), this, true);
   }
 
   @NotNull
@@ -623,7 +630,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       liForDimensionForType.add(addChoices(typeToValues, type));
     }
 
-    reallyAddListFacet(typeToValues, allTypesContainer);
+    listFacetHelper.reallyAddListFacet(typeToValues, allTypesContainer);
 
     ListItem widgets = addContentFacet();
     if (widgets != null) {
@@ -631,42 +638,44 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     }
   }
 
-  private void reallyAddListFacet(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
-    liForDimensionForList = addListFacet(typeToValues);
-    if (liForDimensionForList != null) {
-      allTypesContainer.add(liForDimensionForList);
-    }
-  }
-
-  private ListItem liForDimensionForList;
+//  private void reallyAddListFacet(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
+//    liForDimensionForList = addListFacet(typeToValues);
+//    if (liForDimensionForList != null) {
+//      allTypesContainer.add(liForDimensionForList);
+//    }
+//  }
+//
+//  private ListItem liForDimensionForList;
 
   /**
    * @see #FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, boolean, INavigation.VIEWS)
    */
-  private void gotListChanged() {
-    if (liForDimensionForList != null) {
-      populateListChoices(liForDimensionForList, null);
-    }
-  }
+//  private void gotListChanged() {
+//    if (liForDimensionForList != null) {
+//      populateListChoices(liForDimensionForList, null);
+//    }
+//  }
 
   /**
-   * @param typeToValues
+   * @paramx typeToValues
    * @return
    * @see #addFacetsForReal
    */
+/*
   protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
     ListItem liForDimensionForType = getTypeContainer(getDynamicFacet());
     populateListChoices(liForDimensionForType, typeToValues);
     return liForDimensionForType;
   }
+*/
 
   private ListItem addContentFacet() {
     String dynamicFacet = "Content";
     ListItem liForDimensionForType = getTypeContainer(dynamicFacet);
 
     Set<MatchInfo> value = new HashSet<>();
-    value.add(new MatchInfo("Entries", 1));
-    value.add(new MatchInfo("Sentences", 1));
+    value.add(new MatchInfo("Entries", numEx));
+    value.add(new MatchInfo("Sentences", numContext));
     Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
     typeToValues.put(dynamicFacet, value);
 
@@ -711,19 +720,37 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return exerciseListRequest;
   }
 
+  int numEx, numContext;
+
+  @Override
+  protected void setScores(ExerciseListWrapper<T> result) {
+    Map<Integer, Float> idToScore = result.getIdToScore();
+    numEx = 0;
+    numContext = 0;
+    for (T ex : result.getExercises()) {
+      int id = ex.getID();
+      if (idToScore.containsKey(id)) {
+        ex.getMutableShell().setScore(idToScore.get(id));
+      }
+      if (ex.isContext()) numContext++;
+      else numEx++;
+    }
+  }
+
+
   /**
    * Cheesy hack so we can deal with adding lists without reloading the whole facets
    */
-  private Map<String, Set<MatchInfo>> lastTypeToValues;
+ // private Map<String, Set<MatchInfo>> lastTypeToValues;
 
   /**
    * TODO: reverse this - get the lists first, then build the facets
    *
-   * @param liForDimensionForType
-   * @param typeToValues          - need to remember this and pass it through so later link clicks will have it
-   * @see #addListFacet
+   * @paramx liForDimensionForType
+   * @paramx typeToValues          - need to remember this and pass it through so later link clicks will have it
+   * @seex #addListFacet
    */
-  private void populateListChoices(ListItem liForDimensionForType, Map<String, Set<MatchInfo>> typeToValues) {
+/*  private void populateListChoices(ListItem liForDimensionForType, Map<String, Set<MatchInfo>> typeToValues) {
     if (typeToValues == null) {
       typeToValues = lastTypeToValues;
     } else {
@@ -749,13 +776,13 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         addListsAsLinks(result, finalTypeToValues, liForDimensionForType);
       }
     });
-  }
+  }*/
 
   protected UserList.LIST_TYPE getListType() {
     return UserList.LIST_TYPE.NORMAL;
   }
 
-  private void addListsAsLinks(Collection<IUserList> result,
+/*  private void addListsAsLinks(Collection<IUserList> result,
                                Map<String, Set<MatchInfo>> finalTypeToValues,
                                ListItem liForDimensionForType) {
     String dynamicFacet = getDynamicFacet();
@@ -767,13 +794,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     liForDimensionForType.add(favorites);
     //  logger.info("populateListChoices --- for " + result.size() + " lists ");
     liForDimensionForType.add(addChoices(finalTypeToValues, dynamicFacet));
-  }
+  }*/
 
   /**
-   * @param result
+   * @paramx result
    * @return
-   * @see #populateListChoices
+   * @seex #populateListChoices
    */
+/*
   @NotNull
   private Set<MatchInfo> getMatchInfoForEachList(Collection<IUserList> result) {
     Set<MatchInfo> value = new HashSet<>();
@@ -788,9 +816,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     }
     return value;
   }
+*/
 
+  @Override
   @NotNull
-  private ListItem getTypeContainer(String type) {
+  public ListItem getTypeContainer(String type) {
     if (type.isEmpty()) logger.warning("getTypeContainer huh? type is empty???");
     boolean hasSelection = typeToSelection.containsKey(type);
     ListItem liForDimensionForType = getLIDimension(hasSelection);
@@ -820,7 +850,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @return
    * @see #addFacetsForReal
    */
-  private Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type) {
+  @Override
+  public Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type) {
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
 
@@ -875,7 +906,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       boolean dynamicFacetInteger = isDynamicFacetInteger();
       if (dynamicFacetInteger) {
         int userListID = Integer.parseInt(selectionForType);
-        listName = idToListName.get(userListID);
+        listName = listFacetHelper.getListName(userListID);
       }
 
       if (listName != null) {
@@ -2293,7 +2324,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
   }
 
   protected Map<Integer, IUserList> getIdToList() {
-    return idToList;
+    return listFacetHelper.getIdToList();
   }
 
   public Map<String, String> getTypeToSelection() {
