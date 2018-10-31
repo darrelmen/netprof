@@ -179,6 +179,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    */
   private Widget getItemContent(final T e) {
     long then = System.currentTimeMillis();
+
     Panel card = new DivWidget();
     card.setWidth("100%");
 
@@ -245,7 +246,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    */
   @NotNull
   private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget, boolean hasEnglish) {
-    //  long then = System.currentTimeMillis();
     SimpleRecordAudioPanel<T> recordPanel =
         new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView);
 
@@ -380,7 +380,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   /**
    * @param e
    * @param card
-   * @paramx rowWidget
    * @see #getItemContent
    */
   private void addContext(T e, Panel card) {

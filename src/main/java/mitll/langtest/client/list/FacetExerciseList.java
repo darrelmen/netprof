@@ -104,7 +104,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
 
   private static final String ADDING_VISITOR = "adding visitor";
-  private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
+ // private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
   protected static final String GETTING_TYPE_VALUES = "getting type->values";
 
   /**
