@@ -66,8 +66,7 @@ description = 'NetProF pronunciation feedback'
 
 dependencies {
     // our modules
-//    def dominoVers = '2.7-SNAPSHOT'
-   def dominoVers = '2.7.5'
+    def dominoVers = '2.7.10'
 
    // compile(group: 'net.jthink', name: 'jaudiotagger', version: '2.2.6-20170905.193146-1')
 //    compile('mitll.hlt:domino-core:' + dcVers) { changing = true; }
@@ -77,6 +76,8 @@ dependencies {
         changing = true
         transitive = true
         artifact { name = 'domino'; type = 'jar'; extension='jar'}
+
+        exclude group: 'org.moxieapps.gwt', module: 'highcharts'
     }
 
     compile('mitll.hlt:npdata:1.0.0') { changing = true }

@@ -1,5 +1,6 @@
 package mitll.langtest.server.domino;
 
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.ExerciseServices;
@@ -90,6 +91,9 @@ public class ProjectSync implements IProjectSync {
    *
    * @param projectid
    * @param doChange
+   *
+   *
+   * @see DominoImport#getImportFromDomino
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
    * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
    */
@@ -295,7 +299,7 @@ public class ProjectSync implements IProjectSync {
                                    List<CommonExercise> importUpdateEx,
                                    Map<CommonExercise, Integer> importToKnownID) {
     dominoIDToChangedExercise.forEach((dominoID, importEx) -> {
-      logger.info("addPending import" +
+      logger.info("addChangedExercises import" +
           "\n\tcontext   " + importEx.isContext() +
           "\n\tdomino id " + dominoID +
           "\n\teng       " + importEx.getEnglish() +
@@ -308,7 +312,7 @@ public class ProjectSync implements IProjectSync {
       SlickExercise currentKnownExercise = dominoToNonContextEx.get(dominoID);
 
       if (currentKnownExercise == null) {  // how can this happen???
-        logger.warn("\n\n\naddPending found new CHANGED ex for domino id " + dominoID + //" / " + npID +
+        logger.warn("\n\n\naddChangedExercises found new CHANGED ex for domino id " + dominoID + //" / " + npID +
             " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
         //    newEx.add(importEx);
       } else {
@@ -319,16 +323,16 @@ public class ProjectSync implements IProjectSync {
           int id = currentKnownExercise.id();
 
           if (id == -1) {
-            logger.error("huh? no id on " + currentKnownExercise);
+            logger.error("addChangedExercises huh? no id on " + currentKnownExercise);
           } else {
-            logger.info("\tbefore " + id + "/" + importEx.getID() + "/" + importEx.getOldID() + " domino " + importEx.getDominoID());
+            logger.info("addChangedExercises : before " + id + "/" + importEx.getID() + "/" + importEx.getOldID() + " domino " + importEx.getDominoID());
             mutable.setID(currentKnownExercise.id());
             importToKnownID.put(importEx, id);
-            logger.info("\tafter  " + id + "/" + importEx.getID() + " domino " + importEx.getDominoID());
+            logger.info("addChangedExercises : after  " + id + "/" + importEx.getID() + " domino " + importEx.getDominoID());
           }
         } else { // impossible?
           newEx.add(importEx);
-          logger.warn("\n\n\n addPending 2 found new ex for domino id " + dominoID +// " / " + npID +
+          logger.warn("\n\n\n addChangedExercises 2 found new ex for domino id " + dominoID +// " / " + npID +
               " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
         }
       }
@@ -399,9 +403,9 @@ public class ProjectSync implements IProjectSync {
           "\n\tcontext : " + dominoIDToContextChangedExercise.keySet());
 
       // three piles:
-      // currentIDs exercises for the project that are not in the import should be deleted
-      // import exercises not in the currentIDs set are new and need to be added
-      // matching exercises need to be checked to see if they have changed
+      // 1) currentIDs exercises for the project that are not in the import should be deleted
+      // 2) import exercises not in the currentIDs set are new and need to be added
+      // 3) matching exercises need to be checked to see if they have changed
 
       importToKnownID.forEach((importEx, id) -> {
         logger.info("getNewAndChangedContextExercises " +
@@ -412,7 +416,6 @@ public class ProjectSync implements IProjectSync {
 
         CommonExercise currentParent = exerciseServices.getExercise(projectid, id);
 
-        //List<CommonExercise> importContext = importEx.getDirectlyRelated();
         int importCount = importEx.getDirectlyRelated().size();
         if (currentParent == null) {
           logger.info("getNewAndChangedContextExercises import  " + importEx.getID() + "/" + importEx.getDominoID() +
@@ -420,7 +423,7 @@ public class ProjectSync implements IProjectSync {
         } else {
           List<CommonExercise> currentContextOnParent = new ArrayList<>(currentParent.getDirectlyRelated());
 
-          logger.info("getNewAndChangedContextExercises current " + currentParent.getID() + " has " + currentContextOnParent.size());
+          logger.info("getNewAndChangedContextExercises current " + currentParent.getID() + " has " + currentContextOnParent.size() + " context sentences");
           logger.info("getNewAndChangedContextExercises import  " + importEx.getID() + "/" + importEx.getDominoID() + " has " + importCount + " context");
 
           // first figure out matching sentences, regardless of order
@@ -469,7 +472,7 @@ public class ProjectSync implements IProjectSync {
 
           Iterator<CommonExercise> changedOrNewIter = changedOrNew.iterator();
 
-          logger.info("comparing current num = " + currentContextOnParent.size() + " vs import changed or new " + changedOrNew.size());
+          logger.info("getNewAndChangedContextExercises comparing current num = " + currentContextOnParent.size() + " vs import changed or new " + changedOrNew.size());
 
           // go one-by-one comparing them
           while (currentSentences.hasNext() && changedOrNewIter.hasNext()) {
@@ -477,10 +480,13 @@ public class ProjectSync implements IProjectSync {
             CommonExercise importSentence = changedOrNewIter.next();
 
             if (didChange(importSentence, currentSentence)) {   // how can this be false?
-              logger.info("\tchanged for       " + currentSentence);
-              logger.info("\tchanged import is " + importSentence);
+              logger.info("\tgetNewAndChangedContextExercises changed for       " + currentSentence);
+              logger.info("\tgetNewAndChangedContextExercises changed import is " + importSentence);
               updateItems.add(getChanged(currentSentence, importSentence));
               rememberExID(importUpdateEx, importSentence, currentSentence.getID());
+            }
+            else {
+              logger.info("\tgetNewAndChangedContextExercises NO CHANGE for changed import " + importSentence);
             }
           }
 
@@ -1259,6 +1265,7 @@ public class ProjectSync implements IProjectSync {
 
     logger.info("doUpdate for project " + projectid +
         "\n\tupdate num " + updateEx.size() +
+        "\n\ttypeOrder  " + typeOrder +
         "\n\tfound      " + allByProject.values().size() + " attributes" +
         "\n\tprops      " + propToValueToAttr.keySet() +
         "\n\tdoUpdate for project " + projectid + " values " + propToValueToAttr.values());
@@ -1333,6 +1340,7 @@ public class ProjectSync implements IProjectSync {
       Set<Integer> attributeIDsOnExercise = updateAttributes
           .stream()
           .map(attrToID::get)
+          .filter(Objects::nonNull)
           .collect(Collectors.toCollection(HashSet::new));
       if (DEBUG)
         logger.info("doUpdate updateAttributes attr ids " + attributeIDsOnExercise + " for " + updateExerciseID);
@@ -1404,9 +1412,28 @@ public class ProjectSync implements IProjectSync {
     return exerciseAttribute.getProperty().toLowerCase().replaceAll("-", "");
   }
 
+  /**
+   * Try to ignore case on unit and chapter
+   *
+   * @see #doUpdate
+   * @param currentExercise
+   * @param toUpdate
+   * @param first
+   * @param second
+   * @return
+   */
   private boolean changed(SlickExercise currentExercise, CommonExercise toUpdate, String first, String second) {
-    String currentUnit = toUpdate.getUnitToValue().get(first);
-    String currentChapter = toUpdate.getUnitToValue().get(second);
+    Map<String, String> unitToValue = toUpdate.getUnitToValue();
+    String currentUnit = unitToValue.get(first);
+    if (currentUnit == null) {
+      logger.info("changed : unit for '" + first + "' is missing on " + toUpdate.getID() + " in " + unitToValue.keySet());
+      currentUnit = getUnitValueIgnoreCase(first, unitToValue);
+    }
+    String currentChapter = unitToValue.get(second);
+    if (currentChapter == null) {
+      logger.info("changed : chapter for '" + second + "' is missing on " + toUpdate.getID() + " in " + unitToValue.keySet());
+      currentChapter = getUnitValueIgnoreCase(second, unitToValue);
+    }
 
     return
         !currentExercise.english().equals(toUpdate.getEnglish()) ||
@@ -1417,6 +1444,18 @@ public class ProjectSync implements IProjectSync {
             (currentUnit != null && !currentExercise.unit().equals(currentUnit)) ||
             (currentChapter != null && !currentExercise.lesson().equals(currentChapter))
         ;
+  }
+
+  private String getUnitValueIgnoreCase(String first, Map<String, String> unitToValue) {
+    String currentUnit = null;
+    String anotherString = first.toLowerCase();
+    for (Map.Entry<String, String> pair: unitToValue.entrySet()) {
+      if (pair.getKey().toLowerCase().equalsIgnoreCase(anotherString)) {
+        currentUnit = pair.getValue();
+        break;
+      }
+    }
+    return currentUnit;
   }
 
   private void addRemoveJoins(List<SlickExerciseAttributeJoin> removeJoins, Collection<SlickExerciseAttributeJoin> currentAttributesOnThisExercise, Set<Integer> currentSet) {
