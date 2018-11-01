@@ -101,15 +101,16 @@ public class AudioFileHelper implements AlignDecode {
    */
   private static final String TEST_USER = "demo_";
   private static final String TEST_PASSWORD = "domino22";//"demo";
- // public static final long DAY = 24 * 60 * 60 * 1000L;
+  // public static final long DAY = 24 * 60 * 60 * 1000L;
   private static final String COOKIE = "Cookie";
+  public static final String SCORE_SERVLET = "scoreServlet";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
   private final MP3Support mp3Support;
   private final Project project;
   private ASR asrScoring;
-//  private ASRWebserviceScoring webserviceScoring;
+  //  private ASRWebserviceScoring webserviceScoring;
   private DecodeCorrectnessChecker decodeCorrectnessChecker;
 
   private AutoCRT autoCRT;
@@ -158,10 +159,10 @@ public class AudioFileHelper implements AlignDecode {
     this.language = project.getLanguageEnum();
     removeAccents = language != Language.FRENCH;
     //hasModel = project.hasModel();
-   // makeASRScoring(project);
+    // makeASRScoring(project);
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
 
-  //  makeDecodeCorrectnessChecker();
+    //  makeDecodeCorrectnessChecker();
   }
 
   /**
@@ -1240,20 +1241,19 @@ public class AudioFileHelper implements AlignDecode {
     if (session == null) {
       session = getSession(hydraHost, project.getID());
     }
-    ScoreServlet.PostRequest requestToServer = ScoreServlet.PostRequest.ALIGN;
-
-    HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, requestToServer);
+    HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, ScoreServlet.PostRequest.ALIGN);
 
     if (session != null) {
-//      logger.info("getProxyScore adding session " + session);
+      logger.info("getProxyScore adding session " + session);
       httpClient.addRequestProperty(COOKIE, session);
     }
 
     try {
       logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to " +
-          requestToServer +
-          "\n\teng '" + english + "'" +
-          "\n\tfl  '" + foreignLanguage + "'" +
+          ScoreServlet.PostRequest.ALIGN +
+          "\n\teng     '" + english + "'" +
+          "\n\tsession '" + session + "'" +
+          "\n\tfl      '" + foreignLanguage + "'" +
           (language == Language.JAPANESE ? "\n\tsegmented '" + getSegmented(foreignLanguage) + "'" : "")
       );
 
@@ -1302,11 +1302,14 @@ public class AudioFileHelper implements AlignDecode {
 
   @NotNull
   private HTTPClient getHttpClient(String hydraHost, String actualHydraHost) {
-    String url = hydraHost + "scoreServlet";
+    String url = hydraHost + SCORE_SERVLET;
     if (!actualHydraHost.isEmpty()) url += File.separator + actualHydraHost;
     return new HTTPClient(url);
   }
 
+  /**
+   *
+   */
   private String session = null;
 
   /**
@@ -1329,7 +1332,7 @@ public class AudioFileHelper implements AlignDecode {
       httpClient.addRequestProperty(PASS.toString(), TEST_PASSWORD);
       String json = httpClient.sendAndReceiveCookie("");
 
-//      logger.info("getSession response " + json);
+      logger.info("getSession response " + json);
 
       return json;
     } catch (IOException e) {
@@ -1654,7 +1657,7 @@ public class AudioFileHelper implements AlignDecode {
           project);
     }
 
-  //  asrScoring = webserviceScoring;
+    //  asrScoring = webserviceScoring;
   }
 
   /**
@@ -1776,6 +1779,7 @@ public class AudioFileHelper implements AlignDecode {
   private void makeDecodeCorrectnessChecker() {
     decodeCorrectnessChecker = new DecodeCorrectnessChecker(this, serverProps.getMinPronScore(), getSmallVocabDecoder());
   }
+
   /**
    * If a language is in development and has no model, there will be no dictionary...?
    *

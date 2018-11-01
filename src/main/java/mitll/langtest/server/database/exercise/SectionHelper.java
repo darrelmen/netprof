@@ -100,7 +100,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private Set<String> rootTypes = new HashSet<>();
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_TYPE_ORDER = false;
   private static final boolean DEBUG_OR_MERGE = false;
 

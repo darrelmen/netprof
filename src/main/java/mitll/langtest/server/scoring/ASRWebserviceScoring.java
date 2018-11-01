@@ -96,7 +96,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   public static final boolean DEBUG = false;
   public static final String WAV = ".wav";
   public static final int MSA_PORT = 5000;
-  // public static final String SUCCESS = "SUCCESS";
 
   private final SLFFile slfFile = new SLFFile();
 

@@ -629,42 +629,20 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     listFacetHelper.reallyAddListFacet(typeToValues, allTypesContainer);
 
-    ListItem widgets = addContentFacet();
+    addContentFacet(allTypesContainer);
+  }
+
+  /**
+   * Only for practice view
+   * @param allTypesContainer
+   */
+  protected void addContentFacet(UnorderedList allTypesContainer) {
+
+   /* ListItem widgets = addContentFacet();
     if (widgets != null) {
       allTypesContainer.add(widgets);
-    }
+    }*/
   }
-
-//  private void reallyAddListFacet(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
-//    liForDimensionForList = addListFacet(typeToValues);
-//    if (liForDimensionForList != null) {
-//      allTypesContainer.add(liForDimensionForList);
-//    }
-//  }
-//
-//  private ListItem liForDimensionForList;
-
-  /**
-   * @see #FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, boolean, INavigation.VIEWS)
-   */
-//  private void gotListChanged() {
-//    if (liForDimensionForList != null) {
-//      populateListChoices(liForDimensionForList, null);
-//    }
-//  }
-
-  /**
-   * @paramx typeToValues
-   * @return
-   * @see #addFacetsForReal
-   */
-/*
-  protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
-    ListItem liForDimensionForType = getTypeContainer(getDynamicFacet());
-    populateListChoices(liForDimensionForType, typeToValues);
-    return liForDimensionForType;
-  }
-*/
 
   private ListItem addContentFacet() {
     String dynamicFacet = "Content";

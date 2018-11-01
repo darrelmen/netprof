@@ -183,45 +183,36 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     Panel card = new DivWidget();
     card.setWidth("100%");
 
-    boolean isEnglish = isEnglish();
-    boolean useMeaningInsteadOfEnglish = isEnglish && isMeaningValid(e);
-    String english = useMeaningInsteadOfEnglish ? e.getMeaning() : e.getEnglish();
+    String english = isEnglish() && isMeaningValid(e) ? e.getMeaning() : e.getEnglish();
 
-    DivWidget rowWidget = getRowWidget();
-    //rowWidget.getElement().setId("firstRow");
+    SimpleRecordAudioPanel<T> recordPanel =
+        new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView);
 
-    boolean hasEnglish = isValid(english);
-    Widget recordPanel = makeFirstRow(e, rowWidget, hasEnglish);
-    // logger.info("safe " + e.getID() + " " + e.isSafeToDecode());
-    // if (HIDE_UNSAFE) recordPanel.setVisible(e.isSafeToDecode());
-    card.add(rowWidget);
-
-    //long now = System.currentTimeMillis();
-    //  logger.info("getItemContent for " + e.getID() + " took " + (now - then) + " to add first row");
-
+    // add the first row
     {
-      DivWidget lr = getHorizDiv();
-      addFloatLeft(lr);
-      lr.setWidth(hasEnglish ? RIGHT_WIDTH : RIGHT_WIDTH_NO_ENGLISH);
-      if (hasEnglish) {
-        lr.getElement().getStyle().setProperty("minWidth", "345px");
+      DivWidget rowWidget = getRowWidget();
+      rowWidget.getElement().setId("firstRow");
+      card.add(rowWidget);
+
+      boolean hasEnglish = isValid(english);
+      {
+        DivWidget flContainer = makeFirstRow(e, recordPanel);
+        flContainer.setWidth(hasEnglish ? LEFT_WIDTH : LEFT_WIDTH_NO_ENGLISH);
+        rowWidget.add(flContainer);
       }
-      if (hasEnglish) lr.add(getEnglishWidget(e, english));
-      lr.add(getItemWidget(e));
 
-      DivWidget dropC = new DivWidget();
-      dropC.add(itemMenu.getDropdown());
-      lr.add(dropC);
+      //long now = System.currentTimeMillis();
+      //  logger.info("getItemContent for " + e.getID() + " took " + (now - then) + " to add first row");
 
-      rowWidget.add(lr);
+      rowWidget.add(getUnitChapterAndDropdown(e, english, hasEnglish));
     }
 
-    rowWidget = getRowWidget();
-    card.add(rowWidget);
+    // second row shows score and history for item
+    {
+      card.add(getScoringRow(recordPanel));
+    }
 
-    //rowWidget.getElement().setId("scoringRow");
-    rowWidget.add(recordPanel);
-
+    // finally, third row, has context
     if (e.hasContext()) {
       addContext(e, card);
     }
@@ -233,96 +224,136 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return card;
   }
 
+  @NotNull
+  private DivWidget getScoringRow(Widget recordPanel) {
+    DivWidget rowWidget = getRowWidget();
+    rowWidget.getElement().setId("scoringRow");
+    rowWidget.add(recordPanel);
+    return rowWidget;
+  }
+
+  @NotNull
+  private DivWidget getUnitChapterAndDropdown(T e, String english, boolean hasEnglish) {
+    DivWidget lr = getHorizDiv();
+    addFloatLeft(lr);
+    lr.setWidth(hasEnglish ? RIGHT_WIDTH : RIGHT_WIDTH_NO_ENGLISH);
+
+    if (hasEnglish) {
+      lr.getElement().getStyle().setProperty("minWidth", "345px");
+      lr.add(getEnglishWidget(e, english));
+    }
+
+    lr.add(getItemWidget(e));
+
+    {
+      DivWidget dropC = new DivWidget();
+      dropC.add(itemMenu.getDropdown());
+      lr.add(dropC);
+    }
+    return lr;
+  }
+
   private boolean isEnglish() {
     return controller.getLanguage().equalsIgnoreCase("english");
   }
 
 
   /**
+   * Left to right, in the first row, we have the record button, the play audio widget, and the fl text
+   *
    * @param e
-   * @param rowWidget
    * @return
+   * @paramx rowWidget
    * @see #getItemContent
    */
   @NotNull
-  private SimpleRecordAudioPanel<T> makeFirstRow(T e, DivWidget rowWidget, boolean hasEnglish) {
-    SimpleRecordAudioPanel<T> recordPanel =
-        new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView);
-
+  private DivWidget makeFirstRow(T e, SimpleRecordAudioPanel<T> recordPanel) {
     DivWidget flContainer = getHorizDiv();
 
-    {
-      DivWidget recordButtonContainer = new DivWidget();
-      recordButtonContainer.addStyleName("recordingRowStyle");
-      recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
-      flContainer.add(recordButtonContainer);
+    { // #1 : add record button
+      flContainer.add(getRecordButtonContainer(recordPanel));
+
+      //long now = System.currentTimeMillis();
+      //  logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec");
+
+      // #2 : add play audio button
+      makePlayAudio(e, flContainer);
     }
 
-    //long now = System.currentTimeMillis();
-    //  logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec");
+    {
+      DivWidget fieldContainer = new DivWidget();
+      fieldContainer.setWidth("100%");
+      fieldContainer.getElement().setId("leftSideFieldContainer");
 
-    makePlayAudio(e, flContainer);
-
-    DivWidget fieldContainer = new DivWidget();
-    fieldContainer.setWidth("100%");
-    fieldContainer.getElement().setId("leftSideFieldContainer");
-
-    String trim = getAltFL(e).trim();
+      String trimmedAltFL = getAltFL(e).trim();
 
 //    long now = System.currentTimeMillis();
-    // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec and play");
+      // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec and play");
 
-    if (showFL || getFL(e).trim().equals(trim) || trim.isEmpty()) {
-      fieldContainer.add(getFLEntry(e));
-      fieldContainer.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
-      flClickableRowPhones.getElement().setId("flClickableRowPhones");
-      stylePhoneRow(flClickableRowPhones);
+      // add FL row
+      if (showFL || getFL(e).trim().equals(trimmedAltFL) || trimmedAltFL.isEmpty()) {
+        fieldContainer.add(getFLEntry(e));
+        fieldContainer.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
+        flClickableRowPhones.getElement().setId("flClickableRowPhones");
+        stylePhoneRow(flClickableRowPhones);
 
-      if (playAudio != null && playAudio.getCurrentAudioAttr() != null) {
-        AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
+        if (playAudio != null && playAudio.getCurrentAudioAttr() != null) {
+          AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
 
-        if (DEBUG) logger.info("audioChangedWithAlignment audio " + currentAudioAttr.getUniqueID());
+          if (DEBUG) logger.info("audioChangedWithAlignment audio " + currentAudioAttr.getUniqueID());
 
-        audioChangedWithAlignment(
-            currentAudioAttr.getUniqueID(),
-            currentAudioAttr.getDurationInMillis(),
-            currentAudioAttr.getAlignmentOutput());
+          audioChangedWithAlignment(
+              currentAudioAttr.getUniqueID(),
+              currentAudioAttr.getDurationInMillis(),
+              currentAudioAttr.getAlignmentOutput());
+        }
       }
-    }
 
 //    now = System.currentTimeMillis();
-    // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to fl row");
+      // logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to fl row");
 
-    if (showALTFL) {
-      addField(fieldContainer, addAltFL(e, showFL));
-      altFLClickableRowPhones = clickableWords.getClickableDiv(isRTL);
-      altFLClickableRowPhones.getElement().setId("altFLClickableRowPhones");
-      stylePhoneRow(altFLClickableRowPhones);
+      // add alt fl
+      if (showALTFL) {
+        addField(fieldContainer, addAltFL(e, showFL));
+        altFLClickableRowPhones = clickableWords.getClickableDiv(isRTL);
+        altFLClickableRowPhones.getElement().setId("altFLClickableRowPhones");
+        stylePhoneRow(altFLClickableRowPhones);
 
-      addField(fieldContainer, altFLClickableRowPhones);
+        addField(fieldContainer, altFLClickableRowPhones);
+      }
+
+      // add translit
+      addField(fieldContainer, addTransliteration(e));
+
+      // add meaning
+      {
+        boolean meaningValid = isMeaningValid(e);
+        boolean useMeaningInsteadOfEnglish = meaningValid && isEnglish();
+
+        if (!useMeaningInsteadOfEnglish && meaningValid) {
+          Widget meaningWidget =
+              getEntry(e,
+                  QCNPFExercise.MEANING,
+                  e.getMeaning(),
+                  FieldType.MEANING,
+                  showInitially,
+                  new ArrayList<>(), true, annotationHelper, false);
+          addField(fieldContainer, meaningWidget);
+        }
+      }
+
+      flContainer.add(fieldContainer);
     }
 
-    addField(fieldContainer, addTransliteration(e));
+    return flContainer;
+  }
 
-    boolean meaningValid = isMeaningValid(e);
-    boolean useMeaningInsteadOfEnglish = meaningValid && isEnglish();
-
-    if (!useMeaningInsteadOfEnglish && meaningValid) {
-      Widget meaningWidget =
-          getEntry(e,
-              QCNPFExercise.MEANING,
-              e.getMeaning(),
-              FieldType.MEANING,
-              showInitially,
-              new ArrayList<>(), true, annotationHelper, false);
-      addField(fieldContainer, meaningWidget);
-    }
-
-    flContainer.add(fieldContainer);
-    flContainer.setWidth(hasEnglish ? LEFT_WIDTH : LEFT_WIDTH_NO_ENGLISH);
-
-    rowWidget.add(flContainer);
-    return recordPanel;
+  @NotNull
+  private DivWidget getRecordButtonContainer(SimpleRecordAudioPanel<?> recordPanel) {
+    DivWidget recordButtonContainer = new DivWidget();
+    recordButtonContainer.addStyleName("recordingRowStyle");
+    recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
+    return recordButtonContainer;
   }
 
   protected void makePlayAudio(T e, DivWidget flContainer) {
@@ -383,34 +414,37 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @see #getItemContent
    */
   private void addContext(T e, Panel card) {
-    //  int c = 0;
     String foreignLanguage = getFL(e);
     String altFL = getAltFL(e);
     Collection<ClientExercise> directlyRelated = e.getDirectlyRelated();
     for (ClientExercise contextEx : directlyRelated) {
       DivWidget rowWidget = getRowWidget();
       card.add(rowWidget);
-      addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
-/*
-      c++;
-      if (c < directlyRelated.size()) {
-        card.add(rowWidget = getRowWidget());
-      }*/
+      SimpleRecordAudioPanel<ClientExercise> recordPanel = addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
+      if (recordPanel != null) {
+        card.add(getScoringRow(recordPanel));
+      }
     }
   }
 
   /**
+   * Left - right row - on left we have the context sentence, on right, the translation
+   *
    * @param rowWidget
    * @param foreignLanguage
    * @param altFL
    * @param contextEx
    */
-  private void addContextFields(DivWidget rowWidget,
-                                String foreignLanguage,
-                                String altFL,
-                                ClientExercise contextEx) {
+  private SimpleRecordAudioPanel<ClientExercise> addContextFields(DivWidget rowWidget,
+                                                                  String foreignLanguage,
+                                                                  String altFL,
+                                                                  ClientExercise contextEx) {
+
+
     AnnotationHelper annotationHelper = new AnnotationHelper(controller, controller.getMessageHelper());
-    Panel context = getContext(contextEx, foreignLanguage, altFL, annotationHelper);
+    SimpleRecordAudioPanel<ClientExercise> recordPanel =
+        new SimpleRecordAudioPanel<>(controller, contextEx, listContainer, addPlayer, listenView);
+    Panel context = getContext(contextEx, foreignLanguage, altFL, annotationHelper, getRecordButtonContainer(recordPanel));
     if (context != null) {
       rowWidget.add(context);
       context.setWidth("100%");
@@ -435,6 +469,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         }
       }
     }
+
+    return (context != null) ? recordPanel : null;
   }
 
   private Widget getAltContext(String flToHighlight, String altFL, AnnotationHelper annotationHelper, int exid) {
@@ -457,6 +493,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   /**
+   * Has mouse over showing details about the item.
+   *
    * @param e
    * @return
    */
@@ -478,7 +516,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     englishWidget.addStyleName("rightsidecolor");
     englishWidget.getElement().setId("englishWidget");
     englishWidget.addStyleName("floatLeft");
-    englishWidget.addStyleName("leftFiveMargin");
+
+    // englishWidget.addStyleName("leftFiveMargin");
     // englishWidget.setWidth("90%");
     return englishWidget;
   }
@@ -565,16 +604,19 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private Panel getContext(ClientExercise contextExercise,
                            String itemText,
                            String altFL,
-                           AnnotationHelper annotationHelper) {
+                           AnnotationHelper annotationHelper,
+                           Widget recordWidget) {
     String context = getFL(contextExercise);
 
     if (!context.isEmpty()) {
       Panel hp = new DivWidget();
       {
         hp.addStyleName("inlineFlex");
-        hp.addStyleName("leftFiveMargin");
+//        hp.addStyleName("leftFiveMargin");
         hp.getElement().setId("contentContainer");
-        hp.add(getSpacer());
+
+        hp.add(recordWidget);
+        //hp.add(getSpacer());
       }
       ChoicePlayAudioPanel contextPlay = getContextPlay(contextExercise);
       hp.add(contextPlay);
@@ -711,6 +753,12 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return phonesChoices == SHOW;
   }
 
+  /**
+   * @param e
+   * @param contextTranslation
+   * @param annotationHelper
+   * @return null if there isn't any context translation
+   */
   private Widget addContextTranslation(AnnotationExercise e,
                                        String contextTranslation,
                                        AnnotationHelper annotationHelper) {
