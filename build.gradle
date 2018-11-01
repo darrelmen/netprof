@@ -51,9 +51,8 @@ repositories {
         dirs 'libs'
     }
 
-    maven { url "http://central.maven.org/maven2/" }
+//    maven { url "http://central.maven.org/maven2/" }
 
-    maven { url "${artifactory_contextUrl}/ext-snapshot-local" }
 
     ivy {
         url "${artifactory_contextUrl}/domino"
@@ -72,6 +71,17 @@ repositories {
         }
         layout('ivy')
     }
+
+    ivy {
+        url "${artifactory_contextUrl}/ivy-libs-release-dli"
+        credentials {
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+        }
+        layout('ivy')
+    }
+
+    maven { url "${artifactory_contextUrl}/ext-snapshot-local" }
 }
 
 description = 'NetProF pronunciation feedback'
@@ -79,10 +89,6 @@ description = 'NetProF pronunciation feedback'
 dependencies {
     // our modules
     def dominoVers = '2.7.10'
-
-    // compile(group: 'net.jthink', name: 'jaudiotagger', version: '2.2.6-20170905.193146-1')
-//    compile('mitll.hlt:domino-core:' + dcVers) { changing = true; }
-    //compile('mitll.hlt:domino:' + dominoVers) { changing = true; }
 
     compile('mitll.hlt:domino:' + dominoVers) {
         changing = true
@@ -92,7 +98,8 @@ dependencies {
         exclude group: 'org.moxieapps.gwt', module: 'highcharts'
     }
 
-    compile('mitll.hlt:npdata:1.0.0') { changing = true }
+    // super special location for npdata that's on the branch
+    compile('mitll.hlt:npdata-22:1.0.0-topicNetprof22') { changing = true }
 
     compile group: 'com.github.rwl', name: 'jtransforms', version: 'latest.release'
 
