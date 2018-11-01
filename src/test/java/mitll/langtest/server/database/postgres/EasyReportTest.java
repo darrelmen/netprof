@@ -85,6 +85,20 @@ public class EasyReportTest extends BaseTest {
   }
 
   @Test
+  public void testGerman() {
+    DatabaseImpl english = getDatabase();
+    int projectid = 10;
+    Project project = english.getProject(projectid);
+
+    FilterRequest request = new FilterRequest();
+    project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+
+
+    FilterResponse typeToValues = english.getTypeToValues(request, projectid, 6);
+    logger.info("Got " + typeToValues);
+  }
+
+  @Test
   public void testSimpleRec() {
     DatabaseImpl english = getDatabase();
     english.getProject(4);
@@ -99,7 +113,6 @@ public class EasyReportTest extends BaseTest {
       {
         FilterRequest request = new FilterRequest().setRecordRequest(true);
         project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
-        /*FilterResponse typeToValues =*/
         db.getTypeToValues(request, project.getID(), 6);
       }
 

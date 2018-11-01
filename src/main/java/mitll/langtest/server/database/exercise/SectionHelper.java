@@ -328,8 +328,9 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     if (debug) {
       logger.info("getTypeToMatchPairs typeToMatches    " + typeToMatches);
     }
+//    typeToMatches = filterOutBlanks(typeToMatches);
 
-    return typeToMatches;
+    return filterOutBlanks(typeToMatches);
   }
 
   /**
@@ -1227,19 +1228,26 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     }
   }
 
+  /**
+   * Remove blanks
+   * @param typeToMatches
+   * @return
+   */
   @NotNull
   private Map<String, Set<MatchInfo>> filterOutBlanks(Map<String, Set<MatchInfo>> typeToMatches) {
     Map<String, Set<MatchInfo>> typeToMatchesFiltered = new HashMap<>();
 
     typeToMatches.forEach((k, v) -> {
       if (k.equals(BLANK)) {
-        logger.warn("\n\nfilterOutBlanks drop " +k+"-"+v);
+        logger.warn("\n\nfilterOutBlanks drop " + k + "-" + v);
       } else {
-        Set<MatchInfo> filtered = v.stream().filter(matchInfo -> !matchInfo.getValue().equals(BLANK)).collect(Collectors.toSet());
+        Set<MatchInfo> filtered = new LinkedHashSet<>();
+        v.stream()
+            .filter(matchInfo -> !matchInfo.getValue().equals(BLANK))
+            .forEach(filtered::add);
         if (filtered.isEmpty()) {
-          logger.info("\n\nfilterOutBlanks drop empty type" +k+"-"+v);
-        }
-        else {
+          logger.info("\n\nfilterOutBlanks drop empty type" + k + "-" + v);
+        } else {
           typeToMatchesFiltered.put(k, filtered);
         }
       }
