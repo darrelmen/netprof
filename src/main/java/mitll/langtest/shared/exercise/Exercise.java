@@ -80,7 +80,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private boolean isOverride;
 
 
-
   /**
    * TODO : why do we need to carry this around?
    */
@@ -276,7 +275,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
- //   setState(exercise.getState());
+    //   setState(exercise.getState());
     //setSecondState(exercise.getSecondState());
 
     setAttributes(exercise.getAttributes());
@@ -512,47 +511,18 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return unitToValue;
   }
 
-  public String toString() {
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
-
-    // warn about attr that have no user
-    StringBuilder builder = new StringBuilder();
-    for (AudioAttribute attr : audioAttributes1) {
-      if (attr.getUser() == null) {
-        builder.append("\t").append(attr.toString()).append("\n");
-      }
-    }
-
-    return "Exercise #" +
-
-        getID() +
-        ", domino # " + getDominoID() +
-        " np id '" + getOldID() + "'" +
-        " context index " + dominoContextIndex +
-        " project " + projectid +
-
-        (shouldSwap() ? "\n\tshouldSwap = " + shouldSwap() : "") +
-
-        "'" + getEnglish() +
-        "'/'" + getForeignLanguage() + "' " +
-        (getAltFL().isEmpty() ? "" : getAltFL()) +
-        "meaning '" + getMeaning() +
-        "' transliteration '" + getTransliteration() +
-        "' context " + getDirectlyRelated() +
-        " audio childCount = " + audioAttributes1.size() +
-        (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
-        " unit->lesson " + getUnitToValue() +
-        " attr " + getAttributes();
-  }
-
   /**
    * @param unit
    * @param value
    * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    */
-  public void addUnitToValue(String unit, String value) {
-    if (value == null) return;
-    unitToValue.put(unit, value);
+  public boolean addUnitToValue(String unit, String value) {
+    if (value == null) {
+      return false;
+    } else {
+      unitToValue.put(unit, value);
+      return true;
+    }
   }
 
   public void addPair(Pair pair) {
@@ -597,7 +567,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
 
-
   @Override
   public int getParentExerciseID() {
     return parentExerciseID;
@@ -634,6 +603,39 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   public void setDominoContextIndex(int dominoContextIndex) {
     this.dominoContextIndex = dominoContextIndex;
+  }
+
+  public String toString() {
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+
+    // warn about attr that have no user
+    StringBuilder builder = new StringBuilder();
+    for (AudioAttribute attr : audioAttributes1) {
+      if (attr.getUser() == null) {
+        builder.append("\t").append(attr.toString()).append("\n");
+      }
+    }
+
+    return "Exercise #" +
+
+        getID() +
+        ", domino # " + getDominoID() +
+        " np id '" + getOldID() + "'" +
+        " context index " + dominoContextIndex +
+        " project " + projectid +
+
+        (shouldSwap() ? "\n\tshouldSwap = " + shouldSwap() : "") +
+
+        "'" + getEnglish() +
+        "'/'" + getForeignLanguage() + "' " +
+        (getAltFL().isEmpty() ? "" : getAltFL()) +
+        "meaning '" + getMeaning() +
+        "' transliteration '" + getTransliteration() +
+        "' context " + getDirectlyRelated() +
+        " audio childCount = " + audioAttributes1.size() +
+        (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
+        " unit->lesson " + getUnitToValue() +
+        " attr " + getAttributes();
   }
 
 }

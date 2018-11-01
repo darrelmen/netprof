@@ -206,9 +206,10 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
    * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    */
 
-  public void addUnitToValue(String unit, String value) {
-    if (value == null) return;
+  public boolean addUnitToValue(String unit, String value) {
+    if (value == null) return false;
     this.getUnitToValue().put(unit, value);
+    return true;
   }
 
   @Override

@@ -68,7 +68,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final String NEW_USER_EXERCISE = "NEW_USER_EXERCISE";
   private static final String UNKNOWN = "UNKNOWN";
   private static final String ANY = "Any";
-  private static final String DEFAULT_FOR_EMPTY = ANY;
   private static final String HYDRA = "hydra";
   private static final int DEFAULT_PROJECT = 1;
   private static final boolean WARN_ABOUT_MISSING_PHONES = false;
@@ -80,8 +79,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    *
    * @see SlickUserExerciseDAO#addPhoneInfo
    */
-//  private static final String BLANK = "Blank";
-  private static final String UNIT = "Unit";
 
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
@@ -92,7 +89,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
   private final IUserDAO userDAO;
   private final IRefResultDAO refResultDAO;
-  //public static final boolean ADD_PHONE_LENGTH = false;
   private SlickExercise unknownExercise;
   private final boolean hasMediaDir;
   private final String hostName;
@@ -334,9 +330,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   private final Timestamp never = new Timestamp(0);
-
-//  private final VocabFactory factory = new VocabFactory();
-
 
   /**
    * @param slick
@@ -625,17 +618,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       exercisePhoneInfo = new ExercisePhoneInfo();
       exercisePhoneInfo.setNumPhones(numphones);
     }
-    /*
-    if (slick.english().equals("address")) {
-      logger.info("ex " + slick);
-      logger.info("ex " + foreignlanguage);
-      logger.info("pronunciations " + pronunciations);
-      logger.info("exercisePhoneInfo " + exercisePhoneInfo);
-    }*/
 
     return exercisePhoneInfo;
   }
-  //private int spew = 0;
 
   /**
    * Adds exercise attributes to type hierarchy for facets.
@@ -654,55 +639,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     List<Pair> pairs = getUnitToValue(slick, baseTypeOrder, sectionHelper);
 
     if (slick.ispredef() && !slick.iscontext()) {
-      //addPairsToSectionHelper(sectionHelper, exercise, attrTypes, pairs);
       sectionHelper.addPairs(exercise, exercise, attrTypes, pairs);
     } else {
       exercise.setPairs(pairs);
     }
     return pairs;
   }
-
- /* private void addPairsToSectionHelper(ISection<CommonExercise> sectionHelper,
-                                       CommonExercise exercise,
-                                       Collection<String> attrTypes,
-                                       List<Pair> pairs) {
-    if (exercise.getAttributes() == null) {
-      if (spew++ < 10) {
-        logger.warn("addPhoneInfo : no exercise attributes for " + exercise.getID());
-      }
-    } else {
-      addBlanksForMissingInfo(exercise, attrTypes, pairs);
-    }
-
-    // logger.info("pairs for " + exercise.getID() + " " + exercise.getOldID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
-    sectionHelper.addPairs(exercise, pairs);
-  }*/
-
-  /**
-   * SectionHelper gets confused if we don't have a complete tree - same number of nodes on path to root
-   *
-   * @param exercise
-   * @param attrTypes
-   * @param pairs
-   */
-/*  private void addBlanksForMissingInfo(ClientExercise exercise, Collection<String> attrTypes, List<Pair> pairs) {
-    Map<String, ExerciseAttribute> typeToAtrr = new HashMap<>();
-    exercise.getAttributes().forEach(attribute -> typeToAtrr.put(attribute.getProperty(), attribute));
-
-    for (String attrType : attrTypes) {
-      ExerciseAttribute attribute = typeToAtrr.get(attrType);
-      if (attribute == null) {
-        // missing info for this type, so map it to BLANK
-        pairs.add(new ExerciseAttribute(attrType, BLANK));
-      } else {
-        if (attribute.isFacet()) {
-          pairs.add(attribute);
-        } else {
-          logger.info("Skip attribute not a facet " + attribute);
-        }
-      }
-    }
-  }*/
 
   private int c = 0;
 
@@ -721,52 +663,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     boolean ispredef = slick.ispredef();
 
     return sectionHelper.getPairs(typeOrder, id, unit, lesson, ispredef);
-  }
-
-/*  @NotNull
-  private List<Pair> getPairs(Collection<String> typeOrder, int id, String unit, String lesson, boolean ispredef) {
-    boolean firstEmpty = unit.isEmpty();
-
-    List<Pair> pairs = new ArrayList<>();
-    Iterator<String> iterator = typeOrder.iterator();
-
-    String first = iterator.hasNext() ? iterator.next() : UNIT;
-    String second = iterator.hasNext() ? iterator.next() : "";
-
-
-    if (firstEmpty && ispredef) {
-      pairs.add(getPair(first, DEFAULT_FOR_EMPTY));
-//      unitToValue.put(first, "1");
-      if (c++ < 100 || c % 100 == 0) logger.warn("getUnitToValue (" + c +
-          ") got empty " + first + " for " + id + " type order " + typeOrder);
-
-    } else {
-      pairs.add(getPair(first, unit));
-    }
-
-    if (!second.isEmpty()) {
-      if (ispredef) {
-        boolean empty = lesson.trim().isEmpty();
-
-        if (empty) {
-          pairs.add(getPair(second, DEFAULT_FOR_EMPTY));
-        } else {
-          pairs.add(getPair(second, lesson));
-        }
-        if (empty) {
-          if (c++ < 100) {
-            logger.warn("getUnitToValue got empty " + second + " for " + id);
-          }
-        }
-      }
-    }
-    return pairs;
-  }*/
-
-  @NotNull
-  private Pair getPair(String first, String value) {
-    if (first.isEmpty()) logger.error("huh type is empty " + value, new Exception());
-    return new Pair(first, value);
   }
 
   /**
@@ -1082,10 +978,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     // TODO? : consider getting exercise->phone from the ref result table again
 //    logger.info("getByProject type order " + typeOrder);
     List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(theProject.getID());
-
-    //allPredefByProject = allPredefByProject.stream().filter(ex -> ex.exid().startsWith("0")).collect(Collectors.toList());
-    // allPredefByProject = allPredefByProject.stream().filter(ex -> ex.unit().startsWith("5")).collect(Collectors.toList());
-
 //    logger.info("getByProject got " + allPredefByProject.size() + " from " + theProject);
 
     return getExercises(allPredefByProject,
@@ -1096,21 +988,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         exToAttrs,
         true);
   }
-/*
-  @NotNull
-  private List<String> getBaseTypeOrder(Project project) {
-    List<String> typeOrder = new ArrayList<>();
-    SlickProject project1 = project.getProject();
-    if (!project1.first().isEmpty()) {
-      typeOrder.add(project1.first());
-    } else {
-      logger.error("huh? project " + project + " first type is empty?");
-    }
-    if (!project1.second().isEmpty()) {
-      typeOrder.add(project1.second());
-    }
-    return typeOrder;
-  }*/
 
   /**
    * @param typeOrder

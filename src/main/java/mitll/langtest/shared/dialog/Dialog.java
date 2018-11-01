@@ -8,15 +8,11 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.shared.exercise.STATE.UNSET;
-
 /**
  * @see
  */
 public class Dialog implements IDialog, MutableShell {
-
   private final transient Logger logger = Logger.getLogger("Dialog");
-
 
   private static final String SPEAKER = "Speaker".toLowerCase();
   public static final String UNIT = "unit";
@@ -190,9 +186,16 @@ public class Dialog implements IDialog, MutableShell {
   }
 
   @Override
-  public void addUnitToValue(String unit, String value) {
-    if (unit.equalsIgnoreCase(UNIT)) this.unit = value;
-    else if (unit.equalsIgnoreCase(CHAPTER)) this.chapter = value;
+  public boolean addUnitToValue(String unit, String value) {
+    if (unit.equalsIgnoreCase(UNIT)) {
+      this.unit = value;
+      return true;
+    } else if (unit.equalsIgnoreCase(CHAPTER)) {
+      this.chapter = value;
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @Override
@@ -305,8 +308,8 @@ public class Dialog implements IDialog, MutableShell {
   }
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#setProgressBarScore
    * @return
+   * @see mitll.langtest.client.list.FacetExerciseList#setProgressBarScore
    */
   @Override
   public float getScore() {

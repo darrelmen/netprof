@@ -76,7 +76,7 @@ public interface MutableExercise extends CommonShell, MutableShell {
    * @param unit
    * @param value
    */
-  void addUnitToValue(String unit, String value);
+  boolean addUnitToValue(String unit, String value);
 
   void setUnitToValue(Map<String,String> unitToValue);
 

@@ -43,6 +43,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.exercise.Facet.SEMESTER;
 import static mitll.langtest.server.database.exercise.Facet.SUB_TOPIC;
@@ -69,14 +70,18 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
   public static final String ANY = "any";
+  public static final String ALL1 = "all";
   /**
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
-  private static final String ALL = "all";
+  private static final String ALL = ALL1;
   private static final String LISTS = "Lists";
   private static final String RECORDED = "Recorded";
   private List<String> predefinedTypeOrder = new ArrayList<>();
   private static final String UNIT = "Unit";
+  /**
+   *
+   */
   public static final String DEFAULT_FOR_EMPTY = "Any";  // TODO : ???
   private static final String BLANK = "Blank";  // TODO : remove????
 
@@ -95,7 +100,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private Set<String> rootTypes = new HashSet<>();
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_TYPE_ORDER = false;
   private static final boolean DEBUG_OR_MERGE = false;
 
@@ -1194,6 +1199,8 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
       logger.info("getTypeToValues typeToMatches is " + typeToMatches);
     }
 
+    typeToMatches = filterOutBlanks(typeToMatches);
+
     boolean someEmpty = checkIfAnyTypesAreEmpty(typesInOrder, typesToInclude1, typeToMatches);
 
     int userListID = request.getUserListID();
@@ -1205,7 +1212,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
         if (typesToInclude1.contains(pair.getProperty())) {
           typeToSelection2.add(pair);
         } else {
-          typeToSelection2.add(new Pair(pair.getProperty(), "all"));
+          typeToSelection2.add(new Pair(pair.getProperty(), ALL1));
         }
       }
 
@@ -1218,6 +1225,26 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       return new FilterResponse(reqID, typeToMatches, typesToInclude1, userListID);
     }
+  }
+
+  @NotNull
+  private Map<String, Set<MatchInfo>> filterOutBlanks(Map<String, Set<MatchInfo>> typeToMatches) {
+    Map<String, Set<MatchInfo>> typeToMatchesFiltered = new HashMap<>();
+
+    typeToMatches.forEach((k, v) -> {
+      if (k.equals(BLANK)) {
+        logger.warn("\n\nfilterOutBlanks drop " +k+"-"+v);
+      } else {
+        Set<MatchInfo> filtered = v.stream().filter(matchInfo -> !matchInfo.getValue().equals(BLANK)).collect(Collectors.toSet());
+        if (filtered.isEmpty()) {
+          logger.info("\n\nfilterOutBlanks drop empty type" +k+"-"+v);
+        }
+        else {
+          typeToMatchesFiltered.put(k, filtered);
+        }
+      }
+    });
+    return typeToMatchesFiltered;
   }
 
   @NotNull
