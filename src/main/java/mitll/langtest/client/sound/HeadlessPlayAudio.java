@@ -547,6 +547,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     playing = true;
   }
 
+  /**
+   * @see #pause
+   */
   private void markNotPlaying() {
     playing = false;
   }
