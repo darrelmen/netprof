@@ -318,6 +318,11 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     return false;
   }*/
 
+  @Override
+  public int getNumContext() {
+    return 0;
+  }
+
   public String getOrient() {
     return orient;
   }

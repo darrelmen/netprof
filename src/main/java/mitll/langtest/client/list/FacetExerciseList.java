@@ -81,6 +81,8 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 public abstract class FacetExerciseList<T extends CommonShell & Scored, U extends CommonShell>
     extends HistoryExerciseList<T, U>
     implements ShowEventListener, ChoicesContainer {
+  public static final String CONTENT = "Content";
+  public static final String SENTENCES_ONLY = "Sentences Only";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final String RECORDED = "Recorded";
@@ -563,11 +565,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     this.typeToSelection = typeToSelection;
   }
 
-  /*public boolean hasSelectionForType(String type) {
-    String s = typeToSelection.get(type);
-    return s != null && !s.isEmpty();
-  }*/
-
   /**
    * Populate the filter choices on the left.
    * <p>
@@ -629,35 +626,39 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     listFacetHelper.reallyAddListFacet(typeToValues, allTypesContainer);
 
-    addContentFacet(allTypesContainer);
+    contentFacet = addContentFacet(allTypesContainer);
   }
+
+  // TODO: show on dialog??
+  private ListItem contentFacet;
 
   /**
    * Only for practice view
+   *
    * @param allTypesContainer
    */
-  private void addContentFacet(UnorderedList allTypesContainer) {
-
-   /* ListItem widgets = addContentFacet();
+  private ListItem addContentFacet(UnorderedList allTypesContainer) {
+    ListItem widgets = addContentFacet();
     if (widgets != null) {
       allTypesContainer.add(widgets);
-    }*/
+    }
+    return widgets;
   }
 
-  private ListItem addContentFacet() {
-    String dynamicFacet = "Content";
-    ListItem liForDimensionForType = getTypeContainer(dynamicFacet);
+  protected ListItem addContentFacet() {
+    return getTypeContainer(CONTENT);
+  }
 
+  private void addExerciseChoices(String dynamicFacet, ListItem liForDimensionForType) {
     Set<MatchInfo> value = new HashSet<>();
-    value.add(new MatchInfo("Entries", numEx));
-    value.add(new MatchInfo("Sentences", numContext));
+//    value.add(new MatchInfo("Entries", numEx));
+    value.add(new MatchInfo(SENTENCES_ONLY, numContext));
     Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
     typeToValues.put(dynamicFacet, value);
 
+    liForDimensionForType.clear();
     //  logger.info("populateListChoices --- for " + result.size() + " lists ");
     liForDimensionForType.add(addChoices(typeToValues, dynamicFacet));
-
-    return liForDimensionForType;
   }
 
   /**
@@ -708,91 +709,20 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       if (idToScore.containsKey(id)) {
         ex.getMutableShell().setScore(idToScore.get(id));
       }
-      if (ex.isContext()) numContext++;
-      else numEx++;
+      if (ex.isContext()) {
+        numContext++;
+      } else {
+        numEx++;
+        numContext += ex.getNumContext();
+      }
     }
+
+    addExerciseChoices(CONTENT, contentFacet);
   }
-
-
-  /**
-   * Cheesy hack so we can deal with adding lists without reloading the whole facets
-   */
- // private Map<String, Set<MatchInfo>> lastTypeToValues;
-
-  /**
-   * TODO: reverse this - get the lists first, then build the facets
-   *
-   * @paramx liForDimensionForType
-   * @paramx typeToValues          - need to remember this and pass it through so later link clicks will have it
-   * @seex #addListFacet
-   */
-/*  private void populateListChoices(ListItem liForDimensionForType, Map<String, Set<MatchInfo>> typeToValues) {
-    if (typeToValues == null) {
-      typeToValues = lastTypeToValues;
-    } else {
-      lastTypeToValues = new HashMap<>();
-      lastTypeToValues.putAll(typeToValues);
-    }
-
-    final Map<String, Set<MatchInfo>> finalTypeToValues = typeToValues;
-    final long then = System.currentTimeMillis();
-
-    controller.getListService().getSimpleListsForUser(true, true, getListType(), new AsyncCallback<Collection<IUserList>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError(GETTING_LISTS_FOR_USER, caught);
-      }
-
-      @Override
-      public void onSuccess(Collection<IUserList> result) {
-        long l = System.currentTimeMillis();
-        if (l - then > 250) {
-          logger.info("addListsAsLinks : took " + (l - then) + " to get lists for user.");
-        }
-        addListsAsLinks(result, finalTypeToValues, liForDimensionForType);
-      }
-    });
-  }*/
 
   protected UserList.LIST_TYPE getListType() {
     return UserList.LIST_TYPE.NORMAL;
   }
-
-/*  private void addListsAsLinks(Collection<IUserList> result,
-                               Map<String, Set<MatchInfo>> finalTypeToValues,
-                               ListItem liForDimensionForType) {
-    String dynamicFacet = getDynamicFacet();
-
-    finalTypeToValues.put(dynamicFacet, getMatchInfoForEachList(result));
-
-    Widget favorites = liForDimensionForType.getWidget(0);
-    liForDimensionForType.clear();
-    liForDimensionForType.add(favorites);
-    //  logger.info("populateListChoices --- for " + result.size() + " lists ");
-    liForDimensionForType.add(addChoices(finalTypeToValues, dynamicFacet));
-  }*/
-
-  /**
-   * @paramx result
-   * @return
-   * @seex #populateListChoices
-   */
-/*
-  @NotNull
-  private Set<MatchInfo> getMatchInfoForEachList(Collection<IUserList> result) {
-    Set<MatchInfo> value = new HashSet<>();
-    idToListName.clear();
-    int currentUser = controller.getUser();
-    for (IUserList list : result) {
-      boolean isVisit = list.getUserID() != currentUser;
-      String tooltip = isVisit ? " from " + list.getUserChosenID() : "";
-      value.add(new MatchInfo(list.getName(), list.getNumItems(), list.getID(), isVisit, tooltip));
-      idToListName.put(list.getID(), list.getName());
-      idToList.put(list.getID(), list);
-    }
-    return value;
-  }
-*/
 
   @Override
   @NotNull

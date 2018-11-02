@@ -79,4 +79,6 @@ public interface CommonShell extends HasID {
   int getNumPhones();
 
   boolean isContext();
+
+  int getNumContext();
 }

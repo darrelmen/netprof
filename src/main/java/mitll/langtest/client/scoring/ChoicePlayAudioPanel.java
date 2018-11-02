@@ -122,12 +122,6 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     return actual;
   }
 
-/*  @Override protected void setButtonIconToPause() {
-    logger.info("set icon to pause...");
-
-    splitDropdownButton.setIcon(IconType.PAUSE);
-  }*/
-
   private void configureButton2(SplitDropdownButton playButton) {
     playButton.addClickHandler(event ->
         {
@@ -138,7 +132,9 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
 
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);
-    playButton.getElement().setId("PlayAudioPanel_playButton");
+
+    // playButton.getElement().setId("PlayAudioPanel_playButton");
+
     playButton.addStyleName("leftFiveMargin");
     playButton.addStyleName("floatLeft");
     playButton.addStyleName("choiceplay");
