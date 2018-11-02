@@ -176,7 +176,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private final Map<Integer, U> fetched = new ConcurrentHashMap<>();
   protected final INavigation.VIEWS views;
   private final String pageSizeSelected;
-  private ListFacetHelper listFacetHelper;
+  private final ListFacetHelper listFacetHelper;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -188,13 +188,13 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param views
    * @seex mitll.langtest.client.custom.content.NPFlexSectionExerciseList#NPFlexSectionExerciseList
    */
-  public FacetExerciseList(Panel secondRow,
-                           Panel currentExerciseVPanel,
-                           ExerciseController controller,
-                           ListOptions listOptions,
-                           DivWidget listHeader,
-                           boolean isDrillView,
-                           INavigation.VIEWS views) {
+  protected FacetExerciseList(Panel secondRow,
+                              Panel currentExerciseVPanel,
+                              ExerciseController controller,
+                              ListOptions listOptions,
+                              DivWidget listHeader,
+                              boolean isDrillView,
+                              INavigation.VIEWS views) {
     super(currentExerciseVPanel, controller, listOptions);
     this.views = views;
     this.pageSizeSelected = PAGE_SIZE_SELECTED + "_" + views.toString();
@@ -371,7 +371,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return pagesize;
   }
 
-  protected List<Integer> getPageSizeChoiceValues() {
+  List<Integer> getPageSizeChoiceValues() {
     return PAGE_SIZE_CHOICES;
   }
 
@@ -636,7 +636,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * Only for practice view
    * @param allTypesContainer
    */
-  protected void addContentFacet(UnorderedList allTypesContainer) {
+  private void addContentFacet(UnorderedList allTypesContainer) {
 
    /* ListItem widgets = addContentFacet();
     if (widgets != null) {
@@ -695,7 +695,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return exerciseListRequest;
   }
 
-  int numEx, numContext;
+  private int numEx;
+  private int numContext;
 
   @Override
   protected void setScores(ExerciseListWrapper<T> result) {
@@ -844,18 +845,24 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     } else {
       String childType = getChildForParent(type);
       if (childType != null) {
-        Widget parentAnchor =
-            typeToSelection.containsKey(childType) ?
-                getParentAnchor(type, selectionForType, childType) :
-                getSelectedAnchor(type, selectionForType);
-        choices.add(parentAnchor);
+        // add the parent
+        {
+          Widget parentAnchor =
+              typeToSelection.containsKey(childType) ?
+                  getParentAnchor(type, selectionForType, childType) :
+                  getSelectedAnchor(type, selectionForType);
+          choices.add(parentAnchor);
+        }
 
-        ListItem liForDimension = new ListItem();
-        liForDimension.addStyleName("subdimension");
-        liForDimension.addStyleName("refinement");
-        choices.add(liForDimension);
+        // add the children
+        {
+          ListItem liForDimension = new ListItem();
+          liForDimension.addStyleName("subdimension");
+          liForDimension.addStyleName("refinement");
+          choices.add(liForDimension);
 
-        liForDimension.add(addChoices(typeToValues, childType));
+          liForDimension.add(addChoices(typeToValues, childType));
+        }
       } else {
         if (isListType(type)) {
           if (DEBUG_CHOICES) logger.info("addChoices addListChoice " + type + "=" + selectionForType);
@@ -1633,7 +1640,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    * @see #gotFullExercises
    */
-  protected void hidePrevNextWidgets() {
+  private void hidePrevNextWidgets() {
     pageSizeContainer.setVisible(false);
     sortBox.setVisible(false);
     pagerAndSortRow.setVisible(false);
@@ -1808,9 +1815,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #goGetNextPage
    */
   @NotNull
-  protected Map<Integer, U> setScoreHistory(Map<Integer, CorrectAndScore> scoreHistoryPerExercise,
-                                            List<U> exercises
-                                            //                                    ExerciseListWrapper<U> result
+  Map<Integer, U> setScoreHistory(Map<Integer, CorrectAndScore> scoreHistoryPerExercise,
+                                  List<U> exercises
+                                  //                                    ExerciseListWrapper<U> result
   ) {
     Map<Integer, U> idToEx = new HashMap<>();
     //  Map<Integer, CorrectAndScore> scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
@@ -2052,7 +2059,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     return fetched.get(id);
   }
 
-  protected void addExerciseToCached(U exercise) {
+  void addExerciseToCached(U exercise) {
     if (!fetched.containsKey(exercise.getID())) {
       fetched.put(exercise.getID(), exercise);
     }
@@ -2203,7 +2210,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
    * @param denom
    * @see #setProgressBarScore
    */
-  protected void showNumberPracticed(int num, int denom) {
+  private void showNumberPracticed(int num, int denom) {
     showProgress(num, denom, practicedProgress, NONE_PRACTICED_YET, ALL_PRACTICED, PRACTICED, false);
   }
 
@@ -2302,7 +2309,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     return listFacetHelper.getIdToList();
   }
 
-  public Map<String, String> getTypeToSelection() {
+  protected Map<String, String> getTypeToSelection() {
     return typeToSelection;
   }
 

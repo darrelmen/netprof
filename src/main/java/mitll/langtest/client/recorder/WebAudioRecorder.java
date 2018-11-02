@@ -39,8 +39,6 @@ import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.initial.WavStreamCallback;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 
-import java.util.logging.Logger;
-
 /**
  * Tries to do initWebaudio, and if no response has been received in 5 seconds, tries again.
  *

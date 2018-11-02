@@ -3,7 +3,6 @@ package mitll.langtest.client.custom.recording;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.*;
@@ -25,7 +24,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   private static final String UNRECORD = "Unrecord";
   private static final String RECORDED = "Recorded";
 
-  private boolean isContext;
+  private final boolean isContext;
 
   /**
    * @param controller

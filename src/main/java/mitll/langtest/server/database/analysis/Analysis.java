@@ -176,7 +176,7 @@ public abstract class Analysis extends DAO {
    * @paramx best
    * @see IAnalysis#getPerformanceReportForUser
    */
-  List<WordScore> getWordScores(Collection<UserInfo> values, int projID) {
+/*  List<WordScore> getWordScores(Collection<UserInfo> values, int projID) {
     //Collection<UserInfo> values = best.values();
     logger.info("getWordScores " + values.size() + " users.");
     if (values.isEmpty()) {
@@ -193,7 +193,7 @@ public abstract class Analysis extends DAO {
 
       return wordScore;
     }
-  }
+  }*/
 
   /**
    * @param userid
@@ -395,7 +395,7 @@ public abstract class Analysis extends DAO {
    * @seex SlickAnalysis#getBigramPhoneReportFor(AnalysisRequest)
    * @seex IAnalysis#getPhoneReportFor(AnalysisRequest)
    */
-  PhoneReport getPhoneReportForPhone(int userid, UserInfo next, Project project, String phone, long from, long to) {
+/*  PhoneReport getPhoneReportForPhone(int userid, UserInfo next, Project project, String phone, long from, long to) {
     if (DEBUG)
       logger.debug(" getPhoneReportForPhone " + userid + " got " + next + " from " + new Date(from) + " to " + new Date(to));
 
@@ -420,13 +420,13 @@ public abstract class Analysis extends DAO {
       long diff2 = System.currentTimeMillis() - start;
       if (DEBUG || diff2 > 100) {
         logger.debug(" getPhonesForUser " + userid + " took " + diff2 + " millis to get " +
-            /*phonesForUser.size() +*/ " phones");
+            *//*phonesForUser.size() +*//* " phones");
       }
       // setSessions(phoneReport.getPhoneToAvgSorted());
 
       return phoneReport;
     }
-  }
+  }*/
 
   /**
    * @param userid

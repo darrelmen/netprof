@@ -392,7 +392,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     createIndex(database, EXERCISEID, USEREXERCISE);
   }
 
-  int c = 0;
+  final int c = 0;
 
   /**
    * Handles both userexercise items and predefined exercises.

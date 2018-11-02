@@ -217,7 +217,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @param sortEnglish
    * @see #makeCellTable(boolean)
    */
-  protected void configureTable(boolean sortEnglish) {
+  private void configureTable(boolean sortEnglish) {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     table.setWidth("100%");
     table.setHeight("auto");

@@ -143,7 +143,7 @@ public class AnalysisTab extends DivWidget {
   private final boolean isPolyglot;
   private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
   private ListBox timeScale;
-  private INavigation.VIEWS jumpView;
+  private final INavigation.VIEWS jumpView;
   private int itemColumnWidth = -1;
 
   /**
@@ -668,7 +668,6 @@ public class AnalysisTab extends DivWidget {
           controller,
           soundsDiv,
           analysisPlot,
-          exerciseLookup,
           reqInfo);
     }
   }
@@ -745,7 +744,6 @@ public class AnalysisTab extends DivWidget {
                               final ExerciseController controller,
                               final Panel lowerHalf,
                               AnalysisPlot analysisPlot,
-                              ExerciseLookup<CommonShell> exerciseLookup,
                               ReqInfo reqInfo) {
     // logger.info("GetPhoneReport " + phoneReport);
 

@@ -40,7 +40,6 @@ import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
@@ -54,9 +53,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * @since 3/30/16.
  */
 public class FixNPFHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
-  //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
-  private boolean forSentences;
-  INavigation.VIEWS views;
+  final INavigation.VIEWS views;
 
   /**
    * @param controller
@@ -66,7 +63,8 @@ public class FixNPFHelper<T extends CommonShell & ScoredExercise> extends Simple
    */
   public FixNPFHelper(ExerciseController controller, boolean forSentences, INavigation.VIEWS views) {
     super(controller);
-    this.forSentences = forSentences;
+    //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
+    boolean forSentences1 = forSentences;
     this.views = views;
   }
 

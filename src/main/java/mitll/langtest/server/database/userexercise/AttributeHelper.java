@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 public class AttributeHelper implements IAttribute {
-  private ExerciseAttributeDAOWrapper attributeDAOWrapper;
+  private final ExerciseAttributeDAOWrapper attributeDAOWrapper;
 
   AttributeHelper(ExerciseAttributeDAOWrapper attributeDAOWrapper) {
     this.attributeDAOWrapper = attributeDAOWrapper;

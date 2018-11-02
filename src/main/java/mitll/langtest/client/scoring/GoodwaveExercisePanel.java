@@ -67,7 +67,7 @@ import java.util.logging.Logger;
 public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-  private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  private final Logger logger = Logger.getLogger("GoodwaveExercisePanel");
   /**
    *
    */
@@ -100,9 +100,9 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
   protected final ExerciseController controller;
 
   protected final NavigationHelper navigationHelper;
-  private boolean hasClickable;
-  private boolean isJapanese;
-  private boolean isUrdu;
+  private final boolean hasClickable;
+  private final boolean isJapanese;
+  private final boolean isUrdu;
   protected final ExerciseOptions options;
 
   /**
@@ -265,7 +265,7 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     addAnnotation(field, ExerciseAnnotation.TYPICAL.CORRECT, "", exid);
   }
 
-  Map<String, String> uniqToComment = new HashMap<>();
+  final Map<String, String> uniqToComment = new HashMap<>();
 
   private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost, int exid) {
     logger.info("addAnnotation on field " + field + " ex " + exid + " comment " + commentToPost);

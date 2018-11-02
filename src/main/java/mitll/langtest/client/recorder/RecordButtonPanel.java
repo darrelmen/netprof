@@ -32,25 +32,19 @@
 
 package mitll.langtest.client.recorder;
 
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.BootstrapExercisePanel;
 import mitll.langtest.client.initial.PopupHelper;
-import mitll.langtest.client.scoring.ClientAudioContext;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.DecoderOptions;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
 
 /**

@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 public class VocabFactory {
   public static final String HTML_TAG_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
 
-  private Pattern pattern = Pattern.compile(HTML_TAG_PATTERN);
+  private final Pattern pattern = Pattern.compile(HTML_TAG_PATTERN);
 
   public List<VocabToken> getTokens(String t) {
     Matcher matcher;

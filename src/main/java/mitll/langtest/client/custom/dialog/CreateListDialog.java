@@ -68,8 +68,8 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class CreateListDialog extends BasicDialog {
-  public static final int LIST_WIDTH = 60;
   private final Logger logger = Logger.getLogger("CreateListDialog");
+  private static final int LIST_WIDTH = 60;
 
   private static final String ALL = "All";
   private static final String HEAR_ITEMS = "Hear Items";

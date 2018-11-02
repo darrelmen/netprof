@@ -35,7 +35,6 @@ package mitll.langtest.server.database.annotation;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,8 +42,6 @@ public interface IAnnotationDAO extends IDAO {
   void add(UserAnnotation annotation);
 
   boolean hasDefect(int exerciseID, String field, String status, String comment);
-
- // Collection<Integer> getAudioAnnos();
 
   Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID);
 

@@ -69,7 +69,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   private final IUserSessionDAO userSessionDAO;
   private IProjectManagement projectManagement;
 
-  private static boolean DEBUG = false;
+  private static final boolean DEBUG = false;
 
   /**
    * Only made once but shared with servlets.

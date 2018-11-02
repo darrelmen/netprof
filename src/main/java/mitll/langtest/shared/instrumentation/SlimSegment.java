@@ -1,7 +1,6 @@
 package mitll.langtest.shared.instrumentation;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.audio.image.ITranscriptEvent;
 
 import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 

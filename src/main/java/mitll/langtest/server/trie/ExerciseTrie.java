@@ -63,9 +63,9 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
-  private boolean isMandarin;
-  private boolean removeAllPunct;
-  private SmallVocabDecoder smallVocabDecoder;
+  private final boolean isMandarin;
+  private final boolean removeAllPunct;
+  private final SmallVocabDecoder smallVocabDecoder;
 
   // private static boolean DEBUG = false;
   private boolean debug = false;

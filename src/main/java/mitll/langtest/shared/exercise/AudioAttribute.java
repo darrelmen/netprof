@@ -203,9 +203,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return user != null && user.isMale();
   }
 
+/*
   public boolean isFemale() {
     return !isMale();
   }
+*/
 
   public String getSpeed() {
     String s = getAttributes().get(SPEED);

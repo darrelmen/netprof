@@ -274,7 +274,7 @@ public class ServerProperties {
   /**
    * @see mitll.langtest.server.database.copy.CreateProject#createProject
    */
-  public static List<ProjectProperty> CORE_PROPERTIES = Arrays.asList(
+  public static final List<ProjectProperty> CORE_PROPERTIES = Arrays.asList(
       MODELS_DIR,
       WEBSERVICE_HOST_PORT
   );

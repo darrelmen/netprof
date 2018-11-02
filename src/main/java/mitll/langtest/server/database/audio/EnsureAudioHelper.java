@@ -56,7 +56,7 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
 public class EnsureAudioHelper implements IEnsureAudioHelper {
   private static final Logger logger = LogManager.getLogger(EnsureAudioHelper.class);
 
-  protected DatabaseServices db;
+  protected final DatabaseServices db;
 
   private static final String WAV1 = "wav";
   private static final String WAV = ".wav";

@@ -16,7 +16,7 @@ public enum ProjectProperty implements IsSerializable {
   REPORT_LIST("reportList", PropertyType.LIST);
 
   public enum PropertyType implements IsSerializable {
-    STRING, LIST, BOOLEAN, INTEGER;
+    STRING, LIST, BOOLEAN, INTEGER
   }
 
   private String name;

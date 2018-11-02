@@ -36,7 +36,7 @@ public class ResultTypeAhead {
   private final Collection<String> typeOrder;
   private final CellTable<MonitorResult> cellTable;
   private final ResultServiceAsync resultServiceAsync;
-  private MessageHelper messageHelper;
+  private final MessageHelper messageHelper;
 
   ResultTypeAhead(Collection<String> typeOrder,
                   CellTable<MonitorResult> cellTable,
@@ -65,7 +65,7 @@ public class ResultTypeAhead {
   }
 
 
-  private TextBox userIDBox = new TextBox();
+  private final TextBox userIDBox = new TextBox();
 
   public int getUserID() {
     try {

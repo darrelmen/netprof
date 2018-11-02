@@ -37,5 +37,5 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * @see mitll.langtest.server.database.project.ProjectDAO#add
  */
 public enum ModelType implements IsSerializable {
-  HYDRA, KALDI;
+  HYDRA, KALDI
 }

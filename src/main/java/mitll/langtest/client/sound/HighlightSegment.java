@@ -12,7 +12,6 @@ import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
 import java.util.logging.Logger;
 

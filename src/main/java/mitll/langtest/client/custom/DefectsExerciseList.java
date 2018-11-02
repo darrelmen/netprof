@@ -3,7 +3,6 @@ package mitll.langtest.client.custom;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.recording.NoListFacetExerciseList;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.shared.exercise.*;
@@ -20,7 +19,7 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   //  private MarkDefectsChapterNPFHelper markDefectsChapterNPFHelper;
   //Logger logger = Logger.getLogger("NPExerciseList_Defects");
   // private CheckBox filterOnly, uninspectedOnly;
-  private boolean isContext;
+  private final boolean isContext;
 
   DefectsExerciseList(ExerciseController controller,
                       Panel topRow,

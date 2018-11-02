@@ -95,7 +95,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   private CommonExercise templateExercise;
   private int unknownExerciseID;
-  private DatabaseImpl database;
+  private final DatabaseImpl database;
 
   /**
    * @param database

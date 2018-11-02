@@ -10,15 +10,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.moxieapps.gwt.highcharts.client.Lang;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
-
-import static mitll.langtest.server.autocrt.DecodeCorrectnessChecker.MANDARIN;
-import static mitll.langtest.server.scoring.Scoring.JAPANESE;
-import static mitll.langtest.server.scoring.Scoring.KOREAN;
 
 public class PronunciationLookup implements IPronunciationLookup {
   private static final Logger logger = LogManager.getLogger(PronunciationLookup.class);
@@ -40,13 +34,13 @@ public class PronunciationLookup implements IPronunciationLookup {
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
   private final LTS lts;
-  private boolean korean;
-  private boolean russian;
-  private boolean french;
-  private boolean removeAllPunct;
-  private boolean isAsianLanguage;
-  private boolean hasLTS;
-  private boolean emptyLTS;
+  private final boolean korean;
+  private final boolean russian;
+  private final boolean french;
+  private final boolean removeAllPunct;
+  private final boolean isAsianLanguage;
+  private final boolean hasLTS;
+  private final boolean emptyLTS;
 
   /**
    * @param dictionary

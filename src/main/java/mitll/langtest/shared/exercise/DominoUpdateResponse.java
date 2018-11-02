@@ -72,7 +72,7 @@ public class DominoUpdateResponse implements HasID {
     return timestamp;
   }
 
-  public enum UPLOAD_STATUS implements IsSerializable {SUCCESS, FAIL, WRONG_PROJECT, ANOTHER_PROJECT;}
+  public enum UPLOAD_STATUS implements IsSerializable {SUCCESS, FAIL, WRONG_PROJECT, ANOTHER_PROJECT}
 
   public DominoUpdateResponse() {
   }

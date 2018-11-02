@@ -36,7 +36,6 @@ import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
-import mitll.langtest.server.services.ListServiceImpl;
 import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.IUserListLight;
 import mitll.langtest.shared.custom.IUserListWithIDs;

@@ -137,8 +137,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   private static class UserTimeBaseImpl implements UserTimeBase {
-    int userid;
-    long timestamp;
+    final int userid;
+    final long timestamp;
 
     UserTimeBaseImpl(int userid, long timestamp) {
       this.userid = userid;

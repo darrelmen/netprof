@@ -283,16 +283,16 @@ public class ExerciseToPhone {
   }
 
   public static class Info {
-    int exid;
-    String word;
-    private List<List<String>> pronunciations;
+    final int exid;
+    final String word;
+    private final List<List<String>> pronunciations;
 
-    int numWords;
+    final int numWords;
 
-    private Map<String, Info> pronToInfo = new HashMap<>();
-    private Map<String, Integer> pronToCount = new HashMap<>();
-    private Map<String, Info> pronToInfo2 = new HashMap<>();
-    private Map<String, Integer> pronToCount2 = new HashMap<>();
+    private final Map<String, Info> pronToInfo = new HashMap<>();
+    private final Map<String, Integer> pronToCount = new HashMap<>();
+    private final Map<String, Info> pronToInfo2 = new HashMap<>();
+    private final Map<String, Integer> pronToCount2 = new HashMap<>();
 
     /**
      * @param exid

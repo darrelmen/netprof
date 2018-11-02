@@ -35,11 +35,9 @@ package mitll.langtest.client.scoring;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**

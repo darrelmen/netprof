@@ -34,7 +34,6 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.History;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.server.database.exercise.Facet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

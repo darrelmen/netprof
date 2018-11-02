@@ -38,7 +38,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.CommonShell;
 

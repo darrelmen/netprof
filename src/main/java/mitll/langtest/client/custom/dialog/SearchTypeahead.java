@@ -39,7 +39,7 @@ public class SearchTypeahead {
   private final FeedbackExerciseList feedbackExerciseList;
   private CommonShell currentExercise = null;
   private final SearchHighlighter highlighter = new SearchHighlighter();
-  private Button add;
+  private final Button add;
 
   /**
    * @param controller

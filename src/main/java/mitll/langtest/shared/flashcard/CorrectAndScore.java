@@ -36,10 +36,8 @@ import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.shared.answer.SimpleAudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import mitll.npdata.dao.result.SlickCorrectAndScore;
 
 import java.util.List;
 import java.util.Map;

@@ -95,7 +95,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   static final int MAX_FROM_ANY_TOKEN = 10;
   public static final boolean DEBUG = false;
   public static final String WAV = ".wav";
-  public static final int MSA_PORT = 5000;
+  //public static final int MSA_PORT = 5000;
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -123,7 +123,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private final IPronunciationLookup pronunciationLookup;
 
   private final AtomicInteger hydraReqCounter = new AtomicInteger();
-  private TranscriptSegmentGenerator generator;
+  private final TranscriptSegmentGenerator generator;
 
   /**
    * @param deployPath
@@ -907,19 +907,18 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return pronunciationLookup.getCleanedTranscript(cleaned);
   }
 
-  public String getHydraTranscriptTest(String transcript) {
-    return pronunciationLookup.getCleanedTranscript(getLCTranscript(transcript));
-  }
+//  public String getHydraTranscriptTest(String transcript) {
+//    return pronunciationLookup.getCleanedTranscript(getLCTranscript(transcript));
+//  }
 
   @NotNull
   private String getLCTranscript(String transcript) {
     return getSmallVocabDecoder().lcToken(transcript, removeAllAccents).trim();
   }
 
-  //@Override
-  public String getLM(String transcript, boolean removeAllPunct) {
-    return getSmallLM(getLCTranscript(transcript), removeAllPunct);
-  }
+//  public String getLM(String transcript, boolean removeAllPunct) {
+//    return getSmallLM(getLCTranscript(transcript), removeAllPunct);
+//  }
 
   @NotNull
   private String getSmallLM(String cleaned, boolean removeAllPunct) {

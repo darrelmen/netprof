@@ -12,10 +12,10 @@ public class HydraOutput {
   enum STATUS_CODES {SUCCESS, OOV_IN_TRANS, FAILURE, ERROR}
 
   private Scores scores;
-  private String wordLab;
-  private String phoneLab;
-  private List<WordAndProns> wordAndProns;
-  private TransNormDict transNormDict;
+  private final String wordLab;
+  private final String phoneLab;
+  private final List<WordAndProns> wordAndProns;
+  private final TransNormDict transNormDict;
 
   /**
    * DEFAULT status is success!

@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -21,6 +22,7 @@ import mitll.langtest.client.custom.dialog.CreateListComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.custom.UserList;
@@ -687,14 +689,31 @@ public class ListView implements ContentView, CreateListComplete {
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setIcon(IconType.PLUS);
 
+/*    {
+      KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
+        @Override
+        public String getName() {
+          logger.info("getName ");
+          return null;
+        }
+
+        @Override
+        public void gotPress(NativeEvent ne, boolean isKeyDown) {
+          logger.info("gotPress " + isKeyDown);
+
+          closeButton.click();
+          controller.removeKeyListener(myListener);
+        }
+      };
+      this.myListener = listener;
+      controller.addKeyListener(listener);
+    }*/
+
     return dialogHelper;
   }
 
-  //  private boolean canMakeQuiz() {
-//    Collection<User.Permission> permissions = controller.getPermissions();
-//    return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
-//  }
-//
+  // TODO :  text box has focus... - need to be a little smarter
+ // private KeyPressHelper.KeyListener myListener;
   private CreateListDialog editDialog;
 
   private void doEdit() {

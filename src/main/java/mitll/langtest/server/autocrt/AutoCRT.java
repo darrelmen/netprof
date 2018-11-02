@@ -92,8 +92,8 @@ public class AutoCRT {
 
   private final boolean doEighty = false;
   private final boolean usePreDefOnly = false;
-  boolean comparisonTesting = false;
-  protected ServerProperties serverProperties;
+  final boolean comparisonTesting = false;
+  protected final ServerProperties serverProperties;
 
   /**
    * @param db

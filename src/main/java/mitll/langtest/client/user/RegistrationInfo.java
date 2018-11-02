@@ -43,8 +43,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.shared.user.MiniUser;
 
-import static com.google.gwt.aria.client.Property.AUTOCOMPLETE;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *

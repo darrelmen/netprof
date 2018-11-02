@@ -1,14 +1,11 @@
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
-import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.KoreanLTS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,7 +19,7 @@ import static mitll.langtest.shared.scoring.NetPronImageType.*;
 
 public class TranscriptSegmentGenerator {
   private static final Logger logger = LogManager.getLogger(TranscriptSegmentGenerator.class);
-  protected ServerProperties serverProps;
+  protected final ServerProperties serverProps;
   private static final boolean DEBUG = false;
   private static final boolean WARN_ABOUT_FALLBACK = false;
 
@@ -143,7 +140,7 @@ public class TranscriptSegmentGenerator {
     return builder.toString();
   }
 
-  private KoreanLTS koreanLTS = new KoreanLTS();
+  private final KoreanLTS koreanLTS = new KoreanLTS();
 
   /**
    * @param word

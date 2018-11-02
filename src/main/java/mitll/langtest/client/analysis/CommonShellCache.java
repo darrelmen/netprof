@@ -13,7 +13,7 @@ public class CommonShellCache<T extends CommonShell> implements ICommonShellCach
   private final Logger logger = Logger.getLogger("CommonShellCache");
 
   private Map<Integer, T> idToEx = new TreeMap<>();
-  private MessageHelper messageHelper;
+  private final MessageHelper messageHelper;
 
   public CommonShellCache(MessageHelper messageHelper) {
     this.messageHelper = messageHelper;

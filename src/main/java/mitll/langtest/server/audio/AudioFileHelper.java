@@ -1002,7 +1002,6 @@ public class AudioFileHelper implements AlignDecode {
 
     // do this db write later
     new Thread(() -> db.recordWordAndPhoneInfo(projid, answer, answerID), "recordWordAndPhoneInfo").start();
-    //   return answerID;
   }
 
   /**
@@ -1238,13 +1237,13 @@ public class AudioFileHelper implements AlignDecode {
                                       int userid,
                                       File theFile,
                                       String hydraHost) {
-    if (session == null) {
+    if (session == null || session.isEmpty()) {
       session = getSession(hydraHost, project.getID());
     }
     HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, ScoreServlet.PostRequest.ALIGN);
 
     if (session != null) {
-      logger.info("getProxyScore adding session " + session);
+      logger.info("getProxyScore adding session '" + session +"'");
       httpClient.addRequestProperty(COOKIE, session);
     }
 
@@ -1294,17 +1293,17 @@ public class AudioFileHelper implements AlignDecode {
     return httpClient;
   }
 
-  private TransNormDict getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
-    String s = getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents);
-    String cleaned = getSegmented(s); // segmentation method will filter out the UNK model
-    return getASRScoring().getHydraDict(cleaned.trim(), "", possibleProns);
-  }
-
   @NotNull
   private HTTPClient getHttpClient(String hydraHost, String actualHydraHost) {
     String url = hydraHost + SCORE_SERVLET;
     if (!actualHydraHost.isEmpty()) url += File.separator + actualHydraHost;
     return new HTTPClient(url);
+  }
+
+  private TransNormDict getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
+    String s = getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents);
+    String cleaned = getSegmented(s); // segmentation method will filter out the UNK model
+    return getASRScoring().getHydraDict(cleaned.trim(), "", possibleProns);
   }
 
   /**
@@ -1325,18 +1324,26 @@ public class AudioFileHelper implements AlignDecode {
    */
   private String getSession(String hydraHost, int projID) {
     try {
+      logger.info("getSession " +
+          "\n\thost   " + hydraHost +
+          "\n\tprojID " + projID +
+          "\n\tuser   " + TEST_USER+
+          "\n\tpass   " + TEST_PASSWORD
+      );
+
       HTTPClient httpClient = getHttpClient(hydraHost, "");
       httpClient.addRequestProperty(REQUEST.toString(), HASUSER.toString());
-      httpClient.addRequestProperty(PROJID.toString(), "" + projID);
+      //httpClient.addRequestProperty(PROJID.toString(), "" + projID);
       httpClient.addRequestProperty(USERID.toString(), TEST_USER);
       httpClient.addRequestProperty(PASS.toString(), TEST_PASSWORD);
+
       String json = httpClient.sendAndReceiveCookie("");
 
       logger.info("getSession response " + json);
 
       return json;
     } catch (IOException e) {
-      logger.warn("Got " + e, e);
+      logger.warn("getSession Got " + e, e);
     }
     return "";
   }

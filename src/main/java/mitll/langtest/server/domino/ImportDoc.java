@@ -8,9 +8,9 @@ import java.util.Date;
 import java.util.List;
 
 public class ImportDoc {
-  private int docID;
-  private long timestamp;
-  private VocabularyItem vocabularyItem;
+  private final int docID;
+  private final long timestamp;
+  private final VocabularyItem vocabularyItem;
 
   /**
    * @param docID

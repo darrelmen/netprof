@@ -1,7 +1,6 @@
 package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -11,7 +10,6 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import org.jetbrains.annotations.NotNull;
 

@@ -12,10 +12,6 @@ public class ActiveUser extends SimpleUser {
   public ActiveUser() {
   }
 
-  public ActiveUser(int id) {
-    super(id);
-  }
-
   public ActiveUser(FirstLastUser firstLast, long visited) {
     this(firstLast.id, firstLast.getUserID(),
         firstLast.getFirst(), firstLast.getLast(),

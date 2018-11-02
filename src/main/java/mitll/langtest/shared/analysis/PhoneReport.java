@@ -49,6 +49,7 @@ public class PhoneReport extends PhoneSummary {
   private Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = new HashMap<>();
   private Map<String, List<Bigram>> phoneToBigrams;
 
+  // can't be final!
   private boolean valid;
   private long serverTime;
 

@@ -1,16 +1,12 @@
 package mitll.langtest.server.database.dialog;
 
-import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickRelatedResult;
 import mitll.npdata.dao.dialog.RelatedResultDAOWrapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.List;

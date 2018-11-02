@@ -59,7 +59,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   private int minPolyScore;
   boolean showAudio;
   QuizInfo quizInfo;
-  INavigation.VIEWS instance;
+  final INavigation.VIEWS instance;
 
   /**
    * @param minPolyScore

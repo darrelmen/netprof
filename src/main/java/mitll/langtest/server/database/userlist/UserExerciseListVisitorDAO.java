@@ -265,9 +265,9 @@ public class UserExerciseListVisitorDAO extends DAO implements IUserExerciseList
   }
 
   public static class Pair {
-    private int user;
-    private int listid;
-    private long when;
+    private final int user;
+    private final int listid;
+    private final long when;
 
     public Pair(int user, int listid, long when) {
       this.user = user;

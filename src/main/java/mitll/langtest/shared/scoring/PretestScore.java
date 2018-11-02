@@ -32,13 +32,10 @@
 
 package mitll.langtest.shared.scoring;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.scoring.AlignDecode;
-import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

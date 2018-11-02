@@ -71,7 +71,7 @@ public class ParseResultJson {
   private final ServerProperties props;
   private final Language languageEnum;
 
-  private TranscriptSegmentGenerator transcriptSegmentGenerator;
+  private final TranscriptSegmentGenerator transcriptSegmentGenerator;
   private final Map<NetPronImageType, List<TranscriptSegment>> emptyMap = new HashMap<>();
   //private Map<String, String> phoneToDisplay;
 

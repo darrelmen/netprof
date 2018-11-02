@@ -47,7 +47,7 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
 
   private String language;
   private Language languageInfo;
-  private String keyForSorting;
+  private final String keyForSorting;
 
   private static final boolean DEBUG = false;
 
@@ -227,7 +227,7 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
     }
   }
 
-  private Random random = new Random();
+  private final Random random = new Random();
 
   private int compRand(T o1, T o2) {
     int i = random.nextInt(2);

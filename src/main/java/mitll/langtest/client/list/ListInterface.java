@@ -36,7 +36,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.STATE;
 
 import java.util.Collection;
 import java.util.Comparator;

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class RelatedExerciseHelper implements IRelatedExercise {
-  private RelatedExerciseDAOWrapper daoWrapper;
+  private final RelatedExerciseDAOWrapper daoWrapper;
 
   /**
    *

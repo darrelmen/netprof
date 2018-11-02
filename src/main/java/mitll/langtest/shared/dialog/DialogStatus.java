@@ -38,5 +38,5 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public enum DialogStatus implements IsSerializable {
   DELETED,
-  DEFAULT;
+  DEFAULT
 }

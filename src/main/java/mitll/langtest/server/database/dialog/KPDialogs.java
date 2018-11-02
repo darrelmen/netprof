@@ -7,7 +7,6 @@ import mitll.npdata.dao.SlickDialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -242,7 +241,7 @@ public class KPDialogs extends DialogReader implements IDialogReader {
 
   private final List<String> cv = Arrays.asList(coreVocab1, coreVocab2, coreVocab3, coreVocab4, coreVocab5, coreVocab6);
 
-  private DialogProps dialogProps = new DialogProps(docIDS, title, fltitle, dir, unit, chapter, page, pres);
+  private final DialogProps dialogProps = new DialogProps(docIDS, title, fltitle, dir, unit, chapter, page, pres);
 
   /**
    * @param defaultUser

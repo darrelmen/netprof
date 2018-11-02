@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.amas;
 
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 

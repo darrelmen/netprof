@@ -16,7 +16,7 @@ import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.*;
 public class TestSync {
   private static final Logger logger = LogManager.getLogger(TestSync.class);
 
-  DatabaseImpl db;
+  final DatabaseImpl db;
 
   public TestSync(DatabaseImpl db) {
     this.db = db;

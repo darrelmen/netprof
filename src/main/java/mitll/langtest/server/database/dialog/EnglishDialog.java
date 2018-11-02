@@ -70,7 +70,7 @@ public class EnglishDialog extends DialogReader implements IDialogReader {
           "Topic Presentation A\n" +
           "Topic Presentation A\n";
 
-  private DialogProps dialogProps = new DialogProps(docIDS, title, fltitle, dir, unit, chapter, page, pres);
+  private final DialogProps dialogProps = new DialogProps(docIDS, title, fltitle, dir, unit, chapter, page, pres);
 
   /**
    * @param defaultUser

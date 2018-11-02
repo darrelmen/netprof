@@ -128,7 +128,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             }
           });
 
-  private ConcurrentHashMap<Long, SessionInfo> sessionToInfo = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Long, SessionInfo> sessionToInfo = new ConcurrentHashMap<>();
 
   /**
    * Sanity checks on answers and bestAudio dir
@@ -355,8 +355,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   private class SessionInfo {
-    private int speechDur, silenceDur, expectedSpeechDur;
-    private boolean knownExpected;
+    private int speechDur;
+    private int silenceDur;
+    private final int expectedSpeechDur;
+    private final boolean knownExpected;
 
     SessionInfo(int expectedSpeechDur) {
       this.expectedSpeechDur = expectedSpeechDur;
@@ -724,9 +726,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return packet;
     }
 
-    public boolean isCombined() {
+  /*  public boolean isCombined() {
       return combined;
-    }
+    }*/
 
     byte[] getWavFile() {
       return wavFile;

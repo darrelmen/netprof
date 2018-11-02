@@ -39,10 +39,10 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
    */
   private static final String PUBLIC = "Public?";
   private static final String NUM_ITEMS = "#";
-  private boolean slim;
-  private boolean addOwnerToDescrip;
+  private final boolean slim;
+  private final boolean addOwnerToDescrip;
 
-  private List<Button> buttons = new ArrayList<>();
+  private final List<Button> buttons = new ArrayList<>();
 
   /**
    * @param controller

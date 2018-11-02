@@ -120,7 +120,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private final List<String> errors = new ArrayList<>();
   private final String file;
 
-  private boolean shouldHaveRefAudio;
+  private final boolean shouldHaveRefAudio;
   private final boolean usePredefinedTypeOrder;
   private final boolean skipSemicolons;
   private final int maxExercises;

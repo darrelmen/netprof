@@ -53,7 +53,7 @@ public class DominoImport implements IDominoImport {
   private final DocumentServiceDelegate documentDelegate;
   private final IProjectWorkflowDAO workflowDelegate;
   private final Mongo pool;
-  private IUserExerciseDAO userExerciseDAO;
+  private final IUserExerciseDAO userExerciseDAO;
 
   /**
    * @param projectDelegate
@@ -404,7 +404,7 @@ public class DominoImport implements IDominoImport {
     // private final List<ImportDoc> deleted;
     private final Collection<Integer> deleted2;
     private final Set<String> deletedNPIDs;
-    private Map<String, Integer> npidToDominoID;
+    private final Map<String, Integer> npidToDominoID;
 
     /**
      * @param changed

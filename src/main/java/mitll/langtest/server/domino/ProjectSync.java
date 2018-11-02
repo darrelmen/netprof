@@ -46,12 +46,12 @@ public class ProjectSync implements IProjectSync {
 
   private final ProjectServices projectServices;
   private final IProjectManagement projectManagement;
-  private IUserExerciseDAO userExerciseDAO;
+  private final IUserExerciseDAO userExerciseDAO;
   private final DAOContainer daoContainer;
-  private ExerciseServices exerciseServices;
-  private IUserExerciseDAO slickUEDAO;
+  private final ExerciseServices exerciseServices;
+  private final IUserExerciseDAO slickUEDAO;
 
-  private AudioCopy audioCopy;
+  private final AudioCopy audioCopy;
 
   /**
    * @param projectServices
@@ -450,7 +450,6 @@ public class ProjectSync implements IProjectSync {
               if (!currentContextOnParent.remove(knownContextMatch)) {
                 logger.warn("huh? " + knownContextMatch);
               }
-              ;
             }
           }
           if (DEBUG)

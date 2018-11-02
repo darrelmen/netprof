@@ -183,7 +183,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     return selectionModel.getSelectedObject();
   }
 
-  public T getNext() {
+/*  public T getNext() {
     T currentSelection = getCurrentSelection();
     if (currentSelection != null) {
       int index = getIndex(currentSelection);
@@ -191,7 +191,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     } else {
       return null;
     }
-  }
+  }*/
 
   @Override
   protected void addSelectionModel() {
@@ -247,9 +247,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     if (before + 1 != after) logger.warning("didn't add " + exercise.getID());
   }
 
-  public Set<Integer> getKeys() {
+/*  public Set<Integer> getKeys() {
     return idToExercise.keySet();
-  }
+  }*/
 
   private void markCurrent(T currentExercise) {
     if (currentExercise != null) {
@@ -293,12 +293,12 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     return table.getSelectionModel();
   }
 
-  public void clearSelection() {
+ /* public void clearSelection() {
     T currentSelection = getCurrentSelection();
     if (currentSelection != null) {
       getSelectionModel().setSelected(currentSelection, false);
     }
-  }
+  }*/
 
   /**
    * @param currentExercise

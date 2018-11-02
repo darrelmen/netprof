@@ -83,7 +83,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
 
   protected final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
   //  private static final boolean DEBUG = false;
-  INavigation.VIEWS instance;
+  final INavigation.VIEWS instance;
   /**
    * @param controller
    * @param exerciseList

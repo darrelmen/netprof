@@ -1096,7 +1096,7 @@ public class ProjectManagement implements IProjectManagement {
     return isRTL;
   }
 
-  private DateFormat format = new SimpleDateFormat();
+  private final DateFormat format = new SimpleDateFormat();
 
   private void addDateProps(SlickProject project, Map<String, String> info) {
     info.put(CREATED, format.format(project.created()));

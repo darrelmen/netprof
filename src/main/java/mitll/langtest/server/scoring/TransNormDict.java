@@ -1,9 +1,9 @@
 package mitll.langtest.server.scoring;
 
 public class TransNormDict {
-  private String transcript;
-  private String normTranscript;
-  private String dict;
+  private final String transcript;
+  private final String normTranscript;
+  private final String dict;
 
   TransNormDict(String transcript, String normTranscript, String dict) {
     this.transcript = transcript;

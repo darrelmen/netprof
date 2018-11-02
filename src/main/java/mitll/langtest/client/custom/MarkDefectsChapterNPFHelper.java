@@ -43,8 +43,6 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 
-import java.util.logging.Logger;
-
 import static mitll.langtest.client.custom.INavigation.VIEWS.QC;
 import static mitll.langtest.client.custom.INavigation.VIEWS.QC_SENTENCES;
 
@@ -56,7 +54,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.QC_SENTENCES;
  */
 public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
 //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
-  private boolean forSentences;
+  private final boolean forSentences;
 
   /**
    * @param controller

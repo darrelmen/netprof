@@ -63,7 +63,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   private final UserExerciseListDAOWrapper dao;
   private final UserExerciseListVisitorDAOWrapper visitorDAOWrapper;
   private final IUserExerciseDAO userExerciseDAO;
-  IProjectDAO projectDAO;
+  final IProjectDAO projectDAO;
   private final IUserDAO userDAO;
 
   /**

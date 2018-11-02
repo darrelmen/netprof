@@ -43,7 +43,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.exercise.Facet.SEMESTER;
 import static mitll.langtest.server.database.exercise.Facet.SUB_TOPIC;
@@ -70,7 +69,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
   public static final String ANY = "any";
-  public static final String ALL1 = "all";
+  private static final String ALL1 = "all";
   /**
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
@@ -328,7 +327,6 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     if (debug) {
       logger.info("getTypeToMatchPairs typeToMatches    " + typeToMatches);
     }
-//    typeToMatches = filterOutBlanks(typeToMatches);
 
     return filterOutBlanks(typeToMatches);
   }

@@ -425,7 +425,7 @@ public class Project implements IPronunciationLookup {
     return getProp(SWAP_PRIMARY_AND_ALT).equalsIgnoreCase(TRUE);
   }
 
-  private Map<String, String> propCache = new HashMap<>();
+  private final Map<String, String> propCache = new HashMap<>();
 
   /**
    * Re populate cache really.

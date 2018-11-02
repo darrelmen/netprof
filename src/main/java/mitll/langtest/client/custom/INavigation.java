@@ -1,9 +1,7 @@
 package mitll.langtest.client.custom;
 
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.User;
 
@@ -55,13 +53,13 @@ public interface INavigation extends IViewContaner {
     QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, true),
     FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, true);
 
-    private List<User.Permission> perms;
-    private ProjectMode mode;
+    private final List<User.Permission> perms;
+    private final ProjectMode mode;
     private boolean isQC;
     private boolean isFix;
     private boolean isContext;
 
-    String display;
+    final String display;
 
     VIEWS(String display, List<User.Permission> perms) {
       this.display = display;

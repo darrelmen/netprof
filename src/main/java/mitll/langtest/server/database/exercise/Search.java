@@ -16,7 +16,7 @@ import java.util.List;
 public class Search<T extends CommonExercise> {
   private static final Logger logger = LogManager.getLogger(Search.class);
 
-  private ProjectServices projectServices;
+  private final ProjectServices projectServices;
 
   public Search(ProjectServices projectServices) {
     this.projectServices = projectServices;

@@ -102,9 +102,9 @@ public class AudioCheck {
     return getDurationInSeconds(new File(file));
   }
 
-  public long getDurationInMillis(String file) {
+/*  public long getDurationInMillis(String file) {
     return (long) (1000D * getDurationInSeconds(file));
-  }
+  }*/
 
   /**
    * @param file
@@ -502,9 +502,9 @@ public class AudioCheck {
       this.durationInMillis = (int) (1000d * duration);
     }
 
-    String dump() {
+   /* String dump() {
       return getValidity() + "," + durationInMillis + "," + maxMinRange;
-    }
+    }*/
 
     public int getDurationInMillis() {
       return durationInMillis;

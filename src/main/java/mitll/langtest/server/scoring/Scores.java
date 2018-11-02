@@ -60,7 +60,7 @@ public class Scores {
   static final String PHONES = "phones";
   static final String WORDS = "words";
   float hydraScore = 0f;
-  Map<String, Map<String, Float>> eventScores;
+  final Map<String, Map<String, Float>> eventScores;
   private int processDur = 0;
   private  JsonObject kaldiJsonObject;
 

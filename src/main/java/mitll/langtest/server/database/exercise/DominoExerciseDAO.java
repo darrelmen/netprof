@@ -36,7 +36,7 @@ public class DominoExerciseDAO {
   public static final String EDIT = "edit";
   public static final String UNKNOWN = "unknown";
   private boolean shouldSwap;
-  private IUserExerciseDAO userExerciseDAO;
+  private final IUserExerciseDAO userExerciseDAO;
 
   public DominoExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;

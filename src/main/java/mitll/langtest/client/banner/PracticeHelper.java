@@ -65,7 +65,7 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
   private PolyglotDialog.MODE_CHOICE mode;
   private PolyglotDialog.PROMPT_CHOICE promptChoice;
   private INavigation navigation;
-  INavigation.VIEWS instance;
+  final INavigation.VIEWS instance;
 
   /**
    * @param controller

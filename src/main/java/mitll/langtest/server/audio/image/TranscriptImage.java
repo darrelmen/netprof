@@ -64,7 +64,7 @@ public class TranscriptImage extends AudioImage {
       "[+UNK+]",
       "[+unk+]"));
 
-  private Color bkg;                          /// Background color for widget painting
+  private final Color bkg;                          /// Background color for widget painting
   private static final Color DEFAULT_BKG = new Color(220, 230, 242);
 
 

@@ -1,8 +1,8 @@
 package mitll.langtest.server.database.audio;
 
 public class NativeAudioResult {
-  private String nativeAudioRef;
-  private boolean isContext;
+  private final String nativeAudioRef;
+  private final boolean isContext;
 
   public NativeAudioResult(String nativeAudioRef, boolean isContext) {
     this.nativeAudioRef = nativeAudioRef;

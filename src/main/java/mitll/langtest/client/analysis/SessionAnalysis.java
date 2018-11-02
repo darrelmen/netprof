@@ -45,8 +45,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 
-import static mitll.langtest.client.analysis.BasicUserContainer.MIN_HEIGHT;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -59,7 +57,7 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
   private static final String SESSION = "Session";
   private static final String NO_SESSIONS_YET = "No Sessions yet...";
   private final int user;
-  DivWidget userContainerBottom;
+  final DivWidget userContainerBottom;
 
   /**
    * @param controller

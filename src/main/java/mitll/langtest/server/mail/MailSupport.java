@@ -91,10 +91,12 @@ public class MailSupport {
   private final String mailServer;
   private final String mailFrom;
 
-  private AtomicInteger sent = new AtomicInteger(), failure = new AtomicInteger(), success = new AtomicInteger();
-  private Set<Message> pending = new HashSet<>();
-  private Set<Date> failures = new HashSet<>();
-  private List<String> recs;
+  private final AtomicInteger sent = new AtomicInteger();
+  private final AtomicInteger failure = new AtomicInteger();
+  private final AtomicInteger success = new AtomicInteger();
+  private final Set<Message> pending = new HashSet<>();
+  private final Set<Date> failures = new HashSet<>();
+  private final List<String> recs;
 
   public MailSupport(ServerProperties serverProps) {
     this(serverProps.isDebugEMail(),
@@ -107,7 +109,7 @@ public class MailSupport {
     );
   }
 
-  private Timer timer = new Timer();
+  private final Timer timer = new Timer();
   private Date startDate = null;
 
   public void addHeartbeat() {

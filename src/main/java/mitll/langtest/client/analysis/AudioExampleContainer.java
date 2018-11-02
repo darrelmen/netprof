@@ -144,7 +144,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     }
   }
 
-  private DivWidget recoOutput = new DivWidget();
+  private final DivWidget recoOutput = new DivWidget();
 
   @Override
   protected void addTable(Panel column) {
@@ -462,7 +462,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
         });
   }
 
-  private DownloadContainer downloadContainer = new DownloadContainer();
+  private final DownloadContainer downloadContainer = new DownloadContainer();
   private HeadlessPlayAudio headlessPlayAudio;
 
   private void showRecoOutput(AlignmentAndScore pretestScore, int exid, String answerAudio,

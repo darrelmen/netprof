@@ -40,9 +40,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.analysis.UserInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;

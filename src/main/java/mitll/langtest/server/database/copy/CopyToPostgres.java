@@ -131,7 +131,7 @@ public class CopyToPostgres<T extends CommonShell> {
     REMAP("e"),
     UNKNOWN("k");
 
-    private String value;
+    private final String value;
 
     ACTION(String value) {
       this.value = value;
@@ -157,8 +157,8 @@ public class CopyToPostgres<T extends CommonShell> {
     DATABASE("d", "into database"),
     PROPERTIES("i", "optional properties file to read from within /opt/netprof/config, one-to-one for each deployed webapp");
 
-    private String value;
-    private String desc;
+    private final String value;
+    private final String desc;
 
     OPTIONS(String value, String desc) {
       this.value = value;

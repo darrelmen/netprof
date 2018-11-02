@@ -65,23 +65,9 @@ public class AnswerInfo {
   private String transcript = "";
   private String normtranscript = "";
   private final double snr;
-  private String model = "";
-  private int session = 0;
 
   public int getProjid() {
     return projid;
-  }
-
-  public String getModel() {
-    return model;
-  }
-
-  public int getSession() {
-    return session;
-  }
-
-  public void setSession(int session) {
-    this.session = session;
   }
 
   public void setNormTranscript(String recoSentence) {
@@ -209,12 +195,12 @@ public class AnswerInfo {
     this.validity = validity.getValidity().name();
     this.roundTripDur = 0;
     this.snr = validity.getDynamicRange();
-    this.model = model;
+ //   this.model = model;
   }
 
   public AnswerInfo(AnswerInfo other, ScoreInfo scoreInfo, String model) {
     this(other, scoreInfo.correct, scoreInfo.pronScore, scoreInfo.scoreJson, scoreInfo.processDur);
-    this.model = model;
+   // this.model = model;
   }
 
   private AnswerInfo(AnswerInfo other,

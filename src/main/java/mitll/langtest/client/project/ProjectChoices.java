@@ -26,7 +26,6 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;

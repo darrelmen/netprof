@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise>
     extends LearnFacetExerciseList<T> {

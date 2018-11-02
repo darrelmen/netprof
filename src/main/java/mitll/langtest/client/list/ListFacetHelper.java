@@ -31,7 +31,7 @@ public class ListFacetHelper {
 
   private final UserList.LIST_TYPE list_type;
   private final ChoicesContainer choicesContainer;
-  private boolean active;
+  private final boolean active;
 
   public ListFacetHelper(ExerciseController controller,
                          String dynamicFacet,

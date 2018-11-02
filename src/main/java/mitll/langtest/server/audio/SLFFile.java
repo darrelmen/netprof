@@ -58,7 +58,7 @@ public class SLFFile {
   private static final String UNKNOWN_MODEL_BIAS = "-1.20";
   private static final String STANDARD_WEIGHT = "-1.00";
   private static final String SIL = "SIL";
-  private SmallVocabDecoder svd = new SmallVocabDecoder();
+  private final SmallVocabDecoder svd = new SmallVocabDecoder();
 
   /**
    * Unknown Model Bias Weight balances the likelihood between matching one of the decode words or the unknown model.

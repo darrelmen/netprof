@@ -186,7 +186,7 @@ public class UserCopy {
     return matcher.find();
   }
 
-  private Map<String,String> userIDToPass=new HashMap<>();
+  private final Map<String,String> userIDToPass=new HashMap<>();
 
   /**
    * Checks the password for the import user to see if it's the same as the current one in mongo.

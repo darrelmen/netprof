@@ -27,7 +27,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
   private static final boolean DEBUG = false;
   private static final boolean WARN_MISSING_REF_RESULT = false || DEBUG;
 
-  private IRefResultDAO refResultDAO;
+  private final IRefResultDAO refResultDAO;
 
   public AlignmentHelper(ServerProperties serverProperties, IRefResultDAO refResultDAO) {
     super(serverProperties);

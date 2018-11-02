@@ -33,7 +33,6 @@
 package mitll.langtest.shared.sorter;
 
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.STATE;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

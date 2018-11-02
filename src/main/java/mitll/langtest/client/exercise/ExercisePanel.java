@@ -72,8 +72,8 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
   private final NavigationHelper navigationHelper;
   final ListInterface<L, T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
-  protected final String instance;
-  private boolean doNormalRecording;
+  final String instance;
+  private final boolean doNormalRecording;
 
   /**
    * Includes fix for
@@ -245,7 +245,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
     }
   }
 
-  protected boolean isRTL(T exercise) {
+  private boolean isRTL(T exercise) {
     return isRTLContent(exercise.getFLToShow());
   }
 

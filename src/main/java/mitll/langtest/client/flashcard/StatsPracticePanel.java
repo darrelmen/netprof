@@ -97,7 +97,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
     wifiTimer = getWifiTimer();
   }
 
-  private Timer wifiTimer;
+  private final Timer wifiTimer;
 
   @Override
   protected String getDeviceValue() {

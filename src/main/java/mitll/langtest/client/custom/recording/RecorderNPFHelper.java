@@ -74,7 +74,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
   private final boolean doNormalRecording;
   private boolean added = false;
   private final RecordingProgressTable flex = new RecordingProgressTable();
-  private INavigation.VIEWS myView;
+  private final INavigation.VIEWS myView;
 
   /**
    * @param controller

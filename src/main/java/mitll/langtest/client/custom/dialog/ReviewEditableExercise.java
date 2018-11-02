@@ -862,7 +862,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
   private class MyRecordAudioPanel extends RecordAudioPanel implements BusyPanel {
     private Button deleteButton;
     private Widget comment;
-    ClientExercise exercise;
+    final ClientExercise exercise;
 
     MyRecordAudioPanel(ClientExercise exercise,
                        DivWidget widget, AudioType audioType) {

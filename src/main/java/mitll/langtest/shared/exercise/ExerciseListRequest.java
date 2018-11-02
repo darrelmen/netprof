@@ -35,7 +35,6 @@ package mitll.langtest.shared.exercise;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.analysis.AnalysisPlot;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
 import mitll.langtest.client.custom.dialog.SearchTypeahead;

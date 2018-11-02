@@ -33,7 +33,6 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;

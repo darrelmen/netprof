@@ -50,8 +50,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 import static mitll.langtest.server.services.MyRemoteServiceServlet.USER_AGENT;
@@ -216,7 +214,7 @@ public class RestUserManagement {
    * @param toReturn
    * @param request
    * @param securityManager
-   * @param projid
+   * @param projid if > 0 then we remember the project for this user
    * @param user
    * @param freeTextPassword
    * @param strictValidity

@@ -251,8 +251,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
 
   class ReportUsers {
-    private List<ReportUser> allUsers;
-    private List<ReportUser> deviceUsers;
+    private final List<ReportUser> allUsers;
+    private final List<ReportUser> deviceUsers;
 
     ReportUsers(List<ReportUser> allUsers, List<ReportUser> deviceUsers) {
       this.allUsers = allUsers;

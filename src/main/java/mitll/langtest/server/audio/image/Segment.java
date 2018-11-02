@@ -45,7 +45,7 @@ import java.io.File;
  * To change this template use File | Settings | File Templates.
  */
 class Segment {
-  public String label;
+  public final String label;
   int start = 0;
   private int end;
   private String audioFile;

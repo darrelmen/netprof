@@ -177,9 +177,11 @@ public class AudioAnswer extends SimpleAudioAnswer {
     return validity;
   }
 
+/*
   public void setValidity(Validity validity) {
     this.validity = validity;
   }
+*/
 
   public String getDecodeOutput() {
     return decodeOutput;
@@ -245,10 +247,10 @@ public class AudioAnswer extends SimpleAudioAnswer {
   public long getRoundTripMillis() {
     return roundTripMillis;
   }
-
+/*
   public void setRoundTripMillis(long roundTripMillis) {
     this.roundTripMillis = roundTripMillis;
-  }
+  }*/
 
 /*
   public String getNormTranscript() {

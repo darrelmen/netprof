@@ -49,7 +49,7 @@ import java.util.Collection;
 class ProjectPropertyDAO extends BaseSlickDAO implements IDAO {
   private static final Logger logger = LogManager.getLogger(ProjectPropertyDAO.class);
 
-  private ProjectPropertyDAOWrapper dao;
+  private final ProjectPropertyDAOWrapper dao;
 
   ProjectPropertyDAO(Database database, DBConnection dbConnection) {
     super(database);

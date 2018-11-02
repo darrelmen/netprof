@@ -77,7 +77,7 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
   private static int count = 0;
   private final String name;
   private int id = 0;
-  private RecordButton.RecordingListener outerRecordingListener;
+  private final RecordButton.RecordingListener outerRecordingListener;
 
   /**
    * @param addKeyBinding

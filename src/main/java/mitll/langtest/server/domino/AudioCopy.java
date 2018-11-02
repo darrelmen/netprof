@@ -502,9 +502,9 @@ public class AudioCopy {
       this.noMatch = noMatch;
     }
 
-    public MatchInfo(MatchInfo matchInfo) {
+/*    public MatchInfo(MatchInfo matchInfo) {
       add(matchInfo);
-    }
+    }*/
 
     void add(MatchInfo matchInfo) {
       this.match += matchInfo.match;
