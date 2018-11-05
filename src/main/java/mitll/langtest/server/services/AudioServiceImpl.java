@@ -797,10 +797,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
-/*  private String getRequestType(HttpServletRequest request) {
-    return getHeader(request, ScoreServlet.HeaderValue.REQUEST);
-  }*/
-
   private int getMostRecentProjectByUser(int id) {
     return getDatabase().getUserProjectDAO().getCurrentProjectForUser(id);
   }
@@ -822,18 +818,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
     return 1;
   }
-
-/*
-  private int getDialogSessionID(int userid) {
-    List<IDialogSession> currentDialogSessions = getDatabase().getDialogSessionDAO().getCurrentDialogSessions(userid);
-
-    if (!currentDialogSessions.isEmpty()) {
-      IDialogSession next = currentDialogSessions.iterator().next();
-      logger.info("getDialogSessionID current session " + next);
-      return next.getID();
-    } else return -1;
-  }
-*/
 
   private int getRealExID(HttpServletRequest request) {
     int realExID = 0;

@@ -138,7 +138,7 @@ public class WebAudioRecorder {
   }-*/;
 
   /**
-   *
+   * @see #stopRecording(boolean)
    */
   public native void doStopStream(String abort) /*-{
       $wnd.serviceStopStream(abort);
@@ -247,7 +247,6 @@ public class WebAudioRecorder {
     // logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
     doStopStream("" + abort);
   /*  }
-
     else {
       logger.info("WebAudioRecorder.stopRecording - stop and grab wav");
       WebAudioRecorder.wavCallback = wavCallback;

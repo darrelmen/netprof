@@ -79,8 +79,6 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   int getUser();
 
-  void startRecording();
-
   /**
    *
    * @param clientAudioContext

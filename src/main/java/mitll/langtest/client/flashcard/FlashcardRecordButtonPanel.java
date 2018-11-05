@@ -41,7 +41,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.AudioType;
 
 
 /**
@@ -69,7 +68,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
                                     ExerciseController controller,
                                     int exerciseID,
                                     int index) {
-    super(controller, exerciseID, index, true, AudioType.PRACTICE, "Record", true);
+    super(controller, "Record");
     this.exercisePanel = exercisePanel;
   }
 

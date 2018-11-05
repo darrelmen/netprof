@@ -123,18 +123,20 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
     /**
      * If another play widget on the page is playing - stop!
      */
-    LangTest.EVENT_BUS.addHandler(PlayAudioEvent.TYPE, authenticationEvent -> {
-      if (authenticationEvent.getId() != id) {
-        //logger.info("this " + getClass() + " got play audio event " + authenticationEvent.getSource());
-        if (isPlaying()) {
-          if (DEBUG) {
-            logger.info("\t PAUSE : this " + getClass() + " got play audio event " + authenticationEvent.getSource());
-          }
-          pause();
-          reinitialize();
+    LangTest.EVENT_BUS.addHandler(PlayAudioEvent.TYPE, this::gotPlayAudioEvent);
+  }
+
+  private void gotPlayAudioEvent(PlayAudioEvent authenticationEvent) {
+    if (authenticationEvent.getId() != id) {
+      //logger.info("this " + getClass() + " got play audio event " + authenticationEvent.getSource());
+      if (isPlaying()) {
+        if (DEBUG) {
+          logger.info("\t PAUSE : this " + getClass() + " got play audio event " + authenticationEvent.getSource());
         }
+        pause();
+        reinitialize();
       }
-    });
+    }
   }
 
   /**
@@ -386,10 +388,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   @Override
   protected void pause() {
     super.pause();
-
     setPlayLabel();
-
-    //setPlayButtonText();
   }
 
   public String toString() {

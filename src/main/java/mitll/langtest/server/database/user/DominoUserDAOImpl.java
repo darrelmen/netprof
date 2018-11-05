@@ -1023,6 +1023,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
+   * FROM CACHE
    * @param id
    * @return
    * @see NPUserSecurityManager#getUserForID

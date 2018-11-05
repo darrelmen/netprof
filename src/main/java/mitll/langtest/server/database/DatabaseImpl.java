@@ -927,6 +927,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param userid
    * @param projectid
+   * @see mitll.langtest.server.rest.RestUserManagement#tryToLogin
    * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
    */
   @Override

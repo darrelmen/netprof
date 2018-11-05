@@ -87,7 +87,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
                                           String playButtonSuffix,
                                           String stopButtonText,
                                           AudioType audioType) {
-    super(exerciseID, controller, index, recordInResults, playButtonSuffix, stopButtonText, 93, false);
+    super(exerciseID, controller, playButtonSuffix, stopButtonText, 93);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton_" + exerciseID + "_" + index);

@@ -1168,22 +1168,13 @@ public class LangTest implements
   // recording methods...
 
   /**
-   * Recording interface
-   *
-   * @see RecordButtonPanel#startRecording()
-   * @see PostAudioRecordButton#startRecording()
-   */
-  public void startRecording() {
-    BrowserRecording.recordOnClick();
-  }
-
-  /**
    * @param wavStreamCallback
    * @see PostAudioRecordButton#startRecording
    */
   public void startStream(ClientAudioContext clientAudioContext, WavStreamCallback wavStreamCallback) {
     AudioServiceAsync audioService = getAudioService();
     String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
+    BrowserRecording.recordOnClick();
     BrowserRecording.startStream(serviceEntryPoint, clientAudioContext, wavStreamCallback);
   }
 
@@ -1279,7 +1270,9 @@ public class LangTest implements
   }
 
   @Override
-  public void showListIn(int listID, INavigation.VIEWS views) {  getNavigation().showListIn(listID, views);  }
+  public void showListIn(int listID, INavigation.VIEWS views) {
+    getNavigation().showListIn(listID, views);
+  }
 
   /**
    * @param views

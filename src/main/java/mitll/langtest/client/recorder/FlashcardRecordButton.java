@@ -91,8 +91,8 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
                                final ExerciseController controller,
                                RecordButton.RecordingListener outerRecordingListener,
                                boolean addKeyBinding) {
-    super(exerciseID, controller, 1, true,
-        "", "", WIDTH_FOR_BUTTON, true);
+    super(exerciseID, controller,
+        "", "", WIDTH_FOR_BUTTON);
     id = count++;
     name = "FlashcardRecordButton_";
 

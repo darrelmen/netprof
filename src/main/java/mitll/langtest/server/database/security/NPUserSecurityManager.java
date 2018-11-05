@@ -314,7 +314,6 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     return request.getRequestedSessionId();
   }
 
-
   /**
    * Get the currently logged in user.
    *
