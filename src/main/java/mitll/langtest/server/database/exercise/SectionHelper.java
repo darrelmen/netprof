@@ -338,6 +338,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @param node
    * @param debug
    * @return
+   * @see #getTypeToMatches(Collection, boolean)
    */
   @NotNull
   private Map<String, Map<String, MatchInfo>> getTypeToMatchPairs(List<Pair> pairs, SectionNode node, boolean debug) {
@@ -467,7 +468,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   }
 
   private boolean isDynamicFacet(String type) {
-    return type.equals(LISTS) || type.equals(RECORDED);
+    return type.equals(LISTS) || type.equals(RECORDED) || type.equals("Content");
   }
 
   /**

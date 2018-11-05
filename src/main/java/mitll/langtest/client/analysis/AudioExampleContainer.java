@@ -248,9 +248,9 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 //      logger.info("selected " + selected);
 //      logger.info("selected " + selected.getIsContext());
 
-      INavigation.VIEWS toUse =
-          this.jumpView == INavigation.VIEWS.LEARN ?
-              selected.getIsContext() ? INavigation.VIEWS.LEARN_SENTENCES : this.jumpView : this.jumpView;
+      INavigation.VIEWS toUse = this.jumpView;
+//          this.jumpView == INavigation.VIEWS.LEARN ?
+  //            selected.getIsContext() ? INavigation.VIEWS.LEARN_SENTENCES : this.jumpView : this.jumpView;
 
       controller.getShowTab(toUse).showLearnAndItem(selected.getExid());
     }

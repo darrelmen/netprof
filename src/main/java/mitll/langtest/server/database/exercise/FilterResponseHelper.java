@@ -9,23 +9,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static mitll.langtest.server.database.exercise.SectionHelper.ANY;
 
 public class FilterResponseHelper {
   private static final Logger logger = LogManager.getLogger(FilterResponseHelper.class);
   private static final String LISTS = "Lists";
+  public static final String CONTENT = "Content";
+  public static final String SENTENCES = "Sentences";
 
   private final DatabaseServices databaseServices;
 
-  /**
-   * TODO : remove?
-   */
-  //private static final String RECORDED1 = "Recorded";
   public FilterResponseHelper(DatabaseServices databaseServices) {
     this.databaseServices = databaseServices;
   }
 
   public FilterResponse getTypeToValues(FilterRequest request, int projid, int userID) {
-//    logger.info("getTypeToValues " + request);
+    logger.info("getTypeToValues " + request);
+
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
@@ -38,13 +40,35 @@ public class FilterResponseHelper {
       } else if (request.isOnlyWithAnno()) {
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyWithAnno(true));
       } else if (request.isExampleRequest()) {
+        logger.info("isExampleRequest " + request);
+
+//        List<Pair> filtered = filterOutContent(request);
+//        request.setTypeToSelection(filtered);
+
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyExamples(true));
       } else {
         FilterResponse response = sectionHelper.getTypeToValues(request, false);
-        maybeAddUserListFacet(request, response);
+        maybeAddUserListFacet(request.getUserListID(), response);
+        maybeAddContent(request, response, projid);
+
         return response;
       }
     }
+  }
+
+  @NotNull
+  private List<Pair> filterOutContent(FilterRequest request) {
+    List<Pair> typeToSelection = request.getTypeToSelection();
+
+    List<Pair> filtered = new ArrayList<>();
+    typeToSelection.forEach(pair -> {
+      if (pair.getProperty().equalsIgnoreCase("CONTENT")) {
+
+      } else {
+        filtered.add(pair);
+      }
+    });
+    return filtered;
   }
 
   /**
@@ -66,21 +90,55 @@ public class FilterResponseHelper {
   }
 
   private ExerciseListRequest getExerciseListRequest(FilterRequest request, int userID) {
+    boolean exampleRequest = request.isExampleRequest();
+
+    logger.info("getExerciseListRequest isExampleRequest " + request + " : " + exampleRequest);
+
     return new ExerciseListRequest()
-        .setOnlyExamples(request.isExampleRequest())
+        .setOnlyExamples(exampleRequest)
         .setUserID(userID);
   }
 
-  private void maybeAddUserListFacet(FilterRequest request, FilterResponse typeToValues) {
-    int userListID = request.getUserListID();
+  private void maybeAddUserListFacet(int userListID, FilterResponse typeToValues) {
     UserList<CommonShell> next = userListID != -1 ? databaseServices.getUserListManager().getSimpleUserListByID(userListID) : null;
 
     if (next != null) {  // echo it back
       //logger.info("\tgetTypeToValues " + request + " include list " + next);
-      typeToValues.getTypesToInclude().add(LISTS);
+      typeToValues.addTypeToInclude(LISTS);
+
       Set<MatchInfo> value = new HashSet<>();
+
       value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
+
       typeToValues.getTypeToValues().put(LISTS, value);
+    }
+  }
+
+  private void maybeAddContent(FilterRequest request, FilterResponse typeToValues, int projid) {
+    Optional<Pair> content = request.getTypeToSelection().stream().filter(pair -> pair.getProperty().equalsIgnoreCase(CONTENT)).findAny();
+
+    if (content.isPresent()) {
+      String value1 = content.get().getValue();
+      if (value1.startsWith(SENTENCES)) {
+        ExerciseListRequest exerciseListRequest = new ExerciseListRequest();
+        request.getTypeToSelection().forEach(pair -> {
+          String value = pair.getValue();
+          if (!value.equalsIgnoreCase(ANY))
+            exerciseListRequest.getTypeToSelection().put(pair.getProperty(), Collections.singleton(value));
+        });
+
+        List<CommonExercise> exercisesForSelectionState = getExercisesForSelectionState(exerciseListRequest, projid);
+        int num = exercisesForSelectionState.size();
+
+
+        typeToValues.addTypeToInclude(CONTENT);
+
+        Set<MatchInfo> value = new HashSet<>();
+
+        value.add(new MatchInfo(value1, num, -1, false, ""));
+
+        typeToValues.getTypeToValues().put(CONTENT, value);
+      }
     }
   }
 
@@ -183,8 +241,6 @@ public class FilterResponseHelper {
 
   @NotNull
   private SectionHelper<CommonExercise> getSectionHelperFromFiltered(int projectID, ExerciseListRequest request) {
-//    request.shouldAddContext() && request.
-    // List<CommonExercise> exercises = getExercises(projectID);
     List<CommonExercise> filtered = filterExercises(request, getExercises(projectID), projectID);
 
     logger.info("getFilterResponse build section helper from " + filtered.size());
@@ -234,15 +290,23 @@ public class FilterResponseHelper {
         "\n\treq       " + request +
         "\n\texercises " + exercises.size());
 
+    boolean onlyExamples = request.isOnlyExamples();
+
+    Collection<String> content = request.getTypeToSelection().get(CONTENT);
+
+    if (content != null) {
+      onlyExamples = true;
+    }
+
     if (request.isOnlyUnrecordedByMe()) {
-      if (request.isOnlyExamples()) {
+      if (onlyExamples) {
         logger.info("filterExercises OK doing examples");
         exercises = getContextExercises(exercises);
       }
       logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded");
-      exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples());
+      exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, onlyExamples);
     } else if (request.isOnlyWithAnno()) {
-      boolean isContext = request.isOnlyExamples() || request.shouldAddContext();
+      boolean isContext = onlyExamples || request.shouldAddContext();
       if (isContext) {
         logger.info("filterExercises OK doing examples 2");
         exercises = getContextExercises(exercises);
@@ -255,7 +319,7 @@ public class FilterResponseHelper {
       }
     } else if (request.isOnlyUninspected()) {
       exercises = filterByUninspected(exercises);
-    } else if (request.isOnlyExamples()) {
+    } else if (onlyExamples) {
       logger.info("filterExercises OK doing examples 3");
       exercises = getContextExercises(exercises);
     }
@@ -295,26 +359,6 @@ public class FilterResponseHelper {
     return pairs;
   }
 
-
-  /**
-   * @paramx onlyAudioAnno
-   * @paramx exercises
-   * @returnx
-   * @seex #getExerciseIds
-   */
-/*  private List<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
-                                                     List<CommonExercise> exercises) {
-    if (onlyAudioAnno) {
-      Collection<Integer> audioAnnos = databaseServices.getUserListManager().getAudioAnnos();
-      List<CommonExercise> copy = new ArrayList<>();
-      for (CommonExercise exercise : exercises) {
-        if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
-      }
-      return copy;
-    } else {
-      return exercises;
-    }
-  }*/
   private List<CommonExercise> filterByOnlyAnno(List<CommonExercise> exercises, int projID, boolean isContext) {
     Collection<Integer> audioAnnos = databaseServices.getUserListManager().getAnnotationDAO().getExercisesWithIncorrectAnnotations(projID, isContext);
     List<CommonExercise> copy = new ArrayList<>(audioAnnos.size());
@@ -328,25 +372,6 @@ public class FilterResponseHelper {
     logger.info("filterByOnlyAnno from " + exercises.size() + " to " + copy.size());
     return copy;
   }
-
-/*
-  private List<CommonExercise> filterByOnlyDefaultAudio(boolean onlyDefault,
-                                                        List<CommonExercise> exercises) {
-    if (onlyDefault) {
-      List<CommonExercise> copy = new ArrayList<>();
-      for (CommonExercise exercise : exercises) {
-        for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-          if (audioAttribute.getUserid() == BaseUserDAO.DEFAULT_USER_ID) {
-            copy.add(exercise);
-            break;
-          }
-        }
-      }
-      return copy;
-    } else {
-      return exercises;
-    }
-  }*/
 
   /**
    * Remove any items that have been inspected already.
@@ -371,75 +396,6 @@ public class FilterResponseHelper {
     return copy;
   }
 
-/*  private List<CommonExercise> filterByUninspectedContext(Collection<CommonExercise> exercises) {
-    long then = System.currentTimeMillis();
-    Collection<Integer> inspected = databaseServices.getStateManager().getInspectedExercises();
-    long now = System.currentTimeMillis();
-    logger.info("filterByUninspected found " + inspected.size() + " in " + (now - then));
-    List<CommonExercise> copy = new ArrayList<>(inspected.size());
-    for (CommonExercise exercise : exercises) {
-      boolean found = false;
-      for (ClientExercise context : exercise.getDirectlyRelated()) {
-        if (!inspected.contains(context.getID())) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {  // if not found on inspected list, add parent
-        copy.add(exercise);
-      }
-    }
-    return copy;
-  }*/
-
-/*  @NotNull
-  private List<CommonExercise> getParentChildPairs(Collection<CommonExercise> exercises) {
-    List<CommonExercise> withContext = new ArrayList<>();
-    exercises.forEach(commonExercise -> {
-      //  logger.info("\t" + commonExercise.getID() + " " + commonExercise.getDirectlyRelated().size());
-      commonExercise.getDirectlyRelated().forEach(clientExercise -> {
-        //withContext.add(commonExercise);
-        Exercise copy = new Exercise(commonExercise);
-        withContext.add(copy);
-        copy.getDirectlyRelated().clear();
-        copy.getDirectlyRelated().add(clientExercise.asCommon());
-//            withContext.add(clientExercise.asCommon());
-      });
-      // withContext.addAll(commonExercise.getDirectlyRelated());
-    });
-    return withContext;
-  }*/
-
-
-  /**
-   * For all the exercises the user has not recorded, do they have the required reg and slow speed recordings by a matching gender.
-   * <p>
-   * Or if looking for example audio, find ones missing examples.
-   *
-   * @param exercises to filter
-   * @param projid
-   * @return exercises missing audio, what we want to record
-   * @paramx userID                   exercise not recorded by this user and matching the user's gender
-   * @paramx onlyUnrecordedByMyGender do we filter by gender
-   * @paramx onlyExamples             only example audio
-   * @seex #getExerciseIds
-   * @seex #getExercisesForSelectionState
-   * @see #filterExercises
-   */
-/*  private List<CommonExercise> filterByUnrecordedOrGetContext(
-      ExerciseListRequest request,
-      List<CommonExercise> exercises,
-      int projid) {
-    if (request.isOnlyUnrecordedByMe()) {
-      logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded false");
-      return getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples(), false);
-    } else if (request.isOnlyRecordedByMatchingGender()) {
-      logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded!");
-      return getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples(), true);
-    } else {
-      return request.isOnlyExamples() ? getContextExercises(exercises) : exercises;
-    }
-  }*/
 
   /**
    * TODO : way too much work here... why go through all exercises?
@@ -585,6 +541,9 @@ public class FilterResponseHelper {
 
   public List<CommonExercise> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
     Map<String, Collection<String>> typeToSelection = request.getTypeToSelection();
+
+    logger.info("getExercisesForSelectionState " + typeToSelection);
+
     Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, typeToSelection);
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
     return filterExercises(request, copy, projid);
@@ -601,10 +560,14 @@ public class FilterResponseHelper {
    */
   private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
-    typeToSelection.remove(RECORDED1);
+    Map<String, Collection<String>> copy = new HashMap<>(typeToSelection);
+    copy.remove(RECORDED1);
+    copy.remove(CONTENT);
 
-    return typeToSelection.isEmpty() ?
+    boolean empty = copy.isEmpty();
+    logger.info("getExercises " + empty + " : " + copy);
+    return empty ?
         getExercises(projid) :
-        sectionHelper.getExercisesForSelectionState(typeToSelection);
+        sectionHelper.getExercisesForSelectionState(copy);
   }
 }

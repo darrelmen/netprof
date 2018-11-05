@@ -705,8 +705,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         contextAudioChangedWithAlignment(id, duration, alignmentOutputFromAudio);
       }
     };
-    contextPlay
-        = new ChoicePlayAudioPanel<>(contextExercise, controller, true, contextAudioChanged);
+    contextPlay = new ChoicePlayAudioPanel<>(contextExercise, controller, true, contextAudioChanged);
     AudioAttribute audioAttrPrefGender = contextExercise.getAudioAttrPrefGender(controller.getUserManager().isMale());
     contextPlay.setEnabled(audioAttrPrefGender != null);
     alignmentFetcher.setContextPlay(contextPlay);

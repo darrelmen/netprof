@@ -10,7 +10,7 @@ import java.util.Set;
 
 public interface ChoicesContainer {
   @NotNull
-  ListItem getTypeContainer(String type);
+  ListItem getTypeContainer(String type, boolean hasSelection);
 
   Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type);
 }

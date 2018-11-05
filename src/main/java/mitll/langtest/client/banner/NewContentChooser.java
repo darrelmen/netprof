@@ -46,7 +46,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private static final String CURRENT_VIEW = "CurrentView";
 
   private final DivWidget divWidget = new DivWidget();
-  private final ExerciseListContent learnHelper, learnSentencesHelper;
+  private final ExerciseListContent learnHelper;//, learnSentencesHelper;
 
   private final ExerciseListContent studyHelper;
 
@@ -55,7 +55,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final ListenViewHelper rehearseHelper;
   private final ListenViewHelper performHelper;
 
-  private final PracticeHelper practiceHelper, practiceSentenceHelper;
+  private final PracticeHelper practiceHelper;//, practiceSentenceHelper;
   private final QuizHelper quizHelper;
   private final ExerciseController controller;
   private final IBanner banner;
@@ -72,9 +72,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   public NewContentChooser(ExerciseController controller, IBanner banner) {
     learnHelper = new LearnHelper(controller);
-    learnSentencesHelper = new LearnHelper(controller);
+   // learnSentencesHelper = new LearnHelper(controller);
     practiceHelper = new PracticeHelper(controller, PRACTICE);
-    practiceSentenceHelper = new PracticeHelper(controller, PRACTICE_SENTENCES);
+  //  practiceSentenceHelper = new PracticeHelper(controller, PRACTICE_SENTENCES);
     quizHelper = new QuizHelper(controller, this);
 
     dialogHelper = new DialogViewHelper(controller);
@@ -192,18 +192,18 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           clearAndPush(isFirstTime, currentStoredView, LEARN);
           learnHelper.showContent(divWidget, LEARN);
           break;
-        case LEARN_SENTENCES:
-          clearAndPush(isFirstTime, currentStoredView, LEARN_SENTENCES);
-          learnSentencesHelper.showContent(divWidget, LEARN_SENTENCES);
-          break;
+//        case LEARN_SENTENCES:
+//          clearAndPush(isFirstTime, currentStoredView, LEARN_SENTENCES);
+//          learnSentencesHelper.showContent(divWidget, LEARN_SENTENCES);
+//          break;
         case PRACTICE:
           setInstanceHistory(PRACTICE);
           showDrill(practiceHelper, PRACTICE);
           break;
-        case PRACTICE_SENTENCES:
-          setInstanceHistory(PRACTICE_SENTENCES);
-          showDrill(practiceSentenceHelper, PRACTICE_SENTENCES);
-          break;
+//        case PRACTICE_SENTENCES:
+//          setInstanceHistory(PRACTICE_SENTENCES);
+//          showDrill(practiceSentenceHelper, PRACTICE_SENTENCES);
+//          break;
         case QUIZ:
           showQuiz(fromClick);
           break;

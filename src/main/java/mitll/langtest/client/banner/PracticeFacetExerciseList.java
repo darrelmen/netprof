@@ -46,13 +46,13 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
    * @return
    * @see #getTypeToValues
    */
-  @NotNull
+ /* @NotNull
   @Override
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
     boolean exampleRequest = views == INavigation.VIEWS.PRACTICE_SENTENCES;
 //    logger.info("getFilterReq " + exampleRequest);
     return new FilterRequest(incrReqID(), pairs, userListID).setExampleRequest(exampleRequest);
-  }
+  }*/
 
   public void setControlState(ControlState state) {
     this.controlState = state;

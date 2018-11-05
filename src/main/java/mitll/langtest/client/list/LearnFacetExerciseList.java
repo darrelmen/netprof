@@ -50,6 +50,7 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
    * @return
    * @see #getTypeToValues
    */
+/*
   @NotNull
   @Override
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
@@ -57,6 +58,7 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
 //    logger.info("getFilterReq " + exampleRequest);
     return new FilterRequest(incrReqID(), pairs, userListID).setExampleRequest(exampleRequest);
   }
+*/
 
   /**
    * @param visibleIDs

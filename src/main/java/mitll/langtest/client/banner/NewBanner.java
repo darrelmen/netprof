@@ -39,7 +39,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String QC = "QC";
 
   private static final List<VIEWS> STANDARD_VIEWS =
-      Arrays.asList(VIEWS.LEARN, VIEWS.LEARN_SENTENCES, VIEWS.PRACTICE, VIEWS.PRACTICE_SENTENCES, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
+      Arrays.asList(VIEWS.LEARN, VIEWS.PRACTICE, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
 
   private static final List<VIEWS> DIALOG_VIEWS =
       Arrays.asList(VIEWS.DIALOG, VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.PERFORM, VIEWS.SCORES);
@@ -74,7 +74,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String DOCUMENTATION = "User Manual";
 
   private final UILifecycle lifecycle;
-  private ComplexWidget recnav, defectnav, dialognav, learnNav, drillNav;
+  private ComplexWidget recnav, defectnav, dialognav;//, learnNav, drillNav;
 
   private Nav lnav;
   private Dropdown cog;
@@ -348,7 +348,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     if (DEBUG) logger.info("addChoicesForUser " + toShow.size());
 
-    if (!isDialog) {
+   /* if (!isDialog) {
 
 
       toShow = new ArrayList<>(toShow);
@@ -375,15 +375,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
         drillNav = drillDrop;
       }
-    }
+    }*/
+
 
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
       //   choice1.getElement().setId("Link_" + choice.name());
-//      if (first) {
-//        choice1.addStyleName("leftTenMargin");
-//        first = false;
-//      }
+      if (first) {
+        choice1.addStyleName("leftTenMargin");
+        first = false;
+      }
       viewToLink.put(choice, choice1);
     }
   }
@@ -427,9 +428,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       String name = instance1.toUpperCase();
       name = name.replaceAll(" ", "_");
       if (name.equalsIgnoreCase("Drill")) name = "Practice".toUpperCase();
-    //  if (name.equalsIgnoreCase("Practice")) name = "Drill".toUpperCase();
+      //  if (name.equalsIgnoreCase("Practice")) name = "Drill".toUpperCase();
 
-  //    logger.info("name " + name);
+      //    logger.info("name " + name);
       choices = INavigation.VIEWS.valueOf(name);
     } catch (IllegalArgumentException e) {
       logger.warning("showSection can't parse " + instance1);
@@ -482,9 +483,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
+   * @param permissions
    * @see #setVisibleChoices(boolean)
    * @see InitialUI#showUserPermissions
-   * @param permissions
    */
   @Override
   public void reflectPermissions(Collection<User.Permission> permissions) {
@@ -493,14 +494,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean visible = hasProjectChoice();
     dialognav.setVisible(visible);
 
-  //  logger.info("reflectPerm " + visible);
-    setLearnAndDrill(visible);
+    //  logger.info("reflectPerm " + visible);
+   // setLearnAndDrill(visible);
   }
 
-  private void setLearnAndDrill(boolean visible) {
+/*  private void setLearnAndDrill(boolean visible) {
     learnNav.setVisible(visible);
     drillNav.setVisible(visible);
-  }
+  }*/
 
   @Override
   public void setCogVisible(boolean val) {
@@ -513,7 +514,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     }
 
     cog.setVisible(isAdmin());
-    setLearnAndDrill(val);
+  //  setLearnAndDrill(val);
     boolean hasProject = controller.getProjectStartupInfo() != null;
     //  if (DEBUG) logger.info("setCogVisible " + val + " has project " + hasProject + " for " + hasProjectChoices.size());
 
@@ -533,7 +534,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setDefectNavVisible(false);
     dialognav.setVisible(false);
 
-    setLearnAndDrill(false);
+//    setLearnAndDrill(false);
   }
 
   @Override
@@ -612,7 +613,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     lnav.setVisible(show);
     reflectPermissions(controller.getPermissions());
 
-    setLearnAndDrill(show);
+ //   setLearnAndDrill(show);
   }
 
   /**

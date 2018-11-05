@@ -77,7 +77,7 @@ class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterN
             alignments,
             false,
             LearnHelper.this,
-            views.isContext());
+            e.isContext());
       }
     };
   }

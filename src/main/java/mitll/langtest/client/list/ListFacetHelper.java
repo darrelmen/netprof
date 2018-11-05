@@ -3,6 +3,7 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.IUserList;
@@ -20,7 +21,6 @@ public class ListFacetHelper {
 
   private final Map<Integer, String> idToListName = new HashMap<>();
   private final Map<Integer, IUserList> idToList = new LinkedHashMap<>();
-
 
   private ListItem liForDimensionForList;
 
@@ -53,9 +53,15 @@ public class ListFacetHelper {
     return idToListName.get(id);
   }
 
+  /**
+   * @see FacetExerciseList#addFacetsForReal
+   * @param typeToValues
+   * @param allTypesContainer
+   * @param hasSelection
+   */
   void reallyAddListFacet(Map<String, Set<MatchInfo>> typeToValues,
-                          UnorderedList allTypesContainer) {
-    liForDimensionForList = active ? addListFacet(typeToValues) : null;
+                          UnorderedList allTypesContainer, boolean hasSelection) {
+    liForDimensionForList = active ? addListFacet(typeToValues, hasSelection) : null;
     if (liForDimensionForList != null) {
       allTypesContainer.add(liForDimensionForList);
     }
@@ -76,12 +82,17 @@ public class ListFacetHelper {
    * @return
    * @see #reallyAddListFacet
    */
-  private ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
-    ListItem liForDimensionForType = choicesContainer.getTypeContainer(dynamicFacet);
+  private ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues, boolean hasSelection) {
+    ListItem liForDimensionForType = choicesContainer.getTypeContainer(dynamicFacet, hasSelection);
     populateListChoices(liForDimensionForType, typeToValues);
     return liForDimensionForType;
   }
 
+  /**
+   * Ask the server for lists
+   * @param liForDimensionForType
+   * @param typeToValues
+   */
   private void populateListChoices(ListItem liForDimensionForType, Map<String, Set<MatchInfo>> typeToValues) {
     if (typeToValues == null) {
       typeToValues = lastTypeToValues;
@@ -113,13 +124,14 @@ public class ListFacetHelper {
   private void addListsAsLinks(Collection<IUserList> result,
                                Map<String, Set<MatchInfo>> finalTypeToValues,
                                ListItem liForDimensionForType) {
-    //String dynamicFacet = getDynamicFacet();
-
     finalTypeToValues.put(dynamicFacet, getMatchInfoForEachList(result));
 
-    Widget favorites = liForDimensionForType.getWidget(0);
-    liForDimensionForType.clear();
-    liForDimensionForType.add(favorites);
+    {
+      Widget favorites = liForDimensionForType.getWidget(0);
+      liForDimensionForType.clear();
+      liForDimensionForType.add(favorites);
+    }
+
     //  logger.info("populateListChoices --- for " + result.size() + " lists ");
     liForDimensionForType.add(choicesContainer.addChoices(finalTypeToValues, dynamicFacet));
   }
@@ -138,5 +150,4 @@ public class ListFacetHelper {
     }
     return value;
   }
-
 }

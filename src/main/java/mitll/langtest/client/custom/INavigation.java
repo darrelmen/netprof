@@ -27,9 +27,9 @@ public interface INavigation extends IViewContaner {
      */
     PROGRESS("Progress", VOCABULARY),
     LEARN("Learn", VOCABULARY),
-    LEARN_SENTENCES("Learn Sentences", VOCABULARY, true),
+    //LEARN_SENTENCES("Learn Sentences", VOCABULARY, true),
     PRACTICE("Practice", VOCABULARY),
-    PRACTICE_SENTENCES("Practice Sentences", VOCABULARY, true),
+    //PRACTICE_SENTENCES("Practice Sentences", VOCABULARY, true),
     QUIZ("Quiz", VOCABULARY),
 
     DIALOG("Dialog", ProjectMode.DIALOG),

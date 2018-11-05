@@ -1,10 +1,12 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by go22670 on 3/9/17.
@@ -90,6 +92,12 @@ public class MatchInfo implements IsSerializable, Comparable<MatchInfo> {
     return userListID;
   }
 
+  /**
+   * To indicate when a list is mine or someone else's
+   *
+   * @see mitll.langtest.client.list.FacetExerciseList#addChoicesForType
+   * @return
+   */
   public boolean isItalic() {
     return italic;
   }

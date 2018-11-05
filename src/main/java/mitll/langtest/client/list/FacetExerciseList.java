@@ -81,9 +81,10 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 public abstract class FacetExerciseList<T extends CommonShell & Scored, U extends CommonShell>
     extends HistoryExerciseList<T, U>
     implements ShowEventListener, ChoicesContainer {
-  public static final String CONTENT = "Content";
-  public static final String SENTENCES_ONLY = "Sentences Only";
   private final Logger logger = Logger.getLogger("FacetExerciseList");
+
+  private static final String CONTENT = "Content";
+  private static final String SENTENCES_ONLY = "Sentences Only";
 
   private static final String RECORDED = "Recorded";
 
@@ -612,7 +613,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       // nav
       //  ul
       //   li - dimension
-      ListItem liForDimensionForType = getTypeContainer(type);
+      ListItem liForDimensionForType = getTypeContainer(type, typeToSelection.containsKey(type));
       allTypesContainer.add(liForDimensionForType);
 
       // nav
@@ -624,7 +625,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       liForDimensionForType.add(addChoices(typeToValues, type));
     }
 
-    listFacetHelper.reallyAddListFacet(typeToValues, allTypesContainer);
+    addDynamicFacets(typeToValues, allTypesContainer);
+  }
+
+  private void addDynamicFacets(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
+    listFacetHelper.reallyAddListFacet(typeToValues, allTypesContainer, typeToSelection.containsKey(getDynamicFacet()));
 
     contentFacet = addContentFacet(allTypesContainer);
   }
@@ -646,17 +651,18 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   protected ListItem addContentFacet() {
-    return getTypeContainer(CONTENT);
+    return getTypeContainer(CONTENT, typeToSelection.containsKey(CONTENT));
   }
 
   private void addExerciseChoices(String dynamicFacet, ListItem liForDimensionForType) {
     Set<MatchInfo> value = new HashSet<>();
-//    value.add(new MatchInfo("Entries", numEx));
+
     value.add(new MatchInfo(SENTENCES_ONLY, numContext));
+
     Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
     typeToValues.put(dynamicFacet, value);
 
-    liForDimensionForType.clear();
+    //  liForDimensionForType.clear();
     //  logger.info("populateListChoices --- for " + result.size() + " lists ");
     liForDimensionForType.add(addChoices(typeToValues, dynamicFacet));
   }
@@ -726,9 +732,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   @Override
   @NotNull
-  public ListItem getTypeContainer(String type) {
+  public ListItem getTypeContainer(String type, boolean hasSelection) {
     if (type.isEmpty()) logger.warning("getTypeContainer huh? type is empty???");
-    boolean hasSelection = typeToSelection.containsKey(type);
+    //boolean hasSelection = typeToSelection.containsKey(type);
     ListItem liForDimensionForType = getLIDimension(hasSelection);
     liForDimensionForType.add(hasSelection ? getTypeHeader(type) : getSimpleHeader(type));
     return liForDimensionForType;
@@ -1200,8 +1206,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
     if (!isThereALoggedInUser()) return;
 
-    // List<Pair> pairs = getPairs(typeToSelection);
-    //logger.info("getTypeToValues request " + pairs + " list " + userListID);
+    {
+      List<Pair> pairs = getPairs(typeToSelection);
+      logger.info("getTypeToValues request " + pairs + " list " + userListID);
+    }
 
     final long then = System.currentTimeMillis();
 
@@ -1240,10 +1248,17 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       String s = typeToSelection.get(type);
       pairs.add(new Pair(type, (s == null) ? ANY : s));
     }
-    if (typeToSelection.containsKey(getDynamicFacet())) {
-      pairs.add(new Pair(getDynamicFacet(), typeToSelection.get(getDynamicFacet())));
-    }
+
+    addPairForTypeSelection(typeToSelection, pairs, getDynamicFacet());
+    addPairForTypeSelection(typeToSelection, pairs, CONTENT);
+
     return pairs;
+  }
+
+  private void addPairForTypeSelection(Map<String, String> typeToSelection, List<Pair> pairs, String dynamicFacet) {
+    if (typeToSelection.containsKey(dynamicFacet)) {
+      pairs.add(new Pair(dynamicFacet, typeToSelection.get(dynamicFacet)));
+    }
   }
 
   @NotNull
@@ -1358,21 +1373,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
             typeOrderContainer.iterator().hasNext()) {
 //          logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);
         } else {
-          int userListID = isDynamicFacetInteger() ? getUserListID(newTypeToSelection) : -1;
-          if (userListID != -1) {
-            int projid = selectionState.getProject();
-            int currentProject = getCurrentProject();
-            boolean isForSameProject = projid == -1 || projid == currentProject;
-            userListID = isForSameProject ? userListID : -1;
-
-            if (!isForSameProject) {
-              logger.warning("getProjectIDForList : list is for project " + projid + " but current is " + currentProject);
-/*
-              new ModalInfoDialog(LINK_FOR_CONTENT, PLEASE_CHANGE);
-*/
-            }
-
-          }
+          int userListID = getUserListID(selectionState, newTypeToSelection);
           getTypeToValues(newTypeToSelection, userListID);
         }
       }
@@ -1391,6 +1392,24 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         return 0;
       }
     };
+  }
+
+  private int getUserListID(SelectionState selectionState, Map<String, String> newTypeToSelection) {
+    int userListID = isDynamicFacetInteger() ? getUserListID(newTypeToSelection) : -1;
+    if (userListID != -1) {
+      int projid = selectionState.getProject();
+      int currentProject = getCurrentProject();
+      boolean isForSameProject = projid == -1 || projid == currentProject;
+      userListID = isForSameProject ? userListID : -1;
+
+      if (!isForSameProject) {
+        logger.warning("getProjectIDForList : list is for project " + projid + " but current is " + currentProject);
+/*
+        new ModalInfoDialog(LINK_FOR_CONTENT, PLEASE_CHANGE);
+*/
+      }
+    }
+    return userListID;
   }
 
   /**
@@ -1451,10 +1470,19 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return getStartupInfo().getProjectid();
   }
 
+  /**
+   * From the selection state in the URL.
+   *
+   * @param selectionState
+   * @param typeOrder
+   * @return
+   * @see #getSectionWidgetContainer
+   */
   @NotNull
   private Map<String, String> getNewTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
     typeOrder = new ArrayList<>(typeOrder);
     typeOrder.add(getDynamicFacet());
+    typeOrder.add(CONTENT);
 
     return getTypeToSelection(selectionState, typeOrder);
   }
@@ -1468,6 +1496,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         newTypeToSelection.put(type, selections.iterator().next());
       }
     }
+    logger.info("getTypeToSelection " + newTypeToSelection);
     return newTypeToSelection;
   }
 
