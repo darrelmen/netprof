@@ -46,7 +46,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private static final String CURRENT_VIEW = "CurrentView";
 
   private final DivWidget divWidget = new DivWidget();
-  private final ExerciseListContent learnHelper;//, learnSentencesHelper;
+  private final ExerciseListContent learnHelper;
 
   private final ExerciseListContent studyHelper;
 
@@ -55,7 +55,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final ListenViewHelper rehearseHelper;
   private final ListenViewHelper performHelper;
 
-  private final PracticeHelper practiceHelper;//, practiceSentenceHelper;
+  private final PracticeHelper practiceHelper;
   private final QuizHelper quizHelper;
   private final ExerciseController controller;
   private final IBanner banner;
@@ -72,9 +72,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   public NewContentChooser(ExerciseController controller, IBanner banner) {
     learnHelper = new LearnHelper(controller);
-   // learnSentencesHelper = new LearnHelper(controller);
     practiceHelper = new PracticeHelper(controller, PRACTICE);
-  //  practiceSentenceHelper = new PracticeHelper(controller, PRACTICE_SENTENCES);
     quizHelper = new QuizHelper(controller, this);
 
     dialogHelper = new DialogViewHelper(controller);
@@ -88,7 +86,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     this.controller = controller;
     this.listView = new ListView(controller);
     this.banner = banner;
-    divWidget.setId("NewContentChooser");
+    //  divWidget.setId("NewContentChooser");
 
     divWidget.addStyleName("topFiveMargin");
 
@@ -192,18 +190,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           clearAndPush(isFirstTime, currentStoredView, LEARN);
           learnHelper.showContent(divWidget, LEARN);
           break;
-//        case LEARN_SENTENCES:
-//          clearAndPush(isFirstTime, currentStoredView, LEARN_SENTENCES);
-//          learnSentencesHelper.showContent(divWidget, LEARN_SENTENCES);
-//          break;
         case PRACTICE:
           setInstanceHistory(PRACTICE);
           showDrill(practiceHelper, PRACTICE);
           break;
-//        case PRACTICE_SENTENCES:
-//          setInstanceHistory(PRACTICE_SENTENCES);
-//          showDrill(practiceSentenceHelper, PRACTICE_SENTENCES);
-//          break;
         case QUIZ:
           showQuiz(fromClick);
           break;
@@ -296,16 +286,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         NewContentChooser.this.showScores(divWidget, dialog);
       }
     });
-    // } else {
-    //  NewContentChooser.this.showScores(divWidget, scores, dialog);
-    //}
   }
 
   private void showScores(DivWidget divWidget, IDialog dialog) {
     DivWidget header = new DialogHeader(controller, VIEWS.PERFORM, null).getHeader(dialog);
     header.addStyleName("bottomFiveMargin");
     divWidget.add(header);
-//    divWidget.add(new AnalysisTab(controller, false, 0, () -> 1, STUDY));
     divWidget.add(isTeacher() ?
         new StudentScores(controller) :
         new SessionAnalysis(controller, controller.getUser(), null));
@@ -322,7 +308,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     clearAndFixScroll();
 
     SelectionState selectionState = new SelectionState();
-    //String instance = selectionState.getInstance();
     if (selectionState.getView() != views) {
       //   logger.info("setInstanceHistory clearing history for instance " + views);
       int dialog = selectionState.getDialog();
@@ -344,10 +329,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private void setInstanceHistory(VIEWS views, boolean keepTypeToSelection) {
     if (new SelectionState().getView() != views) {
-      String s = keepTypeToSelection ? getTypeToSelection() : "";
+      String typeToSelection = keepTypeToSelection ? getTypeToSelection() : "";
 
-      //String historyToken = getInstanceParam(views); //SelectionState.INSTANCE + "=" + views.toString();
-      pushItem(getInstanceParam(views) + (s.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + s));
+      pushItem(getInstanceParam(views) +
+          (typeToSelection.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + typeToSelection));
     } else {
       //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
@@ -516,20 +501,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
-/*  private void getReviewList(boolean isContext, VIEWS fix) {
-    controller.getListService().getReviewList(isContext, new AsyncCallback<UserList<CommonShell>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("getting defect list", caught);
-      }
-
-      @Override
-      public void onSuccess(UserList<CommonShell> result) {
-        showReviewItems(result, fix);
-      }
-    });
-  }*/
-
   /**
    * So an view specified in the url trumps a stored one in storage, but if there's none in storage, use it.
    *
@@ -633,30 +604,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @NotNull
   public ShowTab getShowTab(VIEWS views) {
     return (exid) -> {
-      int dialog = new SelectionState().getDialog();
-      // logger.info("getShowTab Dialog id " + dialog);
-
-      //   ExerciseListContent learnHelper = views == LEARN ? this.learnHelper : studyHelper;
-
-      //  boolean wasMade = learnHelper.getReloadable() != null;
-      //   logger.info("getShowTab history - " + History.getToken());
-      //  logger.info("getShowTab view " + views + " was made " + wasMade);
-
-//      if (!wasMade) {
       banner.show(views);
-      //    }
-//      learnHelper.loadExercise(exid);  //??? why - the push should do it
-      //   if (wasMade) {
-      //      banner.show(views);
-      //  }
-
-
-      //   logger.info("getShowTab history after - " + History.getToken());
-
       pushItem(
           getInstanceParam(views) +
-              maybeAddDialogParam(dialog) +
-//              (dialog != -1 ? SelectionState.SECTION_SEPARATOR + SelectionState.DIALOG + "=" + dialog : "") +
+              maybeAddDialogParam(new SelectionState().getDialog()) +
               SelectionState.SECTION_SEPARATOR + SelectionState.ITEM + "=" + exid
       );
     };
@@ -691,7 +642,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushItem(String url) {
-    //  logger.info("pushItem - " + url);
+    logger.info("pushItem - " + url);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //    logger.info("logException stack " + exceptionAsString);
     History.newItem(url);

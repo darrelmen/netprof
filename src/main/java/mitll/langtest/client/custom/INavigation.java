@@ -26,11 +26,13 @@ public interface INavigation extends IViewContaner {
      *
      */
     PROGRESS("Progress", VOCABULARY),
+
     LEARN("Learn", VOCABULARY),
     //LEARN_SENTENCES("Learn Sentences", VOCABULARY, true),
     PRACTICE("Practice", VOCABULARY),
     //PRACTICE_SENTENCES("Practice Sentences", VOCABULARY, true),
     QUIZ("Quiz", VOCABULARY),
+
 
     DIALOG("Dialog", ProjectMode.DIALOG),
     /**
@@ -46,10 +48,13 @@ public interface INavigation extends IViewContaner {
      */
     SCORES("Scores", ProjectMode.DIALOG),
 
+
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    RECORD_CONTEXT("Record Context", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    QC("QC", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, false),
-    FIX("Fix", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, false),
+    RECORD_CONTEXT("Record Sentences", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+
+
+    QC("QC Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, false),
+    FIX("Fix Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, false),
     QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, true),
     FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, true);
 

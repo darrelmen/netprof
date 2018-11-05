@@ -56,17 +56,17 @@ public class SelectionState {
   private static final String POUND = "#";
 
   public static final String ITEM = "item";
-  public static final String LIST = FacetExerciseList.LISTS;
+  static final String LIST = FacetExerciseList.LISTS;
   public static final String SEARCH = "search";
   public static final String PROJECT = "project";
   public static final String DIALOG = "d";
 
   public static final String SECTION_SEPARATOR = "~";
 
-  public static final String ONLY_WITH_AUDIO_DEFECTS = "onlyWithAudioDefects";
+  private static final String ONLY_WITH_AUDIO_DEFECTS = "onlyWithAudioDefects";
   private static final String ONLY_UNRECORDED = "onlyUnrecorded";
-  public static final String ONLY_DEFAULT = "onlyDefault";
-  public static final String ONLY_UNINSPECTED = "onlyUninspected";
+  private static final String ONLY_DEFAULT = "onlyDefault";
+  private static final String ONLY_UNINSPECTED = "onlyUninspected";
   private static final String ITEM_SEPARATOR = "&#44";
   private static final String SHOWING_ALL_ENTRIES = "All entries";
 
@@ -275,7 +275,7 @@ public class SelectionState {
     return search;
   }
 
-  public boolean isOnlyWithAudioDefects() {
+   boolean isOnlyWithAudioDefects() {
     return onlyWithAudioDefects;
   }
 
@@ -283,11 +283,11 @@ public class SelectionState {
     return onlyUnrecorded;
   }
 
-  public boolean isOnlyDefault() {
+   boolean isOnlyDefault() {
     return onlyDefault;
   }
 
-  public boolean isOnlyUninspected() {
+   boolean isOnlyUninspected() {
     return onlyUninspected;
   }
 

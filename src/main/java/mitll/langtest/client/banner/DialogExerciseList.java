@@ -43,7 +43,7 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   DialogExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader,
                      ExerciseController controller) {
-    super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, false, INavigation.VIEWS.DIALOG);
+    super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, INavigation.VIEWS.DIALOG);
   }
 
   @Override

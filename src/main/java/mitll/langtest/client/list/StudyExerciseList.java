@@ -40,7 +40,7 @@ public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends L
                            ListOptions listOptions,
                            DivWidget listHeader,
                            boolean isDrillView) {
-    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView, INavigation.VIEWS.STUDY);
+    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, INavigation.VIEWS.STUDY);
   }
 
   @Override

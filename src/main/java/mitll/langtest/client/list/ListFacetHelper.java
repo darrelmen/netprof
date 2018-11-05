@@ -3,7 +3,6 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.IUserList;

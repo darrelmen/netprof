@@ -2,6 +2,7 @@ package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.banner.PracticeFacetExerciseList;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.LearnFacetExerciseList;
@@ -10,12 +11,13 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> extends LearnFacetExerciseList<T> {
+public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> extends PracticeFacetExerciseList<T, ClientExercise> {
   public NoListFacetExerciseList(ExerciseController controller,
                                  Panel topRow,
                                  Panel currentExercisePanel,
@@ -23,13 +25,18 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> ext
                                  DivWidget listHeader,
                                  INavigation.VIEWS views) {
     super(
+        controller,
+        null,
+
         topRow,
         currentExercisePanel,
-        controller,
+
         new ListOptions(instanceName)
             .setShowFirstNotCompleted(true)
             .setActivityType(ActivityType.RECORDER)
-        , listHeader, true, views);
+        ,
+        listHeader,
+        views);
   }
 
   /**
@@ -53,17 +60,6 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise> ext
     return key;
   }
 
-  /**
-   * No list facet or special facet.
-   *
-   * @paramx typeToValues
-   * @return
-   * @see #addFacetsForReal
-   */
-//  @Override
-//  protected ListItem addListFacet(Map<String, Set<MatchInfo>> typeToValues) {
-//    return null;
-//  }
 
   @NotNull
   @Override

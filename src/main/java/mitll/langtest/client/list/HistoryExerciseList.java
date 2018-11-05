@@ -79,7 +79,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   /**
    * @param currentExerciseVPanel
    * @param controller
-   * @see FacetExerciseList#FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, boolean, INavigation.VIEWS)
+   * @see FacetExerciseList#FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, INavigation.VIEWS)
    */
   protected HistoryExerciseList(Panel currentExerciseVPanel,
                                 ExerciseController controller,
@@ -460,7 +460,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @param selectionState
    * @return true if we're just clicking on a different item in the list and don't need to reload the exercise list
    */
-  protected void restoreUIState(SelectionState selectionState) {
+  void restoreUIState(SelectionState selectionState) {
     restoreListBoxState(selectionState);
 
     if (DEBUG_ON_VALUE_CHANGE) {
@@ -578,13 +578,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
                                 int exerciseID,
                                 ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID +
           "\n\tfor " + request);
 
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-//      logger.info("logException stack " + exceptionAsString);
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+      logger.info("logException stack " + exceptionAsString);
     }
+
     if (controller.getUser() > 0) {
       // final long then = System.currentTimeMillis();
       service.getExerciseIds(

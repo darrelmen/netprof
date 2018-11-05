@@ -74,10 +74,11 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 6/26/2014.
  */
-public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//CommonShell & MutableAnnotationExercise & AudioRefExercise> // CommonExercise & MutableAnnotationExercise>
+public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>
     extends DivWidget implements TimerListener {
-  public static final int HEADING_SIZE = 2;
   private final Logger logger = Logger.getLogger("FlashcardPanel");
+
+  private static final int HEADING_SIZE = 2;
 
   private static final String MEANING = "Meaning";
 
@@ -153,7 +154,7 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>//Co
    * @param soundFeedback
    * @param endListener
    * @param exerciseList
-   * @see ExercisePanelFactory#getExercisePanel(mitll.langtest.shared.exercise.Shell)
+   * @see ExercisePanelFactory#getExercisePanel
    */
   FlashcardPanel(final T e,
                  final ExerciseController controller,

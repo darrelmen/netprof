@@ -460,9 +460,9 @@ public class AudioExercise extends ExerciseShell {
           continue;
         }
 
-        if (audioAttribute.getExid() == 9444) {
-          logger.info("got " + audioAttribute);
-        }
+//        if (audioAttribute.getExid() == 9444) {
+//          logger.info("got " + audioAttribute);
+//        }
 
         if (audioAttribute.isRegularSpeed()) reg = true;
         if (audioAttribute.isSlow()) slow = true;
@@ -478,10 +478,9 @@ public class AudioExercise extends ExerciseShell {
           if (latestReg == null || latestReg.getTimestamp() < candidateTimestamp) {
             latestReg = audioAttribute;
 
-
-            if (audioAttribute.getExid() == 9444) {
-              logger.info("\tnew latest  " + latestReg);
-            }
+//            if (audioAttribute.getExid() == 9444) {
+//              logger.info("\tnew latest  " + latestReg);
+//            }
           }
         }
         if (slow) {

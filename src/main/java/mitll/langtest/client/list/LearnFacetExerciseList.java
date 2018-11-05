@@ -7,7 +7,6 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,10 +18,11 @@ import java.util.logging.Logger;
  *
  * @param <T>
  */
-public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> extends FacetExerciseList<T, ClientExercise> {
+public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise>
+    extends FacetExerciseList<T, ClientExercise> {
   private final Logger logger = Logger.getLogger("LearnFacetExerciseList");
 
-  private static final boolean DEBUG = false;
+  protected static final boolean DEBUG = false;
 
   /**
    * @param secondRow
@@ -30,7 +30,6 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
    * @param controller
    * @param listOptions
    * @param listHeader
-   * @param isDrillView
    * @param views
    * @see mitll.langtest.client.banner.LearnHelper#getMyListLayout(SimpleChapterNPFHelper)
    */
@@ -39,26 +38,9 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise> exte
                                 ExerciseController controller,
                                 ListOptions listOptions,
                                 DivWidget listHeader,
-                                boolean isDrillView,
                                 INavigation.VIEWS views) {
-    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, isDrillView, views);
+    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, views);
   }
-
-  /**
-   * @param userListID
-   * @param pairs
-   * @return
-   * @see #getTypeToValues
-   */
-/*
-  @NotNull
-  @Override
-  protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
-    boolean exampleRequest = views == INavigation.VIEWS.LEARN_SENTENCES;
-//    logger.info("getFilterReq " + exampleRequest);
-    return new FilterRequest(incrReqID(), pairs, userListID).setExampleRequest(exampleRequest);
-  }
-*/
 
   /**
    * @param visibleIDs

@@ -45,6 +45,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 
 import java.util.logging.Logger;
 
@@ -57,7 +58,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonShell>
+public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends HasID>
     implements RequiresResize, ExerciseListContent {
   private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
 

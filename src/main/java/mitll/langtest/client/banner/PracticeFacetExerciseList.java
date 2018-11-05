@@ -8,51 +8,35 @@ import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.LearnFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.exercise.*;
-import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise>
     extends LearnFacetExerciseList<T> {
- // private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
+  private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
   private final PracticeHelper<T, U> practiceHelper;
   private ControlState controlState;
 
-  PracticeFacetExerciseList(ExerciseController controller,
-                            PracticeHelper<T, U> practiceHelper,
-                            Panel topRow, Panel currentExercisePanel,
-                            DivWidget listHeader,
-                            INavigation.VIEWS views) {
+  protected PracticeFacetExerciseList(ExerciseController controller,
+                                      PracticeHelper<T, U> practiceHelper,
+                                      Panel topRow,
+                                      Panel currentExercisePanel,
+                                      ListOptions listOptions,
+                                      DivWidget listHeader,
+                                      INavigation.VIEWS views) {
     super(
         topRow,
         currentExercisePanel,
         controller,
-        new ListOptions(views)
-            .setShowPager(false).
-            setShowTypeAhead(false),
+        listOptions.setShowPager(false).setShowTypeAhead(false),
         listHeader,
-        true,
         views);
     this.practiceHelper = practiceHelper;
   }
-
-  /**
-   * @param userListID
-   * @param pairs
-   * @return
-   * @see #getTypeToValues
-   */
- /* @NotNull
-  @Override
-  protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
-    boolean exampleRequest = views == INavigation.VIEWS.PRACTICE_SENTENCES;
-//    logger.info("getFilterReq " + exampleRequest);
-    return new FilterRequest(incrReqID(), pairs, userListID).setExampleRequest(exampleRequest);
-  }*/
 
   public void setControlState(ControlState state) {
     this.controlState = state;
@@ -66,29 +50,41 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
   protected void onDetach() {
     super.onDetach();
 // logger.info("\n\ngot detach ---> \n\n\n");
-
     if (controlState.isAutoPlay()) {
       // logger.info("onDetach : audio on, so turn auto advance OFF");
       controlState.setAutoPlay(false);
     }
   }
 
+  @Override
+  protected int getPageIndex() {
+    return 0;
+  }
+
   protected void goToFirst(String searchIfAny, int exerciseID) {
     //logger.info("\ngoToFirst ---> \n\n\n");
-
     super.goToFirst(searchIfAny, exerciseID);
-    if (practiceHelper.getPolyglotFlashcardFactory() != null) {
-      practiceHelper.getPolyglotFlashcardFactory().setMode(practiceHelper.getMode());
+
+    if (practiceHelper != null) {
+      if (practiceHelper.getPolyglotFlashcardFactory() != null) {
+        practiceHelper.getPolyglotFlashcardFactory().setMode(practiceHelper.getMode());
+      }
+      if (getStatsFlashcardFactory() != null) {
+        getStatsFlashcardFactory().setNavigation(practiceHelper.getNavigation());
+      }
     }
-    getStatsFlashcardFactory().setNavigation(practiceHelper.getNavigation());
   }
 
   @Override
   protected void onLastItem() {
-    getStatsFlashcardFactory().resetStorage();
+    if (getStatsFlashcardFactory() != null) {
+      getStatsFlashcardFactory().resetStorage();
+    }
   }
 
   /**
+   * NOTE:
+   *
    * The issue is there should only be only keyboard focus - either the space bar and prev/next or
    * the search box. - so we should hide the search box.
    *
@@ -105,20 +101,75 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
                                           int exerciseID, boolean onlyWithAudioAnno,
                                           boolean onlyDefaultUser, boolean onlyUninspected) {
     super.loadExercisesUsingPrefix(typeToSection, "", exerciseID, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected);
-    getStatsFlashcardFactory().setSelection(typeToSection);
+
+    StatsFlashcardFactory<T, U> statsFlashcardFactory = getStatsFlashcardFactory();
+    if (statsFlashcardFactory != null) {
+      statsFlashcardFactory.setSelection(typeToSection);
+    }
   }
 
   private StatsFlashcardFactory<T, U> getStatsFlashcardFactory() {
-    return practiceHelper.getStatsFlashcardFactory();
+    return practiceHelper == null ? null : practiceHelper.getStatsFlashcardFactory();
+  }
+
+  @Override
+  protected void gotRangeChanged() {
+
+  }
+
+  @Override
+  protected void getVisibleExercises(final Collection<Integer> visibleIDs, final int currentReq) {
+    checkAndGetExercises(visibleIDs, currentReq);
+  }
+
+  @Override
+  protected Collection<Integer> getVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
+    if (itemID > 0) {
+      visibleIDs = new ArrayList<>();
+      visibleIDs.add(itemID);
+    }
+    return visibleIDs;
+  }
+
+  @Override
+  protected void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
+    if (visibleIDs.isEmpty()) {
+      CommonShell currentExercise = getCurrentExercise();
+      if (currentExercise != null) {
+        int id = currentExercise.getID();
+        if (!visibleIDs.contains(id)) {
+          visibleIDs.add(id);
+          logger.warning("reallyGetExercises added current ex to visible " + id);
+/*
+          int c = 0;
+          for (Integer id2 : visibleIDs) {
+            logger.info("#" + c++ + " : " + id2);
+          }
+*/
+        }
+      }
+
+      logger.info("\n\n\treallyGetExercises now " + visibleIDs.size() + " visible ids : " + visibleIDs + " currentReq " + currentReq);
+
+    }
+    super.reallyGetExercises(visibleIDs, currentReq);
+  }
+
+  @Override
+  protected void showExercises(final Collection<ClientExercise> result, final int reqID) {
+    hidePrevNextWidgets();
+    showDrill(result);
+    goGetNextPage();
+    setProgressVisible(false);
   }
 
   /**
-   * No one call this...
-   *
-   * @param selectionState
+   * @param result
+   * @see #showExercises
    */
-  @Deprecated
-  void restoreUI(SelectionState selectionState) {
-    restoreUIState(selectionState);
+  protected void showDrill(Collection<ClientExercise> result) {
+    ClientExercise next = result.iterator().next();
+    markCurrentExercise(next.getID());
+    addExerciseWidget(next);
   }
 }
