@@ -35,6 +35,7 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserProject;
+import scala.Tuple2;
 
 import java.util.Collection;
 import java.util.Map;
@@ -101,4 +102,6 @@ public interface IUserProjectDAO extends IDAO {
    * @return
    */
   Map<Integer, Integer> getUsersToProject(Collection<Integer> userids);
+
+  Map<Integer, Tuple2<Integer, Long>> getUsersToProjectAndTime(Collection<Integer> userids);
 }

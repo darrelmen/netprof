@@ -105,7 +105,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
   private static final mitll.hlt.domino.shared.model.user.User.Gender UNSPECIFIED = mitll.hlt.domino.shared.model.user.User.Gender.Unspecified;
-  private static final String PRIMARY = "Netprof";
+  public static final String NETPROF1 = "Netprof";
+  private static final String PRIMARY = NETPROF1;
   private static final String DEFAULT_AFFILIATION = "";
 
   private static final String UID_F = "userId";
@@ -113,6 +114,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String LOCALHOST = "127.0.0.1";
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
+  public static final String TCHR = "TCHR";
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
@@ -135,11 +137,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           "comcast.net"
       );
 
+  public static final String NETPROF2 = "netprof";
   /**
    * Should be consistent with DOMINO.
    * Actually it's all lower case.
    */
-  public static final String NETPROF = "netprof";
+  public static final String NETPROF = NETPROF2;
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
   private static final String LYDIA_01 = "Lydia01";
   private static final String PO_M = "PoM";
@@ -363,6 +366,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   /**
    * DNS LOOKUP.
+   *
    * @param host
    * @return
    */
@@ -663,14 +667,24 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @NotNull
   public Group getGroup() {
     if (primaryGroup == null) {
-      List<Group> groups = delegate.getGroupDAO().searchGroups("Netprof");
+      List<Group> groups = delegate.getGroupDAO().searchGroups(NETPROF1);
       if (groups.isEmpty()) {
-        groups = delegate.getGroupDAO().searchGroups("netprof");
+        logger.warn("getGroup no groups for " + NETPROF1 + "?");
+        groups = delegate.getGroupDAO().searchGroups(NETPROF2);
       }
       if (groups.isEmpty()) {
+        logger.warn("getGroup no groups for " + NETPROF2 + "?");
+
         groups = delegate.getGroupDAO().searchGroups("");
       }
-      primaryGroup = groups.isEmpty() ? null : groups.iterator().next();
+
+      Optional<Group> first = groups.stream().filter(group -> group.getApplicationId().equalsIgnoreCase(NETPROF2)).findFirst();
+      if (first.isPresent()) {
+        primaryGroup = first.get();
+        logger.warn("getGroup OK using " + primaryGroup);
+      } else {
+        primaryGroup = groups.isEmpty() ? null : groups.iterator().next();
+      }
 
       if (primaryGroup == null) { //defensive
         logger.warn("\n\n\ngetGroup making a new group...?\n\n\n");
@@ -693,7 +707,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         24 * 365,
         out,
         adminUser,
-        "netprof");
+        NETPROF2);
   }
 
   @NotNull
@@ -730,7 +744,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
     SResult<ClientGroupDetail> name1 = groupDAO1.doAdd(adminUser,
-        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser, "netprof"));
+        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser, NETPROF2));
 
     Group group = null;
     if (name1.isError()) {
@@ -811,6 +825,39 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private List<DBUser> getDbUsers(Set<FilterDetail<UserColumn>> filterDetails) {
     List<DBUser> users = delegate.getUsers(-1, new FindOptions<>(filterDetails));
     //  logger.info("getDbUsers " + opts + " = " + users);
+    return users;
+  }
+
+  @NotNull
+  public <T> Map<Integer, T> getJustTeachers(Map<Integer, T> activeSince) {
+    logger.info("getJustTeachers active " + activeSince.size());
+
+    Set<Integer> teacherIDs = getTeacherIDs();
+
+    logger.info("getJustTeachers teacherIDs = " + teacherIDs.size());
+
+    Map<Integer, T> justTeachers = new HashMap<>();
+
+    activeSince.forEach((k, v) -> {
+      if (teacherIDs.contains(k)) justTeachers.put(k, v);
+    });
+
+    logger.info("getJustTeachers justTeachers = " + teacherIDs.size());
+
+    return justTeachers;
+  }
+
+  @NotNull
+  public Set<Integer> getTeacherIDs() {
+    return getTeachers().stream().map(UserDescriptor::getDocumentDBID).collect(Collectors.toSet());
+  }
+
+  private List<DBUser> getTeachers() {
+    HashSet<FilterDetail<UserColumn>> filterDetails = new HashSet<>();
+    FilterDetail<UserColumn> tchr = new FilterDetail<>(UserColumn.Roles, TCHR, FilterDetail.Operator.RegEx);
+    filterDetails.add(tchr);
+    List<DBUser> users = delegate.getUsers(-1, new FindOptions<>(filterDetails));
+    logger.info("getTeachers " + tchr + " = " + users.size());
     return users;
   }
 
@@ -1852,9 +1899,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
         ClientUserDetail clientUserDetail = getClientUserDetail(next);
         logger.info("forgotPassword users clientUserDetail " + clientUserDetail);
-        clientUserDetail1 = delegate.forgotPassword(next,
-            clientUserDetail,
-            url);
+        clientUserDetail1 = delegate.forgotPassword(next, clientUserDetail, url);
 
         logger.info("forgotPassword forgotPassword users for " + user + " : " + clientUserDetail1);
       } catch (Exception e) {

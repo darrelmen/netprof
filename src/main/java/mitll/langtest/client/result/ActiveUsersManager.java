@@ -35,16 +35,19 @@ public class ActiveUsersManager {
 
   /**
    * @param controller
-   * @see mitll.langtest.client.banner.UserMenu.ReportListHandler
+   * @see mitll.langtest.client.banner.UserMenu#showActiveUsers
    */
   public ActiveUsersManager(ExerciseController controller) {
     this.controller = controller;
   }
 
-  public void show(int hours) {
+  public void show(String title, int hours) {
     // Create the popup dialog box
     final DialogBox dialogBox = new DialogBox();
-    dialogBox.setText("Active Users" + (hours <= 24 ? " (last day)" : " (last week)"));
+
+    dialogBox.setText(title +
+        (hours == 0 ? "" :
+            (hours <= 24 ? " (last day)" : " (last week)")));
 
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
@@ -55,6 +58,14 @@ public class ActiveUsersManager {
     final Panel dialogVPanel = new VerticalPanel();
     dialogVPanel.setWidth("100%");
 
+    getUsers(hours, dialogBox, dialogVPanel);
+
+    dialogBox.setWidget(dialogVPanel);
+
+    dialogBox.show();
+  }
+
+  protected void getUsers(int hours, DialogBox dialogBox, Panel dialogVPanel) {
     controller.getUserService().getUsersSince(System.currentTimeMillis() - hours * HOUR, new AsyncCallback<List<ActiveUser>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -63,19 +74,18 @@ public class ActiveUsersManager {
 
       @Override
       public void onSuccess(List<ActiveUser> result) {
-        dialogVPanel.add(new ActiveUserBasicUserContainer().getTableWithPager(result));
-
-        DivWidget horiz = new DivWidget();
-        horiz.setWidth("100%");
-        horiz.add(getOKButton(dialogBox));
-        dialogVPanel.add(horiz);
+        gotUsers(result, dialogVPanel, dialogBox);
       }
     });
+  }
 
+  protected void gotUsers(List<ActiveUser> result, Panel dialogVPanel, DialogBox dialogBox) {
+    dialogVPanel.add(new ActiveUserBasicUserContainer().getTableWithPager(result));
 
-    dialogBox.setWidget(dialogVPanel);
-
-    dialogBox.show();
+    DivWidget horiz = new DivWidget();
+    horiz.setWidth("100%");
+    horiz.add(getOKButton(dialogBox));
+    dialogVPanel.add(horiz);
   }
 
   @NotNull

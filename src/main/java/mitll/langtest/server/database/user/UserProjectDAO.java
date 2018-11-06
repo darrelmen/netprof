@@ -40,6 +40,7 @@ import mitll.npdata.dao.SlickUserProject;
 import mitll.npdata.dao.word.UserProjectDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import scala.Tuple2;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -194,5 +195,11 @@ public class UserProjectDAO implements IUserProjectDAO {
   @Override
   public Map<Integer, Integer> getUsersToProject(Collection<Integer> userids) {
     return dao.getUserToProjects(userids);
+  }
+
+  @Override
+  public Map<Integer, Tuple2<Integer, Long>> getUsersToProjectAndTime(Collection<Integer> userids) {
+    Map<Integer, Tuple2<Integer, Long>> userToProjectAndTime = dao.getUserToProjectAndTime(userids);
+    return userToProjectAndTime;
   }
 }

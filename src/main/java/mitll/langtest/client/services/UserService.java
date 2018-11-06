@@ -54,6 +54,10 @@ public interface UserService extends RemoteService {
   User getUserFromSession() throws DominoSessionException;
 
   List<ActiveUser> getUsersSince(long when) throws DominoSessionException, RestrictedOperationException;
+
+  List<ActiveUser> getActiveTeachers() throws DominoSessionException, RestrictedOperationException;
+  List<ActiveUser> getTeachers() throws DominoSessionException, RestrictedOperationException;
+
   void logout() throws DominoSessionException;
 
   /**

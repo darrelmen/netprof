@@ -58,7 +58,27 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminPerm(userIDFromSessionOrDB)) {
       return securityManager.getActiveSince(when);
-    } else return Collections.emptyList();
+    } else {
+      return Collections.emptyList();
+    }
+  }
+
+  @Override
+  public List<ActiveUser> getActiveTeachers() throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return securityManager.getActiveTeachers();
+    } else {
+      return Collections.emptyList();
+    }
+  }
+
+  @Override
+  public List<ActiveUser> getTeachers() throws DominoSessionException, RestrictedOperationException {
+    if (hasAdminPerm(getUserIDFromSessionOrDB())) {
+      return securityManager.getTeachers();
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   /**
@@ -88,7 +108,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
     return
         userWhereResetKey != null &&
             (db.getUserDAO().changePasswordWithCurrent(userIDFromSession, currentHashedPassword, newHashedPassword, getBaseURL()));
-
   }
 
   /**

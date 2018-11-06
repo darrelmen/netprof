@@ -88,6 +88,16 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public void ensureDefaultUsers() {
   }
 
+   @Override
+  public Set<Integer> getTeacherIDs() {
+    return null;
+  }
+
+  @Override
+  public <T> Map<Integer, T> getJustTeachers(Map<Integer, T> activeSince) {
+    return null;
+  }
+
   /**
    * Somehow on subsequent runs, the ids skip by 30 or so?
    * <p>

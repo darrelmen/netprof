@@ -92,4 +92,7 @@ public interface IUserSecurityManager {
    * @return
    */
   List<ActiveUser> getActiveSince(long when);
+  List<ActiveUser> getActiveTeachers();
+
+  List<ActiveUser> getTeachers();
 }
