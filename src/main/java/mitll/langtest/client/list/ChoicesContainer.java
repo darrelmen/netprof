@@ -12,5 +12,5 @@ public interface ChoicesContainer {
   @NotNull
   ListItem getTypeContainer(String type, boolean hasSelection);
 
-  Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type);
+  Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type, boolean addTypePrefix);
 }

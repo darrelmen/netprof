@@ -100,7 +100,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    */
   private static final boolean DEBUG_STALE = true;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_CHOICES = false;
   private static final boolean DEBUGSCORE = false;
 
@@ -551,7 +551,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
       typeOrder = getTypeOrderSimple();
-      //    logger.info("getTypeOrder type order " + typeOrder);
+      logger.info("\n\n\ngetTypeOrder type order " + typeOrder);
       this.rootNodesInOrder = new ArrayList<>(typeOrder);
       this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
     }
@@ -612,16 +612,27 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       // nav
       //  ul
       //   li - dimension
-      ListItem liForDimensionForType = getTypeContainer(type, typeToSelection.containsKey(type));
-      allTypesContainer.add(liForDimensionForType);
+      boolean hasChoices = typeToValues.containsKey(type);
 
-      // nav
-      //  ul
-      //   li
-      //    ul
-      //
-      // logger.info("addChoices --- " + type);
-      liForDimensionForType.add(addChoices(typeToValues, type));
+      if (hasChoices) {
+        // logger.info("addDim " + type + " = " + keys);
+
+
+        ListItem liForDimensionForType = getTypeContainer(type, typeToSelection.containsKey(type));
+        allTypesContainer.add(liForDimensionForType);
+
+        // nav
+        //  ul
+        //   li
+        //    ul
+        //
+//        logger.info("addChoices --- " + type);
+
+        // only the first two get a marking
+        boolean addTypePrefix = typeOrder.indexOf(type) < 2;
+
+        liForDimensionForType.add(addChoices(typeToValues, type, addTypePrefix));
+      }
     }
 
     addDynamicFacets(typeToValues, allTypesContainer);
@@ -663,7 +674,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     //  liForDimensionForType.clear();
     //  logger.info("populateListChoices --- for " + result.size() + " lists ");
-    liForDimensionForType.add(addChoices(typeToValues, dynamicFacet));
+    liForDimensionForType.add(addChoices(typeToValues, dynamicFacet, false));
   }
 
   /**
@@ -758,11 +769,12 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    * @param typeToValues
    * @param type
+   * @param addTypePrefix
    * @return
    * @see #addFacetsForReal
    */
   @Override
-  public Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type) {
+  public Panel addChoices(Map<String, Set<MatchInfo>> typeToValues, String type, boolean addTypePrefix) {
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
 
@@ -775,7 +787,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         if (type.equalsIgnoreCase(RECORDED)) {
           keys = new TreeSet<>(keys);
         }
-        addChoicesForType(typeToValues, type, choices, keys);
+        addChoicesForType(typeToValues, type, choices, keys, addTypePrefix);
       }
     } else {
       String childType = getChildForParent(type);
@@ -784,8 +796,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         {
           Widget parentAnchor =
               typeToSelection.containsKey(childType) ?
-                  getParentAnchor(type, selectionForType, childType) :
-                  getSelectedAnchor(type, selectionForType);
+                  getParentAnchor(type, selectionForType, childType, addTypePrefix) :
+                  getSelectedAnchor(type, selectionForType, addTypePrefix);
           choices.add(parentAnchor);
         }
 
@@ -796,15 +808,26 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
           liForDimension.addStyleName("refinement");
           choices.add(liForDimension);
 
-          liForDimension.add(addChoices(typeToValues, childType));
+          liForDimension.add(addChoices(typeToValues, childType, addTypePrefix));
         }
       } else {
         if (isListType(type)) {
           if (DEBUG_CHOICES) logger.info("addChoices addListChoice " + type + "=" + selectionForType);
-          addListChoice(type, choices, selectionForType);
+          addListChoice(type, choices, selectionForType, addTypePrefix);
         } else {
-          if (DEBUG_CHOICES) logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType);
-          choices.add(getSelectedAnchor(type, selectionForType));
+          Set<MatchInfo> matchInfos = typeToValues.get(type);
+          int num = -1;
+          if (matchInfos != null) {
+            Optional<MatchInfo> first = matchInfos.stream().filter(matchInfo -> matchInfo.getValue().equalsIgnoreCase(selectionForType)).findFirst();
+            if (first.isPresent()) num = first.get().getCount();
+          }
+          if (DEBUG_CHOICES) {
+            logger.info("addChoices getSelectedAnchor " + type + "=" + selectionForType +
+                "\n\tkeys " + typeToValues.get(type));
+
+          }
+          String numberSuffix = num != -1 ? " (" + num + ")" : "";
+          choices.add(getSelectedAnchor(type, selectionForType + numberSuffix, addTypePrefix));
         }
       }
     }
@@ -815,9 +838,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param type
    * @param choices
    * @param selectionForType
-   * @see #addChoices(Map, String)
+   * @param addTypePrefix
+   * @see ChoicesContainer#addChoices(Map, String, boolean)
    */
-  private void addListChoice(String type, Panel choices, String selectionForType) {
+  private void addListChoice(String type, Panel choices, String selectionForType, boolean addTypePrefix) {
     try {
       String listName = selectionForType;
       boolean dynamicFacetInteger = isDynamicFacetInteger();
@@ -828,7 +852,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
       if (listName != null) {
         //      logger.info("addListChoice selected : adding " + listName + " " + type);
-        choices.add(getSelectedAnchor(type, listName));
+        choices.add(getSelectedAnchor(type, listName, addTypePrefix));
       } else {
 
         int toUse = -1;
@@ -865,7 +889,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
           if (result.getProjid() != getCurrentProject()) {
             logger.warning("addVisitor list " + result.getName() + " is NOT in the project #" + result.getProjid());
           } else {
-            choices.add(getSelectedAnchor(type, result.getName()));
+            choices.add(getSelectedAnchor(type, result.getName(), false));
           }
         }
       }
@@ -877,12 +901,13 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param type
    * @param choices
    * @param keys
+   * @param addTypePrefix
    * @see #addChoices
    */
   private void addChoicesForType(Map<String, Set<MatchInfo>> typeToValues,
                                  String type,
                                  Panel choices,
-                                 Set<MatchInfo> keys) {
+                                 Set<MatchInfo> keys, boolean addTypePrefix) {
     int j = 0;
 
     int toShow = getToShow(rootNodesInOrder.size() + 1);
@@ -891,19 +916,22 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     boolean hasMore = shouldShowMore(keysSize, toShow);
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
 
-/*
+
     logger.info("addChoices" +
         "\n\ttype    " + type +
-        "\n\tsize    " + size +// "(" +types+
+        "\n\tsize    " + keysSize +// "(" +types+
         "\n\tto show " + toShow +
         "\n\tkeys    " + keys.size() +
         "\n\thasMore " + hasMore +
+        "\n\tshowAll " + showAll +
         "\n\tshowAll " + showAll
     );
-    */
+
+
+    // boolean addTypePrefix = !getDynamicFacet().equalsIgnoreCase(type) && !type.equalsIgnoreCase(CONTENT);
 
     for (MatchInfo key : keys) {
-      addLIChoice(choices, getAnchor(type, key, key.getUserListID(), key.isItalic()));
+      addLIChoice(choices, getAnchor(type, key, key.getUserListID(), key.isItalic(), addTypePrefix));
 
       // add final "View all" link if we're not supposed to show all
       if (hasMore && !showAll && ++j == toShow) {
@@ -946,8 +974,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   @NotNull
   private Anchor getShowMoreAnchor(final Map<String, Set<MatchInfo>> typeToValues, final String type, int remaining) {
     Anchor anchor = new Anchor();
-    String showMore = "<i>View all (" + remaining +
-        ")</i>";// SHOW_MORE;
+    String showMore = "<i>View all " + type + "s (" + remaining + ")</i>";
     anchor.setHTML(showMore);
     anchor.addClickHandler(event -> {
       typeToShowAll.put(type, true);
@@ -959,13 +986,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    * @param type
    * @param selectionForType
+   * @param addTypePrefix
    * @return
-   * @see #addChoices(Map, String)
+   * @see #addChoices(Map, String, boolean)
    */
   @NotNull
-  private Widget getSelectedAnchor(String type, String selectionForType) {
+  private Widget getSelectedAnchor(String type, String selectionForType, boolean addTypePrefix) {
     Panel anchor = getSpan();
-    anchor.getElement().setInnerHTML(selectionForType);
+    anchor.getElement().setInnerHTML((addTypePrefix ? type + " " : "") + selectionForType);
     anchor.addStyleName("selected");
     addTooltip(type, selectionForType, anchor);
     return anchor;
@@ -1011,9 +1039,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param key
    * @param newUserListID
    * @param italic        true if list is not mine - I don't own it
+   * @param addTypePrefix
    * @return
    */
-  private Widget getAnchor(String type, MatchInfo key, int newUserListID, boolean italic) {
+  private Widget getAnchor(String type, MatchInfo key, int newUserListID, boolean italic, boolean addTypePrefix) {
     Panel span = getSpan();
     span.addStyleName(MENU_ITEM);
 
@@ -1021,7 +1050,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     String choiceName = key.getValue();
 
-    Anchor anchor = getAnchor(choiceName);
+    String nameToUse = (addTypePrefix ? type + " " : "") + choiceName;
+    Anchor anchor = getAnchor(nameToUse);
     ClickHandler choiceHandler = getChoiceHandler(type, choiceName, newUserListID);
     anchor.addClickHandler(choiceHandler);
     anchor.addStyleName("choice");
@@ -1076,16 +1106,17 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param type
    * @param value
    * @param childType
+   * @param addTypePrefix
    * @return
    * @see #addChoices
    */
   @NotNull
-  private Widget getParentAnchor(String type, String value, String childType) {
+  private Widget getParentAnchor(String type, String value, String childType, boolean addTypePrefix) {
     Panel span = getSpan();
     span.addStyleName(MENU_ITEM);
 
     {
-      Anchor typeSection = getAnchor(value); // li
+      Anchor typeSection = getAnchor((addTypePrefix ? type + " " : "") + value); // li
       addRemoveClickHandler(childType, typeSection);
       span.add(typeSection);
     }
@@ -1373,7 +1404,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         if (typeToSelection.equals(newTypeToSelection) &&
             typeOrderContainer != null &&
             typeOrderContainer.iterator().hasNext()) {
-         logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);
+          logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);
         } else {
           getTypeToValues(newTypeToSelection, getUserListID(selectionState, newTypeToSelection));
         }

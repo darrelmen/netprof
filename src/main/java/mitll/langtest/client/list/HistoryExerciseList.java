@@ -406,7 +406,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
 
     maybeSwitchProject(selectionState, controller.getProjectStartupInfo().getProjectid());
 
-    if (DEBUG_ON_VALUE_CHANGE) {
+    if (DEBUG_ON_VALUE_CHANGE || true) {
       logger.info("onValueChange got '" + value + "' sel '" + selectionState + "' '" + selectionState.getInfo() +"'");
     }
     INavigation.VIEWS instance1 = selectionState.getView();
@@ -578,12 +578,12 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
                                 int exerciseID,
                                 ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID +
           "\n\tfor " + request);
 
-      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-      logger.info("logException stack " + exceptionAsString);
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+//      logger.info("logException stack " + exceptionAsString);
     }
 
     if (controller.getUser() > 0) {

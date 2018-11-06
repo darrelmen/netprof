@@ -132,7 +132,7 @@ public class ListFacetHelper {
     }
 
     //  logger.info("populateListChoices --- for " + result.size() + " lists ");
-    liForDimensionForType.add(choicesContainer.addChoices(finalTypeToValues, dynamicFacet));
+    liForDimensionForType.add(choicesContainer.addChoices(finalTypeToValues, dynamicFacet, false));
   }
 
   @NotNull
