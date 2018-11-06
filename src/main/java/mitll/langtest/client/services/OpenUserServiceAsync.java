@@ -75,4 +75,6 @@ public interface OpenUserServiceAsync {
   void checkHeartbeat(String implVersion, AsyncCallback<HeartbeatStatus> async);
 
   void accountExistsWithEmail(String email, AsyncCallback<Boolean> async);
+
+  void isValidServer(String server, AsyncCallback<Boolean> async);
 }

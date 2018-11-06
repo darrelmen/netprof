@@ -55,7 +55,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   void ensureDefaultUsers();
 
-  //void addRunnable(Runnable runnable);
+  boolean isValidServer(String server);
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
@@ -212,12 +212,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
   boolean forgotPassword(String user, String url);
 
-  /**
-   * @param key
-   * @return
-   * @@deprecated
-   */
-  User getUserWithResetKey(String key);
+
 
   /**
    * @return

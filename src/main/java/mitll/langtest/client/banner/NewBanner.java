@@ -348,36 +348,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     if (DEBUG) logger.info("addChoicesForUser " + toShow.size());
 
-   /* if (!isDialog) {
-
-
-      toShow = new ArrayList<>(toShow);
-
-      {
-        Dropdown learnDrop = new Dropdown("Learn");
-        nav.add(learnDrop);
-        rememberViewAndLink(learnDrop, VIEWS.LEARN);
-        toShow.remove(VIEWS.LEARN);
-        rememberViewAndLink(learnDrop, VIEWS.LEARN_SENTENCES);
-        toShow.remove(VIEWS.LEARN_SENTENCES);
-        learnDrop.addStyleName("leftFiveMargin");
-
-        learnNav = learnDrop;
-      }
-
-      {
-        Dropdown drillDrop = new Dropdown("Practice");
-        nav.add(drillDrop);
-        rememberViewAndLink(drillDrop, VIEWS.PRACTICE);
-        toShow.remove(VIEWS.PRACTICE);
-        rememberViewAndLink(drillDrop, VIEWS.PRACTICE_SENTENCES);
-        toShow.remove(VIEWS.PRACTICE_SENTENCES);
-
-        drillNav = drillDrop;
-      }
-    }*/
-
-
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
       //   choice1.getElement().setId("Link_" + choice.name());

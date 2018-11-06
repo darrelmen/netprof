@@ -78,6 +78,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -119,7 +120,19 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       Arrays.asList(
           "dliflc.edu",
           "mail.mil", //146
-          "us.af.mil"
+          "us.af.mil",
+          "gmail.com,",
+          "yahoo.com",
+          "mail.mil",
+          "ll.mit.edu",
+          "hotmail.com",
+          "outlook.com",
+          "pom.dliflc.edu",
+          "us.af.mil",
+          "icloud.com",
+          "aol.com",
+          "live.com",
+          "comcast.net"
       );
 
   /**
@@ -346,6 +359,29 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   public JSONSerializer getSerializer() {
     return serializer;
+  }
+
+  /**
+   * DNS LOOKUP.
+   * @param host
+   * @return
+   */
+  @Override
+  public boolean isValidServer(String host) {
+    boolean contains = DOMAINS.contains(host);
+    if (contains) {
+      return true;
+    } else {
+      InetAddress byName = null;
+      try {
+        byName = InetAddress.getByName(host);
+      } catch (Exception e) {
+        logger.warn("for " + host + "got " + e);
+        return false;
+      }
+      logger.info(host + " = " + byName);
+      return true;
+    }
   }
 
   private void populateRoles() {
@@ -1024,6 +1060,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   /**
    * FROM CACHE
+   *
    * @param id
    * @return
    * @see NPUserSecurityManager#getUserForID
@@ -1654,21 +1691,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private boolean isGenderMale(mitll.hlt.domino.shared.model.user.User.Gender dominoUser) {
     return dominoUser == DMALE;
-  }
-
-  /**
-   * TODO: Reset password works differently now...?
-   *
-   * @param resetKey
-   * @return
-   * @see mitll.langtest.server.rest.RestUserManagement#changePFor
-   * @see mitll.langtest.server.rest.RestUserManagement#getUserIDForToken(String)
-   */
-  @Override
-  @Deprecated
-  public User getUserWithResetKey(String resetKey) {
-    logger.warn("no reset key! " + resetKey);
-    return null;//convertOrNull(dao.getByReset(resetKey));
   }
 
   /**

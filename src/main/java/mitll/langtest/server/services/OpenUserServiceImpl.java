@@ -451,6 +451,12 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       return new HeartbeatStatus(false, false);
     }
   }
+
+  @Override
+  public boolean isValidServer(String server) {
+    return db.getUserDAO().isValidServer(server);
+  }
+
 /*  private void simulateNetworkIssue() {
     try {
 //      logger.info("checkHeartbeat sleep...");

@@ -53,8 +53,8 @@ import java.util.*;
  */
 public class UserDAO extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = LogManager.getLogger(UserDAO.class);
-  public static final String OTHER = "OTHER";
-  public static final boolean DEBUG = false;
+  private static final String OTHER = "OTHER";
+  private static final boolean DEBUG = false;
 
   @Override
   public boolean updateProject(int oldID, int newprojid) {
@@ -73,6 +73,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       logger.error("UserDAO : got " + e, e);
       //    database.logEvent("unk", "create user table " + e.toString(), 0, UNKNOWN, projID);
     }
+  }
+
+  @Override
+  public boolean isValidServer(String server) {
+    return false;
   }
 
   /**
@@ -343,7 +348,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return val;
   }
 
-  public void createTable(Database database) throws Exception {
+  private void createTable(Database database) throws Exception {
     Connection connection = database.getConnection(this.getClass().toString());
 
     try {
@@ -462,11 +467,6 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return null;
   }
 
-  @Override
-  public User getUserWithResetKey(String resetKey) {
-    return getUserWhere(-1, "SELECT * from users where " + RESET_PASSWORD_KEY + "='" + resetKey + "'");
-  }
-
   /**
    * @param userid
    * @return null if no user with that id else the user object
@@ -512,7 +512,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return next;
   }
 
-  private Set<Long> getUserIDs(String sql) {
+/*  private Set<Long> getUserIDs(String sql) {
     try {
       Connection connection = getConnection();
       PreparedStatement statement = connection.prepareStatement(sql);
@@ -531,7 +531,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       database.logEvent("unk", "getUsers: " + ee.toString(), 0, UNKNOWN, -1);
     }
     return new HashSet<>();
-  }
+  }*/
 
   private List<User> getUsers(String sql) {
     try {
