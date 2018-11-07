@@ -18,6 +18,7 @@ public class FilterResponseHelper {
   private static final String LISTS = "Lists";
   public static final String CONTENT = "Content";
   public static final String SENTENCES = "Sentences";
+  public static final String SENTENCES_ONLY = "Sentences Only";
 
   private final DatabaseServices databaseServices;
 
@@ -40,36 +41,20 @@ public class FilterResponseHelper {
       } else if (request.isOnlyWithAnno()) {
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyWithAnno(true));
       } else if (request.isExampleRequest()) {
-        logger.info("isExampleRequest " + request);
-
-//        List<Pair> filtered = filterOutContent(request);
-//        request.setTypeToSelection(filtered);
-
+        logger.info("getTypeToValues isExampleRequest " + request);
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyExamples(true));
       } else {
+        logger.info("getTypeToValues normal req " + request);
         FilterResponse response = sectionHelper.getTypeToValues(request, false);
         maybeAddUserListFacet(request.getUserListID(), response);
         maybeAddContent(request, response, projid);
+        logger.info("getTypeToValues normal response " + response);
 
         return response;
       }
     }
   }
 
-  @NotNull
-  private List<Pair> filterOutContent(FilterRequest request) {
-    List<Pair> typeToSelection = request.getTypeToSelection();
-
-    List<Pair> filtered = new ArrayList<>();
-    typeToSelection.forEach(pair -> {
-      if (pair.getProperty().equalsIgnoreCase("CONTENT")) {
-
-      } else {
-        filtered.add(pair);
-      }
-    });
-    return filtered;
-  }
 
   /**
    * So make a new SectionHelper from the results of the filter for unrecorded.
@@ -104,42 +89,72 @@ public class FilterResponseHelper {
 
     if (next != null) {  // echo it back
       //logger.info("\tgetTypeToValues " + request + " include list " + next);
-      typeToValues.addTypeToInclude(LISTS);
+      String type = LISTS;
+
+      typeToValues.addTypeToInclude(type);
 
       Set<MatchInfo> value = new HashSet<>();
 
       value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
 
-      typeToValues.getTypeToValues().put(LISTS, value);
+      typeToValues.getTypeToValues().put(type, value);
     }
   }
 
+  /**
+   * @param request
+   * @param typeToValues
+   * @param projid
+   * @see #getTypeToValues
+   */
   private void maybeAddContent(FilterRequest request, FilterResponse typeToValues, int projid) {
-    Optional<Pair> content = request.getTypeToSelection().stream().filter(pair -> pair.getProperty().equalsIgnoreCase(CONTENT)).findAny();
+   /* Optional<Pair> content = request.getTypeToSelection().stream().filter(pair -> pair.getProperty().equalsIgnoreCase(CONTENT)).findAny();
 
     if (content.isPresent()) {
+      logger.info("maybeAddContent found content in request...");
       String value1 = content.get().getValue();
+
       if (value1.startsWith(SENTENCES)) {
-        ExerciseListRequest exerciseListRequest = new ExerciseListRequest();
-        request.getTypeToSelection().forEach(pair -> {
-          String value = pair.getValue();
-          if (!value.equalsIgnoreCase(ANY))
-            exerciseListRequest.getTypeToSelection().put(pair.getProperty(), Collections.singleton(value));
-        });
-
-        List<CommonExercise> exercisesForSelectionState = getExercisesForSelectionState(exerciseListRequest, projid);
-        int num = exercisesForSelectionState.size();
-
-
         typeToValues.addTypeToInclude(CONTENT);
 
         Set<MatchInfo> value = new HashSet<>();
-
-        value.add(new MatchInfo(value1, num, -1, false, ""));
-
+        value.add(new MatchInfo(value1, getNumContextSentences(request, projid), -1, false, ""));
         typeToValues.getTypeToValues().put(CONTENT, value);
       }
     }
+    else {
+      logger.info("maybeAddContent no content in request...");
+
+      typeToValues.addTypeToInclude(CONTENT);
+
+      Set<MatchInfo> value = new HashSet<>();
+      value.add(new MatchInfo(SENTENCES_ONLY, getNumContextSentences(request, projid), -1, false, ""));
+      typeToValues.getTypeToValues().put(CONTENT, value);
+    }
+*/
+
+    int numContextSentences = getNumContextSentences(request, projid);
+
+    if (numContextSentences > 0) {
+      typeToValues.addTypeToInclude(CONTENT);
+
+      Set<MatchInfo> value = new HashSet<>();
+      value.add(new MatchInfo(SENTENCES_ONLY, numContextSentences, -1, false, ""));
+      typeToValues.getTypeToValues().put(CONTENT, value);
+    }
+  }
+
+  private int getNumContextSentences(FilterRequest request, int projid) {
+    ExerciseListRequest exerciseListRequest = new ExerciseListRequest();
+    exerciseListRequest.setOnlyExamples(true);
+
+    request.getTypeToSelection().forEach(pair -> {
+      String value = pair.getValue();
+      if (!value.equalsIgnoreCase(ANY))
+        exerciseListRequest.getTypeToSelection().put(pair.getProperty(), Collections.singleton(value));
+    });
+
+    return getExercisesForSelectionState(exerciseListRequest, projid).size();
   }
 
   /**
@@ -305,6 +320,7 @@ public class FilterResponseHelper {
       }
       logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded");
       exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, onlyExamples);
+
     } else if (request.isOnlyWithAnno()) {
       boolean isContext = onlyExamples || request.shouldAddContext();
       if (isContext) {
@@ -317,15 +333,15 @@ public class FilterResponseHelper {
       if (isContext) {
         exercises = getParentChildPairs(exercises, projid);
       }
+
     } else if (request.isOnlyUninspected()) {
       exercises = filterByUninspected(exercises);
+
     } else if (onlyExamples) {
       logger.info("filterExercises OK doing examples 3");
       exercises = getContextExercises(exercises);
+
     }
- /*   if (request.isOnlyForUser()) {
-      exercises = filterOnlyPracticedByUser(request, exercises, projid);
-    }*/
 
     logger.info("filterExercises" +
         "\n\tfilter req " + request +
@@ -559,7 +575,7 @@ public class FilterResponseHelper {
    * @return
    */
   private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
-    ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
+    //  ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     Map<String, Collection<String>> copy = new HashMap<>(typeToSelection);
     copy.remove(RECORDED1);
     copy.remove(CONTENT);
@@ -568,6 +584,6 @@ public class FilterResponseHelper {
     logger.info("getExercises " + empty + " : " + copy);
     return empty ?
         getExercises(projid) :
-        sectionHelper.getExercisesForSelectionState(copy);
+        getSectionHelper(projid).getExercisesForSelectionState(copy);
   }
 }

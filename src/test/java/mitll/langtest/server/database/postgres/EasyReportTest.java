@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.postgres;
 
 
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -41,6 +42,7 @@ import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.SlickResultDAO;
+import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
@@ -49,6 +51,7 @@ import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.user.ActiveUser;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.KoreanLTS;
 import net.sf.json.JSONArray;
@@ -59,6 +62,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 
 import static java.lang.Thread.sleep;
@@ -71,7 +76,62 @@ public class EasyReportTest extends BaseTest {
   public static final int SPANISH = 3;
   private static final int DEMO_USER = 659;
   private static final String KANGNU = "강루";
+
+  public static final String SENTENCES_ONLY = "Sentences Only";
+
   private final String longer = "대폭강화하기로";
+
+  @Test
+  public void testDNS() {
+    getDNS("dliflc.edu");
+    getDNS("dlifl.edu");
+    getDNS("dliflc.com");
+    getDNS("gmail.com");
+    getDNS("gmaiil.com");
+  }
+
+  private void getDNS(String host) {
+
+    InetAddress byName = null;
+    try {
+      byName = InetAddress.getByName(host);
+    } catch (UnknownHostException e) {
+      logger.warn("fo " + host +
+          "got " + e);
+    }
+    logger.info(host + " = " + byName);
+  }
+
+  @Test
+  public void testDNS2() {
+    try {
+      InetAddress byName = InetAddress.getByName("dliflc.com");
+      logger.info("got " + byName);
+    } catch (UnknownHostException e) {
+
+      logger.warn("got " + e);
+    }
+  }
+
+  @Test
+  public void testTeachers() {
+    DatabaseImpl english = getDatabase();
+    Project project = english.getProject(4);
+
+    NPUserSecurityManager securityManager = new NPUserSecurityManager(english.getUserDAO(), english.getUserSessionDAO());
+
+    securityManager.setProjectManagement(english.getProjectManagement());
+
+    List<ActiveUser> teachers1 = securityManager.getTeachers();
+    logger.info("Got " + teachers1.size() + " e.g. " + teachers1.iterator().next());
+
+
+    Set<Integer> teachers = english.getUserDAO().getTeacherIDs();
+    logger.info("Got " + teachers.size() + " e.g. " + teachers.iterator().next());
+    // teachers.forEach(teacher-> logger.info("#" + teacher.getDocumentDBID() + " " + teacher.getUserId() + " " + teacher.getRoleAbbreviations()));
+//    english.getUserListManager().getCommentedList(4, false);
+    // english.getUserListManager().getCommentedList(4, true);
+  }
 
   @Test
   public void testComment() {
@@ -91,7 +151,7 @@ public class EasyReportTest extends BaseTest {
     Project project = english.getProject(projectid);
 
     FilterRequest request = new FilterRequest();
-    project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+    project.getTypeOrder().forEach(type -> request.addPair("Semester", "2"));
 
 
     FilterResponse typeToValues = english.getTypeToValues(request, projectid, 6);
@@ -155,7 +215,6 @@ public class EasyReportTest extends BaseTest {
 
       dumpExercises(exercisesForSelectionState);
     }
-    //}//, "waitUntilDelegate_" + projectID).start();
   }
 
 
@@ -181,6 +240,15 @@ public class EasyReportTest extends BaseTest {
     english.getAudioDAO().attachAudioToExercises(Collections.singleton(exerciseByID), project.getLanguageEnum(), project.getID());
   }
 
+
+  @Test
+  public void testContent() {
+    DatabaseImpl english = getDatabase();
+    english.getProject(4);
+    Project project = english.getProjectByName("Spanish");
+    waitUntilDelegateFix2(english, project);
+  }
+
   @Test
   public void testFix() {
     DatabaseImpl english = getDatabase();
@@ -193,8 +261,7 @@ public class EasyReportTest extends BaseTest {
     waitUntilMongo(db);
 
     {
-      if (false)
-      {
+      if (false) {
         FilterRequest request = new FilterRequest().setOnlyWithAnno(true);
         project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
         /*FilterResponse typeToValues =*/
@@ -244,6 +311,53 @@ public class EasyReportTest extends BaseTest {
     //}//, "waitUntilDelegate_" + projectID).start();
   }
 
+  private void waitUntilDelegateFix2(DatabaseImpl db, Project project) {
+    waitUntilMongo(db);
+
+    {
+      FilterRequest request = new FilterRequest();
+
+      {
+        project.getTypeOrder().forEach(type ->
+            request.addPair(new Pair(
+                type,
+                SectionHelper.DEFAULT_FOR_EMPTY)));
+      }
+
+      request.addPair("Content", SENTENCES_ONLY);
+      logger.info("Request is " + request);
+
+      FilterResponse typeToValues = db.getTypeToValues(request, project.getID(), 6);
+      logger.info("\n\n\nGot " + typeToValues);
+
+      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6);
+
+      {
+        Map<String, Collection<String>> typeToSelection = new HashMap<>();
+        typeToSelection.put("Content", Collections.singleton(SENTENCES_ONLY));
+        request1.setTypeToSelection(typeToSelection);
+      }
+
+      List<CommonExercise> exercisesForSelectionState =
+          db.getFilterResponseHelper().getExercisesForSelectionState(request1, project.getID());
+
+
+      dumpExercises(exercisesForSelectionState);
+
+
+//      request.setExampleRequest(true);
+//      typeToValues = db.getTypeToValues(request, project.getID(), 6);
+//      logger.info("\n\n\nGot examples " + typeToValues);
+//
+//      request1.setOnlyExamples(true);
+//
+//      exercisesForSelectionState =
+//          db.getFilterResponseHelper().getExercisesForSelectionState(request1, project.getID());
+//
+//      dumpExercises(exercisesForSelectionState);
+    }
+  }
+
   private void waitUntilMongo(DatabaseImpl db) {
     while (db.getUserDAO().getDefaultUser() < 1) {
       try {
@@ -257,6 +371,7 @@ public class EasyReportTest extends BaseTest {
 
   private void dumpExercises(List<CommonExercise> exercisesForSelectionState) {
     logger.info("Got back " + exercisesForSelectionState.size());
+    exercisesForSelectionState = exercisesForSelectionState.subList(0, Math.min(100, exercisesForSelectionState.size()));
     exercisesForSelectionState.forEach(exercise -> logger.info("got " + exercise.getID() + " " + exercise.getForeignLanguage() + " context " + exercise.isContext()));
   }
 

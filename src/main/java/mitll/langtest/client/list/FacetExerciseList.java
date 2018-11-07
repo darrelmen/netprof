@@ -43,6 +43,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -551,7 +552,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
       typeOrder = getTypeOrderSimple();
-      logger.info("\n\n\ngetTypeOrder type order " + typeOrder);
+      //logger.info("\n\n\ngetTypeOrder type order " + typeOrder);
       this.rootNodesInOrder = new ArrayList<>(typeOrder);
       this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
     }
@@ -641,11 +642,18 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private void addDynamicFacets(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
     listFacetHelper.reallyAddListFacet(typeToValues, allTypesContainer, typeToSelection.containsKey(getDynamicFacet()));
 
-    contentFacet = addContentFacet(allTypesContainer);
+
+    Set<MatchInfo> matchInfos = typeToValues.get(CONTENT);
+
+    //  logger.info("addDynamicFacets match infos " + matchInfos);
+
+    if (matchInfos != null && !matchInfos.isEmpty()) {
+      ListItem contentFacet = addContentFacet(allTypesContainer);
+      addExerciseChoices(CONTENT, contentFacet, matchInfos.iterator().next());
+    }
   }
 
   // TODO: show on dialog??
-  private ListItem contentFacet;
 
   /**
    * Only for practice view
@@ -664,16 +672,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return getTypeContainer(CONTENT, typeToSelection.containsKey(CONTENT));
   }
 
-  private void addExerciseChoices(String dynamicFacet, ListItem liForDimensionForType) {
+  private void addExerciseChoices(String dynamicFacet, ListItem liForDimensionForType, MatchInfo e) {
     Set<MatchInfo> value = new HashSet<>();
-
-    value.add(new MatchInfo(SENTENCES_ONLY, numContext));
+    value.add(e);
 
     Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
     typeToValues.put(dynamicFacet, value);
 
-    //  liForDimensionForType.clear();
-    //  logger.info("populateListChoices --- for " + result.size() + " lists ");
+    //logger.info("addExerciseChoices --- for " + value);
     liForDimensionForType.add(addChoices(typeToValues, dynamicFacet, false));
   }
 
@@ -733,7 +739,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       }
     }
 
-    addExerciseChoices(CONTENT, contentFacet);
+    //addExerciseChoices(CONTENT, contentFacet);
   }
 
   protected UserList.LIST_TYPE getListType() {
@@ -917,18 +923,17 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
 
 
-    logger.info("addChoices" +
-        "\n\ttype    " + type +
-        "\n\tsize    " + keysSize +// "(" +types+
-        "\n\tto show " + toShow +
-        "\n\tkeys    " + keys.size() +
-        "\n\thasMore " + hasMore +
-        "\n\tshowAll " + showAll +
-        "\n\tshowAll " + showAll
-    );
-
-
-    // boolean addTypePrefix = !getDynamicFacet().equalsIgnoreCase(type) && !type.equalsIgnoreCase(CONTENT);
+    if (DEBUG_CHOICES) {
+      logger.info("addChoicesForType" +
+          "\n\ttype    " + type +
+          "\n\tsize    " + keysSize +// "(" +types+
+          "\n\tto show " + toShow +
+          "\n\tkeys    " + keys.size() +
+          "\n\thasMore " + hasMore +
+          "\n\tshowAll " + showAll +
+          "\n\tshowAll " + showAll
+      );
+    }
 
     for (MatchInfo key : keys) {
       addLIChoice(choices, getAnchor(type, key, key.getUserListID(), key.isItalic(), addTypePrefix));
@@ -1191,9 +1196,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private ClickHandler getChoiceHandler(final String type, final String key, int newUserListID) {
     return event -> {
       Map<String, String> candidate = new HashMap<>(typeToSelection);  // existing set is in type->selection
-      //String value = getChoiceHandlerValue(type, key, newUserListID);
       candidate.put(type, getChoiceHandlerValue(type, key, newUserListID));
-      //    logger.info("getChoiceHandler " + type + "=" + key + " " + newUserListID + " value " + value);
+
+      logger.info("getChoiceHandler click on " + type + "=" + key + ", list = " + newUserListID);
+
       setHistory(candidate);
     };
   }
@@ -1266,6 +1272,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
 
   /**
+   * TODO : push down the part about CONTENT and maybe list.
+   *
    * @param typeToSelection
    * @return
    * @see #getTypeToValues
@@ -1280,7 +1288,13 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     }
 
     addPairForTypeSelection(typeToSelection, pairs, getDynamicFacet());
-    addPairForTypeSelection(typeToSelection, pairs, CONTENT);
+
+    {
+//      addPairForTypeSelection(typeToSelection, pairs, CONTENT);
+      String s = typeToSelection.get(CONTENT);
+      pairs.add(new Pair(CONTENT, s == null ? ANY : s));
+
+    }
 
     return pairs;
   }
@@ -1301,27 +1315,41 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
           "\n\ttype to selection " + typeToSelection +
           "\n\ttype to values    " + response.getTypeToValues().size()
       );
     }
 
-    changeSelection(response.getTypesToInclude(), typeToSelection);
+    boolean didChange = changeSelection(response.getTypesToInclude(), typeToSelection);
     setTypeToSelection(typeToSelection);
     addFacetsForReal(response.getTypeToValues(), typeOrderContainer);
-    gotSelection();
+
+    if (didChange) {
+      gotSelection();
+    } else {
+   //   logger.info("gotFilterResponse - no change. ");
+      restoreUIAndLoadExercises(History.getToken(), didChange);
+    }
   }
 
-  private void changeSelection(Set<String> typesToInclude, Map<String, String> typeToSelection) {
+  /**
+   * @param typesToInclude
+   * @param typeToSelection
+   * @return true if we did actually change the currently visible selection state as a result of asking the server for the type-selection hierarchy
+   */
+  private boolean changeSelection(Set<String> typesToInclude, Map<String, String> typeToSelection) {
+    boolean changed = false;
     for (String selectedType : new ArrayList<>(typeToSelection.keySet())) {
       boolean clearSelection = !typesToInclude.contains(selectedType);
       if (clearSelection) {
         if (removeSelection(selectedType, typeToSelection)) {
+          changed = true;
         }
       }
     }
+    return changed;
   }
 
   protected boolean isThereALoggedInUser() {
@@ -1404,7 +1432,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         if (typeToSelection.equals(newTypeToSelection) &&
             typeOrderContainer != null &&
             typeOrderContainer.iterator().hasNext()) {
-          logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);
+          if (DEBUG)
+            logger.info("getSectionWidgetContainer : restoreListBoxState state already consistent with " + newTypeToSelection);
+
         } else {
           getTypeToValues(newTypeToSelection, getUserListID(selectionState, newTypeToSelection));
         }
@@ -1525,7 +1555,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         newTypeToSelection.put(type, selections.iterator().next());
       }
     }
-    logger.info("getTypeToSelection " + newTypeToSelection);
+
+    // logger.info("getTypeToSelection " + newTypeToSelection);
+
     return newTypeToSelection;
   }
 

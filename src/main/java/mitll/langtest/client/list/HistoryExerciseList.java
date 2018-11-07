@@ -172,7 +172,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   void pushFirstSelection(int exerciseID, String searchIfAny) {
     String token = getHistoryToken();
     logger.info("pushFirstSelection : (" + getInstance() + ") current token " + token);
-   // int exidFromToken = getIDFromToken(token);
+    // int exidFromToken = getIDFromToken(token);
     SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
 
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
@@ -319,8 +319,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @see #pushNewItem
    */
   void setHistoryItem(String historyToken) {
-   // String token = History.getToken();
-  //logger.info("before " + token);
+    // String token = History.getToken();
+    //logger.info("before " + token);
     if (DEBUG_PUSH) {
       logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
     }
@@ -401,43 +401,43 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       return;
     }
 
-    String value = event.getValue();
-    SelectionState selectionState = getSelectionState(value);
+    //  String value = event.getValue();
+    restoreUIAndLoadExercises(event.getValue(), true);
+  }
 
-    maybeSwitchProject(selectionState, controller.getProjectStartupInfo().getProjectid());
+  protected void restoreUIAndLoadExercises(String value, boolean didChange) {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
-    if (DEBUG_ON_VALUE_CHANGE || true) {
-      logger.info("onValueChange got '" + value + "' sel '" + selectionState + "' '" + selectionState.getInfo() +"'");
-    }
-    INavigation.VIEWS instance1 = selectionState.getView();
+    if (projectStartupInfo != null) {
+      SelectionState selectionState = getSelectionState(value);
 
-    if (instance1 != getInstance()) {
+      maybeSwitchProject(selectionState, projectStartupInfo.getProjectid());
+
+      if (DEBUG_ON_VALUE_CHANGE || true) {
+        logger.info("onValueChange got '" + value + "' sel '" + selectionState + "' '" + selectionState.getInfo() + "'");
+
+//        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got change"));
+//        logger.info("HistoryExerciseList.selectionStateChanged logException stack " + exceptionAsString);
+      }
+
       if (DEBUG_ON_VALUE_CHANGE) {
-        logger.info("onValueChange : MAYBE skipping event " + value + " for instance '" + instance1 +
-            "' that is not mine '" + getInstance() + "'");
+        logger.info("HistoryExerciseList.onValueChange : " +
+            "\n\toriginalValue '" + value + "'" +
+            // " token is '" + value + "' " +
+            "for " + selectionState.getView() + " vs my instance " + getInstance());
       }
 
-    /*  if (getCreatedPanel() == null) {
-        popRequest();
-        noSectionsGetExercises(selectionState.getItem());
+      restoreUIState(selectionState);
+
+      try {
+        if (didChange || isEmpty() ) {
+          loadFromSelectionState(selectionState, selectionState);
+        }
+      } catch (Exception e) {
+        logger.warning("HistoryExerciseList.selectionStateChanged " + value + " badly formed. Got " + e);
+        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(e);
+        logger.info("HistoryExerciseList.selectionStateChanged logException stack " + exceptionAsString);
       }
-      return;*/
-    }
-    if (DEBUG_ON_VALUE_CHANGE) {
-      logger.info("HistoryExerciseList.onValueChange : " +
-          "\n\toriginalValue '" + value +          "'" +
-         // " token is '" + value + "' " +
-          "for " + instance1 + " vs my instance " + getInstance());
-    }
-
-    restoreUIState(selectionState);
-
-    try {
-      loadFromSelectionState(selectionState, selectionState);
-    } catch (Exception e) {
-      logger.warning("HistoryExerciseList.selectionStateChanged " + value + " badly formed. Got " + e);
-      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(e);
-      logger.info("HistoryExerciseList.selectionStateChanged logException stack " + exceptionAsString);
     }
   }
 
@@ -561,7 +561,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
                                                        boolean onlyUninspected) {
     return getExerciseListRequest(prefix)
         .setTypeToSelection(typeToSection)
-     //   .setOnlyWithAudioAnno(onlyWithAudioAnno)
+        //   .setOnlyWithAudioAnno(onlyWithAudioAnno)
         //.setOnlyDefaultAudio(onlyDefaultUser)
         .setOnlyUninspected(onlyUninspected);
   }
@@ -578,12 +578,12 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
                                 int exerciseID,
                                 ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID +
           "\n\tfor " + request);
 
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
-//      logger.info("logException stack " + exceptionAsString);
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseIDs"));
+//       logger.info("logException stack " + exceptionAsString);
     }
 
     if (controller.getUser() > 0) {
