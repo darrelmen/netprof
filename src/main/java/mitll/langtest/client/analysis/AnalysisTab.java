@@ -68,6 +68,8 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
+  public static final String TIME_SCALE = "timeScale";
+  public static final String TIME_SCALE1 = "Time Scale : ";
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
   private static final int MIN_HEIGHT = 325;
@@ -397,7 +399,17 @@ public class AnalysisTab extends DivWidget {
     long then2 = now;
 
     if (analysisPlot != null) {
-      Scheduler.get().scheduleDeferred(() -> analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView));
+      Scheduler.get().scheduleDeferred(() -> {
+
+        analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView);
+
+
+        TIME_HORIZON value = TIME_HORIZON.values()[getTimeHorizonFromStorage()];
+
+        logger.info("Set time horizon " + value);
+        analysisPlot.setTimeHorizon(value);
+
+      });
     }
 
     now = System.currentTimeMillis();
@@ -410,7 +422,7 @@ public class AnalysisTab extends DivWidget {
         analysisPlot,
         bottom,
         phoneSummary, reqInfo,
-        result.getUserPerformance().getTimeWindow(), exerciseLookup);
+        result.getUserPerformance().getTimeWindow());
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {
@@ -558,15 +570,18 @@ public class AnalysisTab extends DivWidget {
 
     w.add(buttonGroup);
 
-    buttonGroup.add(sessionChoice = getButtonChoice(TIME_HORIZON.SESSION));
-    if (isPolyglot) {
-      sessionChoice.setActive(true);
-    }
+    TIME_HORIZON stored = TIME_HORIZON.values()[getTimeHorizonFromStorage()];
 
-    buttonGroup.add(dayChoice = getButtonChoice(TIME_HORIZON.DAY));
-    buttonGroup.add(weekChoice = getButtonChoice(TIME_HORIZON.WEEK));
-    buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH));
-    buttonGroup.add(allChoice = getAllChoice());
+
+    buttonGroup.add(sessionChoice = getButtonChoice(TIME_HORIZON.SESSION, stored));
+//    if (isPolyglot) {
+//      sessionChoice.setActive(true);
+//    }
+
+    buttonGroup.add(dayChoice = getButtonChoice(TIME_HORIZON.DAY, stored));
+    buttonGroup.add(weekChoice = getButtonChoice(TIME_HORIZON.WEEK, stored));
+    buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH, stored));
+    buttonGroup.add(allChoice = getAllChoice(stored));
 
     return buttonGroup;
   }
@@ -579,38 +594,70 @@ public class AnalysisTab extends DivWidget {
     timeScale.addChangeHandler(event -> gotTimeScaleChange());
 
     for (TIME_HORIZON horizon : TIME_HORIZON.values()) {
-      timeScale.addItem("Time Scale : " + horizon.getDisplay());
+      timeScale.addItem(TIME_SCALE1 + horizon.getDisplay());
     }
 
     Scheduler.get().scheduleDeferred(() -> {
-      if (isPolyglot) {
-        timeScale.setSelectedValue(TIME_HORIZON.values()[0].getDisplay());
-      } else {
-        timeScale.setSelectedIndex(TIME_HORIZON.values().length - 1);
-      }
+
+
+      //  int timeHorizonFromStorage = getTimeHorizonFromStorage();
+      timeScale.setSelectedIndex(getTimeHorizonFromStorage());
+
+//        TIME_HORIZON value = TIME_HORIZON.values()[timeHorizonFromStorage];
+
+//        logger.info("Set time horizon " + value);
+//        analysisPlot.setTimeHorizon(value);
+
+
     });
 
     return timeScale;
   }
 
+  private int getTimeHorizonFromStorage() {
+    if (isPolyglot) {
+      return 0;
+    } else {
+      int index = TIME_HORIZON.values().length - 1;
+      String timeScale = controller.getStorage().getValue(TIME_SCALE);
+      if (timeScale != null && !timeScale.isEmpty()) {
+        TIME_HORIZON time_horizon = TIME_HORIZON.valueOf(timeScale);
+        // logger.info("found " + time_horizon);
+        int i = 0;
+        for (TIME_HORIZON time_horizon1 : TIME_HORIZON.values()) {
+          if (time_horizon1 == time_horizon) {
+            index = i;
+            break;
+          }
+          i++;
+        }
+
+      }
+      return index;
+    }
+  }
+
   private void gotTimeScaleChange() {
     int selectedIndex = timeScale.getSelectedIndex();
     TIME_HORIZON horizon = TIME_HORIZON.values()[selectedIndex];
+
+    controller.getStorage().storeValue(TIME_SCALE, horizon.name());
     analysisPlot.setTimeHorizon(horizon);
   }
 
-  private Button getButtonChoice(TIME_HORIZON week) {
-    return getButton(controller, getClickHandler(week), week.getDisplay());
+  private Button getButtonChoice(TIME_HORIZON week, TIME_HORIZON stored) {
+    return getButton(controller, getClickHandler(week), week.getDisplay(), stored == week);
   }
 
-  private Button getAllChoice() {
-    Button all = getButtonChoice(TIME_HORIZON.ALL);
-    all.setActive(!isPolyglot);
+  private Button getAllChoice(TIME_HORIZON stored) {
+    Button all = getButtonChoice(TIME_HORIZON.ALL, stored);
+    // all.setActive(isActive);
     return all;
   }
 
-  private Button getButton(ExerciseController controller, ClickHandler handler, String week) {
+  private Button getButton(ExerciseController controller, ClickHandler handler, String week, boolean isActive) {
     Button onButton = new Button(week);
+    onButton.setActive(isActive);
     onButton.getElement().setId(week + "Choice");
     controller.register(onButton);
     onButton.addClickHandler(handler);
@@ -619,7 +666,10 @@ public class AnalysisTab extends DivWidget {
   }
 
   private ClickHandler getClickHandler(final TIME_HORIZON month) {
-    return event -> analysisPlot.setTimeHorizon(month);
+    return event -> {
+      analysisPlot.setTimeHorizon(month);
+      controller.getStorage().storeValue(TIME_SCALE, month.name());
+    };
   }
 
   /**
@@ -628,7 +678,6 @@ public class AnalysisTab extends DivWidget {
    * @param lowerHalf
    * @param phoneReport
    * @param timeWindow
-   * @param exerciseLookup
    * @see #useReport
    */
   private void showWordScores(
@@ -638,8 +687,7 @@ public class AnalysisTab extends DivWidget {
       Panel lowerHalf,
       PhoneSummary phoneReport,
       ReqInfo reqInfo,
-      TimeRange timeWindow,
-      ExerciseLookup<CommonShell> exerciseLookup) {
+      TimeRange timeWindow) {
     {
       Heading wordsTitle = getHeading(WORDS);
 
@@ -686,7 +734,7 @@ public class AnalysisTab extends DivWidget {
    * @param wordsTitle
    * @return
    * @paramx itemColumnWidth
-   * @see #showWordScores(int, ExerciseController, AnalysisPlot, Panel, PhoneSummary, ReqInfo, TimeRange, ExerciseLookup)
+   * @see #showWordScores(int, ExerciseController, AnalysisPlot, Panel, PhoneSummary, ReqInfo, TimeRange)
    */
   private Panel getWordContainer(
       ReqInfo reqInfo,
