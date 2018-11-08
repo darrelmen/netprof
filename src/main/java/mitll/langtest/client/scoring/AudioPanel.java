@@ -219,7 +219,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     imageContainer.getElement().setId("AudioPanel_imageContainer");
 
     int heightForTranscripts = rightMargin > 0 ? 2 * TRANSCRIPT_IMAGE_HEIGHT : 0;
-    float totalHeight = getScaledImageHeight(WAVEFORM) + heightForTranscripts;
+    float totalHeight = getScaledImageHeight(WAVEFORM) + heightForTranscripts +6;
     imageContainer.setHeight(totalHeight + "px");
     //  imageContainer.setWidth(getImageWidth()+"px");
 

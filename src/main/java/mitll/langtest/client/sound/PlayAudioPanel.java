@@ -309,6 +309,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
   /**
    * TODO : Don't call twice - once from resetAudio --
+   *
    * @see #pause
    * @see #resetAudio
    */
@@ -326,18 +327,18 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
       playButton.setBaseIcon(MyCustomIconType.turtle);
       styleSlowIcon(playButton);
     } else {
-      logger.info("showPlayIcon ");
+      if (DEBUG) logger.info("showPlayIcon ");
       setButtonIconToPlay(playButton);
     }
   }
 
   private void setButtonIconToPause() {
-    logger.info("setButtonIconToPause set icon to pause ");
+    if (DEBUG) logger.info("setButtonIconToPause set icon to pause ");
     playButton.setIcon(IconType.PAUSE);
   }
 
   private void setButtonIconToPlay(IconAnchor playButton) {
-    logger.info("setButtonIconToPlay set icon to play ");
+    if (DEBUG) logger.info("setButtonIconToPlay set icon to play ");
     playButton.setIcon(PLAY);
   }
 

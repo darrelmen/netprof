@@ -1,5 +1,5 @@
 package mitll.langtest.client.list;
 
-public interface ShowEventListener {
+interface ShowEventListener {
   void gotShow();
 }

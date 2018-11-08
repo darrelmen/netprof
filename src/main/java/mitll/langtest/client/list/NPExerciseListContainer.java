@@ -76,7 +76,7 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
 
 
   @NotNull
-  protected IExerciseComparator getSorter() {
+  private IExerciseComparator getSorter() {
     return new SimpleExerciseComparator();
   }
 

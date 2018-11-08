@@ -2,13 +2,11 @@ package mitll.langtest.client.custom.userlist;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.NavLink;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -22,7 +20,6 @@ import mitll.langtest.client.custom.dialog.CreateListComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.custom.UserList;
@@ -41,14 +38,14 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
-  public static final String PRACTICE_THE_LIST = "Practice the list.";
+  private static final String PRACTICE_THE_LIST = "Practice the list.";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
   private static final String MY_LISTS = "myLists";
 
-  private static final String EDIT_THE_LIST = "Edit the list title or make it public.";
-  public static final String SHARE = "Share";
+  private static final String EDIT_THE_LIST = "Edit the list, make it public, or make it a quiz.";
+  private static final String SHARE = "Share";
   private static final String SHARE_THE_LIST = "Share the list with someone.";
   private static final String VISITED = "Visited";
   private static final String SAVE = "Save";
@@ -306,6 +303,11 @@ public class ListView implements ContentView, CreateListComplete {
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
     buttons.add(getAddButton());
+
+    if (canMakeQuiz()) {
+      buttons.add(getAddQuizButton());
+    }
+
     buttons.add(getRemoveButton());
     buttons.add(share = getShare());
 
@@ -384,6 +386,9 @@ public class ListView implements ContentView, CreateListComplete {
     //  closeButton.setIcon(IconType.PLUS);
   }*/
 
+  /**
+   * @return
+   */
   private IsWidget getAddItems() {
     Button successButton = getSuccessButton(ITEMS);
     successButton.setIcon(IconType.PENCIL);
@@ -498,10 +503,20 @@ public class ListView implements ContentView, CreateListComplete {
    */
   @NotNull
   private Button getAddButton() {
-    final Button add = new Button("", IconType.PLUS);
+    final Button add = new Button("List", IconType.PLUS);
     add.addClickHandler(event -> dialogHelper = doAdd());
     add.setType(ButtonType.SUCCESS);
     addTooltip(add, "Make a new list.");
+    return add;
+  }
+
+  @NotNull
+  private Button getAddQuizButton() {
+    final Button add = new Button("Quiz", IconType.PLUS);
+    add.addStyleName("leftFiveMargin");
+    add.addClickHandler(event -> dialogHelper = doAddQuiz());
+    add.setType(ButtonType.SUCCESS);
+    addTooltip(add, "Make a new quiz.");
     return add;
   }
 
@@ -534,7 +549,7 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void addTooltip(Widget add, String tip) {
-    new TooltipHelper().addTooltip(add, tip);
+    new TooltipHelper().addTopTooltip(add, tip);
   }
 
   private UserList<CommonShell> getCurrentSelection(ListContainer container) {
@@ -655,11 +670,68 @@ public class ListView implements ContentView, CreateListComplete {
     CreateListDialog createListDialog = new CreateListDialog(this, controller);
     createListDialog.doCreate(contents);
 
+/*    {
+      KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
+        @Override
+        public String getName() {
+          logger.info("getName ");
+          return null;
+        }
 
+        @Override
+        public void gotPress(NativeEvent ne, boolean isKeyDown) {
+          logger.info("gotPress " + isKeyDown);
+
+          closeButton.click();
+          controller.removeKeyListener(myListener);
+        }
+      };
+      this.myListener = listener;
+      controller.addKeyListener(listener);
+    }*/
+
+    return getNewListButton(contents, createListDialog, CREATE_NEW_LIST);
+  }
+
+
+  /**
+   * @return
+   * @see #getAddButton
+   */
+  private DialogHelper doAddQuiz() {
+    DivWidget contents = new DivWidget();
+    CreateListDialog createListDialog = new CreateListDialog(this, controller).setIsQuiz(true);
+    createListDialog.doCreate(contents);
+
+/*    {
+      KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
+        @Override
+        public String getName() {
+          logger.info("getName ");
+          return null;
+        }
+
+        @Override
+        public void gotPress(NativeEvent ne, boolean isKeyDown) {
+          logger.info("gotPress " + isKeyDown);
+
+          closeButton.click();
+          controller.removeKeyListener(myListener);
+        }
+      };
+      this.myListener = listener;
+      controller.addKeyListener(listener);
+    }*/
+
+    return getNewListButton(contents, createListDialog,"Create New Quiz");
+  }
+
+  @NotNull
+  private DialogHelper getNewListButton(DivWidget contents, CreateListDialog createListDialog, String title) {
     DialogHelper dialogHelper = new DialogHelper(true);
-    String createNewList = CREATE_NEW_LIST + (canMakeQuiz() ? " or Quiz" : "");
+    //String createNewList = CREATE_NEW_LIST + (canMakeQuiz() ? " or Quiz" : "");
     Button closeButton = dialogHelper.show(
-        createNewList,
+        title,
         Collections.emptyList(),
         contents,
         ADD,
@@ -688,32 +760,11 @@ public class ListView implements ContentView, CreateListComplete {
 
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setIcon(IconType.PLUS);
-
-/*    {
-      KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
-        @Override
-        public String getName() {
-          logger.info("getName ");
-          return null;
-        }
-
-        @Override
-        public void gotPress(NativeEvent ne, boolean isKeyDown) {
-          logger.info("gotPress " + isKeyDown);
-
-          closeButton.click();
-          controller.removeKeyListener(myListener);
-        }
-      };
-      this.myListener = listener;
-      controller.addKeyListener(listener);
-    }*/
-
     return dialogHelper;
   }
 
   // TODO :  text box has focus... - need to be a little smarter
- // private KeyPressHelper.KeyListener myListener;
+  // private KeyPressHelper.KeyListener myListener;
   private CreateListDialog editDialog;
 
   private void doEdit() {
@@ -751,7 +802,7 @@ public class ListView implements ContentView, CreateListComplete {
     closeButton.setType(ButtonType.SUCCESS);
   }
 
-  private void doShare() {
+/*  private void doShare() {
     UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
     boolean isQuiz = currentSelection.getListType() == UserList.LIST_TYPE.QUIZ;
     String mailToList = getMailTo();
@@ -776,7 +827,7 @@ public class ListView implements ContentView, CreateListComplete {
         , 250);
 
     closeButton.setType(ButtonType.SUCCESS);
-  }
+  }*/
 
   @NotNull
   private String getMailTo() {

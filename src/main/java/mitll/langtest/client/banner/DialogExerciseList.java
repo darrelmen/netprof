@@ -27,6 +27,9 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+/**
+ * A facet list display of dialogs.
+ */
 class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 

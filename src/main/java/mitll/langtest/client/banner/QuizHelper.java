@@ -45,10 +45,7 @@ import mitll.langtest.client.flashcard.HidePolyglotFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.flashcard.QuizIntro;
-import mitll.langtest.client.list.FacetExerciseList;
-import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.list.*;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -160,15 +157,14 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
   }
 
   private void clearListSelection() {
-    FacetExerciseList exerciseList = (FacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
+    ListFacetExerciseList exerciseList = (ListFacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
     exerciseList.clearListSelection();
   }
 
   private class QuizPracticeFacetExerciseList extends PracticeFacetExerciseList<T, U> {
     QuizPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, DivWidget listHeader) {
-      super(QuizHelper.this.controller, QuizHelper.this, topRow, currentExercisePanel,
-          new ListOptions().setInstance(INavigation.VIEWS.QUIZ).setShowPager(false),
-          listHeader, INavigation.VIEWS.QUIZ);
+      super(topRow, currentExercisePanel, QuizHelper.this.controller, new ListOptions().setInstance(INavigation.VIEWS.QUIZ).setShowPager(false), listHeader, INavigation.VIEWS.QUIZ, QuizHelper.this
+      );
     }
 
 
@@ -215,6 +211,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
     }
 
     @Override
+    @NotNull
     protected DivWidget getPagerAndSort(ExerciseController controller) {
       DivWidget pagerAndSort = super.getPagerAndSort(controller);
       pagerAndSort.setVisible(false);

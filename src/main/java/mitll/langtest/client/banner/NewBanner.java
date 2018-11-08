@@ -155,6 +155,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @NotNull
   private Nav getDialogNav() {
     Nav recnav = new Nav();
+    recnav.setVisible(false);
     recnav.getElement().setId("dialogNav");
 
     recnav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
@@ -171,12 +172,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @NotNull
   private Nav getRecNav() {
     Nav recnav = new Nav();
+    recnav.setVisible(false);
     recnav.getElement().setId("recnav");
     styleNav(recnav);
 
     Dropdown nav = new Dropdown(RECORD);
     rememberViewAndLink(nav, VIEWS.RECORD_ENTRIES);
-    rememberViewAndLink(nav, VIEWS.RECORD_CONTEXT);
+    rememberViewAndLink(nav, VIEWS.RECORD_SENTENCES);
 
     recnav.add(nav);
     return recnav;
@@ -200,7 +202,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Dropdown nav = new Dropdown(QC);
     rnav.add(nav);
     rememberViewAndLink(nav, VIEWS.QC);
-    rememberViewAndLink(nav, VIEWS.FIX);
+    rememberViewAndLink(nav, VIEWS.FIX_ENTRIES);
 
     rememberViewAndLink(nav, VIEWS.QC_SENTENCES);
     rememberViewAndLink(nav, VIEWS.FIX_SENTENCES);
@@ -219,8 +221,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     Dropdown nav = new Dropdown(QC);
     rnav.add(nav);
-    rememberViewAndLink(nav, VIEWS.QC);
-    rememberViewAndLink(nav, VIEWS.FIX);
+    rememberViewAndLink(nav, VIEWS.QC_ENTRIES);
+    rememberViewAndLink(nav, VIEWS.FIX_ENTRIES);
 
     rememberViewAndLink(nav, VIEWS.QC_SENTENCES);
     rememberViewAndLink(nav, VIEWS.FIX_SENTENCES);

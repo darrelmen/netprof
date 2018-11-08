@@ -236,20 +236,20 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           setInstanceHistory(RECORD_ENTRIES, false);
           new RecorderNPFHelper(controller, true, RECORD_ENTRIES).showNPF(divWidget, RECORD_ENTRIES);
           break;
-        case RECORD_CONTEXT:
+        case RECORD_SENTENCES:
           clearAndFixScroll();
-          setInstanceHistory(RECORD_CONTEXT, false);
-          new RecorderNPFHelper(controller, false, RECORD_CONTEXT).showNPF(divWidget, RECORD_CONTEXT);
+          setInstanceHistory(RECORD_SENTENCES, false);
+          new RecorderNPFHelper(controller, false, RECORD_SENTENCES).showNPF(divWidget, RECORD_SENTENCES);
           break;
-        case QC:
+        case QC_ENTRIES:
           clear();
-          setInstanceHistory(QC);
-          new MarkDefectsChapterNPFHelper(controller, false).showNPF(divWidget, QC);
+          setInstanceHistory(QC_ENTRIES);
+          new MarkDefectsChapterNPFHelper(controller, false).showNPF(divWidget, QC_ENTRIES);
           break;
-        case FIX:
+        case FIX_ENTRIES:
           clear();
-          setInstanceHistory(FIX);
-          new FixNPFHelper(controller, false, FIX).showNPF(divWidget, FIX);
+          setInstanceHistory(FIX_ENTRIES);
+          new FixNPFHelper(controller, false, FIX_ENTRIES).showNPF(divWidget, FIX_ENTRIES);
           break;
         case QC_SENTENCES:
           clear();

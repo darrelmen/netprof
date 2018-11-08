@@ -50,11 +50,11 @@ public interface INavigation extends IViewContaner {
 
 
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    RECORD_CONTEXT("Record Sentences", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+    RECORD_SENTENCES("Record Sentences", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
 
 
-    QC("QC Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, false),
-    FIX("Fix Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, false),
+    QC_ENTRIES("QC Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, false),
+    FIX_ENTRIES("Fix Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, false),
     QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, true),
     FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, true);
 

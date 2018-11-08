@@ -6,7 +6,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.ControlState;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
-import mitll.langtest.client.list.LearnFacetExerciseList;
+import mitll.langtest.client.list.ListFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.exercise.*;
 
@@ -15,19 +15,26 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
+/**
+ * Only show one item at a time, for flashcards.
+ * Don't show the search box, since it competes for focus with the space bar and arrow key navigation for the cards.
+ *
+ * @param <T>
+ * @param <U>
+ */
 public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise>
-    extends LearnFacetExerciseList<T> {
+    extends ListFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
   private final PracticeHelper<T, U> practiceHelper;
   private ControlState controlState;
 
-  protected PracticeFacetExerciseList(ExerciseController controller,
-                                      PracticeHelper<T, U> practiceHelper,
-                                      Panel topRow,
+  protected PracticeFacetExerciseList(Panel topRow,
                                       Panel currentExercisePanel,
+                                      ExerciseController controller,
                                       ListOptions listOptions,
                                       DivWidget listHeader,
-                                      INavigation.VIEWS views) {
+                                      INavigation.VIEWS views,
+                                      PracticeHelper<T, U> practiceHelper) {
     super(
         topRow,
         currentExercisePanel,
@@ -114,7 +121,6 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
 
   @Override
   protected void gotRangeChanged() {
-
   }
 
   @Override
@@ -158,7 +164,7 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
   @Override
   protected void showExercises(final Collection<ClientExercise> result, final int reqID) {
     hidePrevNextWidgets();
-    showDrill(result);
+    showOnlyOneExercise(result);
     goGetNextPage();
     setProgressVisible(false);
   }
@@ -167,7 +173,7 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
    * @param result
    * @see #showExercises
    */
-  protected void showDrill(Collection<ClientExercise> result) {
+  protected void showOnlyOneExercise(Collection<ClientExercise> result) {
     ClientExercise next = result.iterator().next();
     markCurrentExercise(next.getID());
     addExerciseWidget(next);

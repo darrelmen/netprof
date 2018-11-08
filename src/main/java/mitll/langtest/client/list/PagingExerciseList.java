@@ -135,7 +135,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    *
    * @see #PagingExerciseList
    */
-  void addComponents() {
+  private void addComponents() {
     addTableWithPager(makePagingContainer());
   }
 
@@ -165,7 +165,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    * @return
    * @see FacetExerciseList#noSectionsGetExercises
    */
-  protected String getPrefix() {
+  String getPrefix() {
     return typeAhead != null ? typeAhead.getText() : "";
   }
 
@@ -245,7 +245,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    * @param pagingContainer
    * @see #addComponents
    */
-  protected void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
+  void addTableWithPager(SimplePagingContainer<?> pagingContainer) {
     // row 1
     Panel column = new FlowPanel();
     add(column);
@@ -377,7 +377,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
     pagingContainer.clear();
   }
 
-  public void flush() {
+  private void flush() {
     pagingContainer.flush();
     onResize();
   }
@@ -427,7 +427,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
     return toRemember;
   }
 
-  protected List<T> resort(List<T> toRemember) {
+  List<T> resort(List<T> toRemember) {
     return toRemember;
   }
 

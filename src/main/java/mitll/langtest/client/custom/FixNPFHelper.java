@@ -44,7 +44,7 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 
-import static mitll.langtest.client.custom.INavigation.VIEWS.*;
+import static mitll.langtest.client.custom.INavigation.VIEWS.FIX_SENTENCES;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -64,7 +64,7 @@ public class FixNPFHelper<T extends CommonShell & ScoredExercise> extends Simple
   public FixNPFHelper(ExerciseController controller, boolean forSentences, INavigation.VIEWS views) {
     super(controller);
     //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
-    boolean forSentences1 = forSentences;
+  //  boolean forSentences1 = forSentences;
     this.views = views;
   }
 

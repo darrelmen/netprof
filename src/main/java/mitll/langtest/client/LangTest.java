@@ -609,8 +609,10 @@ public class LangTest implements
 
             public void onSuccess(ImageResponse result) {
               imageCache.put(key, result);
-              //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
+            //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
               if (client != null) {
+              //  logger.info("getImage client "+ client.getClass());
+
                 Scheduler.get().scheduleDeferred(() -> {
                   client.onSuccess(result);
                 });

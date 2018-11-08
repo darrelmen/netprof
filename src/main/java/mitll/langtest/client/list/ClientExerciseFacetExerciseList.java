@@ -10,19 +10,22 @@ import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * Full exercises returns CommonExercise - so we're kinda stuck with it...
+ * A facet exercise list that gets client exercises for those that are currently visible.
+ *
+ * Full exercises returns ClientExercise
  *
  * @param <T>
  */
-public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise>
+public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExercise>
     extends FacetExerciseList<T, ClientExercise> {
-  private final Logger logger = Logger.getLogger("LearnFacetExerciseList");
+  private final Logger logger = Logger.getLogger("ClientExerciseFacetExerciseList");
 
-  protected static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
 
   /**
    * @param secondRow
@@ -33,12 +36,12 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise>
    * @param views
    * @see mitll.langtest.client.banner.LearnHelper#getMyListLayout(SimpleChapterNPFHelper)
    */
-  public LearnFacetExerciseList(Panel secondRow,
-                                Panel currentExerciseVPanel,
-                                ExerciseController controller,
-                                ListOptions listOptions,
-                                DivWidget listHeader,
-                                INavigation.VIEWS views) {
+  public ClientExerciseFacetExerciseList(Panel secondRow,
+                                         Panel currentExerciseVPanel,
+                                         ExerciseController controller,
+                                         ListOptions listOptions,
+                                         DivWidget listHeader,
+                                         INavigation.VIEWS views) {
     super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, views);
   }
 
@@ -92,8 +95,38 @@ public class LearnFacetExerciseList<T extends CommonShell & ScoredExercise>
         });
   }
 
+  /**
+   * @param result
+   * @param alreadyFetched
+   * @param visibleIDs
+   * @see #reallyGetExercises
+   */
+  private void getFullExercisesSuccess(ExerciseListWrapper<ClientExercise> result,
+                                       List<ClientExercise> alreadyFetched,
+                                       Collection<Integer> visibleIDs) {
+    // long now = System.currentTimeMillis();
+//    int size = result.getVisibleExercises().isEmpty() ? 0 : result.getVisibleExercises().size();
+    //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
+    int reqID = result.getReqID();
+
+    Map<Integer, ClientExercise> idToEx = rememberFetched(result, alreadyFetched);
+
+    if (DEBUG) logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs.size());
+
+    if (isCurrentReq(reqID)) {
+      gotFullExercises(reqID, getVisibleExercises(visibleIDs, idToEx));
+    } else {
+      if (DEBUG_STALE)
+        logger.info("getFullExercisesSuccess : ignoring req " + reqID + " vs current " + getCurrentExerciseReq());
+    }
+  }
+
+
   private int nextPageReq = 0;
 
+  /**
+   * Cache the next page so we don't have to wait for it.
+   */
   protected void goGetNextPage() {
     Set<Integer> toAskFor = getNextPageIDs();
     if (toAskFor.isEmpty()) {

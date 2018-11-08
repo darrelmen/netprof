@@ -48,7 +48,6 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.ProjectType;
 
 /**
@@ -108,13 +107,9 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
                                                           DivWidget listHeader,
                                                           DivWidget footer) {
         return new PracticeFacetExerciseList(
-            controller,
-            PracticeHelper.this,
-            topRow,
-            currentExercisePanel,
-            new ListOptions().setInstance(instanceName),
-            listHeader,
-            instanceName);
+            topRow, currentExercisePanel, controller,
+            new ListOptions().setInstance(instanceName), listHeader, instanceName, PracticeHelper.this
+        );
       }
 
       @Override

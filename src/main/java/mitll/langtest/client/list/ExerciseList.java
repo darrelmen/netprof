@@ -181,7 +181,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
    * @return true if we asked the server for exercises
    * @see HistoryExerciseList#noSectionsGetExercises(int)
    */
-  public boolean getExercises() {
+  boolean getExercises() {
     if (DEBUG) logger.info("\n\n\nExerciseList.getExercises");// instance " + getInstance());
     ExerciseListRequest request = getExerciseListRequest("");
 //    logger.info("request is " +request);
@@ -272,7 +272,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
     return createdPanel;
   }
 
-  public INavigation.VIEWS getInstance() {
+  INavigation.VIEWS getInstance() {
     return listOptions.getInstance();
   }
 
@@ -358,7 +358,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
    * @param result
    * @see ExerciseList.SetExercisesCallback#onSuccess
    */
-  protected void setScores(ExerciseListWrapper<T> result) {
+  void setScores(ExerciseListWrapper<T> result) {
   }
 
   /**
@@ -481,10 +481,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
   /**
    * @see mitll.langtest.client.list.ExerciseList.SetExercisesCallback#onSuccess(ExerciseListWrapper)
    */
-  protected void gotEmptyExerciseList() {
+  void gotEmptyExerciseList() {
   }
 
-  public void rememberAndLoadFirst(List<T> exercises) {
+  private void rememberAndLoadFirst(List<T> exercises) {
     rememberAndLoadFirst(exercises, "All", "", -1);
   }
 
@@ -611,7 +611,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
    *
    * @return
    */
-  T findFirstExercise() {
+  private T findFirstExercise() {
     return getFirst();
   }
 

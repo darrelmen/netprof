@@ -40,7 +40,6 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   /**
    * @param typeToSection
    * @param prefix
-   * @param onlyWithAudioAnno
    * @param onlyUninspected
    * @return
    * @see HistoryExerciseList#loadExercisesUsingPrefix
@@ -48,11 +47,10 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   @Override
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
-                                                       boolean onlyWithAudioAnno,
                                                        boolean onlyUninspected) {
 
     ExerciseListRequest exerciseListRequest = super
-        .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUninspected)
+        .getExerciseListRequest(typeToSection, prefix, onlyUninspected)
         .setOnlyUninspected(true)
         .setQC(true)
         .setAddContext(isContext);

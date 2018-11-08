@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * Full exercises returns CommonExercise - so we're kinda stuck with it...
+ * Only the exercises you need to study to practice a dialog.
  *
  * @param <T>
  */
-public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends LearnFacetExerciseList<T> {
+public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends ClientExerciseFacetExerciseList<T> {
   private Logger logger = Logger.getLogger("StudyExerciseList");
 
   private static final int TWO = 2;
@@ -26,20 +26,17 @@ public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends L
   //private static final boolean DEBUG = false;
 
   /**
-   *
-   * @param secondRow
+   *  @param secondRow
    * @param currentExerciseVPanel
    * @param controller
    * @param listOptions
    * @param listHeader
-   * @param isDrillView
    */
   public StudyExerciseList(Panel secondRow,
                            Panel currentExerciseVPanel,
                            ExerciseController controller,
                            ListOptions listOptions,
-                           DivWidget listHeader,
-                           boolean isDrillView) {
+                           DivWidget listHeader) {
     super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, INavigation.VIEWS.STUDY);
   }
 

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Set;
 
-public interface ChoicesContainer {
+interface ChoicesContainer {
   @NotNull
   ListItem getTypeContainer(String type, boolean hasSelection);
 

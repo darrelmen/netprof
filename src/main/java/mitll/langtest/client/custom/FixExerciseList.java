@@ -17,14 +17,23 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
 import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
 
+/**
+ * A list for items to fix (review).
+ * @param <T>
+ */
 class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("FixExerciseList");
-
-  //  private MarkDefectsChapterNPFHelper markDefectsChapterNPFHelper;
-  //Logger logger = Logger.getLogger("NPExerciseList_Defects");
-  // private CheckBox filterOnly, uninspectedOnly;
   private final boolean isContext;
 
+  /**
+   * @see FixNPFHelper#getMyListLayout(SimpleChapterNPFHelper)
+   * @param controller
+   * @param topRow
+   * @param currentExercisePanel
+   * @param instanceName
+   * @param listHeader
+   * @param isContext
+   */
   FixExerciseList(ExerciseController controller,
                   Panel topRow,
                   Panel currentExercisePanel,
@@ -44,7 +53,6 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
   /**
    * @param typeToSection
    * @param prefix
-   * @param onlyWithAudioAnno
    * @param onlyUninspected
    * @return
    * @see HistoryExerciseList#loadExercisesUsingPrefix
@@ -52,11 +60,10 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
   @Override
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
-                                                       boolean onlyWithAudioAnno,
                                                        boolean onlyUninspected) {
 
     ExerciseListRequest exerciseListRequest = super
-        .getExerciseListRequest(typeToSection, prefix, onlyWithAudioAnno, onlyUninspected)
+        .getExerciseListRequest(typeToSection, prefix, onlyUninspected)
         .setOnlyWithAnno(true)
         .setQC(true)
         .setAddContext(isContext);
@@ -72,7 +79,7 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
             .setOnlyWithAnno(true)
             .setQC(true)
             .setAddContext(isContext);
-    logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
+   // logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
 //    logger.info("logException stack " + exceptionAsString);
 
