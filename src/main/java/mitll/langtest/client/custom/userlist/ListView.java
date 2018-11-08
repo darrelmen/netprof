@@ -72,8 +72,8 @@ public class ListView implements ContentView, CreateListComplete {
    */
   private static final String YOUR_LISTS = "Your Lists and Quizzes";
 
-  private static final String LEARN = "Learn";
-  private static final String DRILL = "Drill";
+  private static final String LEARN = INavigation.VIEWS.LEARN.toString();
+  private static final String DRILL = INavigation.VIEWS.PRACTICE.toString();
   private static final String STORAGE_ID = "others";
   /**
    * @see ContentView#showContent

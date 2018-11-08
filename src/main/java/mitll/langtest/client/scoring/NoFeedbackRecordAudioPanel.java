@@ -37,7 +37,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     this.controller = controller;
     this.sessionManager = sessionManager;
 
-    getElement().setId("NoFeedbackRecordAudioPanel_" + exercise.getID());
+   // getElement().setId("NoFeedbackRecordAudioPanel_" + exercise.getID());
   }
 
   /**
@@ -73,7 +73,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     NoFeedbackRecordAudioPanel outer = this;
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller) {
       /**
-       * @see RecordButtonPanel#postAudioFile
+       * @see PostAudioRecordButton#startRecording()
        * @return
        */
       @Override

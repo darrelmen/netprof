@@ -43,6 +43,7 @@ import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.services.AmasServices;
+import mitll.langtest.server.database.user.IPendingUserDAO;
 import mitll.langtest.server.database.userlist.UserListServices;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.dialog.IDialog;
@@ -72,7 +73,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   IAnalysis getAnalysis(int projectid);
 
-  IDLIClassJoinDAO getDliClassJoinDAO();
+
 
   mitll.langtest.server.database.user.UserManagement getUserManagement();
 

@@ -87,7 +87,8 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @param recordButtonTitle
    * @param stopButtonTitle
    * @param buttonWidth
-   * @seex GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
+   * @see FeedbackPostAudioRecordButton#FeedbackPostAudioRecordButton(int, RecordingAudioListener, ExerciseController)
+   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, ExerciseController, RecordingListener, boolean)
    */
   public PostAudioRecordButton(int exerciseID,
                                final ExerciseController controller,
@@ -163,7 +164,7 @@ public abstract class PostAudioRecordButton extends RecordButton
     controller.stopRecording(USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {
-      logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
+     // logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
       return true;
     } else {
       hideWaveform();
@@ -255,7 +256,7 @@ public abstract class PostAudioRecordButton extends RecordButton
   void gotShortDurationRecording() {
   }
 
-  String getDevice() {
+  protected String getDevice() {
     return controller.getBrowserInfo();
   }
 

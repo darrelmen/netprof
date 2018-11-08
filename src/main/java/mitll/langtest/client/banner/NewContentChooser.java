@@ -328,7 +328,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void setInstanceHistory(VIEWS views, boolean keepTypeToSelection) {
-    if (new SelectionState().getView() != views) {
+    VIEWS currentView = new SelectionState().getView();
+    if (currentView != views) {
       String typeToSelection = keepTypeToSelection ? getTypeToSelection() : "";
 
       pushItem(getInstanceParam(views) +

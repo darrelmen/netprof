@@ -90,7 +90,7 @@ function init(config) {
 }
 
 function startStream(url, exid, reqid, isreference, audiotype, dialogSessionID, recordingSession) {
-    console.log("worker.startStream " + exid + " req " + reqid);
+  //  console.log("worker.startStream " + exid + " req " + reqid);
     myurl = new String(url);
     myexid = new String(exid);
     myreqid = new String(reqid);

@@ -439,6 +439,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
             }
           }
 
+
           /**
            * @see FlashcardRecordButton#checkKeyDown
            */

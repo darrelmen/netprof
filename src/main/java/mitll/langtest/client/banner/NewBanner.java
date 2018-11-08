@@ -282,6 +282,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     return rnav;
   }
 
+  /**
+   * @see #setCogVisible
+   */
   private List<LinkAndTitle> hasProjectChoices;
 
   private void addSubtitle(Nav rnav) {
@@ -294,6 +297,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     subtitle.setVisible(!controller.isRecordingEnabled());
   }
 
+  List<LinkAndTitle> teacherReq = new ArrayList<>();
+
   /**
    * @param userManager
    * @param userMenu
@@ -305,9 +310,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     userDrop.setIcon(IconType.USER);
     rnav.add(userDrop);
 
+    teacherReq.clear();
     userDrop.addClickHandler(event -> {
       userDrop.clear();
-      userMenu.getStandardUserMenuChoices().forEach(linkAndTitle -> userDrop.add(linkAndTitle.makeNewLink()));
+      userMenu.getStandardUserMenuChoices(teacherReq).forEach(linkAndTitle -> userDrop.add(linkAndTitle.makeNewLink()));
+      hasProjectChoices.addAll(teacherReq);
     });
   }
 
@@ -467,7 +474,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     dialognav.setVisible(visible);
 
     //  logger.info("reflectPerm " + visible);
-   // setLearnAndDrill(visible);
+    // setLearnAndDrill(visible);
   }
 
 /*  private void setLearnAndDrill(boolean visible) {
@@ -486,7 +493,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     }
 
     cog.setVisible(isAdmin());
-  //  setLearnAndDrill(val);
+    //  setLearnAndDrill(val);
     boolean hasProject = controller.getProjectStartupInfo() != null;
     //  if (DEBUG) logger.info("setCogVisible " + val + " has project " + hasProject + " for " + hasProjectChoices.size());
 
@@ -585,7 +592,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     lnav.setVisible(show);
     reflectPermissions(controller.getPermissions());
 
- //   setLearnAndDrill(show);
+    //   setLearnAndDrill(show);
   }
 
   /**

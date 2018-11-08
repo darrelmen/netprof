@@ -88,10 +88,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           "\n\tcontextPath " + contextPath
       );*/
 
-      LoginResult loginResult = securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, createSession(), true);
-
-      return loginResult;
-
+      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, createSession(), true);
     } catch (Exception e) {
       logger.error("got " + e, e);
       logAndNotifyServerException(e);

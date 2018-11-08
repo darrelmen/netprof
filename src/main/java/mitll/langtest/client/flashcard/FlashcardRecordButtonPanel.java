@@ -53,7 +53,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
-//  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
+  //  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
   private final AudioAnswerListener exercisePanel;
   private IconAnchor waiting;
 
@@ -62,8 +62,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * @param controller
    * @see BootstrapExercisePanel#getAnswerWidget
    */
-  public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel,
-                                    ExerciseController controller) {
+  public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, ExerciseController controller) {
     super(controller, "Record");
     this.exercisePanel = exercisePanel;
   }
@@ -104,6 +103,8 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   @Override
   protected abstract RecordButton makeRecordButton(ExerciseController controller, String title);
 
+  @Override protected abstract String getDevice();
+
   @Override
   protected void postedAudio() {
     exercisePanel.postedAudio();
@@ -120,7 +121,6 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * @param result response from server
    * @param outer  ignored here
    * @see BootstrapExercisePanel#getAnswerWidget
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#onPostSuccess
    */
   @Override
   protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {

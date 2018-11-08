@@ -34,10 +34,9 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.project.ProjectServices;
-import mitll.langtest.server.services.AudioServiceImpl;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserProject;
-import mitll.npdata.dao.word.UserProjectDAOWrapper;
+import mitll.npdata.dao.project.UserProjectDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import scala.Tuple2;

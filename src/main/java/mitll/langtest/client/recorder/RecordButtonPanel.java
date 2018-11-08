@@ -61,7 +61,7 @@ import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class RecordButtonPanel implements RecordButton.RecordingListener {
-  private final Logger logger = Logger.getLogger("RecordButtonPanel");
+  //private final Logger logger = Logger.getLogger("RecordButtonPanel");
 
   protected final RecordButton recordButton;
   private final ExerciseController controller;

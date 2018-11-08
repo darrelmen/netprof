@@ -91,8 +91,7 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
                                final ExerciseController controller,
                                RecordButton.RecordingListener outerRecordingListener,
                                boolean addKeyBinding) {
-    super(exerciseID, controller,
-        "", "", WIDTH_FOR_BUTTON);
+    super(exerciseID, controller, "", "", WIDTH_FOR_BUTTON);
     id = count++;
     name = "FlashcardRecordButton_";
 
@@ -242,20 +241,15 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
     event.preventDefault();
   }
 
-  protected void gotRightArrow() {
-  }
+  protected abstract void gotRightArrow();
 
-  protected void gotLeftArrow() {
-  }
+  protected abstract void gotLeftArrow();
 
-  protected void gotUpArrow() {
-  }
+  protected abstract void gotUpArrow();
 
-  protected void gotDownArrow() {
-  }
+  protected abstract void gotDownArrow();
 
-  protected void gotEnter() {
-  }
+  protected abstract void gotEnter();
 
   private void checkKeyUp(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
@@ -299,13 +293,9 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
   }-*/;
 
   protected boolean showInitialRecordImage() {
-    showFirstRecordImage();
-    return true;
-  }
-
-  void showFirstRecordImage() {
     setBaseIcon(MyCustomIconType.record1);
     setText("");
+    return true;
   }
 
   protected void hideBothRecordImages() {

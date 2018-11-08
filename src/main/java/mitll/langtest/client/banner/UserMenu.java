@@ -202,21 +202,24 @@ public class UserMenu {
    * @return
    * @see NewBanner#addUserMenu
    */
-  List<LinkAndTitle> getStandardUserMenuChoices() {
+  List<LinkAndTitle> getStandardUserMenuChoices(List<LinkAndTitle> teacherReq) {
     List<LinkAndTitle> choices = new ArrayList<>();
 
     choices.add(getChangePassword());
 
-    maybeAddReqInstructor(choices);
+    LinkAndTitle linkAndTitle = maybeAddReqInstructor(choices);
+    if (linkAndTitle != null) teacherReq.add(linkAndTitle);
+
+    choices.add(getLogOut());
 
     return choices;
   }
 
-  private void maybeAddReqInstructor(List<LinkAndTitle> choices) {
+  private LinkAndTitle maybeAddReqInstructor(List<LinkAndTitle> choices) {
     User current = userManager.getCurrent();
 
     if (current != null && !current.isTeacher() && !current.getPermissions().contains(User.Permission.TEACHER_PERM)) {
-      choices.add(new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS,
+      LinkAndTitle e = new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS,
           new SuccessClickHandler(() -> new DialogHelper(true)
               .show(ARE_YOU_AN_INSTRUCTOR,
                   REQ_MESSAGE, new DialogHelper.CloseListener() {
@@ -244,10 +247,12 @@ public class UserMenu {
                     public void gotHidden() {
 
                     }
-                  }, "OK", "Cancel"))));
+                  }, "OK", "Cancel")));
+      choices.add(e);
+      return e;
     }
+    else return null;
 
-    choices.add(getLogOut());
 
   }
 

@@ -87,12 +87,12 @@ public interface INavigation extends IViewContaner {
       this.mode = mode;
     }
 
-    VIEWS(String display, ProjectMode mode, boolean isContext) {
-      this.display = display;
-      this.perms = Collections.emptyList();
-      this.mode = mode;
-      this.isContext = isContext;
-    }
+//    VIEWS(String display, ProjectMode mode, boolean isContext) {
+//      this.display = display;
+//      this.perms = Collections.emptyList();
+//      this.mode = mode;
+//      this.isContext = isContext;
+//    }
 
     public List<User.Permission> getPerms() {
       return perms;
