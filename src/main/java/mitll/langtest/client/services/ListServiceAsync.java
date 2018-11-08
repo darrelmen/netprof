@@ -92,5 +92,5 @@ public interface ListServiceAsync {
   void getReviewList(boolean isContext, AsyncCallback<UserList<CommonShell>> async);
 */
 
-  void getQuizInfo(int userListID, AsyncCallback<QuizInfo> async);
+  void getQuizInfo(int userListID, AsyncCallback<QuizSpec> async);
 }

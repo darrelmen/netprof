@@ -1068,7 +1068,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       return Collections.emptyMap();
     } else {
       Map<String, Float> phoneToScore = new HashMap<>();
-      logger.info("getTokenToScore " + phones.keySet());
+
+//      logger.info("getTokenToScore " + phones.keySet());
+
       for (Map.Entry<String, Float> phoneScorePair : phones.entrySet()) {
         String key = phoneScorePair.getKey();
 

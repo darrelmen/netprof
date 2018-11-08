@@ -267,6 +267,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     String state = getHeader(request, STREAMSTATE);
     String timestamp = getHeader(request, STREAMTIMESTAMP);
 
+    String header = getHeader(request, RECORDINGSESSION);
+    logger.info("recording session " + header);
+    device = header == null?device:header;
+
     byte[] targetArray = IOUtils.toByteArray(request.getInputStream());
     AudioChunk newChunk = new AudioChunk(packet, targetArray);
 
@@ -958,8 +962,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       ((Exercise) commonExercise).setProjectID(audioContextProjid);
       audioContext.setExid(commonExercise.getID());
     }
-
-    // CommonShell exercise1 = amas ? db.getAMASExercise(exerciseID) : commonExercise;
 
     if (commonExercise == null && isExistingExercise) {
       logger.warn("writeAudioFile " + getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");

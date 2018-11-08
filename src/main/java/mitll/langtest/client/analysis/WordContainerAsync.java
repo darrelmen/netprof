@@ -404,7 +404,8 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     Column<WordScore, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
     int itemColWidth = getItemColWidth();
-    logger.info("addReview itemColWidth " + itemColWidth);
+
+  //  logger.info("addReview itemColWidth " + itemColWidth);
 
     table.setColumnWidth(itemCol, itemColWidth + "px");
 

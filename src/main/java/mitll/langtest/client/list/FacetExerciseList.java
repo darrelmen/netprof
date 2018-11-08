@@ -1150,7 +1150,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       Map<String, String> candidate = new HashMap<>(typeToSelection);  // existing set is in type->selection
       candidate.put(type, getChoiceHandlerValue(type, key, newUserListID));
 
-      logger.info("getChoiceHandler click on " + type + "=" + key + ", list = " + newUserListID);
+     // logger.info("getChoiceHandler click on " + type + "=" + key + ", list = " + newUserListID);
 
       setHistory(candidate);
     };
@@ -1639,7 +1639,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       widget.getElement().getStyle().setOpacity(0.2);
      // logger.info("set opacity ");
     } else {
-      logger.warning("not setting opacity...");
+ //     logger.warning("not setting opacity...");
     }
   }
 

@@ -55,7 +55,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
   private boolean correct = false;
   private boolean saidAnswer = false;
   private long durationInMillis;
-  private long roundTripMillis;
+//  private long roundTripMillis;
   private int resultID;
   private AudioAttribute audioAttribute;
   private double dynamicRange;
@@ -245,7 +245,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
    * @return
    */
   public long getRoundTripMillis() {
-    return roundTripMillis;
+    return 0;//roundTripMillis;
   }
 /*
   public void setRoundTripMillis(long roundTripMillis) {

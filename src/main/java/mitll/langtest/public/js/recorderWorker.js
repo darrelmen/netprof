@@ -40,7 +40,7 @@ var myurl;
 var myexid;
 var myreqid;
 var myisreference;
-var myaudiotype, mydialogsessionid;
+var myaudiotype, mydialogsessionid, myrecordingsession;
 
 var lastSendMoment;
 
@@ -76,7 +76,7 @@ this.onmessage = function (e) {
             clear();
             break;
         case 'startStream':
-            startStream(e.data.url, e.data.exid, e.data.reqid, e.data.isreference, e.data.audiotype, e.data.dialogSessionID);
+            startStream(e.data.url, e.data.exid, e.data.reqid, e.data.isreference, e.data.audiotype, e.data.dialogSessionID, e.data.recordingSession);
             break;
         case 'stopStream':
             stopStream(e.data.type, e.data.abort);
@@ -89,7 +89,7 @@ function init(config) {
     sampleRate = config.sampleRate;
 }
 
-function startStream(url, exid, reqid, isreference, audiotype, dialogSessionID) {
+function startStream(url, exid, reqid, isreference, audiotype, dialogSessionID, recordingSession) {
     console.log("worker.startStream " + exid + " req " + reqid);
     myurl = new String(url);
     myexid = new String(exid);
@@ -97,6 +97,7 @@ function startStream(url, exid, reqid, isreference, audiotype, dialogSessionID) 
     myisreference = new String(isreference);
     myaudiotype = new String(audiotype);
     mydialogsessionid = new String(dialogSessionID);
+    myrecordingsession = new String(recordingSession);
     lastSendMoment = new Date().getTime();
 }
 
@@ -184,6 +185,7 @@ function sendBlob(framesBeforeRound, audioBlob, isLast, abort, sendMoment) {
         xhr.setRequestHeader("ISREFERENCE", myisreference);
         xhr.setRequestHeader("AUDIOTYPE", myaudiotype);
         xhr.setRequestHeader("DIALOGSESSION", mydialogsessionid);
+        xhr.setRequestHeader("RECORDINGSESSION", myrecordingsession);
         xhr.setRequestHeader("STREAMTIMESTAMP", sendMoment);
 
         if (framesBeforeRound === 0) {

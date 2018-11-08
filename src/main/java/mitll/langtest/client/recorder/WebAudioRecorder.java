@@ -126,8 +126,8 @@ public class WebAudioRecorder {
    * @param audioType
    * @see BrowserRecording#startStream
    */
-  public native void startStream(String url, String exid, String reqid, String isreference, String audioType, String dialogSessionID) /*-{
-      $wnd.serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID);
+  public native void startStream(String url, String exid, String reqid, String isreference, String audioType, String dialogSessionID, String recordingSession) /*-{
+      $wnd.serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID, recordingSession);
   }-*/;
 
   /**

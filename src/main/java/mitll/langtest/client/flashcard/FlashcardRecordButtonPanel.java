@@ -60,14 +60,10 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   /**
    * @param exercisePanel
    * @param controller
-   * @param exerciseID
-   * @param index
    * @see BootstrapExercisePanel#getAnswerWidget
    */
   public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel,
-                                    ExerciseController controller,
-                                    int exerciseID,
-                                    int index) {
+                                    ExerciseController controller) {
     super(controller, "Record");
     this.exercisePanel = exercisePanel;
   }
@@ -123,6 +119,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    *
    * @param result response from server
    * @param outer  ignored here
+   * @see BootstrapExercisePanel#getAnswerWidget
    * @see mitll.langtest.client.recorder.RecordButtonPanel#onPostSuccess
    */
   @Override

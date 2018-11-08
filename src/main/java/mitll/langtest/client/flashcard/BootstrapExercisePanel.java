@@ -322,7 +322,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
                                             ExerciseController controller,
                                             final boolean addKeyBinding) {
     AudioAnswerListener exercisePanel = this;
-    return new FlashcardRecordButtonPanel(exercisePanel, controller, exerciseID, 1) {
+    return new FlashcardRecordButtonPanel(exercisePanel, controller) {
       final FlashcardRecordButtonPanel outer = this;
       private Timer waitTimer = null;
 

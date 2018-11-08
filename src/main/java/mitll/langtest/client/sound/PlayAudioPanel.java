@@ -292,17 +292,16 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   private void setPlayButtonText() {
     boolean playing1 = isPlaying();
 
-
     playButton.setText(playing1 ? pauseLabel : playLabel);
     setIcon(playing1);
   }
 
   private void setIcon(boolean playing1) {
     if (playing1) {
-      logger.info("setPlayButtonText playing1 " + playing1 + " so pause");
+     // logger.info("setPlayButtonText playing1 " + playing1 + " so pause");
       setButtonIconToPause();
     } else {
-      logger.info("setPlayButtonText icon to play ");
+     // logger.info("setPlayButtonText icon to play ");
       showPlayIcon(playButton);
     }
   }

@@ -207,11 +207,11 @@ public class RecordButton extends Button {
   }
 
   /**
-   * Can't be private - IDEA mistake...
+   * NOTE : Can't be private - IDEA mistake...
    *
    * @see #setupRecordButton
    */
-  protected  void doClick() {
+  protected void doClick() {
     if (isVisible() && isEnabled()) {
       startOrStopRecording();
     }
@@ -333,7 +333,9 @@ public class RecordButton extends Button {
   protected void stop(long duration, boolean abort) {
     long now = System.currentTimeMillis();
     long duration2 = now - started;
-    logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
+
+    //  logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
+
     showStopped();
     recordingListener.stopRecording(duration, abort);
   }

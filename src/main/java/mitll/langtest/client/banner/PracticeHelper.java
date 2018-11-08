@@ -120,9 +120,8 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
     };
   }
 
-  void setMode(PolyglotDialog.MODE_CHOICE mode, PolyglotDialog.PROMPT_CHOICE promptChoice) {
+  void setMode(PolyglotDialog.MODE_CHOICE mode) {
     this.mode = mode;
-   // PolyglotDialog.PROMPT_CHOICE promptChoice1 = promptChoice;
     if (polyglotFlashcardFactory != null) {
       polyglotFlashcardFactory.setMode(mode);
     }

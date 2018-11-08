@@ -63,7 +63,9 @@ public class BrowserRecording {
           "" + clientAudioContext.getReqid(),
           clientAudioContext.isShouldAddToTable() ? "true" : "false",
           clientAudioContext.getAudioType().toString(),
-          "" + clientAudioContext.getDialogSessionID());
+          "" + clientAudioContext.getDialogSessionID(),
+          clientAudioContext.getRecordingSessionID()
+          );
     }
   }
 

@@ -100,10 +100,10 @@ public abstract class PostAudioRecordButton extends RecordButton
         stopButtonTitle,
         controller.getProps());
     setRecordingListener(this);
-     this.exerciseID = exerciseID;
+    this.exerciseID = exerciseID;
     this.controller = controller;
 
-     getElement().setId("PostAudioRecordButton");
+    getElement().setId("PostAudioRecordButton");
 
     controller.register(this, exerciseID);
     Style style = getElement().getStyle();
@@ -141,11 +141,13 @@ public abstract class PostAudioRecordButton extends RecordButton
             reqid,
             shouldAddToAudioTable(),
             getAudioType(),
-            getDialogSessionID()),
+            getDialogSessionID(),
+            getDevice()  // device = session id in quiz
+        ),
         this::gotPacketResponse);
   }
 
-  long stopRecordingReqTimestamp;
+  private long stopRecordingReqTimestamp;
 
   /**
    * TODO : consider putting back reqid increment
@@ -368,9 +370,9 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   /**
-   * @see #onPostSuccess
    * @param resultID
    * @param roundtrip
+   * @see #onPostSuccess
    */
   private void addRT(int resultID, int roundtrip) {
     controller.getScoringService().addRoundTrip(resultID, roundtrip, new AsyncCallback<Void>() {
@@ -391,7 +393,7 @@ public abstract class PostAudioRecordButton extends RecordButton
 
   /**
    * @return
-   * @see #postAudioFile(String)
+   * @see #startRecording
    */
   abstract protected AudioType getAudioType();
 
@@ -422,14 +424,13 @@ public abstract class PostAudioRecordButton extends RecordButton
     });
   }
 
-
   /**
    * Feedback for when audio isn't valid for some reason.
    *
    * @param toShow
    */
   private void showPopup(String toShow) {
-    logger.info("showPopup " + toShow + " on " + getExerciseID());
+    //logger.info("showPopup " + toShow + " on " + getExerciseID());
     new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 3000);
   }
 }

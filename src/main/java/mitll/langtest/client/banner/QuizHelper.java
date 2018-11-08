@@ -141,7 +141,7 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
    * @see QuizPracticeFacetExerciseList#getQuizIntro
    */
   private void showQuizForReal() {
-    setMode(POLYGLOT, PolyglotDialog.PROMPT_CHOICE.NOT_YET);
+    setMode(POLYGLOT);
     setNavigation(navigation);
     hideList();
   }
@@ -163,7 +163,9 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
 
   private class QuizPracticeFacetExerciseList extends PracticeFacetExerciseList<T, U> {
     QuizPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, DivWidget listHeader) {
-      super(topRow, currentExercisePanel, QuizHelper.this.controller, new ListOptions().setInstance(INavigation.VIEWS.QUIZ).setShowPager(false), listHeader, INavigation.VIEWS.QUIZ, QuizHelper.this
+      super(topRow, currentExercisePanel, QuizHelper.this.controller,
+          new ListOptions().setInstance(INavigation.VIEWS.QUIZ).setShowPager(false),
+          listHeader, INavigation.VIEWS.QUIZ, QuizHelper.this
       );
     }
 

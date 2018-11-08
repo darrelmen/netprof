@@ -435,7 +435,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void showPractice(PracticeHelper toUse, VIEWS views) {
-    toUse.setMode(mode, prompt);
+    toUse.setMode(mode);
     toUse.setNavigation(this);
     toUse.showContent(divWidget, views);
     toUse.hideList();
@@ -446,7 +446,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    * @see #showQuiz(boolean)
    */
   private void showQuizForReal(boolean fromClick) {
-    quizHelper.setMode(mode, prompt);
+    quizHelper.setMode(mode);
     quizHelper.setNavigation(this);
     quizHelper.showContent(divWidget, QUIZ);
     quizHelper.hideList();

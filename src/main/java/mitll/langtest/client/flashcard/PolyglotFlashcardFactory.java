@@ -8,7 +8,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.custom.QuizInfo;
+import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
@@ -34,9 +34,8 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
 
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
   private boolean postedAudio;
-  private QuizInfo quizInfo;
+  private QuizSpec quizSpec;
   // private static final boolean DEBUG = false;
-
 
   /**
    * @param controller
@@ -46,21 +45,21 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
   PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, INavigation.VIEWS instance) {
     super(controller, exerciseList, instance);
 
-    controller.getListService().getQuizInfo(new SelectionState().getList(), new AsyncCallback<QuizInfo>() {
+    controller.getListService().getQuizInfo(new SelectionState().getList(), new AsyncCallback<QuizSpec>() {
       @Override
       public void onFailure(Throwable caught) {
 
       }
 
       @Override
-      public void onSuccess(QuizInfo result) {
+      public void onSuccess(QuizSpec result) {
         gotQuizInfo(result);
       }
     });
   }
 
-  private void gotQuizInfo(QuizInfo result) {
-    this.quizInfo = result;
+  private void gotQuizInfo(QuizSpec result) {
+    this.quizSpec = result;
   }
 
   /**
@@ -101,7 +100,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     return new StickyState(storage) {
       @Override
       protected boolean isCorrect(boolean correct, double score) {
-        return (score * 100D) >= Integer.valueOf(quizInfo.getMinScore()).doubleValue();
+        return (score * 100D) >= Integer.valueOf(quizSpec.getMinScore()).doubleValue();
       }
     };
   }
@@ -120,6 +119,9 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     }
   }
 
+  /**
+   * @see #timerFired
+   */
   private void sessionComplete() {
     if (controller.getProjectStartupInfo() != null) {  // could have logged out or gone up in lang hierarchy
       currentFlashcard.cancelAdvanceTimer();
@@ -178,7 +180,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
   }
 
   private void doSessionStart() {
-    int delayMillis = quizInfo.getRoundMinutes() * 60 * 1000;
+    int delayMillis = quizSpec.getRoundMinutes() * 60 * 1000;
     int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
     //logger.info("doSessionStart timeRemainingMillis " + timeRemainingMillis);
     roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
@@ -223,21 +225,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
       recurringTimer.cancel();
     }
   }
-
-/*  @Override
-  public int getRoundTimeMinutes(boolean isDry) {
-    return isDry ? DRY_RUN_ROUND_TIME : ROUND_TIME;
-  }*/
-
-/*
-  public int getMinScore() {
-    return 35;
-  }
-*/
-//
-//  public boolean shouldShowAudio() {
-//    return false;
-//  }
 
   public void setMode(PolyglotDialog.MODE_CHOICE mode) {
     this.mode = mode;
@@ -373,7 +360,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     // clearTimeRemaining();
   }
 
-  public QuizInfo getQuizInfo() {
-    return quizInfo;
+  public QuizSpec getQuizSpec() {
+    return quizSpec;
   }
 }

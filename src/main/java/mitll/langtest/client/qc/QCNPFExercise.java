@@ -805,10 +805,12 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     commentEntry.addStyleName("leftFiveMargin");
     commentEntry.addBlurHandler(event -> {
 
-      logger.info("makeCommentEntry comment on " +
-          "\n\tex      " + exerciseID +
-          "\n\tfield   " + field +
-          "\n\tcomment " + commentEntry.getText());
+      if (false) {
+        logger.info("makeCommentEntry comment on " +
+            "\n\tex      " + exerciseID +
+            "\n\tfield   " + field +
+            "\n\tcomment " + commentEntry.getText());
+      }
 
       addIncorrectComment(exerciseID, field, sanitize(commentEntry.getText()));
     });

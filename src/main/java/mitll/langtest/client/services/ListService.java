@@ -139,5 +139,5 @@ public interface ListService extends RemoteService {
   int getRoundTimeMinutes(int userListID);
   int getMinScore(int userListID);*/
 
-  QuizInfo getQuizInfo(int userListID);
+  QuizSpec getQuizInfo(int userListID);
 }
