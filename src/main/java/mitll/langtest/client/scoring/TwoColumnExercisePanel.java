@@ -116,6 +116,12 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     this.itemMenu = new ItemMenu(controller, commonExercise);
   }
 
+  /**
+   * @param showFL
+   * @param showALTFL
+   * @param phonesChoices
+   * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
+   */
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
     this.showFL = showFL;
@@ -208,9 +214,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     }
 
     // second row shows score and history for item
-    {
-      card.add(getScoringRow(recordPanel));
-    }
+    card.add(getScoringRow(recordPanel));
 
     // finally, third row, has context
     if (e.hasContext()) {
@@ -434,13 +438,12 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @param foreignLanguage
    * @param altFL
    * @param contextEx
+   * @see #addContext
    */
   private SimpleRecordAudioPanel<ClientExercise> addContextFields(DivWidget rowWidget,
                                                                   String foreignLanguage,
                                                                   String altFL,
                                                                   ClientExercise contextEx) {
-
-
     AnnotationHelper annotationHelper = new AnnotationHelper(controller, controller.getMessageHelper());
     SimpleRecordAudioPanel<ClientExercise> recordPanel =
         new SimpleRecordAudioPanel<>(controller, contextEx, listContainer, addPlayer, listenView);

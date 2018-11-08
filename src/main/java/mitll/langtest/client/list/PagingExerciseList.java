@@ -115,17 +115,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
     pushFirstSelection(getFirstID(), getTypeAheadText());
   }
 
-/*
-  @Override
-  public void setState(int id, STATE state) {
-    T t = byID(id);
-    if (t == null) logger.warning("can't find ex " + id);
-    else {
-      t.setState(state);
-    }
-  }
-*/
-
   @Override
   public void reload(Map<String, Collection<String>> typeToSection) {
   }
@@ -154,11 +143,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
         controller.getUserState().getUser())
         .setPrefix(prefix)
         .setUserListID(userListID)
-        .setActivityType(getActivityType())
-        //.setOnlyUnrecordedByMe(false)
-        // .setOnlyDefaultAudio(false)
-        //.setOnlyUninspected(false)
-        ;
+        .setActivityType(getActivityType());
   }
 
   /**
@@ -178,17 +163,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   public abstract void gotClickOnItem(final T e);
 
   /**
-   * Skip to first not completed or just go to the first item.
-   *
-   * @return
-   * @see #loadFirstExercise
-   */
- /* @Override
-  protected T findFirstExercise() {
-    return listOptions.isShowFirstNotCompleted() ? getFirstNotCompleted() : super.findFirstExercise();
-  }*/
-
-  /**
    * Sometimes we want to not respect if there's an item selection in the url.
    *
    * @param searchIfAny
@@ -203,22 +177,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
       super.goToFirst(searchIfAny, exerciseID);
     }
   }
-
-  /**
-   * @deprecated
-   * @return
-   * @see #findFirstExercise
-   */
- /* private T getFirstNotCompleted() {
-    for (T es : pagingContainer.getItems()) {
-      STATE state = es.getState();
-      if (state != null && state.equals(STATE.UNSET)) {
-        // logger.info("first unset is " + es.getID() + " state " + state);
-        return es;
-      }
-    }
-    return super.findFirstExercise();
-  }*/
 
   /**
    * TODO : Not sure if this is needed anymore

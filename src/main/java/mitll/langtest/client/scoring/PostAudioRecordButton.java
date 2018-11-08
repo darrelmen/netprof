@@ -69,7 +69,7 @@ public abstract class PostAudioRecordButton extends RecordButton
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PACKET = false;
 
-  private static final boolean USE_DELAY = false;
+  private static final boolean USE_DELAY = true;
   private static final String END = "END";
 
   public static final int MIN_DURATION = 250;
@@ -136,16 +136,16 @@ public abstract class PostAudioRecordButton extends RecordButton
   public void startRecording() {
     LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
 
-    if (DEBUG) logger.info("startRecording!");
+    ClientAudioContext clientAudioContext = new ClientAudioContext(getExerciseID(),
+        reqid,
+        shouldAddToAudioTable(),
+        getAudioType(),
+        getDialogSessionID(),
+        getDevice()  // device = session id in quiz
+    );
+    if (DEBUG || true) logger.info("startRecording : "+ clientAudioContext);
 
-    controller.startStream(new ClientAudioContext(getExerciseID(),
-            reqid,
-            shouldAddToAudioTable(),
-            getAudioType(),
-            getDialogSessionID(),
-            getDevice()  // device = session id in quiz
-        ),
-        this::gotPacketResponse);
+    controller.startStream(clientAudioContext, this::gotPacketResponse);
   }
 
   private long stopRecordingReqTimestamp;
@@ -257,6 +257,8 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   protected String getDevice() {
+    logger.info("getDevice default " + getClass());
+
     return controller.getBrowserInfo();
   }
 

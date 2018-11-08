@@ -12,6 +12,7 @@ import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.SimpleAudioAnswer;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -32,6 +33,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
 public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends NoFeedbackRecordAudioPanel<T>
     implements SessionManager {
   private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+
   private static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
@@ -57,7 +59,8 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    * @param listContainer
    * @param addPlayer
    * @param listenView
-   * @see TwoColumnExercisePanel#makeFirstRow
+   * @see TwoColumnExercisePanel#getItemContent
+   * @see TwoColumnExercisePanel#addContextFields
    */
   SimpleRecordAudioPanel(ExerciseController controller,
                          T exercise,
@@ -73,7 +76,8 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
     setWidth("100%");
     addWidgets();
     List<CorrectAndScore> scores = exercise.getScores();
-//    logger.info("exercise " + exercise.getID() + " has\n\t" + scores + " scores");
+
+  //  logger.info("SimpleRecordAudioPanel : exercise " + exercise.getID() + " has\n\t" + scores + " scores");
 
     showRecordingHistory(scores);
     hasScoreHistory = scores != null && !scores.isEmpty();
@@ -212,7 +216,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
 
   @Override
   public void useInvalidResult(int exid, boolean isValid) {
-  //  logger.info("useInvalidResult " + isValid);
+    //  logger.info("useInvalidResult " + isValid);
     waitCursorHelper.showFinished();
     setVisible(hasScoreHistory);
 
@@ -275,8 +279,8 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
       setVisible(hasScoreHistory);
     }
     //else {
-      //logger.warning("scores is null?");
-   // }
+    //logger.warning("scores is null?");
+    // }
 
     miniScoreListener.showChart(controller.getHost());
   }
@@ -291,6 +295,6 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
 
   @Override
   public String getSession() {
-    return null;
+    return controller.getBrowserInfo();
   }
 }

@@ -41,12 +41,13 @@ import mitll.langtest.client.initial.BrowserCheck;
  * @since 3/23/16.
  */
 public class CompressedAudio {
- // private final Logger logger = Logger.getLogger("CompressedAudio");
+  // private final Logger logger = Logger.getLogger("CompressedAudio");
   private static final String OGG = ".ogg";
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
   private static final boolean isIE = BrowserCheck.getIEVersion() > 0;
+
   public static String getPath(String path) {
     return ensureForwardSlashes(getPathNoSlashChange(path));
   }
@@ -54,13 +55,13 @@ public class CompressedAudio {
   public static String getPathNoSlashChange(String path) {
     boolean b1 = supportsOgg();
     boolean useOGG = !isIE && b1;
- //   logger.info("using ogg " + useOGG + " is IE  " + isIE   + " supports OGG " + b1 + " checking " + path);
-    return (path.endsWith(WAV)) ? path.replace(WAV, useOGG ? OGG : MP3) : (!useOGG && path.endsWith(OGG) ? path.replace(OGG,MP3) : path);
+    //   logger.info("using ogg " + useOGG + " is IE  " + isIE   + " supports OGG " + b1 + " checking " + path);
+    return (path.endsWith(WAV)) ? path.replace(WAV, useOGG ? OGG : MP3) : (!useOGG && path.endsWith(OGG) ? path.replace(OGG, MP3) : path);
   }
 
   /**
-   * @see #getPathNoSlashChange
    * @return
+   * @see #getPathNoSlashChange
    */
   public static native boolean supportsOgg() /*-{
       if (typeof $wnd.Modernizr == "undefined") {

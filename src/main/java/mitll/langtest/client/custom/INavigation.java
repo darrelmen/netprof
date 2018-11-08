@@ -87,13 +87,6 @@ public interface INavigation extends IViewContaner {
       this.mode = mode;
     }
 
-//    VIEWS(String display, ProjectMode mode, boolean isContext) {
-//      this.display = display;
-//      this.perms = Collections.emptyList();
-//      this.mode = mode;
-//      this.isContext = isContext;
-//    }
-
     public List<User.Permission> getPerms() {
       return perms;
     }
@@ -109,7 +102,6 @@ public interface INavigation extends IViewContaner {
     public boolean isQC() {
       return isQC;
     }
-
 
     public boolean isFix() {
       return isFix;

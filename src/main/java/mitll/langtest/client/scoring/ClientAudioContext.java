@@ -12,13 +12,13 @@ public class ClientAudioContext {
   private final AudioType audioType;
 
   /**
-   * @see PostAudioRecordButton#startRecording
    * @param exerciseID
    * @param reqid
    * @param shouldAddToTable
    * @param audioType
    * @param dialogSessionID
    * @param recordingSessionID
+   * @see PostAudioRecordButton#startRecording
    */
   ClientAudioContext(int exerciseID,
                      int reqid,
@@ -60,5 +60,9 @@ public class ClientAudioContext {
 
   public AudioType getAudioType() {
     return audioType;
+  }
+
+  public String toString() {
+    return "ex " + exerciseID + " req " + reqid + " add " + shouldAddToTable + " dialog " + dialogSessionID + " session " + recordingSessionID + " type " + audioType;
   }
 }

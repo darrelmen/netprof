@@ -64,6 +64,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends HeadlessPlayAudio {
+  public static final String PLAY_AUDIO_PANEL = "PlayAudioPanel_";
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
   private static final boolean DEBUG = false;
@@ -109,7 +110,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
       pauseLabel = "";
     }
 
-    getElement().setId("PlayAudioPanel_" + (doSlow ? "slow" : "") + id);
+    getElement().setId(PLAY_AUDIO_PANEL + (doSlow ? "slow" : "") + id);
 
     isSlow = doSlow;
 
@@ -249,7 +250,8 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   private void stylePlayButton(Button playButton) {
     playButton.setType(ButtonType.INFO);
     playButton.getElement().getStyle().setProperty("minWidth", "15px");
-    playButton.getElement().setId("PlayAudioPanel_playButton");
+    playButton.getElement().setId(PLAY_AUDIO_PANEL +
+        "playButton");
     playButton.addStyleName("leftFiveMargin");
     playButton.addStyleName("floatLeft");
     playButton.setEnabled(false);

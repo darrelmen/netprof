@@ -8,10 +8,7 @@ import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.*;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -109,16 +106,37 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
     //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
     int reqID = result.getReqID();
 
-    Map<Integer, ClientExercise> idToEx = rememberFetched(result, alreadyFetched);
 
     if (DEBUG) logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs.size());
 
     if (isCurrentReq(reqID)) {
+      Map<Integer, ClientExercise> idToEx = rememberFetched(result, alreadyFetched);
+
       gotFullExercises(reqID, getVisibleExercises(visibleIDs, idToEx));
     } else {
       if (DEBUG_STALE)
         logger.info("getFullExercisesSuccess : ignoring req " + reqID + " vs current " + getCurrentExerciseReq());
     }
+  }
+
+  /**
+   * @param visibleIDs
+   * @param idToEx
+   * @return
+   * @see #getFullExercises(Collection, int, Collection, List)
+   */
+  List<ClientExercise> getVisibleExercises(Collection<Integer> visibleIDs, Map<Integer, ClientExercise> idToEx) {
+    List<ClientExercise> toShow = new ArrayList<>();
+    for (int id : visibleIDs) {
+      ClientExercise e = idToEx.get(id);
+      if (e == null) {
+        logger.warning("\n\ngetVisibleExercises : huh? can't find exercise for visible id " + id + " in " + idToEx.keySet());
+      } else {
+        //   logger.info("getFullExercisesSuccess : show id " + id + " = " + e.getID() + " : " + e.getEnglish());
+        toShow.add(e);
+      }
+    }
+    return toShow;
   }
 
 

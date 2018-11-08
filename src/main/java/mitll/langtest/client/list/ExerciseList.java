@@ -71,7 +71,7 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
  * Time: 5:59 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExerciseList<T extends CommonShell, U extends HasID>  extends DivWidget
+public abstract class ExerciseList<T extends CommonShell, U extends HasID> extends DivWidget
     implements ListInterface<T, U>, ProvidesResize {
   private final Logger logger = Logger.getLogger("ExerciseList");
 
@@ -1024,6 +1024,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID>  exte
 
   @Override
   public void setScore(int id, float hydecScore) {
-    byID(id).getMutableShell().setScore(hydecScore);
+    T t = byID(id);
+    if (t == null) {
+      logger.warning("setScore no exercise found for id " + id + " score " + hydecScore);
+    } else {
+      t.getMutableShell().setScore(hydecScore);
+    }
   }
 }

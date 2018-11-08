@@ -119,11 +119,10 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * And then move on to the next item.
    *
    * @param result response from server
-   * @param outer  ignored here
    * @see BootstrapExercisePanel#getAnswerWidget
    */
   @Override
-  protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {
+  protected void receivedAudioAnswer(final AudioAnswer result) {
     hideWaiting();
     showRecord();
     exercisePanel.receivedAudioAnswer(result);

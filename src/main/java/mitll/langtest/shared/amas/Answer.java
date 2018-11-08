@@ -60,13 +60,13 @@ public class Answer implements IsSerializable {
   public void setScore(double score) { this.score = score; }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer)
    * @return score from hydec (see nnscore)
    */
   double getScore() { return score; }
 
   /**
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer)
    * @see mitll.langtest.server.autocrt.AutoCRT#getAutoCRTDecodeOutput(String, int, java.io.File, AudioAnswer)
    * @return
    */

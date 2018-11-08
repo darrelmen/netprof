@@ -616,15 +616,15 @@ public class ResultManager extends PagerTable {
     table.addColumn(type, DEVICE);
     rememberColumn(type, DEVICE);
 
-    TextColumn<MonitorResult> wFlash = new TextColumn<MonitorResult>() {
-      @Override
-      public String getValue(MonitorResult answer) {
-        return answer.isWithFlash() ? YES : NO;
-      }
-    };
-    wFlash.setSortable(true);
-    table.addColumn(wFlash, "w/Flash");
-    rememberColumn(wFlash, "withFlash");
+//    TextColumn<MonitorResult> wFlash = new TextColumn<MonitorResult>() {
+//      @Override
+//      public String getValue(MonitorResult answer) {
+//        return answer.isWithFlash() ? YES : NO;
+//      }
+//    };
+//    wFlash.setSortable(true);
+//    table.addColumn(wFlash, "w/Flash");
+//    rememberColumn(wFlash, "withFlash");
 
     {
       TextColumn<MonitorResult> processDur = new TextColumn<MonitorResult>() {

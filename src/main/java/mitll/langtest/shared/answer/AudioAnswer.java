@@ -106,7 +106,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
 
   /**
    * @return score from hydec (see nnscore)
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer)
    */
   public double getScore() {
     return score;
@@ -114,7 +114,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
 
   /**
    * @return
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer)
    */
   public boolean isCorrect() {
     return correct;

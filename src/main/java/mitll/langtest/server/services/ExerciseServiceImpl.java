@@ -1518,10 +1518,18 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
                                                                    List<ClientExercise> exercises,
                                                                    int userID, Language language) {
     long then = System.currentTimeMillis();
-    Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(ids, exercises, userID, language);
+
+    Set<Integer> contextIDs = new HashSet<>();
+    exercises.forEach(exercise->exercise.getDirectlyRelated().forEach(dir->contextIDs.add(dir.getID())));
+    contextIDs.addAll(ids);
+
+    Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(contextIDs, exercises.isEmpty(), userID, language);
+
     long now = System.currentTimeMillis();
-    if (now - then > 50)
-      logger.info("getScoreHistoryPerExercise took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
+    if (now - then > 0) {
+      logger.info("getScoreHistoryPerExercise took " + (now - then) + " to get score histories for " + exercises.size() +
+          "\n\t exercises: " + scoreHistories.keySet());
+    }
 
     return scoreHistories;
   }
@@ -1557,17 +1565,18 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
   /**
    * @param exids
-   * @param exercises
+   * @param empty
    * @param userID
    * @param language
    * @return
    * @see #getScoreHistoryPerExercise
    */
   private Map<Integer, CorrectAndScore> getScoreHistories(Collection<Integer> exids,
-                                                          List<ClientExercise> exercises,
+                                                          boolean empty,
                                                           int userID,
                                                           Language language) {
-    return (exercises.isEmpty()) ? Collections.emptyMap() :
+  //  boolean empty = exercises.isEmpty();
+    return empty ? Collections.emptyMap() :
         db.getResultDAO().getScoreHistories(userID, exids, language);
   }
 

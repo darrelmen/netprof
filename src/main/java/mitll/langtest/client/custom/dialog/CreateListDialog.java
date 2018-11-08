@@ -220,18 +220,19 @@ public class CreateListDialog extends BasicDialog {
       classBox.box.addBlurHandler(event -> controller.logEvent(classBox.box, TEXT_BOX, CREATE_NEW_LIST, "CourseInfo = " + classBox.box.getValue()));
     }
 
-    if (isQuiz) {
-      if (isEdit) {
-        child.add(getQuizChoices());
-        addEditOptions(child);
+    if (canMakeQuiz()) {
+      if (isQuiz) {
+        if (isEdit) {
+          child.add(getQuizChoices());
+          addEditOptions(child);
+        } else {
+          addQuizOptions(child);
+        }
       } else {
-        addQuizOptions(child);
-      }
-    }
-    else {
-      if (isEdit) {
-        child.add(getQuizChoices());
-        addEditOptions(child);
+        if (isEdit) {
+          child.add(getQuizChoices());
+          addEditOptions(child);
+        }
       }
     }
 

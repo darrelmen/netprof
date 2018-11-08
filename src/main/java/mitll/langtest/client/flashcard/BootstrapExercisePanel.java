@@ -199,7 +199,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     scoreFeedbackRow.setHeight("52px");
 
 
-
     toAddTo.add(scoreFeedbackRow);
 
     DivWidget wrapper = new DivWidget();
@@ -309,8 +308,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     recordButton.addStyleName("alignCenter");
   }
 
-//  private FlashcardRecordButton toGrab;
-
   /**
    * @param exerciseID
    * @param controller
@@ -379,7 +376,11 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
        */
       @Override
       protected String getDevice() {
-        return getDeviceValue();
+
+        String deviceValue = getDeviceValue();
+
+        logger.info("getDevice deviceValue " + deviceValue);
+        return deviceValue;
       }
 
       @Override
@@ -439,6 +440,10 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
             }
           }
 
+          @Override
+          protected String getDevice() {
+            return getDeviceValue();
+          }
 
           /**
            * @see FlashcardRecordButton#checkKeyDown
@@ -457,7 +462,13 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
 
           @Override
           public void useResult(AudioAnswer result) {
-            receivedAudioAnswer(result,this);
+            receivedAudioAnswer(result);
+          }
+
+          @Override
+          protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+          //  super.useInvalidResult(exid, validity, dynamicRange);
+            receivedAudioAnswer(new AudioAnswer("", validity, -1, 0, exid));
           }
         };
 
@@ -488,6 +499,8 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   }
 
   String getDeviceValue() {
+    logger.warning("getDeviceValue default ");
+
     return controller.getBrowserInfo();
   }
 
@@ -650,10 +663,10 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   }
 
   /**
-   * @see #showCorrectFeedback
    * @param score
    * @param pretestScore
    * @param correct
+   * @see #showCorrectFeedback
    */
   void showRecoFeedback(double score, AlignmentAndScore pretestScore, boolean correct) {
     showPronScoreFeedback(correct, score, pretestScore.isFullMatch());

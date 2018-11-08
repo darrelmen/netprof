@@ -327,9 +327,11 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    */
   public List<T> getExercises(String prefix) {
     List<T> matches = getMatches(getTrimmed(prefix));
-    for (T ex : matches)
-      if (ex.isContext()) logger.warn("huh? returning context exercise " + ex.getID() + " " + ex.getEnglish());
+
+/*    for (T ex : matches)
+      if (ex.isContext()) logger.info("getExercises : returning context exercise " + ex.getID() + " " + ex.getEnglish());*/
     //   logger.info("getExercises trim '" + prefix.toLowerCase() + "' = '" + trimmed + "' => " +matches.size());
+
     return matches;
   }
 

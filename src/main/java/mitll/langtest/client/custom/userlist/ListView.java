@@ -50,9 +50,9 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String VISITED = "Visited";
   private static final String SAVE = "Save";
 
-  private static final String CLICK_HERE_TO_SHARE = "Click here to share ";
-  private static final String SHARE_QUIZ = "Share Quiz";
-  private static final String SHARE_LIST = "Share List";
+//  private static final String CLICK_HERE_TO_SHARE = "Click here to share ";
+//  private static final String SHARE_QUIZ = "Share Quiz";
+//  private static final String SHARE_LIST = "Share List";
 
   /**
    * @see #getAddItems

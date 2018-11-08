@@ -187,7 +187,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   @Override
   protected String getDeviceValue() {
     String s = "" + polyglotFlashcardContainer.getSessionStartMillis();
-    //     logger.info("getDeviceValue  " + s);
+    logger.info("getDeviceValue  " + s);
     return s;
   }
 

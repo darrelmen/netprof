@@ -42,8 +42,6 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.logging.Logger;
-
 import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
 
 /**
@@ -169,10 +167,9 @@ public abstract class RecordButtonPanel implements RecordButton.RecordingListene
 
   /**
    * @param result
-   * @param outer
    * @seex #onPostSuccess
    */
-  protected abstract void receivedAudioAnswer(AudioAnswer result, final Panel outer);
+  protected abstract void receivedAudioAnswer(AudioAnswer result);
 
   public void setAllowAlternates(boolean allowAlternates) {
     /*this.allowAlternates = allowAlternates;*/
