@@ -54,7 +54,7 @@ public class UserProjectDAO implements IUserProjectDAO {
   private static final Logger logger = LogManager.getLogger(UserProjectDAO.class);
   private final UserProjectDAOWrapper dao;
 
-  private final ConcurrentHashMap<Integer, Integer> userToProjectCache = new ConcurrentHashMap<>();
+//  private final ConcurrentHashMap<Integer, Integer> userToProjectCache = new ConcurrentHashMap<>();
 
   /**
    * @param dbConnection
@@ -133,7 +133,7 @@ public class UserProjectDAO implements IUserProjectDAO {
     dao.upsert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
 
     // remember
-    userToProjectCache.put(userid, projid);
+    //userToProjectCache.put(userid, projid);
   }
 
   /**
@@ -145,7 +145,7 @@ public class UserProjectDAO implements IUserProjectDAO {
    */
   @Override
   public int getCurrentProjectForUser(int user) {
-    Integer project = userToProjectCache.get(user);
+    Integer project = null;//userToProjectCache.get(user);
 
     if (project == null) {
       long then = System.currentTimeMillis();
@@ -154,7 +154,7 @@ public class UserProjectDAO implements IUserProjectDAO {
 //    logger.info("getCurrentProjectForUser : took " + (now - then) + " to get current prpject for user  " + user + " = " + slickUserProjects);
       int i = slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next();
 
-      userToProjectCache.put(user, i);
+//      userToProjectCache.put(user, i);
 
       return i;
     } else {
@@ -168,7 +168,7 @@ public class UserProjectDAO implements IUserProjectDAO {
    */
   @Override
   public void forget(int userid) {
-    userToProjectCache.remove(userid);
+  //  userToProjectCache.remove(userid);
     dao.forget(userid);
   }
 
@@ -198,7 +198,6 @@ public class UserProjectDAO implements IUserProjectDAO {
 
   @Override
   public Map<Integer, Tuple2<Integer, Long>> getUsersToProjectAndTime(Collection<Integer> userids) {
-    Map<Integer, Tuple2<Integer, Long>> userToProjectAndTime = dao.getUserToProjectAndTime(userids);
-    return userToProjectAndTime;
+    return dao.getUserToProjectAndTime(userids);
   }
 }

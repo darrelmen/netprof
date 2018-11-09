@@ -269,8 +269,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     String timestamp = getHeader(request, STREAMTIMESTAMP);
 
     String header = getHeader(request, RECORDINGSESSION);
-   // logger.info("getJSONForStream recording session " + header);
-    device = header == null?device:header;
+    // logger.info("getJSONForStream recording session " + header);
+    device = header == null ? device : header;
 
     byte[] targetArray = IOUtils.toByteArray(request.getInputStream());
     AudioChunk newChunk = new AudioChunk(packet, targetArray);
@@ -403,7 +403,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private AudioType getAudioType(HttpServletRequest request) {
     String header = getHeader(request, AUDIOTYPE);
     try {
-      if (header.contains("=")) header = header.replaceAll("=","_");
+      if (header.contains("=")) header = header.replaceAll("=", "_");
       return AudioType.valueOf(header.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.warn("getAudioType : can't parse '" + header + "' as audio type");
@@ -547,9 +547,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * @see #getJsonObject
    * @param audioChunks
    * @return
+   * @see #getJsonObject
    */
   private AudioChunk getCombinedRef(List<AudioChunk> audioChunks) {
     long then = System.currentTimeMillis();
@@ -597,6 +597,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * Walk forward, looking for last silence chunk before a speech chunk
+   *
    * @param audioChunks
    * @return
    */
@@ -632,6 +633,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * Walk backwards through chunks, looking for last sequence of silence chunks, keeping the last one.
+   *
    * @param audioChunks
    * @return
    */
