@@ -46,17 +46,42 @@ public class CompressedAudio {
   private static final String WAV = ".wav";
   private static final String MP3 = ".mp3";
 
-  private static final boolean isIE = BrowserCheck.getIEVersion() > 0;
+//  private static final boolean isIE = BrowserCheck.getIEVersion() > 0;
+
+  private static boolean useMP3, useOGG;//
+
+  static {
+    useMP3 = supportsMP3();
+   // isIE = BrowserCheck.getIEVersion() > 0;
+    useOGG = supportsOgg();
+  }
 
   public static String getPath(String path) {
     return ensureForwardSlashes(getPathNoSlashChange(path));
   }
 
   public static String getPathNoSlashChange(String path) {
-    boolean b1 = supportsOgg();
-    boolean useOGG = !isIE && b1;
-    //   logger.info("using ogg " + useOGG + " is IE  " + isIE   + " supports OGG " + b1 + " checking " + path);
-    return (path.endsWith(WAV)) ? path.replace(WAV, useOGG ? OGG : MP3) : (!useOGG && path.endsWith(OGG) ? path.replace(OGG, MP3) : path);
+    if (path == null) {
+      return path;
+    } else {
+      if (path.endsWith(WAV)) {  // prefer mp3
+        return useMP3 ?
+            path.replace(WAV, MP3) :
+            useOGG ?
+                path.replace(WAV, OGG) :
+                path;
+      } else if (path.endsWith(OGG)) {  // prefer mp3
+        return useOGG ? path :
+            useMP3 ? path.replace(OGG, MP3) :
+                path;
+      } else if (path.endsWith(MP3)) {
+        return useMP3 ? path :
+            useOGG ? path.replace(MP3, OGG) :
+                path;
+      } else {
+        return path;
+      }
+    }
   }
 
   /**
@@ -65,14 +90,29 @@ public class CompressedAudio {
    */
   public static native boolean supportsOgg() /*-{
       if (typeof $wnd.Modernizr == "undefined") {
-          console.log("no modernizr?");
+          console.log("CompressedAudio no modernizr?");
           return false;
       }
-      if ($wnd.Modernizr.audio.ogg) {
+      else if ($wnd.Modernizr.audio.ogg) {
           //console.log("Can play ogg - ");
           return true;
       } else {
           //console.log("Can NOT play ogg - ");
+          return false;
+          // not-supported
+      }
+  }-*/;
+
+  public static native boolean supportsMP3() /*-{
+      if (typeof $wnd.Modernizr == "undefined") {
+          console.log("CompressedAudio no modernizr?");
+          return false;
+      }
+      else if ($wnd.Modernizr.audio.mp3) {
+          //console.log("Can play mp3 - ");
+          return true;
+      } else {
+          //console.log("Can NOT play mp3 - ");
           return false;
           // not-supported
       }

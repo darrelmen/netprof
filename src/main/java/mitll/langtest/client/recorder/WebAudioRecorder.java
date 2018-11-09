@@ -175,11 +175,6 @@ public class WebAudioRecorder {
     getMicPermission().silenceDetected();
   }
 
- /* public static void gotFrame() {
-    //  console("silenceDetected -- now!");
-    FlashRecordPanelHeadless.micPermission.gotStreamResponse();
-  }*/
-
   public static void webAudioMicAvailable() {
     gotResponse = true;
 

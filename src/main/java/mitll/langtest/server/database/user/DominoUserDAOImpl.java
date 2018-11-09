@@ -105,8 +105,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
   private static final mitll.hlt.domino.shared.model.user.User.Gender UNSPECIFIED = mitll.hlt.domino.shared.model.user.User.Gender.Unspecified;
-  public static final String NETPROF1 = "Netprof";
-  private static final String PRIMARY = NETPROF1;
+  private static final String NETPROF1 = "Netprof";
+//  private static final String PRIMARY = NETPROF1;
   private static final String DEFAULT_AFFILIATION = "";
 
   private static final String UID_F = "userId";
@@ -114,7 +114,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String LOCALHOST = "127.0.0.1";
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
-  public static final String TCHR = "TCHR";
+  private static final String TCHR = "TCHR";
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
@@ -137,7 +137,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           "comcast.net"
       );
 
-  public static final String NETPROF2 = "netprof";
+  private static final String NETPROF2 = "netprof";
   /**
    * Should be consistent with DOMINO.
    * Actually it's all lower case.
@@ -360,9 +360,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     ensureDefaultUsers();
   }
 
-  public JSONSerializer getSerializer() {
+/*  public JSONSerializer getSerializer() {
     return serializer;
-  }
+  }*/
 
   /**
    * DNS LOOKUP.
@@ -478,8 +478,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           " has roles " + adminUser.getRoleAbbreviationsString());*/
 
       if (adminUser.getPrimaryGroup() == null) {
-        logger.warn("ensureDefaultUsers no group for " + adminUser);
-        adminUser.setPrimaryGroup(makePrimaryGroup(PRIMARY));
+        logger.warn("\n\n\nensureDefaultUsers no group for " + adminUser);
+      //  adminUser.setPrimaryGroup(makePrimaryGroup(PRIMARY));
       }
 
       dominoImportUser = delegate.getUser(IMPORT_USER);
@@ -687,15 +687,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       }
 
       if (primaryGroup == null) { //defensive
-        logger.warn("\n\n\ngetGroup making a new group...?\n\n\n");
-        primaryGroup = makePrimaryGroup(PRIMARY);
+        logger.warn("\n\n\ngetGroup need a new group...?\n\n\n");
+   //     primaryGroup = makePrimaryGroup(PRIMARY);
       }
     }
 
     return primaryGroup;
   }
 
-  @NotNull
+ /* @NotNull
   private Group makePrimaryGroup(String name) {
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
     String description = name + "Group";
@@ -709,7 +709,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         adminUser,
         NETPROF2);
   }
-
+*/
   @NotNull
   private LocalDateTime getThirtyYearsFromNow() {
     return LocalDateTime.now().plusYears(30);
@@ -739,12 +739,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   private Group makeAGroup(String name) {
-    logger.warn("getGroupOrMake making a new group " + name);
+    logger.warn("\n\ngetGroupOrMake making a new group " + name);
     MongoGroupDAO groupDAO1 = (MongoGroupDAO) delegate.getGroupDAO();
 
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
     SResult<ClientGroupDetail> name1 = groupDAO1.doAdd(adminUser,
-        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser, NETPROF2));
+        new ClientGroupDetail(name, "name", 365, 24 * 365, out,
+            5,
+            adminUser, NETPROF2));
 
     Group group = null;
     if (name1.isError()) {
@@ -971,9 +973,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return users;
   }
 
+/*
   public boolean isValidEmailRegex(String text) {
     return text.trim().toLowerCase().matches(EMAIL_REGEX);
-  }
+  }*/
 
   private final Map<String, Map<String, Boolean>> dominoToEncodedToMatch = new HashMap<>();
 
