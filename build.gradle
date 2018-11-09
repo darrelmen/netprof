@@ -98,8 +98,8 @@ dependencies {
     }
 
     // super special location for npdata that's on the branch
-    compile('mitll.hlt:npdata-22:1.0.0-topicNetprof22') { changing = true }
- //   compile('mitll.hlt:npdata:1.0.0') { changing = true }
+  //  compile('mitll.hlt:npdata-22:1.0.0-topicNetprof22') { changing = true }
+    compile('mitll.hlt:npdata:1.0.0') { changing = true }
 
     compile group: 'com.github.rwl', name: 'jtransforms', version: 'latest.release'
 
