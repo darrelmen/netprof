@@ -3,7 +3,6 @@ package mitll.langtest.client.sound;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Widget;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -20,9 +19,9 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   private final DivWidget south;
 
   /**
+   * @param bulk
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchEventSegmentToClickable
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchSegmentToWidgetForAudio
-   * @param bulk
    */
   public AllHighlight(Collection<IHighlightSegment> bulk) {
     //logger.info("making all highlight for " + bulk);
@@ -36,12 +35,12 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
     north.addStyleName("floatLeft");
     north.getElement().setId("all_highlight_north_bulk_" + bulk.size());
 
-    for (IHighlightSegment seg : set) {
-      Widget w = seg.asWidget();
-      w.removeFromParent();
-      north.add(seg.getNorth());
-      seg.clearSouth();
-    }
+    set.forEach(iHighlightSegment -> {
+      iHighlightSegment.asWidget().removeFromParent();
+      north.add(iHighlightSegment.getNorth());
+      iHighlightSegment.clearSouth();
+    });
+
     add(south = new DivWidget());
     south.getElement().setId("all_highlight_south_bulk_" + bulk.size());
     south.addStyleName("floatLeft");
@@ -58,13 +57,23 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   }
 
   @Override
-  public void setBlue() {
-    set.forEach(IHighlightSegment::setBlue);
+  public void showHighlight() {
+    set.forEach(IHighlightSegment::showHighlight);
   }
 
   @Override
-  public void clearBlue() {
-    set.forEach(IHighlightSegment::clearBlue);
+  public void clearHighlight() {
+    set.forEach(IHighlightSegment::clearHighlight);
+  }
+
+  @Override
+  public void checkClearHighlight() {
+    set.forEach(IHighlightSegment::checkClearHighlight);
+  }
+
+  @Override
+  public void setHighlightColor(String highlightColor) {
+    set.forEach(iHighlightSegment -> iHighlightSegment.setHighlightColor(highlightColor));
   }
 
   @Override
@@ -72,12 +81,6 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
     return !set.isEmpty() && set.iterator().next().isHighlighted();
   }
 
-  @Override
-  public int getLength() {
-    int total = 0;
-    for (IHighlightSegment seg : set) total += seg.getLength();
-    return total;
-  }
 
   @Override
   public boolean isClickable() {
@@ -104,10 +107,7 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   @Override
   public String getContent() {
     StringBuilder builder = new StringBuilder();
-    for (IHighlightSegment seg : set) {
-      builder.append(seg.getContent());
-    }
-
+    set.forEach(iHighlightSegment -> builder.append(iHighlightSegment.getContent()));
     return builder.toString();
   }
 
@@ -120,8 +120,9 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
     south.add(widget);
   }
 
-
-  public void setSouthScore(DivWidget widget) { setSouth(widget);}
+  public void setSouthScore(DivWidget widget) {
+    setSouth(widget);
+  }
 
   public void clearSouth() {
 //    logger.info("doing clear south");
@@ -132,6 +133,35 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   public DivWidget getNorth() {
     return north;
   }
+
+  @Override
+  public void setObscurable() {
+    set.forEach(IHighlightSegment::setObscurable);
+  }
+
+  @Override
+  public void obscureText() {
+    set.forEach(IHighlightSegment::obscureText);
+  }
+
+  @Override
+  public void restoreText() {
+    set.forEach(IHighlightSegment::restoreText);
+  }
+
+  /**
+   * Just for toString really.
+   *
+   * @return
+   */
+  @Override
+  public int getLength() {
+    //int total = 0;
+    //for (IHighlightSegment seg : set) total += seg.getLength();
+    return set.stream().mapToInt(IHighlightSegment::getLength).sum();
+    //return total;
+  }
+
   public String toString() {
     return set.size() + " segments " + getLength() + " long : " + getContent();
   }

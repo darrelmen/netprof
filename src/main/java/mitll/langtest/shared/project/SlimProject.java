@@ -32,15 +32,20 @@
 
 package mitll.langtest.shared.project;
 
+
 import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import mitll.langtest.server.database.project.ProjectManagement;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 /**
  * UI-friendly representation of a project...
+ *
  * @see mitll.langtest.client.initial.InitialUI#addBreadcrumbLevels(Breadcrumbs, ProjectStartupInfo)
  */
 public class SlimProject extends ProjectInfo {
@@ -120,7 +125,7 @@ public class SlimProject extends ProjectInfo {
     return getChild(projectid) != null;
   }
 
-  public SlimProject getChild(int projectid) {
+  private SlimProject getChild(int projectid) {
     for (SlimProject child : children) {
       if (child.getID() == projectid) return child;
     }

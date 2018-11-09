@@ -12,7 +12,7 @@ public class ImportProjectInfo {
   private String language;
   private long createTime;
   private int dominoProjectID;
-  private String name;
+  private final String name;
 
 /*
   public ImportProjectInfo(String unitName, String chapterName) {

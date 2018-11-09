@@ -6,7 +6,6 @@ import com.google.gwt.dom.client.Style;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.project.ProjectChoices;
 import mitll.langtest.client.user.UserManager;
-import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
@@ -120,7 +119,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
         crumbs.add(getLangBreadcrumb(project));
         INavigation.VIEWS currentView = breadcrumbPartner.getNavigation().getCurrentView();
 
-        addProjectCrumb(crumbs, project.getChildByMode(currentProject, ProjectMode.VOCABULARY));
+        addProjectCrumb(crumbs, project.getChildByMode(currentProject, currentView.getMode()));
 /*        for (int i = 0; i < crumbs.getWidgetCount(); i++) {
           logger.info("breadcrumb has " + crumbs.getWidget(i));
         }*/

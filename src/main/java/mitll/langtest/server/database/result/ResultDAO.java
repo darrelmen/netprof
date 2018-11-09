@@ -40,7 +40,9 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
+import mitll.npdata.dao.SlickPerfResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -171,7 +173,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, String language) {
+  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language) {
     return null;
   }
 
@@ -311,7 +313,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language) {
     try {
       String list = getInList(ids);
 
@@ -357,7 +359,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @see #attachScoreHistory
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language) {
     try {
       String list = getInList(ids);
 
@@ -677,7 +679,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param statement
    * @return
    * @throws SQLException
-   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, int, String)
+   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, int, Language)
    */
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
@@ -693,7 +695,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
       String path = rs.getString(ANSWER);
       String json = rs.getString(SCORE_JSON);
 
-      CorrectAndScore result = new CorrectAndScore(uniqueID, userid, -1, correct, pronScore, timestamp.getTime(),
+      CorrectAndScore result = new CorrectAndScore(-1, correct, pronScore, timestamp.getTime(),
           trimPathForWebPage2(path), json);
       results.add(result);
     }
@@ -972,11 +974,21 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     }
   }
 
+  @Override
+  public List<SlickPerfResult> getLatestResultsForDialogSession(int dialogSessionID) {
+    return null;
+  }
+
+  @Override
+  public CorrectAndScore getCorrectAndScoreForResult(int id, Language language) {
+    return null;
+  }
+
   /**
    * Just for import
    *
-   * @param isRegular
-   * @param userDAO
+   * @paramx isRegular
+   * @paramx userDAO
    * @return
    */
 /*  public Map<Integer, Map<String, Result>> getUserToResults(boolean isRegular, IUserDAO userDAO) {
@@ -1007,4 +1019,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return userToResult;
   }*/
 
+  @Override
+  public Map<Integer, String> getResultIDToJSON(int projid) {
+    return null;
+  }
 }

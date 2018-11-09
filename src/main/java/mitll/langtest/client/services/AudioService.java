@@ -32,14 +32,14 @@
 
 package mitll.langtest.client.services;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.StartupInfo;
@@ -48,8 +48,6 @@ import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 
-import java.util.Collection;
-
 /**
  * Might actually live on hydra1 or hydra2 - chosen in the client.
  */
@@ -57,9 +55,9 @@ import java.util.Collection;
 public interface AudioService extends RemoteService {
   /**
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, String)
    * @param base64EncodedString encoded audio bytes
    * @param audioContext
-   * @param recordedWithFlash
    * @param deviceType
    * @param device
 
@@ -67,7 +65,6 @@ public interface AudioService extends RemoteService {
    */
   AudioAnswer writeAudioFile(String base64EncodedString,
                              AudioContext audioContext,
-                             boolean recordedWithFlash,
                              String deviceType,
                              String device,
                              DecoderOptions decoderOptions) throws DominoSessionException;
@@ -106,6 +103,5 @@ public interface AudioService extends RemoteService {
    * @param userExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
-  void editItem(CommonExercise userExercise, boolean keepAudio) throws DominoSessionException, RestrictedOperationException;
-
+  void editItem(ClientExercise userExercise, boolean keepAudio) throws DominoSessionException, RestrictedOperationException;
 }

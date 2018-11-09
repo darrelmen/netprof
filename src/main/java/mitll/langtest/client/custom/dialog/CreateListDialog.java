@@ -33,9 +33,7 @@
 package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextArea;
@@ -46,11 +44,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.custom.userlist.ListView;
@@ -60,21 +54,12 @@ import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
-import mitll.langtest.shared.exercise.MatchInfo;
-import mitll.langtest.shared.exercise.Pair;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -83,8 +68,8 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class CreateListDialog extends BasicDialog {
-  public static final int LIST_WIDTH = 60;
   private final Logger logger = Logger.getLogger("CreateListDialog");
+  private static final int LIST_WIDTH = 60;
 
   private static final String ALL = "All";
   private static final String HEAR_ITEMS = "Hear Items";
@@ -95,6 +80,9 @@ public class CreateListDialog extends BasicDialog {
 
 
   private static final String QUIZ_SIZE = "# Items";
+  /**
+   * @see #getDurationLabel
+   */
   private static final String DURATION_MINUTES = "Duration (Min.)";
   private static final int DEFAULT_QUIZ_SIZE = 10;
 
@@ -150,6 +138,9 @@ public class CreateListDialog extends BasicDialog {
   private int minScore = DEFAULT_MIN_SCORE;
   private int duration = DEFAULT_DURATION;
 
+  private Heading modeDep;
+  private boolean isQuiz = false;
+
   /**
    * @param listView
    * @param controller
@@ -162,6 +153,7 @@ public class CreateListDialog extends BasicDialog {
     this.current = current;
     this.isEdit = isEdit;
 
+    this.isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
     this.minScore = current.getMinScore();
     this.duration = current.getDuration();
     this.playAudio = current.shouldShowAudio();
@@ -175,6 +167,11 @@ public class CreateListDialog extends BasicDialog {
   public CreateListDialog(CreateListComplete listView, ExerciseController controller) {
     this.listView = listView;
     this.controller = controller;
+  }
+
+  public CreateListDialog setIsQuiz(boolean isQuiz) {
+    this.isQuiz = isQuiz;
+    return this;
   }
 
   /**
@@ -224,10 +221,20 @@ public class CreateListDialog extends BasicDialog {
     }
 
     if (canMakeQuiz()) {
-      addQuizOptions(child);
+      if (isQuiz) {
+        if (isEdit) {
+          child.add(getQuizChoices());
+          addEditOptions(child);
+        } else {
+          addQuizOptions(child);
+        }
+      } else {
+        if (isEdit) {
+          child.add(getQuizChoices());
+          addEditOptions(child);
+        }
+      }
     }
-
-    addEditOptions(child);
 
     child.add(getPrivacyChoices());
 
@@ -239,13 +246,23 @@ public class CreateListDialog extends BasicDialog {
   private void addQuizOptions(Panel child) {
     child.add(getQuizChoices());
 
-    quizOptions = new DivWidget();
-    styleQuizOptions(quizOptions);
+    createQuizOptions = new DivWidget();
+    styleQuizOptions(createQuizOptions);
     checkQuizOptionsVisible();
-    child.add(quizOptions);
+    child.add(createQuizOptions);
 
-    quizOptions.add(getChoices(true));
+    createQuizOptions.add(getQuizChoices(true));
   }
+
+  private void addEditOptions(Panel child) {
+    editQuizOptions = new DivWidget();
+    styleQuizOptions(editQuizOptions);
+    editQuizOptions.add(getQuizChoices(false));
+    child.add(editQuizOptions);
+
+    editQuizOptions.setVisible(isQuiz);
+  }
+
 
   private void styleQuizOptions(DivWidget quizOptions) {
     quizOptions.addStyleName("leftFiveMargin");
@@ -256,7 +273,7 @@ public class CreateListDialog extends BasicDialog {
   private List<ListBox> allUnitChapter;
 
   @NotNull
-  private Grid getChoices(boolean isCreate) {
+  private Grid getQuizChoices(boolean isCreate) {
     Grid grid = new Grid(isCreate ? 4 : 2, 4);
 
 
@@ -291,12 +308,13 @@ public class CreateListDialog extends BasicDialog {
 
       }
 
+
       row++;
       col = 0;
-    }
-    if (isCreate) {
+
       grid.setWidget(row, col++, getQuizSizeLabel());
     }
+
     grid.setWidget(row, col++, getDurationLabel());
     grid.setWidget(row, col++, getLabel(MIN_SCORE1));
     grid.setWidget(row, col++, getHearLabel());
@@ -383,15 +401,6 @@ public class CreateListDialog extends BasicDialog {
     return w;
   }
 
-  private void addEditOptions(Panel child) {
-    quizOptions2 = new DivWidget();
-    styleQuizOptions(quizOptions2);
-    quizOptions2.add(getChoices(false));
-    child.add(quizOptions2);
-
-    quizOptions2.setVisible(isQuiz);
-  }
-
   private boolean isEditing() {
     return current != null;
   }
@@ -470,9 +479,9 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private void checkQuizOptionsVisible() {
-    quizOptions.setVisible(isQuiz && current == null);
-    if (quizOptions2 != null) {
-      quizOptions2.setVisible(isQuiz && isEditing());
+   // createQuizOptions.setVisible(isQuiz && current == null);
+    if (editQuizOptions != null) {
+      editQuizOptions.setVisible(isQuiz && isEditing());
     }
   }
 
@@ -510,7 +519,7 @@ public class CreateListDialog extends BasicDialog {
     minScore = Integer.parseInt(value);
   }
 
-  private DivWidget quizOptions, quizOptions2;
+  private DivWidget createQuizOptions, editQuizOptions;
 
   private void addWarningField(Panel child) {
     FluidRow row;
@@ -525,28 +534,28 @@ public class CreateListDialog extends BasicDialog {
     row.add(modeDep);
   }
 
-  private Heading modeDep;
-  private boolean isQuiz = false;
 
   @NotNull
   private Widget getQuizChoices() {
     FluidRow row = new FluidRow();
 
+    logger.info("getQuizChoices edit = " +isEdit);
     CheckBox checkBox = new CheckBox(isEdit ? SHOW_AS_QUIZ : CREATE_A_NEW_QUIZ);
     checkBox.addValueChangeHandler(event -> {
       isQuiz = checkBox.getValue();
       checkQuizOptionsVisible();
     });
+    checkBox.setValue(isQuiz);
 
     Panel hp = new HorizontalPanel();
     checkBox.addStyleName("leftFiveMargin");
     hp.add(checkBox);
 
-    if (isEditing()) {
-      boolean isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
-      checkBox.setValue(isQuiz);
-      this.isQuiz = isQuiz;
-    }
+//    if (isEditing()) {
+//      boolean isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
+//      checkBox.setValue(isQuiz);
+//      this.isQuiz = isQuiz;
+//    }
 
     row.add(addControlGroupEntry(row, isEdit ? IS_A_QUIZ : MAKE_A_QUIZ, hp, ""));
     return row;

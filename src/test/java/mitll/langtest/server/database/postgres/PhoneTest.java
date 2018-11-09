@@ -33,16 +33,9 @@
 package mitll.langtest.server.database.postgres;
 
 import mitll.langtest.server.database.BaseTest;
-import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.phone.IPhoneDAO;
-import mitll.langtest.server.database.phone.PhoneDAO;
-import mitll.langtest.server.database.result.Result;
-import mitll.langtest.server.database.result.ResultDAO;
-import mitll.langtest.shared.analysis.PhoneReport;
-import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
-
-import java.util.*;
 
 public class PhoneTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(PhoneTest.class);

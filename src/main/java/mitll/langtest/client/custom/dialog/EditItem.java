@@ -37,13 +37,15 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.MutableExercise;
@@ -52,7 +54,6 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Coordinates editing an item -
@@ -73,10 +74,9 @@ public class EditItem {
    * @see #makeExerciseList
    */
   private static final int NEW_EXERCISE_ID = -100;
-  private static final String EDIT_ITEM = "editItem";
 
   private final ExerciseController controller;
-  private PagingExerciseList<CommonShell, CommonExercise> exerciseList;
+  private PagingExerciseList<CommonShell, ClientExercise> exerciseList;
 
   /**
    * @param controller
@@ -96,8 +96,7 @@ public class EditItem {
   public Panel editItem(UserList<CommonShell> originalList) {
     DivWidget div = new DivWidget();
     Panel hp = new HorizontalPanel();
-
-    hp.getElement().setId("EditItem_for_" + originalList.getName());
+//    hp.getElement().setId("EditItem_for_" + originalList.getName());
 
     Panel pagerOnLeft = new SimplePanel();
     hp.add(pagerOnLeft);
@@ -107,7 +106,7 @@ public class EditItem {
     contentOnRight.getElement().setId("EditItem_content");
     hp.add(contentOnRight);
 
-    exerciseList = makeExerciseList(contentOnRight, EDIT_ITEM, originalList);
+    exerciseList = makeExerciseList(contentOnRight, INavigation.VIEWS.LISTS, originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
     div.add(hp);
     return div;
@@ -128,17 +127,16 @@ public class EditItem {
    * @paramz includeAddItem
    * @see #editItem
    */
-  private PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel right,
-                                                                           String instanceName,
+  private PagingExerciseList<CommonShell, ClientExercise> makeExerciseList(Panel right,
+                                                                           INavigation.VIEWS instanceName,
                                                                            UserList<CommonShell> originalList) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
-    EditableExerciseList exerciseList = new EditableExerciseList(controller, this, right, instanceName, originalList);
-    this.exerciseList = exerciseList;
+    this.exerciseList = new EditableExerciseList(controller, right, instanceName, originalList);
     setFactory(this.exerciseList);
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());
     Scheduler.get().scheduleDeferred(() -> this.exerciseList.onResize());
-  //  Scheduler.get().scheduleDeferred(() -> exerciseList.getTypeAheadGrabFocus());
+    //  Scheduler.get().scheduleDeferred(() -> exerciseList.getTypeAheadGrabFocus());
     return this.exerciseList;
   }
 
@@ -151,7 +149,7 @@ public class EditItem {
    * @return
    * @see #makeExerciseList
    */
-  public CommonExercise getNewItem() {
+  public ClientExercise getNewItem() {
     int user = controller.getUserManager().getUser();
     Exercise exercise = new Exercise(
         NEW_EXERCISE_ID,
@@ -180,20 +178,30 @@ public class EditItem {
     return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
   }
 
-  private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
-    exerciseList.setFactory(new ExercisePanelFactory<CommonShell, CommonExercise>(
+  private void setFactory(final PagingExerciseList<CommonShell, ClientExercise> exerciseList) {
+    exerciseList.setFactory(new ExercisePanelFactory<CommonShell, ClientExercise>(
         controller, exerciseList) {
       private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
       @Override
-      public Panel getExercisePanel(CommonExercise exercise) {
-        TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(exercise,
+      public Panel getExercisePanel(ClientExercise exercise) {
+        TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
             controller,
             exerciseList,
-            alignments, true);
+            alignments, true, new IListenView() {
+          @Override
+          public int getVolume() {
+            return 100;
+          }
+
+          @Override
+          public int getDialogSessionID() {
+            return -1;
+          }
+        },
+            false);
         widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
         return widgets;
-
       }
     });
   }

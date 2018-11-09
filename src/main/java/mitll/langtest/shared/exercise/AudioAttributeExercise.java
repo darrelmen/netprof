@@ -32,16 +32,15 @@
 
 package mitll.langtest.shared.exercise;
 
-import com.github.gwtbootstrap.client.ui.SplitDropdownButton;
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.user.MiniUser;
-import net.sf.json.JSONObject;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
+ * Server side calls to audio exercise.
+ *
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -49,6 +48,7 @@ import java.util.Map;
  */
 public interface AudioAttributeExercise extends AudioRefExercise {
   /**
+   * SERVER
    * @param preferredVoices
    * @return
    * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
@@ -56,6 +56,8 @@ public interface AudioAttributeExercise extends AudioRefExercise {
   String getRefAudioWithPrefs(Collection<Integer> preferredVoices);
 
   /**
+   *
+   * SERVER
    * @return
    * @see mitll.langtest.server.json.JsonExport#addContextAudioRefs
    * @see AudioExport#copyContextAudioBothGenders
@@ -63,6 +65,7 @@ public interface AudioAttributeExercise extends AudioRefExercise {
   AudioAttribute getLatestContext(boolean isMale);
 
   /**
+   * SERVER
    * @param userID
    * @param speed
    * @return
@@ -70,16 +73,16 @@ public interface AudioAttributeExercise extends AudioRefExercise {
    */
   AudioAttribute getRecordingsBy(long userID, String speed);
 
+  /**
+   * SERVER
+   * @param isMale
+   * @param isRegular
+   * @return
+   */
   AudioAttribute getAudioAttributePrefGender(boolean isMale, boolean isRegular);
 
   /**
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay
-   * @param isMale
-   * @return
-   */
-  AudioAttribute getAudioAttrPrefGender(boolean isMale);
-
-  /**
+   * SERVER
    * @param isMale
    * @return
    * @see AudioExport#getAudioAttribute
@@ -87,21 +90,17 @@ public interface AudioAttributeExercise extends AudioRefExercise {
   Collection<AudioAttribute> getByGender(boolean isMale);
 
   /**
+   * SERVER
    * @return
    * @see mitll.langtest.server.decoder.RefResultDecoder#ensure(String, Collection)
    */
   Collection<AudioAttribute> getDefaultUserAudio();
 
+  /**
+   * SERVER
+   * @return
+   */
   Map<String, AudioAttribute> getAudioRefToAttr();
 
-  /**
-   * @param isMale
-   * @param preferredUsers
-   * @param includeContext
-   * @return
-   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices
-   */
-  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Integer> preferredUsers, boolean includeContext);
-
-  List<AudioAttribute> getMostRecentAudioEasy(boolean isMale, boolean includeContext);
+  // List<AudioAttribute> getMostRecentAudioEasy(boolean isMale, boolean includeContext);
 }

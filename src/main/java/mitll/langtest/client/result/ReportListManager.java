@@ -8,8 +8,6 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
@@ -20,10 +18,10 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
@@ -48,7 +46,7 @@ public class ReportListManager {
   private static final int MY_LIST_HEIGHT = 300;
 
   /**
-   * @see mitll.langtest.client.banner.UserMenu.ReportListHandler
+   * @see UserMenu#getCogMenuChoicesForAdmin
    * @param controller
    */
   public ReportListManager(ExerciseController controller) {
@@ -358,10 +356,10 @@ public class ReportListManager {
 
 
     private Column<MyEmail, SafeHtml> getItemColumn() {
-      return new Column<MyEmail, SafeHtml>(new PagingContainer.ClickableCell()) {
+      return new Column<MyEmail, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
 /*
         @Override
-        public void onBrowserEvent(Cell.Context context, Element elem, MyEmail object, NativeEvent event) {
+        public void onBrowserEvent(Cell.Context context, Element elem, MyEmail objelct, NativeEvent event) {
           super.onBrowserEvent(context, elem, object, event);
 
           logger.info("Got click " + object);

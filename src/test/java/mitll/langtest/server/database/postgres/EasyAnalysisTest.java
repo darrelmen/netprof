@@ -51,7 +51,7 @@ public class EasyAnalysisTest extends BaseTest {
   @Test
   public void testAnalysis() {
     DatabaseImpl andPopulate = getAndPopulate();
-    AnalysisReport performanceReportForUser = getPerformanceReportForUser(andPopulate, 2, 295, 1, -1);
+    AnalysisReport performanceReportForUser = null;//getPerformanceReportForUser(andPopulate, 2, 295, 1, -1);
 
     logger.info("Got " + performanceReportForUser);
     //  logger.info("Got word score " + performanceReportForUser.getWordScores().size() + " num");
@@ -108,15 +108,15 @@ public class EasyAnalysisTest extends BaseTest {
     return new Date(first).toString();
 //    return debugShortFormat.format(new Date(first));
   }
-
+/*
   private AnalysisReport getPerformanceReportForUser(DatabaseImpl db, int projectID, int id, int minRecordings, int listid) {
     // logger.info("getPerformanceForUser " +id+ " list " + listid + " min " + minRecordings);
     if (projectID == -1) {
       return new AnalysisReport();
     } else {
-      return getSlickAnalysis(db, projectID).getPerformanceReportForUser(id, minRecordings, listid, 0);
+      return getSlickAnalysis(db, projectID).getPerformanceReportForUser(analysisRequest);
     }
-  }
+  }*/
 
   private List<WordAndScore> getPerformanceReportForUser2(DatabaseImpl db,
                                                           int projectID, int id, int listid, String phone, String bigram) {
@@ -124,7 +124,7 @@ public class EasyAnalysisTest extends BaseTest {
     if (projectID == -1) {
       return new ArrayList<>();
     } else {
-      return getSlickAnalysis(db, projectID).getPhoneReportFor(id, listid, phone, bigram, 0, Long.MAX_VALUE);
+      return getSlickAnalysis(db, projectID).getWordAndScoreForPhoneAndBigram(new AnalysisRequest());
     }
   }
 
@@ -152,7 +152,7 @@ public class EasyAnalysisTest extends BaseTest {
       to = 1485273391652l;
       to++;
       //  return slickAnalysis.getPhoneReportFor(id, -1, phone, from, to);
-      return slickAnalysis.getPhoneReportFor(id, -1, phone, "", 0, to);
+      return slickAnalysis.getWordAndScoreForPhoneAndBigram(new AnalysisRequest());
     }
   }
 
@@ -163,7 +163,7 @@ public class EasyAnalysisTest extends BaseTest {
         db.getPhoneDAO(),
         db.getAudioDAO(),
         (SlickResultDAO) db.getResultDAO(),
-        db.getProject(projectID).getLanguage(),
+        db.getProject(projectID).getLanguageEnum(),
         projectID,
         false);
   }

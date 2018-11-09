@@ -39,10 +39,8 @@ import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -185,7 +183,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     return selectionModel.getSelectedObject();
   }
 
-  public T getNext() {
+/*  public T getNext() {
     T currentSelection = getCurrentSelection();
     if (currentSelection != null) {
       int index = getIndex(currentSelection);
@@ -193,7 +191,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     } else {
       return null;
     }
-  }
+  }*/
 
   @Override
   protected void addSelectionModel() {
@@ -215,7 +213,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   /**
    * @param exercise
-   * @see ListInterface#addExercise(Shell)
+   * @see ListInterface#addExercise
    * @see mitll.langtest.client.list.PagingExerciseList#addExercise(CommonShell)
    */
   public void addExercise(T exercise) {
@@ -249,9 +247,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     if (before + 1 != after) logger.warning("didn't add " + exercise.getID());
   }
 
-  public Set<Integer> getKeys() {
+/*  public Set<Integer> getKeys() {
     return idToExercise.keySet();
-  }
+  }*/
 
   private void markCurrent(T currentExercise) {
     if (currentExercise != null) {
@@ -295,12 +293,12 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     return table.getSelectionModel();
   }
 
-  public void clearSelection() {
+ /* public void clearSelection() {
     T currentSelection = getCurrentSelection();
     if (currentSelection != null) {
       getSelectionModel().setSelected(currentSelection, false);
     }
-  }
+  }*/
 
   /**
    * @param currentExercise

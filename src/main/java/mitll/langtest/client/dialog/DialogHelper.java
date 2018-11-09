@@ -51,9 +51,10 @@ import java.util.List;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class DialogHelper {
-  public static final String OK = "OK";
-  public static final String CANCEL = "Cancel";
   //private final Logger logger = Logger.getLogger("DialogHelper");
+
+  private static final String OK = "OK";
+  private static final String CANCEL = "Cancel";
   private final boolean doYesAndNo;
   private Modal dialogBox;
 
@@ -127,7 +128,7 @@ public class DialogHelper {
                             CloseListener listener, int maxHeight, int width, Button closeButton,
                             boolean isBig) {
     dialogBox = new Modal();
-    if (width>900) {
+    if (width > 900) {
       DOM.setStyleAttribute(dialogBox.getElement(), "left", 310 + "px");
     }
 

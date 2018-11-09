@@ -56,6 +56,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
   private static final int FIRST_WIDTH = 90;
   private static final int LAST_WIDTH = 100;
   private static final String FIRST = "First";
+  public static final int MIN_HEIGHT = 250;
 
   public BasicUserContainer(ExerciseController controller, String selectedUserKey, String header) {
     super(controller, selectedUserKey, header, 10, 7);
@@ -64,7 +65,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
   @Override
   public Panel getTableWithPager(Collection<T> users) {
     Panel tableWithPager = super.getTableWithPager(users);
-    tableWithPager.getElement().getStyle().setProperty("minHeight", 250 + "px");
+    setMinHeight(tableWithPager, MIN_HEIGHT);
     return tableWithPager;
   }
 

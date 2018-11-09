@@ -37,7 +37,8 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
@@ -58,9 +59,9 @@ public class PopupContainerFactory {
   /**
    * @param commentEntryText
    * @return
-   * @see NPFExercise#getNextListButton
+   * @seex NPFExercise#getNextListButton
    */
-  public DecoratedPopupPanel makePopupAndButton(PopupContainerFactory.HidePopupTextBox commentEntryText,
+  /*public DecoratedPopupPanel makePopupAndButton(PopupContainerFactory.HidePopupTextBox commentEntryText,
                                                 Button triggerButton,
                                                 Tooltip triggerButtonTooltip,
                                                 ClickHandler clickHandler) {
@@ -71,10 +72,16 @@ public class PopupContainerFactory {
     configurePopupButton(triggerButton, thePopup, commentEntryText, triggerButtonTooltip);
 
     return thePopup;
-  }
+  }*/
 
+  /**
+   * @param commentEntryText
+   * @param clickHandler
+   * @return
+   * @see NewListButton#getNewListButton2
+   */
   @NotNull
-  public DecoratedPopupPanel getPopup(HidePopupTextBox commentEntryText, ClickHandler clickHandler) {
+  DecoratedPopupPanel getPopup(HidePopupTextBox commentEntryText, ClickHandler clickHandler) {
     final DecoratedPopupPanel thePopup = new DecoratedPopupPanel();
     thePopup.setAutoHideEnabled(true);
 
@@ -98,12 +105,7 @@ public class PopupContainerFactory {
     Button ok = new Button("OK");
     ok.setType(ButtonType.PRIMARY);
     ok.addStyleName("leftTenMargin");
-    ok.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        commentPopup.hide();
-      }
-    });
+    ok.addClickHandler(event -> commentPopup.hide());
     if (clickHandler != null) {
       ok.addClickHandler(clickHandler);
     }
@@ -118,22 +120,17 @@ public class PopupContainerFactory {
    * @param popup
    * @param textEntry
    * @param tooltip
-   * @see mitll.langtest.client.custom.exercise.CommentBox#configureCommentButton(com.github.gwtbootstrap.client.ui.Button, boolean, com.google.gwt.user.client.ui.PopupPanel, String, com.github.gwtbootstrap.client.ui.TextBox)
+   * @see mitll.langtest.client.custom.exercise.CommentBox#configureCommentButton
    */
   void configurePopupButton(final Button popupButton,
                             final PopupPanel popup,
                             final TextBox textEntry,
                             final Tooltip tooltip) {
     //  logger.info("configurePopupButton for " + textEntry.getElement().getId());
-    popupButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        showOrHideRelative(popup, popupButton, textEntry, tooltip);
-      }
-    });
+    popupButton.addClickHandler(event -> showOrHideRelative(popup, popupButton, textEntry, tooltip));
   }
 
-  public void showOrHideRelative(PopupPanel popup, UIObject popupButton, TextBox textEntry, Tooltip tooltip) {
+  void showOrHideRelative(PopupPanel popup, UIObject popupButton, TextBox textEntry, Tooltip tooltip) {
     boolean visible = popup.isShowing();
 
     if (visible) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
@@ -145,13 +142,9 @@ public class PopupContainerFactory {
       popup.showRelativeTo(popupButton);
 //          textEntry.setFocus(true);
 
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        public void execute() {
-          textEntry.setFocus(true);
-        }
-      });
+      Scheduler.get().scheduleDeferred(() -> textEntry.setFocus(true));
 
-     if (tooltip != null) tooltip.hide();
+      if (tooltip != null) tooltip.hide();
     }
   }
 
@@ -185,14 +178,11 @@ public class PopupContainerFactory {
    */
   public static class HidePopupTextBox extends TextBox {
     void configure(final PopupPanel popup) {
-      addKeyPressHandler(new KeyPressHandler() {
-        @Override
-        public void onKeyPress(KeyPressEvent event) {
-          int keyCode = event.getNativeEvent().getKeyCode();
-          if (keyCode == KeyCodes.KEY_ENTER) {
-            popup.hide();
-            onEnter();
-          }
+      addKeyPressHandler(event -> {
+        int keyCode = event.getNativeEvent().getKeyCode();
+        if (keyCode == KeyCodes.KEY_ENTER) {
+          popup.hide();
+          onEnter();
         }
       });
     }

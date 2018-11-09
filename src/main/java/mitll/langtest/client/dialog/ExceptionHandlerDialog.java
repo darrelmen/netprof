@@ -32,9 +32,6 @@
 
 package mitll.langtest.client.dialog;
 
-import com.google.gwt.user.client.ui.DialogBox;
-import mitll.langtest.client.initial.BrowserCheck;
-
 /**
  * Show javascript exceptions
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

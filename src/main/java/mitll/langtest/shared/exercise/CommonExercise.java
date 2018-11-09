@@ -32,7 +32,9 @@
 
 package mitll.langtest.shared.exercise;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -40,79 +42,89 @@ import java.util.List;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/20/2014.
  */
-public interface CommonExercise extends CommonAudioExercise, ScoredExercise, HasUnitChapter {
-  String getOldID();
-
-  int getDominoID();
-
-  boolean shouldSwap();
-
+public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAttributeExercise {
   /**
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addAltFL
+   * SERVER
    * @return
+   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
    */
-  String getAltFL();
-
-  String getAltFLToShow();
+  Collection<String> getRefSentences();
 
   /**
+   * SERVER
    * @deprecated - can't guarantee we'll have this on the znetprof instance
    * @return
+   * @see mitll.langtest.server.sorter.ExerciseSorter#phoneCompFirst(CommonExercise, CommonExercise, Map)
    */
   List<String> getFirstPron();
 
-  boolean isPredefined();
-
-  boolean hasContext();
-
-  String getNoAccentFL();
-
   /**
-   * Get the first context sentence.
+   * Sorta deprecated - can't make an exercise anymore.
+   * SERVER Only
    * @return
    */
-  String getContext();
-  String getContextTranslation();
+  boolean isPredefined();
 
-  List<CommonExercise> getDirectlyRelated();
-
+  /**
+   * SERVER Only
+   * @return
+   */
   boolean isSafeToDecode();
 
   /**
+   * SERVER
    * @return
-   * @see mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem
+   * @seex mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem
    */
   int getCreator();
 
-  long getUpdateTime();
-
+  /**
+   * SERVER
+   * @return
+   */
   int getProjectID();
 
-  String getTransliteration();
-
+  /**
+   * SERVER
+   * @return
+   */
   long getLastChecked();
 
-  MutableExercise getMutable();
-
-  MutableAudioExercise getMutableAudio();
-
-  MutableAnnotationExercise getMutableAnnotation();
-
-  CommonAnnotatable getCommonAnnotatable();
+  /**
+   * SERVER
+   * @return
+   */
+  CommonShell getShell();
 
   /**
+   * NOT USED?
+   * @return
+   */
+  CommonShell asShell();
+
+  /**
+   * SERVER
+   * @return
+   */
+  MutableExercise getMutable();
+
+  /**
+   * SERVER
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addAttributeToExercise
    * @param exerciseAttributes
    */
   void setAttributes(List<ExerciseAttribute> exerciseAttributes);
 
-  List<ExerciseAttribute> getAttributes();
 
-  boolean isContext();
-
+  /**
+   *
+   * @return
+   */
   int getParentExerciseID();
 
-  int getParentDominoID();
-
+  /**
+   * SERVER
+   * @return
+   */
   int getDominoContextIndex();
 }

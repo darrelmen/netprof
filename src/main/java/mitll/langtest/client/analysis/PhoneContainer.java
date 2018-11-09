@@ -39,10 +39,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.shared.analysis.PhoneBigrams;
-import mitll.langtest.shared.analysis.PhoneSession;
-import mitll.langtest.shared.analysis.PhoneStats;
-import mitll.langtest.shared.analysis.PhoneSummary;
+import mitll.langtest.shared.analysis.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -67,16 +64,14 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
   /**
    * @param controller
    * @param bigramContainer
-   * @param listid
-   * @param userid
+   * @param reqInfo
    * @see AnalysisTab#getPhoneReport
    */
   PhoneContainer(ExerciseController controller,
                  BigramContainer bigramContainer,
                  AnalysisServiceAsync analysisServiceAsync,
-                 int listid,
-                 int userid) {
-    super(controller, analysisServiceAsync, listid, userid);
+                 AnalysisTab.ReqInfo reqInfo) {
+    super(controller, analysisServiceAsync, reqInfo);
     this.bigramContainer = bigramContainer;
   }
 
@@ -109,11 +104,12 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
     this.from = from;
     this.to = to;
     long then = System.currentTimeMillis();
-    analysisServiceAsync.getPhoneSummary(userid,
-        listid,
-        from,
-        to,
-        reqid++, new AsyncCallback<PhoneSummary>() {
+
+    AnalysisRequest analysisRequest = getAnalysisRequest(from, to);
+
+
+    analysisServiceAsync.getPhoneSummary(
+        analysisRequest, new AsyncCallback<PhoneSummary>() {
           @Override
           public void onFailure(Throwable caught) {
             logger.warning("\n\n\n-> getPhoneSummary " + caught);
@@ -124,11 +120,12 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
           public void onSuccess(PhoneSummary result) {
             long now = System.currentTimeMillis();
             long total = now - then;
-            if (DEBUG)    logger.info("getPhoneSummary userid " + userid + " req " + reqid +
-                "\n\ttook   " + total +
-                "\n\tserver " + result.getServerTime() +
-                "\n\tclient " + (total - result.getServerTime()));
-
+            if (DEBUG) {
+              logger.info("getPhoneSummary userid " + reqInfo.getUserid() + " req " + reqid +
+                  "\n\ttook   " + total +
+                  "\n\tserver " + result.getServerTime() +
+                  "\n\tclient " + (total - result.getServerTime()));
+            }
 
             if (result.getReqid() + 1 != reqid) {
               logger.info("skip stale req");
@@ -339,8 +336,8 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
             (sessionStart < first && session.getEnd() > last);      // session starts before and ends after window
   }
 
-
- @Override protected void clickOnPhone2(String phone) {
+  @Override
+  protected void clickOnPhone2(String phone) {
     if (DEBUG) logger.info("clickOnPhone2 : got click on" +
         "\n\tphone " + phone +
         "\n\tfrom  " + from +
@@ -348,16 +345,12 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
         "\n\treqid " + reqid
     );
 
-//    this.from = from;
-//    this.to = to;
-
     long then = System.currentTimeMillis();
 
-    analysisServiceAsync.getPhoneBigrams(userid,
-        listid,
-        from,
-        to,
-        reqid++, new AsyncCallback<PhoneBigrams>() {
+    AnalysisRequest analysisRequest = getAnalysisRequest(from, to);
+
+    analysisServiceAsync.getPhoneBigrams(
+        analysisRequest, new AsyncCallback<PhoneBigrams>() {
           @Override
           public void onFailure(Throwable caught) {
             logger.warning("\n\n\n-> getPhoneSummary " + caught);
@@ -366,13 +359,14 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
 
           @Override
           public void onSuccess(PhoneBigrams result) {
-            long now = System.currentTimeMillis();
-            long total = now - then;
-            if (DEBUG)  logger.info("getPhoneBigrams userid " + userid + " req " + reqid +
-                "\n\tphone  " + phone +
-                "\n\ttook   " + total +
-                "\n\tserver " + result.getServerTime() +
-                "\n\tclient " + (total - result.getServerTime()));
+            if (DEBUG) {
+              long total = System.currentTimeMillis() - then;
+              logger.info("getPhoneBigrams userid " + reqInfo.getUserid() + " req " + reqid +
+                  "\n\tphone  " + phone +
+                  "\n\ttook   " + total +
+                  "\n\tserver " + result.getServerTime() +
+                  "\n\tclient " + (total - result.getServerTime()));
+            }
 
             if (result.getReqid() + 1 != reqid) {
               logger.info("clickOnPhone2 : skip stale req");

@@ -39,8 +39,8 @@ import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.DBConnection;
@@ -236,7 +236,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     List<SlickUpdateDominoPair> updateDominoPairs = new ArrayList<>();
     Project project = databaseImpl.getProject(projid);
 
-    List<Integer> foundByNativeExID=new ArrayList<>();
+    List<Integer> foundByNativeExID = new ArrayList<>();
     npToDomino.forEach((npid, dominoID) -> {
       Integer exIDForNPID = oldToID.get(npid);
       if (exIDForNPID == null) {
@@ -453,22 +453,29 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
   /**
    * Really does delete it - could take a long time if a big project.
+   *
+   * NOTE :
+   * NOTE : this will lock up the database for days on real databases BE CAREFUL
+   * NOTE :
+   *
    * <p>
    * Mainly called from drop.sh or tests
    * In general we want to retire projects when we don't want them visible.
    *
    * @param id
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#dropOneConfig
+   * @seex mitll.langtest.server.database.copy.CopyToPostgres#dropOneConfig
    */
   public boolean delete(int id) {
     // logger.info("delete project #" + id);
     return dao.delete(id) > 0;
   }
 
+/*
   public boolean deleteAllBut(int id) {
     // logger.info("delete project #" + id);
     return dao.deleteAllBut(id) > 0;
   }
+*/
 
   /**
    * TODO : consider adding lts class

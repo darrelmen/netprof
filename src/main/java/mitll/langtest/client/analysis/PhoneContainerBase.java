@@ -13,12 +13,14 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.client.services.AnalysisServiceAsync;
+import mitll.langtest.shared.analysis.AnalysisRequest;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -37,24 +39,21 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   /**
    *
    */
-  private static final String CURR = "Avg";//"Average";//"Avg. Score";
-  private static final int COUNT_COL_WIDTH = 45;
-//  private static final String TOOLTIP = "Click to see examples";// and scores over time";
-  private static final int SOUND_WIDTH = 65;
-
+  private static final String CURR = "Avg";
+  private static final int COUNT_COL_WIDTH = 30;
+  private static final int SOUND_WIDTH = 50;
 
   final AnalysisServiceAsync analysisServiceAsync;
-  protected final int listid;
-  protected final int userid;
+
+  final AnalysisTab.ReqInfo reqInfo;
   protected long from;
   protected long to;
   protected int reqid = 0;
 
-  PhoneContainerBase(ExerciseController controller, AnalysisServiceAsync analysisServiceAsync, int listid, int userid) {
+  PhoneContainerBase(ExerciseController controller, AnalysisServiceAsync analysisServiceAsync, AnalysisTab.ReqInfo reqInfo) {
     super(controller);
     this.analysisServiceAsync = analysisServiceAsync;
-    this.listid = listid;
-    this.userid = userid;
+    this.reqInfo = reqInfo;
   }
 
   @Override
@@ -62,6 +61,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     selectionModel = new SingleSelectionModel<>();
     table.setSelectionModel(selectionModel);
   }
+
 
   @Override
   protected void setMaxWidth() {
@@ -170,8 +170,6 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     }
 
     table.setWidth("100%", true);
-
-//    new TooltipHelper().createAddTooltip(table, TOOLTIP, Placement.TOP);
   }
 
   protected int getPageSize() {
@@ -181,7 +179,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   protected abstract String getLabel();
 
   private Column<PhoneAndStats, SafeHtml> getCountColumn() {
-    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<PhoneAndStats, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -196,7 +194,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   }
 
   private Column<PhoneAndStats, SafeHtml> getCurrentCol() {
-    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<PhoneAndStats, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -215,7 +213,10 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     return "<span style='margin-left:10px;'>" + score + "</span>";
   }
 
-
+  /**
+   * @see #addColumnsToTable(boolean)
+   * @param label
+   */
   private void addPhones(String label) {
     Column<PhoneAndStats, SafeHtml> itemCol = getItemColumn();
     itemCol.setSortable(true);
@@ -226,7 +227,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   }
 
   private Column<PhoneAndStats, SafeHtml> getItemColumn() {
-    return new Column<PhoneAndStats, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<PhoneAndStats, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, PhoneAndStats object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -244,7 +245,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   }
 
   private void checkForClick(PhoneAndStats object, NativeEvent event) {
-   // logger.info("checkForClick : stats " + object);
+    // logger.info("checkForClick : stats " + object);
     if (BrowserEvents.CLICK.equals(event.getType())) {
       //   clickOnPhone(object.getPhone());
       clickOnPhone2(object.getPhone());
@@ -265,7 +266,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
    * @see #getTableWithPager
    */
   Panel getTableWithPagerForHistory(List<PhoneAndStats> sortedHistory) {
-    Panel tableWithPager = getTableWithPager(new ListOptions());
+    Panel tableWithPager = getTableWithPager(new ListOptions().setCompact(true));
     table.getElement().getStyle().setProperty("minWidth", PHONE_CONTAINER_MIN_WIDTH + "px");
 
     //  tableWithPager.getElement().setId("PhoneContainerTableScoreHistory");
@@ -273,10 +274,11 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     tableWithPager.addStyleName("leftTenMargin");
 
     addItems(sortedHistory);
+
     return tableWithPager;
   }
 
-   void addItems(List<PhoneAndStats> sortedHistory) {
+  void addItems(List<PhoneAndStats> sortedHistory) {
     addPhones(sortedHistory);
 
     try {
@@ -290,6 +292,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
 
   /**
    * Remember to ask to redraw later
+   *
    * @param sortedHistory
    */
   private void addPhones(List<PhoneAndStats> sortedHistory) {
@@ -310,5 +313,16 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     } else {
       clickOnPhone2(list.get(0).getPhone());
     }
+  }
+
+  AnalysisRequest getAnalysisRequest(long from, long to) {
+    return new AnalysisRequest()
+        .setUserid(reqInfo.getUserid())
+        .setListid(reqInfo.getListid())
+        .setFrom(from)
+        .setTo(to)
+        .setDialogID(new SelectionState().getDialog())
+        .setDialogSessionID(reqInfo.getDialogSessionID())
+        .setReqid(reqid++);
   }
 }

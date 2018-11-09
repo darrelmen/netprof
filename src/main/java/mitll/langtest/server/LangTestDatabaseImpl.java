@@ -35,21 +35,14 @@ package mitll.langtest.server;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.services.LangTestDatabase;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
-import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectHelper;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.flashcard.AVPScoreReport;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
@@ -61,11 +54,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.text.CollationKey;
-import java.text.Collator;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 import static mitll.hlt.domino.server.ServerInitializationManager.CONFIG_HOME_ATTR_NM;
 import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
@@ -99,16 +89,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     try {
       ServletContext servletContext = getServletContext();
       String property = System.getProperty(CONFIG_HOME_ATTR_NM);
-//      logger.info("\n\n\n\n--->prop for domino = '" + property + "'");
-
-      if (property == null) {
-        System.setProperty(CONFIG_HOME_ATTR_NM, "/opt/netprof/config/");
-        //logger.info("--->prop for domino now = '" + System.getProperty(CONFIG_HOME_ATTR_NM) + "'");
-      }
+    //  logger.info("init : prop for domino = '" + property + "'");
       this.pathHelper = new PathHelper(servletContext);
       this.serverProps = readProperties(servletContext);
       pathHelper.setProperties(serverProps);
       setInstallPath(db, servletContext);
+      // logger.info("finished init");
+
     } catch (Exception e) {
       startupMessage = e.getMessage();
       logger.error("Got " + e, e);
@@ -120,7 +107,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   private void optionalInit() {
     try {
-      //   logger.info("optionalInit -- ");
+   //   logger.info("optionalInit -- ");
       if (db != null) db.doReport();
     } catch (Exception e) {
       logger.error("optionalInit couldn't load database " + e, e);
@@ -133,10 +120,36 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     }
   }
 
+  /**
+   * This allows us to upload an exercise file.
+   *
+   * This might be helpful if we want to stream audio in a simple way outside a GWT RPC call.
+   *
+   * @throws ServletException
+   * @throws IOException
+   * @paramx request
+   * @paramx response
+   */
+/*  @Override
+  protected void service(HttpServletRequest request,
+                         HttpServletResponse response) throws ServletException, IOException {
+    ServletRequestContext ctx = new ServletRequestContext(request);
+    boolean isMultipart = ServletFileUpload.isMultipartContent(ctx);
+//    String contentType = ctx.getContentType();
+    //logger.info("service content type " + contentType + " multi " + isMultipart);
+    if (isMultipart) {
+      logger.debug("isMultipart : Request " + request.getQueryString() + " path " + request.getPathInfo());
+      FileUploadHelper.UploadInfo uploadInfo = db.getProjectManagement().getFileUploadHelper().gotFile(request);
+      if (uploadInfo == null) {
+        super.service(request, response);
+      } else {
+        db.getProjectManagement().getFileUploadHelper().doUploadInfoResponse(response, uploadInfo);
+      }
+    } else {
+      super.service(request, response);
+    }
+  }*/
 
-  protected ISection<CommonExercise> getSectionHelper() throws DominoSessionException {
-    return super.getSectionHelper();
-  }
 
   /**
    * This report is for on demand sending the report to the current user.
@@ -233,7 +246,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     return db.getMaleFemaleProgress(getProjectIDFromUser(getUserIDFromSessionOrDB()));
   }
 
-  public static final String TEST_EXCEPTION = "Test Exception";
+  private static final String TEST_EXCEPTION = "Test Exception";
 
   public void logMessage(String message, boolean sendEmail) {
     if (message.length() > 10000) message = message.substring(0, 10000);
@@ -260,6 +273,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.warn("DatabaseImpl was never made properly...");
     } else {
       try {
+      //  logger.info("DatabaseImpl.destroy");
         db.getDatabase().close(); // TODO : redundant with h2 shutdown hook?
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -283,45 +297,35 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     ServerProperties serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
 
     File configDir = serverInitializationManagerNetProf.getConfigDir();
-    logger.info("readProperties : configDir from props " + configDir);
+ //   logger.info("readProperties : configDir from props " + configDir);
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     //åString configDir1 = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
-    //logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
+   // logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 
     try {
       Object attribute = servletContext.getAttribute(USER_SVC);
 
       if (attribute != null) {
-//        logger.info("got " + attribute + " : " + attribute.getClass());
+        logger.info("readProperties got " + attribute + " : " + attribute.getClass());
       } else {
         logger.warn("readProperties : no " + USER_SVC + " attribute...? ");
       }
 
       db = makeDatabaseImpl(serverProps);
-      // logger.info("readProperties made database " + db);
+//      logger.info("readProperties made database " + db);
+
       securityManager = new NPUserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
-      //  logger.info("readProperties made securityManager " + securityManager);
+  //    logger.info("readProperties made securityManager " + securityManager);
       db.setUserSecurityManager(securityManager);
     } catch (Exception e) {
       logger.error("readProperties got " + e, e);
     }
 
     shareDB(servletContext, db);
-    // logger.info("readProperties shareDB ");
-//    shareLoadTesting(servletContext);
-
+   // logger.info("readProperties shareDB ");
     return serverProps;
   }
-/*
-  private void shareLoadTesting(ServletContext servletContext) {
-    Object loadTesting = servletContext.getAttribute(ScoreServlet.LOAD_TESTING);
-    if (loadTesting != null) {
-      logger.debug("hmm... found existing load testing reference " + loadTesting);
-    }
-    servletContext.setAttribute(ScoreServlet.LOAD_TESTING, this);
-  }
-*/
 
   /**
    * @param serverProps

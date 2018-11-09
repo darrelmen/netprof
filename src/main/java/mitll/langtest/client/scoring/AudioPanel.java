@@ -40,15 +40,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.exercise.CommonAudioExercise;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.image.ImageResponse;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,13 +69,13 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel implements RequiresResize {
+public class AudioPanel<T extends HasID> extends VerticalPanel implements RequiresResize {
   private final Logger logger = Logger.getLogger("AudioPanel");
 
   private static final String RECORD = "Record";
   private static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
 
-  private static final int LEFT_COLUMN_WIDTH = PagingContainer.MAX_WIDTH;
+  private static final int LEFT_COLUMN_WIDTH = SimplePagingContainer.MAX_WIDTH;
 
   static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 80f;//96;
@@ -97,6 +95,9 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
 
   private ImageAndCheck waveform;
   private ImageAndCheck spectrogram;
+  /**
+   * @see #addWidgets(String, String)
+   */
   ImageAndCheck words;
   ImageAndCheck phones;
 
@@ -104,8 +105,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
   private int lastWidthOuter = 0;
   private AudioPositionPopup audioPositionPopup;
 
-  protected final SoundManagerAPI soundManager;
-  protected PlayAudioPanel playAudio;
+  PlayAudioPanel playAudio;
   @Deprecated
   private float screenPortion = 1.0f;
   private final boolean logMessages;
@@ -114,8 +114,8 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
   private final int rightMargin;
 
   protected final T exercise;
-  final String instance;
-  final int exerciseID;
+
+  private final int exerciseID;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_GET_IMAGES = false;
@@ -126,7 +126,6 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
    * @param playButtonSuffix
    * @param exercise
    * @param exerciseID
-   * @param instance
    * @see ScoringAudioPanel#ScoringAudioPanel
    */
   public AudioPanel(String path,
@@ -135,15 +134,14 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
                     int rightMargin,
                     String playButtonSuffix,
                     T exercise,
-                    int exerciseID,
-                    String instance) {
-    this(controller, showSpectrogram, 1.0f, rightMargin, exercise, exerciseID, instance);
+                    int exerciseID) {
+    this(controller, showSpectrogram, 1.0f, rightMargin, exercise, exerciseID);
     this.audioPath = path;
 
     addWidgets(playButtonSuffix, RECORD);
     if (playAudio != null) {
       if (exercise == null) {
-       // logger.info("hmm exercise is null for " + instance + " and " + exerciseID);
+        // logger.info("hmm exercise is null for " + instance + " and " + exerciseID);
       } else {
         controller.register(getPlayButton(), exercise.getID());
       }
@@ -161,7 +159,6 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
    * @param rightMargin
    * @param exercise
    * @param exerciseID
-   * @param instance
    * @paramx exerciseID
    * @see mitll.langtest.client.exercise.RecordAudioPanel#RecordAudioPanel
    */
@@ -170,21 +167,17 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
                        float screenPortion,
                        int rightMargin,
                        T exercise,
-                       int exerciseID,
-                       String instance) {
+                       int exerciseID) {
     this.screenPortion = screenPortion;
-    this.soundManager = controller.getSoundManager();
+    //   this.soundManager = controller.getSoundManager();
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
-//    this.gaugePanel = gaugePanel;
-//    if (DEBUG) logger.info("AudioPanel : gauge panel " + gaugePanel);
-//
     this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
     this.exercise = exercise;
-    this.instance = instance;
-    int id = exercise != null ? exercise.getID() : exerciseID;
+    // this.instance = instance;
+    int id = getExerciseID();
     getElement().setId("AudioPanel_exercise_" + id);
 
     int width = getImageWidth();
@@ -193,16 +186,14 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
   }
 
   public void onResize() {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-      public void execute() {
-        int images = getImages();
+    Scheduler.get().scheduleDeferred(() -> {
+      int images = getImages();
 //        logger.info(getElement().getID() + " gotResize " + images);
-        if (images != 0) {
-          int diff = Math.abs(Window.getClientWidth() - lastWidthOuter);
-          if (lastWidthOuter == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
-            lastWidthOuter = Window.getClientWidth();
-            setWidth((images) + "px");
-          }
+      if (images != 0) {
+        int diff = Math.abs(Window.getClientWidth() - lastWidthOuter);
+        if (lastWidthOuter == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
+          lastWidthOuter = Window.getClientWidth();
+          setWidth((images) + "px");
         }
       }
     });
@@ -228,7 +219,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
     imageContainer.getElement().setId("AudioPanel_imageContainer");
 
     int heightForTranscripts = rightMargin > 0 ? 2 * TRANSCRIPT_IMAGE_HEIGHT : 0;
-    float totalHeight = getScaledImageHeight(WAVEFORM) + heightForTranscripts;
+    float totalHeight = getScaledImageHeight(WAVEFORM) + heightForTranscripts +6;
     imageContainer.setHeight(totalHeight + "px");
     //  imageContainer.setWidth(getImageWidth()+"px");
 
@@ -258,19 +249,22 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
       imageContainer.add(getSpectrogram().getImage());
     }
 
-    words = new ImageAndCheck();
-    Image wordsImage = words.getImage();
-    imageContainer.add(wordsImage);
-    wordsImage.getElement().setId("Transcript_Words");
+    {
+      words = new ImageAndCheck();
+      Image wordsImage = words.getImage();
+      imageContainer.add(wordsImage);
+      wordsImage.getElement().setId("Transcript_Words");
+    }
     //   wordsImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
 
-    phones = new ImageAndCheck();
-    Image phonesImage = phones.getImage();
-    imageContainer.add(phonesImage);
-    // for some reason this totally screws up max width for transcript images ????
-    // phonesImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
-    phonesImage.getElement().setId("Transcript_Phones");
-
+    {
+      phones = new ImageAndCheck();
+      Image phonesImage = phones.getImage();
+      imageContainer.add(phonesImage);
+      // for some reason this totally screws up max width for transcript images ????
+      // phonesImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
+      phonesImage.getElement().setId("Transcript_Phones");
+    }
     // hp.setWidth("100%");
 
     add(hp);
@@ -287,11 +281,11 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
     return waveformImage;
   }
 
-  boolean hasAudio() {
+  private boolean hasAudio() {
     return hasAudio(exercise);
   }
 
-  boolean hasAudio(T exercise) {
+  private boolean hasAudio(T exercise) {
     return true;
   }
 
@@ -299,9 +293,9 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
     return audioPath != null;
   }
 
-  void doPause() {
-    if (playAudio != null) playAudio.doPause();
-  }
+ /* void doPause() {
+    if (loadAndPlayOrPlayAudio != null) loadAndPlayOrPlayAudio.doPause();
+  }*/
 
   /**
    * This is sort of a hack --
@@ -316,11 +310,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
   public void onLoad() {
     if (DEBUG) logger.info("onLoad : id=" + getElement().getId() + " audio path is " + audioPath);
     if (audioPath != null) {
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        public void execute() {
-          getImagesForPath(audioPath);
-        }
-      });
+      Scheduler.get().scheduleDeferred(() -> getImagesForPath(audioPath));
     }
   }
 
@@ -359,19 +349,19 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
 
     /**
      * @param visible
-     * @see RecordButton.RecordingListener#stopRecording(long)
+     * @see RecordButton.RecordingListener#stopRecording(long, boolean)
      */
     public void setVisible(boolean visible) {
       getImage().setVisible(visible);
     }
 
-    public boolean isVisible() {
+    boolean isVisible() {
       return getImage().isVisible();
     }
 
     /**
      * @param url
-     * @see RecordButton.RecordingListener#stopRecording(long)
+     * @see RecordButton.RecordingListener#stopRecording(long, boolean)
      */
     public void setUrl(String url) {
       getImage().setUrl(url);
@@ -392,9 +382,9 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
    * Ask the server for the URLs to the mp3 for this audio
    *
    * @param path to audio on the server
+   * @seex mitll.langtest.client.scoring.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult
    * @see #onLoad()
-   * @see RecordButton.RecordingListener#stopRecording(long)
-   * @see mitll.langtest.client.scoring.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable
    */
   public String getImagesForPath(String path) {
@@ -406,10 +396,9 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
     return path;
   }
 
-  @Nullable
-  public String getReadyToPlayAudio(String path) {
+  private String getReadyToPlayAudio(String path) {
     path = getPath(path);
-    if (DEBUG) logger.info("AudioPanel : " + getElement().getId() + " getImagesForPath " + path);
+    if (DEBUG) logger.info("getReadyToPlayAudio : " + getElement().getId() + " getImagesForPath " + path);
     if (path != null) {
       this.audioPath = path;
     }
@@ -430,16 +419,18 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
    * @param start from here
    * @param end   to here
    * @paramx waveDurInSeconds
-   * @see ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
+   * @seex ScoringAudioPanel.TranscriptEventClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
+/*
   void playSegment(float start, float end) {
     if (start >= end) {
       logger.warning("bad segment " + start + "-" + end);
     } else {
 //      logger.info("playSegment segment " + start + "-" + end);
-      playAudio.repeatSegment(start, end);
+      loadAndPlayOrPlayAudio.loadAndPlaySegment(start, end);
     }
   }
+*/
 
   /**
    * Adds a listener to the audio panel - this way it can update its position as the audio plays
@@ -447,15 +438,15 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
    * @return PlayAudioPanel
    * @see #addWidgets(String, String)
    */
-  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String recordButtonTitle, CommonAudioExercise exercise) {
+  private PlayAudioPanel getPlayButtons(Widget toTheRightWidget, String playButtonSuffix, String recordButtonTitle, HasID exercise) {
     PlayAudioPanel playAudio = makePlayAudioPanel(toTheRightWidget, playButtonSuffix, recordButtonTitle, exercise);
     playAudio.setListener(audioPositionPopup);
     return playAudio;
   }
 
   protected PlayAudioPanel makePlayAudioPanel(final Widget toTheRightWidget, String buttonTitle,
-                                              String recordButtonTitle, CommonAudioExercise exercise) {
-    return new PlayAudioPanel(soundManager, buttonTitle, toTheRightWidget, false, controller, exercise, true);
+                                              String recordButtonTitle, HasID exercise) {
+    return new PlayAudioPanel(buttonTitle, toTheRightWidget, false, controller, getExerciseID(), true);
   }
 
   /**
@@ -535,7 +526,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
    * @param width
    * @see #getImages()
    */
-  protected void getEachImage(int width) {
+  void getEachImage(int width) {
     //  logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
     getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
     if (showSpectrogram) {
@@ -563,7 +554,7 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
 
       final int toUse = Math.max(MIN_WIDTH, width);
       int height = getScaledImageHeight(type);
-      final int id = exercise == null ? exerciseID : exercise.getID();
+      final int id = getExerciseID();
       controller.getImage(getReqID(type), path, type, toUse, height, id, new AsyncCallback<ImageResponse>() {
         public void onFailure(Throwable caught) {
           long now = System.currentTimeMillis();
@@ -573,16 +564,17 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
             controller.logMessageOnServer("getImageFailed for " + path + " " + type + " width" + toUse, "onFailure", true);
           }
           logger.info("message " + caught.getMessage() + " " + caught);
-          controller.handleNonFatalError("getting image",caught);
+          controller.handleNonFatalError("getting image", caught);
         }
 
         public void onSuccess(ImageResponse result) {
+//          logger.info("getImageURLForAudio : result " + result);
           long now = System.currentTimeMillis();
           long roundtrip = now - then;
 
           if (!result.successful) {
             logger.warning("getImageURLForAudio : got error for request for type " + type + " and " + path + " and exid " + id);
-            waveform.setUrl(LangTest.LANGTEST_IMAGES + "redx.png");
+            waveform.setUrl(LangTest.RED_X_URL.asString());
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
           } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
             showResult(result, imageAndCheck);
@@ -595,6 +587,10 @@ public class AudioPanel<T extends CommonAudioExercise> extends VerticalPanel imp
         }
       });
     }
+  }
+
+  int getExerciseID() {
+    return exercise == null ? exerciseID : exercise.getID();
   }
 
   protected int getScaledImageHeight(String type) {

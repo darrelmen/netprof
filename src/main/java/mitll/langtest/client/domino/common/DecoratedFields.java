@@ -60,7 +60,7 @@ import java.util.logging.Logger;
  */
 public class DecoratedFields {
 
-	protected static final Logger log = Logger.getLogger(DecoratedFields.class.getName());
+	private static final Logger log = Logger.getLogger(DecoratedFields.class.getName());
 	
 	private ControlGroup ctrlGroup;
 	private ControlLabel label;
@@ -70,14 +70,14 @@ public class DecoratedFields {
 	private Label fieldLabel = null;
 	private Icon fieldIcon = null;
 	
-	public DecoratedFields() {}
+	private DecoratedFields() {}
 
 	public DecoratedFields(String mainLabel, Widget control) {
 		this(mainLabel, control, null, null);
 	}
 	
-	public DecoratedFields(String mainLabel, Widget control,
-                         String helpMsg, IconType labelIcon) {
+	private DecoratedFields(String mainLabel, Widget control,
+													String helpMsg, IconType labelIcon) {
 		List<Widget> controls = new ArrayList<>();
 		if (control != null) {
 			controls.add(control);
@@ -85,11 +85,11 @@ public class DecoratedFields {
 		init(mainLabel, controls, helpMsg, labelIcon);
 	}
 	
-	public DecoratedFields(String mainLabel, Widget[] controlArr) {
+	private DecoratedFields(String mainLabel, Widget[] controlArr) {
 		this(mainLabel, controlArr, null, null);
 	}
 	
-	public DecoratedFields(String mainLabel, Widget[] controlArr, String helpMsg, IconType labelIcon) {
+	private DecoratedFields(String mainLabel, Widget[] controlArr, String helpMsg, IconType labelIcon) {
 		List<Widget> controls = new ArrayList<>();
 		if (controlArr != null) {
 			for (int i = 0; i < controlArr.length; i++) {
@@ -103,12 +103,12 @@ public class DecoratedFields {
 		init(mainLabel, controls, helpMsg, labelIcon);
 	}
 
-	public DecoratedFields(String mainLabel, List<Widget> controls) {
+	private DecoratedFields(String mainLabel, List<Widget> controls) {
 		init(mainLabel, controls, null, null);
 	}
 	
-	protected void init(String fieldLabelVal, List<Widget> controls,
-			String helpMsg, IconType fieldIconType) {
+	private void init(String fieldLabelVal, List<Widget> controls,
+										String helpMsg, IconType fieldIconType) {
 		ctrlGroup = new ControlGroup();
 		Controls ctrls = new Controls();
 		ctrls.setControlsRow(true);
@@ -203,7 +203,7 @@ public class DecoratedFields {
 		setMessage(errMsg, ControlGroupType.ERROR);
 	}
 
-	public void setMessage(String newMsg) {
+	private void setMessage(String newMsg) {
 		setMessage(newMsg, ControlGroupType.NONE);
 	}
 	
@@ -228,7 +228,7 @@ public class DecoratedFields {
 		return label != null;
 	}
 
-	public ControlLabel getLabel() {
+	private ControlLabel getLabel() {
 		return label;
 	}
 
@@ -236,7 +236,7 @@ public class DecoratedFields {
 		return messageLocation;
 	}
 
-	public List<Widget> getControls() {
+	private List<Widget> getControls() {
 		return controls;
 	}
 	
@@ -260,7 +260,7 @@ public class DecoratedFields {
 		return performBasicValidate(0);
 	}
 	
-	public boolean performBasicValidate(int minLength) {
+	private boolean performBasicValidate(int minLength) {
 		this.clearError();
 		String msg = null;
 		

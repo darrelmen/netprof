@@ -1,5 +1,6 @@
 package mitll.langtest.client.analysis;
 
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -13,10 +14,11 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLookup {
-  public static final int HIDE_DELAY = 5000;
-  public static final boolean SHOW_DATE = false;
+public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot
+    implements ExerciseLookup<T> {
   private final Logger logger = Logger.getLogger("BasicTimeSeriesPlot");
+
+  private static final int HIDE_DELAY = 5000;
 
   private static final String SCORE = "Score";
 
@@ -35,12 +37,16 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   private static final int Y_OFFSET_FOR_LEGEND = 25;
 
   private final Map<Long, Integer> timeToId = new TreeMap<>();
-  private Map<Integer, CommonShell> idToEx = new TreeMap<>();
+  //private Map<Integer, T> idToEx = new TreeMap<>();
 
   final ExceptionSupport exceptionSupport;
+  protected final ICommonShellCache<T> commonShellCache;
 
-  BasicTimeSeriesPlot(ExceptionSupport exceptionSupport) {
+  private static final boolean WARN_ABOUT_MISSING_EXERCISE_ID = false;
+
+  BasicTimeSeriesPlot(ExceptionSupport exceptionSupport, MessageHelper messageHelper) {
     this.exceptionSupport = exceptionSupport;
+    this.commonShellCache = new CommonShellCache<>(messageHelper);
   }
 
   /**
@@ -120,8 +126,8 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
             long xAsLong = toolTipData.getXAsLong();
             Integer exerciseID = timeToId.get(xAsLong);
             // if (exerciseID == null) logger.warning("getToolTip no ex at " + xAsLong);
-           // CommonShell commonShell = getCommonShellAtTime(exerciseID, xAsLong);
-            return getTooltip(toolTipData, exerciseID, getCommonShellAtTime(exerciseID, xAsLong));
+            T commonShell = getCommonShellAtTime(exerciseID, xAsLong);
+            return getTooltip(toolTipData, exerciseID, commonShell);
           } catch (Exception e) {
             logger.warning("getToolTip " + e.getMessage());
             exceptionSupport.logException(e);
@@ -134,9 +140,11 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     return HIDE_DELAY;
   }
 
-  protected CommonShell getCommonShellAtTime(Integer exerciseID, long xAsLong) {
-    CommonShell commonShell = exerciseID == null ? null : getIdToEx().get(exerciseID);
-    // if (commonShell == null) logger.warning("getCommonShellAtTime no ex found " + exerciseID);
+  protected T getCommonShellAtTime(Integer exerciseID, long xAsLong) {
+    T commonShell = exerciseID == null ? null : getShell(exerciseID);
+    if (commonShell == null && WARN_ABOUT_MISSING_EXERCISE_ID) {
+      logger.info("getCommonShellAtTime no ex found " + exerciseID);
+    }
     return commonShell;
   }
 
@@ -151,6 +159,13 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
     chart.getYAxis().setAxisTitleText(title);
   }
 
+  /**
+   * @param chart
+   * @param seriesTitle
+   * @param data
+   * @return
+   * @see AnalysisPlot#addCumulativeAverage(Collection, Chart, String, boolean)
+   */
   Series getSplineSeries(Chart chart, String seriesTitle, Number[][] data) {
     return chart.createSeries()
         .setName(seriesTitle)
@@ -177,13 +192,13 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
    * @return
    * @see #getToolTip()
    */
-  protected String getTooltip(ToolTipData toolTipData, Integer exid, CommonShell commonShell) {
-//    logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
+  protected String getTooltip(ToolTipData toolTipData, Integer exid, T commonShell) {
+    //  logger.info("getTooltip for " + exid + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
     return getExerciseTooltip(toolTipData, commonShell, toolTipData.getSeriesName());
   }
 
   @NotNull
-  private String getExerciseTooltip(ToolTipData toolTipData, CommonShell commonShell, String seriesName) {
+  private String getExerciseTooltip(ToolTipData toolTipData, T commonShell, String seriesName) {
     boolean showEx = shouldShowExercise(seriesName);
 
     // logger.info("getExerciseTooltip for " + showEx + " series " + toolTipData.getSeriesName() + " shell " + commonShell);
@@ -206,7 +221,6 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
             "<br/>" +
 
             dateToShow +
-            //  (SHOW_DATE && showDate() ? dateToShow : "") +
 
             (showEx ?
                 getTooltipHint()
@@ -241,20 +255,23 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
    * @return
    * @seex #getShell
    */
-  Map<Integer, CommonShell> getIdToEx() {
+/*
+  Map<Integer, T> getIdToEx() {
     return idToEx;
   }
+*/
 
-  public void setIdToEx(Map<Integer, CommonShell> idToEx) {
-    this.idToEx = idToEx;
+  public void setIdToEx(Map<Integer, T> idToEx) {
+   // this.idToEx = idToEx;
+    commonShellCache.setIdToEx(idToEx);
   }
 
   public boolean isKnown(int exid) {
-    return idToEx.containsKey(exid);
+    //return idToEx.containsKey(exid);
+    return commonShellCache.isKnown(exid);
   }
 
   /**
-   *
    * @param time
    * @param id
    */
@@ -263,14 +280,15 @@ public class BasicTimeSeriesPlot extends TimeSeriesPlot implements ExerciseLooku
   }
 
   /**
-   * @param commonShell
-   * @see AnalysisPlot#populateExerciseMap
+   * @paramx commonShell
+   * @seex AnalysisPlot#populateExerciseMap
    */
-  void rememberExercise(CommonShell commonShell) {
-    idToEx.put(commonShell.getID(), commonShell);
-  }
+/*  void rememberExercise(T commonShell) {
+//    idToEx.put(commonShell.getID(), commonShell);
+    commonShellCache.rememberExercise(commonShell);
+  }*/
 
-  public CommonShell getShell(int id) {
-    return getIdToEx().get(id);
+  public T getShell(int id) {
+    return commonShellCache.getShell(id);//getIdToEx().get(id);
   }
 }

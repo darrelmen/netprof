@@ -8,12 +8,25 @@ import com.google.gwt.user.client.ui.Widget;
  * Created by go22670 on 4/25/17.
  */
 public interface IHighlightSegment {
-  void setBackground(String background);
+  /**
+   * @see #showHighlight
+   */
+  String DEFAULT_HIGHLIGHT = "#2196F3";
 
   String getID();
-  void setBlue();
-  void clearBlue();
+
+  void setHighlightColor(String highlightColor);
+  void setBackground(String background);
+
+  void showHighlight();
+  void checkClearHighlight();
+  void clearHighlight();
   boolean isHighlighted();
+
+  void setObscurable();
+  void obscureText();
+  void restoreText();
+
   int getLength();
 
   boolean isClickable();

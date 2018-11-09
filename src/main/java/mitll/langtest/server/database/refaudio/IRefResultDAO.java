@@ -38,7 +38,6 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
-import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.Collection;
 import java.util.List;
@@ -88,6 +87,7 @@ public interface IRefResultDAO extends IDAO {
   List<Result> getResults();
 
   Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
+  int getNumPhonesForEx(int exid);
 
   /**
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore

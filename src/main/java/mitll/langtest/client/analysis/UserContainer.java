@@ -43,6 +43,8 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
@@ -51,7 +53,6 @@ import mitll.langtest.shared.custom.IUserListLight;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -60,8 +61,9 @@ import java.util.logging.Logger;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
-  public static final int SESSION_AVG_WIDTH = 85;
-  private final Logger logger = Logger.getLogger("UserContainer");
+//  private final Logger logger = Logger.getLogger("UserContainer");
+
+  private static final int SESSION_AVG_WIDTH = 85;
 
   private static final int MAX_NAME_LENGTH = 16;
 
@@ -84,11 +86,11 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    * @seex #addLastSession
    */
 //  private static final int COMPLETED_WIDTH = 60;
-  private static final String SCORE_FOR_COMPLETED = "Comp. Avg.";//"Completed Score";
+//  private static final String SCORE_FOR_COMPLETED = "Comp. Avg.";//"Completed Score";
   // private static final int CURRENT_WIDTH = 60;
 
   private static final boolean SHOW_MY_STUDENTS = false;
-  private static final String Y = "Y";
+//  private static final String Y = "Y";
 
 /*
   private static final String MINE = "Mine";
@@ -125,6 +127,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   // private static final String MY_STUDENT = "My Student";
   // private static final int NUM_WIDTH = 50;
 
+  /**
+   * @see #changeSelectedUser(UserInfo)
+   * @see
+   */
   private final DivWidget rightSide;
   private final DivWidget overallBottom;
   /**
@@ -136,7 +142,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private Button remove;
   private Button mineOnly;
   private final UserTypeahead userTypeahead = new UserTypeahead(this);
-  private List<UserInfo> remembered;
+  //private List<UserInfo> remembered;
   private Collection<UserInfo> orig;
 
   /**
@@ -145,13 +151,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    * @see StudentAnalysis#StudentAnalysis
    */
   UserContainer(ExerciseController controller,
-                DivWidget rightSide,
                 DivWidget overallBottom,
+                DivWidget rightSide,
                 String selectedUserKey
   ) {
     super(controller, selectedUserKey, STUDENT);
-    this.rightSide = rightSide;
     this.overallBottom = overallBottom;
+    this.rightSide = rightSide;
     myStudents = new HashSet<>();
   }
 
@@ -191,7 +197,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private void showMyStudents(Set<Integer> result, Collection<UserInfo> users, DivWidget leftSide) {
     myStudents = result;
 
-    remembered = new ArrayList<>(users);
+    List<UserInfo> remembered = new ArrayList<>(users);
 
     List<UserInfo> filtered = new ArrayList<>();
     remembered.forEach(userInfo -> {
@@ -327,12 +333,16 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     filterContainer.add(userTypeahead.getSearch());
 
+    addListChoiceBox(filterContainer);
+    return filterContainer;
+  }
+
+  protected void addListChoiceBox(DivWidget filterContainer) {
     DivWidget c = new DivWidget();
     c.addStyleName("leftFiveMargin");
     c.addStyleName("floatRight");
     c.add(getListBox());
     filterContainer.add(c);
-    return filterContainer;
   }
 
 /*
@@ -472,10 +482,15 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
       if (SHOW_MY_STUDENTS) addMine(list);
 */
 
+    addLastTwoColumns(list);
+  }
+
+  protected void addLastTwoColumns(List<UserInfo> list) {
     addPolyNumber(list);
-  //  addLastSession(list);
-    Column<UserInfo, SafeHtml> column = addLastOverallScore(list);
-  //  table.getColumnSortList().push(column);
+    //  addLastSession(list);
+    /*Column<UserInfo, SafeHtml> column =*/
+    addLastOverallScore(list);
+    //  table.getColumnSortList().push(column);
 
     table.setWidth("100%", true);
 
@@ -498,9 +513,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   private void addCurrent(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getCurrent();
-    addColumn(current, new TextHeader(LIFETIME_AVG));
+    addColumn(current, new TextHeader(getLifetimeAvgTitle()));
     table.setColumnWidth(current, LIFETIME_AVG_WIDTH + "px");
     table.addColumnSortHandler(getCurrentSorter(current, list));
+  }
+
+  @NotNull
+  protected String getLifetimeAvgTitle() {
+    return LIFETIME_AVG;
   }
 
 /*  private Column<UserInfo, SafeHtml> addLastSession(List<UserInfo> list) {
@@ -531,9 +551,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   private void addNumber(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> num = getNum();
-    addColumn(num, new TextHeader(LIFETIME));
+    addColumn(num, new TextHeader(getLifetimeCountTitle()));
     table.addColumnSortHandler(getNumSorter(num, list));
     table.setColumnWidth(num, LIFETIME_WIDTH + "px");
+  }
+
+  @NotNull
+  protected String getLifetimeCountTitle() {
+    return LIFETIME;
   }
 
   private void addPolyNumber(List<UserInfo> list) {
@@ -635,7 +660,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return columnSortHandler;
   }
 
-  private ColumnSortEvent.ListHandler<UserInfo> getLastSessionSorter(Column<UserInfo, SafeHtml> englishCol,
+/*  private ColumnSortEvent.ListHandler<UserInfo> getLastSessionSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                      List<UserInfo> dataList) {
     ColumnSortEvent.ListHandler<UserInfo> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol,
@@ -654,7 +679,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           return -1;
         });
     return columnSortHandler;
-  }
+  }*/
 
   private ColumnSortEvent.ListHandler<UserInfo> getOverallSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                  List<UserInfo> dataList) {
@@ -703,11 +728,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }*/
 
 
-  private Column<UserInfo, SafeHtml> getCurrent() {    return getClickable(this::getCurrentText);  }
+  private Column<UserInfo, SafeHtml> getCurrent() {
+    return getClickable(this::getCurrentText);
+  }
 
   @NotNull
-  private String getCurrentText(UserInfo shell) {    return "" + shell.getCurrent();  }  @NotNull
-  private String getNumText(UserInfo shell) {    return "" + shell.getNum();  }
+  private String getCurrentText(UserInfo shell) {
+    return "" + shell.getCurrent();
+  }
+
+  @NotNull
+  private String getNumText(UserInfo shell) {
+    return "" + shell.getNum();
+  }
 
 /*  private Column<UserInfo, SafeHtml> getLastSession() {
     return new Column<UserInfo, SafeHtml>(new PagingContainer.ClickableCell()) {
@@ -730,16 +763,22 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     };
   }*/
 
-  private Column<UserInfo, SafeHtml> getLastSession() {    return getClickableDesc(this::getLastSessionScore);  }
+/*
+  private Column<UserInfo, SafeHtml> getLastSession() {
+    return getClickableDesc(this::getLastSessionScore);
+  }
+*/
 
-  @NotNull
+/*  @NotNull
   private String getLastSessionScore(UserInfo shell) {
     int lastSessionScore = shell.getLastSessionScore() / 10;
     // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
     return "" + lastSessionScore;
-  }
+  }*/
 
-  private Column<UserInfo, SafeHtml> getOverall() {    return getClickableDesc(this::getOverallScore);  }
+  private Column<UserInfo, SafeHtml> getOverall() {
+    return getClickableDesc(this::getOverallScore);
+  }
 
   @NotNull
   private String getOverallScore(UserInfo shell) {
@@ -784,8 +823,13 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }
 */
 
-  private Column<UserInfo, SafeHtml> getNum() {    return getClickable(this::getNumText);  }
-  private Column<UserInfo, SafeHtml> getPolyNum() {    return getNoWrapCol(this::getPolyNumValue);  }
+  private Column<UserInfo, SafeHtml> getNum() {
+    return getClickable(this::getNumText);
+  }
+
+  private Column<UserInfo, SafeHtml> getPolyNum() {
+    return getNoWrapCol(this::getPolyNumValue);
+  }
 
   @NotNull
   private String getPolyNumValue(UserInfo shell) {
@@ -819,6 +863,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private UserInfo lastSelected = null;
 
   /**
+   * @see #selectAndClick
+   * @see #checkGotClick
    * @param selectedUser
    */
   public void gotClickOnItem(final UserInfo selectedUser) {
@@ -834,15 +880,28 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     enableButtons();
     rightSide.clear();
 
-    rightSide.add(new AnalysisTab(controller,
+    addRightSideContent(selectedUser);
+  }
+
+  protected void addRightSideContent(UserInfo selectedUser) {
+    rightSide.add(getAnalysisTab(selectedUser));
+  }
+
+  @NotNull
+  protected Widget getAnalysisTab(UserInfo selectedUser) {
+    return new AnalysisTab(controller,
         listid == -1 ? MIN_RECORDINGS : 0,
         overallBottom,
         selectedUser.getID(),
         selectedUser.getUserID(),
         listid,
         listid != -1,
-        req++,
-        this));
+        incrReq(),
+        this, INavigation.VIEWS.LEARN);
+  }
+
+  int incrReq() {
+    return req++;
   }
 
 /*  public Button getAdd() {
@@ -860,7 +919,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
     if (onlyOne && matches.size() == 1 &&
         getList().get(0).getID() == matches.iterator().next().getID()) {
-    //  logger.info("skip...");
+      //  logger.info("skip...");
     } else {
       populateTable(matches);
     }
@@ -880,7 +939,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           || user.getFirst().toLowerCase().startsWith(prefix)
           || user.getLast().toLowerCase().startsWith(prefix)
           || getFormattedDateString(getItemDate(user)).toLowerCase().startsWith(prefix)
-          ) {
+      ) {
         matches.add(user);
       }
     }

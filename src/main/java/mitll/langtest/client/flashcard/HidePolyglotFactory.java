@@ -1,8 +1,9 @@
 package mitll.langtest.client.flashcard;
 
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
  * @param <L>
  * @param <T>
  */
-public class HidePolyglotFactory<L extends CommonShell, T extends CommonExercise> extends PolyglotFlashcardFactory<L,T>{
-  public HidePolyglotFactory(ExerciseController controller, ListInterface<L,T> exerciseList, String instance) {
-    super(controller, exerciseList);
+public class HidePolyglotFactory<L extends CommonShell, T extends ClientExercise> extends PolyglotFlashcardFactory<L,T>{
+  public HidePolyglotFactory(ExerciseController controller, ListInterface<L,T> exerciseList, INavigation.VIEWS instance) {
+    super(controller, exerciseList,instance);
   }
 
   @NotNull
@@ -23,13 +24,10 @@ public class HidePolyglotFactory<L extends CommonShell, T extends CommonExercise
         controlState,
         controller,
         soundFeedback,
-        e.getCommonAnnotatable(),
+        e,
         sticky,
-        exerciseList
-//
-//        ,
-//        getMinScore(),
-//        shouldShowAudio()
+        exerciseList,
+        instance
     );
   }
 }

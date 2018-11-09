@@ -38,9 +38,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.Shell;
-
-import java.util.logging.Logger;
 
 /**
  * A row with prev/next buttons.  Key bindings for keys too.
@@ -53,9 +50,8 @@ import java.util.logging.Logger;
  * Time: 6:36 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NavigationHelper<T extends Shell> extends HorizontalPanel {
-  private final Logger logger = Logger.getLogger("NavigationHelper");
-
+public class NavigationHelper extends HorizontalPanel {
+  //private final Logger logger = Logger.getLogger("NavigationHelper");
 
   private static final String PREVIOUS = "Previous";
   private static final String NEXT = "Next";
@@ -64,9 +60,9 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
 
   private Button prev;
   protected Button next;
-  private boolean enableNextOnlyWhenAllCompleted = true;
+  private final boolean enableNextOnlyWhenAllCompleted;
   private final PostAnswerProvider provider;
-  private final ListInterface<T, ?> listContainer;
+  private final ListInterface<?, ?> listContainer;
 
   /**
    * @param exercise
@@ -74,10 +70,10 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @param provider
    * @param listContainer
    * @param addKeyHandler
-   * @see ExercisePanel#getNavigationHelper(ExerciseController)
+   * @see ExercisePanel#getNavigationHelper
    */
   protected NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
-                             ListInterface<T, ?> listContainer, boolean addKeyHandler) {
+                             ListInterface<?, ?> listContainer, boolean addKeyHandler) {
     this(exercise, controller, provider, listContainer, true, addKeyHandler, false, false);
   }
 
@@ -90,10 +86,10 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @param addKeyHandler
    * @param enableNextOnlyWhenAllCompleted
    * @param addPrevButton
-   * @see ExercisePanel#getNavigationHelper(ExerciseController)
+   * @see ExercisePanel#getNavigationHelper
    */
   NavigationHelper(HasID exercise, ExerciseController controller, PostAnswerProvider provider,
-                   ListInterface<T, ?> listContainer, boolean addButtons, boolean addKeyHandler,
+                   ListInterface<?, ?> listContainer, boolean addButtons, boolean addKeyHandler,
                    boolean enableNextOnlyWhenAllCompleted,
                    boolean addPrevButton) {
     this.provider = provider;
@@ -153,7 +149,7 @@ public class NavigationHelper<T extends Shell> extends HorizontalPanel {
    * @param exercise
    * @see #makeNextButton(HasID, ExerciseController, boolean)
    */
-  protected void enableNext(HasID exercise) {
+  public void enableNext(HasID exercise) {
     if (enableNextOnlyWhenAllCompleted) { // initially not enabled
       // logger.info("enableNextOnlyWhenAllCompleted true");
       next.setEnabled(false);

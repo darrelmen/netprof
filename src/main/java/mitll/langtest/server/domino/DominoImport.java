@@ -53,7 +53,7 @@ public class DominoImport implements IDominoImport {
   private final DocumentServiceDelegate documentDelegate;
   private final IProjectWorkflowDAO workflowDelegate;
   private final Mongo pool;
-  private IUserExerciseDAO userExerciseDAO;
+  private final IUserExerciseDAO userExerciseDAO;
 
   /**
    * @param projectDelegate
@@ -270,7 +270,10 @@ public class DominoImport implements IDominoImport {
    * @see #getImportFromDomino
    */
   @NotNull
-  private ChangedAndDeleted getChangedDocs(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject dominoProject, boolean checkForDominoIDs) {
+  private ChangedAndDeleted getChangedDocs(String sinceInUTC,
+                                           DBUser dominoAdminUser,
+                                           ClientPMProject dominoProject,
+                                           boolean checkForDominoIDs) {
     Set<Integer> added = new HashSet<>();
     long then = System.currentTimeMillis();
 
@@ -283,7 +286,8 @@ public class DominoImport implements IDominoImport {
       long now = System.currentTimeMillis();
       if (now - then > 100)
         logger.info("getChangedDocs took " + (now - then) + " to get " + addedImports.size() + " added imports");
-    });
+    },
+        "getAddedImports");
     addedThread.start();
 
 
@@ -293,28 +297,29 @@ public class DominoImport implements IDominoImport {
           long now = System.currentTimeMillis();
           if (now - then > 100)
             logger.info("getChangedDocs took " + (now - then) + " to get " + addedImports.size() + " changed imports");
-        });
+        },
+            "getChangedImports");
     changedThread.start();
 
 
     Set<String> deletedNPIDs = new TreeSet<>();
 
     Thread deletedThread =
-        new Thread(() -> deletedDocsSince.addAll(getDeletedDocsSince(sinceInUTC, dominoProject.getId(), deletedNPIDs)));
+        new Thread(() -> deletedDocsSince.addAll(getDeletedDocsSince(sinceInUTC, dominoProject.getId(), deletedNPIDs)),
+            "getDeletedDocsSince");
     deletedThread.start();
-
 
     try {
       addedThread.join();
       changedThread.join();
       deletedThread.join();
     } catch (InterruptedException e) {
-      logger.error("could finish the added, changed, deleted lookup.");
+      logger.error("could not finish the added, changed, deleted lookup.");
     }
 
     Map<String, Integer> npidToDominoID = checkForDominoIDs ? getNPIDToDominoID(dominoProject.getId()) : new HashMap<>();
     logger.info("getChangedDocs : added " + addedImports.size() + " change " + changedImports.size() + " deleted " + deletedNPIDs.size());
-    return new ChangedAndDeleted(changedImports, new ArrayList<>(), deletedDocsSince, deletedNPIDs, addedImports, npidToDominoID);
+    return new ChangedAndDeleted(changedImports, deletedDocsSince, deletedNPIDs, addedImports, npidToDominoID);
   }
 
   @NotNull
@@ -399,20 +404,19 @@ public class DominoImport implements IDominoImport {
     // private final List<ImportDoc> deleted;
     private final Collection<Integer> deleted2;
     private final Set<String> deletedNPIDs;
-    private Map<String, Integer> npidToDominoID;
+    private final Map<String, Integer> npidToDominoID;
 
     /**
      * @param changed
-     * @param deleted
      * @param deleted2
      * @param npidToDominoID
      * @see DominoImport#getChangedDocs
      */
     ChangedAndDeleted(List<ImportDoc> changed,
-                      List<ImportDoc> deleted,
                       Collection<Integer> deleted2,
                       Set<String> deletedNPIDs,
-                      List<ImportDoc> added, Map<String, Integer> npidToDominoID) {
+                      List<ImportDoc> added,
+                      Map<String, Integer> npidToDominoID) {
       this.added = added;
       this.changed = changed;
       //  this.deleted = deleted;

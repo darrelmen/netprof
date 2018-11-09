@@ -5,14 +5,18 @@ import mitll.langtest.client.user.Md5Hash;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -178,7 +182,7 @@ public class DecodeTest extends BaseTest {
     for (AudioAttribute audioAttribute : audioAttributes) {
       logger.info("attr " + audioAttribute);
     }
-    for (CommonExercise context : exercise.getDirectlyRelated()) {
+    for (ClientExercise context : exercise.getDirectlyRelated()) {
       logger.info("got " + context + " with " + context.getAudioAttributes());
     }
   }

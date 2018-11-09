@@ -38,6 +38,7 @@ import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,7 +58,12 @@ class H2Analysis extends Analysis implements IAnalysis {
    * @param phoneDAO
    */
   public H2Analysis(Database database, IPhoneDAO phoneDAO) {
-    super(database, phoneDAO, "unknown");
+    super(database, phoneDAO, Language.UNKNOWN);
+  }
+
+  @Override
+  protected Collection<Integer> getDialogExerciseIDs(int dialogID) {
+    return null;
   }
 
   /**
@@ -85,27 +91,27 @@ class H2Analysis extends Analysis implements IAnalysis {
   }*/
 
   @Override
-  public PhoneSummary getPhoneSummaryForPeriod(int userid, int listid, long from, long to) {
+  public PhoneSummary getPhoneSummaryForPeriod(AnalysisRequest analysisRequest) {
     return null;
   }
 
   @Override
-  public PhoneBigrams getPhoneBigramsForPeriod(int userid, int listid, long from, long to) {
+  public PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest) {
     return null;
   }
 
   @Override
-  public AnalysisReport getPerformanceReportForUser(int id, int minRecordings, int listid, int req) {
+  public AnalysisReport getPerformanceReportForUser(AnalysisRequest analysisRequest) {
     return null;
   }
 
   @Override
-  public WordsAndTotal getWordScoresForUser(int userid, int minRecordings, int listid, long from, long to, int rangeStart, int rangeEnd, String sort) {
+  public WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort) {
     return null;
   }
 
   @Override
-  public List<WordAndScore> getPhoneReportFor(int userid, int listid, String phone, String bigram, long from, long to) {
+  public List<WordAndScore> getWordAndScoreForPhoneAndBigram(AnalysisRequest analysisRequest) {
     return null;
   }
 
@@ -217,19 +223,20 @@ class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param userid
    * @param listid
+   * @param projID
    * @return
    * @paramx projid
    * @seez mitll.langtest.server.LangTestDatabaseImpl#getWordScores
    */
-  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid) {
+/*  public List<WordScore> getWordScoresForUser(int userid, int minRecordings, int listid, int projID) {
     try {
       Map<Integer, UserInfo> best = getBest(getPerfSQL(userid), minRecordings);
-      return getWordScores(best.values());
+      return getWordScores(best.values(), projID);
     } catch (Exception ee) {
       logException(ee);
     }
     return new ArrayList<>();
-  }
+  }*/
 
   /**
    * @param connection
@@ -301,5 +308,10 @@ class H2Analysis extends Analysis implements IAnalysis {
 
     finish(connection, statement, rs);
     return userToBest;
+  }
+
+  @Override
+  public List<UserInfo> getUserInfoForDialog(IUserDAO userDAO, int dialogID) {
+    return null;
   }
 }

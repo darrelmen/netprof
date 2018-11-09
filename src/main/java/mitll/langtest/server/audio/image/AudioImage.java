@@ -78,6 +78,8 @@ public abstract class AudioImage extends BufferedImage {
       {255f, 128f, 0f},
       {255f, 64f, 0f},
       {255f, 0f, 0f}};
+
+  /*
   public static final float[][] FIRE_COLOR_MAP = new float[][]{{0f, 0f, 0f},
       {32f, 0f, 0f},
       {64f, 0f, 0f},
@@ -89,6 +91,7 @@ public abstract class AudioImage extends BufferedImage {
       {255f, 128f, 0f},
       {255f, 192f, 0f},
       {255f, 255f, 0f}};
+*/
 
   private final float fps;                              /// Samples (frames) per second for current audio
 

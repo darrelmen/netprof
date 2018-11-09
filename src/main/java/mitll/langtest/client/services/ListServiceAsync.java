@@ -34,7 +34,6 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -77,8 +76,7 @@ public interface ListServiceAsync {
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 
-  void newExercise(int userListID, CommonExercise userExercise, AsyncCallback<CommonExercise> async);
-
+ // void newExercise(int userListID, ClientExercise userExercise, AsyncCallback<ClientExercise> async);
 
   void deleteList(int id, AsyncCallback<Boolean> async);
 
@@ -90,8 +88,9 @@ public interface ListServiceAsync {
 
   void update(UserList userList, AsyncCallback<Void> async);
 
-  void getReviewList(AsyncCallback<UserList<CommonShell>> async);
+/*
+  void getReviewList(boolean isContext, AsyncCallback<UserList<CommonShell>> async);
+*/
 
-
-  void getQuizInfo(int userListID, AsyncCallback<QuizInfo> async);
+  void getQuizInfo(int userListID, AsyncCallback<QuizSpec> async);
 }

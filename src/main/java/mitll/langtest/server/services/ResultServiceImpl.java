@@ -128,11 +128,11 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     }
   }
 
-  private LoadingCache<Integer, Collection<MonitorResult>> projectToResults = CacheBuilder.newBuilder()
+  private final LoadingCache<Integer, Collection<MonitorResult>> projectToResults = CacheBuilder.newBuilder()
       //  .concurrencyLevel(4)
       //  .weakKeys()
       .maximumSize(10000)
-      .expireAfterWrite(30, TimeUnit.SECONDS)
+      .expireAfterWrite(10, TimeUnit.SECONDS)
       .build(
           new CacheLoader<Integer, Collection<MonitorResult>>() {
             @Override
@@ -144,11 +144,11 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
             }
           });
 
-  private LoadingCache<Integer, Collection<MonitorResult>> projectToResults2 = CacheBuilder.newBuilder()
+  private final LoadingCache<Integer, Collection<MonitorResult>> projectToResults2 = CacheBuilder.newBuilder()
       //  .concurrencyLevel(4)
       //  .weakKeys()
       .maximumSize(10000)
-      .expireAfterWrite(10, TimeUnit.MINUTES)
+      .expireAfterWrite(1, TimeUnit.MINUTES)
       .build(
           new CacheLoader<Integer, Collection<MonitorResult>>() {
             @Override

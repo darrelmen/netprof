@@ -37,11 +37,15 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.SlickExercise;
+import mitll.npdata.dao.SlickExerciseAttributeJoin;
 import mitll.npdata.dao.SlickUpdateDominoPair;
+import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,7 +62,94 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String EXERCISEID = "exerciseid";
   private static final String TRANSLITERATION = "transliteration";
   private static final String OVERRIDE = "override";
+
+  @Override
+  public IRelatedExercise getRelatedCoreExercise() {
+    return null;
+  }
+
+  @Override
+  public IRelatedExercise getRelatedExercise() {
+    return null;
+  }
+
+  @Override
+  public BothMaps getOldToNew(int projectid) {
+    return null;
+  }
+
+  @Override
+  public Map<Integer, String> getIDToFL(int projid) {
+    return null;
+  }
+
+  @Override
+  public IRefResultDAO getRefResultDAO() {
+    return null;
+  }
+
+  @Override
+  public boolean updateProjectChinese(int old, int newprojid, List<Integer> justTheseIDs) {
+    return false;
+  }
+
+  @Override
+  public SlickExercise toSlick(Exercise shared, int projectID, Collection<String> typeOrder) {
+    return null;
+  }
+
+  @Override
+  public SlickExercise toSlick(CommonExercise shared, boolean isOverride, int projectID, int importUserIfNotSpecified, boolean isContext, Collection<String> typeOrder) {
+    return null;
+  }
+
+  @Override
+  public void addBulk(List<SlickExercise> bulk) {
+
+  }
+
+  @Override
+  public int insert(SlickExercise UserExercise) {
+    return 0;
+  }
+
+  @Override
+  public List<CommonExercise> getByProject(List<String> typeOrder, ISection<CommonExercise> sectionHelper, Project theProject, Map<Integer, ExerciseAttribute> allByProject, Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
+    return null;
+  }
+
+  @Override
+  public List<CommonExercise> getContextByProject(List<String> typeOrder, ISection<CommonExercise> sectionHelper, Project lookup, Map<Integer, ExerciseAttribute> allByProject, Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
+    return null;
+  }
+
+  @Override
+  public ExerciseDAOWrapper getDao() {
+    return null;
+  }
+
+  @Override
+  public Map<Integer, SlickExercise> getDominoToSlickEx(int projectid) {
+    return null;
+  }
+
+  @Override
+  public IAttributeJoin getExerciseAttributeJoin() {
+    return null;
+  }
+
+  @Override
+  public boolean isProjectEmpty(int projectid) {
+    return false;
+  }
+
   private static final String UNIT = "unit";
+
+  @Override
+  public IAttribute getExerciseAttribute() {
+    return null;
+  }
+
   private static final String LESSON = "lesson";
 
   @Override
@@ -146,9 +237,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return null;
   }
 
-  ;
-
-
   /**
    * TODO : Consider how to add multiple context sentences?
    * <p>
@@ -190,7 +278,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       statement.setLong(i++, userExercise.getCreator());
 
       if (userExercise.hasContext()) {
-        CommonExercise next = userExercise.getDirectlyRelated().iterator().next();
+        CommonShell next = userExercise.getDirectlyRelated().iterator().next();
         statement.setString(i++, fixSingleQuote(next.getForeignLanguage()));
         statement.setString(i++, fixSingleQuote(next.getEnglish()));
       } else {
@@ -267,11 +355,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return -1;
   }
 
-  @Override
-  public void addContextToExercise(int exid, int contextid, int projid) {
-
-  }
-
   private String fixSingleQuote(String s) {
     return s == null ? "" : s.replaceAll("'", "''");
   }
@@ -309,7 +392,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     createIndex(database, EXERCISEID, USEREXERCISE);
   }
 
-  int c = 0;
+  final int c = 0;
 
   /**
    * Handles both userexercise items and predefined exercises.
@@ -484,19 +567,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return -1;
   }
 
-/*
-  @Override
-  public Collection<CommonExercise> getAllUserExercises(int projid) {
-    return getCommonExercises(GET_ALL_SQL);
-  }
-*/
-
-  @Override
-  public int getParentForContextID(int contextID) {
-    return 0;
-  }
-
-
   /**
    * @return
    * @seex #setAudioDAO(AudioDAO)
@@ -548,6 +618,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
     return getCommonExercises(sql);
+  }
+
+  @Override
+  public List<SlickExercise> getExercisesByIDs(Collection<Integer> exids) {
+    return null;
   }
 
   @Override
@@ -716,12 +791,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
       logException(e);
       return false;
     }
-
-  }
-
-  @Override
-  public int addAttribute(int projid, long now, int userid, ExerciseAttribute attribute) {
-    return 0;
   }
 
   @Override
@@ -731,12 +800,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   @Override
   public void deleteForProject(int projID) {
-
-  }
-
-  @Override
-  public int deleteRelated(int related) {
-    return 0;
   }
 
   private void addColumnToTable(Connection connection) throws SQLException {

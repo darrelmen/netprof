@@ -41,7 +41,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class TrieTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(TrieTest.class);
@@ -54,7 +56,7 @@ public class TrieTest extends BaseTest {
     e.setForeignLanguage("soemthing korean");
     exercises.add(e);
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
-    ExerciseTrie<CommonExercise> korean = new ExerciseTrie<>(exercises, "korean", smallVocabDecoder, true);
+    ExerciseTrie<CommonExercise> korean = new ExerciseTrie<>(exercises, "korean", smallVocabDecoder, true, false);
 
     testAll(test,korean);
     testAll("habit custom", korean);

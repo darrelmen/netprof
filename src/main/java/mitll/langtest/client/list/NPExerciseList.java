@@ -36,8 +36,8 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -48,12 +48,12 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/5/16.
  */
-public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExercise> {
+public class NPExerciseList<T extends CommonShell, U extends HasID> extends HistoryExerciseList<T, U> {
   private Logger logger = Logger.getLogger("NPExerciseList");
   private final int pageSize;
 
   public NPExerciseList(Panel currentExerciseVPanel, ExerciseController controller,
-                           ListOptions listOptions, int pageSize) {
+                        ListOptions listOptions, int pageSize) {
     super(currentExerciseVPanel, controller, listOptions);
     this.pageSize = pageSize;
   }
@@ -81,12 +81,10 @@ public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExerc
    * @return
    * @see mitll.langtest.client.list.PagingExerciseList#addComponents
    */
-  protected ClickablePagingContainer<CommonShell> makePagingContainer() {
-    final PagingExerciseList<CommonShell, CommonExercise> outer = this;
+  protected ClickablePagingContainer<T> makePagingContainer() {
     if (logger == null) {
       logger = Logger.getLogger("NPExerciseList");
     }
-
 /*
     logger.info("makePagingContainer : for" +
         "\n\tinstance " + getInstance() +
@@ -96,7 +94,7 @@ public class NPExerciseList extends HistoryExerciseList<CommonShell, CommonExerc
     boolean isRecorder = getActivityType() == ActivityType.RECORDER;
     final boolean showFirstNotCompleted = listOptions.isShowFirstNotCompleted();
 
-    pagingContainer = new NPExerciseListContainer(this, isRecorder, showFirstNotCompleted, outer);
+    pagingContainer = new NPExerciseListContainer<>(this, isRecorder, showFirstNotCompleted);
     return pagingContainer;
   }
 

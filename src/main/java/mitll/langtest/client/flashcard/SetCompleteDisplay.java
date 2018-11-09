@@ -33,8 +33,6 @@
 package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
-import org.apache.xpath.operations.Bool;
 
 import java.util.List;
 

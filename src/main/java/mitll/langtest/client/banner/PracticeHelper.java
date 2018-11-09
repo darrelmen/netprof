@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.IViewContaner;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -45,8 +44,9 @@ import mitll.langtest.client.flashcard.HidePolyglotFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
 
@@ -56,25 +56,23 @@ import mitll.langtest.shared.project.ProjectType;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/4/16.
  */
-class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise> {
+class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends SimpleChapterNPFHelper<T, U> {
   // private final Logger logger = Logger.getLogger("PracticeHelper");
-  private static final String PRACTICE = "practice";
 
-  StatsFlashcardFactory<CommonShell, CommonExercise> statsFlashcardFactory;
-  PolyglotFlashcardFactory<CommonShell, CommonExercise> polyglotFlashcardFactory = null;
+  StatsFlashcardFactory<T, U> statsFlashcardFactory;
+  PolyglotFlashcardFactory<T, U> polyglotFlashcardFactory = null;
   Widget outerBottomRow;
   private PolyglotDialog.MODE_CHOICE mode;
-  private PolyglotDialog.PROMPT_CHOICE promptChoice;
   private INavigation navigation;
+  private final INavigation.VIEWS instance;
 
   /**
    * @param controller
-   * @param viewContaner
-   * @param myView
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  PracticeHelper(ExerciseController controller, IViewContaner viewContaner, INavigation.VIEWS myView) {
+  PracticeHelper(ExerciseController controller, INavigation.VIEWS instance) {
     super(controller);
+    this.instance = instance;
   }
 
   /**
@@ -83,12 +81,12 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
    * @see SimpleChapterNPFHelper.MyFlexListLayout#getFactory
    */
   @Override
-  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactory(PagingExerciseList<CommonShell, CommonExercise> exerciseList) {
+  protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
     if (controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT) {
-      polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, PRACTICE);
+      polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, instance);
       statsFlashcardFactory = polyglotFlashcardFactory;
     } else {
-      statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList);
+      statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, instance);
     }
 
     statsFlashcardFactory.setContentPanel(outerBottomRow);
@@ -100,13 +98,18 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
    * @return
    */
   @Override
-  protected FlexListLayout<CommonShell, CommonExercise> getMyListLayout(SimpleChapterNPFHelper<CommonShell, CommonExercise> outer) {
-    return new MyFlexListLayout<CommonShell, CommonExercise>(controller, outer) {
+  protected FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer) {
+    return new MyFlexListLayout<T, U>(controller, outer) {
       @Override
-      protected PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(Panel topRow,
-                                                                                 Panel currentExercisePanel,
-                                                                                 String instanceName, DivWidget listHeader, DivWidget footer) {
-        return new PracticeFacetExerciseList(controller, PracticeHelper.this, topRow, currentExercisePanel, instanceName, listHeader);
+      protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
+                                                          Panel currentExercisePanel,
+                                                          INavigation.VIEWS instanceName,
+                                                          DivWidget listHeader,
+                                                          DivWidget footer) {
+        return new PracticeFacetExerciseList(
+            topRow, currentExercisePanel, controller,
+            new ListOptions().setInstance(instanceName), listHeader, instanceName, PracticeHelper.this
+        );
       }
 
       @Override
@@ -114,14 +117,11 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
         bottomRow.addStyleName("centerPractice");
         outerBottomRow = bottomRow;
       }
-
-
     };
   }
 
-  void setMode(PolyglotDialog.MODE_CHOICE mode, PolyglotDialog.PROMPT_CHOICE promptChoice) {
+  void setMode(PolyglotDialog.MODE_CHOICE mode) {
     this.mode = mode;
-    this.promptChoice = promptChoice;
     if (polyglotFlashcardFactory != null) {
       polyglotFlashcardFactory.setMode(mode);
     }
@@ -135,20 +135,16 @@ class PracticeHelper extends SimpleChapterNPFHelper<CommonShell, CommonExercise>
     this.navigation = navigation;
   }
 
-  StatsFlashcardFactory<CommonShell, CommonExercise> getStatsFlashcardFactory() {
+  StatsFlashcardFactory<T, U> getStatsFlashcardFactory() {
     return statsFlashcardFactory;
   }
 
-  PolyglotFlashcardFactory<CommonShell, CommonExercise> getPolyglotFlashcardFactory() {
+  PolyglotFlashcardFactory<T, U> getPolyglotFlashcardFactory() {
     return polyglotFlashcardFactory;
   }
 
   public PolyglotDialog.MODE_CHOICE getMode() {
     return mode;
-  }
-
-  PolyglotDialog.PROMPT_CHOICE getPromptChoice() {
-    return promptChoice;
   }
 
   public INavigation getNavigation() {

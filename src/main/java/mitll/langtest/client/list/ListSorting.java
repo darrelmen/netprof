@@ -1,8 +1,12 @@
 package mitll.langtest.client.list;
 
 import com.github.gwtbootstrap.client.ui.ListBox;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.Scored;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +19,7 @@ import java.util.logging.Logger;
  * TODO : don't do sorting here on text
  * Created by go22670 on 3/22/17.
  */
-class ListSorting<T extends CommonShell, U extends Shell> {
+class ListSorting<T extends CommonShell & Scored, U extends HasID> {
   private final Logger logger = Logger.getLogger("ListSorting");
 
   private static final String LANG_ASC = "langASC";
@@ -23,11 +27,11 @@ class ListSorting<T extends CommonShell, U extends Shell> {
 
   private static final String ASCENDING = "ascending";
   private static final String DESCENDING = "descending";
-  private static final String LIST_BOX_SETTING = "listBoxSetting";
 
   private final PagingExerciseList<T, U> exerciseList;
   private final String locale;
 
+  private static final String NATURAL_ORDER = "Natural Order";
   private static final String ENGLISH_ASC = "English : A-Z";
   private static final String MEANING_ASC = "Meaning : A-Z";
   private static final String ENGLISH_DSC = "English : Z-A";
@@ -39,18 +43,28 @@ class ListSorting<T extends CommonShell, U extends Shell> {
   private static final String SCORE_LOW_TO_HIGH = "Score : low to high";
   private static final String SCORE_DSC = "Score : high to low";
   private static final String SHUFFLE = "Shuffle";
+  private static final String LIST_BOX_SETTING = "listBoxSetting";
+
   private String language;
+  private Language languageInfo;
+  private final String keyForSorting;
+
   private static final boolean DEBUG = false;
 
   /**
    * @param exerciseList
+   * @param view
    * @see FacetExerciseList#addSortBox
    */
-  ListSorting(PagingExerciseList<T, U> exerciseList) {
+  ListSorting(PagingExerciseList<T, U> exerciseList, INavigation.VIEWS view) {
     this.exerciseList = exerciseList;
+    keyForSorting = LIST_BOX_SETTING + "_" + view.toString();
+
+  //  logger.info("ListSorting: key " + keyForSorting);
     ProjectStartupInfo projectStartupInfo = exerciseList.controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
       language = exerciseList.controller.getLanguage();
+      languageInfo = exerciseList.controller.getLanguageInfo();
     }
     locale = projectStartupInfo == null ? "" : projectStartupInfo.getLocale();
   }
@@ -63,7 +77,8 @@ class ListSorting<T extends CommonShell, U extends Shell> {
     ListBox w1 = new ListBox();
 
     if (language != null) {
-      boolean isEnglish = language.equalsIgnoreCase("English");
+      boolean isEnglish = languageInfo == Language.ENGLISH;
+      w1.addItem(NATURAL_ORDER);
       w1.addItem(isEnglish ? MEANING_ASC : ENGLISH_ASC);
       w1.addItem(isEnglish ? MEANING_DSC : ENGLISH_DSC);
       String langASC = getLangASC(language, ASCENDING);
@@ -92,7 +107,7 @@ class ListSorting<T extends CommonShell, U extends Shell> {
    * @param langDSC
    */
   private void makeDropDownReflectStoredValue(ListBox w1, String langASC, String langDSC) {
-    String value = exerciseList.controller.getStorage().getValue(LIST_BOX_SETTING);
+    String value = getStoredValue();
 
     //   logger.info("makeDropDownReflectStoredValue value is " + value);
     if (!value.isEmpty()) {
@@ -145,11 +160,26 @@ class ListSorting<T extends CommonShell, U extends Shell> {
     } else if (toStore.equalsIgnoreCase(langDSC)) {
       toStore = LANG_DSC;
     }
-    exerciseList.controller.getStorage().storeValue(LIST_BOX_SETTING, toStore);
+    storeValue(toStore);
     if (DEBUG) logger.info("START onChange Sort by " + selectedValue + " to sort is null ");
 
     sortByValue(null, selectedValue, langASC, langDSC);
     if (DEBUG) logger.info("END   onChange Sort by " + selectedValue + " to sort is null ");
+  }
+
+  private void storeValue(String toStore) {
+    if (DEBUG)  logger.info("store " + keyForSorting + " = " + toStore);
+    getStorage().storeValue(keyForSorting, toStore);
+  }
+
+  private String getStoredValue() {
+    String value = getStorage().getValue(keyForSorting);
+    if (DEBUG) logger.info("get   " + keyForSorting + " = " + value);
+    return value;
+  }
+
+  private KeyStorage getStorage() {
+    return exerciseList.controller.getStorage();
   }
 
   /**
@@ -166,6 +196,8 @@ class ListSorting<T extends CommonShell, U extends Shell> {
       sortBy(toSort, (o1, o2) -> compareShells(o1, o2, compPhones(o1, o2)));
     } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
       sortBy(toSort, (o1, o2) -> compareShells(o1, o2, -1 * compPhones(o1, o2)));
+    } else if (selectedValue.equals(NATURAL_ORDER)) {
+      sortBy(toSort, null);
     } else if (selectedValue.equals(ENGLISH_ASC)) {
       sortBy(toSort, this::compEnglish);
     } else if (selectedValue.equals(ENGLISH_DSC)) {
@@ -195,7 +227,7 @@ class ListSorting<T extends CommonShell, U extends Shell> {
     }
   }
 
-  private Random random = new Random();
+  private final Random random = new Random();
 
   private int compRand(T o1, T o2) {
     int i = random.nextInt(2);
@@ -217,7 +249,8 @@ class ListSorting<T extends CommonShell, U extends Shell> {
       return 0;
     } else {
 //    if (rawScore == -1 && rawScore2 -)
-//    logger.info("o1 " +o1.getID() + " " + rawScore + " vs " + o2.getID() + " " + rawScore2);
+   //  logger.info("compareScores o1 " +o1.getID() + " " + rawScore1 + " vs " + o2.getID() + " " + rawScore2);
+
       if (rawScore1 == -1 && rawScore2 == 0) return +1;
       else if (rawScore1 == 0 && rawScore2 == -1) return -1;
       else return Integer.compare(rawScore1, rawScore2);
@@ -238,8 +271,8 @@ class ListSorting<T extends CommonShell, U extends Shell> {
   }
 
   private int compPhones(CommonShell o1, CommonShell o2) {
-    if (o1.getNumPhones() == 0) logger.warning("1 no phones for " + o1.getID());
-    if (o2.getNumPhones() == 0) logger.warning("2 no phones for " + o2.getID());
+    if (o1.getNumPhones() == 0) logger.info("1 no phones for " + o1.getID());
+    if (o2.getNumPhones() == 0) logger.info("2 no phones for " + o2.getID());
     return Integer.compare(o1.getNumPhones(), o2.getNumPhones());
   }
 

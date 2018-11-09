@@ -42,6 +42,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.DBConnection;
@@ -58,6 +59,8 @@ import scala.Tuple2;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   private static final Logger logger = LogManager.getLogger(SlickResultDAO.class);
@@ -83,16 +86,16 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   /**
-   * @see DatabaseImpl#updateRecordings
    * @param rid
    * @param newprojid
    * @param newEXID
    * @return
+   * @see DatabaseImpl#updateRecordings
    */
   public boolean updateProjectAndEx(int rid, int newprojid, int newEXID) {
     return dao.updateProjectAndEx(rid, newprojid, newEXID) > 0;
   }
-  
+
   public int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID) {
     List<SlickResult> defResult = dao.getAllByProject(projid);
 
@@ -203,7 +206,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
         slick.withflash(),
         slick.dynamicrange(),
         slick.validity(),
-        slick.model());
+        "");
   }
 
   private MonitorResult fromSlickToMonitorResult(SlickResult slick) {
@@ -337,12 +340,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @param language
    * @return
    */
-  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> ids, String language) {
+  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> ids, Language language) {
     Map<Integer, CorrectAndScore> exidToMaxScoreEver = new HashMap<>(ids.size());
 
     getResultsForExIDInForUserEasy(ids, userid, language)
         .stream()
-        .collect(Collectors.groupingBy(CorrectAndScore::getExid))
+        .collect(groupingBy(CorrectAndScore::getExid))
         .forEach((k, v) -> exidToMaxScoreEver.put(k,
             v
                 .stream()
@@ -364,31 +367,27 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @return
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language) {
     return getResultsForExIDInForUserEasy(ids, userid, language);
   }
 
   /**
-   * @paramx ignoredSession
    * @param ids
    * @param userid
    * @param language
    * @return
+   * @paramx ignoredSession
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, String language) {
+  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language) {
     return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids), language);
   }
 
-
-/*
-
   @Override
-  List<CorrectAndScore> getResultsForExIDIn(Collection<Integer> ids, String language) {
-    return getCorrectAndScores(dao.correctAndScoreWhere(ids, true), language);
+  public CorrectAndScore getCorrectAndScoreForResult(int id, Language language) {
+    List<CorrectAndScore> correctAndScores = getCorrectAndScores(dao.correctAndScoreByID(id), language);
+    return correctAndScores.isEmpty() ? null : correctAndScores.get(0);
   }
-
-*/
 
   @Override
   public int getNumResults(int projid) {
@@ -525,9 +524,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @param language              so we can fix the file path
    * @return
    */
-  private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, String language) {
+  private List<CorrectAndScore> getCorrectAndScores(Collection<SlickCorrectAndScore> slickCorrectAndScores, Language language) {
     List<CorrectAndScore> cs = new ArrayList<>(slickCorrectAndScores.size());
-    String relPrefix = database.getRelPrefix(language);
+    String relPrefix = database.getRelPrefix(language.getLanguage());
     slickCorrectAndScores
         .forEach(slickCorrectAndScore -> cs.add(fromSlickCorrectAndScoreWithRelPath(slickCorrectAndScore, relPrefix, language)));
     return cs;
@@ -537,7 +536,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   @NotNull
   private CorrectAndScore fromSlickCorrectAndScoreWithRelPath(SlickCorrectAndScore cs,
                                                               String relPrefix,
-                                                              String language) {
+                                                              Language language) {
     String path = cs.path();
 
 //    boolean isLegacy = path.startsWith("answers");
@@ -549,7 +548,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
 
     String json = cs.json();
-    CorrectAndScore correctAndScore = new CorrectAndScore(cs.id(), cs.userid(), cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
+    CorrectAndScore correctAndScore = new CorrectAndScore(cs.exerciseid(), cs.correct(), cs.pronscore(), cs.modified(),
         trimPathForWebPage2(filePath), json);
 
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = new ParseResultJson(serverProps, language).readFromJSON(json);
@@ -630,6 +629,54 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return dao.perfForUser(userid, projid);
   }
 
+  /**
+   * All sessions for this user and dialog
+   *
+   * @param userid
+   * @param dialogID
+   * @return
+   */
+  public Collection<SlickPerfResult> getPerfForUserInDialog(int userid, int dialogID) {
+    return dao.perfByUserInDialog(userid, dialogID);
+  }
+
+  public Collection<SlickPerfResult> getPerfForDialog(int dialogID) {
+    return dao.perfForDialog(dialogID);
+  }
+
+  /**
+   * Just this one dialog session, for the moment.
+   *
+   * @param dialogsessionid
+   * @return
+   */
+  public Collection<SlickPerfResult> getPerfForDialogSession(int dialogsessionid) {
+    Collection<SlickPerfResult> slickPerfResults = dao.perfByDialogSession(dialogsessionid);
+    logger.info("getPerfForDialogSession for " + dialogsessionid);
+
+    slickPerfResults.forEach(slickPerfResult -> logger.info("perf " + slickPerfResult.id() + " by " + slickPerfResult.userid() + " @ "
+        + slickPerfResult.modified() + " ex " + slickPerfResult.exid() + " answer " + slickPerfResult.answer()));
+
+    return slickPerfResults;
+  }
+
+  @Override
+  public List<SlickPerfResult> getLatestResultsForDialogSession(int dialogSessionID) {
+    Map<Integer, List<SlickPerfResult>> collect = getPerfForDialogSession(dialogSessionID).stream().collect(groupingBy(SlickPerfResult::exid));
+
+    List<SlickPerfResult> perfResults = new ArrayList<>();
+    collect.values().forEach(perfs -> {
+      Optional<SlickPerfResult> max = perfs
+          .stream()
+          .filter(p -> p.pronscore() > 0)
+          .max(Comparator.comparingLong(o -> o.modified().getTime()));
+      max.ifPresent(perfResults::add);
+    });
+    perfResults.sort(Comparator.comparingLong(o -> o.modified().getTime()));
+
+    return perfResults;
+  }
+
   public Collection<SlickPerfResult> getPerfForUserOnList(int userid, int listid) {
     Collection<SlickPerfResult> slickPerfResults = dao.perfForUserOnList(userid, listid);
     List<Integer> unique = new ArrayList<>();
@@ -646,6 +693,10 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     );
 
     return slickPerfResults;
+  }
+
+  public Map<Integer, String> getResultIDToJSON(int projid) {
+    return dao.idToJSON(projid);
   }
 
   public Collection<Integer> getPracticedByUser(int userid, int projid) {

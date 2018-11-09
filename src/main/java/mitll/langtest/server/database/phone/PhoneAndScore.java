@@ -34,8 +34,6 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.shared.analysis.WordAndScore;
 
-import java.util.Map;
-
 import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
 
 /**
@@ -47,9 +45,9 @@ import static mitll.langtest.shared.analysis.SimpleTimeAndScore.SCALE;
  * @since 10/26/15.
  */
 public class PhoneAndScore implements Comparable<PhoneAndScore> {
-  private long timestamp;
-  private int pronScore;
-  private long sessionStart;
+  private final long timestamp;
+  private final int pronScore;
+  private final long sessionStart;
   private WordAndScore wordAndScore;
 
   /**

@@ -14,6 +14,7 @@ import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.PhoneSummary;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
@@ -51,7 +52,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   @Override
-  public PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids, Project project) {
+  public PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids) {
     return null;
   }
 
@@ -61,7 +62,8 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   @Override
-  public void deleteForProject(int projID) {
+  public int deleteForProject(int projID) {
+    return 0;
   }
 
   @Override
@@ -177,7 +179,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @throws SQLException
    * @seex Analysis#getPhonesForUser
    */
-  @Override
+ /* @Override
   public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project) {
     try {
       return getPhoneReport(getResultIDJoinSQL(userid, ids), true, false);
@@ -186,7 +188,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       return new PhoneReport();
     }
   }
-
+*/
   @Override
   public PhoneReport getWorstPhonesForResultsForPhone(int userid, Collection<Integer> ids, Project project, String phone, long from, long to) {
     return null;
@@ -301,7 +303,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 //            (int)rid, phone, seq, phoneScore, database.getLanguage());
 
         if (addTranscript) {
-          addTranscript(stringToMap, scoreJson, wordAndScore, "unknown");
+          addTranscript(stringToMap, scoreJson, wordAndScore, Language.UNKNOWN);
         }
       } catch (NumberFormatException e) {
         logger.warn("got " + e + " for " + exid);
@@ -366,6 +368,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * For old h2 world we don't have phone duration.
    *
    * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyPhone
    */
   public Collection<Phone> getAll(int projid) {
     Connection connection = getConnection();

@@ -32,6 +32,7 @@
 
 package mitll.langtest.client.flashcard;
 
+import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 
 /**
@@ -43,7 +44,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 public interface AudioAnswerListener {
   void postedAudio();
   /**
-   * @see FlashcardRecordButtonPanel#receivedAudioAnswer
+   * @see RecordButtonPanel#receivedAudioAnswer
    * @param result
    */
   void receivedAudioAnswer(AudioAnswer result);

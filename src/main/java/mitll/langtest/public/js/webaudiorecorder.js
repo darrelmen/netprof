@@ -40,10 +40,12 @@ var rememberedInput;
 var allZero;
 var mics = {};
 
+var start = new Date().getTime();
+
 // called from initWebAudio
 function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
-    // __log('Media stream created.');
+    __log('Media stream created : ' + input);
 
     recorder = new Recorder(input);
 //    __log('Recorder initialised.');
@@ -51,6 +53,16 @@ function startUserMedia(stream) {
     rememberedInput = input;
     webAudioMicAvailable();
     document.addEventListener('webkitvisibilitychange', onVisibilityChange);
+
+    /*    if (audio_context) {
+            __log('webaudiorecorder.startUserMedia : state = ' +  audio_context.state);
+
+            //} && audio_context.state === 'running')
+            // {
+            audio_context.suspend().then(function () {
+                __log('webaudiorecorder.startUserMedia suspended recording...');
+            });
+        }*/
 }
 
 // if the user goes to another tab or changes focus, stop recording.
@@ -68,15 +80,28 @@ function onVisibilityChange() {
     }
 }
 
-var start = new Date().getTime();
-
 // fix for bug where chrome prevents recording unless calls resume first
 // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
 function startRecording() {
     audio_context && audio_context.resume();
+
     recorder && recorder.clear();
     recorder && recorder.record();
-    //    __log('Start Recording. ' + recorder);
+
+    //  && audio_context.state === 'suspended'
+    /*     if (audio_context) {
+             __log('webaudiorecorder.startRecording 1 Start Recording. ' +  audio_context.state);
+
+             audio_context.resume().then(function () {
+                 __log('webaudiorecorder.startRecording resumed recording...');
+             //    rememberedInput.start();
+
+                 recorder && recorder.clear();
+                 recorder && recorder.record();
+             });
+         }*/
+
+    //  __log('webaudiorecorder.startRecording 1 Start Recording.  state =' + audio_context.state);
 }
 
 // called from FlashRecordPanelHeadless.stopRecording
@@ -84,15 +109,61 @@ function stopRecording() {
     recorder && recorder.stop();
     // audio_context && audio_context.suspend();
 
-    // __log('Stop Recording.');
+    /*   if (audio_context) {
+           __log('webaudiorecorder.stopRecording : state = ' + audio_context.state);
+
+           //} && audio_context.state === 'running')
+           // {
+           audio_context.suspend().then(function () {
+               __log('webaudiorecorder.stopRecording suspended recording...');
+            //   rememberedInput.stop();
+
+
+               recorder && recorder.clear();
+
+           });
+       }*/
+
+    __log('webaudiorecorder.stopRecording');
+
     //   var end = new Date().getTime();
     //  __log("duration " + (end-start));
     // get WAV from audio data blob
     grabWav();
 }
 
-function uint6ToB64(nUint6) {
+// see WebAudioRecorder.startStream
+function serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID, recordingSession) {
+    __log('webaudiorecorder.startStream ');
+    //  __log('webaudiorecorder.startStream calling recorder');
 
+    recorder && recorder.serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID, recordingSession,
+        function (blob) {
+            //      __log('startStream getStreamResponse.');
+            getStreamResponse(blob);
+        });
+}
+
+function serviceStopStream(abort) {
+    recorder && recorder.stop();
+    //recorder && recorder.clear();
+
+    /*    if (audio_context) {//} && audio_context.state === 'running') {
+            __log('webaudiorecorder.serviceStopStream state = ' + audio_context.state);
+            audio_context.suspend().then(function () {
+                __log('webaudiorecorder.serviceStopStream suspended recording...');
+
+                recorder && recorder.clear();
+            });
+        }*/
+
+    recorder && recorder.serviceStopStream(abort, function (blob) {
+        //  __log('serviceStopStream getStreamResponse.');
+        getStreamResponse(blob);
+    });
+}
+
+function uint6ToB64(nUint6) {
     return nUint6 < 26 ?
         nUint6 + 65
         : nUint6 < 52 ?
@@ -140,7 +211,7 @@ function grabWav() {
     recorder && recorder.exportMonoWAV(function (blob) {
         try {
             var reader = new FileReader();
-            //      __log("grabWav");
+            __log("grabWav");
 
             var arrayBuffer;
             reader.onloadend = function () {
@@ -148,7 +219,7 @@ function grabWav() {
 
                 var myArray = new Uint8Array(arrayBuffer);
 
-                //        __log("grabWav onloadend " + myArray.length);
+                __log("grabWav onloadend " + myArray.length);
 
                 var bytes = bytesToBase64(myArray);
                 getBase64(bytes);
@@ -212,18 +283,18 @@ function initWebAudio() {
                     });
             }
             else if (navigator.getMedia) {
-                //   __log('initWebAudio getMedia ...');
+                __log('initWebAudio (old) getMedia ...');
                 navigator.getMedia(
                     {audio: true},  // only a mic
                     startUserMedia, // when you get it
                     function (e) {
                         __log('initWebAudio (old) No live audio input: ' + e);
                         __log('initWebAudio (old) error: ' + e.name);
-                    if (e.name.startsWith("NotAllowedError")) {
-                        webAudioPermissionDenied();
-                    }
-                    webAudioMicNotAvailable();
-                });
+                        if (e.name.startsWith("NotAllowedError")) {
+                            webAudioPermissionDenied();
+                        }
+                        webAudioMicNotAvailable();
+                    });
             }
             else {
                 __log('initWebAudio getMedia null - no mic.');

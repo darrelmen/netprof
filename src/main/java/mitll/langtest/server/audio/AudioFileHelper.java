@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.audio;
 
+import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.server.*;
 import mitll.langtest.server.autocrt.AutoCRT;
@@ -39,21 +40,22 @@ import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
+import mitll.langtest.server.database.dialog.IDialogSessionDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.MutableExercise;
+import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
+import mitll.npdata.dao.SlickDialogSession;
+import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.lts.HTKDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,10 +65,13 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.Collator;
 import java.util.*;
 
-import static mitll.langtest.server.ScoreServlet.EXERCISE_TEXT;
+import static mitll.langtest.server.ScoreServlet.GetRequest.HASUSER;
+import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
+import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 
 /**
  * Created with IntelliJ IDEA.
@@ -89,18 +94,23 @@ public class AudioFileHelper implements AlignDecode {
   private static final String OGG = "ogg";
 
   private static final boolean DEBUG = false;
-  private static final String FRENCH = "french";
+
   private static final double MIN_SCORE_FOR_CORRECT_ALIGN = 0.35;
+  /**
+   * @see #getSession
+   */
   private static final String TEST_USER = "demo_";
   private static final String TEST_PASSWORD = "domino22";//"demo";
-//  /public static final long DAY = 24 * 60 * 60 * 1000L;
+  // public static final long DAY = 24 * 60 * 60 * 1000L;
+  private static final String COOKIE = "Cookie";
+  public static final String SCORE_SERVLET = "scoreServlet";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
   private final MP3Support mp3Support;
   private final Project project;
   private ASR asrScoring;
-  private ASRWebserviceScoring webserviceScoring;
+  //  private ASRWebserviceScoring webserviceScoring;
   private DecodeCorrectnessChecker decodeCorrectnessChecker;
 
   private AutoCRT autoCRT;
@@ -115,12 +125,13 @@ public class AudioFileHelper implements AlignDecode {
   private Map<String, Integer> phoneToCount;
 
   private final AudioConversion audioConversion;
-  private final String language;
+  private final Language language;
 
   private final EnsureAudioHelper ensureAudioHelper;
 
   private final boolean removeAccents;
   private long dictModified = 0L;
+  private HTKDictionary htkDictionary;
 
   /**
    * @param pathHelper
@@ -145,12 +156,13 @@ public class AudioFileHelper implements AlignDecode {
     this.mp3Support = new MP3Support(pathHelper);
     audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange());
 
-    this.language = project.getLanguage();
-    removeAccents = !language.equalsIgnoreCase(FRENCH);
-    makeASRScoring(project);
+    this.language = project.getLanguageEnum();
+    removeAccents = language != Language.FRENCH;
+    //hasModel = project.hasModel();
+    // makeASRScoring(project);
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
 
-    makeDecodeCorrectnessChecker();
+    //  makeDecodeCorrectnessChecker();
   }
 
   /**
@@ -162,31 +174,38 @@ public class AudioFileHelper implements AlignDecode {
    * @see Project#getPronunciationsFromDictOrLTS
    */
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, true, false, new ArrayList<>());
+    return getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, true, false, new ArrayList<>()).getDict();
   }
 
   public String getPronunciationsFromDictOrLTSFull(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, false, false, new ArrayList<>());
+    return getPronunciationLookup().getPronunciationsFromDictOrLTS(transcript, transliteration, false, false, new ArrayList<>()).getDict();
   }
 
   public int getNumPhonesFromDictionary(String transcript, String transliteration) {
-    return webserviceScoring.getPronunciationLookup().getNumPhonesFromDictionaryOrLTS(transcript, transliteration);
+    return getPronunciationLookup().getNumPhonesFromDictionaryOrLTS(transcript, transliteration);
   }
 
-  public String getLM(String fl, boolean removeAllAccents) {
-    return webserviceScoring.getLM(fl, removeAllAccents);
+  private IPronunciationLookup getPronunciationLookup() {
+    return getASRScoring().getPronunciationLookup();
   }
 
+//
+//  public String getLM(String fl, boolean removeAllAccents) {
+//    return asrScoring.getLM(fl, removeAllAccents);
+//  }
+
+/*
   public String getHydraTranscript(String fl) {
-    return webserviceScoring.getHydraTranscriptTest(fl);
+    return asrScoring.getHydraTranscriptTest(fl);
   }
+*/
 
   /**
    * @return
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getCollator
    */
   public Collator getCollator() {
-    return asrScoring.getCollator();
+    return getASRScoring().getCollator();
   }
 
   /**
@@ -197,7 +216,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see ProjectManagement#configureProject
    */
   public void checkLTSAndCountPhones(Collection<CommonExercise> exercises) {
-    if (asrScoring.isDictEmpty()) {
+    if (getASRScoring().isDictEmpty()) {
       logger.info("checkLTSAndCountPhones : not checking lts on exercises for " + project.getLanguage() + " " + project.getName() +
           " since dictionary is empty " +
           "and this is probably the znetprof instance which has no dictionaries.");
@@ -234,10 +253,11 @@ public class AudioFileHelper implements AlignDecode {
             }
 
             // check context sentences
-            for (CommonExercise context : exercise.getDirectlyRelated()) {
-              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, context, oov);
-              if (context.isSafeToDecode() != validForeignPhrase2) {
-                context.getMutable().setSafeToDecode(validForeignPhrase2);
+            for (ClientExercise context : exercise.getDirectlyRelated()) {
+              CommonExercise commonExercise = context.asCommon();
+              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, commonExercise, oov);
+              if (commonExercise.isSafeToDecode() != validForeignPhrase2) {
+                commonExercise.getMutable().setSafeToDecode(validForeignPhrase2);
               }
             }
           }
@@ -269,7 +289,7 @@ public class AudioFileHelper implements AlignDecode {
     if (!oov.isEmpty()) {
       try {
         String fileName = "Project_" + project.getLanguage() + "_" + project.getName() + ".txt";
-        File file = new File("/tmp/"+fileName);
+        File file = new File("/tmp/" + fileName);
         logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
         FileWriter oovTokens = new FileWriter(file);
         ArrayList<String> strings = new ArrayList<>(oov);
@@ -300,11 +320,10 @@ public class AudioFileHelper implements AlignDecode {
    */
   private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise, Set<String> oov) {
     boolean validForeignPhrase = exercise.isSafeToDecode();
-    if (isStale(exercise) || true
-    ) {
+    if (isStale(exercise)) {
       //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
       // int before = oov.size();
-      validForeignPhrase = asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration(), oov);
+      validForeignPhrase = getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration(), oov);
 //      if (oov.size() > before) {
 //        logger.info("isValidForeignPhrase " + project.getName() + " oov now " + oov.size());
 //      }
@@ -335,7 +354,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #checkLTSAndCountPhones
    */
   private <T extends CommonShell & MutableExercise> void countPhones(T exercise) {
-    PhoneInfo bagOfPhones = asrScoring.getBagOfPhones(exercise.getForeignLanguage());
+    PhoneInfo bagOfPhones = getASRScoring().getBagOfPhones(exercise.getForeignLanguage());
     List<String> firstPron = bagOfPhones.getFirstPron();
     exercise.setFirstPron(firstPron);
     for (String phone : firstPron) {
@@ -348,54 +367,58 @@ public class AudioFileHelper implements AlignDecode {
    * @param foreignLanguagePhrase
    * @param oov
    * @return
-   * @see mitll.langtest.server.services.ScoringServiceImpl#isValidForeignPhrase
+   * @seex mitll.langtest.server.services.ScoringServiceImpl#isValidForeignPhrase
+   * @see InDictFilter#isPhraseInDict
    */
   public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration, Set<String> oov) {
-    return asrScoring.validLTS(foreignLanguagePhrase, transliteration, oov);
+    return getASRScoring().validLTS(foreignLanguagePhrase, transliteration, oov);
   }
 
-//  private boolean isInDictOrLTS(CommonExercise exercise, Set<String> oov) {
-//    boolean b = asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration(), oov);
-////  logger.info("isInDictOrLTS " +project.getName()+ " oov now " +oov.size());
-//    return b;
-//  }
+/*  private boolean isInDictOrLTS(ClientExercise exercise) {
+    return getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
+  }*/
 
   public SmallVocabDecoder getSmallVocabDecoder() {
-    return asrScoring.getSmallVocabDecoder();
+    return getASRScoring().getSmallVocabDecoder();
   }
 
   /**
    * Write the wav file given the posted audio in base 64.
-   *
+   * <p>
    * Record an answer entry in the database.<br></br>
    * Write the posted data to a wav and an mp3 file (since all the browser audio works with mp3).
    * <p>
    * Client references:
    *
    * @param base64EncodedString generated by flash on the client
+   * @param fileInstead         - optional input file
    * @param exercise1           exerciseID within the plan - could be null if we're creating a new user exercise
    * @param options
    * @return URL to audio on server and if audio is valid (not too short, etc.)
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#stopRecording
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#stopRecording
+   * @see RecordButton.RecordingListener#stopRecording
+   * @see RecordButton.RecordingListener#stopRecording
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
+   * @see mitll.langtest.server.services.AudioServiceImpl#getAudioAnswer
    */
   public AudioAnswer writeAudioFile(String base64EncodedString,
-                                    CommonExercise exercise1,
+                                    File fileInstead,
+                                    ClientExercise exercise1,
                                     AudioContext audioContext,
                                     AnswerInfo.RecordingInfo recordingInfoInitial,
 
                                     DecoderOptions options) {
-    String wavPath = pathHelper.getAbsoluteToAnswer(audioContext);
+    String wavPath = fileInstead == null ? pathHelper.getAbsoluteToAnswer(audioContext) : fileInstead.getAbsolutePath();
     String relPath = pathHelper.getRelToAnswer(wavPath);
 
     File wavFile = new File(wavPath);
     String absolutePath = wavFile.getAbsolutePath();
     String path = wavFile.getPath();
 
-    AudioCheck.ValidityAndDur validity =
-        audioConversion.convertBase64ToAudioFiles(base64EncodedString, wavFile, options.isRefRecording(),
-            isQuietAudioOK());
+    long then = System.currentTimeMillis();
+
+    AudioCheck.ValidityAndDur validity = fileInstead == null ?
+        audioConversion.convertBase64ToAudioFiles(base64EncodedString, wavFile, options.isRefRecording(), isQuietAudioOK()) :
+        audioConversion.getValidityAndDur(fileInstead, options.isRefRecording(), isQuietAudioOK(), then);
 
     if (logger.isInfoEnabled()) {
       logger.info("writeAudioFile writing" +
@@ -411,7 +434,7 @@ public class AudioFileHelper implements AlignDecode {
 
     if (options.isRefRecording() && validity.isValid()) {
       // make sure there's a compressed version for later review.
-      new Thread(() -> ensureCompressed(exercise1, audioContext, wavPath), "ensureCompressed").start();
+      new Thread(() -> ensureCompressed(exercise1, audioContext, wavPath), "ensureCompressedAudio").start();
     }
 
     // remember who recorded this audio wavFile.
@@ -455,10 +478,10 @@ public class AudioFileHelper implements AlignDecode {
     project.addAnswerToUser(absolutePath, userid);
   }
 
-  private void ensureCompressed(CommonExercise exercise1, AudioContext audioContext, String wavPath) {
+  private void ensureCompressed(ClientExercise exercise1, AudioContext audioContext, String wavPath) {
     String actualPath =
         ensureAudioHelper.ensureCompressedAudio(audioContext.getUserid(), exercise1, wavPath,
-            audioContext.getAudioType(), language, new HashMap<>());
+            audioContext.getAudioType(), language, new HashMap<>(), true);
     logger.info("ensureCompressed wav path " + wavPath + " compressed actual " + actualPath);
   }
 
@@ -512,7 +535,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.scoring.JsonScoring#getAnswer
    */
   public AudioAnswer getAnswer(
-      CommonShell exercise,
+      ClientExercise exercise,
       AudioContext audioContext,
 
       String wavPath, File file,
@@ -523,7 +546,7 @@ public class AudioFileHelper implements AlignDecode {
       PretestScore pretestScore) {
     AudioCheck.ValidityAndDur validity = audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
 
-    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, true, "");
+    AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, "", "");
 
     return options.shouldDoDecoding() ?
         getAudioAnswerDecoding(exercise,
@@ -550,7 +573,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #getAnswer
    * @see #writeAudioFile
    */
-  private AudioAnswer getAudioAnswerDecoding(CommonShell exercise,
+  private AudioAnswer getAudioAnswerDecoding(ClientExercise exercise,
 
                                              AudioContext context,
                                              AnswerInfo.RecordingInfo recordingInfo,
@@ -570,14 +593,16 @@ public class AudioFileHelper implements AlignDecode {
         decoderOptions, context.getUserid());
 
     if (decoderOptions.isRecordInResults()) {
-      double maxMinRange = validity.getMaxMinRange();
+      double maxMinRange = validity.getDynamicRange();
       answer.setDynamicRange(maxMinRange);
       //  logger.info("min max " + maxMinRange + " answer " + answer);
       if (exercise != null) {
         answer.setTranscript(exercise.getForeignLanguage()); // TODO : necessary?
+        //answer.setNormTranscript(answer.getNormTranscript());
       }
       //  logger.info("getAudioAnswerDecoding recordInResults answer " + answer);// + " " + answer.getTranscript());
       recordInResults(context, recordingInfo, validity, answer);
+
     } else {
       answer.setTranscript(recordingInfo.getTranscript());
     }
@@ -589,21 +614,24 @@ public class AudioFileHelper implements AlignDecode {
                                AnswerInfo.RecordingInfo recordingInfo,
                                AudioCheck.ValidityAndDur validity,
                                AudioAnswer answer) {
-    int processDur = answer.getPretestScore() == null ? 0 : answer.getPretestScore().getProcessDur();
-
-    AnswerInfo infoOrig = new AnswerInfo(
-        context,
-        recordingInfo,
-        validity,
-        getModelsDir());
+    PretestScore pretestScore = answer.getPretestScore();
+    boolean hasScore = pretestScore != null;
+    int processDur = hasScore ? pretestScore.getProcessDur() : 0;
 
     AnswerInfo info = new AnswerInfo(
-        infoOrig,
+        new AnswerInfo(
+            context,
+            recordingInfo,
+            validity,
+            getModelsDir()),
 
         new AnswerInfo.ScoreInfo(answer.isCorrect(), (float) answer.getScore(),
             new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur), getModelsDir());
 
-    rememberAnswer(context.getProjid(), answer, info);
+    if (hasScore) {
+      info.setNormTranscript(pretestScore.getRecoSentence());
+    }
+    rememberAnswer(context.getProjid(), answer, info, context.getDialogSessionID());
   }
 
   /**
@@ -616,7 +644,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.decoder.RefResultDecoder#doDecode
    */
   public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, int userID, File absoluteFile) {
-    if (asrScoring.validLTS(exercise.getForeignLanguage(), exercise.getTransliteration(), new HashSet<>())) {
+    if (getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration(), new HashSet<>())) {
       decodeAndRemember(exercise, attribute, true, userID, absoluteFile);
     } else {
       logger.warn("decodeOneAttribute skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
@@ -632,7 +660,8 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper
    */
-  public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute, boolean doDecode, int userID, File absoluteFile) {
+  public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute,
+                                        boolean doDecode, int userID, File absoluteFile) {
     String audioRef = attribute.getAudioRef();
 
     if (DEBUG) {
@@ -647,7 +676,7 @@ public class AudioFileHelper implements AlignDecode {
 //    boolean doHydec = false;
     // Do alignment...
     if (absoluteFile == null) {
-      absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language);
+      absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language.getLanguage());
     }
     String absolutePath = absoluteFile.getAbsolutePath();
 
@@ -687,6 +716,8 @@ public class AudioFileHelper implements AlignDecode {
             exercise.getID(),
             precalcScores,
             false);
+
+    logger.info("decodeAndRemember : returning " + alignmentScore);
     DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore, false);
 
     // Do decoding, and record alignment info we just got in the database ...
@@ -793,7 +824,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private boolean isUsePhoneToDisplay() {
-    return serverProps.usePhoneToDisplay();
+    return serverProps.usePhoneToDisplay(project.getLanguageEnum());
   }
 
   private boolean isQuietAudioOK() {
@@ -837,7 +868,7 @@ public class AudioFileHelper implements AlignDecode {
     if (alignOutput.isValid()) {
       db.getRefResultDAO().addAnswer(user, exercise1.getProjectID(), exercise1.getID(),
           audioid,
-          validity.durationInMillis,
+          validity.getDurationInMillis(),
 
           decodeOutput.isCorrect(),
 
@@ -858,7 +889,7 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
-  private AudioAnswer getDecodeAnswer(CommonExercise exercise1,
+  private AudioAnswer getDecodeAnswer(ClientExercise exercise1,
                                       String wavPath,
                                       File file,
                                       long duration) {
@@ -895,8 +926,9 @@ public class AudioFileHelper implements AlignDecode {
    * @param pretestScore
    * @return
    * @see #getAnswer
+   * @see mitll.langtest.server.scoring.JsonScoring#getAnswer
    */
-  private AudioAnswer getAudioAnswerAlignment(CommonShell exercise,
+  private AudioAnswer getAudioAnswerAlignment(ClientExercise exercise,
 
                                               AudioContext context,
                                               AnswerInfo.RecordingInfo recordingInfo,
@@ -935,7 +967,9 @@ public class AudioFileHelper implements AlignDecode {
               new ScoreToJSON().getJsonFromAnswer(answer).toString(), processDur), getModelsDir());
 
       answer.setTranscript(exercise.getForeignLanguage());
-      rememberAnswer(info.getProjid(), answer, info);
+      answer.setNormTranscript(answer.getPretestScore().getRecoSentence());
+
+      rememberAnswer(info.getProjid(), answer, info, context.getDialogSessionID());
     }
     //logger.info("getAudioAnswerAlignment 2 answer " + answer);
     return answer;
@@ -949,16 +983,65 @@ public class AudioFileHelper implements AlignDecode {
    * @param projid
    * @param answer
    * @param info
+   * @param dialogSessionID
+   * @see #recordInResults
+   * @see #getAudioAnswerAlignment
    */
-  private void rememberAnswer(int projid, AudioAnswer answer, AnswerInfo info) {
+  private void rememberAnswer(int projid, AudioAnswer answer, AnswerInfo info, int dialogSessionID) {
     long timestamp = System.currentTimeMillis();
     int answerID = db.getAnswerDAO().addAnswer(info, timestamp);
     answer.setResultID(answerID);
     answer.setTimestamp(timestamp);
 
+    if (dialogSessionID > 0) {
+      new Thread(() -> {
+        db.getRelatedResultDAO().add(answerID, dialogSessionID);
+        updateDialogSessionWithAnswer(dialogSessionID, timestamp);
+      }, "rememberSessionInfo").start();
+    }
 
     // do this db write later
-    new Thread(() -> db.recordWordAndPhoneInfo(projid, answer, answerID)).start();
+    new Thread(() -> db.recordWordAndPhoneInfo(projid, answer, answerID), "recordWordAndPhoneInfo").start();
+  }
+
+  /**
+   * TODO : speaking rate.
+   *
+   * @param dialogSessionID
+   * @param timestamp
+   */
+  private void updateDialogSessionWithAnswer(int dialogSessionID, long timestamp) {
+    // find all the results for this session - group by exid, take the latest one in group
+    // then update the num answers, avg score, and maybe speaking rate?
+    // would have to find min, max of word scores for each result id...
+    List<SlickPerfResult> latestResultsForDialogSession = db.getResultDAO().getLatestResultsForDialogSession(dialogSessionID);
+    int size = latestResultsForDialogSession.size();
+    float num = size;
+    float total = 0F;
+    for (SlickPerfResult perfResult : latestResultsForDialogSession) {
+      total += perfResult.pronscore();
+    }
+
+    IDialogSessionDAO dialogSessionDAO = db.getDialogSessionDAO();
+    SlickDialogSession slickDialogSession = dialogSessionDAO.byID(dialogSessionID);
+    if (slickDialogSession == null) {
+      logger.warn("\n\n\nrememberAnswer nothing with " + dialogSessionID);
+    } else {
+      logger.info("now " + dialogSessionID + " num " + size + " score " + total);
+      dialogSessionDAO
+          .update(new SlickDialogSession(
+              slickDialogSession.id(),
+              slickDialogSession.userid(),
+              slickDialogSession.projid(),
+              slickDialogSession.dialogid(),
+              slickDialogSession.modified(),
+              new Timestamp(timestamp),
+              slickDialogSession.view(),
+              slickDialogSession.status(),
+              size,
+              total / num,
+              0F));
+    }
   }
 
   private boolean hasModel() {
@@ -999,7 +1082,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #getAudioAnswerDecoding
    */
   private AudioAnswer getAudioAnswer(int reqid,
-                                     CommonShell commonShell,
+                                     ClientExercise commonShell,
                                      String wavPath,
                                      File file,
                                      AudioCheck.ValidityAndDur validity,
@@ -1011,11 +1094,11 @@ public class AudioFileHelper implements AlignDecode {
         getAudioAnswer(
             commonShell,
             reqid, file, validity, url, decoderOptions, userID) :
-        new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, commonShell.getID());
+        new AudioAnswer(url, validity.getValidity(), reqid, validity.getDurationInMillis(), commonShell.getID());
   }
 
-  private PretestScore getEasyAlignment(CommonExercise exercise, String testAudioPath) {
-    DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(serverProps.usePhoneToDisplay());
+  private PretestScore getEasyAlignment(ClientExercise exercise, String testAudioPath) {
+    DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay());
     return getAlignmentScore(exercise, testAudioPath, options);
   }
 
@@ -1024,7 +1107,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #decodeOneAttribute(CommonExercise, AudioAttribute, int, File)
    */
 
-  private PretestScore getAlignmentScore(CommonExercise exercise, String testAudioPath, DecoderOptions options) {
+  private PretestScore getAlignmentScore(ClientExercise exercise, String testAudioPath, DecoderOptions options) {
     if (DEBUG) {
       logger.info("getAlignmentScore alignment " +
           "\n\texid    " + exercise.getID() +
@@ -1064,22 +1147,12 @@ public class AudioFileHelper implements AlignDecode {
                                           String transliteration,
                                           DecoderOptions options,
                                           PrecalcScores precalcScores) {
-    /*
-        List<String> unk = new ArrayList<>();
-    if (isMacOrWin()) {  // i.e. NOT using cool new jcodr webservice
-      unk.add(ASR.UNKNOWN_MODEL); // if  you don't include this dcodr will say : ERROR: word UNKNOWNMODEL is not in the dictionary!
-    }
-      String vocab = asrScoring.getUsedTokens(lmSentences, unk); // this is basically the transcript
-    logger.info("getASRScoreForAudio from" +
-        "\n\tlm sentences '" + lmSentences + "'" +
-        "\n\tto vocab '" + vocab + "'");
-*/
     String prefix = options.isUsePhoneToDisplay() ? "phoneToDisplay" : "";
-    String path = testAudioFile.getPath();
+    //String path = testAudioFile.getPath();
 
     String firstSentence = lmSentences.iterator().next();
 //      logger.info("getASRScoreForAudio audio file path is " + path + " " + firstSentence);
-    return getASRScoreForAudio(reqid, path, firstSentence, lmSentences, transliteration,
+    return getASRScoreForAudio(reqid, testAudioFile.getPath(), firstSentence, lmSentences, transliteration,
         DEFAULT, prefix, precalcScores,
         options, isKaldi());
   }
@@ -1137,8 +1210,6 @@ public class AudioFileHelper implements AlignDecode {
           logger.info("raw after   " + foreignLanguage);
         }
 */
-
-
         PrecalcScores precalcScores = getProxyScore(english, foreignLanguage, userid, theFile, hydraHost);
         return (precalcScores != null && precalcScores.isDidRunNormally()) ? precalcScores : null;
       } else {
@@ -1166,29 +1237,23 @@ public class AudioFileHelper implements AlignDecode {
                                       int userid,
                                       File theFile,
                                       String hydraHost) {
-    if (session == null) {
+    if (session == null || session.isEmpty()) {
       session = getSession(hydraHost, project.getID());
     }
-    HTTPClient httpClient = getHttpClient(hydraHost);
-    ScoreServlet.PostRequest requestToServer = ScoreServlet.PostRequest.ALIGN;
-    httpClient.addRequestProperty(ScoreServlet.REQUEST, requestToServer.toString());
-    httpClient.addRequestProperty(ScoreServlet.ENGLISH, english);
-    httpClient.addRequestProperty(EXERCISE_TEXT, new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
-    httpClient.addRequestProperty(ScoreServlet.LANGUAGE, getLanguage());
-    httpClient.addRequestProperty(ScoreServlet.USER, "" + userid);
-    httpClient.addRequestProperty(ScoreServlet.FULL, ScoreServlet.FULL);  // full json returned
+    HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, ScoreServlet.PostRequest.ALIGN);
 
     if (session != null) {
-//      logger.info("getProxyScore adding session " + session);
-      httpClient.addRequestProperty("Cookie", session);
+      logger.info("getProxyScore adding session '" + session +"'");
+      httpClient.addRequestProperty(COOKIE, session);
     }
 
     try {
       logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to " +
-          requestToServer +
-          "\n\teng '" + english + "'" +
-          "\n\tfl  '" + foreignLanguage + "'" +
-          (language.equalsIgnoreCase("Japanese") ? "\n\tsegmented '" + getSegmented(foreignLanguage) + "'" : "")
+          ScoreServlet.PostRequest.ALIGN +
+          "\n\teng     '" + english + "'" +
+          "\n\tsession '" + session + "'" +
+          "\n\tfl      '" + foreignLanguage + "'" +
+          (language == Language.JAPANESE ? "\n\tsegmented '" + getSegmented(foreignLanguage) + "'" : "")
       );
 
       {
@@ -1202,6 +1267,7 @@ public class AudioFileHelper implements AlignDecode {
 
       String json = httpClient.sendAndReceiveAndClose(theFile);
       logger.info("getProxyScore response " + json);
+
       return json.equals(MESSAGE_NO_SESSION) ? new PrecalcScores(serverProps, language) : new PrecalcScores(serverProps, json, language);
     } catch (IOException e) {
       logger.error("checkForWebservice got " + e);
@@ -1209,31 +1275,75 @@ public class AudioFileHelper implements AlignDecode {
     return null;
   }
 
-  private String getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
-    String s = getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents);
-    String cleaned = getSegmented(s); // segmentation method will filter out the UNK model
-    return asrScoring.getHydraDict(cleaned.trim(), "", possibleProns);
+  @NotNull
+  private HTTPClient getHttpClientForNetprofServer(String english,
+                                                   String foreignLanguage,
+                                                   int userid,
+                                                   String hydraHost,
+                                                   ScoreServlet.PostRequest requestToServer) {
+    boolean isDefault = project.getWebserviceHost().equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
+
+    HTTPClient httpClient = getHttpClient(hydraHost, isDefault ? "" : project.getWebserviceHost());
+    httpClient.addRequestProperty(REQUEST.toString(), requestToServer.toString());
+    httpClient.addRequestProperty(ENGLISH.toString(), english);
+    httpClient.addRequestProperty(EXERCISE_TEXT.toString(), new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
+    httpClient.addRequestProperty(LANGUAGE.toString(), getLanguage());
+    httpClient.addRequestProperty(USER.toString(), "" + userid);
+    httpClient.addRequestProperty(FULL.toString(), FULL.toString());  // full json returned
+    return httpClient;
   }
 
   @NotNull
-  private HTTPClient getHttpClient(String hydraHost) {
-    return new HTTPClient(hydraHost + "scoreServlet");
+  private HTTPClient getHttpClient(String hydraHost, String actualHydraHost) {
+    String url = hydraHost + SCORE_SERVLET;
+    if (!actualHydraHost.isEmpty()) url += File.separator + actualHydraHost;
+    return new HTTPClient(url);
   }
 
+  private TransNormDict getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
+    String s = getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents);
+    String cleaned = getSegmented(s); // segmentation method will filter out the UNK model
+    return getASRScoring().getHydraDict(cleaned.trim(), "", possibleProns);
+  }
+
+  /**
+   *
+   */
   private String session = null;
 
+  /**
+   * For laptop dev
+   * <p>
+   * Get session from netprof1-dev for demo/demo or equivalent.
+   * We just need some session.
+   *
+   * @param hydraHost
+   * @param projID
+   * @return
+   * @see #getProxyScore
+   */
   private String getSession(String hydraHost, int projID) {
     try {
-      HTTPClient httpClient = getHttpClient(hydraHost);
-      httpClient.addRequestProperty(ScoreServlet.REQUEST, ScoreServlet.GetRequest.HASUSER.toString());
-      httpClient.addRequestProperty(ScoreServlet.PROJID, "" + projID);
-      httpClient.addRequestProperty(ScoreServlet.USERID, TEST_USER);
-      httpClient.addRequestProperty(ScoreServlet.PASS, TEST_PASSWORD);
+      logger.info("getSession " +
+          "\n\thost   " + hydraHost +
+          "\n\tprojID " + projID +
+          "\n\tuser   " + TEST_USER+
+          "\n\tpass   " + TEST_PASSWORD
+      );
+
+      HTTPClient httpClient = getHttpClient(hydraHost, "");
+      httpClient.addRequestProperty(REQUEST.toString(), HASUSER.toString());
+      //httpClient.addRequestProperty(PROJID.toString(), "" + projID);
+      httpClient.addRequestProperty(USERID.toString(), TEST_USER);
+      httpClient.addRequestProperty(PASS.toString(), TEST_PASSWORD);
+
       String json = httpClient.sendAndReceiveCookie("");
+
       logger.info("getSession response " + json);
+
       return json;
     } catch (IOException e) {
-      logger.warn("Got " + e, e);
+      logger.warn("getSession Got " + e, e);
     }
     return "";
   }
@@ -1241,20 +1351,21 @@ public class AudioFileHelper implements AlignDecode {
   /**
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#isHydraRunning
+   * @see mitll.langtest.server.services.ScoringServiceImpl#isHydraRunning
    */
   public boolean isHydraAvailable() {
-    return webserviceScoring.isAvailable();
+    return getASRScoring().isAvailable();
   }
 
   public boolean isHydraAvailableCheckNow() {
-    return webserviceScoring.isAvailableCheckNow();
+    return getASRScoring().isAvailableCheckNow();
   }
 
   /**
    * @see mitll.langtest.server.services.ScoringServiceImpl#isHydraRunning
    */
   public void setAvailable() {
-    webserviceScoring.setAvailable();
+    getASRScoring().setAvailable();
   }
 
   /**
@@ -1309,7 +1420,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param options
    * @param kaldi
    * @return
-   * @see #getASRScoreForAudio(int, File, Collection, String, DecoderOptions, PrecalcScores)
+   * @seex #getASRScoreForAudio(int, String, String, String, ImageOptions, String, PrecalcScores, DecoderOptions)
    */
   private PretestScore getASRScoreForAudio(int reqid,
                                            String testAudioFile,
@@ -1333,6 +1444,7 @@ public class AudioFileHelper implements AlignDecode {
             (prefix.isEmpty() ? "" : " prefix " + prefix)
     );
 
+
     if (testAudioFile == null) {
       logger.warn("getASRScoreForAudio huh? " + getLanguage() + " no test audio file for '" + sentence + "'");
       return new PretestScore(); // very defensive
@@ -1345,7 +1457,7 @@ public class AudioFileHelper implements AlignDecode {
       String absolutePath = pathHelper.getAbsoluteAudioFile(testAudioFile).getAbsolutePath();
       File file = new File(absolutePath);
       if (!file.exists()) {
-        String relPrefix = db.getDatabase().getRelPrefix(language);
+        String relPrefix = db.getDatabase().getRelPrefix(language.getLanguage());
 
         if (!testAudioFile.startsWith(relPrefix)) {
           String webPageAudioRefWithPrefix = db.getDatabase().getWebPageAudioRefWithPrefix(relPrefix, testAudioFile);
@@ -1369,7 +1481,7 @@ public class AudioFileHelper implements AlignDecode {
             "\n\tnor      " + file.getAbsolutePath());
         return new PretestScore();
       } else {
-        logger.info("found " + testAudioFile + " at " + absolutePath);
+        logger.info("getASRScoreForAudio : found " + testAudioFile + " at " + absolutePath);
       }
     }
 
@@ -1391,7 +1503,7 @@ public class AudioFileHelper implements AlignDecode {
         testAudioDir, removeSuffix(testAudioName),
         sentence, lmSentences, transliteration,
 
-        pathHelper.getImageOutDir(language.toLowerCase()), imageOptions,
+        pathHelper.getImageOutDir(language.getLanguage()), imageOptions,
         shouldDoDecoding,
         options.isCanUseCache(), prefix,
         precalcScores,
@@ -1423,12 +1535,13 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @return
    */
+  @Deprecated
   private String getLanguage() {
-    return language;
+    return language.getLanguage();
   }
 
   private boolean isEnglish() {
-    return getLanguage().equalsIgnoreCase("English");
+    return language == Language.ENGLISH;
   }
 
   private String removeSuffix(String audioFile) {
@@ -1437,7 +1550,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * TODO : this whole approach is WAY TOO COMPLICATED - rework so it makes sense.
-   *
+   * <p>
    * Does decoding if doFlashcard is true.
    *
    * @param reqid
@@ -1446,16 +1559,16 @@ public class AudioFileHelper implements AlignDecode {
    * @param url
    * @param userID
    * @return AudioAnswer with decode info attached, if doFlashcard is true
-   * @see #getAudioAnswer(int, CommonShell, String, File, AudioCheck.ValidityAndDur, DecoderOptions, int)
+   * @see #getAudioAnswer(int, ClientExercise, String, File, AudioCheck.ValidityAndDur, DecoderOptions, int)
    */
-  private AudioAnswer getAudioAnswer(CommonShell exercise,
+  private AudioAnswer getAudioAnswer(ClientExercise exercise,
                                      int reqid,
                                      File file,
                                      AudioCheck.ValidityAndDur validity,
                                      String url,
                                      DecoderOptions decoderOptions,
                                      int userID) {
-    AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.durationInMillis, exercise.getID());
+    AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.getDurationInMillis(), exercise.getID());
     if (decoderOptions.shouldDoAlignment()) {
       PrecalcScores precalcScores =
           checkForWebservice(
@@ -1466,7 +1579,7 @@ public class AudioFileHelper implements AlignDecode {
               userID,
               file);
 
-      String phraseToDecode = decodeCorrectnessChecker.getPhraseToDecode(exercise.getForeignLanguage(), language);
+      String phraseToDecode = getChecker().getPhraseToDecode(exercise.getForeignLanguage(), language);
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
           file,
           Collections.singleton(phraseToDecode),
@@ -1493,7 +1606,7 @@ public class AudioFileHelper implements AlignDecode {
               userID,
               file);
 
-      PretestScore flashcardAnswer = decodeCorrectnessChecker.getDecodeScore(
+      PretestScore flashcardAnswer = getChecker().getDecodeScore(
           exercise,
           file,
           audioAnswer,
@@ -1525,12 +1638,16 @@ public class AudioFileHelper implements AlignDecode {
    * @see AlignDecode#getASRScoreForAudio
    */
   private ASR getASRScoring() {
-    return webserviceScoring;
+    makeASRScoring(project);
+    return asrScoring;
   }
 
   public void reloadScoring(Project project) {
-    webserviceScoring = null;
-    makeASRScoring(project);
+    if (asrScoring != null) {
+      //asrScoring = null;
+      makeASRScoring(project);
+    }
+//    else
   }
 
   /**
@@ -1539,12 +1656,15 @@ public class AudioFileHelper implements AlignDecode {
    */
   // TODO: gross
   private void makeASRScoring(Project project) {
-    if (webserviceScoring == null) {
+    if (asrScoring == null) {
+      logger.info("makeASRScoring for " + project.getName());
       String installPath = pathHelper.getInstallPath();
-      webserviceScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify,
-          readDictionary(project), project);
+      asrScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify,
+          readDictionary(project),
+          project);
     }
-    asrScoring = webserviceScoring;
+
+    //  asrScoring = webserviceScoring;
   }
 
   /**
@@ -1555,7 +1675,7 @@ public class AudioFileHelper implements AlignDecode {
   public void runHydra(String transcript) {
     List<String> lmSentences = new ArrayList<>();
     lmSentences.add(transcript);
-    webserviceScoring.runHydra("", transcript, "", lmSentences, "", true, 1000);
+    getASRScoring().runHydra("", transcript, "", lmSentences, "", true, 1000);
   }
 
   /**
@@ -1565,13 +1685,18 @@ public class AudioFileHelper implements AlignDecode {
    */
   @Nullable
   private HTKDictionary readDictionary(Project project) {
-    HTKDictionary htkDictionary = null;
-    try {
-      htkDictionary = makeDict(project.getModelsDir());
-    } catch (Exception e) {
-      logger.error("readDictionary : got " + e, e);
+    if (this.htkDictionary != null) {
+      return this.htkDictionary;
+    } else {
+      HTKDictionary htkDictionary = null;
+      try {
+        htkDictionary = makeDict(project.getModelsDir());
+        this.htkDictionary = htkDictionary;
+      } catch (Exception e) {
+        logger.error("readDictionary : got " + e, e);
+      }
+      return htkDictionary;
     }
-    return htkDictionary;
   }
 
   /**
@@ -1648,6 +1773,13 @@ public class AudioFileHelper implements AlignDecode {
     return autoCRT;
   }
 
+  private DecodeCorrectnessChecker getChecker() {
+    if (decodeCorrectnessChecker == null) {
+      makeDecodeCorrectnessChecker();
+    }
+    return decodeCorrectnessChecker;
+  }
+
   /**
    * @see #AudioFileHelper
    */
@@ -1661,11 +1793,11 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    */
   public boolean hasDict() {
-    return !asrScoring.isDictEmpty();
+    return !getASRScoring().isDictEmpty();
   }
 
   public ASR getASR() {
-    return asrScoring;
+    return getASRScoring();
   }
 
   /**
@@ -1710,6 +1842,6 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    */
   public String getSegmented(String transcript) {
-    return asrScoring.getSegmented(transcript);
+    return getASRScoring().getSegmented(transcript);
   }
 }

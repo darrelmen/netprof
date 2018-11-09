@@ -11,8 +11,12 @@ import java.util.logging.Logger;
  */
 public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegment {
   protected final Logger logger = Logger.getLogger("HighlightSegment");
+  /**
+   * @see #showHighlight
+   */
+  // private static final String DEFAULT_HIGHLIGHT = "#2196F3";
 
-  private static final String BLUE = "#2196F3";
+  private String highlightColor;
   private final int length;
   private String background = null;
   private boolean highlighted = false;
@@ -20,11 +24,13 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
 
   /**
    * @param content
+   * @param highlightColor
    * @seex mitll.langtest.client.scoring.ClickableWords#makeClickableText
    * @see mitll.langtest.client.scoring.WordTable#addPhonesBelowWord2
    */
-  public SimpleHighlightSegment(String content, int id) {
+  public SimpleHighlightSegment(String content, String highlightColor) {
     super(content);
+    this.highlightColor = highlightColor;
     //getElement().setId(content+"_s_"+id);
     this.length = content.length();
   }
@@ -34,9 +40,20 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
     return getElement().getId();
   }
 
-  public int getLength() {
-    return length;
-  }
+  @Override
+  public void setObscurable() {}
+
+  /**
+   * Not needed here.
+   */
+  @Override
+  public void obscureText() {}
+
+  /**
+   * Not needed here.
+   */
+  @Override
+  public void restoreText() {}
 
   @Override
   public void setBackground(String background) {
@@ -45,19 +62,24 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   }
 
   @Override
-  public void setBlue() {
+  public void showHighlight() {
     highlighted = true;
-    getElement().getStyle().setBackgroundColor(BLUE);
+    getElement().getStyle().setBackgroundColor(highlightColor);
   }
 
   @Override
-  public void clearBlue() {
+  public void clearHighlight() {
     highlighted = false;
     if (background == null) {
       getElement().getStyle().clearBackgroundColor();
     } else {
       getElement().getStyle().setBackgroundColor(background);
     }
+  }
+
+  @Override
+  public void checkClearHighlight() {
+    if (isHighlighted()) clearHighlight();
   }
 
   @Override
@@ -89,9 +111,7 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
 
   @Override
   public void setSouthScore(DivWidget widget) {
-    //setSouth(widget);
   }
-
 
   @Override
   public void clearSouth() {
@@ -100,6 +120,15 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   @Override
   public DivWidget getNorth() {
     return null;
+  }
+
+  @Override
+  public void setHighlightColor(String highlightColor) {
+    this.highlightColor = highlightColor;
+  }
+
+  public int getLength() {
+    return length;
   }
 
   public String toString() {

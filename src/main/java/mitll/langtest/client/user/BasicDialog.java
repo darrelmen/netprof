@@ -68,8 +68,9 @@ import static com.github.gwtbootstrap.client.ui.constants.Placement.TOP;
  * To change this template use File | Settings | File Templates.
  */
 public class BasicDialog {
-  private static final int DELAY_MILLIS = 3000;
   private final Logger logger = Logger.getLogger("BasicDialog");
+
+  private static final int DELAY_MILLIS = 3000;
 
   private static final boolean DEBUG = false;
   static final String TRY_AGAIN = "Try Again";
@@ -356,7 +357,7 @@ public class BasicDialog {
     markWarn(signUpEmail.group, signUpEmail.box, header, message);
   }
 
-  void markWarn(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
+  private void markWarn(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
     markError(dialectGroup, dialect, header, message, TOP, false, true, false);
   }
 
@@ -365,7 +366,7 @@ public class BasicDialog {
       logger.info("markError on '" + "" + "' with " + header + "/" + message + " grab " + grabFocus + " warng " + isWarning);
 
     if (isWarning) {
-      dialectGroup.setType(ControlGroupType.WARNING);
+      dialectGroup.setType(ControlGroupType.ERROR);
     } else {
       markErrorOnGroup(dialectGroup);
     }
@@ -423,7 +424,7 @@ public class BasicDialog {
     setupPopover(w, heading, message, placement, DELAY_MILLIS, false, requestFocus);
   }
 
-  protected Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, boolean isHTML, boolean requestFocus) {
+  private Popover setupPopover(Widget w, String heading, String message, Placement placement, int delayMillis, boolean isHTML, boolean requestFocus) {
     return setupPopover(w, heading, message, placement, delayMillis, new MyPopover(), isHTML, requestFocus);
   }
 

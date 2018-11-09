@@ -70,7 +70,8 @@ public class WordDAO extends DAO implements IWordDAO {
   }
 
   @Override
-  public void deleteForProject(int projID) {
+  public int deleteForProject(int projID) {
+    return 0;
   }
 
   @Override

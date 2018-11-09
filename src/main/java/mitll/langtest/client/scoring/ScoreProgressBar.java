@@ -6,17 +6,18 @@ import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.gauge.SimpleColumnChart;
-
-import java.util.logging.Logger;
+import org.jetbrains.annotations.NotNull;
 
 public class ScoreProgressBar {
   //private Logger logger = Logger.getLogger("ScoreProgressBar");
 
   private static final String AUDIO_CUT_OFF = "Audio cut off.";
-  protected ProgressBar progressBar;
+  ProgressBar progressBar;
 
+  /**
+   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getProgressBar
+   */
   public ScoreProgressBar() {
     progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
   }
@@ -30,10 +31,9 @@ public class ScoreProgressBar {
    *
    * @param score
    * @param isFullMatch
-   * @param showNow
    * @see SimpleRecordAudioPanel#useScoredResult
    */
-  public DivWidget showScore(double score, boolean isFullMatch, boolean showNow) {
+  public DivWidget showScore(double score, boolean isFullMatch) {
     double percent = isFullMatch ? score / 100d : 0.41D;
     progressBar.setVisible(true);
     if (isFullMatch) {
@@ -46,30 +46,43 @@ public class ScoreProgressBar {
     String text = isFullMatch ? "" + round : AUDIO_CUT_OFF;
 
     progressBar.setText(text);
-    setColor(progressBar, percent, round, showNow);
+    setColor(progressBar, percent, round);
     return progressBar;
   }
 
-  public void setColor(ProgressBar progressBar, double percent, double round, boolean showNow) {
-     String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
+  /**
+   * @param progressBar
+   * @param percent
+   * @param round
+   */
+  public void setColor(ProgressBar progressBar, double percent, double round) {
+   setColor(progressBar, percent);
 
 //    if (showNow) {
 //      setPercentLater(progressBar, percent, round, color);
 //    } else {
-   //    logger.info("showScore : color " + color + " for %" + percent + " and " + round);
-      Scheduler.get().scheduleDeferred((Command) () -> setPercentLater(progressBar, percent, round, color));
+    //    logger.info("showScore : color " + color + " for %" + percent + " and " + round);
+    Scheduler.get().scheduleDeferred((Command) () -> setPercentLater(progressBar, percent, round));
 //    }
   }
 
-  private void setPercentLater(ProgressBar progressBar, double percent, double round, String color) {
-    Style style = getStyleWidget(progressBar);
-     style.setBackgroundImage("linear-gradient(to bottom," +
+  public String setColor(ProgressBar progressBar, double percent) {
+    String color = SimpleColumnChart.getColor(Double.valueOf(percent).floatValue());
+    setColorGradient(progressBar, color);
+    return color;
+  }
+
+  private void setPercentLater(ProgressBar progressBar, double percent, double round) {
+    setPercent(progressBar, percent, round, getStyleWidget(progressBar));
+  }
+
+  @NotNull
+  private void setColorGradient(ProgressBar progressBar, String color) {
+    getStyleWidget(progressBar).setBackgroundImage("linear-gradient(to bottom," +
         color +
         "," +
         color +
         ")");
-
-    setPercent(progressBar, percent, round, style);
   }
 
   private Style getStyleWidget(ProgressBar progressBar) {

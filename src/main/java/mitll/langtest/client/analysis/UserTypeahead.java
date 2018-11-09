@@ -6,11 +6,12 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 
 import java.util.logging.Logger;
 
-public class UserTypeahead {
+class UserTypeahead {
   private final Logger logger = Logger.getLogger("UserTypeahead");
 
   //private static final int DISPLAY_ITEMS = 15;
@@ -19,7 +20,7 @@ public class UserTypeahead {
   private static final int SEARCH_FONT = 14;
   private final TextBox box;
   //private Collection<UserInfo> choices;
-  TypeaheadListener listener;
+  //TypeaheadListener listener;
 
   UserTypeahead(TypeaheadListener listener) {
     TextBox box = getTextBox();

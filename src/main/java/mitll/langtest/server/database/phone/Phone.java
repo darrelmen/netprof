@@ -1,8 +1,5 @@
 package mitll.langtest.server.database.phone;
 
-import mitll.langtest.server.database.DatabaseServices;
-import mitll.npdata.dao.SlickPhone;
-
 /**
  * Created by go22670 on 3/29/16.
  */
@@ -28,8 +25,8 @@ public class Phone {
    * @param seq
    * @param score
    * @param duration
-   * @see DatabaseServices#recordWordAndPhoneInfo
-   * @see SlickPhoneDAO#fromSlick(SlickPhone)
+   * @see RecordWordAndPhone#recordWordAndPhoneInfo
+   * @seex SlickPhoneDAO#fromSlick
    */
   public Phone(int projid, int rid, int wid, String phone, int seq, float score, int duration) {
     this.projid = projid;

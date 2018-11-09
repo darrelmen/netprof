@@ -38,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.incubator.TableHeader;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
+import mitll.langtest.client.analysis.WordContainerAsync;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.sound.AudioControl;
@@ -61,7 +62,8 @@ import java.util.stream.Collectors;
  * @since 10/21/15.
  */
 public class WordTable {
-//  private final Logger logger = Logger.getLogger("WordTable");
+  private final Logger logger = Logger.getLogger("WordTable");
+
   private static final String WHITE_SPACE_NOWRAP = PagerTable.WHITE_SPACE_NOWRAP;
 
   private static final String TABLE = "<table>";
@@ -69,8 +71,14 @@ public class WordTable {
 
   private static final String UNKNOWNMODEL = "UNKNOWNMODEL";
   private static final String TEXT_ALIGN_CENTER = "text-align:center;";
+  private static final String COLORED_SPAN_STYLE = "padding:3px; " +
+      "margin-left:3px; " +
+      TEXT_ALIGN_CENTER + " " +
+      "font-family:sans-serif; " +
+      WHITE_SPACE_NOWRAP + " ";
+  private static final String FONT_SIZE = "font-size:14pt;";
   private static final String BACKGROUND_COLOR = "background-color";
-
+  private static final String BLUE = "#2196F3";
   /**
    * Fix for japanese word wrap issue.
    */
@@ -84,6 +92,8 @@ public class WordTable {
   private static final String CLICK_TO_HEAR_WORD = "Click to hear.";
   private static final String SIL = "sil";
   private static final String THEAD = "<thead>";
+  private static final String NBSP = "&nbsp;";
+  private static final boolean DEBUG = false;
 
   /**
    * @param netPronImageTypeToEndTime
@@ -107,7 +117,7 @@ public class WordTable {
     {
       builder.append("<tr>");
 
-      //logger.info("show " + filter + " and " + bigram);
+      //    logger.info("show " + filter + " and " + bigram + " phones " + wordToPhones.values());
 
       for (List<TranscriptSegment> phones : wordToPhones.values()) {
         builder.append("<td>");
@@ -130,10 +140,15 @@ public class WordTable {
 
   private void addWordColHeaders(StringBuilder builder, Collection<? extends SlimSegment> transcriptSegments) {
     transcriptSegments.forEach(word -> {
+      // float score = word.getScore();
       float score = word.getScore();
       String color = getColor(score);
       //   logger.warning("addWordColHeaders : word " + word.getEvent() + " score " + score + " = " + color);
-      builder.append(HEADER).append(color).append("'>");
+      builder.append(HEADER)
+          .append(color)
+          .append(";")
+          .append(getForeground(score))
+          .append("'>");
       builder.append(word.getEvent());
       builder.append("</th>");
     });
@@ -159,10 +174,10 @@ public class WordTable {
       TranscriptSegment prev = phones.get(i);
       TranscriptSegment next = i + 1 < phones.size() ? phones.get(i + 1) : new TranscriptSegment();
 
-      String prevCandidate = prev.getDisplayEvent();
-      String nextCandidate = next.getDisplayEvent();
+      String prevCandidate = prev.getEvent();
+      String nextCandidate = next.getEvent();
 
-//      logger.info("addPhones at " + i + " prev " + prevCandidate + " next " + nextCandidate);
+      // logger.info("addPhones at " + i + " prev " + prevCandidate + " next " + nextCandidate);
 
       if (!first && (prevCandidate.equalsIgnoreCase(contextPhone)) &&
           nextCandidate.equalsIgnoreCase(filter)
@@ -170,14 +185,14 @@ public class WordTable {
         toMark.add(prev);
         toColor.add(next);
       } else {
-
+        boolean prevMatchFilter = prevCandidate.equalsIgnoreCase(filter);
         if (isUnder) {
           // first phone
-          if (i == 0 && prevCandidate.equalsIgnoreCase(filter)) {
+          if (i == 0 && prevMatchFilter) {
             toColor.add(prev);
           }
         } else if (
-            (first && prevCandidate.equalsIgnoreCase(filter)) &&
+            (first && prevMatchFilter) &&
                 (nextCandidate.equalsIgnoreCase(contextPhone))
         ) {
           toColor.add(prev);
@@ -186,31 +201,53 @@ public class WordTable {
       }
     }
 
-    for (TranscriptSegment phone : phones) {
-      String event = phone.getDisplayEvent();
-      boolean match = toColor.contains(phone);
-      boolean contextMatch = toMark.contains(phone);
+    boolean found = !toColor.isEmpty();
+    if (found) {
+      for (TranscriptSegment phone : phones) {
+        String event = phone.getEvent();
+        boolean match = toColor.contains(phone);
+        boolean contextMatch = toMark.contains(phone);
 
-      if (!event.equals(SIL)) {
-        {
-          String color = match ?
-              (" " + BACKGROUND_COLOR + ":" + getColor(phone)) :
-              contextMatch ? (" " + BACKGROUND_COLOR + ":" + "#C0C0C0") :
-                  "";
-          builder
-              .append("<th style='" + TEXT_ALIGN_CENTER)
-              .append(color)
-              .append("'>");
+        if (!event.equals(SIL)) {
+          {
+            builder
+                .append("<th style='" + TEXT_ALIGN_CENTER)
+                .append(FONT_SIZE);
+
+            if (match) {
+              builder.append(getForeground(phone.getScore()));
+            }
+
+            {
+              String color = match ?
+                  (" " + BACKGROUND_COLOR + ":" + getColor(phone)) :
+                  contextMatch ? (" " + BACKGROUND_COLOR + ":" + "#C0C0C0") :
+                      "";
+              builder.append(color)
+                  .append("'>");
+            }
+          }
+
+          builder.append(event);
+          builder.append("</th>");
         }
-        builder.append(event);
-        builder.append("</th>");
       }
     }
   }
 
+  /**
+   * From words
+   *
+   * @param netPronImageTypeToEndTime
+   * @return
+   * @see WordContainerAsync#getItemColumn
+   */
   public String makeColoredTableReally(Map<NetPronImageType, List<SlimSegment>> netPronImageTypeToEndTime) {
-    List<SlimSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
-    List<SlimSegment> filtered = words.stream().filter(slimSegment -> !shouldSkipPhone(slimSegment.getEvent())).collect(Collectors.toList());
+    //List<SlimSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
+    List<SlimSegment> filtered = netPronImageTypeToEndTime
+        .get(NetPronImageType.WORD_TRANSCRIPT)
+        .stream()
+        .filter(slimSegment -> !shouldSkipPhone(slimSegment.getEvent())).collect(Collectors.toList());
     StringBuilder builder = new StringBuilder();
     builder.append(TABLE);
 
@@ -227,14 +264,13 @@ public class WordTable {
   /**
    * @param netPronImageTypeToEndTime
    * @return
-   * @see mitll.langtest.client.gauge.ASRHistoryPanel#makeColoredTable
+   * @seex mitll.langtest.client.gauge.ASRHistoryPanel#makeColoredTable
    */
-  public String makeColoredTable(Map<NetPronImageType, List<SlimSegment>> netPronImageTypeToEndTime) {
+/*  public String makeColoredTable(Map<NetPronImageType, List<SlimSegment>> netPronImageTypeToEndTime) {
     StringBuilder builder = new StringBuilder();
     List<SlimSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
     return getHTMLForWords(builder, words);
-  }
-
+  }*/
   public String makeColoredTableFull(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime) {
     StringBuilder builder = new StringBuilder();
     List<TranscriptSegment> words = netPronImageTypeToEndTime.get(NetPronImageType.WORD_TRANSCRIPT);
@@ -273,19 +309,23 @@ public class WordTable {
    */
   public String getColoredSpan(String event, float score) {
     StringBuilder builder = new StringBuilder();
+    String foreground = getForeground(score);
     builder.append("<span " +
         //"class='scoringStyle'" +
         "style='" +
-        "padding:3px; " +
-        "margin-left:3px; " +
-        TEXT_ALIGN_CENTER + " " +
-        "font-family:sans-serif; " +
-        WHITE_SPACE_NOWRAP + " " +
+        COLORED_SPAN_STYLE +
+        foreground +
         BACKGROUND_COLOR + ":" + getColor(score) +
         "'>");
     builder.append(event);
+    // logger.info("getColoredSpan Return " + builder + " for " + event + " at " + score);
     builder.append("</span>");
     return builder.toString();
+  }
+
+  @NotNull
+  private String getForeground(float score) {
+    return score < 0.4F ? "color:white; " : "";
   }
 
   /**
@@ -343,6 +383,7 @@ public class WordTable {
    * @param phonesForWord
    * @param word
    * @return
+   * @see #getDivWord
    */
   private Widget getDivForWord(AudioControl audioControl,
                                TreeMap<TranscriptSegment, IHighlightSegment> words,
@@ -356,6 +397,7 @@ public class WordTable {
 
     // String color =
     setColorClickable(word, header);
+    setForegroundColor(word, header);
     //   logger.info("getDivForWord : color for " + word.getEvent() + " score " + word.getScore() + " = " + color);
 
     new TooltipHelper().addTooltip(header, CLICK_TO_HEAR_WORD);
@@ -365,6 +407,12 @@ public class WordTable {
 
     header.setSouthScore(phones);
     return header;
+  }
+
+  private void setForegroundColor(TranscriptSegment word, UIObject header) {
+    if (word.getScore() < 0.4F) {
+      header.getElement().getStyle().setColor("white");
+    }
   }
 
   /**
@@ -386,9 +434,9 @@ public class WordTable {
   }
 
   /**
-   * @param audioControl so when clicked, we can play audio
+   * @param audioControl  so when clicked, we can play audio
    * @param phoneMap
-   * @param value
+   * @param phoneSegments
    * @param simpleLayout
    * @param wordSegment
    * @return
@@ -398,16 +446,13 @@ public class WordTable {
   @NotNull
   DivWidget getPhoneDivBelowWord(AudioControl audioControl,
                                  TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                                 List<TranscriptSegment> value,
+                                 List<TranscriptSegment> phoneSegments,
                                  boolean simpleLayout,
                                  TranscriptSegment wordSegment
   ) {
     DivWidget phones = new DivWidget();
-    //phones.addStyleName("inlineFlex");
     phones.addStyleName("phoneContainer");
-    //phones.setWidth("100%");
-
-    addPhonesBelowWord2(value, phones, audioControl, phoneMap, simpleLayout, wordSegment/*, isRTL*/);
+    addPhonesBelowWord2(phoneSegments, phones, audioControl, phoneMap, simpleLayout, wordSegment);
     return phones;
   }
 
@@ -504,7 +549,7 @@ public class WordTable {
   }
 
   private String getPhoneEvent(TranscriptSegment phone) {
-    return phone.getDisplayEvent();
+    return phone.getEvent();
   }
 
   /**
@@ -526,38 +571,52 @@ public class WordTable {
                                    TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                    boolean simpleLayout,
                                    TranscriptSegment wordSegment) {
+    if (DEBUG) logger.info("addPhonesBelowWord2 add phones below " +
+        "\n\tword " + wordSegment +
+        "\n\tsegs " + phoneSegments.size());
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("word " +wordSegment));
+//    logger.info("logException stack " + exceptionAsString);
+
     Iterator<TranscriptSegment> iterator = phoneSegments.iterator();
+    boolean hasAudioControl = audioControl != null;
+
     while (iterator.hasNext()) {
       TranscriptSegment phoneSegment = iterator.next();
       String phoneLabel = getPhoneEvent(phoneSegment);
       if (!shouldSkipPhone(phoneLabel)) {
-        float v = phoneSegment.getStart() * 100;
-        int vi = (int) v;
-        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel, vi);
-        boolean hasAudioControl = audioControl != null;
+        boolean b = iterator.hasNext();
+        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel + (b ? NBSP : ""), BLUE);
+
+        //  logger.info("\taddPhonesBelowWord2 word " + wordSegment + " phone " + phoneLabel + " : " + h.getContent());
+
+//        if (phoneSegment.isIn(wordSegment)) {
         addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, h.getClickable());
-        phoneMap.put(phoneSegment, h);
+        //      }
+        IHighlightSegment put = phoneMap.put(phoneSegment, h);
+        if (put != null) logger.info("prev for " + phoneSegment + " was " + put);
 
         if (simpleLayout) {
-          if (iterator.hasNext()) {
+          if (b) {
             //  h.getElement().getStyle().setPaddingRight(PHONE_PADDING, Style.Unit.PX);
             h.addStyleName("phoneStyle");
           } else {
-            if (hasAudioControl) addHandStyle(h);
-            alignCenter(h);
-            h.addStyleName("phoneColor");
+//            if (hasAudioControl) addHandStyle(h);
+//            alignCenter(h);
+            h.addStyleName("lastPhoneStyle");
           }
         } else {
           if (hasAudioControl) addHandStyle(h);
           alignCenter(h);
           setColorClickable(phoneSegment, h);
+          setForegroundColor(phoneSegment, h);
+
           h.addStyleName("phoneWidth");
         }
         scoreRow.add(h);
       }
     }
   }
-
 
   /**
    * When clicked, tell audioControl to play segment
@@ -570,7 +629,11 @@ public class WordTable {
    */
   private void addClickHandler(AudioControl audioControl, TranscriptSegment segmentToPlay, Label header) {
     if (audioControl != null) {
-      header.addClickHandler(event -> audioControl.repeatSegment(segmentToPlay.getStart(), segmentToPlay.getEnd()));
+      if (false) logger.info("addClickHandler add handler for " + segmentToPlay + " when click on " + header.getText());
+      header.addClickHandler(event -> {
+        logger.info("addClickHandler click on " + segmentToPlay + " header " + header.getText());
+        audioControl.loadAndPlaySegment(segmentToPlay.getStart(), segmentToPlay.getEnd());
+      });
     }
   }
 
@@ -578,18 +641,16 @@ public class WordTable {
     header.addStyleName("handCursor");
   }
 
-  private void setColor(TranscriptSegment phone, UIObject h) {
+  private void setColor(SlimSegment phone, UIObject h) {
     h.getElement().getStyle().setBackgroundColor(getColor(phone));
   }
 
-  private String setColorClickable(TranscriptSegment phone, IHighlightSegment h) {
-    String color = getColor(phone);
-    h.setBackground(color);
-    return color;
+  private void setColorClickable(SlimSegment phone, IHighlightSegment h) {
+    h.setBackground(getColor(phone));
   }
 
   @NotNull
-  private String getColor(TranscriptSegment phone) {
+  private String getColor(SlimSegment phone) {
     return getColor(phone.getScore());
   }
 
@@ -603,7 +664,7 @@ public class WordTable {
   }
 
   @NotNull
-  private HTML getScore(TranscriptSegment word) {
+  private HTML getScore(SlimSegment word) {
     return new HTML("" + getPercent(word.getScore()));
   }
 
@@ -653,5 +714,4 @@ public class WordTable {
   private boolean shouldSkipWord(String wordLabel) {
     return wordLabel.equals("SIL");
   }
-
 }

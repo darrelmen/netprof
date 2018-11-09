@@ -8,16 +8,12 @@ import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.StartupInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 class FlagsDisplay {
   private static final int FLAG_DIM = 32;
   private static final int COLUMNS = 4;
-  private List<LangCC> ccs = new ArrayList<>();
+  private final List<LangCC> ccs = new ArrayList<>();
 
   void getFlags(StartupInfo startupInfo) {
     Set<String> seen = new HashSet<>();
@@ -75,7 +71,8 @@ class FlagsDisplay {
    * Sorts by language
    */
   private static class LangCC implements Comparable<LangCC> {
-    String cc, language;
+    final String cc;
+    final String language;
 
     LangCC(String cc, String language) {
       this.cc = cc;

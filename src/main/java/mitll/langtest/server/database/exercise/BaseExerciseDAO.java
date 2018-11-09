@@ -98,7 +98,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     this.userListManager = userListManager;
     this.language = language;
     this.addDefects = addDefects;
-//    logger.debug("\n\n\nlanguage is " + language);
+   // logger.debug("language is " + language + " add defects " + addDefects);
   }
 
   public Set<Integer> getIDs() {

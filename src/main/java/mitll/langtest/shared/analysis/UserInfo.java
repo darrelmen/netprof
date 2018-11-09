@@ -33,7 +33,6 @@
 package mitll.langtest.shared.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.user.cellview.client.Column;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.user.IUserDAO;

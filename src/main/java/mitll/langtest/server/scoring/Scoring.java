@@ -32,18 +32,18 @@
 
 package mitll.langtest.server.scoring;
 
+import com.google.gson.JsonObject;
+import mitll.langtest.server.LogAndNotify;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.image.TranscriptReader;
-import com.google.gson.JsonObject;
-
-import mitll.langtest.server.LogAndNotify;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.audio.imagewriter.TranscriptWriter;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.lts.EmptyLTS;
 import mitll.npdata.dao.lts.HTKDictionary;
@@ -105,6 +105,7 @@ public abstract class Scoring {
 
   private LTSFactory ltsFactory;
   final String language;
+  final Language languageEnum;
 
   /**
    * @param deployPath
@@ -120,6 +121,7 @@ public abstract class Scoring {
     this.logAndNotify = langTestDatabase;
     String language = project.getLanguage();
     this.language = language;
+    this.languageEnum = project.getLanguageEnum();
     removeAllAccents = !language.equalsIgnoreCase("french");
     isAsianLanguage = isAsianLanguage(language);
 //    logger.info("isAsian " + isAsianLanguage + " lang " + language);
@@ -142,8 +144,10 @@ public abstract class Scoring {
 
   private boolean isAsianLanguage(String language) {
     return language.equalsIgnoreCase(MANDARIN) ||
-        language.equalsIgnoreCase(JAPANESE) ||
-        language.equalsIgnoreCase(KOREAN);
+        language.equalsIgnoreCase(JAPANESE)
+//        ||
+//        language.equalsIgnoreCase(KOREAN)
+        ;
   }
 
   LTS getLTS() {
@@ -196,7 +200,7 @@ public abstract class Scoring {
       logger.error("no label files found, e.g. " + phoneLabFile);
     }
 
-    boolean usePhone = usePhoneToDisplay || props.usePhoneToDisplay();
+    boolean usePhone = usePhoneToDisplay || props.usePhoneToDisplay(languageEnum);
     if (decode || !writeImages) {  //  skip image generation
       return getEventInfo(typeToFile, useWebservice, usePhone);
     } else {
@@ -210,7 +214,7 @@ public abstract class Scoring {
 
       return new TranscriptWriter().writeTranscripts(pathname,
           imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, useWebservice,
-          usePhone, props.getPhoneToDisplay(language));
+          usePhone, props.getPhoneToDisplay(languageEnum));
     }
   }
 
@@ -293,7 +297,7 @@ public abstract class Scoring {
     String w = useKaldi ? "word" : "w";
 
     return
-        new ParseResultJson(props, language)
+        new ParseResultJson(props, languageEnum)
             .readFromJSON(object, words, w, usePhoneToDisplay, null, useKaldi);
   }
 
@@ -314,12 +318,11 @@ public abstract class Scoring {
         ImageType imageType = o.getKey();
         boolean isPhone = imageType.equals(ImageType.PHONE_TRANSCRIPT) && usePhoneToDisplay;
         TranscriptReader transcriptReader = new TranscriptReader();
-        Map<String, String> phoneToDisplay = props.getPhoneToDisplay(language);
+        Map<String, String> phoneToDisplay = props.getPhoneToDisplay(languageEnum);
         typeToEvent.put(imageType,
             useWebservice ?
                 transcriptReader.readEventsFromString(o.getValue(), isPhone, phoneToDisplay) :
                 transcriptReader.readEventsFromFile(o.getValue(), isPhone, phoneToDisplay));
-
       }
       return new EventAndFileInfo(new HashMap<>(), typeToEvent);
     } catch (IOException e) {
@@ -375,16 +378,16 @@ public abstract class Scoring {
    * @param transliteration
    * @param oov
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSOnForeignPhrase
-   * @see mitll.langtest.server.audio.AudioFileHelper#isInDictOrLTS
+   * @seex mitll.langtest.server.audio.AudioFileHelper#checkLTSOnForeignPhrase
+   * @seex mitll.langtest.server.audio.AudioFileHelper#isInDictOrLTS
    */
   public boolean validLTS(String fl, String transliteration, Set<String> oov) {
     if (fl.isEmpty()) return false;
     Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
 
-   if (oov.addAll(oovForFL)) {
-    // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
-   }
+    //if (oov.addAll(oovForFL)) {
+      // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
+    //}
 
     return oovForFL.isEmpty();
   }

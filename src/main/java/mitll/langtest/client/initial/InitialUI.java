@@ -98,7 +98,8 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private static final boolean DO_HEARTBEAT = true;
 
 
-  private static final int TOP_OF_ROOT = 58;//48;//58;
+  private static final int TOP_OF_ROOT = 52;//58;//48;//58;
+
   /**
    * Make sure we can talk to the server...
    *
@@ -229,7 +230,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
         logger.warning("got " + e);
       }
     }
-//    logger.info("----> populateRootPanel END   ------>");
+    //  logger.info("----> populateRootPanel END   ------>");
   }
 
   private void showIOSAd() {
@@ -412,32 +413,32 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
         });
       } else {
         if (DO_HEARTBEAT) {
-        long then = System.currentTimeMillis();
+          long then = System.currentTimeMillis();
 
-        Timer timer = getWifiTimer();
-        controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), implementationVersion, new AsyncCallback<HeartbeatStatus>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            cancelHeartbeatTimer(timer);
-          }
-
-          @Override
-          public void onSuccess(HeartbeatStatus result) {
-            cancelHeartbeatTimer(timer);
-            long now = System.currentTimeMillis();
-            //logger.info("2 waited " + (now - then));
-            if (result.isCodeHasUpdated()) {
-              logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
-              Window.Location.reload();
-            } else if (!result.isHasSession()) {
-              logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user - logging out!");
-              logout();
+          Timer timer = getWifiTimer();
+          controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), implementationVersion, new AsyncCallback<HeartbeatStatus>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              cancelHeartbeatTimer(timer);
             }
-          }
-        });
+
+            @Override
+            public void onSuccess(HeartbeatStatus result) {
+              cancelHeartbeatTimer(timer);
+              long now = System.currentTimeMillis();
+              //logger.info("2 waited " + (now - then));
+              if (result.isCodeHasUpdated()) {
+                logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
+                Window.Location.reload();
+              } else if (!result.isHasSession()) {
+                logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user - logging out!");
+                logout();
+              }
+            }
+          });
+        }
       }
     }
-  }
   }
 
   private void cancelHeartbeatTimer(Timer timer) {
@@ -537,7 +538,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     choices.showProject(project);
   }
 
-
   /**
    * @see BreadcrumbHelper#addCrumbs
    */
@@ -625,12 +625,12 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     // are we here to show the login screen?
     boolean show = userManager.getUserID() == null;
     if (show) {
-     // logger.info("showLogin user is not valid : user expired " + userManager.getUserID());
+      // logger.info("showLogin user is not valid : user expired " + userManager.getUserID());
       verticalContainer.setHeight("100%");
       showLogin(eventRegistration);
       return true;
     }
-   // logger.info("user is valid...");
+    // logger.info("user is valid...");
 
     showCogMenu();
     return false;

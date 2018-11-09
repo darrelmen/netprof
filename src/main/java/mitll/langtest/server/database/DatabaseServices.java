@@ -43,8 +43,10 @@ import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.services.AmasServices;
+import mitll.langtest.server.database.user.IPendingUserDAO;
 import mitll.langtest.server.database.userlist.UserListServices;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.result.MonitorResult;
@@ -71,7 +73,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   IAnalysis getAnalysis(int projectid);
 
-  IDLIClassJoinDAO getDliClassJoinDAO();
+
 
   mitll.langtest.server.database.user.UserManagement getUserManagement();
 
@@ -91,6 +93,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext);
 
   ISection<CommonExercise> getSectionHelper(int projectid);
+  ISection<IDialog> getDialogSectionHelper(int projectid);
 
   void markAudioDefect(AudioAttribute audioAttribute);
 
@@ -122,8 +125,6 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   void setStartupInfo(User userWhere);
 
   Collection<String> getTypeOrder(int projectid);
-
-  void setStartupInfo(User userWhere, int projid);
 
   IStateManager getStateManager();
 

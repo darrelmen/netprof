@@ -33,4 +33,8 @@ public class ExerciseIDAndScore implements IsSerializable {
   }
 
   public int getPercentScore() {    return Math.round(100f * score);  }
+
+  public int getExid() {
+    return exid;
+  }
 }

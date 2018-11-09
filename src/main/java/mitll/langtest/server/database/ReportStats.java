@@ -3,7 +3,9 @@ package mitll.langtest.server.database;
 import mitll.npdata.dao.SlickProject;
 import net.sf.json.JSONObject;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ReportStats {
   private final int projid;

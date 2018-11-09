@@ -54,6 +54,7 @@ import mitll.langtest.client.services.ResultService;
 import mitll.langtest.client.services.ResultServiceAsync;
 import mitll.langtest.client.services.ScoringServiceAsync;
 import mitll.langtest.client.table.PagerTable;
+import mitll.langtest.server.services.ResultServiceImpl;
 import mitll.langtest.shared.ResultAndTotal;
 import mitll.langtest.shared.result.MonitorResult;
 
@@ -86,6 +87,8 @@ public class ResultManager extends PagerTable {
   private static final String YES = "Yes";
   private static final String NO = "No";
 
+  private static final int MIN_TO_SHOW = 4;
+
   private static final int PAGE_SIZE = 7;
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "Score";
@@ -106,7 +109,7 @@ public class ResultManager extends PagerTable {
   private static final String CLOSE = "Close";
   private static final int MAX_TO_SHOW = PAGE_SIZE;
 
-  private static final boolean DEBUG = false;
+ // private static final boolean DEBUG = false;
 
   private final EventRegistration eventRegistration;
   private final ResultServiceAsync resultServiceAsync = GWT.create(ResultService.class);
@@ -136,7 +139,8 @@ public class ResultManager extends PagerTable {
   }
 
   /**
-   * @see UserMenu.ResultsClickHandler
+   * @see UserMenu#getProjectSpecificChoices
+   * @see ResultServiceImpl#getNumResults()
    */
   public void showResults() {
     req = 0;
@@ -231,7 +235,7 @@ public class ResultManager extends PagerTable {
 
     addColumnsToTable(cellTable);
     cellTable.setRowCount(numResults, true);
-    int maxToShow = Window.getClientHeight() > 850 ? MAX_TO_SHOW : 5;
+    int maxToShow = Window.getClientHeight() > 850 ? MAX_TO_SHOW : MIN_TO_SHOW;
     cellTable.setVisibleRange(0, maxToShow);
 
     createProvider(numResults, cellTable, resultTypeAhead);
@@ -257,9 +261,10 @@ public class ResultManager extends PagerTable {
       // logger.info("audio type " + audioType);
       String foreignText = selectedObject.getForeignText();
 
-      ReviewScoringPanel w = new ReviewScoringPanel(selectedObject.getAnswer(), foreignText, "", controller,
-          exID, // no exercise!
-          "instance");
+      ReviewScoringPanel w = new ReviewScoringPanel(
+          selectedObject.getAnswer(), foreignText, controller,
+          exID // no exercise!
+      );
 
       w.setResultID(selectedObject.getUniqueID());
 
@@ -270,8 +275,13 @@ public class ResultManager extends PagerTable {
       reviewContainer.add(vert);
       reviewContainer.add(w.getTables());
     } else {
-      AudioPanel w = new AudioPanel<>(selectedObject.getAnswer(), controller, false, 10, "",
-          null, exID, "instance");
+      AudioPanel w = new AudioPanel<>(selectedObject.getAnswer(),
+          controller,
+          false,
+          10,
+          "",
+          null,
+          exID);
       reviewContainer.add(w);
     }
   }
@@ -304,9 +314,9 @@ public class ResultManager extends PagerTable {
         logger.info("createProvider req " + unitToValue
             +
             //" user " + userID +
-            " text '" + text + "' currentReq " + currentReq);
+            " text '" + text + "' currentReq " + currentReq);*/
         //   logger.info("got " + builder.toString());
-*/
+
         String sortInfo = builder.toString();
         resultServiceAsync.getResults(
             start,
@@ -606,15 +616,15 @@ public class ResultManager extends PagerTable {
     table.addColumn(type, DEVICE);
     rememberColumn(type, DEVICE);
 
-    TextColumn<MonitorResult> wFlash = new TextColumn<MonitorResult>() {
-      @Override
-      public String getValue(MonitorResult answer) {
-        return answer.isWithFlash() ? YES : NO;
-      }
-    };
-    wFlash.setSortable(true);
-    table.addColumn(wFlash, "w/Flash");
-    rememberColumn(wFlash, "withFlash");
+//    TextColumn<MonitorResult> wFlash = new TextColumn<MonitorResult>() {
+//      @Override
+//      public String getValue(MonitorResult answer) {
+//        return answer.isWithFlash() ? YES : NO;
+//      }
+//    };
+//    wFlash.setSortable(true);
+//    table.addColumn(wFlash, "w/Flash");
+//    rememberColumn(wFlash, "withFlash");
 
     {
       TextColumn<MonitorResult> processDur = new TextColumn<MonitorResult>() {

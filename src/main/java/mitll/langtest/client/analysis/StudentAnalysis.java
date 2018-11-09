@@ -33,24 +33,17 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.banner.NewContentChooser;
-import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.services.AnalysisService;
-import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.UserInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;
-import static mitll.langtest.client.project.ProjectChoices.PLEASE_WAIT;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -58,31 +51,19 @@ import static mitll.langtest.client.project.ProjectChoices.PLEASE_WAIT;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/27/15.
  */
-public class StudentAnalysis extends DivWidget {
-  private static final int DELAY_MILLIS = 2000;
+public class StudentAnalysis extends TwoColumnAnalysis<UserInfo> {
   private final Logger logger = Logger.getLogger("StudentAnalysis");
-  private final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
-
-  private Object waitToken = null;
 
   /**
    * @param controller
    * @see NewContentChooser#showProgress
    */
   public StudentAnalysis(final ExerciseController controller) {
-    MessageHelper messageHelper = controller.getMessageHelper();
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        waitToken = messageHelper.startWaiting(PLEASE_WAIT);
-      }
-    };
-    t.schedule(DELAY_MILLIS);
-
+    Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
     analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
-        finishPleaseWait(t, messageHelper);
+        finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());
 
         logger.warning("Got " + throwable);
         controller.handleNonFatalError("Error retrieving user performance!", throwable);
@@ -90,92 +71,54 @@ public class StudentAnalysis extends DivWidget {
 
       @Override
       public void onSuccess(Collection<UserInfo> users) {
-        finishPleaseWait(t, messageHelper);
-
-        DivWidget bottom = new DivWidget();
-        bottom.addStyleName("floatLeft");
-        bottom.getElement().setId("StudentAnalysis_bottom");
-
-        clear();
-
-        {
-          DivWidget rightSide = getRightSide();
-          UserContainer userContainer = new UserContainer(controller, rightSide, bottom, getRememberedSelectedUser(controller));
-          add(getTop(userContainer.getTable(getUserInfos(users)), rightSide));
-        }
-        add(bottom);
-
+        showItems(users, pleaseWaitTimer, controller);
       }
     });
   }
 
-  private void finishPleaseWait(Timer t, MessageHelper messageHelper) {
-    t.cancel();
-    if (waitToken != null) {
-      messageHelper.stopWaiting(waitToken);
-      waitToken = null;
-    }
+  @Override protected String getStorageKey() {
+    return SELECTED_USER;
+  }
+
+  @NotNull
+  @Override
+  protected String getNoDataYetMessage() {
+    return "No Users Yet...";
+  }
+
+  @NotNull
+  @Override
+  protected MemoryItemContainer<UserInfo> getItemContainer(ExerciseController controller, DivWidget bottom, DivWidget rightSide) {
+    return new UserContainer(controller, bottom, rightSide, getRememberedSelectedUser(controller));
+  }
+
+  @Override
+  protected String getHeaderLabel() {
+    return null;
   }
 
   /**
-   * TODO : use common key storage
-   *
+   * @see TwoColumnAnalysis#addTop
+   * @param users
    * @param controller
-   * @return
-   */
-  @NotNull
-  private String getRememberedSelectedUser(ExerciseController controller) {
-    return getSelectedUserKey(controller, controller.getProps().getAppTitle());
-  }
-
-  @NotNull
-  private DivWidget getRightSide() {
-    DivWidget rightSide = new DivWidget();
-    rightSide.getElement().setId("rightSide");
-    rightSide.setWidth("100%");
-    return rightSide;
-  }
-
-  /**
-   * @param leftSide
+   * @param bottom
    * @param rightSide
+   * @param noDataMessage
    * @return
    */
-  private DivWidget getTop(DivWidget leftSide, DivWidget rightSide) {
-    DivWidget top = new DivWidget();
-    top.addStyleName("inlineFlex");
-    top.setWidth("100%");
-    top.getElement().setId("top");
-    top.add(leftSide);
-    top.add(rightSide);
-
-    {
-      DivWidget spacer = new DivWidget();
-      spacer.getElement().getStyle().setProperty("minWidth", 5 + "px");
-      top.add(spacer);
-    }
-    return top;
-  }
-
-  private String getSelectedUserKey(ExerciseController controller, String appTitle) {
-    return getStoragePrefix(controller, appTitle) + SELECTED_USER;
-  }
-
-  private String getStoragePrefix(ExerciseController controller, String appTitle) {
-    return appTitle + ":" + controller.getUser() + ":";
-  }
-
+/*  protected DivWidget getTable(Collection<UserInfo> users, ExerciseController controller, DivWidget bottom, DivWidget rightSide, String noDataMessage) {
+    UserContainer userContainer = new UserContainer(controller, bottom, rightSide, getRememberedSelectedUser(controller));
+    return userContainer.getTable(getUserInfos(users));
+  }*/
+/*
   private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
     List<UserInfo> filtered = new ArrayList<>();
     for (UserInfo userInfo : users) {
       String userID = userInfo.getUserID();
       if (userID != null && !userID.equals("defectDetector")) {
         filtered.add(userInfo);
-      } else {
-        //String userID = user == null ? "" :user.getUserID();
-        //logger.warning("skip " + "'" + userID + "' : " +  user);
       }
     }
     return filtered;
-  }
+  }*/
 }

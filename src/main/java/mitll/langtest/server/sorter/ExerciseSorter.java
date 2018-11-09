@@ -33,6 +33,7 @@
 package mitll.langtest.server.sorter;
 
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +48,7 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 4/30/2014.
  */
-public class ExerciseSorter extends SimpleSorter {
+public class ExerciseSorter<T extends CommonShell> extends SimpleSorter<T> {
   private static final Logger logger = LogManager.getLogger(ExerciseSorter.class);
 
   private Map<String, Integer> phoneToCount;

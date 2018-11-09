@@ -77,7 +77,7 @@ public class WordAndScore extends WordScore {
     this.seq = seq;
     this.scoreJson = scoreJson;
 
-    this.prevScore=prevScore;
+    this.prevScore = prevScore;
   }
 
   public WordAndScore() {

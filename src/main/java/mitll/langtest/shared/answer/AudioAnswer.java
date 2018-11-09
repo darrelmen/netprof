@@ -32,36 +32,34 @@
 
 package mitll.langtest.shared.answer;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.scoring.PretestScore;
 
-public class AudioAnswer implements IsSerializable {
+/**
+ *
+ */
+public class AudioAnswer extends SimpleAudioAnswer {
   private int exid = -1;
   private int reqid = -1;
-  private String path = null;
   private Validity validity = Validity.INVALID;
   private String decodeOutput = "";
-  private String transcript = "";
+
+  /**
+   * Server side only...
+   */
+  private transient String transcript = "";
+
+  private String normTranscript = "";
   private double score = -1;
   private boolean correct = false;
   private boolean saidAnswer = false;
   private long durationInMillis;
-  private long roundTripMillis;
+//  private long roundTripMillis;
   private int resultID;
   private AudioAttribute audioAttribute;
-  private PretestScore pretestScore;
   private double dynamicRange;
   private long timestamp;
-
-  public double getDynamicRange() {
-    return dynamicRange;
-  }
-
-  public void setDynamicRange(double dynamicRange) {
-    this.dynamicRange = dynamicRange;
-  }
 
   public AudioAnswer() {
   }
@@ -82,6 +80,18 @@ public class AudioAnswer implements IsSerializable {
     this.durationInMillis = duration;
   }
 
+  /**
+   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyWaveformPostAudioRecordButton#useResult
+   * @return
+   */
+  public double getDynamicRange() {
+    return dynamicRange;
+  }
+
+  public void setDynamicRange(double dynamicRange) {
+    this.dynamicRange = dynamicRange;
+  }
+
   public void setDecodeOutput(String decodeOutput) {
     this.decodeOutput = decodeOutput;
   }
@@ -96,7 +106,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * @return score from hydec (see nnscore)
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer)
    */
   public double getScore() {
     return score;
@@ -104,7 +114,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * @return
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer, com.google.gwt.user.client.ui.Panel)
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#receivedAudioAnswer(AudioAnswer)
    */
   public boolean isCorrect() {
     return correct;
@@ -133,6 +143,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * Not really used very much anymore ...
+   * Maybe on iOS???
    * @return
    */
   public boolean isSaidAnswer() {
@@ -147,12 +158,12 @@ public class AudioAnswer implements IsSerializable {
     return validity == Validity.OK;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#onPostSuccess
+   * @return
+   */
   public int getReqid() {
     return reqid;
-  }
-
-  public String getPath() {
-    return path;
   }
 
   public void setPath(String path) {
@@ -166,9 +177,11 @@ public class AudioAnswer implements IsSerializable {
     return validity;
   }
 
+/*
   public void setValidity(Validity validity) {
     this.validity = validity;
   }
+*/
 
   public String getDecodeOutput() {
     return decodeOutput;
@@ -180,7 +193,7 @@ public class AudioAnswer implements IsSerializable {
 
   /**
    * Audio information that is attached to the exercise.
-   *
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise.MyRecordAudioPanel#makePostAudioRecordButton
    * @return
    */
   public AudioAttribute getAudioAttribute() {
@@ -189,10 +202,6 @@ public class AudioAnswer implements IsSerializable {
 
   public void setAudioAttribute(AudioAttribute audioAttribute) {
     this.audioAttribute = audioAttribute;
-  }
-
-  public PretestScore getPretestScore() {
-    return pretestScore;
   }
 
   /**
@@ -210,6 +219,10 @@ public class AudioAnswer implements IsSerializable {
     return transcript;
   }
 
+  /**
+   * @param transcript
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding
+   */
   public void setTranscript(String transcript) {
     this.transcript = transcript;
   }
@@ -227,12 +240,26 @@ public class AudioAnswer implements IsSerializable {
     return exid;
   }
 
+  /**
+   * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#receivedAudioAnswer
+   * @return
+   */
   public long getRoundTripMillis() {
-    return roundTripMillis;
+    return 0;//roundTripMillis;
   }
-
+/*
   public void setRoundTripMillis(long roundTripMillis) {
     this.roundTripMillis = roundTripMillis;
+  }*/
+
+/*
+  public String getNormTranscript() {
+    return normTranscript;
+  }
+*/
+
+  public void setNormTranscript(String normTranscript) {
+    this.normTranscript = normTranscript;
   }
 
   public String toString() {
@@ -246,6 +273,7 @@ public class AudioAnswer implements IsSerializable {
         "\n\tscore " + score +
         "\n\tsaid answer " + saidAnswer +
         "\n\tpretest " + pretestScore +
-        "\n\ttranscript " + transcript;
+        "\n\ttranscript " + transcript +
+        "\n\tnormTrans  " + normTranscript;
   }
 }

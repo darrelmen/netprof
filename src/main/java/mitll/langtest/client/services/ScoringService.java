@@ -35,10 +35,9 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
-import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.scoring.AlignmentOutput;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -58,7 +57,8 @@ public interface ScoringService extends RemoteService {
   PretestScore getResultASRInfo(int resultID, ImageOptions imageOptions) throws DominoSessionException, RestrictedOperationException;
 
 
-  Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException;
+  Map<Integer, AlignmentAndScore> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException;
+  AlignmentAndScore getStudentAlignment(int projid, int resultID) throws DominoSessionException;
 
   /**
    * @param reqid
@@ -92,9 +92,11 @@ public interface ScoringService extends RemoteService {
   /**
    * @param foreign
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
+   * @seex mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
+/*
   boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException;
+*/
 
   /**
    * @param projid
@@ -102,10 +104,12 @@ public interface ScoringService extends RemoteService {
    */
   void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException;
 
-/*
-  void recalcAllAlignments() throws DominoSessionException, RestrictedOperationException;
-*/
-
+  /**
+   * @see mitll.langtest.client.LangTest#tellHydraServerToRefreshProject
+   * @param projID
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
   void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException;
 
   void ensureAudio(int resultID) throws DominoSessionException;

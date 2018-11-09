@@ -53,19 +53,6 @@
         <url-pattern>/langtest/open-user-manager</url-pattern>
     </servlet-mapping>
 
-
-    <!--
-        <servlet>
-            <servlet-name>monitoringService</servlet-name>
-            <servlet-class>mitll.langtest.server.services.MonitoringServiceImpl</servlet-class>
-            <load-on-startup>3</load-on-startup>
-        </servlet>
-
-        <servlet-mapping>
-            <servlet-name>monitoringService</servlet-name>
-            <url-pattern>/langtest/monitoring-manager</url-pattern>
-        </servlet-mapping>-->
-
     <servlet>
         <servlet-name>analysisService</servlet-name>
         <servlet-class>mitll.langtest.server.services.AnalysisServiceImpl</servlet-class>
@@ -110,6 +97,18 @@
         <url-pattern>/langtest/exercise-manager</url-pattern>
     </servlet-mapping>
 
+
+    <servlet>
+        <servlet-name>dialogService</servlet-name>
+        <servlet-class>mitll.langtest.server.services.DialogServiceImpl</servlet-class>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>dialogService</servlet-name>
+        <url-pattern>/langtest/dialog-manager</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>audioService</servlet-name>
         <servlet-class>mitll.langtest.server.services.AudioServiceImpl</servlet-class>
@@ -127,8 +126,13 @@
     </servlet-mapping>
 
     <!--    <servlet-mapping>
+<<<<<<< HEAD
+            <servlet-name>amasService</servlet-name>
+            <url-pattern>/langtest/amas-manager</url-pattern>
+=======
         <servlet-name>amasService</servlet-name>
         <url-pattern>/langtest/amas-manager</url-pattern>
+>>>>>>> development
         </servlet-mapping>-->
 
     <servlet>
@@ -180,13 +184,29 @@
         <url-pattern>/langtest/project-manager</url-pattern>
     </servlet-mapping>
 
+        <servlet>
+            <servlet-name>MyDefaultServlet</servlet-name>
+            <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+            <init-param>
+                <param-name>resourceBase</param-name>
+                <param-value>/opt/netprof/bestAudio</param-value>
+            </init-param>
+            <init-param>
+                <param-name>dirAllowed</param-name>
+                <param-value>true</param-value>
+            </init-param>
+            <init-param>
+                <param-name>pathInfoOnly</param-name>
+                <param-value>true</param-value>
+            </init-param>
+        </servlet>
 
     <servlet>
-        <servlet-name>MyDefaultServlet</servlet-name>
+            <servlet-name>DefaultServletAnswers</servlet-name>
         <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
         <init-param>
             <param-name>resourceBase</param-name>
-            <param-value>/opt/netprof/bestAudio</param-value>
+                <param-value>/opt/netprof/answers</param-value>
         </init-param>
         <init-param>
             <param-name>dirAllowed</param-name>
@@ -199,11 +219,11 @@
     </servlet>
 
     <servlet>
-        <servlet-name>DefaultServletAnswers</servlet-name>
+        <servlet-name>DefaultServletImages</servlet-name>
         <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
         <init-param>
             <param-name>resourceBase</param-name>
-            <param-value>/opt/netprof/answers</param-value>
+            <param-value>/opt/netprof/images</param-value>
         </init-param>
         <init-param>
             <param-name>dirAllowed</param-name>
@@ -225,6 +245,10 @@
         <url-pattern>/answers/*</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>DefaultServletImages</servlet-name>
+        <url-pattern>/images/*</url-pattern>
+    </servlet-mapping>
 
     <!-- ==================================================================== -->
     <!-- End RPC mappings                                                     -->
@@ -277,6 +301,19 @@
         <servlet-name>scoreServlet</servlet-name>
         <url-pattern>/scoreServlet/h2/*</url-pattern>
     </servlet-mapping>
+
+<!--
+
+    <servlet>
+        <servlet-name>echoEndpoint</servlet-name>
+        <servlet-class>mitll.langtest.server.EchoEndpoint</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>echoEndpoint</servlet-name>
+        <url-pattern>/echoEndpoint/*</url-pattern>
+    </servlet-mapping>
+-->
 
     <!-- ==================================================================== -->
     <!-- START filters	                                                    -->

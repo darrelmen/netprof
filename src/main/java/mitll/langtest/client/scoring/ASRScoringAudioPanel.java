@@ -36,13 +36,14 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.CommonAudioExercise;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Does ASR scoring -- adds phone and word transcript images below waveform and spectrum
@@ -53,31 +54,16 @@ import java.util.Set;
  * Time: 11:31 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends ScoringAudioPanel<T> {
-  //private final Logger logger = Logger.getLogger("ASRScoringAudioPanel");
+public class ASRScoringAudioPanel<T extends HasID> extends ScoringAudioPanel<T> {
+  private final Logger logger = Logger.getLogger("ASRScoringAudioPanel");
+
+
   private static final String ANIMATED_PROGRESS44_GIF = "animated_progress44.gif";
   private static final String WAIT_GIF = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS44_GIF;
   private static final String SCORE = "score";
   private static final int WAIT_GIF_DELAY = 150;
   private final Set<String> tested = new HashSet<>();
-  private boolean useScoreToColorBkg = true;
-
-  /**
-   * @param refSentence
-   * @param playButtonSuffix
-   * @param exercise
-   * @param instance
-   * @paramx audioType
-   * @see mitll.langtest.client.scoring.ASRRecordAudioPanel
-   */
-  ASRScoringAudioPanel(String refSentence,
-                       String transliteration,
-                       ExerciseController controller,
-                       String playButtonSuffix,
-                       T exercise,
-                       String instance) {
-    super(refSentence, transliteration, controller, playButtonSuffix, exercise, instance);
-  }
+  private boolean useScoreToColorBkg;
 
   /**
    * @param path
@@ -87,17 +73,15 @@ public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends Scoring
    * @param rightMargin
    * @param playButtonSuffix
    * @param exercise
-   * @param instance
    * @paramx audioType
-   * @seex mitll.langtest.client.scoring.FastAndSlowASRScoringAudioPanel#FastAndSlowASRScoringAudioPanel
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getPanelForAudio
    */
   public ASRScoringAudioPanel(String path, String refSentence, String transliteration,
                               ExerciseController controller, boolean showSpectrogram,
                               int rightMargin, String playButtonSuffix,
-                              T exercise,
-                              String instance) {
+                              T exercise) {
     super(path, refSentence, transliteration, controller, showSpectrogram, rightMargin, playButtonSuffix,
-        exercise, exercise.getID(), instance);
+        exercise, exercise.getID());
     this.useScoreToColorBkg = controller.useBkgColorForRef();
   }
 
@@ -128,17 +112,20 @@ public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends Scoring
                             int height,
                             final int reqid) {
     if (path == null || path.equals("FILE_MISSING")) return;
-    //System.out.println("scoring audio " + path +" with ref sentence " + refSentence + " reqid " + reqid);
+
+    if (false)
+      logger.info("scoreAudio : scoring audio " + path + " with ref sentence " + refSentence + " reqid " + reqid);
+
     boolean wasVisible = wordTranscript.isVisible();
 
     // only show the spinning icon if it's going to take awhile
     final Timer t = getWaitTimer(wordTranscript, phoneTranscript, wasVisible);
 
-  //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
+    //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " type " + "score" + " width " + toUse);
 
     AsyncCallback<PretestScore> async = getPretestScoreAsyncCallback(path, wordTranscript, phoneTranscript, t);
 
-    int id = exercise.getID();
+    int id = getExerciseID();
     ImageOptions imageOptions = new ImageOptions(toUse, height, useScoreToColorBkg, true);
 
     boolean usePhoneToDisplay = controller.getProps().shouldUsePhoneToDisplay();
@@ -156,7 +143,7 @@ public class ASRScoringAudioPanel<T extends CommonAudioExercise> extends Scoring
         //  logger.info("ASRScoringAudioPanel.scoreAudio : req " + reqid + " path " + path + " failure? "+ caught.getMessage());
         wordTranscript.setVisible(false);
         phoneTranscript.setVisible(false);
-        controller.handleNonFatalError("scoring audio",caught);
+        controller.handleNonFatalError("scoring audio", caught);
       }
 
       public void onSuccess(PretestScore result) {

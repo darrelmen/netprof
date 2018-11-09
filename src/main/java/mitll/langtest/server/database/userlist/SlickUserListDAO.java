@@ -39,7 +39,9 @@ import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.services.ListServiceImpl;
-import mitll.langtest.shared.custom.*;
+import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.custom.UserListLight;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.npdata.dao.DBConnection;
@@ -61,7 +63,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   private final UserExerciseListDAOWrapper dao;
   private final UserExerciseListVisitorDAOWrapper visitorDAOWrapper;
   private final IUserExerciseDAO userExerciseDAO;
-  IProjectDAO projectDAO;
+  final IProjectDAO projectDAO;
   private final IUserDAO userDAO;
 
   /**

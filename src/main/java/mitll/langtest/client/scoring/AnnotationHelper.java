@@ -10,7 +10,7 @@ import mitll.langtest.shared.exercise.ExerciseAnnotation;
  */
 public class AnnotationHelper implements CommentAnnotator {
   private final Services controller;
-  MessageHelper messageHelper;
+  private final MessageHelper messageHelper;
 
   /**
    * @param controller

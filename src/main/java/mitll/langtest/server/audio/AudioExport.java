@@ -37,6 +37,7 @@ import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.MiniUser;
@@ -135,7 +136,7 @@ public class AudioExport {
                                                   Collection<CommonExercise> exercisesForSelectionState,
                                                   boolean isEnglish) {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
-    new ExerciseSorter().getSorted(copy, false, isEnglish, "");
+    new ExerciseSorter().getSorted(copy, isEnglish, "");
     return copy;
   }
 
@@ -451,9 +452,9 @@ public class AudioExport {
     AudioAttribute latestContext = ex.getLatestContext(justMale);  // likely always be empty?
 
     if (latestContext == null) {
-      List<CommonExercise> directlyRelated = ex.getDirectlyRelated();
+      List<ClientExercise> directlyRelated = ex.getDirectlyRelated();
       if (!directlyRelated.isEmpty()) {
-        latestContext = directlyRelated.iterator().next().getLatestContext(justMale);
+        latestContext = directlyRelated.iterator().next().asCommon().getLatestContext(justMale);
       }
     }
     if (latestContext != null) {

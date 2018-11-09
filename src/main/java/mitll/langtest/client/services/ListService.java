@@ -38,9 +38,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -123,7 +121,9 @@ public interface ListService extends RemoteService {
    */
   void addItemToUserList(int userListID, int exID) throws DominoSessionException;
 
-  UserList<CommonShell> getReviewList() throws DominoSessionException, RestrictedOperationException;
+/*
+  UserList<CommonShell> getReviewList(boolean isContext) throws DominoSessionException, RestrictedOperationException;
+*/
 
   /**
    * @param userListID
@@ -131,11 +131,13 @@ public interface ListService extends RemoteService {
    * @return
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
+/*
   CommonExercise newExercise(int userListID, CommonExercise userExercise) throws DominoSessionException;
+*/
 
 /*  boolean shouldShowAudio(int userListID);
   int getRoundTimeMinutes(int userListID);
   int getMinScore(int userListID);*/
 
-  QuizInfo getQuizInfo(int userListID);
+  QuizSpec getQuizInfo(int userListID);
 }

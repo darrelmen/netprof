@@ -41,18 +41,19 @@ import mitll.npdata.dao.SlickUserSession;
 import mitll.npdata.dao.user.UserSessionDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import scala.Tuple2;
 
 import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
-  private static final Logger logger = LogManager.getLogger(SlickUserSessionDAOImpl.class);
+ // private static final Logger logger = LogManager.getLogger(SlickUserSessionDAOImpl.class);
   private final UserSessionDAOWrapper dao;
-  private IUserProjectDAO userProjectDAO;
+  private final IUserProjectDAO userProjectDAO;
 
   /**
    * @param database
@@ -118,16 +119,56 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
 
   @Override
   public Map<Integer, ActiveInfo> getActiveSince(long when) {
-    Map<Integer, Tuple2<Long, Long>> since = dao.since(new Timestamp(when));
-   // logger.info("found " + since.size() + " since " + new Date(when));
+    return getUserToActiveInfo(dao.since(new Timestamp(when)));
+  }
+
+  /**
+   * @return
+   * @see NPUserSecurityManager#getActiveTeachers
+   */
+  @Override
+  public Map<Integer, ActiveInfo> getActive() {
+    return getUserToActiveInfo(dao.all());
+  }
+
+  @Override
+  public Map<Integer, ActiveInfo> getActiveFrom(Set<Integer> userIDs) {
+    return getUserToActiveInfoSimple(userIDs);
+  }
+
+  @NotNull
+  private Map<Integer, ActiveInfo> getUserToActiveInfo(Map<Integer, Tuple2<Long, Long>> since) {
     Map<Integer, Integer> usersToProject = userProjectDAO.getUsersToProject(since.keySet());
-    Map<Integer, ActiveInfo> integerActiveInfoHashMap = new HashMap<>();
+
+    Map<Integer, ActiveInfo> userToActiveInfo = new HashMap<>();
 
     since.forEach((k, pair) -> {
-      ActiveInfo value = new ActiveInfo(k, pair._1(), pair._2(), usersToProject.getOrDefault(k, -1));
-     // logger.info("getActiveSince " + k + "->" + value);
-      integerActiveInfoHashMap.put(k, value);
+      Long loggedInTime = pair._1();
+      Long visited = pair._2();
+
+      ActiveInfo value = new ActiveInfo(k, loggedInTime, visited, usersToProject.getOrDefault(k, -1));
+      // logger.info("getActiveSince " + k + "->" + value);
+      userToActiveInfo.put(k, value);
     });
-    return integerActiveInfoHashMap;
+    return userToActiveInfo;
+  }
+
+
+  @NotNull
+  private Map<Integer, ActiveInfo> getUserToActiveInfoSimple(Set<Integer> userIDs) {
+    Map<Integer, ActiveInfo> userToActiveInfo = new HashMap<>();
+    Map<Integer, Tuple2<Integer, Long>> usersToProjectAndTime = userProjectDAO.getUsersToProjectAndTime(userIDs);
+
+  //  logger.info("getUserToActiveInfoSimple got back " + usersToProjectAndTime.size());
+
+    usersToProjectAndTime.forEach((k, pair) -> {
+      Integer projectID = pair._1();
+      Long visited = pair._2();
+
+      ActiveInfo value = new ActiveInfo(k, visited, visited, projectID);
+      // logger.info("getActiveSince " + k + "->" + value);
+      userToActiveInfo.put(k, value);
+    });
+    return userToActiveInfo;
   }
 }

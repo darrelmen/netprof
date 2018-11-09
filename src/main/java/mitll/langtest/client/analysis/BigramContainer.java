@@ -64,23 +64,21 @@ class BigramContainer extends PhoneContainerBase {
   private static final String SOUND = "Context";
 
   private final PhoneExampleContainer exampleContainer;
-
   //  private static final boolean DEBUG = false;
 
   /**
    * @param controller
    * @param exampleContainer
-   * @param listid
-   * @param userid
+   * @param reqInfo
    * @see AnalysisTab#getPhoneReport
    */
   BigramContainer(ExerciseController controller,
                   PhoneExampleContainer exampleContainer,
                   AnalysisServiceAsync analysisServiceAsync,
-                  int listid,
-                  int userid) {
-    super(controller, analysisServiceAsync, listid, userid);
+                  AnalysisTab.ReqInfo reqInfo) {
+    super(controller, analysisServiceAsync, reqInfo);
     this.exampleContainer = exampleContainer;
+
   }
 
   @Override
@@ -119,7 +117,7 @@ class BigramContainer extends PhoneContainerBase {
         logger.warning("no bigrams for phone " + phone);
         phoneAndStatsList = new ArrayList<>();
       } else {
-        logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
+        //    logger.info("gotNewPhoneReport Got " + bigrams.size() + " for " + phone);
         phoneAndStatsList = getPhoneAndStatsListForPeriod(bigrams);
       }
       //   logger.info("gotNewPhoneReport Got " + phoneAndStatsList.size() + " items for " + phone);
@@ -163,7 +161,6 @@ class BigramContainer extends PhoneContainerBase {
     );
   }
 
-
   @Override
   protected CellTable.Resources chooseResources() {
     CellTable.Resources o;
@@ -175,17 +172,15 @@ class BigramContainer extends PhoneContainerBase {
    * TODO : common base class
    *
    * @param bigram
+   * @see #checkForClick
    */
-  @Override
-  protected void clickOnPhone2(String bigram) {
+  void clickOnPhone2(String bigram) {
     //   logger.info("clickOnPhone2 bigram = " + bigram);
-
-    analysisServiceAsync.getPerformanceReportForUserForPhone(userid,
-        listid,
-        phone,
-        bigram,
-        from,
-        to, new AsyncCallback<List<WordAndScore>>() {
+    analysisServiceAsync.getPerformanceReportForUserForPhone(
+        getAnalysisRequest(from, to)
+            .setPhone(phone)
+            .setBigram(bigram),
+        new AsyncCallback<List<WordAndScore>>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("getting performance report for user and phone", caught);
@@ -208,7 +203,6 @@ class BigramContainer extends PhoneContainerBase {
           }
         });
   }
-
 
   /**
    * MUST BE PUBLIC

@@ -42,20 +42,20 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
-import mitll.langtest.server.database.audio.AudioDAO;
-import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.audio.IEnsureAudioHelper;
-import mitll.langtest.server.database.audio.SlickAudioDAO;
+import mitll.langtest.server.database.audio.*;
 import mitll.langtest.server.database.copy.CopyToPostgres;
 import mitll.langtest.server.database.custom.IStateManager;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.StateManager;
 import mitll.langtest.server.database.custom.UserListManager;
+import mitll.langtest.server.database.dialog.*;
 import mitll.langtest.server.database.dliclass.DLIClassDAO;
 import mitll.langtest.server.database.dliclass.DLIClassJoinDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassDAO;
 import mitll.langtest.server.database.dliclass.IDLIClassJoinDAO;
 import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.image.IImageDAO;
+import mitll.langtest.server.database.image.ImageDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.instrumentation.SlickEventImpl;
 import mitll.langtest.server.database.phone.IPhoneDAO;
@@ -93,8 +93,10 @@ import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.instrumentation.Event;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -117,6 +119,7 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.*;
 
+import static java.lang.Thread.sleep;
 import static mitll.langtest.server.PathHelper.ANSWERS;
 import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAGIC_ID;
 
@@ -183,6 +186,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IUserSecurityManager userSecurityManager;
   private DominoExerciseDAO dominoExerciseDAO;
   private boolean hasValidDB = false;
+  private IDialogDAO dialogDAO;
+  private IDialogSessionDAO dialogSessionDAO;
+  private IRelatedResultDAO relatedResultDAO;
+  private IImageDAO imageDAO;
+  private IPendingUserDAO pendingUserDAO;
 
   public DatabaseImpl() {
   }
@@ -337,7 +345,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @see #DatabaseImpl(ServerProperties, PathHelper, LogAndNotify, ServletContext)
    */
-  private void initializeDAOs(PathHelper pathHelper, DominoUserDAOImpl dominoUserDAO) {
+  private void initializeDAOs(PathHelper pathHelper, IUserDAO dominoUserDAO) {
     eventDAO = new SlickEventImpl(dbConnection);
 
     this.userDAO = dominoUserDAO;
@@ -356,7 +364,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     SlickUserListExerciseJoinDAO userListExerciseJoinDAO = new SlickUserListExerciseJoinDAO(this, dbConnection);
     IUserListDAO userListDAO = new SlickUserListDAO(this, dbConnection, this.userDAO, userExerciseDAO, projectDAO);
-    IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO.getDefectDetector());
+    IAnnotationDAO annotationDAO = new SlickAnnotationDAO(this, dbConnection, this.userDAO);
 
     IReviewedDAO reviewedDAO = new SlickReviewedDAO(this, dbConnection, true);
     IReviewedDAO secondStateDAO = new SlickReviewedDAO(this, dbConnection, false);
@@ -373,11 +381,51 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
+    pendingUserDAO = new PendingUserDAO(dbConnection);
+    finalSetup(slickAudioDAO);
+  }
 
+  private void finalSetup(SlickAudioDAO slickAudioDAO) {
+    makeDialogDAOs();
     createTables();
 
+    new Thread(() -> {
+      while (getUserDAO().getDefaultUser() < 1) {
+        try {
+          sleep(1000);
+          logger.info("finalSetup ---> no default user yet.....");
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
 
-    userDAO.ensureDefaultUsers();
+      {
+        int defaultUser = getUserDAO().getDefaultUser();
+        imageDAO.ensureDefault(projectDAO.getDefault());
+//        logger.info("finalSetup : default user " + defaultUser);
+        dialogDAO.ensureDefault(defaultUser);
+      }
+    }, "ensureDefaultUser").start();
+
+    afterDAOSetup(slickAudioDAO);
+
+    logger.info("finalSetup : tables = " + getTables());
+  }
+
+  /**
+   * Image DAO must go first - dialog default references it.
+   */
+  private void makeDialogDAOs() {
+    imageDAO = new ImageDAO(this, dbConnection);
+    dialogDAO = new DialogDAO(this, dbConnection, this);
+    dialogSessionDAO = new DialogSessionDAO(this, dbConnection);
+    relatedResultDAO = new RelatedResultDAO(this, dbConnection);
+  }
+
+  private void afterDAOSetup(SlickAudioDAO slickAudioDAO) {
+    if (userDAO instanceof UserDAO) {
+      userDAO.ensureDefaultUsers();
+    }
     int defaultProject = getDefaultProject();
     // make sure we have a template exercise
 
@@ -504,7 +552,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     List<Integer> justTheseIDs = new ArrayList<>();
 
     if (isChinese) {
-      SlickUserExerciseDAO userExerciseDAO = (SlickUserExerciseDAO) getUserExerciseDAO();
+      IUserExerciseDAO userExerciseDAO = getUserExerciseDAO();
       if (!userExerciseDAO.updateProjectChinese(oldID, newprojid, justTheseIDs)) {
         logger.warn("couldn't update chinese exercises dao to " + newprojid);
       } else {
@@ -645,7 +693,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   private DBConnection getDbConnection() {
-    DBConnection dbConnection = new DBConnection(getDbConfig());
+    String dbConfig = getDbConfig();
+    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
+
+    DBConnection dbConnection = new DBConnection(dbConfig);
+    dbConnection.addColumn();
 //    logger.info("getDbConnection using " + serverProps.getDBConfig() + " : " + dbConnection);
     return dbConnection;
   }
@@ -730,6 +782,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  @Override
+  public ISection<IDialog> getDialogSectionHelper(int projectid) {
+    if (projectid == -1) {
+      return null;
+    } else {
+      return getDialogSectionHelperForProject(projectid);
+    }
+  }
+
   @Nullable
   private ISection<CommonExercise> getSectionHelperForProject(int projectid) {
     Project project = getProject(projectid);
@@ -741,6 +802,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  @Nullable
+  private ISection<IDialog> getDialogSectionHelperForProject(int projectid) {
+    Project project = getProject(projectid);
+    if (project == null) {
+      logger.error("getSectionHelper huh? couldn't find project with id " + projectid);
+      return null;
+    } else {
+      return project.getDialogSectionHelper();
+    }
+  }
 
   private boolean isAmas() {
     return serverProps.isAMAS();
@@ -825,9 +896,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public ExerciseDAO<CommonExercise> getExerciseDAO(int projectid) {
     Project project = getProject(projectid);
-    logger.debug("getExerciseDAO " + projectid + " found project " + project);
+    // logger.debug("getExerciseDAO " + projectid + " found project " + project);
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
-    logger.debug("getExerciseDAO " + projectid + " found exercise dao " + exerciseDAO);
+    // logger.debug("getExerciseDAO " + projectid + " found exercise dao " + exerciseDAO);
     return exerciseDAO;
   }
 
@@ -857,6 +928,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param userid
    * @param projectid
+   * @see mitll.langtest.server.rest.RestUserManagement#tryToLogin
    * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
    */
   @Override
@@ -864,15 +936,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     logger.info("rememberUsersCurrentProject user " + userid + " -> " + projectid);
     getUserProjectDAO().upsert(userid, projectid);
     getUserListManager().createFavorites(userid, projectid);
-  }
-
-  /**
-   * @param userid
-   * @see mitll.langtest.server.services.OpenUserServiceImpl#forgetProject
-   */
-  @Override
-  public void forgetProject(int userid) {
-    getUserProjectDAO().forget(userid);
   }
 
   /**
@@ -891,8 +954,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #setStartupInfo(User)
    * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
    */
-  @Override
-  public void setStartupInfo(User userWhere, int projid) {
+  private void setStartupInfo(User userWhere, int projid) {
     projectManagement.setStartupInfo(userWhere, projid);
   }
 
@@ -1038,18 +1100,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * TODO : why is this so confusing???
    *
-   * @param userExercise
+   * @param clientExercise
    * @param keepAudio
    * @seex mitll.langtest.server.services.ListServiceImpl#editItem
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   @Override
-  public CommonExercise editItem(CommonExercise userExercise, boolean keepAudio) {
+  public void editItem(ClientExercise clientExercise, boolean keepAudio) {
+    CommonExercise userExercise = clientExercise.asCommon();
     int id = userExercise.getID();
     logger.debug("editItem exercise #" + id +
         " keep audio " + keepAudio +
         " mediaDir : " + getServerProps().getMediaDir() +
         " audio " + userExercise.getAudioAttributes());
+
     int projectID = userExercise.getProjectID();
     if (projectID < 0) {
       logger.warn("huh? no project id on user exer " + userExercise);
@@ -1101,7 +1165,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (isPredef) {
       getSectionHelper(projectID).refreshExercise(userExercise);
     }
-    return userExercise;
+    //return userExercise;
   }
 
   private void clearDefects(Set<AudioAttribute> defects, CommonExercise exercise) {
@@ -1272,49 +1336,62 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   public void createTables() {
-    //  logger.info("createTables create slick tables - has " + dbConnection.getTables());
-    List<IDAO> idaos = Arrays.asList(
-        getProjectDAO(),
-        userExerciseDAO,
-        ((SlickUserExerciseDAO) userExerciseDAO).getRelatedExercise(),
-        ((SlickUserExerciseDAO) userExerciseDAO).getExerciseAttribute(),
-        ((SlickUserExerciseDAO) userExerciseDAO).getExerciseAttributeJoin(),
-        getEventDAO(),
-        getResultDAO(),
-        getAudioDAO(),
-        getAnnotationDAO(),
-        getWordDAO(),
-        getPhoneDAO(),
-        getRefResultDAO(),
-        getReviewedDAO(),
-        getSecondStateDAO(),
-        ((ProjectDAO) getProjectDAO()).getProjectPropertyDAO(),
-        getUserProjectDAO(),
-        userSessionDAO,
-        dliClassDAO,
-        dliClassJoinDAO
-    );
-
+    logger.info("createTables create slick tables - has " + getTables());
     List<String> created = new ArrayList<>();
-    for (IDAO dao : idaos) createIfNotThere(dao, created);
+
+    List<String> known = dbConnection.getJavaListOfTables();
+    {
+      Arrays.asList(
+          getProjectDAO(),
+          userExerciseDAO,
+          userExerciseDAO.getRelatedExercise(),
+          userExerciseDAO.getRelatedCoreExercise(),
+          userExerciseDAO.getExerciseAttribute(),
+          userExerciseDAO.getExerciseAttributeJoin(),
+          getEventDAO(),
+          getResultDAO(),
+          getAudioDAO(),
+          getAnnotationDAO(),
+          getWordDAO(),
+          getPhoneDAO(),
+          getRefResultDAO(),
+          getReviewedDAO(),
+          getSecondStateDAO(),
+          ((ProjectDAO) getProjectDAO()).getProjectPropertyDAO(),
+          getUserProjectDAO(),
+          userSessionDAO,
+          dliClassDAO,
+          dliClassJoinDAO,
+          dialogDAO,
+          dialogDAO.getDialogAttributeJoinHelper(),
+          dialogSessionDAO,
+          relatedResultDAO,
+          imageDAO,
+          pendingUserDAO
+      ).forEach(idao -> {
+        if (createIfNotThere(idao, known)) {
+          created.add(idao.getName());
+        }
+      });
+    }
+
     userListManager.createTables(dbConnection, created);
 
     if (!created.isEmpty()) {
       logger.info("createTables created slick tables          : " + created);
       logger.info("createTables after create slick tables - has " + getTables());
     }
-
-    dbConnection.addColumn();
   }
 
-  private void createIfNotThere(IDAO slickUserDAO, List<String> created) {
+  private boolean createIfNotThere(IDAO slickUserDAO, List<String> known) {
     String name = slickUserDAO.getName();
-    if (!dbConnection.hasTable(name)) {
+    if (!known.contains(name)) {
       logger.info("createIfNotThere create " + name);
       slickUserDAO.createTable();
-      created.add(name);
+      return true;
     } else {
-      //   logger.debug("createIfNotThere has table " + name);
+//      logger.info("createIfNotThere has table " + name);
+      return false;
     }
   }
 
@@ -1422,14 +1499,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.error("close got " + e, e);
     }
 
-   // reportHelper.interrupt();
-
     if (mailSupport != null) {
       mailSupport.stopHeartbeat();
     }
     try {
 
-    //  logger.info(this.getClass() + " : closing db connection : " + dbConnection);
+      //  logger.info(this.getClass() + " : closing db connection : " + dbConnection);
       dbConnection.close();
     } catch (Exception e) {
       logger.error("close got " + e, e);
@@ -1474,7 +1549,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }*/
 
     if (toRet == null) {
-      logger.info("getCustomOrPredefExercise OK - try all projects for exercise #" + id);
+      logger.info("getCustomOrPredefExercise can't find ex in project #" + projid +
+          ", so try all projects for exercise #" + id);
       toRet = projectManagement.getExercise(id);
     }
 
@@ -1503,11 +1579,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see SlickPhoneDAO#getPhoneReport
    */
   @Nullable
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender,
-                               int userid,
-                               int exid,
-                               Project project,
-                               Map<Integer, MiniUser> idToMini) {
+  public NativeAudioResult getNativeAudio(Map<Integer, MiniUser.Gender> userToGender,
+                                          int userid,
+                                          int exid,
+                                          Project project,
+                                          Map<Integer, MiniUser> idToMini) {
     CommonExercise exercise = project.getExerciseByID(exid);
 
     if (exercise == null && exid != getUserExerciseDAO().getUnknownExerciseID()) {
@@ -1520,7 +1596,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
       exercise = getUserExerciseByExID(exid, swap);
     }
 
-    return audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguage(), idToMini);
+    String nativeAudio = audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguageEnum(), idToMini);
+    return new NativeAudioResult(nativeAudio, exercise != null && exercise.isContext());
+    // return nativeAudio;
   }
 
   /**
@@ -1577,8 +1655,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
         " selection " + typeToSection);
 
     if (options.getIncludeAudio()) {
-      audioDAO.attachAudioToExercises(exercisesForSelectionState, language);
-      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, language);
+      Language languageEnum = project.getLanguageEnum();
+      audioDAO.attachAudioToExercises(exercisesForSelectionState, languageEnum, projectid);
+      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, languageEnum);
     }
 
     new AudioExport(getServerProps())
@@ -1598,8 +1677,18 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   @Override
+  public Language getLanguageEnum(CommonExercise ex) {
+    return getLanguageEnum(ex.getProjectID());
+  }
+
+  @Override
   public String getLanguage(int projectid) {
     return getLanguage(getProject(projectid));
+  }
+
+  public Language getLanguageEnum(int projectid) {
+    Project project = getProject(projectid);
+    return project == null ? Language.UNKNOWN : project.getLanguageEnum();
   }
 
   private String getLanguage(Project project) {
@@ -1614,6 +1703,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   private String getOldLanguage(ServerProperties serverProps) {
     return serverProps.getLanguage();
+  }
+
+  public FilterResponse getTypeToValues(FilterRequest request, int projid, int userid) {
+    return getFilterResponseHelper().getTypeToValues(request, projid, userid);
+  }
+
+  public List<CommonExercise> filterExercises(ExerciseListRequest request,
+                                              List<CommonExercise> exercises,
+                                              int projid) {
+    return getFilterResponseHelper().filterExercises(request, exercises, projid);
+  }
+
+  public FilterResponseHelper getFilterResponseHelper() {
+    return new FilterResponseHelper(this);
   }
 
   /**
@@ -1631,7 +1734,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
                                    int listid,
                                    int projectid,
                                    AudioExportOptions options) throws Exception {
-    String language = getLanguage(projectid);
+    Language language = getLanguageEnum(projectid);
     if (listid == -1) return language + "_Unknown";
 
     UserList<CommonShell> userListByID = getUserListManager().getSimpleUserListByID(listid);
@@ -1659,7 +1762,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           userListByID.getName(),
           getSectionHelper(projectid),
           copyAsExercises,
-          language,
+          language.getLanguage(),
           listid == COMMENT_MAGIC_ID,
           options);
     }
@@ -1680,7 +1783,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Project project = getProject(projectid);
     String language = project.getLanguage();
 
-    getAudioDAO().attachAudioToExercises(exercises, language);
+    getAudioDAO().attachAudioToExercises(exercises, project.getLanguageEnum(), project.getID());
 
     {
       String name = project.getName();
@@ -1704,6 +1807,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * Sort by english if normal list
    *
+   * TODO : when would we want the commented list???
+   *
    * @param listid
    * @param projectid
    * @return
@@ -1726,7 +1831,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       return list;
     } else {
-      return getUserListManager().getCommentedListEx(projectid);
+      logger.error("getUserListByIDExercises returning commented list? " + listid + " vs " + COMMENT_MAGIC_ID);
+      //return getUserListManager().getCommentedListEx(projectid, false);
+      return new UserList<>();
     }
   }
 
@@ -1761,9 +1868,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
       } else {
         logger.info("doReport : not sending email report since this is not Sunday...");
       }
-      //reportHelper.tryTomorrow(this);
     } else {
-      logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
+      // logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
     }
   }
 
@@ -1879,16 +1985,19 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  public RecordWordAndPhone getRecordWordAndPhone() {
+    return recordWordAndPhone;
+  }
+
   /**
    * @param language
    * @param path
    * @return
-   * @see mitll.langtest.server.database.phone.BasePhoneDAO#getAndRememberWordAndScore(String, Map, Map, int, String, String, long, String, int, String, int, String, int, float, String)
+   * @see mitll.langtest.server.database.phone.BasePhoneDAO#getAndRememberWordAndScore
    */
   @Override
   public String getWebPageAudioRef(String language, String path) {
-    String relPrefix = getRelPrefix(language);
-    return getWebPageAudioRefWithPrefix(relPrefix, path);
+    return getWebPageAudioRefWithPrefix(getRelPrefix(language), path);
   }
 
   @Override
@@ -1903,7 +2012,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   /**
    * @param language
    * @return
-   * @see SlickResultDAO#getCorrectAndScores(Collection, String)
+   * @see SlickResultDAO#getCorrectAndScores
    */
   @Override
   public String getRelPrefix(String language) {
@@ -1979,6 +2088,23 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return audioDAO;
   }
 
+  public IDialogDAO getDialogDAO() {
+    return dialogDAO;
+  }
+
+  public IDialogSessionDAO getDialogSessionDAO() {
+    return dialogSessionDAO;
+  }
+
+  public IRelatedResultDAO getRelatedResultDAO() {
+    return relatedResultDAO;
+  }
+
+  @Override
+  public IImageDAO getImageDAO() {
+    return imageDAO;
+  }
+
   @Override
   public IWordDAO getWordDAO() {
     return wordDAO;
@@ -1992,6 +2118,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public IDLIClassJoinDAO getDliClassJoinDAO() {
     return dliClassJoinDAO;
+  }
+
+  @Override
+  public IPendingUserDAO getPendingUserDAO() {
+    return pendingUserDAO;
   }
 
   @Override

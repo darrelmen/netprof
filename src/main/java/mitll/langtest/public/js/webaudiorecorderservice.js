@@ -35,14 +35,28 @@
     var WORKER_PATH = 'langtest/js/recorderWorker.js';
 
     window.Recorder = function (source, cfg) {
-//        console.log("making recorder  at " + new Date());
+        console.log("window.Recorder : making recorder at " + new Date());
 
         var config = cfg || {};
         var bufferLen = config.bufferLen || 4096;
+
+        var recording = false,
+            currCallback, start, totalSamples, didStream;
+
+
         this.context = source.context;
         this.node = (this.context.createScriptProcessor ||
             this.context.createJavaScriptNode).call(this.context, bufferLen, 2, 2);
         var worker = new Worker(config.workerPath || WORKER_PATH);
+
+
+        var silenceDetectionConfig = {};
+
+        // how long of a silence before we start saying we've found silence
+        silenceDetectionConfig.time = 1000;
+        silenceDetectionConfig.amplitude = 0.2;
+
+
         worker.postMessage({
             command: 'init',
             config: {
@@ -50,18 +64,25 @@
             }
         });
 
-        var recording = false,
-            currCallback;
 
+        // when audio samples come in, they come in here and passed to the worker
         this.node.onaudioprocess = function (e) {
-            if (!recording) return;
-            worker.postMessage({
-                command: 'record',
-                buffer: [
-                    e.inputBuffer.getChannelData(0),
-                    e.inputBuffer.getChannelData(1)
-                ]
-            });
+            if (recording) {
+                //      console.log("onaudioprocess recording...");
+                var mytype = config.type || 'audio/wav';
+                worker.postMessage({
+                    command: 'record',
+                    buffer: [
+                        e.inputBuffer.getChannelData(0),
+                        e.inputBuffer.getChannelData(1)
+                    ],
+                    type: mytype
+                });
+                analyse();
+            }
+            else {
+                //console.log("onaudioprocess not recording...");
+            }
         };
 
         this.configure = function (cfg) {
@@ -77,13 +98,16 @@
             //  this.node.connect(this.context.destination);    //this should not be necessary
             //source.start();
             recording = true;
-//      console.log("record " + "  at " + new Date().getTime());
+            start = Date.now();
+            totalSamples = 0;
+            //   console.log("Recorder.record at " + new Date().getTime());
         };
 
         this.stop = function () {
             //    source.disconnect(this.node);
             //    this.node.disconnect(this.context.destination);    //this should not be necessary
             recording = false;
+            // didStream = false;
 //      console.log("stop " + "  at " + new Date().getTime());
         };
 
@@ -111,12 +135,88 @@
         this.exportMonoWAV = function (cb, type) {
             currCallback = cb || config.callback;
             type = type || config.type || 'audio/wav';
-//      console.log("exportMonoWAV " + "  at " + new Date().getTime());
-            if (!currCallback) throw new Error('Callback not set');
+            console.log("exportMonoWAV " + "  at " + new Date().getTime());
+            //  if (!currCallback) throw new Error('Callback not set');
             worker.postMessage({
                 command: 'exportMonoWAV',
                 type: type
             });
+        };
+
+        // see webaudiorecorder serviceStartStream
+        this.serviceStartStream = function (url, exid, reqid, isreference, audiotype, dialogSessionID, recordingSession, cb) {
+            currCallback = cb || config.callback;
+
+            if (url) {
+                // console.log('service.startStream url ' + url);
+            }
+            else {
+                console.log('service.startStream url undefined');
+            }
+            //  if (!currCallback) throw new Error('Callback not set');
+            didStream = true;
+
+            worker.postMessage({
+                command: 'startStream',
+                url: url,
+                exid: exid,
+                reqid: reqid,
+                isreference: isreference,
+                audiotype: audiotype,
+                dialogSessionID: dialogSessionID,
+                recordingSession: recordingSession
+            });
+        };
+
+        this.serviceStopStream = function (abort, cb) {
+            currCallback = cb || config.callback;
+
+            if (didStream) {
+                //   source.disconnect(analyser);
+                didStream = false;
+                currCallback = cb || config.callback;
+
+                //  console.log("serviceStopStream " + " abort " + abort + " at " + new Date().getTime());
+
+                if (!currCallback) throw new Error('Callback not set');
+                worker.postMessage({
+                    command: 'stopStream',
+                    type: 'audio/wav',
+                    abort: abort
+                });
+            }
+            else console.log("stopStream - never started.")
+        };
+
+        // get reply from worker
+        worker.onmessage = function (e) {
+            if (currCallback) {
+
+                if (e.data.startsWith("{\"status\"")) { // stop recording!
+                    console.log("stop recording! ", e.data);
+                    recording = false;
+
+                    // if (source.context && source.context.state === 'running') {
+                    //     source.context.suspend().then(function () {
+                    //         __log('worker.onmessage suspended recording...');
+                    //         source.stop();
+                    //     });
+                    // }
+                }
+                else {
+                    //  console.log("worker.onmessage ", e.data);
+
+                }
+                if (typeof currCallback === 'function') {
+                    currCallback(e.data);
+                }
+                else {
+                    console.log("currCallback not a function")
+                }
+            }
+            else {
+                console.log("currCallback not set - maybe that's ok...?")
+            }
         };
 
         this.getAllZero = function (cb) {
@@ -124,12 +224,63 @@
             worker.postMessage({command: 'getAllZero'})
         };
 
-        worker.onmessage = function (e) {
-            var blob = e.data;
-            currCallback(blob);
+        /**
+         * Checks the time domain data to see if the amplitude of the audio waveform is more than
+         * the silence threshold. If it is, "noise" has been detected and it resets the start time.
+         * If the elapsed time reaches the time threshold the silence callback is called. If there is a
+         * visualizationCallback it invokes the visualization callback with the time domain data.
+         */
+        var analyse = function () {
+            analyser.fftSize = 2048;
+            var bufferLength = analyser.fftSize;
+            var dataArray = new Uint8Array(bufferLength);
+            var amplitude = silenceDetectionConfig.amplitude;
+
+            var max = 0;
+            var nonzero = 0;
+            analyser.getByteTimeDomainData(dataArray);
+
+            for (var i = 0; i < bufferLength; i++) {
+                // Normalize between -1 and 1.
+                var curr_value_time = (dataArray[i] / 128) - 1.0;
+                if (curr_value_time > amplitude || curr_value_time < (-1 * amplitude)) {
+                    start = Date.now();
+                    if (curr_value_time > max) {
+                        max = curr_value_time;
+                    }
+                }
+                else if (curr_value_time !== 0) {
+                    nonzero = curr_value_time;
+                }
+            }
+            var newtime = Date.now();
+            var elapsedTime = newtime - start;
+
+            var time = silenceDetectionConfig.time;
+            if (elapsedTime > time) {
+                /*                console.log("analyze : SILENCE! elapsedTime is " + elapsedTime + " vs " + time + " max " + max + "/" + nonzero +
+                                    " start " + start);*/
+                silenceDetected();
+            }
+            /*            else if (max > 0) {
+                            console.log("analyze : VAD      elapsedTime is " + elapsedTime + " vs " + time + " max " + max + " start " + start);
+                        }*/
+            /*         else {
+                         console.log("analyze : SHORT SL elapsedTime is " + elapsedTime + " vs " + time + " max " + max + "/" +nonzero+
+                             " start " + start);
+                     }*/
+
         };
 
-        source.connect(this.node);
+
+        var analyser = source.context.createAnalyser();
+        analyser.minDecibels = -90;
+        analyser.maxDecibels = -10;
+        analyser.smoothingTimeConstant = 0.85;
+
+        source.connect(analyser);
+        analyser.connect(this.node);
+
         this.node.connect(this.context.destination);    //this should not be necessary
     };
 

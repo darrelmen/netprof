@@ -16,12 +16,10 @@ import java.util.List;
 public class Search<T extends CommonExercise> {
   private static final Logger logger = LogManager.getLogger(Search.class);
 
-  //private DatabaseServices database;
-  private ProjectServices projectServices;
+  private final ProjectServices projectServices;
 
   public Search(ProjectServices projectServices) {
     this.projectServices = projectServices;
-    //this.database = database;
   }
 
   /**
@@ -64,7 +62,7 @@ public class Search<T extends CommonExercise> {
                                                                                       int projectID,
                                                                                       boolean matchOnContext) {
     ExerciseTrie<T> trie = predefExercises ? fullTrie :
-        new ExerciseTrie<>(exercises, getLanguage(projectID), getSmallVocabDecoder(projectID), true);
+        new ExerciseTrie<>(exercises, getLanguage(projectID), getSmallVocabDecoder(projectID), true, false);
     List<T> basicExercises = trie.getExercises(prefix);
     Project project = getProject(projectID);
     ExerciseTrie<T> fullContextTrie = !matchOnContext || project == null ? null : (ExerciseTrie<T>) project.getFullContextTrie();
@@ -96,18 +94,7 @@ public class Search<T extends CommonExercise> {
           "\n\tprefix    " + prefix +
           "\n\tmatches   " + basicExercises.size());
     }
- /*   int exid = getExid(prefix);
 
-
-    List<T> byID = new ArrayList<>();
-
-    if (exid != -1) {
-      T customOrPredefExercise = (T) database.getCustomOrPredefExercise(projectID, exid);
-      if (customOrPredefExercise != null) {
-        byID.add(customOrPredefExercise);
-      }
-      else logger.warn("getExercisesForSearchWithTrie no ex for " +projectID + " = " + exid);
-    }*/
     return new TripleExercises<T>(
         Collections.emptyList(),
         basicExercises,

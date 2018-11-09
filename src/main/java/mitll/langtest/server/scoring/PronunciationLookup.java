@@ -3,6 +3,7 @@ package mitll.langtest.server.scoring;
 
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.LTS;
 import org.apache.commons.lang.StringUtils;
@@ -11,10 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-
-import static mitll.langtest.server.autocrt.DecodeCorrectnessChecker.MANDARIN;
-import static mitll.langtest.server.scoring.Scoring.JAPANESE;
-import static mitll.langtest.server.scoring.Scoring.KOREAN;
+import java.util.List;
 
 public class PronunciationLookup implements IPronunciationLookup {
   private static final Logger logger = LogManager.getLogger(PronunciationLookup.class);
@@ -36,9 +34,13 @@ public class PronunciationLookup implements IPronunciationLookup {
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
   private final LTS lts;
-  private boolean korean, russian, french, german, removeAllPunct, isAsianLanguage;
-  private boolean hasLTS;
-  private boolean emptyLTS;
+  private final boolean korean;
+  private final boolean russian;
+  private final boolean french;
+  private final boolean removeAllPunct;
+  private final boolean isAsianLanguage;
+  private final boolean hasLTS;
+  private final boolean emptyLTS;
 
   /**
    * @param dictionary
@@ -52,12 +54,12 @@ public class PronunciationLookup implements IPronunciationLookup {
     hasLTS = lts != null;
     emptyLTS = hasLTS && LTSFactory.isEmpty(lts);
 
-    String language = project.getLanguage();
-    korean = language.equalsIgnoreCase("korean");
-    russian = language.equalsIgnoreCase("russian");
-    french = language.equalsIgnoreCase("french");
-    german = language.equalsIgnoreCase("german");
-    removeAllPunct = !language.equalsIgnoreCase("french");
+    Language language = project.getLanguageEnum();
+    korean = language == Language.KOREAN;
+    russian = language == Language.RUSSIAN;
+    french = language == Language.FRENCH;
+    //boolean german = language == Language.GERMAN;
+    removeAllPunct = language != Language.FRENCH;
     this.isAsianLanguage = isAsianLanguage(language);
 
     makeDecoder();
@@ -69,10 +71,10 @@ public class PronunciationLookup implements IPronunciationLookup {
     }
   }
 
-  private boolean isAsianLanguage(String language) {
-    return language.equalsIgnoreCase(MANDARIN) ||
-        language.equalsIgnoreCase(JAPANESE) ||
-        language.equalsIgnoreCase(KOREAN);
+  private boolean isAsianLanguage(Language language) {
+    return language == Language.MANDARIN ||
+        language == Language.JAPANESE ||
+        language == Language.KOREAN;
   }
 
   /**
@@ -85,19 +87,20 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @param transcript
    * @param possibleProns
    * @return the dictionary for dcodr
-   * @see ASR#getHydraDict
+   * @see ASRWebserviceScoring#getHydraDict
    */
   @Override
-  public String createHydraDict(String transcript, String transliteration, List<WordAndProns> possibleProns) {
+  public TransNormDict createHydraDict(String transcript, String transliteration, List<WordAndProns> possibleProns) {
     if (lts == null) {
       logger.warn(this + " : createHydraDict : LTS is null???");
     }
 
     String dict = "[";
-    dict += getPronunciationsFromDictOrLTS(transcript, transliteration, false, true, possibleProns);
+    TransNormDict pronunciationsFromDictOrLTS = getPronunciationsFromDictOrLTS(transcript, transliteration, false, true, possibleProns);
+    dict += pronunciationsFromDictOrLTS.getDict();
     dict += "UNKNOWNMODEL,+UNK+;<s>,sil;</s>,sil;SIL,sil";
     dict += "]";
-    return dict;
+    return new TransNormDict(transcript, pronunciationsFromDictOrLTS.getNormTranscript(), dict);
   }
 
   private final Set<String> seen = new HashSet<>();
@@ -171,11 +174,11 @@ public class PronunciationLookup implements IPronunciationLookup {
    * @see mitll.langtest.server.audio.AudioFileHelper#getPronunciationsFromDictOrLTS
    */
   @Override
-  public String getPronunciationsFromDictOrLTS(String transcript,
-                                               String transliteration,
-                                               boolean justPhones,
-                                               boolean makeCandidates,
-                                               List<WordAndProns> possible) {
+  public TransNormDict getPronunciationsFromDictOrLTS(String transcript,
+                                                      String transliteration,
+                                                      boolean justPhones,
+                                                      boolean makeCandidates,
+                                                      List<WordAndProns> possible) {
     StringBuilder dict = new StringBuilder();
 
 //    logger.info("getPronunciationsFromDictOrLTS ask for pron for '" + transcript + "'");
@@ -187,6 +190,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 //      logger.info("getPronunciationsFromDictOrLTS : transcript '" + transcript + "' = " + builder.toString());
 //    }
 
+    String norm = String.join(" ", transcriptTokens);
     int numTokens = transcriptTokens.size();
     int index = 0;
 
@@ -207,15 +211,17 @@ public class PronunciationLookup implements IPronunciationLookup {
         if ((easyMatch = htkDictionary.contains(word)) ||
             (lowerMatch = htkDictionary.contains(word.toLowerCase())) ||
             (russian && (stripMatch = htkDictionary.contains(getSmallVocabDecoder().removeAccents(word))))
-            ) {
+        ) {
           candidates.add(addDictMatch(justPhones, dict, word, easyMatch, lowerMatch, stripMatch));
         } else if (!removeAllPunct && !(wordProns = hasParts(word)).isEmpty()) {
           if (DEBUG || true) logger.info("getPronunciationsFromDictOrLTS add parts for '" + word + "'");
           candidates.add(addDictParts(justPhones, dict, wordProns, word));
         } else {  // not in the dictionary, let's ask LTS
           {
-            String optional = russian ? " or " + getSmallVocabDecoder().removeAccents(word) : "";
-            if (DEBUG) logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
+            if (DEBUG) {
+              String optional = russian ? " or " + getSmallVocabDecoder().removeAccents(word) : "";
+              logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
+            }
           }
           if (!hasLTS) {
             logger.warn("getPronunciationsFromDictOrLTS " + this + " : LTS is null???");
@@ -230,7 +236,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       }
     }
     possible.addAll(candidates);
-    return dict.toString();
+    return new TransNormDict(transcript, norm, dict.toString());
   }
 
   /**
@@ -325,11 +331,12 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   int n = 0;
+
   private void addUnkPron(String transcript, StringBuilder dict, List<WordAndProns> candidates, String word) {
     String s = emptyLTS ? " with empty LTS" : "";
     n++;
     if (n < 100 || n % 100 == 0) {
-      logger.warn("getPronunciationsFromDictOrLTS (" +n+
+      logger.warn("getPronunciationsFromDictOrLTS (" + n +
           ") using unk phone for '" + word + "' in " + transcript + s);
     }
     dict.append(getUnkPron(word));
@@ -375,7 +382,7 @@ public class PronunciationLookup implements IPronunciationLookup {
    */
   private List<List<String>> hasParts(String token) {
     String[] split = token.split("['\\-]");
-   // logger.info("hasParts for '" + token + "' found " + split.length + " parts.");
+    // logger.info("hasParts for '" + token + "' found " + split.length + " parts.");
 
     boolean match = true;
 
@@ -384,7 +391,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
     if (split.length > 1) {
       for (String part : split) {
-   //     logger.info("hasParts for '" + token + "' found " + part);
+        //     logger.info("hasParts for '" + token + "' found " + part);
         boolean easyMatch;
         match &=
             (easyMatch = htkDictionary.contains(part)) ||
@@ -401,7 +408,7 @@ public class PronunciationLookup implements IPronunciationLookup {
           for (int i = 0; i < size; i++) {
             String[] phoneSequence = prons.apply(i);
             List<String> e = Arrays.asList(phoneSequence);
-           // logger.warn("hasParts adding " + lookupToken + " : " + e);
+            // logger.warn("hasParts adding " + lookupToken + " : " + e);
             possibleProns.add(e);
           }
 

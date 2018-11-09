@@ -53,15 +53,18 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
 
   private final ReviewedDAOWrapper dao;
 
+  /**
+   * @param database
+   * @param dbConnection
+   * @param isReviewed
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
+   */
   public SlickReviewedDAO(Database database, DBConnection dbConnection, boolean isReviewed) {
     super(database);
     dao = isReviewed ? new ReviewedDAOWrapper(dbConnection) : new SecondStateDAOWrapper(dbConnection);
   }
 
-  public void createTable() {
-    //logger.info("dao is " + dao.getClass());
-    dao.createTable();
-  }
+  public void createTable() {  dao.createTable();  }
 
   @Override
   public String getName() {
@@ -70,9 +73,10 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
     return name;
   }
 
-  public void insert(SlickReviewed word) {
+/*  public void insert(SlickReviewed word) {
+    logger.info("insert " + word);
     dao.insert(word);
-  }
+  }*/
 
   public void addBulk(List<SlickReviewed> bulk) {
     dao.addBulk(bulk);
@@ -84,8 +88,16 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
     if (i == 0) logger.error("didn't delete reviewed by exercise " + exerciseID);
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.StateManager#setState
+   * @param exerciseID
+   * @param state
+   * @param creatorID
+   */
   @Override
   public void setState(int exerciseID, STATE state, long creatorID) {
+    logger.info("setState " + exerciseID + " state " + state + " by " + creatorID);
+
     dao.insert(toSlick(exerciseID, state, (int) creatorID));
   }
 
@@ -122,7 +134,6 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
   }
 
   /**
-   *
    * @return
    */
   @Override
@@ -134,6 +145,9 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
         ids.add(pair.getKey());
       }
     }
+
+    logger.info("getDefectExercises found " + ids.size() + " defect exercises.");
+
     return ids;
   }
 
@@ -152,6 +166,8 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
         ids.add(pair.getKey());
       }
     }
+
+    logger.info("getInspectedExercises found " + ids.size() + " inspected exercises.");
     return ids;
   }
 

@@ -61,7 +61,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public AnnotationDAO(Database database, IUserDAO userDAO) {
-    super(database, userDAO.getDefectDetector());
+    super(database, userDAO);
     try {
       createTable(database);
 //      populate(userDAO.getDefectDetector());
@@ -77,6 +77,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    *
    * @throws SQLException
    */
+/*
   private void markCorrectForDefectAudio() throws SQLException {
     String sql = "select annotation.uniqueid from annotation, audio where status='incorrect' and annotation.field = audio.audioref and audio.defect=true";
     Connection connection = database.getConnection(this.getClass().toString());
@@ -105,6 +106,8 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       finish(connection, statement);
     }
   }
+*/
+/*
 
   private String getInClause(Set<Long> longs) {
     StringBuilder buffer = new StringBuilder();
@@ -116,6 +119,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     if (s.endsWith(",")) s = s.substring(0, s.length() - 1);
     return s;
   }
+*/
 
 
   /**
@@ -149,7 +153,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     index(database);
   }
 
-  void index(Database database) throws SQLException {
+  private void index(Database database) throws SQLException {
     createIndex(database, EXERCISEID, ANNOTATION);
     createIndex(database, FIELD1, ANNOTATION);
     createIndex(database, MODIFIED, ANNOTATION);
@@ -160,7 +164,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * <p/>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#addAnnotation(int, String, String, String, int)
+   * @seex UserListManager#addAnnotation
    */
   @Override
   public void add(UserAnnotation annotation) {
@@ -249,20 +253,20 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * @return
    * @see mitll.langtest.server.database.custom.UserListManager#getAudioAnnos
    */
-  @Override
+/*  @Override
   public Collection<Integer> getAudioAnnos() {
-/*    String sql = "SELECT " +
+*//*    String sql = "SELECT " +
         EXERCISEID+ "," +
         FIELD+ "," +
         STATUS+
         " from " + ANNOTATION + " where " +
         FIELD +
-        " like'%.wav' order by field,modified desc";*/
+        " like'%.wav' order by field,modified desc";*//*
 
-/*    String sql2 = "select a.exerciseid, a.field, a.status, r.MaxTime \n" +
+*//*    String sql2 = "select a.exerciseid, a.field, a.status, r.MaxTime \n" +
         "from (\n" +
         "select exerciseid, field, MAX(modified) as MaxTime from annotation where field like'%.wav' group by exerciseid, field) r \n" +
-        "inner join annotation a on a.exerciseid = r.exerciseid AND a.modified = r.MaxTime order by a.exerciseid, a.field";*/
+        "inner join annotation a on a.exerciseid = r.exerciseid AND a.modified = r.MaxTime order by a.exerciseid, a.field";*//*
 
     String sql3 = "select a.exerciseid, a.status, r.MaxTime \n" +
         "from (\n" +
@@ -291,13 +295,13 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       logger.error("got " + e, e);
     }
     return new HashSet<>();
-  }
+  }*/
 
   /**
    * @param exerciseID
    * @return
    * @seex UserListManager#addAnnotations
-   * @see mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
+   * @seex mitll.langtest.server.LangTestDatabaseImpl#addAnnotations
    */
   @Override
   public Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID) {
@@ -313,7 +317,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
   }
 
   @Override
-  public Set<Integer> getExercisesWithIncorrectAnnotations(int projID) {
+  public Set<Integer> getExercisesWithIncorrectAnnotations(int projID, boolean isContext) {
     return getAnnotationExToCreator(true).keySet();
   }
 
@@ -327,6 +331,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
    * @param lists
    * @return
    */
+/*
   private Map<String, ExerciseAnnotation> getFieldToAnnotationMap(List<UserAnnotation> lists) {
     Map<String, UserAnnotation> fieldToAnno = new HashMap<>();
 
@@ -349,6 +354,7 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
       return fieldToAnnotation;
     }
   }
+*/
 
   /**
    * @param sql

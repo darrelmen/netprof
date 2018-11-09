@@ -3,8 +3,11 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.sound.HeadlessPlayAudio;
+import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.HashSet;
@@ -12,8 +15,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-public class AlignmentFetcher {
-  private Logger logger = Logger.getLogger("AlignmentFetcher");
+class AlignmentFetcher {
+  private final Logger logger = Logger.getLogger("AlignmentFetcher");
 
   private static final boolean DEBUG = false;
 
@@ -21,25 +24,32 @@ public class AlignmentFetcher {
   private final int exerciseID;
   private final ExerciseController controller;
   private final ListInterface<?, ?> listContainer;
-  private ChoicePlayAudioPanel playAudio;
-  private ChoicePlayAudioPanel contextPlay;
-  private int req;
-  private AudioChangeListener audioChangeListener, contextChangeListener;
 
+  private HeadlessPlayAudio playAudio;
+  private HeadlessPlayAudio contextPlay;
+  private int req;
+  private final AudioChangeListener audioChangeListener;
+  private final AudioChangeListener contextChangeListener;
+
+  /**
+   * @param exerciseID
+   * @param controller
+   * @param listContainer
+   * @param alignments
+   * @param audioChangeListener
+   * @param contextChangeListener
+   * @see DialogExercisePanel#DialogExercisePanel
+   */
   AlignmentFetcher(final int exerciseID,
                    final ExerciseController controller,
                    final ListInterface<?, ?> listContainer,
                    Map<Integer, AlignmentOutput> alignments,
-//                   ChoicePlayAudioPanel playAudio,
-//                   ChoicePlayAudioPanel contextPlay,
                    AudioChangeListener audioChangeListener,
                    AudioChangeListener contextChangeListener) {
     this.exerciseID = exerciseID;
     this.controller = controller;
     this.listContainer = listContainer;
     this.alignments = alignments;
-//    this.playAudio = playAudio;
-//    this.contextPlay = contextPlay;
     this.audioChangeListener = audioChangeListener;
     this.contextChangeListener = contextChangeListener;
   }
@@ -48,7 +58,7 @@ public class AlignmentFetcher {
    * @param listener
    * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio
    */
-  // @Override
+
   public void getRefAudio(RefAudioListener listener) {
     AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
     int refID = currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();
@@ -76,7 +86,8 @@ public class AlignmentFetcher {
       }
       if (addToRequest(currentAudioAttr)) req.add(currentAudioAttr.getUniqueID());
 
-      playAudio.getAllPossible().forEach(audioAttribute -> {
+      Set<AudioAttribute> allPossible = playAudio.getAllPossible();
+      allPossible.forEach(audioAttribute -> {
         if (addToRequest(audioAttribute)) req.add(audioAttribute.getUniqueID());
       });
     }
@@ -134,14 +145,14 @@ public class AlignmentFetcher {
 
       //registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
       listener.refAudioComplete();
-      if (listContainer.isCurrentReq(getReq())) {
+      if (listContainer == null || listContainer.isCurrentReq(getReq())) {
         cacheOthers(listener);
       }
     } else {
       ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
 
       // threre could be a race where we go to get this after we log out...
-      if (projectStartupInfo != null && listContainer.isCurrentReq(getReq())) {
+      if (projectStartupInfo != null && (listContainer == null || listContainer.isCurrentReq(getReq()))) {
         getAlignments(listener, currentAudioAttr, refID, contextAudioAttr, contextRefID, req, projectStartupInfo.getProjectid());
       }
     }
@@ -151,12 +162,10 @@ public class AlignmentFetcher {
    * @param req
    * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
    */
-  //@Override
   public void setReq(int req) {
     this.req = req;
   }
 
-  // @Override
   public int getReq() {
     return req;
   }
@@ -190,10 +199,20 @@ public class AlignmentFetcher {
     }
   }
 
-  public void rememberAlignment(int refID, AlignmentOutput alignmentOutput) {
+  /**
+   * @param refID
+   * @param alignmentOutput
+   * @see #addToRequest
+   */
+  void rememberAlignment(int refID, AlignmentOutput alignmentOutput) {
     alignments.put(refID, alignmentOutput);
   }
 
+  /**
+   * @param refID
+   * @return
+   * @see DialogExercisePanel#audioChanged(int, long)
+   */
   public AlignmentOutput getAlignment(int refID) {
     return alignments.get(refID);
   }
@@ -216,14 +235,19 @@ public class AlignmentFetcher {
     if (projectStartupInfo != null && projectStartupInfo.isHasModel()) {
       controller.getScoringService().getAlignments(
           projectid,
-          req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+          req,
+          new AsyncCallback<Map<Integer, AlignmentAndScore>>() {
             @Override
             public void onFailure(Throwable caught) {
               controller.handleNonFatalError("get alignments", caught);
             }
 
             @Override
-            public void onSuccess(Map<Integer, AlignmentOutput> result) {
+            public void onSuccess(Map<Integer, AlignmentAndScore> result) {
+              if (DEBUG){
+                result.forEach((k, v) -> logger.info("getAlignments got " + k + " = " + v));
+              }
+
               alignments.putAll(result);
 
               if (needToShowRef) {
@@ -256,14 +280,14 @@ public class AlignmentFetcher {
       ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
       if (projectStartupInfo != null) {
         controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
-            req, new AsyncCallback<Map<Integer, AlignmentOutput>>() {
+            req, new AsyncCallback<Map<Integer, AlignmentAndScore>>() {
               @Override
               public void onFailure(Throwable caught) {
                 controller.handleNonFatalError("cacheOthers get alignments", caught);
               }
 
               @Override
-              public void onSuccess(Map<Integer, AlignmentOutput> result) {
+              public void onSuccess(Map<Integer, AlignmentAndScore> result) {
                 alignments.putAll(result);
                 listener.refAudioComplete();
               }
@@ -276,10 +300,10 @@ public class AlignmentFetcher {
     return controller.getProjectStartupInfo();
   }
 
-  public Set<Integer> getReqAudio() {
+  Set<Integer> getReqAudio() {
     Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
 
-//    logger.info("getRefAudio " + req.size() + " audio attrs");
+//    logger.info("getRefAudio " + req.size() + " audio attrs : " +req);
     if (contextPlay != null) {
       req.addAll(contextPlay.getAllAudioIDs());
       //    logger.info("getRefAudio with context  " + req.size() + " audio attrs");
@@ -290,11 +314,11 @@ public class AlignmentFetcher {
     return req;
   }
 
-  public void setPlayAudio(ChoicePlayAudioPanel playAudio) {
+  public void setPlayAudio(HeadlessPlayAudio playAudio) {
     this.playAudio = playAudio;
   }
 
-  public void setContextPlay(ChoicePlayAudioPanel contextPlay) {
+  void setContextPlay(PlayAudioPanel contextPlay) {
     this.contextPlay = contextPlay;
   }
 }

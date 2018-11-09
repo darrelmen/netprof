@@ -34,7 +34,6 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.client.ui.Anchor;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.user.*;
 import mitll.langtest.shared.user.*;
@@ -116,4 +115,6 @@ public interface OpenUserService extends RemoteService {
   HeartbeatStatus setCurrentUserToProject(int projid, String implVersion);
 
   HeartbeatStatus checkHeartbeat(String implVersion);
+
+  boolean isValidServer(String server);
 }

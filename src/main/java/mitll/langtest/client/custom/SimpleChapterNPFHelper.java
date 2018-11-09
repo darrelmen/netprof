@@ -44,12 +44,9 @@ import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.list.Reloadable;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.scoring.AlignmentOutput;
+import mitll.langtest.shared.exercise.HasID;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -61,7 +58,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends CommonExercise>
+public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends HasID>
     implements RequiresResize, ExerciseListContent {
   private final Logger logger = Logger.getLogger("SimpleChapterNPFHelper");
 
@@ -71,17 +68,16 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
   protected final ExerciseController controller;
   private ExerciseList npfExerciseList;
   protected final FlexListLayout<T, U> flexListLayout;
-
+  protected INavigation.VIEWS views;
 
   /**
    * @param controller
-   * @see RecorderNPFHelper#RecorderNPFHelper(ExerciseController, boolean, IViewContaner, INavigation.VIEWS)
+   * @see RecorderNPFHelper#RecorderNPFHelper(ExerciseController, boolean, INavigation.VIEWS)
    */
   public SimpleChapterNPFHelper(ExerciseController controller) {
     this.controller = controller;
     final SimpleChapterNPFHelper<T, U> outer = this;
     this.flexListLayout = getMyListLayout(outer);
-
   }
 
   protected abstract FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer);
@@ -92,13 +88,13 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @param instanceName flex, review, etc.
    * @see NewContentChooser#showView
    */
-  public void showNPF(DivWidget content, String instanceName) {
+  public void showNPF(DivWidget content, INavigation.VIEWS instanceName) {
     //   logger.info(getClass() + " : adding npf content instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
     if (!madeNPFContent || content.getWidgetCount() == 0) {
       madeNPFContent = true;
       //  logger.info("\t: showNPF : adding npf content instanceName = " + instanceName);
-      showContent(content, instanceName, true);
-      npfExerciseList.reloadWithCurrent();
+      showContent(content, instanceName);
+      //  npfExerciseList.reloadWithCurrent();
     } else {
       logger.warning("showNPF not doing anything for " + instanceName);
     }
@@ -106,24 +102,24 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
 
   /**
    * @param listContent
-   * @param instanceName
-   * @param fromClick
+   * @param views
    * @see #showNPF
    */
   @Override
-  public void showContent(Panel listContent, String instanceName, boolean fromClick) {
-    //logger.info(getClass() + " : showContent instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
-    Panel child = doNPF(instanceName);
+  public void showContent(Panel listContent, INavigation.VIEWS views) {
+    //logger.info(getClass() + " : showContent views = " + views);//+ " loadExercises " + loadExercises);
+//    Panel child = doNPF(views);
 
 /*
-    logger.info("showContent - (" + instanceName + " ) " +
+    logger.info("showContent - (" + views + " ) " +
         myView + " vs " + viewContaner.getCurrentView() +
         " adding " + child.getElement().getId() + " to " + listContent.getElement().getId() + " with " + listContent.getElement().getChildCount());
 */
 
-    listContent.add(child);
+    this.views = views;
+    listContent.add(doNPF(views));
  /*   if (fromClick) {
-      logger.info(getClass() + " : END showContent instanceName = " + instanceName);//+ " loadExercises " + loadExercises);
+      logger.info(getClass() + " : END showContent views = " + views);//+ " loadExercises " + loadExercises);
     }*/
   }
 
@@ -134,7 +130,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    * @return
    * @see ContentView#showContent
    */
-  private Panel doNPF(String instanceName) {
+  private Panel doNPF(INavigation.VIEWS instanceName) {
     // logger.info(getClass() + " : doNPF instanceName = " + instanceName);
     Panel widgets = flexListLayout.doInternalLayout(-1, instanceName, false);
     npfExerciseList = flexListLayout.npfExerciseList;
@@ -159,6 +155,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   @Override
   public void hideList() {
+    //  logger.info("hideList on exercise list : " + npfExerciseList.getElement().getId());
     npfExerciseList.hide();
   }
 
@@ -175,24 +172,6 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
    */
   protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);
 
-  protected ExercisePanelFactory<CommonShell, CommonExercise> getFactoryInject(
-      final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
-      PanelFactory panelFactory) {
-    return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
-      private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
-
-      @Override
-      public Panel getExercisePanel(CommonExercise e) {
-        return panelFactory.getExercisePanel(e);
-      }
-    };
-  }
-
-  public interface PanelFactory {
-    Panel getExercisePanel(CommonExercise e);
-  }
-
-
   @Override
   public void onResize() {
     if (flexListLayout != null) {
@@ -202,9 +181,8 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Co
     }
   }
 
-  protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonExercise> extends FlexListLayout<T, U> {
+  protected abstract static class MyFlexListLayout<T extends CommonShell, U extends CommonShell> extends FlexListLayout<T, U> {
     private final SimpleChapterNPFHelper<T, U> outer;
-    //private final Logger logger = Logger.getLogger("MyFlexListLayout");
 
     /**
      * @param controller

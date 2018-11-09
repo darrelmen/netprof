@@ -32,12 +32,13 @@
 
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.server.audio.image.ImageType;
-import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.database.result.ISlimResult;
+import mitll.langtest.shared.project.Language;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +58,7 @@ public class PrecalcScores {
   private boolean didRunNormally = false;
   private final ParseResultJson parseResultJson;
 
-  public PrecalcScores(ServerProperties serverProperties, String language) {
+  public PrecalcScores(ServerProperties serverProperties, Language language) {
     this.parseResultJson = new ParseResultJson(serverProperties, language);
   }
 
@@ -70,7 +71,7 @@ public class PrecalcScores {
    * @param language
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPrecalcScores
    */
-  public PrecalcScores(ServerProperties serverProperties, ISlimResult precalcResult, boolean usePhoneToDisplay, String language) {
+  public PrecalcScores(ServerProperties serverProperties, ISlimResult precalcResult, boolean usePhoneToDisplay, Language language) {
     this(serverProperties,language);
     this.precalcResult = precalcResult;
 
@@ -83,7 +84,7 @@ public class PrecalcScores {
     }
   }
 
-  public PrecalcScores(ServerProperties serverProperties, String json, String language) {
+  public PrecalcScores(ServerProperties serverProperties, String json, Language language) {
     this(serverProperties,language);
     this.didRunNormally = true;
     parseJSON(false, -100, json);
@@ -119,7 +120,7 @@ public class PrecalcScores {
 //    boolean avp = eventScores.isEmpty() ||
 //        (wordsMap.isEmpty() &&
 //            (precalcResult != null &&
-//                (precalcResult.getAudioType() != AudioType.DRILL || precalcResult.isCorrect()))
+//                (precalcResult.getAudioType() != AudioType.PRACTICE || precalcResult.isCorrect()))
 //        );
 //
 ////    boolean onlyUnknown = wordsMap != null && wordsMap.size() == 1 && wordsMap.containsKey(ASRWebserviceScoring.UNKNOWN_MODEL);

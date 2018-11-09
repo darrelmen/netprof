@@ -33,11 +33,11 @@
 package mitll.langtest.client.bootstrap;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.security.NPUserSecurityManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -49,6 +49,8 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class ItemSorter implements Comparator<String>, IsSerializable {
+ // private static transient final Logger logger = LogManager.getLogger(ItemSorter.class);
+
   private static final String PREFIX = ">";
 
   public ItemSorter() {
@@ -97,6 +99,18 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
     }
   }
 
+  /**
+   * Tries to do smart things with sorting labels like "1-2" so that "9-2" comes before "10-2".
+   * Also "1 2" or "10 2"
+   *
+   * Maybe overkill - can shoot yourself...
+   *
+   * Don't assume that the values are all like "Unit 5" - they could be "Unit Dude 5" etc.
+   *
+   * @param o1
+   * @param o2
+   * @return
+   */
   private int compoundCompare(String o1, String o2) {
     boolean firstHasSep = o1.contains("-");
     boolean secondHasSep = o2.contains("-");
@@ -115,11 +129,13 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
         right1 = first[1];
       }
     } else if (o1.contains(" ")) {
-      firstHasSep = true;
       String[] first = o1.split("\\s");
+      firstHasSep = true;
       left1 = first[0];
       if (first.length == 2) {
         right1 = first[1];
+      } else {
+        right1 = o1.substring(left1.length() + 1);
       }
     }
 
@@ -133,6 +149,8 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
       left2 = second[0];
       if (second.length == 2) {
         right2 = second[1];
+      } else {
+        right2 = o2.substring(left2.length() + 1);
       }
     }
 
@@ -141,6 +159,9 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
       if (leftCompare != 0) {
         return leftCompare;
       } else {
+        if (right1.isEmpty() && right2.isEmpty()) {
+   //       logger.error("huh? right 1 and 2 are empty for " + o1 + " and " + o2);
+        }
         return getIntCompare(right1, right2);
       }
     } else {
@@ -155,7 +176,7 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
   }
 
   private String dropGreater(String item) {
-    if (item.startsWith(PREFIX)) item = item.substring(1, item.length());
+    if (item.startsWith(PREFIX)) item = item.substring(1);
     return item;
   }
 

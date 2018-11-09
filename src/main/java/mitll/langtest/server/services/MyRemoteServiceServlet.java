@@ -45,10 +45,13 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
+import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -60,8 +63,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implements LogAndNotify {
@@ -73,6 +76,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    */
   public static final String DATABASE_REFERENCE = "databaseReference";
 
+  /**
+   * @see mitll.langtest.server.database.user.UserManagement
+   */
   public static final String USER_AGENT = "User-Agent";
   public static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
@@ -274,7 +280,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @throws DominoSessionException
    */
   User getSessionUser() throws DominoSessionException {
-    return securityManager.getLoggedInUser(getThreadLocalRequest());
+    return securityManager == null ? null : securityManager.getLoggedInUser(getThreadLocalRequest());
   }
 
   int getSessionUserID() throws DominoSessionException {
@@ -303,6 +309,46 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     } else {
       return project.getProject().language();
     }
+  }
+
+  protected Language getLanguageEnum(Project project) {
+    if (project == null) {
+      logger.error("getLanguage : no current project ");
+      return Language.UNKNOWN;
+    } else {
+      return toEnum(project.getProject().language());
+    }
+  }
+
+  protected Language getLanguageEnum(CommonExercise exercise) {
+    if (exercise == null) {
+      logger.error("getLanguage : no current project ");
+      return Language.UNKNOWN;
+    } else {
+      int projectID = exercise.getProjectID();
+      return getProject(projectID).getLanguageEnum();
+      //return toEnum(project.getProject().language());
+    }
+  }
+
+  protected Language getLanguageEnum(int projectID) {
+    if (projectID == -1) {
+      logger.error("getLanguage : no current project ");
+      return Language.UNKNOWN;
+    } else {
+      return getProject(projectID).getLanguageEnum();
+    }
+  }
+
+  private Language toEnum(String language) {
+    Language language1;
+
+    try {
+      language1 = Language.valueOf(language.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      language1 = Language.UNKNOWN;
+    }
+    return language1;
   }
 
   /**
@@ -365,10 +411,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   protected String getInfo(String message) {
     HttpServletRequest request = getThreadLocalRequest();
     if (request != null) {
-      String remoteAddr = request.getHeader(X_FORWARDED_FOR);
-      if (remoteAddr == null || remoteAddr.isEmpty()) {
-        remoteAddr = request.getRemoteAddr();
-      }
+      String remoteAddr = getRemoteAddr(request);
       String userAgent = request.getHeader(USER_AGENT);
 
       String strongName = getPermutationStrongName();
@@ -409,6 +452,14 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   protected ISection<CommonExercise> getSectionHelper(int projectID) {
     return db.getSectionHelper(projectID);
+  }
+
+  ISection<IDialog> getDialogSectionHelper() throws DominoSessionException {
+    return getDialogSectionHelper(getProjectIDFromUser());
+  }
+
+  ISection<IDialog> getDialogSectionHelper(int projectID) {
+    return db.getDialogSectionHelper(projectID);
   }
 
   /**
@@ -463,7 +514,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    *
    * @return
    */
-  private DatabaseImpl getDatabase() {
+  protected DatabaseImpl getDatabase() {
     DatabaseImpl db = null;
 
     Object databaseReference = getServletContext().getAttribute(DATABASE_REFERENCE);
@@ -499,5 +550,80 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   @NotNull
   protected RestrictedOperationException getRestricted(String updating_project_info) {
     return new RestrictedOperationException(updating_project_info, true);
+  }
+
+  String getRemoteAddr(HttpServletRequest request) {
+    String remoteAddr = request.getHeader(X_FORWARDED_FOR);
+    if (remoteAddr == null || remoteAddr.isEmpty()) {
+      remoteAddr = request.getRemoteAddr();
+    }
+    return remoteAddr;
+  }
+
+  /**
+   * @param id
+   * @return
+   * @throws DominoSessionException
+   */
+  public IDialog getDialog(int id) throws DominoSessionException {
+    IDialog iDialog = getOneDialog(id);
+
+    logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
+
+    if (iDialog != null) {
+      int projid = iDialog.getProjid();
+      Project project = db.getProject(projid);
+
+      {
+        Language language = project.getLanguageEnum();
+        iDialog.getExercises().forEach(clientExercise ->
+            db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>())
+        );
+      }
+
+      new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projid, project, iDialog.getExercises());
+    }
+
+    return iDialog;
+  }
+
+
+  private IDialog getOneDialog(int id) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    return getOneDialog(userIDFromSessionOrDB, id);
+  }
+
+  /**
+   * TODO : do this smarter!
+   *
+   * Return the first dialog if the id is -1 or bogus...
+   *
+   * @param userIDFromSessionOrDB
+   * @param dialogID              -1 OK - just return the first dialog
+   * @return the first dialog if the id is -1 or bogus...
+   */
+  @Nullable
+  protected IDialog getOneDialog(int userIDFromSessionOrDB, int dialogID) {
+    List<IDialog> iDialogs = getDialogs(userIDFromSessionOrDB);
+    if (dialogID == -1) {
+      return iDialogs.isEmpty() ? null : iDialogs.get(0);
+    } else {
+      List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == dialogID).collect(Collectors.toList());
+      return collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
+    }
+  }
+
+  protected List<IDialog> getDialogs(int userIDFromSessionOrDB) {
+    return getDialogsForProject(getProjectIDFromUser(userIDFromSessionOrDB));
+  }
+
+  protected List<IDialog> getDialogsForProject(int projectIDFromUser) {
+    List<IDialog> dialogList = new ArrayList<>();
+    {
+      if (projectIDFromUser != -1) {
+        dialogList = getProject(projectIDFromUser).getDialogs();
+      }
+    }
+    return dialogList;
   }
 }

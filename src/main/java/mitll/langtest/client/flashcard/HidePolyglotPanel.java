@@ -1,18 +1,17 @@
 package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.shared.exercise.CommonAnnotatable;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.logging.Logger;
 
-class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends PolyglotPracticePanel<L, T> {
+class HidePolyglotPanel<L extends CommonShell, T extends ClientExercise> extends PolyglotPracticePanel<L, T> {
   private final Logger logger = Logger.getLogger("HidePolyglotPanel");
 
   /**
@@ -30,25 +29,23 @@ class HidePolyglotPanel<L extends CommonShell, T extends CommonExercise> extends
                     ControlState controlState,
                     ExerciseController controller,
                     MySoundFeedback soundFeedback,
-                    CommonAnnotatable e,
+                    T e,
                     StickyState stickyState,
-                    ListInterface<L, T> exerciseListToUse//,
-  //                  int minPoly,
-    //                boolean showAudio
+                    ListInterface<L, T> exerciseListToUse, INavigation.VIEWS instance
   ) {
-    super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse/*, minPoly, showAudio*/);
+    super(statsFlashcardFactory, controlState, controller, soundFeedback, e, stickyState, exerciseListToUse, instance);
   }
 
   /**
-   * @see FlashcardPanel#getThreePartContent
    * @param controlState
    * @return
+   * @see FlashcardPanel#getThreePartContent
    */
   Panel getRightColumn(final ControlState controlState) {
     Panel rightColumn = new DivWidget();
     rightColumn.addStyleName("leftTenMargin");
 
-    if (quizInfo.isShowAudio()) {
+    if (quizSpec.isShowAudio()) {
       rightColumn.add(getAudioGroup(controlState));
       addControlsBelowAudio(controlState, rightColumn);
     } else {

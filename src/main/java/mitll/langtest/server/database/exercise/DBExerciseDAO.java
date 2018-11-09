@@ -34,8 +34,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
-import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.*;
@@ -54,7 +53,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
 
   private static final int SPEW_THRESH = 5;
-  private final SlickUserExerciseDAO userExerciseDAO;
+  private final IUserExerciseDAO userExerciseDAO;
   private final SlickProject project;
   private final Project fullProject;
   private static final boolean DEBUG = false;
@@ -66,7 +65,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       ServerProperties serverProps,
       IUserListManager userListManager,
       boolean addDefects,
-      SlickUserExerciseDAO userExerciseDAO,
+      IUserExerciseDAO userExerciseDAO,
       Project fullProject
   ) {
     super(serverProps, userListManager, addDefects, fullProject.getProject().language());
@@ -122,8 +121,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     getRawExercises()
         .forEach(parent -> parent.getDirectlyRelated()
             .forEach(commonExercise -> {
-              idToContextExercise.put(commonExercise.getID(), commonExercise);
-              commonExercise.getMutable().setParentExerciseID(parent.getID());
+              idToContextExercise.put(commonExercise.getID(), commonExercise.asCommon());
+              commonExercise.asCommon().getMutable().setParentExerciseID(parent.getID());
             }));
   }
 
@@ -168,36 +167,31 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       int projid = project.id();
 
-      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
-          userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
+      //   IRefResultDAO refResultDAO = userExerciseDAO.getRefResultDAO();
 
-/*
-      exerciseToPhoneForProject.forEach((k, v) -> {
-        if (v.getNumPhones() < 1) {
-          logger.warn("1 ex #" + k + " has no phones?");
-        }
-      });
-      */
+//      logger.info("Ref result dao " + refResultDAO);
+//      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
+//          userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
 
-      Map<Integer, ExerciseAttribute> allByProject = userExerciseDAO.getIDToPair(projid);
+      Map<Integer, ExerciseAttribute> allAttributesByProject = userExerciseDAO.getExerciseAttribute().getIDToPair(projid);
       logger.info("readExercises" +
-          "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
+          //      "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\ttype order     " + typeOrder +
-          "\n\tnum attributes " + allByProject.size()
+          "\n\tnum attributes " + allAttributesByProject.size()
       );
-      //logger.info("readExercises found " + allByProject.size() + " attributes");
+      //logger.info("readExercises found " + allAttributesByProject.size() + " attributes");
 
-      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs = userExerciseDAO.getAllJoinByProject(projid);
+      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs =
+          userExerciseDAO.getExerciseAttributeJoin().getAllJoinByProject(projid);
 
       // do we add attributes to context exercises?
       List<CommonExercise> allNonContextExercises =
           userExerciseDAO.getByProject(
               typeOrder,
               getSectionHelper(),
-              exerciseToPhoneForProject,
               fullProject,
 
-              allByProject,
+              allAttributesByProject,
               exToAttrs
           );
 
@@ -205,20 +199,21 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           "\n\tfor        " + projid +
           "\n\tproject    " + project.name() +
           "\n\ttype order " + typeOrder +
-          "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
+          // "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\tgot        " + allNonContextExercises.size() + " predef exercises");
 
 
-//      logger.info(prefix + " readExercises got " + related.size() + " related exercises;");
+      logger.info("readExercises got " + typeOrder + " typeOrder");
+
       Map<Integer, CommonExercise> idToContext =
           getIDToExercise(userExerciseDAO.getContextByProject(
               typeOrder,
               getSectionHelper(),
-              exerciseToPhoneForProject, fullProject, allByProject, exToAttrs
+              fullProject, allAttributesByProject, exToAttrs
           ));
 //      logger.info("readExercises project " + project + " idToContext " + idToContext.size());
 
-      attachContextExercises(allNonContextExercises, userExerciseDAO.getAllRelated(projid), idToContext);
+      attachContextExercises(allNonContextExercises, userExerciseDAO.getRelatedExercise().getAllRelated(projid), idToContext);
 
       return allNonContextExercises;
     } catch (Exception e) {
@@ -228,6 +223,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   /**
+   * Don't attach context sentences for relations in dialogs.
+   *
    * @param allNonContextExercises
    * @param related
    * @param idToContext
@@ -253,7 +250,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       CommonExercise root = idToEx.get(relatedExercise.exid());
       if (root != null) {
         CommonExercise context = idToContext.get(relatedExercise.contextexid());
-        if (context != null) {
+        if (context != null && relatedExercise.dialogid() < 2) {
           root.getMutable().addContextExercise(context);
           //      attached++;
         } else if (c++ < 2) {
@@ -307,6 +304,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     return typeOrder;
   }
 
+  /**
+   * @param typeOrder
+   * @see #readExercises
+   */
   private void setRootTypes(List<String> typeOrder) {
     Collection<String> attributeTypes = getAttributeTypes();
     if (DEBUG) logger.info("setRootTypes attributeTypes " + attributeTypes);
@@ -367,8 +368,13 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         .collect(Collectors.toSet());
   }
 
+  /**
+   * @return
+   * @see #getTypeOrderFromProject
+   * @see #setRootTypes
+   */
   private Collection<String> getAttributeTypes() {
-    return userExerciseDAO.getAttributeTypes(project.id());
+    return userExerciseDAO.getExerciseAttribute().getAttributeTypes(project.id());
   }
 
   private Map<Integer, CommonExercise> getIDToExercise(Collection<CommonExercise> allExercises) {
@@ -391,7 +397,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   /**
    * @param id
    * @param count
-   * @see SlickUserExerciseDAO#getExercisePhoneInfo
+   * @seex SlickUserExerciseDAO#getExercisePhoneInfo
    * @deprecated
    */
   public void updatePhones(int id, int count) {
@@ -406,7 +412,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   /**
    * @param pairs
    * @return
-   * @see SlickUserExerciseDAO#updateDominoBulk
+   * @sexe SlickUserExerciseDAO#updateDominoBulk
    */
   public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
     return getDao().updateDominoBulk(pairs).toSeq().size();
@@ -420,7 +426,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
   @Override
   public int getParentFor(int exid) {
-    return userExerciseDAO.getParentForContextID(exid);
+    return userExerciseDAO.getRelatedExercise().getParentForContextID(exid);
   }
 
   private ExerciseDAOWrapper getDao() {

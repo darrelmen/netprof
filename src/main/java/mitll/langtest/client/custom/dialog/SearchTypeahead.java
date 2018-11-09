@@ -15,7 +15,10 @@ import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -36,7 +39,7 @@ public class SearchTypeahead {
   private final FeedbackExerciseList feedbackExerciseList;
   private CommonShell currentExercise = null;
   private final SearchHighlighter highlighter = new SearchHighlighter();
-  private Button add;
+  private final Button add;
 
   /**
    * @param controller
@@ -60,7 +63,7 @@ public class SearchTypeahead {
     SuggestOracle oracle = new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-        //logger.info("make request for '" + request.getQuery() + "'");
+       // logger.info("getTypeaheadUsing make request for '" + request.getQuery() + "'");
         ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
             .setPrefix(textBox.getText())
             .setLimit(DISPLAY_ITEMS)

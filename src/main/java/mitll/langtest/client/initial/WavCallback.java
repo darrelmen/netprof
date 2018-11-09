@@ -39,5 +39,10 @@ package mitll.langtest.client.initial;
  * @since 1/24/14.
  */
 public interface WavCallback {
+  /**
+   * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#stopFlashRecording
+   * @param bytes
+   */
   void getBase64EncodedWavFile(String bytes);
+  //void gotStreamResponse(String json);
 }

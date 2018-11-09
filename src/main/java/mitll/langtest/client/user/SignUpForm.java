@@ -40,7 +40,6 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -49,10 +48,9 @@ import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.*;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.hlt.domino.shared.Constants.RESET_PW_HASH;
@@ -61,6 +59,7 @@ import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 public class SignUpForm extends UserDialog implements SignUp {
   private final Logger logger = Logger.getLogger("SignUpForm");
 
+  private static final String USERNAME1 = "username";
   private static final String DLIFLC_EDU = "dliflc.edu";
 
   // out of 1630 instances on 6/8/18
@@ -80,6 +79,24 @@ public class SignUpForm extends UserDialog implements SignUp {
           "outlook.com" // 5
       );
 
+  /**
+   *
+   * Go ahead and automatically replace them.
+   */
+  private static final Set<String> DLI_TYPOS = new HashSet<>(Arrays.asList("dflic.edu",
+      "DILFLC.edu".toLowerCase(),
+      "dli.edu",
+      "dli.flc.edu",
+      "dlif.c.edu",
+      "dlifc.edu",
+      "dlifcl.edu",
+      "dlifcu.edu",
+      "dliflc.com",
+
+      "dliflc.org",
+      "dliflflc.edu",
+      "dliflic.edu",
+      "dlifllc.edu"));
 
   private static final int MIN_EMAIL_LENGTH = 7;
   private static final String BAD_PASS = "Your password is incorrect. Please try again.";
@@ -109,6 +126,10 @@ public class SignUpForm extends UserDialog implements SignUp {
    *
    */
   private static final String CHOOSE_AFFILIATION = " -- Choose Affiliation -- ";
+
+  /**
+   *
+   */
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email.";
 //  public static final String SORRY_NO_EMAIL_MATCH = "Sorry, this email is not in this user account.";
 
@@ -128,11 +149,15 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String SIGN_UP_SUBTEXT = "Sign up";
   private static final String USERNAME = "Username";
   private static final String PLEASE_ENTER_A_LONGER_USER_ID = "Please enter a longer user id.";
+  /**
+   *
+   */
   private static final String INVALID_EMAIL = "Please enter a valid email address.";
   private static final String SIGN_UP_WIDTH = "266px";
   private static final int USERNAME_WIDTH = 25;
   private static final String USER_EXISTS = "User exists already, please sign in or choose a different name.";
   private static final String AGE_ERR_MSG = "Enter age between " + MIN_AGE + " and " + MAX_AGE + ".";
+  private static final String CURRENT_USERS = "Please update your name and email.";
 
   private FormField signUpUser;
 
@@ -150,11 +175,14 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private Button signUp;
   private final UserPassDialog userPassLogin;
-  private static final String CURRENT_USERS = "Please update your name and email.";
   private boolean markFieldsWithLabels = false;
   private final UserManager userManager;
   private ListBox affBox;
   private final List<Affiliation> affiliations;
+
+  /**
+   *
+   */
   private Heading pleaseCheck;
 
   /**
@@ -352,7 +380,8 @@ public class SignUpForm extends UserDialog implements SignUp {
     signUpUser = getFormField(fieldset, MIN_LENGTH_USER_ID, USERNAME_WIDTH, USERNAME);
     final TextBoxBase userBox = signUpUser.box;
     styleBoxNotLast(userBox);
-    addFocusHandler(userBox, "username");
+    addFocusHandler(userBox, USERNAME1);
+    userBox.getElement().setPropertyString(AUTOCOMPLETE, USERNAME1);
 
     signUpUser.box.addBlurHandler(event -> onUserIDBlur());
 
@@ -424,6 +453,8 @@ public class SignUpForm extends UserDialog implements SignUp {
   private void makeSignUpFirstName(Fieldset fieldset) {
     firstName = getFormField(fieldset, 3, USERNAME_WIDTH, "First Name");
     final TextBoxBase userBox = firstName.box;
+    userBox.getElement().setPropertyString(AUTOCOMPLETE, "given-name");
+
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "firstName");
   }
@@ -437,6 +468,8 @@ public class SignUpForm extends UserDialog implements SignUp {
   private void makeSignUpLastName(Fieldset fieldset) {
     lastName = getFormField(fieldset, 3, USERNAME_WIDTH, LAST_NAME);
     final TextBoxBase userBox = lastName.box;
+    userBox.getElement().setPropertyString(AUTOCOMPLETE, "family-name");
+
     styleBoxNotLast(userBox);
     addFocusHandler(userBox, "lastName");
   }
@@ -451,6 +484,8 @@ public class SignUpForm extends UserDialog implements SignUp {
   private TextBoxBase makeSignUpEmail(Fieldset fieldset) {
     signUpEmail = getFormField(fieldset, MIN_EMAIL_LENGTH, USER_ID_MAX_LENGTH, EMAIL);
     final TextBoxBase emailBox = signUpEmail.box;
+    emailBox.getElement().setPropertyString(AUTOCOMPLETE, "email");
+
     styleBox(emailBox);
     addFocusHandler(emailBox, EMAIL1);
 
@@ -463,32 +498,29 @@ public class SignUpForm extends UserDialog implements SignUp {
    */
   private void gotEmailBlur() {
     final TextBoxBase box = signUpEmail.box;
-    String value = box.getValue();
+    String value = box.getValue().trim();
     if (isValidEmail(value)) {
       String[] split = value.split("@");
-      if (value.endsWith("dliflc.com")) {
-        didYouMean(split, DLIFLC_EDU);
+      if (hasDLIFLCEmail(value)) {
+
+        if (split.length == 2) {
+          String server = split[1];
+          String text = value.replaceAll(server, DLIFLC_EDU);
+          logger.info("replace with " + text);
+          signUpEmail.box.setText(text);
+        } else {
+          didYouMean(split, DLIFLC_EDU);
+        }
+
       } else {
         if (split.length == 2) {
           String server = split[1];
 
           // check for popular domain typos
-          boolean anyNear = false;
-
-          for (String domain : DOMAINS) {
-            int ed = ed(server, domain);
-            boolean isNear = ed > 0 && ed < 3;
-            if (isNear) {
-              didYouMean(split, domain);
-              anyNear = true;
-              break;
-            }
-          }
-
-
-          if (!anyNear) {
+          if (!checkForCloseEditDistance(split, server)) {
             warnIfAlreadyHasAccount(box, value);
           }
+          warnIfDNSMiss(server);
         } else {
           warnIfAlreadyHasAccount(box, value);
         }
@@ -498,6 +530,48 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
   }
 
+  private void warnIfDNSMiss(String server) {
+    openUserService.isValidServer(server, new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        if (!result)
+          markWarn(signUpEmail, "Typo in email?", "The server seems wrong.");
+      }
+    });
+  }
+
+  /**
+   * True if 2 or less edit distance away from another valid server name
+   * @param split
+   * @param server
+   * @return
+   */
+  private boolean checkForCloseEditDistance(String[] split, String server) {
+    boolean anyNear = false;
+
+    for (String domain : DOMAINS) {
+      int ed = ed(server, domain);
+      boolean isNear = ed > 0 && ed < 3;
+      if (isNear) {
+        didYouMean(split, domain);
+        anyNear = true;
+        break;
+      }
+    }
+    return anyNear;
+  }
+
+  @NotNull
+  private boolean hasDLIFLCEmail(String email) {
+    String lc = email.toLowerCase();
+    return DLI_TYPOS.stream().anyMatch(lc::endsWith);
+  }
+
   private void didYouMean(String[] split, String server) {
     String suffix = "@" + server;
     if (split.length == 2) {
@@ -505,7 +579,6 @@ public class SignUpForm extends UserDialog implements SignUp {
     }
     String message = "Did you mean " + suffix + "?";
 
-    // markErrorBlur(signUpEmail, message);
     markWarn(signUpEmail, "Did you mean?", message);
   }
 
@@ -850,6 +923,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * - user is new and needs to be added
    *
    * @param result
+   * @see #gotSignUp(String, String)
    */
   private void handleAddUserResponse(LoginResult result, String user) {
     LoginResult.ResultType resultType = result.getResultType();
@@ -870,6 +944,8 @@ public class SignUpForm extends UserDialog implements SignUp {
         userManager.setPendingUserStorage(theUser.getUserID());
         if (theUser.isEnabled()) {
           eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser));
+
+          logger.info("handleAddUserResponse reset  key " + theUser.getResetKey());
           if (theUser.hasResetKey()) {
             reloadPage(theUser);
           } else {
@@ -887,7 +963,6 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private void reloadPage(User user) {
-    // String changePwPnm = CHANGE_PW_PNM;
     String changePwPnm = PropertyHandler.CPW_TOKEN_2;
     String newURL = trimURL(Window.Location.getHref()) + "?" + changePwPnm + "=" + user.getResetKey() + RESET_PW_HASH;
     userManager.rememberUser(user);

@@ -172,7 +172,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
 
   /**
    * @return
-   * @see RefResultDecoder#getDecodedFiles
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyRefResult
    */
   @Override
   public List<Result> getResults() {
@@ -186,6 +186,11 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return dao.getAllAudioID(projid);
   }
 
+  /**
+   *
+   * @param projid
+   * @return
+   */
   public Collection<ISlimResult> getAllSlimForProject(int projid) {
     return dao.getAllSlimForProject(projid).stream().map(this::fromSlickToSlim).collect(Collectors.toList());
   }
@@ -201,6 +206,10 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    */
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
     return new ExerciseToPhone().getExerciseToPhoneForProject(getJsonResultsForProject(projid));
+  }
+
+  public int getNumPhonesForEx(int exid) {
+    return dao.numPhonesForEx(exid);
   }
 
   private Collection<SlickRefResultJson> getJsonResultsForProject(int projid) {

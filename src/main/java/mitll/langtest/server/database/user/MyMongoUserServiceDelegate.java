@@ -2,7 +2,6 @@ package mitll.langtest.server.database.user;
 
 import mitll.hlt.domino.server.user.UserServiceDelegateBase;
 import mitll.hlt.domino.server.util.LegacyMd5Hash;
-import mitll.langtest.server.database.security.NPUserSecurityManager;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +19,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
   private static final Logger log = LogManager.getLogger(MyMongoUserServiceDelegate.class);
   private static final UserServiceDelegateBase.PasswordEncoding DEFAULT_ENC = UserServiceDelegateBase.PasswordEncoding.common_v1;
 
-  boolean DEBUG = false;
+  private final boolean DEBUG = false;
 //  MyMongoUserServiceDelegate(UserServiceProperties props, Mailer mailer, String appName, Mongo mongoPool) {
 //    super(props, mailer, appName, mongoPool);
 //  }
@@ -36,7 +35,7 @@ class MyMongoUserServiceDelegate {//extends MongoUserServiceDelegate {
     return encodePass(txtPass, salt, DEFAULT_ENC);
   }
 
-  protected byte[] generateUserSalt(UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
+  private byte[] generateUserSalt(UserServiceDelegateBase.PasswordEncoding pEnc) throws Exception {
     SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
     byte[] salt = new byte[pEnc.saltLength];
     random.nextBytes(salt);

@@ -284,8 +284,8 @@ public class Export {
   }
 
   public static class ExportPair {
-    private List<ExerciseExport> allExports;
-    private List<ExerciseExport> predefOnly;
+    private final List<ExerciseExport> allExports;
+    private final List<ExerciseExport> predefOnly;
 
     /**
      * @param allExports

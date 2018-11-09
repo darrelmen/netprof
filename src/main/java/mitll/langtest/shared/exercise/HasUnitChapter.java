@@ -43,6 +43,10 @@ import java.util.Map;
  * @since 2/2/16.
  */
 public interface HasUnitChapter extends IsSerializable {
+  /**
+   * @see mitll.langtest.client.scoring.UnitChapterItemHelper#addUnitChapterItem
+   * @return
+   */
   Map<String, String> getUnitToValue();
 
   /**
@@ -51,5 +55,10 @@ public interface HasUnitChapter extends IsSerializable {
    * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
    */
   boolean addUnitToValue(String unit, String value);
+
+  /**
+   * @see mitll.langtest.server.database.exercise.SectionHelper#addExerciseToLesson
+   * @param pair
+   */
   void addPair(Pair pair);
 }

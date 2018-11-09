@@ -33,8 +33,8 @@
 package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.Analysis;
+import mitll.langtest.server.database.audio.NativeAudioResult;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -119,6 +119,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     dao.addBulk(bulk);
   }
 
+  /**
+   * @see RecordWordAndPhone#recordWordAndPhoneInfo(int, int, Map)
+   * @param bulk
+   * @param projID
+   */
   @Override
   public void addBulkPhones(List<Phone> bulk, int projID) {
     List<SlickPhone> sbulk = new ArrayList<>(bulk.size());
@@ -154,47 +159,38 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   /**
    * @param userid
-   * @param ids
-   * @param project
+   * @param resultIDs
    * @return
    * @throws SQLException
+   * @paramx project
    * @seex mitll.langtest.server.database.analysis.Analysis#getPhoneReport
    * @seex mitll.langtest.server.database.analysis.Analysis#getPhoneReportForPeriod(int, UserInfo, Project, long, long)
    */
+ /*  @Override
+  public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> resultIDs, Project project) {
+    return getPhoneReport(getSlickPhoneReports(userid, resultIDs), true, userid, project);
+  }*/
   @Override
-  public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project) {
+  public PhoneSummary getPhoneSummary(int userid, Collection<Integer> resultIDs) {
+    return getPhoneSummary(getSlickPhoneReports(userid, resultIDs));
+  }
+
+  @Override
+  public PhoneBigrams getPhoneBigrams(int userid, Collection<Integer> resultIDs) {
+    return getPhoneBigrams(getSlickPhoneReports(userid, resultIDs));
+  }
+
+  private Collection<SlickPhoneReport> getSlickPhoneReports(int userid, Collection<Integer> resultIDs) {
     long then = System.currentTimeMillis();
-    logger.info("getWorstPhonesForResults " + userid + " project " + project.getID() + " ids " + ids);
-    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, ids);
+    if (DEBUG) logger.info("getPhoneReports " + userid + " project ids " + resultIDs);
+
+    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, resultIDs);
+
     long now = System.currentTimeMillis();
-    if (now - then > 0)
+    if (now - then > 0 && DEBUG)
       logger.info("getWorstPhonesForResults took " + (now - then) + " to get " + phoneReportByResult.size());
 
-    return getPhoneReport(phoneReportByResult, true, userid, project);
-  }
-
-  @Override
-  public PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids, Project project) {
-    long then = System.currentTimeMillis();
-    logger.info("getPhoneSummary " + userid + " project " + project.getID() + " ids " + ids);
-    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, ids);
-    long now = System.currentTimeMillis();
-    if (now - then > 0)
-      logger.info("getPhoneSummary took " + (now - then) + " to get " + phoneReportByResult.size());
-
-    return getPhoneSummary(phoneReportByResult);
-  }
-
-  @Override
-  public PhoneBigrams getPhoneBigrams(int userid, Collection<Integer> ids) {
-    long then = System.currentTimeMillis();
-    logger.info("getPhoneBigrams " + userid + " ids " + ids);
-    Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, ids);
-    long now = System.currentTimeMillis();
-    if (now - then > 0)
-      logger.info("getPhoneBigrams took " + (now - then) + " to get " + phoneReportByResult.size());
-
-    return getPhoneBigrams(phoneReportByResult);
+    return phoneReportByResult;
   }
 
   /**
@@ -273,7 +269,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     return new MakePhoneReport().getPhoneSummary(phoneToScores);
   }
 
-  private PhoneBigrams getPhoneBigramsOLD(Collection<SlickPhoneReport> phoneReportByResult) {
+/*  private PhoneBigrams getPhoneBigramsOLD(Collection<SlickPhoneReport> phoneReportByResult) {
     Map<String, Map<String, Bigram>> phoneToBigramToScore = new HashMap<>();
 
     String prevPhone = UNDERSCORE;
@@ -342,14 +338,14 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     logger.info("for " + phoneReportByResult.size() + " got " + phoneToBigramToScore.size() + " phones");
 
     return new MakePhoneReport().getPhoneBigrams(phoneToBigramToScore);
-  }
+  }*/
 
   private PhoneBigrams getPhoneBigrams(Collection<SlickPhoneReport> phoneReportByResult) {
     Set<Integer> exids = new HashSet<>();
 
     // first by phone,
     // then by bigram, then examples per bigram
-     String prevPhone = UNDERSCORE;
+    String prevPhone = UNDERSCORE;
 
     Map<String, Map<String, Bigram>> phoneToBigramToScore = new HashMap<>();
 
@@ -421,10 +417,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     phoneToBigramToScore.values().forEach(pair -> pair.values().forEach(Bigram::setScore));
 
-    logger.info("getPhoneBigrams for " + phoneReportByResult.size() + " got " + phoneToBigramToScore.size() + " phones");
+    if (DEBUG) {
+      logger.info("getPhoneBigrams for " + phoneReportByResult.size() + " got " + phoneToBigramToScore.size() + " phones");
+    }
 
     return new MakePhoneReport().getPhoneBigrams(phoneToBigramToScore);
-
   }
 
   /**
@@ -440,7 +437,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @param project
    * @return
    * @throws SQLException
-   * @see #getWorstPhonesForResults
+   * @see #getWorstPhonesForResultsForTimeWindow(int, Collection, Project, long, long)
    * @see #getWorstPhonesForResultsForPhone(int, Collection, Project, String, long, long)
    */
   private PhoneReport getPhoneReport(Collection<SlickPhoneReport> phoneReportByResult,
@@ -475,7 +472,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     int num = 0;
     Map<Integer, String> exidToRef = new HashMap<>();
-
+Set<Integer> isContextEx=new HashSet<>();
     // first by phone,
     // then by bigram, then examples per bigram
     Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS = new HashMap<>();
@@ -509,8 +506,14 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       }*/
 
       String refAudioForExercise = exidToRef.get(exid);
+
       if (refAudioForExercise == null) {
-        refAudioForExercise = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
+        NativeAudioResult nativeAudio = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
+        refAudioForExercise = nativeAudio.getNativeAudioRef();
+        if (nativeAudio.isContext()) {
+          isContextEx.add(exid);
+          logger.info("getPhoneReport add context for " + exid);
+        }
         exidToRef.put(exid, refAudioForExercise);
       }
 
@@ -596,7 +599,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           prevScore,
           phoneScore,
           language);
+      wordAndScore.setIsContext(isContextEx.contains(exid));
 
+//      if (wordAndScore.getIsContext()) {
+//        logger.info("getPhoneReport exid " + exid + " is context");
+//      }
       prevScore = phoneScore;
 
       // right thing to do?
@@ -610,7 +617,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 //        }
       }
 
-
       if (DEBUG) {
         logger.info("getPhoneReport adding " +
             "\n\tanswer " + report.answer() +
@@ -618,7 +624,10 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       }
 
       if (addTranscript) {
-        addTranscript(jsonToTranscript, scoreJson, wordAndScore, language);
+        /*Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =*/
+        addTranscript(jsonToTranscript, scoreJson, wordAndScore, project.getLanguageEnum());
+//        logger.info("For " + wordAndScore+
+//            "\n\tGot back " + netPronImageTypeListMap);
         num++;
       }
       //    } else {
@@ -692,8 +701,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   @Override
-  public void deleteForProject(int projID) {
-    dao.deleteForProject(projID);
+  public int deleteForProject(int projID) {
+   return dao.deleteForProject(projID);
   }
 
   public boolean updateProjectForRID(int rid, int newprojid) {

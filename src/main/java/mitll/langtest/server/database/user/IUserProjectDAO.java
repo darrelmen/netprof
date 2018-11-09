@@ -32,8 +32,10 @@
 
 package mitll.langtest.server.database.user;
 
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserProject;
+import scala.Tuple2;
 
 import java.util.Collection;
 import java.util.Map;
@@ -54,6 +56,10 @@ public interface IUserProjectDAO extends IDAO {
    */
   void addBulk(Collection<SlickUserProject> bulk);
 
+  /**
+   * @see mitll.langtest.server.database.copy.UserCopy#addUserProjectBinding
+   * @param bulk
+   */
   void forgetUsersBulk(Collection<Integer> bulk);
 
   /**
@@ -63,18 +69,39 @@ public interface IUserProjectDAO extends IDAO {
    */
   int getCurrentProjectForUser(int user);
 
+  /**
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#setCurrentUserToProject
+   * @param userid
+   * @param projid
+   * @return
+   */
   int setCurrentProjectForUser(int userid, int projid);
 
   /**
    * @param userid
-   * @see mitll.langtest.server.database.DatabaseImpl#forgetProject
    * @see mitll.langtest.server.services.OpenUserServiceImpl#forgetProject
    */
   void forget(int userid);
 
+  /**
+   * @see DatabaseImpl#getReport
+   * @return
+   */
   Map<Integer, Integer> getUserToProject();
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#rememberUsers
+   * @param projid
+   * @return
+   */
   Collection<Integer> getUsersForProject(int projid);
 
+  /**
+   * @see SlickUserSessionDAOImpl#getActiveSince
+   * @param userids
+   * @return
+   */
   Map<Integer, Integer> getUsersToProject(Collection<Integer> userids);
+
+  Map<Integer, Tuple2<Integer, Long>> getUsersToProjectAndTime(Collection<Integer> userids);
 }

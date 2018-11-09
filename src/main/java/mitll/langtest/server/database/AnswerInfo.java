@@ -43,7 +43,7 @@ import mitll.langtest.shared.scoring.AudioContext;
  * @since 2/24/16.
  */
 public class AnswerInfo {
-//  private static final Logger logger = LogManager.getLogger(AnswerInfo.class);
+  //  private static final Logger logger = LogManager.getLogger(AnswerInfo.class);
   private final int userid;
   private final int id;
   private final int projid;
@@ -57,30 +57,21 @@ public class AnswerInfo {
   private float pronScore;
   private final String deviceType;
   private final String device;
-  private String scoreJson;
-  private final boolean withFlash;
+  private String scoreJson = "";
+
   private int processDur;
   private final int roundTripDur;
   private final String validity;
   private String transcript = "";
+  private String normtranscript = "";
   private final double snr;
-  private String model = "";
-  private int session = 0;
 
   public int getProjid() {
     return projid;
   }
 
-  public String getModel() {
-    return model;
-  }
-
-  public int getSession() {
-    return session;
-  }
-
-  public void setSession(int session) {
-    this.session = session;
+  public void setNormTranscript(String recoSentence) {
+    this.normtranscript = recoSentence;
   }
 
   public static class RecordingInfo {
@@ -88,39 +79,46 @@ public class AnswerInfo {
     final String audioFile;
     final String deviceType;
     final String device;
-    final boolean withFlash;
     private String transcript = "";
+    private String normtranscript = "";
 
     public RecordingInfo(RecordingInfo other, String audioFile) {
       this.answer = other.answer;
       this.audioFile = audioFile;
       this.deviceType = other.deviceType;
       this.device = other.device;
-      this.withFlash = other.withFlash;
       this.transcript = other.transcript;
+      this.normtranscript = other.normtranscript;
     }
 
     public RecordingInfo(String answer,
                          String audioFile,
                          String deviceType,
                          String device,
-                         boolean withFlash,
-                         String transcript) {
+                         String transcript,
+                         String normtranscript) {
       this.answer = answer;
       this.audioFile = audioFile;
       this.deviceType = deviceType;
       this.device = device;
-      this.withFlash = withFlash;
       this.transcript = transcript;
-    }
-
-    public String toString() {
-      return "RecordingInfo answer " + answer + " audioFile " + audioFile + " device " + deviceType + "/" + device +
-          " with flash " + withFlash + " transcript " + getTranscript();
+      this.normtranscript = normtranscript;
     }
 
     public String getTranscript() {
       return transcript;
+    }
+
+    String getNormtranscript() {
+      return normtranscript;
+    }
+
+    public String toString() {
+      return "RecordingInfo " +
+          "\n\tanswer    " + answer +
+          "\n\taudioFile " + audioFile + " device " + deviceType + "/" + device +
+          "\n\ttranscript " + getTranscript() +
+          "\n\tnorm       " + getNormtranscript();
     }
   }
 
@@ -142,7 +140,6 @@ public class AnswerInfo {
   }
 
   /**
-   *
    * @param audioContext
    * @param recordingInfo
    * @param validity
@@ -164,7 +161,7 @@ public class AnswerInfo {
         recordingInfo.deviceType,
         recordingInfo.device,
 
-        recordingInfo.withFlash, validity, model);
+        validity, model);
     if (transcript.isEmpty()) {
       transcript = recordingInfo.getTranscript();
     }
@@ -180,7 +177,6 @@ public class AnswerInfo {
                      String audioFile,
                      String deviceType,
                      String device,
-                     boolean withFlash,
 
                      AudioCheck.ValidityAndDur validity,
                      String model) {
@@ -192,20 +188,19 @@ public class AnswerInfo {
     this.audioFile = audioFile;
     this.valid = validity.isValid();
     this.audioType = audioType;
-    this.durationInMillis = validity.durationInMillis;
+    this.durationInMillis = validity.getDurationInMillis();
     this.deviceType = deviceType;
     this.device = device;
-    this.withFlash = withFlash;
+
     this.validity = validity.getValidity().name();
-    this.roundTripDur = 0;//roundTripDur;
-    this.snr = validity.getMaxMinRange();
-    this.model = model;
+    this.roundTripDur = 0;
+    this.snr = validity.getDynamicRange();
+ //   this.model = model;
   }
 
-  public AnswerInfo(AnswerInfo other,
-                    ScoreInfo scoreInfo, String model) {
+  public AnswerInfo(AnswerInfo other, ScoreInfo scoreInfo, String model) {
     this(other, scoreInfo.correct, scoreInfo.pronScore, scoreInfo.scoreJson, scoreInfo.processDur);
-    this.model = model;
+   // this.model = model;
   }
 
   private AnswerInfo(AnswerInfo other,
@@ -224,7 +219,6 @@ public class AnswerInfo {
         other.getDeviceType(),
         other.getDevice(),
 
-        other.isWithFlash(),
         other.getDurationInMillis(),
         other.isValid(),
         other.getValidity(),
@@ -239,7 +233,7 @@ public class AnswerInfo {
 
   private AnswerInfo(int userid, int projid, int id, int questionID,
                      AudioType audioType, String answer, String audioFile,
-                     String deviceType, String device, boolean withFlash,
+                     String deviceType, String device,
 
                      long durationInMillis,
                      boolean valid,
@@ -262,13 +256,13 @@ public class AnswerInfo {
     this.deviceType = deviceType;
     this.device = device;
     this.scoreJson = scoreJson;
-    this.withFlash = withFlash;
+
     this.validity = validity;
     this.processDur = processDur;
     this.roundTripDur = 0;//roundTripDur;
     this.snr = snr;
 
- //   if (answer.isEmpty()) logger.debug("answer is not set?");
+    //   if (answer.isEmpty()) logger.debug("answer is not set?");
   }
 
   public int getUserid() {
@@ -323,10 +317,6 @@ public class AnswerInfo {
     return scoreJson;
   }
 
-  public boolean isWithFlash() {
-    return withFlash;
-  }
-
   public int getProcessDur() {
     return processDur;
   }
@@ -345,6 +335,10 @@ public class AnswerInfo {
 
   public String getTranscript() {
     return transcript;
+  }
+
+  public String getNormtTranscript() {
+    return normtranscript;
   }
 
   public void setTranscript(String transcript) {

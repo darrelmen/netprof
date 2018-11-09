@@ -57,15 +57,24 @@ import static mitll.langtest.client.user.ResetPassword.SHOW_ADVERTISED_IOS;
  * To change this template use File | Settings | File Templates.
  */
 public class PropertyHandler {
+  private final Logger logger = Logger.getLogger("PropertyHandler");
+
+  /**
+   *
+   */
+  public static final boolean IS_BETA=true;
+
+
   private static final String AFTER_STOP_DELAY_MILLIS = "afterStopDelayMillis";
   private static final String SHOW_SPECTROGRAM1 = "showSpectrogram";
-  private final Logger logger = Logger.getLogger("PropertyHandler");
+  private static final String PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS = "Practice vocabulary with audio flashcards.";
+  public static final String RECEIVE_FEEDBACK_ON_STRENGTHS_AND_WEAKNESSES = "Receive feedback on strengths and weaknesses.";
 
   private static final String PRONUNCIATION_FEEDBACK = "netprof";//"Pronunciation Feedback";
   private static final String CPW_TOKEN = "CPWtoken";
   public static final String CPW_TOKEN_2 = "CPW-token";
 
-  private static final String FONT_FAMILY = "fontFamily";
+ // private static final String FONT_FAMILY = "fontFamily";
   private static final String IS_AMAS = "isAMAS";
 
   /**
@@ -86,7 +95,8 @@ public class PropertyHandler {
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
   private static final String NAME_FOR_RECORDER = "nameForRecorder";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
-  private static final String DIALOG = "dialog";
+  private static final String DIALOG1 = "dialog";
+  private static final String DIALOG = DIALOG1;
 
   // URL parameters that can override above parameters
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
@@ -105,19 +115,13 @@ public class PropertyHandler {
   private static final String HELP = "help";
   private static final String HELP_EMAIL = "helpEmail";
   private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
-  //private String HELP_DEFAULT = getHelpDefault();
 
-
+  private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
+  //private static final String INITIAL_PROMPT = "Practice dialogs to improve pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
 
   private boolean isAMAS;
 
   private boolean usePhoneToDisplay;
-  private static final String AMAS_PRONUNCIATION_FEEDBACK = "AMAS — Automatic Multi-Skilled Assessment System";
-
-  private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
-
-  private static final String AMAS_INITIAL_PROMPT = "Test your Listening and Reading Skills.";
-  private String fontFamily = "";
 
   private int afterStopDelayMillis = DEFAULT_AFTER_STOP_DELAY_MILLIS;
 
@@ -157,10 +161,6 @@ public class PropertyHandler {
     return isAMAS;
   }
 
-  public boolean isBeta() {
-    return true;
-  }
-
   /**
    * Typically 50 or 100 milliseconds.
    *
@@ -168,19 +168,6 @@ public class PropertyHandler {
    */
   public int getAfterStopDelayMillis() {
     return afterStopDelayMillis;
-  }
-
-  /**
-   * ONLY AMAS
-   *
-   * @return
-   */
-  public String getFontFamily() {
-    return fontFamily;
-  }
-
-  public void setFontFamily(String fontFamily) {
-    this.fontFamily = fontFamily;
   }
 
   private boolean spectrogram = false;
@@ -200,12 +187,8 @@ public class PropertyHandler {
   private boolean demoMode;
 
   private boolean logClientMessages = false;
-  private String nameForItem = "Item";
   private String nameForAnswer = "Recording";
-  private String nameForRecorder = "Speaker";
-  private String dialog = "";
 
-  private String releaseDate;
   private int recordTimeout = DEFAULT_TIMEOUT;
 
   private String splashTitle = null;
@@ -214,7 +197,7 @@ public class PropertyHandler {
 
   private static final String RESPONSE_TYPE = "responseType";
   private static final String SPEECH = "Speech";
-  public static final String TEXT = "Text";
+  private static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
   private String responseType = AUDIO;
   private String helpEmail = NETPROF_HELP_DLIFLC_EDU;
@@ -238,33 +221,62 @@ public class PropertyHandler {
       String key = kv.getKey();
       String value = kv.getValue();
 
-      if (key.equals(APP_TITLE)) appTitle = value;
-      else if (key.equals(RELEASE_DATE)) releaseDate = value;
-      else if (key.equals(BKG_COLOR_FOR_REF)) bkgColorForRef = getBoolean(value);
-      else if (key.equals(DEMO_MODE)) demoMode = getBoolean(value);
-      else if (key.equals(RECORD_TIMEOUT)) recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
-      else if (key.equals(NAME_FOR_ITEM)) nameForItem = value;
-      else if (key.equals(NAME_FOR_ANSWER)) nameForAnswer = value;
-      else if (key.equals(NAME_FOR_RECORDER)) nameForRecorder = value;
-      else if (key.equals(LOG_CLIENT_MESSAGES)) logClientMessages = getBoolean(value);
-      else if (key.equals(SPLASH_TITLE)) splashTitle = value;
-      else if (key.equals(ALLOW_PLUS_IN_URL)) allowPlusInURL = getBoolean(value);
-      else if (key.equals(SHOW_SPECTROGRAM)) spectrogram = getBoolean(value);
-      else if (key.equals(SHOW_SPECTROGRAM1)) spectrogram = getBoolean(value);
-      else if (key.equals(DIALOG)) dialog = value;
-      else if (key.equals(QUIET_AUDIO_OK)) quietAudioOK = getBoolean(value);
-      else if (key.equals(IS_AMAS)) isAMAS = getBoolean(value);
-      else if (key.equals(FONT_FAMILY)) fontFamily = value;
-      else if (key.equals(DOMINO_SERVER)) dominoURL = value;
-      else if (key.equals(HELP)) helpMessage = value;
-      else if (key.equals(HELP_EMAIL)) helpEmail = value;
-      else if (key.equals(AFTER_STOP_DELAY_MILLIS)) {
-        afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, AFTER_STOP_DELAY_MILLIS);
-      } else if (key.equals(USE_PHONE_TO_DISPLAY)) {
-        // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
-        usePhoneToDisplay = getBoolean(value);
-      } else if (key.equals(PREFERRED_VOICES)) {
-        getPreferredVoices(value);
+      switch (key) {
+        case APP_TITLE:
+          appTitle = value;
+          break;
+        case BKG_COLOR_FOR_REF:
+          bkgColorForRef = getBoolean(value);
+          break;
+        case DEMO_MODE:
+          demoMode = getBoolean(value);
+          break;
+        case RECORD_TIMEOUT:
+          recordTimeout = getInt(value, DEFAULT_TIMEOUT, RECORD_TIMEOUT);
+          break;
+        case NAME_FOR_ANSWER:
+          nameForAnswer = value;
+          break;
+        case LOG_CLIENT_MESSAGES:
+          logClientMessages = getBoolean(value);
+          break;
+        case SPLASH_TITLE:
+          splashTitle = value;
+          break;
+        case ALLOW_PLUS_IN_URL:
+          allowPlusInURL = getBoolean(value);
+          break;
+        case SHOW_SPECTROGRAM:
+          spectrogram = getBoolean(value);
+          break;
+        case SHOW_SPECTROGRAM1:
+          spectrogram = getBoolean(value);
+          break;
+        case QUIET_AUDIO_OK:
+          quietAudioOK = getBoolean(value);
+          break;
+        case IS_AMAS:
+          isAMAS = getBoolean(value);
+          break;
+        case DOMINO_SERVER:
+          dominoURL = value;
+          break;
+        case HELP:
+          helpMessage = value;
+          break;
+        case HELP_EMAIL:
+          helpEmail = value;
+          break;
+        case AFTER_STOP_DELAY_MILLIS:
+          afterStopDelayMillis = getInt(value, DEFAULT_AFTER_STOP_DELAY_MILLIS, AFTER_STOP_DELAY_MILLIS);
+          break;
+        case USE_PHONE_TO_DISPLAY:
+          // logger.info("found " + USE_PHONE_TO_DISPLAY + " = " + value);
+          usePhoneToDisplay = getBoolean(value);
+          break;
+        case PREFERRED_VOICES:
+          getPreferredVoices(value);
+          break;
       }
     }
 
@@ -281,15 +293,15 @@ public class PropertyHandler {
   }
 
   private String getAppTitleSuffix() {
-    return isAMAS() ? AMAS_PRONUNCIATION_FEEDBACK : " " + PRONUNCIATION_FEEDBACK;
+    return PRONUNCIATION_FEEDBACK;
   }
 
   public String getInitialPrompt() {
-    return isAMAS() ? AMAS_INITIAL_PROMPT : INITIAL_PROMPT;
+    return INITIAL_PROMPT;
   }
 
   public String getFirstBullet() {
-    return isAMAS() ? "Receive feedback on strengths and weaknesses." : "Practice vocabulary with audio flashcards.";
+    return PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS;
   }
 
   @Deprecated
@@ -397,40 +409,32 @@ public class PropertyHandler {
   }
 
   public String getAppTitle() {
+//    String path = Window.Location.getPath();
+//    String substring = path.substring(0, path.lastIndexOf("/"));
+//    logger.info("candidate " +substring);
+//    logger.info("path      " +path);
     return appTitle;
   }
+
+  private static native String getAppName() /*-{
+      return $wnd.navigator.appName;
+  }-*/;
 
   @Deprecated
   public boolean isDemoMode() {
     return demoMode;
   }
 
-  public String getReleaseDate() {
-    return releaseDate;
-  }
-
   public int getRecordTimeout() {
     return recordTimeout;
-  }
-
-  public String getNameForItem() {
-    return nameForItem;
   }
 
   public String getNameForAnswer() {
     return nameForAnswer;
   }
 
-  public String getNameForRecorder() {
-    return nameForRecorder;
-  }
-
   public boolean isLogClientMessages() {
     return logClientMessages;
-  }
-
-  public boolean hasDialog() {
-    return !dialog.isEmpty();
   }
 
   public boolean shouldAllowPlusInURL() {
@@ -478,14 +482,6 @@ public class PropertyHandler {
     }
   }
 
-  public String getResponseType() {
-    return responseType;
-  }
-
-  public void setResponseType(String responseType) {
-    this.responseType = responseType;
-  }
-
   @Deprecated
   public boolean isOdaMode() {
     return false;
@@ -518,7 +514,7 @@ public class PropertyHandler {
     return props;
   }
 
-  public boolean isShowAdvertiseIOS() {
+  boolean isShowAdvertiseIOS() {
     return showAdvertiseIOS;
   }
 
@@ -526,18 +522,4 @@ public class PropertyHandler {
     return helpEmail;
   }
 
-/*  public String getAMASHelpMessage() {
-    return
-        "Welcome to the Automatic Multi-Skilled Assessment System (AMAS)<br/>" +
-            "<br/>" +
-            "If you are a first-time user of this site, or an existing user of an earlier version of AMAS you will need " +
-            "to use the \"Sign Up\" box to add/update a password and an email address to your account. Your email is " +
-            "only used if you ever forget your password.<br/>" +
-            "<br/>" +
-            "Once you create/update your Username, Email, and Password, click on “sign up” and you will be taken to " +
-            "the site. For future access, use the Login box to access the AMAS site.<br/>" +
-            "<br/>" +
-            "The site will remember your login information on this computer for up to one year. You will need to login " +
-            "with your username and password again if you access AMAS from a different machine.";
-  }*/
 }

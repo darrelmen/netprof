@@ -33,8 +33,6 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -44,9 +42,6 @@ import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.instrumentation.EventRegistration;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -87,35 +82,9 @@ public class SendResetPassword extends UserDialog {
    * @see InitialUI#handleResetPass
    */
   public Panel getResetPassword() {
-    Panel container = new DivWidget();
-    container.getElement().setId("SendResetPassswordContent");
-
-    DivWidget child = new DivWidget();
-    container.add(child);
-    child.addStyleName("loginPageBack");
-
-    Panel leftAndRight = new DivWidget();
-    boolean isIOS = Window.getClientWidth() < 800;
-    leftAndRight.addStyleName(isIOS ? "resetPageMobile" : "resetPage");
-    container.add(leftAndRight);
-
-    DivWidget right = new DivWidget();
-
-    leftAndRight.add(right);
-    right.addStyleName("floatRight");
-
-    DivWidget rightDiv = new DivWidget();
-
-    Form form = new Form();
-    form.getElement().setId("resetForm");
-    rightDiv.add(form);
-
-    form.addStyleName("topMargin");
-    form.addStyleName("formRounded");
-    form.getElement().getStyle().setBackgroundColor("white");
-
     final Fieldset fieldset = new Fieldset();
-    form.add(fieldset);
+
+    Panel container = getLoginContainer(fieldset);
 
     Heading w = new Heading(3, ENTER_USER_ID);
     fieldset.add(w);
@@ -131,8 +100,6 @@ public class SendResetPassword extends UserDialog {
     Button changePasswordButton = getChangePasswordButton(useridField);
 
     fieldset.add(changePasswordButton);
-
-    right.add(rightDiv);
 
     setFocusOn(useridField.getWidget());
     return container;

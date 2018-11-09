@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -49,7 +50,7 @@ import java.util.TreeMap;
  * @since 11/20/15.
  */
 class TimeSeriesPlot extends DivWidget {
-  // private final Logger logger = Logger.getLogger("TimeSeriesPlot");
+  private final Logger logger = Logger.getLogger("TimeSeriesPlot");
   static final String AVERAGE = "Average";
   private final Map<Long, PhoneSession> timeToSession = new TreeMap<>();
 
@@ -65,16 +66,18 @@ class TimeSeriesPlot extends DivWidget {
    * @return
    * @see PhonePlot#getErrorBarChart(String)
    */
-  ToolTip getErrorBarToolTip() {
+/*
+ private ToolTip getErrorBarToolTip() {
     return new ToolTip().setFormatter(this::getTooltipText);
   }
+*/
 
   /**
    * @param toolTipData
    * @return
    * @see #getErrorBarToolTip
    */
-  private String getTooltipText(ToolTipData toolTipData) {
+/*  private String getTooltipText(ToolTipData toolTipData) {
     try {
       String seriesName1 = toolTipData.getSeriesName();
       if (seriesName1.equals(AVERAGE)) {
@@ -85,7 +88,7 @@ class TimeSeriesPlot extends DivWidget {
     } catch (Exception e) {
       return "error " + e.getMessage();
     }
-  }
+  }*/
 
   /**
    * How can phoneSession be null? Transient?
@@ -100,24 +103,34 @@ class TimeSeriesPlot extends DivWidget {
     String dateToShow = getDateToShow(toolTipData);
     PhoneSession session = timeToSession.get(toolTipData.getXAsLong());
     //  String countInfo = (session.getCount() < 10) ? "<br/>n = " + session.getCount() : "";
-    String countInfo = session == null ? "" : "<br/>n = " + session.getCount();
+    boolean noSession = session == null;
+    String countInfo = noSession ? "" : "<br/>n = " + session.getCount();
+
+    long start = noSession ? 0L : session.getStart();
+    long end = noSession ? 0L : session.getEnd();
+    String range = end == start ? "" : "<br/> [" + getDateToShow(start) +
+        " - " + getDateToShow(end) + "]";
 
     return getTooltipPrefix(seriesName1, dateToShow) +
+        range +
+        "<br/>" +
         "Mean = " + toolTipData.getYAsLong() + "%" +
         countInfo;
   }
 
-  private String getTooltipPrefix(String seriesName1, String dateToShow) {
+  private String getTooltipPrefix(String seriesName1,
+                                  String dateToShow) {
     return "<b>" + seriesName1 + "</b>" +
-        "<br/>" + dateToShow + "<br/>";
+        "<br/>" + dateToShow +
+        "<br/>";
   }
 
   /**
    * @param toolTipData
    * @param seriesName1
    * @return
+   * @seex #getTooltipText
    * @see AnalysisPlot#getTooltip
-   * @see #getTooltipText
    */
   String getErrorBarToolTip(ToolTipData toolTipData, String seriesName1) {
     String dateToShow = getDateToShow(toolTipData);
@@ -142,10 +155,6 @@ class TimeSeriesPlot extends DivWidget {
     DateTimeFormat toUse = sameYear(shortForDate) ? noYearFormat : format;
     return toUse.format(date);
   }
-//
-//  String getShortDate(long xAsLong) {
-//    return getShortDate(xAsLong, true);
-//  }
 
   String getDate(long xAsLong) {
     return getDate(xAsLong, true);
@@ -182,8 +191,8 @@ class TimeSeriesPlot extends DivWidget {
 
   /**
    * @param phoneSessions
+   * @seex PhonePlot#showErrorBarData(List, String)
    * @see AnalysisPlot#setVisibility(long, long)
-   * @see PhonePlot#showErrorBarData(List, String)
    */
   void setPhoneSessions(List<PhoneSession> phoneSessions) {
     timeToSession.clear();
@@ -201,7 +210,7 @@ class TimeSeriesPlot extends DivWidget {
    * @param chart
    * @param seriesTitle
    * @param hidden
-   * @see PhonePlot#getErrorBarChart
+   * @seex PhonePlot#getErrorBarChart
    * @see AnalysisPlot#addErrorBars
    */
   Series addErrorBarSeries(List<PhoneSession> phoneSessions, Chart chart, String seriesTitle, boolean hidden) {
@@ -231,9 +240,7 @@ class TimeSeriesPlot extends DivWidget {
         .setVisible(hidden, false);
 
 //    logger.info("before series " + seriesTitle + " is hidden = " + hidden + " " + series.isVisible());
-    if (!hidden) {
-      chart.addSeries(series);
-    }
+    addSeries(chart, hidden, series);
 
     if (hidden) series.setVisible(false, false);
 
@@ -247,18 +254,26 @@ class TimeSeriesPlot extends DivWidget {
    * @param seriesName
    * @param hidden
    * @return
-   * @see #addErrorBarSeries
-   * @see PhonePlot#getErrorBarChart(String, String, String, List)
+   * @see AnalysisPlot#addErrorBarSeries
    */
   Series addMeans(List<PhoneSession> iPadData, Chart chart, String seriesName, boolean hidden) {
+  //  logger.info("addMeans seriesName " + seriesName);
     Series series = chart.createSeries()
         .setName(seriesName)
         .setPoints(getData(iPadData))
         .setOption("color", "#00B800")
         .setType(Series.Type.SPLINE);
 
-    if (!hidden) chart.addSeries(series);
+    addSeries(chart, hidden, series);
     return series;
+  }
+
+  private void addSeries(Chart chart, boolean hidden, Series series) {
+    if (!hidden) {
+      logger.info("addSeries " + series.getId() + " " + series.getName());
+      chart.addSeries(series);
+    }
+    // logger.info("addSeries NOT " + series);
   }
 
   private Number[][] getData(List<PhoneSession> yValuesForUser) {
@@ -282,8 +297,7 @@ class TimeSeriesPlot extends DivWidget {
    */
   private long getSessionTime(PhoneSession lastSession, PhoneSession ts) {
     long middle = ts.getMiddle();
-    if (ts == lastSession &&
-        ts.getEnd() - middle > AnalysisTab.HOUR) {
+    if (ts == lastSession && ts.getEnd() - middle > AnalysisTab.HOUR) {
       middle = ts.getEnd();
     }
     return middle;

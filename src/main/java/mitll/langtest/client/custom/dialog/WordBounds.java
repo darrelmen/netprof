@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A class reresenting the bounds of a word within a string.
+ * A class representing the bounds of a word within a string.
  * <p>
  * The bounds are represented by a {@code startIndex} (inclusive) and
  * an {@code endIndex} (exclusive).

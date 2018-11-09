@@ -37,14 +37,17 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 class BasePhoneDAO extends DAO {
   //private static final Logger logger = LogManager.getLogger(BasePhoneDAO.class);
-
 
   static final String PHONE = "phone";
   static final String SEQ = "seq";
@@ -52,28 +55,29 @@ class BasePhoneDAO extends DAO {
   static final String DURATION = "duration";
   static final String RID1 = "RID";
 
-  protected Map<String, Long> sessionToLong = new HashMap<>();
+  final Map<String, Long> sessionToLong = new HashMap<>();
 
   BasePhoneDAO(Database database) {
     super(database);
   }
 
-
   /**
    * @param jsonToTranscript
    * @param scoreJson
    * @param wordAndScore
-   * @param language
+   * @param languageEnum
    * @see SlickPhoneDAO#getPhoneReport
    */
-  void addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript,
+  Map<NetPronImageType, List<TranscriptSegment>> addTranscript(Map<String, Map<NetPronImageType, List<TranscriptSegment>>> jsonToTranscript,
                      String scoreJson,
                      WordAndScore wordAndScore,
-                     String language) {
-    ParseResultJson parseResultJson = new ParseResultJson(database.getServerProps(), language);
+                     Language languageEnum) {
+    ParseResultJson parseResultJson = new ParseResultJson(database.getServerProps(), languageEnum);
     Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap =
         jsonToTranscript.computeIfAbsent(scoreJson, k -> parseResultJson.readFromJSON(scoreJson));
     setTranscript(wordAndScore, netPronImageTypeListMap);
+
+    return netPronImageTypeListMap;
   }
 
   /**
@@ -150,7 +154,7 @@ class BasePhoneDAO extends DAO {
    * @return
    * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSessionTime
    */
-  protected Long getSessionTime(Map<String, Long> sessionToLong, String device) {
+  Long getSessionTime(Map<String, Long> sessionToLong, String device) {
     Long parsedTime = sessionToLong.get(device);
 
     if (parsedTime == null) {
@@ -187,7 +191,7 @@ class BasePhoneDAO extends DAO {
   /**
    * @param wordAndScore
    * @param netPronImageTypeListMap
-   * @see #addTranscript(Map, String, WordAndScore, String)
+   * @see #addTranscript(Map, String, WordAndScore, Language)
    */
   private void setTranscript(WordAndScore wordAndScore,
                              Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {

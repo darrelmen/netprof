@@ -34,10 +34,7 @@ package mitll.langtest.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.analysis.WordScore;
-import mitll.langtest.shared.result.MonitorResult;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**

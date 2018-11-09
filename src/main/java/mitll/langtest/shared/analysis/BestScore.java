@@ -97,6 +97,11 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
     return resultID;
   }
 
+  /**
+   * @see mitll.langtest.server.database.analysis.Analysis#getWordScore
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getTranscriptFromJSON
+   * @return
+   */
   public String getJson() {
     return json;
   }
@@ -105,7 +110,7 @@ public class BestScore extends SimpleTimeAndScore implements Comparable<BestScor
     return isiPad;
   }
 
-  public String getFileRef() {
+  String getFileRef() {
     return fileRef;
   }
 

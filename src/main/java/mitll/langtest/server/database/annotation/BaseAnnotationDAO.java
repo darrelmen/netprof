@@ -35,22 +35,24 @@ package mitll.langtest.server.database.annotation;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
-public abstract class BaseAnnotationDAO extends DAO {
+abstract class BaseAnnotationDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseAnnotationDAO.class);
-  public static final String CORRECT = "correct";
-  int defectDetector;
+  private static final String CORRECT = "correct";
+  //int defectDetector;
+  private final IUserDAO userDAO;
 
   private Map<Integer, List<UserAnnotation>> exerciseToAnnos = null;
 
-  BaseAnnotationDAO(Database database, int defectDetector) {
+  BaseAnnotationDAO(Database database,  IUserDAO userDAO) {
     super(database);
-    this.defectDetector = defectDetector;
+    this.userDAO = userDAO;
   }
 
   abstract List<UserAnnotation> getAll(int userid);
@@ -81,7 +83,7 @@ public abstract class BaseAnnotationDAO extends DAO {
    * @param userid
    * @seez #AnnotationDAO
    */
-  protected void populate(int userid) {
+  private void populate(int userid) {
     exerciseToAnnos = new HashMap<>();
     List<UserAnnotation> all = getAll(userid);
     for (UserAnnotation userAnnotation : all) {
@@ -94,7 +96,7 @@ public abstract class BaseAnnotationDAO extends DAO {
   }
 
   private List<UserAnnotation> getDefectsForExercise(int exerciseID) {
-    if (exerciseToAnnos == null) populate(defectDetector);
+    if (exerciseToAnnos == null) populate(userDAO.getDefectDetector());
     return exerciseToAnnos.get(exerciseID);
   }
 
@@ -104,7 +106,7 @@ public abstract class BaseAnnotationDAO extends DAO {
    * @param lists
    * @return
    */
-  protected Map<String, ExerciseAnnotation> getFieldToAnnotationMap(Collection<UserAnnotation> lists) {
+  Map<String, ExerciseAnnotation> getFieldToAnnotationMap(Collection<UserAnnotation> lists) {
     Map<String, UserAnnotation> fieldToAnno = new HashMap<>();
 
     for (UserAnnotation annotation : lists) {

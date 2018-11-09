@@ -61,7 +61,9 @@ public interface ASR {
 
   SmallVocabDecoder getSmallVocabDecoder();
 
-  String getUsedTokens(Collection<String> lmSentences, List<String> background);
+ // String getUsedTokens(Collection<String> lmSentences, List<String> background);
+
+  boolean isAvailableCheckNow();
 
   /**
    * @param testAudioDir
@@ -91,11 +93,23 @@ public interface ASR {
                            PrecalcScores precalcScores,
                            boolean usePhoneToDisplay, boolean kaldi);
 
+  void setAvailable();
+
   /**
    * @see AudioFileHelper#isHydraAvailable
    * @return
    */
   boolean isAvailable();
+
+  HydraOutput runHydra(String audioPath,
+                       String transcript,
+                       String transliteration,
+                       Collection<String> lmSentences,
+                       String tmpDir,
+                       boolean decode,
+                       int end);
+
+//  String getLM(String transcript, boolean removeAllPunct);
 
   /**
    *
@@ -103,8 +117,11 @@ public interface ASR {
    * @param transliteration
    * @param possibleProns
    * @return
+   * @see AudioFileHelper#getHydraDict
    */
-  String getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns);
+  TransNormDict getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns);
 
   String getSegmented(String input);
+
+  IPronunciationLookup getPronunciationLookup();
 }

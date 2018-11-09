@@ -33,8 +33,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.scoring.AlignmentOutput;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -53,20 +52,25 @@ public interface ScoringServiceAsync {
                            boolean usePhonemeMap,
                            AsyncCallback<PretestScore> async);
 
+  /**
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
+   * @param resultid
+   * @param roundTrip
+   * @param async
+   */
   void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 
   void getResultASRInfo(int resultID, ImageOptions imageOptions, AsyncCallback<PretestScore> async);
 
   void isHydraRunning(int projid, AsyncCallback<Boolean> async);
 
-  void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Boolean> async);
-
-  void getAlignments(int projid, Set<Integer> audioIDs,
-                     AsyncCallback<Map<Integer, AlignmentOutput>> async);
+  void getAlignments(int projid, Set<Integer> audioIDs, AsyncCallback<Map<Integer, AlignmentAndScore>> async);
 
   void recalcAlignments(int projid, AsyncCallback<Void> async);
 
   void configureAndRefresh(int projID, AsyncCallback<Void> async);
 
   void ensureAudio(int resultID, AsyncCallback<Void> async);
+
+  void getStudentAlignment(int projid, int resultID, AsyncCallback<AlignmentAndScore> async);
 }

@@ -85,7 +85,7 @@ class AudioPositionPopup extends SimplePanel implements AudioControl  {
   public void songFirstLoaded(double durationEstimate) {}
 
   @Override
-  public void repeatSegment(float startInSeconds, float endInSeconds) {
+  public void loadAndPlaySegment(float startInSeconds, float endInSeconds) {
 
   }
 

@@ -4,11 +4,12 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.shared.custom.QuizInfo;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.custom.QuizSpec;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
  * @param <T>
  * @see mitll.langtest.client.banner.PracticeHelper
  */
-public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExercise>
+public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExercise>
     extends StatsFlashcardFactory<L, T> implements PolyglotFlashcardContainer {
   private final Logger logger = Logger.getLogger("PolyglotFlashcardFactory");
 
@@ -33,32 +34,32 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
   private boolean postedAudio;
-  private QuizInfo quizInfo;
+  private QuizSpec quizSpec;
   // private static final boolean DEBUG = false;
 
   /**
-   * @see HidePolyglotFactory
    * @param controller
    * @param exerciseList
+   * @see HidePolyglotFactory
    */
-  PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList) {
-    super(controller, exerciseList);
+  PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, INavigation.VIEWS instance) {
+    super(controller, exerciseList, instance);
 
-    controller.getListService().getQuizInfo(new SelectionState().getList(), new AsyncCallback<QuizInfo>() {
+    controller.getListService().getQuizInfo(new SelectionState().getList(), new AsyncCallback<QuizSpec>() {
       @Override
       public void onFailure(Throwable caught) {
 
       }
 
       @Override
-      public void onSuccess(QuizInfo result) {
+      public void onSuccess(QuizSpec result) {
         gotQuizInfo(result);
       }
     });
   }
 
-  private void gotQuizInfo(QuizInfo result) {
-    this.quizInfo = result;
+  private void gotQuizInfo(QuizSpec result) {
+    this.quizSpec = result;
   }
 
   /**
@@ -73,11 +74,9 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
         controlState,
         controller,
         soundFeedback,
-        e.getCommonAnnotatable(),
+        e,
         sticky,
-        exerciseList/*,
-        getMinScore(),
-        shouldShowAudio()*/);
+        exerciseList, instance);
   }
 
   @NotNull
@@ -101,7 +100,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     return new StickyState(storage) {
       @Override
       protected boolean isCorrect(boolean correct, double score) {
-        return (score * 100D) >= Integer.valueOf(quizInfo.getMinScore()).doubleValue();
+        return (score * 100D) >= Integer.valueOf(quizSpec.getMinScore()).doubleValue();
       }
     };
   }
@@ -120,6 +119,9 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     }
   }
 
+  /**
+   * @see #timerFired
+   */
   private void sessionComplete() {
     if (controller.getProjectStartupInfo() != null) {  // could have logged out or gone up in lang hierarchy
       currentFlashcard.cancelAdvanceTimer();
@@ -178,7 +180,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
   }
 
   private void doSessionStart() {
-    int delayMillis = quizInfo.getRoundMinutes() * 60 * 1000;
+    int delayMillis = quizSpec.getRoundMinutes() * 60 * 1000;
     int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
     //logger.info("doSessionStart timeRemainingMillis " + timeRemainingMillis);
     roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
@@ -224,21 +226,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     }
   }
 
-/*  @Override
-  public int getRoundTimeMinutes(boolean isDry) {
-    return isDry ? DRY_RUN_ROUND_TIME : ROUND_TIME;
-  }*/
-
-/*
-  public int getMinScore() {
-    return 35;
-  }
-*/
-//
-//  public boolean shouldShowAudio() {
-//    return false;
-//  }
-
   public void setMode(PolyglotDialog.MODE_CHOICE mode) {
     this.mode = mode;
   }
@@ -278,7 +265,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
 
   protected void listChanged(List<L> items, String selectionID) {
     baseListChanged(items, selectionID);
-  //  logger.info("listChanged : " + selectionID + " got new set of items from list. " + items.size());
+    //  logger.info("listChanged : " + selectionID + " got new set of items from list. " + items.size());
     Scheduler.get().scheduleDeferred(() -> {
       if (sticky.inQuiz() && sticky.getTimeRemainingMillis() > 0 && hasListSelection()) {
         // inLightningRound = true;
@@ -347,7 +334,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
         listChoice = lists == null || lists.isEmpty() ? "" : LISTS + "=" + lists.iterator().next();
       }
       //logger.info("lists " + lists);
-      String historyToken = SelectionState.INSTANCE + "=" + selectionState.getInstance() +
+      String historyToken = SelectionState.INSTANCE + "=" + selectionState.getView() +
           SelectionState.SECTION_SEPARATOR +
           SelectionState.PROJECT + "=" + selectionState.getProject() +//  controller.getProjectStartupInfo().getProjectid()
           SelectionState.SECTION_SEPARATOR +
@@ -373,7 +360,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends CommonExe
     // clearTimeRemaining();
   }
 
-  public QuizInfo getQuizInfo() {
-    return quizInfo;
+  public QuizSpec getQuizSpec() {
+    return quizSpec;
   }
 }

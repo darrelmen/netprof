@@ -60,6 +60,9 @@ public class PathHelper {
   private static final String IMAGE_OUTDIR = "imageOutdir";
   private static final String ANSWER = "answer_";
 
+  // consistent with
+  private static final int QUESTION = 1;
+
   private String realContextPathTest;
   private final ServletContext context;
   private ServerProperties properties;
@@ -173,8 +176,15 @@ public class PathHelper {
     return absoluteToAnswer.substring(properties.getAudioBaseDir().length());
   }
 
+  /**
+   * Somehow the question index default is 1.
+   * @param language
+   * @param exercise
+   * @param user
+   * @return
+   */
   String getAbsoluteToAnswer(String language, int exercise, int user) {
-    return getAbsoluteToAnswer(language, exercise, 0, user);
+    return getAbsoluteToAnswer(language, exercise, QUESTION, user);
   }
 
   /**

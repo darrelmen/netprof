@@ -72,12 +72,15 @@ class RegistrationInfo extends BasicDialog {
   RegistrationInfo(ComplexWidget toAddTo, boolean includeDialect) {
     genders = new HorizontalPanel();
     genders.add(male);
+    male.getElement().setPropertyString("autocomplete", "sex");
+
     male.addStyleName("topFiveMargin");
 
     genders.add(female);
     genders.addStyleName("leftTenMargin");
     female.addStyleName("leftFiveMargin");
     female.addStyleName("topFiveMargin");
+    female.getElement().setPropertyString("autocomplete", "sex");
 
     toAddTo.add(genders);
     //  ageEntryGroup = addDecoratedControlFormFieldWithPlaceholder(toAddTo, false, 2, 2, YOUR_AGE);
@@ -85,6 +88,7 @@ class RegistrationInfo extends BasicDialog {
     if (ADD_AGE) {
       ageEntryGroup = addControlFormFieldWithPlaceholder(toAddTo, false, 2, 2, YOUR_AGE);
       ageEntryGroup.box.setWidth("88px");
+
       genders.add(ageEntryGroup.getGroup());
     } else {
       ageEntryGroup = new FormField(new TextBox(), new ControlGroup(), 0);

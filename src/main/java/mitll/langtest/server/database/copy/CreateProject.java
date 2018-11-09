@@ -3,10 +3,9 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.shared.project.*;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectServices;
+import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
@@ -392,8 +391,8 @@ public class CreateProject {
   }
 
   private static class Pair {
-    String language;
-    String cc;
+    final String language;
+    final String cc;
 
     public Pair(String language, String cc) {
       this.language = language;

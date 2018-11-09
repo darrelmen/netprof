@@ -41,15 +41,6 @@
     border: 2px solid #628cd5;
 }
 
-/*.cellTableCell {
-    padding: 2px 15px;
-    overflow: hidden;
-    cursor:pointer;
-    font-size: larger;
-    direction: rtl;
-    font-family: sans-serif;
-}*/
-
 /**
  * So in general english comes after, if at all.
  */
@@ -57,7 +48,7 @@
     padding: 2px 5px;
     overflow: hidden;
     cursor:pointer;
-    font-size: larger;
+    font-size: 14pt;
     font-family: 'MyUrduWebFont';
 }
 
@@ -67,7 +58,7 @@
     overflow: hidden;
     */
     cursor:pointer;
-    font-size: larger;
+    font-size: 14pt;
     direction: rtl;
     font-family: 'MyUrduWebFont';
     text-align: right;

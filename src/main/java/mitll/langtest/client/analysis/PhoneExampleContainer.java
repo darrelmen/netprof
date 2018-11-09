@@ -33,7 +33,6 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -43,13 +42,14 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.PagingContainer;
 import mitll.langtest.client.flashcard.SetCompleteDisplay;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.scoring.WordTable;
 import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.project.Language;
 
 import java.util.Collection;
 import java.util.List;
@@ -75,7 +75,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    */
   private static final String WORDS_USING = "Vocabulary with ";
 
-  private static final int ITEM_WIDTH = 250;
+  private static final int ITEM_WIDTH = 400;
   /**
    * @see #getItemColumn()
    * @see #addItems(String, String, Collection, int)
@@ -88,12 +88,17 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
   /**
    * @param controller
+   * @param jumpView
    * @see AnalysisTab#getPhoneReport
    */
-  PhoneExampleContainer(ExerciseController controller, AnalysisPlot plot, Heading heading) {
-    super(controller, plot);
-    isSpanish = controller.getLanguage().equalsIgnoreCase("Spanish");
+  PhoneExampleContainer(ExerciseController controller, Heading heading, INavigation.VIEWS jumpView) {
+    super(controller, jumpView);
+    isSpanish = controller.getLanguageInfo() == Language.SPANISH;
     this.heading = heading;
+  }
+
+  @Override
+  protected void setMaxWidth() {
   }
 
   /**
@@ -106,7 +111,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   }
 
   Panel getTableWithPager() {
-    return getTableWithPager(new ListOptions());
+    return getTableWithPager(new ListOptions().setCompact(true));
   }
 
   /**
@@ -131,38 +136,51 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @see BigramContainer#clickOnPhone2
    */
   void addItems(String phone, String bigram, Collection<WordAndScore> sortedHistory, int maxExamples) {
+    stopAll();
+
     this.phone = phone;
 
     heading.setText(WORDS_USING + bigram);
 
-    String[] split = bigram.split("-");
-    if (split[0].equalsIgnoreCase(phone)) {
-      first = true;
-      this.bigram = split[1];
-    } else {
-      first = false;
-      this.bigram = split[0];
+    {
+      String[] split = bigram.split("-");
+      if (split[0].equalsIgnoreCase(phone)) {
+        first = true;
+        this.bigram = split[1];
+      } else {
+        first = false;
+        this.bigram = split[0];
+      }
     }
 
     {
       boolean onlyFirstFew = sortedHistory != null && sortedHistory.size() > maxExamples;
-      String subtext = sortedHistory == null ? "" : sortedHistory.size() > maxExamples ? "first " + maxExamples : "" + sortedHistory.size();
-      if (onlyFirstFew) heading.setSubtext(subtext);
+      if (onlyFirstFew) {
+        String subtext = sortedHistory == null ? "" : sortedHistory.size() > maxExamples ? "first " + maxExamples : "" + sortedHistory.size();
+        heading.setSubtext(subtext);
+      }
     }
     clear();
 
+    addItemsToTable(sortedHistory);
+
+    flush();
+  }
+
+  private void addItemsToTable(Collection<WordAndScore> sortedHistory) {
     if (sortedHistory != null) {
-      StringBuffer buffer = new StringBuffer();
-      sortedHistory.forEach(wordAndScore -> buffer.append(wordAndScore.getPronScore()).append(", "));
-  //    logger.info("PhoneExampleContainer Scores " + buffer);
+      // StringBuffer buffer = new StringBuffer();
+      // sortedHistory.forEach(wordAndScore -> buffer.append(wordAndScore.getPronScore()).append(", "));
+      //    logger.info("PhoneExampleContainer Scores " + buffer);
       sortedHistory.forEach(this::addItem);
+      if (!sortedHistory.isEmpty()) {
+        setSelectedAndShowReco(sortedHistory.iterator().next(), false);
+      }
     } else {
       logger.warning("PhoneExampleContainer.addItems null items");
     }
-
-    flush();
-    addPlayer();
   }
+
 
   @Override
   protected void addColumnsToTable(boolean sortEnglish) {
@@ -173,15 +191,11 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
       addColumn(itemCol, header);
       table.addColumnSortHandler(getEnglishSorter(itemCol, getList()));
     }
-
     try {
-      addAudioColumns();
       table.setWidth("100%", true);
     } catch (Exception e) {
       logger.warning("Got " + e);
     }
-
-    //new TooltipHelper().createAddTooltip(table, CLICK_ON, Placement.TOP);
   }
 
   private ColumnSortEvent.ListHandler<WordAndScore> getEnglishSorter(Column<WordAndScore, SafeHtml> englishCol,
@@ -204,7 +218,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
    * @see #addColumnsToTable
    */
   private Column<WordAndScore, SafeHtml> getItemColumn() {
-    return new Column<WordAndScore, SafeHtml>(new PagingContainer.ClickableCell()) {
+    return new Column<WordAndScore, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, WordAndScore object, NativeEvent event) {
         super.onBrowserEvent(context, elem, object, event);
@@ -213,11 +227,13 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
       @Override
       public SafeHtml getValue(WordAndScore shell) {
+//        logger.info("for " + phone + " bigram " + bigram + " first " + first +
+//            " full " + shell.getFullTranscript());
         String columnText = new WordTable().toHTML(shell.getFullTranscript(), phone, bigram, first);
+//        logger.info("textx " + columnText);
         if (columnText.isEmpty()) {
           String foreignLanguage = shell.getWord();
           if (isSpanish) foreignLanguage = foreignLanguage.toUpperCase();
-
 
           columnText = new WordTable().getColoredSpan(foreignLanguage, shell.getPronScore());
         }

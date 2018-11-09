@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -42,21 +41,20 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.BusyPanel;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.NavigationHelper;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.LangTestDatabaseAsync;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.project.Language;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -66,14 +64,14 @@ import java.util.List;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class GoodwaveExercisePanel<T extends CommonExercise>
+public abstract class GoodwaveExercisePanel<T extends ClientExercise>
     extends HorizontalPanel
     implements BusyPanel, RequiresResize, ProvidesResize, CommentAnnotator {
-  //private Logger logger = Logger.getLogger("GoodwaveExercisePanel");
+  private final Logger logger = Logger.getLogger("GoodwaveExercisePanel");
   /**
    *
    */
-  public static final String CONTEXT = "Context";
+  private static final String CONTEXT = "Context";
   private static final String SAY = "Say";
   private static final String TRANSLITERATION = "Transliteration";
 
@@ -90,7 +88,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   public static final String PUNCT_REGEX = "[\\?\\.,\\/#!$%\\^&\\*;:{}=_`~()]";
   static final String SPACE_REGEX = " ";
 
-  private final ListInterface listContainer;
+  private final ListInterface<?, ?> listContainer;
 
   /**
    * TODO : remove me
@@ -98,43 +96,37 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
   @Deprecated
   boolean isBusy = false;
 
-  /**
-   * TODO make better relationship with ASRRecordAudioPanel
-   */
-  Image recordImage1;
-  Image recordImage2;
-
   protected final T exercise;
   protected final ExerciseController controller;
 
   protected final NavigationHelper navigationHelper;
-  private boolean hasClickable = false;
-  private boolean isJapanese = false;
-  private boolean isUrdu = false;
+  private final boolean hasClickable;
+  private final boolean isJapanese;
+  private final boolean isUrdu;
   protected final ExerciseOptions options;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side -- the charts and gauges
    *
-   * @param commonExercise for this exercise
+   * @param clientExercise for this exercise
    * @param controller
    * @param listContainer
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    */
-  protected GoodwaveExercisePanel(final T commonExercise,
+  protected GoodwaveExercisePanel(final T clientExercise,
                                   final ExerciseController controller,
-                                  final ListInterface<CommonShell, T> listContainer,
+                                  final ListInterface<?, ?> listContainer,
                                   ExerciseOptions options
   ) {
     this.options = options;
-    this.exercise = commonExercise;
+    this.exercise = clientExercise;
     this.controller = controller;
-    String language = controller.getLanguage();
+    Language language = controller.getLanguageInfo();
 
-    isJapanese = language.equalsIgnoreCase(JAPANESE);
-    isUrdu = language.equalsIgnoreCase("urdu");
-    this.hasClickable = language.equalsIgnoreCase(MANDARIN) || language.equals(KOREAN) || isJapanese;
+    isJapanese = language == Language.JAPANESE;
+    isUrdu = language == Language.URDU;
+    this.hasClickable = language == Language.MANDARIN || language == Language.KOREAN || isJapanese;
     setWidth("100%");
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, options.isAddKeyHandler(), options.isIncludeListButtons());
@@ -143,7 +135,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     addContent();
   }
 
-  protected boolean isRTL(T exercise) {
+  private boolean isRTL(T exercise) {
     return isRTLContent(exercise.getForeignLanguage());
   }
 
@@ -156,7 +148,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     center.addStyleName("floatLeftAndClear");
     // attempt to left justify
 
-    makeScorePanel(exercise, options.getInstance());
+    makeScorePanel(exercise);
 
     addQuestionContentRow(exercise, center);
 
@@ -172,25 +164,23 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     //  }
   }
 
-  protected abstract NavigationHelper<CommonShell> getNavigationHelper(ExerciseController controller,
-                                                                       final ListInterface<CommonShell, T> listContainer,
-                                                                       boolean addKeyHandler, boolean includeListButtons);
+  protected abstract NavigationHelper getNavigationHelper(ExerciseController controller,
+                                                          final ListInterface<?, ?> listContainer,
+                                                          boolean addKeyHandler, boolean includeListButtons);
 
-  public void wasRevealed() {
-  }
-
-  protected abstract void makeScorePanel(T e, String instance);
+  protected abstract void makeScorePanel(T e);
 
   protected void loadNext() {
     listContainer.loadNextExercise(exercise.getID());
   }
 
-  protected void nextWasPressed(ListInterface listContainer, HasID completedExercise) {
+  protected void nextWasPressed(ListInterface<?, ?> listContainer, HasID completedExercise) {
     navigationHelper.enableNextButton(false);
     listContainer.loadNextExercise(completedExercise.getID());
   }
 
-  protected void addQuestionContentRow(T e, Panel hp) {
+  private void addQuestionContentRow(T e, Panel hp) {
+  //  logger.info("Add question row for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage() + " is context " + e.isContext());
     hp.add(getQuestionContent(e));
   }
 
@@ -215,9 +205,11 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
    */
   protected abstract void addUserRecorder(LangTestDatabaseAsync service, ExerciseController controller, Panel toAddTo,
                                           float screenPortion, T exercise);
+
   protected abstract void addGroupingStyle(Widget div);
 
-  public void onResize() {}
+  public void onResize() {
+  }
 
   /**
    * Three lines - the unit/chapter/item info, then the item content - vocab item, english, etc.
@@ -273,24 +265,31 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     addAnnotation(field, ExerciseAnnotation.TYPICAL.CORRECT, "", exid);
   }
 
+  final Map<String, String> uniqToComment = new HashMap<>();
+
   private void addAnnotation(final String field, final ExerciseAnnotation.TYPICAL status, final String commentToPost, int exid) {
-    controller.getQCService().addAnnotation(exid, field, status.toString(), commentToPost,
-        new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("adding annotation", caught);
-          }
+    logger.info("addAnnotation on field " + field + " ex " + exid + " comment " + commentToPost);
 
-          @Override
-          public void onSuccess(Void result) {
-//        System.out.println("\t" + new Date() + " : onSuccess : posted to server " + getExercise().getOldID() +
-//            " field '" + field + "' commentLabel '" + commentToPost + "' is " + status);//, took " + (now - then) + " millis");
-          }
-        });
-  }
+    String key = exid + "_" + field + "_" + status;
 
-  protected int getUser() {
-    return controller.getUserState().getUser();
+    String lastPost = uniqToComment.get(key);
+
+    if (lastPost != null && lastPost.equals(commentToPost)) {
+      logger.info("addAnnotation Skip since same as last post " + lastPost);
+    } else {
+      controller.getQCService().addAnnotation(exid, field, status.toString(), commentToPost,
+          new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("adding annotation", caught);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              uniqToComment.put(key, commentToPost);
+            }
+          });
+    }
   }
 
   /**
@@ -418,7 +417,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     return new TooltipHelper().addTooltip(w, tip);
   }
 
-  protected String removePunct(String t) {
+  private String removePunct(String t) {
     return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "");
   }
 
@@ -427,7 +426,7 @@ public abstract class GoodwaveExercisePanel<T extends CommonExercise>
     return isBusy;
   }
 
-  protected String getInstance() {
+  protected INavigation.VIEWS getInstance() {
     return options.getInstance();
   }
 }

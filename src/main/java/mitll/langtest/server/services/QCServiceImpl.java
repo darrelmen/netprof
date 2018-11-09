@@ -71,7 +71,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasQCPerm(userIDFromSessionOrDB)) {
       int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
-      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectIDFromUser, exid);
+      CommonExercise customOrPredefExercise = db.getExercise(projectIDFromUser,exid);//db.getCustomOrPredefExercise(projectIDFromUser, exid);
       getUserListManager().markCorrectness(customOrPredefExercise, isCorrect, userIDFromSessionOrDB);
     } else {
       throw getRestricted("mark reviewed");

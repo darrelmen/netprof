@@ -32,6 +32,11 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.langtest.server.database.result.BaseResultDAO;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
+
+import java.util.List;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -40,7 +45,16 @@ package mitll.langtest.shared.exercise;
  */
 public interface MutableShell {
   void setEnglish(String english);
+
   void setForeignLanguage(String foreignLanguage);
+
   void setMeaning(String meaning);
+
   void setScore(float score);
+
+  /**
+   * @param scoreTotal
+   * @see BaseResultDAO#attachScoreHistory
+   */
+  void setScores(List<CorrectAndScore> scoreTotal);
 }

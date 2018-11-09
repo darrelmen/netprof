@@ -32,21 +32,20 @@
 
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.server.audio.image.ImageType;
-import mitll.langtest.server.audio.image.TranscriptEvent;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.database.Database;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.util.*;
 
@@ -60,6 +59,7 @@ import static mitll.langtest.server.scoring.PronunciationLookup.SIL;
  */
 public class ParseResultJson {
   private static final Logger logger = LogManager.getLogger(ParseResultJson.class);
+
   private static final String STR = "str";
   private static final String END = "end";
   private static final String S = "s";
@@ -67,77 +67,23 @@ public class ParseResultJson {
   private static final String PHONES = "phones";
   private static final String WORDS = "words";
   private static final String W = "w";
+  public static final String WORD = "word";
   private final ServerProperties props;
-  private final String language;
-  private final Map<NetPronImageType, List<TranscriptSegment>> emptyMap = new HashMap<>();
+  private final Language languageEnum;
 
-  private Map<String, String> phoneToDisplay;
+  private final TranscriptSegmentGenerator transcriptSegmentGenerator;
+  private final Map<NetPronImageType, List<TranscriptSegment>> emptyMap = new HashMap<>();
+  //private Map<String, String> phoneToDisplay;
 
   /**
    * @param properties
-   * @param language
-   * @see PhoneDAO#PhoneDAO(Database)
+   * @param languageEnum
+   * @see mitll.langtest.server.database.analysis.Analysis#Analysis
    */
-  public ParseResultJson(ServerProperties properties, String language) {
+  public ParseResultJson(ServerProperties properties, Language languageEnum) {
     this.props = properties;
-    this.language = language;
-    phoneToDisplay = props.getPhoneToDisplay(language);
-  }
-
-  /**
-   * @param typeToEvent
-   * @return
-   * @seex xASRScoring#getTypeToEndTimes
-   * @see #readFromJSON(String)
-   * @see #parseJsonAndGetProns
-   */
-  private Map<NetPronImageType, List<TranscriptSegment>> getNetPronImageTypeToEndTimes(
-      Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
-
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      boolean isPhone = key == NetPronImageType.PHONE_TRANSCRIPT;
-      List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
-
-
-      StringBuilder builder = new StringBuilder();
-      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        TranscriptEvent value = event.getValue();
-        String event1 = value.getEvent();
-
-        String displayName = isPhone ? getDisplayName(event1) : event1;
-        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName, builder.length()));
-        if (!isPhone) builder.append(event1);
-      }
-    }
-
-    return typeToEndTimes;
-  }
-
-  private String getDisplayName(String event) {
-    String displayName = phoneToDisplay.get(event);
-    displayName = displayName == null ? event : displayName;
-    return displayName;
-  }
-
-
-  private Map<NetPronImageType, List<SlimSegment>> slimGetNetPronImageTypeToEndTimes(
-      Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
-    Map<NetPronImageType, List<SlimSegment>> typeToEndTimes = new HashMap<>();
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      List<SlimSegment> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) {
-        typeToEndTimes.put(key, endTimes = new ArrayList<>());
-      }
-      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        TranscriptEvent value = event.getValue();
-        endTimes.add(new SlimSegment(value.getEvent(), value.getScore()));
-      }
-    }
-
-    return typeToEndTimes;
+    this.transcriptSegmentGenerator = new TranscriptSegmentGenerator(properties);
+    this.languageEnum = languageEnum;
   }
 
   private int warn = 0;
@@ -199,7 +145,7 @@ public class ParseResultJson {
       // logger.warn("json is " + json);
       return emptyMap;
     } else {
-      return getNetPronImageTypeToEndTimes(parseJsonString(json, false, null));
+      return transcriptSegmentGenerator.getTypeToSegments(parseJsonString(json, false, null), languageEnum);
     }
   }
 
@@ -211,10 +157,47 @@ public class ParseResultJson {
       // logger.warn("json is " + json);
       return Collections.emptyMap();
     } else {
-      return slimGetNetPronImageTypeToEndTimes(parseJsonString(json, false, null));
+    //  Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = parseJsonString(json, false, null);
+
+      Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = readFromJSON(json);
+      return toSlim(netPronImageTypeListMap);
     }
   }
 
+  /**
+   * @seex #slimReadFromJSON(String)
+   * @paramx typeToEvent
+   * @return
+   */
+/*  private Map<NetPronImageType, List<SlimSegment>> slimGetNetPronImageTypeToEndTimes(
+      Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
+    Map<NetPronImageType, List<SlimSegment>> typeToEndTimes = new HashMap<>();
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
+      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+      List<SlimSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
+
+      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+        TranscriptEvent value = event.getValue();
+        endTimes.add(new SlimSegment(value.getEvent(), value.getScore()));
+      }
+    }
+
+    return typeToEndTimes;
+  }*/
+
+  private  Map<NetPronImageType, List<SlimSegment>> toSlim(Map<NetPronImageType, List<TranscriptSegment>> fullTranscript) {
+    Map<NetPronImageType, List<SlimSegment>> typeToEndTimes = new HashMap<>();
+
+   for (Map.Entry<NetPronImageType, List<TranscriptSegment>> typeToEvents: fullTranscript.entrySet()) {
+     NetPronImageType key = typeToEvents.getKey();
+
+     List<TranscriptSegment> segments = typeToEvents.getValue();
+     List<SlimSegment> value = new ArrayList<>(segments.size());
+     typeToEndTimes.put(key, value);
+     segments.forEach(segment -> value.add(segment.toSlim()));
+   }
+   return typeToEndTimes;
+  }
 
   /**
    * @param json
@@ -222,8 +205,9 @@ public class ParseResultJson {
    * @return
    * @see mitll.langtest.server.database.userexercise.ExerciseToPhone#getExToPhonePerProject
    */
-  public Map<NetPronImageType, List<TranscriptSegment>> parseJsonAndGetProns(String json, Map<String, List<List<String>>> wordToPronunciations) {
-    return getNetPronImageTypeToEndTimes(parseJsonString(json, false, wordToPronunciations));
+  public Map<NetPronImageType, List<TranscriptSegment>> parseJsonAndGetProns(String json,
+                                                                             Map<String, List<List<String>>> wordToPronunciations) {
+    return transcriptSegmentGenerator.getTypeToSegments(parseJsonString(json, false, wordToPronunciations), languageEnum);
   }
 
   /**
@@ -265,8 +249,8 @@ public class ParseResultJson {
 //          logger.info("\treadFromJSON wsubs     " + wsubs);
           List<TranscriptEvent> psubs = new ArrayList<>();
           List<String> phones1 = getPhones(phoneEvents,
-              word.getAsJsonArray(phones), usePhones, psubs,
-              useKaldi ? "phone" : P, useKaldi);
+              word.getAsJsonArray(phones), useKaldi ? "phone" : P, usePhones, psubs,
+              useKaldi);
 
           if (!psubs.isEmpty()) {
             TranscriptEvent phoneEvent = psubs.get(psubs.size() - 1);
@@ -289,7 +273,7 @@ public class ParseResultJson {
 
           if (wordToPronunciations != null) {
             if (!phones1.isEmpty()) {
-              List<List<String>> lists = wordToPronunciations.computeIfAbsent(wordToken, k -> new ArrayList<List<String>>());
+              List<List<String>> lists = wordToPronunciations.computeIfAbsent(wordToken, k -> new ArrayList<>());
               lists.add(phones1);
               //  logger.info("Adding " + wordToken + " -> " + phones1);
             }
@@ -317,15 +301,35 @@ public class ParseResultJson {
     return typeToEvent;
   }
 
+  /**
+   * @see #readFromJSON(JsonObject, String, String, boolean, Map, boolean)
+   * @param phoneEvents
+   * @param phones
+   * @param phoneToken
+   * @param usePhone
+   * @param subs
+   * @param useKaldi
+   * @return
+   */
   private List<String> getPhones(SortedMap<Float, TranscriptEvent> phoneEvents,
                                  JsonArray phones,
+                                 String phoneToken,
                                  boolean usePhone,
-                                 List<TranscriptEvent> subs, String phoneToken,
+                                 List<TranscriptEvent> subs,
                                  boolean useKaldi) {
-
     return getEventsFromJson(phoneEvents, phones, phoneToken, usePhone, subs, useKaldi);
   }
 
+  /**
+   * @see #getPhones
+   * @param phoneEvents
+   * @param phones
+   * @param tokenKey
+   * @param usePhone
+   * @param subs
+   * @param useKaldi
+   * @return
+   */
   private List<String> getEventsFromJson(SortedMap<Float, TranscriptEvent> phoneEvents,
                                          JsonArray phones,
                                          String tokenKey,
@@ -364,7 +368,7 @@ public class ParseResultJson {
     }
 
     if (usePhone) {
-      token = props.getDisplayPhoneme(language, token);
+      token = props.getDisplayPhoneme(languageEnum, token);
     }
 
     TranscriptEvent value = new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore);

@@ -33,25 +33,20 @@
 package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.PathWriter;
-import mitll.langtest.server.audio.TrackInfo;
-import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.server.database.userlist.*;
-import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
+import mitll.langtest.server.database.userlist.IUserListDAO;
+import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
+import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.user.MiniUser;
-import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserExerciseList;
 import mitll.npdata.dao.userexercise.UserExerciseListVisitorDAOWrapper;
@@ -60,7 +55,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -80,11 +74,11 @@ public class UserListManager implements IUserListManager {
   private static final String INCORRECT = "incorrect";
   private static final String FIXED = "fixed";
 
-  private static final String FAST = "regular";
-  private static final String SLOW = "slow";
+//  private static final String FAST = "regular";
+//  private static final String SLOW = "slow";
   private static final String MY_FAVORITES = "My Favorites";
-  private static final String COMMENTS = "Comments";
-  private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
+//  private static final String COMMENTS = "Comments";
+//  private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
 
 
   private static final boolean DEBUG = false;
@@ -103,7 +97,7 @@ public class UserListManager implements IUserListManager {
   private final IUserExerciseListVisitorDAO visitorDAO;
   private final IUserListExerciseJoinDAO userListExerciseJoinDAO;
   private final IAnnotationDAO annotationDAO;
-  private final PathHelper pathHelper;
+
   private final IStateManager stateManager;
   private final DatabaseServices databaseServices;
 
@@ -127,7 +121,7 @@ public class UserListManager implements IUserListManager {
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     this.annotationDAO = annotationDAO;
-    this.pathHelper = pathHelper;
+    // this.pathHelper = pathHelper;
     this.visitorDAO = visitorDAO;
     this.stateManager = stateManager;
     this.databaseServices = databaseServices;
@@ -696,33 +690,46 @@ public class UserListManager implements IUserListManager {
    * annotations - only if the latest is incorrect should the item appear on the comment or defect list.
    *
    * @param projID
+   * @param isContext
    * @return
-   * @see mitll.langtest.server.services.ListServiceImpl#getReviewList
+   * @seex mitll.langtest.server.services.ListServiceImpl#getReviewList
    */
-  @Override
-  public UserList<CommonShell> getCommentedList(int projID) {
-    Set<Integer> exercisesWithIncorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID);
-    logger.info("getCommented for " + projID + " found " + exercisesWithIncorrectAnnotations.size());
-    List<CommonExercise> defectExercises = getDefectExercises(projID, exercisesWithIncorrectAnnotations);
+/*  @Override
+  public UserList<CommonShell> getCommentedList(int projID, boolean isContext) {
+    Set<Integer> exercisesWithIncorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID, isContext);
+    logger.info("getCommented for " + projID + " found " + exercisesWithIncorrectAnnotations.size() + " is context " + isContext);
+    List<CommonExercise> defectExercises = getDefectExercises(projID, exercisesWithIncorrectAnnotations, isContext);
     logger.info("getCommented for " + projID + " found " + defectExercises.size() + " exercises");
+    defectExercises.forEach(exercise -> logger.info("\tgetCommented : defect " + exercise.getID() + " " + exercise.getForeignLanguage() + " context " + exercise.isContext()));
     UserList<CommonShell> reviewList = getReviewList(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
     logger.info("getCommented for " + projID + " list has " + reviewList.getNumItems() + " exercises");
     return reviewList;
-  }
+  }*/
 
   /**
    * @param projID
+   * @param isContext
    * @return
    * @seex IUserListManager#getUserListByIDExercises
    */
+/*
   @Override
-  public UserList<CommonExercise> getCommentedListEx(int projID) {
-    List<CommonExercise> defectExercises = getDefectExercises(projID, annotationDAO.getExercisesWithIncorrectAnnotations(projID));
+  public UserList<CommonExercise> getCommentedListEx(int projID, boolean isContext) {
+    List<CommonExercise> defectExercises = getDefectExercises(projID, annotationDAO.getExercisesWithIncorrectAnnotations(projID, isContext), isContext);
     return getReviewListEx(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
   }
+*/
 
+  /**
+   * @seex #getCommentedList
+   * @paramx xprojID
+   * @paramx exerciseIDs
+   * @paramx isContext
+   * @returnx
+   */
+/*
   @NotNull
-  private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> exerciseIDs) {
+  private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> exerciseIDs, boolean isContext) {
     List<CommonExercise> defectExercises = new ArrayList<>();
 
     IProjectManagement projectManagement = databaseServices.getProjectManagement();
@@ -732,54 +739,40 @@ public class UserListManager implements IUserListManager {
       exerciseIDs.forEach(id -> {
         CommonExercise byExID = projectManagement.getExercise(projID, id);
         if (byExID == null) {
-          logger.warn("can't find exercise " + id + " in project " + projID);
-        } else {
-          if (byExID.isContext()) {
-            int parentExerciseID = byExID.getParentExerciseID();
-            logger.warn("parentExerciseID for " + id + " = " + parentExerciseID);
-            if (parentExerciseID < 1) {  // super defensive
-              parentExerciseID = databaseServices.getExerciseDAO(projID).getParentFor(id);
-              logger.warn("\tparentExerciseID for " + id + " = " + parentExerciseID);
-            }
-            if (parentExerciseID > 0) {
-              CommonExercise parent = projectManagement.getExercise(projID, parentExerciseID);
-              if (parent == null) {
-                logger.warn("couldn't find parent " + parentExerciseID);
-              } else {
-                byExID = parent;
-              }
-            }
-          }
-
+          logger.warn("getDefectExercises can't find exercise " + id + " in project " + projID);
+        } else if ((byExID.isContext() && isContext) || (!byExID.isContext() && !isContext)) {
           defectExercises.add(byExID);
         }
       });
     }
     return defectExercises;
   }
+*/
 
   /**
-   * @param allKnown
-   * @param name
-   * @param description
-   * @param userListID
+   * @paramx allKnown
+   * @paramx name
+   * @paramx description
+   * @paramx userListID
    * @return
-   * @see IUserListManager#getCommentedList(int)
+   * @seex IUserListManager#getCommentedList(int, boolean)
    */
-  private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
+/*  private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
                                               String name,
                                               String description,
                                               int userListID) {
     return getCommonUserList(getQCList(name, description, userListID), getShells(allKnown));
-  }
+  }*/
 
+/*
   @NotNull
   private UserList<CommonShell> getQCList(String name, String description, int userListID) {
-    User qcUser = getQCUser();
+    SimpleUser qcUser = getQCUser();
     long modified = System.currentTimeMillis();
     return new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
         false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10, 30, false);
   }
+*/
 
   @NotNull
   private List<CommonShell> getShells(Collection<CommonExercise> allKnown) {
@@ -788,27 +781,29 @@ public class UserListManager implements IUserListManager {
     return commonShells;
   }
 
+/*
   private UserList<CommonExercise> getReviewListEx(List<CommonExercise> allKnown,
                                                    String name, String description,
                                                    int userListID) {
-    User qcUser = getQCUser();
+    SimpleUser qcUser = getQCUser();
     long modified = System.currentTimeMillis();
     UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
         false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10, 30, false);
     return getCommonUserList(userList, allKnown);
   }
+*/
 
   /**
    * TODO : should we worry about sort order for english?
    *
-   * @param <T>
-   * @param userList
-   * @param copy
+   * @paramx <T>
+   * @paramx userList
+   * @paramx copy
    * @return
-   * @see #getReviewList(Collection, String, String, int)
-   * @see #getReviewListEx(List, String, String, int)
+   * @sexe #getReviewList(Collection, String, String, int)
+   * @sexe #getReviewListEx(List, String, String, int)
    */
-  @NotNull
+ /* @NotNull
   private <T extends CommonShell> UserList<T> getCommonUserList(UserList<T> userList, List<T> copy) {
     userList.setReview(true);
     new ExerciseSorter().getSorted(copy, false, false, "");
@@ -816,43 +811,49 @@ public class UserListManager implements IUserListManager {
     stateManager.markState(copy);
     logger.debug("getCommonUserList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
     return userList;
-  }
+  }*/
 
   /**
    * Need a bogus user for the list.
    *
    * @return
    */
-  private User getQCUser() {
+/*  private SimpleUser getQCUser() {
     List<User.Permission> permissions = new ArrayList<>();
     permissions.add(User.Permission.QUALITY_CONTROL);
     return new User(-1, 89, 0, MiniUser.Gender.Unspecified, 0, "", "", false, permissions);
-  }
+  }*/
 
   /**
    * Really create a new exercise and associated context exercise in database.
    * Add newly created exercise to the user list.
    *
-   * @param userListID
-   * @param userExercise notional until now!
-   * @param mediaDir
+   * @paramx userListID
+   * @paramx userExercise notional until now!
+   * @paramx mediaDir
    * @seex mitll.langtest.server.services.AudioServiceImpl#newExercise
+   * @seex mitll.langtest.server.services.ListServiceImpl#newExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
-  @Override
+/*  @Override
   public void newExercise(int userListID, CommonExercise userExercise, String mediaDir) {
-    newExerciseOnList(getUserListNoExercises(userListID), userExercise, mediaDir);
-  }
-
+    newExerciseOnList(getUserListNoExercises(userListID), userExercise);
+  }*/
   public UserList getUserListNoExercises(int userListID) {
     logger.info("getUserListNoExercises for " + userListID);
     return userListDAO.getWhere(userListID, true);
   }
 
-  private void newExerciseOnList(UserList userList, CommonExercise userExercise, String mediaDir) {
+  /**
+   * @seex #newExercise(int, CommonExercise, String)
+   * @params userList
+   * @params userExercise
+   */
+/*
+  private void newExerciseOnList(UserList userList, CommonExercise userExercise) {
     int projectID = userExercise.getProjectID();
     int newExerciseID = userExerciseDAO.add(userExercise, false, false, getTypeOrder(projectID));
-    logger.debug("newExercise added exercise " + newExerciseID + " from " + userExercise);
+    logger.warn("\n\n\n\n\nnewExercise added exercise " + newExerciseID + " from " + userExercise);
 
     int contextID = 0;
     try {
@@ -861,27 +862,36 @@ public class UserListManager implements IUserListManager {
       logger.error("Got " + e, e);
     }
 
-    logger.debug("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
+    logger.warn("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
 
     addItemToList(userList.getID(), userExercise.getOldID(), newExerciseID);
 
     // TODOx : necessary?
 //    fixAudioPaths(userExercise, true, mediaDir);
   }
-
+*/
+/*
   private Collection<String> getTypeOrder(int projectID) {
     return userDAO.getDatabase().getTypeOrder(projectID);
   }
+*/
 
+  /**
+   * @return
+   * @seex #newExerciseOnList(UserList, CommonExercise)
+   * @paramx userExercise
+   * @paramx newExerciseID
+   * @paramx projectID
+   */
+/*
   private int makeContextExercise(CommonExercise userExercise, int newExerciseID, int projectID) {
     Exercise userExercise1 = new Exercise(-1, userExercise.getCreator(), "", projectID, false);
     int contextID = userExerciseDAO.add(userExercise1, false, true, getTypeOrder(projectID));
-    userExerciseDAO.addContextToExercise(newExerciseID, contextID, projectID);
+    userExerciseDAO.getRelatedExercise().addContextToExercise(newExerciseID, contextID, projectID);
     userExercise.getDirectlyRelated().add(userExercise1);
     return contextID;
   }
-
-
+*/
   private void addItemToList(int userListID, int exid) {
     addItemToList(userListID, "", exid);
   }
@@ -912,146 +922,6 @@ public class UserListManager implements IUserListManager {
     userExerciseDAO.update(userExercise, false, typeOrder);
   }
 
-
-  /**
-   * TODOx : why all this foolishness with the id?
-   * TODOx : put this back?
-   *
-   * @param userExercise
-   * @return
-   * @seex mitll.langtest.server.LangTestDatabaseImpl#duplicateExercise
-   */
-/*  @Override
-  public CommonExercise duplicate(CommonExercise userExercise) {
-    logger.error("should call domino instead");
-    return userExercise;
-*//*    String newid = getDupID(userExercise);
-
-    logger.debug("duplicating " + userExercise + " with id " + newid);
-    userExercise.getCombinedMutableUserExercise().setOldID(newid);
-    userExerciseDAO.add(userExercise, true);
-    String assignedID = userExercise.getOldID();
-
-    // copy the annotations
-    for (Map.Entry<String, ExerciseAnnotation> pair : userExercise.getFieldToAnnotation().entrySet()) {
-      ExerciseAnnotation value = pair.getValue();
-      addAnnotation(assignedID, pair.getKey(), value.getStatus(), value.getComment(), userExercise.getCombinedMutableUserExercise().getCreator());
-    }
-
-    return userExercise;*//*
-  }*/
-
-/*  private String getDupID(CommonExercise userExercise) {
-    String id = userExercise.getOldID();
-    String newid;
-    if (id.contains("dup")) {
-      newid = id.split("dup")[0] + DUP + System.currentTimeMillis();
-    } else {
-      newid = id + DUP + System.currentTimeMillis();
-    }
-    return newid;
-  }*/
-
-  /**
-   * TODO : Why is this needed?
-   * <p>
-   * Remember to copy the audio from the posted location to a more permanent location.
-   * <p>
-   * If it's already under a media directory -- don't change it.
-   *
-   * @param userExercise
-   * @param overwrite
-   * @param mediaDir
-   * @seex IUserListManager#newExercise
-   * @see UserListManager#editItem
-   */
-  private void fixAudioPaths(CommonExercise userExercise, boolean overwrite, String mediaDir) {
-    AudioAttribute regularSpeed = userExercise.getRegularSpeed();
-    if (regularSpeed == null) {
-      logger.info("fixAudioPaths no audio yet for " + userExercise);
-      return;
-    }
-    long now = System.currentTimeMillis();
-    logger.info("fixAudioPaths : checking regular '" + regularSpeed.getAudioRef() + "' against '" + mediaDir + "'");
-
-    // String foreignLanguage = userExercise.getForeignLanguage();
-    int id = userExercise.getID();
-    int projectID = userExercise.getProjectID();
-
-    if (!regularSpeed.getAudioRef().contains(mediaDir)) {
-      fixAudioPathOfAttribute(userExercise, overwrite, regularSpeed, now, id, projectID, FAST);
-      logger.info("fixAudioPaths : for " + userExercise.getOldID() + " fast is " + regularSpeed.getAudioRef());
-    }
-
-    AudioAttribute slowSpeed = userExercise.getSlowSpeed();
-    if (slowSpeed != null && !slowSpeed.getAudioRef().isEmpty() &&
-        !slowSpeed.getAudioRef().contains(mediaDir)) {
-      fixAudioPathOfAttribute(userExercise, overwrite, slowSpeed, now, id, projectID, SLOW);
-    }
-  }
-
-  /**
-   * @param userExercise
-   * @param overwrite
-   * @param regularSpeed
-   * @param now
-   * @param id
-   * @param projectID
-   * @param prefix
-   */
-  private void fixAudioPathOfAttribute(CommonExercise userExercise,
-                                       boolean overwrite,
-                                       AudioAttribute regularSpeed,
-                                       long now,
-                                       int id,
-                                       int projectID,
-                                       String prefix) {
-    File fileRef = pathHelper.getAbsoluteAudioFile(regularSpeed.getAudioRef());
-
-    String fast = prefix + "_" + now + "_by_" + userExercise.getCreator() + ".wav";
-    String artist = regularSpeed.getUser().getUserID();
-    String refAudio = getRefAudioPath(
-        projectID,
-        id,
-        fileRef,
-        fast,
-        overwrite,
-        new TrackInfo(userExercise.getForeignLanguage(), artist, userExercise.getEnglish(), ""));
-    regularSpeed.setAudioRef(refAudio);
-  }
-
-  /**
-   * Copying audio from initial recording location to new location.
-   * <p>
-   * Also normalizes the audio level.
-   *
-   * @param projid
-   * @param id
-   * @param fileRef
-   * @param destFileName
-   * @param overwrite
-   * @param trackInfo
-   * @return new, permanent audio path
-   * @see #fixAudioPaths
-   */
-  private String getRefAudioPath(int projid,
-                                 int id,
-                                 File fileRef,
-                                 String destFileName,
-                                 boolean overwrite,
-                                 TrackInfo trackInfo) {
-    Database database = userDAO.getDatabase();
-    ServerProperties serverProps = database.getServerProps();
-    Project project = database.getProject(projid);
-    return new PathWriter(serverProps).getPermanentAudioPath(
-        fileRef,
-        destFileName,
-        overwrite,
-        project.getLanguage(),
-        id,
-        serverProps,
-        trackInfo);
-  }
 
   /**
    * @param userExerciseDAO
@@ -1166,7 +1036,7 @@ public class UserListManager implements IUserListManager {
    * @see #markAllFieldsFixed
    */
   @Override
-  public void addAnnotations(CommonExercise exercise) {
+  public void addAnnotations(ClientExercise exercise) {
     if (exercise != null) {
       {
         MutableAnnotationExercise mutableAnnotation = exercise.getMutableAnnotation();
@@ -1209,7 +1079,7 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void markState(CommonExercise exercise, STATE state, int creatorID) {
-    logger.info("markState mark state " + exercise + " = " + state + " by " + creatorID);
+    logger.info("markState mark state " + exercise.getID() + " = " + state + " by " + creatorID);
 
     stateManager.setState(exercise, state, creatorID);
 
@@ -1275,12 +1145,12 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByOnlyAudioAnno
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#filterByOnlyAudioAnno
    */
-  @Override
+/*  @Override
   public Collection<Integer> getAudioAnnos() {
     return annotationDAO.getAudioAnnos();
-  }
+  }*/
 
   @Override
   public IAnnotationDAO getAnnotationDAO() {
@@ -1333,9 +1203,9 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
+   * @param userList
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doEdit
    * @see mitll.langtest.server.services.ListServiceImpl#update
-   * @param userList
    */
   @Override
   public void update(UserList userList) {

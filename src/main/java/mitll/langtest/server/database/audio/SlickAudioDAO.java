@@ -40,6 +40,7 @@ import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
@@ -136,8 +137,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   private static class UserTimeBaseImpl implements UserTimeBase {
-    int userid;
-    long timestamp;
+    final int userid;
+    final long timestamp;
 
     UserTimeBaseImpl(int userid, long timestamp) {
       this.userid = userid;
@@ -182,7 +183,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
 //    logger.info("addOrUpdate Add or update after  " + audioAttribute);
 
-  //  Collection<SlickAudio> byID = dao.getByID(audioAttribute.getUniqueID());
+    //  Collection<SlickAudio> byID = dao.getByID(audioAttribute.getUniqueID());
 
 //    byID.forEach(slickAudio -> logger.info("addOrUpdate Got " + slickAudio));
 //    logger.info("Add or update exists " + audioAttribute);
@@ -257,25 +258,27 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
+   * @param projID
    * @param exids
    * @return
    * @see BaseAudioDAO#attachAudioToExercises
    */
-  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids, Map<Integer, MiniUser> idToMini) {
+  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(int projID, Set<Integer> exids, Map<Integer, MiniUser> idToMini) {
     long then = System.currentTimeMillis();
-    Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDsThatExist(exids);
+    Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDsThatExist(projID, exids);
     long now = System.currentTimeMillis();
 
     if (now - then > 30) {
-      logger.info("getAudioAttributesForExercise took " + (now - then) + " to get " + byExerciseID.size() +
-          " attr for " + exids.size());
+      logger.info("getAudioAttributesForExercise took " + (now - then) +
+          "\n\tto get " + byExerciseID.size() + " attr" +
+          "\n\tfor    " + exids.size());
     }
 
     Map<Integer, List<AudioAttribute>> copy = new HashMap<>(byExerciseID.size());
     byExerciseID.forEach((k, v) -> copy.put(k, toAudioAttributes(v, idToMini)));
-//    for (Map.Entry<Integer, List<SlickAudio>> pair : byExerciseID.entrySet()) {
-//      copy.put(pair.getKey(), toAudioAttributes(pair.getValue(), idToMini));
-//    }
+
+    if (DEBUG) copy.forEach((k, v) -> logger.info(" getAudioAttributesForExercises " + k + " - " + v));
+
     if (copy.size() != exids.size()) {
       String suffix = copy.size() < 10 ? " : " + copy.keySet() : "";
       logger.info("getAudioAttributesForExercises asked for " + exids.size() + " exercises, but only found " +
@@ -350,11 +353,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
-/*
-  public boolean isNoAccentMatch(String transcript, String exerciseFL) {
-    return dao.isNoAccentMatch(transcript, exerciseFL);
-  }*/
-
   @Override
   Set<Integer> getValidAudioOfType(int userid, AudioType audioType) {
     return dao.getExerciseIDsOfValidAudioOfType(userid, audioType.toString());
@@ -402,7 +400,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
-   *
    * @param projid
    * @param isMale
    * @param exToTranscript
@@ -810,6 +807,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param userToGender
    * @param userid
    * @param exercise
+   * @param language
    * @param idToMini
    * @return
    * @see Database#getNativeAudio
@@ -818,7 +816,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender,
                                int userid,
                                CommonExercise exercise,
-                               String language,
+                               Language language,
                                Map<Integer, MiniUser> idToMini) {
     //String nativeAudio = null;
     if (exercise != null) {
@@ -842,25 +840,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         return audioAttributePrefGender.getAudioRef();
       }
 
-/*
-      Map<MiniUser, List<AudioAttribute>> userMap = exercise.getUserMap(genderOfUser == MiniUser.Gender.Male,false);
-      Collection<List<AudioAttribute>> audioByMatchingGender = userMap.values();
-
-      if (audioByMatchingGender.isEmpty()) { // ok, no audio with matching gender, fall back to other audio
-        userMap = exercise.getUserMap(genderOfUser != MiniUser.Gender.Male,false);
-        audioByMatchingGender = userMap.values();
-      }
-
-      if (audioByMatchingGender.isEmpty()) {
-        // logger.warn("no audio for " + userid + " and " + exercise.getID());
-        //missing++;
-      } else {
-        nativeAudio = getRegularSpeedFromARecorder(audioByMatchingGender);
-
-        if (nativeAudio == null) {
-          nativeAudio = getSlowSpeedFromARecorder(audioByMatchingGender);
-        }
-      }*/
     } else {
       return null;
     }

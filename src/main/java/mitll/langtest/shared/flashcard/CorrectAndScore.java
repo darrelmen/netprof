@@ -34,8 +34,7 @@ package mitll.langtest.shared.flashcard;
 
 import mitll.langtest.client.scoring.MiniScoreListener;
 import mitll.langtest.server.database.result.ResultDAO;
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.answer.SimpleAudioAnswer;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -50,23 +49,7 @@ import java.util.Map;
  * @since 9/13/14.
  */
 public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<CorrectAndScore> {
-  private int uniqueID;
-  private int userid;
-
-  /**
-   * For AMAS
-   */
-  // private int qid;
   private boolean correct;
-  /**
-   * For AMAS
-   */
-  // private float classifierScore;
-  /**
-   * For AMAS
-   */
-  // private float userScore;
-
   private String path;
 
   private transient String scoreJson;
@@ -85,16 +68,19 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
     this.path = path;
   }
 
-  public CorrectAndScore(AudioAnswer result) {
+  /**
+   * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#scoreAudio
+   * @param result
+   */
+  public CorrectAndScore(SimpleAudioAnswer result) {
     this(result.getPretestScore().getHydecScore(), result.getPath());
 
-    setScores(result.getPretestScore().getTypeToSegments());
-    setJson(result.getPretestScore().getJson());
+    PretestScore pretestScore = result.getPretestScore();
+    setScores(pretestScore.getTypeToSegments());
+    setJson(pretestScore.getJson());
   }
 
   /**
-   * @param uniqueID
-   * @param userid
    * @param exerciseID
    * @param correct
    * @param score
@@ -103,12 +89,9 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
    * @param scoreJson
    * @see ResultDAO#getScoreResultsForQuery(java.sql.Connection, java.sql.PreparedStatement)
    */
-  public CorrectAndScore(int uniqueID, int userid, int exerciseID, boolean correct, float score, long timestamp,
+  public CorrectAndScore(int exerciseID, boolean correct, float score, long timestamp,
                          String path, String scoreJson) {
-    super(uniqueID, timestamp, score);
-    this.uniqueID = uniqueID;
-    this.exid = exerciseID;
-    this.userid = userid;
+    super(exerciseID, timestamp, score);
     this.correct = correct;
     this.path = path;
     this.scoreJson = scoreJson;
@@ -123,10 +106,6 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
     return correct;
   }
 
-  public int getExid() {
-    return exid;
-  }
-
   public long getTimestamp() {
     return timestamp;
   }
@@ -135,44 +114,10 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
     return path;
   }
 
-  public int getUniqueID() {
-    return uniqueID;
-  }
-
-  public int getUserid() {
-    return userid;
-  }
-
   public String getScoreJson() {
     return scoreJson;
   }
 
-  /**
-   * AMAS
-   * TODO : maybe put this back someday
-   *
-   * @return
-   */
-  public int getQid() {
-    return 0;
-  }
-
-  /**
-   * AMAS
-   *
-   * @return
-   */
-  public boolean hasUserScore() {
-    return false;//userScore > -1;
-  }
-
-  public float getUserScore() {
-    return 0;//userScore;
-  }
-
-  public boolean isMatch(HasID ex) {
-    return getExid() == ex.getID();
-  }
 
   public void setJson(String json) {
     this.scoreJson = json;
@@ -182,6 +127,10 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
     return scores;
   }
 
+  /**
+   * @see mitll.langtest.server.database.result.SlickResultDAO#fromSlickCorrectAndScoreWithRelPath
+   * @param scores
+   */
   public void setScores(Map<NetPronImageType, List<TranscriptSegment>> scores) {
     this.scores = scores;
   }

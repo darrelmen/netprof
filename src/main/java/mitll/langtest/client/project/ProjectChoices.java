@@ -1,7 +1,7 @@
 package mitll.langtest.client.project;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -61,7 +61,7 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
 
-  private static final int DIALOG_HEIGHT = 550;
+  private static final int DIALOG_HEIGHT = 580;
   private static final String COURSE1 = " course";
   /**
    * @see #getLabel
@@ -363,14 +363,15 @@ public class ProjectChoices extends ThumbnailChoices {
       DivWidget right = new DivWidget();
       right.addStyleName("floatRight");
       right.addStyleName("inlineFlex");
+      right.addStyleName("topMargin");
 
       topBottom.add(right);
       if (isQC()) {
-        getCreateNewButton(right);
+        right.add(getCreateNewButton());
       }
 
       if (controller.getUserState().isAdmin()) {
-        addAdminControls(topBottom, right);
+        topBottom.add(addAdminControls(right));
       }
     }
 
@@ -387,41 +388,44 @@ public class ProjectChoices extends ThumbnailChoices {
   /**
    * For right now recalc all alignments only should be done by really prepared admin.
    *
-   * @param topBottom
    * @param right
+   * @paramx topBottom
    */
-  private void addAdminControls(DivWidget topBottom, DivWidget right) {
+  private HTML addAdminControls(DivWidget right) {
     HTML status = new HTML();
     status.setHeight("15px");
     status.addStyleName("leftFiveMargin");
-    getEnsureAllAudioButton(right, status);
-    right.addStyleName("topFiveMargin");
+
+    right.add(getEnsureAllAudioButton(status));
+
     if (isSuperUser) {
-      getRecalcRefAudioButton(right, status);
+      right.add(getRecalcRefAudioButton(status));
     }
-    topBottom.add(status);
+
+    return status;
   }
 
-  private void getCreateNewButton(DivWidget header) {
+  private DivWidget getCreateNewButton() {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button(NEW_PROJECT);
 
     DivWidget right = new DivWidget();
     right.add(w);
 
     w.addStyleName("floatLeft");
-    header.add(right);
 
     w.setIcon(IconType.PLUS);
     w.setSize(ButtonSize.LARGE);
     w.setType(ButtonType.WARNING);
     w.addClickHandler(event -> showNewProjectDialog());
+
+    return right;
   }
 
   /**
-   * @param header
+   * @param status
    * @see #getHeader(List, int)
    */
-  private void getEnsureAllAudioButton(DivWidget header, HTML status) {
+  private DivWidget getEnsureAllAudioButton(HTML status) {
     com.github.gwtbootstrap.client.ui.Button checkAudio = new com.github.gwtbootstrap.client.ui.Button(CHECK_AUDIO);
 
     DivWidget right = new DivWidget();
@@ -429,12 +433,13 @@ public class ProjectChoices extends ThumbnailChoices {
     checkAudio.addStyleName("leftFiveMargin");
 
     checkAudio.addStyleName("floatLeft");
-    header.add(right);
 
     checkAudio.setIcon(IconType.CHECK);
     checkAudio.setSize(ButtonSize.LARGE);
     checkAudio.setType(ButtonType.SUCCESS);
     checkAudio.addClickHandler(event -> checkAudio(controller.getAllProjects(), status));
+
+    return right;
   }
 
   private void checkAudio(List<SlimProject> projects, HTML status) {
@@ -460,7 +465,7 @@ public class ProjectChoices extends ThumbnailChoices {
     }
   }
 
-  private void getRecalcRefAudioButton(DivWidget header, HTML status) {
+  private DivWidget getRecalcRefAudioButton(HTML status) {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button(RECALC_REF);
 
     DivWidget right = new DivWidget();
@@ -468,12 +473,13 @@ public class ProjectChoices extends ThumbnailChoices {
     w.addStyleName("leftFiveMargin");
 
     w.addStyleName("floatLeft");
-    header.add(right);
 
     w.setIcon(IconType.MEDKIT);
     w.setSize(ButtonSize.LARGE);
     w.setType(ButtonType.SUCCESS);
     w.addClickHandler(event -> recalcProject(controller.getAllProjects(), status));
+
+    return right;
   }
 
   /**
@@ -582,7 +588,7 @@ public class ProjectChoices extends ThumbnailChoices {
           }
         } else {
           if (projectForLang.getCourse().isEmpty()) {
-            addPopover(button, projectForLang);
+            // addPopover(button, projectForLang);
           } else {
             addPopoverUsual(button, projectForLang);
           }
@@ -625,13 +631,15 @@ public class ProjectChoices extends ThumbnailChoices {
     if (isQC &&
         ((hasChildren && alldialog) ||
             (!hasChildren && projectType != ProjectType.DIALOG))) {
-     // logger.info("getContainerWithButtons add qc buttons " + isQC);
+      // logger.info("getContainerWithButtons add qc buttons " + isQC);
       container.add(getQCButtons(projectForLang, label));
     }
     return container;
   }
 
   private void addPopoverUsual(FocusWidget button, SlimProject projectForLang) {
+    logger.info("addPopoverUsual " + projectForLang);
+
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
     UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
@@ -647,7 +655,13 @@ public class ProjectChoices extends ThumbnailChoices {
     showPopover(value, button, typeOrder, ClientExerciseUnitChapterItemHelper, Placement.RIGHT);
   }
 
+  /**
+   * @param button
+   * @param projectForLang
+   * @see #getImageAnchor
+   */
   private void addPopover(FocusWidget button, SlimProject projectForLang) {
+    //logger.info("addPopover " + projectForLang);
     addPopover(button, getProps(projectForLang), Placement.RIGHT);
   }
 

@@ -34,13 +34,10 @@ package mitll.langtest.client.scoring;
 
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.CommonAudioExercise;
-import mitll.langtest.shared.exercise.Shell;
-import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -53,7 +50,7 @@ import java.util.Map;
  * Time: 11:17 AM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends AudioPanel<T> {
+public abstract class ScoringAudioPanel<T extends HasID> extends AudioPanel<T> {
   //  private Logger logger = Logger.getLogger("ScoringAudioPanel");
   private static final int ANNOTATION_HEIGHT = 20;
   private static final boolean SHOW_SPECTROGRAM = false;
@@ -62,21 +59,19 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
   private final ClickableTranscript clickableTranscript;
   private int resultID = -1;
   private final String transliteration;
-  private MiniScoreListener miniScoreListener;
+//  private MiniScoreListener miniScoreListener;
 //  private static final boolean debug = false;
 
   /**
    * @param refSentence
    * @param playButtonSuffix
    * @param exercise
-   * @param instance
    * @see ASRScoringAudioPanel#ASRScoringAudioPanel
    */
   ScoringAudioPanel(String refSentence, String transliteration, ExerciseController controller,
-                    String playButtonSuffix, T exercise,
-                    String instance) {
+                    String playButtonSuffix, T exercise) {
     this(null, refSentence, transliteration, controller, SHOW_SPECTROGRAM, 23,
-        playButtonSuffix, exercise, exercise.getID(), instance);
+        playButtonSuffix, exercise, exercise.getID());
   }
 
   /**
@@ -87,8 +82,7 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
    * @param playButtonSuffix
    * @param exercise
    * @param exerciseID
-   * @param instance
-   * @see ASRScoringAudioPanel#ASRScoringAudioPanel(String, String, ExerciseController, boolean, ScoreListener, int, String, Shell, String)
+   * @see ASRScoringAudioPanel#ASRScoringAudioPanel
    */
   ScoringAudioPanel(String path, String refSentence,
                     String transliteration,
@@ -97,23 +91,20 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
                     int rightMargin,
                     String playButtonSuffix,
                     T exercise,
-                    int exerciseID,
-                    String instance) {
-    super(path, controller, showSpectrogram, rightMargin, playButtonSuffix,
-        exercise, exerciseID, instance);
+                    int exerciseID) {
+    super(path, controller, showSpectrogram, rightMargin, playButtonSuffix, exercise, exerciseID);
     this.refSentence = refSentence;
     this.transliteration = transliteration;
     this.clickableTranscript = new ClickableTranscript(words, phones, controller.getButtonFactory(), exerciseID, playAudio);
   }
 
-
-  public void addMinicoreListener(MiniScoreListener l) {
+ /* public void addMinicoreListener(MiniScoreListener l) {
     this.miniScoreListener = l;
   }
-
+*/
   /**
    * @param resultID
-   * @see mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
+   * @seex mitll.langtest.client.scoring.GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton#useResult(PretestScore, ImageAndCheck, ImageAndCheck, boolean, String)
    */
   public void setResultID(int resultID) {
     this.resultID = resultID;
@@ -161,8 +152,6 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
                                      int height,
                                      int reqid);
 
-  private static final String IMAGES_REDX_PNG = LangTest.LANGTEST_IMAGES + "redx.png";
-
   /**
    * Record the image URLs in the Image widgets and enable the check boxes
    *
@@ -173,18 +162,18 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
    * @param path
    * @see #scoreAudio
    */
-  protected void useResult(PretestScore result,
-                           ImageAndCheck wordTranscript,
-                           ImageAndCheck phoneTranscript,
-                           boolean scoredBefore,
-                           String path) {
+  void useResult(PretestScore result,
+                 ImageAndCheck wordTranscript,
+                 ImageAndCheck phoneTranscript,
+                 boolean scoredBefore,
+                 String path) {
     Map<NetPronImageType, String> netPronImageTypeStringMap = result.getsTypeToImage();
     {
       String words = netPronImageTypeStringMap.get(NetPronImageType.WORD_TRANSCRIPT);
       if (words != null) {
         showImageAndCheck(words, wordTranscript);
       } else {
-        wordTranscript.getImage().setUrl(IMAGES_REDX_PNG);
+        wordTranscript.getImage().setUrl(LangTest.RED_X_URL.asString());
       }
     }
     {
@@ -192,12 +181,12 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
       if (phones != null) {
         showImageAndCheck(phones, phoneTranscript);
       } else {
-        phoneTranscript.getImage().setUrl(IMAGES_REDX_PNG);
+        phoneTranscript.getImage().setUrl(LangTest.RED_X_URL.asString());
       }
     }
-    if (!scoredBefore && miniScoreListener != null) {
+ /*   if (!scoredBefore && miniScoreListener != null) {
       miniScoreListener.gotScore(result, path);
-    }
+    }*/
     clickableTranscript.setScore(result);
   }
 
@@ -210,16 +199,20 @@ public abstract class ScoringAudioPanel<T extends CommonAudioExercise> extends A
    * @param scores
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
+/*
   void addScores(Collection<CorrectAndScore> scores) {
     for (CorrectAndScore score : scores) {
       miniScoreListener.addScore(score);
     }
   }
+*/
 
   /**
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addUserRecorder
    */
+/*
   public void showChart() {
     miniScoreListener.showChart(controller.getHost());
   }
+*/
 }

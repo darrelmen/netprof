@@ -21,7 +21,6 @@ import static mitll.hlt.domino.shared.Constants.CHANGE_PW_PNM;
 import static mitll.hlt.domino.shared.Constants.RESET_PW_HASH;
 
 public class MyUserService extends MongoUserServiceDelegate {
-
   private static final String ID_F = "_id";
 
   private static final String ENC_EMAIL_TOKEN_F = "encEmailToken";
@@ -32,16 +31,22 @@ public class MyUserService extends MongoUserServiceDelegate {
 
   private final MailSupport mailSupport;
 
-  private Clock theClock = Clock.systemUTC();
+  private final Clock theClock = Clock.systemUTC();
 
    MyUserService(UserServiceProperties props, Mailer mailer, String acctTypeName, Mongo mongoPool, MailSupport mailSupport) {
     super(props, mailer, acctTypeName, mongoPool);
     this.mailSupport = mailSupport;
   }
 
-  //  @Override
+  /**
+   *
+   * @param currUser
+   * @param addUser
+   * @param urlBase
+   * @return
+   */
   LoginResult addUserNoEmail(User currUser, ClientUserDetail addUser, String urlBase) {
-    log.info("Adding a user: " + addUser);
+    log.info("addUserNoEmail : Adding a user: " + addUser);
     if (addUser == null || addUser.getUserId() == null || addUser.getUserId().isEmpty() ||
         addUser.getFirstName() == null || addUser.getLastName() == null ||
         addUser.getEmail() == null || addUser.getEmail().isEmpty()) {
@@ -146,8 +151,8 @@ public class MyUserService extends MongoUserServiceDelegate {
   }
 
   static class LoginResult {
-    SResult<ClientUserDetail> result;
-    String emailToken;
+    final SResult<ClientUserDetail> result;
+    final String emailToken;
 
     public LoginResult(SResult<ClientUserDetail> result, String emailToken) {
       this.result = result;
@@ -212,20 +217,17 @@ public class MyUserService extends MongoUserServiceDelegate {
         if (success) {
           getEventDAO().logEvent(changeUser, UserEventType.PWChange, changeUser, false);
 
-          new Thread(new Runnable() {
-            @Override
-            public void run() {
-              try {
-                mailSupport.email(changeUser.getEmail(), acctTypeName + " Password Changed",
-                    "Hello " + changeUser.getUserId() + ",\nYour " + acctTypeName + " password has been changed.\n\n" +
-                        "If you did not change your password, you can recover access by resetting your password" +
-                        " at the following link:\n\n" + urlBase + RESET_PW_HASH +
-                        "\n\nThanks,\n   " + acctTypeName + " Administrator");
-              } catch (Exception e) {
-                log.warn("couldn't send email " + e, e);
-              }
+          new Thread(() -> {
+            try {
+              mailSupport.email(changeUser.getEmail(), acctTypeName + " Password Changed",
+                  "Hello " + changeUser.getUserId() + ",\nYour " + acctTypeName + " password has been changed.\n\n" +
+                      "If you did not change your password, you can recover access by resetting your password" +
+                      " at the following link:\n\n" + urlBase + RESET_PW_HASH +
+                      "\n\nThanks,\n   " + acctTypeName + " Administrator");
+            } catch (Exception e) {
+              log.warn("couldn't send email " + e, e);
             }
-          }).start();
+          },"changePassword").start();
 
         }
       } else {
@@ -271,19 +273,16 @@ public class MyUserService extends MongoUserServiceDelegate {
 
   // package access for testing.
   static class UserCredentials {
-    public final String encPass;
-    public final boolean active;
-    public final String encEmailToken;
-    public final Date emailTokenExp;
+    final String encPass;
+    final boolean active;
+    final String encEmailToken;
+    final Date emailTokenExp;
 
-    public UserCredentials(String encodedPass, boolean active, String encEmailToken, Date emailTokenExp) {
+    UserCredentials(String encodedPass, boolean active, String encEmailToken, Date emailTokenExp) {
       this.encPass = encodedPass;
       this.active = active;
       this.encEmailToken = encEmailToken;
       this.emailTokenExp = emailTokenExp;
     }
-
   }
-
-
 }

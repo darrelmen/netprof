@@ -92,7 +92,7 @@ public interface IProjectDAO extends IDAO {
    * @return
    */
   boolean delete(int id);
-  boolean deleteAllBut(int id);
+//  boolean deleteAllBut(int id);
 
   /**
    * @return

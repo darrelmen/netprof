@@ -33,11 +33,15 @@
 package mitll.langtest.server;
 
 import com.typesafe.config.ConfigFactory;
+import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectProperty;
+import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.Affiliation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,6 +75,12 @@ public class ServerProperties {
   private static final Logger logger = LogManager.getLogger(ServerProperties.class);
 
   /**
+   * TODO : good idea????
+   * ON THIS BRANCH!
+   */
+  private static final String APP_NAME_DEFAULT = "netprof";//dialog";
+
+  /**
    * As of 8/2/17 we have these languages on the hydra2 server:
    * korean, levantine, msa, and russian
    * By default, we set the hydra host to point to h2 for these.
@@ -99,8 +109,8 @@ public class ServerProperties {
    */
   public static final String H2_HOST = "h2";
 
+  private static final String APP_NAME = "appName";
   private static final String APP_TITLE = "appTitle";
-  private static final String APP_URL = "app.url";
 
   private static final String FALSE = "false";
   private static final String TRUE = "true";
@@ -134,6 +144,21 @@ public class ServerProperties {
   private static final String LOG_MAILHOST = "log.mailhost";
   private static final String LOG_MAILFROM = "log.mailfrom";
   private static final String MAIL_FROM = "mail.from";
+
+  //  private static final String IMAGE = "image";
+  private static final String NETPROF = "netprof";
+
+  private static final String POSTGRES_HYDRA = "postgresHydra";
+  private static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
+
+
+  public static final String ADD_USER_VIA_EMAIL = "addUserViaEmail";
+  public static final String SEND_HEARTBEAT = "sendHeartbeat";
+  public static final String HEARTBEAT_PERIOD = "heartbeatPeriod";
+  public static final String HEARTBEAT_REC1 = "heartbeatRec";
+
+ // private String dbConfig = POSTGRES_DATA2_DIALOG;
+
   private static final String SCORING_MODEL = "scoringModel";
   private static final String TALKS_TO_DOMINO = "talksToDomino";
 
@@ -147,7 +172,6 @@ public class ServerProperties {
 
   private static final String SLEEP_BETWEEN_DECODES_MILLIS = "sleepBetweenDecodesMillis";
   private static final String DB_CONFIG = "dbConfig";
-  private static final String POSTGRES_HYDRA = "postgresHydra";
   private static final String POSTGRES = "postgres";
 
   /**
@@ -165,6 +189,7 @@ public class ServerProperties {
    * For development, from a laptop.
    */
   private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
+//  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof.ll.mit.edu/netprof/";
 
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
@@ -173,6 +198,7 @@ public class ServerProperties {
   private static final String LANGUAGE = "language";
 
   private static final String MEDIA_DIR = "mediaDir";
+  // private static final String IMAGE_DIR = "imageDir";
   private static final String ANSWER_DIR = "answerDir";
   private static final String NETPROF_AUDIO_DIR = "audioDir";
   private static final String DCODR_DIR = "dcodrDir";
@@ -241,14 +267,14 @@ public class ServerProperties {
   private final Set<Integer> preferredVoices = new HashSet<>();
   private EmailList emailList;
   //  private final Map<String, String> phoneToDisplay = new HashMap<>();
-  private final Map<String, Map<String, String>> langToPhoneToDisplay = new HashMap<>();
+  private final Map<Language, Map<String, String>> langToPhoneToDisplay = new HashMap<>();
 
   private List<Affiliation> affliations = new ArrayList<>();
 
   /**
    * @see mitll.langtest.server.database.copy.CreateProject#createProject
    */
-  public static List<ProjectProperty> CORE_PROPERTIES = Arrays.asList(
+  public static final List<ProjectProperty> CORE_PROPERTIES = Arrays.asList(
       MODELS_DIR,
       WEBSERVICE_HOST_PORT
   );
@@ -440,6 +466,10 @@ public class ServerProperties {
   public String getMediaDir() {
     return props.getProperty(MEDIA_DIR, getAudioBaseDir() + BEST_AUDIO);
   }
+
+/*  public String getImageDir() {
+    return props.getProperty(IMAGE_DIR, getAudioBaseDir() + IMAGE);
+  }*/
 
   /**
    * Relative to install location
@@ -665,8 +695,8 @@ public class ServerProperties {
     return preferredVoices;
   }
 
-  public Map<String, String> getPhoneToDisplay(String language) {
-    Map<String, String> stringStringMap = langToPhoneToDisplay.get(language);
+  public Map<String, String> getPhoneToDisplay(Language languageEnum) {
+    Map<String, String> stringStringMap = langToPhoneToDisplay.get(languageEnum);
     return stringStringMap == null ? Collections.emptyMap() : stringStringMap;
   }
 
@@ -676,7 +706,7 @@ public class ServerProperties {
    * @return
    * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore
    */
-  public String getDisplayPhoneme(String language, String phone) {
+  public String getDisplayPhoneme(Language language, String phone) {
     Map<String, String> phoneToDisplay = getPhoneToDisplay(language);
     if (phoneToDisplay == null) {
       return phone;
@@ -686,8 +716,18 @@ public class ServerProperties {
     }
   }
 
-  public boolean usePhoneToDisplay() {
-    return getDefaultFalse(USE_PHONE_TO_DISPLAY);
+  /**
+   * @param languageEnum
+   * @return
+   * @seex mitll.langtest.server.scoring.AlignmentHelper#getPrecalcScores(boolean, ISlimResult, String)
+   * @seex mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore(String, ImageOptions, boolean, String, String, HydraOutput, double, int, boolean, JsonObject)
+   * @see AudioFileHelper#isUsePhoneToDisplay
+   * @see AudioFileHelper#getEasyAlignment(ClientExercise, String)
+   * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore(PretestScore, boolean, ServerProperties, Language)
+   */
+  public boolean usePhoneToDisplay(Language languageEnum) {
+    return languageEnum == Language.KOREAN;
+//    return getDefaultFalse(USE_PHONE_TO_DISPLAY);
   }
 
   // EMAIL ------------------------
@@ -804,8 +844,23 @@ public class ServerProperties {
   }
 */
 
+  /**
+   * Dialog branch specific config!
+   * Not read from config file!
+   * So we can share the netprof.properties config file.
+   *
+   * @return
+   */
   public String getDBConfig() {
     return props.getProperty(DB_CONFIG, POSTGRES_HYDRA);
+  }
+
+  /**
+   * @param optDatabase
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight
+   */
+  public void setDBConfig(String optDatabase) {
+    //this.dbConfig = optDatabase;
   }
 
   /**
@@ -826,7 +881,11 @@ public class ServerProperties {
   }
 
   public String getAppTitle() {
-    return props.getProperty(APP_TITLE, "netprof");
+    return props.getProperty(APP_TITLE, NETPROF);
+  }
+
+  public String getAppName() {
+    return props.getProperty(APP_NAME, APP_NAME_DEFAULT);
   }
 
   /**
@@ -882,6 +941,7 @@ public class ServerProperties {
   public String getHelpEmail() {
     return getProp(HELP_EMAIL, HELP_EMAIL_DEF);
   }
+
   public String getDominoServer() {
     return getProp("domino.server", DOMINO_LL_MIT_EDU);
   }
@@ -912,22 +972,22 @@ public class ServerProperties {
   }
 
   public boolean addUserViaEmail() {
-    return getDefaultFalse("addUserViaEmail");
+    return getDefaultTrue(ADD_USER_VIA_EMAIL);
   }
 
   /**
    * @return
    */
   public boolean sendHeartbeat() {
-    return getDefaultFalse("sendHeartbeat");
+    return getDefaultFalse(SEND_HEARTBEAT);
   }
 
   public List<String> getHeartbeatRec() {
-    String heartbeatRec = props.getProperty("heartbeatRec", HEARTBEAT_REC);
+    String heartbeatRec = props.getProperty(HEARTBEAT_REC1, HEARTBEAT_REC);
     return Arrays.asList(heartbeatRec.split(","));
   }
 
   public int getHeartbeatPeriod() {
-    return getIntPropertyDef("heartbeatPeriod", DEFAULT_PERIOD);
+    return getIntPropertyDef(HEARTBEAT_PERIOD, DEFAULT_PERIOD);
   }
 }

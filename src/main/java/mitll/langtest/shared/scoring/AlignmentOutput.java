@@ -1,5 +1,6 @@
 package mitll.langtest.shared.scoring;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
@@ -13,17 +14,25 @@ import java.util.Map;
 public class AlignmentOutput implements IsSerializable {
   private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
 
+  /**
+   * Required by RPC.
+   */
   public AlignmentOutput() {
   }
 
   /**
    * @param sTypeToEndTimes
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getAlignments
+   * @see mitll.langtest.server.scoring.AlignmentHelper#getCachedAudioRef
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getCachedAudioRef
    */
   public AlignmentOutput(Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes) {
     this.sTypeToEndTimes = sTypeToEndTimes;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.ScoreFeedbackDiv#showScoreFeedback(AlignmentAndScore, boolean, DivWidget, float)
+   * @return
+   */
   public Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments() {
     return sTypeToEndTimes;
   }

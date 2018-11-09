@@ -40,10 +40,12 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
+import mitll.langtest.client.scoring.PostAudioRecordButton;
+import mitll.langtest.shared.answer.AudioType;
 
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
+import static mitll.langtest.shared.answer.AudioType.PRACTICE;
 
 /**
  * Basically a click handler and a timer to click stop recording, if the user doesn't.
@@ -61,7 +63,7 @@ import static mitll.langtest.client.scoring.PostAudioRecordButton.MIN_DURATION;
  * Time: 5:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class FlashcardRecordButton extends RecordButton {
+public abstract class FlashcardRecordButton extends PostAudioRecordButton {
   private final Logger logger = Logger.getLogger("FlashcardRecordButton");
 
   /**
@@ -75,31 +77,32 @@ public class FlashcardRecordButton extends RecordButton {
   private static int count = 0;
   private final String name;
   private int id = 0;
+  private final RecordButton.RecordingListener outerRecordingListener;
 
   /**
-   * @param delay
-   * @param recordingListener
    * @param addKeyBinding
    * @param controller
-   * @param instance
+   * @paramx delay
+   * @paramx recordingListener
+   * @paramx instance
    * @see mitll.langtest.client.flashcard.FlashcardRecordButtonPanel#makeRecordButton
    */
-  public FlashcardRecordButton(int delay,
-                               RecordingListener recordingListener,
-                               boolean addKeyBinding,
-                               ExerciseController controller,
-                               final String instance) {
-    super(delay, recordingListener, true, controller.getProps());
+  public FlashcardRecordButton(int exerciseID,
+                               final ExerciseController controller,
+                               RecordButton.RecordingListener outerRecordingListener,
+                               boolean addKeyBinding) {
+    super(exerciseID, controller, "", "", WIDTH_FOR_BUTTON);
     id = count++;
     name = "FlashcardRecordButton_";
 
+    this.outerRecordingListener = outerRecordingListener;
     if (addKeyBinding) {
-      addKeyListener(controller, instance);
+      addKeyListener(controller);
       // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
     }
     this.controller = controller;
 
-    setWidth(WIDTH_FOR_BUTTON + "px");
+//    setWidth(WIDTH_FOR_BUTTON + "px");
     setHeight("48px");
     Style style = getElement().getStyle();
     style.setProperty("fontSize", "x-large");
@@ -110,7 +113,30 @@ public class FlashcardRecordButton extends RecordButton {
 
     initRecordButton();
 
-    getElement().setId("FlashcardRecordButton_" + instance + "_" + id);
+    // getElement().setId("FlashcardRecordButton_" + instance + "_" + id);
+  }
+
+  @Override
+  protected int getDialogSessionID() {
+    return -1;
+  }
+
+  @Override
+  protected AudioType getAudioType() {
+    return PRACTICE;
+  }
+
+  @Override
+  public void startRecording() {
+    super.startRecording();
+    outerRecordingListener.startRecording();
+  }
+
+  @Override
+  public boolean stopRecording(long duration, boolean abort) {
+    boolean b = super.stopRecording(duration, abort);
+    outerRecordingListener.stopRecording(duration, abort);
+    return b;
   }
 
   @Override
@@ -120,7 +146,7 @@ public class FlashcardRecordButton extends RecordButton {
 
     if (isRecording()) {
       logger.info("stop recording since detach!");
-      stop(MIN_DURATION + 1);
+      stop(MIN_DURATION + 1, true);
     }
   }
 
@@ -128,7 +154,7 @@ public class FlashcardRecordButton extends RecordButton {
   protected void onUnload() {
     super.onUnload();
 
-  //  logger.info("onUnload ---> ");
+    //  logger.info("onUnload ---> ");
     removeListener();
     stopRecordingSafe();
   }
@@ -144,8 +170,8 @@ public class FlashcardRecordButton extends RecordButton {
 
   private KeyPressHelper.KeyListener listener = null;
 
-  private void addKeyListener(ExerciseController controller, final String instance) {
-    if (DEBUG) logger.info("FlashcardRecordButton.addKeyListener : using  for " + instance);
+  private void addKeyListener(ExerciseController controller) {
+    // if (DEBUG) logger.info("FlashcardRecordButton.addKeyListener : using  for " + instance);
     listener = new KeyPressHelper.KeyListener() {
       @Override
       public String getName() {
@@ -215,20 +241,15 @@ public class FlashcardRecordButton extends RecordButton {
     event.preventDefault();
   }
 
-  protected void gotRightArrow() {
-  }
+  protected abstract void gotRightArrow();
 
-  protected void gotLeftArrow() {
-  }
+  protected abstract void gotLeftArrow();
 
-  protected void gotUpArrow() {
-  }
+  protected abstract void gotUpArrow();
 
-  protected void gotDownArrow() {
-  }
+  protected abstract void gotDownArrow();
 
-  protected void gotEnter() {
-  }
+  protected abstract void gotEnter();
 
   private void checkKeyUp(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
@@ -257,7 +278,7 @@ public class FlashcardRecordButton extends RecordButton {
     }
     boolean hidden = checkHidden(getElement().getId());
     if (hidden) {
-  //    logger.info("shouldIgnoreKeyPress : hidden");
+      //    logger.info("shouldIgnoreKeyPress : hidden");
       removeListener();
       stopRecordingSafe();
     }
@@ -272,18 +293,9 @@ public class FlashcardRecordButton extends RecordButton {
   }-*/;
 
   protected boolean showInitialRecordImage() {
-    showFirstRecordImage();
-    return true;
-  }
-
-  void showFirstRecordImage() {
     setBaseIcon(MyCustomIconType.record1);
     setText("");
-  }
-
-  protected void showSecondRecordImage() {
-    setBaseIcon(MyCustomIconType.record2);
-    setText("");
+    return true;
   }
 
   protected void hideBothRecordImages() {

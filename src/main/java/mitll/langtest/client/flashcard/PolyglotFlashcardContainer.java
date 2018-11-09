@@ -1,6 +1,6 @@
 package mitll.langtest.client.flashcard;
 
-import mitll.langtest.shared.custom.QuizInfo;
+import mitll.langtest.shared.custom.QuizSpec;
 
 interface PolyglotFlashcardContainer extends FlashcardContainer {
   void startTimedRun();
@@ -10,8 +10,6 @@ interface PolyglotFlashcardContainer extends FlashcardContainer {
   long getSessionStartMillis();
 
   long getRoundTimeLeftMillis();
-
-//  int getRoundTimeMinutes(boolean isDry);
 
   boolean getIsDry();
 
@@ -27,5 +25,5 @@ interface PolyglotFlashcardContainer extends FlashcardContainer {
   void postAudio();
   void addRoundTrip(long roundTripMillis);
 
-  QuizInfo getQuizInfo();
+  QuizSpec getQuizSpec();
 }

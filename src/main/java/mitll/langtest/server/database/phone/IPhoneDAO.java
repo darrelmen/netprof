@@ -34,16 +34,15 @@ public interface IPhoneDAO<T> extends IDAO {
    * @return
    * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReport
    */
-  PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project);
+  //PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project);
 
   /**
    * @see mitll.langtest.server.database.analysis.Analysis#getPhoneSummary
    * @param userid
    * @param ids
-   * @param project
    * @return
    */
-  PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids, Project project);
+  PhoneSummary getPhoneSummary(int userid, Collection<Integer> ids);
 
   PhoneBigrams getPhoneBigrams(int userid, Collection<Integer> ids );
 
@@ -69,7 +68,7 @@ public interface IPhoneDAO<T> extends IDAO {
 
   void removeForResult(int resultid);
 
-  void deleteForProject(int projID);
+  int deleteForProject(int projID);
 
   boolean updateProjectForRID(int rid, int newprojid);
 

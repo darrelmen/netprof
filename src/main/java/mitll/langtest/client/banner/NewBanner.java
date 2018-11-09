@@ -6,20 +6,19 @@ import com.github.gwtbootstrap.client.ui.constants.Alignment;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.constants.NavbarPosition;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.client.user.UserManager;
+import mitll.langtest.shared.project.ProjectMode;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,20 +26,35 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
+import static mitll.langtest.shared.project.ProjectType.DIALOG;
 
 /**
+ * Holds nav links at top of page...
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
-  private static final List<INavigation.VIEWS> STANDARD_VIEWS =
-      Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, VIEWS.QUIZ, INavigation.VIEWS.PROGRESS, INavigation.VIEWS.LISTS);
+  private static final String RECORD = "Record";
+  private static final String QC = "QC";
 
-  private static final List<INavigation.VIEWS> POLY_VIEWS =
-      Arrays.asList(INavigation.VIEWS.LEARN, INavigation.VIEWS.DRILL, INavigation.VIEWS.PROGRESS);
+  private static final List<VIEWS> STANDARD_VIEWS =
+      Arrays.asList(VIEWS.LEARN, VIEWS.PRACTICE, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
 
-  private static final String NETPROF = "netprof";
+  private static final List<VIEWS> DIALOG_VIEWS =
+      Arrays.asList(VIEWS.DIALOG, VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.PERFORM, VIEWS.SCORES);
+
+  private static final List<VIEWS> BOTH = new ArrayList<>(STANDARD_VIEWS);
+
+  static {
+    BOTH.addAll(DIALOG_VIEWS);
+  }
+
+  private static final List<VIEWS> POLY_VIEWS = Arrays.asList(VIEWS.LEARN, VIEWS.PRACTICE, VIEWS.PROGRESS);
+
+  private static final String appNameToUse = "netprof";
+  private static final String NETPROF = appNameToUse + (PropertyHandler.IS_BETA ? "BETA" : "");
+
   private static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
 
   private static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
@@ -49,9 +63,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private static final String NEW_PRO_F1_PNG = "NewProF1_48x48.png";
 
-//  private static final String NETPROF_HELP_LL_MIT_EDU = "netprof-help@dliflc.edu";
   private static final String MAILTO_SUBJECT = "Question%20about%20netprof";
- // private String MAIL_TO = getMailTo();
 
   @NotNull
   private String getMailTo() {
@@ -62,7 +74,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String DOCUMENTATION = "User Manual";
 
   private final UILifecycle lifecycle;
-  private ComplexWidget recnav, defectnav;
+  private ComplexWidget recnav, defectnav, dialognav;//, learnNav, drillNav;
 
   private Nav lnav;
   private Dropdown cog;
@@ -75,12 +87,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private final Map<VIEWS, NavLink> viewToLink = new HashMap<>();
 
-  /**
-   * @see #addChoicesForUser
-   */
-  private final List<Widget> choices = new ArrayList<>();
-
   private final ExerciseController controller;
+  private Label subtitle;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param userManager
@@ -95,6 +105,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setPosition(NavbarPosition.TOP);
     this.controller = controller;
     this.lifecycle = lifecycle;
+    //  logger.info("--- addWidgets ---");
     addWidgets(userManager, userMenu, breadcrumbs);
   }
 
@@ -109,19 +120,28 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     add(navCollapse);
 
+    // left nav
     {
       navCollapse.add(this.lnav = getLNav());
       addChoicesForUser(lnav);
     }
+
+    // dialog nav
     {
-      Nav recnav = getRecNav();
+      navCollapse.add(dialognav = getDialogNav());
+    }
+
+    // rev nav
+    {
+      ComplexWidget recnav = getRecNav();
       this.recnav = recnav;
       navCollapse.add(recnav);
     }
     recordMenuVisible();
 
+    // qc nav
     {
-      Nav defectnav = getDefectNav();
+      ComplexWidget defectnav = getDefectNav();
       this.defectnav = defectnav;
       navCollapse.add(defectnav);
     }
@@ -132,36 +152,86 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setCogVisible(userManager.hasUser());
   }
 
+  @NotNull
+  private Nav getDialogNav() {
+    Nav recnav = new Nav();
+    recnav.setVisible(false);
+    recnav.getElement().setId("dialogNav");
+
+    recnav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+
+    DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
+    return recnav;
+  }
+
+
   /**
-   *
    * @return
    */
   @NotNull
   private Nav getRecNav() {
     Nav recnav = new Nav();
+    recnav.setVisible(false);
     recnav.getElement().setId("recnav");
     styleNav(recnav);
-    viewToLink.put(INavigation.VIEWS.RECORD, getChoice(recnav, INavigation.VIEWS.RECORD));
-    viewToLink.put(INavigation.VIEWS.CONTEXT, getChoice(recnav, INavigation.VIEWS.CONTEXT));
+
+    Dropdown nav = new Dropdown(RECORD);
+    rememberViewAndLink(nav, VIEWS.RECORD_ENTRIES);
+    rememberViewAndLink(nav, VIEWS.RECORD_SENTENCES);
+
+    recnav.add(nav);
     return recnav;
   }
 
-  private void styleNav(Nav recnav) {
-    recnav.addStyleName("inlineFlex");
+  private void styleNav(ComplexWidget recnav) {
+    //  recnav.addStyleName("inlineFlex");
+    zeroLeftRightMargins(recnav);
+  }
+
+  private void zeroLeftRightMargins(ComplexWidget recnav) {
     recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
     recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
   }
 
+/*  @NotNull
+  private ComplexWidget getLearnNav() {
+    Nav rnav = new Nav();
+    zeroLeftRightMargins(rnav);
+
+    Dropdown nav = new Dropdown(QC);
+    rnav.add(nav);
+    rememberViewAndLink(nav, VIEWS.QC);
+    rememberViewAndLink(nav, VIEWS.FIX_ENTRIES);
+
+    rememberViewAndLink(nav, VIEWS.QC_SENTENCES);
+    rememberViewAndLink(nav, VIEWS.FIX_SENTENCES);
+
+    return rnav;
+  }*/
+
+  /**
+   * @return
+   * @see #addWidgets
+   */
   @NotNull
-  private Nav getDefectNav() {
-    Nav nav = new Nav();
-    nav.getElement().setId("defectnav");
-    styleNav(nav);
+  private ComplexWidget getDefectNav() {
+    Nav rnav = new Nav();
+    zeroLeftRightMargins(rnav);
 
-    viewToLink.put(INavigation.VIEWS.DEFECTS, getChoice(nav, INavigation.VIEWS.DEFECTS));
-    viewToLink.put(INavigation.VIEWS.FIX, getChoice(nav, INavigation.VIEWS.FIX));
+    Dropdown nav = new Dropdown(QC);
+    rnav.add(nav);
+    rememberViewAndLink(nav, VIEWS.QC_ENTRIES);
+    rememberViewAndLink(nav, VIEWS.FIX_ENTRIES);
 
-    return nav;
+    rememberViewAndLink(nav, VIEWS.QC_SENTENCES);
+    rememberViewAndLink(nav, VIEWS.FIX_SENTENCES);
+
+    return rnav;
+  }
+
+  private void rememberViewAndLink(ComplexWidget recnav, VIEWS record) {
+    viewToLink.put(record, getChoice(recnav, record));
   }
 
   @NotNull
@@ -192,7 +262,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Nav rnav = new Nav();
     rnav.setAlignment(Alignment.RIGHT);
     addSubtitle(rnav);
-    rnav.getElement().getStyle().setMarginRight(-10, Style.Unit.PX );
+    rnav.getElement().getStyle().setMarginRight(-10, Style.Unit.PX);
 
     addUserMenu(userManager, userMenu, rnav);
 
@@ -212,6 +282,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     return rnav;
   }
 
+  /**
+   * @see #setCogVisible
+   */
   private List<LinkAndTitle> hasProjectChoices;
 
   private void addSubtitle(Nav rnav) {
@@ -224,6 +297,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     subtitle.setVisible(!controller.isRecordingEnabled());
   }
 
+  List<LinkAndTitle> teacherReq = new ArrayList<>();
+
   /**
    * @param userManager
    * @param userMenu
@@ -235,24 +310,19 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     userDrop.setIcon(IconType.USER);
     rnav.add(userDrop);
 
+    teacherReq.clear();
     userDrop.addClickHandler(event -> {
-     // logger.info("got click ");
       userDrop.clear();
-      userMenu.getStandardUserMenuChoices().forEach(linkAndTitle -> userDrop.add(linkAndTitle.makeNewLink()));
+      userMenu.getStandardUserMenuChoices(teacherReq).forEach(linkAndTitle -> userDrop.add(linkAndTitle.makeNewLink()));
+      hasProjectChoices.addAll(teacherReq);
     });
-
-  //  Scheduler.get().scheduleDeferred(() -> userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink())));
-
-//    userMenu.getStandardUserMenuChoices().forEach(lt -> userDrop.add(lt.makeNewLink()));
   }
-
-  private Label subtitle;
 
   /**
    * Tell them we can't record.
    *
-   * @see UILifecycle#setSplash
    * @param subtitle
+   * @see UILifecycle#setSplash
    */
   @Override
   public void setSubtitle(String subtitle) {
@@ -272,61 +342,93 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   /**
    * @param nav
+   * @see #addWidgets
    */
   private void addChoicesForUser(ComplexWidget nav) {
     boolean first = true;
     boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == User.Permission.POLYGLOT;
 
-    List<VIEWS> toShow = isPoly ? POLY_VIEWS : STANDARD_VIEWS;
+    boolean isDialog = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
+    List<VIEWS> toShow = isPoly ?
+        POLY_VIEWS :
+        (isDialog ?
+            DIALOG_VIEWS :
+            STANDARD_VIEWS);
+
+    if (DEBUG) logger.info("addChoicesForUser " + toShow.size());
+
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
+      //   choice1.getElement().setId("Link_" + choice.name());
       if (first) {
-        choice1.addStyleName("leftTwentyMargin");
+        choice1.addStyleName("leftTenMargin");
+        first = false;
       }
-      first = false;
-      choices.add(choice1);
       viewToLink.put(choice, choice1);
     }
   }
 
   @NotNull
   private NavLink getChoice(ComplexWidget nav, VIEWS views) {
-    String instanceName = views.toString();//(views.toString().equalsIgnoreCase("Drill")) ? PRACTICE :views.toString();
- //   if (instanceName.equalsIgnoreCase("Drill")) instanceName="Practice";
-//    String historyToken = SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + instanceName;
-    NavLink learn = getLink(nav, instanceName);
+    String viewName = views.toString();
+
+    NavLink learn = getLink(nav, viewName);
     learn.addClickHandler(event -> {
-      //  logger.info("getChoice got click on " + instanceName + " = " + historyToken);
-      controller.logEvent("ViewLink", instanceName, "N/A", "click on view");
-      gotClickOnChoice(instanceName, learn, true);
+      //  logger.info("getChoice got click on " + viewName + " = " + historyToken);
+      controller.logEvent(viewName, "NavLink", "N/A", "click on view");
+      gotClickOnChoice(viewName, learn, true);
       // setHistoryItem(historyToken);
     });
     return learn;
   }
 
-  public void show(INavigation.VIEWS views) {
-    gotClickOnChoice(views.toString(), viewToLink.get(views), false);
+  public void show(VIEWS views) {
+    show(views, true);
+  }
+
+  public void show(VIEWS views, boolean fromClick) {
+    NavLink learn = viewToLink.get(views);
+    if (learn == null) {
+      logger.warning("no view for " + views + " yet...");
+    } else {
+      gotClickOnChoice(views.toString(), learn, fromClick);
+    }
   }
 
   /**
-   *
    * @param instanceName
    * @param learn
    * @param fromClick
    */
   private void gotClickOnChoice(String instanceName, NavLink learn, boolean fromClick) {
     showSection(instanceName, fromClick);
-    showActive(learn);
+    showActive(learn);  // how can this be null?
   }
 
   private void showSection(String instance1, boolean fromClick) {
-    VIEWS choices = INavigation.VIEWS.NONE;
+    navigation.showView(getViews(instance1), false, fromClick);
+  }
+
+  @NotNull
+  private VIEWS getViews(String instance1) {
+    VIEWS choices = VIEWS.NONE;
     try {
-      choices = INavigation.VIEWS.valueOf(instance1.toUpperCase());
+      String name = instance1.toUpperCase();
+      name = name.replaceAll(" ", "_");
+      if (name.equalsIgnoreCase("Drill")) name = "Practice".toUpperCase();
+      //  if (name.equalsIgnoreCase("Practice")) name = "Drill".toUpperCase();
+
+      //    logger.info("name " + name);
+      choices = VIEWS.valueOf(name);
     } catch (IllegalArgumentException e) {
-      logger.info("showSection can't parse " + instance1);
+      logger.warning("showSection can't parse " + instance1);
     }
-    navigation.showView(choices, false, fromClick);
+    return choices;
+  }
+
+  public void selectView(VIEWS views) {
+    NavLink learn = viewToLink.get(views);
+    if (learn != null) showActive(learn);
   }
 
   /**
@@ -373,28 +475,59 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     this.navigation = navigation;
   }
 
+  /**
+   * @param permissions
+   * @see #setVisibleChoices(boolean)
+   * @see InitialUI#showUserPermissions
+   */
   @Override
   public void reflectPermissions(Collection<User.Permission> permissions) {
     recordMenuVisible();
     defectMenuVisible();
+    boolean visible = hasProjectChoice();
+    dialognav.setVisible(visible);
+
+    //  logger.info("reflectPerm " + visible);
+    // setLearnAndDrill(visible);
   }
+
+/*  private void setLearnAndDrill(boolean visible) {
+    learnNav.setVisible(visible);
+    drillNav.setVisible(visible);
+  }*/
 
   @Override
   public void setCogVisible(boolean val) {
     userDrop.setVisible(val);
-    choices.forEach(choice -> choice.setVisible(val));
-    cog.setVisible(isAdmin());
 
+    viewToLink.values().forEach(choice -> choice.setVisible(val));
+
+    if (val && navigation != null) {
+      setVisibleChoicesByMode(navigation.getCurrentView().getMode());
+    }
+
+    cog.setVisible(isAdmin());
+    //  setLearnAndDrill(val);
     boolean hasProject = controller.getProjectStartupInfo() != null;
-    //   logger.info("setCogVisible " + val + " has project " + hasProject + " is admin " + admin);
-    hasProjectChoices.forEach(linkAndTitle -> linkAndTitle.getMyLink().setVisible(hasProject));
+    //  if (DEBUG) logger.info("setCogVisible " + val + " has project " + hasProject + " for " + hasProjectChoices.size());
+
+    hasProjectChoices.forEach(linkAndTitle -> {
+      linkAndTitle.getMyLink().setVisible(hasProject);
+      // logger.info("setCogVisible " + hasProject + " for " + linkAndTitle);
+    });
   }
 
+  /**
+   * @see InitialUI#logout
+   */
   @Override
   public void reset() {
     setCogVisible(false);
     setRecNavVisible(false);
     setDefectNavVisible(false);
+    dialognav.setVisible(false);
+
+//    setLearnAndDrill(false);
   }
 
   @Override
@@ -438,34 +571,76 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
-   * @see InitialUI#addCrumbs
-   * @see InitialUI#showInitialState
+   * @see UILifecycle#showInitialState
    */
   @Override
   public void checkProjectSelected() {
-    setVisibleChoices(controller.getProjectStartupInfo() != null);
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    setVisibleChoices(projectStartupInfo != null);
 
     VIEWS currentView = navigation.getCurrentView();
     NavLink linkToShow = viewToLink.get(currentView);
 
     if (linkToShow == null) {
       logger.warning("checkProjectSelected Current view is " + currentView);
-      logger.warning("checkProjectSelected Current view link is null");
+      //  logger.warning("checkProjectSelected Current view link is null");
       logger.warning("checkProjectSelected huh? keys are " + viewToLink.keySet());
-      linkToShow = viewToLink.get(INavigation.VIEWS.LEARN);
+
+      if (projectStartupInfo != null && projectStartupInfo.getProjectType() == DIALOG) {
+        if (DEBUG) logger.info("choosing dialog view... " + projectStartupInfo.getProjectType());
+        linkToShow = viewToLink.get(VIEWS.DIALOG);
+      } else {
+        if (DEBUG) logger.info("choosing learn view..." + projectStartupInfo);
+        linkToShow = viewToLink.get(VIEWS.LEARN);
+      }
     }
     showActive(linkToShow);
     recordMenuVisible();
   }
 
+  /**
+   * @param show
+   * @see #checkProjectSelected
+   */
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
     reflectPermissions(controller.getPermissions());
+    //   setLearnAndDrill(show);
+  }
+
+  /**
+   * @param mode
+   * @see NewBanner#setCogVisible
+   */
+  @Override
+  public void setVisibleChoicesByMode(ProjectMode mode) {
+    if (DEBUG) logger.info("setVisibleChoicesByMode set visible choices " + mode);
+    hideOrShowByMode((mode == ProjectMode.DIALOG) ? DIALOG_VIEWS : STANDARD_VIEWS);
+  }
+
+  private void hideOrShowByMode(List<VIEWS> standardViews) {
+    BOTH.forEach(views -> {
+      NavLink widgets = viewToLink.get(views);
+      if (widgets == null) {
+        logger.warning("no widget for " + views);
+      } else {
+        boolean contains = standardViews.contains(views);
+//        logger.info("\tlink " + views + " " +widgets.getElement().getId()+
+//            " " + widgets.isVisible() + " '" + widgets.getTitle() + "'" +
+//            " '" + widgets.getName() + "' display " + widgets.getElement().getStyle().getDisplay() +
+//            " now " + contains);
+        widgets.setVisible(contains);
+      }
+    });
   }
 
   private void recordMenuVisible() {
     if (recnav != null) {
       boolean visible = isPermittedToRecord() && hasProjectChoice();
+
+//      boolean learnVisible = viewToLink.get(VIEWS.LEARN).isVisible();
+      //    logger.info("recordMenuVisible learn vis " + learnVisible);
+      //    visible &= learnVisible;
       setRecNavVisible(visible);
     }
   }

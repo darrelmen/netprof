@@ -52,7 +52,7 @@ public class TranscriptImage extends AudioImage {
   private static final int BKG_ALPHA = 150;
 
   // don't color these events when coloring
-  private static final HashSet<String> IGNORE_TOKENS = new HashSet<>(Arrays.asList(
+  public static final HashSet<String> IGNORE_TOKENS = new HashSet<>(Arrays.asList(
       "sil",
       "SIL",
       "<s>",
@@ -64,7 +64,7 @@ public class TranscriptImage extends AudioImage {
       "[+UNK+]",
       "[+unk+]"));
 
-  private Color bkg;                          /// Background color for widget painting
+  private final Color bkg;                          /// Background color for widget painting
   private static final Color DEFAULT_BKG = new Color(220, 230, 242);
 
 

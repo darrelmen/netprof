@@ -40,23 +40,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
+public class ExerciseListWrapper<T extends HasID> implements IsSerializable {
   public ExerciseListWrapper() {
   } // req for serialization
 
   private int reqID;
   private List<T> exercises;
-  private CommonExercise firstExercise;
-  private Map<Integer,CorrectAndScore> scoreHistoryPerExercise;
+  private ClientExercise firstExercise;
+  private Map<Integer, CorrectAndScore> scoreHistoryPerExercise;
   private Map<Integer, Float> idToScore = new HashMap<>();
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    * @param reqID
    * @param ids
    * @param firstExercise
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    */
-  public ExerciseListWrapper(int reqID, List<T> ids, CommonExercise firstExercise) {
+  public ExerciseListWrapper(int reqID, List<T> ids, ClientExercise firstExercise) {
     this(reqID, ids, firstExercise, new HashMap<>());
   }
 
@@ -69,7 +69,7 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
    */
   public ExerciseListWrapper(int reqID,
                              List<T> ids,
-                             CommonExercise firstExercise,
+                             ClientExercise firstExercise,
                              Map<Integer, CorrectAndScore> scoreHistoryPerExercise
   ) {
     this.reqID = reqID;
@@ -86,14 +86,17 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
     return exercises;
   }
 
-  public int getSize() { return exercises.size(); }
-  public CommonExercise getFirstExercise() {
+  public int getSize() {
+    return exercises.size();
+  }
+
+  public ClientExercise getFirstExercise() {
     return firstExercise;
   }
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#setScoreHistory
    * @return
+   * @see mitll.langtest.client.list.FacetExerciseList#setScoreHistory
    */
   public Map<Integer, CorrectAndScore> getScoreHistoryPerExercise() {
     return scoreHistoryPerExercise;
@@ -104,8 +107,8 @@ public class ExerciseListWrapper<T extends Shell> implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper(ExerciseListRequest, Collection, int)
    * @param idToScore
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper(ExerciseListRequest, Collection, int)
    */
   public void setIdToScore(Map<Integer, Float> idToScore) {
     this.idToScore = idToScore;

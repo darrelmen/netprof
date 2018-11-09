@@ -35,15 +35,12 @@ package mitll.langtest.client.flashcard;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.project.ProjectType;
 
 
 /**
@@ -56,23 +53,17 @@ import mitll.langtest.shared.project.ProjectType;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel implements RecordButton.RecordingListener {
-//  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
+  //  private final Logger logger = Logger.getLogger("FlashcardRecordButtonPanel");
   private final AudioAnswerListener exercisePanel;
   private IconAnchor waiting;
 
   /**
    * @param exercisePanel
    * @param controller
-   * @param exerciseID
-   * @param index
    * @see BootstrapExercisePanel#getAnswerWidget
    */
-  public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel,
-                                    ExerciseController controller,
-                                    int exerciseID,
-                                    int index) {
-    super(controller, exerciseID, index, true, AudioType.PRACTICE,
-        "Record", true);
+  public FlashcardRecordButtonPanel(AudioAnswerListener exercisePanel, ExerciseController controller) {
+    super(controller, "Record");
     this.exercisePanel = exercisePanel;
   }
 
@@ -112,6 +103,8 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   @Override
   protected abstract RecordButton makeRecordButton(ExerciseController controller, String title);
 
+  @Override protected abstract String getDevice();
+
   @Override
   protected void postedAudio() {
     exercisePanel.postedAudio();
@@ -126,28 +119,24 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
    * And then move on to the next item.
    *
    * @param result response from server
-   * @param outer  ignored here
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
+   * @see BootstrapExercisePanel#getAnswerWidget
    */
   @Override
-  protected void receivedAudioAnswer(final AudioAnswer result, Panel outer) {
+  protected void receivedAudioAnswer(final AudioAnswer result) {
     hideWaiting();
     showRecord();
     exercisePanel.receivedAudioAnswer(result);
   }
 
-  @Override
-  public void flip(boolean first) {
-  }
-
   /**
-   * @see RecordButton#stopRecording
    * @param duration
+   * @param abort
    * @return
+   * @see RecordButton#stopRecording
    */
   @Override
-  public boolean stopRecording(long duration) {
-    boolean b = super.stopRecording(duration);
+  public boolean stopRecording(long duration, boolean abort) {
+    boolean b = super.stopRecording(duration, abort);
     if (b) {
       hideRecord();
       showWaiting();
@@ -158,6 +147,7 @@ public abstract class FlashcardRecordButtonPanel extends RecordButtonPanel imple
   private void hideRecord() {
     recordButton.setVisible(false);
   }
+
   private void showRecord() {
     recordButton.setVisible(true);
   }

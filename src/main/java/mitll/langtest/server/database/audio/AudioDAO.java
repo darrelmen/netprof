@@ -42,6 +42,7 @@ import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickAudio;
 import org.apache.logging.log4j.LogManager;
@@ -253,7 +254,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(Set<Integer> exids, Map<Integer,MiniUser> map) {
+  Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(int projID, Set<Integer> exids, Map<Integer, MiniUser> map) {
     return null;
   }
 
@@ -470,12 +471,12 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
-   * @param userIds
-   * @param uniqueIDs
+   * @paramx userIds
+   * @paramx uniqueIDs
    * @return
    * @see BaseAudioDAO#getRecordedReport
    */
-  protected int getCountBothSpeeds(Set<Integer> userIds,
+/*  protected int getCountBothSpeeds(Set<Integer> userIds,
                                    Set<Integer> uniqueIDs) {
     Set<String> results = new HashSet<>();
 
@@ -516,7 +517,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
     //logger.debug("both speeds " + results.size());
     return results.size();
-  }
+  }*/
 
   private String getInClause(Collection<Integer> longs) {
     StringBuilder buffer = new StringBuilder();
@@ -646,6 +647,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   /**
    * @seex mitll.langtest.server.database.ImportCourseExamples#copyAudio
    */
+/*
   public long add(Result result, int userid, String path) {
     try {
       long then = System.currentTimeMillis();
@@ -666,6 +668,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
     return -1;
   }
+*/
 
   /**
    * Add a row to the table.
@@ -913,7 +916,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, String language, Map<Integer, MiniUser> idToMini) {
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, Language language, Map<Integer, MiniUser> idToMini) {
     return null;
   }
 

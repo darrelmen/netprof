@@ -1,8 +1,5 @@
 package mitll.langtest.shared.user;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import mitll.langtest.client.user.FormField;
-
 import java.io.Serializable;
 
 /**

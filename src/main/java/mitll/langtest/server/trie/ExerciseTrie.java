@@ -34,6 +34,7 @@ package mitll.langtest.server.trie;
 
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.commons.lang3.StringUtils;
@@ -62,11 +63,12 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
   private static final String JAPANESE = "Japanese";
-  boolean isMandarin;
-  private boolean removeAllPunct;
-  private SmallVocabDecoder smallVocabDecoder;
+  private final boolean isMandarin;
+  private final boolean removeAllPunct;
+  private final SmallVocabDecoder smallVocabDecoder;
 
-  private static boolean DEBUG = false;
+  // private static boolean DEBUG = false;
+  private boolean debug = false;
 
   /**
    * Tokens are normalized to lower case.
@@ -78,6 +80,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    * @param exercisesForState
    * @param language
    * @param doExercise
+   * @param debug
    * @see Project#buildExerciseTrie
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseListWrapperForPrefix
@@ -85,8 +88,9 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   public ExerciseTrie(Collection<T> exercisesForState,
                       String language,
                       SmallVocabDecoder smallVocabDecoder,
-                      boolean doExercise) {
+                      boolean doExercise, boolean debug) {
     this.smallVocabDecoder = smallVocabDecoder;
+    this.debug = debug;
     startMakingNodes();
 
     long then = System.currentTimeMillis();
@@ -127,7 +131,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    * @param isMandarin
    * @param hasClickableCharacters
    * @param exercise
-   * @see #ExerciseTrie(Collection, String, SmallVocabDecoder, boolean)
+   * @see #ExerciseTrie(Collection, String, SmallVocabDecoder, boolean, boolean)
    */
   private void addEntriesForExercise(boolean isMandarin, boolean hasClickableCharacters, T exercise) {
     addEnglish(exercise);
@@ -144,13 +148,13 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private void addContextSentences(boolean isMandarin, boolean hasClickableCharacters, T exercise) {
-    for (CommonExercise ex : exercise.getDirectlyRelated()) {
+    for (ClientExercise ex : exercise.getDirectlyRelated()) {
       addEnglish(exercise, ex.getEnglish());
       includeForeign(isMandarin, hasClickableCharacters, exercise, ex);
     }
   }
 
-  private void includeForeign(boolean isMandarin, boolean hasClickableCharacters, T exercise, CommonExercise ex) {
+  private void includeForeign(boolean isMandarin, boolean hasClickableCharacters, T exercise, ClientExercise ex) {
     addForeign(isMandarin, hasClickableCharacters, exercise, ex.getForeignLanguage(), ex.getTransliteration());
     if (!exercise.getAltFL().isEmpty()) {
       addForeign(isMandarin, hasClickableCharacters, exercise, ex.getAltFL(), ex.getTransliteration());
@@ -207,6 +211,8 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    */
   private void addFL(boolean isMandarin, boolean hasClickableCharacters, T exToReturnOnMatch, String fl) {
     fl = getTrimmed(fl);
+
+    if (debug) logger.info("addFL " + fl + " for " + exToReturnOnMatch.getID());
     addEntryToTrie(new ExerciseWrapper<>(fl, exToReturnOnMatch));
     //addSubstrings(exToReturnOnMatch, fl);
 
@@ -230,7 +236,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
   private void addEnglish(T exercise) {
     //String english = exercise.getEnglish();
-    if (DEBUG) logger.info("addEnglish " + exercise.getEnglish());
+    if (debug) logger.info("addEnglish " + exercise.getEnglish());
     addEnglish(exercise, exercise.getEnglish());
     // addSubstrings(exercise, english);
   }
@@ -238,7 +244,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private void addEnglish(T exercise, String english) {
     if (english != null && !english.isEmpty()) {
       String trimmed = getTrimmed(english);
-      if (DEBUG) logger.info("addEnglish 2 " + trimmed);
+      if (debug) logger.info("addEnglish 2 " + trimmed);
       addEntryToTrie(new ExerciseWrapper<>(trimmed, exercise));
       addSuffixes(exercise, trimmed);
     }
@@ -259,7 +265,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
           if (trimmed1.isEmpty()) {
             //logger.error("is empty ");
           } else {
-            if (DEBUG) logger.info("addSuffixes '" + trimmed1 + "'");
+            if (debug) logger.info("addSuffixes '" + trimmed1 + "'");
             addEntry(exercise, trimmed1);
           }
           trimmed = trimmed1;
@@ -321,9 +327,11 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
    */
   public List<T> getExercises(String prefix) {
     List<T> matches = getMatches(getTrimmed(prefix));
-    for (T ex : matches)
-      if (ex.isContext()) logger.warn("huh? returning context exercise " + ex.getID() + " " + ex.getEnglish());
+
+/*    for (T ex : matches)
+      if (ex.isContext()) logger.info("getExercises : returning context exercise " + ex.getID() + " " + ex.getEnglish());*/
     //   logger.info("getExercises trim '" + prefix.toLowerCase() + "' = '" + trimmed + "' => " +matches.size());
+
     return matches;
   }
 

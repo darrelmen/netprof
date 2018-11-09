@@ -42,6 +42,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -59,7 +60,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 7/17/15.
  */
-public class ReviewScoringPanel extends ScoringAudioPanel {
+public class ReviewScoringPanel<T extends HasID> extends ScoringAudioPanel<T> {
   private final Logger logger = Logger.getLogger("ReviewScoringPanel");
 
   private static final int WIDTH_MARGIN = 230;
@@ -71,16 +72,16 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    * @param refSentence
    * @param controller
    * @paramx exercise
-   * @param instance
    * @see mitll.langtest.client.result.ResultManager#getAsyncTable
    */
   public ReviewScoringPanel(String path,
                             String refSentence,
-                            String transliteration,
                             ExerciseController controller,
-                            int exerciseID,
-                            String instance) {
-    super(path, refSentence,transliteration, controller, false, 23, "", null, exerciseID, instance);
+                            int exerciseID) {
+    super(path, refSentence, "", controller, false,
+        23, "", null, exerciseID);
+
+ //   logger.info("ReviewScoringPanel ex " + exerciseID);
     tablesContainer = new HorizontalPanel();
     tablesContainer.getElement().setId("TablesContainer");
     belowContainer = new DivWidget();
@@ -98,11 +99,11 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   }
 
   /**
-   * @see ScoringAudioPanel#scoreAudio
    * @param label
    * @param scoreColHeader
    * @param scores
    * @return
+   * @see ScoringAudioPanel#scoreAudio
    * @see #scoreAudio
    * @see #addWordScoreTable
    */
@@ -138,11 +139,11 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   }
 
   /**
-   * @see #getPhoneScoreTable
    * @param label
    * @param scoreColHeader
    * @param scores
    * @return
+   * @see #getPhoneScoreTable
    */
   private Table makeTableHoriz(String label, String scoreColHeader, Map<String, Float> scores) {
     Table table = new Table();
@@ -205,14 +206,15 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
    * @see ScoringAudioPanel#getTranscriptImageURLForAudio
    */
   @Override
-  protected void scoreAudio(String path, int resultID, String refSentence, String transliteration,final ImageAndCheck wordTranscript,
+  protected void scoreAudio(String path, int resultID, String refSentence, String transliteration, final ImageAndCheck wordTranscript,
                             final ImageAndCheck phoneTranscript, int width, int height, int reqid) {
-    // logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
+  //  logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
+
     boolean wasVisible = wordTranscript.getImage().isVisible();
     belowContainer.setWidth(width + "px");
 
     // only show the spinning icon if it's going to take awhile
-    final Timer t = new Timer() {
+    final Timer waitTimer = new Timer() {
       @Override
       public void run() {
         wordTranscript.setUrl(LangTest.LANGTEST_IMAGES + "animated_progress44.gif");
@@ -221,19 +223,19 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
     };
 
     // Schedule the timer to run once in 1 seconds.
-    t.schedule(wasVisible ? 1000 : 1);
+    waitTimer.schedule(wasVisible ? 1000 : 1);
 
-    controller.getScoringService().getResultASRInfo((int)resultID, new ImageOptions(width, height, true, true), new AsyncCallback<PretestScore>() {
+    controller.getScoringService().getResultASRInfo((int) resultID, new ImageOptions(width, height, true, true), new AsyncCallback<PretestScore>() {
       public void onFailure(Throwable caught) {
         wordTranscript.getImage().setVisible(false);
         phoneTranscript.getImage().setVisible(false);
-    controller.handleNonFatalError("get asr score",caught);
+        controller.handleNonFatalError("get asr score", caught);
       }
 
       public void onSuccess(PretestScore result) {
-       // logger.info("scoreAudio : req " + result);
+        // logger.info("scoreAudio : req " + result);
 
-        t.cancel();
+        waitTimer.cancel();
         if (result != null) {
           useResult(result, wordTranscript, phoneTranscript, false, "");
 
@@ -292,9 +294,9 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   }
 
   /**
-   * @see ScoringAudioPanel#scoreAudio
    * @param score
    * @return
+   * @see ScoringAudioPanel#scoreAudio
    * @see #scoreAudio
    */
   private Widget getWordTable(PretestScore score) {
@@ -308,7 +310,8 @@ public class ReviewScoringPanel extends ScoringAudioPanel {
   public Widget getTables() {
     return tablesContainer;
   }
-  public Widget getBelow()  {
+
+  public Widget getBelow() {
     return belowContainer;
   }
 }

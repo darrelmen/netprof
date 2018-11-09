@@ -54,17 +54,14 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.client.scoring.ClickableWords;
-import mitll.langtest.client.scoring.ScoreFeedbackDiv;
-import mitll.langtest.client.scoring.ScoreProgressBar;
-import mitll.langtest.client.scoring.TwoColumnExercisePanel;
+import mitll.langtest.client.scoring.*;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.MutableAnnotationExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -73,6 +70,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.scoring.DialogExercisePanel.BLUE;
 import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
 
 /**
@@ -84,18 +82,18 @@ import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
  * Time: 3:07 PM
  * To change this template use File | Settings | File Templates.
  */
-public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotationExercise>
-    extends FlashcardPanel<T>
+public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExercise> //T extends CommonExercise & MutableAnnotationExercise>
+    extends FlashcardPanel<L, T>
     implements AudioAnswerListener {
   private final Logger logger = Logger.getLogger("BootstrapExercisePanel");
+
+  private static final int RECO_OUTPUT_WIDTH = 725;
 
   /**
    * Auto fetch their response as a compressed version.
    * TODO :  Bug - first time you click it, button returns to play state too early...
    */
   private static final boolean DO_AUTOLOAD = false;
-
-  //private static final String IN = "in";
 
   private static final int FEEDBACK_LEFT_MARGIN = PROGRESS_LEFT_MARGIN;
   private Panel recoOutput;
@@ -116,7 +114,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param controller
    * @param soundFeedback
    * @param endListener
-   * @param instance
    * @param exerciseList
    * @see StatsPracticePanel#StatsPracticePanel
    */
@@ -126,9 +123,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
                          final ControlState controlState,
                          MySoundFeedback soundFeedback,
                          SoundFeedback.EndListener endListener,
-                         String instance,
                          ListInterface exerciseList) {
-    super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, instance, exerciseList);
+    super(e, controller, addKeyBinding, controlState, soundFeedback, endListener, exerciseList);
     downloadContainer = new DownloadContainer();
     //logger.info("Bootstrap instance " + instance);
   }
@@ -201,12 +197,16 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     scoreFeedbackRow = new DivWidget();
     scoreFeedbackRow.addStyleName("bottomFiveMargin");
     scoreFeedbackRow.setHeight("52px");
+
+
     toAddTo.add(scoreFeedbackRow);
 
     DivWidget wrapper = new DivWidget();
     wrapper.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
 
     recoOutput = new DivWidget();
+    recoOutput.getElement().getStyle().setProperty("maxWidth", RECO_OUTPUT_WIDTH + "px");
+
     wrapper.add(recoOutput);
 
     recoOutput.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
@@ -214,16 +214,16 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   private void addContextSentenceToShowWhileWaiting(ExerciseController controller, Panel toAddTo) {
-    CommonExercise next = exercise.getDirectlyRelated().iterator().next();
+    ClientExercise next = exercise.getDirectlyRelated().iterator().next();
     int fontSize = controller.getProjectStartupInfo().getLanguageInfo().getFontSize();
 
-    ClickableWords<CommonExercise> commonExerciseClickableWords =
-        new ClickableWords<>(null, exercise.getID(), controller.getLanguage(), fontSize);
+    ClickableWords commonExerciseClickableWords =
+        new ClickableWords(null, exercise.getID(), controller.getLanguage(), fontSize, BLUE);
 
     String flToShow = next.getFLToShow();
     String flToShow1 = exercise.getFLToShow();
     DivWidget contentWidget = commonExerciseClickableWords.getClickableWordsHighlight(flToShow, flToShow1,
-       TwoColumnExercisePanel.FieldType.FL, new ArrayList<>(), false);
+        FieldType.FL, new ArrayList<>(), false);
 
     contextSentenceWhileWaiting = getCenteredRow(contentWidget);
 
@@ -308,8 +308,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     recordButton.addStyleName("alignCenter");
   }
 
-  FlashcardRecordButton toGrab;
-
   /**
    * @param exerciseID
    * @param controller
@@ -321,64 +319,59 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
                                             ExerciseController controller,
                                             final boolean addKeyBinding) {
     AudioAnswerListener exercisePanel = this;
-    return new FlashcardRecordButtonPanel(exercisePanel, controller, exerciseID, 1) {
+    return new FlashcardRecordButtonPanel(exercisePanel, controller) {
       final FlashcardRecordButtonPanel outer = this;
       private Timer waitTimer = null;
 
-      @Override
+ /*     @Override
       protected void showWaiting() {
-        //super.showWaiting();
-
         if (contextSentenceWhileWaiting != null) {
           scheduleWaitTimer();
         } else {
           super.showWaiting();
         }
       }
+*/
 
-      @Override
+   /*   @Override
       protected void hideWaiting() {
         super.hideWaiting();
         cancelTimer();
         if (contextSentenceWhileWaiting != null) {
           contextSentenceWhileWaiting.setVisible(false);
         }
-      }
+      }*/
 
-      void scheduleWaitTimer() {
-        //  WaitCursorHelper outer = this;
-        // logger.info("scheduleWaitTimer --- " + outer);
+  /*    private void scheduleWaitTimer() {
         cancelTimer();
 
         waitTimer = new Timer() {
           @Override
           public void run() {
-            //   logger.info("scheduleWaitTimer timer expired..." + outer);
             if (contextSentenceWhileWaiting != null) {
               contextSentenceWhileWaiting.setVisible(true);
             }
-
           }
         };
         waitTimer.schedule(500);
-      }
+      }*/
 
-      private void cancelTimer() {
+   /*   private void cancelTimer() {
         if (waitTimer != null) {
-          // logger.info("cancelTimer --- " + this);
-          waitTimer.cancel();
+           waitTimer.cancel();
         }
-        //else {
-        //  logger.info("cancelTimer waitTimer is null " +this);
-        // }
-      }
 
+      }*/
 
       @NotNull
       protected String getDeviceType() {
         return getDeviceTypeValue();
       }
 
+      /**
+       * @seex RecordButtonPanel#postAudioFile
+       * @return
+       */
       @Override
       protected String getDevice() {
         return getDeviceValue();
@@ -387,12 +380,17 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
       @Override
       protected RecordButton makeRecordButton(final ExerciseController controller, String buttonTitle) {
         // logger.info("makeRecordButton : using " + instance);
+        FlashcardRecordButtonPanel recordingListener = this;
         final FlashcardRecordButton widgets = new FlashcardRecordButton(
-            controller.getRecordTimeout(),
-            this,
-            addKeyBinding,
+            exerciseID,
             controller,
-            BootstrapExercisePanel.this.instance) {
+            recordingListener,
+            addKeyBinding
+        ) {
+
+          /**
+           * @see RecordButton#startRecordingWithTimer
+           */
           @Override
           protected void start() {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Start_Recording");
@@ -402,13 +400,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
           }
 
           @Override
-          public void stop(long duration) {
+          public void stop(long duration, boolean abort) {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Stop_Recording");
             outer.setAllowAlternates(showOnlyEnglish);
             //logger.info("BootstrapExercisePlugin : stop recording " + duration);
-            super.stop(duration);
+            super.stop(duration, abort);
           }
-
 
           /**
            * @see FlashcardRecordButton#checkKeyDown
@@ -437,6 +434,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
             }
           }
 
+          @Override
+          protected String getDevice() {
+            return getDeviceValue();
+          }
+
           /**
            * @see FlashcardRecordButton#checkKeyDown
            */
@@ -451,11 +453,21 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
             //   if (b) logger.info("ignore key press?");
             return b;
           }
+
+          @Override
+          public void useResult(AudioAnswer result) {
+            receivedAudioAnswer(result);
+          }
+
+          @Override
+          protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+          //  super.useInvalidResult(exid, validity, dynamicRange);
+            receivedAudioAnswer(new AudioAnswer("", validity, -1, 0, exid));
+          }
         };
 
         // without this, the arrow keys may go to the chapter selector
         grabFocus(widgets);
-        toGrab = widgets;
         return widgets;
       }
     };
@@ -480,6 +492,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   String getDeviceValue() {
+//    logger.warning("getDeviceValue default ");
+
     return controller.getBrowserInfo();
   }
 
@@ -494,7 +508,8 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
    * @param correct
    * @param score
    * @param isFullMatch
-   * @see
+   * @see #showCorrectFeedback
+   * @see #showRecoFeedback
    */
   private void showPronScoreFeedback(boolean correct, double score, boolean isFullMatch) {
     scoreFeedbackRow.clear();
@@ -502,7 +517,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   }
 
   /**
-   * TODO : use same as in learn tab or vice versa
+   * use same as in learn tab or vice versa
    *
    * @param score
    * @param isFullMatch
@@ -545,7 +560,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
   @NotNull
   private DivWidget getProgressBar(double score, boolean isFullMatch) {
-    DivWidget widgets = new ScoreProgressBar().showScore(score * 100, isFullMatch, true);
+    DivWidget widgets = new ScoreProgressBar().showScore(score * 100, isFullMatch);
     widgets.setHeight("25px");
     return widgets;
   }
@@ -577,7 +592,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         showCorrectFeedback(score, result.getPretestScore());
       } else {   // incorrect!!
         showIncorrectFeedback(result, score, hasRefAudio());
-        //prefix = IN;
       }
 /*
       controller.logEvent(button, "Button", exercise.getID(), prefix + "correct response - score " +
@@ -641,6 +655,12 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     maybeAdvance(score, pretestScore.isFullMatch());
   }
 
+  /**
+   * @param score
+   * @param pretestScore
+   * @param correct
+   * @see #showCorrectFeedback
+   */
   void showRecoFeedback(double score, AlignmentAndScore pretestScore, boolean correct) {
     showPronScoreFeedback(correct, score, pretestScore.isFullMatch());
     showRecoOutput(pretestScore);
@@ -662,13 +682,16 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
   private void showRecoOutput(AlignmentAndScore pretestScore) {
     recoOutput.clear();
 
-    playAudioPanel = new PlayAudioPanel(controller.getSoundManager(), null, controller, exercise);
-    ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, downloadContainer);
+    playAudioPanel = new PlayAudioPanel(null, controller, exercise.getID());
+    ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel, downloadContainer, true);
     downloadContainer.getDownloadContainer().setVisible(true);
-    recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, new ClickableWords<>().isRTL(exercise)));
+    recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, new ClickableWords().isRTL(exercise.getForeignLanguage())));
   }
 
   PlayAudioPanel playAudioPanel;
+  /**
+   * @see #BootstrapExercisePanel
+   */
   private final DownloadContainer downloadContainer;
 
   private void setDownloadHref(String audioPath) {
@@ -730,12 +753,6 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
     }
   }
 
-/*
-  boolean showScoreFeedback(AudioAnswer result) {
-    return result.isSaidAnswer();
-  }
-*/
-
   /**
    * @see #showIncorrectFeedback
    */
@@ -775,11 +792,11 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
         });
   }
 
-  void disableRecord() {
+  private void disableRecord() {
     realRecordButton.setEnabled(false);
   }
 
-  void enableRecord() {
+  private void enableRecord() {
     realRecordButton.setEnabled(true);
   }
 
@@ -827,8 +844,7 @@ public class BootstrapExercisePanel<T extends CommonExercise & MutableAnnotation
 
       List<Boolean> adjusted = new ArrayList<>();
       for (CorrectAndScore score : scores) {
-        boolean correct = isCorrect(score.isCorrect(), score.getScore());
-        adjusted.add(correct);
+        adjusted.add(isCorrect(score.isCorrect(), score.getScore()));
       }
       String history = SetCompleteDisplay.getScoreHistory(adjusted);
       String s = "<span style='float:right;'>" + history + "&nbsp;" + Math.round(getAvgScore(scores)) + "</span>";

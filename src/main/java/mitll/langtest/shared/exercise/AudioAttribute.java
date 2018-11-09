@@ -32,9 +32,7 @@
 
 package mitll.langtest.shared.exercise;
 
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -115,7 +113,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @param transcript       what the speaker read at the time of recording
    * @param actualPath
    * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getResultsForQuery
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
+   * @seex mitll.langtest.server.database.audio.BaseAudioDAO#getAudioAttribute
    */
   public AudioAttribute(int uniqueID,
                         int userid,
@@ -205,9 +203,11 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return user != null && user.isMale();
   }
 
+/*
   public boolean isFemale() {
     return !isMale();
   }
+*/
 
   public String getSpeed() {
     String s = getAttributes().get(SPEED);
@@ -306,7 +306,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @param hasBeenPlayed
-   * @see EventDAO#addPlayedMarkings
+   * @seex EventDAO#addPlayedMarkings
    */
   public void setHasBeenPlayed(boolean hasBeenPlayed) {
     this.hasBeenPlayed = hasBeenPlayed;
@@ -320,19 +320,21 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return durationInMillis;
   }
 
+  public void setDurationInMillis(long durationInMillis) {
+    this.durationInMillis = durationInMillis;
+  }
+
   public int getUniqueID() {
     return uniqueID;
   }
-
-
 
   public String getTranscript() {
     return transcript == null ? "" : transcript;
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyAudio
    * @param transcript
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyAudio
    */
   public void setTranscript(String transcript) {
     this.transcript = transcript;
@@ -356,7 +358,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.audio.BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)
+   * @seex mitll.langtest.server.database.audio.BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)
    * @deprecated - do we ever set this properly???
    */
   public String getActualPath() {
@@ -381,7 +383,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
 
   /**
    * @param alignmentOutput
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#setAlignmentInfo
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#setAlignmentInfo
    */
   public void setAlignmentOutput(AlignmentOutput alignmentOutput) {
     this.alignmentOutput = alignmentOutput;
@@ -395,14 +397,14 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public String toString() {
     return "Audio" +
         "\n\tid         " + uniqueID +
-        "\n\texid         " + exid +
+        "\n\texid       " + exid +
         // "\n\tfor ex     " + getID()+
-        " (old ex " + getOldexid() + ") :" +
+        (getOldexid() == null ? "" : " (old ex " + getOldexid() + ") :") +
         "\n\tpath       " + audioRef +
-        "\n\tactual     " + actualPath +
+        // "\n\tactual     " + actualPath +
         "\n\tattrs      " + attributes +
         "\n\tby         " + userid + "/" + user +
-        "\n\ttranscript '" + transcript +
-        "'\n\tdnr\t" + dnr;
+        "\n\ttranscript '" + transcript + "'" +
+        "\n\tdnr        " + dnr;
   }
 }

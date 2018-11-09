@@ -33,19 +33,19 @@
 package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.TabPanel;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.ListInterface;
@@ -61,8 +61,7 @@ import mitll.langtest.shared.user.MiniUser;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.shared.answer.AudioType.REGULAR;
-import static mitll.langtest.shared.answer.AudioType.SLOW;
+import static mitll.langtest.shared.answer.AudioType.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -70,9 +69,11 @@ import static mitll.langtest.shared.answer.AudioType.SLOW;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/28/2014.
  */
-public class ReviewEditableExercise extends EditableExerciseDialog {
-  private static final String MARKING_AUDIO_DEFECT = "marking audio defect";
+public class ReviewEditableExercise<T extends CommonShell, U extends ClientExercise> extends EditableExerciseDialog<T, U> {
+  public static final String CONTEXT = "context";
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
+
+  private static final String MARKING_AUDIO_DEFECT = "marking audio defect";
 
   private static final String YOUR_RECORDING = "Your Recording";
 
@@ -89,20 +90,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @see #makeFixedButton
    */
   private static final String FIXED = "Mark Fixed";
-  // private static final String DUPLICATE = "Duplicate";
-  /**
-   * @seex #getRemove
-   */
-/*  private static final String DELETE = "Delete";
-  private static final String DELETE_THIS_ITEM = "Delete this item.";
-  private static final String ARE_YOU_SURE = "Are you sure?";
-  private static final String REALLY_DELETE_ITEM = "Really delete whole item and all audio cuts?";
-  private static final List<String> MSGS = Collections.singletonList(REALLY_DELETE_ITEM);
-  */
-//  private static final String COPY_THIS_ITEM = "Copy this item.";
+
   private static final String REGULAR_SPEED = " Regular speed";
   private static final String SLOW_SPEED = " Slow speed";
-  private static final int DELAY_MILLIS = 5000;
 
   /**
    * @see #makeAudioRow
@@ -110,12 +100,12 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private static final String ADD_AUDIO = "Add audio";
 
   private final Set<Widget> audioWasPlayed = new HashSet<>();
-  private final PagingExerciseList<CommonShell, CommonExercise> exerciseList;
+  private final PagingExerciseList<T, U> exerciseList;
 
   private List<RememberTabAndContent> tabs;
 
   /**
-   * @see #checkForForeignChange
+   * @seex #checkForForeignChange
    * @see #getKeepAudio
    */
   private final CheckBox keepAudio = new CheckBox("Keep Audio even if text changes");
@@ -125,14 +115,13 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param originalList
    * @param exerciseList
    * @paramx predefinedContent   - this should be a reference to the Learn tab exercise list, but it's not getting set.
-   * @see mitll.langtest.client.custom.content.ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @see mitll.langtest.client.custom.content.ReviewItemHelper#doInternalLayout
    */
   public ReviewEditableExercise(ExerciseController controller,
-                                CommonExercise changedUserExercise,
-
+                                U changedUserExercise,
                                 int originalList,
-                                PagingExerciseList<CommonShell, CommonExercise> exerciseList,
-                                String instanceName) {
+                                PagingExerciseList<T, U> exerciseList,
+                                INavigation.VIEWS instanceName) {
     super(controller,
         changedUserExercise,
         originalList,
@@ -141,7 +130,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     this.exerciseList = exerciseList;
   }
 
-  public Panel addFields(final ListInterface<CommonShell, CommonExercise> listInterface, final Panel toAddTo) {
+  public Panel addFields(final ListInterface<T, U> listInterface, final Panel toAddTo) {
     Panel widgets = super.addFields(listInterface, toAddTo);
     english.box.setEnabled(false);
     foreignLang.box.setEnabled(false);
@@ -159,32 +148,50 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   @Override
   protected Panel makeAudioRow() {
-    AudioAttributeExercise audioAttributeExercise = newUserExercise;
+    boolean b = isContext();
+    AudioRefExercise audioAttributeExercise =
+        b && newUserExercise.hasContext() ?
+            newUserExercise.getDirectlyRelated().iterator().next() : newUserExercise;
 
+    ClientExercise exerciseWithAudio = null;
+    if (newUserExercise.hasContext()) {
+      exerciseWithAudio = newUserExercise.getDirectlyRelated().iterator().next();
+
+//      logger.info("makeAudioRow (" + instance +
+//          ") exerciseWithAudio " + exerciseWithAudio.getID() + " is exerciseWithAudio " + exerciseWithAudio.isContext() + " " + exerciseWithAudio.getEnglish() + " " + exerciseWithAudio.getForeignLanguage());
+//      logger.info("makeAudioRow exerciseWithAudio " + exerciseWithAudio.getID() + " " + exerciseWithAudio.getAudioAttributes().size());
+    } else {
+      exerciseWithAudio = newUserExercise;
+    }
+
+    //  logger.info("makeAudioRow make audio row for " + newUserExercise.getID() + " is exerciseWithAudio " + newUserExercise.isContext());
     tabs = new ArrayList<>();
 
     TabPanel tabPanel = new TabPanel();
     tabLinks.clear();
 
     Collection<AudioAttribute> maleDisplayed = getDisplayedAudio(audioAttributeExercise, true);
+//    logger.info("makeAudioRow male   audio has " + maleDisplayed.size());
     Collection<AudioAttribute> femaleDisplayed = getDisplayedAudio(audioAttributeExercise, false);
+//    logger.info("makeAudioRow female audio has " + femaleDisplayed.size());
 
-    AudioAttribute audioAttribute = getAudioAttribute(REGULAR);
+    AudioAttribute audioAttribute = getAudioAttribute(audioAttributeExercise, isContext() ? CONTEXT_REGULAR : REGULAR);
     if (audioAttribute == null) {
-      audioAttribute = getAudioAttribute(SLOW);
+      audioAttribute = getAudioAttribute(audioAttributeExercise, SLOW);
     }
 
     if (audioAttribute != null) {
       boolean isDisplayed = maleDisplayed.contains(audioAttribute) || femaleDisplayed.contains(audioAttribute);
-      addNewOrYourRecordingTab(tabPanel, audioAttribute, isDisplayed);
+      //  logger.info("makeAudioRow isDisplayed " + isDisplayed);
+      addNewOrYourRecordingTab(exerciseWithAudio, tabPanel, audioAttribute, isDisplayed);
     }
 
-    addAudioByGender(audioAttributeExercise, tabPanel, true, maleDisplayed);
-    addAudioByGender(audioAttributeExercise, tabPanel, false, femaleDisplayed);
+    addAudioByGender(exerciseWithAudio, audioAttributeExercise, tabPanel, true, maleDisplayed);
+    addAudioByGender(exerciseWithAudio, audioAttributeExercise, tabPanel, false, femaleDisplayed);
 
     // put at end if not yours
     if (audioAttribute == null) {
-      addNewOrYourRecordingTab(tabPanel, audioAttribute, false);
+      addNewOrYourRecordingTab(exerciseWithAudio, tabPanel, audioAttribute, false);
     }
 
     tabPanel.addShowHandler(showEvent -> currentTab = tabLinks.indexOf(showEvent.getTarget()));
@@ -194,6 +201,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return tabPanel;
   }
 
+  private boolean isContext() {
+    return instance == INavigation.VIEWS.FIX_SENTENCES;
+  }
+
   /**
    * TODO redo preferred voices...
    *
@@ -201,9 +212,9 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param isMale
    * @return
    */
-  private Collection<AudioAttribute> getDisplayedAudio(AudioAttributeExercise exercise, boolean isMale) {
+  private Collection<AudioAttribute> getDisplayedAudio(AudioRefExercise exercise, boolean isMale) {
     //Set<Integer> preferredVoices = controller.getProps().getPreferredVoices();
-    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(isMale, Collections.emptyList(), false);
+    Map<MiniUser, List<AudioAttribute>> malesMap = exercise.getMostRecentAudio(isMale, Collections.emptyList(), isContext());
     List<MiniUser> maleUsers = exercise.getSortedUsers(malesMap);
     return maleUsers.isEmpty() ? Collections.emptyList() : malesMap.get(maleUsers.get(0));
   }
@@ -214,10 +225,10 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param tabPanel
    * @see
    */
-  private void addNewOrYourRecordingTab(TabPanel tabPanel, AudioAttribute audioAttribute, boolean isDisplayed) {
+  private void addNewOrYourRecordingTab(ClientExercise newUserExercise, TabPanel tabPanel, AudioAttribute audioAttribute, boolean isDisplayed) {
     String addAudio = (audioAttribute == null) ? ADD_AUDIO : YOUR_RECORDING;
     RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, addAudio, false, false, isDisplayed);
-    tabAndContent.getContent().add(getRecordingWidget());
+    tabAndContent.getContent().add(getRecordingWidget(newUserExercise));
     tabAndContent.getTab().setIcon(IconType.PLUS);
   }
 
@@ -228,33 +239,39 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param displayed
    * @see #makeAudioRow
    */
-  private void addAudioByGender(AudioAttributeExercise audioAttributeExercise,
+  private void addAudioByGender(ClientExercise newUserExercise,
+                                AudioRefExercise audioAttributeExercise,
                                 TabPanel tabPanel,
                                 boolean isMale,
                                 Collection<AudioAttribute> displayed) {
-    Map<MiniUser, List<AudioAttribute>> malesMap = audioAttributeExercise.getUserMap(isMale, false);
+    Map<MiniUser, List<AudioAttribute>> malesMap = audioAttributeExercise.getUserMap(isMale, isContext());
+
+/*    logger.info("isMale " + isMale + " " + malesMap.size());
+    malesMap.forEach((k, v) -> logger.info("addAudioByGender got " + k + "-" + v));*/
+
     List<MiniUser> maleUsers = audioAttributeExercise.getSortedUsers(malesMap);
     addTabsForUsers(newUserExercise, tabPanel, malesMap, maleUsers, displayed);
   }
 
-  private DivWidget getRecordingWidget() {
-//    DivWidget widget = new DivWidget();
-//    widget.add(getRecordAudioWithAnno(widget, AudioType.REGULAR));
-//    widget.add(getRecordAudioWithAnno(widget, AudioType.SLOW));
+  private DivWidget getRecordingWidget(ClientExercise newUserExercise) {
     DivWidget widget = new MyDivWidget();
 
     panels.clear();
 
-    widget.add(getRecordAudioWithAnno(widget, REGULAR));
-    widget.add(getRecordAudioWithAnno(widget, SLOW));
+    if (isContext()) {
+      widget.add(getRecordAudioWithAnno(widget, CONTEXT_REGULAR, newUserExercise));
+    } else {
+      widget.add(getRecordAudioWithAnno(widget, REGULAR, newUserExercise));
+      widget.add(getRecordAudioWithAnno(widget, SLOW, newUserExercise));
+    }
 
     return widget;
   }
 
   private final List<MyRecordAudioPanel> panels = new ArrayList<>();
 
-  private Panel getRecordAudioWithAnno(DivWidget widget, AudioType audioTypeRegular) {
-    MyRecordAudioPanel w = new MyRecordAudioPanel(widget, audioTypeRegular, instance);
+  private Panel getRecordAudioWithAnno(DivWidget widget, AudioType audioTypeRegular, ClientExercise clientExercise) {
+    MyRecordAudioPanel w = new MyRecordAudioPanel(clientExercise, widget, audioTypeRegular);
 
     panels.add(w);
 
@@ -278,7 +295,11 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @return
    * @see #makeAudioRow
    */
-  public AudioAttribute getAudioAttribute(AudioType audioType) {
+  public AudioAttribute getAudioAttribute(AudioRefExercise newUserExercise, AudioType audioType) {
+    // U newUserExercise = this.newUserExercise;
+
+    logger.info("getAudioAttribute audio type " + audioType);
+
     AudioAttribute audioAttribute =
         audioType.equals(REGULAR) ?
             newUserExercise.getRecordingsBy(controller.getUser(), true) :
@@ -288,7 +309,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     if (audioType.isContext()) {
       for (AudioAttribute audioAttribute1 : newUserExercise.getAudioAttributes()) {
         Map<String, String> attributes = audioAttribute1.getAttributes();
-        if (attributes.containsKey("context") && audioAttribute1.getUserid() == controller.getUser()) {
+        if (attributes.containsKey(CONTEXT) && audioAttribute1.getUserid() == controller.getUser()) {
           return audioAttribute1;
         }
       }
@@ -307,19 +328,14 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param users
    * @see #makeAudioRow
    */
-  private <X extends CommonExercise & AnnotationExercise> void addTabsForUsers(X commonExercise,
+  private <X extends ClientExercise & AnnotationExercise> void addTabsForUsers(X commonExercise,
                                                                                TabPanel tabPanel,
                                                                                Map<MiniUser, List<AudioAttribute>> userToAudio,
                                                                                List<MiniUser> users,
                                                                                Collection<AudioAttribute> displayed) {
     int me = controller.getUser();
-//    UserTitle userTitle = new UserTitle();
     for (MiniUser user : users) {
-//      boolean byMe = (user.getID() == me);
-//      if (!byMe) {
-//        String tabTitle = userTitle.getUserTitle(me, user);
-//
-//        RememberTabAndContent tabAndContent = getRememberTabAndContent(tabPanel, tabTitle, true, true);
+//      logger.info("addTabsForUsers user " + user);
       boolean byMe = (user.getID() == me);
       if (!byMe) {
         List<AudioAttribute> audioAttributes = userToAudio.get(user);
@@ -358,7 +374,11 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
           if (allHaveBeenPlayed) {
             tabAndContent.getTab().setIcon(IconType.CHECK_SIGN);
           }
+        } else {
+          logger.warning("no audio for " + user);
         }
+      } else {
+        logger.info("it's by me");
       }
     }
   }
@@ -416,7 +436,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    *
    * @return
    */
-  @Override
+/*  @Override
   boolean checkForForeignChange() {
     boolean didChange = super.checkForForeignChange();
 
@@ -427,18 +447,20 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     }
 
     return didChange;
-  }
-
-  private <X extends CommonExercise & AnnotationExercise> Widget getPanelForAudio(final X exercise,
-                                                                                  final AudioAttribute audio,
-                                                                                  RememberTabAndContent tabAndContent) {
+  }*/
+  private <X extends CommonShell & AnnotationExercise> Widget getPanelForAudio(final X exercise,
+                                                                               final AudioAttribute audio,
+                                                                               RememberTabAndContent tabAndContent) {
     String audioRef = audio.getAudioRef();
     if (audioRef != null) {
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getFLToShow(), exercise.getTransliteration(), controller,
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getFLToShow(),
+        //exercise.getTransliteration(),
+        "",
+        controller,
         controller.getProps().showSpectrogram(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED,
-        exercise, instance
+        exercise
     ) {
       //audio.isRegularSpeed() ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW) {
 
@@ -453,7 +475,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     };
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
-    noteAudioHasBeenPlayed(exercise, audio, audioPanel);
+    noteAudioHasBeenPlayed(exercise.getID(), audio, audioPanel);
     tabAndContent.addWidget(audioPanel);
     //  toResize.add(audioPanel);
 
@@ -488,13 +510,13 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         public void onSuccess(Void result) {
           widgets.getParent().setVisible(false);
           //   reloadLearnList();
-          LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+          LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
           // TODO : need to update other lists too?
         }
       });
     });
   }
- 
+
   private Button getDeleteButton(String tip, ClickHandler handler) {
     Button delete = new Button(DELETE_AUDIO);
     addTooltip(delete, tip);
@@ -511,7 +533,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * @param audioPanel
    * @see #getPanelForAudio
    */
-  private void noteAudioHasBeenPlayed(final HasID id, final AudioAttribute audio, final ASRScoringAudioPanel audioPanel) {
+  private void noteAudioHasBeenPlayed(final int id, final AudioAttribute audio, final ASRScoringAudioPanel audioPanel) {
     audioPanel.addPlayListener(new PlayListener() {
       @Override
       public void playStarted() {
@@ -520,7 +542,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         for (RememberTabAndContent tabAndContent : tabs) {
           tabAndContent.checkAllPlayed(audioWasPlayed);
         }
-        controller.logEvent(audioPanel, "qcPlayAudio", id.getID(), audio.getAudioRef());
+        controller.logEvent(audioPanel, "qcPlayAudio", id, audio.getAudioRef());
       }
 
       @Override
@@ -562,15 +584,13 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    * <p>
    * Add a fixed button, so we know when to clear the comments and remove this item from the reviewed list.
    *
-   * @param pagingContainer
    * @param toAddTo
    * @param normalSpeedRecording
    * @return
    * @see #addFields
    */
   @Override
-  protected Panel getCreateButton(final ListInterface<CommonShell, CommonExercise> pagingContainer,
-                                  final Panel toAddTo,
+  protected Panel getCreateButton(final Panel toAddTo,
                                   final ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
@@ -585,7 +605,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       row.add(getDuplicate());
     }
 */
-    row.add(getFixedButton(pagingContainer, toAddTo, normalSpeedRecording));
+    row.add(getFixedButton(toAddTo, normalSpeedRecording));
     boolean keepAudioSelection = getKeepAudioSelection();
 
     //   logger.info("value is  " + keepAudioSelection);
@@ -598,29 +618,23 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     return row;
   }
 
-  private Button getFixedButton(final ListInterface<CommonShell, CommonExercise> pagingContainer,
-                                final Panel toAddTo,
-                                final ControlGroup normalSpeedRecording) {
+  private Button getFixedButton(final Panel toAddTo, final ControlGroup normalSpeedRecording) {
     final Button fixed = makeFixedButton();
-    fixed.addClickHandler(event -> validateThenPost(foreignLang, rap, normalSpeedRecording, pagingContainer, toAddTo, true, true));
+    fixed.addClickHandler(event -> validateThenPost(rap, normalSpeedRecording, toAddTo, true));
     return fixed;
   }
 
   /**
-   * @param exerciseList
    * @param toAddTo
    * @param onClick
    * @seex mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
-   * @see #isValidForeignPhrase
+   * @see NewUserExercise#validateThenPost(RecordAudioPanel, ControlGroup, Panel, boolean)
    */
   @Override
-  void afterValidForeignPhrase(final ListInterface<CommonShell, CommonExercise> exerciseList,
-                               final Panel toAddTo,
-                               boolean onClick) {
-    super.afterValidForeignPhrase(exerciseList, toAddTo, onClick);
-    LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance));
+  void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {
+    super.afterValidForeignPhrase(toAddTo, onClick);
+    LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance.toString()));
   }
-
 
 /*  private Button getRemove() {
     Button remove = new Button(DELETE);
@@ -688,20 +702,20 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
  /* private void duplicateExercise(final Button duplicate) {
     duplicate.setEnabled(false);
     newUserExercise.getMutable().setCreator(controller.getUser());
-    CommonShell commonShell = exerciseList.byHasID(newUserExercise);
+    T commonShell = exerciseList.byHasID(newUserExercise);
     if (commonShell != null) {
       newUserExercise.setState(commonShell.getState());
       newUserExercise.setSecondState(commonShell.getSecondState());
     }
     //logger.info("to duplicate " + newUserExercise + " state " + newUserExercise.getState());
-    listService.duplicateExercise(newUserExercise, new AsyncCallback<CommonExercise>() {
+    listService.duplicateExercise(newUserExercise, new AsyncCallback<U>() {
       @Override
       public void onFailure(Throwable caught) {
         duplicate.setEnabled(true);
       }
 
       @Override
-      public void onSuccess(CommonExercise result) {
+      public void onSuccess(U result) {
         duplicate.setEnabled(true);
 
         exerciseList.addExerciseAfter(newUserExercise, result);
@@ -713,7 +727,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
 
   /**
    * @return
-   * @see NewUserExercise#getCreateButton(ListInterface, Panel, ControlGroup)
+   * @see NewUserExercise#getCreateButton(Panel, ControlGroup)
    */
   private Button makeFixedButton() {
     Button fixed = new Button(FIXED);
@@ -723,7 +737,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
     fixed.addStyleName("floatLeftAndClear");
     fixed.addStyleName("marginRight");
 
-    fixed.addMouseOverHandler(event -> checkForForeignChange());
+    // fixed.addMouseOverHandler(event -> checkForForeignChange());
     addTooltip(fixed, MARK_FIXED_TOOLTIP);
     return fixed;
   }
@@ -733,7 +747,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   @Override
   protected void audioPosted() {
-    reallyChange(listInterface, false, getKeepAudio());
+    reallyChange(false, getKeepAudio());
   }
 
   /**
@@ -742,13 +756,6 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
    */
   protected boolean getKeepAudio() {
     return keepAudio.getValue();
-  }
-
-  /**
-   * @see #isValidForeignPhrase
-   */
-  @Override
-  protected void checkIfNeedsRefAudio() {
   }
 
   private boolean getKeepAudioSelection() {
@@ -790,15 +797,14 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   /**
    * TODOx : why do we have to do a sequence of server calls -- how about just one???
    *
-   * @param pagingContainer
    * @param buttonClicked
    * @seex #doAfterEditComplete(mitll.langtest.client.list.ListInterface, boolean)
    * @seex #postEditItem
    * @see #reallyChange
    */
   @Override
-  protected void doAfterEditComplete(ListInterface<CommonShell, CommonExercise> pagingContainer, boolean buttonClicked) {
-    super.doAfterEditComplete(pagingContainer, buttonClicked);
+  protected void doAfterEditComplete(boolean buttonClicked) {
+    super.doAfterEditComplete(buttonClicked);
     //changeTooltip(pagingContainer);
     if (buttonClicked) {
       userSaidExerciseIsFixed();
@@ -806,7 +812,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   }
 
   private void userSaidExerciseIsFixed() {
-    final int id = newUserExercise.getID();
+    final int id = isContext() ? newUserExercise.getDirectlyRelated().iterator().next().getID() : newUserExercise.getID();
     controller.getQCService().markState(id, STATE.FIXED, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -816,6 +822,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
       public void onSuccess(Void result) {
         logger.info("doAfterEditComplete : forgetting exercise " + id);
         exerciseList.forgetExercise(id);
+        exerciseList.loadNext();
       }
     });
   }
@@ -852,11 +859,14 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
   private class MyRecordAudioPanel extends RecordAudioPanel implements BusyPanel {
     private Button deleteButton;
     private Widget comment;
+    final ClientExercise exercise;
 
-    MyRecordAudioPanel(DivWidget widget, AudioType audioType, String instance) {
-      super(ReviewEditableExercise.this.newUserExercise, ReviewEditableExercise.this.controller, widget,
-          0, false, audioType, instance);
+    MyRecordAudioPanel(ClientExercise exercise,
+                       DivWidget widget, AudioType audioType) {
+      super(exercise, ReviewEditableExercise.this.controller, widget,
+          0, false, audioType);
       this.audioType = audioType;
+      this.exercise = exercise;
     }
 
     public void setComment(Widget comment) {
@@ -869,16 +879,21 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
         public void useResult(AudioAnswer result) {
           super.useResult(result);
           if (result.isValid()) {
-            newUserExercise.getMutableAudio().addAudio(result.getAudioAttribute());
+          //  exercise.getMutableAudio().addAudio(result.getAudioAttribute());
             deleteButton.setEnabled(true);
 
-            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+            /**
+             * Who receives this?
+             */
+            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
           }
         }
       };
     }
 
     /**
+     * TODO reconsider audio changed event...
+     *
      * @return
      * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String)
      */
@@ -901,7 +916,7 @@ public class ReviewEditableExercise extends EditableExerciseDialog {
             if (comment != null) {
               comment.setVisible(false);
             }
-            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
           }
         });
       };

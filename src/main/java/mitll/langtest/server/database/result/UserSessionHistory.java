@@ -32,13 +32,8 @@
 
 package mitll.langtest.server.database.result;
 
-import mitll.langtest.shared.flashcard.AVPScoreReport;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.text.CollationKey;
-import java.util.Collection;
-import java.util.Map;
 
 class UserSessionHistory {
   private static final Logger logger = LogManager.getLogger(UserSessionHistory.class);

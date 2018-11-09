@@ -33,10 +33,11 @@
 package mitll.langtest.client.recorder;
 
 import com.google.gwt.user.client.Timer;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
-
-import java.util.logging.Logger;
+import mitll.langtest.client.initial.WavStreamCallback;
+import mitll.langtest.client.scoring.PostAudioRecordButton;
 
 /**
  * Tries to do initWebaudio, and if no response has been received in 5 seconds, tries again.
@@ -47,22 +48,27 @@ import java.util.logging.Logger;
  * @since 5/27/2014.
  */
 public class WebAudioRecorder {
- // private final Logger logger = Logger.getLogger("WebAudioRecorder");
-  private static final int DELAY_MILLIS = 4000;
+//  private static final Logger logger = Logger.getLogger("WebAudioRecorder");
+ // private static final int DELAY_MILLIS = 4000;
 
   private static boolean webAudioMicAvailable;
-  private static boolean tried = false;
+ // private static boolean tried = false;
   private static boolean gotResponse = false;
+  //private static boolean USE_STREAMS = true;
+
   private Timer theTimer = null;
 
+
   /**
-   *
    * The valid responses to this are : webAudioMicAvailable, webAudioMicNotAvailable, webAudioPermissionDenied
    * IF we get no response in 5 seconds, ask again!
    *
    * The user can easily ignore the dialog by clicking away.
+   *
+   * @seex FlashRecordPanelHeadless#tryWebAudio
    */
-/*  boolean tryWebAudio() {
+/*
+  private void tryWebAudio() {
     if (!tried) {
       tried = true;
       //attempts--;
@@ -81,12 +87,10 @@ public class WebAudioRecorder {
         }
       };
       theTimer.schedule(DELAY_MILLIS);
-      return true;
+    } else {
     }
-    else {
-      return false;
-    }
-  }*/
+  }
+*/
 
   /**
    * Call initWebAudio in webaudiorecorder.js.
@@ -99,18 +103,49 @@ public class WebAudioRecorder {
   }-*/;
 
   public native void advertise() /*-{
+      $wnd.silenceDetected = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::silenceDetected());
       $wnd.webAudioMicAvailable = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioMicAvailable());
       $wnd.webAudioMicNotAvailable = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioMicNotAvailable());
       $wnd.webAudioPermissionDenied = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::webAudioPermissionDenied());
       $wnd.getBase64 = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::getBase64(Ljava/lang/String;));
+      $wnd.getStreamResponse = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::getStreamResponse(Ljava/lang/String;));
+//      $wnd.getStopStreamResponse = $entry(@mitll.langtest.client.recorder.WebAudioRecorder::getStopStreamResponse(Ljava/lang/String;));
   }-*/;
 
+  /**
+   * Call webaudiorecorder.startRecording
+   */
   public native void startRecording() /*-{
       $wnd.startRecording();
   }-*/;
 
+  /**
+   * @param url
+   * @param exid
+   * @param reqid
+   * @param audioType
+   * @see BrowserRecording#startStream
+   */
+  public native void startStream(String url, String exid, String reqid, String isreference, String audioType, String dialogSessionID, String recordingSession) /*-{
+      $wnd.serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID, recordingSession);
+  }-*/;
+
+  /**
+   * @see #stopRecording(boolean)
+   */
   public native void stopRecording() /*-{
       $wnd.stopRecording();
+  }-*/;
+
+  /**
+   * @see #stopRecording(boolean)
+   */
+  public native void doStopStream(String abort) /*-{
+      $wnd.serviceStopStream(abort);
+  }-*/;
+
+  public native void stopRecordingAndPost(String url, String exid) /*-{
+      $wnd.stopRecordingAndPost(url, exid);
   }-*/;
 
   private static void console(String message) {
@@ -124,11 +159,21 @@ public class WebAudioRecorder {
     }
   }
 
-  private native static void consoleLog( String message) /*-{
-      console.log( "WebAudioRecorder:" + message );
+  private native static void consoleLog(String message) /*-{
+      console.log("WebAudioRecorder:" + message);
   }-*/;
 
-  public boolean isWebAudioMicAvailable() { return webAudioMicAvailable; }
+  boolean isWebAudioMicAvailable() {
+    return webAudioMicAvailable;
+  }
+
+  /**
+   * @see #advertise
+   */
+  public static void silenceDetected() {
+    // console("silenceDetected -- now!");
+    getMicPermission().silenceDetected();
+  }
 
   public static void webAudioMicAvailable() {
     gotResponse = true;
@@ -184,13 +229,51 @@ public class WebAudioRecorder {
   }
 
   /**
-   * @see mitll.langtest.client.LangTest#stopRecording(WavCallback)
+   * @see ExerciseController#stopRecording(boolean, boolean)
    */
   private static WavCallback wavCallback = null;
 
-  public void stopRecording(WavCallback wavCallback) {
-    WebAudioRecorder.wavCallback = wavCallback;
-    //logger.info("got stopRecording ");
-    stopRecording();
+  /**
+   * @param abort
+   * @see BrowserRecording#stopWebRTCRecording
+   */
+  public void stopRecording(boolean abort) {
+    //if (USE_STREAMS) {
+    // logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
+    doStopStream("" + abort);
+  /*  }
+    else {
+      logger.info("WebAudioRecorder.stopRecording - stop and grab wav");
+      WebAudioRecorder.wavCallback = wavCallback;
+      stopRecording();
+    }*/
+  }
+
+  private static WavStreamCallback wavStreamCallback = null;
+
+  /**
+   * Called by webaudiorecorder.serviceStartStream or stop
+   *
+   * @param json
+   * @see #advertise()
+   */
+  public static void getStreamResponse(String json) {
+    //  console("getStreamResponse   bytes = '" + json.length() + "'");
+    if (wavStreamCallback != null) {
+      //  console("getStreamResponse got " + json.length() + " " + json);
+      wavStreamCallback.getResponse(json);
+    } else {
+      console("getStreamResponse no callback?");
+    }
+  }
+
+  /**
+   * @param wavStreamCallback
+   * @see PostAudioRecordButton#startRecording
+   * @see ExerciseController#startStream
+   * @see BrowserRecording#startStream
+   */
+  static void setStreamCallback(WavStreamCallback wavStreamCallback) {
+    WebAudioRecorder.wavStreamCallback = wavStreamCallback;
   }
 }

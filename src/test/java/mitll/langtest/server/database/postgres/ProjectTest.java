@@ -50,7 +50,9 @@ import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.server.trie.SearchHelper;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.User;
@@ -142,9 +144,10 @@ public class ProjectTest extends BaseTest {
         logger.warn("For " +
             "\n\ten " + exercise.getEnglish() +
             "\n\tfl " + exercise.getForeignLanguage() +
-            "\n\t   " + pronunciationsFromDictOrLTS+
-            "\n\tLM " + audioFileHelper.getLM(foreignLanguage,false)+
-            "\n\tTR " + audioFileHelper.getHydraTranscript(foreignLanguage)
+            "\n\t   " + pronunciationsFromDictOrLTS
+//            +
+//            "\n\tLM " + audioFileHelper.getLM(foreignLanguage,false)+
+//            "\n\tTR " + audioFileHelper.getHydraTranscript(foreignLanguage)
         );
       }
     });
@@ -172,7 +175,7 @@ public class ProjectTest extends BaseTest {
     logger.info("1 got '" + test + "' = '" + segmented + "'");
 
     String pronunciationsFromDictOrLTS = audioFileHelper.getASR().getHydraDict(segmented, "",
-        new ArrayList<>());
+        new ArrayList<>()).getDict();
     logger.info("1 pronunciationsFromDictOrLTS '" + pronunciationsFromDictOrLTS + "' = '" + segmented + "'");
 
 
@@ -533,14 +536,14 @@ public class ProjectTest extends BaseTest {
       UserList<CommonExercise> userListByID = database.getUserListByIDExercises(3924, PROJECTID);
       List<CommonExercise> exercises = userListByID.getExercises();
       for (CommonExercise exercise : exercises) {
-        Collection<CommonExercise> directlyRelated = exercise.getDirectlyRelated();
+        Collection<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
 
         logger.info("User list " + userListByID + " : " + exercise.getID() + " '" + exercise.getForeignLanguage() + "'\t'" + exercise.getEnglish() + "'");
-        for (CommonExercise de : directlyRelated) {
+        for (ClientExercise de : directlyRelated) {
           logger.info("\tUser list " + userListByID + " : " + de.getID() + " '" + de.getForeignLanguage() + "'\t'" + de.getEnglish() + "'");
         }
       }
-      for (String test : supuesto) {
+    /*  for (String test : supuesto) {
         Collection<CommonExercise> searchMatches = new SearchHelper().getSearchMatches(exercises, test, "french", project.getAudioFileHelper().getSmallVocabDecoder());
 
         if (searchMatches.isEmpty()) logger.error("2 no match for " + test);
@@ -549,9 +552,8 @@ public class ProjectTest extends BaseTest {
             logger.info(test + " : " + exercise.getID() + " '" + exercise.getForeignLanguage() + "'\t'" + exercise.getEnglish() + "'");
           }
         }
-      }
+      }*/
     }
-
   }
 
   @Test
@@ -693,7 +695,7 @@ public class ProjectTest extends BaseTest {
     String json = "{\"words\":[{\"id\":\"0\",\"w\":\"<s>\",\"s\":\"0.977\",\"str\":\"0.0\",\"end\":\"0.71\",\"phones\":[]},{\"id\":\"1\",\"w\":\"abbreviation\",\"s\":\"0.995\",\"str\":\"0.71\",\"end\":\"1.75\",\"phones\":[{\"id\":\"0\",\"p\":\"ah\",\"s\":\"1.0\",\"str\":\"0.71\",\"end\":\"0.81\"},{\"id\":\"1\",\"p\":\"b\",\"s\":\"1.0\",\"str\":\"0.81\",\"end\":\"0.89\"},{\"id\":\"2\",\"p\":\"r\",\"s\":\"1.0\",\"str\":\"0.89\",\"end\":\"0.97\"},{\"id\":\"3\",\"p\":\"iy\",\"s\":\"0.943\",\"str\":\"0.97\",\"end\":\"1.03\"},{\"id\":\"4\",\"p\":\"v\",\"s\":\"1.0\",\"str\":\"1.03\",\"end\":\"1.1\"},{\"id\":\"5\",\"p\":\"iy\",\"s\":\"1.0\",\"str\":\"1.1\",\"end\":\"1.21\"},{\"id\":\"6\",\"p\":\"ey\",\"s\":\"1.0\",\"str\":\"1.21\",\"end\":\"1.36\"},{\"id\":\"7\",\"p\":\"sh\",\"s\":\"1.0\",\"str\":\"1.36\",\"end\":\"1.49\"},{\"id\":\"8\",\"p\":\"ah\",\"s\":\"1.0\",\"str\":\"1.49\",\"end\":\"1.58\"},{\"id\":\"9\",\"p\":\"n\",\"s\":\"0.987\",\"str\":\"1.58\",\"end\":\"1.75\"}]},{\"id\":\"2\",\"w\":\"<\\/s>\",\"s\":\"0.932\",\"str\":\"1.75\",\"end\":\"2.1\",\"phones\":[]}],\"score\":0.9984356,\"exid\":9255,\"valid\":\"OK\",\"reqid\":\"1\"}\n";
 //    String json = "{\"words\":[{\"id\":\"0\",\"w\":\"<s>\",\"s\":\"0.977\",\"str\":\"0.0\",\"end\":\"0.71\",\"phones\":[]},{\"id\":\"1\",\"w\":\"abbreviation\",\"s\":\"0.995\",\"str\":\"0.71\",\"end\":\"1.75\",\"phones\":[{\"id\":\"0\",\"p\":\"ah\",\"s\":\"1.0\",\"str\":\"0.71\",\"end\":\"0.81\"},{\"id\":\"1\",\"p\":\"b\",\"s\":\"1.0\",\"str\":\"0.81\",\"end\":\"0.89\"},{\"id\":\"2\",\"p\":\"r\",\"s\":\"1.0\",\"str\":\"0.89\",\"end\":\"0.97\"},{\"id\":\"3\",\"p\":\"iy\",\"s\":\"0.943\",\"str\":\"0.97\",\"end\":\"1.03\"},{\"id\":\"4\",\"p\":\"v\",\"s\":\"1.0\",\"str\":\"1.03\",\"end\":\"1.1\"},{\"id\":\"5\",\"p\":\"iy\",\"s\":\"1.0\",\"str\":\"1.1\",\"end\":\"1.21\"},{\"id\":\"6\",\"p\":\"ey\",\"s\":\"1.0\",\"str\":\"1.21\",\"end\":\"1.36\"},{\"id\":\"7\",\"p\":\"sh\",\"s\":\"1.0\",\"str\":\"1.36\",\"end\":\"1.49\"},{\"id\":\"8\",\"p\":\"ah\",\"s\":\"1.0\",\"str\":\"1.49\",\"end\":\"1.58\"},{\"id\":\"9\",\"p\":\"n\",\"s\":\"0.987\",\"str\":\"1.58\",\"end\":\"1.75\"}]},{\"id\":\"2\",\"w\":\"<\\/s>\",\"s\":\"0.932\",\"str\":\"1.75\",\"end\":\"2.1\",\"phones\":[]}],\"exid\":9255,\"valid\":\"OK\",\"reqid\":\"1\"}\n";
 //    String json = "{\"score\":0.7233214,\"WORD_TRANSCRIPT\":[{\"event\":\"<s>\",\"start\":0,\"end\":0.51,\"score\":0.9104534},{\"event\":\"abbreviation\",\"start\":0.51,\"end\":1.34,\"score\":0.7858934},{\"event\":\"<\\/s>\",\"start\":1.34,\"end\":1.35,\"score\":0.88590395}],\"PHONE_TRANSCRIPT\":[{\"event\":\"sil\",\"start\":0,\"end\":0.51,\"score\":0.9104534},{\"event\":\"ah\",\"start\":0.51,\"end\":0.62,\"score\":0.690349},{\"event\":\"b\",\"start\":0.62,\"end\":0.7,\"score\":0.94709295},{\"event\":\"r\",\"start\":0.7,\"end\":0.77,\"score\":1},{\"event\":\"iy\",\"start\":0.77,\"end\":0.84,\"score\":1},{\"event\":\"v\",\"start\":0.84,\"end\":0.9,\"score\":0.5870326},{\"event\":\"iy\",\"start\":0.9,\"end\":1.02,\"score\":0.96210086},{\"event\":\"ey\",\"start\":1.02,\"end\":1.1,\"score\":0.94535315},{\"event\":\"sh\",\"start\":1.1,\"end\":1.27,\"score\":0.7260531},{\"event\":\"ah\",\"start\":1.27,\"end\":1.31,\"score\":0.25677478},{\"event\":\"n\",\"start\":1.31,\"end\":1.34,\"score\":0.019446973},{\"event\":\"sil\",\"start\":1.34,\"end\":1.35,\"score\":0.8859039}],\"exid\":9255,\"valid\":\"OK\",\"reqid\":\"1\"}";
-    PrecalcScores precalcScores = new PrecalcScores(serverProperties, json, "");
+    PrecalcScores precalcScores = new PrecalcScores(serverProperties, json, Language.SPANISH);
 
     logger.info("Got " + precalcScores);
   }

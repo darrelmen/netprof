@@ -32,29 +32,22 @@
 
 package mitll.langtest.server.services;
 
-import com.google.gson.JsonObject;
 import mitll.langtest.client.services.ExerciseService;
-import mitll.langtest.server.audio.image.ImageType;
-import mitll.langtest.server.audio.image.TranscriptEvent;
-import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.*;
-import mitll.langtest.server.database.result.ISlimResult;
-import mitll.langtest.server.database.user.BaseUserDAO;
-import mitll.langtest.server.scoring.ParseResultJson;
-import mitll.langtest.server.scoring.PrecalcScores;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.Search;
+import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.TripleExercises;
+import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.scoring.AlignmentOutput;
-import mitll.langtest.shared.scoring.NetPronImageType;
+import mitll.langtest.shared.project.Language;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -68,7 +61,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
-public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceServlet implements ExerciseService<T> {
+public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
+    extends MyRemoteServiceServlet
+    implements ExerciseService<T> {
   private static final Logger logger = LogManager.getLogger(ExerciseServiceImpl.class);
 
   private static final int SLOW_EXERCISE_EMAIL = 2000;
@@ -79,14 +74,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   private static final int MIN_WARN_DURATION = 1000;
   private static final String LISTS = "Lists";
 
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_ID_LOOKUP = false;
-
-  private static final boolean USE_PHONE_TO_DISPLAY = true;
-  private static final boolean WARN_MISSING_REF_RESULT = false;
-  private static final String RECORDED1 = "Recorded";
-  //  private static final String RECORDED = RECORDED1;
-  private static final String ANY = "Any";
+  private static final boolean DEBUG_SEARCH = false;
+  private static final boolean DEBUG = true;
+  private static final boolean DEBUG_ID_LOOKUP = true;
 
   /**
    * @param request
@@ -94,86 +84,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see mitll.langtest.client.list.FacetExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
-    ISection<CommonExercise> sectionHelper = getSectionHelper();
-    if (sectionHelper == null) {
-      logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
-      return new FilterResponse();
-    } else {
-      FilterResponse response = sectionHelper.getTypeToValues(request);
-      addUserListFacet(request, response);
-      int userFromSessionID = getUserIDFromSessionOrDB();
-      if (userFromSessionID != -1) {
-//        logger.info("getTypeToValues got " + userFromSession);
-        //       logger.info("getTypeToValues isRecordRequest " + request.isRecordRequest());
-
-        if (request.isRecordRequest()) { //how no user???
-          response = getFilterResponseForRecording(request, response, userFromSessionID);
-        }
-      }
-
-      return response;
-    }
-  }
-
-  private FilterResponse getFilterResponseForRecording(FilterRequest request, FilterResponse response, int userFromSessionID) {
-    int projectID = getProjectIDFromUser(userFromSessionID);
-
-    Map<String, Collection<String>> typeToSelection = new HashMap<>();
-    request.getTypeToSelection().forEach(pair -> {
-      String value1 = pair.getValue();
-      if (!value1.equalsIgnoreCase(ANY)) {
-        typeToSelection.put(pair.getProperty(), Collections.singleton(value1));
-      }
-    });
-
-
-    List<CommonExercise> exercisesForState = new ArrayList<>(getExercisesForSelection(projectID, typeToSelection));
-
-    ExerciseListRequest request1 = new ExerciseListRequest()
-        .setOnlyUnrecordedByMe(true)
-        .setOnlyExamples(request.isExampleRequest())
-        .setUserID(userFromSessionID);
-
-    List<String> typeOrder = getProject(projectID).getTypeOrder();
-    if (typeOrder.isEmpty()) {
-
-    } else {
-      String firstType = typeOrder.get(0);
-      //   List<CommonExercise> rec = filterByUnrecorded(request1.setOnlyUnrecordedByMe(false).setOnlyRecordedByMatchingGender(true), exercisesForState, projectID);
-      List<CommonExercise> unRec = filterByUnrecorded(request1, exercisesForState, projectID);
-
-      //   logger.info("found " + unRec.size() + " unrecorded");
-
-      Map<String, Long> collect = unRec.stream().collect(Collectors.groupingBy(ex -> ex.getUnitToValue().get(firstType) == null ? "Unknown" : ex.getUnitToValue().get(firstType), Collectors.counting()));
-
-      // logger.info("map is " + collect);
-
-      Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
-
-      Set<MatchInfo> matches = new TreeSet<>();
-      collect.forEach((k, v) -> matches.add(new MatchInfo(k, v.intValue())));
-      //    logger.info("matches is " + matches);
-      typeToValues.put(firstType, matches);
-
-      HashSet<String> typesToInclude = new HashSet<>();
-      typesToInclude.add(firstType);
-
-      response = new FilterResponse(request.getReqID(), typeToValues, typesToInclude, -1);
-    }
-    return response;
-  }
-
-  private void addUserListFacet(FilterRequest request, FilterResponse typeToValues) {
-    int userListID = request.getUserListID();
-    UserList<CommonShell> next = userListID != -1 ? db.getUserListManager().getSimpleUserListByID(userListID) : null;
-
-    if (next != null) {  // echo it back
-      //logger.info("\tgetTypeToValues " + request + " include list " + next);
-      typeToValues.getTypesToInclude().add(LISTS);
-      Set<MatchInfo> value = new HashSet<>();
-      value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
-      typeToValues.getTypeToValues().put(LISTS, value);
-    }
+    int userFromSessionID = getUserIDFromSessionOrDB();
+    return db.getTypeToValues(request, getProjectIDFromUser(userFromSessionID), userFromSessionID);
   }
 
   /**
@@ -210,6 +122,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     logger.info("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
 
+    if (request.getDialogID() != -1) {
+      return getDialogResponse(request, projectID);
+    }
+
     try {
       boolean isUserListReq = request.getUserListID() != -1;
       UserList<CommonExercise> userListByID =
@@ -230,7 +146,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
           Collection<CommonExercise> exercisesForState =
               getExercisesFromUserListFiltered(request.getTypeToSelection(), userListByID);
           ExerciseListWrapper<T> exerciseListWrapperForPrefix = getExerciseListWrapperForPrefix(request,
-              filterExercises(request, new ArrayList<>(exercisesForState), projectID), projectID);
+              db.filterExercises(request, new ArrayList<>(exercisesForState), projectID), projectID);
 
           logger.info("getExerciseIds : 2 req  " + request + " took " + (System.currentTimeMillis() - then) +
               " millis to get " + exerciseListWrapperForPrefix.getSize());
@@ -250,6 +166,28 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logAndNotifyServerException(e);
       return new ExerciseListWrapper<>();
     }
+  }
+
+  private ExerciseListWrapper<T> getDialogResponse(ExerciseListRequest request, int projectID) throws DominoSessionException {
+    int dialogID = request.getDialogID();
+    List<CommonExercise> collect = getCommonExercises(getDialog(dialogID).getCoreVocabulary());
+    collect.addAll(getCommonExercises(getDialog(dialogID).getExercises()));
+
+    // logger.info("request " + request.getPrefix());
+    if (!request.getPrefix().isEmpty()) {
+      collect = new ArrayList<>(getSearchMatches(collect, request.getPrefix(), projectID));
+    }
+    //logger.info("getDialogResponse returning exercises for " + request.getDialogID() + " " + collect.size());
+    ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, collect, projectID);
+    return exerciseListWrapper;
+  }
+
+  @NotNull
+  private List<CommonExercise> getCommonExercises(List<ClientExercise> exercises) {
+    return exercises
+        .stream()
+        .map(ClientExercise::asCommon)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -282,9 +220,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
 
-    if (DEBUG_ID_LOOKUP) logger.info("triple resp       " + exercisesForSearch);
-    exercisesForSearch.setByExercise(filterExercises(request, exercisesForSearch.getByExercise(), projectID));
-    if (DEBUG_ID_LOOKUP) logger.info("after triple resp " + exercisesForSearch);
+    if (DEBUG_ID_LOOKUP) logger.info("getExerciseWhenNoUnitChapter triple resp       " + exercisesForSearch);
+    exercisesForSearch.setByExercise(db.filterExercises(request, exercisesForSearch.getByExercise(), projectID));
+    if (DEBUG_ID_LOOKUP) logger.info("getExerciseWhenNoUnitChapter after triple resp " + exercisesForSearch);
 
     // TODO : I don't think we need this?
 /*        if (!isUserListReq) {
@@ -292,7 +230,21 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         }*/
 
     // now sort : everything gets sorted the same way
-    List<CommonExercise> commonExercises = getSortedExercises(request, exercisesForSearch, predefExercises, request.getUserID(), projectID);
+    List<CommonExercise> commonExercises;
+
+    if (request.isOnlyExamples() && !request.getPrefix().isEmpty()) {
+      boolean sortByFL = getProject(projectID).isEnglish();
+      String searchTerm = request.getPrefix();
+      commonExercises = new ArrayList<>();
+
+      // make sure we only return the context exercises...
+      exercisesForSearch.getByContext().forEach(ex -> ex.getDirectlyRelated().forEach(dir -> commonExercises.add(dir.asCommon())));
+      getSortedExercises(sortByFL, searchTerm, commonExercises);
+
+      logger.info("getExerciseWhenNoUnitChapter OK only return context " + commonExercises.size());
+    } else {
+      commonExercises = getSortedExercises(request, exercisesForSearch, predefExercises, request.getUserID(), projectID);
+    }
 
     long now = System.currentTimeMillis();
 
@@ -309,51 +261,50 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * Complicated -- put the vocab matches first, then context matches second
    *
    * @param request
-   * @param exercises
+   * @param tripleExercises
    * @param predefExercises
    * @param userID
    * @return
    * @see #getExerciseWhenNoUnitChapter
    */
   private List<CommonExercise> getSortedExercises(ExerciseListRequest request,
-                                                  TripleExercises<CommonExercise> exercises,
+                                                  TripleExercises<CommonExercise> tripleExercises,
                                                   boolean predefExercises,
                                                   int userID,
                                                   int projID) {
     Project projectForUser = getProject(projID);
 
-    List<CommonExercise> commonExercises = exercises.getByExercise();
+    List<CommonExercise> commonExercises = tripleExercises.getByExercise();
     if (commonExercises.isEmpty()) {
-      commonExercises = exercises.getByID();
+      commonExercises = tripleExercises.getByID();
     }
     if (request.isIncorrectFirstOrder()) {
       if (DEBUG)
-        logger.info("getSortedExercises adding isIncorrectFirstOrder " + exercises.getByExercise().size() + " basicExercises");
+        logger.info("getSortedExercises adding isIncorrectFirstOrder " + tripleExercises.getByExercise().size() + " basicExercises");
       commonExercises =
-          db.getResultDAO().getExercisesSortedIncorrectFirst(exercises.getByExercise(), userID, getAudioFileHelper(projID).getCollator(), getLanguage(projectForUser));
+          db.getResultDAO().getExercisesSortedIncorrectFirst(tripleExercises.getByExercise(), userID,
+              getAudioFileHelper(projID).getCollator(), getLanguageEnum(projectForUser));
     } else {
       if (predefExercises) {
-        commonExercises = new ArrayList<>(exercises.getByID());
-        List<CommonExercise> basicExercises = new ArrayList<>(exercises.getByExercise());
+        commonExercises = new ArrayList<>(tripleExercises.getByID());
+        List<CommonExercise> basicExercises = new ArrayList<>(tripleExercises.getByExercise());
         boolean sortByFL = projectForUser.isEnglish();
         String searchTerm = request.getPrefix();
-        boolean hasSearch = !searchTerm.isEmpty();
 
         {
           // only do this if we control the sort in the facet exercise list drop down
-          //     sortByFL = isSortByFL(basicExercises, sortByFL, searchTerm);
-
-          sortExercises(request.getActivityType() == ActivityType.RECORDER, basicExercises, sortByFL, searchTerm);
+          sortExercises(basicExercises, sortByFL, searchTerm);
         }
 
         Set<Integer> unique = new HashSet<>();
-        if (DEBUG) logger.info("getSortedExercises adding " + exercises.getByID().size() + " by id exercises");
+        if (DEBUG)
+          logger.info("getSortedExercises adding " + tripleExercises.getByID().size() + " by id tripleExercises");
 
         // 1) first add any exact by id matches - should only be one
-        if (exercises.getByID().size() > 1)
-          logger.error("expecting only 0 or 1 matches for by id " + exercises.getByID().size());
+        if (tripleExercises.getByID().size() > 1)
+          logger.error("expecting only 0 or 1 matches for by id " + tripleExercises.getByID().size());
 
-        exercises.getByID().forEach(e -> unique.add(e.getID()));
+        tripleExercises.getByID().forEach(e -> unique.add(e.getID()));
         if (DEBUG) logger.info("getSortedExercises adding " + basicExercises.size() + " basicExercises");
 
         basicExercises
@@ -365,15 +316,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
         // last come context matches
         {
-          List<CommonExercise> contextExercises = new ArrayList<>(exercises.getByContext());
-          {
-            if (!contextExercises.isEmpty() && hasSearch) {
-              // if the search term is in the fl, sort by fl
-              sortByFL = contextExercises.iterator().next().getForeignLanguage().contains(searchTerm);
-              if (DEBUG) logger.info("getSortedExercises found search term " + searchTerm + " = " + sortByFL);
-            }
-            sortExercises(request.getActivityType() == ActivityType.RECORDER, contextExercises, sortByFL, searchTerm);
-          }
+          List<CommonExercise> contextExercises = getSortedContext(tripleExercises, sortByFL, searchTerm);
           if (DEBUG)
             logger.info("getSortedExercises adding " + contextExercises.size() + " contextExercises, " + unique.size() + " unique");
 
@@ -385,6 +328,28 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       }
     }
     return commonExercises;
+  }
+
+  @NotNull
+  private List<CommonExercise> getSortedContext(TripleExercises<CommonExercise> tripleExercises, boolean sortByFL, String searchTerm) {
+    List<CommonExercise> byContext = tripleExercises.getByContext();
+    return getSortedExercises(sortByFL, searchTerm, byContext);
+  }
+
+  @NotNull
+  private List<CommonExercise> getSortedExercises(boolean sortByFL, String searchTerm, List<CommonExercise> byContext) {
+    boolean hasSearch = !searchTerm.isEmpty();
+
+    List<CommonExercise> contextExercises = new ArrayList<>(byContext);
+    {
+      if (!contextExercises.isEmpty() && hasSearch) {
+        // if the search term is in the fl, sort by fl
+        sortByFL = contextExercises.iterator().next().getForeignLanguage().contains(searchTerm);
+        if (DEBUG) logger.info("getSortedExercises found search term " + searchTerm + " = " + sortByFL);
+      }
+      sortExercises(contextExercises, sortByFL, searchTerm);
+    }
+    return contextExercises;
   }
 
 
@@ -462,7 +427,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    * @see #getExerciseIds
    */
-  private int markRecordedState(int userID,
+ /* private int markRecordedState(int userID,
                                 ActivityType activityType,
                                 Collection<? extends Shell> exercises,
                                 boolean onlyExample) {
@@ -487,7 +452,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.info("\tmarkRecordedState marked " + c + "  recorded for activity '" + activityType + "' and user " + userID + " on " + exercises.size());
     }
     return c;
-  }
+  }*/
 
   /**
    * Copies the exercises....?
@@ -497,7 +462,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExerciseIds
    * @see #getExercisesFromUserListFiltered(java.util.Map, mitll.langtest.shared.custom.UserList)
    */
-  private <T extends CommonShell> List<T> getCommonExercises(UserList<T> userListByID) {
+  private <U extends CommonExercise> List<U> getCommonExercises(UserList<U> userListByID) {
     return new ArrayList<>(userListByID.getExercises());
   }
 
@@ -506,22 +471,11 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see mitll.langtest.client.list.HistoryExerciseList#loadExercises
    * @see #getExerciseIds
    */
-  private <T extends CommonShell> ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
-    Map<String, Collection<String>> typeToSelection = request.getTypeToSelection();
-    Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, typeToSelection);
-
-    List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
-    exercisesForState = filterExercises(request, copy, projid);
-    return getExerciseListWrapperForPrefix(request, exercisesForState, projid);
+  private ExerciseListWrapper<T> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
+    return getExerciseListWrapperForPrefix(request,
+        db.getFilterResponseHelper().getExercisesForSelectionState(request, projid), projid);
   }
 
-  private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
-    ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
-    typeToSelection.remove(RECORDED1);
-
-    return typeToSelection.isEmpty() ? getExercises(projid) :
-        sectionHelper.getExercisesForSelectionState(typeToSelection);
-  }
 
   /**
    * Always sort the result
@@ -532,26 +486,28 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExerciseIds
    * @see #getExercisesForSelectionState
    */
-  private <T extends CommonShell> ExerciseListWrapper<T> getExerciseListWrapperForPrefix(ExerciseListRequest request,
-                                                                                         Collection<CommonExercise> exercisesForState,
-                                                                                         int projID) {
+  private ExerciseListWrapper<T> getExerciseListWrapperForPrefix(ExerciseListRequest request,
+                                                                 Collection<CommonExercise> exercisesForState,
+                                                                 int projID) {
+    logger.info("getExerciseListWrapperForPrefix initially found " + exercisesForState.size());
+
     String prefix = request.getPrefix();
     int userID = request.getUserID();
     boolean incorrectFirst = request.isIncorrectFirstOrder();
 
     boolean hasPrefix = !prefix.isEmpty();
     if (hasPrefix) {
-      logger.debug("getExerciseListWrapperForPrefix" +
+      logger.info("getExerciseListWrapperForPrefix" +
           "\n\tuserID   " + userID +
           "\n\tprefix   '" + prefix + "'" +
           (request.getActivityType() != ActivityType.UNSET ? "" : "\n\tactivity " + request.getActivityType()));
     }
 
-    int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
-    logger.debug("getExerciseListWrapperForPrefix marked " + i + " as recorded");
+//    int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
+ //   logger.info("getExerciseListWrapperForPrefix marked " + i + " as recorded");
 
     if (hasPrefix) {
-      //logger.info("check for prefix match over " + exercisesForState.size());
+      logger.info("getExerciseListWrapperForPrefix check for prefix match over " + exercisesForState.size());
       exercisesForState = getSearchMatches(exercisesForState, prefix, projID);
     }
 
@@ -563,13 +519,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     List<CommonExercise> copy;
 
     if (incorrectFirst) {
-      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getAudioFileHelper(projID).getCollator(), getLanguage(projID));
+      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getAudioFileHelper(projID).getCollator(), getLanguageEnum(projID));
     } else {
       copy = new ArrayList<>(exercisesForState);
 //      if (!request.isQuiz()) {
-      sortExercises(request.getActivityType() == ActivityType.RECORDER, copy, false, request.getPrefix());
+      sortExercises(copy, false, request.getPrefix());
       //    }
     }
+    logger.info("getExerciseListWrapperForPrefix returning " + copy.size());
 
     return makeExerciseListWrapper(request, copy, projID);
   }
@@ -585,23 +542,30 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExerciseListWrapperForPrefix(ExerciseListRequest, Collection, int)
    */
   @NotNull
-  private Collection<CommonExercise> getSearchMatches(Collection<CommonExercise> exercisesForState, String prefix, int projID) {
+  private Collection<CommonExercise> getSearchMatches(Collection<CommonExercise> exercisesForState,
+                                                      final String prefix,
+                                                      final int projID) {
     Collection<CommonExercise> originalSet = exercisesForState;
     // logger.info("original set" +originalSet.size());
     long then = System.currentTimeMillis();
     String language = getLanguage(projID);
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder(projID);
-    ExerciseTrie<CommonExercise> trie =
-        new ExerciseTrie<>(exercisesForState, language, smallVocabDecoder, true);
-    long now = System.currentTimeMillis();
-    if (now - then > 20)
-      logger.info("took " + (now - then) + " millis to build trie for " + exercisesForState.size() + " exercises");
-    exercisesForState = trie.getExercises(prefix);
 
-    if (exercisesForState.isEmpty()) {
-      String prefix1 = StringUtils.stripAccents(prefix);
-      exercisesForState = trie.getExercises(prefix1);
-      logger.info("getSearchMatches trying " + prefix1 + " instead of " + prefix + " found " + exercisesForState.size());
+    {
+      ExerciseTrie<CommonExercise> trie =
+          new ExerciseTrie<>(exercisesForState, language, smallVocabDecoder, true, false);
+      long now = System.currentTimeMillis();
+      if (now - then > 20 || DEBUG_SEARCH)
+        logger.info("getSearchMatches took " + (now - then) + " millis to build trie for " + exercisesForState.size() + " exercises");
+      exercisesForState = trie.getExercises(prefix);
+
+      if (exercisesForState.isEmpty()) {
+        String prefix1 = StringUtils.stripAccents(prefix);
+        exercisesForState = trie.getExercises(prefix1);
+        logger.info("getSearchMatches trying '" + prefix1 + "' instead of " + prefix + " found " + exercisesForState.size());
+      } else if (DEBUG_SEARCH) {
+        exercisesForState.forEach(exercise -> logger.info("trie for " + prefix + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage()));
+      }
     }
 
     Set<Integer> unique = new HashSet<>();
@@ -609,22 +573,35 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     {
       then = System.currentTimeMillis();
-      trie = new ExerciseTrie<>(originalSet, language, smallVocabDecoder, false);
-      now = System.currentTimeMillis();
-      if (now - then > 20) {
+
+      if (DEBUG_SEARCH) {
+        originalSet.forEach(exercise -> {
+          logger.info("ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+          exercise.getDirectlyRelated().forEach(ex -> {
+            logger.info("\tdirect ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+          });
+        });
+      }
+
+      ExerciseTrie<CommonExercise> contextTrie = new ExerciseTrie<>(originalSet, language, smallVocabDecoder, false, false);
+      long now = System.currentTimeMillis();
+      if (now - then > 20 || DEBUG_SEARCH) {
         logger.info("took " + (now - then) + " millis to build trie for " + originalSet.size() + " context exercises");
       }
 
-      List<CommonExercise> contextExercises = trie.getExercises(prefix);
+      List<CommonExercise> contextExercises = contextTrie.getExercises(prefix);
       if (contextExercises.isEmpty()) {
-        contextExercises = trie.getExercises(StringUtils.stripAccents(prefix));
-        logger.info("getSearchMatches context trying " + StringUtils.stripAccents(prefix) + " instead of " + prefix + " found " + contextExercises.size());
+        contextExercises = contextTrie.getExercises(StringUtils.stripAccents(prefix));
+        logger.info("getSearchMatches context " +
+            "trying '" + StringUtils.stripAccents(prefix) + "' instead of " + prefix + " found " + contextExercises.size());
+      } else if (DEBUG_SEARCH) {
+        contextExercises.forEach(exercise -> logger.info("contextExercises trie for '" + prefix + "' = " +
+            "eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "'"));
       }
       exercisesForState.addAll(contextExercises.stream().filter(e -> !unique.contains(e.getID())).collect(Collectors.toList()));
     }
     if (exercisesForState.isEmpty()) {
       logger.info("getSearchMatches neither " + prefix + " nor " + StringUtils.stripAccents(prefix) + " found any matches against " + exercisesForState.size());
-
     }
     return exercisesForState;
   }
@@ -646,9 +623,9 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExerciseIds
    * @see #getExerciseListWrapperForPrefix
    */
-  private <T extends CommonShell> ExerciseListWrapper<T> makeExerciseListWrapper(ExerciseListRequest request,
-                                                                                 Collection<CommonExercise> exercises,
-                                                                                 int projID) {
+  private ExerciseListWrapper<T> makeExerciseListWrapper(ExerciseListRequest request,
+                                                         Collection<CommonExercise> exercises,
+                                                         int projID) {
     long then = System.currentTimeMillis();
     CommonExercise firstExercise = exercises.isEmpty() ? null : request.isAddFirst() ? exercises.iterator().next() : null;
 
@@ -659,34 +636,28 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       // NOTE : not ensuring MP3s or OGG versions of WAV file.
       // ensureMP3s(firstExercise, pathHelper.getInstallPath());
       if (request.shouldAddContext()) { // add the context exercises
-        //  logger.info("adding context exercises...");
-        List<CommonExercise> withContext = new ArrayList<>();
-        exercises.forEach(commonExercise -> {
-          withContext.add(commonExercise);
-          //  logger.info("\t" + commonExercise.getID() + " " + commonExercise.getDirectlyRelated().size());
-          withContext.addAll(commonExercise.getDirectlyRelated());
-        });
-        exercises = withContext;
+        logger.info("\n\n\n makeExerciseListWrapper adding context exercises - parent/child pairs\n\n\n");
+        exercises = getParentChildPairs(exercises);
       }
     }
-    List<CommonShell> exerciseShells = getExerciseShells(exercises, request.isQC());
+    List<T> exerciseShells = getExerciseShells(exercises, request.isQC());
 
 //    logger.debug("makeExerciseListWrapper : userID " + userID + " Role is " + request.getActivityType());
-    markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
+   // markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
 
     // TODO : do this the right way vis-a-vis type safe collection...
 
-    List<T> exerciseShells1 = (List<T>) exerciseShells;
-    if (exerciseShells1.isEmpty() && firstExercise != null) {
+    //List<T> exerciseShells1 = (List<T>) exerciseShells;
+    if (exerciseShells.isEmpty() && firstExercise != null) {
       logger.error("makeExerciseListWrapper huh? no exercises");
     }
 
-    ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<>(request.getReqID(), exerciseShells1, firstExercise);
+    ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(request.getReqID(), exerciseShells, firstExercise);
 
     if (!request.isQC()) {
       // should be consistent with getScoreHistoryPerExercise
       // @see #getScoreHistoryPerExercise
-      Map<Integer, Float> scores = db.getResultDAO().getScores(userID, exerciseShells1);
+      Map<Integer, Float> scores = db.getResultDAO().getScores(userID, exerciseShells);
 
 /*
       List<Integer> sorted = new ArrayList<>(scores.keySet());
@@ -701,13 +672,38 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   /**
+   * Make pairs of parent exercise to child context sentence exercise
+   *
+   * @param exercises
+   * @return
+   * @see #makeExerciseListWrapper
+   */
+  @NotNull
+  private List<CommonExercise> getParentChildPairs(Collection<CommonExercise> exercises) {
+    List<CommonExercise> withContext = new ArrayList<>();
+    exercises.forEach(commonExercise -> {
+      //  logger.info("\t" + commonExercise.getID() + " " + commonExercise.getDirectlyRelated().size());
+      commonExercise.getDirectlyRelated().forEach(clientExercise -> {
+        //withContext.add(commonExercise);
+        Exercise copy = new Exercise(commonExercise);
+        withContext.add(copy);
+        copy.getDirectlyRelated().clear();
+        copy.getDirectlyRelated().add(clientExercise.asCommon());
+//            withContext.add(clientExercise.asCommon());
+      });
+      // withContext.addAll(commonExercise.getDirectlyRelated());
+    });
+    return withContext;
+  }
+
+  /**
    * @param onlyExamples
    * @param userID
    * @param exerciseShells
    * @param activityType
    * @see #makeExerciseListWrapper(ExerciseListRequest, Collection, int)
    */
-  private void markStateForActivity(boolean onlyExamples, int userID, List<CommonShell> exerciseShells, ActivityType activityType) {
+/*  private void markStateForActivity(boolean onlyExamples, int userID, List<T> exerciseShells, ActivityType activityType) {
     switch (activityType) {
       case RECORDER:
         markRecordedState(userID, activityType, exerciseShells, onlyExamples);
@@ -720,7 +716,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       default:
         break;
     }
-  }
+  }*/
 
 
   /**
@@ -735,6 +731,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param projID
    * @seex LoadTesting#getExercise(String, long, boolean)
    * @see #makeExerciseListWrapper
+   * @see #getAnnotatedExercise(int, int, int)
    */
   private void addAnnotationsAndAudio(int userID, CommonExercise firstExercise, boolean isQC, int projID) {
     long then = System.currentTimeMillis();
@@ -751,7 +748,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }
     then = now;
     int i = attachAudio(firstExercise);
-    //logger.info("attached " + i + " audio cuts to " + firstExercise.getID());
+    logger.info("attached " + i + " audio cuts to " + firstExercise.getID());
 
     if (DEBUG) {
       for (AudioAttribute audioAttribute : firstExercise.getAudioAttributes())
@@ -775,7 +772,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
     then = now;
 
-    db.getResultDAO().attachScoreHistory(userID, firstExercise, getLanguage(firstExercise));
+    db.getResultDAO().attachScoreHistory(userID, firstExercise, getLanguageEnum(firstExercise));
 
     now = System.currentTimeMillis();
     if (now - then > SLOW_MILLIS) {
@@ -793,10 +790,12 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   /**
+   * Add annotations to parent exercise and any child exercise.
+   *
    * @param byID
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, int)
    */
-  private void addAnnotations(CommonExercise byID) {
+  private void addAnnotations(ClientExercise byID) {
     IUserListManager userListManager = db.getUserListManager();
     userListManager.addAnnotations(byID);
     byID.getDirectlyRelated().forEach(userListManager::addAnnotations);
@@ -807,11 +806,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, int)
    */
   private int attachAudio(CommonExercise firstExercise) {
-    return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguage(firstExercise), new HashMap<>());
-  }
-
-  private String getLanguage(CommonExercise firstExercise) {
-    return db.getLanguage(firstExercise);
+    return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguageEnum(firstExercise), new HashMap<>());
   }
 
   /**
@@ -828,54 +823,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
   }
 
   /**
-   * @param request
-   * @param exercises
-   * @param projid
-   * @return
-   * @see #getExerciseIds
-   */
-  private List<CommonExercise> filterExercises(ExerciseListRequest request,
-                                               List<CommonExercise> exercises,
-                                               int projid) {
-    logger.info("filter req " + request);
-    exercises = filterByUnrecorded(request, exercises, projid);
-
-    if (request.isOnlyWithAudioAnno()) {
-      exercises = filterByOnlyAudioAnno(request.isOnlyWithAudioAnno(), exercises);
-    }
-    if (request.isOnlyDefaultAudio()) {
-      exercises = filterByOnlyDefaultAudio(request.isOnlyDefaultAudio(), exercises);
-    }
-    if (request.isOnlyUninspected()) {
-      exercises = filterByUninspected(exercises);
-    }
-    if (request.isOnlyForUser()) {
-      exercises = filterOnlyPracticedByUser(request, exercises, projid);
-    }
-    return exercises;
-  }
-
-  @NotNull
-  private List<CommonExercise> filterOnlyPracticedByUser(ExerciseListRequest request, List<CommonExercise> exercises, int projid) {
-    Collection<Integer> practicedByUser = db.getResultDAO().getPracticedByUser(request.getUserID(), projid);
-    List<CommonExercise> copy = new ArrayList<>();
-
-    // TODO:  gosh - wasteful most of the time....
-    long then = System.currentTimeMillis();
-    for (CommonExercise ex : exercises) {
-      if (practicedByUser.contains(ex.getID())) copy.add(ex);
-    }
-    long now = System.currentTimeMillis();
-    if (now - then > 100) {
-      logger.info("filterExercises : took " + (now - then));
-    }
-    return copy;
-  }
-
-  /**
    * TODO : slow?
    *
-   * @param <T>
    * @param commonExercises
    * @param sortByFL
    * @param searchTerm
@@ -883,9 +832,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExerciseListWrapperForPrefix(ExerciseListRequest, Collection, int)
    * @see #getSortedExercises
    */
-  private <T extends CommonShell> void sortExercises(boolean isRecorder, List<T> commonExercises, boolean sortByFL,
+  private <U extends CommonShell> void sortExercises(List<U> commonExercises,
+                                                     boolean sortByFL,
                                                      String searchTerm) {
-    new ExerciseSorter().getSorted(commonExercises, isRecorder, sortByFL, searchTerm);
+    new ExerciseSorter<U>().getSorted(commonExercises, sortByFL, searchTerm);
   }
 
 
@@ -897,7 +847,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * If you ask for a context exercise id, you get back the parent exercise.
    * If you look up by domino id, you get the matching exercise.
    *
-   * @param <T>
    * @param prefix
    * @param exercises
    * @param predefExercises
@@ -905,265 +854,67 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    * @see #getExerciseIds
    */
-  private <T extends CommonExercise> TripleExercises<T> getExercisesForSearch(String prefix,
-                                                                              Collection<T> exercises,
-                                                                              boolean predefExercises,
-                                                                              int projectID,
-                                                                              int userID, boolean matchOnContext) {
-    Search<T> search = new Search<T>(db);
-    TripleExercises<T> exercisesForSearch =
+  private TripleExercises<CommonExercise> getExercisesForSearch(String prefix,
+                                                                Collection<CommonExercise> exercises,
+                                                                boolean predefExercises,
+                                                                int projectID,
+                                                                int userID,
+                                                                boolean matchOnContext) {
+    Search<CommonExercise> search = new Search<CommonExercise>(db);
+    TripleExercises<CommonExercise> exercisesForSearch =
         search.getExercisesForSearch(prefix, exercises, predefExercises, projectID, matchOnContext);
     exercisesForSearch.setByID(Collections.emptyList());
 
     {
       int exid = search.getID(prefix.trim());
       if (exid != -1 && exid != 1) {
-        if (DEBUG_ID_LOOKUP) logger.info("getExercisesForSearch looking for exercise in " + projectID + " = " + exid);
-        T exercise = getAnnotatedExercise(userID, projectID, exid);
-
-        if (exercise != null && exercise.isContext()) {
-          if (DEBUG_ID_LOOKUP)
-            logger.info("\tgetExercisesForSearch found context sentence in " + projectID + " = " + exid);
-          int parentExerciseID1 = exercise.getParentExerciseID();
-          int parentExerciseID = parentExerciseID1 > 0 ? parentExerciseID1 : db.getExerciseDAO(projectID).getParentFor(exid);
-
-          if (parentExerciseID > 0) {
-            exercise = getAnnotatedExercise(userID, projectID, parentExerciseID);
-            if (exercise != null) {
-              exid = parentExerciseID;
-              if (DEBUG_ID_LOOKUP)
-                logger.info("\tgetExercisesForSearch found parent for sentence in " + projectID + " = " + exid);
-            }
-          }
-        }
-        if (exercise == null) {
-          if (DEBUG_ID_LOOKUP)
-            logger.info("getExercisesForSearch looking for exercise in " + projectID + " with domino id " + exid);
-          exid = db.getExerciseDAO(projectID).getExIDForDominoID(projectID, exid);
-          if (exid > 0) {
-            if (DEBUG_ID_LOOKUP)
-              logger.info("getExercisesForSearch got match for domino - exercise in " + projectID + " = " + exid);
-            exercise = getAnnotatedExercise(userID, projectID, exid);
-          }
-        }
-
-        if (exercise != null && exercise.getProjectID() == projectID) {
-          exercisesForSearch.setByID(Collections.singletonList(exercise));
-        } else {
-          logger.info("getExercisesForSearch no exercise with " + projectID + " " + exid);
-        }
+        getSpecialExerciseByID(projectID, userID, exercisesForSearch, exid);
       }
     }
 
     return exercisesForSearch;
   }
 
-  /**
-   * For all the exercises the user has not recorded, do they have the required reg and slow speed recordings by a matching gender.
-   * <p>
-   * Or if looking for example audio, find ones missing examples.
-   *
-   * @param exercises to filter
-   * @param projid
-   * @return exercises missing audio, what we want to record
-   * @paramx userID                   exercise not recorded by this user and matching the user's gender
-   * @paramx onlyUnrecordedByMyGender do we filter by gender
-   * @paramx onlyExamples             only example audio
-   * @see #getExerciseIds
-   * @see #getExercisesForSelectionState
-   * @see #filterExercises
-   */
-  private List<CommonExercise> filterByUnrecorded(
-      ExerciseListRequest request,
-      List<CommonExercise> exercises,
-      int projid) {
-    if (request.isOnlyUnrecordedByMe()) {
-      logger.info("filterByUnrecorded : Filter for matching gender to " + request.getUserID());
-      return getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples(), false);
-    } else if (request.isOnlyRecordedByMatchingGender()) {
-      logger.info("filterByUnrecorded : Filter for matching gender to " + request.getUserID());
-      return getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, request.isOnlyExamples(), true);
-    } else {
-      return request.isOnlyExamples() ? getExercisesWithContext(exercises) : exercises;
-    }
-  }
+  private void getSpecialExerciseByID(int projectID, int userID, TripleExercises<CommonExercise> exercisesForSearch, int exid) {
+    if (DEBUG_ID_LOOKUP) logger.info("getExercisesForSearch looking for exercise in " + projectID + " = " + exid);
+    CommonExercise exercise = getAnnotatedExercise(userID, projectID, exid);
 
-  /**
-   * TODO : way too much work here... why go through all exercises?
-   * TODO : why return all exercises?
-   *
-   * @param userID
-   * @param exercises
-   * @param projid
-   * @param onlyExamples
-   * @param onlyRecorded
-   * @return
-   */
-  @NotNull
-  private List<CommonExercise> getRecordFilterExercisesMatchingGender(int userID,
-                                                                      Collection<CommonExercise> exercises,
-                                                                      int projid,
-                                                                      boolean onlyExamples,
-                                                                      boolean onlyRecorded) {
+    if (exercise != null && exercise.isContext()) {
+      if (DEBUG_ID_LOOKUP)
+        logger.info("\tgetExercisesForSearch found context sentence in " + projectID + " = " + exid);
+      int parentExerciseID = getParentExerciseID(projectID, exid, exercise);
 
-    Set<Integer> unrecordedIDs = new HashSet<>(exercises.size());
-
-    Map<Integer, String> exToTranscript = new HashMap<>();
-
-    for (CommonExercise exercise : exercises) {
-      if (onlyExamples) {
-        exercise.getDirectlyRelated().forEach(dir -> {
-          int id = dir.getID();
-          unrecordedIDs.add(id);
-          exToTranscript.put(id, dir.getForeignLanguage());
-        });
-      } else {
-        int id = exercise.getID();
-        unrecordedIDs.add(id);
-        exToTranscript.put(id, exercise.getForeignLanguage());
-      }
-    }
-
-    logger.info("getRecordFilterExercisesMatchingGender " + onlyExamples +
-        "\n\texToTranscript " + exToTranscript.size());
-    Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples, exToTranscript);
-
-    logger.info("getRecordFilterExercisesMatchingGender" +
-        "\n\tall exercises " + unrecordedIDs.size() +
-        "\n\tfor project # " + projid +
-        "\n\tuserid #      " + userID +
-        "\n\tremoving      " + recordedBySameGender.size() +
-        "\n\tretain        " + onlyRecorded
-    );
-
-    if (onlyRecorded) {
-      unrecordedIDs.retainAll(recordedBySameGender);
-    } else {
-      unrecordedIDs.removeAll(recordedBySameGender);
-    }
-
-    logger.info("getRecordFilterExercisesMatchingGender after removing recorded exercises " + unrecordedIDs.size());
-
-    List<CommonExercise> unrecordedExercises = new ArrayList<>();
-
-    for (CommonExercise exercise : exercises) {
-      if (onlyExamples) {
-        for (CommonExercise dir : exercise.getDirectlyRelated()) {
-          if (unrecordedIDs.contains(dir.getID())) {
-            unrecordedExercises.add(dir);
-          }
-        }
-      } else {
-        if (unrecordedIDs.contains(exercise.getID())) {
-          unrecordedExercises.add(exercise);
+      if (parentExerciseID > 0) {
+        exercise = getAnnotatedExercise(userID, projectID, parentExerciseID);
+        if (exercise != null) {
+          exid = parentExerciseID;
+          if (DEBUG_ID_LOOKUP)
+            logger.info("\tgetExercisesForSearch found parent for sentence in " + projectID + " = " + exid);
         }
       }
     }
 
-    logger.info("getRecordFilterExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
-
-    return unrecordedExercises;
-  }
-
-  /**
-   * @param userID
-   * @param projid
-   * @param onlyExamples
-   * @return
-   * @see #getRecordFilterExercisesMatchingGender
-   */
-  private Collection<Integer> getRecordedByMatchingGender(int userID,
-                                                          int projid,
-                                                          boolean onlyExamples,
-                                                          Map<Integer, String> exToTranscript) {
-    logger.debug("getRecordedByMatchingGender : for " + userID +
-        " only by same gender examples only " + onlyExamples);// + " from " + exercises.size());
-
-    return onlyExamples ?
-        db.getAudioDAO().getRecordedBySameGenderContext(userID, projid, exToTranscript) :
-        db.getAudioDAO().getRecordedBySameGender(userID, projid, exToTranscript);
-  }
-
-  /**
-   * @param exercises
-   * @return
-   * @see #filterByUnrecorded
-   */
-  @NotNull
-  private List<CommonExercise> getExercisesWithContext(Collection<CommonExercise> exercises) {
-    List<CommonExercise> copy = new ArrayList<>();
-    Set<Integer> seen = new HashSet<>();
-    for (CommonExercise exercise : exercises) {
-      if (seen.contains(exercise.getID())) logger.warn("saw " + exercise.getID() + " " + exercise + " again!");
-      if (hasContext(exercise)) {
-        seen.add(exercise.getID());
-        //    copy.add(exercise);
-        copy.addAll(exercise.getDirectlyRelated());
+    if (exercise == null) {
+      if (DEBUG_ID_LOOKUP)
+        logger.info("getExercisesForSearch looking for exercise in " + projectID + " with domino id " + exid);
+      exid = db.getExerciseDAO(projectID).getExIDForDominoID(projectID, exid);
+      if (exid > 0) {
+        if (DEBUG_ID_LOOKUP)
+          logger.info("getExercisesForSearch got match for domino - exercise in " + projectID + " = " + exid);
+        exercise = getAnnotatedExercise(userID, projectID, exid);
       }
     }
-    //   logger.debug("ONLY EXAMPLES - to be recorded " + copy.size() + " from " + exercises.size());
 
-    return copy;
-  }
-
-  private <X extends CommonExercise> boolean hasContext(X exercise) {
-    return !exercise.getDirectlyRelated().isEmpty();//.getContext() != null && !exercise.getContext().isEmpty();
-  }
-
-  /**
-   * @param onlyAudioAnno
-   * @param exercises
-   * @return
-   * @see #getExerciseIds
-   */
-  private List<CommonExercise> filterByOnlyAudioAnno(boolean onlyAudioAnno,
-                                                     List<CommonExercise> exercises) {
-    if (onlyAudioAnno) {
-      Collection<Integer> audioAnnos = getUserListManager().getAudioAnnos();
-      List<CommonExercise> copy = new ArrayList<>();
-      for (CommonExercise exercise : exercises) {
-        if (audioAnnos.contains(exercise.getID())) copy.add(exercise);
-      }
-      return copy;
+    if (exercise != null && exercise.getProjectID() == projectID) {
+      exercisesForSearch.setByID(Collections.singletonList(exercise));
     } else {
-      return exercises;
+      logger.info("getExercisesForSearch no exercise with " + projectID + " " + exid);
     }
   }
 
-  private List<CommonExercise> filterByOnlyDefaultAudio(boolean onlyDefault,
-                                                        List<CommonExercise> exercises) {
-    if (onlyDefault) {
-      List<CommonExercise> copy = new ArrayList<>();
-      for (CommonExercise exercise : exercises) {
-        for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-          if (audioAttribute.getUserid() == BaseUserDAO.DEFAULT_USER_ID) {
-            copy.add(exercise);
-            break;
-          }
-        }
-      }
-      return copy;
-    } else {
-      return exercises;
-    }
-  }
-
-  /**
-   * Remove any items that have been inspected already.
-   *
-   * @param exercises
-   * @return
-   */
-  private List<CommonExercise> filterByUninspected(Collection<CommonExercise> exercises) {
-    Collection<Integer> inspected = db.getStateManager().getInspectedExercises();
-    // logger.info("found " + inspected.size());
-    List<CommonExercise> copy = new ArrayList<>();
-    for (CommonExercise exercise : exercises) {
-      if (!inspected.contains(exercise.getID())) {
-        copy.add(exercise);
-      }
-    }
-    return copy;
+  private int getParentExerciseID(int projectID, int exid, CommonExercise exercise) {
+    int parentExerciseID1 = exercise.getParentExerciseID();
+    return parentExerciseID1 > 0 ? parentExerciseID1 : db.getExerciseDAO(projectID).getParentFor(exid);
   }
 
   /**
@@ -1174,36 +925,38 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    *
    * @param typeToSelection
    * @param userListByID
-   * @param <T>
+   * @param
    * @return
+   * @see #getExerciseIds
    */
-  private <T extends CommonShell & HasUnitChapter>
-  Collection<T> getExercisesFromUserListFiltered(Map<String, Collection<String>> typeToSelection,
-                                                 UserList<T> userListByID) {
-    Collection<T> exercises2 = getCommonExercises(userListByID);
+  private <U extends CommonExercise> Collection<U> getExercisesFromUserListFiltered(
+      Map<String, Collection<String>> typeToSelection,
+      UserList<U> userListByID) {
+    Collection<U> listExercises = getCommonExercises(userListByID);
     typeToSelection.remove(LISTS);
     if (typeToSelection.isEmpty()) {
-      logger.info("getExercisesFromUserListFiltered returning  " + userListByID.getExercises().size() + " exercises for " + userListByID.getID());
-      return exercises2;
+      logger.info("getExercisesFromUserListFiltered returning  " + userListByID.getExercises().size() +
+          " exercises for " + userListByID.getID());
+      return listExercises;
     } else {
-      SectionHelper<T> helper = new SectionHelper<>();
+      SectionHelper<U> helper = new SectionHelper<>();
 
-      logger.info("getExercisesFromUserListFiltered found " + exercises2.size() + " for list " + userListByID);
+      logger.info("getExercisesFromUserListFiltered found " + listExercises.size() + " for list " + userListByID);
       long then = System.currentTimeMillis();
-      exercises2.forEach(helper::addExercise);
+      listExercises.forEach(helper::addExercise);
       long now = System.currentTimeMillis();
 
       if (now - then > 100) {
-        logger.debug("getExercisesFromUserListFiltered used " + exercises2.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
+        logger.debug("getExercisesFromUserListFiltered used " + listExercises.size() + " exercises to build a hierarchy in " + (now - then) + " millis");
       }
       //helper.report();
-      Collection<T> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
+      Collection<U> exercisesForState = helper.getExercisesForSelectionState(typeToSelection);
       logger.debug("\tgetExercisesFromUserListFiltered after found " + exercisesForState.size() + " matches to " + typeToSelection);
-      return /*typeToSelection.isEmpty() ? exercises2 :*/ exercisesForState;
+      return /*typeToSelection.isEmpty() ? listExercises :*/ exercisesForState;
     }
   }
 
-  int warn = 0;
+  private int warn = 0;
 
   /**
    * Save transmission bandwidth - don't send a list of fully populated items - just send enough to populate a list
@@ -1213,8 +966,8 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @return
    * @see #makeExerciseListWrapper
    */
-  private <T extends CommonShell> List<CommonShell> getExerciseShells(Collection<T> exercises, boolean skipDups) {
-    List<CommonShell> ids = new ArrayList<>(exercises.size());
+  private List<T> getExerciseShells(Collection<CommonExercise> exercises, boolean skipDups) {
+    List<T> ids = new ArrayList<>(exercises.size());
 
     Set<Integer> checkDups = new HashSet<>();
     exercises.forEach(ex -> {
@@ -1225,7 +978,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         //   logger.info("skip dup " + ex.getID());
       } else {
         checkDups.add(ex.getID());
-        ids.add(ex.getShell());
+        ids.add((T) ex.getShell());
       }
     });
     return ids;
@@ -1236,21 +989,31 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * Joins with annotation data when doing QC.
    *
    * @param exid
-   * @param isFlashcardReq
    * @return
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    * @see mitll.langtest.client.list.ExerciseList#goGetNextAndCacheIt
    * @see mitll.langtest.client.analysis.PlayAudio#playLast
    */
-  public <T extends Shell> T getExercise(int exid, boolean isFlashcardReq) throws DominoSessionException {
-    if (serverProps.isAMAS()) { // TODO : HOW TO AVOID CAST???
-      return (T) db.getAMASExercise(exid);
+  public T getExercise(int exid) throws DominoSessionException {
+    return (T) getAnnotatedExercise(getUserIDFromSessionOrDB(), getProjectIDFromUser(), exid);
+  }
+
+  public int getExerciseIDOrParent(int exid) throws DominoSessionException {
+    int projectIDFromUser = getProjectIDFromUser();
+    CommonExercise exerciseByID = getProject(projectIDFromUser).getExerciseByID(exid);
+    if (exerciseByID.isContext()) {
+      int parentExerciseID = exerciseByID.getParentExerciseID();
+      if (parentExerciseID == -1) {
+        parentExerciseID = getParentExerciseID(projectIDFromUser,exid,exerciseByID);
+      }
+      return parentExerciseID;
     }
-    return getAnnotatedExercise(getUserIDFromSessionOrDB(), getProjectIDFromUser(), exid);
+    else {
+      return exid;
+    }
   }
 
   /**
-   * @param <T>
    * @param userID
    * @param projectID
    * @param exid
@@ -1258,7 +1021,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @see #getExercise(int, boolean)
    */
   @Nullable
-  private <T extends Shell> T getAnnotatedExercise(int userID, int projectID, int exid) {
+  private CommonExercise getAnnotatedExercise(int userID, int projectID, int exid) {
     long then2 = System.currentTimeMillis();
     CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
 
@@ -1330,18 +1093,18 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     }*/
     // return byID;
     // TODO : why doesn't this work?
-    return (T) byID;
+    return byID;
   }
 
   /**
-   * @param reqid
+   * @param request
    * @param ids
    * @return
    * @see mitll.langtest.client.list.FacetExerciseList#getExercises
    */
   @Override
-  public ExerciseListWrapper<CommonExercise> getFullExercises(int reqid, Collection<Integer> ids) throws DominoSessionException {
-    List<CommonExercise> exercises = new ArrayList<>();
+  public ExerciseListWrapper<ClientExercise> getFullExercises(ExerciseListRequest request, Collection<Integer> ids) throws DominoSessionException {
+    List<ClientExercise> exercises = new ArrayList<>();
 
     int userID = getUserIDFromSessionOrDB();
     int projectID = getProjectIDFromUser(userID);
@@ -1349,10 +1112,10 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
       logger.info("getFullExercises : no project for user " + userID);
       return new ExerciseListWrapper<>();
     }
-    String language = getLanguage(projectID);
+    Language language = getLanguageEnum(projectID);
 
     long then = System.currentTimeMillis();
-    Set<CommonExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
+    Set<ClientExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
     long now = System.currentTimeMillis();
 
     if (now - then > 10)
@@ -1369,14 +1132,14 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
 //    if (!toAddAudioTo.isEmpty()) {
     then = System.currentTimeMillis();
-    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language);
+    db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language, projectID);
     now = System.currentTimeMillis();
 
     if (now - then > 10)
       logger.info("getFullExercises took " + (now - then) + " to attach audio to " + toAddAudioTo.size() + " exercises");
 
     then = System.currentTimeMillis();
-    addAlignmentOutput(projectID, toAddAudioTo);
+    new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projectID, getProject(projectID), toAddAudioTo);
     now = System.currentTimeMillis();
     if (now - then > 20)
       logger.info("getFullExercises took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
@@ -1395,7 +1158,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (now - then > 50)
       logger.info("getFullExercises took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
 
-    Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryPerExercise(ids, exercises, userID);
+    Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryPerExercise(ids, exercises, userID, language);
     logger.info("getFullExercises found " + exercises.size() + " exercises and " + scoreHistoryPerExercise.size() + " scores");
 
 /*
@@ -1405,8 +1168,18 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
 */
 
+    if (request.isOnlyUninspected()) {
+      exercises.forEach(firstExercise -> {
+        addAnnotations(firstExercise); // todo do this in a better way
+
+        if (request.isQC()) {
+          addPlayedMarkings(userID, firstExercise.asCommon());
+        }
+      });
+    }
+
     // for (CommonExercise exercise : exercises) logger.info("\treturning " + exercise.getID());
-    return new ExerciseListWrapper<>(reqid, exercises, null, scoreHistoryPerExercise);
+    return new ExerciseListWrapper<>(request.getReqID(), exercises, null, scoreHistoryPerExercise);
   }
 
   /**
@@ -1459,7 +1232,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
     if (byID == null) {
       logger.warn("getRefAudio can't find ex id " + exid);
     } else {
-      db.getAudioDAO().attachAudioToExercises(Collections.singleton(byID), getLanguage(projectIDFromUser));
+      db.getAudioDAO().attachAudioToExercises(Collections.singleton(byID), getLanguageEnum(projectIDFromUser), projectIDFromUser);
       AudioAttribute audioAttributePrefGender = byID.getAudioAttributePrefGender(db.getUserDAO().isMale(userID), true);
       if (audioAttributePrefGender == null) {
         logger.warn("getRefAudio : no audio on ex " + exid + " ?");
@@ -1474,7 +1247,7 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
                                                          int exid) {
 
     return db.getResultDAO()
-        .getResultsForExIDInForUser(userID, exid, getLanguage(projectIDFromUser));
+        .getResultsForExIDInForUser(userID, exid, getLanguageEnum(projectIDFromUser));
   }
 
   /**
@@ -1485,217 +1258,31 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param ids
    * @param exercises
    * @param userID
+   * @param language
    * @see mitll.langtest.server.database.result.SlickResultDAO#getScores
    * @see #makeExerciseListWrapper
    * @see #getFullExercises
    */
   private Map<Integer, CorrectAndScore> getScoreHistoryPerExercise(Collection<Integer> ids,
-                                                                   List<CommonExercise> exercises,
-                                                                   int userID) {
+                                                                   List<ClientExercise> exercises,
+                                                                   int userID, Language language) {
     long then = System.currentTimeMillis();
-    Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(ids, exercises, userID);
+
+    Set<Integer> contextIDs = new HashSet<>();
+    exercises.forEach(exercise->exercise.getDirectlyRelated().forEach(dir->contextIDs.add(dir.getID())));
+    contextIDs.addAll(ids);
+
+    Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(contextIDs, exercises.isEmpty(), userID, language);
+
     long now = System.currentTimeMillis();
-    if (now - then > 50)
-      logger.info("getScoreHistoryPerExercise took " + (now - then) + " to get score histories for " + exercises.size() + " exercises");
+    if (now - then > 0) {
+      logger.info("getScoreHistoryPerExercise took " + (now - then) + " to get score histories for " + exercises.size() +
+          "\n\t exercises: " + scoreHistories.keySet());
+    }
 
     return scoreHistories;
   }
 
-  /**
-   * @param projectID
-   * @param toAddAudioTo
-   * @see #getFullExercises
-   */
-  private void addAlignmentOutput(int projectID, Set<CommonExercise> toAddAudioTo) {
-    Project project = db.getProject(projectID);
-
-    if (project != null) {
-      Map<Integer, AlignmentOutput> audioToAlignment = project.getAudioToAlignment();
-      Map<Integer, AudioAttribute> idToAudio = new HashMap<>();
-
-      logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
-          " audio->alignment entries, trying to marry to " + toAddAudioTo.size() + " exercises");
-
-      for (CommonExercise exercise : toAddAudioTo) {
-        setAlignmentInfo(audioToAlignment, idToAudio, exercise);
-        exercise.getDirectlyRelated().forEach(context -> setAlignmentInfo(audioToAlignment, idToAudio, context));
-      }
-
-      Map<Integer, AlignmentOutput> alignments = rememberAlignments(projectID, idToAudio, project.getLanguage());
-
-      synchronized (audioToAlignment) {
-        audioToAlignment.putAll(alignments);
-      }
-    }
-  }
-
-  /**
-   * TODO : why not concurrent hash map...
-   *
-   * @param audioToAlignment
-   * @param idToAudio
-   * @param exercise
-   */
-  private void setAlignmentInfo(Map<Integer, AlignmentOutput> audioToAlignment,
-                                Map<Integer, AudioAttribute> idToAudio,
-                                CommonExercise exercise) {
-    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-      AlignmentOutput currentAlignment = audioAttribute.getAlignmentOutput();
-      if (currentAlignment == null) {
-        synchronized (audioToAlignment) {
-          AlignmentOutput alignmentOutput1 = audioToAlignment.get(audioAttribute.getUniqueID());
-
-          if (alignmentOutput1 == null) {
-            idToAudio.put(audioAttribute.getUniqueID(), audioAttribute);
-          } else {  // not sure how this can happen
-            audioAttribute.setAlignmentOutput(alignmentOutput1);
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * @param projectID
-   * @param idToAudio
-   * @param language
-   * @return
-   * @see #addAlignmentOutput
-   */
-  private Map<Integer, AlignmentOutput> rememberAlignments(int projectID,
-                                                           Map<Integer, AudioAttribute> idToAudio, String language) {
-    if (!idToAudio.isEmpty() && idToAudio.size() > 50)
-      logger.info("rememberAlignments : asking for " + idToAudio.size() + " alignment outputs from database");
-
-    Map<Integer, AlignmentOutput> alignments = getAlignmentsFromDB(projectID, idToAudio.keySet(), language);
-    addAlignmentToAudioAttribute(idToAudio, alignments);
-    return alignments;
-  }
-
-
-  private void addAlignmentToAudioAttribute(Map<Integer, AudioAttribute> idToAudio,
-                                            Map<Integer, AlignmentOutput> alignments) {
-    idToAudio.forEach((k, v) -> {
-      AlignmentOutput alignmentOutput = alignments.get(k);
-      if (alignmentOutput == null) {
-        // logger.warn("addAlignmentToAudioAttribute : couldn't get alignment for audio #" + v.getUniqueID());
-      } else {
-        v.setAlignmentOutput(alignmentOutput);
-      }
-    });
-  }
-
-  /**
-   * get alignment from db
-   *
-   * @param projid
-   * @param audioIDs
-   * @param language
-   * @return
-   * @see #rememberAlignments
-   */
-  private Map<Integer, AlignmentOutput> getAlignmentsFromDB(int projid, Set<Integer> audioIDs, String language) {
-    //logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
-    if (audioIDs.isEmpty()) logger.warn("getAlignmentsFromDB not asking for any audio ids?");
-    Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
-    logger.info("getAlignmentsFromDB found " + audioIDs.size() + "/" + audioIDMap.size() + " ref result alignments...");
-    return parseJsonToGetAlignments(audioIDs, audioIDMap, language);
-  }
-
-  @NotNull
-  private Map<Integer, ISlimResult> getAudioIDMap(Collection<ISlimResult> jsonResultsForProject) {
-    Map<Integer, ISlimResult> audioToResult = new HashMap<>();
-    jsonResultsForProject.forEach(slimResult -> audioToResult.put(slimResult.getAudioID(), slimResult));
-    return audioToResult;
-  }
-
-  private Map<Integer, AlignmentOutput> parseJsonToGetAlignments(Collection<Integer> audioIDs,
-                                                                 Map<Integer, ISlimResult> audioToResult,
-                                                                 String language) {
-    Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
-    for (Integer audioID : audioIDs) {
-      // do we have alignment for this audio in the map
-      ISlimResult cachedResult = audioToResult.get(audioID);
-
-      if (cachedResult == null) { // nope, ask the database
-        cachedResult = db.getRefResultDAO().getResult(audioID);
-      }
-
-      if (cachedResult == null || !cachedResult.isValid()) { // not in the database, recalculate it now?
-        if (WARN_MISSING_REF_RESULT) logger.info("parseJsonToGetAlignments : nothing in database for audio " + audioID);
-      } else {
-        getCachedAudioRef(idToAlignment, audioID, cachedResult, language);  // OK, let's translate the db info into the alignment output
-      }
-    }
-    return idToAlignment;
-  }
-
-  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult, String language) {
-    PrecalcScores precalcScores = getPrecalcScores(USE_PHONE_TO_DISPLAY, cachedResult, language);
-    Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
-        getTypeToTranscriptEvents(precalcScores.getJsonObject(), USE_PHONE_TO_DISPLAY, language);
-    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents, language);
-//    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
-    idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
-  }
-
-  @NotNull
-  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, String language) {
-    return new PrecalcScores(serverProps, cachedResult,
-        usePhoneToDisplay || serverProps.usePhoneToDisplay(), language);
-  }
-
-  private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
-                                                                                boolean usePhoneToDisplay,
-                                                                                String language) {
-    return
-        new ParseResultJson(db.getServerProps(), language)
-            .readFromJSON(object, "words", "w", usePhoneToDisplay, null, false);
-  }
-
-  /**
-   * TODO : why four copies!!!
-   *
-   * @param typeToEvent
-   * @param language
-   * @return
-   * @see #getCachedAudioRef
-   */
-  @NotNull
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent, String language) {
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
-
-    Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      boolean isPhone = key == NetPronImageType.PHONE_TRANSCRIPT;
-
-      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) {
-        typeToEndTimes.put(key, endTimes = new ArrayList<>());
-      }
-
-      StringBuilder builder = new StringBuilder();
-      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        TranscriptEvent value = event.getValue();
-        String event1 = value.getEvent();
-        String displayName = isPhone ? getDisplayName(event1, phoneToDisplay) : event1;
-        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName, builder.length()));
-
-        if (!isPhone) {
-          builder.append(event1);
-        }
-      }
-    }
-
-    return typeToEndTimes;
-  }
-
-  private String getDisplayName(String event, Map<String, String> phoneToDisplay) {
-    String displayName = phoneToDisplay.get(event);
-    displayName = displayName == null ? event : displayName;
-    return displayName;
-  }
 
   /**
    * TODO : don't add annotations one at a time.
@@ -1704,13 +1291,13 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
    * @param exercises
    * @param projectID
    * @return
-   * @see #getFullExercises(int, Collection)
+   * @see #getFullExercises
    */
   @NotNull
-  private Set<CommonExercise> getCommonExercisesWithoutAudio(Collection<Integer> ids,
-                                                             List<CommonExercise> exercises,
+  private Set<ClientExercise> getCommonExercisesWithoutAudio(Collection<Integer> ids,
+                                                             List<ClientExercise> exercises,
                                                              int projectID) {
-    Set<CommonExercise> toAddAudioTo = new HashSet<>();
+    Set<ClientExercise> toAddAudioTo = new HashSet<>();
 //    logger.info("getCommonExercisesWithoutAudio " + ids);
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
@@ -1727,20 +1314,22 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
 
   /**
    * @param exids
-   * @param exercises
+   * @param empty
    * @param userID
+   * @param language
    * @return
    * @see #getScoreHistoryPerExercise
    */
   private Map<Integer, CorrectAndScore> getScoreHistories(Collection<Integer> exids,
-                                                          List<CommonExercise> exercises,
-                                                          int userID) {
-    return (exercises.isEmpty()) ?
-        Collections.emptyMap() :
-        db.getResultDAO().getScoreHistories(userID, exids, getLanguage(exercises.get(0)));
+                                                          boolean empty,
+                                                          int userID,
+                                                          Language language) {
+  //  boolean empty = exercises.isEmpty();
+    return empty ? Collections.emptyMap() :
+        db.getResultDAO().getScoreHistories(userID, exids, language);
   }
 
-  private <T extends Shell> T getExercise(int userID, int projectID, String exid) {
+  private CommonExercise getExercise(int userID, int projectID, String exid) {
     int exid1 = -1;
     try {
       exid1 = Integer.parseInt(exid);
@@ -1787,26 +1376,6 @@ public class ExerciseServiceImpl<T extends CommonShell> extends MyRemoteServiceS
         " millis, threads " + threadInfo + " on " + hostName);
   }
 
-  /**
-   * TODO : put back trie
-   *
-   * @return
-   * @deprecated
-   */
-  private List<AmasExerciseImpl> getAMASExercises() {
-    logger.info("get getAMASExercises -------");
-    long then = System.currentTimeMillis();
-    List<AmasExerciseImpl> exercises = db.getAMASExercises();
-/*    if (amasFullTrie == null) {
-      amasFullTrie = new ExerciseTrie<>(exercises, getOldLanguage(), getSmallVocabDecoder());
-    }*/
-
-    long now = System.currentTimeMillis();
-    if (now - then > 200) {
-      logger.info("took " + (now - then) + " millis to get the predef exercise list");// for " + getOldLanguage());
-    }
-    return exercises;
-  }
 
   private SmallVocabDecoder getSmallVocabDecoder(int projectID) {
     return getAudioFileHelper(projectID).getSmallVocabDecoder();

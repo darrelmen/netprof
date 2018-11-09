@@ -33,6 +33,11 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.dialog.IDialogDAO;
+import mitll.langtest.server.database.dialog.IDialogSessionDAO;
+import mitll.langtest.server.database.dialog.IRelatedResultDAO;
+import mitll.langtest.server.database.dliclass.IDLIClassJoinDAO;
+import mitll.langtest.server.database.image.IImageDAO;
 import mitll.langtest.server.database.instrumentation.IEventDAO;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.phone.Phone;
@@ -40,6 +45,7 @@ import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.result.IAnswerDAO;
 import mitll.langtest.server.database.result.IResultDAO;
+import mitll.langtest.server.database.user.IPendingUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.IUserProjectDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
@@ -70,6 +76,8 @@ public interface DAOContainer {
 
   IUserSessionDAO getUserSessionDAO();
 
+  IImageDAO getImageDAO();
+
   IWordDAO getWordDAO();
 
   IPhoneDAO<Phone> getPhoneDAO();
@@ -79,4 +87,14 @@ public interface DAOContainer {
   IEventDAO getEventDAO();
 
   IAudioDAO getAudioDAO();
+
+  IDialogDAO getDialogDAO();
+
+  IDialogSessionDAO getDialogSessionDAO();
+
+  IRelatedResultDAO getRelatedResultDAO();
+
+  IDLIClassJoinDAO getDliClassJoinDAO();
+
+  IPendingUserDAO getPendingUserDAO();
 }

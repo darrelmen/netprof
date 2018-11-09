@@ -51,6 +51,8 @@ public class FilterRequest implements IsSerializable {
   private int userListID = -1;
   private boolean recordRequest = false;
   private boolean exampleRequest = false;
+  private boolean onlyUninspected = false;
+  private boolean onlyWithAnno = false;
 
   public FilterRequest() {
   }
@@ -65,6 +67,14 @@ public class FilterRequest implements IsSerializable {
     this.reqID = reqID;
     this.typeToSelection = pairs;
     this.userListID = userListID;
+  }
+
+  public void addPair(Pair pair) {
+    this.typeToSelection.add(pair);
+  }
+
+  public void addPair(String p, String v) {
+    addPair(new Pair(p, v));
   }
 
   public boolean isNoFilter() {
@@ -130,9 +140,9 @@ public class FilterRequest implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getFilterRequest
    * @param recordRequest
    * @return
+   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getFilterRequest
    */
   public FilterRequest setRecordRequest(boolean recordRequest) {
     this.recordRequest = recordRequest;
@@ -140,16 +150,45 @@ public class FilterRequest implements IsSerializable {
   }
 
   public boolean isExampleRequest() {
+    boolean exampleRequest = this.exampleRequest;
+  /*  if (!exampleRequest) {
+      for (Pair pair : typeToSelection) {
+        if (pair.getProperty().equalsIgnoreCase("CONTENT")) {
+          exampleRequest = pair.getValue().startsWith("Sentences");
+
+          break;
+        }
+      }
+      ;
+    }*/
     return exampleRequest;
   }
 
   /**
-   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getFilterRequest
    * @param exampleRequest
    * @return
+   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getFilterRequest
    */
   public FilterRequest setExampleRequest(boolean exampleRequest) {
     this.exampleRequest = exampleRequest;
+    return this;
+  }
+
+  public boolean isOnlyUninspected() {
+    return onlyUninspected;
+  }
+
+  public FilterRequest setOnlyUninspected(boolean onlyDefaultAudio) {
+    this.onlyUninspected = onlyDefaultAudio;
+    return this;
+  }
+
+  public boolean isOnlyWithAnno() {
+    return onlyWithAnno;
+  }
+
+  public FilterRequest setOnlyWithAnno(boolean onlyWithAnno) {
+    this.onlyWithAnno = onlyWithAnno;
     return this;
   }
 
@@ -160,8 +199,10 @@ public class FilterRequest implements IsSerializable {
     return
         (userListID == -1 ? "" : "userListID =" + userListID) +
             (limit == -1 ? "" : "limit '" + limit + "'") +
-            (prefix.isEmpty() ? "" : "prefix '" + prefix + "'") +
-            (recordRequest ? "" : "recordRequest") +
+            (prefix.isEmpty() ? "" : "prefix '" + prefix + "' ") +
+            (recordRequest ? "recordRequest " : "") +
+            (onlyUninspected ? "onlyUninspected " : "") +
+            (onlyWithAnno ? "onlyWithAnno " : "") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection " + getTypeToSelection());
   }
 }

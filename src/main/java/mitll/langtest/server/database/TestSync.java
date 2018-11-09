@@ -4,24 +4,19 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.domino.ProjectSync;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.DominoUpdateItem;
-import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.ADD;
-import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.CHANGE;
-import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.DELETE;
+import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.*;
 
 public class TestSync {
   private static final Logger logger = LogManager.getLogger(TestSync.class);
 
-  DatabaseImpl db;
+  final DatabaseImpl db;
 
   public TestSync(DatabaseImpl db) {
     this.db = db;
@@ -205,7 +200,7 @@ public class TestSync {
           new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, 0, bogusDominoID, false);
 
       CommonExercise parent = project.getExerciseByID(154838);
-      CommonExercise context = parent.getDirectlyRelated().iterator().next();
+      HasID context = parent.getDirectlyRelated().iterator().next();
 
       List<CommonExercise> changedExercises = new ArrayList<>();
       changedExercises.add(withNoContext);
@@ -215,7 +210,8 @@ public class TestSync {
           new ArrayList<>(),
           new HashSet<>());
 
-      DominoUpdateResponse dominoUpdateResponse2 = getProjectSync().getDominoUpdateResponse(projectid, importUser, false, importFromDomino2);
+      DominoUpdateResponse dominoUpdateResponse2 =
+          getProjectSync().getDominoUpdateResponse(projectid, importUser, false, importFromDomino2);
 
       logger.info("--- Got delete context sentence  " + dominoUpdateResponse2);
       List<DominoUpdateItem> updates = dominoUpdateResponse2.getUpdates();
@@ -321,10 +317,10 @@ public class TestSync {
       // this guy has a changed context exercise...
       CommonExercise withAnotherContext = new Exercise(project.getExerciseByID(154838));
 
-      List<CommonExercise> directlyRelated = withAnotherContext.getDirectlyRelated();
-      CommonExercise orig = directlyRelated.iterator().next();
+      List<ClientExercise> directlyRelated = withAnotherContext.getDirectlyRelated();
+      ClientExercise orig = directlyRelated.iterator().next();
 
-      CommonExercise copyContext = new Exercise(orig);
+      CommonExercise copyContext = new Exercise(orig.asCommon());
       copyContext.getMutable().setEnglish(orig.getEnglish() + " _ CHANGED");
       withAnotherContext.getDirectlyRelated().clear();
       withAnotherContext.getDirectlyRelated().add(copyContext);

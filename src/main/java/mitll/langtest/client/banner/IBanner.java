@@ -3,6 +3,7 @@ package mitll.langtest.client.banner;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.initial.UILifecycle;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
@@ -16,8 +17,8 @@ public interface IBanner {
   void setNavigation(INavigation navigation);
 
   /**
-   * @see mitll.langtest.client.initial.InitialUI#setSplash
    * @param subtitle
+   * @see mitll.langtest.client.initial.InitialUI#setSplash
    */
   void setSubtitle(String subtitle);
 
@@ -26,17 +27,22 @@ public interface IBanner {
   void reflectPermissions(Collection<User.Permission> permissions);
 
   void setVisibleChoices(boolean visible);
+
+  void setVisibleChoicesByMode(ProjectMode mode);
+
   void setCogVisible(boolean val);
 
   void reset();
 
   /**
-   * @see UILifecycle#gotUser
    * @param name
+   * @see UILifecycle#gotUser
    */
   void setUserName(String name);
 
   void checkProjectSelected();
 
   void show(INavigation.VIEWS views);
+
+ // void selectView(INavigation.VIEWS views);
 }

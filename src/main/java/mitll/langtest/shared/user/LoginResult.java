@@ -34,6 +34,8 @@ package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.Collection;
+
 /**
  * LoginResult
  *
@@ -42,30 +44,15 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 
 public class LoginResult implements IsSerializable {
-  public int getId() {
-    return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
-  }
-
-  public String getToken() {
-    return token;
-  }
-
-  public void setToken(String token) {
-    this.token = token;
-  }
 
   public enum ResultType implements IsSerializable {
     Success,
     Failed,
-    AcctExpired,
-    PassExpired,
+    //AcctExpired,
+    // PassExpired,
     BadPassword,
-    SessionNotRestored,
-    SessionExpired,
+    //SessionNotRestored,
+    //SessionExpired,
     MissingInfo,
     Updated,
     Added,
@@ -85,8 +72,14 @@ public class LoginResult implements IsSerializable {
   private User loggedInUser;
   private ResultType resultType = ResultType.Unknown;
 
-  public LoginResult(){};
+  public LoginResult() {
+  }
 
+  /**
+   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
+   * @param id
+   * @param token
+   */
   public LoginResult(int id, String token) {
     this.id = id;
     this.token = token;
@@ -118,6 +111,27 @@ public class LoginResult implements IsSerializable {
     this.userID = userID;
     return this;
   }
+
+  public int getId() {
+    return id;
+  }
+
+/*
+  public void setId(int id) {
+    this.id = id;
+  }
+*/
+
+  public String getToken() {
+    return token;
+  }
+
+/*
+  public void setToken(String token) {
+    this.token = token;
+  }
+*/
+
 
   public User getLoggedInUser() {
     return loggedInUser;

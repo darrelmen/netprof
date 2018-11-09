@@ -40,6 +40,7 @@ public interface OpenUserServiceAsync {
    * @param userId
    * @param attemptedFreeTextPassword
    * @param async
+   * @see mitll.langtest.client.user.SignInForm#gotLogin
    */
   void loginUser(String userId, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
 
@@ -74,4 +75,6 @@ public interface OpenUserServiceAsync {
   void checkHeartbeat(String implVersion, AsyncCallback<HeartbeatStatus> async);
 
   void accountExistsWithEmail(String email, AsyncCallback<Boolean> async);
+
+  void isValidServer(String server, AsyncCallback<Boolean> async);
 }

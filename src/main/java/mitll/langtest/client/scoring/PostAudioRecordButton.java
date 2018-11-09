@@ -33,9 +33,11 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.initial.PopupHelper;
@@ -43,14 +45,9 @@ import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.logging.Logger;
-
-import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 
 /**
  * This binds a record button with the act of posting recorded audio to the server.
@@ -62,52 +59,53 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
  * Time: 6:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class PostAudioRecordButton extends RecordButton implements RecordButton.RecordingListener {
+public abstract class PostAudioRecordButton extends RecordButton
+    implements RecordButton.RecordingListener {
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
+
+  // TODO : enum
+  private static final String ABORT = "ABORT";
+
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PACKET = false;
+
+  private static final boolean USE_DELAY = true;
+  private static final String END = "END";
 
   public static final int MIN_DURATION = 250;
 
   private boolean validAudio = false;
   private static final int LOG_ROUNDTRIP_THRESHOLD = 3000;
-  private final int index;
   private int reqid = 0;
   private int exerciseID;
   protected final ExerciseController controller;
-  private final boolean recordInResults;
-  private final boolean scoreAudioNow;
+  private final JSONAnswerParser jsonAnswerParser = new JSONAnswerParser();
 
   /**
    * @param exerciseID
    * @param controller
-   * @param index
-   * @param recordInResults
    * @param recordButtonTitle
    * @param stopButtonTitle
    * @param buttonWidth
-   * @param scoreAudioNow
-   * @seex GoodwaveExercisePanel.ASRRecordAudioPanel.MyPostAudioRecordButton
+   * @see FeedbackPostAudioRecordButton#FeedbackPostAudioRecordButton(int, RecordingAudioListener, ExerciseController)
+   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, ExerciseController, RecordingListener, boolean)
    */
   public PostAudioRecordButton(int exerciseID,
                                final ExerciseController controller,
-                               int index,
-                               boolean recordInResults,
                                String recordButtonTitle,
                                String stopButtonTitle,
-                               int buttonWidth,
-                               boolean scoreAudioNow) {
+                               int buttonWidth) {
     super(controller.getRecordTimeout(),
         controller.getProps().doClickAndHold(),
         recordButtonTitle,
         stopButtonTitle,
         controller.getProps());
     setRecordingListener(this);
-    this.index = index;
     this.exerciseID = exerciseID;
     this.controller = controller;
-    this.scoreAudioNow = scoreAudioNow;
 
-    this.recordInResults = recordInResults;
-    // getElement().setId("PostAudioRecordButton");
+    getElement().setId("PostAudioRecordButton");
+
     controller.register(this, exerciseID);
     Style style = getElement().getStyle();
     style.setMarginBottom(1, Style.Unit.PX);
@@ -115,6 +113,8 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     if (buttonWidth > 0) {
       setWidth(buttonWidth + "px");
     }
+
+    getElement().setId("PostAudioRecordButton" + exerciseID);
   }
 
   public void setExerciseID(int exercise) {
@@ -126,109 +126,209 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
   }
 
   /**
+   * When we start recording, we ask to be called with a callback for updates...
+   * This callback may not necessarily return a response that's for this exercise!
+   *
+   * Send a message to any play buttons so they can stop playing any audio.
+   *
+   * @see mitll.langtest.client.sound.PlayAudioPanel#gotPlayAudioEvent
+   */
+  public void startRecording() {
+    LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
+
+    ClientAudioContext clientAudioContext = new ClientAudioContext(getExerciseID(),
+        reqid,
+        shouldAddToAudioTable(),
+        getAudioType(),
+        getDialogSessionID(),
+        getDevice()  // device = session id in quiz
+    );
+    if (DEBUG || true) logger.info("startRecording : "+ clientAudioContext);
+
+    controller.startStream(clientAudioContext, this::gotPacketResponse);
+  }
+
+  private long stopRecordingReqTimestamp;
+
+  /**
+   * TODO : consider putting back reqid increment
+   *
    * @param duration
+   * @param abort
+   * @see mitll.langtest.client.recorder.FlashcardRecordButton#stopRecording(long, boolean)
    * @see RecordButton#stop
    */
-  public boolean stopRecording(long duration) {
+  public boolean stopRecording(long duration, boolean abort) {
+    //logger.warning("stopRecording ");
+    stopRecordingReqTimestamp = System.currentTimeMillis();
+    controller.stopRecording(USE_DELAY, abort);
+
     if (duration > MIN_DURATION) {
-      //  logger.info("stopRecording duration " + duration + " > " + MIN_DURATION);
-      controller.stopRecording(this::postAudioFile);
+     // logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
       return true;
     } else {
-      showPopup(Validity.TOO_SHORT.getPrompt());
       hideWaveform();
       gotShortDurationRecording();
-      //logger.info("stopRecording duration " + duration + " < " + MIN_DURATION);
+      logger.info("stopRecording duration " + duration + " < min = " + MIN_DURATION);
       return false;
     }
+  }
+
+  /**
+   * We can get back START, STREAM, END or nothing - in which case we got a 500 or 503 or something...
+   * <p>
+   * So if we get something other than a 200 http response, stop recording and show a big failure warning.
+   * which is different than a "hey, please speak in response to the prompt" or "check your mic"
+   *
+   * @param json
+   * @see #startRecording
+   */
+  private void gotPacketResponse(String json) {
+    if (DEBUG_PACKET) logger.info("gotPacketResponse " + json);
+    JSONObject digestJsonResponse = jsonAnswerParser.digestJsonResponse(json);
+    if (DEBUG_PACKET) logger.info("gotPacketResponse digestJsonResponse " + digestJsonResponse);
+    String message = getMessage(digestJsonResponse);
+    if (message.isEmpty()) {
+      if (DEBUG_PACKET) logger.info("gotPacketResponse message empty!");
+      handlePostError(System.currentTimeMillis(), digestJsonResponse);
+    } else if (message.equalsIgnoreCase(ABORT)) {
+      logger.info("gotPacketResponse gotAbort");
+      gotAbort();
+    } else if (message.equalsIgnoreCase(END)) {
+      AudioAnswer audioAnswer = jsonAnswerParser.getAudioAnswer(digestJsonResponse);
+      if (DEBUG_PACKET) logger.info("gotPacketResponse audioAnswer " + audioAnswer);
+      onPostSuccess(audioAnswer, stopRecordingReqTimestamp);
+    } else {
+      if (DEBUG_PACKET) {
+        logger.info("gotPacketResponse: post " + getElement().getId() +
+            "\n\tgot " + json);
+      }
+      usePartial(jsonAnswerParser.getResponse(digestJsonResponse));
+    }
+  }
+
+  private String getMessage(JSONObject digestJsonResponse) {
+    return jsonAnswerParser.getField(digestJsonResponse, "MESSAGE".toLowerCase());
+  }
+
+  private void handlePostError(long then, JSONObject digestJsonResponse) {
+    HttpStatus status = new HttpStatus(digestJsonResponse);
+    if (status.isWellFormed() && status.getCode() != 200) {
+      onStreamPostFailure(status, then);
+    }
+  }
+
+  private void onStreamPostFailure(HttpStatus status, long then) {
+    if (isRecording()) {
+      stopRecordingFirstStep();
+    }
+
+    onPostFailure(
+        then,
+        getUser(),
+        "error (" + status.getCode() + " : " + status.getStatusText() +
+            ") posting audio for exercise " + getExerciseID());
+  }
+
+  /**
+   * why so confusing -- ?
+   *
+   * @param result
+   * @see #onPostSuccess
+   */
+  public abstract void useResult(AudioAnswer result);
+
+  void usePartial(StreamResponse validity) {
+    // logger.info("got " + validity);
+  }
+
+  void gotAbort() {
+    logger.warning("gotAbort\n\n\n ");
+  }
+
+  public boolean hasValidAudio() {
+    return validAudio;
   }
 
   protected void hideWaveform() {
   }
 
-  protected void gotShortDurationRecording() {
+  void gotShortDurationRecording() {
+  }
+
+  protected String getDevice() {
+    logger.info("getDevice default " + getClass());
+
+    return controller.getBrowserInfo();
   }
 
   /**
-   * @param base64EncodedWavFile
-   * @see #stopRecording
+   * @param then
+   * @param user
+   * @param exception
    */
-  private void postAudioFile(String base64EncodedWavFile) {
-    reqid++;
-    final long then = System.currentTimeMillis();
-
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    final int user = getUser();
-
-    AudioContext audioContext = new AudioContext(
-        reqid,
-        user,
-        projectStartupInfo.getProjectid(),
-        projectStartupInfo.getLanguage(),
-        getExerciseID(),
-        index,
-        getAudioType());
-
-    //  logger.info("PostAudioRecordButton.postAudioFile : " + getAudioType() + " : " + audioContext);
-
-    DecoderOptions decoderOptions = new DecoderOptions()
-        .setDoDecode(scoreAudioNow)
-        .setDoAlignment(scoreAudioNow)
-        .setRecordInResults(recordInResults)
-        .setRefRecording(shouldAddToAudioTable())
-        .setAllowAlternates(false);
-
-    controller.getAudioService().writeAudioFile(
-        base64EncodedWavFile,
-
-        audioContext,
-
-        false,
-        "browser",
-        controller.getBrowserInfo(),
-        decoderOptions,
-        new AsyncCallback<AudioAnswer>() {
-          public void onFailure(Throwable caught) {
-            onPostFailure(then, user, getExceptionAsString(caught));
-            controller.handleNonFatalError("posting audio", caught);
-          }
-
-          public void onSuccess(AudioAnswer result) {
-            onPostSuccess(result, then);
-          }
-        });
-  }
-
   private void onPostFailure(long then, int user, String exception) {
+    onPostFailure();
+
     long now = System.currentTimeMillis();
     logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis :\n" + exception);
+    showWarning(Validity.INVALID.getPrompt() + "\n" + exception);
+
     logMessage("failed to post audio for " + user + " exercise " + getExerciseID(), true);
-    showPopup(Validity.INVALID.getPrompt());
   }
 
+  /**
+   * TODO : don't do this...
+   */
+  private boolean showing = false;
+
+  private void showWarning(String toShow) {
+    if (!showing) {
+      new ModalInfoDialog("Warning", toShow, hiddenEvent -> showing = false);
+      showing = true;
+    }
+  }
+
+  void onPostFailure() {
+    logger.info("onPostFailure --- !");
+  }
+
+  /**
+   * TODO : fix reqid...
+   *
+   * @param result
+   * @param then
+   * @see #gotPacketResponse
+   */
   private void onPostSuccess(AudioAnswer result, long then) {
     long now = System.currentTimeMillis();
     long roundtrip = now - then;
 
-    //  logger.info("PostAudioRecordButton : onPostSuccess Got audio answer " + result);// + " platform is " + getPlatform());
+    if (DEBUG) {
+      logger.info("PostAudioRecordButton : onPostSuccess Got audio " +
+          "\n\tanswer for " + result.getExid() +
+          "\n\tscore      " + result.getScore() +
+          "\n\troundtrip  " + roundtrip);
+    }
 
-    if (result.getReqid() != reqid) {
+/*    if (result.getReqid() != reqid) {
       logger.info("onPostSuccess ignoring old response " + result);
       return;
-    }
+    }*/
+
     validAudio = (result.getValidity() == Validity.OK || doQuietAudioCheck(result));
 
     if (validAudio) {
       useResult(result);
-      addRT(result, (int) roundtrip);
+      addRT(result.getResultID(), (int) roundtrip);
 
       maybeShowPopup(result.getPretestScore());
     } else {
-      useInvalidResult(result);
+      useInvalidResult(result.getExid(), result.getValidity(), result.getDynamicRange());
     }
 
     if (controller.isLogClientMessages() || roundtrip > LOG_ROUNDTRIP_THRESHOLD) {
-      logRoundtripTime(result, roundtrip);
+      logRoundtripTime(result.getDurationInMillis(), roundtrip);
     }
   }
 
@@ -239,6 +339,22 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
       String toShow = "Status " + pretestScore.getStatus();
       String suffix = pretestScore.getMessage().isEmpty() ? "" : " : " + pretestScore.getMessage();
       showPopup(toShow + suffix);
+    }
+  }
+
+  /**
+   * TODO : consider why we have to do this from the client.
+   *
+   * @param exid
+   * @param validity
+   * @param dynamicRange
+   * @see PostAudioRecordButton#onPostSuccess
+   */
+  protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+    controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + validity);
+    //logger.info("useInvalidResult platform is " + getPlatform());
+    if (!checkAndShowTooLoud(validity)) {
+      showPopup(validity.getPrompt());
     }
   }
 
@@ -256,8 +372,13 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     return controller.getUserState().getUser();
   }
 
-  private void addRT(AudioAnswer result, int roundtrip) {
-    controller.getScoringService().addRoundTrip(result.getResultID(), roundtrip, new AsyncCallback<Void>() {
+  /**
+   * @param resultID
+   * @param roundtrip
+   * @see #onPostSuccess
+   */
+  private void addRT(int resultID, int roundtrip) {
+    controller.getScoringService().addRoundTrip(resultID, roundtrip, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("addRoundTrip", caught);
@@ -275,19 +396,22 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
 
   /**
    * @return
-   * @see #postAudioFile(String)
+   * @see #startRecording
    */
   abstract protected AudioType getAudioType();
 
-  private Widget getOuter() {
+  abstract protected int getDialogSessionID();
+
+  Widget getPopupTargetWidget() {
     return this;
   }
 
-  private void logRoundtripTime(AudioAnswer result, long roundtrip) {
+  private void logRoundtripTime(long durationInMillis, long roundtrip) {
+    //  long durationInMillis = result.getDurationInMillis();
     String message = "PostAudioRecordButton : (success) User #" + getUser() +
         " post audio took " + roundtrip + " millis, audio dur " +
-        result.getDurationInMillis() + " millis, " +
-        " " + ((float) roundtrip / (float) result.getDurationInMillis()) + " roundtrip/audio duration ratio.";
+        durationInMillis + " millis, " +
+        " " + ((float) roundtrip / (float) durationInMillis) + " roundtrip/audio duration ratio.";
     logMessage(message, false);
   }
 
@@ -303,41 +427,13 @@ public abstract class PostAudioRecordButton extends RecordButton implements Reco
     });
   }
 
-  public void startRecording() {
-    LangTest.EVENT_BUS.fireEvent(new PlayAudioEvent(-1));
-    controller.startRecording();
-  }
-
-  /**
-   * TODO : consider why we have to do this from the client.
-   *
-   * @param result
-   * @see PostAudioRecordButton#postAudioFile
-   */
-  protected void useInvalidResult(AudioAnswer result) {
-    controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + result.getValidity());
-    //  logger.info("useInvalidResult platform is " + getPlatform());
-    if (!checkAndShowTooLoud(result.getValidity())) {
-      showPopup(result.getValidity().getPrompt());
-    }
-  }
-
   /**
    * Feedback for when audio isn't valid for some reason.
    *
    * @param toShow
    */
   private void showPopup(String toShow) {
-    new PopupHelper().showPopup(toShow, getOuter(), 3000);
-  }
-
-  /**
-   * @param result
-   * @see #onPostSuccess
-   */
-  public abstract void useResult(AudioAnswer result);
-
-  public boolean hasValidAudio() {
-    return validAudio;
+    //logger.info("showPopup " + toShow + " on " + getExerciseID());
+    new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 3000);
   }
 }

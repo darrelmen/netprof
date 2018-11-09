@@ -6,8 +6,8 @@ import com.google.gwt.event.shared.GwtEvent;
  * Created by go22670 on 11/18/16.
  */
 public class DefectEvent extends GwtEvent<DefectEventHandler> {
-  public static final Type<DefectEventHandler> TYPE = new Type<>();
-  final String source;
+  private static final Type<DefectEventHandler> TYPE = new Type<>();
+  private final String source;
   public DefectEvent(String source) { this.source = source;}
 
   public String getSource() {return source;}

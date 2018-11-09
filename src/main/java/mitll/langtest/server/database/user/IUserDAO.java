@@ -43,18 +43,20 @@ import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface IUserDAO extends IDAO, AutoCloseable {
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   void ensureDefaultUsers();
+
+  boolean isValidServer(String server);
 
   /**
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
@@ -201,21 +203,17 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @param userKey
    * @param newPassword
    * @param url
+   * @param email
    * @return
    * @see
    */
-  boolean changePasswordForToken(String userId, String userKey, String newPassword, String url);
+  boolean changePasswordForToken(String userId, String userKey, String newPassword, String url, String email);
 
   SResult<ClientUserDetail> updateUser(DBUser dbUser);
 
   boolean forgotPassword(String user, String url);
 
-  /**
-   * @param key
-   * @return
-   * @@deprecated
-   */
-  User getUserWithResetKey(String key);
+
 
   /**
    * @return
@@ -246,11 +244,13 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   DBUser getDominoAdminUser();
 
   void setProjectManagement(IProjectManagement projectManagement);
-
+ // List<DBUser> getTeachers();
+  Set<Integer> getTeacherIDs();
+  <T> Map<Integer, T> getJustTeachers(Map<Integer, T> activeSince);
 
   class ReportUsers {
-    private List<ReportUser> allUsers;
-    private List<ReportUser> deviceUsers;
+    private final List<ReportUser> allUsers;
+    private final List<ReportUser> deviceUsers;
 
     ReportUsers(List<ReportUser> allUsers, List<ReportUser> deviceUsers) {
       this.allUsers = allUsers;

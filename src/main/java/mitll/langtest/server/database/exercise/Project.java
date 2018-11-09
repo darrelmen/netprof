@@ -43,16 +43,15 @@ import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.scoring.ASRWebserviceScoring;
-import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.AlignmentOutput;
-import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
-import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -100,6 +99,9 @@ public class Project implements IPronunciationLookup {
   private JsonSupport jsonSupport;
   private SlickAnalysis analysis;
   private AudioFileHelper audioFileHelper;
+  /**
+   * @see #makeItemTrie(List, SmallVocabDecoder)
+   */
   private ExerciseTrie<CommonExercise> fullTrie = null;
   private ExerciseTrie<CommonExercise> fullContextTrie = null;
   private RefResultDecoder refResultDecoder;
@@ -110,6 +112,8 @@ public class Project implements IPronunciationLookup {
   private final Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
 
   private Map<String, Integer> fileToRecorder = new HashMap<>();
+  private List<IDialog> dialogs = new ArrayList();
+  private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
 
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
@@ -169,7 +173,7 @@ public class Project implements IPronunciationLookup {
   }
 
   public boolean isEnglish() {
-    return getLanguage().equalsIgnoreCase("english");
+    return getLanguageEnum() == Language.ENGLISH;//getLanguage().equalsIgnoreCase("english");
   }
 
   private SmallVocabDecoder getSmallVocabDecoder() {
@@ -217,6 +221,21 @@ public class Project implements IPronunciationLookup {
     return types;
   }
 
+  @NotNull
+  public List<String> getBaseTypeOrder() {
+    List<String> typeOrder = new ArrayList<>();
+    SlickProject project1 = getProject();
+    if (!project1.first().isEmpty()) {
+      typeOrder.add(project1.first());
+    } else {
+      logger.error("huh? project " + project + " first type is empty?");
+    }
+    if (!project1.second().isEmpty()) {
+      typeOrder.add(project1.second());
+    }
+    return typeOrder;
+  }
+
   /**
    * @param exerciseDAO
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
@@ -237,6 +256,10 @@ public class Project implements IPronunciationLookup {
     return exerciseDAO == null ? null : exerciseDAO.getSectionHelper();
   }
 
+  public ISection<IDialog> getDialogSectionHelper() {
+    return dialogSectionHelper;
+  }
+
   public void setJsonSupport(JsonSupport jsonSupport) {
     this.jsonSupport = jsonSupport;
   }
@@ -247,7 +270,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    * @param analysis
-   * @see IProjectManagement#configureProject
+   * @see ProjectManagement#configureProject
    */
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
@@ -256,21 +279,26 @@ public class Project implements IPronunciationLookup {
   }
 
   /**
-   *
-   *
+   * @see #setAnalysis(SlickAnalysis)
    */
   private <T extends CommonShell> void buildExerciseTrie() {
     final List<CommonExercise> rawExercises = getRawExercises();
+
     SmallVocabDecoder smallVocabDecoder = getSmallVocabDecoder();
 
-    new Thread(() -> makeItemTrie(Collections.unmodifiableList(rawExercises), smallVocabDecoder)).start();
-    new Thread(() -> makeContextTrie(Collections.unmodifiableList(new ArrayList<>(rawExercises)), smallVocabDecoder)).start();
+    new Thread(() -> makeItemTrie(rawExercises, smallVocabDecoder), "makeFullTrie_" + getID()).start();
+    new Thread(() -> makeContextTrie(rawExercises, smallVocabDecoder), "makeContextTrie_" + getID()).start();
   }
 
+  /**
+   * @param rawExercises
+   * @param smallVocabDecoder
+   * @see #buildExerciseTrie
+   */
   private void makeItemTrie(List<CommonExercise> rawExercises, SmallVocabDecoder smallVocabDecoder) {
     logger.info("buildExerciseTrie : build trie from " + rawExercises.size() + " exercises for " + project);
     long then = System.currentTimeMillis();
-    fullTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, true);
+    fullTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, true, false);
     logger.info("buildExerciseTrie : for " + project.id() + " took " + (System.currentTimeMillis() - then) + " millis to build trie for " + rawExercises.size() + " exercises");
   }
 
@@ -289,7 +317,7 @@ public class Project implements IPronunciationLookup {
       }
 */
     long before = logMemory();
-    fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false);
+    fullContextTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, false, false);
     long after = logMemory();
     logger.info("buildExerciseTrie : END context for " + project.id() + " took " + (System.currentTimeMillis() - then1) + " millis to build context trie for " + rawExercises.size() +
         " exercises, used " + (after - before) + " MB");
@@ -301,7 +329,7 @@ public class Project implements IPronunciationLookup {
   public RecalcRefResponse recalcRefAudio() {
     Collection<CommonExercise> exercisesForUser = getRawExercises();
     logger.info("recalcRefAudio " + project + " for " + exercisesForUser.size() + " exercises.");
-    return refResultDecoder.writeRefDecode(getLanguage(), exercisesForUser, project.id());
+    return refResultDecoder.writeRefDecode(getLanguageEnum(), exercisesForUser, project.id());
   }
 
   public SlickAnalysis getAnalysis() {
@@ -312,8 +340,15 @@ public class Project implements IPronunciationLookup {
     return audioFileHelper;
   }
 
+  /**
+   * @return
+   */
   public ExerciseTrie<CommonExercise> getFullTrie() {
     return fullTrie;
+  }
+
+  public boolean isTrieBuilt() {
+    return fullTrie != null;
   }
 
   ExerciseTrie<CommonExercise> getFullContextTrie() {
@@ -390,7 +425,7 @@ public class Project implements IPronunciationLookup {
     return getProp(SWAP_PRIMARY_AND_ALT).equalsIgnoreCase(TRUE);
   }
 
-  private Map<String, String> propCache = new HashMap<>();
+  private final Map<String, String> propCache = new HashMap<>();
 
   /**
    * Re populate cache really.
@@ -463,8 +498,8 @@ public class Project implements IPronunciationLookup {
    *
    * @param prefix
    * @return
+   * @seex mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
    * @see mitll.langtest.server.ScoreServlet#getExerciseIDFromText
-   * @see mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
    */
   public CommonExercise getExerciseBySearch(String prefix) {
     return getMatchEither(prefix, fullTrie.getExercises(prefix));
@@ -514,7 +549,7 @@ public class Project implements IPronunciationLookup {
         List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(english);
         exercise = getFirstMatchingLength(english, fl, fullContextTrieExercises);
         if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
-          exercise = exercise.getDirectlyRelated().iterator().next();
+          exercise = getFirstContext(exercise);
         }
         logger.info("\tgetExerciseBySearchBoth context looking for '" + english + "' found " + exercise);
       }
@@ -530,14 +565,14 @@ public class Project implements IPronunciationLookup {
         logger.info("\tinitially context num = " + fullContextTrieExercises.size());
         exercise = getMatchEither(english, fl, fullContextTrieExercises);
         if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
-          exercise = exercise.getDirectlyRelated().iterator().next();
+          exercise = getFirstContext(exercise);
         }
         logger.info("\tgetExerciseBySearchBoth context looking for '" + english + " or '" + fl +
             "' found " + exercise);
         if (exercise == null && !fullContextTrieExercises.isEmpty()) {
           exercise = fullContextTrieExercises.iterator().next();
           if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
-            exercise = exercise.getDirectlyRelated().iterator().next();
+            exercise = getFirstContext(exercise);
           }
           logger.info("\tnow returning " + exercise);
         }
@@ -545,6 +580,10 @@ public class Project implements IPronunciationLookup {
 
       return exercise;
     }
+  }
+
+  private CommonExercise getFirstContext(CommonExercise exercise) {
+    return exercise.getDirectlyRelated().iterator().next().asCommon();
   }
 
   private CommonExercise getFirstMatchingLength(String english, String fl, List<CommonExercise> exercises1) {
@@ -595,7 +634,7 @@ public class Project implements IPronunciationLookup {
    * @param transcript
    * @param transliteration
    * @return
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict(SlickExercise, IPronunciationLookup, List)
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict
    */
   @Override
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
@@ -642,6 +681,10 @@ public class Project implements IPronunciationLookup {
     refResultDecoder.ensure(getLanguage(), toAddAudioTo);
   }
 
+  /**
+   * @return
+   * @see mitll.langtest.server.scoring.AlignmentHelper#addAlignmentOutput(int, Project, Collection)
+   */
   public Map<Integer, AlignmentOutput> getAudioToAlignment() {
     return audioToAlignment;
   }
@@ -689,7 +732,7 @@ public class Project implements IPronunciationLookup {
   /**
    * @param testAudioFile
    * @param userIDFromSessionOrDB
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore(int, int, String, String, String, ImageOptions, int, boolean, PrecalcScores, AudioFileHelper, int, int, String)
+   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
    */
   public void addAnswerToUser(String testAudioFile, int userIDFromSessionOrDB) {
     fileToRecorder.put(testAudioFile, userIDFromSessionOrDB);
@@ -709,6 +752,59 @@ public class Project implements IPronunciationLookup {
 
   public String getName() {
     return project.name();
+  }
+
+  public List<IDialog> getDialogs() {
+    return dialogs;
+  }
+
+  public Collection<Integer> getDialogExerciseIDs(int dialogID) {
+    Set<Integer> dialogExercises = new HashSet<>();
+    if (dialogID != -1) {
+      Optional<IDialog> first = getDialogs().stream().filter(iDialog -> iDialog.getID() == dialogID).findFirst();
+      if (first.isPresent()) {
+        first.get().getExercises().forEach(clientExercise -> dialogExercises.add(clientExercise.getID()));
+        first.get().getCoreVocabulary().forEach(clientExercise -> dialogExercises.add(clientExercise.getID()));
+      } else logger.warn("can't find dialog " + dialogID);
+    }
+    return dialogExercises;
+  }
+
+  /**
+   * @param dialogs
+   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogInfo
+   */
+  public void setDialogs(List<IDialog> dialogs) {
+    this.dialogs = dialogs;
+
+    List<List<Pair>> seen = new ArrayList<>();
+    List<String> typeOrder = getTypeOrder();
+
+    String unitType = typeOrder.size() > 0 ? typeOrder.get(0) : "";
+    boolean hasUnitType = !unitType.isEmpty();
+
+    String chapterType = typeOrder.size() > 1 ? typeOrder.get(1) : "";
+    boolean hasChapterType = !chapterType.isEmpty();
+
+    dialogs.forEach(dialog -> {
+      List<Pair> pairs = new ArrayList<>();
+      String unit = dialog.getUnit();
+      if (!unit.isEmpty() && hasUnitType) {
+        pairs.add(new Pair(unitType, unit));
+      }
+
+      String chapter = dialog.getChapter();
+      if (!chapter.isEmpty() && hasChapterType) {
+        pairs.add(new Pair(chapterType, chapter));
+      }
+
+      pairs.addAll(dialog.getAttributes());
+      this.dialogSectionHelper.addPairs(dialog, pairs);
+
+      seen.add(pairs);
+    });
+
+    dialogSectionHelper.rememberTypesInOrder(typeOrder, seen);
   }
 
   public String toString() {

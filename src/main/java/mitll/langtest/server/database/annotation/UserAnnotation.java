@@ -40,8 +40,8 @@ public class UserAnnotation {
   private final String status;
   private final String comment;
   private long creatorID;
-  private long timestamp;
-  private String oldExID;
+  private final long timestamp;
+  private final String oldExID;
 
   public UserAnnotation(int exerciseID, String field, String status, String comment, long userID, long timestamp) {
     this(exerciseID, field, status, comment, userID, timestamp, "" + exerciseID);
@@ -58,7 +58,7 @@ public class UserAnnotation {
    * @paramx uniqueID
    * @see AnnotationDAO#getUserAnnotations(String)
    */
-  public UserAnnotation(int exerciseID, String field, String status, String comment, long userID, long timestamp, String oldExID) {
+   UserAnnotation(int exerciseID, String field, String status, String comment, long userID, long timestamp, String oldExID) {
     this.exerciseID = exerciseID;
     this.field = field;
     this.status = status;
@@ -93,9 +93,9 @@ public class UserAnnotation {
     return timestamp;
   }
 
-  public void setTimestamp(long timestamp) {
+/*  public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
-  }
+  }*/
 
   public void setCreatorID(Integer creatorID) {
     this.creatorID = (long) creatorID;

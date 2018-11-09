@@ -14,8 +14,7 @@ import mitll.langtest.client.custom.dialog.WordBoundsFactory;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -24,7 +23,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class ClickableWords<T extends CommonShell> {
+public class ClickableWords {
   private final Logger logger = Logger.getLogger("ClickableWords");
   private static final String SEARCHMATCH = "searchmatch";
 
@@ -38,7 +37,8 @@ public class ClickableWords<T extends CommonShell> {
   private boolean isJapanese = false;
   private boolean isUrdu = false;
 
-  //private T exercise;
+  private int exercise;
+
   private boolean hasClickableAsian = false;
   private static final String MANDARIN = "Mandarin";
   private static final String JAPANESE = "Japanese";
@@ -48,8 +48,8 @@ public class ClickableWords<T extends CommonShell> {
   private int fontSize;
 
   private static final boolean DEBUG = false;
-  //private boolean showPhones = true;
-  private  int exerciseID;
+  private String highlightColor;
+
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
    */
@@ -58,45 +58,48 @@ public class ClickableWords<T extends CommonShell> {
 
   /**
    * @param listContainer
-   * @param exerciseID
+   * @param exercise
    * @param language
    * @param fontSize
-   * @see TwoColumnExercisePanel#addWidgets
+   * @param highlightColor
+   * @see RefAudioGetter#addWidgets
    */
-  public ClickableWords(ListInterface listContainer, int exerciseID, String language, int fontSize) {
+  public ClickableWords(ListInterface listContainer, int exercise, String language, int fontSize, String highlightColor) {
     this.listContainer = listContainer;
-    this.exerciseID = exerciseID;
+    this.exercise = exercise;
+    this.highlightColor = highlightColor;
+
     isJapanese = language.equalsIgnoreCase(JAPANESE);
     isUrdu = language.equalsIgnoreCase("Urdu");
-    this.hasClickableAsian = language.equalsIgnoreCase(MANDARIN) || language.equalsIgnoreCase(Language.KOREAN.name()) || isJapanese;
+    this.hasClickableAsian =
+        language.equalsIgnoreCase(MANDARIN) ||
+            //  language.equalsIgnoreCase(Language.KOREAN.name()) ||
+            isJapanese;
     this.fontSize = fontSize;
-    //  this.showPhones = showPhones;
   }
 
   /**
    * Split the value into tokens, and make each one clickable - so we can search on it.
    *
    * @param value
+   * @param fieldType  fl, meaning, english, etc.
    * @param clickables
-   * @param isSimple
    * @param isRTL
-   * @see TwoColumnExercisePanel#getEntry
+   * @see DialogExercisePanel#getFLEntry(ClientExercise)
+   * @see TwoColumnExercisePanel#getFLEntry
    */
   DivWidget getClickableWords(String value,
-                              TwoColumnExercisePanel.FieldType fieldType,
+                              FieldType fieldType,
                               List<IHighlightSegment> clickables,
-                              boolean isSimple,
                               boolean isRTL) {
-    boolean isFL = fieldType == TwoColumnExercisePanel.FieldType.FL;
-    boolean flLine = isFL || (isJapanese && fieldType == TwoColumnExercisePanel.FieldType.TRANSLIT);
+    boolean flLine = fieldType == FieldType.FL || (isJapanese && fieldType == FieldType.TRANSLIT);
     boolean isChineseCharacter = flLine && hasClickableAsian;
     HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL :
         WordCountDirectionEstimator.get().estimateDirection(value);
 
-    // boolean addRight = (isSimple && !isChineseCharacter) || addRightMargin;
     return getClickableDiv(
         getTokens(value, isChineseCharacter),
-        getSearchTokens(isChineseCharacter), isSimple, dir, clickables, fieldType);
+        getSearchTokens(isChineseCharacter), dir, clickables, fieldType);
   }
 
   @NotNull
@@ -107,7 +110,6 @@ public class ClickableWords<T extends CommonShell> {
   /**
    * @param tokens
    * @param searchTokens
-   * @param isSimple
    * @param dir
    * @param clickables
    * @param fieldType
@@ -117,10 +119,9 @@ public class ClickableWords<T extends CommonShell> {
   @NotNull
   private DivWidget getClickableDiv(List<String> tokens,
                                     List<String> searchTokens,
-                                    boolean isSimple,
                                     HasDirection.Direction dir,
                                     List<IHighlightSegment> clickables,
-                                    TwoColumnExercisePanel.FieldType fieldType
+                                    FieldType fieldType
   ) {
     List<IHighlightSegment> segmentsForTokens = getSegmentsForTokens(tokens, searchTokens, dir, fieldType);
     clickables.addAll(segmentsForTokens);
@@ -136,11 +137,9 @@ public class ClickableWords<T extends CommonShell> {
    * @return
    */
   private List<IHighlightSegment> getSegmentsForTokens(List<String> tokens,
-
                                                        List<String> searchTokens,
-
                                                        HasDirection.Direction dir,
-                                                       TwoColumnExercisePanel.FieldType fieldType) {
+                                                       FieldType fieldType) {
     List<IHighlightSegment> segments = new ArrayList<>();
     int id = 0;
     Iterator<String> searchIterator = searchTokens.iterator();
@@ -169,12 +168,11 @@ public class ClickableWords<T extends CommonShell> {
    * @param segmentsForTokens
    * @param isRTL
    * @return a clickable row
-   * @see #getClickableDiv(List, List, boolean, HasDirection.Direction, List, TwoColumnExercisePanel.FieldType)
+   * @see #getClickableDiv(List, List, HasDirection.Direction, List, FieldType)
    */
   @NotNull
   private DivWidget getClickableDivFromSegments(List<IHighlightSegment> segmentsForTokens, boolean isRTL) {
     DivWidget horizontal = getClickableDiv(isRTL);
-    // horizontal.getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
     horizontal.getElement().setId(CLICKABLE_ROW);
 
 /*
@@ -196,7 +194,6 @@ public class ClickableWords<T extends CommonShell> {
 
 /*
   private static boolean didIt = false;
-
   public native boolean intercept() */
 /*-{
       var clipboard =
@@ -237,21 +234,20 @@ public class ClickableWords<T extends CommonShell> {
    * @param contextSentence
    * @param highlight
    * @param clickables
-   * @param addClickableProps
    * @return
    * @see TwoColumnExercisePanel#getContext
    */
-  public DivWidget getClickableWordsHighlight(String contextSentence,
-                                              String highlight,
-                                              TwoColumnExercisePanel.FieldType fieldType,
-                                              List<IHighlightSegment> clickables, boolean addClickableProps) {
+ public DivWidget getClickableWordsHighlight(String contextSentence,
+                                       String highlight,
+                                       FieldType fieldType,
+                                       List<IHighlightSegment> clickables, boolean addClickableProps) {
     DivWidget horizontal = new DivWidget();
 
     horizontal.getElement().setId("clickableWordsHighlightRow");
     horizontal.setWidth("100%");
 
-    boolean isFL = fieldType == TwoColumnExercisePanel.FieldType.FL;
-    boolean flLine = isFL || (isJapanese && fieldType == TwoColumnExercisePanel.FieldType.TRANSLIT);
+    boolean isFL = fieldType == FieldType.FL;
+    boolean flLine = isFL || (isJapanese && fieldType == FieldType.TRANSLIT);
     boolean isChineseCharacter = flLine && hasClickableAsian;
 
     List<String> tokens = getTokens(contextSentence, isChineseCharacter);
@@ -276,11 +272,11 @@ public class ClickableWords<T extends CommonShell> {
     HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(contextSentence);
 
     if (DEBUG) {
-      logger.info("getClickableWordsHighlight exercise " + exerciseID+ " dir " + dir +
+      logger.info("getClickableWordsHighlight exercise " + exercise + " dir " + dir +
           " isfL " + fieldType);
     }
     if ((dir == HasDirection.Direction.RTL) && isFL) {
-      if (DEBUG) logger.info("exercise " + exerciseID + " is RTL ");
+      if (DEBUG) logger.info("\texercise " + exercise + " is RTL ");
       setDirection(horizontal);
     }
     int id = 0;
@@ -397,7 +393,7 @@ public class ClickableWords<T extends CommonShell> {
    * @param longer
    * @param shorter
    * @return
-   * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
+   * @see #getClickableWordsHighlight
    * @see #getMatchingHighlightAll
    * @see #makeClickableText
    */
@@ -419,22 +415,28 @@ public class ClickableWords<T extends CommonShell> {
     }
   }
 
-  private boolean isSearchMatch(String first, String search) {
-    if (search == null || search.isEmpty()) {
+  boolean isSearchMatch(String first, String toSearchFor) {
+    if (toSearchFor == null || toSearchFor.isEmpty()) {
       return false;
     } else {
       String context = removePunct(first.toLowerCase());
-      String lcSearch = removePunct(search.toLowerCase());
+      String lcSearch = removePunct(toSearchFor.toLowerCase());
       return (context.contains(lcSearch));
     }
+  }
+
+  boolean isExactMatch(String first, String toSearchFor) {
+    String context = removePunct(first.toLowerCase());
+    String lcSearch = removePunct(toSearchFor.toLowerCase());
+    return (context.equalsIgnoreCase(lcSearch));
   }
 
   /**
    * @param value
    * @param isChineseCharacter
    * @return
-   * @see #getClickableWords(String, TwoColumnExercisePanel.FieldType, List, boolean, boolean)
-   * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
+   * @seex #getClickableWords(String, TwoColumnExercisePanel.FieldType, List, boolean, boolean)
+   * @seex #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
    */
   @NotNull
   private List<String> getTokens(String value, boolean isChineseCharacter) {
@@ -452,8 +454,8 @@ public class ClickableWords<T extends CommonShell> {
     return tokens;
   }
 
-  public boolean isRTL(T exercise) {
-    return isRTLContent(exercise.getForeignLanguage());
+  public boolean isRTL(String fl) {
+    return isRTLContent(fl);
   }
 
   private boolean isRTLContent(String content) {
@@ -463,8 +465,10 @@ public class ClickableWords<T extends CommonShell> {
   /**
    * @param dir            text direction
    * @param html           a token that can be clicked on to search on it
+   * @param searchToken
    * @param isContextMatch
-   * @param id
+   * @param id             to label highlight segment
+   * @param fieldType      if meaning, use english font, if FL, choose the font
    * @param addClickableProps
    * @return
    * @see #getClickableWords
@@ -476,30 +480,22 @@ public class ClickableWords<T extends CommonShell> {
       String searchToken,
       boolean isContextMatch,
       int id,
-      TwoColumnExercisePanel.FieldType fieldType, boolean addClickableProps) {
+      FieldType fieldType,
+      boolean addClickableProps) {
     final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir,
-
         false,
-        false);
+        false,
+        highlightColor);
 
     HTML highlightSegment = highlightSegmentDiv.getClickable();
-    if (fieldType == TwoColumnExercisePanel.FieldType.FL) {
-      if (dir == HasDirection.Direction.RTL) {
-        String bigflfont = "bigflfont";
-        if (isUrdu) bigflfont = "urdubigflfont";
-        highlightSegment.addStyleName(bigflfont);
-      } else {
-        highlightSegment.addStyleName("flfont");
-        if (fontSize != 24) {
-          highlightSegment.getElement().getStyle().setFontSize(fontSize, Style.Unit.PX);
-        }
-      }
+    if (fieldType == FieldType.FL) {
+      setFont(dir, highlightSegment);
     } else {
       highlightSegment.addStyleName("Instruction-data-with-wrap-keep-word");
     }
 
     if (isContextMatch) highlightSegment.addStyleName(CONTEXTMATCH);
-    if (fieldType == TwoColumnExercisePanel.FieldType.MEANING) highlightSegment.addStyleName("englishFont");
+    if (fieldType == FieldType.MEANING) highlightSegment.addStyleName("englishFont");
 
     if (searchToken != null) {
       showSearchMatch(dir, html, highlightSegment, searchToken);
@@ -521,9 +517,27 @@ public class ClickableWords<T extends CommonShell> {
   private void addClickableProperties(HTML highlightSegment, String removePunct) {
     highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
     highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
-    //highlightSegment.addClickHandler(clickEvent -> putTextInSearchBox(removePunct));
     highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
     highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
+  }
+
+  /**
+   * Use bigflfont for RTL.
+   * @param dir
+   * @param highlightSegment
+   */
+  private void setFont(HasDirection.Direction dir, HTML highlightSegment) {
+    if (dir == HasDirection.Direction.RTL) {
+      String bigflfont = isUrdu ? "urdubigflfont" : "bigflfont";
+      highlightSegment.addStyleName(bigflfont);
+    } else {
+      highlightSegment.addStyleName("flfont");
+      if (fontSize != 24) {
+        Style style = highlightSegment.getElement().getStyle();
+        style.setFontSize(fontSize, Style.Unit.PX);
+        style.setLineHeight(fontSize+8, Style.Unit.PX);
+      }
+    }
   }
 
   /**
@@ -539,7 +553,10 @@ public class ClickableWords<T extends CommonShell> {
     WordBounds wordBounds = factory.findNextWord(html.toLowerCase(), toFind, 0);
 
     if (wordBounds == null) {
-      logger.warning("\n\n\nshowSearchMatch can't find  '" + searchToken + "' in '" + html + "'");
+      logger.warning("showSearchMatch can't find " +
+          "\n\ttoken '" + searchToken + "' " +
+          "\n\tin    '" + html + "'");
+
       w.addStyleName(SEARCHMATCH);
     } else {
       // logger.info("showSearchMatch word bounds " + wordBounds + " for '" + searchToken + "' in '" + html + "'");
@@ -566,7 +583,9 @@ public class ClickableWords<T extends CommonShell> {
     String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
     String s2 = s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
     // logger.info("putTextInSearchBox after    " + s2);
-    listContainer.searchBoxEntry(s2);
+    if (listContainer != null) {
+      listContainer.searchBoxEntry(s2);
+    }
   }
 
   /**
@@ -590,6 +609,7 @@ public class ClickableWords<T extends CommonShell> {
         .replaceAll(GoodwaveExercisePanel.SPACE_REGEX, "")
         .replaceAll("\\u00ED", "i")
         // .replaceAll("\\u00E9", "\\u0435")
+
         .replaceAll("[\\u0301\\u0022\\u0027\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u300A\\u300B\\u003F\\u00BF\\u002E\\u002C\\u002D\\u0021\\u20260\\u005C\\u2013\\u2019]", "");
   }
 }

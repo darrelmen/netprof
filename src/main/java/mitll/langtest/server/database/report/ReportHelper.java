@@ -7,7 +7,6 @@ import mitll.langtest.server.database.IReport;
 import mitll.langtest.server.database.ReportStats;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.project.ProjectProperty;
@@ -42,7 +41,6 @@ public class ReportHelper {
                       PathHelper pathHelper,
                       MailSupport mailSupport) {
     this.services = services;
-
     this.projectDAO = projectDAO;
     this.userDAO = userDAO;
     this.pathHelper = pathHelper;
@@ -65,6 +63,7 @@ public class ReportHelper {
   public void sendReports(IReport report) {
     sendReports(report, false, -1);
   }
+
 
 
   /**
@@ -101,6 +100,7 @@ public class ReportHelper {
     thread.start();
   }
 */
+
   public boolean isTodayAGoodDay() {
     return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;
   }

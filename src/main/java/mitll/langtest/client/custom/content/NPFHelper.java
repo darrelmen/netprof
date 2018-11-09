@@ -33,25 +33,26 @@
 package mitll.langtest.client.custom.content;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.banner.NewContentChooser;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.QCNPFExercise;
-import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -64,7 +65,7 @@ import java.util.logging.Logger;
  * Time: 3:27 PM
  * To change this template use File | Settings | File Templates.
  */
-public class NPFHelper implements RequiresResize {
+public class NPFHelper<T extends CommonShell, U extends ClientExercise> implements RequiresResize, IListenView {
   private final Logger logger = Logger.getLogger("NPFHelper");
 
   public static final String LIST_COMPLETE = "List complete!";
@@ -72,20 +73,19 @@ public class NPFHelper implements RequiresResize {
 
   final ExerciseController controller;
 
-  PagingExerciseList<CommonShell, CommonExercise> npfExerciseList = null;
-  private final boolean showQC;
+  PagingExerciseList<T, U> npfExerciseList = null;
+  //private final boolean showQC;
   private final boolean showFirstNotCompleted;
 
   /**
    * TODO : remove showQC
    *
    * @param controller
-   * @param showQC
    * @see ReviewItemHelper#ReviewItemHelper(ExerciseController)
    */
-  NPFHelper(ExerciseController controller, boolean showQC, boolean showFirstNotCompleted) {
+  NPFHelper(ExerciseController controller, boolean showFirstNotCompleted) {
     this.controller = controller;
-    this.showQC = showQC;
+    // this.showQC = showQC;
     this.showFirstNotCompleted = showFirstNotCompleted;
   }
 
@@ -99,10 +99,10 @@ public class NPFHelper implements RequiresResize {
    * @return
    * @see NewContentChooser#getReviewList
    */
-  public Panel doNPF(UserList<CommonShell> ul, String instanceName, boolean loadExercises, HasID toSelect) {
+  public Panel doNPF(UserList<T> ul, INavigation.VIEWS instanceName, boolean loadExercises, HasID toSelect) {
     logger.info(getClass() + " : doNPF instanceName = " + instanceName + " for list " + ul + " of size " + loadExercises);
 
-    Panel hp = doInternalLayout(ul, instanceName);
+    Panel hp = doInternalLayout(ul.getID(), instanceName);
     if (loadExercises) {
       rememberAndLoadFirstFromUserList(ul, toSelect);
     } else {
@@ -114,12 +114,12 @@ public class NPFHelper implements RequiresResize {
   /**
    * Left and right components
    *
-   * @param ul
+   * @param userListID
    * @param instanceName
    * @return
    * @see #doNPF
    */
-  Panel doInternalLayout(UserList<CommonShell> ul, String instanceName) {
+  Panel doInternalLayout(int userListID, INavigation.VIEWS instanceName) {
 //    logger.info(getClass() + " : doInternalLayout instanceName = " + instanceName + " for list " + ul);
     // row 1
     Panel hp = new HorizontalPanel();
@@ -132,11 +132,11 @@ public class NPFHelper implements RequiresResize {
     hp.add(left);
 
     // right side
-    hp.add(getRightSideContent(ul, instanceName));
+    hp.add(getRightSideContent(instanceName));
 
     // this must come here!
     if (npfExerciseList == null) {
-      logger.warning("huh? exercise list is null for " + instanceName + " and " + ul);
+      logger.warning("huh? exercise list is null for " + instanceName + " and " + userListID);
     } else {
       left.add(npfExerciseList.getExerciseListOnLeftSide());
     }
@@ -144,12 +144,12 @@ public class NPFHelper implements RequiresResize {
     return hp;
   }
 
-  private Panel getRightSideContent(UserList<CommonShell> ul, String instanceName) {
+  private Panel getRightSideContent(INavigation.VIEWS instanceName) {
     Panel npfContentPanel = new SimplePanel();
     npfContentPanel.addStyleName("floatRight");
     npfContentPanel.getElement().setId("internalLayout_RightContent");
 
-    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName + "_" + ul.getID(), showFirstNotCompleted);
+    npfExerciseList = makeNPFExerciseList(npfContentPanel, instanceName, showFirstNotCompleted);
     return npfContentPanel;
   }
 
@@ -160,11 +160,11 @@ public class NPFHelper implements RequiresResize {
    * @return
    * @see ##getRightSideContent
    */
-  private PagingExerciseList<CommonShell, CommonExercise> makeNPFExerciseList(Panel right, String instanceName, boolean showFirstNotCompleted) {
+  private PagingExerciseList<T, U> makeNPFExerciseList(Panel right, INavigation.VIEWS instanceName, boolean showFirstNotCompleted) {
     //  logger.info("got " + getClass() + " instance " + instanceName+ " show first " + showFirstNotCompleted);
-    final PagingExerciseList<CommonShell, CommonExercise> exerciseList =
+    final PagingExerciseList<T, U> exerciseList =
         makeExerciseList(right, new ListOptions().setInstance(instanceName).setShowFirstNotCompleted(showFirstNotCompleted));
-    setFactory(exerciseList, instanceName, showQC);
+    setFactory(exerciseList, instanceName);
     Scheduler.get().scheduleDeferred(exerciseList::onResize);
     return exerciseList;
   }
@@ -176,13 +176,13 @@ public class NPFHelper implements RequiresResize {
    * @param toSelect for now just the id?
    * @see #doNPF
    */
-  private void rememberAndLoadFirstFromUserList(final UserList<CommonShell> ul, HasID toSelect) {
+  private void rememberAndLoadFirstFromUserList(final UserList<T> ul, HasID toSelect) {
     npfExerciseList.setUserListID(ul.getID());
 
-    List<CommonShell> copy = new ArrayList<>(ul.getExercises());
+    List<T> copy = new ArrayList<>(ul.getExercises());
 
     int id = toSelect == null ? -1 : toSelect.getID();
-   // logger.info("rememberAndLoadFirstFromUserList " + copy.size() + " exercises for " + id);
+    // logger.info("rememberAndLoadFirstFromUserList " + copy.size() + " exercises for " + id);
     npfExerciseList.rememberAndLoadFirst(copy, "", "", id);
     npfExerciseList.setWidth("270px");
     npfExerciseList.getElement().getStyle().setProperty("minWidth", "270px");
@@ -194,50 +194,45 @@ public class NPFHelper implements RequiresResize {
    * @return
    * @see #makeNPFExerciseList
    */
-  private PagingExerciseList<CommonShell, CommonExercise> makeExerciseList(final Panel right, ListOptions listOptions) {
+  private PagingExerciseList<T, U> makeExerciseList(final Panel right, ListOptions listOptions) {
     return new NPExerciseList(right, controller, listOptions, -1);
   }
 
   /**
    * @param exerciseList
    * @param instanceName
-   * @param showQC
    * @see #makeNPFExerciseList(Panel, String, boolean)
    */
-  private void setFactory(final PagingExerciseList<CommonShell, CommonExercise> exerciseList, final String instanceName, boolean showQC) {
-    exerciseList.setFactory(getFactory(exerciseList, instanceName, showQC));
+  private void setFactory(final PagingExerciseList<T, U> exerciseList, final INavigation.VIEWS instanceName) {
+    exerciseList.setFactory(getFactory(exerciseList, instanceName));
   }
 
-  private ExercisePanelFactory<CommonShell, CommonExercise> getFactory(
-      final PagingExerciseList<CommonShell, CommonExercise> exerciseList,
-      final String instanceName,
-      final boolean showQC) {
-    return new ExercisePanelFactory<CommonShell, CommonExercise>(controller, exerciseList) {
-      private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
-
+  private ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList, final INavigation.VIEWS instanceName) {
+    return new ExercisePanelFactory<T, U>(controller, exerciseList) {
       @Override
-      public Panel getExercisePanel(CommonExercise e) {
-        if (showQC) {
-          return new QCNPFExercise<>(e, controller, exerciseList, instanceName);
-        } else {
-          TwoColumnExercisePanel<CommonExercise> widgets = new TwoColumnExercisePanel<>(e,
-              controller,
-              exerciseList,
-              alignments, true);
-          widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
-
-          return widgets;
-        }
+      public Panel getExercisePanel(U e) {
+        return new QCNPFExercise<U>(e, controller, exerciseList, instanceName);
       }
     };
+  }
+
+  @Override
+  public int getVolume() {
+    return 100;
+  }
+
+  @Override
+  public int getDialogSessionID() {
+    return -1;
   }
 
   @Override
   public void onResize() {
     if (npfExerciseList != null) {
       npfExerciseList.onResize();
-    } else {
-      //logger.info("no exercise list " +instanceName + "  for " + getClass());
     }
+    //else {
+      //logger.info("no exercise list " +instanceName + "  for " + getClass());
+    //}
   }
 }

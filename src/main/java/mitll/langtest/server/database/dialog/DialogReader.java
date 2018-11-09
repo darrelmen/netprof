@@ -1,0 +1,434 @@
+package mitll.langtest.server.database.dialog;
+
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.dialog.Dialog;
+import mitll.langtest.shared.dialog.DialogStatus;
+import mitll.langtest.shared.dialog.DialogType;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.npdata.dao.SlickDialog;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static mitll.langtest.shared.dialog.IDialog.METADATA.FLTITLE;
+
+class DialogReader {
+  private static final Logger logger = LogManager.getLogger(DialogReader.class);
+
+  /**
+   * @param defaultUser
+   * @param exToAudio
+   * @param project
+   * @param dialogProps
+   * @param coreVocabs
+   * @return
+   * @see EnglishDialog#getDialogs(int, int, Map, Project)
+   * @see KPDialogs#getDialogs(int, int, Map, Project)
+   */
+  @NotNull
+  Map<Dialog, SlickDialog> getDialogsByProp(int defaultUser,
+                                            Map<ClientExercise, String> exToAudio,
+                                            Project project,
+                                            DialogProps dialogProps, List<String> coreVocabs) {
+    int projID = project.getID();
+    String[] docs = dialogProps.docIDS.split("\n");
+    String[] titles = dialogProps.title.split("\n");
+    String[] ktitles = dialogProps.fltitle.split("\n");
+
+    String[] units = dialogProps.unit.split("\n");
+    String[] chapters = dialogProps.chapter.split("\n");
+    String[] pages = dialogProps.page.split("\n");
+    String[] topics = dialogProps.pres.split("\n");
+    String[] dirs = dialogProps.dir.split("\n");
+
+    Timestamp modified = new Timestamp(System.currentTimeMillis());
+
+    Map<Dialog, SlickDialog> dialogToSlick = new HashMap<>();
+    String dialogDataDir = getDialogDataDir(project);
+    String projectLanguage = project.getLanguage().toLowerCase();
+    String imageBaseDir = IDialogReader.IMAGES + projectLanguage + File.separator;
+
+    List<CVMatch> cvs = getCVs(coreVocabs, project);
+    for (int i = 0; i < docs.length; i++) {
+      String dir = dirs[i];
+
+      CVMatch cvMatch = i < cvs.size() ? cvs.get(i) : null;
+      //  logger.info("Dir " + dir);
+      String imageRef = imageBaseDir + dir + File.separator + dir + IDialogReader.JPG;
+      String unit = units[i];
+      String chapter = chapters[i];
+      List<ExerciseAttribute> attributes = getExerciseAttributes(pages[i], topics[i]);
+
+      List<ClientExercise> exercises = new ArrayList<>();
+      Set<ClientExercise> coreExercises = new TreeSet<>();
+
+      String dirPath = dialogDataDir + dir;
+      File loc = new File(dirPath);
+      boolean directory = loc.isDirectory();
+      if (!directory) logger.warn("huh? not a dir");
+
+      List<String> sentences = new ArrayList<>();
+      List<String> audio = new ArrayList<>();
+
+      Map<String, Path> sentenceToFile = new HashMap<>();
+      List<String> orientations = new ArrayList<>();
+      try {
+        String absolutePath = loc.getAbsolutePath();
+        logger.info("looking in " + absolutePath);
+
+        try (Stream<Path> paths = Files.walk(Paths.get(absolutePath))) {
+          paths
+              .filter(Files::isRegularFile)
+              .forEach(file -> {
+                if (file.getFileName().toString().endsWith("~")) {
+                  logger.info("skip tilde - " + file);
+                } else {
+                  logger.info(dir + " found " + file);
+                  String fileName = file.getFileName().toString();
+                  String[] parts = fileName.split("_");
+                  if (fileName.endsWith("jpg")) {
+//                  logger.info("skip dialog image " + fileName);
+                  } else if (fileName.endsWith(".wav")) {
+                    //              logger.info("audio " + fileName);
+                    String relPath = projectLanguage + File.separator + dir + File.separator + fileName;
+                    logger.info("audio rel path " + relPath);
+
+                    audio.add(relPath);
+                  } else if (fileName.endsWith(".txt") && parts.length == 3) { // slickDialog.g. 010_C01_00.txt
+                    logger.info(dir + " text " + fileName);
+                    sentences.add(fileName);
+                    sentenceToFile.put(fileName, file);
+                  }
+                }
+              });
+        }
+
+        audio.sort(Comparator.comparingInt(this::getIndex));
+        sentences.sort(Comparator.comparingInt(this::getIndex));
+
+        logger.info(dir + " found audio      " + audio.size());
+        logger.info(dir + " found sentences  " + sentences.size());
+
+        Set<String> speakers = new LinkedHashSet<>();
+
+        sentences.forEach(file -> {
+          Path path = sentenceToFile.get(file);
+          int index = getIndex(path.toString());
+          // logger.info("sentence " + file);
+          // logger.info("path     " + path.toString());
+          // logger.info("index    " + index);
+
+          String fileText = getTextFromFile(path);
+
+          if (index == 0) {
+            orientations.add(fileText);
+          } else {
+            ClientExercise exercise = getExercise(attributes, speakers, path, fileText, unit, chapter, project.getTypeOrder());
+
+            int exindex = exercises.size();
+            String audioFile = audio.size() > exindex ? audio.get(exindex) : null;
+            if (audioFile != null) {
+              exToAudio.put(exercise, IDialogReader.DIALOG + File.separator + audioFile);
+            }
+
+            while (!project.isTrieBuilt()) {
+              logger.info("wait for trie...");
+              try {
+                Thread.sleep(2000);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
+            }
+            //   logger.info(" trie ready...");
+
+            if (cvMatch == null) {
+              // if we don't have core vocab defined for a dialog, try to find matches in netprof
+              addCoreWords(project, coreExercises, exercise);
+            } else {
+              coreExercises.addAll(cvMatch.getNetprofEntries());
+
+              logger.info("for dialog " + dir + " adding " + cvMatch.getNetprofEntries().size() + " : ");
+
+            }
+            exercises.add(exercise);
+//            logger.info("Ex " + exercise.getOldID() + " " + exercise.getUnitToValue());
+          }
+        });
+
+        // add speaker attributes
+        addSpeakerAttrbutes(attributes, speakers);
+      } catch (IOException e) {
+        logger.error("got " + e, e);
+      }
+
+      String orientation = orientations.get(0);
+      String title = titles[i];
+
+      List<ExerciseAttribute> dialogAttr = new ArrayList<>(attributes);
+      String fltitle = ktitles[i];
+      dialogAttr.add(new ExerciseAttribute(FLTITLE.toString().toLowerCase(), fltitle, false));
+
+      SlickDialog slickDialog = new SlickDialog(-1,
+          defaultUser,
+          projID,
+          -1,
+          -1,
+          modified,
+          modified,
+          unit, chapter,
+          DialogType.DIALOG.toString(),
+          DialogStatus.DEFAULT.toString(),
+          title,
+          orientation
+      );
+
+      Dialog dialog = new Dialog(-1, defaultUser, projID, -1, -1, modified.getTime(),
+          unit, chapter,
+          orientation,
+          imageRef,
+          fltitle,
+          title,
+
+          dialogAttr,
+          exercises,
+          new ArrayList<>(coreExercises));
+
+      dialogToSlick.put(dialog, slickDialog);
+      // logger.info("read " + dialog);
+      //    dialog.getExercises().forEach(logger::info);
+      //logger.info("\tex   " + dialog.getExercises());
+      // logger.info("\tattr " + dialog.getAttributes());
+      //  dialog.getAttributes().forEach(logger::info);
+    }
+
+    logger.info("ex to audio now " + exToAudio.size());
+    return dialogToSlick;
+  }
+
+  private List<CVMatch> getCVs(List<String> coreVocabs, Project project) {
+    List<CVMatch> cvs = new ArrayList<>(coreVocabs.size());
+
+//    Set<CommonExercise> coreExercises=new HashSet<>();
+    coreVocabs.forEach(raw -> {
+      Set<CommonExercise> coreExercises = new HashSet<>();
+      CVMatch cvMatch = new CVMatch(coreExercises);
+      cvs.add(cvMatch);
+      String[] split = raw.split("\n");
+      List<String> rawEntries = Arrays.asList(split);
+      rawEntries.forEach(rawEntry -> {
+        String entry = rawEntry.trim();
+
+        CommonExercise exerciseBySearch = project.getExerciseBySearch(entry);
+
+        if (exerciseBySearch != null) {
+          remember(coreExercises, entry, exerciseBySearch);
+        } else {
+          logger.warn("getCVs can't find token '" + entry + "'");
+
+          // remove things in parens
+          entry = entry.replaceAll("\\([^()]*\\)", "");
+          exerciseBySearch = project.getExerciseBySearch(entry);
+
+          if (exerciseBySearch == null) {
+            logger.warn("getCVs 1 can't find token '" + entry + "'");
+
+            String[] split1 = entry.split("\\/");
+            if (split1.length > 1) {
+              entry = split1[0].trim();
+              exerciseBySearch = project.getExerciseBySearch(entry);
+              if (exerciseBySearch == null) {
+                logger.warn("getCVs 2 can't find token '" + entry + "'");
+
+                entry = entry.replaceAll("~", "").trim();
+                exerciseBySearch = project.getExerciseBySearch(entry);
+                if (exerciseBySearch == null) {
+                  logger.warn("getCVs 3 can't find token '" + entry + "'");
+                } else {
+                  remember(coreExercises, entry, exerciseBySearch);
+                }
+              } else {
+                remember(coreExercises, entry, exerciseBySearch);
+              }
+            }
+
+          } else {
+            remember(coreExercises, entry, exerciseBySearch);
+          }
+
+        }
+      });
+    });
+    return cvs;
+  }
+
+  private void remember(Set<CommonExercise> coreExercises, String entry, CommonExercise exerciseBySearch) {
+    logger.info("getCVs : core vocab '" + entry + "' = '" + exerciseBySearch.getForeignLanguage() +
+        "'");
+    coreExercises.add(exerciseBySearch);
+  }
+
+  class CVMatch {
+    private final Set<CommonExercise> netprofEntries;
+    private Map<String, CommonExercise> tokenToEx;
+
+    CVMatch(Set<CommonExercise> netprofEntries) {//}, Map<String, CommonExercise> tokenToEx) {
+      this.netprofEntries = netprofEntries;
+      //this.tokenToEx = tokenToEx;
+    }
+
+    Set<CommonExercise> getNetprofEntries() {
+      return netprofEntries;
+    }
+
+    public Map<String, CommonExercise> getTokenToEx() {
+      return tokenToEx;
+    }
+  }
+
+  static class DialogProps {
+    final String docIDS;
+    final String title;
+    final String fltitle;
+    final String dir;
+    final String unit;
+    final String chapter;
+    final String page;
+    final String pres;
+
+    DialogProps(String docIDS,
+                String title, String fltitle, String dir, String unit, String chapter, String page, String pres) {
+      this.docIDS = docIDS;
+      this.title = title;
+      this.fltitle = fltitle;
+      this.dir = dir;
+      this.unit = unit;
+      this.chapter = chapter;
+      this.page = page;
+      this.pres = pres;
+    }
+  }
+
+  @NotNull
+  private String getDialogDataDir(Project project) {
+    return IDialogReader.OPT_NETPROF_DIALOG + project.getLanguage().toLowerCase() + File.separator;
+  }
+
+  private void addSpeakerAttrbutes(List<ExerciseAttribute> attributes, Set<String> speakers) {
+    List<String> speakersList = new ArrayList<>(speakers);
+    speakersList
+        .forEach(s -> attributes
+            .add(new ExerciseAttribute(IDialogReader.SPEAKER +
+                " " + IDialogReader.SPEAKER_LABELS.get(speakersList.indexOf(s)), s, false)));
+  }
+
+  /**
+   * @param project
+   * @param coreExercises set - only unique exercises...
+   * @param exercise
+   */
+  private void addCoreWords(Project project, Collection<ClientExercise> coreExercises, ClientExercise exercise) {
+    String[] tokens = exercise.getForeignLanguage().split(" ");
+    Set<String> uniq = new HashSet<>(Arrays.asList(tokens));
+    uniq.forEach(token -> {
+      CommonExercise exerciseBySearch = project.getExerciseBySearch(token);
+      if (exerciseBySearch != null) {
+        coreExercises.add(exerciseBySearch);
+      }
+    });
+  }
+
+  /**
+   * @param page
+   * @param topic
+   * @return
+   */
+  @NotNull
+  private List<ExerciseAttribute> getExerciseAttributes(String page, String topic) {
+    List<ExerciseAttribute> attributes = new ArrayList<>();
+    attributes.add(new ExerciseAttribute(IDialogReader.PAGE, page));
+    attributes.add(new ExerciseAttribute(IDialogReader.PRESENTATION, topic));
+    return attributes;
+  }
+
+  /**
+   * @param attributes
+   * @param speakers
+   * @param path
+   * @param fileText
+   * @param unit
+   * @param chapter
+   * @param typeOrder
+   * @return
+   * @seex #getDialogs
+   */
+  @NotNull
+  private Exercise getExercise(List<ExerciseAttribute> attributes,
+                               Set<String> speakers,
+                               Path path,
+                               String fileText,
+                               String unit, String chapter, List<String> typeOrder) {
+    Exercise exercise = new Exercise();
+    {
+      Map<String, String> unitToValue = new HashMap<>();
+      unitToValue.put(typeOrder.get(0), unit);
+      unitToValue.put(typeOrder.get(1), chapter);
+      exercise.setUnitToValue(unitToValue);
+    }
+
+    attributes.forEach(exercise::addAttribute);
+
+    {
+      int i1 = fileText.indexOf(":");
+      String speaker = fileText.substring(0, i1).trim();
+      speakers.add(speaker);
+      //  logger.info("file name " + path.getFileName());
+      {
+        String[] split = path.getFileName().toString().split("\\.");
+        String oldID = split[0];
+        //  logger.info("ex " + oldID);
+        exercise.getMutable().setOldID(oldID);
+      }
+      exercise.addAttribute(new ExerciseAttribute(IDialogReader.SPEAKER, speaker, false));
+      // logger.info("speaker " + speaker);
+      exercise.getMutable().setForeignLanguage(fileText.substring(i1 + 1).trim());
+    }
+
+    return exercise;
+  }
+
+  @NotNull
+  private String getTextFromFile(Path path) {
+    StringBuilder builder = new StringBuilder();
+
+    try (Stream<String> stream = Files.lines(path)) {
+      stream.forEach(builder::append);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return builder.toString();
+  }
+
+  private int getIndex(String o1) {
+    String[] split = o1.split("/");
+    String name = split[split.length - 1];
+    // logger.info("index " + name );
+    String[] parts = name.split("_");
+    String count = parts[2];
+    //  logger.info("count " + count );
+    String index = count.split("\\.")[0];
+    //  logger.info("index " + index );
+    return Integer.parseInt(index);
+  }
+}

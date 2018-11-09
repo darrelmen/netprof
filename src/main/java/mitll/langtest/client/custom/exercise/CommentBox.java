@@ -90,7 +90,9 @@ public class CommentBox extends PopupContainerFactory {
    * @see GoodwaveExercisePanel#getQuestionContent
    * @see mitll.langtest.client.flashcard.FlashcardPanel#getFirstRow(mitll.langtest.client.exercise.ExerciseController)
    */
-  public CommentBox(int exerciseID, EventRegistration registration, CommentAnnotator commentAnnotator,
+  public CommentBox(int exerciseID,
+                    EventRegistration registration,
+                    CommentAnnotator commentAnnotator,
                     MutableAnnotationExercise annotationExercise, boolean tooltipOnRight) {
     this.exerciseID = exerciseID;
     this.registration = registration;
@@ -501,8 +503,11 @@ public class CommentBox extends PopupContainerFactory {
       fieldToComment.put(field, comment);
       boolean isCorrect = comment.isEmpty();
 
-/*      logger.info("commentComplete ex #" + exerciseID +
-          " field " + field + " comment '" + comment + "' correct = " + isCorrect);*/
+      logger.info("commentComplete " +
+          "\n\tex #    " + exerciseID +
+          "\n\tfield   " + field +
+          "\n\tcomment '" + comment + "' " +
+          "\n\tcorrect " + isCorrect);
 
       addToolTip(commentButton, isCorrect, comment);
       showOrHideCommentButton(commentButton, clearButton, isCorrect);

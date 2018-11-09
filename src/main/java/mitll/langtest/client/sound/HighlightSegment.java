@@ -2,7 +2,10 @@ package mitll.langtest.client.sound;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
@@ -18,11 +21,14 @@ import java.util.logging.Logger;
 public class HighlightSegment extends DivWidget implements IHighlightSegment {
   protected final Logger logger = Logger.getLogger("HighlightSegment");
 
-  private static final String BLUE = "#2196F3";
+  private static final String UNDERLINE = "underline";
+
+  private String highlightColor;
   private final int length;
   private String background = null;
   private boolean highlighted = false;
   private boolean clickable = true;
+
   private final DivWidget north;
   private DivWidget south;
   private final String content;
@@ -34,7 +40,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @see mitll.langtest.client.scoring.WordTable#getWordLabel
    */
   public HighlightSegment(int id, String content) {
-    this(id, content, HasDirection.Direction.LTR, true, true);
+    this(id, content, HasDirection.Direction.LTR, true, true, DEFAULT_HIGHLIGHT);
   }
 
   /**
@@ -43,9 +49,12 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @param dir
    * @param addSouth
    * @param showPhones
+   * @param highlightColor
    * @see mitll.langtest.client.scoring.ClickableWords#makeClickableText
    */
-  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir, boolean addSouth, boolean showPhones) {
+  public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir, boolean addSouth,
+                          boolean showPhones, String highlightColor) {
+    this.highlightColor = highlightColor;
     DivWidget north;
     add(north = new DivWidget());
 
@@ -62,8 +71,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
 
     south = new DivWidget();
 
-    addMouseOverHandler(mouseOverEvent -> south.addStyleName("underline"));
-    addMouseOutHandler(mouseOutEvent -> south.removeStyleName("underline"));
+    addMouseOverHandler(mouseOverEvent -> south.addStyleName(UNDERLINE));
+    addMouseOutHandler(mouseOutEvent -> south.removeStyleName(UNDERLINE));
 
     if (addSouth) {
       add(south);
@@ -71,6 +80,36 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     }
 
     length = html.length();
+  }
+
+  private boolean shouldObscure = false;
+  private boolean didObscure = false;
+
+  @Override
+  public void setObscurable() {
+    shouldObscure = true;
+  }
+
+  @Override
+  public void obscureText() {
+    if (shouldObscure) {
+      Style style = this.span.getElement().getStyle();
+      style.setColor("gray");
+      style.setBackgroundColor("gray");
+      didObscure = true;
+    }
+  }
+
+  @Override
+  public void restoreText() {
+    if (shouldObscure && didObscure) {
+      Style style = this.span.getElement().getStyle();
+      style.setColor("rgb(51, 51, 51)");
+      style.clearBackgroundColor();
+      didObscure = false;
+    } else {
+//      logger.warning("no restore color?");
+    }
   }
 
   private HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
@@ -86,7 +125,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @param north
    * @param isLTR
    * @param span
-   * @see #HighlightSegment(int, String, HasDirection.Direction, boolean, boolean)
+   * @see #HighlightSegment(int, String, HasDirection.Direction, boolean, boolean, String)
    */
   private void configureNorth(int id, DivWidget north, boolean isLTR, Widget span) {
     north.add(span);
@@ -94,13 +133,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
 
     String floatDir = isLTR ? "floatLeft" : "floatRight";
     north.addStyleName(floatDir);
-
-    if (isLTR) {
-      north.addStyleName("wordSpacerRight");
-    } else {
-      north.addStyleName("wordSpacerLeft");
-//      north.addStyleName("rtlMarginBottom");
-    }
+    north.addStyleName(isLTR ? "wordSpacerRight" : "wordSpacerLeft");
   }
 
   private void configureSouth(int id, Widget south, boolean isLTR, boolean ensureHeight) {
@@ -132,19 +165,35 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   }
 
   @Override
-  public void setBlue() {
+  public void showHighlight() {
     highlighted = true;
-    getSpanStyle().setBackgroundColor(BLUE);
+    getSpanStyle().setBackgroundColor(highlightColor);
+  }
+
+  /**
+   * @see mitll.langtest.client.scoring.RecordDialogExercisePanel#showWordScore
+   * @param highlightColor
+   */
+  @Override
+  public void setHighlightColor(String highlightColor) {
+    this.highlightColor = highlightColor;
   }
 
   @Override
-  public void clearBlue() {
+  public void clearHighlight() {
     highlighted = false;
     if (background == null) {
-      getSpanStyle().clearBackgroundColor();
+      if (!didObscure) {
+        getSpanStyle().clearBackgroundColor();
+      }
     } else {
       getSpanStyle().setBackgroundColor(background);
     }
+  }
+
+  @Override
+  public void checkClearHighlight() {
+    if (isHighlighted()) clearHighlight();
   }
 
   private Style getSpanStyle() {
@@ -183,8 +232,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   public void setSouth(DivWidget widget) {
     south = widget;
 
-    south.addDomHandler(event -> addStyleName("underline"), MouseOverEvent.getType());
-    south.addDomHandler(event -> removeStyleName("underline"), MouseOutEvent.getType());
+    south.addDomHandler(event -> addStyleName(UNDERLINE), MouseOverEvent.getType());
+    south.addDomHandler(event -> removeStyleName(UNDERLINE), MouseOutEvent.getType());
   }
 
   public void setSouthScore(DivWidget widget) {
@@ -202,8 +251,10 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     return north;
   }
 
+
+
   public String toString() {
     return //"#" + id + " " +
-        "'" + content + "'" + (getLength() > 1 ? " (" + getLength() + ")" : "") + (clickable ? "" : " NC");
+        "'" + content + "'" + (getLength() > 1 ? " (" + getLength() + ")" : "") + (clickable ? "" : " NC");// + " color " + colorBefore + " bkg " + bkgColorBefore;
   }
 }

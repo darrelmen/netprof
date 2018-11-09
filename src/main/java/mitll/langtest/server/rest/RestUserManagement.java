@@ -50,10 +50,9 @@ import org.jetbrains.annotations.NotNull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
+import static mitll.langtest.server.services.MyRemoteServiceServlet.USER_AGENT;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Success;
 
@@ -110,7 +109,6 @@ public class RestUserManagement {
   private static final String DIALECT = "dialect";
   private static final String KIND = "kind";
 
-  public static final String USERS = "users";
   private static final String DLIFLC = "DLIFLC";
   private static final String MALE = "male";
   private static final String FIRST = "First";
@@ -121,7 +119,6 @@ public class RestUserManagement {
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
-  protected String configDir;
 
   /**
    * @param db
@@ -213,21 +210,11 @@ public class RestUserManagement {
     return first.split("=")[1];
   }
 
-  private void reply(HttpServletResponse response, String x) {
-    try {
-      PrintWriter writer = response.getWriter();
-      writer.println(x);
-      writer.close();
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-    }
-  }
-
   /**
    * @param toReturn
    * @param request
    * @param securityManager
-   * @param projid
+   * @param projid if > 0 then we remember the project for this user
    * @param user
    * @param freeTextPassword
    * @param strictValidity
@@ -294,7 +281,7 @@ public class RestUserManagement {
                                 boolean strictValidity) {
     try {
       String remoteAddr = securityManager.getRemoteAddr(request);
-      String userAgent = request.getHeader("User-Agent");
+      String userAgent = request.getHeader(USER_AGENT);
       // ensure a session is created.
       HttpSession session = createSession(request);
       logger.info("loginUser :" +
@@ -315,67 +302,6 @@ public class RestUserManagement {
 
   private HttpSession createSession(HttpServletRequest request) {
     return request.getSession(true);
-  }
-
-  /**
-   * @param token
-   * @return
-   * @see #doGet
-   * @deprecated
-   */
-  private long getUserIDForToken(String token) {
-    User user = db.getUserDAO().getUserWithResetKey(token);
-    return (user == null) ? -1 : user.getID();
-  }
-
-  /**
-   * @param message
-   * @return
-   * @see #doGet
-   */
-  private String getHTML(String message, String title) {
-    return "<html>" +
-        "<head>" +
-        "<title>" +
-        title +
-        "</title>" +
-        "</head>" +
-
-        "<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>" +
-        "<div align=center>" +
-        "<table>" +
-        (message.length() > 0 ?
-            "<tr>" +
-                "    <td colspan=2 style='padding:.75pt .75pt .75pt .75pt'>\n" +
-                "    <p ><span style='font-size:13.0pt;font-family:\"Georgia\",\"serif\";\n" +
-                "    color:#333333'>" +
-                message +
-                "<p></p></span></p>\n" +
-                "    </td>" +
-                "</tr>" : "") +
-        "     <tr >\n" +
-        "      <td style='border:none;padding:10.5pt 10.5pt 10.5pt 10.5pt'>\n" +
-        "      <h1 style='margin-top:0in;margin-right:0in;margin-bottom:3.0pt;\n" + "      margin-left:0in'>" +
-        "<span style='font-size:12.5pt;font-family:\"Georgia\",\"serif\";\n" + "      font-weight:normal'>" +
-        "<p></p>" +
-        "</span>" +
-        "</h1>\n" +
-        "      </td>\n" +
-        "     </tr>" +
-
-        "   <tr>\n" +
-        "    <td style='padding:0in 0in 0in 0in'>\n" +
-        "    <p>" +
-        "<p></p></span>" +
-        "</p>\n" +
-        "    </td>\n" +
-        //     "    <td style='padding:.75pt .75pt .75pt .75pt'></td>\n" +
-        "   </tr>" +
-
-        "</table>" +
-        "</div>" +
-        "</body>" +
-        "</html>";
   }
 
   /**
@@ -488,64 +414,58 @@ public class RestUserManagement {
     } catch (NumberFormatException e) {
       logger.error("Got " + e, e);
     }
-    if (existingUser == null) {
-      User checkExisting = existingUser;// kinda stupid but here we are
+    if (existingUser == null) { // OK, nobody with matching user and password
+      String age = request.getHeader(AGE);
+      String gender = request.getHeader(GENDER);
+      String dialect = request.getHeader(DIALECT);
+      String emailH = request.getHeader(EMAIL_H);
+      String email = request.getHeader(EMAIL);
+      if (email == null) email = "";
 
-      if (checkExisting == null) { // OK, nobody with matching user and password
-        String age = request.getHeader(AGE);
-        String gender = request.getHeader(GENDER);
-        String dialect = request.getHeader(DIALECT);
-        String emailH = request.getHeader(EMAIL_H);
-        String email = request.getHeader(EMAIL);
-        if (email == null) email = "";
+      logger.warn("addUser : Request " + requestType + " for " + deviceType + "\n\tuser " + user +
+          " adding " + gender +
+          " age " + age + " dialect " + dialect);
 
-        logger.warn("addUser : Request " + requestType + " for " + deviceType + "\n\tuser " + user +
-            " adding " + gender +
-            " age " + age + " dialect " + dialect);
+      User user1 = null;
+      //String appURL = serverProps.getAppURL();
+      if (age != null && gender != null && dialect != null) {
+        try {
+          int age1 = Integer.parseInt(age);
+          boolean male = gender.equalsIgnoreCase(MALE);
 
-        User user1 = null;
-        //String appURL = serverProps.getAppURL();
-        if (age != null && gender != null && dialect != null) {
-          try {
-            int age1 = Integer.parseInt(age);
-            boolean male = gender.equalsIgnoreCase(MALE);
+          SignUpUser user2 = new SignUpUser(user,
+              emailH,
+              email,
+              Kind.CONTENT_DEVELOPER,
+              male,
+              male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
+              age1,
+              deviceType,
+              device,
+              "",
+              "",
+              "OTHER");
 
-            SignUpUser user2 = new SignUpUser(user,
-                emailH,
-                email,
-                Kind.CONTENT_DEVELOPER,
-                male,
-                male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
-                age1,
-                deviceType,
-                device,
-                "",
-                "",
-                "OTHER");
-
-            user1 = getUserManagement().addUser(user2);
-          } catch (NumberFormatException e) {
-            logger.warn("couldn't parse age " + age);
-            jsonObject.put(ERROR, "bad age");
-          }
-        } else {
-          try {
-            user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
-          } catch (Exception e) {
-            jsonObject.put(ERROR, "got " + e.getMessage());
-            logger.error("Got " + e, e);
-          }
+          user1 = getUserManagement().addUser(user2);
+        } catch (NumberFormatException e) {
+          logger.warn("couldn't parse age " + age);
+          jsonObject.put(ERROR, "bad age");
         }
-
-        if (user1 == null) { // how could this happen?
-          jsonObject.put(EXISTING_USER_NAME, "");
-        } else {
-          jsonObject.put(USERID, user1.getID());
-        }
-
       } else {
-        jsonObject.put(EXISTING_USER_NAME, "");
+        try {
+          user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
+        } catch (Exception e) {
+          jsonObject.put(ERROR, "got " + e.getMessage());
+          logger.error("Got " + e, e);
+        }
       }
+
+      if (user1 == null) { // how could this happen?
+        jsonObject.put(EXISTING_USER_NAME, "");
+      } else {
+        jsonObject.put(USERID, user1.getID());
+      }
+
     } else {
       logger.warn("addUser - found existing user for " + user +
           //" pass " + passwordH +

@@ -2,14 +2,18 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.refaudio.RefResultDAO;
-import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.result.Result;
-import org.apache.logging.log4j.*;
+import mitll.langtest.server.database.result.ResultDAO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

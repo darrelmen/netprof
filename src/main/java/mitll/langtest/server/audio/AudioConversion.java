@@ -35,12 +35,15 @@ import mitll.langtest.server.ServerProperties;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AudioConversion extends AudioBase {
   private static final Logger logger = LogManager.getLogger(AudioConversion.class);
@@ -52,6 +55,9 @@ public class AudioConversion extends AudioBase {
   private static final String LINUX_SOX_BIN_DIR_2 = "/usr/bin";
   private static final String WINDOWS_SOX_BIN_DIR = "sox-14-3-2";
   public static final String SIXTEEN_K_SUFFIX = "_16K";
+  /**
+   *
+   */
   public static final String FILE_MISSING = "FILE_MISSING";
   private static final float SIXTEEN_K = 16000f;
   private static final String LAME = "lame";
@@ -67,7 +73,7 @@ public class AudioConversion extends AudioBase {
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_DETAIL = false;
-  private boolean trimAudio;
+  private final boolean trimAudio;
   private static final boolean WARN_MISSING_FILE = false;
 
   /**
@@ -91,8 +97,9 @@ public class AudioConversion extends AudioBase {
    * @param file                     where we want to write the wav file to
    * @param useSensitiveTooLoudCheck
    * @return true if audio is valid (not too short, not silence)
-   * @see AudioFileHelper#writeAudioFile
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAlignment
+   * @seex mitll.langtest.server.audio.AudioFileHelper#getAlignment
+   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
+   * @deprecated using streaming audio currently
    */
   AudioCheck.ValidityAndDur convertBase64ToAudioFiles(String base64EncodedString,
                                                       File file,
@@ -105,19 +112,34 @@ public class AudioConversion extends AudioBase {
     setPermissions(parentFile);
     setPermissions(parentFile.getParentFile());
     setPermissions(parentFile.getParentFile().getParentFile());
-    boolean b;
 
     if (DEBUG) logger.debug("convertBase64ToAudioFiles: write wav file " + file.getAbsolutePath());
 
     writeToFile(getBytesFromBase64String(base64EncodedString), file);
 
-    b = file.setReadable(true, false);
-    if (!b) logger.warn("convertBase64ToAudioFiles couldn't make " + file  + " readable?");
+    return getValidityAndDur(file, useSensitiveTooLoudCheck, quietAudioOK, then);
+  }
 
-    if (DEBUG) logger.debug("convertBase64ToAudioFiles: wrote wav file " + file.getAbsolutePath());
+  /**
+   * @param file
+   * @param useSensitiveTooLoudCheck
+   * @param quietAudioOK
+   * @param then
+   * @return
+   * @see AudioFileHelper#writeAudioFile
+   * @see #convertBase64ToAudioFiles(String, File, boolean, boolean)
+   */
+  @NotNull
+  public AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
+    if (DEBUG) logger.debug("getValidityAndDur: wrote wav file " + file.getAbsolutePath());
+    boolean b;
+    b = file.setReadable(true, false);
+    if (!b) logger.warn("getValidityAndDur couldn't make " + file + " readable?");
+
+    if (DEBUG) logger.debug("getValidityAndDur: wrote wav file " + file.getAbsolutePath());
 
     if (!file.exists()) {
-      logger.error("convertBase64ToAudioFiles : after writing, can't find file at " + file.getAbsolutePath());
+      logger.error("getValidityAndDur : after writing, can't find file at " + file.getAbsolutePath());
     }
     AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
     if (valid.isValid() && trimAudio) {
@@ -127,16 +149,35 @@ public class AudioConversion extends AudioBase {
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
-      logger.debug("writeAudioFile: took " + diff + " millis to write wav file (" + file.getName() +
-          ") " + valid.durationInMillis + " millis long");
+      logger.debug("getValidityAndDur: took " + diff + " millis to write wav file (" + file.getName() +
+          ") " + valid.getDurationInMillis() + " millis long");
     }
     return valid;
   }
 
+/*  @NotNull
+  AudioCheck.ValidityAndDur getValidityAndDurStream(String name,
+                                                    String fileInfo,
+                                                    int length,
+                                                    AudioInputStream stream,
+                                                    boolean useSensitiveTooLoudCheck,
+                                                    boolean quietAudioOK,
+                                                    long then) {
+    AudioCheck.ValidityAndDur valid = audioCheck.isValid(name, fileInfo, length, stream, useSensitiveTooLoudCheck, quietAudioOK);
+
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+    if (diff > MIN_WARN_DUR) {
+      logger.debug("writeAudioFile: took " + diff + " millis to write wav file (" + name +
+          ") " + valid.durationInMillis + " millis long");
+    }
+    return valid;
+  }*/
+
   private void setPermissions(File parentFile) {
     boolean b = parentFile.setReadable(true, false);
     if (!b) logger.warn("couldn't make " + parentFile + " readable?");
-    b =  parentFile.setExecutable(true, false);
+    b = parentFile.setExecutable(true, false);
     if (!b) logger.warn("couldn't make " + parentFile + " executable?");
   }
 
@@ -170,29 +211,18 @@ public class AudioConversion extends AudioBase {
   }
 
   /**
+   * TODO: dom't necessarily force us to use a file to do the validity check
+   *
    * @param file
    * @param useSensitiveTooLoudCheck
    * @param quietAudioOK
    * @return
    * @see #convertBase64ToAudioFiles
    * @see AudioFileHelper#getAnswer
+   * @see #getValidityAndDur
    */
   public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     return audioCheck.isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
-/*    try {
-      if (file.length() < 44) {
-        logger.warn("isValid : audio file " + file.getAbsolutePath() + " length was " + file.length() + " bytes.");
-        return new AudioCheck.ValidityAndDur(AudioAnswer.Validity.TOO_SHORT, 0, false);
-      } else {
-        AudioCheck.ValidityAndDur validityAndDur =
-            useSensitiveTooLoudCheck ? audioCheck.checkWavFileRejectAnyTooLoud(file, quietAudioOK) :
-                audioCheck.checkWavFile(file, quietAudioOK);
-        return validityAndDur;
-      }
-    } catch (Exception e) {
-      logger.error("isValid got " + e, e);
-    }
-    return AudioCheck.INVALID_AUDIO;*/
   }
 
   /**
@@ -210,23 +240,10 @@ public class AudioConversion extends AudioBase {
     String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + WAV;
     File wavFile = convertTo16Khz(new File(pathname), uniqueTimestamp);
     boolean b = wavFile.setReadable(true, false);
-    if (!b) logger.warn("couldn't make " +wavFile + " readable?");
+    if (!b) logger.warn("couldn't make " + wavFile + " readable?");
     return removeSuffix(wavFile.getName());
   }
 
-  /**
-   * @param wavFile
-   * @return
-   * @see AudioCheck#getDynamicRange
-   */
-  public String getHighPassFilterFile(String wavFile) {
-    try {
-      return doHighPassFilter(wavFile);
-    } catch (IOException e) {
-      logger.error("Got " + e, e);
-    }
-    return null;
-  }
 
   /**
    * @param wavFile
@@ -303,8 +320,10 @@ public class AudioConversion extends AudioBase {
 
   private String sampleAt16KHZ(String pathToAudioFile, String tempForWavz) throws IOException {
     // i.e. sox inputFile -s -2 -c 1 -q tempForWavz.wav rate 16000
-    ProcessBuilder soxFirst = new ProcessBuilder(soxPath,
-        pathToAudioFile, "-s", "-2", "-c", "1", "-q", tempForWavz, "rate", "16000");
+    ProcessBuilder soxFirst = new ProcessBuilder(
+        soxPath,
+        pathToAudioFile,
+        "-s", "-2", "-c", "1", "-q", tempForWavz, "rate", "16000");
 //        logger.info("ENTER running sox on " + tempForWavz + " : " + soxFirst);
     if (!new ProcessRunner().runProcess(soxFirst)) {
       ProcessBuilder soxFirst2 = new ProcessBuilder(soxPath,
@@ -314,6 +333,20 @@ public class AudioConversion extends AudioBase {
     //   log.info("EXIT running sox on " + tempForWavz + " : " + soxFirst);
 
     return tempForWavz;
+  }
+
+  /**
+   * @param wavFile
+   * @return
+   * @see AudioCheck#getDynamicRange
+   */
+  public String getHighPassFilterFile(String wavFile) {
+    try {
+      return doHighPassFilter(wavFile);
+    } catch (IOException e) {
+      logger.error("Got " + e, e);
+    }
+    return null;
   }
 
   /**
@@ -347,10 +380,11 @@ public class AudioConversion extends AudioBase {
 
   /**
    * Rip the header off to make a raw file.
-   * assumes 16Khz?
+   * Consumer should assume it's 16Khz?
    *
    * @param wavFile
    * @param rawFile
+   * @return true if raw file exists
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
   public static boolean wav2raw(String wavFile, String rawFile) {
@@ -358,12 +392,19 @@ public class AudioConversion extends AudioBase {
     AudioInputStream sourceStream = null;
 
     File sourceFile = new File(wavFile);
+    File outputFile = new File(rawFile);
+
+    long sourceLength = sourceFile.length();
+    long outputLength = outputFile.length();
+    if (outputFile.exists() && (sourceLength - 44 == outputLength)) {
+      logger.info("skip raw conversion since " + outputFile.getAbsolutePath() + " already there.");
+      return true;
+    }
     if (DEBUG)
       logger.info("wav2raw Reading from " + sourceFile + " exists " + sourceFile.exists() + " at " + sourceFile.getAbsolutePath());
 
     try {
       sourceStream = AudioSystem.getAudioInputStream(sourceFile);
-      File outputFile = new File(rawFile);
 
       String absolutePath = outputFile.getAbsolutePath();
       if (DEBUG) logger.info("wav2raw Writing to " + absolutePath);
@@ -385,13 +426,11 @@ public class AudioConversion extends AudioBase {
       sourceStream.close();
       fout.close();
 
-      boolean b1 = outputFile.setReadable(true);
-      if (!b1) {
-        logger.error("wav2raw : can't read the output file " + absolutePath);
-      }
+      makeOutputReadable(outputFile, absolutePath);
 
       if (DEBUG) {
-        logger.info("wav2raw wrote to " + absolutePath + " exists = " + outputFile.exists() + " len " + (outputFile.length() / 1024) + "K");
+        logger.info("wav2raw wrote to " + absolutePath + " exists = " + outputFile.exists() +
+            " len " + (outputLength / 1024) + "K");
       }
 
       return outputFile.exists();
@@ -410,6 +449,13 @@ public class AudioConversion extends AudioBase {
     }
   }
 
+  private static void makeOutputReadable(File outputFile, String absolutePath) {
+    boolean b1 = outputFile.setReadable(true);
+    if (!b1) {
+      logger.error("wav2raw : can't read the output file " + absolutePath);
+    }
+  }
+
   private String removeSuffix(String name1) {
     return name1.substring(0, name1.length() - 4);
   }
@@ -419,12 +465,14 @@ public class AudioConversion extends AudioBase {
    * @param pathToWav
    * @param overwrite       true if step on existing file.
    * @param trackInfo
+   * @param waitToFinish
    * @return
-   * @see mitll.langtest.server.services.AudioServiceImpl#ensureMP3
+   * @see mitll.langtest.server.database.audio.EnsureAudioHelper#ensureMP3
+   * @see mitll.langtest.server.decoder.RefResultDecoder#doEnsure
    */
-  public String ensureWriteMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo) {
+  public String ensureWriteMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo, boolean waitToFinish) {
     if (pathToWav == null || pathToWav.equals("null")) throw new IllegalArgumentException("huh? path is null");
-    return writeMP3(realContextPath, pathToWav, overwrite, trackInfo);
+    return writeMP3(realContextPath, pathToWav, overwrite, trackInfo, waitToFinish);
   }
 
   private int spew2 = 0;
@@ -435,10 +483,11 @@ public class AudioConversion extends AudioBase {
    * @param pathToWav
    * @param overwrite
    * @param trackInfo
+   * @param waitToFinish
    * @return
    * @see #ensureWriteMP3
    */
-  private String writeMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo) {
+  private String writeMP3(String realContextPath, String pathToWav, boolean overwrite, TrackInfo trackInfo, boolean waitToFinish) {
     File absolutePathToWav = new File(pathToWav); // LAZY - what should it be?
     if (!absolutePathToWav.exists()) {
       if (spew3++ < 100 && spew3 % 100 == 0) {
@@ -447,25 +496,51 @@ public class AudioConversion extends AudioBase {
       }
       absolutePathToWav = getAbsoluteFile(realContextPath, pathToWav);
     }
-    return writeCompressedVersions(absolutePathToWav, overwrite, trackInfo);
+    return writeCompressedVersions(absolutePathToWav, overwrite, trackInfo, waitToFinish);
   }
 
   /**
+   * Do conversion in parallel...
+   *
    * @param absolutePathToWav
    * @param overwrite
    * @param trackInfo
+   * @param waitToFinish
    * @return absolute path to file
    * @see PathWriter#getPermanentAudioPath
    */
-  public String writeCompressedVersions(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo) {
+  public String writeCompressedVersions(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo, boolean waitToFinish) {
     try {
-      String absolutePath = absolutePathToWav.getAbsolutePath();
-      String mp3File = getMP3ForWav(absolutePath);
+      String mp3File = getMP3ForWav(absolutePathToWav.getAbsolutePath());
       //logger.info("writeCompressedVersions started  writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
-      if (!writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)) return FILE_MISSING;
-      if (!new ConvertToOGG().writeOGG(absolutePathToWav, overwrite, trackInfo)) return FILE_MISSING;
-      // logger.info("writeCompressedVersions finished writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
-      return mp3File;
+
+      List<Boolean> results = new ArrayList<>(2);
+
+      Thread mp3Thread = new Thread(() -> results.add(
+          writeMP3(absolutePathToWav, overwrite, trackInfo, mp3File)), "writeCompressedVersionsMP3");
+      mp3Thread.start();
+
+      Thread oggThread = new Thread(() -> results.add(new ConvertToOGG()
+          .writeOGG(absolutePathToWav, overwrite, trackInfo)), "writeCompressedVersionsOGG");
+      oggThread.start();
+
+      if (waitToFinish) {
+        try {
+          mp3Thread.join();
+          oggThread.join();
+        } catch (InterruptedException e) {
+          logger.error("could not finish the mp3 and ogg conversion.", e);
+        }
+
+        long count = results.stream().filter(res -> !res).count();
+
+        if (count > 0) logger.warn("couldn't write compressed file " + mp3File);
+        // logger.info("writeCompressedVersions finished writing " + absolutePathToWav.getAbsolutePath() + " over " + overwrite);
+        return (count == 0) ? mp3File : FILE_MISSING;
+      } else {
+        logger.info("writeCompressedVersions not waiting for files to finish for " + mp3File);
+        return mp3File;
+      }
     } catch (Exception e) {
       logger.error("writeCompressedVersions got " + e, e);
       return FILE_MISSING;
@@ -476,6 +551,13 @@ public class AudioConversion extends AudioBase {
     return absolutePath.replace(WAV, MP3);
   }
 
+  /**
+   * @param absolutePathToWav
+   * @param overwrite
+   * @param trackInfo
+   * @param mp3File
+   * @return true if succeeded
+   */
   private boolean writeMP3(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo, String mp3File) {
     File mp3 = new File(mp3File);
     if (!mp3.exists() || overwrite) {
@@ -627,6 +709,7 @@ public class AudioConversion extends AudioBase {
           }
         } catch (IOException e) {
           logger.error("convertToMP3FileAndCheck for " + lameProc + " got " + e, e);
+          logger.warn("consider on mac : brew install lame");
         }
 
       }
@@ -648,7 +731,7 @@ public class AudioConversion extends AudioBase {
     File test = new File(wavFile);
     if (!test.exists()) {
       if (WARN_MISSING_FILE) {
-        logger.warn("ensureMP3 : can't find " + test.getAbsolutePath());// + " under " + parent + " trying config... ");
+        logger.warn("getParentForFilePathUnderBaseAudio : can't find " + test.getAbsolutePath());// + " under " + parent + " trying config... ");
       }
 //      String audioBaseDir = serverProps.getAudioBaseDir();
       parent = audioBaseDir;// + File.separator + language;
@@ -667,7 +750,7 @@ public class AudioConversion extends AudioBase {
 
       if (!fileUnderParent2.exists()) {
         if (spew4++ < 100) {
-          logger.warn("ensureMP3 can't find " + fileUnderParent2.getAbsolutePath());
+          logger.info("getParentForFilePathUnderBaseAudio can't find " + fileUnderParent2.getAbsolutePath());
         }
       } else {
         // logger.info("OK found " + fileUnderParent2.getAbsolutePath() + " " + fileUnderParent2.exists());

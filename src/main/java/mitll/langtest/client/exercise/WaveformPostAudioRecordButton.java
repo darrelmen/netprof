@@ -34,12 +34,12 @@ package mitll.langtest.client.exercise;
 
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 
 import java.util.logging.Logger;
 
@@ -87,7 +87,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
                                           String playButtonSuffix,
                                           String stopButtonText,
                                           AudioType audioType) {
-    super(exerciseID, controller, index, recordInResults, playButtonSuffix, stopButtonText, 93, false);
+    super(exerciseID, controller, playButtonSuffix, stopButtonText, 93);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton_" + exerciseID + "_" + index);
@@ -100,8 +100,8 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   /**
-   * So when we're recording reference audio for an item, we want to add the audio to the audio table and not
-   * the results table.
+   * So when we're recording reference audio for an item,
+   * we want to add the audio to the audio table in addition to the results table.
    *
    * @return
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile
@@ -111,7 +111,6 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   protected boolean shouldAddToAudioTable() {
     return true;
   }
-
 
   /**
    * @see mitll.langtest.client.recorder.RecordButton#start
@@ -127,16 +126,13 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     setPlayEnabled(false);
   }
 
-  @Override
-  public void flip(boolean first) {
-  } // force not to be abstract
-
   /**
    * @param duration
+   * @param abort
    * @see mitll.langtest.client.recorder.RecordButton#stop
    */
   @Override
-  public boolean stopRecording(long duration) {
+  public boolean stopRecording(long duration, boolean abort) {
     if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
     } else {
@@ -145,7 +141,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (System.currentTimeMillis() - then) + " millis");
 
     getWaveform().setUrl(WAIT_URL);
-    return super.stopRecording(duration);
+    return super.stopRecording(duration, abort);
   }
 
   private AudioPanel.ImageAndCheck getWaveform() {
@@ -161,12 +157,18 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     return audioType;
   }
 
+  @Override
+  protected int getDialogSessionID() {
+    return -1;
+  }
+
   /**
    * @param result
-   * @see RecordingListener#stopRecording(long)
+   * @see RecordingListener#stopRecording(long, boolean)
    */
   @Override
   public void useResult(AudioAnswer result) {
+   // logger.info("useResult -- " + result);
     recordAudioPanel.getImagesForPath(result.getPath());
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordCompleted(recordAudioPanel);
@@ -175,8 +177,8 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   @Override
-  protected void useInvalidResult(AudioAnswer result) {
-    super.useInvalidResult(result);
+  protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+    super.useInvalidResult(exid, validity, dynamicRange);
     //   logger.info("WaveformPostAudioRecordButton : got invalid result " + result);
     hideWaveform();
     recordAudioPanel.getSpectrogram().setVisible(false);

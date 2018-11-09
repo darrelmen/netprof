@@ -51,18 +51,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Deals with downloads from site -- for excel spreadsheets and zips of audio.
@@ -106,10 +98,11 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String RESULTS_XLSX = "results.xlsx";
   private static final String EVENTS_XLSX = "events.xlsx";
   private static final String WAV = ".wav";
-  public static final String MP3 = ".mp3";
+  private static final String MP3 = ".mp3";
   private static final String UNIT = "unit";
-  public static final String SEARCH = "search";
-  public static final String AUDIO1 = "audio";
+  private static final String SEARCH = "search";
+  private static final String AUDIO1 = "audio";
+  private static final int BUFFER_SIZE = 4096;
 
   /**
    * This is getting complicated.
@@ -379,17 +372,19 @@ public class DownloadServlet extends DatabaseServlet {
 
     if (file.endsWith(WAV)) file = file.replaceAll(WAV, MP3);
 
-    String exercise = split[1].split("=")[1];
-    String useridString = split[2].split("=")[1];
+    {
+      String exercise = split[1].split("=")[1];
+      String useridString = split[2].split("=")[1];
 
-    logger.debug("returnAudioFile download exercise #" + exercise + " for user id=" + useridString + " file " + file);
+      logger.debug("returnAudioFile download exercise #" + exercise + " for user id=" + useridString + " file " + file);
 
-    String underscores = getFilenameForDownload(db, projid, Integer.parseInt(exercise), useridString, language);
+      String underscores = getFilenameForDownload(db, projid, Integer.parseInt(exercise), useridString, language);
 
-    logger.debug("returnAudioFile query is " + queryString + " exercise " + exercise +
-        " user " + useridString + " so name is " + underscores);
+      logger.debug("returnAudioFile query is " + queryString + " exercise " + exercise +
+          " user " + useridString + " so name is " + underscores);
 
-    setResponse(response, underscores);
+      setResponse(response, underscores);
+    }
 
     File fileRef = pathHelper.getAbsoluteAudioFile(file);
     if (!fileRef.exists()) {
@@ -613,5 +608,35 @@ public class DownloadServlet extends DatabaseServlet {
   public void init() throws ServletException {
     super.init();
     setPaths();
+  }
+
+  /**
+   *
+   * @param inputStream
+   * @param saveFile
+   * @throws IOException
+   */
+  void writeToFile(InputStream inputStream, File saveFile) throws IOException {
+    // opens an output stream for writing file
+    copyToOutput(inputStream, new FileOutputStream(saveFile));
+  }
+
+  /**
+   * TODO replace with commons call
+   *
+   * @param inputStream
+   * @param outputStream
+   * @throws IOException
+   */
+  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
+    byte[] buffer = new byte[BUFFER_SIZE];
+    int bytesRead;
+
+    while ((bytesRead = inputStream.read(buffer)) != -1) {
+      outputStream.write(buffer, 0, bytesRead);
+    }
+
+    outputStream.close();
+    inputStream.close();
   }
 }

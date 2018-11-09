@@ -43,7 +43,6 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,7 +53,7 @@ import java.util.Map;
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {
   private static final Logger logger = LogManager.getLogger(ListServiceImpl.class);
-  private static final boolean DEBUG = false;
+  //private static final boolean DEBUG = false;
 
   /**
    * @return
@@ -151,7 +150,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz) throws DominoSessionException {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    // try {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
     Collection<UserList<CommonShell>> listsForUser = getUserListManager()
@@ -159,17 +157,14 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     long now = System.currentTimeMillis();
 
-    logger.info("getListsForUser : took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+    if (now - then > 30) {
+      logger.info("getListsForUser : took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+    }
     return listsForUser;
-    // } catch (Exception e) {
-    //  logger.error("Got " + e, e);
-    // return Collections.emptyList();
-    // }
   }
 
   public Collection<IUserListWithIDs> getListsWithIDsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");
-    // try {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
     Collection<IUserListWithIDs> listsForUser = getUserListManager()
@@ -179,10 +174,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     logger.info("getListsWithIDsForUser took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
     return listsForUser;
-    // } catch (Exception e) {
-    //  logger.error("Got " + e, e);
-    // return Collections.emptyList();
-    // }
   }
 
   /**
@@ -255,29 +246,33 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @throws DominoSessionException
    * @throws RestrictedOperationException
    * @see NewContentChooser#getReviewList
+   * @param isContext
    */
-  @Override
-  public UserList<CommonShell> getReviewList() throws DominoSessionException, RestrictedOperationException {
+/*  @Override
+  public UserList<CommonShell> getReviewList(boolean isContext) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasQCPerm(userIDFromSessionOrDB)) {
-      return getUserListManager().getCommentedList(getProjectIDFromUser(userIDFromSessionOrDB));
+      return getUserListManager().getCommentedList(getProjectIDFromUser(userIDFromSessionOrDB), isContext);
     } else {
       throw getRestricted("getting review lists");
     }
-  }
+  }*/
 
   /**
+   * TODO: Tamas wants this back in.
+   *
    * Put the new item in the database,
    * copy the audio under bestAudio ??
    * assign the item to a user list
    * <p>
    * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
    *
-   * @param userListID
-   * @param userExercise
+   * @paramx userListID
+   * @paramx userExercise
    * @return CommonExercise with id from database
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
+/*
   @Override
   public CommonExercise newExercise(int userListID, CommonExercise userExercise) throws DominoSessionException {
     if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
@@ -292,6 +287,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       return userExercise;
     }
   }
+*/
 
   /**
    * @see mitll.langtest.client.flashcard.PolyglotFlashcardFactory#PolyglotFlashcardFactory(ExerciseController, ListInterface)
@@ -299,21 +295,21 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param userListID
    * @return
    */
-  public QuizInfo getQuizInfo(int userListID) {
-    UserList<CommonExercise> list = db.getUserListManager().getUserListDAO().getList(userListID);
+  public QuizSpec getQuizInfo(int userListID) {
+    UserList<?> list = db.getUserListManager().getUserListDAO().getList(userListID);
     if (list == null) logger.warn("no quiz with list id " + userListID);
-    QuizInfo quizInfo = list != null ? new QuizInfo(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio()) : new QuizInfo(10, 35, false);
-    logger.info("Returning " + quizInfo + " for " + userListID);
-    return quizInfo;
+    QuizSpec quizSpec = list != null ? new QuizSpec(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio()) : new QuizSpec(10, 35, false);
+    logger.info("Returning " + quizSpec + " for " + userListID);
+    return quizSpec;
   }
 
-  private CommonExercise getExerciseIfKnown(CommonExercise userExercise) {
+/*  private ClientExercise getExerciseIfKnown(ClientExercise userExercise) {
     return getExerciseByVocab(userExercise.getProjectID(), userExercise.getForeignLanguage());
-  }
+  }*/
 
-  private CommonExercise getExerciseByVocab(int projectID, String foreignLanguage) {
+/*  private CommonExercise getExerciseByVocab(int projectID, String foreignLanguage) {
     return db.getProject(projectID).getExerciseBySearch(foreignLanguage.trim());
-  }
+  }*/
 
   /**
    * Create in bulk, e.g. as import from quizlet export format.

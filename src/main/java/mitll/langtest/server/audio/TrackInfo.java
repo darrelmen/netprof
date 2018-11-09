@@ -4,10 +4,10 @@ package mitll.langtest.server.audio;
  * Created by go22670 on 11/16/16.
  */
 public class TrackInfo {
-  private String title;
-  private String artist;
-  private String comment;
-  private String album;
+  private final String title;
+  private final String artist;
+  private final String comment;
+  private final String album;
 
   public TrackInfo(String title, String artist, String comment, String album) {
     this.title = title;

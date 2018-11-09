@@ -3,7 +3,8 @@ package mitll.langtest.client.recorder;
 import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.initial.WavCallback;
+import mitll.langtest.client.initial.WavStreamCallback;
+import mitll.langtest.client.scoring.ClientAudioContext;
 
 import java.util.logging.Logger;
 
@@ -11,6 +12,7 @@ public class BrowserRecording {
   private static final Logger logger = Logger.getLogger("BrowserRecording");
 
   private static final int DELAY_MILLIS = 130;
+  private static final boolean DEBUG = false;
 
   private static WebAudioRecorder webAudio;
   private static MicPermission micPermission;
@@ -30,11 +32,40 @@ public class BrowserRecording {
   }
 
   /**
-   * @see LangTest#startRecording()
+   * @see LangTest#startStream
    */
   public static void recordOnClick() {
     if (usingWebRTC()) {
       webAudio.startRecording();
+    }
+  }
+
+  /**
+   * @param url
+   * @param wavStreamCallback
+   * @see LangTest#startStream
+   */
+  public static void startStream(String url, ClientAudioContext clientAudioContext, WavStreamCallback wavStreamCallback) {
+    if (usingWebRTC()) {
+      if (DEBUG) {
+        logger.info("startStream post" +
+            "\n\tto      " + url +
+            "\n\tfor     " + clientAudioContext.getExerciseID() +
+            "\n\tsession " + clientAudioContext.getDialogSessionID()
+        );
+      }
+
+      WebAudioRecorder.setStreamCallback(wavStreamCallback);
+
+      webAudio.startStream(
+          url,
+          "" + clientAudioContext.getExerciseID(),
+          "" + clientAudioContext.getReqid(),
+          clientAudioContext.isShouldAddToTable() ? "true" : "false",
+          clientAudioContext.getAudioType().toString(),
+          "" + clientAudioContext.getDialogSessionID(),
+          clientAudioContext.getRecordingSessionID()
+          );
     }
   }
 
@@ -52,22 +83,22 @@ public class BrowserRecording {
    *
    * @see ExerciseController#stopRecording
    */
-  public static void stopRecording(final WavCallback wavCallback, boolean abort) {
+  public static void stopRecording(boolean abort) {
     if (usingWebRTC()) {
-      stopWebRTCRecordingLater(abort, wavCallback);
+      stopWebRTCRecordingLater(abort);
     }
   }
 
-  private static void stopWebRTCRecordingLater(boolean abort, final WavCallback wavCallback) {
-    final long then = System.currentTimeMillis();
-    //logger.info("stopWebRTCRecordingLater - initial ");
+  private static void stopWebRTCRecordingLater(boolean abort) {
+  //  final long then = System.currentTimeMillis();
+     logger.info("stopWebRTCRecordingLater -  after " + DELAY_MILLIS);
 
     Timer t = new Timer() {
       @Override
       public void run() {
-        long now = System.currentTimeMillis();
-        logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then) + " abort " + abort);
-        stopWebRTCRecording(abort, wavCallback);
+    //    long now = System.currentTimeMillis();
+      //  logger.info("stopWebRTCRecordingLater timer at " + now + " diff " + (now - then) + " abort " + abort);
+        stopWebRTCRecording(abort);
       }
     };
     t.schedule(DELAY_MILLIS); // add flash delay
@@ -75,11 +106,11 @@ public class BrowserRecording {
 
   /**
    * @param abort
-   * @param wavCallback
-   * @see #stopWebRTCRecordingLater(boolean, WavCallback)
+   * @see #stopWebRTCRecordingLater(boolean)
+   * @see LangTest#stopRecording
    */
-  public static void stopWebRTCRecording(boolean abort, WavCallback wavCallback) {
-    webAudio.stopRecording(wavCallback);
+  public static void stopWebRTCRecording(boolean abort) {
+    webAudio.stopRecording(abort);
   }
 
   private static boolean usingWebRTC() {

@@ -33,9 +33,7 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.user.UserDAO;
-import mitll.langtest.shared.exercise.HasID;
 
 public class MiniUser extends FirstLastUser {
   private int age;

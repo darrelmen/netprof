@@ -53,7 +53,6 @@ import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
-import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
@@ -78,6 +77,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.lang.Thread.sleep;
 import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
 
 public class ProjectManagement implements IProjectManagement {
@@ -91,6 +91,10 @@ public class ProjectManagement implements IProjectManagement {
    * @see #addOtherProps
    */
   private static final String DOMINO_NAME = "Domino Project";
+  public static final String VOCABULARY = "Vocabulary";
+  public static final String DIALOG = "Dialog";
+  public static final String VOCAB = "vocab";
+  public static final String DIALOG1 = "dialog";
   /**
    * JUST FOR TESTING
    */
@@ -107,6 +111,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see #addDateProps(SlickProject, Map)
    */
   private static final String CREATED = "Created";
+  public static final String CREATED_BY = CREATED + " by";
   public static final String MODIFIED = "Modified";
   /**
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
@@ -115,13 +120,8 @@ public class ProjectManagement implements IProjectManagement {
    */
   public static final String NUM_ITEMS = "Num Items";
 
-  /**
-   * @see #addOtherProps
-   */
-  private static final String DOMINO_ID = "Domino ID";
-
   private static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-  private static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
+  static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
   private static final ZoneId UTC = ZoneId.of("UTC");
 
   private final PathHelper pathHelper;
@@ -158,13 +158,12 @@ public class ProjectManagement implements IProjectManagement {
     this.db = db;
     this.debugOne = properties.debugOneProject();
     this.debugProjectID = properties.debugProjectID();
-
-    logger.info("ProjectManagement debug one " + debugOne + " = " + debugProjectID);
+//    logger.info("ProjectManagement debug one " + debugOne + " = " + debugProjectID);
 
     this.projectDAO = db.getProjectDAO();
 
     if (servletContext == null) {
-      logger.warn("\n\n\nProjectManagement : no servlet context, no domino delegates");
+      logger.warn("\nProjectManagement : no servlet context, no domino delegates\n");
       dominoImport = null;
     } else {
       dominoImport = setupDominoProjectImport(servletContext);
@@ -284,6 +283,10 @@ public class ProjectManagement implements IProjectManagement {
     logMemory();
   }
 
+  /**
+   * @param projid
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
+   */
   public void configureProjectByID(int projid) {
     Project project = getProject(projid, false);
     if (project != null) {
@@ -372,14 +375,14 @@ public class ProjectManagement implements IProjectManagement {
               db.getPhoneDAO(),
               db.getAudioDAO(),
               (SlickResultDAO) db.getResultDAO(),
-              project.getLanguage(),
+
+              project.getLanguageEnum(),
               id,
               isPolyglot(project))
       );
 
       if (myProject) {
-        //    project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises);
-        new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises)).start();
+        new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises),"checkLTSAndCountPhones_"+project.getID()).start();
       }
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
 
@@ -398,21 +401,25 @@ public class ProjectManagement implements IProjectManagement {
       logger.info("configure END " + projectID + " " + project.getLanguage() + " in " + (System.currentTimeMillis() - then) + " millis.");
 
       // side effect is to cache the users.
-      new Thread(() -> rememberUsers(projectID)).start();
+      new Thread(() -> rememberUsers(projectID),"rememberUsers_"+projectID).start();
 
-      /**
-       * Cache it for later....?
-       */
- /*      new Thread(() -> {
-         db
-          .getAnalysis(projectID)
-          .getUserInfo(db.getUserDAO(), 1);
-       }).start();*/
-
+      if (project.getLanguageEnum() == Language.KOREAN) {
+        addDialogInfo(project);
+      }
+      if (project.getLanguageEnum() == Language.ENGLISH) {
+        addDialogInfo(project);
+      }
       return rawExercises.size();
     } else {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);
       return 0;
+    }
+  }
+
+  private void addDialogInfo(Project project) {
+    if (project.getKind() == ProjectType.DIALOG || true) {
+      if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
+      }
     }
   }
 
@@ -425,7 +432,18 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private void rememberUsers(int projectID) {
-    db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
+    new Thread(() -> {
+      while (db.getUserDAO().getDefaultUser() < 1) {
+        try {
+          sleep(1000);
+          logger.info("rememberUsers ---> no default user yet.....");
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+
+      db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
+    },"ProjectManagement.rememberUsers_"+projectID).start();
   }
 
   @Override
@@ -618,7 +636,7 @@ public class ProjectManagement implements IProjectManagement {
         serverProps,
         db.getUserListManager(),
         ADD_DEFECTS,
-        (SlickUserExerciseDAO) db.getUserExerciseDAO(),
+        db.getUserExerciseDAO(),
         project);
   }
 
@@ -644,7 +662,7 @@ public class ProjectManagement implements IProjectManagement {
   public CommonExercise getExercise(int id) {
     int projectForExercise = db.getUserExerciseDAO().getProjectForExercise(id);
     if (projectForExercise == -1) {
-      logger.error("getExercise : can't find project for exercise " + id);
+      logger.warn("getExercise : can't find project for exercise " + id);
       return null;
     } else {
       Project project = getProject(projectForExercise, false);
@@ -698,12 +716,12 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public Project getProjectByName(String name) {
-    return idToProject
+    Optional<Project> first = idToProject
         .values()
         .stream()
         .filter(project -> project.getProject().name().toLowerCase().equals(name.toLowerCase()))
-        .findFirst()
-        .orElseGet(null);
+        .findFirst();
+    return first.orElse(null);
   }
 
   @Override
@@ -936,22 +954,57 @@ public class ProjectManagement implements IProjectManagement {
 
     List<SlimProject> projectInfos = new ArrayList<>();
     Map<String, List<Project>> langToProject = getLangToProjects();
+
 //    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
 
     langToProject.values().forEach(projects -> {
-      List<Project> production = getProductionProjects(projects);
-      Project firstProject = (production.isEmpty()) ? projects.iterator().next() : production.iterator().next();
-
-      SlimProject parent = getProjectInfo(firstProject);
+      Project firstProduction = getFirstProduction(projects);
+      SlimProject parent = getProjectInfo(firstProduction);
       projectInfos.add(parent);
 
       if (projects.size() > 1) {
         // add child to self?
-        projects.forEach(project -> parent.addChild(getProjectInfo(project)));
+        projects.forEach(project -> {
+          SlimProject projectInfo = getProjectInfo(project);
+          parent.addChild(projectInfo);
+          addModeChoices(project, projectInfo);
+        });
+      }
+      else {
+        addModeChoices(firstProduction, parent);
       }
     });
 
     return projectInfos;
+  }
+
+  /**
+   * Use custom icons for both vocab and dialog - hack the country code.
+   *
+   * @param project
+   * @param projectInfo
+   */
+  private void addModeChoices(Project project, SlimProject projectInfo) {
+    if (project.getKind() == ProjectType.DIALOG) {
+      SlimProject vocab = getProjectInfo(project);
+      projectInfo.addChild(vocab);
+      vocab.setName(VOCABULARY);
+      vocab.setProjectType(ProjectType.DIALOG);
+      vocab.setMode(ProjectMode.VOCABULARY);
+      vocab.setCountryCode(VOCAB);
+
+      SlimProject dialog = getProjectInfo(project);
+      projectInfo.addChild(dialog);
+      dialog.setName(DIALOG);
+      dialog.setProjectType(ProjectType.DIALOG);
+      dialog.setMode(ProjectMode.DIALOG);
+      dialog.setCountryCode(DIALOG1);
+    }
+  }
+
+  private Project getFirstProduction(List<Project> projects) {
+    List<Project> production = getProductionProjects(projects);
+    return (production.isEmpty()) ? projects.iterator().next() : production.iterator().next();
   }
 
   @NotNull
@@ -975,21 +1028,17 @@ public class ProjectManagement implements IProjectManagement {
     Map<String, String> info = new LinkedHashMap<>();
 
     SlickProject project = pproject.getProject();
-
     {
       User creator = db.getUserDAO().getByID(project.userid());
       String userInfo = creator == null ? "" : " : " + creator.getUserID();
-      info.put(CREATED + " by", project.userid() + userInfo);
+      info.put(CREATED_BY, project.userid() + userInfo);
     }
-//    logger.info(project.id() + " : model type " + pproject.getID() + " : " + pproject.getModelType());
 
     info.put(ProjectProperty.MODEL_TYPE.toString(), pproject.getModelType().toString());
 
-    addDateProps(project, info);
+     addDateProps(project, info);
 
     boolean isRTL = addOtherProps(project, info);
-
-    //   logger.info(project.id() + " : props now " + info);
 
     return new SlimProject(
         project.id(),
@@ -1042,7 +1091,7 @@ public class ProjectManagement implements IProjectManagement {
     return isRTL;
   }
 
-  private DateFormat format = new SimpleDateFormat();
+  private final DateFormat format = new SimpleDateFormat();
 
   private void addDateProps(SlickProject project, Map<String, String> info) {
     info.put(CREATED, format.format(project.created()));

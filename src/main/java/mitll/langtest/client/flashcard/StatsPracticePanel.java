@@ -3,7 +3,6 @@ package mitll.langtest.client.flashcard;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Label;
-import com.github.gwtbootstrap.client.ui.Nav;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -14,26 +13,24 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.AnalysisTab;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.IShowStatus;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonAnnotatable;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
 /**
- * @see ExercisePanelFactory#getExercisePanel(Shell)
+ * @see ExercisePanelFactory#getExercisePanel
  */
-class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extends BootstrapExercisePanel<CommonAnnotatable> {
+class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extends BootstrapExercisePanel<L, T> {
   private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   /**
@@ -70,7 +67,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   private Label remain, incorrectBox, correctBox, pronScore;
 
   /**
-   * @see StatsFlashcardFactory#getFlashcard
    * @param statsFlashcardFactory
    * @param controlState
    * @param controller
@@ -78,12 +74,13 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
    * @param e
    * @param stickyState
    * @param exerciseListToUse
+   * @see StatsFlashcardFactory#getFlashcard
    */
   public StatsPracticePanel(FlashcardContainer statsFlashcardFactory,
                             ControlState controlState,
                             ExerciseController controller,
                             MySoundFeedback soundFeedback,
-                            CommonAnnotatable e,
+                            T e,
                             StickyState stickyState,
                             ListInterface<L, T> exerciseListToUse) {
     super(e,
@@ -92,7 +89,6 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
         controlState,
         soundFeedback,
         null,
-        "",
         exerciseListToUse
     );
     this.sticky = stickyState;
@@ -101,7 +97,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     wifiTimer = getWifiTimer();
   }
 
-  private Timer wifiTimer;
+  private final Timer wifiTimer;
 
   @Override
   protected String getDeviceValue() {
@@ -123,6 +119,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
     if (isAudioOn()) {
       playRef();
     }
+//    else logger.info("audio set to off - so not playing.");
   }
 
   @Override
@@ -204,6 +201,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
       rememberCurrentExercise();
     }
 
+    logger.info("onSetComplete - show charts!");
     showFeedbackCharts();
   }
 
@@ -250,7 +248,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
   }
 
   AnalysisTab getScoreHistory() {
-    return new AnalysisTab(controller, true, -1, () -> 0);
+    return new AnalysisTab(controller, true, -1, () -> 0, INavigation.VIEWS.LEARN);
   }
 
   /**
@@ -343,7 +341,7 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
 
   /**
    * @param toAddTo
-   * @see FlashcardPanel#addWidgets(CommonExercise, ExerciseController, ControlState)
+   * @see FlashcardPanel#addWidgets
    */
   @Override
   void addRowBelowPrevNext(DivWidget toAddTo) {
@@ -377,10 +375,14 @@ class StatsPracticePanel<L extends CommonShell, T extends CommonExercise> extend
       @Override
       public void run() {
         //logger.warning("waited " + (System.currentTimeMillis() - then) + " for a response");
-        if (controller.isHasNetworkProblem()) {
-          logger.info("check - " + controller.isHasNetworkProblem());
+        boolean hasNetworkProblem = controller.isHasNetworkProblem();
+        if (hasNetworkProblem) {
+          logger.info("getWifiTimer network problem?");
         }
-        wifiStatus.setVisible(controller.isHasNetworkProblem());
+
+        if (wifiStatus != null) {
+          wifiStatus.setVisible(hasNetworkProblem);
+        }
       }
     };
     timer.scheduleRepeating(1000);

@@ -32,8 +32,6 @@
 
 package mitll.langtest.client.sound;
 
-import java.util.logging.Logger;
-
 /**
  * Does sound feedback - correct/incorrect to user.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -44,11 +42,12 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class SoundFeedback {
-  private final Logger logger = Logger.getLogger("SoundFeedback");
+ // private final Logger logger = Logger.getLogger("SoundFeedback");
 
   public static final String CORRECT   = "langtest/sounds/correct4.mp3";
   public static final String INCORRECT = "langtest/sounds/incorrect1.mp3";
   private static final int SOFT_VOL = 50;
+  private static final int VOLUME = 100;
 
   private Sound currentSound = null;
   private final SoundManagerAPI soundManager;
@@ -91,9 +90,8 @@ public class SoundFeedback {
       }
 
       @Override
-      public void repeatSegment(float startInSeconds, float endInSeconds) {
-       // logger.info("got repeatSegment");
-
+      public void loadAndPlaySegment(float startInSeconds, float endInSeconds) {
+       // logger.info("got loadAndPlaySegment");
       }
 
       @Override
@@ -123,7 +121,7 @@ public class SoundFeedback {
       }
     });
 
-    soundManager.createSound(currentSound, song, song, true);
+    soundManager.createSound(currentSound, song, song, true, VOLUME);
 
     return currentSound;
   }

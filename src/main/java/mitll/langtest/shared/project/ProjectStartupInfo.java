@@ -90,7 +90,8 @@ public class ProjectStartupInfo implements IsSerializable {
                             Map<String, Set<MatchInfo>> typeToDistinct,
                             Set<String> rootNodes,
                             Map<String, String> parentToChild,
-                            ProjectType projectType, boolean shouldSwap) {
+                            ProjectType projectType,
+                            boolean shouldSwap) {
     this.properties = properties;
     this.typeOrder = typeOrder;
     this.sectionNodes = sectionNodes;
@@ -122,12 +123,16 @@ public class ProjectStartupInfo implements IsSerializable {
     return projectid;
   }
 
+  public void setProjectid(int projectid) {
+    this.projectid = projectid;
+  }
+
   public String getLanguage() {
     return language;
   }
 
-  public void setProjectid(int projectid) {
-    this.projectid = projectid;
+  public Language getLanguageInfo() {
+    return languageInfo;
   }
 
   public boolean isHasModel() {
@@ -148,10 +153,6 @@ public class ProjectStartupInfo implements IsSerializable {
 
   public String getLocale() {
     return locale;
-  }
-
-  public Language getLanguageInfo() {
-    return languageInfo;
   }
 
   public ProjectType getProjectType() {

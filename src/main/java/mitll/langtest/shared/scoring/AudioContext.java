@@ -73,6 +73,8 @@ public class AudioContext implements IsSerializable {
    */
   private AudioType audioType;
 
+  private int dialogSessionID = -1;
+
   public AudioContext() {
   }
 
@@ -136,13 +138,32 @@ public class AudioContext implements IsSerializable {
     this.exid = exid;
   }
 
+  /**
+   *
+   * @return
+   */
+  public int getDialogSessionID() {
+    return dialogSessionID;
+  }
+
+  /**
+   * @see mitll.langtest.server.services.AudioServiceImpl#getJsonObject
+   * @param dialogSessionID
+   * @return
+   */
+  public AudioContext setDialogSessionID(int dialogSessionID) {
+    this.dialogSessionID = dialogSessionID;
+    return this;
+  }
+
   public String toString() {
     return
         "AudioContext" +
-            "\n\tuser   " + userid +
-            "\n\tprojid " + projid +
-            "\n\texid   " + exid +
-            "\n\treq    " + reqid +
-            "\n\ttype   " + audioType;
+            "\n\tuser           " + userid +
+            "\n\tprojid         " + projid +
+            "\n\texid           " + exid +
+            "\n\treq            " + reqid +
+            "\n\tdialog session " + dialogSessionID +
+            "\n\ttype           " + audioType;
   }
 }

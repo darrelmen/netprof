@@ -58,10 +58,13 @@ import mitll.langtest.shared.scoring.RecalcResponses;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
@@ -73,14 +76,12 @@ public class ProjectEditForm extends UserDialog {
 
   private static final String GVIDAVER = "gvidaver";
   private static final String CHECKING_AUDIO = "Checking audio and making mp3's...";
-  private static final String MODEL_TYPE = "Model Type";
-  /**
-   *
-   */
-  private static final String IN_PROGRESS = "In progress...";
 
   private static final String PROJECT_TYPE = "Project Type";
-  private static final boolean SHOW_PROJECT_TYPE = false;
+  private static final boolean SHOW_PROJECT_TYPE = true;
+
+
+  private static final String MODEL_TYPE = "Model Type";
 
   private static final String LANGUAGE = "Language";
   private static final String LIFECYCLE = "Lifecycle";
@@ -137,6 +138,9 @@ public class ProjectEditForm extends UserDialog {
 
   private final LifecycleSupport lifecycleSupport;
   private final MessageHelper messageHelper;
+  /**
+   * @see #addProjectType
+   */
   private ListBox statusBox, typeBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
@@ -159,10 +163,11 @@ public class ProjectEditForm extends UserDialog {
   private CheckBox showOniOSBox;
   private final Services services;
   private boolean isSuperUser = false;
+  private final Map<String, DominoProject> dominoToProject = new HashMap<>();
 
   /**
    * @param lifecycleSupport
-   * @see ProjectChoices#getCreateNewButton(DivWidget)
+   * @see ProjectChoices#getCreateNewButton
    */
   ProjectEditForm(LifecycleSupport lifecycleSupport, ExerciseController controller) {
     super(controller.getProps());
@@ -484,12 +489,19 @@ public class ProjectEditForm extends UserDialog {
     DivWidget lifecycle = getHDivLabel(fieldset, LIFECYCLE, false);
 
     lifecycle.add(statusBox = getStatusChoices());
+    statusBox.setWidth("150px");
     {
+      DivWidget ios = new DivWidget();
+
+      ios.addStyleName("leftThirtyMargin");
       showOniOSBox = new CheckBox(SHOW_ON_I_OS);
       showOniOSBox.setValue(info.isShowOniOS());
-      lifecycle.add(showOniOSBox);
       showOniOSBox.addStyleName("leftTenMargin");
       showOniOSBox.setEnabled(info.getStatus() == ProjectStatus.PRODUCTION);
+      ios.add(showOniOSBox);
+      ios.addStyleName("floatRight");
+      lifecycle.add(ios);
+
     }
 
     checkPortOnBlur(statusBox);
@@ -505,7 +517,40 @@ public class ProjectEditForm extends UserDialog {
     return lifecycle;
   }
 
-  private final Map<String, DominoProject> dominoToProject = new HashMap<>();
+  private ListBox getTypeBox() {
+    ListBox affBox = new ListBox();
+    affBox.addStyleName("leftTenMargin");
+    logger.info("getTypeBox type " + affBox.getItemCount());
+
+    getVisibleProjectTypes().forEach(projectType -> affBox.addItem(projectType.name()));
+    logger.info("getTypeBox after type " + affBox.getItemCount());
+
+    return affBox;
+  }
+
+  private void setBoxForType(ListBox statusBox, ProjectType projectType) {
+    int i = 0;
+    boolean found = false;
+
+    logger.info("project type " + projectType);
+
+    for (ProjectType projectType1 : getVisibleProjectTypes()) {
+      if (projectType1 == projectType) {
+        found = true;
+        break;
+      } else i++;
+    }
+    logger.info("project type " + projectType + " found " + found + " i " + i);
+
+    // first is please select.
+    statusBox.setSelectedIndex(found ? i : 0);
+  }
+
+  @NotNull
+  private List<ProjectType> getVisibleProjectTypes() {
+    return Arrays.stream(ProjectType.values())
+        .filter(ProjectType::shouldShow).collect(Collectors.toList());
+  }
 
   /**
    * @param info
@@ -636,7 +681,6 @@ public class ProjectEditForm extends UserDialog {
 
       /*    if (dominoToProject.size() == 1) {
             if (info.getDominoID() == -1) {
-
             }
           }*/
         }
@@ -863,11 +907,7 @@ public class ProjectEditForm extends UserDialog {
     affBox.getElement().setId(STATUS_BOX);
     affBox.addStyleName("leftTenMargin");
 
-    for (ProjectStatus status : ProjectStatus.values()) {
-      if (status.shouldShow()) {
-        affBox.addItem(status.name());
-      }
-    }
+    getVisibleStatus().forEach(projectType -> affBox.addItem(projectType.name()));
 
     affBox.addChangeHandler(event ->
         showOniOSBox.setEnabled(affBox.getValue().equalsIgnoreCase(ProjectStatus.PRODUCTION.toString()))
@@ -876,24 +916,11 @@ public class ProjectEditForm extends UserDialog {
     return affBox;
   }
 
-  private ListBox getTypeBox() {
-    ListBox affBox = new ListBox();
-    affBox.addStyleName("leftTenMargin");
-
-    for (ProjectType status : ProjectType.values()) {
-      if (status.shouldShow()) {
-        affBox.addItem(status.name());
-      }
-    }
-
-    return affBox;
-  }
-
   private void setBoxForStatus(ListBox statusBox, ProjectStatus statusValue) {
     int i = 0;
     boolean found = false;
 
-    for (ProjectStatus status : ProjectStatus.values()) {
+    for (ProjectStatus status : getVisibleStatus()) {
       if (status == statusValue) {
         found = true;
         break;
@@ -904,18 +931,11 @@ public class ProjectEditForm extends UserDialog {
     statusBox.setSelectedIndex(found ? i : 0);
   }
 
-  private void setBoxForType(ListBox statusBox, ProjectType projectType) {
-    int i = 0;
-    boolean found = false;
-
-    for (ProjectType projectType1 : ProjectType.values()) {
-      if (projectType1 == projectType) {
-        found = true;
-        break;
-      } else i++;
-    }
-
-    // first is please select.
-    statusBox.setSelectedIndex(found ? i : 0);
+  @NotNull
+  private List<ProjectStatus> getVisibleStatus() {
+    Stream<ProjectStatus> projectStatusStream = Arrays.stream(ProjectStatus.values())
+        .filter(ProjectStatus::shouldShow);
+    List<ProjectStatus> collect = projectStatusStream.collect(Collectors.toList());
+    return collect;
   }
 }

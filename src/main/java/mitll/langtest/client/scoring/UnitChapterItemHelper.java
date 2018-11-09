@@ -43,7 +43,8 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.Details;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -54,7 +55,7 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/11/16.
  */
-public class UnitChapterItemHelper<T extends CommonExercise> {
+public class UnitChapterItemHelper<T extends HasID & Details> {
   //private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
   private static final int MAXLEN = 10;
   /**
@@ -100,7 +101,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    * @return
    * @see GoodwaveExercisePanel#getQuestionContent
    */
-  private Widget getItemHeader(T e) {
+  private Widget getItemHeader(HasID e) {
     return new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + e.getID());
   }
 
@@ -124,7 +125,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
    * Show unit and chapter info for every item.
    *
    * @return
-   * @see #addUnitChapterItem(CommonExercise, Panel)
+   * @see #addUnitChapterItem
    */
   private Panel getUnitLessonForExercise(T exercise) {
     Panel flow = new HorizontalPanel();
@@ -141,12 +142,13 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
       }
     }
 
+
     int dominoID = exercise.getDominoID();
     String oldID = exercise.getOldID();
 
     boolean showDomino = dominoID > 0;
     if (showDomino) {
-      addProminentLabel(flow, DOMINO_ID, "" + exercise.getDominoID());
+      addProminentLabel(flow, DOMINO_ID, "" + dominoID);
     }
 
     if (!showDomino && !oldID.isEmpty()) {
@@ -156,10 +158,6 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     return flow;
   }
 
-/*  private boolean showDominoID(int dominoID, String oldID) {
-    return dominoID > 0 &&
-        !("" + dominoID).equals(oldID);
-  }*/
 
   private void addProminentLabel(Panel flow, String npId, String oldID) {
     Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);
@@ -194,7 +192,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
     return inlineLabel;
   }
 
-  public void showPopup(InlineLabel label, String toShow) {
+  private void showPopup(InlineLabel label, String toShow) {
     label.addMouseOverHandler(event -> new BasicDialog().showPopover(
         label,
         null,
@@ -207,7 +205,7 @@ public class UnitChapterItemHelper<T extends CommonExercise> {
   /**
    * @param exercise
    * @return
-   * @see #showPopup(CommonExercise)
+   * @see #showPopup
    */
   private String getUnitLessonForExercise2(T exercise) {
     long update = exercise.getUpdateTime();

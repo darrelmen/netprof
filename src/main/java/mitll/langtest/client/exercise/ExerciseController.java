@@ -39,13 +39,18 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.initial.PropertyHandler;
-import mitll.langtest.client.initial.WavCallback;
+import mitll.langtest.client.initial.WavEndCallback;
+import mitll.langtest.client.initial.WavStreamCallback;
+import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.scoring.ClientAudioContext;
 import mitll.langtest.client.scoring.CommentAnnotator;
+import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 
@@ -75,10 +80,21 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   int getUser();
 
-  void startRecording();
+  /**
+   * @see PostAudioRecordButton#startRecording
+   * @param clientAudioContext
+   * @param wavStreamCallback
+   */
+  void startStream(ClientAudioContext clientAudioContext, WavStreamCallback wavStreamCallback);
 
-  void stopRecording(WavCallback wavCallback);
-
+  /**
+   * @see RecordButton.RecordingListener#stopRecording
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
+   * @param useDelay
+   * @param abort
+   */
+  void stopRecording(boolean useDelay, boolean abort);
+  void registerStopDetected(WavEndCallback wavEndCallback);
   int getRecordTimeout();
 
   SoundManagerAPI getSoundManager();
@@ -94,6 +110,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
   void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);
 
   String getLanguage();
+  Language getLanguageInfo();
 
   boolean isRightAlignContent();
 
@@ -118,13 +135,13 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   boolean isMicAvailable();
 
-//  boolean usingFlashRecorder();
-
   KeyStorage getStorage();
 
   void showListIn(int listID, INavigation.VIEWS views);
 
-  ShowTab getShowTab();
+  ShowTab getShowTab(INavigation.VIEWS views);
+
+  INavigation getNavigation();
 
   void setBannerVisible(boolean visible);
 

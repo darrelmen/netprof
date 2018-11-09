@@ -67,6 +67,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   private static final float DEFAULT_PAGE_SIZE = 15f;
   protected final ExerciseController controller;
   private final ListDataProvider<T> dataProvider;
+  /**
+   *
+   */
   protected CellTable<T> table;
   protected SingleSelectionModel<T> selectionModel;
   int verticalUnaccountedFor = 100;
@@ -100,12 +103,15 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    *
    * @param listOptions
    * @return
+   * @see mitll.langtest.client.analysis.WordContainerAsync#getTableWithPager
    */
   @NotNull
   protected Panel getTable(ListOptions listOptions) {
-    final SimplePager pager = new SimplePager(SimplePager.TextLocation.CENTER, true, true);
+    final SimplePager pager =
+        new SimplePager(SimplePager.TextLocation.CENTER, !listOptions.isCompact(), !listOptions.isCompact());
 
     this.pager = pager;
+    pager.addStyleName("simplePager");
     // Set the cellList as the display.
     pager.setDisplay(table);
     pager.setVisible(listOptions.isShowPager());
@@ -123,6 +129,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     column.add(table);
     table.addStyleName("floatLeftAndClear");
   }
+
+
 
   public Map<Integer, T> getIdToExercise() {
     return Collections.emptyMap();
@@ -209,7 +217,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @param sortEnglish
    * @see #makeCellTable(boolean)
    */
-  protected void configureTable(boolean sortEnglish) {
+  private void configureTable(boolean sortEnglish) {
     table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     table.setWidth("100%");
     table.setHeight("auto");
@@ -354,8 +362,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     getList().add(0, item);
   }
 
-  //boolean DEBUG=true;
-
   /**
    * @param i
    * @see ClickablePagingContainer#markCurrent
@@ -440,7 +446,19 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   protected SafeHtml getNoWrapContent(String noWrapContent) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<div style='white-space: nowrap;'><span>" +
+    sb.appendHtmlConstant("<div style='white-space: nowrap;'>" +
+        "<span>" +
+        noWrapContent +
+        "</span>");
+
+    sb.appendHtmlConstant("</div>");
+    return sb.toSafeHtml();
+  }
+
+  protected SafeHtml getNoWrapContentBlue(String noWrapContent) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<div style='white-space: nowrap;'>" +
+        "<span style='color:blue;'>" +
         noWrapContent +
         "</span>");
 

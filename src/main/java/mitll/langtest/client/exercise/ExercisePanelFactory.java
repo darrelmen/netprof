@@ -36,7 +36,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.list.DisplayMenu;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -52,7 +52,7 @@ import static mitll.langtest.client.list.DisplayMenu.SHOW_PHONES;
  * Time: 6:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
+public abstract class ExercisePanelFactory<T extends HasID, U extends HasID> {
   private final Logger logger = Logger.getLogger("ExercisePanelFactory");
   /**
    * Fix for bug #115 : <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/115'>Bug #115 : Remove the transliteration </a>
@@ -67,20 +67,19 @@ public abstract class ExercisePanelFactory<T extends Shell, U extends Shell> {
    * @param exerciseList
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    */
-  public ExercisePanelFactory(final ExerciseController controller,
-                              ListInterface<T, U> exerciseList) {
+  public ExercisePanelFactory(final ExerciseController controller, ListInterface<T, U> exerciseList) {
     this.controller = controller;
     this.exerciseList = exerciseList;
   }
 
-  public void setExerciseList(ListInterface<T, U> exerciseList) {
+ /* public void setExerciseList(ListInterface<T, U> exerciseList) {
     this.exerciseList = exerciseList;
   }
-
+*/
   /**
    * @param e
    * @return
-   * @seex mitll.langtest.client.list.ExerciseList#makeExercisePanel
+   * @see mitll.langtest.client.list.ExerciseList#addExerciseWidget
    */
   public abstract Panel getExercisePanel(U e);
 

@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Client side
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -48,32 +49,57 @@ public interface AudioRefExercise {
   boolean hasRefAudio();
 
   /**
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#hasAudio
    * @param vocab
    * @return
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#hasAudio
    */
   boolean hasAudioNonContext(boolean vocab);
+
+  boolean hasContextAudio();
 
   String getRefAudio();
 
   String getSlowAudioRef();
 
+  /**
+   * @return
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#getRegularSpeedIfAvailable
+   */
   AudioAttribute getRegularSpeed();
 
-  AudioAttribute getSlowSpeed();
-
   Collection<AudioAttribute> getAudioAttributes();
-
-  Collection<Integer> getAudioIDs();
 
   AudioAttribute getRecordingsBy(long userID, boolean regularSpeed);
 
   /**
-   * Sorted by user age. Gotta choose something...
+   * TODO :  Sorted by user age. Gotta choose something... ???
+   *
    * @param malesMap
    * @return
    */
   List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap);
 
   Map<MiniUser, List<AudioAttribute>> getUserMap(boolean isMale, boolean includeContext);
+
+  /**
+   * CLIENT
+   *
+   * @param isMale
+   * @return
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getContextPlay
+   */
+  AudioAttribute getAudioAttrPrefGender(boolean isMale);
+
+  /**
+   * CLIENT
+   *
+   * @param isMale
+   * @param preferredUsers
+   * @param includeContext
+   * @return
+   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#addChoices
+   */
+  Map<MiniUser, List<AudioAttribute>> getMostRecentAudio(boolean isMale, Collection<Integer> preferredUsers, boolean includeContext);
+
+  List<AudioAttribute> getMostRecentAudioEasy(boolean isMale, boolean includeContext);
 }

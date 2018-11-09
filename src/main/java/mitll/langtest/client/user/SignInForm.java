@@ -175,6 +175,7 @@ public class SignInForm extends UserDialog implements SignIn {
     userField.box.addStyleName("topMargin");
     userField.box.addStyleName("rightFiveMargin");
     userField.box.getElement().setId("Username_Box_SignIn");
+    userField.box.getElement().setPropertyString(AUTOCOMPLETE,"username email");
     userField.box.setWidth(SIGN_UP_WIDTH);
 
     userField.box.addFocusHandler(event -> {
@@ -200,6 +201,8 @@ public class SignInForm extends UserDialog implements SignIn {
 
     hp.add(password.getGroup());
     box.addStyleName("rightFiveMargin");
+
+    box.getElement().setPropertyString(AUTOCOMPLETE,"current-password");
 
     return password;
   }
@@ -271,7 +274,7 @@ public class SignInForm extends UserDialog implements SignIn {
 
       @Override
       public void onSuccess(LoginResult result) {
-       // logger.info("checkLegacyUserWithSpaces  " + testUserID + " = " + result);
+        // logger.info("checkLegacyUserWithSpaces  " + testUserID + " = " + result);
         if (result.getResultType() == LoginResult.ResultType.Success) {
           //    logger.info("try again with " + testUserID);
           tryLoginWithUserID(testUserID);
@@ -338,7 +341,7 @@ public class SignInForm extends UserDialog implements SignIn {
    * @see #getSignInButton
    */
   private void gotLogin(String user, final String freeTextPassword) {
-  //  logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
+    //  logger.info("gotLogin : userField is '" + user + "' freeTextPassword " + freeTextPassword.length() + " characters" //+
 //    );
 
     if (user != null) {
@@ -430,15 +433,17 @@ public class SignInForm extends UserDialog implements SignIn {
   }
 
   private void gotGoodPassword(User foundUser) {
-    String user = foundUser.getUserID();
+    String context = "successful sign in for " + foundUser.getUserID();
     if (foundUser.isEnabled()) {
-      eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user);
       //    logger.info("Got valid userField " + userField + " and matching password, so we're letting them in.");
       storeUser(foundUser, userManager);
+
+      eventRegistration.logEvent(signIn, "sign in", "N/A", context);
     } else {
-      eventRegistration.logEvent(signIn, "sign in", "N/A", "successful sign in for " + user + " but wait for approval.");
       markErrorBlur(signIn, "I'm sorry", DEACTIVATED, Placement.LEFT);
       enableSignIn();
+
+      eventRegistration.logEvent(signIn, "sign in", "N/A", context + " but wait for approval.");
     }
   }
 

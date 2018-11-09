@@ -220,7 +220,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
       statement.setString(i++, info.getDeviceType());
       statement.setString(i++, info.getDevice());
       statement.setString(i++, info.getScoreJson());
-      statement.setBoolean(i++, info.isWithFlash());
+      statement.setBoolean(i++, false);
       statement.setInt(i++, info.getProcessDur());
       statement.setInt(i++, info.getRoundTripDur()); // always zero?
       statement.setString(i++, info.getValidity());

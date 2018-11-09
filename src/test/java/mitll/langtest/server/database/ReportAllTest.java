@@ -3,7 +3,8 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.connection.H2Connection;
 import mitll.langtest.server.database.exercise.Project;
-import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 

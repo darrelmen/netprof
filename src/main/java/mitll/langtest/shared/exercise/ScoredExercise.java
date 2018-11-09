@@ -42,6 +42,7 @@ import java.util.List;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 1/26/16.
  */
-public interface ScoredExercise {
+public interface ScoredExercise extends Scored {
   List<CorrectAndScore> getScores();
+
 }

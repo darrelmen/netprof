@@ -38,6 +38,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -111,6 +112,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     this.shortPageSize = shortPageSize;
   }
 
+  /**
+   * @param users
+   * @return
+   * @see StudentAnalysis#StudentAnalysis(ExerciseController)
+   */
   DivWidget getTable(Collection<T> users) {
     DivWidget leftSide = new DivWidget();
     leftSide.getElement().setId("studentDiv");
@@ -164,6 +170,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return Window.getClientHeight() < 822;
   }
 
+  protected void setMinHeight(Panel tableWithPager, int minHeight) {
+    tableWithPager.getElement().getStyle().setProperty("minHeight", minHeight + "px");
+  }
+
   /**
    */
   @Override
@@ -211,13 +221,18 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see StudentAnalysis#StudentAnalysis
    */
   public Panel getTableWithPager(final Collection<T> users) {
-    Panel tableWithPager = getTableWithPager(new ListOptions());
+    Panel tableWithPager = getTableWithPager(getListOptions());
 
     tableWithPager.getElement().setId("TableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
-
+    tableWithPager.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
     populateTable(users);
     return tableWithPager;
+  }
+
+  @NotNull
+  protected ListOptions getListOptions() {
+    return new ListOptions();
   }
 
   /**
@@ -248,6 +263,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     scrollIntoView(index);
 
+    makeInitialSelectionFromSet(users, userToSelect);
+  }
+
+  protected void makeInitialSelectionFromSet(Collection<T> users, T userToSelect) {
     if (!users.isEmpty()) {
       makeInitialSelection(users.iterator().next(), userToSelect);
     }
@@ -258,8 +277,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @paramx users
    * @see #getTableWithPager
    */
-  private void makeInitialSelection(T firstUser, T userToSelect) {
-    //logger.info("makeInitialSelection make initial selection : select " + userToSelect);
+  void makeInitialSelection(T firstUser, T userToSelect) {
+  //  logger.info("makeInitialSelection make initial selection : select " + userToSelect);
     Scheduler.get().scheduleDeferred(() -> selectAndClick((userToSelect == null) ? firstUser : userToSelect));
   }
 
@@ -329,6 +348,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return columnSortHandler;
   }
 
+  /**
+   * FILL ME IN
+   *
+   * @param o1
+   * @return
+   */
   protected abstract int getDateCompare(T o1, T o2);
 
   protected SafeHtml getSafeHtml(String columnText) {
@@ -376,7 +401,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     new TooltipHelper().addTooltip(table, "Click on a " + header + ".");
   }
 
-  private Column<T, SafeHtml> getItemColumn(int maxLength) {  return getTruncatedCol(maxLength, this::getItemLabel);  }
+  protected Column<T, SafeHtml> getItemColumn(int maxLength) {
+    return getTruncatedCol(maxLength, this::getItemLabel);
+  }
 
   protected Column<T, SafeHtml> getNoWrapCol(GetSafe<T> getSafe) {
     Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
@@ -399,6 +426,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * Is sortable.
+   *
    * @param maxLength
    * @param getSafe
    * @return
@@ -423,6 +451,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * Is sortable.
+   *
    * @param getSafe
    * @return
    */
@@ -447,6 +476,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   /**
    * Is sortable.
+   *
    * @param getSafe
    * @return
    */
@@ -478,6 +508,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     String getSafe(T shell);
   }
 
+  /**
+   * FILL ME IN
+   *
+   * @param shell
+   * @return
+   */
   protected abstract String getItemLabel(T shell);
 
   /**
@@ -486,28 +522,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    */
   private Column<T, SafeHtml> getDateColumn() {
     return getClickableDesc(shell -> getNoWrapDate(getItemDate(shell)));
-/*    return new Column<T, SafeHtml>(new PagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public boolean isDefaultSortAscending() {
-        return false;
-      }
-
-      @Override
-      public SafeHtml getValue(T shell) {
-        return getFormattedDate(getItemDate(shell));
-      }
-    };*/
   }
-
-//  private SafeHtml getFormattedDate(Long itemDate) {
-//    return getSafeHtml(getNoWrapDate(itemDate));
-//  }
 
   @NotNull
   protected String getNoWrapDate(Long itemDate) {
@@ -532,6 +547,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return signedUp;
   }
 
+  /**
+   * FILL ME IN
+   *
+   * @param shell
+   * @return
+   */
   protected abstract Long getItemDate(T shell);
 
   protected void checkGotClick(T object, NativeEvent event) {

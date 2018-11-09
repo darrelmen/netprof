@@ -36,7 +36,6 @@ import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.sorter.ExerciseComparator;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -47,27 +46,28 @@ import java.util.List;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 10/9/15.
  */
-public class SimpleSorter extends ExerciseComparator {
-  private  boolean sortByEnglishOnly;
+public class SimpleSorter<T extends CommonShell> extends ExerciseComparator {
+  private final boolean sortByEnglishOnly;
 
-  SimpleSorter(boolean sortByEnglishOnly) {  this.sortByEnglishOnly = sortByEnglishOnly;  }
+  SimpleSorter(boolean sortByEnglishOnly) {
+    this.sortByEnglishOnly = sortByEnglishOnly;
+  }
 
   /**
    * what if the item has no unit/chapter info?
    * what if we have a mixed list of user and predef items?
    *
    * @param toSort
-   * @param recordedLast
    * @param sortByFL
    * @param searchTerm
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
    */
-  public void getSorted(List<? extends CommonShell> toSort, final boolean recordedLast, boolean sortByFL, String searchTerm) {
+  public void getSorted(List<T> toSort, boolean sortByFL, String searchTerm) {
     if (sortByEnglishOnly) {
       sortByEnglish(toSort, searchTerm);
     } else {
-      toSort.sort((Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, recordedLast, sortByFL, searchTerm));
+      toSort.sort((Comparator<CommonShell>) (o1, o2) -> SimpleSorter.this.simpleCompare(o1, o2, sortByFL, searchTerm));
     }
   }
 
@@ -77,9 +77,9 @@ public class SimpleSorter extends ExerciseComparator {
    *
    * @param exerciseShells
    * @param searchTerm
-   * @see AudioExport#writeZipJustOneAudio
+   * @see AudioExport#writeUserListAudio
    */
-  public <T extends CommonShell> void sortByEnglish(List<T> exerciseShells, String searchTerm) {
+  public void sortByEnglish(List<T> exerciseShells, String searchTerm) {
     exerciseShells.sort((o1, o2) -> compareByEnglish(o1, o2, searchTerm));
   }
 }

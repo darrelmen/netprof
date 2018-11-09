@@ -52,10 +52,7 @@ import org.apache.poi.POIXMLProperties;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.internal.PackagePropertiesPart;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.XmlException;
@@ -123,7 +120,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private final List<String> errors = new ArrayList<>();
   private final String file;
 
-  private boolean shouldHaveRefAudio;
+  private final boolean shouldHaveRefAudio;
   private final boolean usePredefinedTypeOrder;
   private final boolean skipSemicolons;
   private final int maxExercises;
@@ -987,13 +984,13 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     if (col == -1) return "";
     Cell cell = next.getCell(col);
     if (cell == null) return "";
-    if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+    if (cell.getCellTypeEnum() == CellType.NUMERIC) {
       double numericCellValue = cell.getNumericCellValue();
       if ((new Double(numericCellValue).intValue()) < numericCellValue)
         return "" + numericCellValue;
       else
         return "" + new Double(numericCellValue).intValue();
-    } else if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+    } else if (cell.getCellTypeEnum() == CellType.STRING) {
       return cell.getStringCellValue().trim();
     } else {
       return cell.toString().trim();

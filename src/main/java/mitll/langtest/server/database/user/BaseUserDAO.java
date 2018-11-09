@@ -64,13 +64,18 @@ public abstract class BaseUserDAO extends DAO {
   static final String ENABLED_REQ_KEY = "enabledReqKey";
   static final String NATIVE_LANG = "nativeLang";
   static final String UNKNOWN = "unknown";
-  public static final String DEFAULT_USER1 = "defaultUser";
-  public static final String DEFAULT_MALE_USER = "defaultMaleUser";
-  public static final String DEFAULT_FEMALE_USER = "defaultFemaleUser";
+  static final String DEFAULT_USER1 = "defaultUser";
+  static final String DEFAULT_MALE_USER = "defaultMaleUser";
+  static final String DEFAULT_FEMALE_USER = "defaultFemaleUser";
   private static final String UNSET_EMAIL = "unset@unset.com";
   @Deprecated
   final String language;
-  protected int defectDetector, beforeLoginUser, importUser, defaultUser, defaultMale, defaultFemale;
+  /**
+   * @see DominoUserDAOImpl#ensureDefaultUsersLocal
+   */
+  int defectDetector = DEFAULT_USER_ID,
+      beforeLoginUser = DEFAULT_USER_ID, importUser = DEFAULT_USER_ID, defaultUser = DEFAULT_USER_ID,
+      defaultMale = DEFAULT_USER_ID, defaultFemale = DEFAULT_USER_ID;
 
   static final String ID = "id";
   static final String AGE = "age";
@@ -130,9 +135,7 @@ public abstract class BaseUserDAO extends DAO {
     return importUser;
   }
 
-  public int getDefaultUser() {
-    return defaultUser;
-  }
+  public int getDefaultUser() {    return defaultUser;  }
 
   public int getDefaultMale() {
     return defaultMale;
@@ -158,9 +161,13 @@ public abstract class BaseUserDAO extends DAO {
     if (currentUser == null) {
       LoginResult loginResult = addUserAndGetID(user);
       int userid = loginResult.getId();
+
       User userWhere = userid == -1 ? null : getUserWhere(userid);
-      if (userWhere != null) userWhere.setResetKey(loginResult.getToken());
-      logger.warn(" : addUser : added new user " + userWhere);
+      if (userWhere != null) {
+        userWhere.setResetKey(loginResult.getToken());
+      }
+      logger.info(" : addUser : added new user " + userWhere);
+
       return userWhere;
     } else {
       logger.warn(" : addUser : user exists ");
@@ -184,15 +191,18 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   /**
+   * Will send out an email with an embedded url to click on - should match the webapp.
+   *
    * @param user
    * @return -1 if we couldn't add this user
    * @paramx perms
    * @see #addUser
    */
   private LoginResult addUserAndGetID(SignUpUser user) {
-    String urlToUse = "https://" + getDatabase().getServerProps().getNPServer() + "/netprof";
+    String urlToUse = "https://" + getDatabase().getServerProps().getNPServer() + "/" +
+        database.getServerProps().getAppName();
 
-    // logger.info("addUserAndGetID user will see url = " + urlToUse);
+    logger.info("addUserAndGetID user will see url = " + urlToUse);
 
     return addUser(user.getAge(),
         user.getRealGender(),
@@ -245,20 +255,20 @@ public abstract class BaseUserDAO extends DAO {
   }
 
   /**
-   * @param defectDetector
+   * @param userID
    * @param first
    * @param last
    * @param kind
    * @return
    * @see #getOrAdd
    */
-  private int addShellUser(String defectDetector, String first, String last, Kind kind) {
+  private int addShellUser(String userID, String first, String last, Kind kind) {
     return addUser(89,
         MiniUser.Gender.Unspecified,
-        0, "", "", UNKNOWN, UNKNOWN, defectDetector, false, EMPTY_PERMISSIONS,
+        0, "", "", UNKNOWN, UNKNOWN, userID, false, EMPTY_PERMISSIONS,
         kind,
         "",
-        UNSET_EMAIL,//"admin@dliflc.edu",
+        UNSET_EMAIL,
         "",
         first,
         last,

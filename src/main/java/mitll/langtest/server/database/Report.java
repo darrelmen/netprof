@@ -179,7 +179,7 @@ public class Report implements IReport {
   private final Map<Integer, Integer> userToProject;
   private final LogAndNotify logAndNotify;
 
-  private Map<Integer, String> idToUserID = new HashMap<>();
+  private final Map<Integer, String> idToUserID = new HashMap<>();
 
   private static final boolean DEBUG = false;
 

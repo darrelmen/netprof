@@ -16,9 +16,9 @@ public enum Facet implements Comparator<Facet> {
   DIALECT("Dialect", 4),
   DIFFICULTY("Difficulty", 5);
 
-  private String name;
+  private final String name;
   private String alt;
-  private int order;
+  private final int order;
 
   Facet(String name, int order) {
     this.name = name;

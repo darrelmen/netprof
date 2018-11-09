@@ -32,29 +32,7 @@
 
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.gauge.SimpleColumnChart;
-import mitll.langtest.client.initial.PopupHelper;
-import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.services.LangTestDatabaseAsync;
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.scoring.NetPronImageType;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Just for dialog support -- {@link mitll.langtest.client.contextPractice.DialogWindow}
@@ -69,7 +47,7 @@ import java.util.logging.Logger;
  * <p>
  * TODO : make PostAudioRecordButton extend this class.
  */
-public abstract class SimplePostAudioRecordButton {//extends RecordButton implements RecordButton.RecordingListener {
+abstract class SimplePostAudioRecordButton {//extends RecordButton implements RecordButton.RecordingListener {
 /*  private final Logger logger = Logger.getLogger("SimplePostAudioRecordButton");
 
   private static final String RELEASE_TO_STOP = "Release";
@@ -131,7 +109,7 @@ public abstract class SimplePostAudioRecordButton {//extends RecordButton implem
 
   *//**
    * @param duration
-   * @see RecordButton#stop(long)
+   * @see RecordButton#stop(long, boolean)
    *//*
   public boolean stopRecording(long duration) {
     controller.stopRecording(new WavCallback() {

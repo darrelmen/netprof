@@ -251,8 +251,8 @@ public class SpectrumImage extends AudioImage {
   }
 
   private static class SpectrumResults {
-    float[][] spectrum;
-    float maxPower;
+    final float[][] spectrum;
+    final float maxPower;
 
     public SpectrumResults(float[][] spectrum, float maxPower) {
       this.spectrum = spectrum;

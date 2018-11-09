@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.SlickRefResultJson;
 import org.apache.logging.log4j.LogManager;
@@ -120,14 +121,14 @@ public class ExerciseToPhone {
    */
   public Map<Integer, ExercisePhoneInfo> getExerciseToPhone2(
       List<SlickRefResultJson> jsonResults,
-      Set<Integer> inProject, String language) {
+      Set<Integer> inProject, Language language) {
     long then = System.currentTimeMillis();
     //List<SlickRefResultJson> jsonResults = refResultDAO.getJsonResults();
     logger.info("getExerciseToPhone took " + (System.currentTimeMillis() - then) + " millis to get ref results");
     return getExToPhonePerProject(inProject, jsonResults, language);
   }
 
-  Map<Integer, ExercisePhoneInfo> getExToPhonePerProject(Set<Integer> inProject, List<SlickRefResultJson> jsonResults, String language) {
+  Map<Integer, ExercisePhoneInfo> getExToPhonePerProject(Set<Integer> inProject, List<SlickRefResultJson> jsonResults, Language language) {
     long then = System.currentTimeMillis();
     Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
 
@@ -282,16 +283,16 @@ public class ExerciseToPhone {
   }
 
   public static class Info {
-    int exid;
-    String word;
-    private List<List<String>> pronunciations;
+    final int exid;
+    final String word;
+    private final List<List<String>> pronunciations;
 
-    int numWords;
+    final int numWords;
 
-    private Map<String, Info> pronToInfo = new HashMap<>();
-    private Map<String, Integer> pronToCount = new HashMap<>();
-    private Map<String, Info> pronToInfo2 = new HashMap<>();
-    private Map<String, Integer> pronToCount2 = new HashMap<>();
+    private final Map<String, Info> pronToInfo = new HashMap<>();
+    private final Map<String, Integer> pronToCount = new HashMap<>();
+    private final Map<String, Info> pronToInfo2 = new HashMap<>();
+    private final Map<String, Integer> pronToCount2 = new HashMap<>();
 
     /**
      * @param exid

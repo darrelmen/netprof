@@ -39,11 +39,12 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -54,7 +55,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/28/2014.
  */
-public abstract class FlexListLayout<T extends CommonShell, U extends Shell> implements RequiresResize, IVisible {
+public abstract class FlexListLayout<T extends CommonShell, U extends HasID> implements RequiresResize, IVisible {
   private final Logger logger = Logger.getLogger("FlexListLayout");
 
   public PagingExerciseList<T, U> npfExerciseList;
@@ -62,7 +63,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
   /**
    * @param controller
-   * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @see NPFHelper#doInternalLayout(int, INavigation.VIEWS)
    */
   public FlexListLayout(ExerciseController controller) {
     this.controller = controller;
@@ -76,9 +77,9 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    * @param hasTopRow
    * @return
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#doNPF
-   * @see ReviewItemHelper#doInternalLayout(mitll.langtest.shared.custom.UserList, String)
+   * @see NPFHelper#doInternalLayout(int, INavigation.VIEWS)
    */
-  public Panel doInternalLayout(int userListID, String instanceName, boolean hasTopRow) {
+  public Panel doInternalLayout(int userListID, INavigation.VIEWS instanceName, boolean hasTopRow) {
     Panel twoRows = hasTopRow ? new FlowPanel() : new DivWidget();
     twoRows.getElement().setId("FlexListLayout_twoRows");
     Panel exerciseListContainer = new SimplePanel();
@@ -125,7 +126,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
         listHeader, footer);
     npfExerciseList = widgets;
 
-    addThirdColumn(bottomRow);
+  //  addThirdColumn(bottomRow);
 
     if (npfExerciseList == null) {
       logger.warning("huh? exercise list is null for " + instanceName + " and " + userListID);
@@ -178,6 +179,13 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
   }
 
 
+  /**
+   * mainBlock sometimes helpful, sometimes not...
+   * when do we need it when do we need to remove it...
+   *
+   * @param bottomRowDiv
+   * @param listHeader
+   */
   private void styleBottomRowDiv(DivWidget bottomRowDiv, DivWidget listHeader) {
     bottomRowDiv.addStyleName("floatLeft");
     bottomRowDiv.addStyleName("mainBlock");
@@ -209,8 +217,8 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
     return currentExerciseVPanel;
   }
 
-  protected void addThirdColumn(Panel bottomRow) {
-  }
+//  private void addThirdColumn(Panel bottomRow) {
+//  }
 
   protected void styleBottomRow(Panel bottomRow) {
   }
@@ -227,14 +235,13 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
    */
   private PagingExerciseList<T, U> makeNPFExerciseList(final Panel topRow,
                                                        Panel currentExercisePanel,
-                                                       String instanceName,
+                                                       INavigation.VIEWS instanceName,
                                                        int userListID,
                                                        DivWidget listHeader,
                                                        DivWidget footer) {
     final PagingExerciseList<T, U> exerciseList = makeExerciseList(topRow, currentExercisePanel, instanceName,
         listHeader, footer);
     exerciseList.setUserListID(userListID);
-
     exerciseList.setFactory(getFactory(exerciseList));
     Scheduler.get().scheduleDeferred(exerciseList::onResize);
     return exerciseList;
@@ -242,7 +249,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends Shell> imp
 
   protected abstract PagingExerciseList<T, U> makeExerciseList(final Panel topRow,
                                                                Panel currentExercisePanel,
-                                                               final String instanceName,
+                                                               final INavigation.VIEWS instanceName,
                                                                DivWidget listHeader, DivWidget footer);
 
   protected abstract ExercisePanelFactory<T, U> getFactory(final PagingExerciseList<T, U> exerciseList);

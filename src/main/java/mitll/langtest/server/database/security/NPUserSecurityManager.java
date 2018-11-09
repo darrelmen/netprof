@@ -32,8 +32,10 @@
 
 package mitll.langtest.server.database.security;
 
+import mitll.hlt.domino.shared.model.user.UserDescriptor;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.user.ActiveInfo;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
@@ -53,6 +55,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static mitll.langtest.server.services.MyRemoteServiceServlet.X_FORWARDED_FOR;
 
 /**
  * NPUserSecurityManager: Provide top level security management.
@@ -67,7 +72,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   private final IUserSessionDAO userSessionDAO;
   private IProjectManagement projectManagement;
 
-  private static boolean DEBUG = false;
+  private static final boolean DEBUG = false;
 
   /**
    * Only made once but shared with servlets.
@@ -77,11 +82,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @paramx projectManagement
    * @see
    */
-  public NPUserSecurityManager(IUserDAO userDAO,
-                               IUserSessionDAO userSessionDAO) {
+  public NPUserSecurityManager(IUserDAO userDAO, IUserSessionDAO userSessionDAO) {
     this.userDAO = userDAO;
     this.userSessionDAO = userSessionDAO;
-    // this.projectManagement = projectManagement;
     //startShiro();
   }
 
@@ -216,22 +219,21 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @see #setSessionUser(HttpSession, User, boolean)
    */
   private void setSessionUserAndRemember(HttpSession session, int id1) {
-    log.info("setSessionUserAndRemember : set session user to " + id1);
-
+    //  log.info("setSessionUserAndRemember : set session user to " + id1);
     session.setAttribute(USER_SESSION_ATT, id1);
-    String sessionID = session.getId();
-
 
     Timestamp modified = new Timestamp(System.currentTimeMillis());
     userSessionDAO.add(
         new SlickUserSession(-1,
             id1,
-            sessionID,
+            session.getId(),
             "",
             "",
             modified, modified));
 
-    if (DEBUG) logSetSession(session, sessionID);
+    if (DEBUG) {
+      logSetSession(session, session.getId());
+    }
   }
 
   private void logSetSession(HttpSession session1, String sessionID) {
@@ -314,7 +316,6 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   public String getSessionID(HttpServletRequest request) {
     return request.getRequestedSessionId();
   }
-
 
   /**
    * Get the currently logged in user.
@@ -472,7 +473,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @see mitll.langtest.server.rest.RestUserManagement#loginUser
    */
   public String getRemoteAddr(HttpServletRequest request) {
-    String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+    String remoteAddr = request.getHeader(X_FORWARDED_FOR);
     if (remoteAddr == null || remoteAddr.isEmpty()) {
       remoteAddr = request.getRemoteAddr();
     }
@@ -533,6 +534,11 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     return sessUser;
   }
 
+  /**
+   * @param request
+   * @return
+   * @see #lookupUserIDFromSessionOrDB(HttpServletRequest, boolean)
+   */
   private Integer lookupUserIDFromHttpSession(HttpServletRequest request) {
     //long then = System.currentTimeMillis();
     HttpSession session = request != null ? getCurrentSession(request) : null;
@@ -651,23 +657,53 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     }
   }
 
-  public List<ActiveUser> getActiveSince(long when) {
-    Map<Integer, IUserSessionDAO.ActiveInfo> activeSince = userSessionDAO.getActiveSince(when);
-    List<ActiveUser> since = new ArrayList<>();
+  public List<ActiveUser> getActiveTeachers() {
+    Map<Integer, ActiveInfo> justTeachers = userDAO.getJustTeachers(userSessionDAO.getActive());
+    return addProjectInfo(justTeachers, userDAO.getFirstLastFor(justTeachers.keySet()));
+  }
+
+  public List<ActiveUser> getTeachers() {
+    Set<Integer> teacherIDs = userDAO.getTeacherIDs();
+
+    log.info("getTeachers num teachers " + teacherIDs.size());
+    Map<Integer, ActiveInfo> activeSince = userSessionDAO.getActiveFrom(teacherIDs);
+    log.info("getTeachers activeSince " + activeSince.size());
     Map<Integer, FirstLastUser> firstLastFor = userDAO.getFirstLastFor(activeSince.keySet());
+    log.info("getTeachers firstLastFor " + firstLastFor.size());
+    return addProjectInfo(activeSince, firstLastFor);
+  }
+
+  /**
+   * @param when
+   * @return
+   * @see mitll.langtest.server.services.UserServiceImpl#getUsersSince
+   */
+  public List<ActiveUser> getActiveSince(long when) {
+    Map<Integer, ActiveInfo> activeSince = userSessionDAO.getActiveSince(when);
+    return addProjectInfo(activeSince, userDAO.getFirstLastFor(activeSince.keySet()));
+  }
+
+  private List<ActiveUser> addProjectInfo(Map<Integer, ActiveInfo> activeSince,
+                                          Map<Integer, FirstLastUser> firstLastFor) {
+    List<ActiveUser> since = new ArrayList<>();
+
     activeSince.forEach((k, v) -> {
       FirstLastUser firstLastUser = firstLastFor.get(k);
       if (firstLastUser != null) {
         firstLastUser.setLastChecked(v.getWhen());
-        // firstLastUser.setVisited(v.getVisited());
 
         ActiveUser e = new ActiveUser(firstLastUser, v.getVisited());
         since.add(e);
-        if (v.getProjid() > 0) {
-          Project project = projectManagement.getProject(v.getProjid(), false);
-          if (project != null) {
-            e.setProjectName(project.getName());
-            e.setLanguage(project.getLanguage());
+
+        {
+          int projid = v.getProjid();
+
+          if (projid > 0) {
+            Project project = projectManagement.getProject(projid, false);
+            if (project != null) {
+              e.setProjectName(project.getName());
+              e.setLanguage(project.getLanguage());
+            }
           }
         }
       }
@@ -728,8 +764,9 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     long then = System.currentTimeMillis();
     User sessUser = userDAO.getByID(id);
     long now = System.currentTimeMillis();
-    //if (now - then > 20)
-    log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
+    if (now - then > 20) {
+      log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
+    }
     return sessUser;
   }
 

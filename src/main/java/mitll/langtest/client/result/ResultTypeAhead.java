@@ -36,7 +36,7 @@ public class ResultTypeAhead {
   private final Collection<String> typeOrder;
   private final CellTable<MonitorResult> cellTable;
   private final ResultServiceAsync resultServiceAsync;
-  private MessageHelper messageHelper;
+  private final MessageHelper messageHelper;
 
   ResultTypeAhead(Collection<String> typeOrder,
                   CellTable<MonitorResult> cellTable,
@@ -65,7 +65,7 @@ public class ResultTypeAhead {
   }
 
 
-  private TextBox userIDBox = new TextBox();
+  private final TextBox userIDBox = new TextBox();
 
   public int getUserID() {
     try {
@@ -183,13 +183,8 @@ public class ResultTypeAhead {
       //  logger.info("UpdaterCallback " + " got update " +" " + " ---> '" + replacementString +"'");
 
       // NOTE : we need both a redraw on key up and one on selection!
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        public void execute() {
-          //       logger.info("--> getUpdaterCallback onSelection REDRAW ");
-          redraw();
-        }
-      });
-
+      //       logger.info("--> getUpdaterCallback onSelection REDRAW ");
+      Scheduler.get().scheduleDeferred(this::redraw);
       return replacementString;
     };
   }

@@ -161,6 +161,14 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return countryCode;
   }
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#addModeChoices
+   * @param cc
+   */
+  public void setCountryCode(String cc) {
+    this.countryCode = cc;
+  }
+
   @Override
   public void setStatus(ProjectStatus status) {
     this.status = status;

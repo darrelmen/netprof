@@ -35,15 +35,9 @@ package mitll.langtest.client.flashcard;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
+import java.util.*;
 
 /**
  * Remember the state of the flashcards in the localStorage browser cache.
@@ -52,9 +46,8 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 7/8/14.
  */
-public class StickyState {
-  private final Logger logger = Logger.getLogger("StickyState");
-
+public class StickyState extends SessionStorage {
+  //private final Logger logger = Logger.getLogger("StickyState");
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
 
@@ -63,7 +56,6 @@ public class StickyState {
   private static final String TIME_REMAINING = "timeRemaining";
   private static final String SESSION = "session";
   private static final String IN_QUIZ = "inQuiz";
-  private final KeyStorage storage;
 
 
   private final Map<Integer, Boolean> exToCorrect = new HashMap<>();
@@ -77,15 +69,15 @@ public class StickyState {
    * @see StatsFlashcardFactory
    */
   StickyState(KeyStorage storage) {
-    this.storage = storage;
+    super(storage,SESSION);
   }
 
   /**
    * @param e
-   * @see ExercisePanelFactory#getExercisePanel(Shell)
+   * @see ExercisePanelFactory#getExercisePanel
    * @see StatsPracticePanel#rememberCurrentExercise
    */
-  void storeCurrent(Shell e) {
+  void storeCurrent(HasID e) {
     // logger.info("StickyState.storeCurrent store current " + e.getID());
     storage.storeValue(CURRENT_EXERCISE, "" + e.getID());
   }
@@ -163,7 +155,10 @@ public class StickyState {
     //clearSession();
   }
 
-  public void clearTimeRemaining() {
+  /**
+   * @see PolyglotFlashcardFactory#clearTimeRemaining
+   */
+  void clearTimeRemaining() {
     storage.removeValue(TIME_REMAINING);
     clearSession();
   }
@@ -174,38 +169,6 @@ public class StickyState {
 
   long getTimeRemainingMillis() {
     return getLongValue(TIME_REMAINING);
-  }
-
-  /**
-   * The idea is that we remember the current session id across page reloads...
-   */
-  public void clearSession() {
-    storage.removeValue(SESSION);
-  //  logger.info("clearSession " );
-  }
-
-  void storeSession(long millis) {
-    storage.storeValue(SESSION, "" + millis);
-   // logger.info("storeSession " + millis);
-  }
-
-  long getSession() {
-    String session = SESSION;
-    return getLongValue(session);
-  }
-
-  private long getLongValue(String session) {
-    String value = storage.getValue(session);
-    if (value == null) return 0L;
-    long i = 0L;
-    try {
-      i = Long.parseLong(value);
-    } catch (NumberFormatException e) {
-
-    }
-    //   logger.info("getSession " + i);
-
-    return i;
   }
 
   void startQuiz() {
@@ -245,7 +208,8 @@ public class StickyState {
       AudioAnswer lastAnswer = answers.get(index);
       //  if (answerToEx.get(lastAnswer)==id) {
       if (lastAnswer.getExid() == id) {
-        AudioAnswer remove = answers.remove(index);
+        /* AudioAnswer remove =*/
+        answers.remove(index);
         //  logger.info("storeAnswer forget earlier answer " + remove);
       }
     }

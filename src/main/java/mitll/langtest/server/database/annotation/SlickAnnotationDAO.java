@@ -33,6 +33,8 @@
 package mitll.langtest.server.database.annotation;
 
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickAnnotation;
@@ -49,8 +51,8 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
 
   private final AnnotationDAOWrapper dao;
 
-  public SlickAnnotationDAO(Database database, DBConnection dbConnection, int defectDetector) {
-    super(database, defectDetector);
+  public SlickAnnotationDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
+    super(database, userDAO);
     dao = new AnnotationDAOWrapper(dbConnection);
   }
 
@@ -109,10 +111,10 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
     return copy;
   }
 
-  @Override
+/*  @Override
   public Collection<Integer> getAudioAnnos() {
     return dao.getOnlyAudioAnnos();
-  }
+  }*/
 
   @Override
   public Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID) {
@@ -132,12 +134,19 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
     return getFieldToAnnotationMapSlick(latestByExerciseID);
   }
 
+  /**
+   * @param projID
+   * @param isContext
+   * @return
+   * @see IUserListManager#getCommentedList
+   */
   @Override
-  public Set<Integer> getExercisesWithIncorrectAnnotations(int projID) {
-    Collection<Tuple4<Integer, String, String, Timestamp>> annoToCreator = dao.getAnnosGrouped(projID);
+  public Set<Integer> getExercisesWithIncorrectAnnotations(int projID, boolean isContext) {
+    Collection<Tuple4<Integer, String, String, Timestamp>> annoToCreator = dao.getAnnosGrouped(projID, isContext);
 
-    logger.info("getExercisesWithIncorrectAnnotations " + annoToCreator.size());
+    logger.info("getExercisesWithIncorrectAnnotations " + annoToCreator.size() + " projID " + projID + " is context " + isContext);
 
+    boolean debug = annoToCreator.size() < 20 || isContext;
     Integer prevExid = -1;
 
     Set<Integer> incorrect = new HashSet<>();
@@ -148,7 +157,8 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
       String field = tuple4._2();
       String status = tuple4._3();
 //      logger.info("getExercisesWithIncorrectAnnotations Got " + tuple4);
-//      logger.info("getExercisesWithIncorrectAnnotations " + exid + " : " + field +" : " + status);
+//      if (debug) logger.info("getExercisesWithIncorrectAnnotations ex " + exid + " : " + field + " : " + status);
+
       if (prevExid == -1) {
         prevExid = exid;
       } else if (!prevExid.equals(exid)) {
@@ -175,6 +185,11 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
       }*/
 
 //      finish(connection, statement, rs);
+
+
+    logger.info("getExercisesWithIncorrectAnnotations from " + annoToCreator.size() + " returning " + incorrect.size());
+
+//    if (incorrect.size()<20) incorrect.forEach(ex->logger.info("getExercisesWithIncorrectAnnotations return " + ex));
 
     return incorrect;
   }
@@ -259,7 +274,7 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
 
 */
 
-  public boolean isEmpty() {
+/*  public boolean isEmpty() {
     return dao.getNumRows() == 0;
-  }
+  }*/
 }

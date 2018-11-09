@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static mitll.langtest.shared.project.ProjectMode.EITHER;
+import static mitll.langtest.shared.project.ProjectMode.VOCABULARY;
 import static mitll.langtest.shared.user.User.Permission.*;
 
 /**
@@ -17,35 +19,98 @@ import static mitll.langtest.shared.user.User.Permission.*;
  */
 public interface INavigation extends IViewContaner {
   enum VIEWS {
-    NONE,
-    LISTS,
-    PROGRESS,
-    LEARN,
-    DRILL,
-    QUIZ,
-    DIALOG,
-    RECORD(Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    CONTEXT(Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    DEFECTS(Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    FIX(Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN));
+    NONE("", EITHER),
 
-    private List<User.Permission> perms;
+    LISTS("Lists", VOCABULARY),
+    /**
+     *
+     */
+    PROGRESS("Progress", VOCABULARY),
 
-    VIEWS(List<User.Permission> perms) {
+    LEARN("Learn", VOCABULARY),
+    //LEARN_SENTENCES("Learn Sentences", VOCABULARY, true),
+    PRACTICE("Practice", VOCABULARY),
+    //PRACTICE_SENTENCES("Practice Sentences", VOCABULARY, true),
+    QUIZ("Quiz", VOCABULARY),
+
+
+    DIALOG("Dialog", ProjectMode.DIALOG),
+    /**
+     * @see mitll.langtest.client.banner.DialogExerciseList#gotClickOnDialog
+     * @see mitll.langtest.client.banner.NewContentChooser#showView
+     */
+    STUDY("Study", ProjectMode.DIALOG),
+    LISTEN("Listen", ProjectMode.DIALOG),
+    REHEARSE("Rehearse", ProjectMode.DIALOG),
+    PERFORM("Perform", ProjectMode.DIALOG),
+    /**
+     * @see mitll.langtest.client.banner.NewContentChooser#showScores
+     */
+    SCORES("Scores", ProjectMode.DIALOG),
+
+
+    RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+    RECORD_SENTENCES("Record Sentences", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+
+
+    QC_ENTRIES("QC Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, false),
+    FIX_ENTRIES("Fix Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, false),
+    QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, true),
+    FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, true);
+
+    private final List<User.Permission> perms;
+    private final ProjectMode mode;
+    private boolean isQC;
+    private boolean isFix;
+    private boolean isContext;
+
+    final String display;
+
+    VIEWS(String display, List<User.Permission> perms) {
+      this.display = display;
       this.perms = perms;
+      this.mode = EITHER;
     }
 
-    VIEWS() {
+    VIEWS(String display, List<User.Permission> perms, boolean isQC, boolean isFix, boolean isContext) {
+      this.display = display;
+      this.perms = perms;
+      this.mode = EITHER;
+      this.isQC = isQC;
+      this.isFix = isFix;
+      this.isContext = isContext;
+    }
+
+    VIEWS(String display, ProjectMode mode) {
+      this.display = display;
       this.perms = Collections.emptyList();
+      this.mode = mode;
     }
 
     public List<User.Permission> getPerms() {
       return perms;
     }
 
-    public String toString() {
-      return name().substring(0, 1) + name().substring(1).toLowerCase();
+    public ProjectMode getMode() {
+      return mode;
     }
+
+    public String toString() {
+      return display;
+    }
+
+    public boolean isQC() {
+      return isQC;
+    }
+
+    public boolean isFix() {
+      return isFix;
+    }
+
+    public boolean isContext() {
+      return isContext;
+    }
+
   }
 
   void storeViewForMode(ProjectMode mode);
@@ -60,7 +125,13 @@ public interface INavigation extends IViewContaner {
 
   void showListIn(int listid, VIEWS view);
 
-  ShowTab getShowTab();
+  void showDialogIn(int dialogid, VIEWS view);
+
+  /**
+   * @param views
+   * @return
+   */
+  ShowTab getShowTab(VIEWS views);
 
   Widget getNavigation();
 

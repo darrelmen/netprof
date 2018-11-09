@@ -1,7 +1,6 @@
 package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.google.gwt.user.client.ui.Panel;
 
 /**
  * Created by go22670 on 11/15/16.
@@ -14,6 +13,7 @@ public class DecoderOptions implements IsSerializable {
   private boolean canUseCache = true;
   private boolean allowAlternates = false;
   private boolean usePhoneToDisplay = false;
+  private boolean compressLater = false;
 
   public DecoderOptions() {
   }
@@ -91,14 +91,25 @@ public class DecoderOptions implements IsSerializable {
     return usePhoneToDisplay;
   }
 
+/*  public DecoderOptions setCompressLater(boolean val) {
+    this.compressLater = val;
+    return this;
+  }*/
+
+  public boolean shouldCompressLater() {
+    return compressLater;
+  }
+
+
+
   public String toString() {
     return "Decoder options " +
-        (isRefRecording() ? "add to audio table " : "") +
-        (recordInResults ? "add to results table " : "") +
-        (doDecode ? "decoding " : "alignment ") +
-        (canUseCache ? "use score cache " : "") +
-        (allowAlternates ? "allow alternates paths in decoding " : "")
-        // +        (useOldSchool ? "use hydec " : "use hydra")
-        ;
+            (isRefRecording() ? "add to audio table " : "") +
+            (recordInResults ? "add to results table " : "") +
+            (doDecode ? "decoding " : "alignment ") +
+            (canUseCache ? "use score cache " : "") +
+            (allowAlternates ? "allow alternates paths in decoding " : "")
+            // +        (useOldSchool ? "use hydec " : "use hydra")
+            ;
   }
 }

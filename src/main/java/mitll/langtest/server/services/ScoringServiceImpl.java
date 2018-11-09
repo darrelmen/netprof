@@ -46,12 +46,16 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.scoring.PrecalcScores;
+import mitll.langtest.server.scoring.TranscriptSegmentGenerator;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.*;
@@ -77,7 +81,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   private static final String RECALC_ALIGNMENTS = "recalc alignments";
 
   private IEnsureAudioHelper ensureAudioHelper;
-
+  private TranscriptSegmentGenerator transcriptSegmentGenerator;
   // private static final boolean DEBUG = true;
 
   /**
@@ -87,6 +91,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   public void init() {
     super.init();
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
+    this.transcriptSegmentGenerator = new TranscriptSegmentGenerator(db.getServerProps());
   }
 
   /**
@@ -121,7 +126,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           if (exercise1 != null) {
             transliteration = exercise1.getTransliteration();
             exercise = exercise1;
-            Collection<CommonExercise> directlyRelated = exercise1.getDirectlyRelated();
+            Collection<ClientExercise> directlyRelated = exercise1.getDirectlyRelated();
             sentence =
                 result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
                     directlyRelated.iterator().next().getForeignLanguage() :
@@ -141,7 +146,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         } else {
           String audioFilePath = result.getAnswer();
           Project project = db.getProject(projectIDFromUser);
-          String language = project.getLanguage();
+          //  String language = project.getLanguage();
 
           // NOTE : actively avoid doing this -
           //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
@@ -153,12 +158,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
               transliteration,
               imageOptions,
               "" + exerciseID,
-              getPrecalcScores(serverProps.usePhoneToDisplay(), result, language),
+              getPrecalcScores(serverProps.usePhoneToDisplay(project.getLanguageEnum()), result, project.getLanguageEnum()),
 
               new DecoderOptions()
                   .setDoDecode(false)
                   .setCanUseCache(serverProps.useScoreCache())
-                  .setUsePhoneToDisplay(serverProps.usePhoneToDisplay()), isKaldi(project));
+                  .setUsePhoneToDisplay(serverProps.usePhoneToDisplay(project.getLanguageEnum())), isKaldi(project));
+
         }
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -275,34 +281,43 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @see mitll.langtest.client.scoring.AlignmentFetcher#cacheOthers
    */
   @Override
-  public Map<Integer, AlignmentOutput> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
-    //logger.info("getAlignments project " + projid + " asking for " + audioIDs);
+  public Map<Integer, AlignmentAndScore> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
+    logger.info("getAlignments project " + projid + " asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
-    Project project = getProject(projid);
 
-    if (project.hasProjectSpecificAudio()) {
-      List<CommonExercise> exercisesForAudio =
-          audioIDMap
-              .values()
-              .stream()
-              .map(iSlimResult -> db.getExercise(projid, iSlimResult.getExID()))
-              .collect(Collectors.toList());
+    {
+      Project project = getProject(projid);
 
-      logger.info("ensure compressed audio for " + exercisesForAudio.size() + " exercises");
-      new EnsureAudioHelper(db, pathHelper).ensureCompressedAudio(exercisesForAudio, getLanguage(project));
+      if (project != null && project.hasProjectSpecificAudio()) {
+        List<CommonExercise> exercisesForAudio =
+            audioIDMap
+                .values()
+                .stream()
+                .map(iSlimResult -> db.getExercise(projid, iSlimResult.getExID()))
+                .collect(Collectors.toList());
+
+        logger.info("ensure compressed audio for " + exercisesForAudio.size() + " exercises");
+        new EnsureAudioHelper(db, pathHelper).ensureCompressedAudio(exercisesForAudio, getLanguageEnum(project));
+      }
     }
 
     logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
-    Map<Integer, AlignmentOutput> audioIDToAlignment = recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
+    Map<Integer, AlignmentAndScore> audioIDToAlignment = recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
     return audioIDToAlignment;
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
   }
 
-  private Map<Integer, AlignmentOutput> recalcAlignments(int projid,
-                                                         Collection<Integer> audioIDs,
-                                                         int userIDFromSession,
-                                                         Map<Integer, ISlimResult> audioToResult,
-                                                         boolean hasModel) {
+  public AlignmentAndScore getStudentAlignment(int projid, int resultID) {
+    CorrectAndScore correctAndScoreForResult = db.getResultDAO().getCorrectAndScoreForResult(resultID, getProject(projid).getLanguageEnum());
+    return correctAndScoreForResult == null ? null :
+        new AlignmentAndScore(correctAndScoreForResult.getScores(), correctAndScoreForResult.getScore(), true);
+  }
+
+  private Map<Integer, AlignmentAndScore> recalcAlignments(int projid,
+                                                           Collection<Integer> audioIDs,
+                                                           int userIDFromSession,
+                                                           Map<Integer, ISlimResult> audioToResult,
+                                                           boolean hasModel) {
     return recalcAlignments(projid, audioIDs, getAudioFileHelper(projid), userIDFromSession, audioToResult, hasModel);
   }
 
@@ -315,13 +330,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param hasModel
    * @return
    */
-  private Map<Integer, AlignmentOutput> recalcAlignments(int projid,
-                                                         Collection<Integer> audioIDs,
-                                                         AudioFileHelper audioFileHelper,
-                                                         int userIDFromSession,
-                                                         Map<Integer, ISlimResult> audioToResult,
-                                                         boolean hasModel) {
-    Map<Integer, AlignmentOutput> idToAlignment = new HashMap<>();
+  private Map<Integer, AlignmentAndScore> recalcAlignments(int projid,
+                                                           Collection<Integer> audioIDs,
+                                                           AudioFileHelper audioFileHelper,
+                                                           int userIDFromSession,
+                                                           Map<Integer, ISlimResult> audioToResult,
+                                                           boolean hasModel) {
+    Map<Integer, AlignmentAndScore> idToAlignment = new HashMap<>();
 
     if (hasModel) {
       logger.info("recalcAlignments recalc " + audioIDs.size() + " audio ids for project #" + projid);
@@ -352,7 +367,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                     AudioFileHelper audioFileHelper,
                                     int userIDFromSession,
                                     ISlimResult cachedResult,
-                                    Map<Integer, AlignmentOutput> idToAlignment,
+                                    Map<Integer, AlignmentAndScore> idToAlignment,
                                     Set<Integer> completed,
                                     int total) {
     if (cachedResult == null) { // nope, ask the database
@@ -372,8 +387,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         idToAlignment.put(audioID, pretestScore);
       }
     } else {
-//      logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " + audioID);
-      getCachedAudioRef(idToAlignment, audioID, cachedResult, db.getProject(projid).getLanguage());  // OK, let's translate the db info into the alignment output
+      logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " + audioID);
+      getCachedAudioRef(idToAlignment, audioID, cachedResult, db.getProject(projid).getLanguageEnum());  // OK, let's translate the db info into the alignment output
     }
     completed.add(audioID);
 
@@ -384,13 +399,22 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
   }
 
-  private void getCachedAudioRef(Map<Integer, AlignmentOutput> idToAlignment, Integer audioID, ISlimResult cachedResult, String language) {
+  /**
+   * TODO : mark full match true for now - also see other call!
+   *
+   * @param idToAlignment
+   * @param audioID
+   * @param cachedResult
+   * @param language
+   */
+  private void getCachedAudioRef(Map<Integer, AlignmentAndScore> idToAlignment,
+                                 Integer audioID, ISlimResult cachedResult, Language language) {
     PrecalcScores precalcScores = getPrecalcScores(USE_PHONE_TO_DISPLAY, cachedResult, language);
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
         getTypeToTranscriptEvents(precalcScores.getJsonObject(), USE_PHONE_TO_DISPLAY, language);
-    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents, language);
+    Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = transcriptSegmentGenerator.getTypeToSegments(typeToTranscriptEvents, language);
 //    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
-    idToAlignment.put(audioID, new AlignmentOutput(typeToSegments));
+    idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments, cachedResult.getPronScore(), true));
   }
 
 
@@ -402,28 +426,28 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     if (byID != null) {
       CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
 
-      boolean contextAudio = byID.isContextAudio();
+      //boolean contextAudio = byID.isContextAudio();
 
 /*
       if (customOrPredefExercise != null) {
         logger.info("getAlignmentsFromDB decoding " + audioID +
-            (contextAudio ? " CONTEXT" : "") +
+            (contextAudio ? " RECORD_CONTEXT" : "") +
             " for exercise " + byID.getExid() + " : '" +
             customOrPredefExercise.getEnglish() + "' = '" + customOrPredefExercise.getForeignLanguage() + "'");
       }
       */
 
       // cover for import bug...
-      if (contextAudio &&
+      if (byID.isContextAudio() &&
           customOrPredefExercise != null &&
           customOrPredefExercise.getDirectlyRelated() != null &&
           !customOrPredefExercise.getDirectlyRelated().isEmpty()) {
-        customOrPredefExercise = customOrPredefExercise.getDirectlyRelated().iterator().next();
+        customOrPredefExercise = customOrPredefExercise.getDirectlyRelated().iterator().next().asCommon();
 
         //logger.info("getAlignmentsFromDB using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }
 
-      logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " for exercise #" + byID.getExid() + "...");
+      logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " '" + byID.getTranscript() + "' for exercise #" + byID.getExid() + "...");
       return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null);
     } else {
       logger.info("recalcRefAudioWithHelper can't find audio id " + audioID);
@@ -432,56 +456,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
-                                                                                boolean usePhoneToDisplay, String language) {
+                                                                                boolean usePhoneToDisplay,
+                                                                                Language language) {
     return
         new ParseResultJson(db.getServerProps(), language)
             .readFromJSON(object, "words", "w", usePhoneToDisplay, null, false);
-  }
-
-  /**
-   * TODO : remove duplicate code
-   *
-   * @param typeToEvent
-   * @param language
-   * @return
-   * @see #getCachedAudioRef
-   */
-  @NotNull
-  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent, String language) {
-    Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
-
-    Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      boolean isPhone = key == NetPronImageType.PHONE_TRANSCRIPT;
-
-      List<TranscriptSegment> endTimes = typeToEndTimes.get(key);
-      if (endTimes == null) {
-        typeToEndTimes.put(key, endTimes = new ArrayList<>());
-      }
-
-      StringBuilder builder = new StringBuilder();
-
-      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        TranscriptEvent value = event.getValue();
-        String event1 = value.getEvent();
-
-        String displayName = isPhone ? getDisplayName(event1, phoneToDisplay) : event1;
-        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName, builder.length()));
-
-        if (!isPhone) {
-          builder.append(event1);
-        }
-      }
-    }
-
-    return typeToEndTimes;
-  }
-
-  private String getDisplayName(String event, Map<String, String> phoneToDisplay) {
-    String displayName = phoneToDisplay.get(event);
-    displayName = displayName == null ? event : displayName;
-    return displayName;
   }
 
   /**
@@ -520,12 +499,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         audioFileHelper
             .checkForWebservice(exerciseID, english, sentence, projectID, userIDFromSessionOrDB, absoluteAudioFile);
 
+    Language languageEnum = getProject(projectID).getLanguageEnum();
     String absPath = absoluteAudioFile.getAbsolutePath();
     return getPretestScore(reqid,
         (int) resultID,
         testAudioFile,
         sentence, transliteration, imageOptions,
-        exerciseID, usePhonemeMap, precalcScores, audioFileHelper, projectID, userIDFromSessionOrDB, absPath);
+        exerciseID, usePhonemeMap, precalcScores, audioFileHelper, projectID, userIDFromSessionOrDB, absPath, languageEnum);
   }
 
   /**
@@ -539,6 +519,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param usePhoneToDisplay
    * @param precalcScores
    * @param absPath
+   * @param language
    * @return
    */
   private PretestScore getPretestScore(int reqid,
@@ -553,9 +534,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                        AudioFileHelper audioFileHelper,
                                        int projID,
                                        int userIDFromSessionOrDB,
-                                       String absPath) {
+
+                                       String absPath, Language language) {
     if (testAudioFile.equals(AudioConversion.FILE_MISSING))
       return new PretestScore(-1).setStatus("can't find audio file");
+
     long then = System.currentTimeMillis();
 
     //String[] split = testAudioFile.split(File.separator);
@@ -563,7 +546,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 //    String wavEndingAudio = answer.replaceAll(".mp3", ".wav").replaceAll(".ogg", ".wav");
     //  ISlimResult cachedResult = null;//db.getRefResultDAO().getResult(audioID);//exerciseID, wavEndingAudio);
 
-    boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay();
+    boolean usePhoneToDisplay1 = usePhoneToDisplay || serverProps.usePhoneToDisplay(language);
 /*    if (cachedResult != null && precalcScores == null) {
       precalcScores = getPrecalcScores(usePhoneToDisplay, cachedResult, language);
       if (DEBUG)
@@ -639,8 +622,12 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   @NotNull
-  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, String language) {
-    return new PrecalcScores(serverProps, cachedResult, usePhoneToDisplay || serverProps.usePhoneToDisplay(), language);
+  private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, Language language) {
+    return new PrecalcScores(serverProps, cachedResult, shouldUsePhoneDisplay(usePhoneToDisplay, language), language);
+  }
+
+  private boolean shouldUsePhoneDisplay(boolean usePhoneToDisplay, Language language) {
+    return usePhoneToDisplay || serverProps.usePhoneToDisplay(language);
   }
 
   /**
@@ -670,7 +657,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         } else {
           sendSlowEmail(resultID, roundTrip, userIDFromSessionOrDB);
         }
-
       } catch (Exception e) {
         logger.warn("addRoundTrip got " + e, e);
       }
@@ -762,14 +748,16 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * <p>
    * Can't check if it's valid if we don't have a model.
    *
-   * @param foreign
+   * @paramx foreign
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
+   * @seex mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
+/*
   @Override
   public boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration, new HashSet<>());
   }
+*/
 
   /**
    * @param projID should be a projid from project table...
@@ -793,6 +781,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         }
       }
     } else {
+      logger.warn("configureAndRefresh project " + projID + " user #" + userIDFromSessionOrDB + " does not have permission?");
       throw getRestricted(UPDATING_PROJECT_INFO);
     }
   }
@@ -803,7 +792,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   }
 
   private void ensureAudioForAnswers(int projectID, MonitorResult result) {
-    String language = db.getLanguage(projectID);
+    Language language = db.getLanguageEnum(projectID);
     Map<Integer, User> idToUser = new HashMap<>();
 
     if (result == null) logger.error("couldn't find result in " + projectID);
@@ -811,7 +800,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       String path = result.getAnswer();
       CommonExercise commonExercise = db.getExercise(projectID, result.getExID());
       /*String actualPath =*/
-      ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser);
+      ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser, true);
 //    logger.info("ensureAudioForAnswers initial path " + path + " compressed actual " + actualPath);
     }
   }

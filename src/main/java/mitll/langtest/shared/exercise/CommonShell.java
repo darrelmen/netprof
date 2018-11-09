@@ -32,8 +32,6 @@
 
 package mitll.langtest.shared.exercise;
 
-import java.util.Collection;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  * <p>
@@ -42,7 +40,7 @@ import java.util.Collection;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/21/2014.
  */
-public interface CommonShell extends Shell {
+public interface CommonShell extends HasID {
   /**
    * @return
    * @see mitll.langtest.client.list.ListSorting#compEnglish
@@ -60,21 +58,27 @@ public interface CommonShell extends Shell {
    * @see mitll.langtest.client.list.ListSorting#compForeign
    */
   String getForeignLanguage();
-  String getFLToShow();
-
-  MutableShell getMutableShell();
 
   /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getFL
    * @return
-   * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
    */
-  Collection<String> getRefSentences();
+  String getFLToShow();
 
-  CommonShell getShell();
+  /**
+   * @see mitll.langtest.client.list.ExerciseList#setScore
+   * @return
+   */
+  MutableShell getMutableShell();
 
+
+  /**
+   * @see mitll.langtest.client.list.ListSorting#compPhones
+   * @return
+   */
   int getNumPhones();
 
-  int getRawScore();
-  float getScore();
-  boolean hasScore();
+  boolean isContext();
+
+  int getNumContext();
 }

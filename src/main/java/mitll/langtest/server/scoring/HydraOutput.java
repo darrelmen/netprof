@@ -9,13 +9,13 @@ import java.util.Set;
 public class HydraOutput {
   private static final Logger logger = LogManager.getLogger(HydraOutput.class);
 
-
   enum STATUS_CODES {SUCCESS, OOV_IN_TRANS, FAILURE, ERROR}
 
   private Scores scores;
-  private String wordLab;
-  private String phoneLab;
-  private List<WordAndProns> wordAndProns;
+  private final String wordLab;
+  private final String phoneLab;
+  private final List<WordAndProns> wordAndProns;
+  private final TransNormDict transNormDict;
 
   /**
    * DEFAULT status is success!
@@ -29,12 +29,18 @@ public class HydraOutput {
    * @param wordLab
    * @param phoneLab
    * @param wordAndProns
+   * @see ASRWebserviceScoring#scoreRepeatExercise
    */
-  HydraOutput(Scores scores, String wordLab, String phoneLab, List<WordAndProns> wordAndProns) {
+  HydraOutput(Scores scores,
+              String wordLab,
+              String phoneLab,
+              List<WordAndProns> wordAndProns,
+              TransNormDict transNormDict) {
     this.scores = scores;
     this.wordLab = wordLab;
     this.phoneLab = phoneLab;
     this.wordAndProns = wordAndProns;
+    this.transNormDict = transNormDict;
   }
 
   public Scores getScores() {
@@ -63,11 +69,11 @@ public class HydraOutput {
   boolean isMatch(List<WordAndProns> reco) {
     if (reco.size() != wordAndProns.size()) {
       logger.warn("isMatch " +
-          "\n\texpecting " + wordAndProns.size() + " words," +
-          "\n\tsaw       " + reco.size());
+          "\n\texpecting " + wordAndProns.size() + " words : " + wordAndProns +
+          "\n\tsaw       " + reco.size() + " : " + reco);
       return false;
     } else {
-      // boolean res = doPhoneComparison(reco, wordAndProns); // this is just for fun - it doesn't actually work reliably
+//      boolean res = doPhoneComparison(reco, wordAndProns); // this is just for fun - it doesn't actually work reliably
       return true; // don't use the result of the phone comparison!
     }
   }
@@ -101,6 +107,10 @@ public class HydraOutput {
 
   List<WordAndProns> getWordAndProns() {
     return wordAndProns;
+  }
+
+  public TransNormDict getTransNormDict() {
+    return transNormDict;
   }
 
   public STATUS_CODES getStatus() {

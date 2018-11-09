@@ -7,6 +7,9 @@ import mitll.langtest.shared.user.ActiveUser;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -17,8 +20,10 @@ import java.util.List;
 public interface IUserSecurityManager {
   /**
    * The key to get/set the id of the user stored in the session
-   * @see NPUserSecurityManager#getUserIDFromRequest
-   * @see IUserSecurityManager#logoutUser
+   * @see NPUserSecurityManager#setSessionUserAndRemember(HttpSession, int) (HttpSession)
+   * @see NPUserSecurityManager#getUserIDFromSession(HttpSession)
+   * @see NPUserSecurityManager#logoutUser
+   * @see mitll.langtest.server.filter.ForceNocacheFilter#doFilter(ServletRequest, ServletResponse, FilterChain)
    */
   String USER_SESSION_ATT = "user-db-id";
 
@@ -87,4 +92,7 @@ public interface IUserSecurityManager {
    * @return
    */
   List<ActiveUser> getActiveSince(long when);
+  List<ActiveUser> getActiveTeachers();
+
+  List<ActiveUser> getTeachers();
 }

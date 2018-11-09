@@ -51,11 +51,7 @@ public class H2DatabaseImpl extends DatabaseImpl {
    * Only for h2
    */
   @Deprecated
-  private DatabaseConnection connection = null;
-/*
-  public H2DatabaseImpl(ServerProperties serverProps) {
-    super(serverProps);
-  }*/
+  private DatabaseConnection connection;
 
   /**
    * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight

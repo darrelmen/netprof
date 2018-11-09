@@ -46,6 +46,8 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 
+import java.util.logging.Logger;
+
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -53,7 +55,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @since 9/25/14.
  */
 public abstract class TypeAhead implements ITypeAhead {
-  //private final Logger logger = Logger.getLogger("TypeAhead");
+ private final Logger logger = Logger.getLogger("TypeAhead");
   /**
    * @see #makeTypeAhead
    */
@@ -86,17 +88,17 @@ public abstract class TypeAhead implements ITypeAhead {
 
   @Override
   public void grabFocus() {
-    if (typeAhead != null) typeAhead.setFocus(true);
+    typeAhead.setFocus(true);
   }
 
   @Override
   public String getText() {
-    return typeAhead == null ? "" : typeAhead.getText();
+    return typeAhead.getText();
   }
 
   @Override
   public void setText(String text) {
-    if (typeAhead != null) typeAhead.setText(text);
+    typeAhead.setText(text);
   }
 
   /**
@@ -114,7 +116,7 @@ public abstract class TypeAhead implements ITypeAhead {
       String current = getTypeAheadBox().getText();
 
       if (previous.equals(current) && !previous.isEmpty()) {
-      //  logger.info("makeTypeAhead prev = current '" + previous + "'");
+        logger.info("makeTypeAhead prev = current '" + previous + "'");
       } else {
         gotTypeAheadEntry(current);
         previous = current;

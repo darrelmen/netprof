@@ -37,8 +37,6 @@ import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.services.OpenUserServiceImpl;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 import java.util.List;

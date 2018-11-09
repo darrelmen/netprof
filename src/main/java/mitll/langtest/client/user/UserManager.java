@@ -168,7 +168,7 @@ public class UserManager {
         ((result.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
             result.getPermissions().contains(User.Permission.DEVELOP_CONTENT)) &&
             result.getRealGender() == MiniUser.Gender.Unspecified)
-        ) {
+    ) {
       clearUser();
       userNotification.showLogin();
     } else {
@@ -331,7 +331,8 @@ public class UserManager {
   }
 
   public boolean hasPermission(User.Permission permission) {
-    return getPermissions().contains(permission);
+    Collection<User.Permission> permissions = getPermissions();
+    return permissions != null && permissions.contains(permission);
   }
 
   public Collection<User.Permission> getPermissions() {

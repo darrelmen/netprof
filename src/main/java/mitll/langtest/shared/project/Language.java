@@ -80,4 +80,6 @@ public enum Language implements IsSerializable {
   public String getDominoName() {
     return dominoName;
   }
+
+  public String getLanguage() { return toString().toLowerCase(); }
 }

@@ -36,8 +36,8 @@ import mitll.langtest.server.database.IDAO;
 import mitll.npdata.dao.SlickUserSession;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 
 public interface IUserSessionDAO extends IDAO {
   /**
@@ -58,50 +58,7 @@ public interface IUserSessionDAO extends IDAO {
   void removeAllSessionsForUser(int userId);
 
   Map<Integer, ActiveInfo> getActiveSince(long when);
+  Map<Integer, ActiveInfo> getActive();
+  Map<Integer, ActiveInfo> getActiveFrom(Set<Integer> userIDs);
 
-//  int getNumRows();
-
-  class ActiveInfo {
-    private int userid;
-    private long when;
-    private long visited;
-    private int projid;
-
-    /**
-     * @param userid
-     * @param loggedInTime
-     * @param projid
-     * @see SlickUserSessionDAOImpl#getActiveSince
-     */
-    ActiveInfo(int userid, long loggedInTime, long visited, int projid) {
-      this.userid = userid;
-      this.when = loggedInTime;
-      this.visited = visited;
-      this.projid = projid;
-    }
-
-    public int getUserid() {
-      return userid;
-    }
-
-    /**
-     * @see mitll.langtest.server.database.security.NPUserSecurityManager#getActiveSince
-     * @return
-     */
-    public long getWhen() {
-      return when;
-    }
-
-    public int getProjid() {
-      return projid;
-    }
-
-    public long getVisited() {
-      return visited;
-    }
-
-    public String toString() {
-      return "user " + userid + " proj " + projid + " logged in at " + new Date(when) + " visited " + new Date(visited);
-    }
-  }
 }

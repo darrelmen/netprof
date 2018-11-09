@@ -50,13 +50,15 @@ import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.answer.Validity;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.AudioRefExercise;
+import mitll.langtest.shared.exercise.HasID;
 
 import java.util.Map;
 import java.util.logging.Logger;
 
-import static com.google.gwt.dom.client.Style.*;
-import static com.google.gwt.dom.client.Style.Unit.*;
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * A waveform record button and a play audio button.
@@ -66,8 +68,8 @@ import static com.google.gwt.dom.client.Style.Unit.*;
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
-public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<CommonAudioExercise> {
- private final Logger logger = Logger.getLogger("RecordAudioPanel");
+public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioPanel<T> {
+  private final Logger logger = Logger.getLogger("RecordAudioPanel");
 
   /**
    * @see #getAfterPlayWidget
@@ -86,11 +88,7 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
   private final ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
   private final HorizontalPanel afterPlayWidget = new HorizontalPanel();
 
-  /**
-   * @see #flipRecordImages
-   */
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
-  private final Image recordImage2 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png"));
   protected T exercise;
   protected AudioType audioType;
 
@@ -100,8 +98,7 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
    * @param index
    * @param showSpectrogram
    * @param audioType
-   * @param instance
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel(CommonExercise, Panel, boolean, String)
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel
    * @see ExercisePanel#getAnswerWidget
    */
   public RecordAudioPanel(T exercise,
@@ -109,13 +106,12 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
                           Panel widgets,
                           int index,
                           boolean showSpectrogram,
-                          AudioType audioType,
-                          String instance) {
+                          AudioType audioType) {
     super(
         controller, showSpectrogram,
         1.0f, 0,
         exercise,
-        exercise.getID(), instance
+        exercise.getID()
     );
 
     this.exercisePanel = widgets;
@@ -213,12 +209,14 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
    * @see mitll.langtest.client.scoring.AudioPanel#getPlayButtons
    */
   @Override
-  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle, CommonAudioExercise exercise) {
+  protected PlayAudioPanel makePlayAudioPanel(Widget toTheRightWidget, String buttonTitle, String recordButtonTitle, HasID exercise) {
     WaveformPostAudioRecordButton myPostAudioRecordButton = makePostAudioRecordButton(audioType, recordButtonTitle);
     postAudioRecordButton = myPostAudioRecordButton;
 
     // System.out.println("makePlayAudioPanel : audio type " + audioType + " suffix '" +playButtonSuffix +"'");
-    playAudioPanel = new MyPlayAudioPanel(recordImage1, recordImage2, exercisePanel, buttonTitle, toTheRightWidget, controller, exercise);
+    playAudioPanel = new MyPlayAudioPanel(recordImage1,
+        //recordImage2,
+        exercisePanel, buttonTitle, toTheRightWidget, controller, exercise);
     myPostAudioRecordButton.setPlayAudioPanel(playAudioPanel);
 
     return playAudioPanel;
@@ -244,21 +242,12 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
 
   protected void showStop() {
     recordImage1.setVisible(false);
-    recordImage2.setVisible(false);
   }
 
   protected void showStart() {
     recordImage1.setVisible(true);
   }
 
-  /**
-   * @param first
-   * @see RecordAudioPanel.MyWaveformPostAudioRecordButton#flip
-   */
-  protected void flipRecordImages(boolean first) {
-    recordImage1.setVisible(first);
-    recordImage2.setVisible(!first);
-  }
 
   public Button getButton() {
     return postAudioRecordButton;
@@ -267,7 +256,7 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
   public void setEnabled(boolean val) {
     //logger.info("RecordAudioPanel.setEnabled " + val);
     postAudioRecordButton.setEnabled(val);
-    if (postAudioRecordButton.hasValidAudio()){
+    if (postAudioRecordButton.hasValidAudio()) {
       playAudioPanel.setEnabled(val);
     }
   }
@@ -281,9 +270,11 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
    * A play button that controls the state of the record button.
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
-    public MyPlayAudioPanel(Image recordImage1, Image recordImage2, final Panel panel,
-                            String suffix, Widget toTheRightWidget, ExerciseController controller, CommonAudioExercise exercise) {
-      super(RecordAudioPanel.this.soundManager,
+    MyPlayAudioPanel(Image recordImage1,
+                     //Image recordImage2,
+                     final Panel panel,
+                     String suffix, Widget toTheRightWidget, ExerciseController controller, HasID exercise) {
+      super(
           new PlayListener() {
             public void playStarted() {
               checkAndSetBusy(panel, true);
@@ -293,13 +284,13 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
               checkAndSetBusy(panel, false);
             }
 
-          }, suffix, toTheRightWidget, controller, exercise, true);
+          }, suffix, toTheRightWidget, controller, exercise.getID(), true);
 
       add(recordImage1);
       recordImage1.setVisible(false);
 
-      add(recordImage2);
-      recordImage2.setVisible(false);
+/*      add(recordImage2);
+      recordImage2.setVisible(false);*/
 
 //      getElement().setId("MyPlayAudioPanel");
       postAudioRecordButton.addStyleName("leftFiveMargin");
@@ -329,6 +320,10 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
   }
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
+
+
+    private long then, now;
+
     /**
      * @param audioType
      * @param recordButtonTitle
@@ -349,24 +344,19 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
      */
     @Override
     public void startRecording() {
-      /// then = System.currentTimeMillis();
+      then = System.currentTimeMillis();
       super.startRecording();
       showStart();
       afterPlayWidget.setVisible(false);
     }
 
     @Override
-    public boolean stopRecording(long duration) {
-      //  now = System.currentTimeMillis();
-      // logger.info("stopRecording " + now + " diff " + (now-then) + " millis");
-      boolean b = super.stopRecording(duration);
+    public boolean stopRecording(long duration, boolean abort) {
+      now = System.currentTimeMillis();
+     // logger.info("stopRecording " + now + " diff " + (now - then) + " millis");
+      boolean b = super.stopRecording(duration, abort);
       showStop();
       return b;
-    }
-
-    @Override
-    public void flip(boolean first) {
-      flipRecordImages(first);
     }
 
     /**
@@ -385,23 +375,22 @@ public class RecordAudioPanel<T extends CommonAudioExercise> extends AudioPanel<
     @Override
     public void useResult(AudioAnswer result) {
       super.useResult(result);
-      showDynamicRange(result);
+      showDynamicRange(result.getDynamicRange());
     }
 
     @Override
-    protected void useInvalidResult(AudioAnswer result) {
-      super.useInvalidResult(result);
-      showDynamicRange(result);
+    protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+      super.useInvalidResult(exid, validity, dynamicRange);
+      showDynamicRange(dynamicRange);
     }
 
     /**
      * Set the value on the progress bar to reflect the dynamic range we measure on the audio.
      *
-     * @param result
+     * @param dynamicRange
      * @see #useResult(AudioAnswer)
      */
-    private void showDynamicRange(AudioAnswer result) {
-      double dynamicRange = result.getDynamicRange();
+    private void showDynamicRange(double dynamicRange) {
       double percent = dynamicRange / 70;
       progressBar.setPercent(100 * percent);
       progressBar.setText("" + roundToTenth(dynamicRange));

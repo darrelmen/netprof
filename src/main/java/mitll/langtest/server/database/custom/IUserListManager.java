@@ -36,8 +36,11 @@ import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
-import mitll.langtest.server.services.ListServiceImpl;
-import mitll.langtest.shared.custom.*;
+import mitll.langtest.shared.custom.IUserList;
+import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.IUserListWithIDs;
+import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.STATE;
@@ -84,13 +87,18 @@ public interface IUserListManager {
   void createFavorites(int userid, int projid);
 
   /**
-   * @param projID
+   * @paramx projID
+   * @paramx isContext
    * @return
-   * @see ListServiceImpl#getReviewList
+   * @seex ListServiceImpl#getReviewList
    */
-  UserList<CommonShell> getCommentedList(int projID);
+/*
+  UserList<CommonShell> getCommentedList(int projID, boolean isContext);
+*/
 
-  UserList<CommonExercise> getCommentedListEx(int projID);
+/*
+  UserList<CommonExercise> getCommentedListEx(int projID, boolean isContext);
+*/
 
   @Deprecated
   UserList<CommonShell> getUserListByID(int id);
@@ -99,7 +107,13 @@ public interface IUserListManager {
 
   UserList getUserListNoExercises(int userListID);
 
-  void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
+  /**
+   * @seexx ListServiceImpl#newExercise(int, CommonExercise)
+   * @paramx userListID
+   * @paramx userExercise
+   * @paramx mediaDir
+   */
+ // void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
 
   void addItemToList(int userListID, String exerciseID, int exid);
 
@@ -114,7 +128,7 @@ public interface IUserListManager {
   void addAnnotation(int exerciseID, String field, String status, String comment, int userid);
 
 
-  void addAnnotations(CommonExercise exercise);
+  void addAnnotations(ClientExercise exercise);
 
   void markState(CommonExercise exercise, STATE state, int creatorID);
 
@@ -124,7 +138,9 @@ public interface IUserListManager {
 
   boolean deleteItemFromList(int listid, int exid);
 
+/*
   Collection<Integer> getAudioAnnos();
+*/
 
   IAnnotationDAO getAnnotationDAO();
 

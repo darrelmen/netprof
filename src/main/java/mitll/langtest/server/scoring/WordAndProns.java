@@ -5,8 +5,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class WordAndProns {
-  private String word;
-  private Set<String> prons = new LinkedHashSet<>();
+  private final String word;
+  private final Set<String> prons = new LinkedHashSet<>();
 
   WordAndProns(String word, Collection<String> prons) {
     this.word = word;

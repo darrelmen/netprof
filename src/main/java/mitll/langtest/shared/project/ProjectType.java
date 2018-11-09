@@ -38,15 +38,11 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public enum ProjectType implements IsSerializable {
   NP(true),
-  //  AMAS,
-  POLYGLOT(true),
-  DIALOG(false),
-  //  EXPERIMENTAL(false),
-  // TESTING,
-//  OTHER(false),
+  POLYGLOT(false),
+  DIALOG(true),
   DEFAULT(false);
 
-  private boolean show = false;
+  private boolean show;
 
   ProjectType(boolean show) {
     this.show = show;

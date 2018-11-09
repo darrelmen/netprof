@@ -34,7 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -46,16 +46,16 @@ public interface AudioServiceAsync {
   /**
    * @param base64EncodedString
    * @param audioContext
-   * @param recordedWithFlash
    * @param deviceType
    * @param device
    * @param decoderOptions
    * @param async
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
    */
   void writeAudioFile(String base64EncodedString,
                       AudioContext audioContext,
 
-                      boolean recordedWithFlash,
                       String deviceType,
                       String device,
                       DecoderOptions decoderOptions,
@@ -100,6 +100,6 @@ public interface AudioServiceAsync {
    * @param keepAudio
    * @param async
    */
-  void editItem(CommonExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
+  void editItem(ClientExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
 
 }

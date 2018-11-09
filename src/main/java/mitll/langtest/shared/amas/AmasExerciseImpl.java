@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.amas;
 
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
@@ -108,10 +107,10 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   public String getAltID() {
     return altID;
   }
-
+/*
   private void addQuestion(boolean isFL, String question, String answer) throws Exception {
     addQuestion(isFL ? FL : EN, question, answer);
-  }
+  }*/
 
 /*  public void addQuestion(boolean isFL, String question, String[] alternateAnswers) throws Exception {
     addQuestion(isFL ? FL : EN, question, alternateAnswers);
@@ -230,14 +229,19 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
     return realID;
   }
 
-  @Override
-  public STATE getState() {
-    return state;
-  }
+//  @Override
+//  public STATE getState() {
+//    return state;
+//  }
+//
+//  @Override
+//  public void setState(STATE state) {
+//    this.state = state;
+//  }
 
   @Override
-  public void setState(STATE state) {
-    this.state = state;
+  public boolean isContext() {
+    return false;
   }
 
   /**
@@ -245,14 +249,15 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
    *
    * @return
    */
-  @Override
-  public STATE getSecondState() {
-    return null;
-  }
+//  @Override
+//  public STATE getSecondState() {
+//    return null;
+//  }
+//
+//  @Override
+//  public void setSecondState(STATE state) {
+//  }
 
-  @Override
-  public void setSecondState(STATE state) {
-  }
 
   public String toString() {
     return "Exercise " + getOldID() + (getAltID().isEmpty() ? "" : "/" + getAltID()) +
@@ -294,21 +299,11 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   }
 
   @Override
-  public Collection<String> getRefSentences() {
-    return Collections.singleton(getForeignLanguage());
-  }
-
-  @Override
-  public CommonShell getShell() {
-    return null;
-  }
-
-  @Override
   public int getNumPhones() {
     return 0;
   }
 
-  @Override
+/*  @Override
   public int getRawScore() {
     return 0;
   }
@@ -321,19 +316,12 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   @Override
   public boolean hasScore() {
     return false;
-  }
-/*
+  }*/
 
   @Override
-  public String getCforeignLanguage() {
-    return null;
+  public int getNumContext() {
+    return 0;
   }
-
-  @Override
-  public String getCenglish() {
-    return null;
-  }
-*/
 
   public String getOrient() {
     return orient;
@@ -345,7 +333,7 @@ public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
 
   /**
    * @return
-   * @see mitll.langtest.client.amas.AudioExerciseContent#addAudioRow(AmasExerciseImpl, String, boolean, Panel, int, int)
+   * @seex mitll.langtest.client.amas.AudioExerciseContent#addAudioRow(AmasExerciseImpl, String, boolean, Panel, int, int)
    */
   public String getAudioURL() {
     return audioURL;

@@ -78,6 +78,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -104,7 +105,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final mitll.hlt.domino.shared.model.user.User.Gender DMALE = mitll.hlt.domino.shared.model.user.User.Gender.Male;
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
   private static final mitll.hlt.domino.shared.model.user.User.Gender UNSPECIFIED = mitll.hlt.domino.shared.model.user.User.Gender.Unspecified;
-  private static final String PRIMARY = "primary";
+  private static final String NETPROF1 = "Netprof";
+//  private static final String PRIMARY = NETPROF1;
   private static final String DEFAULT_AFFILIATION = "";
 
   private static final String UID_F = "userId";
@@ -112,17 +114,35 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String LOCALHOST = "127.0.0.1";
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
+  private static final String TCHR = "TCHR";
 
-  @Override
-  public boolean updateProject(int oldID, int newprojid) {
-    return false;
-  }
+  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
+  private static final List<String> DOMAINS =
+      Arrays.asList(
+          "dliflc.edu",
+          "mail.mil", //146
+          "us.af.mil",
+          "gmail.com,",
+          "yahoo.com",
+          "mail.mil",
+          "ll.mit.edu",
+          "hotmail.com",
+          "outlook.com",
+          "pom.dliflc.edu",
+          "us.af.mil",
+          "icloud.com",
+          "aol.com",
+          "live.com",
+          "comcast.net"
+      );
+
+  private static final String NETPROF2 = "netprof";
   /**
    * Should be consistent with DOMINO.
    * Actually it's all lower case.
    */
-  public static final String NETPROF = "netprof";//DLIApplication.NetProf;
+  public static final String NETPROF = NETPROF2;
   private static final Set<String> APPLICATION_ABBREVIATIONS = Collections.singleton(NETPROF);
   private static final String LYDIA_01 = "Lydia01";
   private static final String PO_M = "PoM";
@@ -144,7 +164,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
-  private static final boolean SKIP_SIGNUP_EMAIL = false;
+  //private static final boolean SKIP_SIGNUP_EMAIL = false;
 
   /**
    * If false, don't use email to set the initial user password via email.
@@ -182,9 +202,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private IProjectManagement projectManagement;
   private Group primaryGroup = null;
 
-  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
-
-  private LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
+  private final LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
@@ -199,7 +217,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           });
 
 
-  private LoadingCache<Integer, User> idToUser = CacheBuilder.newBuilder()
+  private final LoadingCache<Integer, User> idToUser = CacheBuilder.newBuilder()
       .maximumSize(10000)
       .expireAfterWrite(10, TimeUnit.MINUTES)
       .build(
@@ -218,22 +236,34 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   public DominoUserDAOImpl(Database database, ServletContext servletContext) {
     super(database);
+    long then = System.currentTimeMillis();
+    addUserViaEmail = database.getServerProps().addUserViaEmail();
 
     populateRoles();
 
     Object attribute = servletContext == null ? null : servletContext.getAttribute(USER_SVC);
     Properties props = database.getServerProps().getProps();
 
-    addUserViaEmail = database.getServerProps().addUserViaEmail();
-
     if (attribute != null) {
       delegate = (IUserServiceDelegate) attribute;
       pool = (Mongo) servletContext.getAttribute(MONGO_ATT_NAME);
+      logger.info("DominoUserDAOImpl got pool reference " + pool);
       serializer = (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER);
 
       makeUserService(database, props);
-
+      {
+        long now = System.currentTimeMillis();
+        if (now - then > 30) {
+          logger.info("took " + (now - then) + " millis to make user service");
+        }
+      }
       doAfterGetDelegate();
+      {
+        long now = System.currentTimeMillis();
+        if (now - then > 100) {
+          logger.info("took " + (now - then) + " millis to do after delegate");
+        }
+      }
     } else {
       if (servletContext != null) {
         Enumeration<String> attributeNames = servletContext.getAttributeNames();
@@ -243,13 +273,23 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       }
       usedDominoResources = false;
       try {
-        connectToMongo(database, props);
+        new Thread(() -> connectToMongo(database, props), "connectToMongo").start();
       } catch (Exception e) {
         logger.error("Couldn't connect to mongo - is it running and accessible? " + e, e);
         throw e;
       }
+      long now = System.currentTimeMillis();
+      if (now - then > 100) {
+        logger.info("took " + (now - then) + " millis to connect to mongo");
+      }
+    }
+
+    long now = System.currentTimeMillis();
+    if (now - then > 100) {
+      logger.info("took " + (now - then) + " millis to start user dao");
     }
   }
+
 
   private void makeUserService(Database database, Properties props) {
     ServerProperties dominoProps = getDominoProps(database, props);
@@ -269,6 +309,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @throws MongoTimeoutException
    */
   private void connectToMongo(Database database, Properties props) throws MongoTimeoutException {
+    noServletContextSetup(database, props);
+    doAfterGetDelegate();
+  }
+
+  private void noServletContextSetup(Database database, Properties props) {
     pool = Mongo.createPool(new DBProperties(props));
     serializer = Mongo.makeSerializer();
     logger.info("connectToMongo : OK made serializer " + serializer);
@@ -296,8 +341,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         "\ndelegate " + delegate.getClass() +
         "\nignite = " + ignite +
         "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
-
-    doAfterGetDelegate();
   }
 
   @NotNull
@@ -313,10 +356,36 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private void doAfterGetDelegate() {
     myDelegate = makeMyServiceDelegate();
     dominoAdminUser = delegate.getAdminUser();
+
+    ensureDefaultUsers();
   }
 
-  public JSONSerializer getSerializer() {
+/*  public JSONSerializer getSerializer() {
     return serializer;
+  }*/
+
+  /**
+   * DNS LOOKUP.
+   *
+   * @param host
+   * @return
+   */
+  @Override
+  public boolean isValidServer(String host) {
+    boolean contains = DOMAINS.contains(host);
+    if (contains) {
+      return true;
+    } else {
+      InetAddress byName = null;
+      try {
+        byName = InetAddress.getByName(host);
+      } catch (Exception e) {
+        logger.warn("for " + host + "got " + e);
+        return false;
+      }
+      logger.info(host + " = " + byName);
+      return true;
+    }
   }
 
   private void populateRoles() {
@@ -335,6 +404,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       ignite.close();
     }
 
+    if (pool != null) {
+      logger.info("close : closing connection to " + pool);
+      pool.closeConnection();
+    }
+
+    if (ignite != null) {
+      ignite.close();
+    }
 /*    if (pool != null) {
       logger.info("close : closing connection to " + pool);
       pool.closeConnection();
@@ -393,16 +470,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @Override
   public void ensureDefaultUsers() {
     if (delegate == null) {
-      logger.error("no delegate - couldn't connect to Mongo!");
+      logger.error("ensureDefaultUsers : no delegate - couldn't connect to Mongo!");
     } else {
       ensureDefaultUsersLocal();
-      String userId = dominoAdminUser.getUserId();
-      adminUser = delegate.getUser(userId);//BEFORE_LOGIN_USER);
-      // logger.info("ensureDefaultUsers got admin user " + adminUser + " has roles " + adminUser.getRoleAbbreviationsString());
+      adminUser = delegate.getUser(dominoAdminUser.getUserId());//BEFORE_LOGIN_USER);
+/*      logger.info("ensureDefaultUsers got admin user " + adminUser +
+          " has roles " + adminUser.getRoleAbbreviationsString());*/
 
       if (adminUser.getPrimaryGroup() == null) {
-        logger.warn("ensureDefaultUsers no group for " + adminUser);
-        adminUser.setPrimaryGroup(makePrimaryGroup(PRIMARY));
+        logger.warn("\n\n\nensureDefaultUsers no group for " + adminUser);
+      //  adminUser.setPrimaryGroup(makePrimaryGroup(PRIMARY));
       }
 
       dominoImportUser = delegate.getUser(IMPORT_USER);
@@ -412,15 +489,18 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   /**
    * public for test access... for now
    *
+   * @see #ensureDefaultUsers
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   private void ensureDefaultUsersLocal() {
+    // logger.info("ensureDefaultUsersLocal --- ");
     this.defectDetector = getOrAdd(DEFECT_DETECTOR, "Defect", "Detector", Kind.QAQC);
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", USER, Kind.CONTENT_DEVELOPER);
     this.defaultUser = getOrAdd(DEFAULT_USER1, DEFAULT, USER, Kind.AUDIO_RECORDER);
     this.defaultMale = getOrAdd(DEFAULT_MALE_USER, DEFAULT, "Male", Kind.AUDIO_RECORDER);
     this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, DEFAULT, "Female", Kind.AUDIO_RECORDER);
+    //  logger.info("ensureDefaultUsersLocal defaultUser " + defaultUser);
 
     this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
   }
@@ -447,11 +527,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   @Override
   public ClientUserDetail addAndGet(ClientUserDetail user, String encodedPass) {
-    //invalidateCache();
-/*    if (user.getGender() != UNSPECIFIED) {
-      logger.info("addAndGet going in " + user.getGender() + " for user '" + user.getUserId() + "'");
-    }*/
-
     SResult<ClientUserDetail> clientUserDetailSResult1 = delegate.migrateUser(user, encodedPass);
     boolean b = !clientUserDetailSResult1.isError();
     if (!b) {
@@ -479,8 +554,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return delegate.addUser(sendEmail ? user : adminUser, user, url);
   }
 
-
+  /**
+   * @param user
+   * @param url
+   * @param sendEmail
+   * @return
+   * @see #addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
+   */
   private MyUserService.LoginResult addUserToMongoNoEmail(ClientUserDetail user, String url, boolean sendEmail) {
+    logger.info("addUserToMongoNoEmail " + user + " send email " + sendEmail);
     return myUserService.addUserNoEmail(sendEmail ? user : adminUser, user, url);
   }
 
@@ -546,8 +628,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     setCreationTime(updateUser);
 
+    boolean useUsualLogin = shouldUseUsualDominoEmail(email);
+
+    logger.info("usual login " + useUsualLogin + " for " + email);
+
     MyUserService.LoginResult loginResult =
-        addUserViaEmail ?
+        useUsualLogin ?
             loginViaEmail(url, updateUser) :
             addUserToMongoNoEmail(updateUser, url, true);
 
@@ -556,7 +642,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       return new LoginResult(-1, ""); // password error?
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
-      return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(), SKIP_SIGNUP_EMAIL ? loginResult.emailToken : "");
+      return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(),
+          useUsualLogin ? "" : loginResult.emailToken);
     }
   }
 
@@ -571,7 +658,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
-   * Need a group - just use the first one.
+   * Need a group - use "Netprof"
    *
    * @return
    * @see #addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
@@ -580,19 +667,35 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @NotNull
   public Group getGroup() {
     if (primaryGroup == null) {
-      List<Group> groups = delegate.getGroupDAO().searchGroups("");
-      primaryGroup = groups.isEmpty() ? null : groups.iterator().next();
+      List<Group> groups = delegate.getGroupDAO().searchGroups(NETPROF1);
+      if (groups.isEmpty()) {
+        logger.warn("getGroup no groups for " + NETPROF1 + "?");
+        groups = delegate.getGroupDAO().searchGroups(NETPROF2);
+      }
+      if (groups.isEmpty()) {
+        logger.warn("getGroup no groups for " + NETPROF2 + "?");
+
+        groups = delegate.getGroupDAO().searchGroups("");
+      }
+
+      Optional<Group> first = groups.stream().filter(group -> group.getApplicationId().equalsIgnoreCase(NETPROF2)).findFirst();
+      if (first.isPresent()) {
+        primaryGroup = first.get();
+        logger.warn("getGroup OK using " + primaryGroup);
+      } else {
+        primaryGroup = groups.isEmpty() ? null : groups.iterator().next();
+      }
 
       if (primaryGroup == null) { //defensive
-        logger.warn("\n\n\ngetGroup making a new group...?\n\n\n");
-        primaryGroup = makePrimaryGroup(PRIMARY);
+        logger.warn("\n\n\ngetGroup need a new group...?\n\n\n");
+   //     primaryGroup = makePrimaryGroup(PRIMARY);
       }
     }
 
     return primaryGroup;
   }
 
-  @NotNull
+ /* @NotNull
   private Group makePrimaryGroup(String name) {
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
     String description = name + "Group";
@@ -604,9 +707,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         24 * 365,
         out,
         adminUser,
-        "netprof");
+        NETPROF2);
   }
-
+*/
   @NotNull
   private LocalDateTime getThirtyYearsFromNow() {
     return LocalDateTime.now().plusYears(30);
@@ -636,12 +739,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   private Group makeAGroup(String name) {
-    logger.warn("getGroupOrMake making a new group " + name);
+    logger.warn("\n\ngetGroupOrMake making a new group " + name);
     MongoGroupDAO groupDAO1 = (MongoGroupDAO) delegate.getGroupDAO();
 
     Date out = Date.from(getZonedDateThirtyYears().toInstant());
     SResult<ClientGroupDetail> name1 = groupDAO1.doAdd(adminUser,
-        new ClientGroupDetail(name, "name", 365, 24 * 365, out, adminUser, "netprof"));
+        new ClientGroupDetail(name, "name", 365, 24 * 365, out,
+            5,
+            adminUser, NETPROF2));
 
     Group group = null;
     if (name1.isError()) {
@@ -725,6 +830,39 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return users;
   }
 
+  @NotNull
+  public <T> Map<Integer, T> getJustTeachers(Map<Integer, T> activeSince) {
+    logger.info("getJustTeachers active " + activeSince.size());
+
+    Set<Integer> teacherIDs = getTeacherIDs();
+
+    logger.info("getJustTeachers teacherIDs = " + teacherIDs.size());
+
+    Map<Integer, T> justTeachers = new HashMap<>();
+
+    activeSince.forEach((k, v) -> {
+      if (teacherIDs.contains(k)) justTeachers.put(k, v);
+    });
+
+    logger.info("getJustTeachers justTeachers = " + teacherIDs.size());
+
+    return justTeachers;
+  }
+
+  @NotNull
+  public Set<Integer> getTeacherIDs() {
+    return getTeachers().stream().map(UserDescriptor::getDocumentDBID).collect(Collectors.toSet());
+  }
+
+  private List<DBUser> getTeachers() {
+    HashSet<FilterDetail<UserColumn>> filterDetails = new HashSet<>();
+    FilterDetail<UserColumn> tchr = new FilterDetail<>(UserColumn.Roles, TCHR, FilterDetail.Operator.RegEx);
+    filterDetails.add(tchr);
+    List<DBUser> users = delegate.getUsers(-1, new FindOptions<>(filterDetails));
+    logger.info("getTeachers " + tchr + " = " + users.size());
+    return users;
+  }
+
   private Set<FilterDetail<UserColumn>> getEmailFilter(String emailH) {
     Set<FilterDetail<UserColumn>> filterDetails = new HashSet<>();
     filterDetails.add(new FilterDetail<>(UserColumn.Email, emailH, FilterDetail.Operator.EQ));
@@ -781,7 +919,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           toUse = mostRecentUserID;
           byEmail = true;
         }
-        //return new LoginResult(LoginResult.PasswordResultType.Multiple);
       } else if (userCredentialsEmail1.size() == 1) {
         toUse = userCredentialsEmail1.get(0);
         byEmail = true;
@@ -836,9 +973,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return users;
   }
 
+/*
   public boolean isValidEmailRegex(String text) {
     return text.trim().toLowerCase().matches(EMAIL_REGEX);
-  }
+  }*/
 
   private final Map<String, Map<String, Boolean>> dominoToEncodedToMatch = new HashMap<>();
 
@@ -971,6 +1109,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
+   * FROM CACHE
+   *
    * @param id
    * @return
    * @see NPUserSecurityManager#getUserForID
@@ -1233,7 +1373,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           projID = collect.iterator().next().getID();
           logger.info("getProjectAssignment : match " + next + " to project " + projID);
         } else {
-          logger.warn("getProjectAssignment no polyglot project for " + languageMatchingGroup);
+          logger.info("getProjectAssignment no polyglot project for " + languageMatchingGroup);
         }
       } else {
         logger.warn("getProjectAssignment no language matching group " + next);
@@ -1604,21 +1744,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   /**
-   * TODO: Reset password works differently now...?
-   *
-   * @param resetKey
-   * @return
-   * @see mitll.langtest.server.rest.RestUserManagement#changePFor
-   * @see mitll.langtest.server.rest.RestUserManagement#getUserIDForToken(String)
-   */
-  @Override
-  @Deprecated
-  public User getUserWithResetKey(String resetKey) {
-    logger.warn("no reset key! " + resetKey);
-    return null;//convertOrNull(dao.getByReset(resetKey));
-  }
-
-  /**
    * @param userid assumes a valid user id
    * @return
    */
@@ -1644,12 +1769,25 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param userKey
    * @param newPassword
    * @param url
+   * @param email
    * @return
    */
-  public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url) {
-    return addUserViaEmail ?
+  public boolean changePasswordForToken(String userId, String userKey, String newPassword, String url, String email) {
+    return shouldUseUsualDominoEmail(email) ?
         delegate.changePassword(userId, userKey, newPassword, url) :
         myUserService.changePassword(userId, userKey, newPassword, url);
+  }
+
+  private boolean shouldUseUsualDominoEmail(String email) {
+    boolean b = hasBlessedEmail(email);
+    logger.info("shouldUseUsualDominoEmail '" + email + "' - " + b);
+    return addUserViaEmail && !b;
+  }
+
+  @NotNull
+  private boolean hasBlessedEmail(String email) {
+    String lc = email.toLowerCase();
+    return DOMAINS.stream().anyMatch(lc::endsWith);
   }
 
   /**
@@ -1764,9 +1902,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
         ClientUserDetail clientUserDetail = getClientUserDetail(next);
         logger.info("forgotPassword users clientUserDetail " + clientUserDetail);
-        clientUserDetail1 = delegate.forgotPassword(next,
-            clientUserDetail,
-            url);
+        clientUserDetail1 = delegate.forgotPassword(next, clientUserDetail, url);
 
         logger.info("forgotPassword forgotPassword users for " + user + " : " + clientUserDetail1);
       } catch (Exception e) {
@@ -1788,5 +1924,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   public void setProjectManagement(IProjectManagement projectManagement) {
     this.projectManagement = projectManagement;
+  }
+
+  @Override
+  public boolean updateProject(int oldID, int newprojid) {
+    return false;
   }
 }

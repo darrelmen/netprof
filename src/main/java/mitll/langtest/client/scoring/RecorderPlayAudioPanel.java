@@ -8,18 +8,18 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.client.sound.SoundManagerAPI;
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.LangTest.RED_X_URL;
 
 /**
  * Created by go22670 on 4/5/17.
@@ -27,54 +27,50 @@ import java.util.logging.Logger;
  * @see SimpleRecordAudioPanel#makePlayAudioPanel
  */
 class RecorderPlayAudioPanel extends PlayAudioPanel {
-  protected final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
+  private final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
+
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final SafeUri firstRed = UriUtils.fromSafeConstant(FIRST_RED);
-
-  private static final String SECOND_RED = LangTest.LANGTEST_IMAGES + "media-record-4_32x32.png";
-  private static final SafeUri secondRed = UriUtils.fromSafeConstant(SECOND_RED);
-
-  private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
-  private static final SafeUri RED_X_URL = UriUtils.fromSafeConstant(RED_X);
 
   /**
    * TODO make better relationship with ASRRecordAudioPanel
    */
   private Image recordImage1;
-  private Image recordImage2;
-  private Image redX;
-  private final DownloadContainer downloadContainer;
-  private boolean canRecord;
 
   /**
-   * @param soundManager
+   *
+   */
+  private Image redX;
+  private final DownloadContainer downloadContainer;
+
+  /**
    * @param postAudioRecordButton1
    * @param controller
    * @param exercise
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  RecorderPlayAudioPanel(SoundManagerAPI soundManager, final Button postAudioRecordButton1, ExerciseController controller, CommonExercise exercise) {
-    super(soundManager, new PlayListener() {
-          public void playStarted() {
+  RecorderPlayAudioPanel(final Button postAudioRecordButton1, ExerciseController controller, HasID exercise) {
+    super(new PlayListener() {
+            public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
-            // TODO put back busy thing?
-            postAudioRecordButton1.setEnabled(false);
-          }
+              // TODO put back busy thing?
+              postAudioRecordButton1.setEnabled(false);
+            }
 
-          public void playStopped() {
-            //  goodwaveExercisePanel.setBusy(false);
-            postAudioRecordButton1.setEnabled(true);
-          }
-        },
+            public void playStopped() {
+              //  goodwaveExercisePanel.setBusy(false);
+              postAudioRecordButton1.setEnabled(true);
+            }
+          },
         "",
-        null, controller, exercise, true);
+        null, controller, exercise.getID(), true);
 
     downloadContainer = new DownloadContainer();
     getElement().setId("RecorderPlayAudioPanel");
   }
 
   private void configureButton(Button playButton) {
-    playButton.addClickHandler(event -> doClick());
+    playButton.addClickHandler(event -> doPlayPauseToggle());
 //    logger.info("configureButton " + playButton.getElement().getId());
     playButton.setIcon(PLAY);
     playButton.setType(ButtonType.INFO);
@@ -92,30 +88,25 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     playButton.setVisible(false);
   }
 
-  public void flip(boolean first) {
-    if (canRecord) {
-      recordImage1.setVisible(first);
-      recordImage2.setVisible(!first);
-    } else {
-
-    }
-  }
 
   void showFirstRecord() {
-    if (canRecord) {
+    if (controller.shouldRecord()) {
+      logger.info("showFirstRecording " + exid + " red recording signal now visible!");
       recordImage1.setVisible(true);
     } else {
       redX.setVisible(true);
     }
     downloadContainer.getDownloadContainer().setVisible(false);
-
-
   }
 
+  /**
+   * @see NoFeedbackRecordAudioPanel#stopRecording()
+   */
   void hideRecord() {
-    if (canRecord) {
+    if (controller.shouldRecord()) {
+      // logger.info("hideRecord " + exid);
       recordImage1.setVisible(false);
-      recordImage2.setVisible(false);
+      //  recordImage2.setVisible(false);
     } else {
       redX.setVisible(false);
     }
@@ -141,21 +132,13 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     return playButton;
   }
 
-  /**
-   * @return
-   * @see SimpleRecordAudioPanel#scoreAudio
-   */
-  Panel getDownloadContainer() {
-    return downloadContainer.getDownloadContainer();
-  }
 
   /**
-   * @param waitCursor
-   * @param canRecord
+   * @param waitCursor null OK
    * @return
    * @see SimpleRecordAudioPanel#addWidgets
    */
-  DivWidget getRecordFeedback(Widget waitCursor, boolean canRecord) {
+  DivWidget getRecordFeedback(Widget waitCursor) {
     DivWidget recordFeedback = new DivWidget();
     recordFeedback.addStyleName("inlineFlex");
     recordFeedback.addStyleName("floatLeft");
@@ -165,15 +148,13 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     recordImage1.setVisible(false);
     recordImage1.setWidth("32px");
 
-    recordImage2 = new Image(secondRed);
-    recordImage2.setVisible(false);
-    recordImage2.setWidth("32px");
+    recordImage1.addStyleName("hvr-pulse");
 
-    this.canRecord = canRecord;
-    if (canRecord) {
+    if (controller.shouldRecord()) {
       recordFeedback.add(recordImage1);
-      recordFeedback.add(recordImage2);
-      recordFeedback.add(waitCursor);
+      if (waitCursor != null) {
+        recordFeedback.add(waitCursor);
+      }
     } else {
       recordFeedback.add(redX = getRedX());
     }

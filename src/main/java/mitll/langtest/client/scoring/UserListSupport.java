@@ -21,12 +21,12 @@ import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.IUserListWithIDs;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 4/19/17.
@@ -271,14 +271,13 @@ public class UserListSupport {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
     boolean hasProject = selectionState.getProject() != -1;
-    boolean hasInstance = !selectionState.getInstance().isEmpty();
+    boolean hasInstance = selectionState.getView() != INavigation.VIEWS.NONE;
 
     String s = getURL() +
         "#" +
         token +
         (hasProject ? "" : getProjectParam()) +
         (hasInstance ? "" : getInstance(false));
-    ;
 
     String encode = s.replaceAll("\\s", "+");//URL.encode(s);
 
@@ -297,7 +296,7 @@ public class UserListSupport {
   }
 
   @NotNull
-  public String getPrefix() {
+  private String getPrefix() {
     return "Hi%2C%0A%20Here's%20a%20link%20to%20";
   }
 
@@ -305,12 +304,13 @@ public class UserListSupport {
    * @return
    */
   @NotNull
-  public String getSuffix() {
+  private String getSuffix() {
     return "%0A%20Thanks%2C%20%0A%20" + getFullName();
   }
 
   private String getFullName() {
-    return controller.getUserManager().getCurrent().getFullName();
+    User current = controller.getUserManager().getCurrent();
+    return current == null ? "" : current.getFullName();
   }
 
   private String getURL() {

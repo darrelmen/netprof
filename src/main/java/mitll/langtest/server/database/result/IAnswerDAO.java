@@ -32,14 +32,8 @@
 
 package mitll.langtest.server.database.result;
 
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.AnswerInfo;
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.DecoderOptions;
-
-import java.io.File;
 
 public interface IAnswerDAO {
   int addTextAnswer(AudioContext audioContext,

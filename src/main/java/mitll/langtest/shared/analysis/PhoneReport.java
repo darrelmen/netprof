@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.server.database.analysis.IAnalysis;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,7 @@ public class PhoneReport extends PhoneSummary {
   private Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted = new HashMap<>();
   private Map<String, List<Bigram>> phoneToBigrams;
 
+  // can't be final!
   private boolean valid;
   private long serverTime;
 
@@ -77,7 +80,7 @@ public class PhoneReport extends PhoneSummary {
    * Map of each phone to words it appears in.
    *
    * @return
-   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getPhoneReportFor(int, int, String, String, long, long)
+   * @see IAnalysis#getPhoneReportFor(AnalysisRequest)
    */
   public Map<String, Map<String, List<WordAndScore>>> getPhoneToWordAndScoreSorted() {
     return phoneToWordAndScoreSorted;

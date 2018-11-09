@@ -45,6 +45,8 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.UUID;
 
+import static mitll.langtest.server.services.MyRemoteServiceServlet.X_FORWARDED_FOR;
+
 /**
  * ForceNocacheFilter: Force the GWT nocache files to not cache.
  * <p>
@@ -57,7 +59,7 @@ import java.util.UUID;
 public class ForceNocacheFilter implements Filter {
   private static final Logger log = LogManager.getLogger(ForceNocacheFilter.class);
 
-  private boolean DEBUG = false;
+  private static final  boolean DEBUG = false;
 
   /**
    * The key to get/set the id of the user stored in the session
@@ -89,7 +91,7 @@ public class ForceNocacheFilter implements Filter {
       sessionId = httpRequest.getRequestedSessionId() + " - req-but-missing";
     }
 
-    String remoteAddr = httpRequest.getHeader("X-FORWARDED-FOR");
+    String remoteAddr = httpRequest.getHeader(X_FORWARDED_FOR);
     if (remoteAddr == null || remoteAddr.isEmpty()) {
       remoteAddr = request.getRemoteAddr();
     }

@@ -34,12 +34,8 @@ package mitll.langtest.client.list;
 
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.STATE;
-import mitll.langtest.shared.exercise.Shell;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -54,13 +50,13 @@ import java.util.Map;
  * Time: 5:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public interface ListInterface<T extends Shell, U extends Shell> extends RequiresResize, Reloadable {
+public interface ListInterface<T extends HasID, U extends HasID> extends RequiresResize, Reloadable {
   /**
    * @seex Navigation#showLearnAndItem
-   * @param name
+   * @param id
    * @return
    */
-  T byID(int name);
+  T byID(int id);
 
   void loadByID(int id);
 
@@ -78,7 +74,7 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
 
   /**
    * @return
-   * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout(UserList, String)
+   * @see mitll.langtest.client.custom.content.NPFHelper#doInternalLayout
    */
   Widget getExerciseListOnLeftSide();
 
@@ -118,8 +114,6 @@ public interface ListInterface<T extends Shell, U extends Shell> extends Require
   boolean isPendingReq();
 
   void hide();
-
-  void setState(int id, STATE state);
 
   void addListChangedListener(ListChangeListener<T> listener);
 

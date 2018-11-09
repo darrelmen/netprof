@@ -51,12 +51,11 @@ import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.client.analysis.WordContainerAsync;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
-import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -70,6 +69,7 @@ import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.recorder.*;
 import mitll.langtest.client.scoring.AnnotationHelper;
+import mitll.langtest.client.scoring.ClientAudioContext;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 import mitll.langtest.client.services.*;
@@ -79,7 +79,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
-import mitll.langtest.shared.exercise.Shell;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -236,6 +236,9 @@ public class LangTest implements
 
   private static final String GOT_BROWSER_EXCEPTION = "got browser exception : ";
 
+  /**
+   * @see #setPageTitle
+   */
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
 /*
@@ -269,6 +272,7 @@ public class LangTest implements
   private final UserServiceAsync userService = GWT.create(UserService.class);
   private final OpenUserServiceAsync openUserService = GWT.create(OpenUserService.class);
   private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+  private final DialogServiceAsync dialogServiceAsync = GWT.create(DialogService.class);
   private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
 
@@ -301,7 +305,9 @@ public class LangTest implements
   private final long then = 0;
   private MessageHelper messageHelper;
   private AnnotationHelper annotationHelper;
-private boolean hasNetworkProblem;
+  private boolean hasNetworkProblem;
+  private WavEndCallback wavEndCallback;
+
   /**
    * This gets called first.
    * <p>
@@ -603,8 +609,14 @@ private boolean hasNetworkProblem;
 
             public void onSuccess(ImageResponse result) {
               imageCache.put(key, result);
-              //logger.info("getImage storing key " + key+ " now  " + imageCache.size() + " cached.");
-              client.onSuccess(result);
+            //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
+              if (client != null) {
+              //  logger.info("getImage client "+ client.getClass());
+
+                Scheduler.get().scheduleDeferred(() -> {
+                  client.onSuccess(result);
+                });
+              }
             }
           });
     }
@@ -773,10 +785,10 @@ private boolean hasNetworkProblem;
       /**
        * @see WebAudioRecorder#silenceDetected
        */
-//      @Override
-//      public void silenceDetected() {
-//        if (wavEndCallback != null) wavEndCallback.silenceDetected();
-//      }
+      @Override
+      public void silenceDetected() {
+        if (wavEndCallback != null) wavEndCallback.silenceDetected();
+      }
     };
 
     BrowserRecording.init(micPermission);
@@ -800,7 +812,7 @@ private boolean hasNetworkProblem;
 
   @Override
   public ProjectStartupInfo getProjectStartupInfo() {
-    //  logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
+    //logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
     return projectStartupInfo;
   }
 
@@ -924,7 +936,7 @@ private boolean hasNetworkProblem;
   }
 
   @Override
-  public void logEvent(UIObject button, String widgetType, Shell ex, String context) {
+  public void logEvent(UIObject button, String widgetType, HasID ex, String context) {
     //logger.info("logEvent START ex " + ex + " in " + context);
     buttonFactory.logEvent(button, widgetType, new EventContext("" + ex.getID(), context, getUser()));
     //logger.info("logEvent END   ex " + ex + " in " + context);
@@ -1138,6 +1150,11 @@ private boolean hasNetworkProblem;
     return exerciseServiceAsync;
   }
 
+  @Override
+  public DialogServiceAsync getDialogService() {
+    return dialogServiceAsync;
+  }
+
   public ListServiceAsync getListService() {
     return listServiceAsync;
   }
@@ -1153,29 +1170,42 @@ private boolean hasNetworkProblem;
   // recording methods...
 
   /**
-   * Recording interface
-   *
-   * @see RecordButtonPanel#startRecording()
-   * @see PostAudioRecordButton#startRecording()
+   * @param wavStreamCallback
+   * @see PostAudioRecordButton#startRecording
    */
-  public void startRecording() {
+  public void startStream(ClientAudioContext clientAudioContext, WavStreamCallback wavStreamCallback) {
+    AudioServiceAsync audioService = getAudioService();
+    String serviceEntryPoint = ((ServiceDefTarget) audioService).getServiceEntryPoint();
     BrowserRecording.recordOnClick();
+    BrowserRecording.startStream(serviceEntryPoint, clientAudioContext, wavStreamCallback);
   }
 
   /**
    * Recording interface
    *
-   * @see RecordButton.RecordingListener#stopRecording(long)
-   * @see RecordButton.RecordingListener#stopRecording(long)
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
-  public void stopRecording(WavCallback wavCallback) {
-    // logger.info("stopRecording : time recording in UI " + (System.currentTimeMillis() - then) + " millis");
-    BrowserRecording.stopRecording(wavCallback,false);
+  public void stopRecording(boolean useDelay, boolean abort) {
+   logger.info("stopRecording : " +
+       "\n\ttime recording in UI " + (System.currentTimeMillis() - then) + " millis, " +
+       "\n\tabort                " + abort +
+       "\n\tuse delay            " + useDelay);
+
+    if (useDelay) {
+      BrowserRecording.stopRecording(abort);
+    } else {
+      BrowserRecording.stopWebRTCRecording(abort);
+    }
   }
 
   /**
    * Recording interface
+   *
+   * @see mitll.langtest.client.banner.RehearseViewHelper#RehearseViewHelper
    */
+  public void registerStopDetected(WavEndCallback wavEndCallback) {
+    this.wavEndCallback = wavEndCallback;
+  }
 
   public SoundManagerAPI getSoundManager() {
     return soundManager;
@@ -1189,7 +1219,7 @@ private boolean hasNetworkProblem;
 
   /**
    * @param listener
-   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton(int, RecordButton.RecordingListener, boolean, ExerciseController, String)
+   * @see mitll.langtest.client.recorder.FlashcardRecordButton#FlashcardRecordButton
    */
   @Override
   public void addKeyListener(KeyPressHelper.KeyListener listener) {
@@ -1251,18 +1281,13 @@ private boolean hasNetworkProblem;
   }
 
   /**
-   * @seex WordContainerAsync#gotClickOnLearn
-   * @paramx views
+   * @param views
    * @return
+   * @see WordContainerAsync#gotClickOnLearn
    */
-//  @Override
-//  public ShowTab getShowTab(INavigation.VIEWS views) {
-//    return getNavigation().getShowTab(views);
-//  }
-
   @Override
-  public ShowTab getShowTab( ) {
-    return getNavigation().getShowTab();
+  public ShowTab getShowTab(INavigation.VIEWS views) {
+    return getNavigation().getShowTab(views);
   }
 
   @Override

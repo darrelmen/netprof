@@ -36,7 +36,6 @@ import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.OpenUserService;
 import mitll.langtest.server.mail.EmailHelper;
-import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.LoginResult.ResultType;
@@ -47,7 +46,6 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import java.util.List;
 
 import static mitll.langtest.shared.user.ChoosePasswordResult.PasswordResultType.*;
@@ -58,10 +56,6 @@ import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 @SuppressWarnings("serial")
 public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenUserService {
   private static final Logger logger = LogManager.getLogger(OpenUserServiceImpl.class);
-  //private static final int BOUND = 10000;
-  //private static final boolean SIMULATE_NETWORK = false;
-  private static final String USER_AGENT = "User-Agent";
-  private static final String X_FORWARDED_FOR = "X-FORWARDED-FOR";
 
   /**
    * If successful, establishes a session.
@@ -78,23 +72,28 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       HttpServletRequest request = getThreadLocalRequest();
       String remoteAddr = getRemoteAddr(request);
       String userAgent = request.getHeader(USER_AGENT);
-      LoginResult loginResult = securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, createSession(), true);
 
+/*      String localAddr = request.getLocalAddr();
+      String localName = request.getLocalName();
+      String serverName = request.getServerName();
+      int localPort = request.getLocalPort();
+      int serverPort = request.getServerPort();
+      String contextPath = request.getContextPath();
+      logger.info("loginUser : " +
+          "\n\tlocalAddr   " + localAddr +
+          "\n\tlocalName   " + localName +
+          "\n\tserverName  " + serverName +
+          "\n\tlocalPort   " + localPort +
+          "\n\tserverPort  " + serverPort +
+          "\n\tcontextPath " + contextPath
+      );*/
 
-      return loginResult;
+      return securityManager.getLoginResult(userId, attemptedFreeTextPassword, remoteAddr, userAgent, createSession(), true);
     } catch (Exception e) {
       logger.error("got " + e, e);
       logAndNotifyServerException(e);
       return new LoginResult(Failed);
     }
-  }
-
-  private String getRemoteAddr(HttpServletRequest request) {
-    String remoteAddr = request.getHeader(X_FORWARDED_FOR);
-    if (remoteAddr == null || remoteAddr.isEmpty()) {
-      remoteAddr = request.getRemoteAddr();
-    }
-    return remoteAddr;
   }
 
   private User getUserByID(String id) {
@@ -200,6 +199,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       }
     } else {
       ResultType resultType = Exists;
+
       if (!userByID.isValid()) {
         userByID.setEmail(user.getEmail());
         userByID.setFirst(user.getFirst());
@@ -211,6 +211,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         db.getUserDAO().update(userByID);
         resultType = Updated;
       }
+
       return new LoginResult(userByID, resultType);
     }
   }
@@ -242,9 +243,10 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   public ChoosePasswordResult changePasswordWithToken(String userId, String userKey, String newPassword) {
     //long startMS = System.currentTimeMillis();
     logger.info("changePasswordWithToken - userId '" + userId + "' key " + userKey + " pass length " + newPassword.length());
-    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL());
-
     User userByID = getUserByID(userId);
+    String email = userByID != null ? userByID.getEmail() : "";
+    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL(), email);
+
     if (result) {
       if (userByID != null) {
         boolean newSession = false;
@@ -316,10 +318,10 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           logger.info("setProject set project (" + projectid + ") for '" + sessionUser + "' = " + id);
           db.getProjectManagement().configureProjectByID(projectid);
           db.rememberUsersCurrentProject(id, projectid);
-          db.setStartupInfo(sessionUser, projectid);
+          db.getProjectManagement().setStartupInfo(sessionUser, projectid);
         } else {
           logger.warn("setProject : project " + projectid + " is gone....");
-          db.forgetProject(id);
+          db.getUserProjectDAO().forget(id);
           db.getProjectManagement().clearStartupInfo(sessionUser);
         }
       }
@@ -338,7 +340,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     try {
       int sessionUserID = getSessionUserID();
       if (sessionUserID != -1) {
-        db.forgetProject(sessionUserID);
+        db.getUserProjectDAO().forget(sessionUserID);
       }
     } catch (DominoSessionException e) {
       logger.error("forgetProject got  " + e, e);
@@ -402,7 +404,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   private void updateVisitedLater() {
     final String sid = getSessionID();
     // TODO : expensive?
-    new Thread(() -> updateVisited(sid)).start();
+    new Thread(() -> updateVisited(sid), "updateVisited").start();
   }
 
   private void updateVisited(String sid) {
@@ -445,6 +447,11 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       logger.error("setCurrentProjectForUser got  " + e, e);
       return new HeartbeatStatus(false, false);
     }
+  }
+
+  @Override
+  public boolean isValidServer(String server) {
+    return db.getUserDAO().isValidServer(server);
   }
 
 /*  private void simulateNetworkIssue() {

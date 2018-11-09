@@ -56,13 +56,13 @@ public class AddRemoveDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(AddRemoveDAO.class);
 
   private static final String ADDREMOVE = "addremove";
-  public static final String ADD = "ADD";
-  public static final String REMOVE = "REMOVE";
+  private static final String ADD = "ADD";
+  private static final String REMOVE = "REMOVE";
   private static final String EXERCISEID = "exerciseid";
   private static final String MODIFIED = "modified";
   private static final String OPERATION = "operation";
 
-  public AddRemoveDAO(Database database) {
+  private AddRemoveDAO(Database database) {
     super(database);
     try {
       createTable(database);

@@ -1,5 +1,6 @@
 package mitll.langtest.client.list;
 
+import mitll.langtest.client.custom.INavigation.VIEWS;
 import mitll.langtest.shared.answer.ActivityType;
 
 import static mitll.langtest.shared.answer.ActivityType.UNSET;
@@ -10,15 +11,16 @@ import static mitll.langtest.shared.answer.ActivityType.UNSET;
 public class ListOptions {
   private boolean sort = true;
   private boolean showTypeAhead = true;
-  private String instance = "unk";
+  private VIEWS instance = VIEWS.NONE;
   private boolean showFirstNotCompleted = false;
   private ActivityType activityType = UNSET;
   private boolean showPager = true;
+  private boolean compact = false;
 
   public ListOptions() {
   }
 
-  public ListOptions(String instance) {
+  public ListOptions(VIEWS instance) {
     this.instance = instance;
   }
 
@@ -42,10 +44,18 @@ public class ListOptions {
     return this;
   }
 
+  public ListOptions setCompact(boolean val) {
+    this.compact = val;
+    return this;
+  }
 
-  public ListOptions setInstance(String instance) {
+  public ListOptions setInstance(VIEWS instance) {
     this.instance = instance;
     return this;
+  }
+
+  public VIEWS getInstance() {
+    return instance;
   }
 
   public ListOptions setActivityType(ActivityType activityType) {
@@ -64,14 +74,6 @@ public class ListOptions {
     return showTypeAhead;
   }
 
-  public String getInstance() {
-    return instance;
-  }
-
-/*  boolean isIncorrectFirst() {
-    return false;
-  }*/
-
   boolean isShowFirstNotCompleted() {
     return showFirstNotCompleted;
   }
@@ -82,5 +84,9 @@ public class ListOptions {
 
   public boolean isShowPager() {
     return showPager;
+  }
+
+  public boolean isCompact() {
+    return compact;
   }
 }

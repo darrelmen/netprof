@@ -6,26 +6,18 @@ import com.github.gwtbootstrap.client.ui.Typeahead;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.event.HiddenEvent;
-import com.github.gwtbootstrap.client.ui.event.HiddenHandler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -36,24 +28,21 @@ import java.util.logging.Logger;
  */
 class EditableExerciseList extends NPExerciseList implements FeedbackExerciseList {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
-  private final EditItem editItem;
+
   private final UserList<CommonShell> list;
   private SearchTypeahead searchTypeahead;
-  private TextBox quickAddText;
   private HTML message;
 
   /**
    * @param controller
-   * @param editItem
    * @param right
    * @param instanceName
    * @param list
    * @see EditItem#makeExerciseList
    */
   EditableExerciseList(ExerciseController controller,
-                       EditItem editItem,
                        Panel right,
-                       String instanceName,
+                       INavigation.VIEWS instanceName,
                        UserList<CommonShell> list) {
     super(right,
         controller,
@@ -61,7 +50,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
             .setInstance(instanceName)
             .setShowTypeAhead(false)
             .setSort(false), 12);
-    this.editItem = editItem;
     setUserListID(list.getID());
     this.list = list;
 
@@ -138,7 +126,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
     delete = makeDeleteButtonItself();
     delete.addClickHandler(event -> {
-      CommonShell currentSelection = pagingContainer.getCurrentSelection();
+      HasID currentSelection = pagingContainer.getCurrentSelection();
       if (currentSelection != null) {
         deleteItem(currentSelection.getID(), widgets, widgets, delete);
       }
@@ -155,7 +143,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private Button makeDeleteButtonItself() {
     Button delete = new Button("");//REMOVE_FROM_LIST);
     delete.setIcon(IconType.MINUS);
-    delete.getElement().getStyle().setMarginTop(10,Style.Unit.PX );
+    delete.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     delete.getElement().setId("Remove_from_list");
     // delete.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
     delete.setType(ButtonType.WARNING);
@@ -168,6 +156,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     return delete;
   }
 
+  private TextBox quickAddText;
   /**
    * @return
    * @see #getAddButtonContainer
@@ -204,7 +193,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private Button getAddButton() {
     Button add = new Button("", IconType.PLUS);
     add.setType(ButtonType.SUCCESS);
-    add.getElement().getStyle().setMarginTop(10,Style.Unit.PX );
+    add.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
     add.setEnabled(false);
     add.addClickHandler(event -> onClickAdd(add));
@@ -215,13 +204,16 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private void onClickAdd(Button add) {
     add.setEnabled(false);
 
-    if (searchTypeahead.getCurrentExercise() != null) {
+    logger.info("click add " + add);
+
+    final CommonShell currentExercise = searchTypeahead.getCurrentExercise();
+    if (currentExercise != null) {
       if (isOnList()) {
         message.setText("This is already in the list.");
         enableButton(add);
       } else {
         message.setText("");
-        controller.getListService().addItemToUserList(list.getID(), searchTypeahead.getCurrentExercise().getID(), new AsyncCallback<Void>() {
+        controller.getListService().addItemToUserList(list.getID(), currentExercise.getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("adding an exercise to a list", caught);
@@ -231,11 +223,14 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
           @Override
           public void onSuccess(Void result) {
             enableButton(add);
-            showNewItem(searchTypeahead.getCurrentExercise());
+            showNewItem(currentExercise);
+            quickAddText.setValue("",false);
+
           }
         });
       }
-    } else {
+    }
+/*    else {
       String safeText = getSafeText(quickAddText);
       if (safeText.trim().isEmpty()) {
         enableButton(add);
@@ -243,16 +238,16 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
       } else {
         checkIsValidPhrase(add, safeText);
       }
-    }
+    }*/
   }
 
   /**
    * TODO : this should be simpler - does the exercise exist or not - we don't create new exercises anymore.
    *
-   * @param add
-   * @param safeText
+   * @paramx add
+   * @paramx safeText
    */
-  private void checkIsValidPhrase(Button add, String safeText) {
+/*  private void checkIsValidPhrase(Button add, String safeText) {
     controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -263,8 +258,8 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
       @Override
       public void onSuccess(Boolean result) {
         enableButton(add);
-/*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
-        " before adding/changing " + newUserExercise + " -> " + result);*/
+*//*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
+        " before adding/changing " + newUserExercise + " -> " + result);*//*
         if (result) {
           controller.getListService().newExercise(
               list.getID(),
@@ -286,12 +281,12 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
         }
       }
     });
-  }
-
+  }*/
   private void enableButton(Button add) {
     add.setEnabled(true);
   }
 
+/*
   @NotNull
   private CommonExercise makeNewExercise(String safeText) {
     CommonExercise newItem = editItem.getNewItem();
@@ -300,6 +295,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     newItem.getMutable().setMeaning("");
     return newItem;
   }
+*/
 
   private boolean isOnList() {
     boolean found = false;
@@ -327,20 +323,22 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     gotClickOnItem(currentExercise);
     markCurrentExercise(currentExercise.getID());
   }
-
+/*
   private String getSafeText(TextBox box) {
     return sanitize(box.getText()).replaceAll("&#39;", "'");
-  }
+  }*/
+/*
   private String sanitize(String text) {
     return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
+*/
 
   protected int getNumTableRowsGivenScreenHeight() {
     return 12;
   }
 
   /**
-   * Removes from 4 lists!
+   * Removes from 4 lists!  ??????
    *
    * @param exid
    * @param exerciseList
