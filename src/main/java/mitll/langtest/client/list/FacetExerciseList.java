@@ -1492,6 +1492,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see ExerciseList#checkAndAskServer
    */
   protected void askServerForExercise(int itemID) {
+    if (itemID > 0) pagingContainer.markCurrentExercise(itemID);
+
     Collection<Integer> visibleIDs = pagingContainer.getVisibleIDs();
 
     if (visibleIDs.isEmpty()) {
@@ -1510,7 +1512,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #askServerForExercise
    */
   private void askServerForVisibleExercises(int itemID, Collection<Integer> visibleIDs, final int currentReq) {
-    // logger.info("askServerForExercises ask for single -- " + itemID + " and " + visibleIDs.size());
+    // logger.info("askServerForVisibleExercises ask for single -- " + itemID + " and " + visibleIDs.size());
     if (visibleIDs.isEmpty() && pagingContainer.isEmpty() && finished) {
       if (DEBUG) logger.info("askServerForVisibleExercises show empty -- ");
     } else {
@@ -1670,7 +1672,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     Map<Integer, ClientExercise> idToEx = setScoreHistory(result.getScoreHistoryPerExercise(), result.getExercises());
     alreadyFetched.forEach(exercise -> idToEx.put(exercise.getID(), exercise));
 
-    result.getExercises().forEach(clientEx->addExerciseToCached((U)clientEx));
+    result.getExercises().forEach(clientEx -> addExerciseToCached((U) clientEx));
     return idToEx;
   }
 
@@ -2027,9 +2029,8 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
       T t = byID(id);
       if (t == null) {
-       logger.info("setScore not adding score for " + id + " since likely a context sentence ");
-      }
-      else {
+        logger.info("setScore not adding score for " + id + " since likely a context sentence ");
+      } else {
         exerciseToScore.put(id, hydecScore);
       }
     } else {

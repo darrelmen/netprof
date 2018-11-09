@@ -17,8 +17,8 @@ public interface IBanner {
   void setNavigation(INavigation navigation);
 
   /**
-   * @see mitll.langtest.client.initial.InitialUI#setSplash
    * @param subtitle
+   * @see mitll.langtest.client.initial.InitialUI#setSplash
    */
   void setSubtitle(String subtitle);
 
@@ -27,18 +27,22 @@ public interface IBanner {
   void reflectPermissions(Collection<User.Permission> permissions);
 
   void setVisibleChoices(boolean visible);
+
   void setVisibleChoicesByMode(ProjectMode mode);
+
   void setCogVisible(boolean val);
 
   void reset();
 
   /**
-   * @see UILifecycle#gotUser
    * @param name
+   * @see UILifecycle#gotUser
    */
   void setUserName(String name);
 
   void checkProjectSelected();
 
   void show(INavigation.VIEWS views);
+
+ // void selectView(INavigation.VIEWS views);
 }

@@ -400,13 +400,11 @@ public class AnalysisTab extends DivWidget {
 
     if (analysisPlot != null) {
       Scheduler.get().scheduleDeferred(() -> {
-
         analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView);
-
 
         TIME_HORIZON value = TIME_HORIZON.values()[getTimeHorizonFromStorage()];
 
-        logger.info("Set time horizon " + value);
+     //   logger.info("Set time horizon " + value);
         analysisPlot.setTimeHorizon(value);
 
       });

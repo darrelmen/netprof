@@ -323,7 +323,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
       final FlashcardRecordButtonPanel outer = this;
       private Timer waitTimer = null;
 
-      @Override
+ /*     @Override
       protected void showWaiting() {
         if (contextSentenceWhileWaiting != null) {
           scheduleWaitTimer();
@@ -331,17 +331,18 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
           super.showWaiting();
         }
       }
+*/
 
-      @Override
+   /*   @Override
       protected void hideWaiting() {
         super.hideWaiting();
         cancelTimer();
         if (contextSentenceWhileWaiting != null) {
           contextSentenceWhileWaiting.setVisible(false);
         }
-      }
+      }*/
 
-      void scheduleWaitTimer() {
+  /*    private void scheduleWaitTimer() {
         cancelTimer();
 
         waitTimer = new Timer() {
@@ -353,17 +354,14 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
           }
         };
         waitTimer.schedule(500);
-      }
+      }*/
 
-      private void cancelTimer() {
+   /*   private void cancelTimer() {
         if (waitTimer != null) {
-          // logger.info("cancelTimer --- " + this);
-          waitTimer.cancel();
+           waitTimer.cancel();
         }
-        //else {
-        //  logger.info("cancelTimer waitTimer is null " +this);
-        // }
-      }
+
+      }*/
 
       @NotNull
       protected String getDeviceType() {
@@ -376,11 +374,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
        */
       @Override
       protected String getDevice() {
-
-        String deviceValue = getDeviceValue();
-
-        logger.info("getDevice deviceValue " + deviceValue);
-        return deviceValue;
+        return getDeviceValue();
       }
 
       @Override
@@ -474,7 +468,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
 
         // without this, the arrow keys may go to the chapter selector
         grabFocus(widgets);
-        //   toGrab = widgets;
         return widgets;
       }
     };
@@ -499,7 +492,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   }
 
   String getDeviceValue() {
-    logger.warning("getDeviceValue default ");
+//    logger.warning("getDeviceValue default ");
 
     return controller.getBrowserInfo();
   }
@@ -524,7 +517,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   }
 
   /**
-   * TODO : use same as in learn tab or vice versa
+   * use same as in learn tab or vice versa
    *
    * @param score
    * @param isFullMatch

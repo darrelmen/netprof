@@ -15,6 +15,7 @@ import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE;
@@ -182,12 +183,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
     if (!currentSection.equals(view)) {
       if (DEBUG) logger.info("showView - showing " + view);
-      //} else {
+
       currentSection = view;
       storeValue(view);
       switch (view) {
         case LEARN:
-          clearAndPush(isFirstTime, currentStoredView, LEARN);
+          clearAndPush(isFirstTime, currentStoredView, LEARN, !fromClick);
           learnHelper.showContent(divWidget, LEARN);
           break;
         case PRACTICE:
@@ -208,7 +209,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           listView.showContent(divWidget, LISTS);
           break;
         case DIALOG:
-          clearAndPush(isFirstTime, currentStoredView, DIALOG);
+          clearAndPush(isFirstTime, currentStoredView, DIALOG, true);
           dialogHelper.showContent(divWidget, DIALOG);
           break;
         case STUDY:
@@ -298,10 +299,13 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     currentSection = SCORES;
   }
 
-  private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen) {
+  private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen, boolean doPushItem) {
     clearAndFixScroll();
-    if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
-    setInstanceHistory(listen);
+
+    if (doPushItem) {
+      if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
+      setInstanceHistory(listen);
+    }
   }
 
   private void clearAndPushKeep(VIEWS views) {
@@ -643,7 +647,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushItem(String url) {
-    logger.info("pushItem - " + url);
+//    logger.info("pushItem - " + url);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //    logger.info("logException stack " + exceptionAsString);
     History.newItem(url);

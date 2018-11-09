@@ -246,7 +246,10 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private void gotClickOnLearn() {
     T selected = getSelected();
     if (selected != null) {
-      controller.getShowTab(this.jumpView).showLearnAndItem(selected.getExid());
+      int exid = selected.getExid();
+
+      logger.info("gotClickOnLearn OK show " + exid);
+      controller.getShowTab(this.jumpView).showLearnAndItem(exid);
     }
   }
 

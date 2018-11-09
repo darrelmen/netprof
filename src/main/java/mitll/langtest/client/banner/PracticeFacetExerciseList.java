@@ -28,7 +28,7 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
   private final PracticeHelper<T, U> practiceHelper;
   private ControlState controlState;
 
-  protected PracticeFacetExerciseList(Panel topRow,
+  PracticeFacetExerciseList(Panel topRow,
                                       Panel currentExercisePanel,
                                       ExerciseController controller,
                                       ListOptions listOptions,
@@ -173,7 +173,7 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
    * @param result
    * @see #showExercises
    */
-  protected void showOnlyOneExercise(Collection<ClientExercise> result) {
+  private void showOnlyOneExercise(Collection<ClientExercise> result) {
     ClientExercise next = result.iterator().next();
     markCurrentExercise(next.getID());
     addExerciseWidget(next);
