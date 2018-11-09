@@ -44,7 +44,8 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
   private static final String MY_LISTS = "myLists";
 
-  private static final String EDIT_THE_LIST = "Edit the list, make it public, or make it a quiz.";
+  private static final String EDIT_THE_LIST = "Edit the list, make it public.";
+  private static final String EDIT_THE_LIST_OR_QUIZ = "Edit the list, make it public, or make it a quiz.";
   private static final String SHARE = "Share";
   private static final String SHARE_THE_LIST = "Share the list with someone.";
   private static final String VISITED = "Visited";
@@ -323,7 +324,7 @@ public class ListView implements ContentView, CreateListComplete {
     Button successButton = getSuccessButton(EDIT_TITLE);
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> doEdit());
-    addTooltip(successButton, EDIT_THE_LIST);
+    addTooltip(successButton, canMakeQuiz() ? EDIT_THE_LIST_OR_QUIZ : EDIT_THE_LIST);
     // successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
@@ -723,7 +724,7 @@ public class ListView implements ContentView, CreateListComplete {
       controller.addKeyListener(listener);
     }*/
 
-    return getNewListButton(contents, createListDialog,"Create New Quiz");
+    return getNewListButton(contents, createListDialog, "Create New Quiz");
   }
 
   @NotNull

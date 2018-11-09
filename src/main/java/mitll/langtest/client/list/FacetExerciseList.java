@@ -52,6 +52,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.QuizHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -1255,13 +1256,20 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   /**
+   * TODO: figure out a way to not do multiple restores when jumping from progress.
    * @param selectionState
    * @see HistoryExerciseList#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {
-    if (DEBUG) logger.info("restoreListBoxState = '" + selectionState + "' " +
-        "\n\t" + selectionState.getInfo());
+    if (DEBUG) {
+      logger.info("restoreListBoxState = '" + selectionState + "' " +
+          "\n\t" + selectionState.getInfo());
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("here for " + selectionState));
+//      logger.info("logException stack:\n" + exceptionAsString);
+
+    }
     super.restoreListBoxState(selectionState);
     downloadHelper.updateDownloadLinks(selectionState, typeOrder);
   }

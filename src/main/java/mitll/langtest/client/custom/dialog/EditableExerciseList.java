@@ -156,12 +156,13 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     return delete;
   }
 
+  private TextBox quickAddText;
   /**
    * @return
    * @see #getAddButtonContainer
    */
   private Typeahead getTypeahead(Button add) {
-    TextBox quickAddText = getEntryTextBox();
+    quickAddText = getEntryTextBox();
     quickAddText.addKeyUpHandler(event -> searchTypeahead.clearCurrentExercise());
     this.searchTypeahead = new SearchTypeahead(controller, this, add);
     return searchTypeahead.getTypeaheadUsing(quickAddText);
@@ -205,13 +206,14 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
 
     logger.info("click add " + add);
 
-    if (searchTypeahead.getCurrentExercise() != null) {
+    final CommonShell currentExercise = searchTypeahead.getCurrentExercise();
+    if (currentExercise != null) {
       if (isOnList()) {
         message.setText("This is already in the list.");
         enableButton(add);
       } else {
         message.setText("");
-        controller.getListService().addItemToUserList(list.getID(), searchTypeahead.getCurrentExercise().getID(), new AsyncCallback<Void>() {
+        controller.getListService().addItemToUserList(list.getID(), currentExercise.getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("adding an exercise to a list", caught);
@@ -221,7 +223,9 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
           @Override
           public void onSuccess(Void result) {
             enableButton(add);
-            showNewItem(searchTypeahead.getCurrentExercise());
+            showNewItem(currentExercise);
+            quickAddText.setValue("",false);
+
           }
         });
       }

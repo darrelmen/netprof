@@ -117,7 +117,7 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
 
 
   /**
-   * SERVER
+   *
    * @return
    */
   int getParentExerciseID();

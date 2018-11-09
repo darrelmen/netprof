@@ -22,9 +22,12 @@ import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.MySoundFeedback;
+import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.scoring.ScoreFeedbackDiv;
 import mitll.langtest.client.sound.*;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -77,6 +80,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private Button getPlay() {
     return play;
   }
+
   private Button getReview() {
     return review;
   }
@@ -205,7 +209,10 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
       learn.addStyleName("leftTenMargin");
       learn.setType(ButtonType.SUCCESS);
 
-      learn.addClickHandler(event -> gotClickOnLearn());
+      learn.addClickHandler(event -> {
+        learn.setEnabled(false);
+        gotClickOnLearn();
+      });
       wrapper.add(learn);
     }
 
@@ -248,8 +255,23 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     if (selected != null) {
       int exid = selected.getExid();
 
-      logger.info("gotClickOnLearn OK show " + exid);
-      controller.getShowTab(this.jumpView).showLearnAndItem(exid);
+
+      controller.getExerciseService().getExerciseIDOrParent(exid, new AsyncCallback<Integer>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Integer result) {
+          logger.info("gotClickOnLearn OK show " + result + " Vs " + exid);
+          controller.getShowTab(jumpView).showLearnAndItem(result);
+        }
+      });
+
+
+//      logger.info("gotClickOnLearn OK show " + exid);
+//      controller.getShowTab(this.jumpView).showLearnAndItem(exid);
     }
   }
 
@@ -539,7 +561,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
                     }
                   }
 
-                  if (DEBUG)  logger.info("studentAudioEnded OK select new first row " + toSelect);
+                  if (DEBUG) logger.info("studentAudioEnded OK select new first row " + toSelect);
 
                   setSelectedAndShowReco(toSelect, true);
                 }

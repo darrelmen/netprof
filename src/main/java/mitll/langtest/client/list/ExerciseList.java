@@ -44,6 +44,7 @@ import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -302,9 +303,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       this.searchIfAny = searchIfAny;
       this.exerciseID = exerciseID;
       this.request = request;
+
 //      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
-//      logger.info("logException stack " + exceptionAsString);
+//       String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
+//       logger.info("logException stack " + exceptionAsString);
     }
 
     public void onFailure(Throwable caught) {
@@ -688,7 +690,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
     } else {
       pendingReq = true;
       if (DEBUG) logger.info("ExerciseList.askServerForExercise id = " + itemID);// + " instance " + getInstance());
-      service.getExercise(itemID, false, new ExerciseAsyncCallback());
+      service.getExercise(itemID, new ExerciseAsyncCallback());
     }
 
     // go get next and cache it
@@ -701,7 +703,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       T next = getAt(i + 1);
 
       if (controller.getUser() > 0) {
-        service.getExercise(next.getID(), false, new AsyncCallback<U>() {
+        service.getExercise(next.getID(), new AsyncCallback<U>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError(GETTING_EXERCISE, caught);

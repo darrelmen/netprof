@@ -49,10 +49,9 @@ public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
   /**
    * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    * @param exid
-   * @param isFlashcardReq
    * @param async
    */
-  void getExercise(int exid, boolean isFlashcardReq, AsyncCallback<T> async);
+  void getExercise(int exid, AsyncCallback<T> async);
 
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
 
@@ -67,4 +66,6 @@ public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
    * @param async
    */
   void getLatestScoreAudioPath(int userID, int exid, long nearTime, AsyncCallback<Pair> async);
+
+  void getExerciseIDOrParent(int exid, AsyncCallback<Integer> async);
 }
