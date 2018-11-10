@@ -34,8 +34,7 @@ package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -70,6 +69,11 @@ public class FilterRequest implements IsSerializable {
   }
 
   public void addPair(Pair pair) {
+
+    Optional<Pair> first = typeToSelection.stream().filter(pair1 -> pair1.property.equalsIgnoreCase(pair.getProperty())).findFirst();
+
+    first.ifPresent(pair1 -> typeToSelection.remove(pair1));
+
     this.typeToSelection.add(pair);
   }
 
@@ -190,6 +194,14 @@ public class FilterRequest implements IsSerializable {
   public FilterRequest setOnlyWithAnno(boolean onlyWithAnno) {
     this.onlyWithAnno = onlyWithAnno;
     return this;
+  }
+
+  public void prune() {
+    Map<String, String> pv = new LinkedHashMap<>();
+    List<Pair> typeToSelection = getTypeToSelection();
+    typeToSelection.forEach(pair -> pv.put(pair.getProperty(), pair.getValue()));
+    typeToSelection.clear();
+    pv.forEach((k, v) -> typeToSelection.add(new Pair(k, v)));
   }
 
   /**
