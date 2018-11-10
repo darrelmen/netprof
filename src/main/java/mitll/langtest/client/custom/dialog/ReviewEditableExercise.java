@@ -115,7 +115,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * @param originalList
    * @param exerciseList
    * @paramx predefinedContent   - this should be a reference to the Learn tab exercise list, but it's not getting set.
-   * @see mitll.langtest.client.custom.content.ReviewItemHelper#doInternalLayout
+   * @see mitll.langtest.client.custom.FixNPFHelper#getFactory
    */
   public ReviewEditableExercise(ExerciseController controller,
                                 U changedUserExercise,
@@ -148,13 +148,12 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    */
   @Override
   protected Panel makeAudioRow() {
-    boolean b = isContext();
     AudioRefExercise audioAttributeExercise =
-        b && newUserExercise.hasContext() ?
+        isContext() && newUserExercise.hasContext() ?
             newUserExercise.getDirectlyRelated().iterator().next() : newUserExercise;
 
     ClientExercise exerciseWithAudio = null;
-    if (newUserExercise.hasContext()) {
+    if (isContext() && newUserExercise.hasContext()) {
       exerciseWithAudio = newUserExercise.getDirectlyRelated().iterator().next();
 
 //      logger.info("makeAudioRow (" + instance +
@@ -296,9 +295,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * @see #makeAudioRow
    */
   public AudioAttribute getAudioAttribute(AudioRefExercise newUserExercise, AudioType audioType) {
-    // U newUserExercise = this.newUserExercise;
-
-    logger.info("getAudioAttribute audio type " + audioType);
+    // logger.info("getAudioAttribute audio type " + audioType);
 
     AudioAttribute audioAttribute =
         audioType.equals(REGULAR) ?
@@ -413,14 +410,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
   }
 
   private String getUserTitle(int me, MiniUser user) {
-/*    long id = user.getID();
-    if (id == UserDAO.DEFAULT_USER_ID) return GoodwaveExercisePanel.DEFAULT_SPEAKER;
-    else if (id == UserDAO.DEFAULT_MALE_ID) return "Default Male";
-    else if (id == UserDAO.DEFAULT_FEMALE_ID) return "Default Female";
-    else*/
-
-    return
-        (user.getID() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
+    return (user.getID() == me) ? "by You (" + user.getUserID() + ")" : getUserTitle(user);
   }
 
   private String getUserTitle(MiniUser user) {
@@ -879,7 +869,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
         public void useResult(AudioAnswer result) {
           super.useResult(result);
           if (result.isValid()) {
-          //  exercise.getMutableAudio().addAudio(result.getAudioAttribute());
+            //  exercise.getMutableAudio().addAudio(result.getAudioAttribute());
             deleteButton.setEnabled(true);
 
             /**
