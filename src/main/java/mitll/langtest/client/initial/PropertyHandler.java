@@ -62,7 +62,7 @@ public class PropertyHandler {
   /**
    *
    */
-  public static final boolean IS_BETA=true;
+  public static final boolean IS_BETA=false;
 
 
   private static final String AFTER_STOP_DELAY_MILLIS = "afterStopDelayMillis";
