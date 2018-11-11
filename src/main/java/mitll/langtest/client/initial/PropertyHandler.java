@@ -86,17 +86,17 @@ public class PropertyHandler {
 
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
-  private static final String RELEASE_DATE = "releaseDate";
+  //private static final String RELEASE_DATE = "releaseDate";
   @Deprecated
   private static final String DEMO_MODE = "demo";
   private static final String RECORD_TIMEOUT = "recordTimeout";
 
-  private static final String NAME_FOR_ITEM = "nameForItem";
+//  private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
-  private static final String NAME_FOR_RECORDER = "nameForRecorder";
+//  private static final String NAME_FOR_RECORDER = "nameForRecorder";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String DIALOG1 = "dialog";
-  private static final String DIALOG = DIALOG1;
+//  private static final String DIALOG = DIALOG1;
 
   // URL parameters that can override above parameters
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
@@ -199,7 +199,7 @@ public class PropertyHandler {
   private static final String SPEECH = "Speech";
   private static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
-  private String responseType = AUDIO;
+ // private String responseType = AUDIO;
   private String helpEmail = NETPROF_HELP_DLIFLC_EDU;
   private String helpMessage = "";
 
@@ -389,14 +389,14 @@ public class PropertyHandler {
       usePhoneToDisplay = !Window.Location.getParameter(USE_PHONE_TO_DISPLAY).equals("false");
       if (usePhoneToDisplay) logger.info("usePhoneToDisplay is " + usePhoneToDisplay);
     }
-    if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
-      responseType = Window.Location.getParameter(RESPONSE_TYPE);
-    }
+//    if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
+//      responseType = Window.Location.getParameter(RESPONSE_TYPE);
+//    }
     if (Window.Location.getParameter(SHOW_ADVERTISED_IOS) != null) {
       showAdvertiseIOS = Window.Location.getParameter(SHOW_ADVERTISED_IOS) != null;
     }
 
-    setResponseType();
+    //setResponseType();
   }
 
   /**
@@ -468,19 +468,19 @@ public class PropertyHandler {
   /**
    * Parse URL to extract the responseType values
    */
-  private void setResponseType() {
-    String href = Window.Location.getHref();
-    if (href.contains("responseType=")) {
-      //     logger.info("found response type " + href);
-      String s = href.split("responseType=")[1];
-      String candidate = s.split("\\*\\*\\*")[0];
-      if (knownChoice(candidate)) {
-        responseType = candidate;
-      } else {
-        logger.warning("responseType unknown " + candidate);
-      }
-    }
-  }
+//  private void setResponseType() {
+//    String href = Window.Location.getHref();
+//    if (href.contains("responseType=")) {
+//      //     logger.info("found response type " + href);
+//      String s = href.split("responseType=")[1];
+//      String candidate = s.split("\\*\\*\\*")[0];
+//      if (knownChoice(candidate)) {
+//        //responseType = candidate;
+//      } else {
+//        logger.warning("responseType unknown " + candidate);
+//      }
+//    }
+//  }
 
   @Deprecated
   public boolean isOdaMode() {
@@ -521,5 +521,4 @@ public class PropertyHandler {
   public String getHelpEmail() {
     return helpEmail;
   }
-
 }

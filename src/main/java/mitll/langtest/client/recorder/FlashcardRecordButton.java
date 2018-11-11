@@ -194,11 +194,15 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
     controller.addKeyListener(listener);
   }
 
-
+  /**
+   * Remember to prevent default on space event or the window will jump (why?)
+   * @param event
+   */
   private void checkKeyDown(NativeEvent event) {
     if (!shouldIgnoreKeyPress()) {
       boolean isSpace = checkIsSpace(event);
       if (isSpace) {
+        event.preventDefault();  // critical!
         if (DEBUG) logger.info("checkKeyDown got space " + event);
         if (!mouseDown) {
           mouseDown = true;

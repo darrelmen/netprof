@@ -76,11 +76,12 @@ class JSONAnswerParser {
       sTypeToEndTimes.put(NetPronImageType.WORD_TRANSCRIPT, wsegments);
 
       float wavFileLengthSeconds = ((float) converted.getDurationInMillis()) / 1000F;
+      boolean isFullMatch = true;
       PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
           new HashMap<>(),
           new HashMap<>(),
           sTypeToEndTimes, "", wavFileLengthSeconds,
-          0, true);
+          0, isFullMatch);
 
       converted.setPretestScore(pretestScore);
     } else {
