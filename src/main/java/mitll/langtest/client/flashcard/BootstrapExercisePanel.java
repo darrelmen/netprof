@@ -534,7 +534,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     {
       IconAnchor correctIcon = new IconAnchor();
 //      logger.info("showScoreFeedback correct" + correct + " is full " + isFullMatch);
-      correctIcon.setBaseIcon(correct ? MyCustomIconType.correct : MyCustomIconType.incorrect);
+      correctIcon.setBaseIcon(correct && isFullMatch ? MyCustomIconType.correct : MyCustomIconType.incorrect);
 
       DivWidget iconContainer = new DivWidget();
       iconContainer.addStyleName("floatLeft");

@@ -1191,31 +1191,23 @@ public class AudioFileHelper implements AlignDecode {
           "\n\thost    " + hydraHost
       );
     }
-    if (!available && !theFile.getName().endsWith(OGG) && serverProps.isLaptop()) {
- /*
-      logger.info("checkForWebservice exid    " + exid);
-      logger.info("checkForWebservice projid  " + projid);
+    if (!available && !theFile.getName().endsWith(OGG) && serverProps.useProxy()) {
+  //    logger.info("checkForWebservice exid    " + exid);
+   /*   logger.info("checkForWebservice projid  " + projid);
       logger.info("checkForWebservice userid  " + userid);
       logger.info("checkForWebservice theFile " + theFile.getAbsolutePath());
       logger.info("checkForWebservice exists  " + theFile.exists());
       */
       if (theFile.exists()) {
-
-/*
-        if (language.equalsIgnoreCase("spanish")) {
-          logger.info("raw before " + foreignLanguage);
-          foreignLanguage = foreignLanguage
-              .replaceAll("Ud.", "usted")
-              .replaceAll("Uds.", "ustedes");
-          logger.info("raw after   " + foreignLanguage);
-        }
-*/
         PrecalcScores precalcScores = getProxyScore(english, foreignLanguage, userid, theFile, hydraHost);
         return (precalcScores != null && precalcScores.isDidRunNormally()) ? precalcScores : null;
       } else {
+//        logger.info("checkForWebservice no file at " + theFile.getAbsolutePath());
         return null;
       }
     } else {
+//      logger.info("checkForWebservice available " +available + " laptop " +serverProps.useProxy() +" "+serverProps.getHostName());
+
       return null;
     }
   }
@@ -1587,7 +1579,7 @@ public class AudioFileHelper implements AlignDecode {
           decoderOptions,
           precalcScores);
 
-      logger.info("for file " + file + " asr score " + asrScoreForAudio);
+      logger.info("getAudioAnswer for file " + file + " asr score " + asrScoreForAudio);
 
       audioAnswer.setPretestScore(asrScoreForAudio);
       audioAnswer.setCorrect(audioAnswer.getScore() > MIN_SCORE_FOR_CORRECT_ALIGN &&

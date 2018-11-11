@@ -75,7 +75,8 @@ public class PropertyHandler {
   public static final String CPW_TOKEN_2 = "CPW-token";
 
  // private static final String FONT_FAMILY = "fontFamily";
-  private static final String IS_AMAS = "isAMAS";
+// private static final String IS_AMAS = "isAMAS";
+  private static final String IS_BETA_PROP = "isBeta";
 
   /**
    * Possibly we need to add a delay after button is released to actually tell flash to stop recording.
@@ -173,6 +174,7 @@ public class PropertyHandler {
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
+  public boolean isBeta;
   private final Set<Integer> preferredVoices = new HashSet<>();
 
   /**
@@ -255,8 +257,8 @@ public class PropertyHandler {
         case QUIET_AUDIO_OK:
           quietAudioOK = getBoolean(value);
           break;
-        case IS_AMAS:
-          isAMAS = getBoolean(value);
+        case IS_BETA_PROP:
+          isBeta = getBoolean(value);
           break;
         case DOMINO_SERVER:
           dominoURL = value;

@@ -155,6 +155,7 @@ public class JsonScoring {
         jsonForScore.put("resultID", answer.getResultID());
         jsonForScore.put("pretest", new JSONObject());
         jsonForScore.put("timestamp", answer.getTimestamp());
+        jsonForScore.put("isfullmatch", answer.getPretestScore().isFullMatch());
       }
     }
 
