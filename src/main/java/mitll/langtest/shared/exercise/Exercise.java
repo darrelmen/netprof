@@ -289,12 +289,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.creator = exercise.getCreator();
   }
 
-//  @Override
-//  public CommonShell getShell() {
-//    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, isContext);
-//  }
-
-
   public CommonShell getShell() {
     return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, isContext(), getDirectlyRelated().size());
   }

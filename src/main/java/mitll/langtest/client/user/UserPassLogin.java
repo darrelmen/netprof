@@ -173,6 +173,12 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     signInForm.tryLogin();
   }
 
+  @Override
+  public void setSignInFieldAndFocus(String userid) {
+    signInForm.setValueAndFocusOnUserID(userid);
+
+  }
+
   /**
    * Don't redirect them to download site just yet.
    *

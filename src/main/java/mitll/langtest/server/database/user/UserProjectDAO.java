@@ -154,6 +154,10 @@ public class UserProjectDAO implements IUserProjectDAO {
 //    logger.info("getCurrentProjectForUser : took " + (now - then) + " to get current prpject for user  " + user + " = " + slickUserProjects);
       int i = slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next();
 
+      if (i == -1) {
+        logger.info("getCurrentProjectForUser no current project for user #" + user);
+      }
+
 //      userToProjectCache.put(user, i);
 
       return i;

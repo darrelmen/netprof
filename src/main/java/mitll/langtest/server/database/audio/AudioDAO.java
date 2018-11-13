@@ -527,7 +527,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return buffer.toString();
   }
 
-
+/*
   protected Set<Integer> getValidAudioOfType(int userid, AudioType audioType) {
     String sql = "SELECT " + Database.EXID +
         " FROM " + AUDIO + " WHERE " + USERID + "=" + userid +
@@ -543,7 +543,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       logger.error("got " + e, e);
       return Collections.emptySet();
     }
-  }
+  }*/
 
   /**
    * @param sql

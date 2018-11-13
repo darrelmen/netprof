@@ -34,7 +34,13 @@ package mitll.langtest.client.user;
 
 public interface UserPassDialog {
   void clearSignInHasFocus();
+
+  /**
+   *
+   */
   void setSignInHasFocus();
   void setSignInPasswordFocus();
   void tryLogin();
+
+  void setSignInFieldAndFocus(String userid);
 }

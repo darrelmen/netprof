@@ -296,8 +296,6 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * @see #makeAudioRow
    */
   public AudioAttribute getAudioAttribute(AudioRefExercise newUserExercise, AudioType audioType) {
-    // U newUserExercise = this.newUserExercise;
-
     logger.info("getAudioAttribute audio type " + audioType);
 
     AudioAttribute audioAttribute =

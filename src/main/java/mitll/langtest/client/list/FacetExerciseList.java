@@ -1192,7 +1192,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       pairs.add(new Pair(type, (s == null) ? ANY : s));
     }
 
-
     return pairs;
   }
 
@@ -1207,7 +1206,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
           "\n\ttype to selection " + typeToSelection +
           "\n\ttype to values    " + response.getTypeToValues().size()
@@ -1357,10 +1356,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   @NotNull
   Map<String, String> getNewTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
-//    typeOrder = new ArrayList<>(typeOrder);
-//    typeOrder.add(getDynamicFacet());
-//    typeOrder.add(CONTENT);
-
     return getTypeToSelection(selectionState, typeOrder);
   }
 

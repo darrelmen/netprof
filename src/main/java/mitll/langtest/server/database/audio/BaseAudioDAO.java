@@ -356,7 +356,7 @@ public abstract class BaseAudioDAO extends DAO {
 
     // unfortunately we update existing records, so the id will not change, but the path will
     //  Collection<Integer> currentIDs = getAudioIDs(firstExercise);
-    Collection<String> currentPaths = getAudioPaths(firstExercise);
+    Collection<String> currentPaths = firstExercise.getAudioPaths();
 
     boolean doDebug = debug || DEBUG_ATTACH;
 
@@ -401,12 +401,12 @@ public abstract class BaseAudioDAO extends DAO {
     return allSucceeded;
   }
 
-  private Collection<String> getAudioPaths(ClientExercise firstExercise) {
+/*  private Collection<String> getAudioPaths(ClientExercise firstExercise) {
     Collection<AudioAttribute> audioAttributes1 = firstExercise.getAudioAttributes();
     synchronized (audioAttributes1) {
       return audioAttributes1.stream().map(AudioAttribute::getAudioRef).collect(Collectors.toSet());
     }
-  }
+  }*/
 
   /**
    * TODO : Why does this have to be so complicated???
@@ -748,9 +748,9 @@ public abstract class BaseAudioDAO extends DAO {
    *
    * @param userid
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
    */
-  public Collection<Integer> getRecordedExForUser(int userid) {
+/*  public Collection<Integer> getRecordedExForUser(int userid) {
     try {
       Set<Integer> validAudioAtReg = getValidAudioOfType(userid, AudioType.REGULAR);
       Set<Integer> validAudioAtSlow = getValidAudioOfType(userid, AudioType.SLOW);
@@ -760,25 +760,27 @@ public abstract class BaseAudioDAO extends DAO {
       logger.error("got " + ee, ee);
     }
     return new HashSet<>();
-  }
+  }*/
 
   /**
    * TODO make this a like "context=%"
    *
    * @param userid
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
    */
-  public Collection<Integer> getRecordedExampleForUser(int userid) {
+/*  public Collection<Integer> getRecordedExampleForUser(int userid) {
     try {
       return getValidAudioOfType(userid, AudioType.CONTEXT_REGULAR);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return new HashSet<>();
-  }
+  }*/
 
+/*
   abstract Set<Integer> getValidAudioOfType(int userid, AudioType audioType);
+*/
 
   /**
    * @param userid

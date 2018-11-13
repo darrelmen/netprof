@@ -107,18 +107,11 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
   protected List<Pair> getPairs(Map<String, String> typeToSelection) {
     List<Pair> pairs = super.getPairs(typeToSelection);
 
-    for (String type : getTypeOrderSimple()) {
-      String s = typeToSelection.get(type);
-      pairs.add(new Pair(type, (s == null) ? ANY : s));
-    }
-
     addPairForTypeSelection(typeToSelection, pairs, getDynamicFacet());
 
     {
-//      addPairForTypeSelection(typeToSelection, pairs, CONTENT);
       String s = typeToSelection.get(CONTENT);
       pairs.add(new Pair(CONTENT, s == null ? ANY : s));
-
     }
 
     return pairs;

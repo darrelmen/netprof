@@ -196,7 +196,7 @@ public class SignInForm extends UserDialog implements SignIn {
     TextBoxBase box = password.box;
     box.addFocusHandler(event -> {
       userPassLogin.setSignInHasFocus();
-      eventRegistration.logEvent(userField.box, "PasswordBox", "N/A", "focus in password field");
+      eventRegistration.logEvent(password.box, "PasswordBox", "N/A", "focus in password field");
     });
 
     hp.add(password.getGroup());
@@ -489,6 +489,12 @@ public class SignInForm extends UserDialog implements SignIn {
   @Override
   public void setFocusOnUserID() {
     setFocusOn(userField.box);
+  }
+
+  public void setValueAndFocusOnUserID(String userID) {
+    userField.box.setText(userID);
+    setFocusOn(password.box);
+    markErrorBlur(password, "You already have an account. Please sign in.");
   }
 
   @Override

@@ -390,7 +390,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   private int getMinExpectedDur(CommonExercise commonExercise) {
-    if (commonExercise.hasRefAudio()) {
+    if (commonExercise != null && commonExercise.hasRefAudio()) {
       return (int) commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
     } else return -1;
   }
@@ -505,9 +505,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     long then = System.currentTimeMillis();
     //logger.info("Stop - combine " + audioChunks.size());
 
-    List<Integer> before = audioChunks.stream().map(audioChunk -> audioChunk.getPacket()).collect(Collectors.toList());
+    List<Integer> before = getPacketIDs(audioChunks);
     audioChunks.sort(AudioChunk::compareTo);
-    List<Integer> after = audioChunks.stream().map(audioChunk -> audioChunk.getPacket()).collect(Collectors.toList());
+    List<Integer> after = getPacketIDs(audioChunks);
 
     if (!after.equals(before)) {
       logger.warn("getCombinedAudioChunk before " + before);
@@ -517,7 +517,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     AudioChunk combined = audioChunks.get(0);
     logger.info("getCombinedAudioChunk Stop - combine " + combined);
 
-    if (combined.getPacket() != 0) {
+    if (combined.getPacket() != 1) {
       logger.warn("\n\n\n\n\n\n getCombinedAudioChunk huh? first packet is " + combined);
     }
 
@@ -544,6 +544,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.info("getCombinedAudioChunk - finally combine " + combined + " in " + (now - then) + " millis");
     }
     return combined;
+  }
+
+  @NotNull
+  private List<Integer> getPacketIDs(List<AudioChunk> audioChunks) {
+    return audioChunks.stream().map(AudioChunk::getPacket).collect(Collectors.toList());
   }
 
   /**
