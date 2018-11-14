@@ -101,6 +101,7 @@ public class ProjectManagement implements IProjectManagement {
   private static final String DIALOG = "Dialog";
   private static final String VOCAB = "vocab";
   private static final String DIALOG1 = "dialog";
+  private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
   /**
    * JUST FOR TESTING
    */
@@ -1086,7 +1087,8 @@ public class ProjectManagement implements IProjectManagement {
           new CacheLoader<Integer, String>() {
             @Override
             public String load(Integer key) {
-              return getDominoProjectName(key);
+              String dominoProjectName = getDominoProjectName(key);
+              return dominoProjectName == null ? NO_PROJECT_FOR_ID : dominoProjectName;
             }
           });
 
@@ -1101,19 +1103,30 @@ public class ProjectManagement implements IProjectManagement {
     int dominoid = project.dominoid();
     if (dominoid > 0) {
 //      info.put(DOMINO_ID, "" + project.dominoid());
-      String s = "";
-      try {
-        s = dominoToName.get(dominoid);
-      } catch (ExecutionException e) {
-        logger.warn("got " + e, e);
-      }
-
-      info.put(DOMINO_NAME, dominoid + " : " + s
+      String s = getDominoName(dominoid);
+      info.put(DOMINO_NAME, dominoid + (s.isEmpty() ? "" : " : " + s)
           //  getDominoProjectName(project.dominoid())
       );
     }
 
     return addExerciseDerivedProperties(project, info);
+  }
+
+  @NotNull
+  private String getDominoName(int dominoid) {
+    String s = "";
+    try {
+      s = dominoToName.get(dominoid);
+
+      if (s.equalsIgnoreCase(NO_PROJECT_FOR_ID)) {
+        dominoToName.refresh(dominoid);
+        s = dominoToName.get(dominoid);
+        if (s.equalsIgnoreCase(NO_PROJECT_FOR_ID)) s = "";
+      }
+    } catch (ExecutionException e) {
+      logger.warn("got " + e, e);
+    }
+    return s;
   }
 
   private boolean addExerciseDerivedProperties(SlickProject project, Map<String, String> info) {

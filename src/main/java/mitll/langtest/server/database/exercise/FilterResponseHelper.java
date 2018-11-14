@@ -560,11 +560,7 @@ public class FilterResponseHelper {
   }
 
   public List<CommonExercise> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
-    Map<String, Collection<String>> typeToSelection = request.getTypeToSelection();
-
-    logger.info("getExercisesForSelectionState " + typeToSelection);
-
-    Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, typeToSelection);
+    Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, request.getTypeToSelection());
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
     return filterExercises(request, copy, projid);
   }
@@ -579,13 +575,12 @@ public class FilterResponseHelper {
    * @return
    */
   private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
-    //  ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     Map<String, Collection<String>> copy = new HashMap<>(typeToSelection);
     copy.remove(RECORDED1);
     copy.remove(CONTENT);
 
     boolean empty = copy.isEmpty();
-    logger.info("getExercises " + empty + " : " + copy);
+//    logger.info("getExercises " + empty + " : " + copy);
     return empty ?
         getExercises(projid) :
         getSectionHelper(projid).getExercisesForSelectionState(copy);
