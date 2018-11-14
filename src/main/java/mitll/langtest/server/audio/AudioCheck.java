@@ -211,7 +211,7 @@ public class AudioCheck {
 
       if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
         logger.info("maybeAddDNR file " + fileInfo + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE +
-            "):\n" + dynamicRange.maxMin);
+            "): " + dynamicRange.maxMin);
         validityAndDur.validity = Validity.SNR_TOO_LOW;
       }
       validityAndDur.setMaxMinRange(dynamicRange.maxMin);

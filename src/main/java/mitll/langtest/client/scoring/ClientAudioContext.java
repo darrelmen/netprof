@@ -24,7 +24,8 @@ public class ClientAudioContext {
                      int reqid,
                      boolean shouldAddToTable,
                      AudioType audioType,
-                     int dialogSessionID, String recordingSessionID) {
+                     int dialogSessionID,
+                     String recordingSessionID) {
     this.exerciseID = exerciseID;
     this.reqid = reqid;
     this.shouldAddToTable = shouldAddToTable;

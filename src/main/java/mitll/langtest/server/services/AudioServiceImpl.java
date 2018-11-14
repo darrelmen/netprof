@@ -86,6 +86,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
@@ -118,9 +119,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private AudioCheck audioCheck;
   private final static boolean DEBUG_REF_TRIM = false;
 
+  /**
+   * @see #getJSONForStream
+   */
   private final LoadingCache<Long, List<AudioChunk>> sessionToChunks = CacheBuilder.newBuilder()
       .maximumSize(10000)
-      .expireAfterWrite(2, TimeUnit.MINUTES)
+      .expireAfterWrite(1, TimeUnit.MINUTES)
       .build(
           new CacheLoader<Long, List<AudioChunk>>() {
             @Override
@@ -129,7 +133,21 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             }
           });
 
-  private final ConcurrentHashMap<Long, SessionInfo> sessionToInfo = new ConcurrentHashMap<>();
+  private final LoadingCache<Long, SessionInfo> sessionToInfo = CacheBuilder.newBuilder()
+      .maximumSize(10000)
+      .expireAfterWrite(1, TimeUnit.MINUTES)
+      .build(
+          new CacheLoader<Long, SessionInfo>() {
+            @Override
+            public SessionInfo load(Long key) {
+              return new SessionInfo();
+            }
+          });
+
+  /**
+   * @see #getSessionInfo
+   */
+  // private final ConcurrentHashMap<Long, SessionInfo> sessionToInfo = new ConcurrentHashMap<>();
 
   /**
    * Sanity checks on answers and bestAudio dir
@@ -277,10 +295,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     //  long then = System.currentTimeMillis();
     Validity validity = newChunk.calcValid(audioCheck, isRef, serverProps.isQuietAudioOK());
-    //if (validity != Validity.OK)
     AudioCheck.ValidityAndDur validityAndDur = newChunk.getValidityAndDur();
 
-    logger.info("getJSONForStream : (" + state + ") chunk for exid " + realExID + " " + newChunk + " is " + validity + " : " + validityAndDur);
+    logger.info("getJSONForStream : (" + state + "), \tsession (" + session +
+        ") chunk for exid " + realExID + " " + newChunk + " is " + validity + " : " + validityAndDur);
 
 /*
     long now = System.currentTimeMillis();
@@ -293,35 +311,45 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     // END write file and score
 
     List<AudioChunk> audioChunks = sessionToChunks.get(session);
-    boolean isFinished = checkIsFinished(projid, realExID, session, newChunk, validityAndDur);
 
-    audioChunks.add(newChunk);
+    SessionInfo sessionInfo = getSession(projid, realExID, session, newChunk, validityAndDur);
+    boolean isFinished = sessionInfo.isFinished();
+
+    synchronized (audioChunks) {
+      audioChunks.add(newChunk);
+    }
 
     JSONObject jsonObject = new JSONObject();
-
     new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, validity, "" + reqid);
 
-    if (state.equalsIgnoreCase(START)) {
-    } else if (state.equalsIgnoreCase(STREAM)) {
-  /*  if (audioChunks.size() == 1) {
-        AudioChunk audioChunk = audioChunks.get(0);
-        if (audioChunk.getPacket()== packet-1) {
-          AudioChunk combined = newChunk.concat(audioChunk);
-          if (combined == null) logger.error("huh? can't combine???");
-          else {
-            audioChunks.remove(0);
-          }
-        }
-      }*/
-    } else {  // STOP
-      long then2 = System.currentTimeMillis();
-      jsonObject = getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid, dialogSessionID,
-          isRef, audioType,
-          audioChunks, jsonObject);
+    {
+      if (state.equalsIgnoreCase(START)) {
+        sessionInfo.setSawStart();
+      } else if (state.equalsIgnoreCase(STREAM)) {
+      } else {  // STOP
+        sessionInfo.setSawEnd();
+      }
 
-      long now2 = System.currentTimeMillis();
-      logger.info("getJSONForStream END chunk took " + (now2 - then2) + " for ex " + realExID + " req " + reqid + " # chunks " + audioChunks.size());
+      if (sessionInfo.sawStartAndEnd()) {  // if we've seen both start and end, check to see if we have all the packets
+        boolean completeSet;
+        synchronized (audioChunks) {
+          completeSet = isCompleteSet(audioChunks);
+        }
+        if (completeSet) {
+          long then2 = System.currentTimeMillis();
+          jsonObject = getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid, dialogSessionID,
+              isRef, audioType,
+              audioChunks, jsonObject);
+
+          long now2 = System.currentTimeMillis();
+          logger.info("getJSONForStream END chunk took " + (now2 - then2) + " for ex " + realExID + " req " + reqid + " # chunks " + audioChunks.size());
+        } else {
+          logger.info("audio chunks not complete, so waiting for others to arrive for " + session);
+        }
+
+      }
     }
+
     // so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
     // otherwise, we'll have to make a list and combine them...
 
@@ -333,28 +361,32 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return jsonObject;
   }
 
-  private boolean checkIsFinished(int projid,
-                                  int realExID,
-                                  long session,
-                                  AudioChunk newChunk,
-                                  AudioCheck.ValidityAndDur validityAndDur) {
-    boolean isFinished = false;
+  private SessionInfo getSession(int projid,
+                                 int realExID,
+                                 long session,
+                                 AudioChunk newChunk,
+                                 AudioCheck.ValidityAndDur validityAndDur) throws ExecutionException {
+    //boolean isFinished = false;
     SessionInfo sessionInfo = getSessionInfo(realExID, projid, session);
     int durationInMillis1 = newChunk.getValidityAndDur().getDurationInMillis();
     if (validityAndDur.isValid()) {
       sessionInfo.incrementSpeech(durationInMillis1);
     } else {
       sessionInfo.incrementSilence(durationInMillis1);
-      isFinished = sessionInfo.isFinished();
+      //  isFinished = sessionInfo.isFinished();
+      //  logger.info("checkIsFinished " + session + " = " + sessionInfo);
     }
-    return isFinished;
+    return sessionInfo;
+    //return isFinished;
   }
 
   @NotNull
-  private SessionInfo getSessionInfo(int realExID, int projid, long session) {
+  private SessionInfo getSessionInfo(int realExID, int projid, long session) throws ExecutionException {
     SessionInfo sessionInfo = sessionToInfo.get(session);
-    if (sessionInfo == null) {
-      sessionToInfo.put(session, sessionInfo = new SessionInfo(getMinExpectedDur(db.getExercise(projid, realExID))));
+    if (!sessionInfo.isSet()) {
+      // sessionToInfo.put(session, sessionInfo = new SessionInfo(getMinExpectedDur(db.getExercise(projid, realExID))));
+      sessionInfo.setSessionInfo(getMinExpectedDur(db.getExercise(projid, realExID)));
+      logger.info("getSessionInfo now " + sessionToChunks.size() + " and " + sessionToInfo.size() + " sessions.");
     }
     return sessionInfo;
   }
@@ -362,13 +394,20 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private class SessionInfo {
     private int speechDur;
     private int silenceDur;
-    private final int expectedSpeechDur;
-    private final boolean knownExpected;
+    private int expectedSpeechDur;
+    private boolean knownExpected;
+    private boolean isSet = false;
+    private AtomicBoolean sawStart = new AtomicBoolean(false);
+    private AtomicBoolean sawEnd = new AtomicBoolean(false);
 
-    SessionInfo(int expectedSpeechDur) {
+
+    SessionInfo() {
+    }
+
+    void setSessionInfo(int expectedSpeechDur) {
+      this.isSet = true;
       this.expectedSpeechDur = expectedSpeechDur;
       this.knownExpected = expectedSpeechDur > 0;
-      if (expectedSpeechDur < 0) expectedSpeechDur = 3000;
     }
 
     public boolean isFinished() {
@@ -384,15 +423,38 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       silenceDur += dur;
     }
 
+    public boolean isSet() {
+      return isSet;
+    }
+
+    void setSawStart() {
+      this.sawStart.set(true);
+    }
+
+    void setSawEnd() {
+      this.sawEnd.set(true);
+    }
+
+    public boolean getSawStart() {
+      return sawStart.get();
+    }
+
+
+    boolean sawStartAndEnd() {
+      return sawStart.get() && sawEnd.get();
+    }
+
     public String toString() {
       return "Session " + speechDur + " vs " + expectedSpeechDur + " sil " + silenceDur;
     }
   }
 
-  private int getMinExpectedDur(CommonExercise commonExercise) {
+  private int getMinExpectedDur(AudioRefExercise commonExercise) {
     if (commonExercise != null && commonExercise.hasRefAudio()) {
       return (int) commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
-    } else return -1;
+    } else {
+      return -1;
+    }
   }
 
   /**
@@ -461,7 +523,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         audioType)
         .setDialogSessionID(dialogSessionID);
 
-    logger.info("audio context " + audioContext);
+    // logger.info("getJsonObject audio context " + audioContext);
 
     DecoderOptions decoderOptions = new DecoderOptions()
         .setDoDecode(true)
@@ -493,7 +555,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * TODO : deal with gaps!
+   * deals with gaps
    * <p>
    * Wait for arrival?
    *
@@ -517,7 +579,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     AudioChunk combined = audioChunks.get(0);
     logger.info("getCombinedAudioChunk Stop - combine " + combined);
 
-    if (combined.getPacket() != 1) {
+    if (combined.getPacket() != 0) {
       logger.warn("\n\n\n\n\n\n getCombinedAudioChunk huh? first packet is " + combined);
     }
 
@@ -529,9 +591,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       // ordering check...
       {
         int packet = combined.getPacket();
-        int packet1 = next.getPacket();
-        if (packet != packet1 - 1) {
-          logger.warn("\n\n\ngetCombinedAudioChunk : hmm current packet " + packet + " vs next " + packet1);
+        int nextPacketID = next.getPacket();
+        if (packet != nextPacketID - 1) {
+          logger.warn("\n\n\ngetCombinedAudioChunk : hmm current packet " + packet + " vs next " + nextPacketID);
         }
       }
       combined = combined.concat(next);
@@ -544,6 +606,26 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.info("getCombinedAudioChunk - finally combine " + combined + " in " + (now - then) + " millis");
     }
     return combined;
+  }
+
+  /**
+   * Are there any gaps?
+   *
+   * @param audioChunks
+   * @return
+   */
+  private boolean isCompleteSet(List<AudioChunk> audioChunks) {
+    List<Integer> before = getPacketIDs(audioChunks);
+    before.sort(Integer::compareTo);
+    for (int i = 0; i < before.size() - 1; i++) {
+      Integer packetID = before.get(i);
+      Integer nextPacketID = before.get(i + 1);
+      if (nextPacketID != packetID + 1) {
+        logger.warn("\n\n\ngetCombinedAudioChunk : hmm current packet " + packetID + " vs next " + nextPacketID);
+        return false;
+      }
+    }
+    return true;
   }
 
   @NotNull
@@ -857,8 +939,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private long getStreamSession(HttpServletRequest request) {
     String header = request.getHeader(STREAMSESSION.toString());
     try {
-      long l = Long.parseLong(header);
-      return l;
+      return Long.parseLong(header);
     } catch (NumberFormatException e) {
       logger.error("couldn't parse " + header);
       return System.currentTimeMillis();
