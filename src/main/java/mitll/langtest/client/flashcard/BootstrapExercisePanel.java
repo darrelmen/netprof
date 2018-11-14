@@ -54,7 +54,10 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
-import mitll.langtest.client.scoring.*;
+import mitll.langtest.client.scoring.ClickableWords;
+import mitll.langtest.client.scoring.FieldType;
+import mitll.langtest.client.scoring.ScoreFeedbackDiv;
+import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.SoundFeedback;
@@ -321,7 +324,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     AudioAnswerListener exercisePanel = this;
     return new FlashcardRecordButtonPanel(exercisePanel, controller) {
       final FlashcardRecordButtonPanel outer = this;
-      private Timer waitTimer = null;
+     // private Timer waitTimer = null;
 
  /*     @Override
       protected void showWaiting() {
@@ -474,7 +477,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   }
 
 
-  private void grabFocus(FlashcardRecordButton widgets) {
+  private void grabFocus(IconAnchor widgets) {
     Scheduler.get().scheduleDeferred((Command) () -> {
       if (widgets != null) {
         //logger.warning("getAnswerWidget set focus on " + widgets.getElement().getId());
@@ -531,7 +534,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     {
       IconAnchor correctIcon = new IconAnchor();
 //      logger.info("showScoreFeedback correct" + correct + " is full " + isFullMatch);
-      correctIcon.setBaseIcon(correct ? MyCustomIconType.correct : MyCustomIconType.incorrect);
+      correctIcon.setBaseIcon(correct && isFullMatch ? MyCustomIconType.correct : MyCustomIconType.incorrect);
 
       DivWidget iconContainer = new DivWidget();
       iconContainer.addStyleName("floatLeft");

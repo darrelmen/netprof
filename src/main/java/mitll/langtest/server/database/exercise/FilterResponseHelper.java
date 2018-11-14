@@ -16,9 +16,9 @@ import static mitll.langtest.server.database.exercise.SectionHelper.ANY;
 public class FilterResponseHelper {
   private static final Logger logger = LogManager.getLogger(FilterResponseHelper.class);
   private static final String LISTS = "Lists";
-  public static final String CONTENT = "Content";
+  private static final String CONTENT = "Content";
   public static final String SENTENCES = "Sentences";
-  public static final String SENTENCES_ONLY = "Sentences Only";
+  private static final String SENTENCES_ONLY = "Sentences Only";
 
   private final DatabaseServices databaseServices;
 
@@ -28,6 +28,10 @@ public class FilterResponseHelper {
 
   public FilterResponse getTypeToValues(FilterRequest request, int projid, int userID) {
     logger.info("getTypeToValues " + request);
+
+    request.prune();
+
+    //logger.info("getTypeToValues 2 " + request);
 
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     if (sectionHelper == null) {
@@ -44,11 +48,11 @@ public class FilterResponseHelper {
         logger.info("getTypeToValues isExampleRequest " + request);
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyExamples(true));
       } else {
-        logger.info("getTypeToValues normal req " + request);
+       // logger.info("getTypeToValues normal req " + request);
         FilterResponse response = sectionHelper.getTypeToValues(request, false);
         maybeAddUserListFacet(request.getUserListID(), response);
         maybeAddContent(request, response, projid);
-        logger.info("getTypeToValues normal response " + response);
+      //  logger.info("getTypeToValues normal response " + response);
 
         return response;
       }

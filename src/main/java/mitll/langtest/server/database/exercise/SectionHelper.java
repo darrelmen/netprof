@@ -499,7 +499,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       for (SectionNode child : node.getChildren()) {
         if (!child.getType().equals(childType)) {
-          logger.error("child " + child + " doesn't match " + childType);
+          logger.error("recurseAndCountMatchInfo child " + child + " doesn't match " + childType);
         }
 
         addOrMerge(members, child);
@@ -512,7 +512,8 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     String name = child.getName();
     MatchInfo matchInfo = matches.get(name);
 
-    if (DEBUG_OR_MERGE) logger.info("addOrMerge " + name + " match info " + matchInfo);
+    if (DEBUG_OR_MERGE) logger.info("addOrMerge '" + name + "' in " +matches.size()+
+        " match info " + matchInfo);
     if (matchInfo == null) {
       matches.put(name, new MatchInfo(child));
     } else {

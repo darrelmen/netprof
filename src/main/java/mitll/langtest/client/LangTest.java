@@ -829,7 +829,6 @@ public class LangTest implements
 
     if (projectStartupInfo == null) {
       logger.info("setProjectStartupInfo project startup null for " + user);
-
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("no startup?"));
 //      logger.info("logException stack " + exceptionAsString);
     }

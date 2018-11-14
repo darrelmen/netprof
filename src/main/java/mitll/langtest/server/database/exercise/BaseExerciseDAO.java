@@ -201,7 +201,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    */
   void setAudioDAO(IAudioDAO audioDAO, int projectID, boolean isMyProject) {
     this.audioDAO = audioDAO;
-    if (!serverProps.isLaptop() && isMyProject) {
+    if (!serverProps.useProxy() && isMyProject) {
       logger.info("setAudioDAO makeSureAudioIsThere " + projectID);
       audioDAO.makeSureAudioIsThere(projectID, language, false);
     }

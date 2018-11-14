@@ -52,7 +52,7 @@ class JSONAnswerParser {
     converted.setDynamicRange(getFloatField(jsonObject, "dynamicRange"));
     //useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
 
-    if (validity == Validity.OK || validity == Validity.CUT_OFF) {
+    if (validity == Validity.OK /*|| validity == Validity.CUT_OFF*/) {
       // logger.info("Got validity " + validity);
       converted.setTimestamp(getLongField(jsonObject, "timestamp"));
 
@@ -76,11 +76,16 @@ class JSONAnswerParser {
       sTypeToEndTimes.put(NetPronImageType.WORD_TRANSCRIPT, wsegments);
 
       float wavFileLengthSeconds = ((float) converted.getDurationInMillis()) / 1000F;
-      PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
+
+      // if somehow we don't get full match field, skip it
+      JSONValue jsonValue = jsonObject.get("isfullmatch");
+      boolean isFullMatch = jsonValue == null || jsonValue.isBoolean().booleanValue();
+
+       PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
           new HashMap<>(),
           new HashMap<>(),
           sTypeToEndTimes, "", wavFileLengthSeconds,
-          0, true);
+          0, isFullMatch);
 
       converted.setPretestScore(pretestScore);
     } else {

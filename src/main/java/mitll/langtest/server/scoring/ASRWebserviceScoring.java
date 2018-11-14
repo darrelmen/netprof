@@ -562,7 +562,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   @NotNull
   private String getPrefix(int port) {
-    String localhost = props.isLaptop() ? "hydra-dev" : "localhost";
+    String localhost = props.useProxy() ? "hydra-dev" : "localhost";
     return "http://" + localhost + ":" + port + "/score/";
   }
 

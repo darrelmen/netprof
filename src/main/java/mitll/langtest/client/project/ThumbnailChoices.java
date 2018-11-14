@@ -14,6 +14,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * @see mitll.langtest.client.banner.DialogExerciseList
+ */
 public class ThumbnailChoices {
   private static final int CHOICE_WIDTH = 170;//180;//190;//195;
   private final BasicDialog basicDialog = new BasicDialog();
@@ -21,9 +24,9 @@ public class ThumbnailChoices {
   @NotNull
   public Section getScrollingSection() {
     final Section section = new Section("section");
-    section.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
+    //section.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
     section.setHeight("100%");
-    section.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
+  //  section.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
 
     return section;
   }

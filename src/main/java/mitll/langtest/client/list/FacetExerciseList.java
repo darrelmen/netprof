@@ -1146,7 +1146,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     if (isThereALoggedInUser()) {
       doOpacityFeedback();
 
-      {
+      if (DEBUG) {
         List<Pair> pairs = getPairs(typeToSelection);
         logger.info("getTypeToValues request " + pairs + " list " + userListID);
       }
@@ -1194,7 +1194,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     return pairs;
   }
-
 
   @NotNull
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
@@ -1256,6 +1255,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   /**
    * TODO: figure out a way to not do multiple restores when jumping from progress.
+   *
    * @param selectionState
    * @see HistoryExerciseList#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */

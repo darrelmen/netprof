@@ -62,7 +62,7 @@ public class PropertyHandler {
   /**
    *
    */
-  public static final boolean IS_BETA=true;
+  public static final boolean IS_BETA=false;
 
 
   private static final String AFTER_STOP_DELAY_MILLIS = "afterStopDelayMillis";
@@ -75,7 +75,8 @@ public class PropertyHandler {
   public static final String CPW_TOKEN_2 = "CPW-token";
 
  // private static final String FONT_FAMILY = "fontFamily";
-  private static final String IS_AMAS = "isAMAS";
+// private static final String IS_AMAS = "isAMAS";
+  private static final String IS_BETA_PROP = "isBeta";
 
   /**
    * Possibly we need to add a delay after button is released to actually tell flash to stop recording.
@@ -86,17 +87,17 @@ public class PropertyHandler {
 
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
-  private static final String RELEASE_DATE = "releaseDate";
+  //private static final String RELEASE_DATE = "releaseDate";
   @Deprecated
   private static final String DEMO_MODE = "demo";
   private static final String RECORD_TIMEOUT = "recordTimeout";
 
-  private static final String NAME_FOR_ITEM = "nameForItem";
+//  private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
-  private static final String NAME_FOR_RECORDER = "nameForRecorder";
+//  private static final String NAME_FOR_RECORDER = "nameForRecorder";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
   private static final String DIALOG1 = "dialog";
-  private static final String DIALOG = DIALOG1;
+//  private static final String DIALOG = DIALOG1;
 
   // URL parameters that can override above parameters
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
@@ -173,6 +174,7 @@ public class PropertyHandler {
   private boolean spectrogram = false;
   private boolean clickAndHold = true;
   private boolean quietAudioOK;
+  public boolean isBeta;
   private final Set<Integer> preferredVoices = new HashSet<>();
 
   /**
@@ -199,7 +201,7 @@ public class PropertyHandler {
   private static final String SPEECH = "Speech";
   private static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
-  private String responseType = AUDIO;
+ // private String responseType = AUDIO;
   private String helpEmail = NETPROF_HELP_DLIFLC_EDU;
   private String helpMessage = "";
 
@@ -255,8 +257,8 @@ public class PropertyHandler {
         case QUIET_AUDIO_OK:
           quietAudioOK = getBoolean(value);
           break;
-        case IS_AMAS:
-          isAMAS = getBoolean(value);
+        case IS_BETA_PROP:
+          isBeta = getBoolean(value);
           break;
         case DOMINO_SERVER:
           dominoURL = value;
@@ -389,14 +391,14 @@ public class PropertyHandler {
       usePhoneToDisplay = !Window.Location.getParameter(USE_PHONE_TO_DISPLAY).equals("false");
       if (usePhoneToDisplay) logger.info("usePhoneToDisplay is " + usePhoneToDisplay);
     }
-    if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
-      responseType = Window.Location.getParameter(RESPONSE_TYPE);
-    }
+//    if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
+//      responseType = Window.Location.getParameter(RESPONSE_TYPE);
+//    }
     if (Window.Location.getParameter(SHOW_ADVERTISED_IOS) != null) {
       showAdvertiseIOS = Window.Location.getParameter(SHOW_ADVERTISED_IOS) != null;
     }
 
-    setResponseType();
+    //setResponseType();
   }
 
   /**
@@ -468,19 +470,19 @@ public class PropertyHandler {
   /**
    * Parse URL to extract the responseType values
    */
-  private void setResponseType() {
-    String href = Window.Location.getHref();
-    if (href.contains("responseType=")) {
-      //     logger.info("found response type " + href);
-      String s = href.split("responseType=")[1];
-      String candidate = s.split("\\*\\*\\*")[0];
-      if (knownChoice(candidate)) {
-        responseType = candidate;
-      } else {
-        logger.warning("responseType unknown " + candidate);
-      }
-    }
-  }
+//  private void setResponseType() {
+//    String href = Window.Location.getHref();
+//    if (href.contains("responseType=")) {
+//      //     logger.info("found response type " + href);
+//      String s = href.split("responseType=")[1];
+//      String candidate = s.split("\\*\\*\\*")[0];
+//      if (knownChoice(candidate)) {
+//        //responseType = candidate;
+//      } else {
+//        logger.warning("responseType unknown " + candidate);
+//      }
+//    }
+//  }
 
   @Deprecated
   public boolean isOdaMode() {
@@ -521,5 +523,4 @@ public class PropertyHandler {
   public String getHelpEmail() {
     return helpEmail;
   }
-
 }

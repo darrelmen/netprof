@@ -157,7 +157,7 @@ public class ServerProperties {
   public static final String HEARTBEAT_PERIOD = "heartbeatPeriod";
   public static final String HEARTBEAT_REC1 = "heartbeatRec";
 
- // private String dbConfig = POSTGRES_DATA2_DIALOG;
+  // private String dbConfig = POSTGRES_DATA2_DIALOG;
 
   private static final String SCORING_MODEL = "scoringModel";
   private static final String TALKS_TO_DOMINO = "talksToDomino";
@@ -219,7 +219,7 @@ public class ServerProperties {
   private static final String DO_DECODE = "dodecode";
   private static final String DO_TRIM = "dotrim";
 
-  private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
+  //private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
 
   private static final int MIN_DYNAMIC_RANGE_DEFAULT = 24;      // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
@@ -467,10 +467,6 @@ public class ServerProperties {
     return props.getProperty(MEDIA_DIR, getAudioBaseDir() + BEST_AUDIO);
   }
 
-/*  public String getImageDir() {
-    return props.getProperty(IMAGE_DIR, getAudioBaseDir() + IMAGE);
-  }*/
-
   /**
    * Relative to install location
    *
@@ -488,8 +484,8 @@ public class ServerProperties {
     return props.getProperty(DCODR_DIR, DEFAULT_DCODR_DIR);
   }
 
-  public boolean isLaptop() {
-    return getHostName().contains("MITLL");
+  public boolean useProxy() {
+    return getHostName().toLowerCase().contains("mitll") || props.getProperty("useProxy") != null;
   }
 
   /**
