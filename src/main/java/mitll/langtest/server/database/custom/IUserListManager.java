@@ -86,20 +86,6 @@ public interface IUserListManager {
    */
   void createFavorites(int userid, int projid);
 
-  /**
-   * @paramx projID
-   * @paramx isContext
-   * @return
-   * @seex ListServiceImpl#getReviewList
-   */
-/*
-  UserList<CommonShell> getCommentedList(int projID, boolean isContext);
-*/
-
-/*
-  UserList<CommonExercise> getCommentedListEx(int projID, boolean isContext);
-*/
-
   @Deprecated
   UserList<CommonShell> getUserListByID(int id);
 

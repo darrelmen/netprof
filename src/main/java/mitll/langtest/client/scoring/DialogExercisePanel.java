@@ -115,7 +115,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     if (projectStartupInfo != null) {
       makeClickableWords(projectStartupInfo, null);
-      this.isRTL = clickableWords.isRTL(exercise.getForeignLanguage());
+
+      this.isRTL = projectStartupInfo.getLanguageInfo().isRTL();
 
       {
         DivWidget wrapper = new DivWidget();

@@ -603,8 +603,8 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
           password, // password
           // first
           // last
-          rs.getString(NATIVE_LANG), // native
-          rs.getString(DIALECT), // dialect
+          // native
+          // dialect
 
           rs.getBoolean(ENABLED),// || (userKind1 != User.Kind.CONTENT_DEVELOPER),
           isAdmin,

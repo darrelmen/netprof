@@ -113,6 +113,10 @@
             <appender-ref ref="LogFile"/>
         </logger>
 
+        <logger name="mitll.hlt.documentservice" level="info" additivity="true">
+            <appender-ref ref="LogFile"/>
+        </logger>
+
         <!--    <logger name="slick.compiler.QueryCompiler" level="INFO">
                 <appender-ref ref="LogFile"/>
             </logger>

@@ -55,13 +55,6 @@ public class User extends MiniUser implements ReportUser {
    */
   private String passwordHash;
 
-/*
-  @Deprecated
-  private String nativeLang;
-  @Deprecated
-  private String dialect;
-*/
-
   private String resetKey = "";
 
   private String ipaddr;
@@ -147,9 +140,9 @@ public class User extends MiniUser implements ReportUser {
       this.name = name;
     }
 
-    public String getName() {
-      return name;
-    }
+//    public String getName() {
+//      return name;
+//    }
   }
 
   public User() {
@@ -166,6 +159,7 @@ public class User extends MiniUser implements ReportUser {
    * @param permissions
    * @see mitll.langtest.server.database.custom.UserListManager#getQCUser
    */
+/*
   public User(int id, int age, int gender, Gender realGender, int experience, String ipaddr, String password,
               boolean enabled, Collection<Permission> permissions) {
     this(id, NOT_SET, age, gender, realGender, experience, ipaddr, password, NOT_SET, NOT_SET, enabled, false, permissions,
@@ -174,6 +168,7 @@ public class User extends MiniUser implements ReportUser {
         "", "", //"",
         System.currentTimeMillis(), "OTHER", true);
   }
+*/
 
   /**
    * @param id
@@ -206,8 +201,6 @@ public class User extends MiniUser implements ReportUser {
         gender,
         realGender,
         0,
-        "",
-        "",
         "",
         "",
         enabled,
@@ -249,7 +242,6 @@ public class User extends MiniUser implements ReportUser {
               int experience,
               String ipaddr,
               String passwordH,
-              String nativeLang, String dialect,
               boolean enabled, boolean isAdmin,
               Collection<Permission> permissions, Kind userKind,
 
@@ -266,13 +258,10 @@ public class User extends MiniUser implements ReportUser {
     if (passwordH == null) passwordH = "";
     this.passwordHash = passwordH;
     this.email = email;
-    //  this.emailHash = emailHash;
     this.userKind = userKind;
     this.enabled = enabled;
     this.admin = isAdmin;
     this.permissions = permissions;
-//    this.nativeLang = nativeLang;
-//    this.dialect = dialect;
     this.device = device;
     this.resetKey = resetPassKey;
     setLastChecked(timestamp);
@@ -445,7 +434,7 @@ public class User extends MiniUser implements ReportUser {
     return text != null && !text.isEmpty() && text.trim().toUpperCase().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
   }
 
-  public boolean isValid(String email) {
+  private boolean isValid(String email) {
     return email != null && !email.trim().isEmpty();
   }
 

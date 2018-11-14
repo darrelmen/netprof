@@ -2000,8 +2000,8 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
         if (DEBUGSCORE) logger.info("# " + exercise.getID() + " Score " + score);
         withScore++;
       } else {
-        if (DEBUGSCORE)
-          logger.info("# " + exercise.getID() + " no score " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+//        if (DEBUGSCORE)
+//          logger.info("# " + exercise.getID() + " no score " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
       }
       // if (!isCurrentReq(reqid)) break;
     }
@@ -2112,13 +2112,11 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     double percent = 100 * score;
     if (DEBUGSCORE) logger.info("showProgress percent " + percent);
 
-    practicedProgress.setPercent(num == 0 ? 100 : percent);
+    double percent1 = Math.max(30, num == 0 ? 100 : percent);
+    practicedProgress.setPercent(percent1);
     boolean allDone = num == denom;
 
-    {
-      String text = getPracticedText(num, denom, zeroPercent, oneHundredPercent, suffix);
-      practicedProgress.setText(text);
-    }
+    practicedProgress.setText(getPracticedText(num, denom, zeroPercent, oneHundredPercent, suffix));
 
     if (useColorGradient && num > 0) {
       double round = Math.max(percent, 30);

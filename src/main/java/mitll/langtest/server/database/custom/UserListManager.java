@@ -678,101 +678,9 @@ public class UserListManager implements IUserListManager {
   public void createFavorites(int userid, int projid) {
     if (userListDAO.getByName(userid, UserList.MY_LIST, projid).isEmpty()) {
       long start = System.currentTimeMillis();
-      createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true, projid,
-          start, start);
+      createUserList(userid, UserList.MY_LIST, MY_FAVORITES, "", true, projid, start, start);
     }
   }
-
-  /**
-   * So comments are items with incorrect annotations on their fields that have not been marked as defects.
-   * <p>
-   * Also, incorrect annotations are the latest annotations- a field can have a history of correct and incorrect
-   * annotations - only if the latest is incorrect should the item appear on the comment or defect list.
-   *
-   * @param projID
-   * @param isContext
-   * @return
-   * @seex mitll.langtest.server.services.ListServiceImpl#getReviewList
-   */
-/*  @Override
-  public UserList<CommonShell> getCommentedList(int projID, boolean isContext) {
-    Set<Integer> exercisesWithIncorrectAnnotations = annotationDAO.getExercisesWithIncorrectAnnotations(projID, isContext);
-    logger.info("getCommented for " + projID + " found " + exercisesWithIncorrectAnnotations.size() + " is context " + isContext);
-    List<CommonExercise> defectExercises = getDefectExercises(projID, exercisesWithIncorrectAnnotations, isContext);
-    logger.info("getCommented for " + projID + " found " + defectExercises.size() + " exercises");
-    defectExercises.forEach(exercise -> logger.info("\tgetCommented : defect " + exercise.getID() + " " + exercise.getForeignLanguage() + " context " + exercise.isContext()));
-    UserList<CommonShell> reviewList = getReviewList(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
-    logger.info("getCommented for " + projID + " list has " + reviewList.getNumItems() + " exercises");
-    return reviewList;
-  }*/
-
-  /**
-   * @param projID
-   * @param isContext
-   * @return
-   * @seex IUserListManager#getUserListByIDExercises
-   */
-/*
-  @Override
-  public UserList<CommonExercise> getCommentedListEx(int projID, boolean isContext) {
-    List<CommonExercise> defectExercises = getDefectExercises(projID, annotationDAO.getExercisesWithIncorrectAnnotations(projID, isContext), isContext);
-    return getReviewListEx(defectExercises, COMMENTS, ALL_ITEMS_WITH_COMMENTS, COMMENT_MAGIC_ID);
-  }
-*/
-
-  /**
-   * @seex #getCommentedList
-   * @paramx xprojID
-   * @paramx exerciseIDs
-   * @paramx isContext
-   * @returnx
-   */
-/*
-  @NotNull
-  private List<CommonExercise> getDefectExercises(int projID, Collection<Integer> exerciseIDs, boolean isContext) {
-    List<CommonExercise> defectExercises = new ArrayList<>();
-
-    IProjectManagement projectManagement = databaseServices.getProjectManagement();
-    if (projectManagement == null) {
-      logger.error("\n\n no projec management???");
-    } else {
-      exerciseIDs.forEach(id -> {
-        CommonExercise byExID = projectManagement.getExercise(projID, id);
-        if (byExID == null) {
-          logger.warn("getDefectExercises can't find exercise " + id + " in project " + projID);
-        } else if ((byExID.isContext() && isContext) || (!byExID.isContext() && !isContext)) {
-          defectExercises.add(byExID);
-        }
-      });
-    }
-    return defectExercises;
-  }
-*/
-
-  /**
-   * @paramx allKnown
-   * @paramx name
-   * @paramx description
-   * @paramx userListID
-   * @return
-   * @seex IUserListManager#getCommentedList(int, boolean)
-   */
-/*  private UserList<CommonShell> getReviewList(Collection<CommonExercise> allKnown,
-                                              String name,
-                                              String description,
-                                              int userListID) {
-    return getCommonUserList(getQCList(name, description, userListID), getShells(allKnown));
-  }*/
-
-/*
-  @NotNull
-  private UserList<CommonShell> getQCList(String name, String description, int userListID) {
-    SimpleUser qcUser = getQCUser();
-    long modified = System.currentTimeMillis();
-    return new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10, 30, false);
-  }
-*/
 
   @NotNull
   private List<CommonShell> getShells(Collection<CommonExercise> allKnown) {
@@ -780,49 +688,6 @@ public class UserListManager implements IUserListManager {
     allKnown.forEach(commonExercise -> commonShells.add(commonExercise.getShell()));
     return commonShells;
   }
-
-/*
-  private UserList<CommonExercise> getReviewListEx(List<CommonExercise> allKnown,
-                                                   String name, String description,
-                                                   int userListID) {
-    SimpleUser qcUser = getQCUser();
-    long modified = System.currentTimeMillis();
-    UserList<CommonExercise> userList = new UserList<>(userListID, qcUser.getID(), qcUser.getUserID(), name, description, "",
-        false, modified, "", "", -1, UserList.LIST_TYPE.NORMAL, modified, modified, 10, 30, false);
-    return getCommonUserList(userList, allKnown);
-  }
-*/
-
-  /**
-   * TODO : should we worry about sort order for english?
-   *
-   * @paramx <T>
-   * @paramx userList
-   * @paramx copy
-   * @return
-   * @sexe #getReviewList(Collection, String, String, int)
-   * @sexe #getReviewListEx(List, String, String, int)
-   */
- /* @NotNull
-  private <T extends CommonShell> UserList<T> getCommonUserList(UserList<T> userList, List<T> copy) {
-    userList.setReview(true);
-    new ExerciseSorter().getSorted(copy, false, false, "");
-    userList.setExercises(copy);
-    stateManager.markState(copy);
-    logger.debug("getCommonUserList returning " + userList + (userList.getExercises().isEmpty() ? "" : " first " + userList.getExercises().iterator().next()));
-    return userList;
-  }*/
-
-  /**
-   * Need a bogus user for the list.
-   *
-   * @return
-   */
-/*  private SimpleUser getQCUser() {
-    List<User.Permission> permissions = new ArrayList<>();
-    permissions.add(User.Permission.QUALITY_CONTROL);
-    return new User(-1, 89, 0, MiniUser.Gender.Unspecified, 0, "", "", false, permissions);
-  }*/
 
   /**
    * Really create a new exercise and associated context exercise in database.

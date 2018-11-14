@@ -248,6 +248,11 @@ public class DominoImport implements IDominoImport {
     );
   }
 
+  /**
+   * @see ProjectManagement#getDominoProjectName
+   * @param id
+   * @return
+   */
   @Override
   public String getDominoProjectName(int id) {
     return projectDelegate.getProjectName(id);

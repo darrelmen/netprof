@@ -133,7 +133,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     if (projectStartupInfo != null) {
       makeClickableWords(projectStartupInfo, listContainer);
-      this.isRTL = clickableWords.isRTL(exercise.getForeignLanguage());
+      this.isRTL = projectStartupInfo.getLanguageInfo().isRTL();
+       //   clickableWords.isRTL(exercise.getForeignLanguage());
 
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
       add(getItemContent(exercise));
@@ -387,6 +388,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         flclickables, isRTL);
 
     flClickableRow = contentWidget;
+    if (isRTL) flClickableRow.addStyleName("rightTenMargin");
 
     DivWidget flEntry = getCommentEntry(FOREIGN_LANGUAGE,
         e.getAnnotation(FOREIGN_LANGUAGE),
