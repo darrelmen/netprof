@@ -139,8 +139,12 @@ public class ProjectChoices extends ThumbnailChoices {
   public ProjectChoices(LangTest langTest, UILifecycle uiLifecycle) {
     this.lifecycleSupport = langTest;
     this.sessionUser = langTest.getUser();
-    String userID = langTest.getUserManager().getUserID();
-    if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
+
+    {
+      String userID = langTest.getUserManager().getUserID();
+      if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
+    }
+
     this.controller = langTest;
     messageHelper = langTest.getMessageHelper();
     this.userNotification = langTest;
@@ -291,7 +295,7 @@ public class ProjectChoices extends ThumbnailChoices {
     current.getElement().getStyle().setMarginBottom(70, Style.Unit.PX);
     getSorted(result, nest)
         .forEach(project -> {
-          Panel langIcon = getLangIcon(capitalize(project.getLanguage()), project, nest);
+          Panel langIcon = getLangIcon(project.getLanguage().toDisplay(), project, nest);
           if (langIcon != null) {
             current.add(langIcon);
           }
@@ -315,7 +319,7 @@ public class ProjectChoices extends ThumbnailChoices {
   private void sortLanguages(final int nest, List<SlimProject> languages) {
     languages.sort((o1, o2) -> {
       if (nest == 0) {
-        return o1.getLanguage().toLowerCase().compareTo(o2.getLanguage().toLowerCase());
+        return o1.getLanguage().toString().toLowerCase().compareTo(o2.getLanguage().toString().toLowerCase());
       } else {
         int i = Integer.compare(o1.getDisplayOrder(), o2.getDisplayOrder());
         return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
@@ -575,7 +579,9 @@ public class ProjectChoices extends ThumbnailChoices {
 
       boolean isQC = isQC();
       {
-        PushButton button = new PushButton(getFlag(projectForLang.getCountryCode()));
+        String countryCode = projectForLang.getCountryCode();
+        logger.info("for " + name +" cc " + countryCode);
+        PushButton button = new PushButton(getFlag(countryCode));
         final int projid = projectForLang.getID();
         button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));
         thumbnail.add(button);

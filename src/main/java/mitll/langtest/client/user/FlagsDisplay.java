@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.StartupInfo;
 import org.jetbrains.annotations.NotNull;
@@ -16,13 +17,13 @@ class FlagsDisplay {
   private final List<LangCC> ccs = new ArrayList<>();
 
   void getFlags(StartupInfo startupInfo) {
-    Set<String> seen = new HashSet<>();
+    Set<Language> seen = new HashSet<>();
 
     startupInfo.getProjects().forEach(slimProject -> {
-      String language = slimProject.getLanguage();
+      Language language = slimProject.getLanguage();
       if (slimProject.getStatus() == ProjectStatus.PRODUCTION) {
         if (!seen.contains(language)) {
-          ccs.add(new LangCC(slimProject.getCountryCode(), language.substring(0, 1).toUpperCase() + language.substring(1)));
+          ccs.add(new LangCC(slimProject.getCountryCode(), language.toDisplay()));
           seen.add(language);
         }
       }

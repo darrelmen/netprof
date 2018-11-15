@@ -135,10 +135,11 @@ public class DownloadHelper implements IShowStatus {
       container.add(row);
     }
 
+    container.add(getIncludeAudio());
+
     container.add(getContentRow());
     container.add(getGenderRow());
     container.add(getSpeedRow());
-    container.add(getIncludeAudio());
     container.add(getStatusArea());
 
     closeButton = new DialogHelper(true).show(

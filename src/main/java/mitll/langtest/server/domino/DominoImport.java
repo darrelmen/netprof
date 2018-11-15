@@ -19,6 +19,7 @@ import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.exercise.DominoExerciseDAO;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
@@ -138,14 +139,24 @@ public class DominoImport implements IDominoImport {
     return imported;
   }
 
+  /**
+   * Language name from domino is in domino space of Language names!
+   * @see Language#getDominoName
+   * @param project
+   * @return
+   */
   @NotNull
   private ImportProjectInfo getImportProjectInfo(ProjectDescriptor project) {
     int id = project.getId();
+    String languageName = project.getContent().getLanguageName();
+
+    if (languageName.equalsIgnoreCase("Mandarin")) languageName = Language.CHINESE.name();
+   // Language language = Language.valueOf(languageName);
     ImportProjectInfo importProjectInfo = new ImportProjectInfo(
         id,
         project.getCreator().getDocumentDBID(),
         project.getName(),
-        project.getContent().getLanguageName(),
+        languageName,
         project.getCreateTime().getTime()
     );
 

@@ -55,6 +55,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.jar.Attributes;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.shared.project.ProjectProperty.MODELS_DIR;
 import static mitll.langtest.shared.project.ProjectProperty.WEBSERVICE_HOST_PORT;
@@ -954,9 +955,10 @@ public class ServerProperties {
     return getPropertyMap(uiprops);
   }
 
-  public Set<String> getHydra2Languages() {
+  public Set<Language> getHydra2Languages() {
     String property = props.getProperty(HYDRA_2_LANGUAGES, HYDRA_2_LANGUAGES_DEFAULT);
-    return new HashSet<>(Arrays.asList(property.split(",")));
+    Set<String> strings = new HashSet<>(Arrays.asList(property.split(",")));
+    return strings.stream().map(Language::valueOf).collect(Collectors.toSet());
   }
 
   String getIOSVersion() {

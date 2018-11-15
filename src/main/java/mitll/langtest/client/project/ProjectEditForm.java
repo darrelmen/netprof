@@ -229,7 +229,7 @@ public class ProjectEditForm extends UserDialog {
    * @see ProjectChoices#showEditDialog
    */
   void updateProject() {
-    info.setLanguage(language.getSelectedValue());
+    info.setLanguage(getLanguage());
     String selectedValue = modelTypeBox.getSelectedValue();
     logger.info("value is " + selectedValue);
     info.setModelType(ModelType.valueOf(selectedValue));
@@ -269,6 +269,16 @@ public class ProjectEditForm extends UserDialog {
         services.tellHydraServerToRefreshProject(info.getID());
       }
     });
+  }
+
+  @NotNull
+  private Language getLanguage() {
+    return getLanguage(this.language.getSelectedValue());
+  }
+
+  @NotNull
+  private Language getLanguage(String selectedValue) {
+    return Language.valueOf(selectedValue.toUpperCase());
   }
 
   private void setPort() {
@@ -344,7 +354,7 @@ public class ProjectEditForm extends UserDialog {
    * @see ProjectChoices#showNewProjectDialog
    */
   void newProject() {
-    info.setLanguage(getLanguageChoice());
+    info.setLanguage(getLanguage(getLanguageChoice()));
 
     {
       DominoProject id = dominoToProject.get(dominoProjectsListBox.getValue());
@@ -520,10 +530,10 @@ public class ProjectEditForm extends UserDialog {
   private ListBox getTypeBox() {
     ListBox affBox = new ListBox();
     affBox.addStyleName("leftTenMargin");
-    logger.info("getTypeBox type " + affBox.getItemCount());
+ //   logger.info("getTypeBox type " + affBox.getItemCount());
 
     getVisibleProjectTypes().forEach(projectType -> affBox.addItem(projectType.name()));
-    logger.info("getTypeBox after type " + affBox.getItemCount());
+   // logger.info("getTypeBox after type " + affBox.getItemCount());
 
     return affBox;
   }
@@ -532,7 +542,7 @@ public class ProjectEditForm extends UserDialog {
     int i = 0;
     boolean found = false;
 
-    logger.info("project type " + projectType);
+ //   logger.info("project type " + projectType);
 
     for (ProjectType projectType1 : getVisibleProjectTypes()) {
       if (projectType1 == projectType) {
@@ -540,7 +550,7 @@ public class ProjectEditForm extends UserDialog {
         break;
       } else i++;
     }
-    logger.info("project type " + projectType + " found " + found + " i " + i);
+//    logger.info("project type " + projectType + " found " + found + " i " + i);
 
     // first is please select.
     statusBox.setSelectedIndex(found ? i : 0);
@@ -565,7 +575,7 @@ public class ProjectEditForm extends UserDialog {
     this.language = new ListBox();
     this.language.addStyleName("leftTenMargin");
 
-    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(this.language.getSelectedValue(),
+    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(getLanguage(this.language.getSelectedValue()),
         new AsyncCallback<List<DominoProject>>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -601,7 +611,7 @@ public class ProjectEditForm extends UserDialog {
 
     for (Language value : Language.values()) {
       this.language.addItem(value.toDisplay());
-      if (info.getLanguage().equalsIgnoreCase(value.toString())) {
+      if (info.getLanguage() == value) {
         this.language.setItemSelected(i, true);
       }
       i++;

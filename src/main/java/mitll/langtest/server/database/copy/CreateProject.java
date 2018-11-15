@@ -6,14 +6,12 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.project.*;
-import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 import static mitll.langtest.server.ServerProperties.H2_HOST;
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
@@ -30,9 +28,9 @@ public class CreateProject {
   public static final String TRUE = Boolean.TRUE.toString();
   private static final String MANDARIN_TRAD = "mandarinTrad";
   private static final String DEFAULT_MODEL_TYPE = ModelType.HYDRA.toString();
-  private final Set<String> h2Languages;
+  private final Set<Language> h2Languages;
 
-  public CreateProject(Set<String> h2Languages) {
+  public CreateProject(Set<Language> h2Languages) {
     this.h2Languages = h2Languages;
   }
 
@@ -120,12 +118,15 @@ public class CreateProject {
     String secondType = iterator.hasNext() ? iterator.next() : "";
     String language = getLanguage(db);
 
+    if (language.equalsIgnoreCase("Mandaring")) language = Language.CHINESE.toString();
+    Language language1 = Language.valueOf(language);
+
     int beforeLoginUser = db.getUserDAO().getBeforeLoginUser();
     int projectID =
         addProject(projectDAO,
             beforeLoginUser,
             name,
-            language,
+            language1,
             course,
             countryCode,
             projectType,
@@ -180,7 +181,8 @@ public class CreateProject {
                            ProjectInfo info,
                            int creator) {
     IProjectDAO projectDAO = daoContainer.getProjectDAO();
-    int byName = projectDAO.getByLanguageAndName(info.getLanguage(), info.getName());
+    Language language = info.getLanguage();
+    int byName = projectDAO.getByLanguageAndName(language.toString(), info.getName());
 
 
     if (byName == -1) {
@@ -192,9 +194,9 @@ public class CreateProject {
       int projectID = addProject(projectDAO,
           creator,
           info.getName(),
-          info.getLanguage(),
+          language,
           info.getCourse(),
-          info.getCountryCode().isEmpty() ? getCC(info.getLanguage()) : info.getCountryCode(),
+          info.getCountryCode().isEmpty() ? language.getCC() : info.getCountryCode(),
           info.getProjectType(),
           ProjectStatus.DEVELOPMENT,
           info.getDisplayOrder(),
@@ -204,8 +206,8 @@ public class CreateProject {
 
       String host = info.getHost();
       if (host.isEmpty()) {
-        host = h2Languages.contains(info.getLanguage()) ? "h2" : WEBSERVICE_HOST_DEFAULT;
-        logger.info("createProject choosing host for " + info.getLanguage() + " = " + host);
+        host = h2Languages.contains(language) ? "h2" : WEBSERVICE_HOST_DEFAULT;
+        logger.info("createProject choosing host for " + language + " = " + host);
       } else {
         logger.info("createProject host=" + host);
       }
@@ -258,7 +260,7 @@ public class CreateProject {
   private int addProject(IProjectDAO projectDAO,
                          int beforeLoginUser,
                          String name,
-                         String language,
+                         Language language,
                          String course,
                          String countryCode,
                          ProjectType projectType,
@@ -285,52 +287,6 @@ public class CreateProject {
     return db.getLanguage();
   }
 
-  /**
-   * Add brazilian, serbo croatian, french, etc.
-   * <p>
-   * TODO : read this from a json config file
-   *
-   * @param language
-   * @return
-   * @see CopyToPostgres#copyOneConfigCommand
-   */
-  public String getCC(String language) {
-    List<Pair> languages = Arrays.asList(
-        new Pair("croatian", "hr"),
-        new Pair("dari", "af"),
-        new Pair("egyptian", "eg"),
-        new Pair("english", "us"),
-        new Pair("farsi", "ir"),
-        new Pair("french", "fr"),
-        new Pair("german", "de"),
-        new Pair("hindi", "in"),
-        new Pair("korean", "kr"),
-        new Pair("iraqi", "iq"),
-        new Pair("japanese", "jp"),
-        new Pair("levantine", "sy"),
-        new Pair("mandarin", "cn"),
-        new Pair("msa", "al"),
-        new Pair("pashto", "af"),
-        new Pair("portuguese", "br"),
-        new Pair("russian", "ru"),
-        new Pair("serbian", "rs"),
-        new Pair("sorani", "ku"),
-        new Pair("spanish", "es"),
-        new Pair("sudanese", "sd"),
-        new Pair("tagalog", "ph"),
-        new Pair("turkish", "tr"),
-        new Pair("urdu", "pk"));
-
-    Map<String, String> langToCode = new HashMap<>();
-    for (Pair pair : languages) langToCode.put(pair.language, pair.cc);
-
-    String cc = langToCode.get(language.toLowerCase());
-    if (cc == null) {
-      logger.error("\n\n\n\ncan't find a flag for " + language);
-      cc = "us";
-    }
-    return cc;
-  }
 
   /**
    * netprof update
@@ -351,7 +307,6 @@ public class CreateProject {
     return netprofUpdate;
   }
 
-
   /**
    * Assumes no change in target project...
    *
@@ -361,17 +316,7 @@ public class CreateProject {
    */
   long getSinceWhenResults(DatabaseImpl db, int projectID) {
     List<Long> latest = new ArrayList<>();
-    db.getResultDAO().getMonitorResults(projectID).stream().max(new Comparator<MonitorResult>() {
-      @Override
-      public int compare(MonitorResult o1, MonitorResult o2) {
-        return Long.compare(o1.getTimestamp(), o2.getTimestamp());
-      }
-    }).ifPresent(new Consumer<MonitorResult>() {
-      @Override
-      public void accept(MonitorResult monitorResult) {
-        latest.add(monitorResult.getTimestamp());
-      }
-    });
+    db.getResultDAO().getMonitorResults(projectID).stream().max((o1, o2) -> Long.compare(o1.getTimestamp(), o2.getTimestamp())).ifPresent(monitorResult -> latest.add(monitorResult.getTimestamp()));
     long netprofUpdate = latest.isEmpty() ? 0 : latest.iterator().next();
 
     logger.info("\n\n\n latest result is at " + new Date(netprofUpdate));
@@ -390,7 +335,7 @@ public class CreateProject {
     return db.getProjectDAO().getByID(projectID);
   }
 
-  private static class Pair {
+/*  private static class Pair {
     final String language;
     final String cc;
 
@@ -398,5 +343,5 @@ public class CreateProject {
       this.language = language;
       this.cc = cc;
     }
-  }
+  }*/
 }

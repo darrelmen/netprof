@@ -86,6 +86,7 @@ import static java.lang.Thread.sleep;
 import static mitll.langtest.server.ServerProperties.DEFAULT_NETPROF_AUDIO_DIR;
 import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.*;
 import static mitll.langtest.server.database.copy.CopyToPostgres.OPTIONS.*;
+import static mitll.langtest.server.database.exercise.Project.MANDARIN;
 
 /**
  * Take an old netprof 1 website (excel spreadsheet and h2.db file) and copy its info
@@ -246,9 +247,13 @@ public class CopyToPostgres<T extends CommonShell> {
       String nameToUse = optionalName == null ? language : optionalName;
       boolean checkConvert = config.toLowerCase().startsWith("mandarintrad");
       if (checkConvert) logger.info("\n\n\n\n\ndoing special mandarin trad conversion\n\n\n\n\n");
+
+      Language languageFor = getLanguageFor(language);
+
       copyToPostgres.copyOneConfig(
           databaseLight,
-          getCreateProject(serverProps).getCC(language),
+
+          languageFor.getCC(),
           nameToUse,
           displayOrder,
           ProjectType.NP,
@@ -265,6 +270,18 @@ public class CopyToPostgres<T extends CommonShell> {
       return false;
     }
   }
+
+  @NotNull
+  private Language getLanguageFor(String name) {
+    try {
+      if (name.equalsIgnoreCase(MANDARIN)) name = Language.CHINESE.name();
+      return Language.valueOf(name);
+    } catch (IllegalArgumentException e) {
+      logger.error("no known language  " + name);
+      return Language.UNKNOWN;
+    }
+  }
+
 
   /**
    * Look under oldConfig for date.
@@ -373,7 +390,7 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.error("nope - not same language " + fProject.getLanguage() + " vs " + tProject.getLanguage());
       return;
     }
-    boolean isChinese = fProject.getLanguageEnum() == Language.MANDARIN && tProject.getLanguageEnum() == Language.MANDARIN;
+    boolean isChinese = fProject.getLanguageEnum() == Language.CHINESE && tProject.getLanguageEnum() == Language.CHINESE;
     database.updateProject(from, to, isChinese);
     database.close();
   }

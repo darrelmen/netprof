@@ -39,10 +39,7 @@ import mitll.langtest.server.database.copy.CreateProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectProperty;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.project.*;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickProjectProperty;
@@ -90,7 +87,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
       add(defaultUser,
           System.currentTimeMillis(),
           DEFAULT_PROJECT,
-          "",
+          Language.UNKNOWN,
           "",
           ProjectType.DEFAULT,
           ProjectStatus.RETIRED,
@@ -160,7 +157,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         new Timestamp(projectInfo.getLastImport()),// last import - maintain it
         new Timestamp(projectInfo.getLastNetprof()),// last netprof 1 update - maintain it
         projectInfo.getName(),
-        projectInfo.getLanguage(),
+        projectInfo.getLanguage().toString(),
         projectInfo.getCourse(),
         projectInfo.getProjectType().toString(),
         projectInfo.getStatus().toString(),
@@ -294,7 +291,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   private String getCountryCode(ProjectInfo projectInfo) {
     String countryCode = projectInfo.getCountryCode();
 
-    String ccFromLang = new CreateProject(database.getServerProps().getHydra2Languages()).getCC(projectInfo.getLanguage());
+    String ccFromLang = projectInfo.getLanguage().getCC();//new CreateProject(database.getServerProps().getHydra2Languages()).getCC(projectInfo.getLanguage());
     if (!ccFromLang.equals(countryCode)) {
       logger.warn("getCountryCode : setting country code to " + countryCode +
           " to be consistent with the language " + projectInfo.getLanguage() + " = " + ccFromLang);
@@ -443,7 +440,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @paraxm isDev
    * @see mitll.langtest.server.database.copy.CreateProject#addProject
    */
-  public int add(int userid, String name, String language, String course,
+  public int add(int userid, String name, Language language, String course,
                  String firstType, String secondType, String countryCode, int displayOrder,
                  ProjectType projectType, ProjectStatus status, int dominoID) {
     return add(userid, System.currentTimeMillis(), name, language, course, projectType,
@@ -499,7 +496,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   public int add(int userid,
                  long modified,
                  String name,
-                 String language,
+                 Language language,
                  String course,
                  ProjectType type,
                  ProjectStatus status,
@@ -518,7 +515,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
         created,
         lastNetprof,
         name,
-        language,
+        language.toString(),
         course,
         type.toString(),
         status.toString(),

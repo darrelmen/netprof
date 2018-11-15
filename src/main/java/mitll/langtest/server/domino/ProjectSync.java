@@ -17,6 +17,7 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.moxieapps.gwt.highcharts.client.Lang;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -25,6 +26,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.database.exercise.Project.MANDARIN;
 import static mitll.langtest.server.database.project.ProjectManagement.MODIFIED;
 import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
 import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.*;
@@ -600,7 +602,7 @@ public class ProjectSync implements IProjectSync {
    * @return
    * @see mitll.langtest.server.services.ProjectServiceImpl#getDominoForLanguage
    */
-  public List<DominoProject> getDominoForLanguage(String lang) {
+  public List<DominoProject> getDominoForLanguage(Language lang) {
     List<DominoProject> dominoProjects = new ArrayList<>();
     getForLanguage(lang, projectManagement.getVocabProjects())
         .forEach(importProjectInfo -> dominoProjects.add(getDominoProject(importProjectInfo)));
@@ -619,11 +621,12 @@ public class ProjectSync implements IProjectSync {
   }
 
   @NotNull
-  private List<ImportProjectInfo> getForLanguage(String lang, List<ImportProjectInfo> vocabProjects) {
-    List<ImportProjectInfo> collect = getByLanguage(lang, vocabProjects);
+  private List<ImportProjectInfo> getForLanguage(Language lang, List<ImportProjectInfo> vocabProjects) {
+    String lang1 = lang.toString();
+    List<ImportProjectInfo> collect = getByLanguage(lang1, vocabProjects);
 
     if (collect.isEmpty()) {
-      String dominoName = getLanguage(lang).getDominoName();
+      String dominoName = getLanguage(lang1).getDominoName();
       if (!dominoName.isEmpty()) {
         logger.debug("getForLanguage trying using domino language : " + dominoName);
         collect = getByLanguage(dominoName, vocabProjects);
@@ -641,6 +644,8 @@ public class ProjectSync implements IProjectSync {
   private Language getLanguage(String lang) {
     Language language = Language.UNKNOWN;
     try {
+      if (lang.equalsIgnoreCase(MANDARIN)) lang = Language.CHINESE.name();
+
       language = Language.valueOf(lang.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.error("unknown language " + lang);

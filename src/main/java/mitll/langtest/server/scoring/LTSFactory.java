@@ -44,6 +44,8 @@ import org.apache.logging.log4j.Logger;
 import java.text.Collator;
 import java.util.*;
 
+import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -56,6 +58,9 @@ import java.util.*;
 public class LTSFactory {
   private static final Logger logger = LogManager.getLogger(LTSFactory.class);
   private static final String CORPUS = "mitll.npdata.dao.lts.";
+  public static final String EN = "en";
+  public static final String AR = "ar";
+  public static final String FA = "fa";
 
   private final Language thisLanguage;
 
@@ -75,7 +80,7 @@ public class LTSFactory {
    * @param thisLanguage
    * @seex ASRScoring#ASRScoring
    */
-  private LTSFactory(Language thisLanguage) {
+  public LTSFactory(Language thisLanguage) {
     this.thisLanguage = thisLanguage;
     // logger.info("got " +thisLanguage + " " + thisLanguage.name());
     String name = thisLanguage.name();
@@ -115,14 +120,6 @@ public class LTSFactory {
   }
 
   /**
-   * @param thisLanguage
-   * @seex mitll.langtest.server.scoring.ASRScoring#ASRScoring
-   */
-  LTSFactory(String thisLanguage) {
-    this(Language.valueOf(thisLanguage.toUpperCase()));
-  }
-
-  /**
    * @return
    * @seex mitll.langtest.server.scoring.ASRScoring#getCollator
    * @seex #sort(List)
@@ -131,23 +128,6 @@ public class LTSFactory {
     return Collator.getInstance(getLocale(thisLanguage));
   }
 
-  /**
-   * @param toSort
-   * @param <T>
-   * @see Scoring#sort
-   */
-/*  public <T extends CommonExercise> void sort(List<T> toSort) {
-    Collator collator = getCollator();
-    final Map<T, CollationKey> exToKey = new HashMap<T, CollationKey>();
-
-    toSort.forEach(t -> exToKey.put(t, collator.getCollationKey(t.getForeignLanguage())));
-
-    toSort.sort((o1, o2) -> {
-      CollationKey collationKey1 = exToKey.get(o1);
-      CollationKey collationKey2 = exToKey.get(o2);
-      return collationKey1.compareTo(collationKey2);
-    });
-  }*/
 
   /**
    * @param language1
@@ -157,101 +137,13 @@ public class LTSFactory {
   public static String getLocale(String language1) {
     Language lang;
     try {
+      if (language1.equalsIgnoreCase(MANDARIN)) language1 = Language.CHINESE.name();
       lang = Language.valueOf(language1.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.error("getLocale for emptyLTS language " + language1);
       lang = Language.ENGLISH;
     }
-    return LTSFactory.getID(lang);
-  }
-
-  /**
-   * Consistent with BCP 47.
-   * <p>
-   * These are based on lookups in <a href='http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry'>subtag-registry</a>
-   * <p>
-   * Also see <a href='https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation'>Locale identification and negotiation</a>
-   *
-   * @param lang
-   * @return
-   * @see AudioExport#getCountryCode
-   */
-  private static String getID(Language lang) {
-    String locale = "en";
-    switch (lang) {
-      case ARABIC:
-        locale = "ar";
-        break;
-      case CROATIAN:
-        locale = "hr";
-        break;
-      case DARI:
-        locale = "prs";
-        break;
-      case EGYPTIAN:
-        locale = "arz";
-        break;
-      case FARSI:  // or Persian
-        locale = "fa";
-        break;
-      case FRENCH:
-        locale = "fr";
-        break;
-      case GERMAN:
-        locale = "de";
-        break;
-      case HINDI:
-        locale = "hi";
-        break;
-      case IRAQI:
-        locale = "ar-IQ";
-        break;
-      case JAPANESE:
-        locale = "ja";
-        break;
-      case KOREAN:
-        locale = "ko";
-        break;
-      case LEVANTINE:
-        locale = "ar-SY";
-        break;
-      case MANDARIN:
-        locale = "cmn";
-        break;
-      case MSA:
-        locale = "ar";
-        break;
-      case PASHTO:
-        locale = "ps";
-        break;
-      case RUSSIAN:
-        locale = "ru";
-        break;
-      case SERBIAN:
-        locale = "sr";
-        break;
-      case SORANI: // Kurdish sorani
-        locale = "ku";
-        break;
-      case SPANISH:
-        locale = "es";
-        break;
-      case SUDANESE:
-        locale = "apd";
-        break;
-      case TAGALOG:
-        locale = "tl";
-        break;
-      case URDU:
-        locale = "ur";
-        break;
-    }
-//
-//    logger.debug("Name of Locale: " + locale.getDisplayName());
-//    logger.debug("Language Code: " + locale.getLanguage() + ", Language Display Name: " + locale.getDisplayLanguage());
-//    logger.debug("Country Code: " + locale.getCountry() + ", Country Display Name: " + locale.getDisplayCountry());
-
-    return locale;
+    return lang.getLocale();
   }
 
   /**
@@ -263,16 +155,16 @@ public class LTSFactory {
     Locale locale = Locale.ENGLISH;
     switch (lang) {
       case ARABIC:
-        locale = new Locale.Builder().setLanguage("ar").build();
+        locale = new Locale.Builder().setLanguage(AR).build();
         break;
       case DARI:
-        locale = new Locale.Builder().setLanguage("fa").setRegion("pk").build();
+        locale = new Locale.Builder().setLanguage(FA).setRegion("pk").build();
         break;
       case EGYPTIAN:
-        locale = new Locale.Builder().setLanguage("ar").setRegion("eg").build();
+        locale = new Locale.Builder().setLanguage(AR).setRegion("eg").build();
         break;
       case FARSI:
-        locale = new Locale.Builder().setLanguage("fa").setRegion("ir").build();
+        locale = new Locale.Builder().setLanguage(FA).setRegion("ir").build();
         break;
       case KOREAN:
         locale = Locale.KOREAN;
@@ -281,16 +173,16 @@ public class LTSFactory {
         locale = Locale.JAPANESE;
         break;
       case IRAQI:
-        locale = new Locale.Builder().setLanguage("ar").setRegion("iq").build();
+        locale = new Locale.Builder().setLanguage(AR).setRegion("iq").build();
         break;
       case LEVANTINE:
-        locale = new Locale.Builder().setLanguage("ar").setRegion("sy").build();
+        locale = new Locale.Builder().setLanguage(AR).setRegion("sy").build();
         break;
-      case MANDARIN:
+      case CHINESE:
         locale = Locale.CHINESE;
         break;
       case MSA:
-        locale = new Locale.Builder().setLanguage("ar").build();
+        locale = new Locale.Builder().setLanguage(AR).build();
         break;
       case PASHTO:
         locale = new Locale.Builder().setLanguage("ps").build();
@@ -302,7 +194,7 @@ public class LTSFactory {
         locale = new Locale.Builder().setLanguage("es").build();
         break;
       case SUDANESE:
-        locale = new Locale.Builder().setLanguage("ar").setRegion("sd").build();
+        locale = new Locale.Builder().setLanguage(AR).setRegion("sd").build();
         break;
       case TAGALOG:
         locale = new Locale.Builder().setLanguage("tl").build();
@@ -332,103 +224,7 @@ public class LTSFactory {
     }
   }
 
-//  static Map<String, Set<String>> phoneToKorean = new HashMap<>();
-//  static Map<String, Map<String, Set<String>>> phoneToKoreanCompound = new HashMap<>();
-//
-//  static void popKorean() {
-//
-//  }
-/*
-  static {
-    phoneToKorean.put("K", List("ᄀ", "ᄁ", "ᆿ"));
-    phoneToKorean.put("N", List("ᄂ"));
-    phoneToKorean.put("T", List("ᄃ", "ᄄ", "ᄐ"));
-    phoneToKorean.put("L", List("ᄅ"));
-    phoneToKorean.put("M", List("ᄆ"));
-    phoneToKorean.put("P", List("ᄇ", "ᄈ", "ᄑ"));
-    phoneToKorean.put("S", List("ᄉ", "ᄊ"));
-    phoneToKorean.put("J", List("ᄌ", "ᄍ", "ᄎ"));
-
-    phoneToKorean.put("H", List("ᄒ"));
-
-    phoneToKorean.put("A", List("ᅡ", "ᅢ"));
-    phoneToKorean.put("EO", List("ᅥ"));
-    phoneToKorean.put("E", List("ᅦ"));
-    phoneToKorean.put("O", List("ᅩ"));
-    phoneToKorean.put("U", List("ᅮ"));
-    phoneToKorean.put("EU", List("ᅳ"));
-    phoneToKorean.put("I", List("ᅴ", "ᅵ"));
-
-    phoneToKorean.put("NG", List("ᆼ"));
-
-
-
-
-    phoneToKoreanCompound.put(    "I" ->"A"->  List("ᅣ","ᅤ"));
-    phoneToKoreanCompound.put(  "I"->"EO"->    List("ᅧ"));
-        phoneToKoreanCompound.put(     "I"->"E"->
-
-    List("ᅨ"));
-        phoneToKoreanCompound.put(     "O"->"A"->
-
-    List("ᅪ","ᅫ"));
-        phoneToKoreanCompound.put(      "O"->"E"->
-
-    List("ᅬ"));
-        phoneToKoreanCompound.put(         "I"->"O"->
-
-    List("ᅭ"));
-        phoneToKoreanCompound.put(         "O"->"EO"->
-
-    List("ᅯ","ᅰ"));
-        phoneToKoreanCompound.put(         "O"->"I"->
-
-    List("ᅱ"));
-        phoneToKoreanCompound.put(         "I"->"U"->
-
-    List("ᅲ"));
-
-        phoneToKoreanCompound.put(         "K"->"S"->
-
-    List("ᆪ"));
-        phoneToKoreanCompound.put(         "N"->"J"->
-
-    List("ᆬ"));
-        phoneToKoreanCompound.put(         "N"->"H"->
-
-    List("ᆭ"));
-        phoneToKoreanCompound.put(         "L"->"K"->
-
-    List("ᆰ"));
-        phoneToKoreanCompound.put(         "L"->"M"->
-
-    List("ᆱ"));
-        phoneToKoreanCompound.put(         "L"->"P"->
-
-    List("ᆲ"));
-        phoneToKoreanCompound.put(         "L"->"S"->
-
-    List("ᆳ"));
-        phoneToKoreanCompound.put(         "L"->"T"->
-
-    List("ᆴ"));
-        phoneToKoreanCompound.put(         "L"->"P"->
-
-    List("ᆵ"));
-        phoneToKoreanCompound.put(         "L"->"H"->
-
-    List("ᆶ"));
-        phoneToKoreanCompound.put(         "P"->"S"->
-
-    List("ᆹ"));
-  )
-  }
-*/
-
-
   static Set<String> List(String... var) {
     return new HashSet<String>(Arrays.asList(var));
   }
-
-
 }

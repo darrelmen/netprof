@@ -35,10 +35,7 @@ package mitll.langtest.server.database.project;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectProperty;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.project.*;
 import mitll.npdata.dao.SlickProject;
 
 import java.util.Collection;
@@ -62,12 +59,12 @@ public interface IProjectDAO extends IDAO {
    * @param dominoID
    * @return
    */
-  int add(int userid, String name, String language, String course,
+  int add(int userid, String name, Language language, String course,
           String firstType, String secondType, String countryCode, int displayOrder,
           ProjectType projectType, ProjectStatus status, int dominoID);
 
   /**
-   * @see ProjectDAO#add(int, long, String, String, String, ProjectType, ProjectStatus, String, String, String, int, int)
+   * @see IProjectDAO#add(int, long, String, Language, String, ProjectType, ProjectStatus, String, String, String, int, int)
    * @param userid
    * @param modified
    * @param name
@@ -82,7 +79,7 @@ public interface IProjectDAO extends IDAO {
    * @param dominoID
    * @return
    */
-  int add(int userid, long modified, String name, String language, String course,
+  int add(int userid, long modified, String name, Language language, String course,
           ProjectType type, ProjectStatus status, String firstType, String secondType, String countryCode, int displayOrder, int dominoID);
 
   /**
@@ -115,7 +112,7 @@ public interface IProjectDAO extends IDAO {
   int getDefault();
 
   /**
-   * @see mitll.langtest.server.services.ProjectServiceImpl#exists(int)
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
    * @param projid
    * @return
    */

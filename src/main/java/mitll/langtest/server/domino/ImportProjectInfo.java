@@ -2,6 +2,7 @@ package mitll.langtest.server.domino;
 
 import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.model.user.DBUser;
+import mitll.langtest.shared.project.Language;
 
 import java.util.Date;
 
@@ -13,13 +14,6 @@ public class ImportProjectInfo {
   private long createTime;
   private int dominoProjectID;
   private final String name;
-
-/*
-  public ImportProjectInfo(String unitName, String chapterName) {
-    this.unitName = unitName;
-    this.chapterName = chapterName;
-  }
-*/
 
   /**
    * @param dominoProjectID
@@ -94,6 +88,7 @@ public class ImportProjectInfo {
   }
 
   public String toString() {
-    return dominoProjectID + " : " + name + " : " + getLanguage() + " creator " + getCreatorID() + " at " + getCreateDate() + " unit " + getUnitName() + " chapt " + getChapterName();
+    return dominoProjectID + " : " + name + " : " + getLanguage() + " creator " + getCreatorID() +
+        " at " + getCreateDate() + " unit " + getUnitName() + " chapt " + getChapterName();
   }
 }

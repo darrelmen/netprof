@@ -32,9 +32,10 @@ package mitll.langtest.shared.project;
  */
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.project.IProjectDAO;
 
 /**
- * @see mitll.langtest.server.database.project.ProjectDAO#add
+ * @see IProjectDAO#add
  */
 public enum ProjectType implements IsSerializable {
   NP(true),

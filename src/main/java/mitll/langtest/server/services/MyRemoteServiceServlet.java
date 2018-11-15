@@ -66,6 +66,8 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implements LogAndNotify {
   private static final Logger logger = LogManager.getLogger(MyRemoteServiceServlet.class);
@@ -344,6 +346,8 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     Language language1;
 
     try {
+      if (language.equalsIgnoreCase(MANDARIN)) language = Language.CHINESE.name();
+
       language1 = Language.valueOf(language.toUpperCase());
     } catch (IllegalArgumentException e) {
       language1 = Language.UNKNOWN;

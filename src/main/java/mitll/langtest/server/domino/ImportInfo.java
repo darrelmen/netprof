@@ -1,12 +1,15 @@
 package mitll.langtest.server.domino;
 
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import static mitll.langtest.server.database.exercise.Project.MANDARIN;
 
 /**
  * @see ProjectSync#addPending
@@ -76,6 +79,7 @@ public class ImportInfo {
   private mitll.langtest.shared.project.Language getLanguage(String languageName) {
     mitll.langtest.shared.project.Language lang = mitll.langtest.shared.project.Language.UNKNOWN;
     try {
+      if (languageName.equalsIgnoreCase(MANDARIN)) languageName = Language.CHINESE.name();
       lang = mitll.langtest.shared.project.Language.valueOf(languageName);
 //        logger.info("Got " + languageName + " " + lang);
     } catch (IllegalArgumentException e) {

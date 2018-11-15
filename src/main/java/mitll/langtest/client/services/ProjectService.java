@@ -39,6 +39,7 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.DominoProject;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectProperty;
 
@@ -77,8 +78,7 @@ public interface ProjectService extends RemoteService {
 
   DominoUpdateResponse addPending(int id, boolean doChange) throws DominoSessionException, RestrictedOperationException;
 
-  List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException;
-
+  List<DominoProject> getDominoForLanguage(Language lang) throws DominoSessionException;
 
 /*
   String getProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException;

@@ -88,6 +88,7 @@ public class Project implements IPronunciationLookup {
    */
   public static final String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
   public static final String TRUE = Boolean.TRUE.toString();
+  public static final String MANDARIN = "Mandarin";
 
   /**
    * @see #getWebservicePort
@@ -112,7 +113,7 @@ public class Project implements IPronunciationLookup {
   private final Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
 
   private Map<String, Integer> fileToRecorder = new HashMap<>();
-  private List<IDialog> dialogs = new ArrayList();
+  private List<IDialog> dialogs = new ArrayList<>();
   private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
 
   //private ExerciseTrie<CommonExercise> phoneTrie;
@@ -165,15 +166,22 @@ public class Project implements IPronunciationLookup {
   @NotNull
   private Language getLanguageFor() {
     try {
-      return Language.valueOf(project.language().toUpperCase());
+      return Language.valueOf(getLangName());
     } catch (IllegalArgumentException e) {
       logger.error("no known language  " + project.language());
       return Language.UNKNOWN;
     }
   }
 
+  @NotNull
+  private String getLangName() {
+    String name = project.language().toUpperCase();
+    if (name.equalsIgnoreCase(MANDARIN)) name = Language.CHINESE.name();
+    return name;
+  }
+
   public boolean isEnglish() {
-    return getLanguageEnum() == Language.ENGLISH;//getLanguage().equalsIgnoreCase("english");
+    return getLanguageEnum() == Language.ENGLISH;
   }
 
   private SmallVocabDecoder getSmallVocabDecoder() {

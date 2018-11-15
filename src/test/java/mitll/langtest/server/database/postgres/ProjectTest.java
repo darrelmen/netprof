@@ -220,7 +220,7 @@ public class ProjectTest extends BaseTest {
         .replaceAll("\\p{P}", "");
   }
 
-
+/*
   @Test
   public void testProject() {
     DatabaseImpl spanish = getDatabase();
@@ -236,7 +236,7 @@ public class ProjectTest extends BaseTest {
         "ALL",
         ProjectType.NP,
         ProjectStatus.PRODUCTION, iterator.next(), iterator.next(), "es", 0, -1);
-  }
+  }*/
 
   @Test
   public void testListProjects() {

@@ -40,10 +40,7 @@ import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.project.DominoProject;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectProperty;
-import mitll.langtest.shared.project.ProjectStatus;
+import mitll.langtest.shared.project.*;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -141,7 +138,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
 
   private void setDefaultsIfMissing(ProjectInfo newProject) {
     try {
-      String language = newProject.getLanguage();
+      Language language = newProject.getLanguage();
 
       logger.info("setDefaultsIfMissing for " + newProject);
       logger.info("setDefaultsIfMissing for language " + language);
@@ -151,7 +148,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
       logger.info("setDefaultsIfMissing examing " + productionProjects.size() + " production projects.");
 
       Optional<Project> max = productionProjects.stream()
-          .filter(project -> project.getLanguage().equalsIgnoreCase(language) && project.getModelsDir() != null)
+          .filter(project -> project.getLanguageEnum() == language && project.getModelsDir() != null)
           .max(Comparator.comparingLong(p -> p.getProject().modified().getTime()));
 
       if (max.isPresent()) {
@@ -231,7 +228,7 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
   }
 
   @Override
-  public List<DominoProject> getDominoForLanguage(String lang) throws DominoSessionException {
+  public List<DominoProject> getDominoForLanguage(Language lang) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     return db.getProjectSync().getDominoForLanguage(lang);
   }

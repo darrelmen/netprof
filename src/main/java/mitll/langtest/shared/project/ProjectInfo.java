@@ -45,7 +45,7 @@ import static mitll.langtest.shared.project.ProjectProperty.MODEL_TYPE;
 
 public class ProjectInfo extends DominoProject implements HasID, MutableProject {
   private int id = -1;
-  private String language = "";
+  private Language language = Language.UNKNOWN;
   private String course = "";
   private String countryCode = "";
   private ProjectStatus status = ProjectStatus.DEVELOPMENT;
@@ -75,7 +75,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
    */
   public ProjectInfo(int projectid,
                      String name,
-                     String language,
+                     Language language,
                      String course,
                      String countryCode,
                      ProjectStatus status,
@@ -114,7 +114,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.propertyValue = props;
   }
 
-  public String getLanguage() {
+  public Language getLanguage() {
     return language;
   }
 
@@ -219,7 +219,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     this.course = course;
   }
 
-  public void setLanguage(String language) {
+  public void setLanguage(Language language) {
     this.language = language;
   }
 

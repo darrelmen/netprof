@@ -161,7 +161,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
    */
   @NotNull
   private NavLink getLangBreadcrumb(SlimProject project) {
-    NavLink lang = new NavLink(project.getLanguage());
+    NavLink lang = new NavLink(project.getLanguage().toDisplay());
 
     if (DEBUG) logger.info("addProjectCrumb  for " + project.getName() + " " + project.getMode());
 
@@ -193,13 +193,6 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     breadcrumbs.clear();
   }
 
-/*
-  //@Override
-  public void addBreadcrumbs() {
-    addCrumbs(true);
-  }
-*/
-
   /**
    * @param name
    * @return
@@ -224,16 +217,6 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     breadcrumbs.remove(breadcrumbs.getWidgetCount() - 1);
     // logger.info("removeLastCrumb now " + breadcrumbs.getWidgetCount());
   }
-
-/*
-  public String getLastBreadcrumb() {
-    Widget widget = breadcrumbs.getWidget(breadcrumbs.getWidgetCount() - 1);
-    if (widget instanceof NavLink) {
-      NavLink link = (NavLink) widget;
-      return link.getTitle();
-    } else return "Unknown";
-  }
-*/
 
   /**
    * @param count

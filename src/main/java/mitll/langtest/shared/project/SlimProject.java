@@ -32,8 +32,6 @@
 
 package mitll.langtest.shared.project;
 
-
-import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import mitll.langtest.server.database.project.ProjectManagement;
 
 import java.util.ArrayList;
@@ -46,16 +44,14 @@ import java.util.stream.Collectors;
 /**
  * UI-friendly representation of a project...
  *
- * @see mitll.langtest.client.initial.InitialUI#addBreadcrumbLevels(Breadcrumbs, ProjectStartupInfo)
+ * @see mitll.langtest.client.initial.InitialUI#addBreadcrumbLevels
  */
 public class SlimProject extends ProjectInfo {
   private boolean hasModel;
   private boolean isRTL;
   private List<SlimProject> children = new ArrayList<>();
 
-  private Map<String, String> props;
   private ProjectMode mode = ProjectMode.VOCABULARY;
-
 
   public SlimProject() {
   }
@@ -81,7 +77,7 @@ public class SlimProject extends ProjectInfo {
    */
   public SlimProject(int projectid,
                      String name,
-                     String language,
+                     Language language,
                      String course,
                      String countryCode,
                      ProjectStatus status,
@@ -154,13 +150,6 @@ public class SlimProject extends ProjectInfo {
     return isRTL;
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.client.project.ProjectChoices#getImageAnchor
-   */
-/*  public Map<String, String> getProps() {
-    return props;
-  }*/
   public ProjectMode getMode() {
     return mode;
   }

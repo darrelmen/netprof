@@ -85,6 +85,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
 import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
+import static mitll.langtest.server.database.exercise.Project.MANDARIN;
 
 public class ProjectManagement implements IProjectManagement {
   private static final Logger logger = LogManager.getLogger(ProjectManagement.class);
@@ -914,13 +915,14 @@ public class ProjectManagement implements IProjectManagement {
     boolean hasModel = project.hasModel();
 
     boolean shouldSwap = project.getProp(ProjectProperty.SWAP_PRIMARY_AND_ALT).equalsIgnoreCase("true");
+    Language languageInfo = toEnum(language);
     ProjectStartupInfo startupInfo = new ProjectStartupInfo(
         serverProps.getProperties(),
         typeOrder,
         sectionHelper.getSectionNodesForTypes(),
         project1.id(),
         language,
-        toEnum(language),
+        languageInfo,
         LTSFactory.getLocale(language),
         hasModel,
         sectionHelper.getTypeToDistinct(),
@@ -943,7 +945,9 @@ public class ProjectManagement implements IProjectManagement {
     Language language1;
 
     try {
-      language1 = Language.valueOf(language.toUpperCase());
+      String name = language.toUpperCase();
+      if (name.equalsIgnoreCase(MANDARIN)) name = Language.CHINESE.name();
+      language1 = Language.valueOf(name);
     } catch (IllegalArgumentException e) {
       language1 = Language.UNKNOWN;
     }
@@ -1050,11 +1054,13 @@ public class ProjectManagement implements IProjectManagement {
 
     boolean isRTL = addOtherProps(project, info);
 
+    String language = project.language();
     return new SlimProject(
         project.id(),
         project.name(),
-        project.language(),
-        project.course(), project.countrycode(),
+        toEnum(language),
+        project.course(),
+        project.countrycode(),
         ProjectStatus.valueOf(project.status()),
         ProjectType.valueOf(project.kind()),
         project.displayorder(),

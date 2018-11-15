@@ -156,7 +156,7 @@ class CheckLTS {
 
     boolean translitOk = isTranslitOk(lts, transliteration, tokens, translitTokens);
 
-    //   String language = isAsianLanguage ? " MANDARIN " : "";
+    //   String language = isAsianLanguage ? " CHINESE " : "";
 
     if (DEBUG) {
       logger.info("checkLTS '" + language + "'" +
