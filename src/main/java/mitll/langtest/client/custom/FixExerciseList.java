@@ -67,8 +67,7 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
         .setOnlyWithAnno(true)
         .setQC(true)
         .setAddContext(isContext);
-
-    logger.info("getExerciseListRequest req " + exerciseListRequest);
+   // logger.info("getExerciseListRequest req " + exerciseListRequest);
 
     return exerciseListRequest;
   }
@@ -109,5 +108,4 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
     return "<b>You've completed fixing defects for this selection.</b>" +
         "<p>Please clear one of your selections and select a different unit or chapter.</p>";
   }
-
 }

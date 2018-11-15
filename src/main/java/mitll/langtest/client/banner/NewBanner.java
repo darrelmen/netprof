@@ -377,7 +377,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       //  logger.info("getChoice got click on " + viewName + " = " + historyToken);
       controller.logEvent(viewName, "NavLink", "N/A", "click on view");
       gotClickOnChoice(viewName, learn, true);
-      // setHistoryItem(historyToken);
     });
     return learn;
   }
@@ -401,6 +400,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @param fromClick
    */
   private void gotClickOnChoice(String instanceName, NavLink learn, boolean fromClick) {
+   // logger.info("gotClickOn " + instanceName + " " + learn + " from click " + fromClick);
     showSection(instanceName, fromClick);
     showActive(learn);  // how can this be null?
   }

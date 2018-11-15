@@ -29,6 +29,8 @@ public class FilterResponseHelper {
   public FilterResponse getTypeToValues(FilterRequest request, int projid, int userID) {
     logger.info("getTypeToValues " + request);
 
+
+
     request.prune();
 
     //logger.info("getTypeToValues 2 " + request);
@@ -45,7 +47,7 @@ public class FilterResponseHelper {
       } else if (request.isOnlyWithAnno()) {
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyWithAnno(true));
       } else if (request.isExampleRequest()) {
-        logger.info("getTypeToValues isExampleRequest " + request);
+        logger.info("\n\n\ngetTypeToValues isExampleRequest " + request);
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyExamples(true));
       } else {
        // logger.info("getTypeToValues normal req " + request);
@@ -81,7 +83,7 @@ public class FilterResponseHelper {
   private ExerciseListRequest getExerciseListRequest(FilterRequest request, int userID) {
     boolean exampleRequest = request.isExampleRequest();
 
-    logger.info("getExerciseListRequest isExampleRequest " + request + " : " + exampleRequest);
+    logger.info("\n\n\ngetExerciseListRequest isExampleRequest " + request + " : " + exampleRequest);
 
     return new ExerciseListRequest()
         .setOnlyExamples(exampleRequest)
@@ -112,31 +114,6 @@ public class FilterResponseHelper {
    * @see #getTypeToValues
    */
   private void maybeAddContent(FilterRequest request, FilterResponse typeToValues, int projid) {
-   /* Optional<Pair> content = request.getTypeToSelection().stream().filter(pair -> pair.getProperty().equalsIgnoreCase(CONTENT)).findAny();
-
-    if (content.isPresent()) {
-      logger.info("maybeAddContent found content in request...");
-      String value1 = content.get().getValue();
-
-      if (value1.startsWith(SENTENCES)) {
-        typeToValues.addTypeToInclude(CONTENT);
-
-        Set<MatchInfo> value = new HashSet<>();
-        value.add(new MatchInfo(value1, getNumContextSentences(request, projid), -1, false, ""));
-        typeToValues.getTypeToValues().put(CONTENT, value);
-      }
-    }
-    else {
-      logger.info("maybeAddContent no content in request...");
-
-      typeToValues.addTypeToInclude(CONTENT);
-
-      Set<MatchInfo> value = new HashSet<>();
-      value.add(new MatchInfo(SENTENCES_ONLY, getNumContextSentences(request, projid), -1, false, ""));
-      typeToValues.getTypeToValues().put(CONTENT, value);
-    }
-*/
-
     int numContextSentences = getNumContextSentences(request, projid);
 
     if (numContextSentences > 0) {

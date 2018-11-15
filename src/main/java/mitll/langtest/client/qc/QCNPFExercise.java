@@ -678,7 +678,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       }
     });
 
-    logger.info("getPanelForAudio : comment widget for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage() + " context " + e.isContext());
+//    logger.info("getPanelForAudio : comment widget for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage() + " context " + e.isContext());
     return
         new Pair(getCommentWidget(audio.getAudioRef(), audioPanel, e.getAnnotation(audio.getAudioRef()), e.getID()), audioPanel);
   }

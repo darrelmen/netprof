@@ -517,11 +517,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       maybeSwitchProject(selectionState, getStartupInfo().getProjectid());
     }
 
-    INavigation.VIEWS instance = selectionState.getView();
-    if (instance != getInstance()) {
-      // Collection<String> remove = selectionState.getTypeToSection().remove(getDynamicFacet());
-      logger.warning("addWidgets selection '" + instance + "' != " + getInstance());// + " so removing " + remove);
-    }
+//    INavigation.VIEWS instance = selectionState.getView();
+//    if (instance != getInstance()) {
+//      logger.info("addWidgets selection '" + instance + "' != " + getInstance());// + " so removing " + remove);
+//    }
 
     restoreUIState(selectionState);
   }
@@ -536,9 +535,12 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
 //     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest for " + prefix));
 //   logger.info("logException stack " + exceptionAsString);
+    boolean context = views.isContext();
+
+    if (context) logger.warning("getExerciseListRequest view " + views );
     return super.getExerciseListRequest(prefix)
         .setAddFirst(false)
-        .setOnlyExamples(views.isContext());
+        .setOnlyExamples(context);
   }
 
   /**
@@ -1153,7 +1155,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
       final long then = System.currentTimeMillis();
 
-      service.getTypeToValues(getFilterRequest(userListID, getPairs(typeToSelection)),
+      FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
+
+     // logger.info("getTypeToValues Send req " + filterRequest);
+
+      service.getTypeToValues(filterRequest,
           new AsyncCallback<FilterResponse>() {
             @Override
             public void onFailure(Throwable caught) {

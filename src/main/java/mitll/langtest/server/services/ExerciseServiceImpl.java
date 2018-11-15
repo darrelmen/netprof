@@ -85,7 +85,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
     int userFromSessionID = getUserIDFromSessionOrDB();
-    return db.getTypeToValues(request, getProjectIDFromUser(userFromSessionID), userFromSessionID);
+    return db.getFilterResponseHelper().getTypeToValues(request, getProjectIDFromUser(userFromSessionID), userFromSessionID);
   }
 
   /**

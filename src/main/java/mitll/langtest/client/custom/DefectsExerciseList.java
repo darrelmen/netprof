@@ -16,9 +16,6 @@ import java.util.logging.Logger;
 class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("DefectsExerciseList");
 
-  //  private MarkDefectsChapterNPFHelper markDefectsChapterNPFHelper;
-  //Logger logger = Logger.getLogger("NPExerciseList_Defects");
-  // private CheckBox filterOnly, uninspectedOnly;
   private final boolean isContext;
 
   DefectsExerciseList(ExerciseController controller,
@@ -55,7 +52,7 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
         .setQC(true)
         .setAddContext(isContext);
 
-    logger.info("getExerciseListRequest req " + exerciseListRequest);
+  //  logger.info("getExerciseListRequest req " + exerciseListRequest);
 
     return exerciseListRequest;
   }
@@ -66,11 +63,10 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
             .setOnlyUninspected(true)
             .setQC(true)
             .setAddContext(isContext);
-    logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
+ //   logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
 //    logger.info("logException stack " + exceptionAsString);
-
     return exerciseListRequest;
   }
 

@@ -1247,7 +1247,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
             .filter(matchInfo -> !matchInfo.getValue().equals(BLANK))
             .forEach(filtered::add);
         if (filtered.isEmpty()) {
-          logger.info("filterOutBlanks drop empty type" + k + "-" + v);
+          logger.info("filterOutBlanks drop empty type " + k + "-" + v);
         } else {
           typeToMatchesFiltered.put(k, filtered);
         }

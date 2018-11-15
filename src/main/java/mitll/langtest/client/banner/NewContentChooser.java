@@ -15,7 +15,6 @@ import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE;
@@ -188,7 +187,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       storeValue(view);
       switch (view) {
         case LEARN:
-          clearAndPush(isFirstTime, currentStoredView, LEARN, !fromClick);
+          clearAndPush(isFirstTime, currentStoredView, LEARN, fromClick);
           learnHelper.showContent(divWidget, LEARN);
           break;
         case PRACTICE:
@@ -234,32 +233,32 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           break;
         case RECORD_ENTRIES:
           clearAndFixScroll();
-          setInstanceHistory(RECORD_ENTRIES, false);
+          setInstanceHistory(RECORD_ENTRIES, false, true);
           new RecorderNPFHelper(controller, true, RECORD_ENTRIES).showNPF(divWidget, RECORD_ENTRIES);
           break;
         case RECORD_SENTENCES:
           clearAndFixScroll();
-          setInstanceHistory(RECORD_SENTENCES, false);
+          setInstanceHistory(RECORD_SENTENCES, false, true);
           new RecorderNPFHelper(controller, false, RECORD_SENTENCES).showNPF(divWidget, RECORD_SENTENCES);
           break;
         case QC_ENTRIES:
           clear();
-          setInstanceHistory(QC_ENTRIES);
+          setInstanceHistory(QC_ENTRIES, true, false);
           new MarkDefectsChapterNPFHelper(controller, false).showNPF(divWidget, QC_ENTRIES);
           break;
         case FIX_ENTRIES:
           clear();
-          setInstanceHistory(FIX_ENTRIES);
+          setInstanceHistory(FIX_ENTRIES, true, false);
           new FixNPFHelper(controller, false, FIX_ENTRIES).showNPF(divWidget, FIX_ENTRIES);
           break;
         case QC_SENTENCES:
           clear();
-          setInstanceHistory(QC_SENTENCES);
+          setInstanceHistory(QC_SENTENCES, true, false);
           new MarkDefectsChapterNPFHelper(controller, true).showNPF(divWidget, QC_SENTENCES);
           break;
         case FIX_SENTENCES:
           clear();
-          setInstanceHistory(FIX_SENTENCES);
+          setInstanceHistory(FIX_SENTENCES, true, false);
           new FixNPFHelper(controller, true, FIX_SENTENCES).showNPF(divWidget, FIX_SENTENCES);
           break;
         case NONE:
@@ -302,6 +301,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen, boolean doPushItem) {
     clearAndFixScroll();
 
+//    logger.info("clearAndPush isFirst " + isFirstTime + " current " + currentStoredView + " now " + listen + " push " + doPushItem);
     if (doPushItem) {
       if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
       setInstanceHistory(listen);
@@ -328,18 +328,21 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void setInstanceHistory(VIEWS views) {
-    setInstanceHistory(views, true);
+    setInstanceHistory(views, true, true);
   }
 
-  private void setInstanceHistory(VIEWS views, boolean keepTypeToSelection) {
+  private void setInstanceHistory(VIEWS views, boolean keepTypeToSelection, boolean keepLists) {
     VIEWS currentView = new SelectionState().getView();
     if (currentView != views) {
-      String typeToSelection = keepTypeToSelection ? getTypeToSelection() : "";
+      String typeToSelection1 = keepLists ? getTypeToSelection() : getTypeToSelectionNoList();
+      String typeToSelection = keepTypeToSelection ? typeToSelection1 : "";
+
+  //    logger.info("typeToSelection " + typeToSelection);
 
       pushItem(getInstanceParam(views) +
           (typeToSelection.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + typeToSelection));
     } else {
-      //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
+    //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
   }
 
@@ -347,6 +350,19 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private String getTypeToSelection() {
     Map<String, Collection<String>> typeToSection = new SelectionState(History.getToken(), false).getTypeToSection();
     //   logger.info("setInstanceHistory clearing history for instance " + views);
+    return getURLParams(typeToSection);
+  }
+
+  @NotNull
+  private String getTypeToSelectionNoList() {
+    Map<String, Collection<String>> typeToSection = new SelectionState(History.getToken(), false).getTypeToSection();
+    typeToSection.remove("Lists");
+    //   logger.info("setInstanceHistory clearing history for instance " + views);
+    return getURLParams(typeToSection);
+  }
+
+  @NotNull
+  private String getURLParams(Map<String, Collection<String>> typeToSection) {
     StringBuilder stringBuilder = new StringBuilder();
     typeToSection.forEach((k, v) -> stringBuilder
         .append(k)
@@ -647,7 +663,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushItem(String url) {
-  //  logger.info("pushItem - " + url);
+   // logger.info("pushItem - " + url);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //    logger.info("logException stack " + exceptionAsString);
     History.newItem(url);

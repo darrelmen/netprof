@@ -448,22 +448,25 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   private void showRecoOutputLater(T toSelect, boolean playAfterLoad) {
-    controller.getScoringService().getStudentAlignment(controller.getProjectStartupInfo().getProjectid(),
-        (int) toSelect.getResultID(), new AsyncCallback<AlignmentAndScore>() {
-          @Override
-          public void onFailure(Throwable caught) {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    if (projectStartupInfo != null) {
+      controller.getScoringService().getStudentAlignment(projectStartupInfo.getProjectid(),
+          (int) toSelect.getResultID(), new AsyncCallback<AlignmentAndScore>() {
+            @Override
+            public void onFailure(Throwable caught) {
 
-          }
-
-          @Override
-          public void onSuccess(AlignmentAndScore result) {
-            if (result == null) {
-              logger.warning("no result for " + toSelect.getResultID());
-            } else {
-              showRecoOutput(result, toSelect.getExid(), toSelect.getAnswerAudio(), playAfterLoad);
             }
-          }
-        });
+
+            @Override
+            public void onSuccess(AlignmentAndScore result) {
+              if (result == null) {
+                logger.warning("no result for " + toSelect.getResultID());
+              } else {
+                showRecoOutput(result, toSelect.getExid(), toSelect.getAnswerAudio(), playAfterLoad);
+              }
+            }
+          });
+    }
   }
 
   private final DownloadContainer downloadContainer = new DownloadContainer();
