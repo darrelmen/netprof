@@ -25,9 +25,11 @@ public class DownloadContainer {
    * @see #getDownloadIcon
    */
   private static final String DOWNLOAD_YOUR_RECORDING = "Download your recording.";
+  private static final String OGG = ".ogg";
+  private static final String MP_3 = ".mp3";
+  private static final String WAV = ".wav";
   private IconAnchor download;
   private Panel downloadContainer;
-
 
   public DownloadContainer() {
     addDownloadAudioWidget();
@@ -118,17 +120,22 @@ public class DownloadContainer {
    * @see #getDownload
    */
   private void setDownloadHref(IconAnchor download, String audioPath, String host, int exerciseID, ExerciseController controller) {
-    audioPath = audioPath.endsWith(".ogg") ? audioPath.replaceAll(".ogg", ".mp3") : audioPath;
+    audioPath = audioPath.endsWith(OGG) ?
+        audioPath.replaceAll(OGG, MP_3) :
+        audioPath.endsWith(WAV) ?
+            audioPath.replaceAll(WAV, MP_3) :
+            audioPath;
+
     setHRef(download, audioPath, host, exerciseID, controller.getUserState().getUser());
   }
 
   /**
-   * @see mitll.langtest.server.DownloadServlet#returnAudioFile
    * @param download
    * @param audioPath
    * @param host
    * @param exerciseID
    * @param user
+   * @see mitll.langtest.server.DownloadServlet#returnAudioFile
    */
   private void setHRef(IconAnchor download, String audioPath, String host, int exerciseID, int user) {
     String href = getDownloadAudio(host) +
@@ -141,14 +148,13 @@ public class DownloadContainer {
   }
 
   @NotNull
-  public static String getDownloadAudio(String host) {
+  static String getDownloadAudio(String host) {
     return DownloadContainer.DOWNLOAD_AUDIO + (host.isEmpty() ? "" : "/" + host);
   }
 
   public Panel getDownloadContainer() {
     return downloadContainer;
   }
-
 
   private void addTooltip(Widget w, String tip) {
     new TooltipHelper().addTooltip(w, tip);

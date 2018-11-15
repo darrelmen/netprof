@@ -22,7 +22,7 @@ import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
  * @param <T>
  */
 class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
-  private final Logger logger = Logger.getLogger("FixExerciseList");
+ // private final Logger logger = Logger.getLogger("FixExerciseList");
   private final boolean isContext;
 
   /**

@@ -56,10 +56,10 @@ public class ExcelExport {
   private static final String WORD_EXPRESSION = "Word/Expression";
   private static final String TRANSLITERATION = "Transliteration";
   private static final String MEANING = "Meaning";
-  //  private static final String MALE = "Male";
-//  private static final String FEMALE = "Female";
+
   private static final String CONTEXT_SENTENCE = "Context Sentence";
   private static final String CONTEXT_TRANSLATION = "Context Translation";
+  public static final String BLANK = "Blank";
   private final ServerProperties props;
 
   public ExcelExport(ServerProperties props) {
@@ -153,7 +153,9 @@ public class ExcelExport {
       row.createCell(j++).setCellValue(exercise.getAltFL());
 
       for (String type : typeOrder) {
-        row.createCell(j++).setCellValue(exercise.getUnitToValue().get(type));
+        String value = exercise.getUnitToValue().get(type);
+        if (value.equalsIgnoreCase(BLANK)) value = "";
+        row.createCell(j++).setCellValue(value);
       }
       Collection<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
       if (!directlyRelated.isEmpty()) {
@@ -164,7 +166,6 @@ public class ExcelExport {
       }
       if (isDefectList) {
         addDefects(english, preferredVoices, exercise, row, j);
-
       }
     }
     now = System.currentTimeMillis();

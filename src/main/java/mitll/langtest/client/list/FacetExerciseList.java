@@ -52,7 +52,6 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.QuizHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -210,7 +209,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
 
-//    this.listFacetHelper = getListFacetHelper(controller);
     secondRow.add(sectionPanel);
     setUnaccountedForVertical(0);
 
@@ -230,14 +228,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     // TODO : don't do it - will keep around reference to dead components.
     // so for instance if in TwoColumnExercisePanel there's an addList, removeList, newList
-    // LangTest.EVENT_BUS.addHandler(ListChangedEvent.TYPE, authenticationEvent -> listFacetHelper.gotListChanged());
     LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost()));
   }
-//
-//  @NotNull
-//  protected ListFacetHelper getListFacetHelper(ExerciseController controller) {
-//    return new ListFacetHelper(controller, getDynamicFacet(), getListType(), this, true);
-//  }
 
   @NotNull
   private DivWidget getBreadcrumbRow() {

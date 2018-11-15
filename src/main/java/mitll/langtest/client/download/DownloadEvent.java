@@ -7,17 +7,9 @@ import com.google.gwt.event.shared.GwtEvent;
  */
 public class DownloadEvent extends GwtEvent<DownloadEventHandler> {
   public static final Type<DownloadEventHandler> TYPE = new Type<>();
-  //private String source;
 
   public DownloadEvent() {
-    //this.source = source;
   }
-
-/*
-  public String getSource() {
-    return source;
-  }
-*/
 
   @Override
   public Type<DownloadEventHandler> getAssociatedType() {

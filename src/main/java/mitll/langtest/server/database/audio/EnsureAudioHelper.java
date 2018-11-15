@@ -66,7 +66,6 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
   private static final int WARN_THRESH = 10;
 
   private static final boolean DEBUG = false;
-//  private static final boolean WARN_MISSING_FILE = false;
 
   private static final int CHECKED_INTERVAL = 1;
   public static final String UNKNOWN = "unknown";

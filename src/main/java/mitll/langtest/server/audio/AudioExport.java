@@ -58,7 +58,9 @@ public class AudioExport {
 
   private static final String MALE = "Male";
   private static final String FEMALE = "Female";
-  public static final String MP3 = ".mp3";
+  private static final String MP3 = ".mp3";
+  private static final String CNTXT_ = "_cntxt_";
+  private static final String BLANK = "Blank";
 
   private Collection<String> typeOrder;
   private final ServerProperties props;
@@ -97,7 +99,6 @@ public class AudioExport {
         typeOrder,
         language,
         out,
-        // false,
         isDefectList,
         options);
   }
@@ -375,7 +376,7 @@ public class AudioExport {
       if (audioAttribute.isValid() &&
           (isMale && audioAttribute.isMale()) ||
           (!isMale && !audioAttribute.isMale())
-          ) {
+      ) {
 
         if (audioAttribute.getTimestamp() >= latestTime) {
           latest = audioAttribute;
@@ -419,8 +420,7 @@ public class AudioExport {
   }
 
   private String getMP3(AudioConversion audioConversion, AudioAttribute audioAttribute, String language) {
-    String s = getAbsFilePath(audioConversion, audioAttribute, language);
-    return audioConversion.getMP3ForWav(s);
+    return audioConversion.getMP3ForWav(getAbsFilePath(audioConversion, audioAttribute, language));
   }
 
   /**
@@ -479,7 +479,7 @@ public class AudioExport {
   }
 
   /**
-   * ae_cntxt_c01_u01_e0003. Mp3
+   * ae_cntxt_c01_u01_e0003.mp3
    * <p>
    * ae = Egyptian Arabic
    * contxt = context
@@ -528,15 +528,24 @@ public class AudioExport {
     String name;
     StringBuilder builder = new StringBuilder();
     builder.append(countryCode);
-    builder.append("_cntxt_");
+    builder.append(CNTXT_);
     for (String type : typeOrder) {
-      builder.append(type.toLowerCase().substring(0, 1));
-      builder.append(unitToValue.get(type));
-      builder.append("_");
+      String typeValue = unitToValue.get(type);
+      typeValue = typeValue.replaceAll(",", "");
+      if (typeValue.equalsIgnoreCase(BLANK)) {
+
+      } else {
+        builder.append(type.toLowerCase(), 0, 1);
+        builder.append(typeValue);
+        builder.append("_");
+      }
     }
+
     builder.append("e");
     builder.append(id);
+
     name = folder + builder.toString();
+
     return name;
   }
 
@@ -600,7 +609,7 @@ public class AudioExport {
     return name;
   }
 
-  int spew = 0;
+  private int spew = 0;
 
   /**
    * @param zOut

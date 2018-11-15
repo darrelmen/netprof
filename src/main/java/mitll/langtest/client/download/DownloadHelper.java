@@ -57,8 +57,9 @@ import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
  *
  */
 public class DownloadHelper implements IShowStatus {
+  // private final Logger logger = Logger.getLogger("DownloadHelper");
+
   private static final String INCLUDE_AUDIO = "Include Audio?";
- // private final Logger logger = Logger.getLogger("DownloadHelper");
   public static final String AMPERSAND = "___AMPERSAND___";
   public static final String COMMA = "___COMMA___";
 
@@ -129,7 +130,7 @@ public class DownloadHelper implements IShowStatus {
         description += " and searching '" + search + "'";
       }
       Heading w = new Heading(4, description);
-      w.addStyleName("blueColor");
+      //w.addStyleName("blueColor");
       row.add(w);
       container.add(row);
     }

@@ -61,7 +61,7 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
 
-  private static final int DIALOG_HEIGHT = 580;
+  private static final int DIALOG_HEIGHT = 590;
   private static final String COURSE1 = " course";
   /**
    * @see #getLabel
@@ -112,7 +112,6 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final String NO_LANGUAGES_LOADED_YET = "No languages loaded yet.";
 
-  //protected static final String LOGIN = "Login";
   private final UILifecycle uiLifecycle;
 
   private final LifecycleSupport lifecycleSupport;
