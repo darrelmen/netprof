@@ -366,25 +366,20 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                  long session,
                                  AudioChunk newChunk,
                                  AudioCheck.ValidityAndDur validityAndDur) throws ExecutionException {
-    //boolean isFinished = false;
     SessionInfo sessionInfo = getSessionInfo(realExID, projid, session);
     int durationInMillis1 = newChunk.getValidityAndDur().getDurationInMillis();
     if (validityAndDur.isValid()) {
       sessionInfo.incrementSpeech(durationInMillis1);
     } else {
       sessionInfo.incrementSilence(durationInMillis1);
-      //  isFinished = sessionInfo.isFinished();
-      //  logger.info("checkIsFinished " + session + " = " + sessionInfo);
     }
     return sessionInfo;
-    //return isFinished;
   }
 
   @NotNull
   private SessionInfo getSessionInfo(int realExID, int projid, long session) throws ExecutionException {
     SessionInfo sessionInfo = sessionToInfo.get(session);
     if (!sessionInfo.isSet()) {
-      // sessionToInfo.put(session, sessionInfo = new SessionInfo(getMinExpectedDur(db.getExercise(projid, realExID))));
       sessionInfo.setSessionInfo(getMinExpectedDur(db.getExercise(projid, realExID)));
       logger.info("getSessionInfo now " + sessionToChunks.size() + " and " + sessionToInfo.size() + " sessions.");
     }
@@ -853,14 +848,18 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         );
 
 //        long then = System.currentTimeMillis();
-        audioCheck.maybeAddDNR("" + packet, getAudioInputStream(), validityAndDur);
+        if (validityAndDur.isValid()) {
+          audioCheck.maybeAddDNR("" + packet, getAudioInputStream(), validityAndDur);
+        }
+
         //      long now = System.currentTimeMillis();
         //    logger.info("dnr took " + (now - then) + " millis");
-        return validityAndDur.getValidity();
       } catch (Exception e) {
         logger.error("got " + e, e);
+        validityAndDur = new AudioCheck.ValidityAndDur();
       }
-      return null;
+
+      return validityAndDur.getValidity();
     }
 
     public boolean isValid() {
