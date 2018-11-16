@@ -956,8 +956,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private boolean isFullJSON(HttpServletRequest request) {
-    String fullJSONFormat = getHeader(request, HeaderValue.FULL);
-    return fullJSONFormat != null;
+    return getHeader(request, HeaderValue.FULL) != null;
   }
 
   /**

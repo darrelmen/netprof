@@ -40,10 +40,9 @@ import java.util.Map;
 public interface IUserListExerciseJoinDAO extends IDAO {
   /**
    * @param userListID
-   * @param uniqueID
    * @param exid
    */
-  void add(int userListID, String uniqueID, int exid);
+  void add(int userListID, int exid);
 
   /**
    * TODO : remove

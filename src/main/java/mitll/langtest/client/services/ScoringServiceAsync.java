@@ -73,4 +73,12 @@ public interface ScoringServiceAsync {
   void ensureAudio(int resultID, AsyncCallback<Void> async);
 
   void getStudentAlignment(int projid, int resultID, AsyncCallback<AlignmentAndScore> async);
+
+  /**
+   * @param foreign
+   * @return
+   * @seex mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
+   */
+
+  void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Boolean> async);
 }

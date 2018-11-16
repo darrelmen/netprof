@@ -24,5 +24,4 @@ public interface IRelatedExercise  extends IDAO {
   Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid);
 
   boolean updateProject(int oldID, int newprojid);
-
 }

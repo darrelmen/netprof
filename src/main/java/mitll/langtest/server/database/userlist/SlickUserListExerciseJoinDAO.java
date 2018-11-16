@@ -65,13 +65,13 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
   }
 
   /**
-   * @param userListID
    * @param ignoredUniqueID
+   * @param userListID
    * @param exid
    * @see UserListManager#addItemToList
    */
   @Override
-  public void add(int userListID, String ignoredUniqueID, int exid) {  addPair(userListID, exid);  }
+  public void add(int userListID, int exid) {  addPair(userListID, exid);  }
 
   /**
    * Just for copying from h2 initially

@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
@@ -231,18 +232,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * TODO : we won't do override items soon, since they will just be domino edits...?
    *
    * @param shared
-   * @param isOverride
    * @param isContext
    * @param typeOrder
    * @return
    * @seex #add
    * @see #update(CommonExercise, boolean, Collection)
    */
-  private SlickExercise toSlick(CommonExercise shared,
-                                @Deprecated boolean isOverride,
-                                boolean isContext,
-                                Collection<String> typeOrder) {
-    return toSlick(shared, isOverride, shared.getProjectID(), BaseUserDAO.DEFAULT_USER_ID, isContext, typeOrder);
+  private SlickExercise toSlick(CommonExercise shared, boolean isContext, Collection<String> typeOrder) {
+    return toSlick(shared, shared.getProjectID(), BaseUserDAO.DEFAULT_USER_ID, isContext, typeOrder);
   }
 
   private int spew = 0;
@@ -251,7 +248,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * Deals with &quot; in the fl text.
    *
    * @param shared
-   * @param isOverride
    * @param isContext
    * @param typeOrder
    * @return
@@ -260,7 +256,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
   @Override
   public SlickExercise toSlick(CommonExercise shared,
-                               @Deprecated boolean isOverride,
                                int projectID,
                                int importUserIfNotSpecified,
                                boolean isContext,
@@ -306,7 +301,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         getFL(shared),
         shared.getAltFL(),
         shared.getTransliteration(),
-        isOverride,
+        false,
         firstType,
         secondType,
         projectID,  // project id fk
@@ -462,12 +457,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * TODO : why two almost the same ways to make an exercise?????
    *
    * @param slick
-   * @param shouldSwap
    * @return
    * @see #getExercises(Collection, List, ISection, Project, Map, Map, boolean)
    */
   @NotNull
-  private Exercise makeExercise(SlickExercise slick, boolean shouldSwap, List<String> typeOrder) {
+  private Exercise makeExercise(SlickExercise slick, List<String> typeOrder) {
     int id = slick.id();
     String foreignlanguage = getTruncated(slick.foreignlanguage());
     String noAccentFL = StringUtils.stripAccents(foreignlanguage);
@@ -736,7 +730,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       int n = 0;
       boolean shouldSwap = getShouldSwap(lookup.getID());
       for (SlickExercise slickExercise : all) {
-        Exercise exercise = makeExercise(slickExercise, shouldSwap, typeOrder);
+        Exercise exercise = makeExercise(slickExercise, typeOrder);
 
         if (WARN_ABOUT_MISSING_PHONES) {
           if (exercise.getNumPhones() == 0 && n++ < 10) {
@@ -810,16 +804,15 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @paramxx isOverride
    * @paramx isContext
    * @paramx typeOrder
-   * @seex IUserListManager#newExercise
+   * @see IUserListManager#newExercise
    */
-/*
   @Override
-  public int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder) {
-    int insert = insert(toSlick(userExercise, isOverride, isContext, typeOrder));
-    ((Exercise) userExercise).setID(insert);
+  public int add(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder) {
+    int insert = insert(toSlick(userExercise, isContext, typeOrder));
+    userExercise.getMutable().setID(insert);
     return insert;
   }
-*/
+
   @Override
   public int insert(SlickExercise UserExercise) {
     return dao.insert(UserExercise);
@@ -1051,7 +1044,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   @Override
   public boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder) {
     //logger.info("update : " + userExercise.getID() + " has " + userExercise.getDirectlyRelated().size() + " context");
-    SlickExercise slickUserExercise = toSlick(userExercise, true, isContext, typeOrder);
+    SlickExercise slickUserExercise = toSlick(userExercise, isContext, typeOrder);
 
     int rows = dao.update(slickUserExercise);
     boolean didIt = rows > 0;

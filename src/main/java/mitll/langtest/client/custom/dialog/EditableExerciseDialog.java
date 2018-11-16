@@ -135,8 +135,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    * @see NewUserExercise#addFields
    */
   @Override
-  protected Panel getCreateButton(Panel toAddTo,
-                                  ControlGroup normalSpeedRecording) {
+  protected Panel getCreateButton(Panel toAddTo, ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
     return row;
@@ -360,8 +359,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
 
   private void setEnglish(U newUserExercise) {
     String english = isEnglish() ? getMeaning(newUserExercise) : newUserExercise.getEnglish();
-    String originalEnglish;
-    this.english.box.setText(originalEnglish = english);
+    this.english.box.setText(english);
     ((TextBox) this.english.box).setVisibleLength(english.length() + 4);
     if (english.length() > 20) {
       this.english.box.setWidth("500px");

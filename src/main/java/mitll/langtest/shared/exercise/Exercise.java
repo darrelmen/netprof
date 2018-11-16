@@ -38,7 +38,7 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.user.UserDAO;
-import mitll.langtest.server.database.userexercise.UserExerciseDAO;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.npdata.dao.SlickExercise;
 
 import java.util.*;
@@ -500,7 +500,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @param id
-   * @see UserExerciseDAO#add
+   * @see IUserExerciseDAO#add
    */
   public void setOldID(String id) {
     this.oldid = id;

@@ -819,8 +819,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @Override
   public String getNameForEmail(String emailH) {
-    Set<FilterDetail<UserColumn>> emailFilter = getEmailFilter(emailH);
-    List<DBUser> users = getDbUsers(emailFilter);
+    List<DBUser> users = getDbUsers(getEmailFilter(emailH));
     return users.isEmpty() ? null : users.get(0).getFullName();
   }
 
@@ -831,7 +830,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   private List<DBUser> getDbUsers(Set<FilterDetail<UserColumn>> filterDetails) {
     List<DBUser> users = delegate.getUsers(-1, new FindOptions<>(filterDetails));
-    //  logger.info("getDbUsers " + opts + " = " + users);
+ //   logger.info("getDbUsers " + filterDetails + " = " + users);
     return users;
   }
 

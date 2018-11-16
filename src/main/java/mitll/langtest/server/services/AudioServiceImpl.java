@@ -108,6 +108,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   // TODO : make these enums...
   public static final String START = "START";
   private static final String STREAM = "STREAM";
+  private static final String APPLICATION_WAV = "application/wav";
 
   enum STEAMSTATES {START, STREAM, END, ABORT}
 
@@ -133,6 +134,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             }
           });
 
+  /**
+   * @see #getSessionInfo
+   */
+
   private final LoadingCache<Long, SessionInfo> sessionToInfo = CacheBuilder.newBuilder()
       .maximumSize(10000)
       .expireAfterWrite(1, TimeUnit.MINUTES)
@@ -143,11 +148,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
               return new SessionInfo();
             }
           });
-
-  /**
-   * @see #getSessionInfo
-   */
-  // private final ConcurrentHashMap<Long, SessionInfo> sessionToInfo = new ConcurrentHashMap<>();
 
   /**
    * Sanity checks on answers and bestAudio dir
@@ -177,7 +177,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     String contentType = ctx.getContentType();
     //  String requestType = getRequestType(request);
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
-    if (contentType.equalsIgnoreCase("application/wav")) {
+    if (contentType != null && contentType.equalsIgnoreCase(APPLICATION_WAV)) {
       //reportOnHeaders(request);
 
       try {

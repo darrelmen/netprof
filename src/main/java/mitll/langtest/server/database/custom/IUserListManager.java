@@ -99,9 +99,9 @@ public interface IUserListManager {
    * @paramx userExercise
    * @paramx mediaDir
    */
- // void newExercise(int userListID, CommonExercise userExercise, String mediaDir);
+   void newExercise(int userListID, CommonExercise userExercise);
 
-  void addItemToList(int userListID, String exerciseID, int exid);
+  void addItemToList(int userListID, int exid);
 
   void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder);
 

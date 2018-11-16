@@ -48,10 +48,7 @@ public interface OpenUserServiceAsync {
 
   void resetPassword(String userid, AsyncCallback<Boolean> asyncCallback);
 
-  void addUser(
-      SignUpUser user,
-      String url,
-      AsyncCallback<LoginResult> async);
+  void addUser(SignUpUser user, String url, AsyncCallback<LoginResult> async);
 
   void forgotUsername(String email, AsyncCallback<Boolean> async);
 
@@ -72,6 +69,7 @@ public interface OpenUserServiceAsync {
   void isKnownUserWithEmail(String id, AsyncCallback<Boolean> async);
 
   void setCurrentUserToProject(int projid, String implVersion, AsyncCallback<HeartbeatStatus> async);
+
   void checkHeartbeat(String implVersion, AsyncCallback<HeartbeatStatus> async);
 
   void accountExistsWithEmail(String email, AsyncCallback<Boolean> async);

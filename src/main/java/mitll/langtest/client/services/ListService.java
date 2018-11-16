@@ -39,6 +39,7 @@ import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.*;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
@@ -131,9 +132,9 @@ public interface ListService extends RemoteService {
    * @return
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
-/*
-  CommonExercise newExercise(int userListID, CommonExercise userExercise) throws DominoSessionException;
-*/
+
+  CommonExercise newExercise(int userListID, String initialText) throws DominoSessionException;
+
 
 /*  boolean shouldShowAudio(int userListID);
   int getRoundTimeMinutes(int userListID);

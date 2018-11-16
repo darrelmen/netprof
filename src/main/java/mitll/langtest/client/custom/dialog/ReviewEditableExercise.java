@@ -130,6 +130,12 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     this.exerciseList = exerciseList;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.FixNPFHelper#getFactory
+   * @param listInterface
+   * @param toAddTo
+   * @return
+   */
   public Panel addFields(final ListInterface<T, U> listInterface, final Panel toAddTo) {
     Panel widgets = super.addFields(listInterface, toAddTo);
     english.box.setEnabled(false);

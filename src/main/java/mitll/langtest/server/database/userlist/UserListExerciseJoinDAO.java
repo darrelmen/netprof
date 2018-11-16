@@ -99,13 +99,13 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
    * <p>
    * Uses return generated keys to get the user id
    *
-   * @see UserListManager#addItemToList
+   * @seex UserListManager#addItemToList
    */
   @Override
-  public void add(int userListID, String uniqueID, int exid) {
-    try {
+  public void add(int userListID, int exid) {
+/*    try {
       // there are much better ways of doing this...
-      logger.info("UserListExerciseJoinDAO.add :userList #" + userListID + " exercise id '" + uniqueID + "'");
+      logger.info("UserListExerciseJoinDAO.add :userList #" + userListID + " exercise id '" + "" + "'");
 
       Connection connection = database.getConnection(this.getClass().toString());
       PreparedStatement statement = connection.prepareStatement(
@@ -118,7 +118,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
               "VALUES(?,?);");
       int i = 1;
       statement.setLong(i++, userListID);
-      statement.setString(i++, uniqueID);
+      statement.setString(i++, "");
 
       int j = statement.executeUpdate();
 
@@ -130,7 +130,7 @@ public class UserListExerciseJoinDAO extends DAO implements IUserListExerciseJoi
       logger.debug("\tUserListExerciseJoinDAO.add : now " + getCount(USER_EXERCISE_LIST_EXERCISE) + " and user exercise is " + userListID);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
-    }
+    }*/
   }
 
   public Collection<Join> getAll() {

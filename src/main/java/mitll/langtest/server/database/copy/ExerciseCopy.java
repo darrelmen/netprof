@@ -370,7 +370,7 @@ public class ExerciseCopy {
                                                      CommonExercise context,
                                                      int dialogID) {
     int contextid =
-        slickUEDAO.insert(slickUEDAO.toSlick(context, false, projectid, importUser, true, typeOrder));
+        slickUEDAO.insert(slickUEDAO.toSlick(context, projectid, importUser, true, typeOrder));
 
     return new SlickRelatedExercise(-1, parentExerciseID, contextid, projectid, dialogID, now);
   }
@@ -449,7 +449,6 @@ public class ExerciseCopy {
       }
 
       int exerciseID = slickUEDAO.insert(slickUEDAO.toSlick(exToUse,
-          false,
           projectid,
           importUser,
           false, typeOrder));

@@ -305,8 +305,11 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
   @Override
   public boolean forgotUsername(String email) {
     List<String> userChosenIDIfValid = db.getUserDAO().isValidEmail(email);
-    getEmailHelper().getUserNameEmail(email, getBaseURL(), userChosenIDIfValid);
-    return userChosenIDIfValid != null;
+    boolean found = userChosenIDIfValid != null && !userChosenIDIfValid.isEmpty();
+    if (found) {
+      getEmailHelper().getUserNameEmail(email, getBaseURL(), userChosenIDIfValid);
+    }
+    return found;
   }
 
   /**

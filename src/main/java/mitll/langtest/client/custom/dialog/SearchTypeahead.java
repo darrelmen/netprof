@@ -63,7 +63,7 @@ public class SearchTypeahead {
     SuggestOracle oracle = new SuggestOracle() {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
-       // logger.info("getTypeaheadUsing make request for '" + request.getQuery() + "'");
+        // logger.info("getTypeaheadUsing make request for '" + request.getQuery() + "'");
         ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
             .setPrefix(textBox.getText())
             .setLimit(DISPLAY_ITEMS)
@@ -92,18 +92,26 @@ public class SearchTypeahead {
   @NotNull
   private Typeahead getTypeahead(TextBox textBox, Typeahead typeahead) {
     typeahead.setDisplayItemCount(DISPLAY_ITEMS);
-    typeahead.setMatcherCallback((query, item) -> true);
+    typeahead.setMatcherCallback((query, item) -> {
+  //   logger.info("getTypeahead Got " + query);
+      add.setEnabled(!textBox.getText().isEmpty());
+      return true;
+    });
+    logger.info("getTypeahead ");
     typeahead.setUpdaterCallback(selectedSuggestion -> {
       currentExercise = ((ExerciseSuggestion) selectedSuggestion).getShell();
-      add.setEnabled(currentExercise != null);
+     // logger.info("getTypeahead Got " + selectedSuggestion.getDisplayString());
+//      add.setEnabled(!selectedSuggestion.getDisplayString().isEmpty());
+      //   add.setEnabled(currentExercise != null);
       return selectedSuggestion.getReplacementString();
     });
 
     textBox.getElement().setId("TextBox_exercise");
     typeahead.setWidget(textBox);
 
-    Scheduler.get().scheduleDeferred((Command) () -> textBox.setFocus(true));
     textBox.setDirectionEstimator(true);   // automatically detect whether text is RTL
+
+    Scheduler.get().scheduleDeferred((Command) () -> textBox.setFocus(true));
 
     return typeahead;
   }
@@ -138,7 +146,7 @@ public class SearchTypeahead {
 
   void clearCurrentExercise() {
     currentExercise = null;
-    add.setEnabled(false);
+    //add.setEnabled(quickAddText.);
   }
 
   @NotNull
@@ -241,7 +249,10 @@ public class SearchTypeahead {
     return currentExercise;
   }
 
-  public void grabFocus() {
+  /**
+   * TODO REMOVE
+   */
+  void grabFocus() {
     //getTypeahead()
   }
 

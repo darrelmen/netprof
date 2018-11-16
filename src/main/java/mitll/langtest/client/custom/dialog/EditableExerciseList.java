@@ -7,6 +7,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -16,8 +17,8 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -26,8 +27,10 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 2/14/17.
  */
-class EditableExerciseList extends NPExerciseList implements FeedbackExerciseList {
+class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> implements FeedbackExerciseList {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
+
+  private static final String PLEASE_ENTER_SOME_TEXT = "Please enter some text.";
 
   private final UserList<CommonShell> list;
   private SearchTypeahead searchTypeahead;
@@ -56,6 +59,8 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     if (list.isEmpty()) delete.setEnabled(false);
     pagingContainer.setPageSize(8);
   }
+
+  public int getListID() { return list.getID(); }
 
   /**
    * @return
@@ -87,7 +92,6 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     DivWidget addW = new DivWidget();
     addW.getElement().setId("buttonContainer");
     addW.addStyleName("topMargin");
-    addW.addStyleName("inlineFlex");
     addW.addStyleName("inlineFlex");
 
     {
@@ -141,7 +145,7 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
    * @see #makeDeleteButton
    */
   private Button makeDeleteButtonItself() {
-    Button delete = new Button("");//REMOVE_FROM_LIST);
+    Button delete = new Button("");
     delete.setIcon(IconType.MINUS);
     delete.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
     delete.getElement().setId("Remove_from_list");
@@ -157,13 +161,16 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   }
 
   private TextBox quickAddText;
+
   /**
    * @return
    * @see #getAddButtonContainer
    */
   private Typeahead getTypeahead(Button add) {
     quickAddText = getEntryTextBox();
-    quickAddText.addKeyUpHandler(event -> searchTypeahead.clearCurrentExercise());
+    quickAddText.addKeyUpHandler(event -> {
+      searchTypeahead.clearCurrentExercise();
+    });
     this.searchTypeahead = new SearchTypeahead(controller, this, add);
     return searchTypeahead.getTypeaheadUsing(quickAddText);
   }
@@ -204,14 +211,14 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
   private void onClickAdd(Button add) {
     add.setEnabled(false);
 
-    logger.info("click add " + add);
+    //  logger.info("click add " + add);
 
     final CommonShell currentExercise = searchTypeahead.getCurrentExercise();
     if (currentExercise != null) {
       if (isOnList()) {
         message.setText("This is already in the list.");
         enableButton(add);
-      } else {
+      } else {   // not on the list
         message.setText("");
         controller.getListService().addItemToUserList(list.getID(), currentExercise.getID(), new AsyncCallback<Void>() {
           @Override
@@ -224,21 +231,21 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
           public void onSuccess(Void result) {
             enableButton(add);
             showNewItem(currentExercise);
-            quickAddText.setValue("",false);
+            quickAddText.setValue("", false);
 
           }
         });
       }
-    }
-/*    else {
+    } else {
       String safeText = getSafeText(quickAddText);
-      if (safeText.trim().isEmpty()) {
+      if (safeText.trim().isEmpty()) {  // necessary?
+        logger.info("\n\n\nempty box???");
         enableButton(add);
-        message.setText("Please enter some text.");
+        message.setText(PLEASE_ENTER_SOME_TEXT);
       } else {
         checkIsValidPhrase(add, safeText);
       }
-    }*/
+    }
   }
 
   /**
@@ -246,57 +253,87 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
    *
    * @paramx add
    * @paramx safeText
+   * @see #onClickAdd
    */
-/*  private void checkIsValidPhrase(Button add, String safeText) {
-    controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("checking exercise validity", caught);
-        enableButton(add);
-      }
+  private void checkIsValidPhrase(Button add, String safeText) {
+    enableButton(add);
 
-      @Override
-      public void onSuccess(Boolean result) {
-        enableButton(add);
-*//*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
-        " before adding/changing " + newUserExercise + " -> " + result);*//*
-        if (result) {
-          controller.getListService().newExercise(
-              list.getID(),
-              makeNewExercise(safeText),
-              new AsyncCallback<CommonExercise>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                  controller.handleNonFatalError("adding an exercise to a list", caught);
-                }
+//        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
+//        " before adding/changing " + newUserExercise + " -> " + result);
 
-                @Override
-                public void onSuccess(CommonExercise newExercise) {
-                  showNewItem(newExercise);
-                }
-              });
-        } else {
-          message.setText("The item " +
-              " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
-        }
-      }
-    });
-  }*/
+    controller.getListService().newExercise(list.getID(), safeText,
+        new AsyncCallback<CommonExercise>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("adding an exercise to a list", caught);
+          }
+
+          @Override
+          public void onSuccess(CommonExercise newExercise) {
+            if (newExercise == null) {
+              message.setText("The item " +
+                  " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
+            } else {
+              showNewItem(newExercise);
+            }
+          }
+        });
+  }
+
   private void enableButton(Button add) {
     add.setEnabled(true);
   }
 
-/*
-  @NotNull
+
+ /* @NotNull
   private CommonExercise makeNewExercise(String safeText) {
-    CommonExercise newItem = editItem.getNewItem();
+    CommonExercise newItem = getNewItem();
     newItem.getMutable().setForeignLanguage(safeText);
     newItem.getMutable().setEnglish("");
     newItem.getMutable().setMeaning("");
     return newItem;
+  }*/
+
+  /**
+   * TODOx : don't do it like this!
+   * <p>
+   * TODOx : consider filling in context and context translation?
+   * <p>
+   *
+   * @return
+   * @seex #makeExerciseList
+   */
+/*  private CommonExercise getNewItem() {
+    int user = controller.getUserManager().getUser();
+    Exercise exercise = new Exercise(
+        -1,
+        user,
+        "",
+        getProjectid(),
+        false);
+
+    addContext(user, exercise);
+
+    return exercise;
+  }*/
+
+/*
+  private void addContext(int userid, MutableExercise exercise) {
+    Exercise context = new Exercise(-1,
+        userid,
+        "",
+        getProjectid(),
+        false);
+
+    exercise.addContextExercise(context);
   }
 */
 
+/*
+  private int getProjectid() {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
+  }*/
   private boolean isOnList() {
     boolean found = false;
     if (searchTypeahead.getCurrentExercise() == null) return false;
@@ -323,15 +360,14 @@ class EditableExerciseList extends NPExerciseList implements FeedbackExerciseLis
     gotClickOnItem(currentExercise);
     markCurrentExercise(currentExercise.getID());
   }
-/*
+
   private String getSafeText(TextBox box) {
     return sanitize(box.getText()).replaceAll("&#39;", "'");
-  }*/
-/*
+  }
+
   private String sanitize(String text) {
     return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
-*/
 
   protected int getNumTableRowsGivenScreenHeight() {
     return 12;

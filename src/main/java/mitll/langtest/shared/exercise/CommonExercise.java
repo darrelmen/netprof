@@ -63,7 +63,7 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    * SERVER Only
    * @return
    */
-  boolean isPredefined();
+//  boolean isPredefined();
 
   /**
    * SERVER Only

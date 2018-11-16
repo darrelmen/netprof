@@ -91,10 +91,7 @@ public class NPExerciseList<T extends CommonShell, U extends HasID> extends Hist
         "\n\tshow first not complete " + showFirstNotCompleted +
         "\n\tactivityType " + getActivityType());
 */
-    boolean isRecorder = getActivityType() == ActivityType.RECORDER;
-    final boolean showFirstNotCompleted = listOptions.isShowFirstNotCompleted();
-
-    pagingContainer = new NPExerciseListContainer<>(this, isRecorder, showFirstNotCompleted);
+    pagingContainer = new NPExerciseListContainer<>(this);
     return pagingContainer;
   }
 

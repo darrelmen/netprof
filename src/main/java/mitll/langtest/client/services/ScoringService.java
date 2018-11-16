@@ -83,7 +83,6 @@ public interface ScoringService extends RemoteService {
    * @param resultid
    * @param roundTrip
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
    */
   void addRoundTrip(int resultid, int roundTrip);
 
@@ -94,9 +93,9 @@ public interface ScoringService extends RemoteService {
    * @return
    * @seex mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
-/*
+
   boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException;
-*/
+
 
   /**
    * @param projid

@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.database.custom;
 
-import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
@@ -40,6 +39,7 @@ import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.userexercise.IRelatedExercise;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
@@ -48,6 +48,7 @@ import mitll.langtest.server.database.userlist.SlickUserListDAO;
 import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.SlickUserExerciseList;
 import mitll.npdata.dao.userexercise.UserExerciseListVisitorDAOWrapper;
 import org.apache.logging.log4j.LogManager;
@@ -55,6 +56,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,7 +76,7 @@ public class UserListManager implements IUserListManager {
   private static final String INCORRECT = "incorrect";
   private static final String FIXED = "fixed";
 
-//  private static final String FAST = "regular";
+  //  private static final String FAST = "regular";
 //  private static final String SLOW = "slow";
   private static final String MY_FAVORITES = "My Favorites";
 //  private static final String COMMENTS = "Comments";
@@ -106,7 +108,6 @@ public class UserListManager implements IUserListManager {
    * @param userListDAO
    * @param userListExerciseJoinDAO
    * @param annotationDAO
-   * @param pathHelper
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
    */
   public UserListManager(IUserDAO userDAO,
@@ -115,13 +116,11 @@ public class UserListManager implements IUserListManager {
                          IAnnotationDAO annotationDAO,
                          IStateManager stateManager,
                          IUserExerciseListVisitorDAO visitorDAO,
-                         DatabaseServices databaseServices,
-                         PathHelper pathHelper) {
+                         DatabaseServices databaseServices) {
     this.userDAO = userDAO;
     this.userListDAO = userListDAO;
     this.userListExerciseJoinDAO = userListExerciseJoinDAO;
     this.annotationDAO = annotationDAO;
-    // this.pathHelper = pathHelper;
     this.visitorDAO = visitorDAO;
     this.stateManager = stateManager;
     this.databaseServices = databaseServices;
@@ -700,76 +699,73 @@ public class UserListManager implements IUserListManager {
    * @seex mitll.langtest.server.services.ListServiceImpl#newExercise
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
-/*  @Override
-  public void newExercise(int userListID, CommonExercise userExercise, String mediaDir) {
-    newExerciseOnList(getUserListNoExercises(userListID), userExercise);
-  }*/
+  @Override
+  public void newExercise(int userListID, CommonExercise userExercise) {
+    int projectID = userExercise.getProjectID();
+
+    List<String> typeOrder = databaseServices.getProject(projectID).getTypeOrder();
+
+    int newExerciseID = userExerciseDAO.add(userExercise, false, typeOrder);
+    logger.info("newExercise added exercise " + newExerciseID + " from " + userExercise);
+
+    int contextID = 0;
+    try {
+      contextID = makeContextExercise(userExercise, typeOrder);
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+    }
+
+    logger.info("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
+
+    //int id = userList.getID();
+    addItemToList(userListID, newExerciseID);
+
+    // TODOx : necessary?
+//    fixAudioPaths(userExercise, true, mediaDir);
+  }
+
   public UserList getUserListNoExercises(int userListID) {
     logger.info("getUserListNoExercises for " + userListID);
     return userListDAO.getWhere(userListID, true);
   }
 
   /**
-   * @seex #newExercise(int, CommonExercise, String)
-   * @params userList
-   * @params userExercise
-   */
-/*
-  private void newExerciseOnList(UserList userList, CommonExercise userExercise) {
-    int projectID = userExercise.getProjectID();
-    int newExerciseID = userExerciseDAO.add(userExercise, false, false, getTypeOrder(projectID));
-    logger.warn("\n\n\n\n\nnewExercise added exercise " + newExerciseID + " from " + userExercise);
-
-    int contextID = 0;
-    try {
-      contextID = makeContextExercise(userExercise, newExerciseID, projectID);
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
-    }
-
-    logger.warn("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
-
-    addItemToList(userList.getID(), userExercise.getOldID(), newExerciseID);
-
-    // TODOx : necessary?
-//    fixAudioPaths(userExercise, true, mediaDir);
-  }
-*/
-/*
-  private Collection<String> getTypeOrder(int projectID) {
-    return userDAO.getDatabase().getTypeOrder(projectID);
-  }
-*/
-
-  /**
    * @return
    * @seex #newExerciseOnList(UserList, CommonExercise)
-   * @paramx userExercise
+   * @paramx parentExercise
    * @paramx newExerciseID
    * @paramx projectID
    */
-/*
-  private int makeContextExercise(CommonExercise userExercise, int newExerciseID, int projectID) {
-    Exercise userExercise1 = new Exercise(-1, userExercise.getCreator(), "", projectID, false);
-    int contextID = userExerciseDAO.add(userExercise1, false, true, getTypeOrder(projectID));
-    userExerciseDAO.getRelatedExercise().addContextToExercise(newExerciseID, contextID, projectID);
-    userExercise.getDirectlyRelated().add(userExercise1);
+
+  private int makeContextExercise(CommonExercise parentExercise, List<String> typeOrder) {
+    int projectID = parentExercise.getProjectID();
+    Exercise contextExercise = new Exercise(-1, parentExercise.getCreator(), "", projectID, false);
+    int contextID = userExerciseDAO.add(contextExercise, true, typeOrder);
+    IRelatedExercise relatedExercise = userExerciseDAO.getRelatedExercise();
+
+    long time = System.currentTimeMillis();
+    relatedExercise.addBulkRelated(Collections.singletonList(new SlickRelatedExercise(-1, parentExercise.getID(), contextID, projectID, 1,
+        new Timestamp(time))));
+
+    // relatedExercise.addContextToExercise(newExerciseID, contextID, projectID);
+
+    parentExercise.getDirectlyRelated().add(contextExercise);
+
     return contextID;
   }
-*/
-  private void addItemToList(int userListID, int exid) {
-    addItemToList(userListID, "", exid);
-  }
+
+//  private void addItemToList(int userListID, int exid) {
+//    addItemToList(userListID, exid);
+//  }
 
   /**
    * @param userListID
-   * @param exerciseID
    * @param exid
    * @see mitll.langtest.server.services.ListServiceImpl#addItemToUserList
    */
   @Override
-  public void addItemToList(int userListID, @Deprecated String exerciseID, int exid) {
-    userListExerciseJoinDAO.add(userListID, exerciseID, exid);
+  public void addItemToList(int userListID, int exid) {
+    userListExerciseJoinDAO.add(userListID, exid);
     userListDAO.updateModified(userListID);
   }
 
@@ -1016,7 +1012,6 @@ public class UserListManager implements IUserListManager {
   public Collection<Integer> getAudioAnnos() {
     return annotationDAO.getAudioAnnos();
   }*/
-
   @Override
   public IAnnotationDAO getAnnotationDAO() {
     return annotationDAO;

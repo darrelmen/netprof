@@ -376,8 +376,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
         annotationDAO,
         stateManager,
         new SlickUserListExerciseVisitorDAO(this, dbConnection),
-        this,
-        pathHelper);
+        this
+    );
 
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);

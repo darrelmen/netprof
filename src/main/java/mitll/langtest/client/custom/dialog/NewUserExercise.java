@@ -145,14 +145,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @paramx instance
    * @see EditableExerciseDialog#EditableExerciseDialog
    */
-  public NewUserExercise(
-      ExerciseController controller,
-      U newExercise,
-
-      int listID) {
+  public NewUserExercise(ExerciseController controller, U newExercise, int listID) {
     this.controller = controller;
     this.newUserExercise = newExercise;
-
     this.listID = listID;
   }
 
@@ -278,16 +273,18 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     return row;
   }
 
-  abstract void addItemsAtTop(Panel container);
+  void addItemsAtTop(Panel container) {
+  }
 
   private void gotBlur() {
     gotBlur(foreignLang, rap, normalSpeedRecording, toAddTo);
   }
 
-  abstract void gotBlur(FormField foreignLang,
-                        RecordAudioPanel rap,
-                        ControlGroup normalSpeedRecording,
-                        Panel toAddTo);
+  void gotBlur(FormField foreignLang,
+               RecordAudioPanel rap,
+               ControlGroup normalSpeedRecording,
+               Panel toAddTo) {
+  }
 
   /**
    * @param row
@@ -420,7 +417,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     return newUserExercise.getMeaning().isEmpty() ? newUserExercise.getEnglish() : newUserExercise.getMeaning();
   }
 
-  abstract boolean useAnnotation(AnnotationExercise userExercise, String field, HTML annoField);
+  boolean useAnnotation(AnnotationExercise userExercise, String field, HTML annoField) {
+    return false;
+  }
 
   /**
    * @param buttonClicked
@@ -608,8 +607,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @return
    * @see #addFields
    */
-  abstract Panel getCreateButton(Panel toAddTo,
-                                 ControlGroup normalSpeedRecording);
+  Panel getCreateButton(Panel toAddTo, ControlGroup normalSpeedRecording) {
+    return null;
+  }
 
   /**
    * @param rap

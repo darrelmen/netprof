@@ -34,23 +34,17 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
   private static final int JAPANESE_LENGTH = 9;
   private static final String TRUNCATED = "...";
 
-  // private final boolean isRecorder;
   private final IExerciseComparator sorter;
   private static final String ENGLISH = "English";
   private final boolean english;
-  //private final boolean showExerciseState;
   private int FLLength = MAX_LENGTH_ID;
 
   /**
    * @param exerciseList
-   * @param isRecorder
-   * @param showFirstNotCompleted
    * @see NPExerciseList#makePagingContainer
    */
-  NPExerciseListContainer(NPExerciseList<T, U> exerciseList,
-                          boolean isRecorder,
-                          boolean showFirstNotCompleted) {
-    super(exerciseList.controller/*, exerciseList.getVerticalUnaccountedFor(), isRecorder, showFirstNotCompleted*/);
+  NPExerciseListContainer(NPExerciseList<T, U> exerciseList) {
+    super(exerciseList.controller);
     this.exerciseList = exerciseList;
     // this.outer = outer;
 
@@ -62,9 +56,6 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
 
     boolean japanese = controller.getLanguage().equalsIgnoreCase("Japanese");
     if (japanese) FLLength = JAPANESE_LENGTH;
-
-//    this.verticalUnaccountedFor = verticalUnaccountedFor;
-    //   this.isRecorder = isRecorder;
     english = controller.getLanguage().equals(ENGLISH);
   }
 
@@ -73,7 +64,6 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
     int pageSize = exerciseList.getPageSize();
     return (pageSize == -1) ? super.getNumTableRowsGivenScreenHeight() : pageSize;
   }
-
 
   @NotNull
   private IExerciseComparator getSorter() {

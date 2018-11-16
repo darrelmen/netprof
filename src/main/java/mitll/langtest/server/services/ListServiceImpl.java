@@ -36,24 +36,27 @@ import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.userlist.ListContainer;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.*;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.exercise.MutableExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {
   private static final Logger logger = LogManager.getLogger(ListServiceImpl.class);
-  //private static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
 
   /**
    * @return
@@ -94,9 +97,9 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.CreateListDialog#doEdit(UserList, ListContainer)
    * @param userList
    * @throws DominoSessionException
+   * @see mitll.langtest.client.custom.dialog.CreateListDialog#doEdit(UserList, ListContainer)
    */
   @Override
   public void update(UserList userList) throws DominoSessionException {
@@ -237,7 +240,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     if (db.getCustomOrPredefExercise(getProjectIDFromUser(), exID) == null) {
       logger.error("can't find ex #" + exID);
     } else {
-      getUserListManager().addItemToList(userListID, "" + exID, exID);
+      getUserListManager().addItemToList(userListID, exID);
     }
   }
 
@@ -267,33 +270,88 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * <p>
    * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
    *
+   * @return CommonExercise with id from database
    * @paramx userListID
    * @paramx userExercise
-   * @return CommonExercise with id from database
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
-/*
-  @Override
-  public CommonExercise newExercise(int userListID, CommonExercise userExercise) throws DominoSessionException {
-    if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
 
-    CommonExercise exercise = getExerciseIfKnown(userExercise);
-    if (exercise != null) {
-      addItemToUserList(userListID, exercise.getID());
+  @Override
+  public CommonExercise newExercise(int userListID, String initialText) throws DominoSessionException {
+    if (isValidForeignPhrase(initialText)) {
+      int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+      int projectIDFromUser = getProjectIDFromUser();
+//    if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
+
+//    CommonExercise exercise = getExerciseIfKnown(userExercise);
+//    if (exercise != null) {
+//      addItemToUserList(userListID, exercise.getID());
+//      return exercise;
+//    } else {
+
+
+      CommonExercise exercise = makeNewExercise(userIDFromSessionOrDB, projectIDFromUser, initialText);
+      getUserListManager().newExercise(userListID, exercise);
+      if (DEBUG) logger.debug("\tnewExercise : made user exercise " + exercise + " on list " + userListID);
       return exercise;
     } else {
-      getUserListManager().newExercise(userListID, userExercise, serverProps.getMediaDir());
-      if (DEBUG) logger.debug("\tnewExercise : made user exercise " + userExercise + " on list " + userListID);
-      return userExercise;
+      return null;
     }
+
   }
-*/
+
+
+  private boolean isValidForeignPhrase(String foreign) throws DominoSessionException {
+    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "", new HashSet<>());
+  }
+
+  @NotNull
+  private CommonExercise makeNewExercise(int user, int projectID, String safeText) {
+    CommonExercise newItem = getNewItem(user, projectID);
+    newItem.getMutable().setForeignLanguage(safeText);
+    newItem.getMutable().setEnglish("");
+    newItem.getMutable().setMeaning("");
+    return newItem;
+  }
 
   /**
-   * @see mitll.langtest.client.flashcard.PolyglotFlashcardFactory#PolyglotFlashcardFactory(ExerciseController, ListInterface)
-   * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#PolyglotPracticePanel
+   * TODOx : don't do it like this!
+   * <p>
+   * TODOx : consider filling in context and context translation?
+   * <p>
+   *
+   * @return
+   * @seex #makeExerciseList
+   */
+  private CommonExercise getNewItem(int user, int projectID) {
+    //  int user = getUserManager().getUser();
+    Exercise exercise = new Exercise(
+        -1,
+        user,
+        "",
+        projectID,
+        false);
+
+    addContext(user, projectID, exercise);
+
+    return exercise;
+  }
+
+  private void addContext(int userid, int projectID, MutableExercise exercise) {
+    Exercise context = new Exercise(-1,
+        userid,
+        "",
+        projectID,
+        false);
+
+    exercise.addContextExercise(context);
+  }
+
+  /**
    * @param userListID
    * @return
+   * @see mitll.langtest.client.flashcard.PolyglotFlashcardFactory#PolyglotFlashcardFactory
+   * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#PolyglotPracticePanel
    */
   public QuizSpec getQuizInfo(int userListID) {
     UserList<?> list = db.getUserListManager().getUserListDAO().getList(userListID);

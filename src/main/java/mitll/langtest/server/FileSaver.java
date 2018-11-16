@@ -28,9 +28,7 @@ public class FileSaver {
                              int realExID,
                              int userid,
                              String language,
-                             boolean makeDir)
-      throws IOException {
-
+                             boolean makeDir) throws IOException {
     File saveFile = new File(
         pathHelper.getAbsoluteToAnswer(
             language,
@@ -48,16 +46,57 @@ public class FileSaver {
       logger.warn("writeAudioFile huh? can't mark file read only?");
     }
 
+    setParentPermissions(saveFile);
+
     return saveFile;
   }
 
+  // opt/netprof/answers/turkish/747329/1/subject-6/answer_1542409059474.wav
   private void makeFileSaveDir(File saveFile) {
     File parent = new File(saveFile.getParent());
     boolean mkdirs = parent.mkdirs();
     if (!mkdirs && !parent.exists()) {
       logger.error("Couldn't make " + parent.getAbsolutePath() + " : permissions set? chown done ?");
     }
+//    else if (mkdirs || parent.exists()) {
+//      boolean b = parent.setReadOnly();
+//      if (!b) logger.warn("makeFileSaveDir couldn't set read only on " + parent);
+//     // parent.setExecutable()
+//    }
+
+//    setParentPermissions(saveFile);
+
   }
+
+  // /opt/netprof/answers/turkish/747329/1/subject-6/answer_1542409059474.wav
+  private void setParentPermissions(File saveFile) {
+
+    // /opt/netprof/answers/turkish/747329/1/subject-6
+
+    File parentFile = saveFile.getParentFile();
+
+    boolean b = parentFile.setReadOnly();
+    if (!b) logger.warn("makeFileSaveDir couldn't set read only on " + parentFile);
+
+//    boolean b1 = parentFile.setWritable(true);
+//    if (!b1) logger.warn("makeFileSaveDir couldn't set write on " + parentFile);
+
+
+
+    parentFile = parentFile.getParentFile();
+    b = parentFile.setReadOnly();
+    if (!b) logger.warn("makeFileSaveDir couldn't set read only on " + parentFile);
+//    b1 = parentFile.setWritable(true);
+//    if (!b1) logger.warn("makeFileSaveDir couldn't set write on " + parentFile);
+
+    parentFile = parentFile.getParentFile();
+
+    b = parentFile.setReadOnly();
+    if (!b) logger.warn("makeFileSaveDir couldn't set read only on " + parentFile);
+//    b1 = parentFile.setWritable(true);
+//    if (!b1) logger.warn("makeFileSaveDir couldn't set write on " + parentFile);
+  }
+
 
   /**
    * @param inputStream
@@ -87,5 +126,4 @@ public class FileSaver {
     outputStream.close();
     inputStream.close();
   }
-
 }

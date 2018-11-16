@@ -108,7 +108,6 @@ public interface IUserExerciseDAO extends IDAO {
   /**
    * @see mitll.langtest.server.database.copy.ExerciseCopy#addPredefExercises(int, IUserExerciseDAO, int, Collection, Collection, Map, Map, boolean)
    * @param shared
-   * @param isOverride
    * @param projectID
    * @param importUserIfNotSpecified
    * @param isContext
@@ -116,7 +115,6 @@ public interface IUserExerciseDAO extends IDAO {
    * @return
    */
   SlickExercise toSlick(CommonExercise shared,
-                        @Deprecated boolean isOverride,
                         int projectID,
                         int importUserIfNotSpecified,
                         boolean isContext,
@@ -132,7 +130,7 @@ public interface IUserExerciseDAO extends IDAO {
    * @return
    * @seex IUserListManager#newExercise(int, CommonExercise, String)
    */
- // int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder);
+  int add(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder);
 
 
   int insert(SlickExercise UserExercise);

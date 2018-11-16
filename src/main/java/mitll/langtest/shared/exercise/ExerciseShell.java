@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import mitll.langtest.client.list.ExerciseList;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
 import java.util.ArrayList;
@@ -197,7 +198,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
 
   /**
    * @return
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#toSlick(CommonExercise, boolean, int, int, boolean, Collection)
+   * @see IUserExerciseDAO#toSlick(CommonExercise, int, int, boolean, Collection)
    */
   public String getAltFL() {
     return altfl;

@@ -402,13 +402,8 @@ public class ListView implements ContentView, CreateListComplete {
   private void editList() {
     EditItem editItem = new EditItem(controller);
 
-    UserList<CommonShell> originalList = getCurrentSelectionFromMyLists();
-    boolean hasDescrip = !originalList.getDescription().isEmpty();
-    String suffix =
-        originalList.getName() +
-            (hasDescrip ? " (" + originalList.getDescription() + ")" : "");
     Button closeButton = new DialogHelper(true).show(
-        ADD_EDIT_ITEMS + " : " + suffix,
+        ADD_EDIT_ITEMS + " : " + getListName(),
         Collections.emptyList(),
         editItem.editItem(getCurrentSelectionFromMyLists()),
         "OK",
@@ -434,6 +429,14 @@ public class ListView implements ContentView, CreateListComplete {
     closeButton.setType(ButtonType.SUCCESS);
 
     Scheduler.get().scheduleDeferred(editItem::reload);
+  }
+
+  @NotNull
+  private String getListName() {
+    UserList<CommonShell> originalList = getCurrentSelectionFromMyLists();
+    boolean hasDescrip = !originalList.getDescription().isEmpty();
+    return originalList.getName() +
+        (hasDescrip ? " (" + originalList.getDescription() + ")" : "");
   }
 
   @NotNull

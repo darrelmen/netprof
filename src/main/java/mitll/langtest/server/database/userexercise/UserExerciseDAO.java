@@ -99,7 +99,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
-  public SlickExercise toSlick(CommonExercise shared, boolean isOverride, int projectID, int importUserIfNotSpecified, boolean isContext, Collection<String> typeOrder) {
+  public SlickExercise toSlick(CommonExercise shared, int projectID, int importUserIfNotSpecified, boolean isContext, Collection<String> typeOrder) {
     return null;
   }
 
@@ -247,7 +247,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @seex UserListManager#newExercise
    * @see IUserExerciseDAO#update
    */
-  public int add(CommonExercise userExercise, boolean isOverride, boolean isContext, Collection<String> typeOrder) {
+  public int add(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder) {
     // List<String> typeOrder = exerciseDAO.getSectionHelper().getTypeOrder();
     try {
       // there are much better ways of doing this...
@@ -286,7 +286,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         statement.setString(i++, "");
       }
 
-      statement.setBoolean(i++, isOverride);
+      statement.setBoolean(i++, false);
 
       Map<String, String> unitToValue = userExercise.getUnitToValue();
 

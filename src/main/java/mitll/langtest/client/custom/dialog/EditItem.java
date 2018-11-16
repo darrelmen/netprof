@@ -70,10 +70,10 @@ public class EditItem {
   //private final Logger logger = Logger.getLogger("EditItem");
 
   /**
-   * @see #getNewItem
+   * @seex #getNewItem
    * @see #makeExerciseList
    */
-  private static final int NEW_EXERCISE_ID = -100;
+ // private static final int NEW_EXERCISE_ID = -100;
 
   private final ExerciseController controller;
   private PagingExerciseList<CommonShell, ClientExercise> exerciseList;
@@ -89,13 +89,11 @@ public class EditItem {
   /**
    * @param originalList
    * @return
-   * @paramx itemMarker
-   * @paramx includeAddItem
    * @see ListView#editList
    */
   public Panel editItem(UserList<CommonShell> originalList) {
-    DivWidget div = new DivWidget();
-    Panel hp = new HorizontalPanel();
+    Panel hp = new DivWidget();
+    hp.addStyleName("inlineFlex");
 //    hp.getElement().setId("EditItem_for_" + originalList.getName());
 
     Panel pagerOnLeft = new SimplePanel();
@@ -108,16 +106,10 @@ public class EditItem {
 
     exerciseList = makeExerciseList(contentOnRight, INavigation.VIEWS.LISTS, originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
-    div.add(hp);
-    return div;
+    return hp;
   }
 
-  public void onResize() {
-    if (exerciseList != null) {
-      exerciseList.onResize();
-    }
-  }
-
+  int userListID=-1;
   /**
    * @param right
    * @param instanceName
@@ -131,13 +123,21 @@ public class EditItem {
                                                                            INavigation.VIEWS instanceName,
                                                                            UserList<CommonShell> originalList) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
-    this.exerciseList = new EditableExerciseList(controller, right, instanceName, originalList);
+    userListID=originalList.getID();
+    EditableExerciseList exerciseList = new EditableExerciseList(controller, right, instanceName, originalList);
+    this.exerciseList = exerciseList;
     setFactory(this.exerciseList);
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());
     Scheduler.get().scheduleDeferred(() -> this.exerciseList.onResize());
     //  Scheduler.get().scheduleDeferred(() -> exerciseList.getTypeAheadGrabFocus());
     return this.exerciseList;
+  }
+
+  public void onResize() {
+    if (exerciseList != null) {
+      exerciseList.onResize();
+    }
   }
 
   /**
@@ -149,7 +149,7 @@ public class EditItem {
    * @return
    * @see #makeExerciseList
    */
-  public ClientExercise getNewItem() {
+/*  public ClientExercise getNewItem() {
     int user = controller.getUserManager().getUser();
     Exercise exercise = new Exercise(
         NEW_EXERCISE_ID,
@@ -176,32 +176,47 @@ public class EditItem {
   private int getProjectid() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
-  }
+  }*/
 
   private void setFactory(final PagingExerciseList<CommonShell, ClientExercise> exerciseList) {
-    exerciseList.setFactory(new ExercisePanelFactory<CommonShell, ClientExercise>(
-        controller, exerciseList) {
+    exerciseList.setFactory(new ExercisePanelFactory<CommonShell, ClientExercise>(controller, exerciseList) {
       private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
       @Override
       public Panel getExercisePanel(ClientExercise exercise) {
-        TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
-            controller,
-            exerciseList,
-            alignments, true, new IListenView() {
-          @Override
-          public int getVolume() {
-            return 100;
-          }
+        if (exercise.isPredefined()) {
+          TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
+              controller,
+              exerciseList,
+              alignments, true, new IListenView() {
+            @Override
+            public int getVolume() {
+              return 100;
+            }
 
-          @Override
-          public int getDialogSessionID() {
-            return -1;
-          }
-        },
-            false);
-        widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
-        return widgets;
+            @Override
+            public int getDialogSessionID() {
+              return -1;
+            }
+          },
+              false);
+          widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
+          return widgets;
+        } else {
+          NewUserExercise<CommonShell, ClientExercise> reviewEditableExercise = new NewUserExercise<CommonShell, ClientExercise>(
+              controller,
+              exercise,
+              userListID
+          ) {
+            @Override
+            void afterValidForeignPhrase(Panel toAddTo, boolean onClick) {
+              postChangeIfDirty(onClick);
+            }
+          };
+          Panel widgets = reviewEditableExercise.addFields(exerciseList, new SimplePanel());
+          reviewEditableExercise.setFields(exercise);
+          return widgets;
+        }
       }
     });
   }
