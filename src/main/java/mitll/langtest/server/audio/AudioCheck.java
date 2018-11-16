@@ -454,7 +454,7 @@ public class AudioCheck {
     private int durationInMillis;
     private double maxMinRange;
 
-    ValidityAndDur() {
+    public ValidityAndDur() {
       this(Validity.INVALID, 0d, false);
     }
 
