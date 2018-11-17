@@ -7,9 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 
 public class FileSaver {
-  private static final int BUFFER_SIZE = 4096;
-
   private static final Logger logger = LogManager.getLogger(ScoreServlet.class);
+
+  private static final int BUFFER_SIZE = 4096;
 
   /**
    * After writing the file, it shouldn't be modified any more.
@@ -68,32 +68,51 @@ public class FileSaver {
 
   }
 
+  /**
+   * So it should be readable in case another process not run as tomcat wants to read the file.
+   * @param saveFile
+   */
   // /opt/netprof/answers/turkish/747329/1/subject-6/answer_1542409059474.wav
   private void setParentPermissions(File saveFile) {
 
-    // /opt/netprof/answers/turkish/747329/1/subject-6
 
     File parentFile = saveFile.getParentFile();
 
-    boolean b = parentFile.setReadOnly();
+    // /opt/netprof/answers/turkish/747329/1/subject-6
+
+    setPermissions(parentFile);
+//    boolean b;
+//    boolean b1;
+
+
+    parentFile = parentFile.getParentFile();
+    // /opt/netprof/answers/turkish/747329/1
+
+    setPermissions(parentFile);
+//
+//    b = parentFile.setReadable(true,false);
+//    if (!b) logger.warn("makeFileSaveDir couldn't set read only on " + parentFile);
+//    b1 = parentFile.setWritable(true);
+//    if (!b1) logger.warn("makeFileSaveDir couldn't set write on " + parentFile);
+
+    parentFile = parentFile.getParentFile();
+    // /opt/netprof/answers/turkish/747329
+    setPermissions(parentFile);
+
+//    b = parentFile.setReadOnly();
+//    if (!b) logger.warn("makeFileSaveDir couldn't set read only on " + parentFile);
+//    b1 = parentFile.setWritable(true);
+//    if (!b1) logger.warn("makeFileSaveDir couldn't set write on " + parentFile);
+  }
+
+  private void setPermissions(File parentFile) {
+    boolean b = parentFile.setReadable(true,false);
     if (!b) logger.warn("makeFileSaveDir couldn't set read only on " + parentFile);
+
+    boolean b1 = parentFile.setExecutable(true, false);
+    if (!b1) logger.warn("makeFileSaveDir couldn't set exec only on " + parentFile);
 
 //    boolean b1 = parentFile.setWritable(true);
-//    if (!b1) logger.warn("makeFileSaveDir couldn't set write on " + parentFile);
-
-
-
-    parentFile = parentFile.getParentFile();
-    b = parentFile.setReadOnly();
-    if (!b) logger.warn("makeFileSaveDir couldn't set read only on " + parentFile);
-//    b1 = parentFile.setWritable(true);
-//    if (!b1) logger.warn("makeFileSaveDir couldn't set write on " + parentFile);
-
-    parentFile = parentFile.getParentFile();
-
-    b = parentFile.setReadOnly();
-    if (!b) logger.warn("makeFileSaveDir couldn't set read only on " + parentFile);
-//    b1 = parentFile.setWritable(true);
 //    if (!b1) logger.warn("makeFileSaveDir couldn't set write on " + parentFile);
   }
 
