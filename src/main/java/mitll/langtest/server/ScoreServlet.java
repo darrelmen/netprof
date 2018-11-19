@@ -416,7 +416,7 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private int checkSession(HttpServletRequest request) throws DominoSessionException {
     int userIDFromSession = securityManager.getUserIDFromSessionLight(request);
-    logger.info("checkSession user id from session is " + userIDFromSession);
+//    logger.info("checkSession user id from session is " + userIDFromSession);
     return userIDFromSession;
   }
 
@@ -587,8 +587,9 @@ public class ScoreServlet extends DatabaseServlet {
    */
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-    logger.info("ScoreServlet.doPost : Request " + request.getQueryString() +// " path " + pathInfo +
-        " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
+    long then = System.currentTimeMillis();
+//    logger.info("ScoreServlet.doPost : Request " + request.getQueryString() +// " path " + pathInfo +
+//        " uri " + request.getRequestURI() + "  " + request.getRequestURL() + "  " + request.getServletPath());
 
     makeAudioFileHelper();
 
@@ -650,6 +651,9 @@ public class ScoreServlet extends DatabaseServlet {
     }
 
     writeJsonToOutput(response, jsonObject);
+
+    long now = System.currentTimeMillis();
+    logger.info("doPost request " + requestType + " took " + (now - then) + " millis");
   }
 
 
@@ -878,13 +882,14 @@ public class ScoreServlet extends DatabaseServlet {
    * @param device
    * @return JSON representing response
    * @throws IOException
-   * @see #doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @see #doPost
    */
   private JSONObject getJsonForAudio(HttpServletRequest request,
                                      PostRequest requestType,
                                      String deviceType,
                                      String device) throws IOException {
     // check session
+    long then = System.currentTimeMillis();
     try {
       checkSession(request);
     } catch (DominoSessionException dse) {
@@ -910,6 +915,7 @@ public class ScoreServlet extends DatabaseServlet {
     int userid = userManagement.getUserFromParam(user);
     boolean fullJSON = isFullJSON(request);
 
+    long now = System.currentTimeMillis();
     logger.info("getJsonForAudio got" +
         "\n\trequest  " + requestType +
         "\n\tfor user " + user +
@@ -918,16 +924,28 @@ public class ScoreServlet extends DatabaseServlet {
         //"\n\texercise text " + realExID +
         "\n\treq      " + reqid +
         "\n\tfull     " + fullJSON +
+        "\n\tprep time " + (now - then) +
         "\n\tdevice   " + deviceType + "/" + device);
 
+
+    then = System.currentTimeMillis();
     File saveFile = new FileSaver().writeAudioFile(
         pathHelper, request.getInputStream(), realExID, userid, getProject(projid).getLanguage(), true);
 
-    long then = System.currentTimeMillis();
+    now = System.currentTimeMillis();
+    if (now - then > 10) {
+      logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
+    }
+    then = System.currentTimeMillis();
+
     new AudioConversion(false, db.getServerProps().getMinDynamicRange())
         .getValidityAndDur(saveFile, false, db.getServerProps().isQuietAudioOK(), then);
 
-    logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath());
+    now = System.currentTimeMillis();
+    if (now - then > 10) {
+      logger.info("getJsonForAudio audio conversion for " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
+    }
+
     // TODO : put back trim silence? or is it done somewhere else
 //    new AudioConversion(null).trimSilence(saveFile);
 
@@ -972,10 +990,10 @@ public class ScoreServlet extends DatabaseServlet {
   private int getProjid(HttpServletRequest request) {
     int projid = getProjectID(request);
 
-    logger.debug("getJsonForAudio got projid from session " + projid);
+    logger.debug("getProjid got projid from session " + projid);
     if (projid == -1) {
       projid = getProjID(request);
-      logger.debug("getJsonForAudio got projid from request " + projid);
+      logger.debug("getProjid got projid from request " + projid);
     }
     projid = getProjidFromLanguage(request, projid);
 
@@ -988,12 +1006,12 @@ public class ScoreServlet extends DatabaseServlet {
       realExID = Integer.parseInt(getExerciseHeader(request));
       if (realExID == -1) {
         realExID = getDAOContainer().getUserExerciseDAO().getUnknownExercise().id();
-        logger.info("getJsonForAudio : using unknown exercise id " + realExID);
+        logger.info("getRealExID : using unknown exercise id " + realExID);
       } else {
-        logger.info("getJsonForAudio got exercise id " + realExID);
+        //logger.info("getRealExID got exercise id " + realExID);
       }
     } catch (NumberFormatException e) {
-      logger.info("couldn't parse exercise request header = '" + getExerciseHeader(request) + "'");
+      logger.info("getRealExID couldn't parse exercise request header = '" + getExerciseHeader(request) + "'");
     }
     return realExID;
   }
@@ -1026,13 +1044,13 @@ public class ScoreServlet extends DatabaseServlet {
     return getHeader(request, HeaderValue.LANGUAGE);
   }
 
-  private int getStreamSession(HttpServletRequest request) {
+/*  private int getStreamSession(HttpServletRequest request) {
     return request.getIntHeader(HeaderValue.STREAMSESSION.toString());
   }
 
   private int getStreamPacket(HttpServletRequest request) {
     return request.getIntHeader(HeaderValue.STREAMSPACKET.toString());
-  }
+  }*/
 
   private String getHeader(HttpServletRequest request, HeaderValue resultId) {
     return request.getHeader(resultId.toString());

@@ -202,7 +202,7 @@ public abstract class Scoring {
 
     boolean usePhone = usePhoneToDisplay || props.usePhoneToDisplay(languageEnum);
     if (decode || !writeImages) {  //  skip image generation
-      return getEventInfo(typeToFile, useWebservice, usePhone);
+      return getEventInfo(typeToFile, usePhone);
     } else {
       String pathname = audioFileNoSuffix + ".wav";
       pathname = prependDeploy(pathname);
@@ -228,20 +228,17 @@ public abstract class Scoring {
    * @param audioFileNoSuffix
    * @param useScoreToColorBkg
    * @param prefix
-   * @param suffix
    * @param decode
-   * @param useWebservice
    * @param object
    * @param writeImages
    * @return
    * @see ASRWebserviceScoring#getPretestScore
    */
-  EventAndFileInfo writeTranscriptsCached(String imageOutDir, int imageWidth, int imageHeight,
+  EventAndFileInfo writeTranscriptsCached(String imageOutDir,
+                                          int imageWidth, int imageHeight,
                                           String audioFileNoSuffix, boolean useScoreToColorBkg,
                                           String prefix,
-                                          String suffix,
                                           boolean decode,
-                                          boolean useWebservice,
                                           JsonObject object,
                                           boolean usePhoneToDisplay,
                                           boolean writeImages,
@@ -263,11 +260,9 @@ public abstract class Scoring {
       // logger.debug("writeTranscriptsCached got " + typeToFile);
 
       if (typeToFile.isEmpty()) {
-        Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
-            getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi);
-        return new EventAndFileInfo(typeToFile, imageTypeMapMap);
+        return new EventAndFileInfo(typeToFile, getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi));
       } else {
-        return getEventInfo(typeToFile, useWebservice, usePhoneToDisplay); // if align, don't use webservice regardless
+        return getEventInfo(typeToFile, usePhoneToDisplay); // if align, don't use webservice regardless
       }
     } else {
       Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
@@ -285,7 +280,7 @@ public abstract class Scoring {
 
       Collection<ImageType> expectedTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
       return new TranscriptWriter().getEventAndFileInfo(pathname,
-          imageOutDir, imageWidth, imageHeight, expectedTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix,
+          imageOutDir, imageWidth, imageHeight, expectedTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, "",
           imageTypeMapMap);
     }
   }
@@ -303,15 +298,12 @@ public abstract class Scoring {
 
   /**
    * @param imageTypes
-   * @param useWebservice
    * @param usePhoneToDisplay
    * @return
-   * @see #writeTranscriptsCached(String, int, int, String, boolean, String, String, boolean, boolean, JsonObject, boolean, boolean)
+   * @see #writeTranscriptsCached
    */
   // JESS reupdate here
-  private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes,
-                                        boolean useWebservice,
-                                        boolean usePhoneToDisplay) {
+  private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean usePhoneToDisplay) {
     Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<>();
     try {
       for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
@@ -319,10 +311,7 @@ public abstract class Scoring {
         boolean isPhone = imageType.equals(ImageType.PHONE_TRANSCRIPT) && usePhoneToDisplay;
         TranscriptReader transcriptReader = new TranscriptReader();
         Map<String, String> phoneToDisplay = props.getPhoneToDisplay(languageEnum);
-        typeToEvent.put(imageType,
-            useWebservice ?
-                transcriptReader.readEventsFromString(o.getValue(), isPhone, phoneToDisplay) :
-                transcriptReader.readEventsFromFile(o.getValue(), isPhone, phoneToDisplay));
+        typeToEvent.put(imageType, transcriptReader.readEventsFromFile(o.getValue(), isPhone, phoneToDisplay));
       }
       return new EventAndFileInfo(new HashMap<>(), typeToEvent);
     } catch (IOException e) {
@@ -386,7 +375,7 @@ public abstract class Scoring {
     Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
 
     //if (oov.addAll(oovForFL)) {
-      // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
+    // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
     //}
 
     return oovForFL.isEmpty();
@@ -431,7 +420,7 @@ public abstract class Scoring {
    */
   String getRecoSentence(EventAndFileInfo eventAndFileInfo) {
     StringBuilder b = new StringBuilder();
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.typeToEvent.entrySet()) {
+    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.getTypeToEvent().entrySet()) {
       NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
       if (key == NetPronImageType.WORD_TRANSCRIPT) {
         Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();

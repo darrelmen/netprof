@@ -91,6 +91,7 @@ public class JsonScoring {
                                            String device,
                                            DecoderOptions options,
                                            boolean fullJSON) {
+    long start = System.currentTimeMillis();
     long then = System.currentTimeMillis();
     int mostRecentProjectByUser = projid == -1 ? getMostRecentProjectByUser(user) : projid;
     CommonExercise exercise = db.getCustomOrPredefExercise(mostRecentProjectByUser, exerciseID);  // allow custom items to mask out non-custom items
@@ -113,12 +114,19 @@ public class JsonScoring {
     boolean doFlashcard = request == ScoreServlet.PostRequest.DECODE;
     options.setDoDecode(doFlashcard);
 
+    long now = System.currentTimeMillis();
+
+    if (now - then > 10) {
+      logger.info("getJsonForAudioForUser :  prep took " + (now - then) + " millis");
+    }
+
+    then = System.currentTimeMillis();
     AudioAnswer answer = getAudioAnswer(reqid, exerciseID, user, wavPath, saveFile, deviceType, device,
         foreignLanguage,
         transliteration,
         projid,
         options);
-    long now = System.currentTimeMillis();
+    now = System.currentTimeMillis();
 
     if (logger.isInfoEnabled()) {
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
@@ -126,7 +134,8 @@ public class JsonScoring {
       logger.info("getJsonForAudioForUser" +
               "\n\tflashcard   " + doFlashcard +
               "\n\texercise id " + exerciseID +
-              "\n\ttook        " + (now - then) + " millis " +
+              "\n\ttook        " + (now - start) + " millis " +
+              "\n\tanswer      " + (now - then) + " millis " +
               "\n\tfor         " + saveFile.getName() +
               "\n\tscore       " + hydecScore
           //+
@@ -134,7 +143,13 @@ public class JsonScoring {
       );
     }
 
-    return getJsonObject(projid, exerciseID, options, fullJSON, jsonForScore, doFlashcard, answer, false);
+    then = System.currentTimeMillis();
+    JSONObject jsonObject = getJsonObject(projid, exerciseID, options, fullJSON, jsonForScore, doFlashcard, answer, false);
+    now = System.currentTimeMillis();
+    if (now - then > 10) {
+      logger.info("getJsonForAudioForUser : getting json took " + (now - then) + " millis");
+    }
+    return jsonObject;
   }
 
   public JSONObject getJsonObject(int projid,
@@ -148,21 +163,21 @@ public class JsonScoring {
     PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
     if (answer != null && answer.isValid() && pretestScore != null) {
       jsonForScore = getJsonObject(projid, options.isUsePhoneToDisplay(), fullJSON, doFlashcard, answer, pretestScore);
+
       if (addStream) {
         jsonForScore.put("duration", answer.getDurationInMillis());
         jsonForScore.put("dynamicRange", answer.getDynamicRange());
         jsonForScore.put("path", answer.getPath());
         jsonForScore.put("resultID", answer.getResultID());
-        jsonForScore.put("pretest", new JSONObject());
         jsonForScore.put("timestamp", answer.getTimestamp());
         jsonForScore.put("isfullmatch", answer.getPretestScore().isFullMatch());
       }
+      jsonForScore.put("processDur", answer.getPretestScore().getProcessDur());
     }
 
     addValidity(exerciseID, jsonForScore,
-        answer == null ? Validity.INVALID :  answer.getValidity(),
+        answer == null ? Validity.INVALID : answer.getValidity(),
         answer == null ? "1" : "" + answer.getReqid());
-
 
     return jsonForScore;
   }
@@ -191,7 +206,7 @@ public class JsonScoring {
     float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
 
     Project project = db.getProject(projid);
-  //  String language = project.getLanguage();
+    //  String language = project.getLanguage();
 
     jsonForScore = fullJSON ?
         scoreToJSON.getJsonObject(pretestScore) :
@@ -370,7 +385,7 @@ public class JsonScoring {
       writeCompressedVersions(path, new TrackInfo(foreignLanguage, getUserID(user), english, language));
       // long now = System.currentTimeMillis();
       //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
-    },"ensureMP3Later").start();
+    }, "ensureMP3Later").start();
   }
 
   /**

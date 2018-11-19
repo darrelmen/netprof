@@ -315,7 +315,7 @@ public class DecodeCorrectnessChecker {
       // logger.info("raw after   " + rawRefSentence);
     }
 
-    logger.info("getPhraseToDecode raw (" + language + ") after '" + rawRefSentence + "'");
+//    logger.info("getPhraseToDecode raw (" + language + ") after '" + rawRefSentence + "'");
 
     boolean isKaldi = isKaldi(language);
     boolean removeAllAccents = !isFrench(language) && !isKaldi;

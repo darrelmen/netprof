@@ -502,11 +502,14 @@ public class AudioConversion extends AudioBase {
   /**
    * Do conversion in parallel...
    *
+   * Don't wait for oggenc to finish?
+   *
    * @param absolutePathToWav
    * @param overwrite
    * @param trackInfo
    * @param waitToFinish
    * @return absolute path to file
+   * @see AudioConversion#writeMP3(String, String, boolean, TrackInfo, boolean)
    * @see PathWriter#getPermanentAudioPath
    */
   public String writeCompressedVersions(File absolutePathToWav, boolean overwrite, TrackInfo trackInfo, boolean waitToFinish) {

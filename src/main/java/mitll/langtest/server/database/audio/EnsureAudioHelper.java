@@ -348,7 +348,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
   }
 
   private String ensureWAV(String audioFile) {
-    if (!audioFile.endsWith(WAV1)) {
+    if (!audioFile.endsWith(WAV1) && audioFile.length() > MP3_LENGTH) {
       return audioFile.substring(0, audioFile.length() - MP3_LENGTH) + WAV;
     } else {
       return audioFile;

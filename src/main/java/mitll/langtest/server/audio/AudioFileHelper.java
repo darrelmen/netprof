@@ -440,7 +440,7 @@ public class AudioFileHelper implements AlignDecode {
 
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo(recordingInfoInitial, path);
 
-    logger.info("writeAudioFile recordingInfo " + recordingInfo);
+  //  logger.info("writeAudioFile recordingInfo " + recordingInfo);
 
     return getAudioAnswerDecoding(exercise1,
         audioContext,
@@ -987,6 +987,9 @@ public class AudioFileHelper implements AlignDecode {
   private void rememberAnswer(int projid, AudioAnswer answer, AnswerInfo info, int dialogSessionID) {
     long timestamp = System.currentTimeMillis();
     int answerID = db.getAnswerDAO().addAnswer(info, timestamp);
+    long now = System.currentTimeMillis();
+
+    if (now - timestamp > 10) logger.info("rememberAnswer took " + (now - timestamp));
     answer.setResultID(answerID);
     answer.setTimestamp(timestamp);
 
@@ -1233,7 +1236,7 @@ public class AudioFileHelper implements AlignDecode {
     HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, ScoreServlet.PostRequest.ALIGN);
 
     if (session != null) {
-      logger.info("getProxyScore adding session '" + session + "'");
+//      logger.info("getProxyScore adding session '" + session + "'");
       httpClient.addRequestProperty(COOKIE, session);
     }
 
@@ -1245,18 +1248,20 @@ public class AudioFileHelper implements AlignDecode {
           "\n\tfl      '" + foreignLanguage + "'" +
           (language == Language.JAPANESE ? "\n\tsegmented '" + getSegmented(foreignLanguage) + "'" : "")
       );
-
-      {
+   /*   {
         List<WordAndProns> possibleProns = new ArrayList<>();
 
         logger.info("getProxyScore " +
             "\n\tfile " + theFile +
             "\n\tdict " + getHydraDict(foreignLanguage, possibleProns));
         //possibleProns.forEach(p -> logger.info(foreignLanguage + " : " + p));
-      }
+      }*/
 
+      long then = System.currentTimeMillis();
       String json = httpClient.sendAndReceiveAndClose(theFile);
-      logger.info("getProxyScore response " + json);
+      long now = System.currentTimeMillis();
+      logger.info("getProxyScore took " + (now - then) + " to get " +
+          "\n\tresponse " + json);
 
       return json.equals(MESSAGE_NO_SESSION) ? new PrecalcScores(serverProps, language) : new PrecalcScores(serverProps, json, language);
     } catch (IOException e) {
@@ -1323,13 +1328,11 @@ public class AudioFileHelper implements AlignDecode {
 
       HTTPClient httpClient = getHttpClient(hydraHost, "");
       httpClient.addRequestProperty(REQUEST.toString(), HASUSER.toString());
-      //httpClient.addRequestProperty(PROJID.toString(), "" + projID);
       httpClient.addRequestProperty(USERID.toString(), TEST_USER);
       httpClient.addRequestProperty(PASS.toString(), TEST_PASSWORD);
 
       String json = httpClient.sendAndReceiveCookie("");
-
-      logger.info("getSession response " + json);
+//      logger.info("getSession response " + json);
 
       return json;
     } catch (IOException e) {
@@ -1422,15 +1425,18 @@ public class AudioFileHelper implements AlignDecode {
 
                                            String prefix,
                                            PrecalcScores precalcScores,
-                                           DecoderOptions options, boolean kaldi) {
+                                           DecoderOptions options,
+                                           boolean kaldi) {
     // alignment trumps decoding
+    long then = System.currentTimeMillis();
+
     boolean shouldDoDecoding = options.shouldDoDecoding() && !options.shouldDoAlignment();
     logger.info("getASRScoreForAudio (" + getLanguage() + ")" +
-            "\n\t" + (shouldDoDecoding ? " Decoding " : " Aligning ") +
+            "\n\t" + (shouldDoDecoding ? "Decoding " : "Aligning ") +
+            (kaldi ? "\n\tKALDI!" : "") +
             "" + testAudioFile +
             "\n\twith sentence '" + sentence + "'" +
 //        "\n\treq# " + reqid +
-            //   (options.isCanUseCache() ? " check cache" : " NO CACHE") +
             (prefix.isEmpty() ? "" : " prefix " + prefix)
     );
 
@@ -1489,6 +1495,13 @@ public class AudioFileHelper implements AlignDecode {
 //    logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
 //    logger.info("getASRScoreForAudio : precalcScore " +precalcScores);
 
+    long now = System.currentTimeMillis();
+
+    if (now - then > 10) {
+      logger.info("getASRScoreForAudio : prep " +
+          "\n\ttook    " + (now - then));
+    }
+
     PretestScore pretestScore = getASRScoring().scoreRepeat(
         testAudioDir, removeSuffix(testAudioName),
         sentence, lmSentences, transliteration,
@@ -1501,9 +1514,18 @@ public class AudioFileHelper implements AlignDecode {
 
     pretestScore.setReqid(reqid);
 
-    String json = new ScoreToJSON().asJson(pretestScore);
-    logger.info("getASRScoreForAudio : json for pretest score " + pretestScore + " " + json);
-    pretestScore.setJson(json);
+    {
+      String json = new ScoreToJSON().asJson(pretestScore);
+
+      now = System.currentTimeMillis();
+
+      logger.info("getASRScoreForAudio : for " +
+          "\n\ttook    " + (now - then) +
+          "\n\tpretest " + pretestScore +
+          "\n\tjson    " + json);
+
+      pretestScore.setJson(json);
+    }
 
     return pretestScore;
   }
@@ -1577,7 +1599,7 @@ public class AudioFileHelper implements AlignDecode {
           decoderOptions,
           precalcScores);
 
-      logger.info("getAudioAnswer for file " + file + " asr score " + asrScoreForAudio);
+//      logger.info("getAudioAnswer for file " + file + " asr score " + asrScoreForAudio);
 
       audioAnswer.setPretestScore(asrScoreForAudio);
       audioAnswer.setCorrect(audioAnswer.getScore() > MIN_SCORE_FOR_CORRECT_ALIGN &&

@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RecordWordAndPhone {
   private static final Logger logger = LogManager.getLogger(RecordWordAndPhone.class);
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
 
   private static final String SIL = "sil";
@@ -83,6 +83,7 @@ public class RecordWordAndPhone {
    * @see DatabaseImpl#recordWordAndPhoneInfo
    */
   public void recordWordAndPhoneInfo(int projID, SimpleAudioAnswer answer, int answerID) {
+    long then = System.currentTimeMillis();
     PretestScore pretestScore = answer.getPretestScore();
 
     if (DEBUG) {
@@ -94,6 +95,8 @@ public class RecordWordAndPhone {
     }
 
     recordWordAndPhoneInfo(projID, answerID, pretestScore);
+    long now = System.currentTimeMillis();
+    logger.info("recordWordAndPhoneInfo answer " + answer + " and result id " + answerID + " took " + (now - then));
   }
 
   /**
@@ -113,6 +116,7 @@ public class RecordWordAndPhone {
   /**
    * Blow away old phones and words, rewrite with remapped words and phones
    * Take awhile!
+   *
    * @param projid
    * @param dao
    * @param serverProperties
@@ -131,7 +135,7 @@ public class RecordWordAndPhone {
 
     ParseResultJson parseResultJson = new ParseResultJson(serverProperties, lang);
 
-    AtomicInteger atomicInteger=new AtomicInteger();
+    AtomicInteger atomicInteger = new AtomicInteger();
     resultIDToJSON.forEach((k, v) -> {
       recordWordAndPhoneInfo(projid, k, parseResultJson.readFromJSON(v));
       int andIncrement = atomicInteger.getAndIncrement();

@@ -107,8 +107,6 @@ public interface ASR {
                        boolean decode,
                        int end);
 
-//  String getLM(String transcript, boolean removeAllPunct);
-
   /**
    *
    * @param cleaned

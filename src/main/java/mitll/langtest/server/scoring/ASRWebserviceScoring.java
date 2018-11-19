@@ -41,6 +41,7 @@ import com.google.gson.JsonSyntaxException;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
+import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -68,6 +69,7 @@ import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DE
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.ERROR;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.SUCCESS;
+import static mitll.langtest.server.scoring.Scores.PHONES;
 
 /**
  * Does ASR scoring using hydra.
@@ -94,8 +96,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   static final int MAX_FROM_ANY_TOKEN = 10;
   public static final boolean DEBUG = false;
-  public static final String WAV = ".wav";
-  //public static final int MSA_PORT = 5000;
+  public static final String WAV1 = ".wav";
+  public static final String WAV = WAV1;
+  public static final String SCORE = "score";
+  public static final String STATUS = "status";
+  public static final String LOG = "log";
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -287,6 +292,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            boolean usePhoneToDisplay,
                                            boolean useKaldi,
                                            int port) {
+    long then = System.currentTimeMillis();
+
 //    logger.info("scoreRepeatExercise decode/align '" + sentence + "'");
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + WAV;
@@ -339,20 +346,18 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     List<WordAndProns> possibleProns = new ArrayList<>();
     TransNormDict transNormDict = getHydraDict(sentence, "", possibleProns);
-    logger.info("scoreRepeatExercise " +
+
+/*    logger.info("scoreRepeatExercise " +
         "\n\tdict          " + transNormDict.getDict() +
         "\n\tpossibleProns " + possibleProns.size()
-    );
+    );*/
 
     if (precalcScores != null && precalcScores.isValid()) {
       logger.info("scoreRepeatExercise got valid precalc " + precalcScores);
       Scores scores = precalcScores.getScores();
 
       if (cached == null) {
-
-
         if (DEBUG) possibleProns.forEach(p -> logger.info("\t" + p));
-
         cached = new HydraOutput(scores, "", "", possibleProns, transNormDict);
       } else {
         cached.setScores(scores);
@@ -362,9 +367,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
 
     int processDur = 0;
-    String hydra = useKaldi ? "kaldi" : "hydra";
+    String hydra = getLabel(useKaldi);
     if (cached == null) {
-      long then = System.currentTimeMillis();
       Path tempDir = null;
       String rawAudioPath = getUniqueRawAudioPath(filePath);
       try {
@@ -384,9 +388,16 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
 
         int end = (int) (cachedDuration * 100.0);
+        long now = System.currentTimeMillis();
+
+        if (now - then > 10) {
+          logger.info("scoreRepeatExercise : prep for " + filePath + " took " + (now - then));
+        }
+
+        then = System.currentTimeMillis();
 
         if (useKaldi) {
-          cached = runKaldi(getTokensForKaldi(sentence, transliteration), filePath + ".wav", port, transNormDict);
+          cached = runKaldi(getTokensForKaldi(sentence, transliteration), filePath + WAV1, port, transNormDict);
           if (cached == null || cached.getScores() == null) {
             logger.warn("scoreRepeatExercise kaldi didn't run properly....");
           } else {
@@ -399,7 +410,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         }
 
         if (cached == null) {
-          return new PretestScore(0).setStatus("couldn't run " + (useKaldi ? "kaldi" : "hydra") + " service?");
+          return new PretestScore(0).setStatus("couldn't run " + hydra + " service?");
         } else {
           processDur = (int) (System.currentTimeMillis() - then);
           if (cached.getScores() != null && cached.getScores().isValid()) {
@@ -418,13 +429,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       } catch (IOException e) {
         logger.error("got " + e, e);
       } finally {
-        if (tempDir != null) {
+     /*   if (tempDir != null) {
           if (!tempDir.toFile().delete()) {
-            logger.debug("couldn't delete " + tempDir); // clean up temp file
+            logger.info("scoreRepeatExercise couldn't delete " + tempDir); // clean up temp file
           }
-        }
+        }*/
 
-        cleanUpRawFile(rawAudioPath);
+        if (!useKaldi) {
+          cleanUpRawFile(rawAudioPath);
+        }
       }
     }
 
@@ -451,6 +464,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
   }
 
+  @NotNull
+  private String getLabel(boolean useKaldi) {
+    return useKaldi ? "kaldi" : "hydra";
+  }
+
   /**
    * http://hydra-dev.llan.ll.mit.edu:5000/score/%7B%22reqid%22:1234,%22request%22:%22decode%22,%22phrase%22:%22%D8%B9%D8%B1%D8%A8%D9%8A%D9%91%22,%22file%22:%22/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav%22%7D
    *
@@ -467,18 +485,23 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       long now = System.currentTimeMillis();
       long processDur = now - then;
 
-      logger.info("runKaldi took " + processDur + " for " + sentence + " on " + audioPath);
+//      logger.info("runKaldi took " + processDur + " for " + sentence + " on " + audioPath);
 
       try {
         JsonObject parse = new JsonParser().parse(json).getAsJsonObject();
 
         STATUS_CODES status = getStatus(parse);
-        String log = parse.has("log") ? parse.get("log").getAsString() : "";
+        String log = parse.has(LOG) ? parse.get(LOG).getAsString() : "";
         float score = -1F;
 
         if (status == SUCCESS) {
-          score = parse.get("score").getAsFloat();
-          logger.info("runKaldi For " + sentence + "\n\tfile " + audioPath + "\n\tstatus " + status + "\n\tscore " + score);
+          score = parse.get(SCORE).getAsFloat();
+          logger.info("runKaldi " +
+              "\n\ttook      " + processDur +
+              "\n\tdecoding '" + sentence + "'" +
+              "\n\tfile      " + audioPath +
+              //"\n\tstatus    " + status +
+              "\n\tscore " + score);
         } else {
           logger.warn("runKaldi failed " +
               "\n\tstatus " + status +
@@ -524,7 +547,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   @NotNull
   private STATUS_CODES getStatus(JsonObject parse) {
-    JsonElement status1 = parse.get("status");
+    JsonElement status1 = parse.get(STATUS);
     String status = status1 == null ? STATUS_CODES.ERROR.toString() : status1.getAsString();
     try {
       return STATUS_CODES.valueOf(status);
@@ -686,6 +709,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                        boolean usePhoneToDisplay,
                                        JsonObject jsonObject,
                                        boolean useKaldi) {
+    long then = System.currentTimeMillis();
     try {
       boolean useScoreForBkgColor = imageOptions.isUseScoreToColorBkg();
       String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
@@ -709,12 +733,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               prefix1, "", decode, result.getPhoneLab(), result.getWordLab(), true, usePhoneToDisplay, imageOptions.isWriteImages()) :
           writeTranscriptsCached(imageOutDir, imageWidth, imageHeight, noSuffix,
               useScoreForBkgColor,
-              prefix1, "", decode, false,
+              prefix1, decode,
               jsonObject, reallyUsePhone, imageOptions.isWriteImages(), useKaldi);
-      Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.typeToFile);
+
+      Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.getTypeToFile());
 
       Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes =
-          generator.getTypeToSegments(eventAndFileInfo.typeToEvent, languageEnum);
+          generator.getTypeToSegments(eventAndFileInfo.getTypeToEvent(), languageEnum);
 
 /*
       logger.info("getPretestScore sTypeToImage" +
@@ -724,9 +749,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       if (typeToEndTimes.isEmpty()) {
         logger.warn("getPretestScore huh? no segments from words " + result);// + " phones " + phoneLab);
       }
+
+/*
       logger.info("getPretestScore typeToEndTimes" +
           "\n\ttypeToEndTimes " + typeToEndTimes
       );
+*/
 
       Map<String, String> phoneToDisplay = Collections.emptyMap();
       if (reallyUsePhone && this.phoneToDisplay != null) {
@@ -734,39 +762,80 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         // logger.info("using " + phoneToDisplay.size());
       }
 
-/*      List<String> recoPhones = getRecoPhones(eventAndFileInfo);
-      List<String> noSil = recoPhones.stream().filter(s -> !s.equalsIgnoreCase("sil")).collect(Collectors.toList());
-      StringBuilder builder = new StringBuilder();
-      noSil.forEach(builder::append);
-      String pron = builder.toString();
-      Collection<String> matchesLC = result.getTrie().getMatchesLC(pron);
-      List<String> exact = matchesLC.stream().filter(p -> p.equals(pron)).collect(Collectors.toList());*/
+      Scores scores = result.getScores();
 
-      List<WordAndProns> recoPhones = getRecoPhones(typeToEndTimes);
+      if (useKaldi) {
+        /*Map<String, Float> phoneToTotal = */
+        setPhoneSummaryScores(eventAndFileInfo, scores);
+        // logger.info("got " + phoneToTotal);
+      }
 
-      boolean match = result.isMatch(recoPhones);
+      PretestScore pretestScore = new PretestScore(
+          scores.hydraScore,
+          getPhoneToScore(scores.getEventScores(), phoneToDisplay),
+          getWordToScore(scores.getEventScores()),
+          sTypeToImage,
+          typeToEndTimes,
+          getRecoSentence(eventAndFileInfo),
+          (float) duration,
+          processDur,
+          isMatch(result, typeToEndTimes));
+      long now = System.currentTimeMillis();
+
+      if (now - then > 10) {
+        logger.info("getPretestScore took " + (now - then));
+      }
+      return pretestScore;
+    } catch (Exception e) {
+      logger.error("getPretestScore got " + e, e);
+      return new PretestScore(-1).setStatus(e.getMessage());
+    }
+  }
+
+  /**
+   * Put these back so we can see them in the result view.
+   *
+   * @param eventAndFileInfo
+   * @param scores
+   * @return
+   */
+  @NotNull
+  private Map<String, Float> setPhoneSummaryScores(EventAndFileInfo eventAndFileInfo, Scores scores) {
+    Map<String, Float> phoneToTotal = new HashMap<>();
+    Map<String, Float> phoneToCount = new HashMap<>();
+
+    eventAndFileInfo.getTypeToEvent().forEach((k, v) -> {
+      if (k == ImageType.PHONE_TRANSCRIPT) {
+        v.values().forEach(transcriptEvent -> {
+          String phone = transcriptEvent.getEvent();
+          if (keepEvent(phone)) {
+            phoneToTotal.put(phone, phoneToTotal.getOrDefault(phone, 0F) + transcriptEvent.getScore());
+            phoneToCount.put(phone, phoneToCount.getOrDefault(phone, 0F) + 1F);
+          }
+        });
+      }
+    });
+
+    Map<String, Float> value = new HashMap<>();
+    scores.getEventScores().put(PHONES, value);
+
+    phoneToTotal.forEach((k, v) -> value.put(k, v / phoneToCount.get(k)));
+    return phoneToTotal;
+  }
+
+  private boolean isMatch(HydraOutput result, Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes) {
+    List<WordAndProns> recoPhones = getRecoPhones(typeToEndTimes);
+
+    boolean match = result.isMatch(recoPhones);
+    if (!match) {
       logger.info("getPretestScore : reco" +
           "\n\tphones " + recoPhones +
           // "\n\tphones " + pron +
           "\n\texpect " + result.getWordAndProns() +
           "\n\tmatch  " + match
       );
-
-      Scores scores = result.getScores();
-
-      return new PretestScore(scores.hydraScore,
-          getPhoneToScore(scores.eventScores, phoneToDisplay),
-          getWordToScore(scores.eventScores),
-          sTypeToImage,
-          typeToEndTimes,
-          getRecoSentence(eventAndFileInfo),
-          (float) duration,
-          processDur,
-          match);
-    } catch (Exception e) {
-      logger.error("getPretestScore got " + e, e);
-      return new PretestScore(-1).setStatus(e.getMessage());
     }
+    return match;
   }
 
   private String getTokensForKaldi(String transcript, String transliteration) {
@@ -1040,8 +1109,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 //    return generator.getTypeToSegments(eventAndFileInfo.typeToEvent, languageEnum);
 //  }
   private Map<String, Float> getPhoneToScore(Map<String, Map<String, Float>> typeToEventToScore, Map<String, String> phoneToDisplay) {
-    Map<String, Float> phones = typeToEventToScore.get(Scores.PHONES);
-    return getTokenToScore(phones, true, phoneToDisplay);
+    return getTokenToScore(typeToEventToScore.get(PHONES), true, phoneToDisplay);
   }
 
 //  private Map<String, Float> getPhoneToScore(Collection<TranscriptSegment> segments) {

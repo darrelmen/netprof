@@ -55,7 +55,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
   private boolean correct = false;
   private boolean saidAnswer = false;
   private long durationInMillis;
-//  private long roundTripMillis;
+
   private int resultID;
   private AudioAttribute audioAttribute;
   private double dynamicRange;

@@ -545,7 +545,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             false,
             jsonObject, false, audioAnswer, true);
 
-    logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
+//    logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
     return jsonObject;
   }
 
@@ -1059,7 +1059,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     if (commonExercise == null && isExistingExercise) {
-      logger.warn("writeAudioFile " + getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
+      logger.warn("getAudioAnswer " + getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
     String audioTranscript = getAudioTranscript(audioContext.getAudioType(), commonExercise);
     AnswerInfo.RecordingInfo recordingInfo =
@@ -1078,7 +1078,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //    logger.info("writeAudioFile recording audioAnswer transcript '" + audioAnswer.getTranscript() + "'");
     int user = audioContext.getUserid();
 
-    logger.info("getAudioAnswer " + decoderOptions + " valid " + audioAnswer.isValid());
+//    logger.info("getAudioAnswer " + decoderOptions + " valid " + audioAnswer.isValid());
+
     if (decoderOptions.isRefRecording() && audioAnswer.isValid()) {
       audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(),
           commonExercise, exerciseID, audioAnswer, hasProjectSpecificAudio));
@@ -1096,6 +1097,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         logEvent("audioRecording",
             "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, device, projectID);
       } else {
+        long then=System.currentTimeMillis();
         String path = audioAnswer.getPath();
         String actualPath = ensureAudioHelper.ensureCompressedAudio(
             user,
@@ -1105,13 +1107,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             language,
             new HashMap<>(),  //?
             !decoderOptions.shouldCompressLater());
-        logger.info("writeAudioFile initial path " + path + " compressed actual " + actualPath);
+//        logger.info("getAudioAnswer initial path " + path + " compressed actual " + actualPath);
         if (actualPath.startsWith(serverProps.getAudioBaseDir())) {
           actualPath = actualPath.substring(serverProps.getAudioBaseDir().length());
           // logger.info("Now " + actualPath);
         }
         audioAnswer.setPath(actualPath);
-//        logger.info("wrote compressed...");
+        long now=System.currentTimeMillis();
+
+        logger.info("getAudioAnswer wrote compressed version " + actualPath + " in " +(now-then));
       }
     } catch (Exception e) {
       logger.error("Got " + e, e);

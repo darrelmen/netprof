@@ -36,13 +36,11 @@
 package mitll.langtest.server.scoring;
 
 import com.google.gson.JsonObject;
+import mitll.langtest.shared.scoring.ImageOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Scores is a simple holder for the combination of scores returned when scoring an utterance.
@@ -60,15 +58,15 @@ public class Scores {
   static final String PHONES = "phones";
   static final String WORDS = "words";
   float hydraScore = 0f;
-  final Map<String, Map<String, Float>> eventScores;
+  private final Map<String, Map<String, Float>> eventScores;
   private int processDur = 0;
-  private  JsonObject kaldiJsonObject;
+  private JsonObject kaldiJsonObject;
 
   public Scores() {
     eventScores = Collections.emptyMap();
   }
 
- /**
+  /**
    * @param hydecScore
    * @param eventScores
    * @param processDur
@@ -93,9 +91,11 @@ public class Scores {
     try {
       float s = Float.parseFloat(scoreSplit[0]);
       this.hydraScore = Float.isNaN(s) ? -1f : s;
+
       for (int i = 1; i < scoreSplit.length; i += 2) {
         eventScores.get(PHONES).put(scoreSplit[i], Float.parseFloat(scoreSplit[i + 1]));
       }
+
     } catch (NumberFormatException e) {
       logger.error("Parsing " + Arrays.asList(scoreSplit) + " Got " + e, e);
     }
@@ -105,16 +105,25 @@ public class Scores {
     return hydraScore > -0.01;
   }
 
-  public String toString() {
-    return "Scores score " + hydraScore + " events " + eventScores + " took " + processDur + " millis";
-  }
-
+  /**
+   * @return
+   * @see ASRWebserviceScoring#scoreRepeatExercise
+   */
   public JsonObject getKaldiJsonObject() {
     return kaldiJsonObject;
   }
 
   public Scores setKaldiJsonObject(JsonObject kaldiJsonObject) {
     this.kaldiJsonObject = kaldiJsonObject;
+
     return this;
+  }
+
+  public Map<String, Map<String, Float>> getEventScores() {
+    return eventScores;
+  }
+
+  public String toString() {
+    return "Scores score " + hydraScore + " events " + eventScores + " took " + processDur + " millis";
   }
 }

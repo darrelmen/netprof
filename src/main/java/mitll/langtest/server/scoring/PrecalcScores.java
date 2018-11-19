@@ -110,7 +110,7 @@ public class PrecalcScores {
    * @return
    */
   private boolean isPrecalcValidCheck() {
-    Map<String, Map<String, Float>> eventScores = scores.eventScores;
+    Map<String, Map<String, Float>> eventScores = scores.getEventScores();
     if (eventScores.isEmpty()) {
       return false;
     } else {

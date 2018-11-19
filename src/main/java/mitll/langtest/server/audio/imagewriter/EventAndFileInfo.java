@@ -47,8 +47,8 @@ import java.util.Map;
  * For each image type - e.g. word transcript, remember a map of type to file path, and type to transcript events and their offsets into the audio file.
 */
 public class EventAndFileInfo {
-  public Map<ImageType, String> typeToFile = Collections.emptyMap();
-  public Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = Collections.emptyMap();
+  private Map<ImageType, String> typeToFile = Collections.emptyMap();
+  private Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = Collections.emptyMap();
 
   public EventAndFileInfo() {}
 
@@ -61,5 +61,13 @@ public class EventAndFileInfo {
                           Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
     this.typeToFile = typeToFile;
     this.typeToEvent = typeToEvent;
+  }
+
+  public Map<ImageType, String> getTypeToFile() {
+    return typeToFile;
+  }
+
+  public Map<ImageType, Map<Float, TranscriptEvent>> getTypeToEvent() {
+    return typeToEvent;
   }
 }
