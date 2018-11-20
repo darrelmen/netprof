@@ -1036,10 +1036,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * <p>
    * Maybe separately update context exercises.
    *
+   *
+   * TODO : make it work with context sentences!
    * @param userExercise
    * @param isContext
    * @param typeOrder
    * @see mitll.langtest.server.domino.ProjectSync#doUpdate
+   *
+   * @see mitll.langtest.server.database.custom.UserListManager#editItem
    */
   @Override
   public boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder) {

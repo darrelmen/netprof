@@ -424,7 +424,7 @@ public class ListView implements ContentView, CreateListComplete {
           public void gotNo() {
 
           }
-        }, 660, -1, true);
+        }, 710, -1, true);
 
     closeButton.setType(ButtonType.SUCCESS);
 

@@ -18,7 +18,6 @@ public interface ClientExercise extends CommonShell, MutableAnnotationExercise, 
 
   boolean hasContext();
 
-//  boolean isContext();
   boolean isPredefined();
   /**
    * Get the first context sentence.

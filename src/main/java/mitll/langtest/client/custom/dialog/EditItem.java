@@ -51,6 +51,7 @@ import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -68,13 +69,6 @@ import java.util.Map;
  */
 public class EditItem {
   //private final Logger logger = Logger.getLogger("EditItem");
-
-  /**
-   * @seex #getNewItem
-   * @see #makeExerciseList
-   */
- // private static final int NEW_EXERCISE_ID = -100;
-
   private final ExerciseController controller;
   private PagingExerciseList<CommonShell, ClientExercise> exerciseList;
 
@@ -109,7 +103,8 @@ public class EditItem {
     return hp;
   }
 
-  int userListID=-1;
+  int userListID = -1;
+
   /**
    * @param right
    * @param instanceName
@@ -123,7 +118,7 @@ public class EditItem {
                                                                            INavigation.VIEWS instanceName,
                                                                            UserList<CommonShell> originalList) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
-    userListID=originalList.getID();
+    userListID = originalList.getID();
     EditableExerciseList exerciseList = new EditableExerciseList(controller, right, instanceName, originalList);
     this.exerciseList = exerciseList;
     setFactory(this.exerciseList);
@@ -177,7 +172,6 @@ public class EditItem {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
   }*/
-
   private void setFactory(final PagingExerciseList<CommonShell, ClientExercise> exerciseList) {
     exerciseList.setFactory(new ExercisePanelFactory<CommonShell, ClientExercise>(controller, exerciseList) {
       private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
@@ -203,16 +197,24 @@ public class EditItem {
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
           return widgets;
         } else {
-          NewUserExercise<CommonShell, ClientExercise> reviewEditableExercise = new NewUserExercise<CommonShell, ClientExercise>(
-              controller,
-              exercise,
-              userListID
-          ) {
-            @Override
-            void afterValidForeignPhrase(Panel toAddTo, boolean onClick) {
-              postChangeIfDirty(onClick);
-            }
-          };
+          EditableExerciseDialog<CommonShell, ClientExercise> reviewEditableExercise =
+              new EditableExerciseDialog<CommonShell, ClientExercise>(
+                  controller,
+                  exercise,
+                  userListID,
+                  INavigation.VIEWS.LISTS
+              ) {
+                @NotNull
+                @Override
+                protected DivWidget getDominoEditInfo() {
+                  return null;
+                }
+
+//            @Override
+//            void afterValidForeignPhrase(Panel toAddTo, boolean onClick) {
+//              postChangeIfDirty(onClick);
+//            }
+              };
           Panel widgets = reviewEditableExercise.addFields(exerciseList, new SimplePanel());
           reviewEditableExercise.setFields(exercise);
           return widgets;

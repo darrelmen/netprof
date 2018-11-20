@@ -174,6 +174,11 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     setAudioDAO(audioDAO, projid, isMyProject);
   }
 
+  @Override
+  public void addUserExercise(CommonExercise commonExercise) {
+
+  }
+
   /**
    * @return
    * @see #getRawExercises

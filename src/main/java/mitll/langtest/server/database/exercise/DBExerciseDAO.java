@@ -57,6 +57,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private final SlickProject project;
   private final Project fullProject;
   private static final boolean DEBUG = false;
+  private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
+  final Map<Integer, CommonExercise> idToUserExercise = new HashMap<>();
 
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
@@ -74,7 +76,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     this.fullProject = fullProject;
   }
 
-  int spew = 0;
+  private int spew = 0;
 
   /**
    * so first look in the main id->ex map and then in the context->exercise map
@@ -92,10 +94,15 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         if (id != userExerciseDAO.getUnknownExerciseID()) {
           commonExercise = idToContextExercise.get(id);
           if (commonExercise == null) {
-            spew++;
-            if (spew < 10 || spew % 100 == 0) {
-              logger.warn(this + " getExercise : couldn't find exercise #" + id +
-                  " in " + idToExercise.size() + " exercises and " + idToContextExercise.size() + " context exercises");
+            commonExercise = idToUserExercise.get(id);
+
+            if (commonExercise == null) {
+              spew++;
+              if (spew < 10 || spew % 100 == 0) {
+                logger.warn(this + " getExercise : couldn't find exercise #" + id +
+                    " in " + idToExercise.size() + " exercises" +
+                    "\n\t and " + idToContextExercise.size() + " context exercises");
+              }
             }
           } else {
             //  logger.info("getExercise found context " + commonExercise.getID());
@@ -110,7 +117,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
   }
 
-  private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
 
   /**
    * Make sure the parent is set on the context exercises.
@@ -264,6 +270,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       }
     }
 //    logger.info(prefix + " Read " + allNonContextExercises.size() + " exercises from database, attached " + attached);
+  }
+
+  @Override
+  public void addUserExercise(CommonExercise commonExercise) {
+    CommonExercise put = idToUserExercise.put(commonExercise.getID(), commonExercise);
+    if (put != null) logger.info("  already user ex with " +commonExercise.getID());
   }
 
   /**

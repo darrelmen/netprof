@@ -122,19 +122,15 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
                                 int originalList,
                                 PagingExerciseList<T, U> exerciseList,
                                 INavigation.VIEWS instanceName) {
-    super(controller,
-        changedUserExercise,
-        originalList,
-        exerciseList,
-        instanceName);
+    super(controller, changedUserExercise, originalList, instanceName);
     this.exerciseList = exerciseList;
   }
 
   /**
-   * @see mitll.langtest.client.custom.FixNPFHelper#getFactory
    * @param listInterface
    * @param toAddTo
    * @return
+   * @see mitll.langtest.client.custom.FixNPFHelper#getFactory
    */
   public Panel addFields(final ListInterface<T, U> listInterface, final Panel toAddTo) {
     Panel widgets = super.addFields(listInterface, toAddTo);
@@ -586,8 +582,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * @see #addFields
    */
   @Override
-  protected Panel getCreateButton(final Panel toAddTo,
-                                  final ControlGroup normalSpeedRecording) {
+  protected Panel getCreateButton(final Panel toAddTo, final ControlGroup normalSpeedRecording) {
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
 
@@ -629,6 +624,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
   @Override
   void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {
     super.afterValidForeignPhrase(toAddTo, onClick);
+
     LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance.toString()));
   }
 

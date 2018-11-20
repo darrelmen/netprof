@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
 
@@ -88,4 +89,7 @@ public interface SimpleExerciseDAO<T extends CommonShell & HasUnitChapter> {
    * @return
    */
   boolean isConfigured();
+
+  void addUserExercise(CommonExercise commonExercise);
+
 }

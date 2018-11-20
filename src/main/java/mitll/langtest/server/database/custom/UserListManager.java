@@ -703,10 +703,13 @@ public class UserListManager implements IUserListManager {
   public void newExercise(int userListID, CommonExercise userExercise) {
     int projectID = userExercise.getProjectID();
 
-    List<String> typeOrder = databaseServices.getProject(projectID).getTypeOrder();
+    Project project = databaseServices.getProject(projectID);
+    List<String> typeOrder = project.getTypeOrder();
 
     int newExerciseID = userExerciseDAO.add(userExercise, false, typeOrder);
     logger.info("newExercise added exercise " + newExerciseID + " from " + userExercise);
+
+    project.getExerciseDAO().addUserExercise(userExercise);
 
     int contextID = 0;
     try {
@@ -717,11 +720,7 @@ public class UserListManager implements IUserListManager {
 
     logger.info("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
 
-    //int id = userList.getID();
     addItemToList(userListID, newExerciseID);
-
-    // TODOx : necessary?
-//    fixAudioPaths(userExercise, true, mediaDir);
   }
 
   public UserList getUserListNoExercises(int userListID) {
@@ -780,7 +779,10 @@ public class UserListManager implements IUserListManager {
   @Override
   public void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder) {
     //fixAudioPaths(userExercise, true, mediaDir);
-    userExerciseDAO.update(userExercise, false, typeOrder);
+    boolean update = userExerciseDAO.update(userExercise, false, typeOrder);
+    if (update) {
+      databaseServices.getProject(userExercise.getProjectID()).getExerciseDAO().addUserExercise(userExercise);
+    }
   }
 
 

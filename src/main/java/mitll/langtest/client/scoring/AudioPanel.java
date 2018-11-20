@@ -106,11 +106,10 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   private AudioPositionPopup audioPositionPopup;
 
   PlayAudioPanel playAudio;
-  @Deprecated
-  private float screenPortion = 1.0f;
+
   private final boolean logMessages;
   protected final ExerciseController controller;
-  private boolean showSpectrogram = false;
+  private boolean showSpectrogram;
   private final int rightMargin;
 
   protected final T exercise;
@@ -118,7 +117,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   private final int exerciseID;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_GET_IMAGES = false;
+  private static final boolean DEBUG_GET_IMAGES = true;
 
   /**
    * @param showSpectrogram
@@ -135,7 +134,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
                     String playButtonSuffix,
                     T exercise,
                     int exerciseID) {
-    this(controller, showSpectrogram, 1.0f, rightMargin, exercise, exerciseID);
+    this(controller, showSpectrogram, rightMargin, exercise, exerciseID);
     this.audioPath = path;
 
     addWidgets(playButtonSuffix, RECORD);
@@ -149,13 +148,12 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   }
 
   public Widget getPlayButton() {
-    return hasAudio() ? playAudio.getPlayButton() : null;
+    return playAudio.getPlayButton();
   }
 
   /**
    * @param controller
    * @param showSpectrogram
-   * @param screenPortion
    * @param rightMargin
    * @param exercise
    * @param exerciseID
@@ -164,25 +162,23 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
    */
   protected AudioPanel(ExerciseController controller,
                        boolean showSpectrogram,
-                       float screenPortion,
                        int rightMargin,
                        T exercise,
                        int exerciseID) {
-    this.screenPortion = screenPortion;
-    //   this.soundManager = controller.getSoundManager();
+
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.showSpectrogram = showSpectrogram;
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
     this.exercise = exercise;
-    // this.instance = instance;
+
     int id = getExerciseID();
     getElement().setId("AudioPanel_exercise_" + id);
 
     int width = getImageWidth();
-    //logger.info("AudioPanel " + getElement().getId() + " width " + width);
-    setWidth((width) + "px");
+    logger.info("AudioPanel " + getElement().getId() + " width " + width);
+    setWidth(width + "px");
   }
 
   public void onResize() {
@@ -193,7 +189,9 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
         int diff = Math.abs(Window.getClientWidth() - lastWidthOuter);
         if (lastWidthOuter == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
           lastWidthOuter = Window.getClientWidth();
-          setWidth((images) + "px");
+
+        //  logger.info("width is " + images);
+          setWidth(images + "px");
         }
       }
     });
@@ -219,7 +217,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     imageContainer.getElement().setId("AudioPanel_imageContainer");
 
     int heightForTranscripts = rightMargin > 0 ? 2 * TRANSCRIPT_IMAGE_HEIGHT : 0;
-    float totalHeight = getScaledImageHeight(WAVEFORM) + heightForTranscripts +6;
+    float totalHeight = getScaledImageHeight(WAVEFORM) + heightForTranscripts + 6;
     imageContainer.setHeight(totalHeight + "px");
     //  imageContainer.setWidth(getImageWidth()+"px");
 
@@ -232,14 +230,14 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     audioPositionPopup = new AudioPositionPopup(imageContainer);
     imageContainer.add(audioPositionPopup);
 
-    if (hasAudio()) {
-      playAudio = getPlayButtons(toTheRightWidget, playButtonSuffix, recordButtonTitle, exercise);
-      hp.add(playAudio);
-      hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
-    } else {
-      hp.add(toTheRightWidget);
-      audioPositionPopup.setVisible(false);
-    }
+
+    playAudio = getPlayButtons(toTheRightWidget, playButtonSuffix, recordButtonTitle, exercise);
+    hp.add(playAudio);
+    hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
+//    } else {
+//      hp.add(toTheRightWidget);
+//      audioPositionPopup.setVisible(false);
+//    }
 
     waveform = new ImageAndCheck();
     imageContainer.add(getWaveformImage());
@@ -281,21 +279,9 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     return waveformImage;
   }
 
-  private boolean hasAudio() {
-    return hasAudio(exercise);
-  }
-
-  private boolean hasAudio(T exercise) {
-    return true;
-  }
-
   public boolean isAudioPathSet() {
     return audioPath != null;
   }
-
- /* void doPause() {
-    if (loadAndPlayOrPlayAudio != null) loadAndPlayOrPlayAudio.doPause();
-  }*/
 
   /**
    * This is sort of a hack --
@@ -317,12 +303,6 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   @Override
   protected void onUnload() {
     audioPositionPopup.reinitialize();
-  }
-
-  @Deprecated
-  void setScreenPortion(float screenPortion) {
-    //  if (DEBUG) logger.info("AudioPanel.setScreenPortion : screenPortion " + screenPortion);
-    this.screenPortion = screenPortion;
   }
 
   public ImageAndCheck getWaveform() {
@@ -491,7 +471,11 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 //      } else {
 //        rightSide = 180;
 //      }
-      return getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth);//, rightSide);
+      int widthForWaveform = getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth);
+
+      logger.info("left " + leftColumnWidth + " width " + widthForWaveform);
+
+      return Math.min(770, widthForWaveform);//, rightSide);
     } catch (Exception e) {
       // OK, ignore it
       return 200;
@@ -505,14 +489,15 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
    * @paramx rightSide
    */
   int getWidthForWaveform(int leftColumnWidth1, int leftColumnWidth) {
-    int width = (int) ((screenPortion * ((float) Window.getClientWidth())) - leftColumnWidth);// - rightSide;
+    int width = (int) ((((float) Window.getClientWidth())) - leftColumnWidth);// - rightSide;
     int i = width / 5;
     width = (i - 1) * 5;
     width -= 4;
     if (DEBUG_GET_IMAGES) {
       logger.info("AudioPanel.getImages : leftColumnWidth " + leftColumnWidth + "(" + leftColumnWidth1 +
               ") width " + width +
-              " (screen portion = " + screenPortion +
+              " (" +
+//              "screen portion = " + screenPortion +
               ") vs window width " + Window.getClientWidth()
           //+ " right side " + rightSide
       );

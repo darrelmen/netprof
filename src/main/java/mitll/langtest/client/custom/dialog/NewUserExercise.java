@@ -55,7 +55,11 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.custom.dialog.EditableExerciseDialog.FOREIGN_LANGUAGE;
 
 /**
  * Created with IntelliJ IDEA.
@@ -97,9 +101,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   final ExerciseController controller;
 
-//  protected String originalForeign = "";
-//  protected String originalEnglish = "";
-//  protected String originalTransliteration;
+  protected String originalForeign = "";
+  protected String originalEnglish = "";
+  protected String originalTransliteration;
 
   protected String originalRefAudio;
   protected String originalSlowRefAudio;
@@ -119,8 +123,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   protected final HTML contextAnno = new HTML();
   protected final HTML contextTransAnno = new HTML();
 
-//  protected String originalContext = "";
-//  protected String originalContextTrans = "";
+  protected String originalContext = "";
+  protected String originalContextTrans = "";
 
   CreateFirstRecordAudioPanel rap;
   CreateFirstRecordAudioPanel rapSlow;
@@ -129,14 +133,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   ControlGroup slowSpeedRecording = null;
 
   private final int listID;
-  /**
-   * TODO : What is this for???
-   */
-  private ListInterface<T, U> listInterface;
   private Panel toAddTo;
   private boolean clickedCreate = false;
 
-  private static final boolean DEBUG = false;
+  private ListInterface<T, U> listInterface;
+
+  private static final boolean DEBUG = true;
+
 
   /**
    * @param controller
@@ -158,6 +161,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see EditItem#setFactory
    */
   public Panel addFields(final ListInterface<T, U> listInterface, final Panel toAddTo) {
+
+    this.listInterface = listInterface;
     final FluidContainer container = new ResizableFluid();
     DivWidget upper = new DivWidget();
     upper.getElement().setId("addNewFieldContainer");
@@ -173,7 +178,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     addItemsAtTop(container);
     container.add(upper);
 
-    upper.add(getDominoEditInfo());
+    DivWidget dominoEditInfo = getDominoEditInfo();
+    if (dominoEditInfo != null) {
+      upper.add(dominoEditInfo);
+    }
 
     makeForeignLangRow(upper);
 //    int listID = originalList.getID();
@@ -192,7 +200,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     upper.add(makeAudioRow());
 
     this.toAddTo = toAddTo;
-    this.listInterface = listInterface;
 
     Panel buttonRow = getCreateButton(toAddTo, normalSpeedRecording);
     if (buttonRow != null) {
@@ -240,7 +247,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   @NotNull
-  private DivWidget getDominoEditInfo() {
+  protected DivWidget getDominoEditInfo() {
     DivWidget h = new DivWidget();
     h.addStyleName("leftFiveMargin");
     h.addStyleName("bottomFiveMargin");
@@ -284,6 +291,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
                RecordAudioPanel rap,
                ControlGroup normalSpeedRecording,
                Panel toAddTo) {
+    validateThenPost(rap, normalSpeedRecording, toAddTo, false);
   }
 
   /**
@@ -435,12 +443,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
       @Override
       public void onSuccess(Void newExercise) {
-//        originalForeign = newUserExercise.getForeignLanguage();
-//        originalEnglish = newUserExercise.getEnglish();
-//        originalTransliteration = newUserExercise.getTransliteration();
+        originalForeign = newUserExercise.getForeignLanguage();
+        originalEnglish = newUserExercise.getEnglish();
+        originalTransliteration = newUserExercise.getTransliteration();
         originalRefAudio = newUserExercise.getRefAudio();
         originalSlowRefAudio = newUserExercise.getSlowAudioRef();
-        // if (DEBUG) logger.info("postEditItem : onSuccess " + newUserExercise.getTooltip());
+
+        if (DEBUG) logger.info("postEditItem : onSuccess ");// + newUserExercise.getTooltip());
         doAfterEditComplete(buttonClicked);
       }
     });
@@ -452,18 +461,18 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #reallyChange(boolean, boolean)
    */
   protected void doAfterEditComplete(boolean buttomClicked) {
-    // changeTooltip(pagingContainer);
+    changeTooltip(listInterface);
   }
 
   /**
-   * TODO : get rid of this
+   * TODOx : get rid of this
    * Update the exercise shell in the exercise list with the changes to it's english/fl fields.
    *
    * @param pagingContainer
    * @see #doAfterEditComplete
    */
-/*
-  private void changeTooltip(ListInterface<T, U> pagingContainer) {
+
+  private void changeTooltip(ListInterface<T, ?> pagingContainer) {
     T byID = pagingContainer.byID(newUserExercise.getID());
     if (DEBUG) logger.info("changeTooltip " + byID);
     if (byID == null) {
@@ -477,7 +486,15 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       pagingContainer.redraw();   // show change to tooltip!
     }
   }
-*/
+
+  /**
+   * @param toAddTo
+   * @param onClick
+   * @see #validateThenPost(RecordAudioPanel, ControlGroup, Panel, boolean)
+   */
+  void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {
+    postChangeIfDirty(onClick);
+  }
 
   /**
    * Don't post anything to server unless text actually changed - could get lots of blur events that should be ignored.
@@ -494,30 +511,36 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             "\n\tslow       " + slowRefAudioChanged()
         );
       }
-      //    logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
+      logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
       reallyChange(onClick, getKeepAudio());
+    } else {
+      logger.info("ignore change");
     }
   }
 
   private boolean anyFieldsDirty() {
     return
-        refAudioChanged() ||
+        foreignChanged() ||
+            translitChanged() ||
+            englishChanged() ||
+            contextChanged() ||
+            contextTransChanged() ||
+            refAudioChanged() ||
             slowRefAudioChanged();
-  }
-
-/*  private boolean contextTransChanged() {
-    return !originalContextTrans.equals(contextTrans.getSafeText());
   }
 
   private boolean contextChanged() {
     return !originalContext.equals(context.getSafeText());
-  }*/
+  }
+
+  private boolean contextTransChanged() {
+    return !originalContextTrans.equals(contextTrans.getSafeText());
+  }
 
   protected boolean getKeepAudio() {
     return false;
   }
 
-/*
   private boolean englishChanged() {
     return !english.box.getText().equals(originalEnglish);
   }
@@ -525,19 +548,19 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   protected boolean foreignChanged() {
     return !foreignLang.box.getText().equals(originalForeign);
   }
-*/
 
   /**
    * @return
    * @seex #checkForForeignChange
    * @see #postChangeIfDirty(boolean)
    */
-/*  protected boolean translitChanged() {
+  protected boolean translitChanged() {
     String transliteration = newUserExercise.getTransliteration();
     String originalTransliteration = this.originalTransliteration;
     //  logger.info("translitChanged : translit '" + transliteration + "' vs original '" + originalTransliteration + "' changed  = " + changed);
     return !transliteration.equals(originalTransliteration);
-  }*/
+  }
+
   private boolean refAudioChanged() {
     String refAudio = newUserExercise.getRefAudio();
     return (refAudio == null && originalRefAudio != null) || (refAudio != null && !refAudio.equals(originalRefAudio));
@@ -558,7 +581,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   void reallyChange(final boolean markFixedClicked, boolean keepAudio) {
 //    newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
-//    grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
+
+    logger.info("reallyChange - grab fields!");
+    grabInfoFromFormAndStuffInfoExercise(newUserExercise);
     editItem(markFixedClicked, keepAudio);
   }
 
@@ -623,8 +648,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
                         ControlGroup normalSpeedRecording,
                         Panel toAddTo,
                         boolean onClick) {
-    if (validateForm(rap, normalSpeedRecording)) {
-      afterValidForeignPhrase(toAddTo, onClick);
+
+   if (validateForm(rap, normalSpeedRecording)) {
+      logger.info("NewUserExercise.validateThenPost : form is valid");
+     isValidForeignPhrase(toAddTo, onClick);
       //isValidForeignPhrase(pagingContainer, toAddTo, onClick);
     } else {
       formInvalid();
@@ -642,12 +669,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * Ask the server if the foreign lang text is in our dictionary and can be run through hydec.
    *
-   * @param pagingContainer
+   * @paramx pagingContainer
    * @param toAddTo
    * @param onClick
    * @see #validateThenPost
    */
- /* private void isValidForeignPhrase(final ListInterface<T,U> pagingContainer,
+  private void isValidForeignPhrase(//final ListInterface<T,U> pagingContainer,
                                     final Panel toAddTo,
                                     final boolean onClick) {
     //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getSafeText() + " before adding/changing " + newUserExercise);
@@ -659,63 +686,61 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
       @Override
       public void onSuccess(Boolean result) {
-*//*        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
-            " before adding/changing " + newUserExercise + " -> " + result);*//*
         if (result) {
          // checkIfNeedsRefAudio();
-//          grabInfoFromFormAndStuffInfoExercise(newUserExercise.getMutable());
-          afterValidForeignPhrase(pagingContainer, toAddTo, onClick);
+       // grabInfoFromFormAndStuffInfoExercise(newUserExercise);
+          afterValidForeignPhrase(/*pagingContainer,*/ toAddTo, onClick);
         } else {
-          markError(foreignLang, "The " + FOREIGN_LANGUAGE +
+          markError(foreignLang, "The " + controller.getLanguage() +
               " text is not in our " + getLanguage() + " dictionary. Please edit.");
         }
       }
     });
-  }*/
+  }
 
   /**
-   * @param mutableExercise
-   * @see #isValidForeignPhrase(ListInterface, Panel, boolean)
+   * @param clientExercise
+   * @see #isValidForeignPhrase
    * @see #reallyChange(boolean, boolean)
    */
-/*
-  private void grabInfoFromFormAndStuffInfoExercise(MutableExercise mutableExercise) {
+  private void grabInfoFromFormAndStuffInfoExercise(ClientExercise clientExercise) {
     String text = english.getSafeText();
+
+    MutableShell mutableShell = clientExercise.getMutableShell();
 
     //   logger.info("so english  field is " + text + " fl " + foreignLang.getSafeText());
     //   logger.info("so translit field is " + translit.getSafeText());
     if (isEnglish()) {
-      mutableExercise.setMeaning(text);
+      mutableShell.setMeaning(text);
     } else {
-      mutableExercise.setEnglish(text);
+      mutableShell.setEnglish(text);
     }
-    mutableExercise.setForeignLanguage(foreignLang.getSafeText());
-    mutableExercise.setTransliteration(translit.getSafeText());
+    mutableShell.setForeignLanguage(foreignLang.getSafeText());
+
+    // TODO : put back in!
+
+  //  mutableShell.setTransliteration(translit.getSafeText());
 
 //    Collection<U> directlyRelated = mutableExercise.getDirectlyRelated();
 
- */
-/*
-    if (directlyRelated.isEmpty()) {
-      if (!context.getSafeText().isEmpty() ||
-          !contextTrans.getSafeText().isEmpty()
-          ) {
-        logger.info("grabInfoFromFormAndStuffInfoExercise no context sentence on " + mutableExercise.getID());
-        addContext(controller.getUser(), mutableExercise, projectID);
-      }
-    }
-    *//*
+//    if (directlyRelated.isEmpty()) {
+//      if (!context.getSafeText().isEmpty() ||
+//          !contextTrans.getSafeText().isEmpty()
+//          ) {
+//        logger.info("grabInfoFromFormAndStuffInfoExercise no context sentence on " + mutableExercise.getID());
+//        addContext(controller.getUser(), mutableExercise, projectID);
+//      }
+//    }
 
-   // updateContextExercise(mutableExercise);
+    updateContextExercise(clientExercise);
   }
-*/
 
- /* private void updateContextExercise(MutableExercise mutableExercise) {
-    Collection<U> directlyRelated = mutableExercise.getDirectlyRelated();
+  private void updateContextExercise(ClientExercise clientExercise) {
+    List<ClientExercise> directlyRelated = clientExercise.getDirectlyRelated();
 
-    if (!directlyRelated.isEmpty()) {
-      U contextSentenceExercise = directlyRelated.iterator().next();
-      MutableExercise mutableContext = contextSentenceExercise.getMutable();
+   // if (!directlyRelated.isEmpty()) {
+    ClientExercise contextSentenceExercise = directlyRelated.iterator().next();
+      MutableShell mutableContext = contextSentenceExercise.getMutableShell();
 
       mutableContext.setForeignLanguage(context.getSafeText());
 
@@ -725,10 +750,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         mutableContext.setEnglish(contextTrans.getSafeText());
       }
 
-      Collection<U> directlyRelated1 = mutableExercise.getDirectlyRelated();
-      logger.info("grabInfoFromFormAndStuffInfoExercise context now " + directlyRelated1.iterator().next().getForeignLanguage());
-    }
-  }*/
+    //  Collection<U> directlyRelated1 = mutableExercise.getDirectlyRelated();
+    //  logger.info("grabInfoFromFormAndStuffInfoExercise context now " + directlyRelated1.iterator().next().getForeignLanguage());
+  //  }
+  }
 
   /**
    * @see #isValidForeignPhrase(ListInterface, Panel, boolean)
@@ -781,13 +806,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     annoBox.addStyleName("editComment");
   }
 
-  /**
-   * @param toAddTo
-   * @param onClick
-   * @see #validateThenPost(RecordAudioPanel, ControlGroup, Panel, boolean)
-   */
-  abstract void afterValidForeignPhrase(final Panel toAddTo,
-                                        boolean onClick);
+
 
   /**
    * @param row
@@ -833,6 +852,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       String speed = (recordRegularSpeed ? "Regular" : "Slow") + "_speed";
       getPostAudioButton().getElement().setId(WIDGET_ID + speed);
       getPlayButton().getElement().setId(WIDGET_ID + "Play_" + speed);
+      boolean teacher = controller.getUserManager().isTeacher();
+      setEnabled(teacher);
       controller.register(getPlayButton(), newExercise.getID());
     }
 

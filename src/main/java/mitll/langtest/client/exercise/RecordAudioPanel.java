@@ -109,7 +109,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
                           AudioType audioType) {
     super(
         controller, showSpectrogram,
-        1.0f, 0,
+        0,
         exercise,
         exercise.getID()
     );

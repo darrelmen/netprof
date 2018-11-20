@@ -41,9 +41,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
-import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
-import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -68,12 +66,11 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   public static final String MEANING = "meaning";
   public static final String ENGLISH = "english";
 
-  private static final String ITEM = "Item";
+  // private static final String ITEM = "Item";
 
   private final HTML fastAnno = new HTML();
   private final HTML slowAnno = new HTML();
 
-  private final PagingExerciseList<T, U> exerciseList;
   final INavigation.VIEWS instance;
 
   private static final boolean DEBUG = false;
@@ -84,17 +81,13 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    * @paramx predefinedContent   - so we can tell it to update its tooltip
    * @see EditItem#setFactory
    */
-  EditableExerciseDialog(ExerciseController controller,
-                         U changedUserExercise,
+  EditableExerciseDialog(ExerciseController controller, U changedUserExercise,
                          int originalListID,
-
-                         PagingExerciseList<T, U> exerciseList,
                          INavigation.VIEWS instanceName) {
     super(controller, changedUserExercise, originalListID);
     this.instance = instanceName;
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
-    this.exerciseList = exerciseList;
   }
 
   /**
@@ -104,13 +97,13 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    * @param toAddTo
    * @see
    */
-  @Override
+/*  @Override
   protected void gotBlur(FormField foreignLang,
                          RecordAudioPanel rap,
                          ControlGroup normalSpeedRecording,
                          Panel toAddTo) {
     validateThenPost(rap, normalSpeedRecording, toAddTo, false);
-  }
+  }*/
 
   /**
    * @param container
@@ -164,17 +157,16 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   }
 
   /**
-   * @param toAddTo
-   * @param onClick
+   * @paramx toAddTo
+   * @paramx onClick
    * @see NewUserExercise#validateThenPost(RecordAudioPanel, ControlGroup, Panel, boolean)
    */
-  @Override
-  void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {
-    //  if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
-    // checkForForeignChange();
-    postChangeIfDirty(onClick);
-  }
-
+//  @Override
+//  void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {
+//    //  if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
+//    // checkForForeignChange();
+//    postChangeIfDirty(onClick);
+//  }
   @Override
   protected void formInvalid() {
     postChangeIfDirty(false);
@@ -259,7 +251,6 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     setContextTrans(newUserExercise);
 
     if (rap != null) {
-
       addAudio(instance == INavigation.VIEWS.FIX_SENTENCES ? newUserExercise.getDirectlyRelated().iterator().next() : newUserExercise);
     }
   }
@@ -295,8 +286,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     }
   }
 
-  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row,
-                                                             boolean recordRegularSpeed,
+  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, boolean recordRegularSpeed,
                                                              String instance) {
     return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed) {
       @Override
@@ -334,7 +324,6 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    * @param newUserExercise
    */
   private void setContext(U newUserExercise) {
-    String originalContext;
     context.box.setText(originalContext = newUserExercise.getContext().trim());
     if (!useAnnotation(newUserExercise, CONTEXT, contextAnno)) {
       List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
@@ -346,7 +335,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   }
 
   private void setContextTrans(U newUserExercise) {
-    String originalContextTrans;
+
     contextTrans.box.setText(originalContextTrans = newUserExercise.getContextTranslation().trim());
     if (!useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno)) {
       List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
@@ -359,6 +348,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
 
   private void setEnglish(U newUserExercise) {
     String english = isEnglish() ? getMeaning(newUserExercise) : newUserExercise.getEnglish();
+    this.originalEnglish = english;
     this.english.box.setText(english);
     ((TextBox) this.english.box).setVisibleLength(english.length() + 4);
     if (english.length() > 20) {
@@ -377,9 +367,9 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   @Override
   boolean useAnnotation(AnnotationExercise userExercise, String field, HTML annoField) {
     //  logger.info("useAnnotation " + userExercise.getID() + " : " + field);
-    ExerciseAnnotation annotation = userExercise.getAnnotation(field);
+    //ExerciseAnnotation annotation = userExercise.getAnnotation(field);
     //   logger.info("useAnnotation annotation " + annotation);
-    return useAnnotation(annotation, annoField);
+    return useAnnotation(userExercise.getAnnotation(field), annoField);
   }
 
   /**

@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -51,7 +52,7 @@ import java.util.List;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class DialogHelper {
-  //private final Logger logger = Logger.getLogger("DialogHelper");
+  private final Logger logger = Logger.getLogger("DialogHelper");
 
   private static final String OK = "OK";
   private static final String CANCEL = "Cancel";
@@ -118,7 +119,8 @@ public class DialogHelper {
                      String cancelButtonName,
                      final CloseListener listener,
                      int maxHeight,
-                     int width, boolean isBig) {
+                     int width,
+                     boolean isBig) {
     return showDialog(title, msgs, other, cancelButtonName, listener, maxHeight, width, getCloseButton(buttonName), isBig);
   }
 
@@ -128,6 +130,8 @@ public class DialogHelper {
                             CloseListener listener, int maxHeight, int width, Button closeButton,
                             boolean isBig) {
     dialogBox = new Modal();
+
+    logger.info("max height " + maxHeight);
     if (width > 900) {
       DOM.setStyleAttribute(dialogBox.getElement(), "left", 310 + "px");
     }
