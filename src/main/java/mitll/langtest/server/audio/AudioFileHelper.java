@@ -321,7 +321,7 @@ public class AudioFileHelper implements AlignDecode {
     if (isStale(exercise)) {
       //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
       // int before = oov.size();
-      validForeignPhrase = getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration(), oov);
+      validForeignPhrase = getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
 //      if (oov.size() > before) {
 //        logger.info("isValidForeignPhrase " + project.getName() + " oov now " + oov.size());
 //      }
@@ -363,13 +363,12 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @param foreignLanguagePhrase
-   * @param oov
    * @return
    * @seex mitll.langtest.server.services.ScoringServiceImpl#isValidForeignPhrase
    * @see InDictFilter#isPhraseInDict
    */
-  public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration, Set<String> oov) {
-    return getASRScoring().validLTS(foreignLanguagePhrase, transliteration, oov);
+  public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration) {
+    return getASRScoring().validLTS(foreignLanguagePhrase, transliteration);
   }
 
 /*  private boolean isInDictOrLTS(ClientExercise exercise) {
@@ -642,7 +641,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.decoder.RefResultDecoder#doDecode
    */
   public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, int userID, File absoluteFile) {
-    if (getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration(), new HashSet<>())) {
+    if (getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration())) {
       decodeAndRemember(exercise, attribute, true, userID, absoluteFile);
     } else {
       logger.warn("decodeOneAttribute skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");

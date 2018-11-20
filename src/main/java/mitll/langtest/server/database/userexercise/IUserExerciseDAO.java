@@ -183,7 +183,7 @@ public interface IUserExerciseDAO extends IDAO {
       ISection<CommonExercise> sectionHelper,
       Project theProject,
       Map<Integer, ExerciseAttribute> allByProject,
-      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs);
+      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs, boolean isPredef);
 
   /**
    *
@@ -192,6 +192,7 @@ public interface IUserExerciseDAO extends IDAO {
    * @param lookup
    * @param allByProject
    * @param exToAttrs
+   * @param isPredef
    * @return
    */
   List<CommonExercise> getContextByProject(
@@ -199,8 +200,8 @@ public interface IUserExerciseDAO extends IDAO {
       ISection<CommonExercise> sectionHelper,
       Project lookup,
       Map<Integer, ExerciseAttribute> allByProject,
-      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs
-  );
+      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs,
+      boolean isPredef);
 
   Collection<CommonExercise> getOverrides(boolean shouldSwap);
 

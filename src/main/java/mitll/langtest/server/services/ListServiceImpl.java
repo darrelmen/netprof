@@ -50,7 +50,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 
 @SuppressWarnings("serial")
@@ -302,7 +301,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
 
   private boolean isValidForeignPhrase(String foreign) throws DominoSessionException {
-    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "", new HashSet<>());
+    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "");
   }
 
   @NotNull

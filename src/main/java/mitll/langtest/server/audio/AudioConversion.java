@@ -268,9 +268,12 @@ public class AudioConversion extends AudioBase {
         long now = System.currentTimeMillis();
         long diff = now - then;
 
-        if (diff > 25) {
-          logger.info("convertTo16Khz : took " + diff + " millis to convert original " + orig.getName() + " at " + sampleRate +
-              " to 16K wav file : " + wavFile.getName());
+        if (diff > 5) {
+          logger.info("convertTo16Khz : " +
+              "\n\ttook            " + diff + " millis to convert " +
+              "\n\toriginal        " + orig.getName() +
+              "\n\tat " + sampleRate +
+              "\n\tto 16K wav file " + wavFile.getName());
         }
       }
     } catch (IOException e) {
@@ -310,9 +313,9 @@ public class AudioConversion extends AudioBase {
 
   /**
    * @param pathToAudioFile
-   * @return
    * @throws IOException
    * @see #convertTo16Khz
+   * @return temp file that is at 16K
    */
   private String convertTo16KHZ(String pathToAudioFile) throws IOException {
     return sampleAt16KHZ(pathToAudioFile, makeTempFile("convertTo16KHZ"));

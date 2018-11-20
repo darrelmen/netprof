@@ -110,7 +110,7 @@ class CheckLTS {
   /**
    * @param foreignLanguagePhrase
    * @return
-   * @see Scoring#validLTS(String, String, Set)
+   * @see Scoring#validLTS(String, String)
    */
   Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
     return checkLTS(letterToSoundClass, foreignLanguagePhrase, transliteration, removeAllAccents);

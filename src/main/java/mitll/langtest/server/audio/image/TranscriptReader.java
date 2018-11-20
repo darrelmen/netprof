@@ -32,11 +32,11 @@
 
 package mitll.langtest.server.audio.image;
 
-//import org.apache.logging.log4j.LogManager;
-//import org.apache.logging.log4j.Logger;
-
-import java.io.*;
-import java.util.*;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
@@ -67,12 +67,41 @@ public class TranscriptReader {
   /**
    * Converts MLF units to seconds
    */
-  private static final int MLF_OFFSET_UNITS = 10000000;
-  private static final boolean showPhones = false; // don't show phonemes if also have words
+ // private static final int MLF_OFFSET_UNITS = 10000000;
+ // private static final boolean showPhones = false; // don't show phonemes if also have words
   private final Pattern p = Pattern.compile("\\s+");    /// Splitter for fields in transcript
   private final Pattern semi = Pattern.compile(";");
 
-  public SortedMap<Float, TranscriptEvent> readEventsFromFile(String tfn, boolean usePhone, Map<String,String> phoneToDisplay) throws IOException {
+  public SortedMap<Float, TranscriptEvent> readEventsFromString(String labString, boolean usePhone, Map<String,String> phoneToDisplay) {
+    // format: start end event;start end event;...
+    String[] split = semi.split(labString);
+    SortedMap<Float, TranscriptEvent> events = new TreeMap<Float, TranscriptEvent>();
+    for (String lab : split) {
+      String[] fields = p.split(lab);
+      assert (fields.length == 3 || fields.length == 4);
+      String startTime = fields[0];
+      String endTime = fields[1];
+      float start = Float.valueOf(startTime), end = Float.valueOf(endTime);
+      // TODO jess for alignment this will probably need to have phone scores also
+      String event = fields[2];
+      if (usePhone) {
+        //    String before = event;
+        event = getDisplayPhoneme(phoneToDisplay, event);
+        //    logger.debug("before " + before + " after " + event);
+      }
+
+      events.put(start, new TranscriptEvent(start, end, event, fields.length == 4 ? Float.valueOf(fields[3]) : 0.0f));
+    }
+    return events;
+  }
+
+  private String getDisplayPhoneme(Map<String,String> phoneToDisplay,String phone) {
+    String s = phoneToDisplay.get(phone);
+    if (s == null) return phone;
+    else return s;
+  }
+
+/*  public SortedMap<Float, TranscriptEvent> readEventsFromFile(String tfn, boolean usePhone, Map<String,String> phoneToDisplay) throws IOException {
     BufferedReader f = getReader(tfn);
     String ev;
 
@@ -98,35 +127,7 @@ public class TranscriptReader {
     f.close();
     return events;
   }
-  
-  public SortedMap<Float, TranscriptEvent> readEventsFromString(String labString, boolean usePhone, Map<String,String> phoneToDisplay) {
-	  // format: start end event;start end event;...
-    String[] split = semi.split(labString);
-    SortedMap<Float, TranscriptEvent> events = new TreeMap<Float, TranscriptEvent>();
-    for (String lab : split) {
-      String[] fields = p.split(lab);
-      assert (fields.length == 3 || fields.length == 4);
-      String startTime = fields[0];
-      String endTime = fields[1];
-      float start = Float.valueOf(startTime), end = Float.valueOf(endTime);
-      // TODO jess for alignment this will probably need to have phone scores also
-      String event = fields[2];
-      if (usePhone) {
-    //    String before = event;
-        event = getDisplayPhoneme(phoneToDisplay, event);
-    //    logger.debug("before " + before + " after " + event);
-      }
-
-      events.put(start, new TranscriptEvent(start, end, event, fields.length == 4 ? Float.valueOf(fields[3]) : 0.0f));
-    }
-    return events;
-  }
-
-  private String getDisplayPhoneme(Map<String,String> phoneToDisplay,String phone) {
-    String s = phoneToDisplay.get(phone);
-    if (s == null) return phone;
-    else return s;
-  }
+  */
 
   /**
    * @deprecated
@@ -192,9 +193,9 @@ public class TranscriptReader {
    * @throws UnsupportedEncodingException
    * @throws FileNotFoundException
    */
-  private BufferedReader getReader(String tfn) throws UnsupportedEncodingException, FileNotFoundException {
+ /* private BufferedReader getReader(String tfn) throws UnsupportedEncodingException, FileNotFoundException {
     return new BufferedReader(new InputStreamReader(new FileInputStream(tfn),"UTF-8"));
-  }
+  }*/
 
   /**
    * @deprecated
@@ -204,12 +205,12 @@ public class TranscriptReader {
    * @return
    * @throws java.io.IOException
    */
-  public Map<Float, TranscriptEvent> readEventsFromMLFForOneLabel(String tfn, float sampleRate, String label)
+/*  public Map<Float, TranscriptEvent> readEventsFromMLFForOneLabel(String tfn, float sampleRate, String label)
     throws IOException {
     List<Segment> segments = new ArrayList<Segment>(1);
     segments.add(new Segment(label));
     return readEventsFromMLFFile(tfn, sampleRate, segments);
-  }
+  }*/
 
   /**
    * Filters down to just the current audio file.
@@ -233,7 +234,8 @@ public class TranscriptReader {
    * @throws java.io.IOException if we can't read from the file
    * @deprecated
    */
-  private Map<Float, TranscriptEvent> readEventsFromMLFFile(String tfn, float sampleRate, Collection<Segment> segments)
+
+/*  private Map<Float, TranscriptEvent> readEventsFromMLFFile(String tfn, float sampleRate, Collection<Segment> segments)
     throws IOException {
     BufferedReader f = getReader(tfn);
     String ev = f.readLine();
@@ -255,7 +257,7 @@ public class TranscriptReader {
     float labelStartOffset = 0;
     while ((ev = f.readLine()) != null) {
       if (ev.endsWith(".lab\"")) {
-        String label = ev.substring(ev.indexOf("/") + 1, ev.indexOf(".")); // match "*/sw_40016_120.lab"
+        String label = ev.substring(ev.indexOf("/") + 1, ev.indexOf(".")); // match "*   /sw_40016_120.lab"
         inIncludedLabel = labelToSegment.keySet().contains(label);
         if (inIncludedLabel) {
           Segment segment = labelToSegment.get(label);
@@ -276,8 +278,9 @@ public class TranscriptReader {
     }
     f.close();
     return events;
-  }
+  }*/
 
+/*
   private void addMLFEvent(String ev, Map<Float, TranscriptEvent> events, float labelStartOffset) {
     String[] fields = p.split(ev);
     assert (fields.length == 3);
@@ -298,5 +301,6 @@ public class TranscriptReader {
       events.put(start, transcriptEvent);
     }
   }
+*/
 
 }

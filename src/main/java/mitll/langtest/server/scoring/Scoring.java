@@ -50,9 +50,9 @@ import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.LTS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.Collator;
 import java.util.*;
 
@@ -106,6 +106,7 @@ public abstract class Scoring {
   private LTSFactory ltsFactory;
   final String language;
   final Language languageEnum;
+  private Map<String, String> phoneToDisplay;
 
   /**
    * @param deployPath
@@ -124,6 +125,8 @@ public abstract class Scoring {
     this.languageEnum = project.getLanguageEnum();
     removeAllAccents = !language.equalsIgnoreCase("french");
     isAsianLanguage = isAsianLanguage(language);
+    phoneToDisplay = props.getPhoneToDisplay(languageEnum);
+
 //    logger.info("isAsian " + isAsianLanguage + " lang " + language);
 //    if (isAsianLanguage) {
 //      logger.warn("using mandarin segmentation.");
@@ -179,43 +182,49 @@ public abstract class Scoring {
                                     String prefix, String suffix, boolean decode,
                                     String phoneLab, String wordLab, boolean useWebservice,
                                     boolean usePhoneToDisplay, boolean writeImages) {
-    // logger.debug("writeTranscripts - " + audioFileNoSuffix + " prefix " + prefix);
-    boolean foundATranscript = false;
-    // These may not all exist. The speech file is created only by multisv right now.
-    String phoneLabFile = prependDeploy(audioFileNoSuffix + PHONES_LAB);
-    Map<ImageType, String> typeToFile = new HashMap<>();
+    // logger.info("writeTranscripts - " + audioFileNoSuffix + " prefix " + prefix);
 
-    if (phoneLab != null) {
-//      logger.debug("phoneLab: " + phoneLab);
-      typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLab);
-      foundATranscript = true;
-    }
-    if (wordLab != null) {
-      //     logger.debug("wordLab: " + wordLab);
-      typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLab);
-      foundATranscript = true;
-    }
-
-    if (!foundATranscript) {
-      logger.error("no label files found, e.g. " + phoneLabFile);
-    }
+    Map<ImageType, String> typeToFile = getTypeToFile(audioFileNoSuffix, phoneLab, wordLab);
 
     boolean usePhone = usePhoneToDisplay || props.usePhoneToDisplay(languageEnum);
-    if (decode || !writeImages) {  //  skip image generation
-      return getEventInfo(typeToFile, usePhone);
-    } else {
+    if (writeImages) {
       String pathname = audioFileNoSuffix + ".wav";
       pathname = prependDeploy(pathname);
       if (!new File(pathname).exists()) {
         logger.error("writeTranscripts : can't find " + pathname);
         return new EventAndFileInfo();
       }
-      imageOutDir = deployPath + File.separator + imageOutDir;
 
       return new TranscriptWriter().writeTranscripts(pathname,
-          imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix, useWebservice,
-          usePhone, props.getPhoneToDisplay(languageEnum));
+          deployPath + File.separator + imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix,
+          usePhone, phoneToDisplay);
+    } else { //  skip image generation
+      return new EventAndFileInfo(Collections.emptyMap(), new TranscriptWriter().getImageTypeMapMap(typeToFile, usePhone, phoneToDisplay));
     }
+  }
+
+  @NotNull
+  private Map<ImageType, String> getTypeToFile(String audioFileNoSuffix, String phoneLab, String wordLab) {
+    boolean foundATranscript = false;
+    // These may not all exist. The speech file is created only by multisv right now.
+    Map<ImageType, String> typeToFile = new HashMap<>();
+
+    if (phoneLab != null) {
+      //  logger.info("phoneLab: " + phoneLab);
+      typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLab);
+      foundATranscript = true;
+    }
+    if (wordLab != null) {
+      //  logger.info("wordLab: " + wordLab);
+      typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLab);
+      foundATranscript = true;
+    }
+
+    if (!foundATranscript) {
+      String phoneLabFile = prependDeploy(audioFileNoSuffix + PHONES_LAB);
+      logger.error("no label files found, e.g. " + phoneLabFile);
+    }
+    return typeToFile;
   }
 
 
@@ -243,32 +252,9 @@ public abstract class Scoring {
                                           boolean usePhoneToDisplay,
                                           boolean writeImages,
                                           boolean useKaldi) {
-    //logger.debug("writeTranscriptsCached " + object);
-    if (decode || !writeImages) {  //  skip image generation
-      // These may not all exist. The speech file is created only by multisv right now.
-      Map<ImageType, String> typeToFile = new HashMap<>();
-      if (!useKaldi) {
-        String phoneLabFile = prependDeploy(audioFileNoSuffix + PHONES_LAB);
-        if (new File(phoneLabFile).exists()) {
-          typeToFile.put(ImageType.PHONE_TRANSCRIPT, phoneLabFile);
-        }
-        String wordLabFile = prependDeploy(audioFileNoSuffix + WORDS_LAB);
-        if (new File(wordLabFile).exists()) {
-          typeToFile.put(ImageType.WORD_TRANSCRIPT, wordLabFile);
-        }
-      }
-      // logger.debug("writeTranscriptsCached got " + typeToFile);
-
-      if (typeToFile.isEmpty()) {
-        return new EventAndFileInfo(typeToFile, getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi));
-      } else {
-        return getEventInfo(typeToFile, usePhoneToDisplay); // if align, don't use webservice regardless
-      }
-    } else {
+    if (writeImages) {
       Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
           getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi);
-
-      // logger.info("imageTypeMapMap " + imageTypeMapMap);
       String pathname = audioFileNoSuffix + ".wav";
       pathname = prependDeploy(pathname);
       if (!new File(pathname).exists()) {
@@ -277,11 +263,13 @@ public abstract class Scoring {
       }
       imageOutDir = deployPath + File.separator + imageOutDir;
 //      logger.info("writeTranscriptsCached " + " writing to " + deployPath + " " + imageOutDir);
-
       Collection<ImageType> expectedTypes = Arrays.asList(ImageType.PHONE_TRANSCRIPT, ImageType.WORD_TRANSCRIPT);
       return new TranscriptWriter().getEventAndFileInfo(pathname,
           imageOutDir, imageWidth, imageHeight, expectedTypes, SCORE_SCALAR, useScoreToColorBkg, prefix, "",
           imageTypeMapMap);
+    } else {
+      return new EventAndFileInfo(Collections.emptyMap(), getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi));
+
     }
   }
 
@@ -294,30 +282,6 @@ public abstract class Scoring {
     return
         new ParseResultJson(props, languageEnum)
             .readFromJSON(object, words, w, usePhoneToDisplay, null, useKaldi);
-  }
-
-  /**
-   * @param imageTypes
-   * @param usePhoneToDisplay
-   * @return
-   * @see #writeTranscriptsCached
-   */
-  // JESS reupdate here
-  private EventAndFileInfo getEventInfo(Map<ImageType, String> imageTypes, boolean usePhoneToDisplay) {
-    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<>();
-    try {
-      for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
-        ImageType imageType = o.getKey();
-        boolean isPhone = imageType.equals(ImageType.PHONE_TRANSCRIPT) && usePhoneToDisplay;
-        TranscriptReader transcriptReader = new TranscriptReader();
-        Map<String, String> phoneToDisplay = props.getPhoneToDisplay(languageEnum);
-        typeToEvent.put(imageType, transcriptReader.readEventsFromFile(o.getValue(), isPhone, phoneToDisplay));
-      }
-      return new EventAndFileInfo(new HashMap<>(), typeToEvent);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return null;
-    }
   }
 
   /**
@@ -365,20 +329,22 @@ public abstract class Scoring {
   /**
    * @param fl
    * @param transliteration
-   * @param oov
    * @return
    * @seex mitll.langtest.server.audio.AudioFileHelper#checkLTSOnForeignPhrase
    * @seex mitll.langtest.server.audio.AudioFileHelper#isInDictOrLTS
    */
-  public boolean validLTS(String fl, String transliteration, Set<String> oov) {
-    if (fl.isEmpty()) return false;
-    Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
+  public boolean validLTS(String fl, String transliteration) {
+    if (fl.isEmpty()) {
+      return false;
+    } else {
+      Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
 
-    //if (oov.addAll(oovForFL)) {
-    // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
-    //}
+      //if (oov.addAll(oovForFL)) {
+      // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
+      //}
 
-    return oovForFL.isEmpty();
+      return oovForFL.isEmpty();
+    }
   }
 
   /**
@@ -420,19 +386,23 @@ public abstract class Scoring {
    */
   String getRecoSentence(EventAndFileInfo eventAndFileInfo) {
     StringBuilder b = new StringBuilder();
-    for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : eventAndFileInfo.getTypeToEvent().entrySet()) {
-      NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
-      if (key == NetPronImageType.WORD_TRANSCRIPT) {
-        Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
-        for (Float timeStamp : timeToEvent.keySet()) {
-          String event = timeToEvent.get(timeStamp).getEvent();
-          String trim = event.trim();
-          if (!trim.isEmpty() && !toSkip.contains(event)) {
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = eventAndFileInfo.getTypeToEvent();
+    if (typeToEvent == null) logger.warn("no type to event in " + eventAndFileInfo);
+    else {
+      for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
+        NetPronImageType key = NetPronImageType.valueOf(typeToEvents.getKey().toString());
+        if (key == NetPronImageType.WORD_TRANSCRIPT) {
+          Map<Float, TranscriptEvent> timeToEvent = typeToEvents.getValue();
+          for (Float timeStamp : timeToEvent.keySet()) {
+            String event = timeToEvent.get(timeStamp).getEvent();
+            String trim = event.trim();
+            if (!trim.isEmpty() && !toSkip.contains(event)) {
 //            logger.debug("getRecoSentence including " + event + " trim '" + trim + "'");
-            b.append(trim);
-            b.append(" ");
-          } else {
-            //          logger.debug("getRecoSentence skipping  " + event + " trim '" + trim + "'");
+              b.append(trim);
+              b.append(" ");
+            } else {
+              //          logger.debug("getRecoSentence skipping  " + event + " trim '" + trim + "'");
+            }
           }
         }
       }

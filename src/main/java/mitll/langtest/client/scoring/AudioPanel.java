@@ -75,7 +75,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   private static final String RECORD = "Record";
   private static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
 
-  private static final int LEFT_COLUMN_WIDTH = SimplePagingContainer.MAX_WIDTH;
+  protected static final int LEFT_COLUMN_WIDTH = SimplePagingContainer.MAX_WIDTH;
 
   static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 80f;//96;
@@ -87,7 +87,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
-  private static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
+  protected static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
 
   protected String audioPath;
   private final Map<String, Integer> reqs = new HashMap<>();

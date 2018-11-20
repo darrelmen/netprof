@@ -36,6 +36,7 @@ import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.scoring.Scoring;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -53,7 +54,7 @@ public class EventAndFileInfo {
   public EventAndFileInfo() {}
 
   /**
-   * @see Scoring#getEventInfo
+   * @see TranscriptWriter#getEventAndFileInfo
    * @param typeToFile
    * @param typeToEvent
    */

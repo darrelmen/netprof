@@ -67,16 +67,16 @@ public interface IAudioDAO extends IDAO {
   Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio);
 
   /**
-   * @see SlickAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked
    * @param projid
    * @return
+   * @see SlickAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked
    */
   List<SlickAudio> getAll(int projid);
 
   /**
-   * @see mitll.langtest.server.domino.AudioCopy#getTranscriptToAudio
    * @param projid
    * @return
+   * @see mitll.langtest.server.domino.AudioCopy#getTranscriptToAudio
    */
   List<SlickAudio> getAllNoExistsCheck(int projid);
 
@@ -96,41 +96,26 @@ public interface IAudioDAO extends IDAO {
    * @see mitll.langtest.server.database.DatabaseImpl#writeZip
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
- <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, Language language, int projID);
+  <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, Language language, int projID);
 
   /**
    * @param userid
    * @param projid
    * @param exToTranscript
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#filterByUnrecorded
+   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getRecordedByMatchingGender
    */
   Collection<Integer> getRecordedBySameGender(int userid, int projid, Map<Integer, String> exToTranscript);
 
   Set<Integer> getRecordedBySameGenderContext(int userid, int projid, Map<Integer, String> exToTranscript);
 
-
   boolean hasAudio(int exid);
-
-  /**
-   * @param userid
-   * @return
-   * @seex mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
-   */
-/*
-  Collection<Integer> getRecordedExForUser(int userid);
-*/
-
-/*
-  Collection<Integer> getRecordedExampleForUser(int userid);
-*/
 
   void addOrUpdateUser(int userid, int projid, AudioAttribute attr);
 
   int markDefect(AudioAttribute attribute);
 
-  Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise,
-                                        Map<String, ExerciseAnnotation> fieldToAnnotation);
+  Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation);
 
   void updateDNR(int uniqueID, float dnr);
 

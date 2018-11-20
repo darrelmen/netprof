@@ -958,6 +958,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param typeOrder
    * @param sectionHelper
    * @param theProject
+   * @param isPredef
    * @return
    * @see DBExerciseDAO#readExercises
    */
@@ -967,10 +968,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       ISection<CommonExercise> sectionHelper,
       Project theProject,
       Map<Integer, ExerciseAttribute> allByProject,
-      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs) {
+      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs,
+      boolean isPredef) {
     // TODO? : consider getting exercise->phone from the ref result table again
 //    logger.info("getByProject type order " + typeOrder);
-    List<SlickExercise> allPredefByProject = dao.getAllPredefByProject(theProject.getID());
+    List<SlickExercise> allPredefByProject = isPredef ?
+        dao.getAllPredefByProject(theProject.getID()) :
+        dao.getAllUserDefinedByProject(theProject.getID());
+
 //    logger.info("getByProject got " + allPredefByProject.size() + " from " + theProject);
 
     return getExercises(allPredefByProject,
@@ -986,6 +991,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param typeOrder
    * @param sectionHelper
    * @param lookup
+   * @param isPredef
    * @return
    * @paramx attributeTypes
    * @see DBExerciseDAO#readExercises
@@ -996,10 +1002,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       ISection<CommonExercise> sectionHelper,
       Project lookup,
       Map<Integer, ExerciseAttribute> allByProject,
-      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs
-  ) {
+      Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs,
+      boolean isPredef) {
     int projectid = lookup.getID();
-    List<SlickExercise> allContextPredefByProject = dao.getAllContextByProject(projectid);
+    List<SlickExercise> allContextPredefByProject = isPredef?
+        dao.getAllContextByProject(projectid):
+        dao.getAllUserDefinedContextByProject(projectid);
+
 //    logger.info("getContextByProject For " + projectid + " got " + allContextPredefByProject.size() + " context predef ");
     return getExercises(allContextPredefByProject, typeOrder, sectionHelper,
         lookup, allByProject, exToAttrs, /*attributeTypes,*/ false);
@@ -1038,11 +1047,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    *
    *
    * TODO : make it work with context sentences!
+   *
    * @param userExercise
    * @param isContext
    * @param typeOrder
    * @see mitll.langtest.server.domino.ProjectSync#doUpdate
-   *
    * @see mitll.langtest.server.database.custom.UserListManager#editItem
    */
   @Override

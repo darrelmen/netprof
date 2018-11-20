@@ -37,6 +37,7 @@ import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.image.TranscriptReader;
 import mitll.langtest.server.audio.tools.AudioFile;
+import mitll.langtest.server.scoring.Scoring;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,17 +71,13 @@ public class TranscriptWriter extends mitll.langtest.server.audio.imagewriter.Ba
    */
   public EventAndFileInfo writeTranscripts(String audioFileName, String outdir, int imageWidth, int imageHeight,
                                            Map<ImageType, String> imageTypes, float scoreScalar,
-                                           boolean useScoreToColorBkg, String prefix, String suffix, boolean useWebservice,
+                                           boolean useScoreToColorBkg, String prefix, String suffix,
                                            boolean usePhone,
                                            Map<String, String> phoneToDisplay) {
-    try {
-      Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = getImageTypeMapMap(imageTypes, useWebservice, usePhone, phoneToDisplay);
-      //    logger.debug("prefix " + prefix);
-      return getEventAndFileInfo(audioFileName, outdir, imageWidth, imageHeight, imageTypes.keySet(), scoreScalar, useScoreToColorBkg, prefix, suffix, typeToEvent);
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-      return null;
-    }
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = getImageTypeMapMap(imageTypes, usePhone, phoneToDisplay);
+    //    logger.debug("prefix " + prefix);
+    return getEventAndFileInfo(audioFileName, outdir, imageWidth, imageHeight, imageTypes.keySet(),
+        scoreScalar, useScoreToColorBkg, prefix, suffix, typeToEvent);
   }
 
   /**
@@ -108,28 +105,25 @@ public class TranscriptWriter extends mitll.langtest.server.audio.imagewriter.Ba
     return new EventAndFileInfo(imageTypeStringMap, typeToEvent);
   }
 
+  private final TranscriptReader transcriptReader = new TranscriptReader();
+
   /**
    * @param imageTypes
-   * @param useWebservice
    * @param usePhone
    * @param phoneToDisplay
    * @return
    * @throws IOException
-   * @see #writeTranscripts(String, String, int, int, Map, float, boolean, String, String, boolean)
+   * @see #writeTranscripts
    */
-  private Map<ImageType, Map<Float, TranscriptEvent>> getImageTypeMapMap(Map<ImageType, String> imageTypes,
-                                                                         boolean useWebservice,
-                                                                         boolean usePhone,
-                                                                         Map<String, String> phoneToDisplay
-  ) throws IOException {
-    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<ImageType, Map<Float, TranscriptEvent>>();
+  public Map<ImageType, Map<Float, TranscriptEvent>> getImageTypeMapMap(Map<ImageType, String> imageTypes,
+                                                                        boolean usePhone,
+                                                                        Map<String, String> phoneToDisplay) {
+
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = new HashMap<>();
     for (Map.Entry<ImageType, String> o : imageTypes.entrySet()) {
       ImageType imageType = o.getKey();
       boolean reallyUsePhone = imageType.equals(ImageType.PHONE_TRANSCRIPT) && usePhone;
-      if (useWebservice)
-        typeToEvent.put(imageType, new TranscriptReader().readEventsFromString(o.getValue(), reallyUsePhone, phoneToDisplay));
-      else
-        typeToEvent.put(imageType, new TranscriptReader().readEventsFromFile(o.getValue(), reallyUsePhone, phoneToDisplay));
+      typeToEvent.put(imageType, transcriptReader.readEventsFromString(o.getValue(), reallyUsePhone, phoneToDisplay));
     }
     return typeToEvent;
   }
@@ -171,7 +165,7 @@ public class TranscriptWriter extends mitll.langtest.server.audio.imagewriter.Ba
     // make the image directories
     Map<ImageType, File> helperToOutputDir = getImageDirs(outdir, imageTypes);
 
-    Map<ImageType, String> typeToPath = new HashMap<ImageType, String>();
+    Map<ImageType, String> typeToPath = new HashMap<>();
     for (ImageType type : imageTypes) {
       File imageDir = helperToOutputDir.get(type);
       String relativeFile = getFileForTranscriptImageType(imageWidth, imageHeight, audioFile,

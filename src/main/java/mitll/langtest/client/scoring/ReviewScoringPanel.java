@@ -81,13 +81,18 @@ public class ReviewScoringPanel<T extends HasID> extends ScoringAudioPanel<T> {
     super(path, refSentence, "", controller, false,
         23, "", null, exerciseID);
 
- //   logger.info("ReviewScoringPanel ex " + exerciseID);
+    //   logger.info("ReviewScoringPanel ex " + exerciseID);
     tablesContainer = new HorizontalPanel();
     tablesContainer.getElement().setId("TablesContainer");
     belowContainer = new DivWidget();
     addStyleName("topFiveMargin");
     addStyleName("leftFiveMargin");
     addStyleName("rightFiveMargin");
+  }
+
+  @Override
+  protected int getImageWidth() {
+    return getWidthForWaveform(LEFT_COLUMN_WIDTH, LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP);
   }
 
   @Override
@@ -208,7 +213,7 @@ public class ReviewScoringPanel<T extends HasID> extends ScoringAudioPanel<T> {
   @Override
   protected void scoreAudio(String path, int resultID, String refSentence, String transliteration, final ImageAndCheck wordTranscript,
                             final ImageAndCheck phoneTranscript, int width, int height, int reqid) {
-  //  logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
+    //  logger.info("ReviewScoringPanel.scoreAudio : path " + path + " width " + width + " height " + height);
 
     boolean wasVisible = wordTranscript.getImage().isVisible();
     belowContainer.setWidth(width + "px");

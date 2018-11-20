@@ -453,6 +453,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         doAfterEditComplete(buttonClicked);
       }
     });
+
+
   }
 
   /**
@@ -573,19 +575,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             (slowAudioRef != null && !slowAudioRef.equals(originalSlowRefAudio));
   }
 
-  /**
-   * @param markFixedClicked
-   * @param keepAudio
-   * @see #postChangeIfDirty(boolean)
-   * @see #audioPosted
-   */
-  void reallyChange(final boolean markFixedClicked, boolean keepAudio) {
-//    newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
-
-    logger.info("reallyChange - grab fields!");
-    grabInfoFromFormAndStuffInfoExercise(newUserExercise);
-    editItem(markFixedClicked, keepAudio);
-  }
 
   /**
    * @param newUserExercise
@@ -698,6 +687,39 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     });
   }
 
+
+  /**
+   * Why would we want to change the creator of an exercise?
+   * @param markFixedClicked
+   * @param keepAudio
+   * @see #postChangeIfDirty(boolean)
+   * @see #audioPosted
+   */
+  void reallyChange(final boolean markFixedClicked, boolean keepAudio) {
+//    newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
+
+    logger.info("reallyChange - grab fields!");
+    grabInfoFromFormAndStuffInfoExercise(newUserExercise);
+    editItem(markFixedClicked, keepAudio);
+
+    List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+    if (!directlyRelated.isEmpty()) {
+      ClientExercise clientExercise = directlyRelated.get(0);
+      controller.getAudioService().editItem(clientExercise, keepAudio, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("changing the context exercise", caught);
+        }
+
+        @Override
+        public void onSuccess(Void newExercise) {
+          originalContext = clientExercise.getForeignLanguage();
+          originalContextTrans = clientExercise.getEnglish();
+        }
+      });
+    }
+  }
+
   /**
    * @param clientExercise
    * @see #isValidForeignPhrase
@@ -749,7 +771,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       } else {
         mutableContext.setEnglish(contextTrans.getSafeText());
       }
-
     //  Collection<U> directlyRelated1 = mutableExercise.getDirectlyRelated();
     //  logger.info("grabInfoFromFormAndStuffInfoExercise context now " + directlyRelated1.iterator().next().getForeignLanguage());
   //  }

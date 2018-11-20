@@ -8,14 +8,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * For dialog support!
+ */
 public class RelatedCoreExerciseHelper implements IRelatedExercise {
   private final RelatedCoreExerciseDAOWrapper daoWrapper;
 
   /**
-   *
    * @param daoWrapper
    */
-  RelatedCoreExerciseHelper(RelatedCoreExerciseDAOWrapper daoWrapper ) {
+  RelatedCoreExerciseHelper(RelatedCoreExerciseDAOWrapper daoWrapper) {
     this.daoWrapper = daoWrapper;
   }
 
@@ -54,7 +56,9 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   }
 
   @Override
-  public void deleteForProject(int projID) {    daoWrapper.deleteForProject(projID);  }
+  public void deleteForProject(int projID) {
+    daoWrapper.deleteForProject(projID);
+  }
 
   @Override
   public int deleteRelated(int related) {

@@ -55,7 +55,7 @@ public interface ASR {
 
   boolean isDictEmpty();
 
-  boolean validLTS(String foreignLanguagePhrase, String transliteration, Set<String> oov);
+  boolean validLTS(String foreignLanguagePhrase, String transliteration);
 
   PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
 

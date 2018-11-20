@@ -75,7 +75,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final String LISTS = "Lists";
 
   private static final boolean DEBUG_SEARCH = false;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_ID_LOOKUP = true;
 
   /**
@@ -748,9 +748,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     }
     then = now;
     int i = attachAudio(firstExercise);
-    logger.info("attached " + i + " audio cuts to " + firstExercise.getID());
 
     if (DEBUG) {
+      logger.info("attached " + i + " audio cuts to " + firstExercise.getID());
       for (AudioAttribute audioAttribute : firstExercise.getAudioAttributes())
         logger.debug("\t addAnnotationsAndAudio ex " + oldID + " audio " + audioAttribute);
     }

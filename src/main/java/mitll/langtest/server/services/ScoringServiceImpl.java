@@ -74,8 +74,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   private static final String UPDATING_PROJECT_INFO = "updating project info";
 
-  //  private static final String AUDIO_RECORDING = "audioRecording";
-//  private static final String WRITE_AUDIO_FILE = "writeAudioFile";
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final int SLOW_ROUND_TRIP = 3000;
   private static final String RECALC_ALIGNMENTS = "recalc alignments";
@@ -282,7 +280,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    */
   @Override
   public Map<Integer, AlignmentAndScore> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
-    logger.info("getAlignments project " + projid + " asking for " + audioIDs);
+//    logger.info("getAlignments project " + projid + " asking for " + audioIDs);
     Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
 
     {
@@ -301,7 +299,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       }
     }
 
-    logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
+  //  logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
     Map<Integer, AlignmentAndScore> audioIDToAlignment = recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
     return audioIDToAlignment;
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
@@ -339,8 +337,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     Map<Integer, AlignmentAndScore> idToAlignment = new HashMap<>();
 
     if (hasModel) {
-      logger.info("recalcAlignments recalc " + audioIDs.size() + " audio ids for project #" + projid);
-
+//      logger.info("recalcAlignments recalc " + audioIDs.size() + " audio ids for project #" + projid);
       if (audioIDs.isEmpty()) logger.error("recalcAlignments huh? no audio for " + projid);
 
       Set<Integer> completed = new HashSet<>(audioToResult.size());
@@ -754,7 +751,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    */
    @Override
   public boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
-    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration, new HashSet<>());
+    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
   }
 
   /**

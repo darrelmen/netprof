@@ -24,7 +24,7 @@ public class AudioBase {
    * @throws IOException
    * @see #makeTempFile(String)
    */
-  protected File makeTempDir(String prefix) throws IOException {
+  private File makeTempDir(String prefix) throws IOException {
     String prefix1 = "AudioConversion_makeTempDir_for_" + prefix;
     if (DEBUG) logger.info("makeTempDir " + prefix);
     Path audioConversion = Files.createTempDirectory(prefix1);
@@ -37,11 +37,11 @@ public class AudioBase {
     return file;
   }
 
-  protected String makeTempFile(String prefix) throws IOException {
+  String makeTempFile(String prefix) throws IOException {
     return makeTempDir(prefix) + File.separator + "temp" + prefix + WAV;
   }
 
-  protected void copyAndDeleteOriginal(String srcFile, File replacement) throws IOException {
+  void copyAndDeleteOriginal(String srcFile, File replacement) throws IOException {
     copyAndDeleteOriginal(new File(srcFile), replacement);
   }
 
@@ -53,11 +53,11 @@ public class AudioBase {
 //    deleteParentTempDir(srcFile);
 //  }
 
-  void deleteParentTempDir(File srcFile) throws IOException {
+  private void deleteParentTempDir(File srcFile) throws IOException {
     FileUtils.deleteDirectory(new File(srcFile.getParent()));
   }
 
-  protected void copyAndDeleteOriginal(File srcFile, File replacement) throws IOException {
+  void copyAndDeleteOriginal(File srcFile, File replacement) throws IOException {
     FileUtils.copyFile(srcFile, replacement);
     if (DEBUG)
       logger.debug("copyAndDeleteOriginal " + srcFile.getAbsolutePath() + " to " + replacement.getAbsolutePath());

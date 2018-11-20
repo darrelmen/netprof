@@ -122,23 +122,13 @@ public interface ListService extends RemoteService {
    */
   void addItemToUserList(int userListID, int exID) throws DominoSessionException;
 
-/*
-  UserList<CommonShell> getReviewList(boolean isContext) throws DominoSessionException, RestrictedOperationException;
-*/
-
   /**
    * @param userListID
-   * @param userExercise
+   * @param initialText
    * @return
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
-
   CommonExercise newExercise(int userListID, String initialText) throws DominoSessionException;
-
-
-/*  boolean shouldShowAudio(int userListID);
-  int getRoundTimeMinutes(int userListID);
-  int getMinScore(int userListID);*/
 
   QuizSpec getQuizInfo(int userListID);
 }

@@ -198,8 +198,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
               fullProject,
 
               allAttributesByProject,
-              exToAttrs
-          );
+              exToAttrs,
+              true);
 
       logger.info("readExercises" +
           "\n\tfor        " + projid +
@@ -208,24 +208,72 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           // "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\tgot        " + allNonContextExercises.size() + " predef exercises");
 
-
-      logger.info("readExercises got " + typeOrder + " typeOrder");
-
       Map<Integer, CommonExercise> idToContext =
           getIDToExercise(userExerciseDAO.getContextByProject(
               typeOrder,
               getSectionHelper(),
-              fullProject, allAttributesByProject, exToAttrs
-          ));
+              fullProject, allAttributesByProject, exToAttrs,
+              true));
 //      logger.info("readExercises project " + project + " idToContext " + idToContext.size());
 
-      attachContextExercises(allNonContextExercises, userExerciseDAO.getRelatedExercise().getAllRelated(projid), idToContext);
+      Collection<SlickRelatedExercise> allRelated = userExerciseDAO.getRelatedExercise().getAllRelated(projid);
+      attachContextExercises(allNonContextExercises, allRelated, idToContext);
 
       return allNonContextExercises;
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
     return Collections.emptyList();
+  }
+
+  protected List<CommonExercise> getUserCreatedExercises(List<String> typeOrder,
+                                                         Collection<SlickRelatedExercise> allRelated) {
+    List<CommonExercise> userEx = new ArrayList<>();
+
+    List<CommonExercise> allNonContextExercises =
+        userExerciseDAO.getByProject(
+            typeOrder,
+            getSectionHelper(),
+            fullProject,
+
+            Collections.emptyMap(),
+            Collections.emptyMap(),
+            false);
+
+    Map<Integer, CommonExercise> idToContext =
+        getIDToExercise(userExerciseDAO.getContextByProject(
+            typeOrder,
+            getSectionHelper(),
+            fullProject, Collections.emptyMap(), Collections.emptyMap(),
+            false));
+//      logger.info("readExercises project " + project + " idToContext " + idToContext.size());
+
+    int c = 0;
+    String prefix = "Project " + project.name();
+
+  //  Map<Integer, CommonExercise> idToEx = getIDToExercise(allNonContextExercises);
+
+/*
+    logger.info("attach context " + allNonContextExercises.size());
+    logger.info("related        " + related.size());
+    logger.info("idToContext    " + idToContext.size());
+    logger.info("idToEx         " + idToEx.size());// + " : " + idToEx.keySet());
+*/
+
+    Map<Integer, Integer> parentToChild = new HashMap<>();
+    allRelated.forEach(pair -> parentToChild.put(pair.exid(), pair.contextexid()));
+
+    allNonContextExercises.forEach(parent->{
+      Integer childID = parentToChild.get(parent.getID());
+      if (childID != null) {
+        CommonExercise context = idToContext.get(childID);
+        if (context != null) {
+          parent.getMutable().addContextExercise(context);
+        }
+      }
+    });
+
+    return userEx;
   }
 
   /**
@@ -275,7 +323,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   public void addUserExercise(CommonExercise commonExercise) {
     CommonExercise put = idToUserExercise.put(commonExercise.getID(), commonExercise);
-    if (put != null) logger.info("  already user ex with " +commonExercise.getID());
+    if (put != null) logger.info("  already user ex with " + commonExercise.getID());
   }
 
   /**

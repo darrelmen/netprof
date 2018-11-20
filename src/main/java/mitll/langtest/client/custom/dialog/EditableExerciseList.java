@@ -284,56 +284,6 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
     add.setEnabled(true);
   }
 
-
- /* @NotNull
-  private CommonExercise makeNewExercise(String safeText) {
-    CommonExercise newItem = getNewItem();
-    newItem.getMutable().setForeignLanguage(safeText);
-    newItem.getMutable().setEnglish("");
-    newItem.getMutable().setMeaning("");
-    return newItem;
-  }*/
-
-  /**
-   * TODOx : don't do it like this!
-   * <p>
-   * TODOx : consider filling in context and context translation?
-   * <p>
-   *
-   * @return
-   * @seex #makeExerciseList
-   */
-/*  private CommonExercise getNewItem() {
-    int user = controller.getUserManager().getUser();
-    Exercise exercise = new Exercise(
-        -1,
-        user,
-        "",
-        getProjectid(),
-        false);
-
-    addContext(user, exercise);
-
-    return exercise;
-  }*/
-
-/*
-  private void addContext(int userid, MutableExercise exercise) {
-    Exercise context = new Exercise(-1,
-        userid,
-        "",
-        getProjectid(),
-        false);
-
-    exercise.addContextExercise(context);
-  }
-*/
-
-/*
-  private int getProjectid() {
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
-  }*/
   private boolean isOnList() {
     boolean found = false;
     if (searchTypeahead.getCurrentExercise() == null) return false;
@@ -388,6 +338,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
                           final EditableExerciseList editableExerciseList,
                           Button button) {
     button.setEnabled(false);
+
     controller.getListService().deleteItemFromList(list.getID(), exid, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {

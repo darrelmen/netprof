@@ -421,7 +421,7 @@ public class PronunciationLookup implements IPronunciationLookup {
         }
       }
     } else {
-      logger.info("hasParts for '" + token + "' split " + split.length);
+     // logger.info("hasParts for '" + token + "' split " + split.length);
       match = false;
     }
     return match ? candidates : Collections.emptyList();

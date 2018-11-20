@@ -42,6 +42,7 @@ import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
 import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -95,12 +96,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String SIL = "sil";
 
   static final int MAX_FROM_ANY_TOKEN = 10;
-  public static final boolean DEBUG = false;
-  public static final String WAV1 = ".wav";
-  public static final String WAV = WAV1;
-  public static final String SCORE = "score";
-  public static final String STATUS = "status";
-  public static final String LOG = "log";
+  private static final boolean DEBUG = false;
+  private static final String WAV1 = ".wav";
+  private static final String WAV = WAV1;
+  private static final String SCORE = "score";
+  private static final String STATUS = "status";
+  private static final String LOG = "log";
 
   private final SLFFile slfFile = new SLFFile();
 
@@ -294,11 +295,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            int port) {
     long then = System.currentTimeMillis();
 
-//    logger.info("scoreRepeatExercise decode/align '" + sentence + "'");
+    logger.info("scoreRepeatExercise decode =" + decode + " decode/align '" + sentence + "'");
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + WAV;
 
-    boolean b = validLTS(sentence, transliteration, new HashSet<>());
+    boolean b = validLTS(sentence, transliteration);
     // audio conversion stuff
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
@@ -418,7 +419,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               if (cached.getWordLab().contains("UNKNOWN")) {
                 logger.info("scoreRepeatExercise note : hydra result includes UNKNOWNMODEL : " + cached.getWordLab());
               }
-              cacheHydraResult(decode, filePath, cached);//, scores, phoneLab, wordLab);
+              cacheHydraResult(decode, filePath, cached);
             }
           }
           //else {
@@ -526,7 +527,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         );
 
         return new HydraOutput(
-            new Scores(-1F, new HashMap<>(), (int) 0)
+            new Scores(-1F, new HashMap<>(), 0)
                 .setKaldiJsonObject(new JsonObject()),
             null,
             null,
@@ -537,7 +538,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
     } catch (Exception e) {
       logger.error("Got " + e, e);
-      return new HydraOutput(new Scores(-1F, new HashMap<>(), (int) 0)
+      return new HydraOutput(new Scores(-1F, new HashMap<>(), 0)
           .setKaldiJsonObject(new JsonObject()), null, null, null, transNormDict)
           .setStatus(ERROR)
           .setMessage(e.getMessage())
@@ -638,7 +639,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String absolutePath = rawFile.getAbsolutePath();
     if (rawFile.exists()) {
       if (rawFile.delete()) {
-//        logger.info("cleanUpRawFile : deleted " + absolutePath);
+        logger.info("cleanUpRawFile : deleted " + absolutePath);
       } else {
         String mes = "cleanUpRawFile : huh? couldn't delete raw audio rawFile " + absolutePath;
         logger.error(mes);
@@ -736,10 +737,21 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
               prefix1, decode,
               jsonObject, reallyUsePhone, imageOptions.isWriteImages(), useKaldi);
 
-      Map<NetPronImageType, String> sTypeToImage = getTypeToRelativeURLMap(eventAndFileInfo.getTypeToFile());
+      Map<NetPronImageType, String> sTypeToImage;
+      if (eventAndFileInfo == null) {
+        logger.warn("getPretestScore huh? no event and file info? ");
+        sTypeToImage = Collections.emptyMap();
+      } else {
+        Map<ImageType, String> typeToFile = eventAndFileInfo.getTypeToFile();
+        // logger.info("getPretestScore type to file " + typeToFile);
+        sTypeToImage = getTypeToRelativeURLMap(typeToFile);
+      }
+
+      Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent =
+          eventAndFileInfo == null ? Collections.emptyMap() : eventAndFileInfo.getTypeToEvent();
 
       Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes =
-          generator.getTypeToSegments(eventAndFileInfo.getTypeToEvent(), languageEnum);
+          generator.getTypeToSegments(typeToEvent, languageEnum);
 
 /*
       logger.info("getPretestScore sTypeToImage" +
@@ -765,9 +777,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Scores scores = result.getScores();
 
       if (useKaldi) {
-        /*Map<String, Float> phoneToTotal = */
-        setPhoneSummaryScores(eventAndFileInfo, scores);
-        // logger.info("got " + phoneToTotal);
+        if (eventAndFileInfo != null) {
+          setPhoneSummaryScores(eventAndFileInfo, scores);
+        }
       }
 
       PretestScore pretestScore = new PretestScore(
@@ -800,7 +812,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    */
   @NotNull
-  private Map<String, Float> setPhoneSummaryScores(EventAndFileInfo eventAndFileInfo, Scores scores) {
+  private void setPhoneSummaryScores(EventAndFileInfo eventAndFileInfo, Scores scores) {
     Map<String, Float> phoneToTotal = new HashMap<>();
     Map<String, Float> phoneToCount = new HashMap<>();
 
@@ -820,7 +832,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     scores.getEventScores().put(PHONES, value);
 
     phoneToTotal.forEach((k, v) -> value.put(k, v / phoneToCount.get(k)));
-    return phoneToTotal;
   }
 
   private boolean isMatch(HydraOutput result, Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes) {
@@ -915,7 +926,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       logAndNotify.logAndNotifyServerException(null, message);
       return null;
     } else {
-      String[] results = resultsStr.split("\n"); // 0th entry-overall score and phone scores, 1st entry-word alignments, 2nd entry-phone alignments
+      String[] results = resultsStr.split("\n");
+      // 0th entry-overall score and phone scores,
+      // 1st entry-word alignments,
+      // 2nd entry-phone alignments
       long timeToRunHydra = System.currentTimeMillis() - then;
 
       if (results[0].isEmpty()) {
@@ -929,9 +943,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       // TODO makes this a tuple3 type
       String[] split = results[0].split(SEMI);
       Scores scores = new Scores(split);
+
+      logger.info("runHydra " + language +
+          "\n\ttook      " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
+          "\n\ton        " + audioPath +
+          "\n\tscore     " + split[0] /*+
+          "\n\traw reply " + resultsStr*/);
+
       // clean up tmp directory if above score threshold
-      logger.debug("runHydra " + language + " : took " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
-          " hydra on " + audioPath + " - score: " + split[0] + " raw reply : " + resultsStr);
     /*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
       try {
 				logger.debug("deleting " + tmpDir + " since score is " + split[0]);
@@ -976,18 +995,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return pronunciationLookup.getCleanedTranscript(cleaned);
   }
 
-//  public String getHydraTranscriptTest(String transcript) {
-//    return pronunciationLookup.getCleanedTranscript(getLCTranscript(transcript));
-//  }
-
   @NotNull
   private String getLCTranscript(String transcript) {
     return getSmallVocabDecoder().lcToken(transcript, removeAllAccents).trim();
   }
-
-//  public String getLM(String transcript, boolean removeAllPunct) {
-//    return getSmallLM(getLCTranscript(transcript), removeAllPunct);
-//  }
 
   @NotNull
   private String getSmallLM(String cleaned, boolean removeAllPunct) {
@@ -1044,7 +1055,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private String getFailureMessage(String audioPath, String transcript, Collection<String> lmSentences, boolean decode) {
     String input = decode ? lmSentences == null ? "huh? no sentences to decode???" : lmSentences.toString() : transcript;
     String which = decode ? " DECODING " : " ALIGNMENT ";
-    return "Failure during running of hydra on " + audioPath + which + " with " + input;
+    return "Failure during running of hydra " +
+        "\n\ton   " + audioPath + which +
+        "\n\twith " + input +
+        "\n\tat   " + new Date();
   }
 
   /**
@@ -1090,9 +1104,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see AlignDecode#getASRScoreForAudio
    * @see AlignDecode#getASRScoreForAudio(int, File, Collection, String, DecoderOptions, PrecalcScores)
    */
-  public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
+/*  public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
     return pronunciationLookup.getUsedTokens(lmSentences, background);
-  }
+  }*/
 
   /**
    * Make a map of event type to segment end times (so we can map clicks to which segment is clicked on).<br></br>
@@ -1105,16 +1119,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #getPretestScore
    * @see #scoreRepeatExercise
    */
-//  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToEndTimes(EventAndFileInfo eventAndFileInfo) {
-//    return generator.getTypeToSegments(eventAndFileInfo.typeToEvent, languageEnum);
-//  }
+
   private Map<String, Float> getPhoneToScore(Map<String, Map<String, Float>> typeToEventToScore, Map<String, String> phoneToDisplay) {
     return getTokenToScore(typeToEventToScore.get(PHONES), true, phoneToDisplay);
   }
-
-//  private Map<String, Float> getPhoneToScore(Collection<TranscriptSegment> segments) {
-//    return getTokenToScore(scores, scores.eventScores.get(Scores.PHONES), true, phoneToDisplay);
-//  }
 
   /**
    * @param typeToEventToScore
