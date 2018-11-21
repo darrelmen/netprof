@@ -243,11 +243,9 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   protected void showStop() {
     recordImage1.setVisible(false);
   }
-
   protected void showStart() {
     recordImage1.setVisible(true);
   }
-
 
   public Button getButton() {
     return postAudioRecordButton;

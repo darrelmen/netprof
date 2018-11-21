@@ -111,7 +111,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     this.listContainer = listContainer;
     this.isContext = isContext;
     this.addPlayer = addPlayer;
-    logger.info("Adding isContext " +isContext + " ex " +commonExercise.getID()+ " " + commonExercise.getEnglish() + " " +commonExercise.getForeignLanguage());
+   // logger.info("Adding isContext " +isContext + " ex " +commonExercise.getID()+ " " + commonExercise.getEnglish() + " " +commonExercise.getForeignLanguage());
 
     addStyleName("twoColumnStyle");
     annotationHelper = controller.getCommentAnnotator();
@@ -364,11 +364,11 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   protected void makePlayAudio(T e, DivWidget flContainer) {
-    if (hasAudio(e)) {
+    if (hasAudio(e) || true) {
       flContainer.add(playAudio = getPlayAudioPanel());
       alignmentFetcher.setPlayAudio(playAudio);
     } else {
-      // logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+       logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
     }
   }
 
@@ -429,13 +429,13 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       DivWidget rowWidget = getRowWidget();
       card.add(rowWidget);
 
-      logger.info("Add context " +contextEx.getID() + " " + contextEx);
+     // logger.info("Add context " +contextEx.getID() + " " + contextEx);
       SimpleRecordAudioPanel<ClientExercise> recordPanel = addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
       if (recordPanel != null) {
         card.add(getScoringRow(recordPanel));
       }
       else {
-        logger.warning("can't add record panel?");
+       // logger.warning("can't add record panel?");
       }
     }
   }
@@ -677,17 +677,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
       return hp;
     } else {
-      logger.info("note that the context fl is empty");
+    //  logger.info("note that the context fl is empty");
       return null;
     }
   }
-
-/*  @NotNull
-  private DivWidget getSpacer() {
-    DivWidget spacer = new DivWidget();
-    spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
-    return spacer;
-  }*/
 
   /**
    * @param contextExercise

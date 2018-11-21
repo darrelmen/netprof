@@ -2,6 +2,7 @@ package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Alignment;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
@@ -114,7 +115,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     add(getBrand());
     add(breadcrumbs);
 
-    NavCollapse navCollapse = new NavCollapse();
+//    NavCollapse navCollapse = new NavCollapse();
+    DivWidget navCollapse = new DivWidget();
     navCollapse.addStyleName("topFiveMargin");
     navCollapse.getElement().setId("navCollapse1");
 

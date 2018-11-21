@@ -491,7 +491,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
                                                                  int projID) {
     logger.info("getExerciseListWrapperForPrefix initially found " + exercisesForState.size());
 
-    String prefix = request.getPrefix();
+    String prefix = request.getPrefix().trim(); // leading or trailing spaces shouldn't do anything
     int userID = request.getUserID();
     boolean incorrectFirst = request.isIncorrectFirstOrder();
 

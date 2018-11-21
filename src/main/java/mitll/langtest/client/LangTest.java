@@ -590,7 +590,7 @@ public class LangTest implements
     //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
-      logger.info("getImage for key " + key + " found  " + ifPresent);
+    //  logger.info("getImage for key " + key + " found  " + ifPresent);
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {

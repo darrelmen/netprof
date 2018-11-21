@@ -1,3 +1,35 @@
+/*
+ *
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2015. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015-2018 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ *
+ *
+ */
+
 package mitll.langtest.client.custom.userlist;
 
 import com.github.gwtbootstrap.client.ui.Button;
@@ -6,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
@@ -268,9 +301,9 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   /**
-   * @see #addYourLists
    * @param result
    * @param left
+   * @see #addYourLists
    */
   private void showYourLists(Collection<UserList<CommonShell>> result, DivWidget left) {
     ListContainer myLists = new MyListContainer();
@@ -307,11 +340,16 @@ public class ListView implements ContentView, CreateListComplete {
 
   private Button share;
 
+  /**
+   * @param container
+   * @return
+   */
   @NotNull
   private DivWidget getButtons(ListContainer container) {
     DivWidget buttons = new DivWidget();
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
+    buttons.getElement().getStyle().setProperty("minWidth", "560px");
     buttons.add(getAddButton());
 
     if (canMakeQuiz()) {
@@ -319,11 +357,11 @@ public class ListView implements ContentView, CreateListComplete {
     }
 
     buttons.add(getRemoveButton());
-    buttons.add(share = getShare());
 
     buttons.add(getEdit());
-    // buttons.add(getImport());
     buttons.add(getAddItems());
+    buttons.add(getImport());
+    buttons.add(share = getShare());
     addDrillAndLearn(buttons, container);
 
     return buttons;
@@ -355,22 +393,32 @@ public class ListView implements ContentView, CreateListComplete {
   }
 */
 
-/*  private IsWidget getImport() {
-    Button successButton = getSuccessButton("");
+  private IsWidget getImport() {
+    Button successButton = getSuccessButton("Import");
     successButton.setIcon(IconType.UPLOAD);
+    // successButton.setSize(ButtonSize.LARGE);
     successButton.addClickHandler(event -> doImport());
     return successButton;
-  }*/
+  }
 
-/*  private void doImport() {
-    ImportBulk importBulk = new ImportBulk();
+  private void doImport() {
     UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
-    DivWidget contents = importBulk.showImportItem(controller);
+
+    final int id = currentSelection.getID();
+    boolean favorite = currentSelection.isFavorite();
+
+    doImport(currentSelection, favorite);
+    //  closeButton.setIcon(IconType.PLUS);
+  }
+
+  private void doImport(UserList<CommonShell> currentSelection, boolean favorite) {
+    ImportBulk importBulk = new ImportBulk();
+    DivWidget contents = importBulk.showImportItem(controller.getLanguage());
 
 
     DialogHelper dialogHelper = new DialogHelper(false);
     Button closeButton = dialogHelper.show(
-        "Import Bulk",
+        "Import Bulk from Text",
         Collections.emptyList(),
         contents,
         "Import",
@@ -378,11 +426,12 @@ public class ListView implements ContentView, CreateListComplete {
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
-            if (currentSelection.isFavorite()) {
+            if (favorite) {
               Window.alert("Can't import into favorites...");
               return false;
             } else {
               importBulk.doBulk(controller, currentSelection);
+              myLists.redraw();
               return true;
             }
           }
@@ -390,11 +439,15 @@ public class ListView implements ContentView, CreateListComplete {
           @Override
           public void gotNo() {
           }
+
+          @Override
+          public void gotHidden() {
+
+          }
         }, 550);
 
     closeButton.setType(ButtonType.SUCCESS);
-    //  closeButton.setIcon(IconType.PLUS);
-  }*/
+  }
 
   /**
    * @return
@@ -411,15 +464,18 @@ public class ListView implements ContentView, CreateListComplete {
   private void editList() {
     EditItem editItem = new EditItem(controller);
 
+    UserList<CommonShell> currentSelectionFromMyLists = getCurrentSelectionFromMyLists();
     Button closeButton = new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + getListName(),
         Collections.emptyList(),
-        editItem.editItem(getCurrentSelectionFromMyLists()),
-        "OK",
+        editItem.editItem(currentSelectionFromMyLists),
+        "Done",
         null,
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
+            int numItems = currentSelectionFromMyLists.getNumItems();
+            logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
             myLists.redraw();
             return true;
           }
@@ -512,11 +568,11 @@ public class ListView implements ContentView, CreateListComplete {
 
   /**
    * @return
-   * @see #getButtons(ListContainer)
+   * @see #getButtons
    */
   @NotNull
   private Button getAddButton() {
-    final Button add = new Button("List", IconType.PLUS);
+    final Button add = new Button("", IconType.PLUS);
     add.addClickHandler(event -> dialogHelper = doAdd());
     add.setType(ButtonType.SUCCESS);
     addTooltip(add, "Make a new list.");

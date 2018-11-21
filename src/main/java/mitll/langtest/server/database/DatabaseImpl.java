@@ -1119,9 +1119,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (projectID < 0) {
       logger.warn("huh? no project id on user exer " + userExercise);
     }
-    getUserListManager().editItem(userExercise,
-        // create if doesn't exist
-        getServerProps().getMediaDir(), getTypeOrder(projectID));
+    // create if doesn't exist
+    getUserListManager().editItem(userExercise, getTypeOrder(projectID));
 
     // Set<AudioAttribute> originalAudio = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defectAudio = audioDAO.getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
@@ -1792,7 +1791,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         Collection<Integer> exids = getUserListManager().getUserListExerciseJoinDAO().getExidsForList(listid);
 
         logger.info("getUserListByIDExercises list " + listid + " got " + exids.size() + " : " + exids);
-        list.setExercises(getCommonExercisesForList(projectid, exids));
+        list.setExercises(getCommonExercisesForList(projectid, exids, list.getName()));
       }
       return list;
     } else {
@@ -1803,11 +1802,19 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   @NotNull
-  private List<CommonExercise> getCommonExercisesForList(int projectid, Collection<Integer> exids) {
+  private List<CommonExercise> getCommonExercisesForList(int projectid, Collection<Integer> exids, String listName) {
+    //Collection<String> typeOrder = getTypeOrder(projectid);
+    //String first = typeOrder.isEmpty() ? "" : typeOrder.iterator().next();
     List<CommonExercise> exercises = new ArrayList<>();
     exids.forEach(exid -> {
       CommonExercise exercise = getExercise(projectid, exid);
-      if (exercise != null) exercises.add(exercise);
+      if (exercise != null) {
+        exercises.add(exercise);
+//        if (exercise.getUnitToValue().isEmpty()) {
+//          exercise.getUnitToValue().put(first, listName);
+//        }
+        //else logger.info("getCommonExercisesForList for ex "  +exercise.getID() + " " + exercise.getForeignLanguage() + " unit->value " + exercise.getUnitToValue());
+      }
     });
     exercises.sort((o1, o2) -> o1.getEnglish().compareToIgnoreCase(o2.getEnglish()));
     return exercises;

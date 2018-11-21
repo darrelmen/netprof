@@ -1390,11 +1390,11 @@ body .domino-modal.modal.in {
     right: 20%;
     bottom: 8%;
     top: 8%;
-    margin-left: 0px;
+    margin-left: 0;
     overflow: hidden;
     width: auto;
     max-width: 560px;
-    max-height: 710px;
+    max-height: 660px;
 }
 
 body .small-modal.modal.in {

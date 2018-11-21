@@ -43,6 +43,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @RemoteServiceRelativePath("list-manager")
@@ -131,4 +132,6 @@ public interface ListService extends RemoteService {
   CommonExercise newExercise(int userListID, String initialText) throws DominoSessionException;
 
   QuizSpec getQuizInfo(int userListID);
+
+  List<CommonShell> reallyCreateNewItems(int userListID, String userExerciseText) throws DominoSessionException;
 }

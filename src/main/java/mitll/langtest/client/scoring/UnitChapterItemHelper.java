@@ -38,10 +38,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.InlineLabel;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.Details;
 import mitll.langtest.shared.exercise.HasID;
@@ -84,10 +81,12 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
    * @return
    * @see GoodwaveExercisePanel#getQuestionContent
    */
-  public Panel addUnitChapterItem(T exercise, Panel vp) {
+  public UIObject addUnitChapterItem(T exercise, Panel vp) {
     Widget itemHeader = getItemHeader(exercise);
     if (exercise.getUnitToValue().isEmpty()) {
-      return null;
+      vp.add(itemHeader);
+
+      return itemHeader;
     } else {
       Panel unitLessonForExercise = getUnitLessonForExercise(exercise);
       unitLessonForExercise.add(itemHeader);

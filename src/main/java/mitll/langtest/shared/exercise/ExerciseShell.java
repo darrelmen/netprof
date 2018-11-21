@@ -63,6 +63,9 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    */
   private boolean isContext;
 
+  /**
+   * @see Exercise#setNumPhones
+   */
   int numPhones;
   private int numContext;
 

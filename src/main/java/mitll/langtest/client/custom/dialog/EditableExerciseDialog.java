@@ -61,12 +61,10 @@ import java.util.logging.Logger;
 class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> extends NewUserExercise<T, U> {
   private final Logger logger = Logger.getLogger("EditableExerciseDialog");
 
-  public static final String FOREIGN_LANGUAGE = "foreignLanguage";
+  private static final String FOREIGN_LANGUAGE = "foreignLanguage";
   public static final String TRANSLITERATION = "transliteration";
-  public static final String MEANING = "meaning";
+  private static final String MEANING = "meaning";
   public static final String ENGLISH = "english";
-
-  // private static final String ITEM = "Item";
 
   private final HTML fastAnno = new HTML();
   private final HTML slowAnno = new HTML();
@@ -81,23 +79,14 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    * @paramx predefinedContent   - so we can tell it to update its tooltip
    * @see EditItem#setFactory
    */
-  EditableExerciseDialog(ExerciseController controller, U changedUserExercise,
+  EditableExerciseDialog(ExerciseController controller,
+                         U changedUserExercise,
                          int originalListID,
                          INavigation.VIEWS instanceName) {
     super(controller, changedUserExercise, originalListID);
     this.instance = instanceName;
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
-  }
-
-  /**
-   * @param container
-   * @see #addFields
-   */
-  @Override
-  protected void addItemsAtTop(Panel container) {
-    UnitChapterItemHelper<U> unit = new UnitChapterItemHelper<>(controller.getProjectStartupInfo().getTypeOrder());
-    unit.addUnitChapterItem(newUserExercise, container);
   }
 
   boolean shouldDisableNext() {
@@ -238,6 +227,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     if (rap != null) {
       addAudio(instance == INavigation.VIEWS.FIX_SENTENCES ? newUserExercise.getDirectlyRelated().iterator().next() : newUserExercise);
     }
+
   }
 
   private void addAudio(ClientExercise newUserExercise) {
@@ -298,7 +288,6 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   }
 
   private void setFL(U newUserExercise) {
-    String originalForeign;
     foreignLang.box.setText(originalForeign = newUserExercise.getForeignLanguage().trim());
     useAnnotation(newUserExercise, FOREIGN_LANGUAGE, foreignAnno);
   }

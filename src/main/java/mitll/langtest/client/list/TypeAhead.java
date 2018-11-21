@@ -113,7 +113,7 @@ public abstract class TypeAhead implements ITypeAhead {
     getTypeAheadBox().setDirectionEstimator(true);   // automatically detect whether text is RTL
     getTypeAheadBox().addKeyUpHandler(event -> {
       //  logger.info("got key up " + event);
-      String current = getTypeAheadBox().getText();
+      String current = getTypeAheadBox().getText().trim();
 
       if (previous.equals(current) && !previous.isEmpty()) {
         logger.info("makeTypeAhead prev = current '" + previous + "'");

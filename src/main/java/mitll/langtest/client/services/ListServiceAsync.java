@@ -39,6 +39,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public interface ListServiceAsync {
@@ -90,4 +91,6 @@ public interface ListServiceAsync {
   void update(UserList userList, AsyncCallback<Void> async);
 
   void getQuizInfo(int userListID, AsyncCallback<QuizSpec> async);
+
+  void reallyCreateNewItems(int userListID, String userExerciseText, AsyncCallback<List<CommonShell>> async);
 }

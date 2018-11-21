@@ -597,10 +597,10 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     }
 */
     row.add(getFixedButton(toAddTo, normalSpeedRecording));
-    boolean keepAudioSelection = getKeepAudioSelection();
+    //boolean keepAudioSelection = getKeepAudioSelection();
 
     //   logger.info("value is  " + keepAudioSelection);
-    keepAudio.setValue(keepAudioSelection);
+    keepAudio.setValue(getKeepAudioSelection());
     keepAudio.addClickHandler(clickEvent -> storeKeepAudio(keepAudio.getValue()));
     keepAudio.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     row.add(keepAudio);

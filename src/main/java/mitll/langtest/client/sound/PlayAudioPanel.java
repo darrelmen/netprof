@@ -204,11 +204,6 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   protected void addButtons(Widget optionalToTheRight) {
     playButton = makePlayButton(this);
 
-/*    if (false) {
-      warnNoFlash.setVisible(false);
-      add(warnNoFlash);
-    }*/
-
     if (optionalToTheRight != null) {
       optionalToTheRight.addStyleName("floatLeft");
       //  logger.info("adding " + optionalToTheRight.getElement().getExID() + " to " + getElement().getExID());
@@ -250,8 +245,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   private void stylePlayButton(Button playButton) {
     playButton.setType(ButtonType.INFO);
     playButton.getElement().getStyle().setProperty("minWidth", "15px");
-    playButton.getElement().setId(PLAY_AUDIO_PANEL +
-        "playButton");
+    playButton.getElement().setId(PLAY_AUDIO_PANEL + "playButton");
     playButton.addStyleName("leftFiveMargin");
     playButton.addStyleName("floatLeft");
     playButton.setEnabled(false);
@@ -300,10 +294,10 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
   private void setIcon(boolean playing1) {
     if (playing1) {
-     // logger.info("setPlayButtonText playing1 " + playing1 + " so pause");
+      // logger.info("setPlayButtonText playing1 " + playing1 + " so pause");
       setButtonIconToPause();
     } else {
-     // logger.info("setPlayButtonText icon to play ");
+      // logger.info("setPlayButtonText icon to play ");
       showPlayIcon(playButton);
     }
   }

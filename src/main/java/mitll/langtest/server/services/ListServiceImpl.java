@@ -38,19 +38,16 @@ import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.exercise.MutableExercise;
+import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("serial")
 public class ListServiceImpl extends MyRemoteServiceServlet implements ListService {
@@ -269,9 +266,9 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * <p>
    * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
    *
-   * @return CommonExercise with id from database
    * @param userListID
    * @param initialText
+   * @return CommonExercise with id from database
    * @see mitll.langtest.client.custom.dialog.EditableExerciseList#checkIsValidPhrase
    */
   @Override
@@ -303,47 +300,28 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "");
   }
 
+  private boolean isValidForeignPhrase(Project project, String foreign) {
+    return project.getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "");
+  }
+
   @NotNull
   private CommonExercise makeNewExercise(int user, int projectID, String safeText) {
     CommonExercise newItem = getNewItem(user, projectID);
     newItem.getMutable().setForeignLanguage(safeText);
-    newItem.getMutable().setEnglish("");
-    newItem.getMutable().setMeaning("");
     return newItem;
   }
 
   /**
    * TODOx : don't do it like this!
    * <p>
-   * TODOx : consider filling in context and context translation?
    * <p>
    *
    * @return
    * @seex #makeExerciseList
    */
   private CommonExercise getNewItem(int user, int projectID) {
-    //  int user = getUserManager().getUser();
-    Exercise exercise = new Exercise(
-        -1,
-        user,
-        "",
-        projectID,
-        false);
-
-   // addContext(user, projectID, exercise);
-
-    return exercise;
+    return new Exercise(-1, user, "", projectID, false);
   }
-
-/*  private void addContext(int userid, int projectID, MutableExercise exercise) {
-    Exercise context = new Exercise(-1,
-        userid,
-        "",
-        projectID,
-        false);
-
-    exercise.addContextExercise(context);
-  }*/
 
   /**
    * @param userListID
@@ -359,13 +337,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return quizSpec;
   }
 
-/*  private ClientExercise getExerciseIfKnown(ClientExercise userExercise) {
-    return getExerciseByVocab(userExercise.getProjectID(), userExercise.getForeignLanguage());
-  }*/
-
-/*  private CommonExercise getExerciseByVocab(int projectID, String foreignLanguage) {
-    return db.getProject(projectID).getExerciseBySearch(foreignLanguage.trim());
-  }*/
 
   /**
    * Create in bulk, e.g. as import from quizlet export format.
@@ -374,39 +345,56 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @paramx userListID
    * @paramx userExerciseText
    */
-/*
   @Override
-  public Collection<CommonExercise> reallyCreateNewItems(int userListID, String userExerciseText) {
+  public List<CommonShell> reallyCreateNewItems(int userListID, String userExerciseText) throws DominoSessionException {
+    int userIDFromSession = getUserIDFromSessionOrDB();
+
+    UserList<CommonShell> userListByID = getUserListManager().getUserListByID(userListID);
+
+    int projid = userListByID.getProjid();
+    Project project = getProject(projid);
     String[] lines = userExerciseText.split("\n");
 
     if (DEBUG) logger.info("got " + lines.length + " lines");
 
-    UserList<CommonShell> userListByID =
-        getUserListManager().getUserListByID(userListID, Collections.emptyList(), Collections.emptySet());
     Set<String> currentKnownFL = getCurrentOnList(userListByID);
 
     Set<CommonExercise> knownAlready = new HashSet<>();
-    List<CommonExercise> newItems = convertTextToExercises(lines, knownAlready, currentKnownFL);
+    List<CommonExercise> newItems = convertTextToExercises(lines, knownAlready, currentKnownFL, project, userIDFromSession);
 
-    List<CommonExercise> actualItems = addItemsToList(userListID, userListByID, knownAlready, newItems);
+    List<CommonExercise> actualItems = addItemsToList(userListID, knownAlready, newItems, project);
     logger.info("reallyCreateNewItems : Returning " + actualItems.size() + "/" + lines.length);
-    return actualItems;
+
+    Set<Integer> current =new HashSet<>();
+    userListByID.getExercises().forEach(ex->current.add(ex.getID()));
+
+    actualItems.forEach(commonExercise -> {
+      if (!current.contains(commonExercise.getID())) {
+
+
+        userListByID.addExercise(commonExercise);
+      }
+    });
+
+//    return actualItems.size();
+
+    return userListByID.getExercises();
   }
-*/
- /* private List<CommonExercise> addItemsToList(int userListID,
-                                              UserList<CommonShell> userListByID,
+
+  private List<CommonExercise> addItemsToList(int userListID,
                                               Set<CommonExercise> knownAlready,
-                                              List<CommonExercise> newItems) {
+                                              List<CommonExercise> newItems,
+                                              Project project) {
     List<CommonExercise> actualItems = new ArrayList<>();
 
     IUserListManager userListManager = getUserListManager();
     for (CommonExercise candidate : newItems) {
       String foreignLanguage = candidate.getForeignLanguage();
       if (knownAlready.contains(candidate)) {
-        userListManager.addItemToList(userListID, "", candidate.getID());
+        userListManager.addItemToList(userListID, candidate.getID());
         actualItems.add(candidate);
-      } else if (isValidForeignPhrase(foreignLanguage, candidate.getTransliteration())) {
-        userListManager.newExerciseOnList(userListByID, candidate, serverProps.getMediaDir());
+      } else if (isValidForeignPhrase(project, foreignLanguage)) {
+        userListManager.newExercise(userListID, candidate);
         actualItems.add(candidate);
       } else {
         logger.info("item #" + candidate.getID() + " '" + candidate.getForeignLanguage() + "' is invalid");
@@ -414,29 +402,30 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     }
 
     return actualItems;
-  }*/
+  }
 
- /* private List<CommonExercise> convertTextToExercises(String[] lines,
+  private List<CommonExercise> convertTextToExercises(String[] lines,
                                                       Set<CommonExercise> knownAlready,
-                                                      Set<String> currentKnownFL) {
-    int projectID = getProjectIDFromUser();
+                                                      Set<String> currentKnownFL,
+                                                      Project project,
+                                                      int userIDFromSession)  {
+    int projectID = project.getID();
     boolean onFirst = true;
     boolean firstColIsEnglish = false;
     List<CommonExercise> newItems = new ArrayList<>();
 
     logger.info("convertTextToExercises currently know about " + currentKnownFL.size());
 
-    int userIDFromSession = getUserIDFromSessionOrDB();
 
     for (String line : lines) {
       String[] parts = line.split("\\t");
 //      logger.info("\tgot " + parts.length + " parts");
       if (parts.length > 1) {
         String fl = parts[0];
-        String english = parts[1];
+        String english = parts[1].trim();
 
 
-        if (onFirst && english.equalsIgnoreCase(getProject().getLanguage())) {
+        if (onFirst && english.equalsIgnoreCase(project.getLanguage())) {
           logger.info("convertTextToExercises skipping header line");
           firstColIsEnglish = true;
         } else {
@@ -444,7 +433,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
             logger.warn("convertTextToExercises skipping line " + line);
           } else {
             if (!currentKnownFL.contains(fl)) {
-              CommonExercise known = makeOrFindExercise(newItems, firstColIsEnglish, projectID, userIDFromSession, fl, english);
+              CommonExercise known = makeOrFindExercise(newItems, firstColIsEnglish, projectID, userIDFromSession, fl, english, project);
               logger.info("convertTextToExercises made or found " + fl + "=" + english);
 
               if (known != null) knownAlready.add(known);
@@ -466,10 +455,13 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     for (CommonShell shell : userListByID.getExercises()) currentKnownFL.add(shell.getForeignLanguage());
     return currentKnownFL;
   }
-*/
-/*  private CommonExercise makeOrFindExercise(List<CommonExercise> newItems, boolean firstColIsEnglish, int projectID,
-                                            int userIDFromSession, String fl, String english) {
-    if (firstColIsEnglish || (isValidForeignPhrase(english, "") && !isValidForeignPhrase(fl, ""))) {
+
+  private CommonExercise makeOrFindExercise(List<CommonExercise> newItems, boolean firstColIsEnglish, int projectID,
+                                            int userIDFromSession, String fl, String english,
+                                            Project project)  {
+    english = english.replaceAll("&#39;","");
+
+    if (firstColIsEnglish || (isValidForeignPhrase(project, english) && !isValidForeignPhrase(project, fl))) {
       String temp = english;
       english = fl;
       fl = temp;
@@ -495,7 +487,15 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     newItems.add(newItem);
     logger.info("reallyCreateNewItems new " + newItem);
     return null;
-  }*/
+  }
+//
+//  private ClientExercise getExerciseIfKnown(ClientExercise userExercise) {
+//    return getExerciseByVocab(userExercise.getProjectID(), userExercise.getForeignLanguage());
+//  }
+
+  private CommonExercise getExerciseByVocab(int projectID, String foreignLanguage) {
+    return db.getProject(projectID).getExerciseBySearch(foreignLanguage.trim());
+  }
 
   /**
    * @param exercise

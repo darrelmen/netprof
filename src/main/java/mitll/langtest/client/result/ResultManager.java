@@ -553,7 +553,7 @@ public class ResultManager extends PagerTable {
     table.addColumn(dur, DURATION_SEC);
     rememberColumn(dur, DURATION_IN_MILLIS);
 
-    TextColumn<MonitorResult> valid = new TextColumn<MonitorResult>() {
+/*    TextColumn<MonitorResult> valid = new TextColumn<MonitorResult>() {
       @Override
       public String getValue(MonitorResult answer) {
         return answer.isValid() ? YES : NO;
@@ -561,7 +561,7 @@ public class ResultManager extends PagerTable {
     };
     valid.setSortable(true);
     table.addColumn(valid, "Valid");
-    rememberColumn(valid, VALID);
+    rememberColumn(valid, VALID);*/
 
     TextColumn<MonitorResult> validity = new TextColumn<MonitorResult>() {
       @Override

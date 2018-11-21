@@ -75,6 +75,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final String QUOT = "&quot;";
   private static final int MAX_LENGTH = 250;
   private static final String UNKNOWN1 = "unknown";
+  public static final String MITLL = "MITLL";
   /**
    * If we don't have a value for a facet, it's value is "Blank" as opposed to "Any"
    *
@@ -383,7 +384,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     if (exercise.getNumPhones() < 1 &&
         lookup.hasModel() &&
         (hostName.startsWith(HYDRA) ||
-            hostName.contains("MITLL"))) {  // for local testing
+            hostName.contains(MITLL))) {  // for local testing
 //      logger.info("addExerciseToSectionHelper ex " + slick.id() + " = " + exercise.getNumPhones());
       ExercisePhoneInfo exercisePhoneInfo = getExercisePhoneInfo(slick, lookup, pairs);
 
@@ -572,48 +573,58 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       String foreignlanguage = slick.foreignlanguage();
       String transliteration = slick.transliteration();
 
-      String pronunciations = foreignlanguage.isEmpty() ? "" : lookup.getPronunciationsFromDictOrLTS(foreignlanguage, transliteration);
-      exercisePhoneInfo = pronunciations.isEmpty() ? new ExercisePhoneInfo() : new ExercisePhoneInfo(pronunciations);
+      exercisePhoneInfo = getExercisePhoneInfo(lookup, foreignlanguage, transliteration);
+      int n2 = getNumPhones(lookup, exercisePhoneInfo, foreignlanguage, transliteration);
 
-      {
-        int numPhones = exercisePhoneInfo.getNumPhones();
-
-        int n2;
-        if (numPhones == 0) {
-          n2 = lookup.getNumPhonesFromDictionary(foreignlanguage, transliteration);
-          if (n2 > 0) {
-            exercisePhoneInfo.setNumPhones2(n2);
-          }
-        } else {
-          n2 = numPhones;
+      int id = slick.id();
+      if (n2 < 1) {
+        cantcalc++;
+        if (cantcalc < 100 || cantcalc % 1000 == 0) {
+          String english = slick.english();
+          logger.info("getExercisePhoneInfo can't calc num phones for " + cantcalc +
+              " exercises, e.g. " + id + " " + foreignlanguage + "/" + english);
         }
-
-        int id = slick.id();
-        if (n2 < 1) {
-          cantcalc++;
-          if (cantcalc < 100 || cantcalc % 1000 == 0) {
-            logger.info("getExercisePhoneInfo can't calc num phones for " + cantcalc +
-                " exercises, e.g. " + id + " " + foreignlanguage + "/" + slick.english());
+      } else {
+        if (hasMediaDir) {
+          if (n2 > 0) {
+            exerciseDAO.updatePhones(id, n2);
+            updated++;
+            if (updated < 10 || updated % 1000 == 0) logger.info("getExercisePhoneInfo (project #" + slick.projid() +
+                ") updated " + updated + " exercises with phone info (e.g. " + id + " = " + n2);
           }
         } else {
-          if (hasMediaDir) {
-            if (n2 > 0) {
-              exerciseDAO.updatePhones(id, n2);
-//            pairs.add(new SlickExercisePhone(id, n2));
-              updated++;
-              if (updated < 10 || updated % 1000 == 0) logger.info("getExercisePhoneInfo (project #" + slick.projid() +
-                  ") updated " + updated + " exercises with phone info (e.g. " + id + " = " + n2);
-            }
-          } else {
-            logger.info("getExercisePhoneInfo no media dir so can't update " + id + " with " + n2);
-          }
+          logger.info("getExercisePhoneInfo no media dir so can't update " + id + " with " + n2);
         }
       }
+
     } else {
       exercisePhoneInfo = new ExercisePhoneInfo();
       exercisePhoneInfo.setNumPhones(numphones);
     }
 
+    return exercisePhoneInfo;
+  }
+
+  private int getNumPhones(IPronunciationLookup lookup, ExercisePhoneInfo exercisePhoneInfo,
+                           String foreignlanguage, String transliteration) {
+    int numPhones = exercisePhoneInfo.getNumPhones();
+    int n2;
+    if (numPhones == 0) {
+      n2 = lookup.getNumPhonesFromDictionary(foreignlanguage, transliteration);
+      if (n2 > 0) {
+        exercisePhoneInfo.setNumPhones2(n2);
+      }
+    } else {
+      n2 = numPhones;
+    }
+    return n2;
+  }
+
+  @NotNull
+  private ExercisePhoneInfo getExercisePhoneInfo(IPronunciationLookup lookup, String foreignlanguage, String transliteration) {
+    ExercisePhoneInfo exercisePhoneInfo;
+    String pronunciations = foreignlanguage.isEmpty() ? "" : lookup.getPronunciationsFromDictOrLTS(foreignlanguage, transliteration);
+    exercisePhoneInfo = pronunciations.isEmpty() ? new ExercisePhoneInfo() : new ExercisePhoneInfo(pronunciations);
     return exercisePhoneInfo;
   }
 
@@ -724,7 +735,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       //  logger.info("examining  " + all.size() + " exercises...");
 
       int n = 0;
-    //  boolean shouldSwap = getShouldSwap(lookup.getID());
+      //  boolean shouldSwap = getShouldSwap(lookup.getID());
       for (SlickExercise slickExercise : all) {
         Exercise exercise = makeExercise(slickExercise, typeOrder);
 
@@ -972,7 +983,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         dao.getAllPredefByProject(theProject.getID()) :
         dao.getAllUserDefinedByProject(theProject.getID());
 
-    logger.info("getByProject isPredef " +isPredef+
+    logger.info("getByProject isPredef " + isPredef +
         " got " + allPredefByProject.size() + " from " + theProject);
 
     return getExercises(allPredefByProject,
@@ -1051,7 +1062,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param isContext
    * @param typeOrder
    * @see mitll.langtest.server.domino.ProjectSync#doUpdate
-   * @see mitll.langtest.server.database.custom.UserListManager#editItem
+   * @see IUserListManager#editItem
    */
   @Override
   public boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder) {

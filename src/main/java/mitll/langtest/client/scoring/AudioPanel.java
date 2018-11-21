@@ -78,7 +78,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   protected static final int LEFT_COLUMN_WIDTH = SimplePagingContainer.MAX_WIDTH;
 
   static final int MIN_WIDTH = 256;
-  private static final float WAVEFORM_HEIGHT = 70F;//80f;//96;
+  private static final float WAVEFORM_HEIGHT = 60F;//70F;//80f;//96;
   private static final float SPECTROGRAM_HEIGHT = 50f;//96;
   private static final String WAVEFORM = "Waveform";
   private static final String SPECTROGRAM = "Spectrogram";

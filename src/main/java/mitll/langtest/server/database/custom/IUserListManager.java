@@ -87,7 +87,7 @@ public interface IUserListManager {
    */
   void createFavorites(int userid, int projid);
 
-  @Deprecated
+
   UserList<CommonShell> getUserListByID(int id);
 
   UserList<CommonShell> getSimpleUserListByID(int id);
@@ -104,7 +104,7 @@ public interface IUserListManager {
 
   void addItemToList(int userListID, int exid);
 
-  void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder);
+  void editItem(CommonExercise userExercise, Collection<String> typeOrder);
 
   UserList addVisitor(int userListID, int user);
 

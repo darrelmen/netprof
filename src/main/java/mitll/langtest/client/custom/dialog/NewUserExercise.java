@@ -33,19 +33,19 @@
 package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.TextArea;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
@@ -55,11 +55,8 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
-
-import static mitll.langtest.client.custom.dialog.EditableExerciseDialog.FOREIGN_LANGUAGE;
 
 /**
  * Created with IntelliJ IDEA.
@@ -101,12 +98,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   final ExerciseController controller;
 
-  protected String originalForeign = "";
-  protected String originalEnglish = "";
-  protected String originalTransliteration;
+  String originalForeign = "";
+  String originalEnglish = "";
+  private String originalTransliteration;
 
-  protected String originalRefAudio;
-  protected String originalSlowRefAudio;
+  String originalRefAudio;
+  String originalSlowRefAudio;
 
   /**
    * @see EditableExerciseDialog#setFields
@@ -117,15 +114,18 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   FormField context;
   FormField contextTrans;
 
-  protected final HTML englishAnno = new HTML();
-  protected final HTML translitAnno = new HTML();
-  protected final HTML foreignAnno = new HTML();
-  protected final HTML contextAnno = new HTML();
-  protected final HTML contextTransAnno = new HTML();
+  final HTML englishAnno = new HTML();
+  final HTML translitAnno = new HTML();
+  final HTML foreignAnno = new HTML();
+  final HTML contextAnno = new HTML();
+  final HTML contextTransAnno = new HTML();
 
-  protected String originalContext = "";
-  protected String originalContextTrans = "";
+  String originalContext = "";
+  String originalContextTrans = "";
 
+  /**
+   *
+   */
   CreateFirstRecordAudioPanel rap;
   CreateFirstRecordAudioPanel rapSlow;
 
@@ -151,6 +151,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   public NewUserExercise(ExerciseController controller, U newExercise, int listID) {
     this.controller = controller;
     this.newUserExercise = newExercise;
+//    if (newUserExercise.getUnitToValue().isEmpty()) {
+//      newUserExercise.getUnitToValue().put("List",)
+//    }
     this.listID = listID;
   }
 
@@ -161,19 +164,20 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see EditItem#setFactory
    */
   public Panel addFields(final ListInterface<T, U> listInterface, final Panel toAddTo) {
-
     this.listInterface = listInterface;
     final FluidContainer container = new ResizableFluid();
+
     DivWidget upper = new DivWidget();
     upper.getElement().setId("addNewFieldContainer");
-
-    container.getElement().setId("NewUserExercise_container");
-    Style style = container.getElement().getStyle();
-
-    style.setPaddingLeft(10, Style.Unit.PX);
-    style.setPaddingRight(10, Style.Unit.PX);
     upper.addStyleName("buttonGroupInset4");
-    container.addStyleName("greenBackground");
+
+    {
+      container.getElement().setId("NewUserExercise_container");
+      Style style = container.getElement().getStyle();
+      style.setPaddingLeft(10, Style.Unit.PX);
+      style.setPaddingRight(10, Style.Unit.PX);
+      container.addStyleName("greenBackground");
+    }
 
     addItemsAtTop(container);
     container.add(upper);
@@ -184,16 +188,18 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     }
 
     makeForeignLangRow(upper);
-//    int listID = originalList.getID();
-    final String id1 = "" + listID;
 
-    foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
-    // focusOn(formField); // Bad idea since steals the focus after search
-    makeTranslitRow(upper);
-    translit.box.getElement().setId("NewUserExercise_Transliteration_entry_for_list_" + id1);
+    {
+      final String id1 = "" + listID;
 
-    makeEnglishRow(upper);
-    english.box.getElement().setId("NewUserExercise_English_entry_for_list_" + id1);
+      foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
+      // focusOn(formField); // Bad idea since steals the focus after search
+      makeTranslitRow(upper);
+      translit.box.getElement().setId("NewUserExercise_Transliteration_entry_for_list_" + id1);
+
+      makeEnglishRow(upper);
+      english.box.getElement().setId("NewUserExercise_English_entry_for_list_" + id1);
+    }
 
     makeOptionalRows(upper);
     // make audio row
@@ -280,17 +286,21 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     return row;
   }
 
-  void addItemsAtTop(Panel container) {
+  /**
+   * @param container
+   * @see #addFields
+   */
+//  @Override
+  protected void addItemsAtTop(Panel container) {
+    // UnitChapterItemHelper<U> unit =        new UnitChapterItemHelper<>(controller.getProjectStartupInfo().getTypeOrder());
+    new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
   }
 
   private void gotBlur() {
-    gotBlur(foreignLang, rap, normalSpeedRecording, toAddTo);
+    gotBlur(rap, normalSpeedRecording, toAddTo);
   }
 
-  void gotBlur(FormField foreignLang,
-               RecordAudioPanel rap,
-               ControlGroup normalSpeedRecording,
-               Panel toAddTo) {
+  private void gotBlur(RecordAudioPanel rap, ControlGroup normalSpeedRecording, Panel toAddTo) {
     validateThenPost(rap, normalSpeedRecording, toAddTo, false);
   }
 
@@ -417,7 +427,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       controller.logEvent(box, "TextBox", "UserList_" + listID, prefix + box.getValue());
     } catch (Exception e) {
       logger.warning("got exception " + e);
-      //e.printStackTrace();
     }
   }
 
@@ -449,12 +458,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         originalRefAudio = newUserExercise.getRefAudio();
         originalSlowRefAudio = newUserExercise.getSlowAudioRef();
 
-      //  if (DEBUG) logger.info("postEditItem : onSuccess ");// + newUserExercise.getTooltip());
+        //  if (DEBUG) logger.info("postEditItem : onSuccess ");// + newUserExercise.getTooltip());
         doAfterEditComplete(buttonClicked);
       }
     });
-
-
   }
 
   /**
@@ -513,10 +520,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             "\n\tslow       " + slowRefAudioChanged()
         );
       }
-      logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
+      //logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
       reallyChange(onClick, getKeepAudio());
     } else {
-      logger.info("ignore change");
+      //logger.info("ignore change");
     }
   }
 
@@ -580,40 +587,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @param newUserExercise
    * @seex EditItem#addEditOrAddPanel
    */
-  public void setFields(U newUserExercise) {
-    logger.info("setFields : setting fields with " + newUserExercise);
-    // english
-    String english = newUserExercise.getEnglish();
-    this.english.box.setText(english);
-    ((TextBox) this.english.box).setVisibleLength(english.length() + 4);
-    if (english.length() > 20) {
-      this.english.box.setWidth("400px");
-    }
-
-    // foreign lang
-    String foreignLanguage = newUserExercise.getForeignLanguage();
-    foreignLanguage = foreignLanguage.trim();
-    foreignLang.box.setText(foreignLanguage);
-
-    // translit
-    translit.box.setText(newUserExercise.getTransliteration());
-
-    // regular speed audio
-    rap.getPostAudioButton().setExerciseID(newUserExercise.getID());
-    String refAudio = newUserExercise.getRefAudio();
-
-    if (refAudio != null) {
-      rap.getImagesForPath(refAudio);
-    }
-
-    // slow speed audio
-    rapSlow.getPostAudioButton().setExerciseID(newUserExercise.getID());
-    String slowAudioRef = newUserExercise.getSlowAudioRef();
-
-    if (slowAudioRef != null) {
-      rapSlow.getImagesForPath(slowAudioRef);
-    }
-  }
+  public abstract void setFields(U newUserExercise);
 
   /**
    * @param toAddTo
@@ -621,9 +595,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @return
    * @see #addFields
    */
-  Panel getCreateButton(Panel toAddTo, ControlGroup normalSpeedRecording) {
-    return null;
-  }
+  abstract Panel getCreateButton(Panel toAddTo, ControlGroup normalSpeedRecording);
 
   /**
    * @param rap
@@ -699,7 +671,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   void reallyChange(final boolean markFixedClicked, boolean keepAudio) {
 //    newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
 
-    logger.info("reallyChange - grab fields!");
+    //   logger.info("reallyChange - grab fields!");
     ClientExercise clientExercise = grabInfoFromFormAndStuffInfoExercise(newUserExercise);
     editItem(markFixedClicked, keepAudio);
 
@@ -829,9 +801,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     annoBox.addStyleName("leftFiveMargin");
     annoBox.addStyleName("editComment");
-
   }
-
 
   /**
    * @param row
@@ -889,6 +859,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
      *
      * @return
      * @see mitll.langtest.client.scoring.AudioPanel#makePlayAudioPanel
+     * @see RecordAudioPanel#makePlayAudioPanel
      */
     @Override
     protected WaveformPostAudioRecordButton makePostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
@@ -918,6 +889,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
               return recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW;
             }
 
+            /**
+             * @see NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton
+             * @param result
+             */
             @Override
             public void useResult(AudioAnswer result) {
               super.useResult(result);
@@ -937,7 +912,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
                 }
                 newUserExercise.getMutableAudio().addAudio(audioAttribute);
               } else {
-                logger.warning("no valid audio on " + result);
+                logger.warning("useAudioAttribute no valid audio on " + result);
               }
             }
 

@@ -170,8 +170,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   private Typeahead getTypeahead(Button add) {
     quickAddText = getEntryTextBox();
     quickAddText.addKeyUpHandler(event -> {
-
-      logger.info("getTypeahead got key up "+ quickAddText.getText());
+    //  logger.info("getTypeahead got key up "+ quickAddText.getText());
       searchTypeahead.clearCurrentExercise();
     });
 

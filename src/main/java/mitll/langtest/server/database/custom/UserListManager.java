@@ -39,7 +39,6 @@ import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.server.database.userexercise.IRelatedExercise;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
@@ -706,6 +705,9 @@ public class UserListManager implements IUserListManager {
     Project project = databaseServices.getProject(projectID);
     List<String> typeOrder = project.getTypeOrder();
 
+//    exercisePhoneInfo = getExercisePhoneInfo(lookup, foreignlanguage, transliteration);
+//    int n2 = getNumPhones(lookup, exercisePhoneInfo, foreignlanguage, transliteration);
+
     int newExerciseID = userExerciseDAO.add(userExercise, false, typeOrder);
     logger.info("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
@@ -762,13 +764,12 @@ public class UserListManager implements IUserListManager {
 
   /**
    * @param userExercise
-   * @param mediaDir
    * @param typeOrder
    * @see mitll.langtest.server.database.DatabaseImpl#editItem
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   @Override
-  public void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder) {
+  public void editItem(CommonExercise userExercise, Collection<String> typeOrder) {
     //fixAudioPaths(userExercise, true, mediaDir);
     boolean update = userExerciseDAO.update(userExercise, userExercise.isContext(), typeOrder);
     if (update) {

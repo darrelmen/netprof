@@ -265,15 +265,15 @@ public class AudioAnswer extends SimpleAudioAnswer {
   public String toString() {
     return "Answer id " + getResultID() +
         " : audio attr " + audioAttribute +
-        "\n\tPath " + path +
-        "\n\tduration " + durationInMillis +
-        "\n\tid " + reqid +
-        "\n\tvalidity " + validity +
-        "\n\tcorrect " + correct +
-        "\n\tscore " + score +
+        "\n\tpath        " + path +
+        "\n\tduration    " + durationInMillis +
+        "\n\tid          " + reqid +
+        "\n\tvalidity    " + validity +
+        "\n\tcorrect     " + correct +
+        "\n\tscore       " + score +
         "\n\tsaid answer " + saidAnswer +
-        "\n\tpretest " + pretestScore +
-        "\n\ttranscript " + transcript +
-        "\n\tnormTrans  " + normTranscript;
+        "\n\tpretest     " + pretestScore +
+        "\n\ttranscript  '" + transcript +"'"+
+        "\n\tnormTrans   " + normTranscript;
   }
 }

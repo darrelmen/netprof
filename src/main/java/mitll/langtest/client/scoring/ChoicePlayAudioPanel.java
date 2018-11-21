@@ -79,15 +79,6 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     LangTest.EVENT_BUS.addHandler(AudioSelectedEvent.TYPE, authenticationEvent -> gotAudioSelected(authenticationEvent.getExid()));
   }
 
-  /**
-   * @param optionalToTheRight
-   * @see PlayAudioPanel#PlayAudioPanel
-   */
-  @Override
-  protected void addButtons(Widget optionalToTheRight) {
-    playButton = makePlayButton(this);
-  }
-
   private void gotAudioSelected(int exid) {
     if (exercise != null && exid != exercise.getID()) {
       //  logger.info("gotAudioSelected choosing different audio for " + exercise.getID());
@@ -96,6 +87,15 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   }
 
   private SplitDropdownButton splitDropdownButton;
+
+  /**
+   * @param optionalToTheRight
+   * @see PlayAudioPanel#PlayAudioPanel
+   */
+  @Override
+  protected void addButtons(Widget optionalToTheRight) {
+    playButton = makePlayButton(this);
+  }
 
   /**
    * @param toAddTo

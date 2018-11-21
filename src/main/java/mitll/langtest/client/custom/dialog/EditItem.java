@@ -17,7 +17,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2018 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -32,9 +32,11 @@
 
 package mitll.langtest.client.custom.dialog;
 
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.banner.IListenView;
@@ -47,9 +49,6 @@ import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.exercise.MutableExercise;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
@@ -70,6 +69,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem {
+  public static final String DONE = "OK";
   private final Logger logger = Logger.getLogger("EditItem");
   private final ExerciseController controller;
   private PagingExerciseList<CommonShell, ClientExercise> exerciseList;
@@ -100,28 +100,27 @@ public class EditItem {
     contentOnRight.getElement().setId("EditItem_content");
     hp.add(contentOnRight);
 
-    exerciseList = makeExerciseList(contentOnRight, INavigation.VIEWS.LISTS, originalList);
+    exerciseList = makeExerciseList(contentOnRight, originalList);
     pagerOnLeft.add(exerciseList.getExerciseListOnLeftSide());
     return hp;
   }
 
   private int userListID = -1;
+  private String userListName = "";
 
   /**
    * @param right
-   * @param instanceName
    * @param originalList
    * @return
    * @paramz ul
    * @paramz includeAddItem
    * @see #editItem
    */
-  private PagingExerciseList<CommonShell, ClientExercise> makeExerciseList(Panel right,
-                                                                           INavigation.VIEWS instanceName,
-                                                                           UserList<CommonShell> originalList) {
+  private PagingExerciseList<CommonShell, ClientExercise> makeExerciseList(Panel right, UserList<CommonShell> originalList) {
     //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
     userListID = originalList.getID();
-    EditableExerciseList exerciseList = new EditableExerciseList(controller, right, instanceName, originalList);
+    userListName = originalList.getName();
+    EditableExerciseList exerciseList = new EditableExerciseList(controller, right, INavigation.VIEWS.LISTS, originalList);
     this.exerciseList = exerciseList;
     setFactory(this.exerciseList);
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
@@ -143,7 +142,21 @@ public class EditItem {
 
       @Override
       public Panel getExercisePanel(ClientExercise exercise) {
-      //  logger.info("getExercisePanel got " +exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " +exercise.isPredefined());
+        //  logger.info("getExercisePanel got " +exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " +exercise.isPredefined());
+
+        boolean allBlank = true;
+        for (String value : exercise.getUnitToValue().values()) {
+          if (!value.isEmpty()) {
+            allBlank = false;
+            break;
+          }
+        }
+        if (exercise.getUnitToValue().isEmpty() || allBlank) {
+          exercise.getUnitToValue().put("List", userListName);
+        }
+        //else
+        // logger.info("unit " + exercise.getUnitToValue());
+
         if (exercise.isPredefined()) {
           TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
               controller,
@@ -163,23 +176,14 @@ public class EditItem {
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
           return widgets;
         } else {
-          logger.info("getExercisePanel got " +exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " +exercise.isPredefined());
+          logger.info("getExercisePanel got " + exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " + exercise.isPredefined());
           List<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
-          logger.info("getExercisePanel got #" + directlyRelated.size());
-          directlyRelated.forEach(clientExercise -> logger.info("Got " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
-          EditableExerciseDialog<CommonShell, ClientExercise> reviewEditableExercise =
-              new EditableExerciseDialog<CommonShell, ClientExercise>(
-                  controller,
-                  exercise,
-                  userListID,
-                  INavigation.VIEWS.LISTS
-              ) {
-                @NotNull
-                @Override
-                protected DivWidget getDominoEditInfo() {
-                  return null;
-                }
-              };
+
+
+          // logger.info("getExercisePanel got #" + directlyRelated.size());
+          // directlyRelated.forEach(clientExercise -> logger.info("Got " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
+
+          EditableExerciseDialog<CommonShell, ClientExercise> reviewEditableExercise = new ListEditableDialog(controller, exercise);
           Panel widgets = reviewEditableExercise.addFields(exerciseList, new SimplePanel());
           reviewEditableExercise.setFields(exercise);
           return widgets;
@@ -190,5 +194,56 @@ public class EditItem {
 
   public void reload() {
     exerciseList.reload(new HashMap<>());
+  }
+
+  private class ListEditableDialog extends EditableExerciseDialog<CommonShell, ClientExercise> {
+    ListEditableDialog(ExerciseController controller, ClientExercise exercise) {
+      super(controller, exercise, EditItem.this.userListID, INavigation.VIEWS.LISTS);
+    }
+
+    @Override
+    protected void addItemsAtTop(Panel container) {
+    }
+
+    @NotNull
+    @Override
+    protected DivWidget getDominoEditInfo() {
+      return null;
+    }
+
+    @Override
+    public void setFields(ClientExercise newUserExercise) {
+      super.setFields(newUserExercise);
+      translit.setVisible(false);
+    }
+
+    @Override
+    protected Panel getCreateButton(Panel toAddTo, ControlGroup normalSpeedRecording) {
+      Panel row = new DivWidget();
+      row.addStyleName("marginBottomTen");
+      configureButtonRow(row);
+      Button done;
+      row.add(done = makeDone());
+      done.addClickHandler(event -> exerciseList.loadNext());
+      return row;
+    }
+
+    /**
+     * @return
+     * @see NewUserExercise#getCreateButton(Panel, ControlGroup)
+     */
+    private Button makeDone() {
+      Button fixed = new Button(DONE);
+      fixed.setType(ButtonType.PRIMARY);
+
+      fixed.addStyleName("leftTenMargin");
+      fixed.addStyleName("floatRight");
+      fixed.addStyleName("marginRight");
+
+      // fixed.addMouseOverHandler(event -> checkForForeignChange());
+      addTooltip(fixed, "When done entering item.");
+      return fixed;
+    }
+
   }
 }

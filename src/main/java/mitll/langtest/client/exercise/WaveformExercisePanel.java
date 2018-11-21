@@ -34,10 +34,7 @@ package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.AudioPanel;
@@ -129,7 +126,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     List<String> typeOrder = getTypeOrder();
 
 
-    Panel flow = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, this);
+    UIObject flow = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, this);
     if (flow != null) {
       flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
