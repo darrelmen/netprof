@@ -54,7 +54,9 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Coordinates editing an item -
@@ -68,7 +70,7 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem {
-  //private final Logger logger = Logger.getLogger("EditItem");
+  private final Logger logger = Logger.getLogger("EditItem");
   private final ExerciseController controller;
   private PagingExerciseList<CommonShell, ClientExercise> exerciseList;
 
@@ -103,7 +105,7 @@ public class EditItem {
     return hp;
   }
 
-  int userListID = -1;
+  private int userListID = -1;
 
   /**
    * @param right
@@ -135,49 +137,13 @@ public class EditItem {
     }
   }
 
-  /**
-   * TODOx : don't do it like this!
-   * <p>
-   * TODOx : consider filling in context and context translation?
-   * <p>
-   *
-   * @return
-   * @see #makeExerciseList
-   */
-/*  public ClientExercise getNewItem() {
-    int user = controller.getUserManager().getUser();
-    Exercise exercise = new Exercise(
-        NEW_EXERCISE_ID,
-        user,
-        "",
-        getProjectid(),
-        false);
-
-    addContext(user, exercise);
-
-    return exercise;
-  }
-
-  private void addContext(int userid, MutableExercise exercise) {
-    Exercise context = new Exercise(-1,
-        userid,
-        "",
-        getProjectid(),
-        false);
-
-    exercise.addContextExercise(context);
-  }
-
-  private int getProjectid() {
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
-  }*/
   private void setFactory(final PagingExerciseList<CommonShell, ClientExercise> exerciseList) {
     exerciseList.setFactory(new ExercisePanelFactory<CommonShell, ClientExercise>(controller, exerciseList) {
       private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
       @Override
       public Panel getExercisePanel(ClientExercise exercise) {
+      //  logger.info("getExercisePanel got " +exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " +exercise.isPredefined());
         if (exercise.isPredefined()) {
           TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
               controller,
@@ -197,6 +163,10 @@ public class EditItem {
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
           return widgets;
         } else {
+          logger.info("getExercisePanel got " +exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " +exercise.isPredefined());
+          List<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
+          logger.info("getExercisePanel got #" + directlyRelated.size());
+          directlyRelated.forEach(clientExercise -> logger.info("Got " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
           EditableExerciseDialog<CommonShell, ClientExercise> reviewEditableExercise =
               new EditableExerciseDialog<CommonShell, ClientExercise>(
                   controller,
@@ -209,11 +179,6 @@ public class EditItem {
                 protected DivWidget getDominoEditInfo() {
                   return null;
                 }
-
-//            @Override
-//            void afterValidForeignPhrase(Panel toAddTo, boolean onClick) {
-//              postChangeIfDirty(onClick);
-//            }
               };
           Panel widgets = reviewEditableExercise.addFields(exerciseList, new SimplePanel());
           reviewEditableExercise.setFields(exercise);

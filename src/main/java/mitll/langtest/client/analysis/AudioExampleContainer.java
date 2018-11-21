@@ -118,6 +118,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   private void gotClickOnItem(final T wordScore) {
     showRecoOutputLater(wordScore, false);
+    refAudio.setEnabled(wordScore.getRefAudio() != null);
   }
 
   private boolean isPlayingStudentAudio() {
@@ -223,7 +224,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
   @NotNull
   private Button getPlayButton(int width, boolean playYourAudio) {
-
     Button play = new Button(playYourAudio ? PLAY : REFERENCE) {
       @Override
       protected void onDetach() {
@@ -248,6 +248,9 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   /**
+   * TODO: what to do if a user defined exercise???
+   * TODO: what if no reference audio?
+   *
    * If the item is for a context sentence, jump to the learn sentences view.
    */
   private void gotClickOnLearn() {
@@ -264,7 +267,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
         @Override
         public void onSuccess(Integer result) {
-          logger.info("gotClickOnLearn OK show " + result + " Vs " + exid);
+          //   logger.info("gotClickOnLearn OK show " + result + " Vs " + exid);
           controller.getShowTab(jumpView).showLearnAndItem(result);
         }
       });
@@ -445,6 +448,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   void setSelectedAndShowReco(T toSelect, boolean playAfterLoad) {
     setSelected(toSelect);
     showRecoOutputLater(toSelect, playAfterLoad);
+    refAudio.setEnabled(toSelect.getRefAudio() != null);
   }
 
   private void showRecoOutputLater(T toSelect, boolean playAfterLoad) {

@@ -131,7 +131,7 @@ public class DialogHelper {
                             boolean isBig) {
     dialogBox = new Modal();
 
-    logger.info("max height " + maxHeight);
+  //  logger.info("max height " + maxHeight);
     if (width > 900) {
       DOM.setStyleAttribute(dialogBox.getElement(), "left", 310 + "px");
     }

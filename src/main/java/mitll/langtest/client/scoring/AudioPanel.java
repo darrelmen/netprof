@@ -78,7 +78,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   protected static final int LEFT_COLUMN_WIDTH = SimplePagingContainer.MAX_WIDTH;
 
   static final int MIN_WIDTH = 256;
-  private static final float WAVEFORM_HEIGHT = 80f;//96;
+  private static final float WAVEFORM_HEIGHT = 70F;//80f;//96;
   private static final float SPECTROGRAM_HEIGHT = 50f;//96;
   private static final String WAVEFORM = "Waveform";
   private static final String SPECTROGRAM = "Spectrogram";
@@ -117,7 +117,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   private final int exerciseID;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_GET_IMAGES = true;
+  private static final boolean DEBUG_GET_IMAGES = false;
 
   /**
    * @param showSpectrogram
@@ -177,7 +177,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     getElement().setId("AudioPanel_exercise_" + id);
 
     int width = getImageWidth();
-    logger.info("AudioPanel " + getElement().getId() + " width " + width);
+  //  logger.info("AudioPanel " + getElement().getId() + " width " + width);
     setWidth(width + "px");
   }
 
@@ -464,16 +464,9 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
   protected int getImageWidth() {
     try {
       int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
-//      int rightSide = gaugePanel != null ? gaugePanel.getOffsetWidth() : rightMargin;
-//      if (gaugePanel != null && rightSide == 0) {
-//        //logger.info("adding right side offset ");
-//        rightSide = 180; // TODO : hack!!!
-//      } else {
-//        rightSide = 180;
-//      }
       int widthForWaveform = getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth);
 
-      logger.info("left " + leftColumnWidth + " width " + widthForWaveform);
+    //  logger.info("left " + leftColumnWidth + " width " + widthForWaveform);
 
       return Math.min(770, widthForWaveform);//, rightSide);
     } catch (Exception e) {

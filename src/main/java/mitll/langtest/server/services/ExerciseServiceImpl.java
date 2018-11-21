@@ -1150,10 +1150,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     then = System.currentTimeMillis();
 
-    // I don't think we even have to do this...
-    //getScores(userID, exercises);
-//    Map<Integer, Float> scores = db.getResultDAO().getScores(userID, exercises);
-
     now = System.currentTimeMillis();
     if (now - then > 50)
       logger.info("getFullExercises took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
@@ -1165,7 +1161,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     List<Integer> sorted = new ArrayList<>(scoreHistoryPerExercise.keySet());
     Collections.sort(sorted);
     sorted.forEach(exid -> logger.info("correct & score : exids #" + exid+" -> " + scoreHistoryPerExercise.get(exid)));
-
 */
 
     if (request.isOnlyUninspected()) {
@@ -1301,6 +1296,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 //    logger.info("getCommonExercisesWithoutAudio " + ids);
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
+      logger.info("getCommonExercisesWithoutAudio Got " + byID + " " + byID.getDirectlyRelated());
       addAnnotations(byID); // todo do this in a better way
       //if (true || byID.getAudioAttributes().isEmpty()) {
       toAddAudioTo.add(byID);

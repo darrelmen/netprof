@@ -274,6 +274,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
               message.setText("The item " +
                   " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
             } else {
+              logger.info("checkIsValidPhrase got "+newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
               showNewItem(newExercise);
             }
           }
@@ -301,10 +302,10 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   private void showNewItem(CommonShell currentExercise) {
     list.addExercise(currentExercise);
 
-//    int before = getSize();
+    int before = getSize();
     addExercise(currentExercise);
-    //   int after = getSize();
-//    logger.info("before " + before + " after " + after);
+       int after = getSize();
+    logger.info("before " + before + " after " + after);
     enableRemove(true);
 
     gotClickOnItem(currentExercise);

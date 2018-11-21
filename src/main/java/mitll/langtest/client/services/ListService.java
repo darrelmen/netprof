@@ -126,7 +126,7 @@ public interface ListService extends RemoteService {
    * @param userListID
    * @param initialText
    * @return
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseList#checkIsValidPhrase
    */
   CommonExercise newExercise(int userListID, String initialText) throws DominoSessionException;
 

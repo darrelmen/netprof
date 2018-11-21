@@ -270,11 +270,10 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * So here we set the exercise id to the final id, not a provisional id, as assigned earlier.
    *
    * @return CommonExercise with id from database
-   * @paramx userListID
-   * @paramx userExercise
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
+   * @param userListID
+   * @param initialText
+   * @see mitll.langtest.client.custom.dialog.EditableExerciseList#checkIsValidPhrase
    */
-
   @Override
   public CommonExercise newExercise(int userListID, String initialText) throws DominoSessionException {
     if (isValidForeignPhrase(initialText)) {
@@ -288,17 +287,17 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 //      return exercise;
 //    } else {
 
-
       CommonExercise exercise = makeNewExercise(userIDFromSessionOrDB, projectIDFromUser, initialText);
       getUserListManager().newExercise(userListID, exercise);
-      if (DEBUG) logger.debug("\tnewExercise : made user exercise " + exercise + " on list " + userListID);
+      if (DEBUG || true) {
+        logger.info("\tnewExercise : made user exercise " + exercise + " on list " + userListID);
+        logger.info("\tnewExercise : made user exercise context " + exercise.getDirectlyRelated() + " on list " + userListID);
+      }
       return exercise;
     } else {
       return null;
     }
-
   }
-
 
   private boolean isValidForeignPhrase(String foreign) throws DominoSessionException {
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "");
@@ -331,12 +330,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
         projectID,
         false);
 
-    addContext(user, projectID, exercise);
+   // addContext(user, projectID, exercise);
 
     return exercise;
   }
 
-  private void addContext(int userid, int projectID, MutableExercise exercise) {
+/*  private void addContext(int userid, int projectID, MutableExercise exercise) {
     Exercise context = new Exercise(-1,
         userid,
         "",
@@ -344,7 +343,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
         false);
 
     exercise.addContextExercise(context);
-  }
+  }*/
 
   /**
    * @param userListID

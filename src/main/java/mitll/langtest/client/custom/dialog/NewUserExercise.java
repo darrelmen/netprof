@@ -169,7 +169,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     container.getElement().setId("NewUserExercise_container");
     Style style = container.getElement().getStyle();
-    //style.setMarginTop(5, Style.Unit.PX);
+
     style.setPaddingLeft(10, Style.Unit.PX);
     style.setPaddingRight(10, Style.Unit.PX);
     upper.addStyleName("buttonGroupInset4");
@@ -235,13 +235,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   private void makeContextRow(Panel container) {
-    Panel row = new FluidRow();
+    Panel row = new DivWidget();
     container.add(row);
     context = addContext(container, newUserExercise);
   }
 
   private void makeContextTransRow(Panel container) {
-    Panel row = new FluidRow();
+    Panel row = new DivWidget();
     container.add(row);
     contextTrans = addContextTranslation(container, newUserExercise);
   }
@@ -267,7 +267,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #addFields
    */
   Panel makeAudioRow() {
-    FluidRow row = new FluidRow();
+    DivWidget row = new DivWidget();
 
     normalSpeedRecording = makeRegularAudioPanel(row);
     normalSpeedRecording.addStyleName("buttonGroupInset3");
@@ -314,7 +314,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   private void makeEnglishRow(Panel container) {
-    Panel row = new FluidRow();
+    Panel row = new DivWidget();
     container.add(row);
     english = makeBoxAndAnno(row, getEnglishLabel(), "", englishAnno);
     markPlaceholder(english.box, isEnglish() ? newUserExercise.getMeaning() : newUserExercise.getEnglish());
@@ -330,7 +330,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   private void makeForeignLangRow(Panel container) {
     //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
-    Panel row = new FluidRow();
+    Panel row = new DivWidget();
     container.add(row);
 
     foreignAnno.getElement().setId("foreignLanguageAnnotation");
@@ -357,7 +357,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   private void makeTranslitRow(Panel container) {
-    Panel row = new FluidRow();
+    Panel row = new DivWidget();
     container.add(row);
     String subtext = "";
     translit = makeBoxAndAnno(row, getTransliterationLabel(), subtext, translitAnno);
@@ -449,7 +449,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         originalRefAudio = newUserExercise.getRefAudio();
         originalSlowRefAudio = newUserExercise.getSlowAudioRef();
 
-        if (DEBUG) logger.info("postEditItem : onSuccess ");// + newUserExercise.getTooltip());
+      //  if (DEBUG) logger.info("postEditItem : onSuccess ");// + newUserExercise.getTooltip());
         doAfterEditComplete(buttonClicked);
       }
     });
@@ -638,9 +638,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
                         Panel toAddTo,
                         boolean onClick) {
 
-   if (validateForm(rap, normalSpeedRecording)) {
-      logger.info("NewUserExercise.validateThenPost : form is valid");
-     isValidForeignPhrase(toAddTo, onClick);
+    if (validateForm(rap, normalSpeedRecording)) {
+//   logger.info("NewUserExercise.validateThenPost : form is valid");
+      isValidForeignPhrase(toAddTo, onClick);
       //isValidForeignPhrase(pagingContainer, toAddTo, onClick);
     } else {
       formInvalid();
@@ -658,9 +658,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * Ask the server if the foreign lang text is in our dictionary and can be run through hydec.
    *
-   * @paramx pagingContainer
    * @param toAddTo
    * @param onClick
+   * @paramx pagingContainer
    * @see #validateThenPost
    */
   private void isValidForeignPhrase(//final ListInterface<T,U> pagingContainer,
@@ -676,8 +676,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       @Override
       public void onSuccess(Boolean result) {
         if (result) {
-         // checkIfNeedsRefAudio();
-       // grabInfoFromFormAndStuffInfoExercise(newUserExercise);
+          // checkIfNeedsRefAudio();
+          // grabInfoFromFormAndStuffInfoExercise(newUserExercise);
           afterValidForeignPhrase(/*pagingContainer,*/ toAddTo, onClick);
         } else {
           markError(foreignLang, "The " + controller.getLanguage() +
@@ -690,6 +690,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   /**
    * Why would we want to change the creator of an exercise?
+   *
    * @param markFixedClicked
    * @param keepAudio
    * @see #postChangeIfDirty(boolean)
@@ -699,25 +700,24 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 //    newUserExercise.getMutable().setCreator(controller.getUserState().getUser());
 
     logger.info("reallyChange - grab fields!");
-    grabInfoFromFormAndStuffInfoExercise(newUserExercise);
+    ClientExercise clientExercise = grabInfoFromFormAndStuffInfoExercise(newUserExercise);
     editItem(markFixedClicked, keepAudio);
 
-    List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
-    if (!directlyRelated.isEmpty()) {
-      ClientExercise clientExercise = directlyRelated.get(0);
-      controller.getAudioService().editItem(clientExercise, keepAudio, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("changing the context exercise", caught);
-        }
+    logger.info("edit item " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage());
 
-        @Override
-        public void onSuccess(Void newExercise) {
-          originalContext = clientExercise.getForeignLanguage();
-          originalContextTrans = clientExercise.getEnglish();
-        }
-      });
-    }
+    controller.getAudioService().editItem(clientExercise, keepAudio, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("changing the context exercise", caught);
+      }
+
+      @Override
+      public void onSuccess(Void newExercise) {
+        originalContext = clientExercise.getForeignLanguage();
+        originalContextTrans = clientExercise.getEnglish();
+      }
+    });
+
   }
 
   /**
@@ -725,7 +725,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #isValidForeignPhrase
    * @see #reallyChange(boolean, boolean)
    */
-  private void grabInfoFromFormAndStuffInfoExercise(ClientExercise clientExercise) {
+  private ClientExercise grabInfoFromFormAndStuffInfoExercise(ClientExercise clientExercise) {
     String text = english.getSafeText();
 
     MutableShell mutableShell = clientExercise.getMutableShell();
@@ -741,7 +741,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     // TODO : put back in!
 
-  //  mutableShell.setTransliteration(translit.getSafeText());
+    //  mutableShell.setTransliteration(translit.getSafeText());
 
 //    Collection<U> directlyRelated = mutableExercise.getDirectlyRelated();
 
@@ -754,26 +754,30 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 //      }
 //    }
 
-    updateContextExercise(clientExercise);
+    return updateContextExercise(clientExercise);
   }
 
-  private void updateContextExercise(ClientExercise clientExercise) {
+  private ClientExercise updateContextExercise(ClientExercise clientExercise) {
     List<ClientExercise> directlyRelated = clientExercise.getDirectlyRelated();
 
-   // if (!directlyRelated.isEmpty()) {
+    // if (!directlyRelated.isEmpty()) {
     ClientExercise contextSentenceExercise = directlyRelated.iterator().next();
-      MutableShell mutableContext = contextSentenceExercise.getMutableShell();
+    MutableShell mutableContext = contextSentenceExercise.getMutableShell();
 
-      mutableContext.setForeignLanguage(context.getSafeText());
+    mutableContext.setForeignLanguage(context.getSafeText());
 
-      if (isEnglish()) {
-        mutableContext.setMeaning(contextTrans.getSafeText());
-      } else {
-        mutableContext.setEnglish(contextTrans.getSafeText());
-      }
+    if (isEnglish()) {
+      mutableContext.setMeaning(contextTrans.getSafeText());
+    } else {
+      mutableContext.setEnglish(contextTrans.getSafeText());
+    }
+
+    logger.info("context now " + contextSentenceExercise.getID() + " " + contextSentenceExercise.getEnglish() + " " + contextSentenceExercise.getForeignLanguage());
     //  Collection<U> directlyRelated1 = mutableExercise.getDirectlyRelated();
     //  logger.info("grabInfoFromFormAndStuffInfoExercise context now " + directlyRelated1.iterator().next().getForeignLanguage());
-  //  }
+    //  }
+
+    return contextSentenceExercise;
   }
 
   /**
@@ -825,8 +829,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     annoBox.addStyleName("leftFiveMargin");
     annoBox.addStyleName("editComment");
-  }
 
+  }
 
 
   /**

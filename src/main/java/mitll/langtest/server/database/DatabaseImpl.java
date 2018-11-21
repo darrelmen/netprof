@@ -1125,45 +1125,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     // Set<AudioAttribute> originalAudio = new HashSet<>(userExercise.getAudioAttributes());
     Set<AudioAttribute> defectAudio = audioDAO.getAndMarkDefects(userExercise, userExercise.getFieldToAnnotation());
-
     /*
     if (!originalAudio.isEmpty()) {
       logger.debug("editItem originally had " + originalAudio.size() + " attributes, and " + defectAudio.size() + " defectAudio");
     }*/
-    boolean isPredef = userExercise.isPredefined();
 
-/*
-    CommonExercise exercise = isPredef ? getExerciseDAO(projectID).addOverlay(userExercise) : null;
-    //boolean notOverlay = exercise == null;
-    if (isPredef) {
-      // exercise = userExercise;
-      logger.debug("\teditItem made overlay " + exercise);
-    } else {
-// not an overlay! it's a new user exercise
-      exercise = getUserExerciseByExID(userExercise.getID());
-      logger.debug("editItem user custom exercise is " + exercise);
-    }*/
-
-
-    if (isPredef) {
+    if (userExercise.isPredefined()) {
       clearDefects(defectAudio, userExercise);
-
-      // why would this make sense to do???
-/*      String overlayID = exercise.getOldID();
-
-      logger.debug("editItem copying " + originalAudio.size() + " audio attrs under exercise overlay id " + overlayID);
-
-        for (AudioAttribute toCopy : originalAudio) {
-          if (toCopy.getUserid() < UserDAO.DEFAULT_FEMALE_ID) {
-            logger.error("bad user id for " + toCopy);
-          }
-        logger.debug("\t copying " + toCopy);
-        audioDAO.add((int) toCopy.getUserid(), toCopy.getAudioRef(), overlayID, toCopy.getTimestamp(), toCopy.getAudioType(), toCopy.getDurationInMillis());
-      }*/
-
-    }
-
-    if (isPredef) {
       getSectionHelper(projectID).refreshExercise(userExercise);
     }
     //return userExercise;
@@ -1819,16 +1787,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public UserList<CommonExercise> getUserListByIDExercises(int listid, int projectid) {
     boolean isNormalList = listid != COMMENT_MAGIC_ID;
     if (isNormalList) {
-      Collection<Integer> exids = getUserListManager().getUserListExerciseJoinDAO().getExidsForList(listid);
       UserList<CommonExercise> list = getUserListManager().getUserListDAO().getList(listid);
       if (list != null) {  // could be null if we make it private ?
-        List<CommonExercise> exercises = new ArrayList<>();
-        exids.forEach(exid -> {
-          CommonExercise exercise = getExercise(projectid, exid);
-          if (exercise != null) exercises.add(exercise);
-        });
-        exercises.sort((o1, o2) -> o1.getEnglish().compareToIgnoreCase(o2.getEnglish()));
-        list.setExercises(exercises);
+        Collection<Integer> exids = getUserListManager().getUserListExerciseJoinDAO().getExidsForList(listid);
+
+        logger.info("getUserListByIDExercises list " + listid + " got " + exids.size() + " : " + exids);
+        list.setExercises(getCommonExercisesForList(projectid, exids));
       }
       return list;
     } else {
@@ -1836,6 +1800,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
       //return getUserListManager().getCommentedListEx(projectid, false);
       return new UserList<>();
     }
+  }
+
+  @NotNull
+  private List<CommonExercise> getCommonExercisesForList(int projectid, Collection<Integer> exids) {
+    List<CommonExercise> exercises = new ArrayList<>();
+    exids.forEach(exid -> {
+      CommonExercise exercise = getExercise(projectid, exid);
+      if (exercise != null) exercises.add(exercise);
+    });
+    exercises.sort((o1, o2) -> o1.getEnglish().compareToIgnoreCase(o2.getEnglish()));
+    return exercises;
   }
 
   @Override

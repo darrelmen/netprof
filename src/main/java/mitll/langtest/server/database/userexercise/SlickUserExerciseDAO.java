@@ -140,7 +140,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    */
   public boolean updateProject(int old, int newprojid) {
-
     List<SlickExercise> toImport = dao.getAllByProject(old);
 
     logger.info("updateProject altering " + toImport.size() + " exercises...");
@@ -488,6 +487,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.legacyid() // i.e. dominoID
     );
 
+    exercise.setPredef(slick.ispredef());
+
     exercise.setUnitToValue(unitToValue);
     {
       List<String> translations = new ArrayList<>();
@@ -571,7 +572,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       String foreignlanguage = slick.foreignlanguage();
       String transliteration = slick.transliteration();
 
-      String pronunciations = lookup.getPronunciationsFromDictOrLTS(foreignlanguage, transliteration);
+      String pronunciations = foreignlanguage.isEmpty() ? "" : lookup.getPronunciationsFromDictOrLTS(foreignlanguage, transliteration);
       exercisePhoneInfo = pronunciations.isEmpty() ? new ExercisePhoneInfo() : new ExercisePhoneInfo(pronunciations);
 
       {
@@ -651,12 +652,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @see #addPhoneInfo
    */
   private List<Pair> getUnitToValue(SlickExercise slick, Collection<String> typeOrder, ISection<CommonExercise> sectionHelper) {
-    int id = slick.id();
-    String unit = slick.unit();
-    String lesson = slick.lesson();
-    boolean ispredef = slick.ispredef();
-
-    return sectionHelper.getPairs(typeOrder, id, unit, lesson, ispredef);
+    return sectionHelper.getPairs(typeOrder, slick.id(), slick.unit(), slick.lesson(), slick.ispredef());
   }
 
   /**
@@ -728,7 +724,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       //  logger.info("examining  " + all.size() + " exercises...");
 
       int n = 0;
-      boolean shouldSwap = getShouldSwap(lookup.getID());
+    //  boolean shouldSwap = getShouldSwap(lookup.getID());
       for (SlickExercise slickExercise : all) {
         Exercise exercise = makeExercise(slickExercise, typeOrder);
 
@@ -976,7 +972,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         dao.getAllPredefByProject(theProject.getID()) :
         dao.getAllUserDefinedByProject(theProject.getID());
 
-//    logger.info("getByProject got " + allPredefByProject.size() + " from " + theProject);
+    logger.info("getByProject isPredef " +isPredef+
+        " got " + allPredefByProject.size() + " from " + theProject);
 
     return getExercises(allPredefByProject,
         typeOrder,
@@ -1005,11 +1002,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs,
       boolean isPredef) {
     int projectid = lookup.getID();
-    List<SlickExercise> allContextPredefByProject = isPredef?
-        dao.getAllContextByProject(projectid):
+
+    List<SlickExercise> allContextPredefByProject = isPredef ?
+        dao.getAllContextByProject(projectid) :
         dao.getAllUserDefinedContextByProject(projectid);
 
-//    logger.info("getContextByProject For " + projectid + " got " + allContextPredefByProject.size() + " context predef ");
+    logger.info("getContextByProject For " + projectid + " got " + allContextPredefByProject.size() + " context predef ");
+
     return getExercises(allContextPredefByProject, typeOrder, sectionHelper,
         lookup, allByProject, exToAttrs, /*attributeTypes,*/ false);
   }

@@ -111,6 +111,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     this.listContainer = listContainer;
     this.isContext = isContext;
     this.addPlayer = addPlayer;
+    logger.info("Adding isContext " +isContext + " ex " +commonExercise.getID()+ " " + commonExercise.getEnglish() + " " +commonExercise.getForeignLanguage());
+
     addStyleName("twoColumnStyle");
     annotationHelper = controller.getCommentAnnotator();
     this.itemMenu = new ItemMenu(controller, commonExercise);
@@ -426,9 +428,14 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     for (ClientExercise contextEx : directlyRelated) {
       DivWidget rowWidget = getRowWidget();
       card.add(rowWidget);
+
+      logger.info("Add context " +contextEx.getID() + " " + contextEx);
       SimpleRecordAudioPanel<ClientExercise> recordPanel = addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
       if (recordPanel != null) {
         card.add(getScoringRow(recordPanel));
+      }
+      else {
+        logger.warning("can't add record panel?");
       }
     }
   }
@@ -670,17 +677,17 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
       return hp;
     } else {
+      logger.info("note that the context fl is empty");
       return null;
     }
   }
 
-
-  @NotNull
+/*  @NotNull
   private DivWidget getSpacer() {
     DivWidget spacer = new DivWidget();
     spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
     return spacer;
-  }
+  }*/
 
   /**
    * @param contextExercise

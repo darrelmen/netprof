@@ -97,7 +97,7 @@ public class SearchTypeahead {
       add.setEnabled(!textBox.getText().isEmpty());
       return true;
     });
-    logger.info("getTypeahead ");
+ //   logger.info("getTypeahead ");
     typeahead.setUpdaterCallback(selectedSuggestion -> {
       currentExercise = ((ExerciseSuggestion) selectedSuggestion).getShell();
      // logger.info("getTypeahead Got " + selectedSuggestion.getDisplayString());

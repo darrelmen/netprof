@@ -731,31 +731,23 @@ public class UserListManager implements IUserListManager {
   /**
    * @return
    * @seex #newExerciseOnList(UserList, CommonExercise)
-   * @paramx parentExercise
+   * @param parentExercise
    * @paramx newExerciseID
    * @paramx projectID
    */
-
   private int makeContextExercise(CommonExercise parentExercise, List<String> typeOrder) {
     int projectID = parentExercise.getProjectID();
     Exercise contextExercise = new Exercise(-1, parentExercise.getCreator(), "", projectID, false);
     int contextID = userExerciseDAO.add(contextExercise, true, typeOrder);
-    IRelatedExercise relatedExercise = userExerciseDAO.getRelatedExercise();
 
     long time = System.currentTimeMillis();
-    relatedExercise.addBulkRelated(Collections.singletonList(new SlickRelatedExercise(-1, parentExercise.getID(), contextID, projectID, 1,
+    userExerciseDAO.getRelatedExercise().addBulkRelated(Collections.singletonList(new SlickRelatedExercise(-1, parentExercise.getID(), contextID, projectID, 1,
         new Timestamp(time))));
-
-    // relatedExercise.addContextToExercise(newExerciseID, contextID, projectID);
 
     parentExercise.getDirectlyRelated().add(contextExercise);
 
     return contextID;
   }
-
-//  private void addItemToList(int userListID, int exid) {
-//    addItemToList(userListID, exid);
-//  }
 
   /**
    * @param userListID
@@ -778,10 +770,11 @@ public class UserListManager implements IUserListManager {
   @Override
   public void editItem(CommonExercise userExercise, String mediaDir, Collection<String> typeOrder) {
     //fixAudioPaths(userExercise, true, mediaDir);
-    boolean update = userExerciseDAO.update(userExercise, false, typeOrder);
+    boolean update = userExerciseDAO.update(userExercise, userExercise.isContext(), typeOrder);
     if (update) {
       databaseServices.getProject(userExercise.getProjectID()).getExerciseDAO().addUserExercise(userExercise);
     }
+    else logger.warn("editItem : did not update item  " +userExercise);
   }
 
 

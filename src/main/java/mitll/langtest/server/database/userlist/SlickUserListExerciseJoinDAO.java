@@ -97,9 +97,7 @@ public class SlickUserListExerciseJoinDAO extends DAO implements IUserListExerci
     return dao.getNumRows() == 0;
   }
 
-  public Collection<Integer> getExidsForList(int listid) {
-    return dao.realExids(listid);
-  }
+  public Collection<Integer> getExidsForList(int listid) {    return dao.realExids(listid);  }
 
   /**
    * @see UserListManager#getListsWithIdsForUser

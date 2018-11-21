@@ -66,6 +66,9 @@ public class ListView implements ContentView, CreateListComplete {
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a list or quiz";
 
+  /**
+   *
+   */
   private static final String YOUR_LISTS1 = "Your Lists";
 
   /**
@@ -248,6 +251,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void addYourLists(DivWidget left) {
     showYourLists(Collections.emptyList(), left);
+
     controller.getListService().getListsForUser(true, false, canMakeQuiz(), new AsyncCallback<Collection<UserList<CommonShell>>>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -263,6 +267,11 @@ public class ListView implements ContentView, CreateListComplete {
     });
   }
 
+  /**
+   * @see #addYourLists
+   * @param result
+   * @param left
+   */
   private void showYourLists(Collection<UserList<CommonShell>> result, DivWidget left) {
     ListContainer myLists = new MyListContainer();
     Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);

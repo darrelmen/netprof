@@ -69,13 +69,13 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
   public static final String ANY = "any";
-  //private static final String ALL1 = "all";
-  /**
+   /**
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
   private static final String ALL = "all";
   private static final String LISTS = "Lists";
   private static final String RECORDED = "Recorded";
+  public static final String CONTENT = "Content";
   private List<String> predefinedTypeOrder = new ArrayList<>();
   private static final String UNIT = "Unit";
   /**
@@ -468,7 +468,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   }
 
   private boolean isDynamicFacet(String type) {
-    return type.equals(LISTS) || type.equals(RECORDED) || type.equals("Content");
+    return type.equals(LISTS) || type.equals(RECORDED) || type.equals(CONTENT);
   }
 
   /**
@@ -622,7 +622,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
         } else {
           currentList.retainAll(exercisesForSection);
         }
-      } else {
+      } else if (!isDynamicFacet(type)){
         logger.warn("getExercisesForSelectionState huh? typeToSelection type " + type + " is not in " + typeToUnitToLesson.keySet());
       }
     }
