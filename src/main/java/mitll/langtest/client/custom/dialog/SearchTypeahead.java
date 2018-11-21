@@ -93,7 +93,7 @@ public class SearchTypeahead {
   private Typeahead getTypeahead(TextBox textBox, Typeahead typeahead) {
     typeahead.setDisplayItemCount(DISPLAY_ITEMS);
     typeahead.setMatcherCallback((query, item) -> {
-  //   logger.info("getTypeahead Got " + query);
+     logger.info("getTypeahead Got " + query);
       add.setEnabled(!textBox.getText().isEmpty());
       return true;
     });
@@ -162,7 +162,8 @@ public class SearchTypeahead {
   @NotNull
   private Collection<SuggestOracle.Suggestion> getSuggestions(String query, List<? extends CommonShell> exercises) {
     Collection<SuggestOracle.Suggestion> suggestions = new ArrayList<>();
-    feedbackExerciseList.clearMessage();
+
+//    feedbackExerciseList.clearMessage();
     String[] searchWords = normalizeSearch(query).split(WHITESPACE_STRING);
 
     exercises.forEach(resp -> suggestions.add(getSuggestion(searchWords, resp)));
@@ -179,7 +180,6 @@ public class SearchTypeahead {
    */
   private ExerciseSuggestion getSuggestion(String[] searchWords, CommonShell resp) {
     //String lcQ = query.toLowerCase();
-
     String foreignLanguage = resp.getFLToShow();
     //boolean found = foreignLanguage.toLowerCase().contains(lcQ) || resp.getEnglish().toLowerCase().contains(lcQ);
 

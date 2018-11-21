@@ -80,6 +80,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
 
   @Override
   public void clearMessage() {
+    logger.info("clear message");
     message.setText("");
   }
 
@@ -169,8 +170,11 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   private Typeahead getTypeahead(Button add) {
     quickAddText = getEntryTextBox();
     quickAddText.addKeyUpHandler(event -> {
+
+      logger.info("getTypeahead got key up "+ quickAddText.getText());
       searchTypeahead.clearCurrentExercise();
     });
+
     this.searchTypeahead = new SearchTypeahead(controller, this, add);
     return searchTypeahead.getTypeaheadUsing(quickAddText);
   }
@@ -211,7 +215,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   private void onClickAdd(Button add) {
     add.setEnabled(false);
 
-    //  logger.info("click add " + add);
+   logger.info("click add " + add);
 
     final CommonShell currentExercise = searchTypeahead.getCurrentExercise();
     if (currentExercise != null) {
@@ -271,8 +275,8 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
           @Override
           public void onSuccess(CommonExercise newExercise) {
             if (newExercise == null) {
-              message.setText("The item " +
-                  " text is not in our " + controller.getLanguage() + " dictionary. Please edit.");
+             // logger.info("onSuccess not in dict!");
+              message.setText("This is not in our " + controller.getLanguage() + " dictionary. Please edit.");
             } else {
               logger.info("checkIsValidPhrase got "+newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
               showNewItem(newExercise);

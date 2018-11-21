@@ -580,7 +580,7 @@ public class ProjectChoices extends ThumbnailChoices {
       boolean isQC = isQC();
       {
         String countryCode = projectForLang.getCountryCode();
-        logger.info("for " + name +" cc " + countryCode);
+    //    logger.info("for " + name +" cc " + countryCode);
         PushButton button = new PushButton(getFlag(countryCode));
         final int projid = projectForLang.getID();
         button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));

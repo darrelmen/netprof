@@ -73,16 +73,12 @@ import java.util.stream.Collectors;
 public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = LogManager.getLogger(ScoreServlet.class);
 
-//  public static final String REQUEST = "request";
-
   private static final String CHAPTER_HISTORY = "chapterHistory";
-  //private static final String ROUND_TRIP1 = "roundTrip";
   /**
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private static final String PHONE_REPORT = "phoneReport";
   private static final String ERROR = "ERROR";
-  //public static final String USER = "user";
 
   private static final String DEVICE_TYPE = "deviceType";
   private static final String DEVICE = "device";
@@ -104,11 +100,8 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private static final String VERSION_NOW = "1.0";
-  // private static final String RESULT_ID = "resultID";
   private static final String USE_PHONE_TO_DISPLAY = "USE_PHONE_TO_DISPLAY";
   private static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
-  //private static final String EXERCISE = "exercise";
-  // public static final String EXERCISE_TEXT = "exerciseText";
   private static final String NO_SESSION = "no session";
 
   // public static final String PASS = "pass";
@@ -124,7 +117,6 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private static final boolean CONVERT_DECODE_TO_ALIGN = true;
   private static final String MESSAGE = "message";
-  private static final int BUFFER_SIZE = 4096;
   private static final String UTF_8 = "UTF-8";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
@@ -656,7 +648,6 @@ public class ScoreServlet extends DatabaseServlet {
     logger.info("doPost request " + requestType + " took " + (now - then) + " millis");
   }
 
-
   @NotNull
   private String getOrUnk(HttpServletRequest request, String deviceType1) {
     String deviceType = request.getHeader(deviceType1);
@@ -729,7 +720,6 @@ public class ScoreServlet extends DatabaseServlet {
       jsonObject.put(ERROR, "bad param format " + e.getMessage());
     }
   }
-
 
   private PostRequest getPostRequest(String requestType) {
     String s = requestType.toLowerCase();

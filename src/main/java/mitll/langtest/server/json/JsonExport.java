@@ -70,6 +70,8 @@ public class JsonExport {
   private static final String FL = "fl";
   private static final String TL = "tl";
   private static final String EN = "en";
+
+  private static final String CTID = "ctid";
   private static final String CT = "ct";
   private static final String CTR = "ctr";
 //  private static final String MN = "mn";
@@ -276,7 +278,8 @@ public class JsonExport {
    * @param directlyRelated
    * @see #getJsonForExercise(CommonExercise, Collection)
    */
-  private <T extends AudioAttributeExercise> void addContextAudioRefs(T exercise, JSONObject ex,
+  private <T extends AudioAttributeExercise> void addContextAudioRefs(T exercise,
+                                                                      JSONObject ex,
                                                                       Collection<ClientExercise> directlyRelated) {
     AudioAttribute latestContext = exercise.getLatestContext(true);
 
@@ -346,6 +349,7 @@ public class JsonExport {
       ex.put(CTR, "");
     } else {
       ClientExercise next = exercise.getDirectlyRelated().iterator().next();
+      ex.put(CTID,  next.getID());
       ex.put(CT,  next.getFLToShow());
       ex.put(CTR, next.getEnglish());
     }
