@@ -708,7 +708,11 @@ public class UserListManager implements IUserListManager {
 //    exercisePhoneInfo = getExercisePhoneInfo(lookup, foreignlanguage, transliteration);
 //    int n2 = getNumPhones(lookup, exercisePhoneInfo, foreignlanguage, transliteration);
 
+
     int newExerciseID = userExerciseDAO.add(userExercise, false, typeOrder);
+
+    setNumPhones(userExercise, project, newExerciseID);
+
     logger.info("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
     project.getExerciseDAO().addUserExercise(userExercise);
@@ -716,13 +720,29 @@ public class UserListManager implements IUserListManager {
     int contextID = 0;
     try {
       contextID = makeContextExercise(userExercise, typeOrder);
+
+      ClientExercise next = userExercise.getDirectlyRelated().iterator().next();
+
+      String foreignLanguage = next.getForeignLanguage();
+
+      if (!foreignLanguage.isEmpty()) {
+        setNumPhones(next.asCommon(), project, contextID);
+      }
+
     } catch (Exception e) {
       logger.error("Got " + e, e);
     }
 
-    logger.info("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
+//    logger.info("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
 
     addItemToList(userListID, newExerciseID);
+  }
+
+  private void setNumPhones(CommonExercise userExercise, Project project, int newExerciseID) {
+    userExercise.getMutable().setNumPhones(
+        databaseServices.getUserExerciseDAO().getAndRememberNumPhones(project,
+            newExerciseID, userExercise.getForeignLanguage(), userExercise.getTransliteration()
+        ));
   }
 
   public UserList getUserListNoExercises(int userListID) {
@@ -731,9 +751,9 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
+   * @param parentExercise
    * @return
    * @seex #newExerciseOnList(UserList, CommonExercise)
-   * @param parentExercise
    * @paramx newExerciseID
    * @paramx projectID
    */
@@ -774,8 +794,10 @@ public class UserListManager implements IUserListManager {
     boolean update = userExerciseDAO.update(userExercise, userExercise.isContext(), typeOrder);
     if (update) {
       databaseServices.getProject(userExercise.getProjectID()).getExerciseDAO().addUserExercise(userExercise);
-    }
-    else logger.warn("editItem : did not update item  " +userExercise);
+
+      setNumPhones(userExercise, databaseServices.getProject(userExercise.getProjectID()), userExercise.getID());
+
+    } else logger.warn("editItem : did not update item  " + userExercise);
   }
 
 

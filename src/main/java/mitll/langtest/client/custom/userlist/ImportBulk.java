@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -54,7 +55,7 @@ class ImportBulk {
   private static final int CHARACTER_WIDTH = 150;
   private TextArea textArea;
 
-  DivWidget showImportItem(String language) {//}, int ul) {
+  DivWidget showImportItem(String language) {
     DivWidget inner = new DivWidget();
     DivWidget upper = new DivWidget();
     String width = IMPORT_WIDTH + "px";
@@ -67,9 +68,8 @@ class ImportBulk {
     textArea.setVisibleLines(VISIBLE_LINES);
     textArea.setCharacterWidth(CHARACTER_WIDTH);
     textArea.setPlaceholder("paste text here.");
-    // String language = controller.getLanguage();
     inner.add(new Heading(4, "Copy and paste tab separated lines with pairs of " + language + " item and its translation."));
-    inner.add(new Heading(4, "(Quizlet export format.)"));
+    inner.add(new Heading(4, "(Quizlet tab-separated export format.)"));
 
 /*    Button anImport = new Button("Import");
     anImport.addClickHandler(event -> doBulk(controller, ul));
@@ -81,7 +81,7 @@ class ImportBulk {
     return inner;
   }
 
-  void doBulk(ExerciseController controller, UserList<CommonShell> ulid) {
+  void doBulk(ExerciseController controller, UserList<CommonShell> ulid, ListContainer myLists) {
     controller.getListService().reallyCreateNewItems(ulid.getID(), sanitize(textArea.getText()),
         new AsyncCallback<List<CommonShell>>() {
           @Override
@@ -100,7 +100,16 @@ class ImportBulk {
             //logger.info("after  " + ul.getExercises().size());
             //     reallyShowLearnTab(tabPanel, learnTab, ul, instanceName);
 
+            int numItems = ulid.getNumItems();
             ulid.setExercises(newExercises);
+            int after=ulid.getNumItems();
+            if (after==numItems) new ModalInfoDialog("No changes","No items were imported, check the format and try again.");
+//            int numItems = currentSelection.getNumItems();
+//            logger.info("editList : on " + currentSelection.getName() + " now " + numItems);
+
+            myLists.flush();
+            myLists.redraw();
+
           }
         });
   }

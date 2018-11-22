@@ -605,6 +605,19 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return exercisePhoneInfo;
   }
 
+  @Override
+  public int getAndRememberNumPhones(IPronunciationLookup lookup,
+                                     int exid,
+                                     String foreignlanguage,
+                                     String transliteration) {
+    int n2 = getNumPhones(lookup,
+        getExercisePhoneInfo(lookup, foreignlanguage, transliteration), foreignlanguage, transliteration);
+    if (n2 > 0) {
+      exerciseDAO.updatePhones(exid, n2);
+    }
+    return n2;
+  }
+
   private int getNumPhones(IPronunciationLookup lookup, ExercisePhoneInfo exercisePhoneInfo,
                            String foreignlanguage, String transliteration) {
     int numPhones = exercisePhoneInfo.getNumPhones();

@@ -36,6 +36,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
@@ -105,7 +106,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   @Override
   public void addBulk(List<SlickExercise> bulk) {
+  }
 
+  @Override
+  public int getAndRememberNumPhones(IPronunciationLookup lookup, int exid, String foreignlanguage, String transliteration) {
+    return 0;
   }
 
   @Override

@@ -38,7 +38,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
@@ -72,6 +71,7 @@ import java.util.logging.Logger;
  */
 public class ListView implements ContentView, CreateListComplete {
   private static final String PRACTICE_THE_LIST = "Practice the list.";
+  public static final int MAX_HEIGHT = 710;
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
@@ -404,7 +404,7 @@ public class ListView implements ContentView, CreateListComplete {
   private void doImport() {
     UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
 
-    final int id = currentSelection.getID();
+    //  final int id = currentSelection.getID();
     boolean favorite = currentSelection.isFavorite();
 
     doImport(currentSelection, favorite);
@@ -415,6 +415,9 @@ public class ListView implements ContentView, CreateListComplete {
     ImportBulk importBulk = new ImportBulk();
     DivWidget contents = importBulk.showImportItem(controller.getLanguage());
 
+
+//    int numItems = currentSelection.getNumItems();
+//    logger.info("editList : on " + currentSelection.getName() + " now " + numItems);
 
     DialogHelper dialogHelper = new DialogHelper(false);
     Button closeButton = dialogHelper.show(
@@ -430,8 +433,9 @@ public class ListView implements ContentView, CreateListComplete {
               Window.alert("Can't import into favorites...");
               return false;
             } else {
-              importBulk.doBulk(controller, currentSelection);
-              myLists.redraw();
+              importBulk.doBulk(controller, currentSelection, myLists);
+
+
               return true;
             }
           }
@@ -476,20 +480,19 @@ public class ListView implements ContentView, CreateListComplete {
           public boolean gotYes() {
             int numItems = currentSelectionFromMyLists.getNumItems();
             logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
+            myLists.flush();
             myLists.redraw();
             return true;
           }
 
           @Override
           public void gotHidden() {
-
           }
 
           @Override
           public void gotNo() {
-
           }
-        }, 710, -1, true);
+        }, MAX_HEIGHT, -1, true);
 
     closeButton.setType(ButtonType.SUCCESS);
 
@@ -854,6 +857,10 @@ public class ListView implements ContentView, CreateListComplete {
             boolean okToCreate = editDialog.isValidName();
             if (okToCreate) {
               editDialog.doEdit(myLists.getCurrentSelection(), myLists);
+
+
+              myLists.flush();
+              myLists.redraw();
             }
             return okToCreate;
           }

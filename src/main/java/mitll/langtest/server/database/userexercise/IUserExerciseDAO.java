@@ -35,10 +35,7 @@ package mitll.langtest.server.database.userexercise;
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.DBExerciseDAO;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -119,6 +116,10 @@ public interface IUserExerciseDAO extends IDAO {
                         int importUserIfNotSpecified,
                         boolean isContext,
                         Collection<String> typeOrder);
+
+  int getAndRememberNumPhones(IPronunciationLookup lookup,
+                              int exid,
+                              String foreignlanguage, String transliteration);
 
   void addBulk(List<SlickExercise> bulk);
 
