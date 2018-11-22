@@ -172,7 +172,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   void pushFirstSelection(int exerciseID, String searchIfAny) {
     String token = getHistoryToken();
     logger.info("pushFirstSelection : (" + getInstance() + ") current token " + token);
-    // int exidFromToken = getIDFromToken(token);
     SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
 
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
@@ -196,7 +195,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @return
    * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
    */
-  private int getIDFromToken(String token) {
+/*  private int getIDFromToken(String token) {
     // if (token.startsWith("#item=") || token.startsWith("item=")) {
     SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
     if (selectionState.getView() != getInstance()) {
@@ -212,7 +211,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     }
     // }
     // return -1;
-  }
+  }*/
 
   /**
    * @param exerciseID
@@ -336,7 +335,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
         "\n\told state " + selectionState.getInfo() +
         "\n\tnew state " + newState.getInfo());
 
-
     loadExercisesUsingPrefix(
         newState.getTypeToSection(),
         selectionState.getSearch(),
@@ -395,7 +393,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    if (DEBUG_ON_VALUE_CHANGE) logger.info("HistoryExerciseList.onValueChange : ------ start ---- " + getInstance());
+    if (DEBUG_ON_VALUE_CHANGE) logger.info("onValueChange : ------ start ---- " + getInstance());
     if (controller.getProjectStartupInfo() == null) {
       logger.warning("onValueChange skipping change event since no project");
       return;
@@ -417,11 +415,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
         logger.info("onValueChange got '" + value + "' sel '" + selectionState + "' '" + selectionState.getInfo() + "'");
 
 //        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got change"));
-//        logger.info("HistoryExerciseList.selectionStateChanged logException stack " + exceptionAsString);
+//        logger.info("onValueChange logException stack " + exceptionAsString);
       }
 
       if (DEBUG_ON_VALUE_CHANGE) {
-        logger.info("HistoryExerciseList.onValueChange : " +
+        logger.info("restoreUIAndLoadExercises : " +
             "\n\toriginalValue '" + value + "'" +
             // " token is '" + value + "' " +
             "for " + selectionState.getView() + " vs my instance " + getInstance());
@@ -434,9 +432,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
           loadFromSelectionState(selectionState, selectionState);
         }
       } catch (Exception e) {
-        logger.warning("HistoryExerciseList.selectionStateChanged " + value + " badly formed. Got " + e);
+        logger.warning("restoreUIAndLoadExercises " + value + " badly formed. Got " + e);
         String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(e);
-        logger.info("HistoryExerciseList.selectionStateChanged logException stack " + exceptionAsString);
+        logger.info("restoreUIAndLoadExercises logException stack " + exceptionAsString);
       }
     }
   }
@@ -447,7 +445,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     //   logger.info("maybeSwitchProject project " + project + " vs " + currentProject);
     if (project != currentProject) {
       if (project > DEFAULT_PROJECT_ID) {
-        logger.info("onValueChange project from state " + project + " != " + currentProject);
+        logger.info("maybeSwitchProject project from state " + project + " != " + currentProject);
         projectChangedTo(project);
       }
     }
@@ -457,6 +455,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   }
 
   /**
+   * @see #restoreUIAndLoadExercises
    * @param selectionState
    * @return true if we're just clicking on a different item in the list and don't need to reload the exercise list
    */

@@ -60,6 +60,7 @@ public class SelectionState {
   public static final String SEARCH = "search";
   public static final String PROJECT = "project";
   public static final String DIALOG = "d";
+  public static final String JUMP = "j";
 
   public static final String SECTION_SEPARATOR = "~";
 
@@ -75,6 +76,7 @@ public class SelectionState {
   private final Map<String, Collection<String>> typeToSection = new HashMap<>();
   private String instance = "";
   private String search = "";
+  private boolean isJump;
   private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault, onlyUninspected;
 
   private static final boolean DEBUG = false;
@@ -149,6 +151,8 @@ public class SelectionState {
             }
           } else if (isMatch(type, SEARCH)) {
             search = section;
+          } else if (isMatch(type, JUMP)) {
+            isJump = true;
           } else if (isMatch(type, DIALOG)) {
             try {
               setDialog(Integer.parseInt(section));
@@ -251,9 +255,7 @@ public class SelectionState {
   }
 
 
-
   /**
-   *
    * @return the view on the URL or NONE
    */
   @NotNull
@@ -262,7 +264,7 @@ public class SelectionState {
       instance = instance.replaceAll(" ", "_");
 
       if (instance.equalsIgnoreCase("Drill")) instance = "Practice".toUpperCase();
-     // if (instance.equalsIgnoreCase("Practice")) instance = "Drill".toUpperCase();
+      // if (instance.equalsIgnoreCase("Practice")) instance = "Drill".toUpperCase();
 
       return instance.isEmpty() ? INavigation.VIEWS.NONE : INavigation.VIEWS.valueOf(instance.toUpperCase());
     } catch (IllegalArgumentException e) {
@@ -275,7 +277,7 @@ public class SelectionState {
     return search;
   }
 
-   boolean isOnlyWithAudioDefects() {
+  boolean isOnlyWithAudioDefects() {
     return onlyWithAudioDefects;
   }
 
@@ -283,11 +285,11 @@ public class SelectionState {
     return onlyUnrecorded;
   }
 
-   boolean isOnlyDefault() {
+  boolean isOnlyDefault() {
     return onlyDefault;
   }
 
-   boolean isOnlyUninspected() {
+  boolean isOnlyUninspected() {
     return onlyUninspected;
   }
 
@@ -340,11 +342,16 @@ public class SelectionState {
   public String getInfo() {
     return "parseToken : " +
         "\n\tinstance " + instance +
+        "\n\tlist     " + getList() +
         "\n\tsearch   " + search +
         "\n\titem     " + item +
         "\n\tproject  " + project +
         "\n\tdialog   " + dialog +
         "\n\tunit->chapter " + getTypeToSection() +
         "\n\tonlyWithAudioDefects " + isOnlyWithAudioDefects();
+  }
+
+  public boolean isJump() {
+    return isJump;
   }
 }

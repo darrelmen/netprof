@@ -15,6 +15,7 @@ import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE;
@@ -172,13 +173,18 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   @Override
   public void showView(VIEWS view) {
+    if (DEBUG) logger.info("showView : show " + view );
     showView(view, false, false);
   }
 
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    if (DEBUG) logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+    if (DEBUG) {
+      logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("showView "  + view));
+//      logger.info("logException stack " + exceptionAsString);
+    }
 
     if (!currentSection.equals(view)) {
       if (DEBUG) logger.info("showView - showing " + view);
@@ -301,7 +307,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen, boolean doPushItem) {
     clearAndFixScroll();
 
-//    logger.info("clearAndPush isFirst " + isFirstTime + " current " + currentStoredView + " now " + listen + " push " + doPushItem);
+    logger.info("clearAndPush isFirst " + isFirstTime + " current " + currentStoredView + " now " + listen + " push " + doPushItem);
     if (doPushItem) {
       if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
       setInstanceHistory(listen);
@@ -337,12 +343,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       String typeToSelection1 = keepLists ? getTypeToSelection() : getTypeToSelectionNoList();
       String typeToSelection = keepTypeToSelection ? typeToSelection1 : "";
 
-  //    logger.info("typeToSelection " + typeToSelection);
+      //    logger.info("typeToSelection " + typeToSelection);
 
       pushItem(getInstanceParam(views) +
           (typeToSelection.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + typeToSelection));
     } else {
-    //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
+      //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
   }
 
@@ -471,7 +477,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     quizHelper.setNavigation(this);
     quizHelper.showContent(divWidget, QUIZ);
     quizHelper.hideList();
-    if (fromClick) quizHelper.showQuizIntro();
+    if (fromClick) {
+
+      logger.info("showQuizForReal From a click.");
+      quizHelper.showQuizIntro();
+    }
   }
 
   private MODE_CHOICE candidateMode = MODE_CHOICE.NOT_YET;
@@ -496,7 +506,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
-    // logger.info("pushUnitOrChapter ");
+    logger.info("pushUnitOrChapter ");
     pushItem(s + "=" + next.getValue());
   }
 
@@ -634,17 +644,26 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     };
   }
 
+  /**
+   * @see mitll.langtest.client.LangTest#showListIn
+   * @param listid
+   * @param view
+   */
   @Override
   public void showListIn(int listid, VIEWS view) {
-    // logger.info("showListIn - " + listid + " " + view);
+   // logger.info("showListIn - " + listid + " " + view);
     setHistoryWithList(listid, view);
-    banner.show(view);
+    banner.show(view,false);
   }
 
   private void setHistoryWithList(int listid, VIEWS views) {
-    //  logger.info("showListIn - " + listid + " " + views);
+   // logger.info("showListIn - " + listid + " " + views);
     pushItem(
-        FacetExerciseList.LISTS + "=" + listid + SelectionState.SECTION_SEPARATOR +
+        SelectionState.SECTION_SEPARATOR +
+            FacetExerciseList.LISTS + "=" + listid +
+            SelectionState.SECTION_SEPARATOR +
+            SelectionState.JUMP + "=" + "true" +
+            SelectionState.SECTION_SEPARATOR +
             getInstanceParam(views));
   }
 
@@ -663,9 +682,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushItem(String url) {
-   // logger.info("pushItem - " + url);
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
-//    logger.info("logException stack " + exceptionAsString);
+    //logger.info("pushItem - " + url);
+    //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
+//     logger.info("logException stack " + exceptionAsString);
     History.newItem(url);
   }
 

@@ -190,7 +190,7 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
    * @see QuizHelper#clearListSelection
    */
   public void clearListSelection() {
-    //logger.info("in list ---> clearListSelection ");
+  logger.info("in list ---> clearListSelection ");
     Map<String, String> candidate = new HashMap<>(getTypeToSelection());
     candidate.remove(getDynamicFacet());
     setHistory(candidate);

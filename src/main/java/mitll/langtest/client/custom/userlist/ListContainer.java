@@ -155,7 +155,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
    * @param getSafe
    * @return
    */
-  protected Column<UserList<CommonShell>, SafeHtml> getTruncatedCol2(int maxLength, GetSafe<UserList<CommonShell>> getSafe) {
+  private Column<UserList<CommonShell>, SafeHtml> getTruncatedCol2(int maxLength, GetSafe<UserList<CommonShell>> getSafe) {
     Column<UserList<CommonShell>, SafeHtml> column = new Column<UserList<CommonShell>, SafeHtml>(new ClickableCell()) {
       @Override
       public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {

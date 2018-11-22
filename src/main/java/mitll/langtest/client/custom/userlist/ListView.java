@@ -72,6 +72,7 @@ import java.util.logging.Logger;
 public class ListView implements ContentView, CreateListComplete {
   private static final String PRACTICE_THE_LIST = "Practice the list.";
   public static final int MAX_HEIGHT = 710;
+  public static final String IMPORT = "Import";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
@@ -394,7 +395,7 @@ public class ListView implements ContentView, CreateListComplete {
 */
 
   private IsWidget getImport() {
-    Button successButton = getSuccessButton("Import");
+    Button successButton = getSuccessButton(IMPORT);
     successButton.setIcon(IconType.UPLOAD);
     // successButton.setSize(ButtonSize.LARGE);
     successButton.addClickHandler(event -> doImport());
@@ -403,18 +404,13 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void doImport() {
     UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
-
-    //  final int id = currentSelection.getID();
     boolean favorite = currentSelection.isFavorite();
-
     doImport(currentSelection, favorite);
-    //  closeButton.setIcon(IconType.PLUS);
   }
 
   private void doImport(UserList<CommonShell> currentSelection, boolean favorite) {
     ImportBulk importBulk = new ImportBulk();
     DivWidget contents = importBulk.showImportItem(controller.getLanguage());
-
 
 //    int numItems = currentSelection.getNumItems();
 //    logger.info("editList : on " + currentSelection.getName() + " now " + numItems);
@@ -535,6 +531,10 @@ public class ListView implements ContentView, CreateListComplete {
     controller.getNavigation().showListIn(getListID(container), INavigation.VIEWS.LEARN);
   }
 
+  /**
+   * @see ListView.MyListContainer#gotDoubleClickOn
+   * @param container
+   */
   private void showQuiz(ListContainer container) {
     controller.showListIn(getListID(container), INavigation.VIEWS.QUIZ);
   }
@@ -921,23 +921,15 @@ public class ListView implements ContentView, CreateListComplete {
   @Override
   public void madeIt(UserList userList) {
     // logger.info("madeIt made it " + userList.getName());
-
     try {
       dialogHelper.hide();
-      //  logger.info("made it ex " + userList.getExercises().size());
-      //logger.info("\n\n\ngot made list");
-
       myLists.addExerciseAfter(null, userList);
       myLists.enableAll();
-      //myLists.redraw();
-
-
       names.add(userList.getName());
     } catch (Exception e) {
       logger.warning("got " + e);
     }
-    Scheduler.get().scheduleDeferred(() -> myLists.markCurrentExercise(userList.getID())
-    );
+    Scheduler.get().scheduleDeferred(() -> myLists.markCurrentExercise(userList.getID()));
   }
 
   /**
@@ -966,6 +958,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     @Override
     protected void gotDoubleClickOn(UserList<CommonShell> selected) {
+      logger.info("gotDoubleClickOn got double click on " + selected);
       if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
         showQuiz(this);
       } else {

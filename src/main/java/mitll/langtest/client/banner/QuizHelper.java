@@ -153,10 +153,13 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
   }
 
   void showQuizIntro() {
-    Scheduler.get().scheduleDeferred(this::clearListSelection);
+    //Scheduler.get().scheduleDeferred(this::clearListSelection);
+
+    clearListSelection();
   }
 
   private void clearListSelection() {
+    logger.info("clearListSelection");
     ListFacetExerciseList exerciseList = (ListFacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
     exerciseList.clearListSelection();
   }

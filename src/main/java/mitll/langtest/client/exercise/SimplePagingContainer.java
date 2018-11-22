@@ -193,7 +193,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   protected void gotDoubleClickOn(T selected) {
-//    logger.info("got double click on " + selected);
+    logger.info("got double click on " + selected);
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {

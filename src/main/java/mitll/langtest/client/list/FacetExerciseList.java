@@ -509,10 +509,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       maybeSwitchProject(selectionState, getStartupInfo().getProjectid());
     }
 
-//    INavigation.VIEWS instance = selectionState.getView();
-//    if (instance != getInstance()) {
-//      logger.info("addWidgets selection '" + instance + "' != " + getInstance());// + " so removing " + remove);
-//    }
+    INavigation.VIEWS instance = selectionState.getView();
+    if (instance != getInstance()) {
+      logger.info("addWidgets selection '" + instance + "' != " + getInstance());// + " so removing " + remove);
+    }
 
     restoreUIState(selectionState);
   }
@@ -529,7 +529,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 //   logger.info("logException stack " + exceptionAsString);
     boolean context = views.isContext();
 
-    if (context) logger.warning("getExerciseListRequest view " + views );
+    if (context) logger.warning("getExerciseListRequest view " + views);
     return super.getExerciseListRequest(prefix)
         .setAddFirst(false)
         .setOnlyExamples(context);
@@ -1117,7 +1117,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #addRemoveClickHandler
    */
   void setHistory(Map<String, String> candidate) {
-    //  logger.info("setHistory "+candidate);
+   //   logger.info("setHistory "+candidate);
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
 
@@ -1149,7 +1149,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
       FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
 
-     // logger.info("getTypeToValues Send req " + filterRequest);
+      // logger.info("getTypeToValues Send req " + filterRequest);
 
       service.getTypeToValues(filterRequest,
           new AsyncCallback<FilterResponse>() {
@@ -1256,6 +1256,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    * @param selectionState
    * @see HistoryExerciseList#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
+   *
+   * @see #restoreUIState
    */
   @Override
   protected void restoreListBoxState(SelectionState selectionState) {

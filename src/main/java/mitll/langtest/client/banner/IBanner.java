@@ -43,6 +43,7 @@ public interface IBanner {
   void checkProjectSelected();
 
   void show(INavigation.VIEWS views);
+  void show(INavigation.VIEWS views, boolean fromClick);
 
  // void selectView(INavigation.VIEWS views);
 }
