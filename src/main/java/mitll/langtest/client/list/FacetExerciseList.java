@@ -517,11 +517,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       maybeSwitchProject(selectionState, getStartupInfo().getProjectid());
     }
 
-    INavigation.VIEWS instance = selectionState.getView();
-    if (instance != getInstance()) {
-      // Collection<String> remove = selectionState.getTypeToSection().remove(getDynamicFacet());
-      logger.warning("addWidgets selection '" + instance + "' != " + getInstance());// + " so removing " + remove);
-    }
+//    INavigation.VIEWS instance = selectionState.getView();
+//    if (instance != getInstance()) {
+//      logger.info("addWidgets selection '" + instance + "' != " + getInstance());// + " so removing " + remove);
+//    }
 
     restoreUIState(selectionState);
   }
@@ -536,9 +535,12 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
 //     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest for " + prefix));
 //   logger.info("logException stack " + exceptionAsString);
+    boolean context = views.isContext();
+
+    if (context) logger.warning("getExerciseListRequest view " + views );
     return super.getExerciseListRequest(prefix)
         .setAddFirst(false)
-        .setOnlyExamples(views.isContext());
+        .setOnlyExamples(context);
   }
 
   /**
@@ -1153,7 +1155,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
       final long then = System.currentTimeMillis();
 
-      service.getTypeToValues(getFilterRequest(userListID, getPairs(typeToSelection)),
+      FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
+
+     // logger.info("getTypeToValues Send req " + filterRequest);
+
+      service.getTypeToValues(filterRequest,
           new AsyncCallback<FilterResponse>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -1356,10 +1362,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   @NotNull
   Map<String, String> getNewTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
-//    typeOrder = new ArrayList<>(typeOrder);
-//    typeOrder.add(getDynamicFacet());
-//    typeOrder.add(CONTENT);
-
     return getTypeToSelection(selectionState, typeOrder);
   }
 
@@ -2004,8 +2006,8 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
         if (DEBUGSCORE) logger.info("# " + exercise.getID() + " Score " + score);
         withScore++;
       } else {
-        if (DEBUGSCORE)
-          logger.info("# " + exercise.getID() + " no score " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+//        if (DEBUGSCORE)
+//          logger.info("# " + exercise.getID() + " no score " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
       }
       // if (!isCurrentReq(reqid)) break;
     }
@@ -2116,13 +2118,11 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     double percent = 100 * score;
     if (DEBUGSCORE) logger.info("showProgress percent " + percent);
 
-    practicedProgress.setPercent(num == 0 ? 100 : percent);
+    double percent1 = Math.max(30, num == 0 ? 100 : percent);
+    practicedProgress.setPercent(percent1);
     boolean allDone = num == denom;
 
-    {
-      String text = getPracticedText(num, denom, zeroPercent, oneHundredPercent, suffix);
-      practicedProgress.setText(text);
-    }
+    practicedProgress.setText(getPracticedText(num, denom, zeroPercent, oneHundredPercent, suffix));
 
     if (useColorGradient && num > 0) {
       double round = Math.max(percent, 30);

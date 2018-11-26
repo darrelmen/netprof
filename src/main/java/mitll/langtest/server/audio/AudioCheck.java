@@ -207,7 +207,6 @@ public class AudioCheck {
 
   public void maybeAddDNR(String fileInfo, AudioInputStream stream, ValidityAndDur validityAndDur) throws IOException {
     if (validityAndDur.isValid()) {
-//        addDynamicRange(file, validityAndDur);
       DynamicRange.RMSInfo dynamicRange = new DynamicRange().getRmsInfo(fileInfo, stream);
 
       if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
@@ -455,7 +454,7 @@ public class AudioCheck {
     private int durationInMillis;
     private double maxMinRange;
 
-    ValidityAndDur() {
+    public ValidityAndDur() {
       this(Validity.INVALID, 0d, false);
     }
 

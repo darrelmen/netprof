@@ -25,18 +25,18 @@ public class ProjectHelper {
   public List<SlimProject> getProjectInfos(DatabaseServices db, IUserSecurityManager securityManager) {
     List<SlimProject> projectInfos = new ArrayList<>();
     if (db == null) {
-      logger.info("getStartupInfo no db yet...");
+      logger.info("getProjectInfos no db yet...");
     } else {
       IProjectManagement projectManagement = db.getProjectManagement();
       ((NPUserSecurityManager) securityManager).setProjectManagement(projectManagement);
       if (projectManagement == null) {
-        logger.error("getStartupInfo : config error - didn't make project management");
+        logger.error("getProjectInfos : config error - didn't make project management");
       } else {
         long then = System.currentTimeMillis();
         projectInfos = projectManagement.getNestedProjectInfo();
         long now = System.currentTimeMillis();
-        if (now - then > 100L)
-          logger.info("getStartupInfo took " + (now - then) + " millis to get nested projects.");
+        if (now - then > 10L)
+          logger.info("getProjectInfos took " + (now - then) + " millis to get nested projects.");
       }
     }
     return projectInfos;

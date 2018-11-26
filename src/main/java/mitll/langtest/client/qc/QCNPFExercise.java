@@ -441,11 +441,11 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
         tabAndContent.addWidget(panelForAudio1.audioPanel);
         toResize.add(panelForAudio1.audioPanel);
 
-        if (user.getID() == BaseUserDAO.DEFAULT_USER_ID) {    // add widgets to mark gender on default audio
-          addGenderAssignmentButtons(tabAndContent, audioAttributes, audio, panelForAudio);
-        } else {
+//        if (user.getID() == BaseUserDAO.DEFAULT_USER_ID) {    // add widgets to mark gender on default audio
+//          addGenderAssignmentButtons(tabAndContent, audioAttributes, audio, panelForAudio);
+//        } else {
           tabAndContent.getContent().add(panelForAudio);
-        }
+//        }
         if (audio.isHasBeenPlayed()) {
           audioWasPlayed.add(panelForAudio1.audioPanel);
         }
@@ -678,7 +678,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       }
     });
 
-    logger.info("getPanelForAudio : comment widget for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage() + " context " + e.isContext());
+//    logger.info("getPanelForAudio : comment widget for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage() + " context " + e.isContext());
     return
         new Pair(getCommentWidget(audio.getAudioRef(), audioPanel, e.getAnnotation(audio.getAudioRef()), e.getID()), audioPanel);
   }

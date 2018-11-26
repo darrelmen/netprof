@@ -93,10 +93,10 @@ public class AudioTest extends BaseTest {
     Map<Integer, Integer> truth = new HashMap<>();
     for (User user : new UserDAO(spanish).getUsers()) {
 //      Collection<String> recordedBy = dao.getRecordedBySameGender(user.getID());
-      Collection<Integer> recordedBy = h2AudioDAO.getRecordedExForUser(user.getID());
-      if (!recordedBy.isEmpty()) {
-        logger.info("h2  for " + user.getUserID() + " recorded\t" + recordedBy.size());
-      }
+//      Collection<Integer> recordedBy = h2AudioDAO.getRecordedExForUser(user.getID());
+//      if (!recordedBy.isEmpty()) {
+//        logger.info("h2  for " + user.getUserID() + " recorded\t" + recordedBy.size());
+//      }
     }
 
     IAudioDAO dao = spanish.getAudioDAO();

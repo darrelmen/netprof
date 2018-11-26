@@ -122,7 +122,16 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       //   logger.info("isKnownUser : result type for " + id + " = " + usersWithThisEmail + " : " + resultType);
       return getResultType(usersWithThisEmail);
     } else {
-      return new LoginResult(knownUser ? ResultType.Success : Failed);
+      if (knownUser) {
+        User userByID = getUserByID(id);
+        if (userByID == null) {
+          return new LoginResult(Failed);// HOW?
+        } else {
+          return new LoginResult(userByID, userByID.isValid() ? ExistsValid : Exists);
+        }
+      } else {
+        return new LoginResult(Failed);
+      }
     }
   }
 

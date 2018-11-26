@@ -41,6 +41,7 @@ import mitll.langtest.shared.user.MiniUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -63,6 +64,9 @@ public class AudioExercise extends ExerciseShell {
   private static final String MP3 = ".mp3";
   private static final String CONTEXT = "context";
 
+  /**
+   * NOTE : can't use concurrent hash map.
+   */
   private Map<String, AudioAttribute> audioAttributes = new HashMap<>();
   private Map<String, ExerciseAnnotation> fieldToAnnotation = new HashMap<>();
   protected int projectid;
@@ -128,21 +132,29 @@ public class AudioExercise extends ExerciseShell {
       if (currentByKey == null || currentByKey.getTimestamp() < audioAttribute.getTimestamp()) {
         audioAttributes.put(key, audioAttribute);
         return true;
-      } else return false;
+      } else {
+        return false;
+      }
     }
   }
 
+  /**
+   * CLIENT ONLY
+   */
   public synchronized void clearRefAudio() {
     AudioAttribute audio = getRegularSpeed();
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
+  /**
+   * CLIENT ONLY
+   */
   public synchronized void clearSlowRefAudio() {
     AudioAttribute audio = getSlowSpeed();
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
-  private synchronized AudioAttribute getSlowSpeed() {
+  private AudioAttribute getSlowSpeed() {
     return getAudio(SPEED, SLOW);
   }
 
@@ -204,9 +216,21 @@ public class AudioExercise extends ExerciseShell {
     return audioAttributes.values();
   }
 
+  /*
   public synchronized Collection<Integer> getAudioIDs() {
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
     return audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
+  }
+*/
+
+  public synchronized Collection<String> getAudioPaths() {
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+    Set<String> paths = new HashSet<>(audioAttributes1.size());
+    for (AudioAttribute attr : audioAttributes1) {
+      paths.add(attr.getAudioRef());
+    }
+    return paths;
+    //return audioAttributes1.stream().map(AudioAttribute::getAudioRef).collect(Collectors.toSet());
   }
 
   /**

@@ -78,11 +78,9 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
                                                        String prefix,
                                                        boolean onlyUninspected) {
     ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyUninspected);
-    //  exerciseListRequest.setOnlyRecordedByMatchingGender(true);
     exerciseListRequest.setOnlyUnrecordedByMe(true);
 
  //   logger.info("getExerciseListRequest req " + exerciseListRequest);
-
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest"));
 //    logger.info("logException stack " + exceptionAsString);
 
@@ -104,22 +102,6 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   }
 
   /**
-   * @return
-   * @see #addWidgets()
-   */
- /* @NotNull
-  @Override
-  protected String getDynamicFacet() {
-    return RECORDED;
-  }*/
-
-/*
-  protected boolean isDynamicFacetInteger() {
-    return false;
-  }
-*/
-
-  /**
    * @param prefix
    * @return
    * @see #getExercises
@@ -132,15 +114,11 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
       request.setOnlyUnrecordedByMe(s.startsWith(UNRECORD));
       //   request.setOnlyRecordedByMatchingGender(s.startsWith(RECORD));
       logger.warning("getExerciseListRequest selection is " + s);
-
     } else {
       //logger.info("getExerciseListRequest no recorded selection in " + getTypeToSelection().keySet());
     }
-    logger.info("getExerciseListRequest req     " + request);
+//    logger.info("getExerciseListRequest req     " + request);
     request.setOnlyExamples(isContext);
     return request;
   }
-//  void restoreUI(SelectionState selectionState) {
-//    restoreUIState(selectionState);
-//  }
 }

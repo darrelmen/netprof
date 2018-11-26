@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 class JSONAnswerParser {
+  public static final String PATH = "path";
   private final Logger logger = Logger.getLogger("JSONAnswerParser");
 
   private static final String EVENT = "event";
@@ -29,18 +30,20 @@ class JSONAnswerParser {
   private static final String VALID = "valid";
 
   /**
-   * @see PostAudioRecordButton#gotPacketResponse
    * @param jsonObject
    * @return
+   * @see PostAudioRecordButton#gotPacketResponse
    */
   @NotNull
   AudioAnswer getAudioAnswer(JSONObject jsonObject) {
 //    String message = getField(jsonObject, "MESSAGE");
     Validity validity = getValidity(jsonObject);
-    // logger.info("Validity is " + validity);
+
+    JSONValue jsonValue2 = jsonObject.get(PATH);
+    if (jsonValue2 == null) logger.warning("no path on json?");
 
     AudioAnswer converted = new AudioAnswer(
-        getField(jsonObject, "path"),
+        getField(jsonObject, PATH),
         validity,
         getIntField(jsonObject, REQID),
         getIntField(jsonObject, "duration"),
@@ -81,7 +84,7 @@ class JSONAnswerParser {
       JSONValue jsonValue = jsonObject.get("isfullmatch");
       boolean isFullMatch = jsonValue == null || jsonValue.isBoolean().booleanValue();
 
-       PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
+      PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
           new HashMap<>(),
           new HashMap<>(),
           sTypeToEndTimes, "", wavFileLengthSeconds,

@@ -27,12 +27,6 @@ public interface ProjectServices {
    */
   void rememberUsersCurrentProject(int userid, int projectid);
 
-  /**
-   * @see OpenUserServiceImpl#forgetProject
-   * @param userid
-   */
- // void forgetProject(int userid);
-
   Project getProjectForUser(int userid);
 
   Project getProject(int projectid);

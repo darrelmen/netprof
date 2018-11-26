@@ -32,6 +32,9 @@
 
 package mitll.langtest.server.database.project;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import mitll.hlt.domino.server.data.DocumentServiceDelegate;
@@ -58,6 +61,7 @@ import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
+import mitll.langtest.server.services.AudioServiceImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.*;
@@ -75,6 +79,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
@@ -91,10 +97,11 @@ public class ProjectManagement implements IProjectManagement {
    * @see #addOtherProps
    */
   private static final String DOMINO_NAME = "Domino Project";
-  public static final String VOCABULARY = "Vocabulary";
-  public static final String DIALOG = "Dialog";
-  public static final String VOCAB = "vocab";
-  public static final String DIALOG1 = "dialog";
+  private static final String VOCABULARY = "Vocabulary";
+  private static final String DIALOG = "Dialog";
+  private static final String VOCAB = "vocab";
+  private static final String DIALOG1 = "dialog";
+  private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
   /**
    * JUST FOR TESTING
    */
@@ -111,7 +118,7 @@ public class ProjectManagement implements IProjectManagement {
    * @see #addDateProps(SlickProject, Map)
    */
   private static final String CREATED = "Created";
-  public static final String CREATED_BY = CREATED + " by";
+  private static final String CREATED_BY = CREATED + " by";
   public static final String MODIFIED = "Modified";
   /**
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
@@ -218,7 +225,7 @@ public class ProjectManagement implements IProjectManagement {
    * If a project is already configured, won't be configured again.
    * Fill in id->project map
    *
-   * @see IProjectManagement#populateProjects(int)
+   * @see #populateProjects(int)
    */
   private void populateProjects(PathHelper pathHelper,
                                 ServerProperties serverProps,
@@ -382,7 +389,7 @@ public class ProjectManagement implements IProjectManagement {
       );
 
       if (myProject) {
-        new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises),"checkLTSAndCountPhones_"+project.getID()).start();
+        new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises), "checkLTSAndCountPhones_" + project.getID()).start();
       }
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
 
@@ -401,7 +408,7 @@ public class ProjectManagement implements IProjectManagement {
       logger.info("configure END " + projectID + " " + project.getLanguage() + " in " + (System.currentTimeMillis() - then) + " millis.");
 
       // side effect is to cache the users.
-      new Thread(() -> rememberUsers(projectID),"rememberUsers_"+projectID).start();
+      new Thread(() -> rememberUsers(projectID), "rememberUsers_" + projectID).start();
 
       if (project.getLanguageEnum() == Language.KOREAN) {
         addDialogInfo(project);
@@ -443,7 +450,7 @@ public class ProjectManagement implements IProjectManagement {
       }
 
       db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
-    },"ProjectManagement.rememberUsers_"+projectID).start();
+    }, "ProjectManagement.rememberUsers_" + projectID).start();
   }
 
   @Override
@@ -845,7 +852,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
-    // logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
+    logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
       clearStartupInfo(userWhere);
@@ -868,6 +875,10 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
+  /**
+   * @param userWhere
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#setProject
+   */
   @Override
   public void clearStartupInfo(User userWhere) {
     userWhere.setStartupInfo(null);
@@ -969,8 +980,7 @@ public class ProjectManagement implements IProjectManagement {
           parent.addChild(projectInfo);
           addModeChoices(project, projectInfo);
         });
-      }
-      else {
+      } else {
         addModeChoices(firstProduction, parent);
       }
     });
@@ -1036,7 +1046,7 @@ public class ProjectManagement implements IProjectManagement {
 
     info.put(ProjectProperty.MODEL_TYPE.toString(), pproject.getModelType().toString());
 
-     addDateProps(project, info);
+    addDateProps(project, info);
 
     boolean isRTL = addOtherProps(project, info);
 
@@ -1069,13 +1079,54 @@ public class ProjectManagement implements IProjectManagement {
         project.userid());
   }
 
+
+  private final LoadingCache<Integer, String> dominoToName = CacheBuilder.newBuilder()
+      .maximumSize(1000)
+      .expireAfterWrite(1, TimeUnit.HOURS)
+      .build(
+          new CacheLoader<Integer, String>() {
+            @Override
+            public String load(Integer key) {
+              String dominoProjectName = getDominoProjectName(key);
+              return dominoProjectName == null ? NO_PROJECT_FOR_ID : dominoProjectName;
+            }
+          });
+
+
+  /**
+   * @param project
+   * @param info
+   * @return
+   * @see #getProjectInfo
+   */
   private boolean addOtherProps(SlickProject project, Map<String, String> info) {
-    if (project.dominoid() > 0) {
+    int dominoid = project.dominoid();
+    if (dominoid > 0) {
 //      info.put(DOMINO_ID, "" + project.dominoid());
-      info.put(DOMINO_NAME, project.dominoid() + " : " + getDominoProjectName(project.dominoid()));
+      String s = getDominoName(dominoid);
+      info.put(DOMINO_NAME, dominoid + (s.isEmpty() ? "" : " : " + s)
+          //  getDominoProjectName(project.dominoid())
+      );
     }
 
     return addExerciseDerivedProperties(project, info);
+  }
+
+  @NotNull
+  private String getDominoName(int dominoid) {
+    String s = "";
+    try {
+      s = dominoToName.get(dominoid);
+
+      if (s.equalsIgnoreCase(NO_PROJECT_FOR_ID)) {
+        dominoToName.refresh(dominoid);
+        s = dominoToName.get(dominoid);
+        if (s.equalsIgnoreCase(NO_PROJECT_FOR_ID)) s = "";
+      }
+    } catch (ExecutionException e) {
+      logger.warn("got " + e, e);
+    }
+    return s;
   }
 
   private boolean addExerciseDerivedProperties(SlickProject project, Map<String, String> info) {
@@ -1172,8 +1223,8 @@ public class ProjectManagement implements IProjectManagement {
     return dominoImport == null ? Collections.emptyList() : dominoImport.getImportProjectInfos(db.getUserDAO().getDominoAdminUser());
   }
 
-  @Override
-  public String getDominoProjectName(int dominoProjectID) {
+
+  private String getDominoProjectName(int dominoProjectID) {
     return dominoImport == null ? "" : dominoImport.getDominoProjectName(dominoProjectID);
   }
 

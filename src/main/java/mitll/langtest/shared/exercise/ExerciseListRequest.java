@@ -65,12 +65,9 @@ public class ExerciseListRequest implements IsSerializable {
 
   // TODO : which of these are mutually exclusive???
   private boolean onlyUnrecordedByMe = false;
-  //private boolean onlyRecordedByMatchingGender = false;
   private boolean onlyExamples = false;
   private boolean incorrectFirstOrder = false;
-//  private boolean onlyWithAudioAnno = false;
   private boolean onlyWithAnno = false;
- // private boolean onlyDefaultAudio = false;
   private boolean onlyUninspected = false;
   private boolean onlyForUser = false;
   private boolean addFirst = true;
@@ -79,7 +76,6 @@ public class ExerciseListRequest implements IsSerializable {
   private boolean addContext = false;
   private boolean plainVocab = false;
   private int dialogID = -1;
-  //private boolean quiz = false;
 
   public ExerciseListRequest() {
   }

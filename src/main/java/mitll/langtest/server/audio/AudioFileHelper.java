@@ -101,16 +101,14 @@ public class AudioFileHelper implements AlignDecode {
    */
   private static final String TEST_USER = "demo_";
   private static final String TEST_PASSWORD = "domino22";//"demo";
-  // public static final long DAY = 24 * 60 * 60 * 1000L;
   private static final String COOKIE = "Cookie";
-  public static final String SCORE_SERVLET = "scoreServlet";
+  private static final String SCORE_SERVLET = "scoreServlet";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
   private final MP3Support mp3Support;
   private final Project project;
   private ASR asrScoring;
-  //  private ASRWebserviceScoring webserviceScoring;
   private DecodeCorrectnessChecker decodeCorrectnessChecker;
 
   private AutoCRT autoCRT;
@@ -673,7 +671,6 @@ public class AudioFileHelper implements AlignDecode {
           "\n\tattr    " + attribute);
     }
 
-//    boolean doHydec = false;
     // Do alignment...
     if (absoluteFile == null) {
       absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language.getLanguage());
@@ -1190,9 +1187,10 @@ public class AudioFileHelper implements AlignDecode {
           "\n\tuser    " + userid +
           "\n\thost    " + hydraHost
       );
+      if (theFile.getName().endsWith("mp3")) logger.warn("don't send mp3!");
     }
     if (!available && !theFile.getName().endsWith(OGG) && serverProps.useProxy()) {
-  //    logger.info("checkForWebservice exid    " + exid);
+      //    logger.info("checkForWebservice exid    " + exid);
    /*   logger.info("checkForWebservice projid  " + projid);
       logger.info("checkForWebservice userid  " + userid);
       logger.info("checkForWebservice theFile " + theFile.getAbsolutePath());
@@ -1235,7 +1233,7 @@ public class AudioFileHelper implements AlignDecode {
     HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, ScoreServlet.PostRequest.ALIGN);
 
     if (session != null) {
-      logger.info("getProxyScore adding session '" + session +"'");
+      logger.info("getProxyScore adding session '" + session + "'");
       httpClient.addRequestProperty(COOKIE, session);
     }
 
@@ -1319,7 +1317,7 @@ public class AudioFileHelper implements AlignDecode {
       logger.info("getSession " +
           "\n\thost   " + hydraHost +
           "\n\tprojID " + projID +
-          "\n\tuser   " + TEST_USER+
+          "\n\tuser   " + TEST_USER +
           "\n\tpass   " + TEST_PASSWORD
       );
 

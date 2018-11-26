@@ -115,7 +115,7 @@ public class BasicDialog {
     row.add(textBox);
     row.add(rightSide);
     final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, row, labelWidth, subtext);
-
+    userGroup.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
     FormField formField = new FormField(textBox, userGroup, minLength);
     textBox.getElement().getStyle().setProperty("fontFamily", "sans-serif");
     // formField.setRightSide(rightSide);

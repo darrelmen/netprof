@@ -51,6 +51,7 @@ public class JsonScoring {
   //  public static final String EXERCISE_TEXT = "exerciseText";
   private static final float MIN_HYDRA_ALIGN = 0.3F;
   private static final String BAD_EXERCISE_ID = "bad_exercise_id";
+  public static final String DYNAMIC_RANGE = "dynamicRange";
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
 
@@ -146,21 +147,28 @@ public class JsonScoring {
                                   AudioAnswer answer,
                                   boolean addStream) {
     PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
-    if (answer != null && answer.isValid() && pretestScore != null) {
-      jsonForScore = getJsonObject(projid, options.isUsePhoneToDisplay(), fullJSON, doFlashcard, answer, pretestScore);
-      if (addStream) {
-        jsonForScore.put("duration", answer.getDurationInMillis());
-        jsonForScore.put("dynamicRange", answer.getDynamicRange());
-        jsonForScore.put("path", answer.getPath());
-        jsonForScore.put("resultID", answer.getResultID());
-        jsonForScore.put("pretest", new JSONObject());
-        jsonForScore.put("timestamp", answer.getTimestamp());
+    if (answer != null && answer.isValid()) {
+      if (pretestScore != null) {
+        jsonForScore = getJsonObject(projid, options.isUsePhoneToDisplay(), fullJSON, doFlashcard, answer, pretestScore);
         jsonForScore.put("isfullmatch", answer.getPretestScore().isFullMatch());
       }
+      if (addStream) {
+        jsonForScore.put("duration", answer.getDurationInMillis());
+        jsonForScore.put(DYNAMIC_RANGE, answer.getDynamicRange());
+        String path = answer.getPath();
+        if (path.isEmpty()) logger.warn("no path?");
+        jsonForScore.put("path", path);
+        jsonForScore.put("resultID", answer.getResultID());
+
+        if (jsonForScore.get("pretest") == null) {
+          jsonForScore.put("pretest", new JSONObject());
+        }
+        jsonForScore.put("timestamp", answer.getTimestamp());
+      } else logger.warn("not adding stream info");
     }
 
     addValidity(exerciseID, jsonForScore,
-        answer == null ? Validity.INVALID :  answer.getValidity(),
+        answer == null ? Validity.INVALID : answer.getValidity(),
         answer == null ? "1" : "" + answer.getReqid());
 
 
@@ -191,7 +199,7 @@ public class JsonScoring {
     float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
 
     Project project = db.getProject(projid);
-  //  String language = project.getLanguage();
+    //  String language = project.getLanguage();
 
     jsonForScore = fullJSON ?
         scoreToJSON.getJsonObject(pretestScore) :
@@ -370,7 +378,7 @@ public class JsonScoring {
       writeCompressedVersions(path, new TrackInfo(foreignLanguage, getUserID(user), english, language));
       // long now = System.currentTimeMillis();
       //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
-    },"ensureMP3Later").start();
+    }, "ensureMP3Later").start();
   }
 
   /**

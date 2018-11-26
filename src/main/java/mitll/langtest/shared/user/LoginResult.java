@@ -58,10 +58,15 @@ public class LoginResult implements IsSerializable {
     Added,
     /**
      * @see mitll.langtest.client.user.SignUpForm#handleAddUserResponse
+     * @see mitll.langtest.server.services.OpenUserServiceImpl#addUser
      */
     Exists,
+    ExistsValid,
     Multiple,
     Email,
+    /**
+     * ERROR
+     */
     Unknown
   }
 

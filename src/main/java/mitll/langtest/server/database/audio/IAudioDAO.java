@@ -66,8 +66,18 @@ public interface IAudioDAO extends IDAO {
 
   Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio);
 
+  /**
+   * @see SlickAudioDAO#getAudioAttributesByProjectThatHaveBeenChecked
+   * @param projid
+   * @return
+   */
   List<SlickAudio> getAll(int projid);
 
+  /**
+   * @see mitll.langtest.server.domino.AudioCopy#getTranscriptToAudio
+   * @param projid
+   * @return
+   */
   List<SlickAudio> getAllNoExistsCheck(int projid);
 
   /**
@@ -89,19 +99,6 @@ public interface IAudioDAO extends IDAO {
  <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, Language language, int projID);
 
   /**
-   * @param firstExercise
-   * @param audioAttributes
-   * @param language
-   * @return
-   * @see
-   */
-/*
-  boolean attachAudio(CommonExercise firstExercise,
-                      Collection<AudioAttribute> audioAttributes,
-                      String language, boolean debug);
-*/
-
-  /**
    * @param userid
    * @param projid
    * @param exToTranscript
@@ -118,11 +115,15 @@ public interface IAudioDAO extends IDAO {
   /**
    * @param userid
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
    */
+/*
   Collection<Integer> getRecordedExForUser(int userid);
+*/
 
+/*
   Collection<Integer> getRecordedExampleForUser(int userid);
+*/
 
   void addOrUpdateUser(int userid, int projid, AudioAttribute attr);
 

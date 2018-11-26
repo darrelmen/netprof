@@ -53,7 +53,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.hlt.domino.shared.Constants.RESET_PW_HASH;
 import static mitll.langtest.client.user.SignInForm.NO_SPACES;
 
 public class SignUpForm extends UserDialog implements SignUp {
@@ -61,6 +60,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private static final String USERNAME1 = "username";
   private static final String DLIFLC_EDU = "dliflc.edu";
+  private static final String RESET_PW_HASH = "#reset_password";
 
   // out of 1630 instances on 6/8/18
   private static final List<String> DOMAINS =
@@ -80,7 +80,6 @@ public class SignUpForm extends UserDialog implements SignUp {
       );
 
   /**
-   *
    * Go ahead and automatically replace them.
    */
   private static final Set<String> DLI_TYPOS = new HashSet<>(Arrays.asList("dflic.edu",
@@ -117,7 +116,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   private static final String EXISTING_ACCOUNT = "Existing account with this email - click forgot password?";
 
   /**
-   *
+   * @see #setNewUserPrompt
    */
   private static final String COMPLETE_YOUR_PROFILE = "Complete Your Profile";
 
@@ -402,11 +401,12 @@ public class SignUpForm extends UserDialog implements SignUp {
         openUserService.isKnownUser(normalizeSpaces(text), false, new AsyncCallback<LoginResult>() {
           @Override
           public void onFailure(Throwable caught) {
-            logger.warning("\tgot FAILURE on userExists " + text);
+            logger.warning("\tonUserIDBlur got FAILURE on userExists " + text);
           }
 
           @Override
           public void onSuccess(LoginResult found) {
+          //  logger.info("onUserIDBlur for '" + text + "' " + found);
             if (isSuccess(found)) {
               reallyOnUserIDBlur(text);
               //          logger.warning("got no user for " + text);
@@ -434,9 +434,14 @@ public class SignUpForm extends UserDialog implements SignUp {
 
       @Override
       public void onSuccess(LoginResult found) {
-        boolean isNewUser = !isSuccess(found);
-        setSignUpButtonTitle(isNewUser);
-        setNewUserPrompt(isNewUser);
+        // logger.info("reallyOnUserIDBlur for '" + uidVal + "' found " + found);
+        if (found.getResultType() == LoginResult.ResultType.ExistsValid) {
+          userPassLogin.setSignInFieldAndFocus(uidVal.trim());
+        } else {
+          boolean isNewUser = !isSuccess(found);
+          setSignUpButtonTitle(isNewUser);
+          setNewUserPrompt(isNewUser);
+        }
       }
     });
   }
@@ -547,6 +552,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   /**
    * True if 2 or less edit distance away from another valid server name
+   *
    * @param split
    * @param server
    * @return
@@ -740,7 +746,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private void isFormValid(String userID) {
     if (isFormValid(userID, false)) {
-      gotSignUp(userID, emailBox.getValue());
+      gotSignUp(userID, emailBox.getValue().trim());
     } else {
       logger.info("isFormValid form is not valid!!");
     }
@@ -748,7 +754,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
   private void isFormValidLongUserID(String userID) {
     if (isFormValid(userID, true)) {
-      gotSignUp(userID, emailBox.getValue());
+      gotSignUp(userID, emailBox.getValue().trim());
     } else {
       logger.info("getSignUpClickHandler form is not valid!!");
     }
@@ -943,10 +949,11 @@ public class SignUpForm extends UserDialog implements SignUp {
       } else {
         userManager.setPendingUserStorage(theUser.getUserID());
         if (theUser.isEnabled()) {
-          eventRegistration.logEvent(signUp, "signing up", "N/A", getSignUpEvent(theUser));
+          boolean hasResetKey = theUser.hasResetKey();
+          eventRegistration.logEvent(signUp, "signing up (reset key = " + hasResetKey + ")", "N/A", getSignUpEvent(theUser));
 
           logger.info("handleAddUserResponse reset  key " + theUser.getResetKey());
-          if (theUser.hasResetKey()) {
+          if (hasResetKey) {
             reloadPage(theUser);
           } else {
             pleaseCheck.setVisible(true);
@@ -985,6 +992,11 @@ public class SignUpForm extends UserDialog implements SignUp {
     return registrationInfo.isVisible() ? (age.isEmpty() ? 99 : Integer.parseInt(age)) : 0;
   }
 
+  /**
+   * @param result
+   * @return
+   * @see #handleAddUserResponse
+   */
   private String getSignUpEvent(User result) {
     return "successful sign up as " + result.getUserID() + "/" + result.getID() + " as " + result.getUserKind();
   }

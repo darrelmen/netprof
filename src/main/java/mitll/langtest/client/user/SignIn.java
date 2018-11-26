@@ -43,6 +43,7 @@ public interface SignIn {
   Panel populateSignInForm(Form signInForm, Panel forgotRow, KeyPressHelper enterKeyButtonHelper);
 
   void setFocusOnUserID();
+  void setValueAndFocusOnUserID(String userID);
 
   void setFocusPassword();
 

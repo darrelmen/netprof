@@ -454,6 +454,7 @@ public class ClickableWords {
     return tokens;
   }
 
+/*
   public boolean isRTL(String fl) {
     return isRTLContent(fl);
   }
@@ -461,6 +462,7 @@ public class ClickableWords {
   private boolean isRTLContent(String content) {
     return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
   }
+*/
 
   /**
    * @param dir            text direction

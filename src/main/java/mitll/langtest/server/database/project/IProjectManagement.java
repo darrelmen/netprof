@@ -138,9 +138,11 @@ public interface IProjectManagement {
    */
   ImportInfo getImportFromDomino(int projID);
 
+  /**
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoForLanguage
+   * @return
+   */
   List<ImportProjectInfo> getVocabProjects();
-
-  String getDominoProjectName(int dominoProjectID);
 
   Map<String,Integer> getNpToDomino(int dominoProjectID);
 }

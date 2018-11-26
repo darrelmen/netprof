@@ -63,8 +63,14 @@ import org.jetbrains.annotations.NotNull;
  * To change this template use File | Settings | File Templates.
  */
 public class UserDialog extends BasicDialog {
-  //public static final String LOGIN_PAGE_BACK = "loginPageBack";
-  static final String LOGIN_PAGE_BACK = "dialogLoginPageBack";
+  //private final Logger logger = Logger.getLogger("ResetPassword");
+  static final int MIN_PASSWORD = 8; // Consistent with Domino minimums
+  /**
+   * <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/340'></a>
+   */
+  private static final int MAX_PASSWORD_LENGTH = 40;
+
+  private static final String LOGIN_PAGE_BACK = "dialogLoginPageBack";
   static final String AUTOCOMPLETE = "autocomplete";
   static final String NO_SERVER = "Can't communicate with server - check network connection.";
   static final String USER_ID = "User ID";
@@ -105,7 +111,7 @@ public class UserDialog extends BasicDialog {
    * @return
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#makeEnglishRow
    */
-  protected FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
+  FormField addControlFormField(Panel dialogBox, String label, boolean isPassword, int minLength, int maxLength, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     user.setMaxLength(maxLength);
     return getFormField(dialogBox, label, user, minLength, hint);
@@ -258,17 +264,8 @@ public class UserDialog extends BasicDialog {
     return userID.split("\\s").length > 1;
   }
 
-  protected String normalizeSpaces(String trim) {
+  String normalizeSpaces(String trim) {
     return trim.replaceAll("\\s+", "_");
-  }
-
-  /**
-   * On mobile this is really annoying if we don't turn it off.
-   *
-   * @param useridField
-   */
-  protected void turnOffAutoCapitalize(FormField useridField) {
-    useridField.getWidget().getElement().setAttribute("autocapitalize", "off");
   }
 
   @NotNull
@@ -320,5 +317,28 @@ public class UserDialog extends BasicDialog {
     }
     form.add(fieldset);
     return container;
+  }
+
+  @NotNull
+  FormField getPasswordFormField(Fieldset fieldset, String hint1) {
+    FormField formField = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, MAX_PASSWORD_LENGTH, hint1);
+    formField.box.addKeyUpHandler(event -> {
+      if (formField.box.getText().length() == MAX_PASSWORD_LENGTH) {
+        markWarn(formField, "Max length", "At max password length - stop typing.");
+      } else {
+        clearError(formField.group);
+      }
+    });
+    turnOffAutoCapitalize(formField);
+    return formField;
+  }
+
+  /**
+   * On mobile this is really annoying if we don't turn it off.
+   *
+   * @param useridField
+   */
+  void turnOffAutoCapitalize(FormField useridField) {
+    useridField.getWidget().getElement().setAttribute("autocapitalize", "off");
   }
 }

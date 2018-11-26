@@ -352,27 +352,27 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           "\n\tfemales " + idsOfRecordedExercisesForFemales.size());
     }
   }
-
+/*
   @Override
   Set<Integer> getValidAudioOfType(int userid, AudioType audioType) {
     return dao.getExerciseIDsOfValidAudioOfType(userid, audioType.toString());
-  }
+  }*/
 
   /**
    * Items that are recorded must have both regular and slow speed audio.
    *
    * @param userid
    * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
+   * @seex mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
    */
-  public Collection<Integer> getRecordedExForUser(int userid) {
+/*  public Collection<Integer> getRecordedExForUser(int userid) {
     try {
       return dao.getRecordedForUser(userid);
     } catch (Exception ee) {
       logger.error("got " + ee, ee);
     }
     return new HashSet<>();
-  }
+  }*/
 
   @Override
   int markDefect(int userid, int exerciseID, AudioType audioType) {

@@ -106,7 +106,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
   private static final mitll.hlt.domino.shared.model.user.User.Gender UNSPECIFIED = mitll.hlt.domino.shared.model.user.User.Gender.Unspecified;
   private static final String NETPROF1 = "Netprof";
-//  private static final String PRIMARY = NETPROF1;
+  //  private static final String PRIMARY = NETPROF1;
   private static final String DEFAULT_AFFILIATION = "";
 
   private static final String UID_F = "userId";
@@ -479,7 +479,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
       if (adminUser.getPrimaryGroup() == null) {
         logger.warn("\n\n\nensureDefaultUsers no group for " + adminUser);
-      //  adminUser.setPrimaryGroup(makePrimaryGroup(PRIMARY));
+        //  adminUser.setPrimaryGroup(makePrimaryGroup(PRIMARY));
       }
 
       dominoImportUser = delegate.getUser(IMPORT_USER);
@@ -676,40 +676,44 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         logger.warn("getGroup no groups for " + NETPROF2 + "?");
 
         groups = delegate.getGroupDAO().searchGroups("");
+
+        if (groups.isEmpty()) logger.warn("no groups at all?");
+        else {
+          logger.info("OK, groups is " + groups);
+        }
       }
 
-      Optional<Group> first = groups.stream().filter(group -> group.getApplicationId().equalsIgnoreCase(NETPROF2)).findFirst();
-      if (first.isPresent()) {
-        primaryGroup = first.get();
-        logger.warn("getGroup OK using " + primaryGroup);
+      if (groups.isEmpty()) {
+        primaryGroup = null;
       } else {
-        primaryGroup = groups.isEmpty() ? null : groups.iterator().next();
+        primaryGroup = groups.get(0);
+        logger.warn("getGroup OK using " + primaryGroup);
       }
 
       if (primaryGroup == null) { //defensive
         logger.warn("\n\n\ngetGroup need a new group...?\n\n\n");
-   //     primaryGroup = makePrimaryGroup(PRIMARY);
+        //     primaryGroup = makePrimaryGroup(PRIMARY);
       }
     }
 
     return primaryGroup;
   }
 
- /* @NotNull
-  private Group makePrimaryGroup(String name) {
-    Date out = Date.from(getZonedDateThirtyYears().toInstant());
-    String description = name + "Group";
-    UserDescriptor adminUser = this.adminUser;
-    return new Group(
-        name,
-        description,
-        365,
-        24 * 365,
-        out,
-        adminUser,
-        NETPROF2);
-  }
-*/
+  /* @NotNull
+   private Group makePrimaryGroup(String name) {
+     Date out = Date.from(getZonedDateThirtyYears().toInstant());
+     String description = name + "Group";
+     UserDescriptor adminUser = this.adminUser;
+     return new Group(
+         name,
+         description,
+         365,
+         24 * 365,
+         out,
+         adminUser,
+         NETPROF2);
+   }
+ */
   @NotNull
   private LocalDateTime getThirtyYearsFromNow() {
     return LocalDateTime.now().plusYears(30);
@@ -1786,7 +1790,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @NotNull
   private boolean hasBlessedEmail(String email) {
-    String lc = email.toLowerCase();
+    String lc = email.toLowerCase().trim();
     return DOMAINS.stream().anyMatch(lc::endsWith);
   }
 

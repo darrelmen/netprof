@@ -89,7 +89,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     try {
       ServletContext servletContext = getServletContext();
       String property = System.getProperty(CONFIG_HOME_ATTR_NM);
-    //  logger.info("init : prop for domino = '" + property + "'");
+      //  logger.info("init : prop for domino = '" + property + "'");
       this.pathHelper = new PathHelper(servletContext);
       this.serverProps = readProperties(servletContext);
       pathHelper.setProperties(serverProps);
@@ -107,7 +107,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 
   private void optionalInit() {
     try {
-   //   logger.info("optionalInit -- ");
+      //   logger.info("optionalInit -- ");
       if (db != null) db.doReport();
     } catch (Exception e) {
       logger.error("optionalInit couldn't load database " + e, e);
@@ -183,17 +183,18 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
    */
   @Override
   public StartupInfo getStartupInfo() {
+    long then = System.currentTimeMillis();
     List<SlimProject> projectInfos = new ProjectHelper().getProjectInfos(db, securityManager);
     if (db == null || !db.isHasValidDB()) {
       startupMessage = NO_POSTGRES + "<br/>Using : " + serverProps.getDBConfig();
     }
-    //long then = System.currentTimeMillis();
+    long now = System.currentTimeMillis();
+    if (now - then > 10L) {
+      logger.info("getStartupInfo took " + (now - then) + " millis to get startup info.");
+    }
+
     StartupInfo startupInfo =
         new StartupInfo(serverProps.getUIProperties(), projectInfos, startupMessage, serverProps.getAffiliations());
-//    long now = System.currentTimeMillis();
-//    if (now - then > 100L) {
-//      logger.info("getStartupInfo took " + (now - then) + " millis to get startup info.");
-//    }
 //    logger.debug("getStartupInfo sending " + startupInfo);
     return startupInfo;
   }
@@ -273,7 +274,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       logger.warn("DatabaseImpl was never made properly...");
     } else {
       try {
-      //  logger.info("DatabaseImpl.destroy");
+        //  logger.info("DatabaseImpl.destroy");
         db.getDatabase().close(); // TODO : redundant with h2 shutdown hook?
       } catch (Exception e) {
         logger.error("Got " + e, e);
@@ -297,11 +298,11 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     ServerProperties serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
 
     File configDir = serverInitializationManagerNetProf.getConfigDir();
- //   logger.info("readProperties : configDir from props " + configDir);
+    //   logger.info("readProperties : configDir from props " + configDir);
 
     this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     //åString configDir1 = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
-   // logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
+    // logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 
     try {
       Object attribute = servletContext.getAttribute(USER_SVC);
@@ -316,14 +317,14 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
 //      logger.info("readProperties made database " + db);
 
       securityManager = new NPUserSecurityManager(db.getUserDAO(), db.getUserSessionDAO());
-  //    logger.info("readProperties made securityManager " + securityManager);
+      //    logger.info("readProperties made securityManager " + securityManager);
       db.setUserSecurityManager(securityManager);
     } catch (Exception e) {
       logger.error("readProperties got " + e, e);
     }
 
     shareDB(servletContext, db);
-   // logger.info("readProperties shareDB ");
+    // logger.info("readProperties shareDB ");
     return serverProps;
   }
 

@@ -66,6 +66,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.jetbrains.annotations.NotNull;
 
@@ -324,7 +325,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     AudioAnswerListener exercisePanel = this;
     return new FlashcardRecordButtonPanel(exercisePanel, controller) {
       final FlashcardRecordButtonPanel outer = this;
-     // private Timer waitTimer = null;
+      // private Timer waitTimer = null;
 
  /*     @Override
       protected void showWaiting() {
@@ -464,7 +465,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
 
           @Override
           protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
-          //  super.useInvalidResult(exid, validity, dynamicRange);
+            //  super.useInvalidResult(exid, validity, dynamicRange);
             receivedAudioAnswer(new AudioAnswer("", validity, -1, 0, exid));
           }
         };
@@ -688,7 +689,15 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     playAudioPanel = new PlayAudioPanel(null, controller, exercise.getID());
     ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel, downloadContainer, true);
     downloadContainer.getDownloadContainer().setVisible(true);
-    recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, new ClickableWords().isRTL(exercise.getForeignLanguage())));
+
+    recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL()));
+  }
+
+  private boolean isRTL() {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    boolean isRTL = false;
+    if (projectStartupInfo != null) isRTL = projectStartupInfo.getLanguageInfo().isRTL();
+    return isRTL;
   }
 
   PlayAudioPanel playAudioPanel;

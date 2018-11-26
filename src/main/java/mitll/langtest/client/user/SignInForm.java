@@ -38,6 +38,8 @@ import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -75,6 +77,9 @@ public class SignInForm extends UserDialog implements SignIn {
    */
   private static final int MIN_LENGTH_USER_ID = 4;
 
+  /**
+   * LEGACY ACCOMODATION!
+   */
   private static final int MIN_PASSWORD = 4;
   /**
    * @see #getSignInButton
@@ -175,7 +180,7 @@ public class SignInForm extends UserDialog implements SignIn {
     userField.box.addStyleName("topMargin");
     userField.box.addStyleName("rightFiveMargin");
     userField.box.getElement().setId("Username_Box_SignIn");
-    userField.box.getElement().setPropertyString(AUTOCOMPLETE,"username email");
+    userField.box.getElement().setPropertyString(AUTOCOMPLETE, "username email");
     userField.box.setWidth(SIGN_UP_WIDTH);
 
     userField.box.addFocusHandler(event -> {
@@ -192,17 +197,18 @@ public class SignInForm extends UserDialog implements SignIn {
    * @return
    */
   private FormField addPasswordField(Fieldset fieldset, Panel hp) {
-    FormField password = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, PASSWORD);
+    FormField password =  getPasswordFormField(fieldset,PASSWORD);
+    hp.add(password.getGroup());
+
     TextBoxBase box = password.box;
     box.addFocusHandler(event -> {
       userPassLogin.setSignInHasFocus();
-      eventRegistration.logEvent(userField.box, "PasswordBox", "N/A", "focus in password field");
+      eventRegistration.logEvent(password.box, "PasswordBox", "N/A", "focus in password field");
     });
 
-    hp.add(password.getGroup());
     box.addStyleName("rightFiveMargin");
 
-    box.getElement().setPropertyString(AUTOCOMPLETE,"current-password");
+    box.getElement().setPropertyString(AUTOCOMPLETE, "current-password");
 
     return password;
   }
@@ -241,14 +247,14 @@ public class SignInForm extends UserDialog implements SignIn {
     } else {
       int length = userID.length();
       if (length < MIN_LENGTH_USER_ID) {
-        markErrorBlur(userField, PLEASE_ENTER_A_LONGER_USER_ID);
+        markErrorBlur(userField, PLEASE_ENTER_A_LONGER_USER_ID, Placement.LEFT);
       } else {
         if (length == 4) {
           userID += "_"; // old netprof 1 accounts could be 4 long.
         }
         String passwordText = password.box.getValue();
         if (!passwordText.isEmpty() && passwordText.length() < MIN_PASSWORD) {
-          markErrorBlur(password, "Please enter a password longer than " + MIN_PASSWORD + " characters.");
+          markErrorBlur(password, "Please enter a password at least " + MIN_PASSWORD + " characters long.");
         } else if (passwordText.isEmpty()) {
           if (!userID.isEmpty()) {
             checkUserExists(userID);
@@ -489,6 +495,12 @@ public class SignInForm extends UserDialog implements SignIn {
   @Override
   public void setFocusOnUserID() {
     setFocusOn(userField.box);
+  }
+
+  public void setValueAndFocusOnUserID(String userID) {
+    userField.box.setText(userID);
+    setFocusOn(password.box);
+    markErrorBlur(password, "You already have an account. Please sign in.");
   }
 
   @Override

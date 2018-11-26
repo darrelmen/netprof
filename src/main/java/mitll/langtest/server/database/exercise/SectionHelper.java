@@ -1240,14 +1240,14 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
     typeToMatches.forEach((k, v) -> {
       if (k.equals(BLANK)) {
-        logger.warn("\n\nfilterOutBlanks drop " + k + "-" + v);
+        logger.info("filterOutBlanks drop " + k + "-" + v);
       } else {
         Set<MatchInfo> filtered = new LinkedHashSet<>();
         v.stream()
             .filter(matchInfo -> !matchInfo.getValue().equals(BLANK))
             .forEach(filtered::add);
         if (filtered.isEmpty()) {
-          logger.info("\n\nfilterOutBlanks drop empty type" + k + "-" + v);
+          logger.info("filterOutBlanks drop empty type " + k + "-" + v);
         } else {
           typeToMatchesFiltered.put(k, filtered);
         }

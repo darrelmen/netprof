@@ -488,7 +488,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                           int exerciseID,
                                           boolean usePhonemeMap) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    File absoluteAudioFile = pathHelper.getAbsoluteAudioFile(testAudioFile.replaceAll(".ogg", ".wav"));
+    File absoluteAudioFile = pathHelper.getAbsoluteAudioFile(testAudioFile.replaceAll(".ogg", ".wav").replaceAll(".mp3",".wav"));
 
     int projectID = getProjectIDFromUser(userIDFromSessionOrDB);
     CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectID, exerciseID);

@@ -53,9 +53,6 @@ import mitll.langtest.shared.user.User;
  * @since 10/2/14.
  */
 public class ResetPassword extends UserDialog {
-  //private final Logger logger = Logger.getLogger("ResetPassword");
-  private static final int MIN_PASSWORD = 8; // Consistent with Domino minimums
-
   private static final String PASSWORD = "Password";
   private static final String HINT = "Confirm " + PASSWORD;
 
@@ -72,7 +69,10 @@ public class ResetPassword extends UserDialog {
    * @see ResetPassword#getChangePasswordButton(String, FormField, FormField, FormField)
    */
   private static final String CHANGE_PASSWORD = "Change Password";
-  private static final String CHOOSE_A_NEW_PASSWORD = "Choose a new password";
+  /**
+   * <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/342'></a>
+   */
+  private static final String CHOOSE_A_NEW_PASSWORD = "Create a password";
   /**
    *
    */
@@ -80,6 +80,7 @@ public class ResetPassword extends UserDialog {
   private static final int DELAY_MILLIS = 1000;
   private static final int OLD_NETPROF_LEN = 4;
   public static final String SHOW_ADVERTISED_IOS = "showAd";
+
 
   private final EventRegistration eventRegistration;
   private final KeyPressHelper enterKeyButtonHelper;
@@ -141,9 +142,8 @@ public class ResetPassword extends UserDialog {
   }
 
   private FormField getPasswordField(Fieldset fieldset, String hint) {
-    FormField formField = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, 15, hint);
-    formField.box.getElement().setPropertyString("autocomplete","new-password");
-    turnOffAutoCapitalize(formField);
+    FormField formField = getPasswordFormField(fieldset, hint);
+    formField.box.getElement().setPropertyString(AUTOCOMPLETE, "new-password");
     return formField;
   }
 
