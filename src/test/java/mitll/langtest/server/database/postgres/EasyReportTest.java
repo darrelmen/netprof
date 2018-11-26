@@ -48,6 +48,7 @@ import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectType;
@@ -111,6 +112,26 @@ public class EasyReportTest extends BaseTest {
 
       logger.warn("got " + e);
     }
+  }
+
+  @Test
+  public void testLists() {
+    DatabaseImpl english = getDatabase();
+    int projectid = 3;
+    Project project = english.getProject(projectid);
+
+    try {
+      Thread.sleep(3000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    UserList<CommonExercise> userListByIDExercises = english.getUserListByIDExercises(6528, projectid);
+    logger.info("list " +userListByIDExercises);
+
+    userListByIDExercises.getExercises().forEach(ex->logger.info("Got " + ex.getID() + " " + ex.getDirectlyRelated()));
+
+    CommonExercise exerciseByID = project.getExerciseByID(108637);
+    exerciseByID.getDirectlyRelated().forEach(clientExercise -> logger.info("\t" + clientExercise.getID() + " " +clientExercise));
   }
 
   @Test
