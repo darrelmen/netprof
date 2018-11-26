@@ -537,6 +537,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         saveFile,
         projid);
 
+    logger.info("path is " + audioAnswer.getPath());
+
     jsonObject = new JsonScoring(getDatabase())
         .getJsonObject(
             projid,

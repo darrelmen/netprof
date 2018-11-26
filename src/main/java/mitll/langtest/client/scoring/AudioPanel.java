@@ -39,6 +39,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.recorder.RecordButton;
@@ -527,10 +528,18 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
    * @see #getImages()
    */
   void getEachImage(int width) {
-    //  logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
-    getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
-    if (showSpectrogram) {
-      getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
+   // logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
+    if (audioPath == null || audioPath.isEmpty()) {
+      logger.warning("getEachImage audio path is " +audioPath);
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+//      logger.info("logException stack " + exceptionAsString);
+    }
+    else {
+      getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
+      if (showSpectrogram) {
+        getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());
+      }
     }
   }
 
@@ -544,6 +553,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
    * @param type
    * @param width
    * @param imageAndCheck
+   * @see AudioPanel#getEachImage
    * @see mitll.langtest.client.LangTest#getImage
    */
   private void getImageURLForAudio(final String path, final String type, int width, final ImageAndCheck imageAndCheck) {

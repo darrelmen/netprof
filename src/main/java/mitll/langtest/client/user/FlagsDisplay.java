@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.project.StartupInfo;
 import org.jetbrains.annotations.NotNull;

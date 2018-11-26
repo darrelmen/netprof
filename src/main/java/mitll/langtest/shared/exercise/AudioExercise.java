@@ -124,7 +124,7 @@ public class AudioExercise extends ExerciseShell {
    * @param audioAttribute
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#attachAudioAndFixPath
    */
-  public boolean addAudio(AudioAttribute audioAttribute) {
+  public synchronized boolean addAudio(AudioAttribute audioAttribute) {
     if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
     else {
       String key = audioAttribute.getKey();
@@ -138,12 +138,18 @@ public class AudioExercise extends ExerciseShell {
     }
   }
 
-  public void clearRefAudio() {
+  /**
+   * CLIENT ONLY
+   */
+  public synchronized void clearRefAudio() {
     AudioAttribute audio = getRegularSpeed();
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
-  public void clearSlowRefAudio() {
+  /**
+   * CLIENT ONLY
+   */
+  public synchronized void clearSlowRefAudio() {
     AudioAttribute audio = getSlowSpeed();
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
@@ -209,18 +215,22 @@ public class AudioExercise extends ExerciseShell {
   public synchronized Collection<AudioAttribute> getAudioAttributes() {
     return audioAttributes.values();
   }
-/*
 
+  /*
   public synchronized Collection<Integer> getAudioIDs() {
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
     return audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
   }
 */
 
-
   public synchronized Collection<String> getAudioPaths() {
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
-    return audioAttributes1.stream().map(AudioAttribute::getAudioRef).collect(Collectors.toSet());
+    Set<String> paths = new HashSet<>(audioAttributes1.size());
+    for (AudioAttribute attr : audioAttributes1) {
+      paths.add(attr.getAudioRef());
+    }
+    return paths;
+    //return audioAttributes1.stream().map(AudioAttribute::getAudioRef).collect(Collectors.toSet());
   }
 
   /**

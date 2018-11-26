@@ -41,8 +41,7 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
@@ -57,6 +56,7 @@ import mitll.langtest.shared.project.StartupInfo;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -305,6 +305,8 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   private Button sendUsernameEmail;
 
   /**
+   * So only enables the send button when a grammatically valid email address is in the text box.
+   * Fix for <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/326'>326</a>
    * @return
    * @see SignInForm#populateSignInForm
    */
@@ -314,16 +316,34 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
       @Override
       public void onClick(ClickEvent event) {
         final TextBox emailEntry = new TextBox();
+        // don't even enable the button unless it's a reasonable email
+        emailEntry.addKeyUpHandler(event1 -> sendUsernameEmail.setEnabled(isValidEmail(emailEntry.getText().trim())));
+
         sendUsernamePopup = new DecoratedPopupPanel(true);
         sendUsernamePopup.setAutoHideEnabled(true);
-        sendUsernameEmail = new Button(SEND);
+        sendUsernameEmail = getSendUsernameEmailButton(emailEntry);
+
+        makePopup(sendUsernamePopup, emailEntry, sendUsernameEmail, ENTER_YOUR_EMAIL);
+        sendUsernamePopup.showRelativeTo(forgotUsername);
+        setFocusOn(emailEntry);
+      }
+
+      /**
+       * Fancy - dismisses warning popup on key press, if warning was visible.
+       * @param emailEntry
+       * @return
+       */
+      private Button getSendUsernameEmailButton(TextBox emailEntry) {
+        Button sendUsernameEmail = new Button(SEND);
+        sendUsernameEmail.setEnabled(false);
         sendUsernameEmail.getElement().setId("SendUsernameEmail");
         sendUsernameEmail.setType(ButtonType.PRIMARY);
         sendUsernameEmail.addStyleName("leftTenMargin");
+
         sendUsernameEmail.addClickHandler(new ClickHandler() {
           @Override
           public void onClick(final ClickEvent event) {
-            final String text = emailEntry.getText();
+            final String text = emailEntry.getText().trim();
             if (!isValidEmail(text)) {
               markErrorBlur(emailEntry, PLEASE_CHECK, VALID_EMAIL, Placement.TOP);
               return;
@@ -339,7 +359,8 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
               @Override
               public void onSuccess(Boolean isValid) {
                 if (!isValid) {
-                  markErrorBlur(sendUsernameEmail, "Check your spelling", "No user has this email.", Placement.LEFT);
+                  Popover check_your_spelling = markErrorBlur(emailEntry, "Check your spelling", "No user has this email.", Placement.LEFT);
+                  emailEntry.addKeyUpHandler(event12 -> check_your_spelling.hide());
                   sendUsernameEmail.setEnabled(true);
                   eventRegistration.logEvent(sendUsernameEmail, "send username link", "N/A", "invalid email request ");
                 } else {
@@ -365,9 +386,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
         });
         eventRegistration.register(sendUsernameEmail, "N/A", "send username");
 
-        makePopup(sendUsernamePopup, emailEntry, sendUsernameEmail, ENTER_YOUR_EMAIL);
-        sendUsernamePopup.showRelativeTo(forgotUsername);
-        setFocusOn(emailEntry);
+        return sendUsernameEmail;
       }
     });
     return forgotUsername;
