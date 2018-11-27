@@ -518,7 +518,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         audioType)
         .setDialogSessionID(dialogSessionID);
 
-    // logger.info("getJsonObject audio context " + audioContext);
+    logger.info("getJsonObject audio context " + audioContext);
 
     DecoderOptions decoderOptions = new DecoderOptions()
         .setDoDecode(true)
@@ -1063,7 +1063,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (commonExercise == null && isExistingExercise) {
       logger.warn("getAudioAnswer " + getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
-    String audioTranscript = getAudioTranscript(audioContext.getAudioType(), commonExercise);
+    AudioType audioType = audioContext.getAudioType();
+    logger.info("audio type " + audioType);
+    String audioTranscript = getAudioTranscript(audioType, commonExercise);
     AnswerInfo.RecordingInfo recordingInfo =
         new AnswerInfo.RecordingInfo("", "", deviceType, device, audioTranscript, "");
 
@@ -1083,7 +1085,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //    logger.info("getAudioAnswer " + decoderOptions + " valid " + audioAnswer.isValid());
 
     if (decoderOptions.isRefRecording() && audioAnswer.isValid()) {
-      audioAnswer.setAudioAttribute(addToAudioTable(user, audioContext.getAudioType(),
+      audioAnswer.setAudioAttribute(addToAudioTable(user, audioType,
           commonExercise, exerciseID, audioAnswer, hasProjectSpecificAudio));
     } //else {
     // So Wade has observed that this really messes up the ASR -- silence doesn't appear as silence after you multiply
@@ -1105,7 +1107,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             user,
             commonExercise,
             path,
-            audioContext.getAudioType(),
+            audioType,
             language,
             new HashMap<>(),  //?
             !decoderOptions.shouldCompressLater());
@@ -1187,10 +1189,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int projid = noExistingExercise ? -1 : exercise1.getProjectID();
     String audioTranscript = audioAnswer.getTranscript();
     String language = db.getProject(projid).getLanguage();
-    //   logger.debug("addToAudioTable user " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
+
+    logger.info("addToAudioTable " +
+        "\n\tuser " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
 
     File absoluteFile = pathHelper.getAbsoluteAudioFile(audioAnswer.getPath());
     boolean isContext = audioType == AudioType.CONTEXT_REGULAR || audioType == AudioType.CONTEXT_SLOW;
+
+    logger.info("addToAudioTable isContext " + isContext + " audio type " + audioType);
+
     String context = noExistingExercise ? "" : isContext ? getEnglish(exercise1) : exercise1.getEnglish();
 
     if (!absoluteFile.exists()) logger.error("addToAudioTable huh? no file at " + absoluteFile.getAbsolutePath());

@@ -41,7 +41,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
-import mitll.langtest.client.scoring.UnitChapterItemHelper;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -115,7 +115,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    */
   @Override
   protected ControlGroup makeRegularAudioPanel(Panel row) {
-    rap = makeRecordAudioPanel(row, true);
+    rap = makeRecordAudioPanel(newUserExercise, row, AudioType.REGULAR);
     fastAnno.addStyleName("topFiveMargin");
     return addControlGroupEntrySimple(row, "", rap, fastAnno);
   }
@@ -125,7 +125,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    */
   @Override
   protected ControlGroup makeSlowAudioPanel(Panel row) {
-    rapSlow = makeRecordAudioPanel(row, false);
+    rapSlow = makeRecordAudioPanel(newUserExercise, row, AudioType.SLOW);
     slowAnno.addStyleName("topFiveMargin");
     return addControlGroupEntrySimple(row, "", rapSlow, slowAnno);
   }
@@ -261,12 +261,11 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     }
   }
 
-  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, boolean recordRegularSpeed,
-                                                             String instance) {
-    return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed) {
+  @Override protected CreateFirstRecordAudioPanel makeRecordAudioPanel(U theExercise, final Panel row, AudioType audioType) {
+    return new CreateFirstRecordAudioPanel(theExercise, row, audioType) {
       @Override
       protected int getImageWidth() {
-        return 600;
+        return 700;
       }
 
       @Override

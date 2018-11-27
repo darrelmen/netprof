@@ -55,6 +55,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -128,11 +129,11 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    *
    */
-  CreateFirstRecordAudioPanel rap;
-  CreateFirstRecordAudioPanel rapSlow;
+  CreateFirstRecordAudioPanel rap, rapSlow, rapContext;
 
   ControlGroup normalSpeedRecording = null;
   ControlGroup slowSpeedRecording = null;
+  private ControlGroup contextRecording = null;
 
   private final int listID;
   private Panel toAddTo;
@@ -150,12 +151,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @paramx instance
    * @see EditableExerciseDialog#EditableExerciseDialog
    */
-  public NewUserExercise(ExerciseController controller, U newExercise, int listID) {
+  NewUserExercise(ExerciseController controller, U newExercise, int listID) {
     this.controller = controller;
     this.newUserExercise = newExercise;
-//    if (newUserExercise.getUnitToValue().isEmpty()) {
-//      newUserExercise.getUnitToValue().put("List",)
-//    }
     this.listID = listID;
   }
 
@@ -278,13 +276,33 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     DivWidget row = new DivWidget();
 
     normalSpeedRecording = makeRegularAudioPanel(row);
-    normalSpeedRecording.addStyleName("buttonGroupInset3");
+    normalSpeedRecording.addStyleName("buttonGroupInset5");
 
     slowSpeedRecording = makeSlowAudioPanel(row);
     slowSpeedRecording.addStyleName("buttonGroupInset5");
 
-    rap.setOtherRAP(rapSlow);
-    rapSlow.setOtherRAP(rap);
+    contextRecording = makeContextAudioPanel(row);
+    contextRecording.addStyleName("buttonGroupInset5");
+
+    List<RecordAudioPanel> raps = new ArrayList<>();
+
+    raps.clear();
+    raps.add(rapSlow);
+    raps.add(rapContext);
+    rap.setOtherRAPs(raps);
+
+
+    raps.clear();
+    raps.add(rap);
+    raps.add(rapContext);
+    rapSlow.setOtherRAPs(raps);
+
+    raps.clear();
+    raps.add(rap);
+    raps.add(rapSlow);
+    rapContext.setOtherRAPs(raps);
+
+    // TODO : add notif for context
     return row;
   }
 
@@ -294,7 +312,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
 //  @Override
   protected void addItemsAtTop(Panel container) {
-    // UnitChapterItemHelper<U> unit =        new UnitChapterItemHelper<>(controller.getProjectStartupInfo().getTypeOrder());
     new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
   }
 
@@ -312,12 +329,18 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #addFields
    */
   ControlGroup makeRegularAudioPanel(Panel row) {
-    rap = makeRecordAudioPanel(row, true);
+    rap = makeRecordAudioPanel(newUserExercise, row, AudioType.REGULAR);
     return addControlGroupEntrySimple(row, "", rap);
   }
 
+  ControlGroup makeContextAudioPanel(Panel row) {
+    U next = (U)newUserExercise.getDirectlyRelated().iterator().next();
+    rapContext = makeRecordAudioPanel(next, row, AudioType.CONTEXT_REGULAR);
+    return addControlGroupEntrySimple(row, "", rapContext);
+  }
+
   ControlGroup makeSlowAudioPanel(Panel row) {
-    rapSlow = makeRecordAudioPanel(row, false);
+    rapSlow = makeRecordAudioPanel(newUserExercise, row, AudioType.SLOW);
     return addControlGroupEntrySimple(row, "", rapSlow);
   }
 
@@ -613,7 +636,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
                         ControlGroup normalSpeedRecording,
                         Panel toAddTo,
                         boolean onClick) {
-
     if (validateForm(rap, normalSpeedRecording)) {
 //   logger.info("NewUserExercise.validateThenPost : form is valid");
       isValidForeignPhrase(toAddTo, onClick);
@@ -643,7 +665,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getSafeText() + " before adding/changing " + newUserExercise);
     final FormField foreignLang = this.foreignLang;
 
-
     controller.getScoringService().isValidForeignPhrase(foreignLang.getSafeText(), "", new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -653,22 +674,24 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       @Override
       public void onSuccess(Boolean result) {
         if (result) {
-          controller.getScoringService().isValidForeignPhrase(context.getSafeText(), "", new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              controller.handleNonFatalError("is valid exercise", caught);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-              if (result) {
-                afterValidForeignPhrase(toAddTo, onClick);
-              } else {
-                markError(context, "The " + controller.getLanguage() +
-                    " text is not in our " + getLanguage() + " dictionary. Please edit.", Placement.BOTTOM);
+          if (!context.getSafeText().trim().isEmpty()) {
+            controller.getScoringService().isValidForeignPhrase(context.getSafeText(), "", new AsyncCallback<Boolean>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                controller.handleNonFatalError("is valid exercise", caught);
               }
-            }
-          });
+
+              @Override
+              public void onSuccess(Boolean result) {
+                if (result) {
+                  afterValidForeignPhrase(toAddTo, onClick);
+                } else {
+                  markError(context, "The " + controller.getLanguage() +
+                      " text is not in our " + getLanguage() + " dictionary. Please edit.", Placement.BOTTOM);
+                }
+              }
+            });
+          }
         } else {
           markError(foreignLang, "The " + controller.getLanguage() +
               " text is not in our " + getLanguage() + " dictionary. Please edit.", Placement.BOTTOM);
@@ -822,52 +845,58 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   /**
+   * @param theExercise
    * @param row
-   * @param recordRegularSpeed
+   * @param audioType
    * @return
    * @see #makeRegularAudioPanel
    * @see #makeSlowAudioPanel
    */
-  CreateFirstRecordAudioPanel makeRecordAudioPanel(final Panel row, boolean recordRegularSpeed) {
-    return new CreateFirstRecordAudioPanel(newUserExercise, row, recordRegularSpeed);
+  CreateFirstRecordAudioPanel makeRecordAudioPanel(U theExercise, Panel row, AudioType audioType) {
+    return new CreateFirstRecordAudioPanel(theExercise, row, audioType);
   }
 
   class CreateFirstRecordAudioPanel extends RecordAudioPanel<U> {
-    final boolean recordRegularSpeed;
-    private RecordAudioPanel otherRAP;
+    final AudioType audioType;
+    private List<RecordAudioPanel> otherRAPs;
     private WaveformPostAudioRecordButton postAudioButton;
 
     /**
      * @param newExercise
      * @param row
-     * @param recordRegularSpeed
+     * @param audioType
      * @see #makeRecordAudioPanel
      */
-    CreateFirstRecordAudioPanel(U newExercise, Panel row, boolean recordRegularSpeed) {
+    CreateFirstRecordAudioPanel(U newExercise, Panel row, AudioType audioType) {
       super(newExercise, NewUserExercise.this.controller, row, 0, false,
-          recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW);
-      logger.info("reg speed " + recordRegularSpeed);
-      this.recordRegularSpeed = recordRegularSpeed;
+          audioType);
+      logger.info("reg speed " + audioType);
+      this.audioType = audioType;
       setExercise(newExercise);
 
       addPlayListener(new PlayListener() {
         @Override
         public void playStarted() {
-          otherRAP.setEnabled(false);
+          disableOthers(false);
         }
 
         @Override
         public void playStopped() {
-          otherRAP.setEnabled(true);
+          disableOthers(true);
+          ;
         }
       });
 
-      String speed = (recordRegularSpeed ? "Regular" : "Slow") + "_speed";
-      getPostAudioButton().getElement().setId(WIDGET_ID + speed);
-      getPlayButton().getElement().setId(WIDGET_ID + "Play_" + speed);
+//      String speed = (audioType ? "Regular" : "Slow") + "_speed";
+//      getPostAudioButton().getElement().setId(WIDGET_ID + speed);
+//      getPlayButton().getElement().setId(WIDGET_ID + "Play_" + speed);
       boolean teacher = controller.getUserManager().isTeacher();
       setEnabled(teacher);
       controller.register(getPlayButton(), newExercise.getID());
+    }
+
+    private void disableOthers(boolean b) {
+      otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(b));
     }
 
     /**
@@ -883,14 +912,14 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     protected WaveformPostAudioRecordButton makePostAudioRecordButton(AudioType audioType, String recordButtonTitle) {
       postAudioButton =
           new WaveformPostAudioRecordButton(exercise.getID(), controller, exercisePanel, this,
-              recordRegularSpeed ? 0 : 1,
+              0,
               // don't record in results table????
-              audioType == AudioType.REGULAR ? "Regular" : "Slow",
+              audioType == AudioType.REGULAR ? "Regular" : audioType == AudioType.CONTEXT_REGULAR ? "Context" : "Slow",
               RecordButton.STOP1,
               audioType) {
             @Override
             public boolean stopRecording(long duration, boolean abort) {
-              otherRAP.setEnabled(true);
+              disableOthers(true);
               showStop();
               return super.stopRecording(duration, abort);
             }
@@ -899,12 +928,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             public void startRecording() {
               super.startRecording();
               showStart();
-              otherRAP.setEnabled(false);
+              disableOthers(false);
             }
 
             @Override
             protected AudioType getAudioType() {
-              return recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW;
+              return audioType;
             }
 
             /**
@@ -922,12 +951,18 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
             private void useAudioAttribute(AudioAnswer result) {
               AudioAttribute audioAttribute = result.getAudioAttribute();
+
+
               if (audioAttribute != null) {
-                if (recordRegularSpeed) {
-                  audioAttribute.markRegular();
-                } else {
-                  audioAttribute.markSlow();
-                }
+
+                logger.info("useAudioAttribute audio type " + audioAttribute.getAudioType());
+
+
+//                if (recordRegularSpeed) {
+//                  audioAttribute.markRegular();
+//                } else {
+//                  audioAttribute.markSlow();
+//                }
                 newUserExercise.getMutableAudio().addAudio(audioAttribute);
               } else {
                 logger.warning("useAudioAttribute no valid audio on " + result);
@@ -939,7 +974,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
               super.useInvalidResult(exid, validity, dynamicRange);
 
               MutableAudioExercise mutableAudio = newUserExercise.getMutableAudio();
-              if (recordRegularSpeed) {
+              if (audioType == AudioType.REGULAR || audioType == AudioType.CONTEXT_REGULAR) {
                 mutableAudio.clearRefAudio();
               } else {
                 mutableAudio.clearSlowRefAudio();
@@ -948,12 +983,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
               audioPosted();
             }
           };
-      postAudioButton.getElement().setId(WIDGET_ID + (recordRegularSpeed ? "Regular" : "Slow") + "_speed");
+      //postAudioButton.getElement().setId(WIDGET_ID + (recordRegularSpeed ? "Regular" : "Slow") + "_speed");
       return postAudioButton;
     }
 
-    void setOtherRAP(RecordAudioPanel otherRAP) {
-      this.otherRAP = otherRAP;
+    void setOtherRAPs(List<RecordAudioPanel> otherRAPs) {
+      this.otherRAPs = otherRAPs;
     }
 
     WaveformPostAudioRecordButton getPostAudioButton() {
