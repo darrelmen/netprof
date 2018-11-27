@@ -41,7 +41,6 @@ import mitll.langtest.shared.user.MiniUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -168,7 +167,7 @@ public class AudioExercise extends ExerciseShell {
    */
   private AudioAttribute getAudio(String name, String value) {
     AudioAttribute latest = null;
-    for (AudioAttribute audio : getAudioAttributes()) {
+    for (AudioAttribute audio : getAudioAttributesLocal()) {
       if (audio.matches(name, value)) {
         if (latest == null || audio.getTimestamp() > latest.getTimestamp()) {
           latest = audio;
@@ -180,7 +179,7 @@ public class AudioExercise extends ExerciseShell {
 
   private AudioAttribute getAudioPreferUsers(String name, String value, Collection<Integer> prefs) {
     AudioAttribute candidate = null;
-    for (AudioAttribute audio : getAudioAttributes()) {
+    for (AudioAttribute audio : getAudioAttributesLocal()) {
       if (audio.matches(name, value)) {
         if (prefs.contains(audio.getUser().getID())) {
           return audio;
@@ -198,13 +197,13 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public synchronized boolean hasAudioNonContext(boolean vocab) {
-    return getAudioAttributes()
+    return getAudioAttributesLocal()
         .stream()
         .anyMatch(audioAttribute -> (vocab == !audioAttribute.isContextAudio()));
   }
 
   public synchronized boolean hasContextAudio() {
-    return getAudioAttributes()
+    return getAudioAttributesLocal()
         .stream()
         .anyMatch(AudioAttribute::isContextAudio);
   }
@@ -212,19 +211,33 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @return
    */
-  public synchronized Collection<AudioAttribute> getAudioAttributes() {
+  private synchronized Collection<AudioAttribute> getAudioAttributesLocal() {
     return audioAttributes.values();
   }
 
+  public synchronized Collection<AudioAttribute> getAudioAttributes() {
+    return new ArrayList<>(audioAttributes.values());
+  }
+
+  public synchronized Collection<AudioAttribute> getContextAudio() {
+    return getAudioAttributesLocal()
+        .stream()
+        .filter(AudioAttribute::isContextAudio)
+        .collect(Collectors.toList());
+  }
+
+  public synchronized AudioAttribute getFirst() {
+    return audioAttributes.isEmpty() ? null : audioAttributes.values().iterator().next();
+  }
   /*
   public synchronized Collection<Integer> getAudioIDs() {
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributesLocal();
     return audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
   }
 */
 
   public synchronized Collection<String> getAudioPaths() {
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributesLocal();
     Set<String> paths = new HashSet<>(audioAttributes1.size());
     for (AudioAttribute attr : audioAttributes1) {
       paths.add(attr.getAudioRef());
@@ -281,7 +294,7 @@ public class AudioExercise extends ExerciseShell {
    */
   @NotNull
   private Collection<AudioAttribute> getAudioPrefGender(boolean isMale) {
-    Collection<AudioAttribute> audioAttributes = getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes = getAudioAttributesLocal();
 
     // logger.info("getAudioPrefGender " + isMale + " " + audioAttributes.size());
     Collection<AudioAttribute> collect = audioAttributes
@@ -306,7 +319,7 @@ public class AudioExercise extends ExerciseShell {
   public synchronized AudioAttribute getLatestContext(boolean isMale) {
     long latestTime = 0;
     AudioAttribute latest = null;
-    for (AudioAttribute audioAttribute : getAudioAttributes()) {
+    for (AudioAttribute audioAttribute : getAudioAttributesLocal()) {
       if (audioAttribute.getAudioType() == AudioType.CONTEXT_REGULAR &&
           ((isMale && audioAttribute.isMale()) || (!isMale && !audioAttribute.isMale()))
       ) {
@@ -321,7 +334,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public synchronized Map<String, AudioAttribute> getAudioRefToAttr() {
-    Collection<AudioAttribute> audioAttributes = getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes = getAudioAttributesLocal();
     Map<String, AudioAttribute> audioToAttr = new HashMap<String, AudioAttribute>(audioAttributes.size());
     audioAttributes.forEach(attr -> audioToAttr.put(attr.getAudioRef(), attr));
     return audioToAttr;
@@ -374,7 +387,7 @@ public class AudioExercise extends ExerciseShell {
 
   private List<AudioAttribute> getRecordingsBy(long userID) {
     List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
-    for (AudioAttribute attr : getAudioAttributes()) {
+    for (AudioAttribute attr : getAudioAttributesLocal()) {
       if (attr.getUser() != null) {
         if (attr.getUser().getID() == userID) mine.add(attr);
       }
@@ -724,8 +737,8 @@ public class AudioExercise extends ExerciseShell {
   public String toString() {
     return super.toString() +
         " project " + projectid +
-        " audio attr (" + getAudioAttributes().size() +
-        ") :" + getAudioAttributes() + " and " +
+        " audio attr (" + getAudioAttributesLocal().size() +
+        ") :" + getAudioAttributesLocal() + " and " +
         fieldToAnnotation + " annotations";
   }
 }

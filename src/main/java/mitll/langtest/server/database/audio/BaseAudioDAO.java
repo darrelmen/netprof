@@ -232,10 +232,7 @@ public abstract class BaseAudioDAO extends DAO {
     int id = exercise.getID();
     boolean doDEBUG = DEBUG_ATTACH;
 
-    List<AudioAttribute> onlyContextFromParent = exercise.getAudioAttributes()
-        .stream()
-        .filter(AudioAttribute::isContextAudio)
-        .collect(Collectors.toList());
+    Collection<AudioAttribute> onlyContextFromParent = exercise.getContextAudio();
 
     if (doDEBUG) {
       logger.info("addContextAudio for " + id + " found " + onlyContextFromParent.size() + " to attach ");

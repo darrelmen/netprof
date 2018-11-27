@@ -446,7 +446,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private int getMinExpectedDur(AudioRefExercise commonExercise) {
     if (commonExercise != null && commonExercise.hasRefAudio()) {
-      return (int) commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
+      return (int) commonExercise.getFirst().getDurationInMillis();
     } else {
       return -1;
     }
