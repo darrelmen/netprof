@@ -34,6 +34,7 @@ package mitll.langtest.client.domino.user;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.constants.FormType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -44,7 +45,11 @@ import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.Label;
 import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.domino.common.*;
+import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
+import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.user.FormField;
+import mitll.langtest.client.user.UserDialog;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.user.User;
 
@@ -61,46 +66,46 @@ public class ChangePasswordView extends Composite {
 
   private DominoSaveableModal modal;
 
-  private PasswordTextBox currPWBox;
-  private DecoratedFields currentPWDF = null;
+  // private DecoratedFields currentPWDF = null;
   private DecoratedFields pass1DF;
   private DecoratedFields pass2DF;
 
-  private User editUser = null;
+  private User editUser;
   private final CommonValidation cValidator = new CommonValidation();
-  private UIHandler uiHandler;
-  private boolean forcePWChange = false;
+  private boolean forcePWChange;
   private final UserState userState;
   private final UserServiceAsync userServiceAsync;
 
+  private final UserDialog basicDialog;
+
   /**
-   * @see UserMenu.ChangePasswordClickHandler
    * @param editUser
    * @param forcePWChange
    * @param userState
    * @param userServiceAsync
+   * @see UserMenu.ChangePasswordClickHandler
    */
-  public ChangePasswordView(
-                            User editUser,
+  public ChangePasswordView(User editUser,
                             boolean forcePWChange,
                             UserState userState,
+                            PropertyHandler props,
                             UserServiceAsync userServiceAsync) {
-    //super(sHelper);
     this.editUser = editUser;
     this.forcePWChange = forcePWChange;
     this.userState = userState;
     this.userServiceAsync = userServiceAsync;
+    basicDialog = new UserDialog(props);
     init();
   }
 
   private DecoratedFields getFirstDecoratedField() {
-    return (currentPWDF != null) ? currentPWDF : pass1DF;
+    return /*(currentPWDF != null) ? currentPWDF :*/ pass1DF;
   }
 
   private void init() {
     Form form = new Form();
     form.setType(FormType.HORIZONTAL);
-    uiHandler = new UIHandler();
+    UIHandler uiHandler = new UIHandler();
     if (editUser == null) {
       initWidget(form);
       return;
@@ -132,17 +137,19 @@ public class ChangePasswordView extends Composite {
       emailDF = new DecoratedFields(null, emailBox, null, null);
     }*/
 
-    currPWBox = new PasswordTextBox();
-    currPWBox.addKeyPressHandler(uiHandler);
-    currentPWDF = new DecoratedFields("Current Password", currPWBox);
-    currPWBox.setVisible(false);
+    //   PasswordTextBox currPWBox = new PasswordTextBox();
+//    currPWBox.addKeyPressHandler(uiHandler);
+//    currentPWDF = new DecoratedFields("Current Password", currPWBox);
+//    currPWBox.setVisible(false);
     //form.add(currentPWDF.getCtrlGroup());
 
 
     PasswordTextBox p1Box = new PasswordTextBox();
+
     p1Box.addKeyPressHandler(uiHandler);
     pass1DF = new DecoratedFields("Password", p1Box);
 
+    configurePassword(p1Box);
 
     Scheduler.get().scheduleDeferred(() -> p1Box.setFocus(true));
 
@@ -150,12 +157,19 @@ public class ChangePasswordView extends Composite {
     form.add(pass1DF.getCtrlGroup());
     PasswordTextBox p2Box = new PasswordTextBox();
     p2Box.addKeyPressHandler(uiHandler);
+    configurePassword(p2Box);
+
     pass2DF = new DecoratedFields("Verify password", p2Box);
     form.add(pass2DF.getCtrlGroup());
 //    if (emailDF != null) {
 //      form.add(emailDF.getCtrlGroup());
 //    }
     initWidget(form);
+  }
+
+  private void configurePassword(PasswordTextBox p1Box) {
+    basicDialog.setMaxPasswordLength(p1Box);
+    basicDialog.addPasswordFeedback(pass1DF.getCtrlGroup(), p1Box, Placement.BOTTOM);
   }
 
   @Override
@@ -198,7 +212,7 @@ public class ChangePasswordView extends Composite {
   }
 
   private boolean validateAndWarn() {
-    boolean cPassValid = true;//currentPWDF == null || currentPWDF.performBasicValidate();
+    //boolean cPassValid = true;//currentPWDF == null || currentPWDF.performBasicValidate();
     boolean pass1Valid = pass1DF.performBasicValidate();
     boolean pass2Valid = pass2DF.performBasicValidate();
 
@@ -209,9 +223,9 @@ public class ChangePasswordView extends Composite {
         pass1Valid = false;
         pass2DF.setError("");
         pass2Valid = false;
-      } else if (currentPWDF != null && p1.equals(currentPWDF.getValue())) {
-        pass1DF.setError("New password can not be same as current!");
-        pass1Valid = false;
+//      } else if (currentPWDF != null && p1.equals(currentPWDF.getValue())) {
+//        pass1DF.setError("New password can not be same as current!");
+//        pass1Valid = false;
       } else {
         CommonValidation.Result r = cValidator.validatePassword(p1);
         if (r.errorFound) {
@@ -222,20 +236,21 @@ public class ChangePasswordView extends Composite {
         }
       }
     }
-    return cPassValid && pass1Valid && pass2Valid;
+    return pass1Valid && pass2Valid;
   }
 
   private void changePassword() {
     //	final Modal m = getMsgHelper().makeWaitDialog("Updating password");
-    String currPass = (currentPWDF != null) ? (String) currentPWDF.getValue() : null;
+    //String currPass = (currentPWDF != null) ? (String) currentPWDF.getValue() : null;
     String newPass = (String) pass1DF.getValue();
-   // boolean sendEmail = emailBox != null && emailBox.getValue();
+    // boolean sendEmail = emailBox != null && emailBox.getValue();
     final DecoratedFields df = getFirstDecoratedField();
 
-    String hashNewPass  = newPass;// Md5Hash.getHash(newPass);
-    String hashCurrPass = currPass;//Md5Hash.getHash(currPass);
+    String hashNewPass = newPass;// Md5Hash.getHash(newPass);
+    //  String hashCurrPass = currPass;//Md5Hash.getHash(currPass);
     userServiceAsync.changePasswordWithCurrent(
-        currPass == null ? "" : hashCurrPass,
+        // currPass == null ? "" : hashCurrPass,
+        "",
         hashNewPass,
         //sendEmail,
         new AsyncCallback<Boolean>() {
@@ -255,7 +270,7 @@ public class ChangePasswordView extends Composite {
               df.setError("Password update failed.");
               modal.show();
             } else // if (result //&&
-              //editUser.getDocumentDBID() == getState().getCurrentUser().getDocumentDBID()
+            //editUser.getDocumentDBID() == getState().getCurrentUser().getDocumentDBID()
             //    )
             {
 //					getSessionHelper().logoutUserInClient(m, false);

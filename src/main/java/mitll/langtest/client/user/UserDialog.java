@@ -85,6 +85,7 @@ public class UserDialog extends BasicDialog {
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
   private static final String SIGN_UP_WIDTH = 266 + "px";
+  public static final String MAX_LENGTH = "Max length";
 
   final PropertyHandler props;
   private KeyPressHelper enterKeyButtonHelper;
@@ -320,17 +321,30 @@ public class UserDialog extends BasicDialog {
   }
 
   @NotNull
-  FormField getPasswordFormField(Fieldset fieldset, String hint1) {
+  public FormField getPasswordFormField(HasWidgets fieldset, String hint1) {
     FormField formField = addControlFormFieldWithPlaceholder(fieldset, true, MIN_PASSWORD, MAX_PASSWORD_LENGTH, hint1);
-    formField.box.addKeyUpHandler(event -> {
-      if (formField.box.getText().length() == MAX_PASSWORD_LENGTH) {
-        markWarn(formField, "Max length", "At max password length - stop typing.");
+    addSpecialPasswordBehavior(formField);
+    return formField;
+  }
+
+  public void setMaxPasswordLength(com.github.gwtbootstrap.client.ui.TextBox boxBase) {
+    boxBase.setMaxLength(MAX_PASSWORD_LENGTH);
+  }
+
+  private void addSpecialPasswordBehavior(FormField formField) {
+    com.github.gwtbootstrap.client.ui.base.TextBoxBase box = formField.box;
+    addPasswordFeedback(formField.group, box, Placement.TOP);
+  }
+
+  public void addPasswordFeedback(ControlGroup group, com.github.gwtbootstrap.client.ui.base.TextBoxBase box, Placement placement) {
+    box.addKeyUpHandler(event -> {
+      if (box.getText().length() == MAX_PASSWORD_LENGTH) {
+        markWarn(group, box, MAX_LENGTH, "At max password length - stop typing.", placement);
       } else {
-        clearError(formField.group);
+        clearError(group);
       }
     });
-    turnOffAutoCapitalize(formField);
-    return formField;
+    turnOffAutoCap(box);
   }
 
   /**
@@ -339,6 +353,11 @@ public class UserDialog extends BasicDialog {
    * @param useridField
    */
   void turnOffAutoCapitalize(FormField useridField) {
-    useridField.getWidget().getElement().setAttribute("autocapitalize", "off");
+    FocusWidget widget = useridField.getWidget();
+    turnOffAutoCap(widget);
+  }
+
+  private void turnOffAutoCap(FocusWidget widget) {
+    widget.getElement().setAttribute("autocapitalize", "off");
   }
 }
