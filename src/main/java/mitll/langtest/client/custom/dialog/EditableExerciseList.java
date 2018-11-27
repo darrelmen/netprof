@@ -28,6 +28,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 2/14/17.
  */
 class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> implements FeedbackExerciseList {
+  private static final String THIS_IS_ALREADY_IN_THE_LIST = "This is already in the list.";
   private final Logger logger = Logger.getLogger("EditableExerciseList");
 
   private static final String PLEASE_ENTER_SOME_TEXT = "Please enter some text.";
@@ -219,7 +220,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
     final CommonShell currentExercise = searchTypeahead.getCurrentExercise();
     if (currentExercise != null) {
       if (isOnList()) {
-        message.setText("This is already in the list.");
+        message.setText(THIS_IS_ALREADY_IN_THE_LIST);
         enableButton(add);
       } else {   // not on the list
         message.setText("");

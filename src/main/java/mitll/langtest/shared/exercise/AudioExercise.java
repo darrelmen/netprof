@@ -38,6 +38,7 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.SimpleUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -124,7 +125,7 @@ public class AudioExercise extends ExerciseShell {
    * @param audioAttribute
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#attachAudioAndFixPath
    */
-  public boolean addAudio(AudioAttribute audioAttribute) {
+  public synchronized boolean addAudio(AudioAttribute audioAttribute) {
     if (audioAttribute == null) throw new IllegalArgumentException("adding null audio?");
     else {
       String key = audioAttribute.getKey();
@@ -138,12 +139,18 @@ public class AudioExercise extends ExerciseShell {
     }
   }
 
-  public void clearRefAudio() {
+  /**
+   * CLIENT ONLY
+   */
+  public synchronized void clearRefAudio() {
     AudioAttribute audio = getRegularSpeed();
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
 
-  public void clearSlowRefAudio() {
+  /**
+   * CLIENT ONLY
+   */
+  public synchronized void clearSlowRefAudio() {
     AudioAttribute audio = getSlowSpeed();
     if (audio != null) audioAttributes.remove(audio.getKey());
   }
@@ -162,7 +169,7 @@ public class AudioExercise extends ExerciseShell {
    */
   private AudioAttribute getAudio(String name, String value) {
     AudioAttribute latest = null;
-    for (AudioAttribute audio : getAudioAttributes()) {
+    for (AudioAttribute audio : getAudioAttributesLocal()) {
       if (audio.matches(name, value)) {
         if (latest == null || audio.getTimestamp() > latest.getTimestamp()) {
           latest = audio;
@@ -174,7 +181,7 @@ public class AudioExercise extends ExerciseShell {
 
   private AudioAttribute getAudioPreferUsers(String name, String value, Collection<Integer> prefs) {
     AudioAttribute candidate = null;
-    for (AudioAttribute audio : getAudioAttributes()) {
+    for (AudioAttribute audio : getAudioAttributesLocal()) {
       if (audio.matches(name, value)) {
         if (prefs.contains(audio.getUser().getID())) {
           return audio;
@@ -192,13 +199,13 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public synchronized boolean hasAudioNonContext(boolean vocab) {
-    return getAudioAttributes()
+    return getAudioAttributesLocal()
         .stream()
         .anyMatch(audioAttribute -> (vocab == !audioAttribute.isContextAudio()));
   }
 
   public synchronized boolean hasContextAudio() {
-    return getAudioAttributes()
+    return getAudioAttributesLocal()
         .stream()
         .anyMatch(AudioAttribute::isContextAudio);
   }
@@ -206,21 +213,41 @@ public class AudioExercise extends ExerciseShell {
   /**
    * @return
    */
-  public synchronized Collection<AudioAttribute> getAudioAttributes() {
+  private Collection<AudioAttribute> getAudioAttributesLocal() {
     return audioAttributes.values();
   }
-/*
 
+  public synchronized Collection<AudioAttribute> getAudioAttributes() {
+    return new ArrayList<>(audioAttributes.values());
+  }
+
+  public synchronized Collection<AudioAttribute> getContextAudio() {
+    return getAudioAttributesLocal()
+        .stream()
+        .filter(AudioAttribute::isContextAudio)
+        .collect(Collectors.toList());
+  }
+
+  public synchronized AudioAttribute getFirst() {
+    Collection<AudioAttribute> audioAttributesLocal = getAudioAttributesLocal();
+    return audioAttributesLocal.isEmpty() ? null : audioAttributesLocal.iterator().next();
+  }
+
+  /*
   public synchronized Collection<Integer> getAudioIDs() {
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
     return audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
   }
 */
 
-
   public synchronized Collection<String> getAudioPaths() {
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
-    return audioAttributes1.stream().map(AudioAttribute::getAudioRef).collect(Collectors.toSet());
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributesLocal();
+    Set<String> paths = new HashSet<>(audioAttributes1.size());
+    for (AudioAttribute attr : audioAttributes1) {
+      paths.add(attr.getAudioRef());
+    }
+    return paths;
+    //return audioAttributes1.stream().map(AudioAttribute::getAudioRef).collect(Collectors.toSet());
   }
 
   /**
@@ -296,7 +323,7 @@ public class AudioExercise extends ExerciseShell {
   public synchronized AudioAttribute getLatestContext(boolean isMale) {
     long latestTime = 0;
     AudioAttribute latest = null;
-    for (AudioAttribute audioAttribute : getAudioAttributes()) {
+    for (AudioAttribute audioAttribute : getAudioAttributesLocal()) {
       if (audioAttribute.getAudioType() == AudioType.CONTEXT_REGULAR &&
           ((isMale && audioAttribute.isMale()) || (!isMale && !audioAttribute.isMale()))
       ) {
@@ -311,7 +338,7 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public synchronized Map<String, AudioAttribute> getAudioRefToAttr() {
-    Collection<AudioAttribute> audioAttributes = getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes = getAudioAttributesLocal();
     Map<String, AudioAttribute> audioToAttr = new HashMap<String, AudioAttribute>(audioAttributes.size());
     audioAttributes.forEach(attr -> audioToAttr.put(attr.getAudioRef(), attr));
     return audioToAttr;
@@ -364,7 +391,7 @@ public class AudioExercise extends ExerciseShell {
 
   private List<AudioAttribute> getRecordingsBy(long userID) {
     List<AudioAttribute> mine = new ArrayList<AudioAttribute>();
-    for (AudioAttribute attr : getAudioAttributes()) {
+    for (AudioAttribute attr : getAudioAttributesLocal()) {
       if (attr.getUser() != null) {
         if (attr.getUser().getID() == userID) mine.add(attr);
       }
@@ -646,7 +673,7 @@ public class AudioExercise extends ExerciseShell {
    */
   public List<MiniUser> getSortedUsers(Map<MiniUser, List<AudioAttribute>> malesMap) {
     List<MiniUser> maleUsers = new ArrayList<MiniUser>(malesMap.keySet());
-    maleUsers.sort((o1, o2) -> o1.getUserID().compareTo(o2.getUserID()));
+    maleUsers.sort(Comparator.comparing(SimpleUser::getUserID));
     return maleUsers;
   }
 

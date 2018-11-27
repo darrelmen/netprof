@@ -246,8 +246,7 @@ public class AudioCopy {
     for (ClientExercise context : contextExercises) {
       int cexid = context.getID();
       String prefix = cexid + "/" + context.getDominoID();
-      if (context.getAudioAttributes().isEmpty()) {
-
+      if (context.hasRefAudio()) {
         String cfl = context.getForeignLanguage().toLowerCase();
         List<SlickAudio> audioAttributes = transcriptToAudio.get(cfl);
 

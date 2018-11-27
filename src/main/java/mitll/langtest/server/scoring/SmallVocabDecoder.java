@@ -221,7 +221,7 @@ public class SmallVocabDecoder {
   public List<String> getTokens(String sentence, boolean removeAllAccents) {
     List<String> all = new ArrayList<>();
     if (sentence.isEmpty()) {
-      logger.warn("huh? empty ", new Exception());
+      logger.warn("huh? empty sentence?");
     }
     //  logger.info("getTokens initial    '" + sentence + "'");
     String trimmedSent = getTrimmedSent(sentence, removeAllAccents);

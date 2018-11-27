@@ -44,6 +44,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.custom.UserListLight;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserExerciseList;
 import mitll.npdata.dao.userexercise.UserExerciseListDAOWrapper;
@@ -139,10 +140,14 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   }
 
   private UserList<CommonShell> fromSlick(SlickUserExerciseList slick) {
-    return new UserList<>(
+    User byID = getUser(slick);
+
+   // logger.info("owner for list " + slick.id() + " " + slick.name() + " is "+byID.getUserID() + " " + byID.isTeacher());
+
+    UserList<CommonShell> commonShellUserList = new UserList<>(
         slick.id(),
         slick.userid(),
-        userDAO.getUserChosenID(slick.userid()),
+        byID.getUserID(),
         slick.name(),
         slick.description(),
         slick.classmarker(),
@@ -157,13 +162,19 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.duration(),
         slick.minscore(),
         slick.showaudio());
+    return commonShellUserList.setTeacher(!byID.isStudent());
   }
 
   private UserList<CommonExercise> fromSlickEx(SlickUserExerciseList slick) {
-    return new UserList<>(
+    User byID = getUser(slick);
+    String userChosenID = byID.getUserID();
+
+   // logger.info("fromSlickEx owner for list " + slick.id() + " " + slick.name() + " is "+byID.getUserID() + " " + byID.isTeacher());
+
+    UserList<CommonExercise> commonExerciseUserList = new UserList<>(
         slick.id(),
         slick.userid(),
-        userDAO.getUserChosenID(slick.userid()),
+        userChosenID,
         slick.name(),
         slick.description(),
         slick.classmarker(),
@@ -178,6 +189,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.duration(),
         slick.minscore(),
         slick.showaudio());
+
+    return commonExerciseUserList.setTeacher(!byID.isStudent());
+  }
+
+  private User getUser(SlickUserExerciseList slick) {
+    return userDAO.getByID(slick.userid());
   }
 
   @NotNull
@@ -512,8 +529,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     int update = dao.update(toSlick(userList));
     if (update == 0) {
       logger.warn("huh? didn't update " + userList.getID());
-    }
-    else {
+    } else {
       Option<SlickUserExerciseList> slickUserExerciseListOption = dao.byID(userList.getID());
       if (slickUserExerciseListOption.isDefined()) {
         UserList<CommonShell> commonShellUserList = fromSlick(slickUserExerciseListOption.get());

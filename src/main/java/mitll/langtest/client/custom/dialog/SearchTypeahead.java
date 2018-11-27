@@ -36,7 +36,6 @@ public class SearchTypeahead {
 
   private final ExerciseController controller;
   private int req = 0;
-  private final FeedbackExerciseList feedbackExerciseList;
   private CommonShell currentExercise = null;
   private final SearchHighlighter highlighter = new SearchHighlighter();
   private final Button add;
@@ -49,7 +48,7 @@ public class SearchTypeahead {
    */
   SearchTypeahead(ExerciseController controller, FeedbackExerciseList feedbackExerciseList, Button add) {
     this.controller = controller;
-    this.feedbackExerciseList = feedbackExerciseList;
+    //FeedbackExerciseList feedbackExerciseList1 = feedbackExerciseList;
     this.add = add;
   }
 

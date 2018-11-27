@@ -51,6 +51,7 @@ public class JsonScoring {
   //  public static final String EXERCISE_TEXT = "exerciseText";
   private static final float MIN_HYDRA_ALIGN = 0.3F;
   private static final String BAD_EXERCISE_ID = "bad_exercise_id";
+  private static final String DYNAMIC_RANGE = "dynamicRange";
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
 
@@ -161,18 +162,24 @@ public class JsonScoring {
                                   AudioAnswer answer,
                                   boolean addStream) {
     PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
-    if (answer != null && answer.isValid() && pretestScore != null) {
-      jsonForScore = getJsonObject(projid, options.isUsePhoneToDisplay(), fullJSON, doFlashcard, answer, pretestScore);
-
-      if (addStream) {
-        jsonForScore.put("duration", answer.getDurationInMillis());
-        jsonForScore.put("dynamicRange", answer.getDynamicRange());
-        jsonForScore.put("path", answer.getPath());
-        jsonForScore.put("resultID", answer.getResultID());
-        jsonForScore.put("timestamp", answer.getTimestamp());
+    if (answer != null && answer.isValid()) {
+      if (pretestScore != null) {
+        jsonForScore = getJsonObject(projid, options.isUsePhoneToDisplay(), fullJSON, doFlashcard, answer, pretestScore);
         jsonForScore.put("isfullmatch", answer.getPretestScore().isFullMatch());
       }
-      jsonForScore.put("processDur", answer.getPretestScore().getProcessDur());
+      if (addStream) {
+        jsonForScore.put("duration", answer.getDurationInMillis());
+        jsonForScore.put(DYNAMIC_RANGE, answer.getDynamicRange());
+        String path = answer.getPath();
+        if (path.isEmpty()) logger.warn("no path?");
+        jsonForScore.put("path", path);
+        jsonForScore.put("resultID", answer.getResultID());
+
+        if (jsonForScore.get("pretest") == null) {
+          jsonForScore.put("pretest", new JSONObject());
+        }
+        jsonForScore.put("timestamp", answer.getTimestamp());
+      } else logger.warn("not adding stream info");
     }
 
     addValidity(exerciseID, jsonForScore,

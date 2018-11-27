@@ -114,7 +114,7 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String DRILL = INavigation.VIEWS.PRACTICE.toString();
   private static final String STORAGE_ID = "others";
   /**
-   * @see ContentView#showContent
+   * @see #addPublicTable
    */
   private static final String OTHERS_PUBLIC_LISTS = "Public Lists";
 
@@ -203,7 +203,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private ListContainer addVisitedTable(DivWidget top) {
     ListContainer listContainer =
-        new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE, false) {
+        new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE, false, false) {
           @Override
           protected boolean hasDoubleClick() {
             return true;
@@ -248,7 +248,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private ListContainer addPublicTable(DivWidget bottom) {
     ListContainer listContainer =
-        new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE, false) {
+        new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE, false, true) {
 
           @Override
           protected boolean hasDoubleClick() {
@@ -942,7 +942,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private class MyListContainer extends ListContainer {
     MyListContainer() {
-      super(ListView.this.controller, 18, true, MY_LISTS, 15, true);
+      super(ListView.this.controller, 18, true, MY_LISTS, 15, true,false);
     }
 
     @Override
