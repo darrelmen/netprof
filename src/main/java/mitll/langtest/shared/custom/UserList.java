@@ -83,6 +83,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   private int duration;
   private int minScore;
   private boolean showAudio;
+  private boolean teacher;
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
@@ -319,6 +320,15 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   public void setDuration(int duration) {
     this.duration = duration;
+  }
+
+  public boolean isTeacher() {
+    return teacher;
+  }
+
+  public UserList<T> setTeacher(boolean teacher) {
+    this.teacher = teacher;
+    return this;
   }
 
   @Override

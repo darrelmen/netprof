@@ -577,7 +577,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       String foreignlanguage = slick.foreignlanguage();
       String transliteration = slick.transliteration();
 
-      String pronunciations = lookup.getPronunciationsFromDictOrLTS(foreignlanguage, transliteration);
+      String pronunciations = foreignlanguage.isEmpty() ? "" : lookup.getPronunciationsFromDictOrLTS(foreignlanguage, transliteration);
       exercisePhoneInfo = pronunciations.isEmpty() ? new ExercisePhoneInfo() : new ExercisePhoneInfo(pronunciations);
 
       {

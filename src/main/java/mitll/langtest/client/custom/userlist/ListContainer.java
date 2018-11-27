@@ -1,6 +1,7 @@
 package mitll.langtest.client.custom.userlist;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -39,8 +40,11 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
    */
   private static final String PUBLIC = "Public?";
   private static final String NUM_ITEMS = "#";
+  private static final String NO = "No";
+  private static final String YES = "Yes";
   private final boolean slim;
   private final boolean addOwnerToDescrip;
+  private final  boolean addTeacherCol;
 
   private final List<Button> buttons = new ArrayList<>();
 
@@ -50,13 +54,15 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
    * @param slim
    * @param storageID
    * @param shortPageSize
-   * @see ContentView#showContent(Panel, mitll.langtest.client.custom.INavigation.VIEWS)
+   * @see ListView#addVisitedTable
    */
-  ListContainer(ExerciseController controller, int pageSize, boolean slim, String storageID, int shortPageSize, boolean addOwnerToDescrip) {
+  ListContainer(ExerciseController controller, int pageSize, boolean slim, String storageID, int shortPageSize,
+                boolean addOwnerToDescrip, boolean addTeacherCol) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + storageID, "List",
         pageSize, shortPageSize);
     this.slim = slim;
     this.addOwnerToDescrip = addOwnerToDescrip;
+    this.addTeacherCol=addTeacherCol;
   }
 
   void addButton(Button button) {
@@ -66,7 +72,6 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   void enableAll() {
     buttons.forEach(button -> button.setEnabled(true));
   }
-
   void disableAll() {
     buttons.forEach(button -> button.setEnabled(false));
   }
@@ -109,6 +114,9 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
       if (canMakeQuiz()) {
         addIsQuiz();
       }
+    }
+    if (addTeacherCol) {
+      addIsTeacher();
     }
   }
 
@@ -207,6 +215,14 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     table.setColumnWidth(diff, 50 + "px");
   }
 
+  private void addIsTeacher() {
+    Column<UserList<CommonShell>, SafeHtml> diff = getTeacher();
+    diff.setSortable(true);
+    addColumn(diff, new TextHeader("By Teacher?"));
+    table.addColumnSortHandler(getTeacherSorted(diff, getList()));
+    table.setColumnWidth(diff, 50 + "px");
+  }
+
   private void addIsQuiz() {
     Column<UserList<CommonShell>, SafeHtml> diff = getQuiz();
     diff.setSortable(true);
@@ -291,7 +307,22 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        return getSafeHtml(shell.isPrivate() ? "No" : "Yes");
+        return getSafeHtml(shell.isPrivate() ? NO : YES);
+      }
+    };
+  }
+
+  private Column<UserList<CommonShell>, SafeHtml> getTeacher() {
+    return new Column<UserList<CommonShell>, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, UserList<CommonShell> object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(UserList<CommonShell> shell) {
+        return getSafeHtml(shell.isTeacher() ? YES : NO);
       }
     };
   }
@@ -306,7 +337,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        return getSafeHtml(shell.getListType() == QUIZ ? "Yes" : "No");
+        return getSafeHtml(shell.getListType() == QUIZ ? YES : NO);
       }
     };
   }
@@ -336,6 +367,13 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
                                                                              List<UserList<CommonShell>> dataList) {
     ColumnSortEvent.ListHandler<UserList<CommonShell>> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::isPrivate));
+    return columnSortHandler;
+  }
+
+  private ColumnSortEvent.ListHandler<UserList<CommonShell>> getTeacherSorted(Column<UserList<CommonShell>, SafeHtml> englishCol,
+                                                                                List<UserList<CommonShell>> dataList) {
+    ColumnSortEvent.ListHandler<UserList<CommonShell>> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::isTeacher));
     return columnSortHandler;
   }
 

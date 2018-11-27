@@ -180,7 +180,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   AudioAttribute getRegularSpeedIfAvailable(T e) {
     AudioAttribute candidate = e.getRegularSpeed();
-    return candidate == null ? e.getAudioAttributes().iterator().next() : candidate;
+    return candidate == null ? e.getFirst() : candidate;
   }
 
 

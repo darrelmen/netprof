@@ -91,7 +91,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   private void setMinExpectedDur(T commonExercise) {
     if (commonExercise.hasRefAudio()) {
-      minDur = commonExercise.getAudioAttributes().iterator().next().getDurationInMillis();
+      minDur = commonExercise.getFirst().getDurationInMillis();
       minDur = (long) (((float) minDur) * DELAY_SCALAR);
       minDur -= END_DUR_SKEW;
     }
