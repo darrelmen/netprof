@@ -145,7 +145,6 @@ public class SearchTypeahead {
 
   void clearCurrentExercise() {
     currentExercise = null;
-    //add.setEnabled(quickAddText.);
   }
 
   @NotNull

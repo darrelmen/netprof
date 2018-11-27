@@ -70,7 +70,6 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    * @param widgets
    * @param recordAudioPanel
    * @param index
-   * @param recordInResults
    * @param playButtonSuffix
    * @param stopButtonText
    * @param audioType
@@ -83,11 +82,10 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
                                           Panel widgets,
                                           RecordAudioPanel recordAudioPanel,
                                           int index,
-                                          boolean recordInResults,
-                                          String playButtonSuffix,
+                                          String recordButtonTitle,
                                           String stopButtonText,
                                           AudioType audioType) {
-    super(exerciseID, controller, playButtonSuffix, stopButtonText, 93);
+    super(exerciseID, controller, recordButtonTitle, stopButtonText, 93);
     this.recordAudioPanel = recordAudioPanel;
     this.parentPanel = widgets;
     getElement().setId("WaveformPostAudioRecordButton_" + exerciseID + "_" + index);

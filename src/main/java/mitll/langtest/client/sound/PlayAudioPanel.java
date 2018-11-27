@@ -64,8 +64,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class PlayAudioPanel extends HeadlessPlayAudio {
-  public static final String PLAY_AUDIO_PANEL = "PlayAudioPanel_";
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
+
+  public static final String PLAY_AUDIO_PANEL = "PlayAudioPanel_";
 
   private static final boolean DEBUG = false;
 

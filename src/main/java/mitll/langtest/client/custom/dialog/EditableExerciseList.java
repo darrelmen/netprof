@@ -28,9 +28,12 @@ import java.util.logging.Logger;
  * Created by go22670 on 2/14/17.
  */
 class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> implements FeedbackExerciseList {
-  private static final String THIS_IS_ALREADY_IN_THE_LIST = "This is already in the list.";
   private final Logger logger = Logger.getLogger("EditableExerciseList");
 
+  /**
+   * @see #onClickAdd
+   */
+  private static final String THIS_IS_ALREADY_IN_THE_LIST = "This is already in the list.";
   private static final String PLEASE_ENTER_SOME_TEXT = "Please enter some text.";
 
   private final UserList<CommonShell> list;
@@ -61,7 +64,9 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
     pagingContainer.setPageSize(8);
   }
 
-  public int getListID() { return list.getID(); }
+  public int getListID() {
+    return list.getID();
+  }
 
   /**
    * @return
@@ -171,8 +176,9 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   private Typeahead getTypeahead(Button add) {
     quickAddText = getEntryTextBox();
     quickAddText.addKeyUpHandler(event -> {
-    //  logger.info("getTypeahead got key up "+ quickAddText.getText());
+      //  logger.info("getTypeahead got key up "+ quickAddText.getText());
       searchTypeahead.clearCurrentExercise();
+      message.setText("");
     });
 
     this.searchTypeahead = new SearchTypeahead(controller, this, add);
@@ -215,7 +221,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   private void onClickAdd(Button add) {
     add.setEnabled(false);
 
-   logger.info("click add " + add);
+    logger.info("click add " + add);
 
     final CommonShell currentExercise = searchTypeahead.getCurrentExercise();
     if (currentExercise != null) {
@@ -236,7 +242,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
             enableButton(add);
             showNewItem(currentExercise);
             quickAddText.setValue("", false);
-
+            searchTypeahead.clearCurrentExercise();
           }
         });
       }
@@ -275,10 +281,10 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
           @Override
           public void onSuccess(CommonExercise newExercise) {
             if (newExercise == null) {
-             // logger.info("onSuccess not in dict!");
+              // logger.info("onSuccess not in dict!");
               message.setText("This is not in our " + controller.getLanguage() + " dictionary. Please edit.");
             } else {
-              logger.info("checkIsValidPhrase got "+newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
+              logger.info("checkIsValidPhrase got " + newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
               showNewItem(newExercise);
             }
           }
@@ -308,7 +314,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
 
     int before = getSize();
     addExercise(currentExercise);
-       int after = getSize();
+    int after = getSize();
     logger.info("before " + before + " after " + after);
     enableRemove(true);
 

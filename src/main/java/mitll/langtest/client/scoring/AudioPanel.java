@@ -138,6 +138,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     this(controller, showSpectrogram, rightMargin, exercise, exerciseID);
     this.audioPath = path;
 
+    logger.info("\n\n\nbutton title is " +RECORD);
     addWidgets(playButtonSuffix, RECORD);
     if (playAudio != null) {
       if (exercise == null) {
@@ -166,7 +167,6 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
                        int rightMargin,
                        T exercise,
                        int exerciseID) {
-
     this.logMessages = controller.isLogClientMessages();
     this.controller = controller;
     this.showSpectrogram = showSpectrogram;

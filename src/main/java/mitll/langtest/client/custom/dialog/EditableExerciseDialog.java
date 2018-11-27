@@ -117,7 +117,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   protected ControlGroup makeRegularAudioPanel(Panel row) {
     rap = makeRecordAudioPanel(row, true);
     fastAnno.addStyleName("topFiveMargin");
-    return addControlGroupEntrySimple(row, NORMAL_SPEED_REFERENCE_RECORDING, rap, fastAnno);
+    return addControlGroupEntrySimple(row, "", rap, fastAnno);
   }
 
   /**
@@ -127,7 +127,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   protected ControlGroup makeSlowAudioPanel(Panel row) {
     rapSlow = makeRecordAudioPanel(row, false);
     slowAnno.addStyleName("topFiveMargin");
-    return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow, slowAnno);
+    return addControlGroupEntrySimple(row, "", rapSlow, slowAnno);
   }
 
   /**

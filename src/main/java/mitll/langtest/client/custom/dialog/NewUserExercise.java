@@ -34,9 +34,9 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.TextArea;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -79,18 +79,20 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * @see #addContext
    */
-  private static final String CONTEXT_LABEL = "Context";
-  private static final String CONTEXT_TRANSLATION_LABEL = "C. Translation";
+//  private static final String CONTEXT_LABEL = "Context";
+//  private static final String CONTEXT_TRANSLATION_LABEL = "C. Translation";
 
   private static final int TEXT_FIELD_WIDTH = 500;
+  private static final int WIDE_TEXT_FIELD_WIDTH = 750;
   private static final int LABEL_WIDTH = 105;
 
   //private static final String FOREIGN_LANGUAGE = "Foreign Language";
   private static final String ENGLISH_LABEL = "English";// (optional)";
   private static final String ENGLISH_LABEL_2 = "Meaning";
   private static final String TRANSLITERATION_OPTIONAL = "Transliteration";
-  static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
-  static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
+
+//  static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
+//  static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
   //private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
   // private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
 
@@ -311,12 +313,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   ControlGroup makeRegularAudioPanel(Panel row) {
     rap = makeRecordAudioPanel(row, true);
-    return addControlGroupEntrySimple(row, NORMAL_SPEED_REFERENCE_RECORDING, rap);
+    return addControlGroupEntrySimple(row, "", rap);
   }
 
   ControlGroup makeSlowAudioPanel(Panel row) {
     rapSlow = makeRecordAudioPanel(row, false);
-    return addControlGroupEntrySimple(row, SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL, rapSlow);
+    return addControlGroupEntrySimple(row, "", rapSlow);
   }
 
   void configureButtonRow(Panel row) {
@@ -326,8 +328,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   private void makeEnglishRow(Panel container) {
     Panel row = new DivWidget();
     container.add(row);
-    english = makeBoxAndAnno(row, getEnglishLabel(), "", englishAnno);
-    markPlaceholder(english.box, isEnglish() ? newUserExercise.getMeaning() : newUserExercise.getEnglish());
+    english = makeBoxAndAnno(row, "", englishAnno);
+    markPlaceholder(english.box, isEnglish() ? newUserExercise.getMeaning() : newUserExercise.getEnglish(), "Translation (optional)");
   }
 
   String getEnglishLabel() {
@@ -345,7 +347,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     foreignAnno.getElement().setId("foreignLanguageAnnotation");
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
-    foreignLang = makeBoxAndAnno(row, getLanguage(), "", foreignAnno);
+    foreignLang = makeBoxAndAnno(row, "", foreignAnno);
     if (getLanguage().equalsIgnoreCase("urdu")) {
       foreignLang.getWidget().getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
     }
@@ -370,7 +372,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     Panel row = new DivWidget();
     container.add(row);
     String subtext = "";
-    translit = makeBoxAndAnno(row, getTransliterationLabel(), subtext, translitAnno);
+    translit = makeBoxAndAnno(row, subtext, translitAnno);
   }
 
   String getTransliterationLabel() {
@@ -384,31 +386,33 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #makeContextRow
    */
   private FormField addContext(Panel container, U newUserExercise) {
-    FormField formField = makeBoxAndAnnoArea(container, CONTEXT_LABEL, "", contextAnno);
+    FormField formField = makeBoxAndAnnoArea(container, "", contextAnno);
     setFontSize(formField);
 
     TextBoxBase box = formField.box;
     box.setDirectionEstimator(true);   // automatically detect whether text is RTL
 
     box.setText(newUserExercise.getContext());
-    markPlaceholder(box, newUserExercise.getContext());
+    markPlaceholder(box, newUserExercise.getContext(), "Context Sentence (optional)");
     addOnBlur(box, CONTEXT_BOX);
 
     useAnnotation(newUserExercise, CONTEXT, contextAnno);
     return formField;
   }
 
-  private void markPlaceholder(TextBoxBase box, String content) {
-    if (content.isEmpty()) box.setPlaceholder(OPTIONAL);
+  private void markPlaceholder(TextBoxBase box, String content, String hint) {
+    if (content.isEmpty()) {
+      box.setPlaceholder(hint);
+    }
   }
 
   private FormField addContextTranslation(Panel container,
                                           U newUserExercise) {
-    FormField formField = makeBoxAndAnnoArea(container, CONTEXT_TRANSLATION_LABEL, "", contextTransAnno);
+    FormField formField = makeBoxAndAnnoArea(container, "", contextTransAnno);
 
     TextBoxBase box1 = formField.box;
     box1.setText(newUserExercise.getContextTranslation());
-    markPlaceholder(box1, newUserExercise.getContextTranslation());
+    markPlaceholder(box1, newUserExercise.getContextTranslation(), "Context Sentence Translation (optional)");
 
     addOnBlur(box1, "ContextTransBox = ");
     useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno);
@@ -635,10 +639,11 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @paramx pagingContainer
    * @see #validateThenPost
    */
-  private void isValidForeignPhrase(//final ListInterface<T,U> pagingContainer,
-                                    final Panel toAddTo,
-                                    final boolean onClick) {
+  private void isValidForeignPhrase(final Panel toAddTo, final boolean onClick) {
     //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getSafeText() + " before adding/changing " + newUserExercise);
+    final FormField foreignLang = this.foreignLang;
+
+
     controller.getScoringService().isValidForeignPhrase(foreignLang.getSafeText(), "", new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -648,12 +653,25 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       @Override
       public void onSuccess(Boolean result) {
         if (result) {
-          // checkIfNeedsRefAudio();
-          // grabInfoFromFormAndStuffInfoExercise(newUserExercise);
-          afterValidForeignPhrase(/*pagingContainer,*/ toAddTo, onClick);
+          controller.getScoringService().isValidForeignPhrase(context.getSafeText(), "", new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("is valid exercise", caught);
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+              if (result) {
+                afterValidForeignPhrase(toAddTo, onClick);
+              } else {
+                markError(context, "The " + controller.getLanguage() +
+                    " text is not in our " + getLanguage() + " dictionary. Please edit.", Placement.BOTTOM);
+              }
+            }
+          });
         } else {
           markError(foreignLang, "The " + controller.getLanguage() +
-              " text is not in our " + getLanguage() + " dictionary. Please edit.");
+              " text is not in our " + getLanguage() + " dictionary. Please edit.", Placement.BOTTOM);
         }
       }
     });
@@ -766,31 +784,31 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   /**
    * @param row
-   * @param label
    * @param subtext
    * @param annoBox
    * @return
+   * @paramx label
    * @see #makeEnglishRow
    */
-  private FormField makeBoxAndAnno(Panel row, String label, String subtext, HTML annoBox) {
-    FormField formField = addControlFormFieldHorizontal(row, label, subtext,
+  private FormField makeBoxAndAnno(Panel row, String subtext, HTML annoBox) {
+    FormField formField = addControlFormFieldHorizontal(row, "", subtext,
         false, 1, annoBox,
         LABEL_WIDTH, TEXT_FIELD_WIDTH);
     styleBox(annoBox, formField);
     return formField;
   }
 
-  private FormField makeBoxAndAnnoArea(Panel row, String label, String subtext, HTML annoBox) {
+  private FormField makeBoxAndAnnoArea(Panel row, String subtext, HTML annoBox) {
     TextArea textBox = new TextArea();
     textBox.setVisibleLines(2);
     FormField formField = getFormField(
         row,
-        label,
+        "",
         subtext,
         1,
         annoBox,
         LABEL_WIDTH,
-        TEXT_FIELD_WIDTH,
+        WIDE_TEXT_FIELD_WIDTH,
         textBox);
     styleBox(annoBox, formField);
     return formField;
@@ -825,10 +843,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
      * @param recordRegularSpeed
      * @see #makeRecordAudioPanel
      */
-    CreateFirstRecordAudioPanel(U newExercise, Panel row,
-                                boolean recordRegularSpeed) {
+    CreateFirstRecordAudioPanel(U newExercise, Panel row, boolean recordRegularSpeed) {
       super(newExercise, NewUserExercise.this.controller, row, 0, false,
           recordRegularSpeed ? AudioType.REGULAR : AudioType.SLOW);
+      logger.info("reg speed " + recordRegularSpeed);
       this.recordRegularSpeed = recordRegularSpeed;
       setExercise(newExercise);
 
@@ -866,8 +884,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       postAudioButton =
           new WaveformPostAudioRecordButton(exercise.getID(), controller, exercisePanel, this,
               recordRegularSpeed ? 0 : 1,
-              false, // don't record in results table????
-              RecordButton.RECORD1,
+              // don't record in results table????
+              audioType == AudioType.REGULAR ? "Regular" : "Slow",
               RecordButton.STOP1,
               audioType) {
             @Override

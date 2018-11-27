@@ -189,9 +189,11 @@ public class BasicDialog {
 
     final HorizontalPanel hp = new HorizontalPanel();
     hp.addStyleName("leftFiveMargin");
-    Heading labelHeading = getLabel(label, labelWidth, subtext);
 
-    hp.add(labelHeading);
+    if (!label.isEmpty()) {
+     // Heading labelHeading = getLabel(label, labelWidth, subtext);
+      hp.add(getLabel(label, labelWidth, subtext));
+    }
     hp.add(widget);
     userGroup.add(hp);
 
@@ -216,9 +218,9 @@ public class BasicDialog {
 
   protected ControlGroup addControlGroupEntrySimple(Panel dialogBox, String label, Widget widget) {
     final ControlGroup userGroup = new ControlGroup();
+
     if (!label.isEmpty()) {
-      ControlLabel widget1 = new ControlLabel(label);
-      userGroup.add(widget1);
+      userGroup.add(new ControlLabel(label));
     }
     widget.addStyleName("leftFiveMargin");
     userGroup.add(widget);
@@ -258,8 +260,17 @@ public class BasicDialog {
     markError(dialectGroup, TRY_AGAIN, message);
   }
 
+  protected void markError(FormField dialectGroup, String message, Placement placement) {
+    if (DEBUG) logger.info("mark error " + message + " on " + dialectGroup.getWidget().getElement().getId());
+    markError(dialectGroup, TRY_AGAIN, message, placement);
+  }
+
   protected void markError(FormField dialectGroup, String header, String message) {
-    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, header, message, Placement.RIGHT);
+    markError(dialectGroup, header, message, Placement.RIGHT);
+  }
+
+  protected void markError(FormField dialectGroup, String header, String message, Placement right) {
+    markError(dialectGroup.group, dialectGroup.box, dialectGroup.box, header, message, right);
   }
 
   void markErrorBlur(FormField dialectGroup, String header, String message, Placement right, boolean setFocus) {

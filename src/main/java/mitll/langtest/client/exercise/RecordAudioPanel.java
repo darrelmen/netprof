@@ -332,7 +332,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
           RecordAudioPanel.this.controller,
           RecordAudioPanel.this.exercisePanel,
           RecordAudioPanel.this,
-          RecordAudioPanel.this.index, true,
+          RecordAudioPanel.this.index,
           recordButtonTitle, RecordButton.STOP1, audioType);
       setWidth("110px");
     }
