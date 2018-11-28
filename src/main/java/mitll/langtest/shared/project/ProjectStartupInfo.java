@@ -33,6 +33,7 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.exercise.SectionNode;
 
@@ -159,6 +160,10 @@ public class ProjectStartupInfo implements IsSerializable {
     return projectType;
   }
 
+  /**
+   * @see mitll.langtest.client.list.FacetExerciseList#getPagerAndSort
+   * @return
+   */
   public boolean isShouldSwap() {
     return shouldSwap;
   }

@@ -166,9 +166,9 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   }
 
   /**
+   * @param score
    * @see ExerciseList#setScore
    * @see mitll.langtest.client.list.FacetExerciseList#setScores
-   * @param score
    */
   @Override
   public void setScore(float score) {
@@ -225,6 +225,10 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
 
   public boolean shouldSwap() {
     return shouldSwap;
+  }
+
+  public void setShouldSwap(boolean val) {
+    this.shouldSwap = val;
   }
 
   /**

@@ -75,7 +75,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final String QUOT = "&quot;";
   private static final int MAX_LENGTH = 250;
   private static final String UNKNOWN1 = "unknown";
-  public static final String MITLL = "MITLL";
+  private static final String MITLL = "MITLL";
   /**
    * If we don't have a value for a facet, it's value is "Blank" as opposed to "Any"
    *
@@ -747,10 +747,15 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 //    logger.info("ExToPhones " + exToPhones.size());
       //  logger.info("examining  " + all.size() + " exercises...");
 
-      int n = 0;
+      int n;
       //  boolean shouldSwap = getShouldSwap(lookup.getID());
+      boolean b = lookup.shouldSwapPrimaryAndAlt();
+
       for (SlickExercise slickExercise : all) {
         Exercise exercise = makeExercise(slickExercise, typeOrder);
+
+        // remember to set swap flag so fl becomes alt-fl and vice-versa for chinese
+        if (b) exercise.setShouldSwap(true);
 
         if (WARN_ABOUT_MISSING_PHONES) {
           if (exercise.getNumPhones() == 0 && n++ < 10) {
