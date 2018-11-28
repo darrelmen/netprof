@@ -165,7 +165,9 @@ public class Project implements IPronunciationLookup {
   @NotNull
   private Language getLanguageFor() {
     try {
-      return Language.valueOf(project.language().toUpperCase());
+      String name = project.language().toUpperCase();
+      if (name.equalsIgnoreCase("CHINESE")) name = Language.MANDARIN.name(); // for now a hack
+      return Language.valueOf(name);
     } catch (IllegalArgumentException e) {
       logger.error("no known language  " + project.language());
       return Language.UNKNOWN;
