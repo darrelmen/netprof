@@ -54,6 +54,7 @@ import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.PhoneSummary;
+import mitll.langtest.shared.analysis.UserPerformance;
 import mitll.langtest.shared.custom.TimeRange;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
@@ -398,15 +399,17 @@ public class AnalysisTab extends DivWidget {
     }*/
     long then2 = now;
 
+    UserPerformance userPerformance = result.getUserPerformance();
     if (analysisPlot != null) {
       Scheduler.get().scheduleDeferred(() -> {
-        analysisPlot.showUserPerformance(result.getUserPerformance(), userChosenID, listid, isTeacherView);
+        if (userPerformance != null) { // TODO : not sure how this could be false
+          analysisPlot.showUserPerformance(userPerformance, userChosenID, listid, isTeacherView);
 
-        TIME_HORIZON value = TIME_HORIZON.values()[getTimeHorizonFromStorage()];
+          TIME_HORIZON value = TIME_HORIZON.values()[getTimeHorizonFromStorage()];
 
-     //   logger.info("Set time horizon " + value);
-        analysisPlot.setTimeHorizon(value);
-
+          //   logger.info("Set time horizon " + value);
+          analysisPlot.setTimeHorizon(value);
+        }
       });
     }
 
@@ -416,11 +419,13 @@ public class AnalysisTab extends DivWidget {
     }
     long then3 = now;
 
-    showWordScores(result.getNumScores(), controller,
-        analysisPlot,
-        bottom,
-        phoneSummary, reqInfo,
-        result.getUserPerformance().getTimeWindow());
+    if (userPerformance != null) {
+      showWordScores(result.getNumScores(), controller,
+          analysisPlot,
+          bottom,
+          phoneSummary, reqInfo,
+          userPerformance.getTimeWindow());
+    }
 
     now = System.currentTimeMillis();
     if (now - then3 > 200) {

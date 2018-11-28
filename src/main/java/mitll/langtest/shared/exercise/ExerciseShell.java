@@ -227,10 +227,6 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
     return shouldSwap;
   }
 
-  public void setShouldSwap(boolean val) {
-    this.shouldSwap = val;
-  }
-
   /**
    * @return
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#getFirstRow

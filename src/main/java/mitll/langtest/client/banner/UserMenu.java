@@ -260,6 +260,7 @@ public class UserMenu {
   private LinkAndTitle getChangePassword() {
     return new LinkAndTitle(CHANGE_PASSWORD, new SuccessClickHandler(() ->
         new ChangePasswordView(userManager.getCurrent(), false, userState,
+            controller.getProps(),
             controller.getUserService()).showModal()));
   }
 

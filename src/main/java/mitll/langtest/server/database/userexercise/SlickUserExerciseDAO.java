@@ -461,7 +461,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @see #getExercises(Collection, List, ISection, Project, Map, Map, boolean)
    */
   @NotNull
-  private Exercise makeExercise(SlickExercise slick, List<String> typeOrder) {
+  private Exercise makeExercise(SlickExercise slick, boolean shouldSwap, List<String> typeOrder) {
     int id = slick.id();
     String foreignlanguage = getTruncated(slick.foreignlanguage());
     String noAccentFL = StringUtils.stripAccents(foreignlanguage);
@@ -485,8 +485,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.candecodechecked().getTime(),
         slick.iscontext(),
         slick.numphones(),
-        slick.legacyid() // i.e. dominoID
-    );
+        slick.legacyid(), // i.e. dominoID
+        shouldSwap);
 
     exercise.setPredef(slick.ispredef());
 
@@ -749,13 +749,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
       int n;
       //  boolean shouldSwap = getShouldSwap(lookup.getID());
-      boolean b = lookup.shouldSwapPrimaryAndAlt();
+      boolean shouldSwap = lookup.shouldSwapPrimaryAndAlt();
 
       for (SlickExercise slickExercise : all) {
-        Exercise exercise = makeExercise(slickExercise, typeOrder);
+        Exercise exercise = makeExercise(slickExercise, shouldSwap, typeOrder);
 
         // remember to set swap flag so fl becomes alt-fl and vice-versa for chinese
-        if (b) exercise.setShouldSwap(true);
+
 
         if (WARN_ABOUT_MISSING_PHONES) {
           if (exercise.getNumPhones() == 0 && n++ < 10) {
@@ -968,7 +968,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   /**
    * Niche feature for alt chinese to swap primary and alternate...
-   *
+   * <p>
    * It's back on! 7/13/18 GWFV
    *
    * @param projid
@@ -1072,8 +1072,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * TODOx : Why so complicated?
    * <p>
    * Maybe separately update context exercises.
-   *
-   *
+   * <p>
+   * <p>
    * TODO : make it work with context sentences!
    *
    * @param userExercise

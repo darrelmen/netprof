@@ -234,4 +234,6 @@ public class DialogHelper {
     });
     return noButton;
   }
+
+  public void close() {dialogBox.hide();}
 }

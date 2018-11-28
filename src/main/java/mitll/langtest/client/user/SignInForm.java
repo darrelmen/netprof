@@ -524,7 +524,7 @@ public class SignInForm extends UserDialog implements SignIn {
     forgotPassword.addClickHandler(event -> {
       String safeText = userField.getSafeText();
       if (safeText.isEmpty()) {
-        markErrorBlur(userField, ENTER_A_USER_NAME);
+        markErrorBlur(userField, ENTER_A_USER_NAME, Placement.LEFT);
       } else {
         if (safeText.length() == 4) safeText += "_";
         sendEmailIfExists(forgotPassword, safeText);

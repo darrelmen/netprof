@@ -177,9 +177,8 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
                 exercise.getRecordingsBy(controller.getUser(), false) : null;
 
     if (audioType.isContext()) {
-      for (AudioAttribute audioAttribute1 : exercise.getAudioAttributes()) {
-        Map<String, String> attributes = audioAttribute1.getAttributes();
-        if (attributes.containsKey("context") && audioAttribute1.getUserid() == user) {
+      for (AudioAttribute audioAttribute1 : exercise.getContextAudio()) {
+        if (audioAttribute1.getUserid() == user) {
           return audioAttribute1;
         }
       }

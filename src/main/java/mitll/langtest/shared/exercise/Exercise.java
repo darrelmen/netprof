@@ -179,6 +179,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param lastChecked
    * @param isContext
    * @param dominoID
+   * @param shouldSwap
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#makeExercise
    */
   public Exercise(int exid,
@@ -195,7 +196,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   long lastChecked,
                   boolean isContext,
                   int numPhones,
-                  int dominoID) {
+                  int dominoID,
+                  boolean shouldSwap) {
     super(exid, projectid, isContext);
     this.oldid = oldid;
     this.creator = creator;
@@ -210,6 +212,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
     this.numPhones = numPhones;
     this.dominoID = dominoID;
+    this.shouldSwap = shouldSwap;
   }
 
   /**
@@ -250,7 +253,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int dominoID,
                   boolean shouldSwap) {
     this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration,
-        projectid, candecode, lastChecked, isContext, numPhones, dominoID);
+        projectid, candecode, lastChecked, isContext, numPhones, dominoID, shouldSwap);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;

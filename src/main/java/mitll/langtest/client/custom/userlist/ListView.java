@@ -73,6 +73,7 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String PRACTICE_THE_LIST = "Practice the list.";
   public static final int MAX_HEIGHT = 710;
   public static final String IMPORT = "Import";
+  public static final int MIN_WIDTH = 599;
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
@@ -350,7 +351,7 @@ public class ListView implements ContentView, CreateListComplete {
     DivWidget buttons = new DivWidget();
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
-    buttons.getElement().getStyle().setProperty("minWidth", "560px");
+    buttons.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px");
     buttons.add(getAddButton());
 
     if (canMakeQuiz()) {
@@ -532,8 +533,8 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   /**
-   * @see ListView.MyListContainer#gotDoubleClickOn
    * @param container
+   * @see ListView.MyListContainer#gotDoubleClickOn
    */
   private void showQuiz(ListContainer container) {
     controller.showListIn(getListID(container), INavigation.VIEWS.QUIZ);
@@ -739,7 +740,7 @@ public class ListView implements ContentView, CreateListComplete {
    */
   private DialogHelper doAdd() {
     DivWidget contents = new DivWidget();
-    CreateListDialog createListDialog = new CreateListDialog(this, controller);
+    CreateListDialog createListDialog = new CreateListDialog(this, controller, names);
     createListDialog.doCreate(contents);
 
 /*    {
@@ -772,7 +773,7 @@ public class ListView implements ContentView, CreateListComplete {
    */
   private DialogHelper doAddQuiz() {
     DivWidget contents = new DivWidget();
-    CreateListDialog createListDialog = new CreateListDialog(this, controller).setIsQuiz(true);
+    CreateListDialog createListDialog = new CreateListDialog(this, controller, names).setIsQuiz(true);
     createListDialog.doCreate(contents);
 
 /*    {
@@ -801,6 +802,7 @@ public class ListView implements ContentView, CreateListComplete {
   @NotNull
   private DialogHelper getNewListButton(DivWidget contents, CreateListDialog createListDialog, String title) {
     DialogHelper dialogHelper = new DialogHelper(true);
+    createListDialog.setDialogHelper(dialogHelper);
     //String createNewList = CREATE_NEW_LIST + (canMakeQuiz() ? " or Quiz" : "");
     Button closeButton = dialogHelper.show(
         title,
@@ -811,13 +813,7 @@ public class ListView implements ContentView, CreateListComplete {
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
-            boolean okToCreate = createListDialog.isOKToCreate(names);
-            if (okToCreate) {
-              createListDialog.doCreate();
-            } else {
-              logger.info("doAdd dialog not valid ");
-            }
-            return okToCreate;
+            return createListDialog.isOKToCreate();
           }
 
           @Override
@@ -841,7 +837,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void doEdit() {
     DivWidget contents = new DivWidget();
-    editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection(), true);
+    editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection(), true, names);
     editDialog.doCreate(contents);
 
     DialogHelper dialogHelper = new DialogHelper(true);
@@ -942,7 +938,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private class MyListContainer extends ListContainer {
     MyListContainer() {
-      super(ListView.this.controller, 18, true, MY_LISTS, 15, true,false);
+      super(ListView.this.controller, 18, true, MY_LISTS, 15, true, false);
     }
 
     @Override

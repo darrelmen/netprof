@@ -365,11 +365,11 @@ public class BasicDialog {
   }
 
   void markWarn(FormField signUpEmail, String header, String message) {
-    markWarn(signUpEmail.group, signUpEmail.box, header, message);
+    markWarn(signUpEmail.group, signUpEmail.box, header, message, TOP);
   }
 
-  private void markWarn(ControlGroup dialectGroup, FocusWidget dialect, String header, String message) {
-    markError(dialectGroup, dialect, header, message, TOP, false, true, false);
+   void markWarn(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
+    markError(dialectGroup, dialect, header, message, placement, false, true, false);
   }
 
   void markError(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement, boolean grabFocus, boolean isWarning, boolean requestFocus) {

@@ -67,10 +67,9 @@ public interface AudioRefExercise {
    */
   AudioAttribute getRegularSpeed();
 
+  AudioAttribute getFirst();
   Collection<AudioAttribute> getAudioAttributes();
   Collection<AudioAttribute> getContextAudio();
-
-  AudioAttribute getFirst();
 
   Collection<String> getAudioPaths();
 

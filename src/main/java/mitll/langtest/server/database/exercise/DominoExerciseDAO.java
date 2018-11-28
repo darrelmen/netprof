@@ -398,7 +398,7 @@ public class DominoExerciseDAO {
         0,
         isContext,
         0,
-        dominoID);
+        dominoID, shouldSwap);
 
 
     logger.info("getExerciseFromVocabularyItem : made ex" +
