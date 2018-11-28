@@ -42,12 +42,16 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.custom.userlist.ListView;
+import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
@@ -140,6 +144,7 @@ public class CreateListDialog extends BasicDialog {
 
   private Heading modeDep;
   private boolean isQuiz = false;
+  Set<String> names;
 
   /**
    * @param listView
@@ -148,8 +153,8 @@ public class CreateListDialog extends BasicDialog {
    * @param isEdit
    * @see ListView#doEdit
    */
-  public CreateListDialog(CreateListComplete listView, ExerciseController controller, UserList current, boolean isEdit) {
-    this(listView, controller);
+  public CreateListDialog(CreateListComplete listView, ExerciseController controller, UserList current, boolean isEdit, Set<String> names) {
+    this(listView, controller, names);
     this.current = current;
     this.isEdit = isEdit;
 
@@ -162,16 +167,29 @@ public class CreateListDialog extends BasicDialog {
   /**
    * @param listView
    * @param controller
+   * @param names
    * @see ListView#doAdd
    */
-  public CreateListDialog(CreateListComplete listView, ExerciseController controller) {
+  public CreateListDialog(CreateListComplete listView, ExerciseController controller, Set<String> names) {
     this.listView = listView;
     this.controller = controller;
+    this.names = names;
   }
 
   public CreateListDialog setIsQuiz(boolean isQuiz) {
     this.isQuiz = isQuiz;
     return this;
+  }
+
+  public boolean isOKToCreate() {
+    boolean okToCreate = isOKToCreate(names);
+    if (okToCreate) {
+      doCreate();
+      return true;
+    } else {
+      logger.info("doAdd dialog not valid ");
+      return false;
+    }
   }
 
   /**
@@ -194,6 +212,15 @@ public class CreateListDialog extends BasicDialog {
       final TextBoxBase box = titleBox.box;
       if (isEditing()) box.setText(current.getName());
       box.getElement().setId("CreateListDialog_Title");
+      box.addKeyUpHandler(new KeyUpHandler() {
+        @Override
+        public void onKeyUp(KeyUpEvent event) {
+          int keyCode = event.getNativeEvent().getKeyCode();
+          if (keyCode == KeyCodes.KEY_ENTER) {
+            gotEnter();
+          }
+        }
+      });
       box.addBlurHandler(event -> controller.logEvent(box, TEXT_BOX, CREATE_NEW_LIST, "Title = " + box.getValue()));
     }
 
@@ -241,6 +268,12 @@ public class CreateListDialog extends BasicDialog {
     addWarningField(child);
 
     Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
+  }
+
+  private void gotEnter() {
+    if (isOKToCreate()) {
+      dialogHelper.close();
+    }
   }
 
   private void addQuizOptions(Panel child) {
@@ -479,7 +512,7 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private void checkQuizOptionsVisible() {
-   // createQuizOptions.setVisible(isQuiz && current == null);
+    // createQuizOptions.setVisible(isQuiz && current == null);
     if (editQuizOptions != null) {
       editQuizOptions.setVisible(isQuiz && isEditing());
     }
@@ -539,7 +572,7 @@ public class CreateListDialog extends BasicDialog {
   private Widget getQuizChoices() {
     FluidRow row = new FluidRow();
 
-    logger.info("getQuizChoices edit = " +isEdit);
+    logger.info("getQuizChoices edit = " + isEdit);
     CheckBox checkBox = new CheckBox(isEdit ? SHOW_AS_QUIZ : CREATE_A_NEW_QUIZ);
     checkBox.addValueChangeHandler(event -> {
       isQuiz = checkBox.getValue();
@@ -786,5 +819,11 @@ public class CreateListDialog extends BasicDialog {
         container.redraw();
       }
     });
+  }
+
+  private DialogHelper dialogHelper;
+
+  public void setDialogHelper(DialogHelper dialogHelper) {
+    this.dialogHelper = dialogHelper;
   }
 }

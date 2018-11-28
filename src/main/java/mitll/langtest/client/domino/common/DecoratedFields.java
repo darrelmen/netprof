@@ -236,9 +236,9 @@ public class DecoratedFields {
 //		return messageLocation;
 //	}
 
-	private List<Widget> getControls() {
-		return controls;
-	}
+//	private List<Widget> getControls() {
+//		return controls;
+//	}
 	
 	public Widget getPrimaryControl() {
 		return (controls.size() > 0) ? controls.get(0) : null;

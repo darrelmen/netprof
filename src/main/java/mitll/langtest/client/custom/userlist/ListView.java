@@ -303,6 +303,7 @@ public class ListView implements ContentView, CreateListComplete {
     DivWidget buttons = new DivWidget();
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
+    buttons.getElement().getStyle().setProperty("minWidth", "538px");
     buttons.add(getAddButton());
 
     if (canMakeQuiz()) {
@@ -668,7 +669,7 @@ public class ListView implements ContentView, CreateListComplete {
    */
   private DialogHelper doAdd() {
     DivWidget contents = new DivWidget();
-    CreateListDialog createListDialog = new CreateListDialog(this, controller);
+    CreateListDialog createListDialog = new CreateListDialog(this, controller, names);
     createListDialog.doCreate(contents);
 
 /*    {
@@ -701,7 +702,7 @@ public class ListView implements ContentView, CreateListComplete {
    */
   private DialogHelper doAddQuiz() {
     DivWidget contents = new DivWidget();
-    CreateListDialog createListDialog = new CreateListDialog(this, controller).setIsQuiz(true);
+    CreateListDialog createListDialog = new CreateListDialog(this, controller, names).setIsQuiz(true);
     createListDialog.doCreate(contents);
 
 /*    {
@@ -730,6 +731,7 @@ public class ListView implements ContentView, CreateListComplete {
   @NotNull
   private DialogHelper getNewListButton(DivWidget contents, CreateListDialog createListDialog, String title) {
     DialogHelper dialogHelper = new DialogHelper(true);
+    createListDialog.setDialogHelper(dialogHelper);
     //String createNewList = CREATE_NEW_LIST + (canMakeQuiz() ? " or Quiz" : "");
     Button closeButton = dialogHelper.show(
         title,
@@ -740,13 +742,7 @@ public class ListView implements ContentView, CreateListComplete {
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
-            boolean okToCreate = createListDialog.isOKToCreate(names);
-            if (okToCreate) {
-              createListDialog.doCreate();
-            } else {
-              logger.info("doAdd dialog not valid ");
-            }
-            return okToCreate;
+            return createListDialog.isOKToCreate();
           }
 
           @Override
@@ -770,7 +766,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void doEdit() {
     DivWidget contents = new DivWidget();
-    editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection(), true);
+    editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection(), true, names);
     editDialog.doCreate(contents);
 
     DialogHelper dialogHelper = new DialogHelper(true);
