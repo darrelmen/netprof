@@ -31,6 +31,7 @@
  */
 package mitll.langtest.client.domino.user;
 
+import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Form;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.constants.FormType;
@@ -149,7 +150,7 @@ public class ChangePasswordView extends Composite {
     p1Box.addKeyPressHandler(uiHandler);
     pass1DF = new DecoratedFields("Password", p1Box);
 
-    configurePassword(p1Box);
+    configurePassword(p1Box, pass1DF.getCtrlGroup(), Placement.BOTTOM);
 
     Scheduler.get().scheduleDeferred(() -> p1Box.setFocus(true));
 
@@ -157,9 +158,9 @@ public class ChangePasswordView extends Composite {
     form.add(pass1DF.getCtrlGroup());
     PasswordTextBox p2Box = new PasswordTextBox();
     p2Box.addKeyPressHandler(uiHandler);
-    configurePassword(p2Box);
 
     pass2DF = new DecoratedFields("Verify password", p2Box);
+    configurePassword(p2Box, pass2DF.getCtrlGroup(), Placement.TOP);
     form.add(pass2DF.getCtrlGroup());
 //    if (emailDF != null) {
 //      form.add(emailDF.getCtrlGroup());
@@ -167,9 +168,9 @@ public class ChangePasswordView extends Composite {
     initWidget(form);
   }
 
-  private void configurePassword(PasswordTextBox p1Box) {
+  private void configurePassword(PasswordTextBox p1Box, ControlGroup group, Placement bottom) {
     basicDialog.setMaxPasswordLength(p1Box);
-    basicDialog.addPasswordFeedback(pass1DF.getCtrlGroup(), p1Box, Placement.BOTTOM);
+    basicDialog.addPasswordFeedback(group, p1Box, bottom);
   }
 
   @Override

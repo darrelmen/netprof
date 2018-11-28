@@ -70,7 +70,7 @@ public class DecoratedFields {
 	private Label fieldLabel = null;
 	private Icon fieldIcon = null;
 	
-	private DecoratedFields() {}
+	//private DecoratedFields() {}
 
 	public DecoratedFields(String mainLabel, Widget control) {
 		this(mainLabel, control, null, null);
@@ -272,11 +272,11 @@ public class DecoratedFields {
 			HasValue<?> valw = (HasValue<?>)w;
 			Object valObj = valw.getValue();
 			
-			if (label != null) {
-				log.info("Validating " + label.getFor());
-			}
-			log.info("Validation value '" + valObj + "'");
-			
+//			if (label != null) {
+//				log.info("Validating " + label.getFor());
+//			}
+//			log.info("Validation value '" + valObj + "'");
+//
 			if (valObj == null) { // this implies a parse error.
 				msg = "Invalid value";
 			} else if (valObj != null) {

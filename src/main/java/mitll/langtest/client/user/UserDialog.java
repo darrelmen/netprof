@@ -53,6 +53,8 @@ import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.logging.Logger;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -63,7 +65,8 @@ import org.jetbrains.annotations.NotNull;
  * To change this template use File | Settings | File Templates.
  */
 public class UserDialog extends BasicDialog {
-  //private final Logger logger = Logger.getLogger("ResetPassword");
+  private final Logger logger = Logger.getLogger("UserDialog");
+
   static final int MIN_PASSWORD = 8; // Consistent with Domino minimums
   /**
    * <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/340'></a>
@@ -85,7 +88,7 @@ public class UserDialog extends BasicDialog {
   static final int MIN_AGE = 12;
   static final int MAX_AGE = 90;
   private static final String SIGN_UP_WIDTH = 266 + "px";
-  public static final String MAX_LENGTH = "Max length";
+  private static final String MAX_LENGTH = "At max length";
 
   final PropertyHandler props;
   private KeyPressHelper enterKeyButtonHelper;
@@ -338,9 +341,13 @@ public class UserDialog extends BasicDialog {
 
   public void addPasswordFeedback(ControlGroup group, com.github.gwtbootstrap.client.ui.base.TextBoxBase box, Placement placement) {
     box.addKeyUpHandler(event -> {
-      if (box.getText().length() == MAX_PASSWORD_LENGTH) {
-        markWarn(group, box, MAX_LENGTH, "At max password length - stop typing.", placement);
+      int length = box.getText().length();
+
+      if (length >= MAX_PASSWORD_LENGTH) {
+        markWarn(group, box, MAX_LENGTH, "Max password length is " + MAX_PASSWORD_LENGTH +
+            " - stop typing.", placement);
       } else {
+       // logger.info("length " + length + " Vs " + MAX_PASSWORD_LENGTH);
         clearError(group);
       }
     });
