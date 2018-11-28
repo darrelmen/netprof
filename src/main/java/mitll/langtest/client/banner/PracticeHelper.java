@@ -48,6 +48,7 @@ import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectType;
 
 /**
@@ -82,7 +83,8 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
    */
   @Override
   protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
-    if (controller.getProjectStartupInfo().getProjectType() == ProjectType.POLYGLOT) {
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    if (projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT) {
       polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, instance);
       statsFlashcardFactory = polyglotFlashcardFactory;
     } else {

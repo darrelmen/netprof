@@ -70,7 +70,7 @@ public class DecoratedFields {
 	private Label fieldLabel = null;
 	private Icon fieldIcon = null;
 	
-	private DecoratedFields() {}
+	//private DecoratedFields() {}
 
 	public DecoratedFields(String mainLabel, Widget control) {
 		this(mainLabel, control, null, null);
@@ -158,15 +158,15 @@ public class DecoratedFields {
 		}
 		ctrls.add(messageLocation);
 	}
-	
+/*
 	public void updateFieldLabelValue(String newVal) {
 		fieldLabel.setText(newVal);
 	}
-	
+
 	public void updateFieldIconType(IconType fieldIconType) {
 		fieldIcon.setIcon(fieldIconType);
 	}
-	
+	*/
 	private void makeAndSetID(Widget control) {
 		if (control instanceof HasId) {
 			((HasId) control).setId(makeAndSetIDOnLabel());
@@ -207,9 +207,9 @@ public class DecoratedFields {
 		setMessage(newMsg, ControlGroupType.NONE);
 	}
 	
-	public void setWarning(String newMsg) {
-		setMessage(newMsg, ControlGroupType.WARNING);
-	}
+//	public void setWarning(String newMsg) {
+//		setMessage(newMsg, ControlGroupType.WARNING);
+//	}
 
 	private void setMessage(String newMsg, ControlGroupType mType) {
 		ctrlGroup.setType(mType);
@@ -224,17 +224,17 @@ public class DecoratedFields {
 		return ctrlGroup;
 	}
 	
-	public boolean hasLabel() {
-		return label != null;
-	}
+//	public boolean hasLabel() {
+//		return label != null;
+//	}
 
-	private ControlLabel getLabel() {
-		return label;
-	}
+//	private ControlLabel getLabel() {
+//		return label;
+//	}
 
-	public HelpBlock getMessageLocation() {
-		return messageLocation;
-	}
+//	public HelpBlock getMessageLocation() {
+//		return messageLocation;
+//	}
 
 	private List<Widget> getControls() {
 		return controls;
@@ -244,18 +244,18 @@ public class DecoratedFields {
 		return (controls.size() > 0) ? controls.get(0) : null;
 	}
 	
-	public boolean isPrimaryFocusable() {
-		Widget w = getPrimaryControl();
-		return w != null && w instanceof Focusable;
-	}
+//	public boolean isPrimaryFocusable() {
+//		Widget w = getPrimaryControl();
+//		return w != null && w instanceof Focusable;
+//	}
 	
-	public void setPrimaryFocus(boolean val) {
-		Widget w = getPrimaryControl();
-		if (w != null && w instanceof Focusable) {
-			((Focusable)w).setFocus(val);
-		}
-	}
-	
+//	public void setPrimaryFocus(boolean val) {
+//		Widget w = getPrimaryControl();
+//		if (w != null && w instanceof Focusable) {
+//			((Focusable)w).setFocus(val);
+//		}
+//	}
+//
 	public boolean performBasicValidate() {
 		return performBasicValidate(0);
 	}
@@ -272,11 +272,11 @@ public class DecoratedFields {
 			HasValue<?> valw = (HasValue<?>)w;
 			Object valObj = valw.getValue();
 			
-			if (label != null) {
-				log.info("Validating " + label.getFor());
-			}
-			log.info("Validation value '" + valObj + "'");
-			
+//			if (label != null) {
+//				log.info("Validating " + label.getFor());
+//			}
+//			log.info("Validation value '" + valObj + "'");
+//
 			if (valObj == null) { // this implies a parse error.
 				msg = "Invalid value";
 			} else if (valObj != null) {
@@ -323,24 +323,24 @@ public class DecoratedFields {
 		return null;
 	}
 	
-	public boolean isDirty(Object original) {
-		Object val = getValue();
-		if (val == null) {
-			log.warning("Value should not be null for " + getLabel());
-			return true;
-		}
-		if (val instanceof String) {
-			val = ((String)val).trim();
-		}
-		
-		if (original instanceof String) {
-			original = ((String)original).trim();
-		}
-		boolean isDirty = (!(val.equals(original)));
-//		log.fine("               Dirty check on " + mainLabelText + " shows " + 
-//				isDirty + " for " + val + " and " + original);
-		return isDirty;
-	}
+//	public boolean isDirty(Object original) {
+//		Object val = getValue();
+//		if (val == null) {
+//			log.warning("Value should not be null for " + getLabel());
+//			return true;
+//		}
+//		if (val instanceof String) {
+//			val = ((String)val).trim();
+//		}
+//
+//		if (original instanceof String) {
+//			original = ((String)original).trim();
+//		}
+//		boolean isDirty = (!(val.equals(original)));
+////		log.fine("               Dirty check on " + mainLabelText + " shows " +
+////				isDirty + " for " + val + " and " + original);
+//		return isDirty;
+//	}
 	
 	
 	/**
@@ -354,7 +354,7 @@ public class DecoratedFields {
 
 	 * @return Return the first value selected in the group. 
 	 */
-	public <T extends Enum<T>> T getFirstSelectedValue(Class<T> eType) {
+/*	public <T extends Enum<T>> T getFirstSelectedValue(Class<T> eType) {
 		List<Widget> ctrls = getControls();
 		for (int i = 0; i < ctrls.size(); i++) {
 			Widget w = ctrls.get(i);
@@ -366,9 +366,9 @@ public class DecoratedFields {
 			}
 		}
 		return null;
-	}
+	}*/
 	
-	public <T extends Enum<T>> Set<T> getAllSelectedValues(Class<T> eType) {	
+/*	public <T extends Enum<T>> Set<T> getAllSelectedValues(Class<T> eType) {
 		List<Widget> ctrls = getControls();
 		Set<T> selected = new LinkedHashSet<>();
 		for (int i = 0; i < ctrls.size(); i++) {
@@ -382,5 +382,5 @@ public class DecoratedFields {
 			}
 		}
 		return selected;
-	}
+	}*/
 }

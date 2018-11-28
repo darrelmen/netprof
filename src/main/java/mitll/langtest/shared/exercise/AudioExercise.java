@@ -42,7 +42,6 @@ import mitll.langtest.shared.user.SimpleUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -229,13 +228,11 @@ public class AudioExercise extends ExerciseShell {
   }
 
   public synchronized AudioAttribute getFirst() {
-    Collection<AudioAttribute> audioAttributesLocal = getAudioAttributesLocal();
-    return audioAttributesLocal.isEmpty() ? null : audioAttributesLocal.iterator().next();
+    return audioAttributes.isEmpty() ? null : audioAttributes.values().iterator().next();
   }
-
   /*
   public synchronized Collection<Integer> getAudioIDs() {
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributesLocal();
     return audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
   }
 */
@@ -298,7 +295,7 @@ public class AudioExercise extends ExerciseShell {
    */
   @NotNull
   private Collection<AudioAttribute> getAudioPrefGender(boolean isMale) {
-    Collection<AudioAttribute> audioAttributes = getAudioAttributes();
+    Collection<AudioAttribute> audioAttributes = getAudioAttributesLocal();
 
     // logger.info("getAudioPrefGender " + isMale + " " + audioAttributes.size());
     Collection<AudioAttribute> collect = audioAttributes
@@ -741,8 +738,8 @@ public class AudioExercise extends ExerciseShell {
   public String toString() {
     return super.toString() +
         " project " + projectid +
-        " audio attr (" + getAudioAttributes().size() +
-        ") :" + getAudioAttributes() + " and " +
+        " audio attr (" + getAudioAttributesLocal().size() +
+        ") :" + getAudioAttributesLocal() + " and " +
         fieldToAnnotation + " annotations";
   }
 }

@@ -126,7 +126,7 @@
             <logger name="slick.compiler" level="INFO">
                 <appender-ref ref="LogFile"/>
             </logger>-->
-        
+
         <!--      <logger name="slick.compiler.CodeGen" level="INFO">
                   <appender-ref ref="LogFile"/>
               </logger>
