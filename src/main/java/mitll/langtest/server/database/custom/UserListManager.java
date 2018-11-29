@@ -722,6 +722,7 @@ public class UserListManager implements IUserListManager {
       contextID = makeContextExercise(userExercise, typeOrder);
 
       ClientExercise next = userExercise.getDirectlyRelated().iterator().next();
+      project.getExerciseDAO().addUserExercise(next.asCommon());
 
       String foreignLanguage = next.getForeignLanguage();
 

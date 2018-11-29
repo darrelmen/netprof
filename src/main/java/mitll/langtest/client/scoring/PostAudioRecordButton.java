@@ -32,8 +32,10 @@
 
 package mitll.langtest.client.scoring;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
@@ -128,7 +130,7 @@ public abstract class PostAudioRecordButton extends RecordButton
   /**
    * When we start recording, we ask to be called with a callback for updates...
    * This callback may not necessarily return a response that's for this exercise!
-   *
+   * <p>
    * Send a message to any play buttons so they can stop playing any audio.
    *
    * @see mitll.langtest.client.sound.PlayAudioPanel#gotPlayAudioEvent
@@ -143,7 +145,7 @@ public abstract class PostAudioRecordButton extends RecordButton
         getDialogSessionID(),
         getDevice()  // device = session id in quiz
     );
-    if (DEBUG || true) logger.info("startRecording : "+ clientAudioContext);
+    if (DEBUG || true) logger.info("startRecording : " + clientAudioContext);
 
     controller.startStream(clientAudioContext, this::gotPacketResponse);
   }
@@ -164,7 +166,7 @@ public abstract class PostAudioRecordButton extends RecordButton
     controller.stopRecording(USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {
-     // logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
+      // logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
       return true;
     } else {
       hideWaveform();
@@ -254,10 +256,11 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   void gotShortDurationRecording() {
+    showPopup("Recording too short");
   }
 
   protected String getDevice() {
-    logger.info("getDevice default " + getClass());
+    //logger.info("getDevice default " + getClass());
 
     return controller.getBrowserInfo();
   }
@@ -352,7 +355,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    */
   protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
     controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + validity);
-    //logger.info("useInvalidResult platform is " + getPlatform());
+    logger.info("useInvalidResult platform is " + getPlatform() + " validity " + validity);
     if (!checkAndShowTooLoud(validity)) {
       showPopup(validity.getPrompt());
     }
@@ -402,9 +405,7 @@ public abstract class PostAudioRecordButton extends RecordButton
 
   abstract protected int getDialogSessionID();
 
-  Widget getPopupTargetWidget() {
-    return this;
-  }
+
 
   private void logRoundtripTime(long durationInMillis, long roundtrip) {
     //  long durationInMillis = result.getDurationInMillis();
@@ -433,7 +434,20 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @param toShow
    */
   private void showPopup(String toShow) {
-    //logger.info("showPopup " + toShow + " on " + getExerciseID());
-    new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 3000);
+    Scheduler.get().scheduleDeferred((Command) () -> showPopupLater(toShow));
+  }
+
+  private void showPopupLater(String toShow) {
+    logger.info("showPopup " + toShow + " on " + getExerciseID());
+    new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 5000);
+  }
+
+  /**
+   *
+   * @return
+   */
+  Widget getPopupTargetWidget() {
+    logger.info("getPopupTargetWidget target is " + this.getElement().getId());
+    return this;
   }
 }

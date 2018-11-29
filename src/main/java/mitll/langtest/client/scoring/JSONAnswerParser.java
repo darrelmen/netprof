@@ -3,6 +3,7 @@ package mitll.langtest.client.scoring;
 import com.google.gwt.json.client.*;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -40,7 +41,7 @@ class JSONAnswerParser {
     Validity validity = getValidity(jsonObject);
 
     JSONValue jsonValue2 = jsonObject.get(PATH);
-    if (jsonValue2 == null) logger.warning("no path on json?");
+    if (jsonValue2 == null) logger.info("no path on json? validity = " + validity);
 
     AudioAnswer converted = new AudioAnswer(
         getField(jsonObject, PATH),
@@ -54,29 +55,17 @@ class JSONAnswerParser {
 
     converted.setDynamicRange(getFloatField(jsonObject, "dynamicRange"));
     //useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
+    converted.setTimestamp(getLongField(jsonObject, "timestamp"));
 
     if (validity == Validity.OK /*|| validity == Validity.CUT_OFF*/) {
       // logger.info("Got validity " + validity);
-      converted.setTimestamp(getLongField(jsonObject, "timestamp"));
-
       float score = getFloatField(jsonObject, "score");
       converted.setScore(score);
       converted.setCorrect(getBoolean(jsonObject, "isCorrect"));
 
-
-      JSONValue phone_transcript = jsonObject.get(PHONE_TRANSCRIPT);
-
-      List<TranscriptSegment> psegments =
-          (phone_transcript == null) ? Collections.emptyList() : getSegments(phone_transcript.isArray());
-
-      JSONValue word_transcript = jsonObject.get(WORD_TRANSCRIPT);
-
-      List<TranscriptSegment> wsegments =
-          word_transcript == null ? Collections.emptyList() : getSegments(word_transcript.isArray());
-
       Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<>();
-      sTypeToEndTimes.put(NetPronImageType.PHONE_TRANSCRIPT, psegments);
-      sTypeToEndTimes.put(NetPronImageType.WORD_TRANSCRIPT, wsegments);
+      sTypeToEndTimes.put(NetPronImageType.PHONE_TRANSCRIPT, getTranscriptSegments(jsonObject, PHONE_TRANSCRIPT));
+      sTypeToEndTimes.put(NetPronImageType.WORD_TRANSCRIPT, getTranscriptSegments(jsonObject, WORD_TRANSCRIPT));
 
       float wavFileLengthSeconds = ((float) converted.getDurationInMillis()) / 1000F;
 
@@ -91,11 +80,18 @@ class JSONAnswerParser {
           0, isFullMatch);
 
       converted.setPretestScore(pretestScore);
+
+      converted.setAudioAttribute(new AudioAttribute().setAudioRef(converted.getPath()));
     } else {
       logger.info("getAudioAnswer invalid : " + jsonObject);
     }
 
     return converted;
+  }
+
+  private List<TranscriptSegment> getTranscriptSegments(JSONObject jsonObject, String phoneTranscript) {
+    JSONValue phone_transcript = jsonObject.get(phoneTranscript);
+    return (phone_transcript == null) ? Collections.emptyList() : getSegments(phone_transcript.isArray());
   }
 
   /**

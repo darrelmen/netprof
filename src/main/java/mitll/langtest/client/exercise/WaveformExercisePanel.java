@@ -33,6 +33,7 @@
 package mitll.langtest.client.exercise;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
@@ -97,7 +98,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
 
   /**
    * Make sure we disable the other companion panel.
-   *
+   * <p>
    * Only change enabled state if it's not recording already.
    *
    * @param v
@@ -131,7 +132,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
       flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
     boolean normalRecord = isNormalRecord();
-  //  logger.info("addInstructions normal  "+normalRecord);
+    //  logger.info("addInstructions normal  "+normalRecord);
     add(new Heading(4, normalRecord ? RECORD_PROMPT2 : RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
 
@@ -196,7 +197,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    */
   protected Widget getAnswerWidget(T exercise, ExerciseController controller, final int index) {
     audioPanels = new ArrayList<>();
-    Panel vp = new VerticalPanel();
+    Panel vp = new DivWidget();
 
     // add normal speed recording widget
     boolean normalRecord = isNormalRecord();
@@ -209,7 +210,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
 
     if (!exercise.isContext()) {
       AudioType slow = normalRecord ? AudioType.SLOW : AudioType.CONTEXT_SLOW;
-      VerticalPanel widgets = addRecordAudioPanelNoCaption(exercise, controller, index + 1, vp, slow);
+      UIObject widgets = addRecordAudioPanelNoCaption(exercise, controller, index + 1, vp, slow);
       widgets.addStyleName("topFiveMargin");
     }
 
@@ -229,10 +230,9 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    * @return
    * @see ExercisePanel#getAnswerWidget(CommonShell, ExerciseController, int)
    */
-  private VerticalPanel addRecordAudioPanelNoCaption(T exercise,
-                                                     ExerciseController controller, int index, Panel vp, AudioType audioType) {
-    RecordAudioPanel fast =
-        new RecordAudioPanel<>(exercise, controller, this, index, false, audioType);
+  private DivWidget addRecordAudioPanelNoCaption(T exercise,
+                                                 ExerciseController controller, int index, Panel vp, AudioType audioType) {
+    RecordAudioPanel fast = new RecordAudioPanel<>(exercise, controller, this, index, false, audioType);
     audioPanels.add(fast);
     vp.add(fast);
 

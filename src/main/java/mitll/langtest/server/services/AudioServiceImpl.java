@@ -1061,10 +1061,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     if (commonExercise == null && isExistingExercise) {
-      logger.warn("getAudioAnswer " + getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
+      logger.warn("getAudioAnswer for " + project.getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
     AudioType audioType = audioContext.getAudioType();
-    logger.info("audio type " + audioType);
+    logger.info("audio type " + audioType + " ex " +exerciseID + " "+ commonExercise);
     String audioTranscript = getAudioTranscript(audioType, commonExercise);
     AnswerInfo.RecordingInfo recordingInfo =
         new AnswerInfo.RecordingInfo("", "", deviceType, device, audioTranscript, "");
@@ -1196,7 +1196,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     File absoluteFile = pathHelper.getAbsoluteAudioFile(audioAnswer.getPath());
     boolean isContext = audioType == AudioType.CONTEXT_REGULAR || audioType == AudioType.CONTEXT_SLOW;
 
-    logger.info("addToAudioTable isContext " + isContext + " audio type " + audioType);
+    logger.info("addToAudioTable isContext " + isContext + " audio type " + audioType + " exercise1 " + exercise1 +
+        " is comtext " + exercise1.isContext() + "is pre " +exercise1.isPredefined()  );
 
     String context = noExistingExercise ? "" : isContext ? getEnglish(exercise1) : exercise1.getEnglish();
 

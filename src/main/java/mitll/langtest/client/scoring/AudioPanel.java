@@ -39,7 +39,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.recorder.RecordButton;
@@ -70,13 +69,13 @@ import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
  * Time: 11:51 AM
  * To change this template use File | Settings | File Templates.
  */
-public class AudioPanel<T extends HasID> extends VerticalPanel implements RequiresResize {
+public class AudioPanel<T extends HasID> extends DivWidget implements RequiresResize {
   private final Logger logger = Logger.getLogger("AudioPanel");
 
   private static final String RECORD = "Record";
   private static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
 
-  protected static final int LEFT_COLUMN_WIDTH = SimplePagingContainer.MAX_WIDTH;
+   static final int LEFT_COLUMN_WIDTH = SimplePagingContainer.MAX_WIDTH;
 
   static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 60F;//70F;//80f;//96;
@@ -88,7 +87,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
-  protected static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
+   static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
 
   protected String audioPath;
   private final Map<String, Integer> reqs = new HashMap<>();
@@ -173,6 +172,7 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     this.rightMargin = rightMargin;
     this.exerciseID = exerciseID;
     this.exercise = exercise;
+    getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 
     int id = getExerciseID();
     getElement().setId("AudioPanel_exercise_" + id);
@@ -213,6 +213,8 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
     DivWidget divWithRelativePosition = new DivWidget();  // need this for audio position div to work properly
     divWithRelativePosition.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+    divWithRelativePosition.addStyleName("floatLeft");
+
     Panel imageContainer = new VerticalPanel();
     divWithRelativePosition.add(imageContainer);
     imageContainer.getElement().setId("AudioPanel_imageContainer");
@@ -222,10 +224,10 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
     imageContainer.setHeight(totalHeight + "px");
     //  imageContainer.setWidth(getImageWidth()+"px");
 
-    HorizontalPanel hp = new HorizontalPanel();
-    hp.setVerticalAlignment(ALIGN_MIDDLE);
+    Panel hp = new DivWidget();
+   // hp.setVerticalAlignment(ALIGN_MIDDLE);
     hp.getElement().setId("AudioPanel_hp");
-
+hp.addStyleName("floatLeft");
     // add widgets to left of play button
     Widget toTheRightWidget = getAfterPlayWidget();
     audioPositionPopup = new AudioPositionPopup(imageContainer);
@@ -234,7 +236,8 @@ public class AudioPanel<T extends HasID> extends VerticalPanel implements Requir
 
     playAudio = getPlayButtons(toTheRightWidget, playButtonSuffix, recordButtonTitle, exercise);
     hp.add(playAudio);
-    hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
+    playAudio.addStyleName("floatLeftAndClear");
+    //hp.setCellHorizontalAlignment(playAudio, HorizontalPanel.ALIGN_LEFT);
 //    } else {
 //      hp.add(toTheRightWidget);
 //      audioPositionPopup.setVisible(false);

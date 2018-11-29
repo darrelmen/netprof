@@ -137,9 +137,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.transcript = transcript;
     this.dnr = dnr;
     this.resultid = resultid;
+    this.audioType = type;
 
     this.setUser(user);
-    this.audioType = type;
     this.actualPath = actualPath;
 
     this.realGender = realGender;
@@ -157,8 +157,9 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return audioRef;
   }
 
-  public void setAudioRef(String audioRef) {
+  public AudioAttribute setAudioRef(String audioRef) {
     this.audioRef = audioRef;
+    return this;
   }
 
   public boolean isValid() {
@@ -177,12 +178,12 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.exid = exid;
   }
 
-  public AudioAttribute markRegular() {
+  private AudioAttribute markRegular() {
     addAttribute(SPEED, REGULAR);
     return this;
   }
 
-  public AudioAttribute markSlow() {
+  private AudioAttribute markSlow() {
     addAttribute(SPEED, SLOW);
     return this;
   }
@@ -203,12 +204,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return user != null && user.isMale();
   }
 
-/*
-  public boolean isFemale() {
-    return !isMale();
-  }
-*/
-
   public String getSpeed() {
     String s = getAttributes().get(SPEED);
     return s == null ? isRegularSpeed() ? REGULAR : SLOW : s;
@@ -228,10 +223,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   private void addAttribute(String name, String value) {
-    if (attributes.containsKey(name)) {
-      String s = attributes.get(name);
-      if (!s.equals(REGULAR)) System.out.println("replacing value at " + name + " was " + s + " now " + value);
-    }
+//    if (attributes.containsKey(name)) {
+//      String s = attributes.get(name);
+//      if (!s.equals(REGULAR)) System.out.println("replacing value at " + name + " was " + s + " now " + value);
+//    }
     attributes.put(name, value);
   }
 
@@ -276,12 +271,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public MiniUser getUser() {
     return user;
   }
-
-/*
-  public boolean isUnknownDefault() {
-    return getUser() == null || getUser().isUnknownDefault();
-  }
-*/
 
   /**
    * @param user

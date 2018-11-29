@@ -611,6 +611,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     if (isAudioPerProject) {
       audioref = "project_" + s.projid() + File.separator + audioref;
     }
+    AudioType type = AudioType.valueOf(audiotype.toUpperCase());
+
+//    logger.info("")
     return new AudioAttribute(
         s.id(),
         s.userid(),
@@ -618,7 +621,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         audioref,
         s.modified().getTime(),
         s.duration(),
-        AudioType.valueOf(audiotype.toUpperCase()),
+        type,
         miniUser,
         s.transcript(),
         s.actualpath(),

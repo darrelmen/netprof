@@ -225,6 +225,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       List<CommonExercise> userCreatedExercises = getUserCreatedExercises(typeOrder, allRelated);
       userCreatedExercises.forEach(c -> idToUserExercise.put(c.getID(), c));
+      userCreatedExercises.forEach(c -> c.getDirectlyRelated().forEach(d -> idToUserExercise.put(d.getID(), d.asCommon())));
       logger.info("added " + userCreatedExercises.size() + " vs " + idToUserExercise.size());
       return allNonContextExercises;
     } catch (Exception e) {
@@ -252,11 +253,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         false);
     logger.info("getUserCreatedExercises got " + contextByProject.size() + " context");
 
-   // contextByProject.forEach(c->logger.info(c.getID() + " " + c.getEnglish() + " " + c.getForeignLanguage()));
+    // contextByProject.forEach(c->logger.info(c.getID() + " " + c.getEnglish() + " " + c.getForeignLanguage()));
 
-    Map<Integer, CommonExercise> idToContext =
-        getIDToExercise(contextByProject);
-     logger.info("readExercises project " + project + " idToContext " + idToContext.size());
+    Map<Integer, CommonExercise> idToContext = getIDToExercise(contextByProject);
+    logger.info("readExercises project " + project + " idToContext " + idToContext.size());
 
 //    int c = 0;
 //    String prefix = "Project " + project.name();
@@ -340,7 +340,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   /**
    * First basic types, then attribute types...
    * Might want to allow this to be configurable.
-   *
+   * <p>
    * Added special code for putting semester at the top.
    *
    * @return

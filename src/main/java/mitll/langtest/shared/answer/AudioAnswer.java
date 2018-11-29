@@ -73,11 +73,11 @@ public class AudioAnswer extends SimpleAudioAnswer {
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
   public AudioAnswer(String path, Validity validity, int reqid, long duration, int exid) {
-    this.exid = exid;
     this.path = path;
     this.validity = validity;
     this.reqid = reqid;
     this.durationInMillis = duration;
+    this.exid = exid;
   }
 
   /**

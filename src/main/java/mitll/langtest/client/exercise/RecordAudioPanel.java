@@ -35,11 +35,11 @@ package mitll.langtest.client.exercise;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
@@ -55,7 +55,6 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.HasID;
 
-import java.util.Map;
 import java.util.logging.Logger;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
@@ -74,7 +73,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   /**
    * @see #getAfterPlayWidget
    */
-  private static final String DYNAMIC_RANGE = "Dynamic Range";
+  private static final String DYNAMIC_RANGE = "Audio Quality";//"Dynamic Range";
 
   private static final int MIN_VALID_DYNAMIC_RANGE = 32;
   private static final int MIN_GOOD_DYNAMIC_RANGE = 40;
@@ -86,7 +85,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   protected final Panel exercisePanel;
 
   private final ProgressBar progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
-  private final HorizontalPanel afterPlayWidget = new HorizontalPanel();
+  private final Panel afterPlayWidget = new DivWidget();
 
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   protected T exercise;
@@ -151,6 +150,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
 
     afterPlayWidget.add(progressBar);
     afterPlayWidget.setVisible(false);
+    afterPlayWidget.addStyleName("inlineFlex");
 
     progressBar.setWidth("300px");
     progressBar.setHeight("25px");

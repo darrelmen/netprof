@@ -323,7 +323,6 @@ public class User extends MiniUser implements ReportUser {
     return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? getName() : getUserID();
   }
 
-
   public Collection<Permission> getPermissions() {
     return permissions;
   }

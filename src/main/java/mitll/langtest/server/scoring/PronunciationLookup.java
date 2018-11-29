@@ -58,7 +58,6 @@ public class PronunciationLookup implements IPronunciationLookup {
     korean = language == Language.KOREAN;
     russian = language == Language.RUSSIAN;
     french = language == Language.FRENCH;
-    //boolean german = language == Language.GERMAN;
     removeAllPunct = language != Language.FRENCH;
     this.isAsianLanguage = isAsianLanguage(language);
 
@@ -330,14 +329,14 @@ public class PronunciationLookup implements IPronunciationLookup {
     }
   }
 
-  int n = 0;
+  private int n = 0;
 
   private void addUnkPron(String transcript, StringBuilder dict, List<WordAndProns> candidates, String word) {
     String s = emptyLTS ? " with empty LTS" : "";
     n++;
     if (n < 100 || n % 100 == 0) {
       logger.warn("getPronunciationsFromDictOrLTS (" + n +
-          ") using unk phone for '" + word + "' in " + transcript + s);
+          ") using unk phone for '" + word + "' in '" + transcript +"'"+ s);
     }
     dict.append(getUnkPron(word));
     candidates.add(new WordAndProns(word, UNK));

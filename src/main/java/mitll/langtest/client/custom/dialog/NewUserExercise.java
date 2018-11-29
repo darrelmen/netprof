@@ -53,6 +53,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -127,7 +128,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   String originalContextTrans = "";
 
   /**
-   *
+   * @see #makeRegularAudioPanel
    */
   CreateFirstRecordAudioPanel rap, rapSlow, rapContext;
 
@@ -286,18 +287,16 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     List<RecordAudioPanel> raps = new ArrayList<>();
 
-    raps.clear();
     raps.add(rapSlow);
     raps.add(rapContext);
     rap.setOtherRAPs(raps);
 
-
-    raps.clear();
+    raps = new ArrayList<>();
     raps.add(rap);
     raps.add(rapContext);
     rapSlow.setOtherRAPs(raps);
 
-    raps.clear();
+    raps = new ArrayList<>();
     raps.add(rap);
     raps.add(rapSlow);
     rapContext.setOtherRAPs(raps);
@@ -333,8 +332,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     return addControlGroupEntrySimple(row, "", rap);
   }
 
+  /**
+   * TODO: do this without the cast!
+   * @param row
+   * @return
+   */
   ControlGroup makeContextAudioPanel(Panel row) {
-    U next = (U)newUserExercise.getDirectlyRelated().iterator().next();
+    U next = (U) newUserExercise.getDirectlyRelated().iterator().next();
     rapContext = makeRecordAudioPanel(next, row, AudioType.CONTEXT_REGULAR);
     return addControlGroupEntrySimple(row, "", rapContext);
   }
@@ -542,7 +546,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     if (anyFieldsDirty() || onClick) {
       if (DEBUG) {
         logger.info("postChangeIfDirty:  change" +
-
             "\n\tref        " + refAudioChanged() +
             "\n\tslow       " + slowRefAudioChanged()
         );
@@ -581,7 +584,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     return !english.box.getText().equals(originalEnglish);
   }
 
-  protected boolean foreignChanged() {
+  private boolean foreignChanged() {
     return !foreignLang.box.getText().equals(originalForeign);
   }
 
@@ -590,7 +593,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @seex #checkForForeignChange
    * @see #postChangeIfDirty(boolean)
    */
-  protected boolean translitChanged() {
+  private boolean translitChanged() {
     String transliteration = newUserExercise.getTransliteration();
     String originalTransliteration = this.originalTransliteration;
     //  logger.info("translitChanged : translit '" + transliteration + "' vs original '" + originalTransliteration + "' changed  = " + changed);
@@ -630,7 +633,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @param toAddTo
    * @param onClick
    * @seex #makeCreateButton
-   * @see #audioPosted()
+   * @see #audioPosted
    */
   void validateThenPost(RecordAudioPanel rap,
                         ControlGroup normalSpeedRecording,
@@ -794,18 +797,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   /**
-   * @see #isValidForeignPhrase(ListInterface, Panel, boolean)
-   */
-/*  protected void checkIfNeedsRefAudio() {
-    if (newUserExercise == null) {
-      //logger.info("checkIfNeedsRefAudio : new user ex " + newUserExercise);
-      Button recordButton = rap.getButton();
-      markError(normalSpeedRecording, recordButton, recordButton, "", RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE, Placement.RIGHT);
-      recordButton.addMouseOverHandler(event -> normalSpeedRecording.setType(ControlGroupType.NONE));
-    }
-  }*/
-
-  /**
    * @param row
    * @param subtext
    * @param annoBox
@@ -890,7 +881,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 //      String speed = (audioType ? "Regular" : "Slow") + "_speed";
 //      getPostAudioButton().getElement().setId(WIDGET_ID + speed);
 //      getPlayButton().getElement().setId(WIDGET_ID + "Play_" + speed);
-      boolean teacher = controller.getUserManager().isTeacher();
+      User current = controller.getUserManager().getCurrent();
+      logger.info("kind = " +current.getUserKind());
+      boolean teacher = !current.isStudent() || !current.getPermissions().isEmpty();
       setEnabled(teacher);
       controller.register(getPlayButton(), newExercise.getID());
     }
@@ -944,7 +937,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             public void useResult(AudioAnswer result) {
               super.useResult(result);
 
-              // logger.info("useResult got back " + result.getAudioAttribute() + " for " + newUserExercise);
+               logger.info("useResult got back " + result.getAudioAttribute() + " for " + newUserExercise);
               useAudioAttribute(result);
               audioPosted();
             }
@@ -952,9 +945,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             private void useAudioAttribute(AudioAnswer result) {
               AudioAttribute audioAttribute = result.getAudioAttribute();
 
-
               if (audioAttribute != null) {
-
                 logger.info("useAudioAttribute audio type " + audioAttribute.getAudioType());
 
 

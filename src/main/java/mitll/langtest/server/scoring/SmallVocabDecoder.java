@@ -385,6 +385,8 @@ public class SmallVocabDecoder {
   /**
    * @param phrase
    * @return
+   * @see CheckLTS#checkLTS
+   * @see CheckLTS#checkLTS2
    * @see #getMandarinTokens(String)
    */
   String segmentation(String phrase) {

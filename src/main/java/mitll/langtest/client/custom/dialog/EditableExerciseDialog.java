@@ -115,6 +115,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    */
   @Override
   protected ControlGroup makeRegularAudioPanel(Panel row) {
+    logger.info("makeRegularAudioPanel new user is " + newUserExercise);
     rap = makeRecordAudioPanel(newUserExercise, row, AudioType.REGULAR);
     fastAnno.addStyleName("topFiveMargin");
     return addControlGroupEntrySimple(row, "", rap, fastAnno);
@@ -130,17 +131,6 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     return addControlGroupEntrySimple(row, "", rapSlow, slowAnno);
   }
 
-  /**
-   * @paramx toAddTo
-   * @paramx onClick
-   * @see NewUserExercise#validateThenPost(RecordAudioPanel, ControlGroup, Panel, boolean)
-   */
-//  @Override
-//  void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {
-//    //  if (DEBUG) logger.info("EditableExerciseDialog.afterValidForeignPhrase : exercise id " + newUserExercise.getID());
-//    // checkForForeignChange();
-//    postChangeIfDirty(onClick);
-//  }
   @Override
   protected void formInvalid() {
     postChangeIfDirty(false);
