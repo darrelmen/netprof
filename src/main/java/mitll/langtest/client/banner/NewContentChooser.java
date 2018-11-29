@@ -117,7 +117,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     if (DEBUG) logger.info("getCurrentView currentView " + currentView);
     VIEWS currentStoredView;
     try {
-      currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
+      currentStoredView = currentView == null ? VIEWS.NONE : // Not sure how this can ever happen but saw exceptions.
+          (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
     } catch (IllegalArgumentException e) {
       currentStoredView = VIEWS.NONE;
     }
@@ -337,12 +338,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       String typeToSelection1 = keepLists ? getTypeToSelection() : getTypeToSelectionNoList();
       String typeToSelection = keepTypeToSelection ? typeToSelection1 : "";
 
-  //    logger.info("typeToSelection " + typeToSelection);
+      //    logger.info("typeToSelection " + typeToSelection);
 
       pushItem(getInstanceParam(views) +
           (typeToSelection.isEmpty() ? "" : SelectionState.SECTION_SEPARATOR + typeToSelection));
     } else {
-    //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
+      //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
   }
 
@@ -663,7 +664,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushItem(String url) {
-   // logger.info("pushItem - " + url);
+    // logger.info("pushItem - " + url);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //    logger.info("logException stack " + exceptionAsString);
     History.newItem(url);
