@@ -126,7 +126,7 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
 
     isJapanese = language == Language.JAPANESE;
     isUrdu = language == Language.URDU;
-    this.hasClickable = language == Language.CHINESE || language == Language.KOREAN || isJapanese;
+    this.hasClickable = language == Language.MANDARIN || language == Language.KOREAN || isJapanese;
     setWidth("100%");
 
     this.navigationHelper = getNavigationHelper(controller, listContainer, options.isAddKeyHandler(), options.isIncludeListButtons());

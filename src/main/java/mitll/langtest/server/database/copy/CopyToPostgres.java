@@ -274,7 +274,7 @@ public class CopyToPostgres<T extends CommonShell> {
   @NotNull
   private Language getLanguageFor(String name) {
     try {
-      if (name.equalsIgnoreCase(MANDARIN)) name = Language.CHINESE.name();
+      if (name.equalsIgnoreCase(MANDARIN)) name = Language.MANDARIN.name();
       return Language.valueOf(name);
     } catch (IllegalArgumentException e) {
       logger.error("no known language  " + name);
@@ -390,7 +390,7 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.error("nope - not same language " + fProject.getLanguage() + " vs " + tProject.getLanguage());
       return;
     }
-    boolean isChinese = fProject.getLanguageEnum() == Language.CHINESE && tProject.getLanguageEnum() == Language.CHINESE;
+    boolean isChinese = fProject.getLanguageEnum() == Language.MANDARIN && tProject.getLanguageEnum() == Language.MANDARIN;
     database.updateProject(from, to, isChinese);
     database.close();
   }

@@ -150,7 +150,7 @@ public class DominoImport implements IDominoImport {
     int id = project.getId();
     String languageName = project.getContent().getLanguageName();
 
-    if (languageName.equalsIgnoreCase("Mandarin")) languageName = Language.CHINESE.name();
+    if (languageName.equalsIgnoreCase("Mandarin")) languageName = Language.MANDARIN.name();
    // Language language = Language.valueOf(languageName);
     ImportProjectInfo importProjectInfo = new ImportProjectInfo(
         id,

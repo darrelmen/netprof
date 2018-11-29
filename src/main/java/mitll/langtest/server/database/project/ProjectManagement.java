@@ -61,7 +61,6 @@ import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
-import mitll.langtest.server.services.AudioServiceImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.*;
@@ -946,7 +945,7 @@ public class ProjectManagement implements IProjectManagement {
 
     try {
       String name = language.toUpperCase();
-      if (name.equalsIgnoreCase(MANDARIN)) name = Language.CHINESE.name();
+      if (name.equalsIgnoreCase(MANDARIN)) name = Language.MANDARIN.name();
       language1 = Language.valueOf(name);
     } catch (IllegalArgumentException e) {
       language1 = Language.UNKNOWN;

@@ -4,6 +4,10 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.Typeahead;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.annotations.IsSafeHtml;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -42,13 +46,11 @@ public class SearchTypeahead {
 
   /**
    * @param controller
-   * @param feedbackExerciseList
    * @param add
    * @see EditableExerciseList#getTypeahead
    */
-  SearchTypeahead(ExerciseController controller, FeedbackExerciseList feedbackExerciseList, Button add) {
+  SearchTypeahead(ExerciseController controller, Button add) {
     this.controller = controller;
-    //FeedbackExerciseList feedbackExerciseList1 = feedbackExerciseList;
     this.add = add;
   }
 
@@ -66,8 +68,8 @@ public class SearchTypeahead {
         ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
             .setPrefix(textBox.getText())
             .setLimit(DISPLAY_ITEMS)
-            .setAddFirst(false)
-            .setOnlyPlainVocab(true);
+            .setAddFirst(false)/*
+            .setOnlyPlainVocab(true)*/;
 
         controller.getExerciseService().getExerciseIds(exerciseListRequest, new AsyncCallback<ExerciseListWrapper<T>>() {
               @Override
@@ -92,8 +94,8 @@ public class SearchTypeahead {
   private Typeahead getTypeahead(TextBox textBox, Typeahead typeahead) {
     typeahead.setDisplayItemCount(DISPLAY_ITEMS);
     typeahead.setMatcherCallback((query, item) -> {
-     //  logger.info("getTypeahead Got " + query);
-      add.setEnabled(!textBox.getText().isEmpty());
+  logger.info("getTypeahead Got " + query);
+      add.setEnabled(hasText(textBox));
       return true;
     });
  //   logger.info("getTypeahead ");
@@ -105,6 +107,23 @@ public class SearchTypeahead {
       return selectedSuggestion.getReplacementString();
     });
 
+//    textBox.addChangeHandler(new ChangeHandler() {
+//      @Override
+//      public void onChange(ChangeEvent changeEvent) {
+//        boolean enabled = hasText(textBox);
+//        logger.info("getTypeahead Got ChangeHandler = " +enabled);
+//        add.setEnabled(enabled);
+//      }
+//    });
+
+    textBox.addKeyUpHandler(new KeyUpHandler() {
+      @Override
+      public void onKeyUp(KeyUpEvent keyUpEvent) {
+        add.setEnabled(hasText(textBox));
+
+      }
+    });
+
     textBox.getElement().setId("TextBox_exercise");
     typeahead.setWidget(textBox);
 
@@ -113,6 +132,10 @@ public class SearchTypeahead {
     Scheduler.get().scheduleDeferred((Command) () -> textBox.setFocus(true));
 
     return typeahead;
+  }
+
+  private boolean hasText(TextBox textBox) {
+    return !textBox.getText().isEmpty();
   }
 
   /**

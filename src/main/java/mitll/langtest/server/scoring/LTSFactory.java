@@ -32,7 +32,6 @@
 
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.EmptyLTS;
 import mitll.npdata.dao.lts.KoreanLTS;
@@ -137,7 +136,7 @@ public class LTSFactory {
   public static String getLocale(String language1) {
     Language lang;
     try {
-      if (language1.equalsIgnoreCase(MANDARIN)) language1 = Language.CHINESE.name();
+      if (language1.equalsIgnoreCase(MANDARIN)) language1 = Language.MANDARIN.name();
       lang = Language.valueOf(language1.toUpperCase());
     } catch (IllegalArgumentException e) {
       logger.error("getLocale for emptyLTS language " + language1);
@@ -178,7 +177,7 @@ public class LTSFactory {
       case LEVANTINE:
         locale = new Locale.Builder().setLanguage(AR).setRegion("sy").build();
         break;
-      case CHINESE:
+      case MANDARIN:
         locale = Locale.CHINESE;
         break;
       case MSA:

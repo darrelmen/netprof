@@ -1414,7 +1414,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     try {
 
       String name = lang.toUpperCase();
-      if (name.equalsIgnoreCase(MANDARIN)) name = Language.CHINESE.name();
+      if (name.equalsIgnoreCase(MANDARIN)) name = Language.MANDARIN.name();
       language = Language.valueOf(name);
     } catch (IllegalArgumentException e) {
       logger.error("unknown language " + lang);

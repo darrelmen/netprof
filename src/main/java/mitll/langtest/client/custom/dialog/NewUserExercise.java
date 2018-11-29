@@ -38,6 +38,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -71,25 +73,22 @@ import java.util.logging.Logger;
  */
 abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> extends BasicDialog {
   private static final String CONTEXT_BOX = "ContextBox = ";
+  public static final String CLICK_HERE_TO_GO_TO_DOMINO = "Click here to go to domino.";
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
-  private static final String OPTIONAL = "optional";
-  private static final String WIDGET_ID = "NewUserExercise_WaveformPostAudioRecordButton_";
+//  private static final String OPTIONAL = "optional";
+//  private static final String WIDGET_ID = "NewUserExercise_WaveformPostAudioRecordButton_";
 
   public static final String CONTEXT = "context";
   static final String CONTEXT_TRANSLATION = "context translation";
-  /**
-   * @see #addContext
-   */
-//  private static final String CONTEXT_LABEL = "Context";
-//  private static final String CONTEXT_TRANSLATION_LABEL = "C. Translation";
+
 
   private static final int TEXT_FIELD_WIDTH = 500;
   private static final int WIDE_TEXT_FIELD_WIDTH = 750;
   private static final int LABEL_WIDTH = 105;
 
-  //private static final String FOREIGN_LANGUAGE = "Foreign Language";
-  private static final String ENGLISH_LABEL = "English";// (optional)";
+
+  private static final String ENGLISH_LABEL = "English";
   private static final String ENGLISH_LABEL_2 = "Meaning";
   private static final String TRANSLITERATION_OPTIONAL = "Transliteration";
 
@@ -236,15 +235,28 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     }
   }
 
+  /**
+   * @see #addFields
+   * @param upper
+   */
   private void makeOptionalRows(DivWidget upper) {
     makeContextRow(upper);
     makeContextTransRow(upper);
   }
 
+  /**
+   * Tie to the context audio record box
+   * @param container
+   */
   private void makeContextRow(Panel container) {
     Panel row = new DivWidget();
     container.add(row);
     context = addContext(container, newUserExercise);
+    context.box.addKeyUpHandler(keyUpEvent -> {
+      boolean hasText = !context.box.getText().trim().isEmpty();
+    //  logger.info("Got key up " + hasText);
+      rapContext.setEnabled(hasText);
+    });
   }
 
   private void makeContextTransRow(Panel container) {
@@ -261,7 +273,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     h.addStyleName("inlineFlex");
     HTML child1 = new HTML("To edit text, go into domino, edit the item, and then re-import.");
     h.add(child1);
-    Anchor child = new Anchor("Click here to go to domino.");
+    Anchor child = new Anchor(CLICK_HERE_TO_GO_TO_DOMINO);
     child.addStyleName("leftFiveMargin");
     child.setTarget("_blank");
     child.setHref(controller.getProps().getDominoURL());
@@ -340,6 +352,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   ControlGroup makeContextAudioPanel(Panel row) {
     U next = (U) newUserExercise.getDirectlyRelated().iterator().next();
     rapContext = makeRecordAudioPanel(next, row, AudioType.CONTEXT_REGULAR);
+
+  //  logger.info("set enabled false!");
+    rapContext.setEnabled(false);
     return addControlGroupEntrySimple(row, "", rapContext);
   }
 
@@ -788,7 +803,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       mutableContext.setEnglish(contextTrans.getSafeText());
     }
 
-    logger.info("context now " + contextSentenceExercise.getID() + " " + contextSentenceExercise.getEnglish() + " " + contextSentenceExercise.getForeignLanguage());
+  //  logger.info("context now " + contextSentenceExercise.getID() + " " + contextSentenceExercise.getEnglish() + " " + contextSentenceExercise.getForeignLanguage());
     //  Collection<U> directlyRelated1 = mutableExercise.getDirectlyRelated();
     //  logger.info("grabInfoFromFormAndStuffInfoExercise context now " + directlyRelated1.iterator().next().getForeignLanguage());
     //  }
@@ -861,7 +876,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     CreateFirstRecordAudioPanel(U newExercise, Panel row, AudioType audioType) {
       super(newExercise, NewUserExercise.this.controller, row, 0, false,
           audioType);
-      logger.info("reg speed " + audioType);
+     // logger.info("reg speed " + audioType);
       this.audioType = audioType;
       setExercise(newExercise);
 
@@ -874,7 +889,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         @Override
         public void playStopped() {
           disableOthers(true);
-          ;
         }
       });
 
@@ -882,13 +896,14 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 //      getPostAudioButton().getElement().setId(WIDGET_ID + speed);
 //      getPlayButton().getElement().setId(WIDGET_ID + "Play_" + speed);
       User current = controller.getUserManager().getCurrent();
-      logger.info("kind = " +current.getUserKind());
+    //  logger.info("kind = " +current.getUserKind());
       boolean teacher = !current.isStudent() || !current.getPermissions().isEmpty();
       setEnabled(teacher);
       controller.register(getPlayButton(), newExercise.getID());
     }
 
     private void disableOthers(boolean b) {
+  //    logger.info("disable others " +b);
       otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(b));
     }
 

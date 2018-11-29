@@ -14,7 +14,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public enum Language implements IsSerializable {
   ARABIC(true, "ar", "al"),
-  CHINESE(32, "CHINESE-MANDARIN", "cmn", "cn"),
+  MANDARIN(32, "CHINESE-MANDARIN", "cmn", "cn", "Chinese"),
   CROATIAN("SERBO-CROATIAN", "hr"),
   DARI(true, "PERSIAN-AFGHAN", "prs", "af"),
   EGYPTIAN(true, "ARABIC-EGYPTIAN", "arz", "eg"),
@@ -46,6 +46,7 @@ public enum Language implements IsSerializable {
   private String dominoName = "";
   private String locale = "";
   private String cc = "";
+  private String displayName = "";
 
   Language(String locale, String cc) {
     this.isRTL = false;
@@ -74,13 +75,22 @@ public enum Language implements IsSerializable {
     this.fontSize = fontSize;
   }
 
-  Language(int fontSize, String dominoName, String locale, String cc) {
+  /**
+   * So we can support language renaming - Mandarin->Chinese
+   * @param fontSize
+   * @param dominoName
+   * @param locale
+   * @param cc
+   * @param displayName
+   */
+  Language(int fontSize, String dominoName, String locale, String cc, String displayName) {
     this(fontSize, locale, cc);
     this.dominoName = dominoName;
+    this.displayName = displayName;
   }
 
   public String toDisplay() {
-    return name().substring(0, 1) + name().substring(1).toLowerCase();
+    return displayName.isEmpty() ? name().substring(0, 1) + name().substring(1).toLowerCase() : displayName;
   }
 
   public boolean isRTL() {

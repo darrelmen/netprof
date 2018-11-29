@@ -79,7 +79,7 @@ public class ImportInfo {
   private mitll.langtest.shared.project.Language getLanguage(String languageName) {
     mitll.langtest.shared.project.Language lang = mitll.langtest.shared.project.Language.UNKNOWN;
     try {
-      if (languageName.equalsIgnoreCase(MANDARIN)) languageName = Language.CHINESE.name();
+      if (languageName.equalsIgnoreCase(MANDARIN)) languageName = Language.MANDARIN.name();
       lang = mitll.langtest.shared.project.Language.valueOf(languageName);
 //        logger.info("Got " + languageName + " " + lang);
     } catch (IllegalArgumentException e) {

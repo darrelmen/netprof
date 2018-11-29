@@ -70,7 +70,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   private boolean isAsianLanguage(Language language) {
-    return language == Language.CHINESE ||
+    return language == Language.MANDARIN ||
         language == Language.JAPANESE ||
         language == Language.KOREAN;
   }

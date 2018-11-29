@@ -1,6 +1,5 @@
 package mitll.langtest.server.domino;
 
-import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.ExerciseServices;
@@ -17,7 +16,6 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.moxieapps.gwt.highcharts.client.Lang;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -644,7 +642,7 @@ public class ProjectSync implements IProjectSync {
   private Language getLanguage(String lang) {
     Language language = Language.UNKNOWN;
     try {
-      if (lang.equalsIgnoreCase(MANDARIN)) lang = Language.CHINESE.name();
+      if (lang.equalsIgnoreCase(MANDARIN)) lang = Language.MANDARIN.name();
 
       language = Language.valueOf(lang.toUpperCase());
     } catch (IllegalArgumentException e) {

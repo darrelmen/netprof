@@ -151,7 +151,7 @@ dependencies {
     compile 'net.sf.uadetector:uadetector-resources:2014.10'
 
     // TODO : use gson instead
-    compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
+ //   compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.4', classifier: 'jdk15'
 
     compile 'com.github.gwtbootstrap:gwt-bootstrap:latest.release'
 

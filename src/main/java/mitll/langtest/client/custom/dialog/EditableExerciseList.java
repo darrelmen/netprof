@@ -18,7 +18,6 @@ import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -181,7 +180,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
       message.setText("");
     });
 
-    this.searchTypeahead = new SearchTypeahead(controller, this, add);
+    this.searchTypeahead = new SearchTypeahead(controller, add);
     return searchTypeahead.getTypeaheadUsing(quickAddText);
   }
 
@@ -307,6 +306,18 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
       }
     }
     return found;
+  }
+
+  /**
+   * Wrap around!
+   * @see #loadNextExercise
+   */
+  @Override
+  protected void onLastItem() {
+    CommonShell first = getFirst();
+    if (first != getCurrentExercise()) {
+      loadByID(first.getID());
+    }
   }
 
   private void showNewItem(CommonShell currentExercise) {

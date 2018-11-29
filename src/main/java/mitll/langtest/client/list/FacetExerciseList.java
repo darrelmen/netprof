@@ -300,7 +300,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
       {
         ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-        boolean isMandarin = projectStartupInfo != null && projectStartupInfo.getLanguageInfo() == Language.CHINESE;
+        boolean isMandarin = projectStartupInfo != null && projectStartupInfo.getLanguageInfo() == Language.MANDARIN;
         boolean shouldSwap = projectStartupInfo != null && projectStartupInfo.isShouldSwap();
         Dropdown realViewMenu = new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu();
         widgets.add(realViewMenu);

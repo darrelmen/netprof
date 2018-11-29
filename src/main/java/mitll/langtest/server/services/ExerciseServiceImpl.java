@@ -212,12 +212,19 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       if (!prefix.isEmpty()) {
         logger.info("getExerciseWhenNoUnitChapter found prefix '" + prefix + "' for user list " + userListByID);
         // now do a trie over matches
-        exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises, projectID, request.getUserID(),
-            !request.isPlainVocab());
-        if (request.getLimit() > 0) {
-          exercisesForSearch.setByExercise(getFirstFew(prefix, request, exercisesForSearch.getByExercise(), projectID));
+        exercisesForSearch = getSearchResult(request, projectID, exercises, predefExercises, prefix);
+
+        if (exercisesForSearch.isEmpty()) {
+
+          String prefix1 = prefix.replaceAll("\\s++", "");
+          if (!prefix1.equals(prefix)) {
+            logger.info("OK remove the spaces " + prefix1);
+            exercisesForSearch = getSearchResult(request, projectID, exercises, predefExercises, prefix1);
+          }
         }
       }
+
+
     }
 
     if (DEBUG_ID_LOOKUP) logger.info("getExerciseWhenNoUnitChapter triple resp       " + exercisesForSearch);
@@ -255,6 +262,16 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises, projectID);
     return exerciseListWrapper;
+  }
+
+  private TripleExercises<CommonExercise> getSearchResult(ExerciseListRequest request, int projectID, List<CommonExercise> exercises, boolean predefExercises, String prefix) {
+    TripleExercises<CommonExercise> exercisesForSearch;
+    exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises, projectID, request.getUserID(),
+        !request.isPlainVocab());
+    if (request.getLimit() > 0) {
+      exercisesForSearch.setByExercise(getFirstFew(prefix, request, exercisesForSearch.getByExercise(), projectID));
+    }
+    return exercisesForSearch;
   }
 
   /**
@@ -504,11 +521,18 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     }
 
 //    int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
- //   logger.info("getExerciseListWrapperForPrefix marked " + i + " as recorded");
+    //   logger.info("getExerciseListWrapperForPrefix marked " + i + " as recorded");
 
     if (hasPrefix) {
       logger.info("getExerciseListWrapperForPrefix check for prefix match over " + exercisesForState.size());
       exercisesForState = getSearchMatches(exercisesForState, prefix, projID);
+      if (exercisesForState.isEmpty()) {
+        String noSpaces = prefix.replaceAll("\\s++", "");
+        if (!noSpaces.equals(prefix)) {
+          logger.info("\ttrying " + noSpaces);
+          exercisesForState = getSearchMatches(exercisesForState, noSpaces, projID);
+        }
+      }
     }
 
     if (exercisesForState.isEmpty() && !prefix.isEmpty()) { // allow lookup by id
@@ -643,7 +667,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     List<T> exerciseShells = getExerciseShells(exercises, request.isQC());
 
 //    logger.debug("makeExerciseListWrapper : userID " + userID + " Role is " + request.getActivityType());
-   // markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
+    // markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
 
     // TODO : do this the right way vis-a-vis type safe collection...
 
@@ -1004,11 +1028,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     if (exerciseByID.isContext()) {
       int parentExerciseID = exerciseByID.getParentExerciseID();
       if (parentExerciseID == -1) {
-        parentExerciseID = getParentExerciseID(projectIDFromUser,exid,exerciseByID);
+        parentExerciseID = getParentExerciseID(projectIDFromUser, exid, exerciseByID);
       }
       return parentExerciseID;
-    }
-    else {
+    } else {
       return exid;
     }
   }
@@ -1264,7 +1287,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     long then = System.currentTimeMillis();
 
     Set<Integer> contextIDs = new HashSet<>();
-    exercises.forEach(exercise->exercise.getDirectlyRelated().forEach(dir->contextIDs.add(dir.getID())));
+    exercises.forEach(exercise -> exercise.getDirectlyRelated().forEach(dir -> contextIDs.add(dir.getID())));
     contextIDs.addAll(ids);
 
     Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(contextIDs, exercises.isEmpty(), userID, language);
@@ -1320,7 +1343,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
                                                           boolean empty,
                                                           int userID,
                                                           Language language) {
-  //  boolean empty = exercises.isEmpty();
+    //  boolean empty = exercises.isEmpty();
     return empty ? Collections.emptyMap() :
         db.getResultDAO().getScoreHistories(userID, exids, language);
   }

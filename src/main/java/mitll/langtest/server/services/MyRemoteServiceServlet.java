@@ -346,7 +346,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     Language language1;
 
     try {
-      if (language.equalsIgnoreCase(MANDARIN)) language = Language.CHINESE.name();
+      if (language.equalsIgnoreCase(MANDARIN)) language = Language.MANDARIN.name();
 
       language1 = Language.valueOf(language.toUpperCase());
     } catch (IllegalArgumentException e) {

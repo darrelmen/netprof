@@ -49,9 +49,14 @@ public class TripleExercises<T extends CommonExercise> {
     this.byID = byID;
   }
 
+
+  public boolean isEmpty() {
+    return byExercise.isEmpty() && byContext.isEmpty() && byID.isEmpty();
+  }
+
   public String toString() {
     return
-            "\n\tby id      " + byID.size() +
+        "\n\tby id      " + byID.size() +
             "\n\tby ex      " + byExercise.size() +
             "\n\tby context " + byContext.size();
   }

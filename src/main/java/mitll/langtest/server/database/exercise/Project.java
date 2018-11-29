@@ -176,7 +176,7 @@ public class Project implements IPronunciationLookup {
   @NotNull
   private String getLangName() {
     String name = project.language().toUpperCase();
-    if (name.equalsIgnoreCase(MANDARIN)) name = Language.CHINESE.name();
+    if (name.equalsIgnoreCase(MANDARIN)) name = Language.MANDARIN.name();
     return name;
   }
 

@@ -127,7 +127,7 @@ public class DecodeCorrectnessChecker {
   }
 
   private boolean isAsianLanguage(Language language) {
-    return language == Language.CHINESE ||
+    return language == Language.MANDARIN ||
         language == Language.JAPANESE;
 
 //        ||

@@ -87,7 +87,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     this.exercise = commonExercise;
     this.controller = controller;
     this.listenView = listenView;
-    isMandarin = getProjectStartupInfo() != null && getProjectStartupInfo().getLanguageInfo() == Language.CHINESE;
+    isMandarin = getProjectStartupInfo() != null && getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
     this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
         controller, listContainer,
         alignments, this, new AudioChangeListener() {

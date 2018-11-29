@@ -565,7 +565,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
         //logger.info(getClass() + " removeExercise - load next after " + id);
         loadNextExercise(current);
       } else if (!onFirst(current)) {
-        logger.info(getClass() + " removeExercise - load prev before " + id);
+        // logger.info(getClass() + " removeExercise - load prev before " + id);
         loadPreviousExercise(current);
       }
     }
@@ -736,8 +736,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
     markCurrentExercise(shell.getID());
 
     Scheduler.get().scheduleDeferred((Command) () -> {
-      logger.info("ExerciseList.showExercise : item id " + shell.getID() + " currentExercise " + getCurrentExercise() +
-          " or " + getCurrentExerciseID());
+      if (DEBUG) {
+        logger.info("ExerciseList.showExercise : item id " + shell.getID() + " currentExercise " + getCurrentExercise() +
+            " or " + getCurrentExerciseID());
+      }
       addExerciseWidget(shell);
     });
   }

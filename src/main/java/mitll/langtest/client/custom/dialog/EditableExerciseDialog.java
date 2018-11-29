@@ -115,7 +115,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    */
   @Override
   protected ControlGroup makeRegularAudioPanel(Panel row) {
-    logger.info("makeRegularAudioPanel new user is " + newUserExercise);
+   // logger.info("makeRegularAudioPanel new user is " + newUserExercise);
     rap = makeRecordAudioPanel(newUserExercise, row, AudioType.REGULAR);
     fastAnno.addStyleName("topFiveMargin");
     return addControlGroupEntrySimple(row, "", rap, fastAnno);
@@ -251,7 +251,8 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     }
   }
 
-  @Override protected CreateFirstRecordAudioPanel makeRecordAudioPanel(U theExercise, final Panel row, AudioType audioType) {
+  @Override
+  protected CreateFirstRecordAudioPanel makeRecordAudioPanel(U theExercise, final Panel row, AudioType audioType) {
     return new CreateFirstRecordAudioPanel(theExercise, row, audioType) {
       @Override
       protected int getImageWidth() {
@@ -288,6 +289,12 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    */
   private void setContext(U newUserExercise) {
     context.box.setText(originalContext = newUserExercise.getContext().trim());
+
+    String text = context.box.getText();
+    boolean val = !text.isEmpty();
+   // logger.info("Set context '" + text + "' = " + val);
+    rapContext.setEnabled(val);
+
     if (!useAnnotation(newUserExercise, CONTEXT, contextAnno)) {
       List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
 

@@ -315,6 +315,10 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
     setIcon(isPlaying());
 
+ //   tellListenersPlayStopped();
+  }
+
+  private void tellListenersPlayStopped() {
     playListeners.forEach(PlayListener::playStopped);
   }
 
@@ -369,6 +373,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   public void songFinished() {
     super.songFinished();
     setPlayLabel();
+    tellListenersPlayStopped();
   }
 
   @Override
@@ -386,6 +391,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   protected void pause() {
     super.pause();
     setPlayLabel();
+    tellListenersPlayStopped();
   }
 
   public String toString() {

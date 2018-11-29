@@ -324,8 +324,6 @@ public abstract class PostAudioRecordButton extends RecordButton
     if (result.getAudioAttribute() != null) {
       if (result.getAudioAttribute().getAudioType() == null) {
         result.getAudioAttribute().setAudioType(getAudioType());
-
-        logger.info("Audio type now " + result.getAudioAttribute().getAudioType());
       }
     }
     if (validAudio) {

@@ -176,10 +176,8 @@ public class EditItem {
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
           return widgets;
         } else {
-          logger.info("getExercisePanel got " + exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " + exercise.isPredefined());
-          List<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
-
-
+         // logger.info("getExercisePanel got " + exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " + exercise.isPredefined());
+         // List<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
           // logger.info("getExercisePanel got #" + directlyRelated.size());
           // directlyRelated.forEach(clientExercise -> logger.info("Got " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
 

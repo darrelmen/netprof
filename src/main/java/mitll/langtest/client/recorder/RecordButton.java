@@ -123,7 +123,7 @@ public class RecordButton extends Button {
   protected RecordButton(int delay, boolean doClickAndHold, String buttonText, String stopButtonText, PropertyHandler propertyHandler) {
     super(buttonText);
     RECORD = buttonText;
-    logger.info("RecordButton button text " + buttonText );
+//    logger.info("RecordButton button text " + buttonText );
     STOP = stopButtonText;
     this.propertyHandler = propertyHandler;
     this.doClickAndHold = doClickAndHold;

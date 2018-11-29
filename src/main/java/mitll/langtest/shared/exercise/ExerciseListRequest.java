@@ -42,6 +42,7 @@ import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.services.ExerciseServiceImpl;
 import mitll.langtest.shared.answer.ActivityType;
+import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -315,6 +316,10 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  /**
+   * @see ExerciseServiceImpl#getExerciseWhenNoUnitChapter
+   * @return
+   */
   public boolean isPlainVocab() {
     return plainVocab;
   }

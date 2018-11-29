@@ -1065,7 +1065,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.warn("getAudioAnswer for " + project.getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
     AudioType audioType = audioContext.getAudioType();
-    logger.info("audio type " + audioType + " ex " + exerciseID + " " + commonExercise);
+    logger.info("getAudioAnswer audio type " + audioType + " ex " + exerciseID + " " + commonExercise);
     String audioTranscript = getAudioTranscript(audioType, commonExercise);
     AnswerInfo.RecordingInfo recordingInfo =
         new AnswerInfo.RecordingInfo("", "", deviceType, device, audioTranscript, "");
@@ -1197,7 +1197,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     File absoluteFile = pathHelper.getAbsoluteAudioFile(audioAnswer.getPath());
     boolean isContext = audioType == AudioType.CONTEXT_REGULAR || audioType == AudioType.CONTEXT_SLOW;
 
-    logger.info("addToAudioTable isContext " + isContext + " audio type " + audioType + " exercise1 " + exercise1 +
+    logger.info("addToAudioTable isContext " + isContext +
+        "\n\taudio type " + audioType + " exercise1 " + exercise1 +
         " is comtext " + exercise1.isContext() + "is pre " + exercise1.isPredefined());
 
     String context = noExistingExercise ? "" : isContext ? getEnglish(exercise1) : exercise1.getEnglish();
@@ -1238,8 +1239,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return audioAttribute;
   }
 
+  /**
+   * Has hack if somehow we get a context exercise in here that is not marked as such.
+   * @param exercise1
+   * @return
+   */
   private String getEnglish(CommonExercise exercise1) {
-    return exercise1.isContext() ? exercise1.getEnglish() : exercise1.getDirectlyRelated().iterator().next().getEnglish();
+    return exercise1.isContext() || exercise1.getDirectlyRelated().isEmpty() ? exercise1.getEnglish() : exercise1.getDirectlyRelated().iterator().next().getEnglish();
   }
 
   private String getAudioTranscript(AudioType audioType, CommonExercise exercise1) {
