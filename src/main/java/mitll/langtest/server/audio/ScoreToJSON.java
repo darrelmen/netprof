@@ -32,6 +32,9 @@
 
 package mitll.langtest.server.audio;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.PrecalcScores;
@@ -42,8 +45,6 @@ import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +81,7 @@ public class ScoreToJSON {
    * @see AudioFileHelper#getAudioAnswerAlignment
    * @see AudioFileHelper#getAudioAnswerDecoding
    */
-  JSONObject getJsonFromAnswer(AudioAnswer answer) {
+  JsonObject getJsonFromAnswer(AudioAnswer answer) {
     return getJsonObject(answer.getPretestScore());
   }
 
@@ -93,15 +94,15 @@ public class ScoreToJSON {
     return getJsonObject(pretestScore).toString();
   }
 
-  private static final JSONObject jsonNULL = new JSONObject(true);
+  private static final JsonObject jsonNULL = new JsonObject();
 
   /**
    * @see DecodeAlignOutput#DecodeAlignOutput(PretestScore, boolean)
    * @param pretestScore
    * @return
    */
-  public JSONObject getJsonObject(PretestScore pretestScore) {
-    JSONObject jsonObject = new JSONObject();
+  public JsonObject getJsonObject(PretestScore pretestScore) {
+    JsonObject jsonObject = new JsonObject();
     if (pretestScore != null) {
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = pretestScore.getTypeToSegments();
 
@@ -111,7 +112,9 @@ public class ScoreToJSON {
 //          logger.warn("no json for score");
           return jsonNULL;
         } else {
-          JSONObject jsonObject1 = JSONObject.fromObject(json);
+          JsonParser parser = new JsonParser();
+
+          JsonObject jsonObject1 = parser.parse(json).getAsJsonObject();
           logger.info("getJsonObject returning" +
               "\n\t json " + jsonObject1 +
               "\n\t from " + json);
@@ -125,33 +128,33 @@ public class ScoreToJSON {
 
           int windex = 0;
           int pindex = 0;
-          JSONArray jsonWords = new JSONArray();
+          JsonArray jsonWords = new JsonArray();
 
           for (TranscriptSegment segment : words) {
             String event = segment.getEvent();
             if (isValidEvent(event)) {
-              JSONObject wordJson = getJSONForWord(segment, event, Integer.toString(windex++));
+              JsonObject wordJson = getJSONForWord(segment, event, Integer.toString(windex++));
 
               {
-                JSONArray jsonPhones = new JSONArray();
+                JsonArray jsonPhones = new JsonArray();
 
                 for (TranscriptSegment pseg : phones) {
                   if (pseg.getStart() >= segment.getStart() && pseg.getEnd() <= segment.getEnd()) {
                     String pevent = pseg.getEvent();
                     if (isValidEvent(pevent)) {
-                      JSONObject phoneJson = getJSONForPhone(pindex, pseg, pevent);
+                      JsonObject phoneJson = getJSONForPhone(pindex, pseg, pevent);
                       pindex++;
                       jsonPhones.add(phoneJson);
                     }
                   }
                 }
-                wordJson.put("phones", jsonPhones);
+                wordJson.add("phones", jsonPhones);
               }
               jsonWords.add(wordJson);
             }
           }
 
-          jsonObject.put("words", jsonWords);
+          jsonObject.add("words", jsonWords);
         } else if (pretestScore.getHydecScore() > -0.1f) {
           logger.warn("no word transcript for " + pretestScore, new Exception());
         }
@@ -167,24 +170,24 @@ public class ScoreToJSON {
   }
 
   @NotNull
-  private JSONObject getJSONForWord(TranscriptSegment segment, String event, String wid) {
-    JSONObject wordJson = new JSONObject();
-    wordJson.put(ID, wid);
-    wordJson.put("w", event);
-    wordJson.put(SEGMENT_SCORE, getScore(segment));
-    wordJson.put(STR, floatToString(segment.getStart()));
-    wordJson.put(END1, floatToString(segment.getEnd()));
+  private JsonObject getJSONForWord(TranscriptSegment segment, String event, String wid) {
+    JsonObject wordJson = new JsonObject();
+    wordJson.addProperty(ID, wid);
+    wordJson.addProperty("w", event);
+    wordJson.addProperty(SEGMENT_SCORE, getScore(segment));
+    wordJson.addProperty(STR, floatToString(segment.getStart()));
+    wordJson.addProperty(END1, floatToString(segment.getEnd()));
     return wordJson;
   }
 
   @NotNull
-  private JSONObject getJSONForPhone(int pindex, TranscriptSegment pseg, String pevent) {
-    JSONObject phoneJson = new JSONObject();
-    phoneJson.put(ID, Integer.toString(pindex));
-    phoneJson.put("p", pevent);
-    phoneJson.put(SEGMENT_SCORE, getScore(pseg));
-    phoneJson.put(STR, floatToString(pseg.getStart()));
-    phoneJson.put(END1, floatToString(pseg.getEnd()));
+  private JsonObject getJSONForPhone(int pindex, TranscriptSegment pseg, String pevent) {
+    JsonObject phoneJson = new JsonObject();
+    phoneJson.addProperty(ID, Integer.toString(pindex));
+    phoneJson.addProperty("p", pevent);
+    phoneJson.addProperty(SEGMENT_SCORE, getScore(pseg));
+    phoneJson.addProperty(STR, floatToString(pseg.getStart()));
+    phoneJson.addProperty(END1, floatToString(pseg.getEnd()));
     return phoneJson;
   }
 
@@ -218,21 +221,21 @@ public class ScoreToJSON {
    * @return
    * @see mitll.langtest.server.scoring.JsonScoring#getJsonForAudioForUser
    */
-  public JSONObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps, Language languageEnum) {
-    JSONObject jsonObject = new JSONObject();
+  public JsonObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps, Language languageEnum) {
+    JsonObject jsonObject = new JsonObject();
 
-    jsonObject.put(SCORE, score.getHydecScore());
+    jsonObject.addProperty(SCORE, score.getHydecScore());
 
     for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getTypeToSegments().entrySet()) {
       List<TranscriptSegment> value = pair.getValue();
-      JSONArray value1 = new JSONArray();
+      JsonArray value1 = new JsonArray();
       NetPronImageType imageType = pair.getKey();
 
       boolean usePhone = imageType == NetPronImageType.PHONE_TRANSCRIPT &&
           (serverProps.usePhoneToDisplay(languageEnum) || usePhoneDisplay);
 
       for (TranscriptSegment segment : value) {
-        JSONObject object = new JSONObject();
+        JsonObject object = new JsonObject();
         String event = segment.getEvent();
 
         if (isValidEvent(event)) {
@@ -240,16 +243,16 @@ public class ScoreToJSON {
             event = serverProps.getDisplayPhoneme(languageEnum, event);
           }
 
-          object.put(EVENT, event);
-          object.put(START, segment.getStart());
-          object.put(END, segment.getEnd());
-          object.put(SCORE, segment.getScore());
+          object.addProperty(EVENT, event);
+          object.addProperty(START, segment.getStart());
+          object.addProperty(END, segment.getEnd());
+          object.addProperty(SCORE, segment.getScore());
 
           value1.add(object);
         }
       }
 
-      jsonObject.put(imageType.toString(), value1);
+      jsonObject.add(imageType.toString(), value1);
     }
     return jsonObject;
   }

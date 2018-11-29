@@ -32,6 +32,8 @@
 
 package mitll.langtest.server.database;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.ReportStats.INFO;
@@ -47,8 +49,7 @@ import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.ReportUser;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickSlimEvent;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+
 import net.sf.uadetector.OperatingSystemFamily;
 import net.sf.uadetector.ReadableUserAgent;
 import net.sf.uadetector.UserAgentStringParser;
@@ -221,7 +222,7 @@ public class Report implements IReport {
 
     StringBuilder builder = new StringBuilder();
     foundLincoln.forEach(reportUser -> builder.append(reportUser.getUserID()).append(", "));
-  //  logger.info("found lincoln users " + builder);
+    //  logger.info("found lincoln users " + builder);
 
     this.deviceUsers = deviceUsers;
     this.userToProject = userToProject;
@@ -312,7 +313,7 @@ public class Report implements IReport {
    * @see ReportingServices#doReport
    */
   @Override
-  public JSONObject writeReportToFile(ReportStats reportStats, PathHelper pathHelper, List<ReportStats> allReports) throws IOException {
+  public JsonObject writeReportToFile(ReportStats reportStats, PathHelper pathHelper, List<ReportStats> allReports) throws IOException {
     File file = getReportPath(pathHelper, reportStats.getLanguage(), reportStats.getName(), ".html");
     List<ReportStats> reportStats1 = writeReportToFile(file, reportStats);
     logger.debug("writeReportToFile wrote to " + file.getAbsolutePath());
@@ -445,10 +446,10 @@ public class Report implements IReport {
    * @param year
    * @param allReports
    * @return
-   * @see DatabaseImpl#getReport(int, JSONObject)
+   * @see DatabaseImpl#getReport(int, JsonObject)
    */
   @Override
-  public String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year, List<ReportStats> allReports) {
+  public String getAllReports(Collection<SlickProject> projects, JsonObject jsonObject, int year, List<ReportStats> allReports) {
     StringBuilder builder = new StringBuilder();
     builder.append(getHeader("All Languages", "All Projects"));
     projects.forEach(project ->
@@ -507,10 +508,10 @@ public class Report implements IReport {
     List<ReportStats> reportStats = new ArrayList<>();
 
     {
-      JSONObject jsonObject = stats.getJsonObject();
-      jsonObject.put(HOST, getHostInfo());
+      JsonObject jsonObject = stats.getJsonObject();
+      jsonObject.addProperty(HOST, getHostInfo());
 
-      JSONArray dataArray = new JSONArray();
+      JsonArray dataArray = new JsonArray();
       if (year == ALL_YEARS) {
         int firstYear = getFirstYear(getEarliest(projid));
         if (firstYear < EARLIEST_YEAR) firstYear = EARLIEST_YEAR;
@@ -534,7 +535,7 @@ public class Report implements IReport {
             usersOnProject,
             stats);
       }
-      jsonObject.put(DATA, dataArray);
+      jsonObject.add(DATA, dataArray);
     }
     return reportStats;
   }
@@ -567,7 +568,7 @@ public class Report implements IReport {
    * @param usersForProject
    * @see #getReportForProject
    */
-  private void addYear(JSONArray dataArray,
+  private void addYear(JsonArray dataArray,
                        StringBuilder builder,
                        int i,
                        List<SlickSlimEvent> allSlim,
@@ -578,7 +579,7 @@ public class Report implements IReport {
                        String language,
                        Collection<Integer> usersForProject,
                        ReportStats reportStats) {
-    JSONObject forYear = new JSONObject();
+    JsonObject forYear = new JsonObject();
     builder.append("<h1>").append(i).append("</h1>");
     builder.append(getReportForYear(forYear,
         i, allSlim, allDevicesSlim,
@@ -594,9 +595,9 @@ public class Report implements IReport {
    * @param usersForProject
    * @return
    * @see #addYear
-   * @see DatabaseImpl#getReport(int, JSONObject)
+   * @see DatabaseImpl#getReport(int, JsonObject)
    */
-  private String getReportForYear(JSONObject jsonObject,
+  private String getReportForYear(JsonObject jsonObject,
                                   int year,
                                   List<SlickSlimEvent> allSlim,
                                   List<SlickSlimEvent> allDevicesSlim,
@@ -607,7 +608,7 @@ public class Report implements IReport {
                                   String language,
                                   String name, Collection<Integer> usersForProject,
                                   ReportStats reportStats) {
-    jsonObject.put("forYear", year);
+    jsonObject.addProperty("forYear", year);
 
     long then = System.currentTimeMillis();
     if (DEBUG) logger.info(language + " : doing year " + year);
@@ -618,18 +619,18 @@ public class Report implements IReport {
     Set<Integer> users = getUserIDs(jsonObject, year, usersForProject, builder, language);
 
     {
-      JSONObject iPadUsers = new JSONObject();
+      JsonObject iPadUsers = new JsonObject();
       getUsers(builder, getIOSUsers(usersForProject), NEW_I_PAD_I_PHONE_USERS, iPadUsers, year, false, language);
-      jsonObject.put(I_PAD_USERS, iPadUsers);
+      jsonObject.add(I_PAD_USERS, iPadUsers);
     }
 
-    JSONObject timeOnTaskJSON = new JSONObject();
+    JsonObject timeOnTaskJSON = new JsonObject();
     Set<Integer> events = getEvents(builder, users, timeOnTaskJSON, year, allSlim);
-    jsonObject.put(OVERALL_TIME_ON_TASK, timeOnTaskJSON);
+    jsonObject.add(OVERALL_TIME_ON_TASK, timeOnTaskJSON);
 
-    JSONObject deviceTimeOnTaskJSON = new JSONObject();
+    JsonObject deviceTimeOnTaskJSON = new JsonObject();
     Set<Integer> eventsDevices = getEventsDevices(builder, users, deviceTimeOnTaskJSON, year, allDevicesSlim);
-    jsonObject.put(DEVICE_TIME_ON_TASK, deviceTimeOnTaskJSON);
+    jsonObject.add(DEVICE_TIME_ON_TASK, deviceTimeOnTaskJSON);
 
     events.addAll(eventsDevices);
 
@@ -656,8 +657,8 @@ public class Report implements IReport {
     return builder.toString();
   }
 
-/*  private void addBrowserReport(JSONObject jsonObject, int year, Collection<Integer> usersForProject, StringBuilder builder) {
-    JSONObject browserReport = new JSONObject();
+/*  private void addBrowserReport(JsonObject jsonObject, int year, Collection<Integer> usersForProject, StringBuilder builder) {
+    JsonObject browserReport = new JsonObject();
     getBrowserReport(getValidUsers(fixUserStarts(usersForProject)), year, browserReport, builder);
     jsonObject.put(HOST_INFO, browserReport);
   }*/
@@ -671,29 +672,29 @@ public class Report implements IReport {
    * @param reportStats
    * @param language
    * @param name
-   * @see #getReportForYear(JSONObject, int, List, List, Collection, Collection, Collection, String, String, Collection, ReportStats)
+   * @see #getReportForYear(JsonObject, int, List, List, Collection, Collection, Collection, String, String, Collection, ReportStats)
    */
-  private void addRecordings(JSONObject jsonObject, int year,
+  private void addRecordings(JsonObject jsonObject, int year,
                              Collection<MonitorResult> results, StringBuilder builder,
                              Set<Integer> users, ReportStats reportStats, String language, String name) {
-    JSONObject allRecordings = new JSONObject();
+    JsonObject allRecordings = new JsonObject();
     getResults(builder, users, allRecordings, year, results, reportStats, language, name);
-    jsonObject.put(ALL_RECORDINGS1, allRecordings);
+    jsonObject.add(ALL_RECORDINGS1, allRecordings);
   }
 
-  private void addDeviceRecordings(JSONObject jsonObject, int year,
+  private void addDeviceRecordings(JsonObject jsonObject, int year,
                                    Collection<MonitorResult> resultsDevices,
                                    StringBuilder builder, Set<Integer> users, ReportStats reportStats, String language, String name) {
-    JSONObject deviceRecordings = new JSONObject();
+    JsonObject deviceRecordings = new JsonObject();
     getResultsDevices(builder, users, deviceRecordings, year, resultsDevices, reportStats, language, name);
-    jsonObject.put(DEVICE_RECORDINGS1, deviceRecordings);
+    jsonObject.add(DEVICE_RECORDINGS1, deviceRecordings);
   }
 
-  private void addReferenceRecordings(JSONObject jsonObject, int year, Collection<UserTimeBase> audioAttributes,
+  private void addReferenceRecordings(JsonObject jsonObject, int year, Collection<UserTimeBase> audioAttributes,
                                       StringBuilder builder, Calendar calendar) {
-    JSONObject referenceRecordings = new JSONObject();
+    JsonObject referenceRecordings = new JsonObject();
     addRefAudio(builder, calendar, audioAttributes, referenceRecordings, year);
-    jsonObject.put(REFERENCE_RECORDINGS, referenceRecordings);
+    jsonObject.add(REFERENCE_RECORDINGS, referenceRecordings);
   }
 
   @NotNull
@@ -715,17 +716,17 @@ public class Report implements IReport {
    * @param builder
    * @param language
    * @return
-   * @see #getReportForYear(JSONObject, int, List, List, Collection, Collection, Collection, String, String, Collection, ReportStats)
+   * @see #getReportForYear(JsonObject, int, List, List, Collection, Collection, Collection, String, String, Collection, ReportStats)
    */
-  private Set<Integer> getUserIDs(JSONObject jsonObject,
+  private Set<Integer> getUserIDs(JsonObject jsonObject,
                                   int year,
                                   Collection<Integer> usersForProject,
                                   StringBuilder builder,
                                   String language) {
     // all users
-    JSONObject allUsers = new JSONObject();
+    JsonObject allUsers = new JsonObject();
     Set<Integer> users = getUsers(builder, allUsers, year, usersForProject, language);
-    jsonObject.put(ALL_USERS, allUsers);
+    jsonObject.add(ALL_USERS, allUsers);
     return users;
   }
 
@@ -753,7 +754,7 @@ public class Report implements IReport {
    * @param document
    * @see #getReport
    */
-  private void getBrowserReport(List<ReportUser> fusers, int year, JSONObject section, StringBuilder document) {
+  private void getBrowserReport(List<ReportUser> fusers, int year, JsonObject section, StringBuilder document) {
     List<ReportUser> usersByYear = filterUsersByYear(fusers, year);
 
     UserAgentStringParser parser = UADetectorServiceFactory.getResourceModuleParser();
@@ -811,20 +812,20 @@ public class Report implements IReport {
       // logger.info("osToCount " + osToCount);
 
     }
-    JSONArray hostArray = new JSONArray();
-    JSONArray familyArray = new JSONArray();
-    JSONArray browserArray = new JSONArray();
-    JSONArray browserVerArray = new JSONArray();
+    JsonArray hostArray = new JsonArray();
+    JsonArray familyArray = new JsonArray();
+    JsonArray browserArray = new JsonArray();
+    JsonArray browserVerArray = new JsonArray();
 
     document.append(getWrapper(OPERATING_SYSTEM, getCountTable(NAME, COUNT, familyArray, NAME, getSorted(familyToCount))));
     document.append(getWrapper(OPERATING_SYSTEM_VERSION, getCountTable(NAME, COUNT, hostArray, NAME, getSorted(hostToCount))));
     document.append(getWrapper(BROWSER, getCountTable(NAME, COUNT, browserArray, NAME, getSorted(browserToCount))));
     document.append(getWrapper(BROWSER_VERSION, getCountTable(NAME, COUNT, browserVerArray, NAME, getSorted(browserVerToCount))));
 
-    section.put(OPERATING_SYSTEM, familyArray);
-    section.put(OPERATING_SYSTEM_VERSION, hostArray);
-    section.put(BROWSER, browserArray);
-    section.put(BROWSER_VERSION, browserVerArray);
+    section.add(OPERATING_SYSTEM, familyArray);
+    section.add(OPERATING_SYSTEM_VERSION, hostArray);
+    section.add(BROWSER, browserArray);
+    section.add(BROWSER_VERSION, browserVerArray);
 
     if (miss > 0)
       logger.info("getBrowserReport for " + year + " users by year " + userAgentToReadable.size() + " miss " + miss);
@@ -860,7 +861,7 @@ public class Report implements IReport {
    * @return
    * @see #getReport
    */
-  private Set<Integer> getUsers(StringBuilder builder, JSONObject jsonObject, int year,
+  private Set<Integer> getUsers(StringBuilder builder, JsonObject jsonObject, int year,
                                 Collection<Integer> usersForProject, String language) {
     return getUsers(
         builder,
@@ -928,7 +929,7 @@ public class Report implements IReport {
                                 Collection<ReportUser> users,
                                 String users1,
 
-                                JSONObject jsonObject,
+                                JsonObject jsonObject,
                                 int year,
                                 boolean reportTeachers, String language) {
     Calendar calendar = getCalendarForYear(year);
@@ -1015,7 +1016,7 @@ public class Report implements IReport {
   /**
    * @param user
    * @return
-   * @see #getUsers(StringBuilder, Collection, String, JSONObject, int, boolean, String)
+   * @see #getUsers(StringBuilder, Collection, String, JsonObject, int, boolean, String)
    */
   private boolean isLincoln(ReportUser user) {
     boolean contains = false;
@@ -1115,20 +1116,20 @@ public class Report implements IReport {
    * @see #getUsers
    */
   private String getSectionReport(int ytd,
-                                  Map<Integer, ?> monthToCount,
-                                  Map<Integer, ?> weekToCount,
+                                  Map<Integer, Integer> monthToCount,
+                                  Map<Integer, Integer> weekToCount,
                                   String users1,
-                                  JSONObject jsonObject,
+                                  JsonObject jsonObject,
                                   int year) {
-    JSONObject yearJSON = new JSONObject();
+    JsonObject yearJSON = new JsonObject();
     String yearCol = getYTD(ytd, users1, yearJSON, year);
-    jsonObject.put(YEAR, yearJSON);
+    jsonObject.add(YEAR, yearJSON);
 
-    JSONArray monthArray = new JSONArray();
+    JsonArray monthArray = new JsonArray();
     String monthCol = getMonthToCount(monthToCount, MONTH, users1, "", monthArray, year);
-    jsonObject.put(MONTH1, monthArray);
+    jsonObject.add(MONTH1, monthArray);
 
-    JSONArray weekArray = new JSONArray();
+    JsonArray weekArray = new JsonArray();
     String weekCol = getWC(weekToCount, users1, weekArray, year);
 
     if (DEBUG) {
@@ -1138,7 +1139,7 @@ public class Report implements IReport {
           "\n\tweek->count " + weekToCount);
     }
 
-    jsonObject.put(WEEK1, weekArray);
+    jsonObject.add(WEEK1, weekArray);
 //    logger.debug("getSectionReport json " + jsonObject);
 
     return getYearMonthWeekTable(users1, yearCol, monthCol, weekCol);
@@ -1184,10 +1185,10 @@ public class Report implements IReport {
     return "<h2>" + users1 + "</h2>" + content;
   }
 
-  private String getYTD(int ytd, String users1, JSONObject jsonObject, int year) {
-    jsonObject.put("label", users1);
-    jsonObject.put(YEAR, year);
-    jsonObject.put(YTD, ytd);
+  private String getYTD(int ytd, String users1, JsonObject jsonObject, int year) {
+    jsonObject.addProperty("label", users1);
+    jsonObject.addProperty(YEAR, year);
+    jsonObject.addProperty(YTD, ytd);
 
     String suffix = isCurrentYear(year) ? YTD1 : "";
     return "<table style='background-color: #eaf5fb'>" +
@@ -1212,11 +1213,11 @@ public class Report implements IReport {
    * @param jsonArray
    * @return html for month
    */
-  private String getMonthToCount(Map<Integer, ?> monthToCount,
+  private String getMonthToCount(Map<Integer, Integer> monthToCount,
                                  String unit,
                                  String count,
                                  String tableLabel,
-                                 JSONArray jsonArray,
+                                 JsonArray jsonArray,
                                  int year) {
     // writeMonthToCSV(monthToCount, tableLabel.isEmpty() ? childCount : tableLabel, language, year);
     return getIntCountTable(unit, count, jsonArray, MONTH1, monthToCount);
@@ -1232,17 +1233,18 @@ public class Report implements IReport {
    * @param monthToValue
    * @return
    */
-  private String getIntCountTable(String unit, String count, JSONArray jsonArray, String label, Map<Integer, ?> monthToValue) {
+  private String getIntCountTable(String unit, String count, JsonArray jsonArray, String label, Map<Integer, Integer> monthToValue) {
     StringBuilder s = new StringBuilder();
     Integer max = getMax(monthToValue);
 
     for (int month = 0; month <= max; month++) {
-      Object value = monthToValue.get(month);
-      if (value instanceof Collection<?>) {
-        value = ((Collection<?>) value).size();
-      }
+      Number value = monthToValue.get(month);
+//      if (value instanceof Collection<?>) {
+//        value = ((Collection<?>) value).size();
+//      }
       if (value == null) value = 0;
-      addJsonRow(jsonArray, label, value, month + 1);
+      int i = month + 1;
+      addJsonRow(jsonArray, label, value, "" + i);
       s.append(getHTMLRow(getMonth(month), value));
     }
     return getTableHTML(unit, count, s.toString());
@@ -1262,15 +1264,15 @@ public class Report implements IReport {
    * @param label
    * @param monthToValue
    * @return
-   * @see #getBrowserReport(List, int, JSONObject, StringBuilder)
+   * @see #getBrowserReport(List, int, JsonObject, StringBuilder)
    */
-  private String getCountTable(String unit, String count, JSONArray jsonArray, String label, Map<String, ?> monthToValue) {
+  private String getCountTable(String unit, String count, JsonArray jsonArray, String label, Map<String, Integer> monthToValue) {
     String s = "";
-    for (Map.Entry<String, ?> pair : monthToValue.entrySet()) {
-      Object value = pair.getValue();
-      if (value instanceof Collection<?>) {
-        value = ((Collection<?>) value).size();
-      }
+    for (Map.Entry<String, Integer> pair : monthToValue.entrySet()) {
+      Integer value = pair.getValue();
+//      if (value instanceof Collection<?>) {
+//        value = ((Collection<?>) value).size();
+//      }
       String month = pair.getKey();
       addJsonRow(jsonArray, label, value, month);
       s += getHTMLRow(month, value);
@@ -1285,10 +1287,10 @@ public class Report implements IReport {
         "</tr>";
   }
 
-  private void addJsonRow(JSONArray jsonArray, String label, Object value, Object month) {
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put(label, month);
-    jsonObject.put(COUNT, value);
+  private void addJsonRow(JsonArray jsonArray, String label, Number value, String month) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty(label, month);
+    jsonObject.addProperty(COUNT, value);
     jsonArray.add(jsonObject);
   }
 
@@ -1306,12 +1308,12 @@ public class Report implements IReport {
    * @param weekToCount
    * @param count
    * @return
-   * @see #getSectionReport(int, Map, Map, String, JSONObject, int)
+   * @see #getSectionReport(int, Map, Map, String, JsonObject, int)
    * @see #getEvents
    */
   private String getWC(Map<Integer, ?> weekToCount,
                        String count,
-                       JSONArray jsonArray,
+                       JsonArray jsonArray,
                        int year) {
     String s = "";
     Calendar calendar = getCalendarForYear(year);
@@ -1323,7 +1325,7 @@ public class Report implements IReport {
 
 //    logger.info(unit +" before  " + year + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
     for (int week = 1; week <= max; week++) {
-      Object value = getCountAtWeek(weekToCount, week);
+      Integer value = getCountAtWeek(weekToCount, week);
       //   logger.info("getWC before week " +week + " = " + calendar.getTime() + " or " + df.format(calendar.getTime()));
 
       Date time = getThisWeek(year, calendar, week);
@@ -1376,14 +1378,14 @@ public class Report implements IReport {
     return weekToCountFormatted;
   }
 
-  private void addJSONForWeek(JSONArray jsonArray,
+  private void addJSONForWeek(JsonArray jsonArray,
                               int week,
-                              Object value,
+                              Integer value,
                               String format) {
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put(WEEK_OF_YEAR, week);
-    jsonObject.put(COUNT, value);
-    jsonObject.put(DATE, format);
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty(WEEK_OF_YEAR, week);
+    jsonObject.addProperty(COUNT, value);
+    jsonObject.addProperty(DATE, format);
     jsonArray.add(jsonObject);
   }
 
@@ -1425,11 +1427,11 @@ public class Report implements IReport {
    * @param builder
    * @param year
    * @param language
-   * @see #addRecordings(JSONObject, int, Collection, StringBuilder, Set, ReportStats, String, String)
+   * @see #addRecordings(JsonObject, int, Collection, StringBuilder, Set, ReportStats, String, String)
    */
   private void getResults(StringBuilder builder,
                           Set<Integer> students,
-                          JSONObject jsonObject,
+                          JsonObject jsonObject,
                           int year,
                           Collection<MonitorResult> results,
                           ReportStats reportStats,
@@ -1439,7 +1441,7 @@ public class Report implements IReport {
   }
 
   private void getResultsDevices(StringBuilder builder, Set<Integer> students,
-                                 JSONObject jsonObject, int year,
+                                 JsonObject jsonObject, int year,
                                  Collection<MonitorResult> results,
                                  ReportStats reportStats, String language,
                                  String name) {
@@ -1450,7 +1452,7 @@ public class Report implements IReport {
                                 Set<Integer> students,
                                 Collection<MonitorResult> results,
                                 String recordings,
-                                JSONObject jsonObject,
+                                JsonObject jsonObject,
                                 int year,
                                 ReportStats reportStats,
                                 String language,
@@ -1659,7 +1661,7 @@ public class Report implements IReport {
   private <T extends UserTimeBase> void addRefAudio(StringBuilder builder,
                                                     Calendar calendar,
                                                     Collection<T> refAudio,
-                                                    JSONObject jsonObject, int year) {
+                                                    JsonObject jsonObject, int year) {
 
     logger.info("addRefAudio " + refAudio.size() + " recordings from " + year);
 
@@ -1870,7 +1872,7 @@ public class Report implements IReport {
    * @param jsonObject
    * @see IReport#doReport
    */
-  private Set<Integer> getEvents(StringBuilder builder, Set<Integer> students, JSONObject jsonObject, int year,
+  private Set<Integer> getEvents(StringBuilder builder, Set<Integer> students, JsonObject jsonObject, int year,
                                  Collection<SlickSlimEvent> all) {
     return getEvents(builder, students, all, ACTIVE_USERS, TIME_ON_TASK, jsonObject, year);
   }
@@ -1897,7 +1899,7 @@ public class Report implements IReport {
    * @return
    * @see #getReport
    */
-  private Set<Integer> getEventsDevices(StringBuilder builder, Set<Integer> students, JSONObject jsonObject, int year,
+  private Set<Integer> getEventsDevices(StringBuilder builder, Set<Integer> students, JsonObject jsonObject, int year,
                                         List<SlickSlimEvent> allDevicesSlim) {
     return getEvents(builder, students, allDevicesSlim, ACTIVE_I_PAD, TIME_ON_TASK_IOS, jsonObject, year);
   }
@@ -1915,7 +1917,7 @@ public class Report implements IReport {
   private Set<Integer> getEvents(StringBuilder builder,
                                  final Set<Integer> students,
                                  final Collection<SlickSlimEvent> all, String activeUsers,
-                                 String tableLabel, JSONObject jsonObject, int year) {
+                                 String tableLabel, JsonObject jsonObject, int year) {
     Map<Integer, Set<Long>> monthToCount = new TreeMap<>();
     Map<Integer, Set<Long>> weekToCount = new TreeMap<>();
     ensureYTDEntries2(year, monthToCount, weekToCount);
@@ -1948,9 +1950,15 @@ public class Report implements IReport {
     }
     //dumpActiveUsers(activeUsers, teachers, skipped, users);
 
-    JSONObject activeJSON = new JSONObject();
+// TODO : consider putting this back???
+/*
+    JsonObject activeJSON = new JsonObject();
     builder.append(getSectionReport(users.size(), monthToCount, weekToCount, activeUsers, activeJSON, year));
-    jsonObject.put("activeUsers", activeJSON);
+    jsonObject.add("activeUsers", activeJSON);
+
+    */
+
+
 //    logger.debug("active users " + activeJSON);
 
     Map<Integer, Long> monthToDur = getMonthToDur(monthToCount2, year);
@@ -1961,11 +1969,11 @@ public class Report implements IReport {
 
     Map<Integer, Long> weekToDur = getWeekToDur(weekToCount2, year);
 
-    JSONObject timeOnTaskJSON = new JSONObject();
+    JsonObject timeOnTaskJSON = new JsonObject();
 
-    JSONObject yearJSON = new JSONObject();
-    JSONArray monthArray = new JSONArray();
-    JSONArray weekArray = new JSONArray();
+    JsonObject yearJSON = new JsonObject();
+    JsonArray monthArray = new JsonArray();
+    JsonArray weekArray = new JsonArray();
 
     int ytdHours = Math.round(total / 60);
 
@@ -1977,11 +1985,11 @@ public class Report implements IReport {
         getWC(getMinMap(weekToDur), TIME_ON_TASK_MINUTES, weekArray, year)
     );
 
-    timeOnTaskJSON.put(YEAR, yearJSON);
-    timeOnTaskJSON.put(MONTH1, monthArray);
-    timeOnTaskJSON.put(WEEK1, weekArray);
+    timeOnTaskJSON.add(YEAR, yearJSON);
+    timeOnTaskJSON.add(MONTH1, monthArray);
+    timeOnTaskJSON.add(WEEK1, weekArray);
 
-    jsonObject.put("timeOnTask", timeOnTaskJSON);
+    jsonObject.add("timeOnTask", timeOnTaskJSON);
 
     builder.append(yearMonthWeekTable);
 
@@ -2052,15 +2060,15 @@ public class Report implements IReport {
     events.add(event);
   }
 
-  private Map<Integer, Long> getMinMap(Map<Integer, Long> monthToDur) {
-    Map<Integer, Long> copy = new TreeMap<>();
+  private Map<Integer, Integer> getMinMap(Map<Integer, Long> monthToDur) {
+    Map<Integer, Integer> copy = new TreeMap<>();
     for (Map.Entry<Integer, Long> pair : monthToDur.entrySet()) {
       long value = pair.getValue() / MIN_MILLIS;
       if (value == 0) {
         //logger.debug("huh? " +pair.getKey() + " " + pair.getValue());
         value = 1;
       }
-      copy.put(pair.getKey(), value);
+      copy.put(pair.getKey(), Long.valueOf(value).intValue());
     }
 
     return copy;
@@ -2119,7 +2127,7 @@ public class Report implements IReport {
   /**
    * @param weekToCount
    * @return
-   * @see #getEvents(StringBuilder, Set, Collection, String, String, JSONObject, int)
+   * @see #getEvents(StringBuilder, Set, Collection, String, String, JsonObject, int)
    */
   private Map<Integer, Long> getWeekToDur(Map<Integer, Map<Long, Set<SlickSlimEvent>>> weekToCount, int year) {
     Map<Integer, Long> weekToDur = new TreeMap<>();

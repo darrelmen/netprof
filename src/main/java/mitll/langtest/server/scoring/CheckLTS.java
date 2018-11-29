@@ -36,7 +36,7 @@ package mitll.langtest.server.scoring;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.LTS;
-import org.apache.commons.lang.StringUtils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -309,12 +309,16 @@ class CheckLTS {
     return translitOk;
   }
 
+  private String getCons(String[] tokens) {
+    return String.join("-", tokens);
+  }
+
   private boolean isLegitLTS(String[][] process, String token) {
     boolean b = !(process == null ||
         process.length == 0 ||
         process[0].length == 0 ||
         process[0][0].length() == 0 ||
-        (StringUtils.join(process[0], "-")).contains("#"));
+        (getCons(process[0])).contains("#"));
 
     boolean valid = true;
     if (b) {

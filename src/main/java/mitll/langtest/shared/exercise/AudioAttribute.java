@@ -200,6 +200,10 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return audioType;
   }
 
+  public void setAudioType(AudioType audioType) {
+    this.audioType = audioType;
+  }
+
   public boolean isMale() {
     return user != null && user.isMale();
   }

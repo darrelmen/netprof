@@ -231,13 +231,6 @@ public class AudioExercise extends ExerciseShell {
     return audioAttributes.isEmpty() ? null : audioAttributes.values().iterator().next();
   }
 
-  /*
-  public synchronized Collection<Integer> getAudioIDs() {
-    Collection<AudioAttribute> audioAttributes1 = getAudioAttributesLocal();
-    return audioAttributes1.stream().map(AudioAttribute::getUniqueID).collect(Collectors.toSet());
-  }
-*/
-
   public synchronized Collection<String> getAudioPaths() {
     Collection<AudioAttribute> audioAttributes1 = getAudioAttributesLocal();
     Set<String> paths = new HashSet<>(audioAttributes1.size());

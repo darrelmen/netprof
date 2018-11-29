@@ -32,11 +32,11 @@
 
 package mitll.langtest.server.json;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.*;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -106,8 +106,8 @@ public class JsonExport {
    * @return
    * @see mitll.langtest.server.ScoreServlet#getJsonNestedChapters
    */
-  public JSONArray getContentAsJson(boolean removeExercisesWithMissingAudio) {
-    JSONArray jsonArray = new JSONArray();
+  public JsonArray getContentAsJson(boolean removeExercisesWithMissingAudio) {
+    JsonArray jsonArray = new JsonArray();
     Map<String, Collection<String>> typeToValues = new HashMap<>();
 
     Collection<SectionNode> sectionNodesForTypes = sectionHelper.getSectionNodesForTypes();
@@ -126,7 +126,7 @@ public class JsonExport {
       String type = node.getType();
       //logger.info("\tgetContentAsJson type " + type + " : " + node.getName());
       typeToValues.put(type, Collections.singletonList(node.getName()));
-      JSONObject jsonForNode = getJsonForNode(node, typeToValues, removeExercisesWithMissingAudio, minimalTypeOrder);
+      JsonObject jsonForNode = getJsonForNode(node, typeToValues, removeExercisesWithMissingAudio, minimalTypeOrder);
       typeToValues.remove(type);
 
       jsonArray.add(jsonForNode);
@@ -142,22 +142,22 @@ public class JsonExport {
    * @return
    * @see #getContentAsJson
    */
-  private JSONObject getJsonForNode(SectionNode node,
+  private JsonObject getJsonForNode(SectionNode node,
                                     Map<String, Collection<String>> typeToValues,
                                     boolean removeExercisesWithMissingAudio,
                                     Collection<String> firstTypes) {
-    JSONObject jsonForNode = new JSONObject();
+    JsonObject jsonForNode = new JsonObject();
     String type = node.getType();
-    jsonForNode.put(TYPE, type);
-    jsonForNode.put(NAME, node.getName());
-    JSONArray jsonArray = new JSONArray();
+    jsonForNode.addProperty(TYPE, type);
+    jsonForNode.addProperty(NAME, node.getName());
+    JsonArray jsonArray = new JsonArray();
 
     {
       // logger.info("getJsonForNode node " + type + " = " + node.getName() + " vs " + firstTypes);
 
       if (node.isLeaf() || !firstTypes.iterator().next().equalsIgnoreCase(type)) { // stop when get below first types, e.g. unit,chapter
         // logger.info("getJsonForNode leaf " + typeToValues.keySet() + " types");
-        jsonForNode.put(ITEMS, getJsonForSelection(typeToValues, removeExercisesWithMissingAudio, true, firstTypes));
+        jsonForNode.add(ITEMS, getJsonForSelection(typeToValues, removeExercisesWithMissingAudio, true, firstTypes));
       } else {
         List<SectionNode> children = node.getChildren();
         //     logger.info("getJsonForNode node " + node.getType() + " = " + node.getName() + " with " + children.size() + " children");
@@ -169,7 +169,7 @@ public class JsonExport {
           typeToValues.remove(child.getType());
         }
       }
-      jsonForNode.put(CHILDREN, jsonArray);
+      jsonForNode.add(CHILDREN, jsonArray);
     }
     return jsonForNode;
   }
@@ -181,7 +181,7 @@ public class JsonExport {
    * @return
    * @see #getJsonForNode
    */
-  private JSONArray getJsonForSelection(
+  private JsonArray getJsonForSelection(
       Map<String, Collection<String>> typeToValues,
       boolean removeExercisesWithMissingAudio,
       boolean removeCantDecode,
@@ -242,8 +242,8 @@ public class JsonExport {
    * @return
    * @see #getJsonForSelection
    */
-  private JSONArray getJsonArray(Collection<CommonExercise> copy, Collection<String> firstTypes) {
-    JSONArray exercises = new JSONArray();
+  private JsonArray getJsonArray(Collection<CommonExercise> copy, Collection<String> firstTypes) {
+    JsonArray exercises = new JsonArray();
     copy.forEach(commonExercise -> exercises.add(getJsonForExercise(commonExercise, firstTypes)));
     return exercises;
   }
@@ -258,8 +258,8 @@ public class JsonExport {
    * @return
    * @see #getJsonArray(Collection, Collection)
    */
-  private <T extends CommonExercise> JSONObject getJsonForExercise(T exercise, Collection<String> firstTypes) {
-    JSONObject ex = getJsonForCommonExercise(exercise, firstTypes);
+  private <T extends CommonExercise> JsonObject getJsonForExercise(T exercise, Collection<String> firstTypes) {
+    JsonObject ex = getJsonForCommonExercise(exercise, firstTypes);
 
     addContextAudioRefs(exercise, ex, exercise.getDirectlyRelated());
     addLatestRefs(preferredVoices, exercise, ex);
@@ -279,7 +279,7 @@ public class JsonExport {
    * @see #getJsonForExercise(CommonExercise, Collection)
    */
   private <T extends AudioAttributeExercise> void addContextAudioRefs(T exercise,
-                                                                      JSONObject ex,
+                                                                      JsonObject ex,
                                                                       Collection<ClientExercise> directlyRelated) {
     AudioAttribute latestContext = exercise.getLatestContext(true);
 
@@ -295,7 +295,7 @@ public class JsonExport {
     //  String author = latestContext.getUser().getUserID();
     //  if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
     // }
-    ex.put(CTMREF, latestContext == null ? NO : latestContext.getAudioRef());
+    ex.addProperty(CTMREF, latestContext == null ? NO : latestContext.getAudioRef());
     latestContext = exercise.getLatestContext(false);
 
     if (latestContext == null) {
@@ -310,8 +310,8 @@ public class JsonExport {
     // String author = latestContext.getUser().getUserID();
     // if (CHECK_FOR_MP3) ensureMP3(latestContext.getAudioRef(), exercise.getContext(), author);
     // }
-    ex.put(CTFREF, latestContext == null ? NO : latestContext.getAudioRef());
-    ex.put(REF, exercise.hasRefAudio() ? exercise.getRefAudioWithPrefs(preferredVoices) : NO);
+    ex.addProperty(CTFREF, latestContext == null ? NO : latestContext.getAudioRef());
+    ex.addProperty(REF, exercise.hasRefAudio() ? exercise.getRefAudioWithPrefs(preferredVoices) : NO);
   }
 
   /**
@@ -328,30 +328,30 @@ public class JsonExport {
    * @return
    * @see #getJsonForExercise
    */
-  private JSONObject getJsonForCommonExercise(ClientExercise exercise, Collection<String> firstTypes) {
-    JSONObject ex = new JSONObject();
-    ex.put(ID, exercise.getID());
-    ex.put(FL, exercise.getFLToShow());
-    ex.put(TL, exercise.getTransliteration() == null ? "" : exercise.getTransliteration());
-    ex.put(EN, isEnglish && !exercise.getMeaning().isEmpty() ? exercise.getMeaning() : exercise.getEnglish());
+  private JsonObject getJsonForCommonExercise(ClientExercise exercise, Collection<String> firstTypes) {
+    JsonObject ex = new JsonObject();
+    ex.addProperty(ID, exercise.getID());
+    ex.addProperty(FL, exercise.getFLToShow());
+    ex.addProperty(TL, exercise.getTransliteration() == null ? "" : exercise.getTransliteration());
+    ex.addProperty(EN, isEnglish && !exercise.getMeaning().isEmpty() ? exercise.getMeaning() : exercise.getEnglish());
 
     Map<String, String> unitToValue = exercise.getUnitToValue();
     unitToValue.forEach((k, v) -> {
       if (!firstTypes.contains(k)) {
         String keyToUse = k.equalsIgnoreCase(SUB_TOPIC.getName()) ? SUB_TOPIC.getAlt() : k;
-        ex.put(keyToUse, v);
+        ex.addProperty(keyToUse, v);
       }
     });
-    //  if (addMeaning) ex.put(MN, exercise.getMeaning());
+    //  if (addMeaning) ex.addProperty(MN, exercise.getMeaning());
 
     if (exercise.getDirectlyRelated().isEmpty()) {
-      ex.put(CT, "");
-      ex.put(CTR, "");
+      ex.addProperty(CT, "");
+      ex.addProperty(CTR, "");
     } else {
       ClientExercise next = exercise.getDirectlyRelated().iterator().next();
-      ex.put(CTID,  next.getID());
-      ex.put(CT,  next.getFLToShow());
-      ex.put(CTR, next.getEnglish());
+      ex.addProperty(CTID,  next.getID());
+      ex.addProperty(CT,  next.getFLToShow());
+      ex.addProperty(CTR, next.getEnglish());
     }
 
     return ex;
@@ -366,7 +366,7 @@ public class JsonExport {
    * @param ex
    * @see #getJsonForExercise
    */
-  private void addLatestRefs(Collection<Integer> preferredVoices, AudioRefExercise exercise, JSONObject ex) {
+  private void addLatestRefs(Collection<Integer> preferredVoices, AudioRefExercise exercise, JsonObject ex) {
     String mr = null, ms = null, fr = null, fs = null;
     long mrt = 0, mst = 0, frt = 0, fst = 0;
     AudioAttribute mra = null, msa = null, fra = null, fsa = null;
@@ -421,21 +421,21 @@ public class JsonExport {
 //    if (mr != null) {
 //      if (CHECK_FOR_MP3) ensureMP3(mr, foreignLanguage, author);
 //    }
-    ex.put("mrr", mr == null ? NO : mr);
+    ex.addProperty("mrr", mr == null ? NO : mr);
 
 //    if (ms != null) {
 //      if (CHECK_FOR_MP3) ensureMP3(ms, foreignLanguage, author);
 //    }
-    ex.put("msr", ms == null ? NO : ms);
+    ex.addProperty("msr", ms == null ? NO : ms);
 
 //    if (fr != null) {
 //      if (CHECK_FOR_MP3) ensureMP3(fr, foreignLanguage, author);
 //    }
-    ex.put("frr", fr == null ? NO : fr);
+    ex.addProperty("frr", fr == null ? NO : fr);
 
 //    if (fs != null) {
 //      if (CHECK_FOR_MP3) ensureMP3(fs, foreignLanguage, author);
 //    }
-    ex.put("fsr", fs == null ? NO : fs);
+    ex.addProperty("fsr", fs == null ? NO : fs);
   }
 }

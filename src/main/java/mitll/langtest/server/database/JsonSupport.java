@@ -32,6 +32,8 @@
 
 package mitll.langtest.server.database;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
@@ -43,8 +45,7 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.project.Language;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -95,7 +96,7 @@ public class JsonSupport {
    * @paramx collator
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  JSONObject getJsonScoreHistory(int userid,
+  JsonObject getJsonScoreHistory(int userid,
                                  Map<String, Collection<String>> typeToSection,
                                  ExerciseSorter sorter) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
@@ -149,14 +150,14 @@ public class JsonSupport {
    * @return
    * @see #getJsonScoreHistory
    */
-  private JSONObject addJsonHistory(Collection<ExerciseCorrectAndScore> exerciseCorrectAndScores) {
-    JSONArray scores = new JSONArray();
+  private JsonObject addJsonHistory(Collection<ExerciseCorrectAndScore> exerciseCorrectAndScores) {
+    JsonArray scores = new JsonArray();
     int correct = 0, incorrect = 0;
     for (ExerciseCorrectAndScore ex : exerciseCorrectAndScores) {
       //logger.debug("for " + ex);
       List<CorrectAndScore> correctAndScoresLimited = ex.getCorrectAndScoresLimited();
 
-      JSONArray history = new JSONArray();
+      JsonArray history = new JsonArray();
       boolean lastCorrect = getHistoryAsJson(history, correctAndScoresLimited);
       boolean empty = correctAndScoresLimited.isEmpty();
       if (!empty) {
@@ -164,19 +165,19 @@ public class JsonSupport {
         else incorrect++;
       }
 
-      JSONObject exAndScores = new JSONObject();
-      exAndScores.put("ex", ex.getId());
-      exAndScores.put("s", Integer.toString(ex.getAvgScorePercent()));
-      exAndScores.put("h", history);
-      exAndScores.put("scores", getScoresAsJson(correctAndScoresLimited));
-      exAndScores.put("scoreJson", empty ? "" : correctAndScoresLimited.get(correctAndScoresLimited.size() - 1).getScoreJson());
+      JsonObject exAndScores = new JsonObject();
+      exAndScores.addProperty("ex", ex.getId());
+      exAndScores.addProperty("s", Integer.toString(ex.getAvgScorePercent()));
+      exAndScores.add("h", history);
+      exAndScores.add("scores", getScoresAsJson(correctAndScoresLimited));
+      exAndScores.addProperty("scoreJson", empty ? "" : correctAndScoresLimited.get(correctAndScoresLimited.size() - 1).getScoreJson());
       scores.add(exAndScores);
     }
 
-    JSONObject container = new JSONObject();
-    container.put("scores", scores);
-    container.put("lastCorrect", Integer.toString(correct));
-    container.put("lastIncorrect", Integer.toString(incorrect));
+    JsonObject container = new JsonObject();
+    container.add("scores", scores);
+    container.addProperty("lastCorrect", Integer.toString(correct));
+    container.addProperty("lastIncorrect", Integer.toString(incorrect));
     return container;
   }
 
@@ -186,7 +187,7 @@ public class JsonSupport {
    * @return array of Y's and N's
    * @see #addJsonHistory
    */
-  private boolean getHistoryAsJson(JSONArray history, Collection<CorrectAndScore> correctAndScoresLimited) {
+  private boolean getHistoryAsJson(JsonArray history, Collection<CorrectAndScore> correctAndScoresLimited) {
     boolean lastCorrect = false;
     for (CorrectAndScore cs : correctAndScoresLimited) {
       history.add(cs.isCorrect() ? "Y" : "N");
@@ -196,8 +197,8 @@ public class JsonSupport {
   }
 
 
-  private JSONArray getScoresAsJson(Collection<CorrectAndScore> correctAndScoresLimited) {
-    JSONArray history = new JSONArray();
+  private JsonArray getScoresAsJson(Collection<CorrectAndScore> correctAndScoresLimited) {
+    JsonArray history = new JsonArray();
     for (CorrectAndScore cs : correctAndScoresLimited) {
       history.add(round(cs.getScore()));
     }
@@ -236,7 +237,7 @@ public class JsonSupport {
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    * @see DatabaseImpl#getJsonPhoneReport
    */
-  JSONObject getJsonPhoneReport(int userid, Map<String, Collection<String>> typeToValues, String language) {
+  JsonObject getJsonPhoneReport(int userid, Map<String, Collection<String>> typeToValues, String language) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
 
     logger.info("getJsonPhoneReport : for user "+userid + " and" +

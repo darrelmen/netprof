@@ -1,9 +1,10 @@
 package mitll.langtest.server.database;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.npdata.dao.SlickProject;
-import net.sf.json.JSONObject;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +19,7 @@ public interface IReport {
                              boolean forceSend,
                              boolean getAllYears);
 
-  JSONObject writeReportToFile(ReportStats stats, PathHelper pathHelper, List<ReportStats> allReports) throws IOException;
+  JsonObject writeReportToFile(ReportStats stats, PathHelper pathHelper, List<ReportStats> allReports) throws IOException;
 
   /**
    * @param projects
@@ -27,7 +28,7 @@ public interface IReport {
    * @param allReports
    * @return
    */
-  String getAllReports(Collection<SlickProject> projects, JSONObject jsonObject, int year, List<ReportStats> allReports);
+  String getAllReports(Collection<SlickProject> projects, JsonObject jsonObject, int year, List<ReportStats> allReports);
 
   void sendExcelViaEmail(MailSupport mailSupport,
                          List<String> reportEmails,

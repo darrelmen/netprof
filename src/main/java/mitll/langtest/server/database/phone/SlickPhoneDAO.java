@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.phone;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.audio.NativeAudioResult;
@@ -44,7 +45,7 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPhone;
 import mitll.npdata.dao.SlickPhoneReport;
 import mitll.npdata.dao.phone.PhoneDAOWrapper;
-import net.sf.json.JSONObject;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -142,7 +143,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport
    */
   @Override
-  public JSONObject getWorstPhonesJson(int userid,
+  public JsonObject getWorstPhonesJson(int userid,
                                        Collection<Integer> exids,
                                        String language,
                                        Project project) {

@@ -32,8 +32,8 @@
 
 package mitll.langtest.server.database.postgres;
 
-
-import mitll.hlt.domino.shared.model.user.DBUser;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -55,8 +55,6 @@ import mitll.langtest.shared.project.ProjectType;
 import mitll.langtest.shared.user.ActiveUser;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.KoreanLTS;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -1110,7 +1108,7 @@ public class EasyReportTest extends BaseTest {
     JsonExport jsonExport = andPopulate.getJSONExport(3);
     // long now = System.currentTimeMillis();
 
-    JSONArray contentAsJson = jsonExport.getContentAsJson(false);
+    JsonArray contentAsJson = jsonExport.getContentAsJson(false);
     logger.info("Got\n\t" + contentAsJson);
   }
 
@@ -1120,7 +1118,7 @@ public class EasyReportTest extends BaseTest {
     //   Project project = andPopulate.getProject(3);
     HashMap<String, Collection<String>> typeToValues = new HashMap<>();
     typeToValues.put("Unit", Collections.singleton("21"));
-    JSONObject jsonPhoneReport = andPopulate.getJsonPhoneReport(295, 2, typeToValues);
+    JsonObject jsonPhoneReport = andPopulate.getJsonPhoneReport(295, 2, typeToValues);
     // long now = System.currentTimeMillis();
 
     logger.info("Got\n\t" + jsonPhoneReport);

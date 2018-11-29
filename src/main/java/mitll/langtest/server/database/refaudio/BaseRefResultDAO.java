@@ -32,11 +32,12 @@
 
 package mitll.langtest.server.database.refaudio;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,22 +69,22 @@ class BaseRefResultDAO extends DAO {
     }
   }
 
-  JSONObject getJsonObject(Map<Integer, List<String>> idToAnswers, Map<Integer, List<String>> idToJSONs) {
-    JSONObject jsonObject = new JSONObject();
+  JsonObject getJsonObject(Map<Integer, List<String>> idToAnswers, Map<Integer, List<String>> idToJSONs) {
+    JsonObject jsonObject = new JsonObject();
     for (Map.Entry<Integer, List<String>> pair : idToAnswers.entrySet()) {
       Integer exid = pair.getKey();
       List<String> answers = pair.getValue();
       List<String> jsons = idToJSONs.get(exid);
 
-      JSONArray array = new JSONArray();
+      JsonArray array = new JsonArray();
 
       for (int i = 0; i < answers.size(); i++) {
-        JSONObject jsonObject1 = new JSONObject();
-        jsonObject1.put("file", answers.get(i));
-        jsonObject1.put(SCORE_JSON, jsons.get(i));
+        JsonObject jsonObject1 = new JsonObject();
+        jsonObject1.addProperty("file", answers.get(i));
+        jsonObject1.addProperty(SCORE_JSON, jsons.get(i));
         array.add(jsonObject1);
       }
-      jsonObject.put(exid, array);
+      jsonObject.add(exid.toString(), array);
     }
     return jsonObject;
   }

@@ -1,8 +1,9 @@
 package mitll.langtest.server.database.report;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
-import net.sf.json.JSONObject;
+
 
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public interface ReportingServices {
    */
   void sendReport(int userID);
 
-  String getReport(int year, JSONObject jsonObject);
+  String getReport(int year, JsonObject jsonObject);
 
   Map<String, Float> getMaleFemaleProgress(int projectid);
 

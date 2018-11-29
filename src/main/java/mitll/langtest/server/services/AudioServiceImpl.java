@@ -35,6 +35,7 @@ package mitll.langtest.server.services;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.gson.JsonObject;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.services.AudioService;
 import mitll.langtest.server.FileSaver;
@@ -67,7 +68,7 @@ import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-import net.sf.json.JSONObject;
+
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -181,7 +182,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       //reportOnHeaders(request);
 
       try {
-        JSONObject jsonForStream = getJSONForStream(request, ScoreServlet.PostRequest.ALIGN, "", "");
+        JsonObject jsonForStream = getJSONForStream(request, ScoreServlet.PostRequest.ALIGN, "", "");
         configureResponse(response);
         reply(response, jsonForStream);
       } catch (Exception e) {
@@ -209,7 +210,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     response.setCharacterEncoding(UTF_8);
   }
 
-  private void reply(HttpServletResponse response, JSONObject jsonObject) {
+  private void reply(HttpServletResponse response, JsonObject jsonObject) {
     reply(response, jsonObject.toString());
   }
 
@@ -243,7 +244,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @throws ExecutionException
    * @see #service(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject getJSONForStream(HttpServletRequest request,
+  private JsonObject getJSONForStream(HttpServletRequest request,
                                       ScoreServlet.PostRequest requestType,
                                       String deviceType,
                                       String device) throws IOException, DominoSessionException, ExecutionException {
@@ -252,8 +253,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       userIDFromSession = checkSession(request);
     } catch (DominoSessionException dse) {
       logger.info("getJSONForStream got " + dse);
-      JSONObject jsonObject = new JSONObject();
-      jsonObject.put(MESSAGE, NO_SESSION);
+      JsonObject jsonObject = new JsonObject();
+      jsonObject.addProperty(MESSAGE, NO_SESSION);
       return jsonObject;
     }
 
@@ -319,7 +320,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       audioChunks.add(newChunk);
     }
 
-    JSONObject jsonObject = new JSONObject();
+    JsonObject jsonObject = new JsonObject();
     new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, validity, "" + reqid);
 
     {
@@ -353,10 +354,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     // so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
     // otherwise, we'll have to make a list and combine them...
 
-    jsonObject.put(MESSAGE, state);
-    jsonObject.put(STREAMTIMESTAMP.toString(), timestamp);
-    jsonObject.put(STREAMSPACKET.toString(), packet);
-    jsonObject.put(STREAMSTOP.toString(), isFinished);
+    jsonObject.addProperty(MESSAGE, state);
+    jsonObject.addProperty(STREAMTIMESTAMP.toString(), timestamp);
+    jsonObject.addProperty(STREAMSPACKET.toString(), packet);
+    jsonObject.addProperty(STREAMSTOP.toString(), isFinished);
 
     return jsonObject;
   }
@@ -484,7 +485,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @throws IOException
    * @throws DominoSessionException
    */
-  private JSONObject getJsonObject(String deviceType,
+  private JsonObject getJsonObject(String deviceType,
                                    String device,
                                    int userIDFromSession,
                                    int realExID,
@@ -496,7 +497,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                    AudioType audioType,
 
                                    List<AudioChunk> audioChunks,
-                                   JSONObject jsonObject) throws IOException, DominoSessionException {
+                                   JsonObject jsonObject) throws IOException, DominoSessionException {
     AudioChunk combined = isReference ? getCombinedRef(audioChunks) : getCombinedAudioChunk(audioChunks);
 
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(combined.getWavFile());
@@ -1064,7 +1065,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.warn("getAudioAnswer for " + project.getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
     AudioType audioType = audioContext.getAudioType();
-    logger.info("audio type " + audioType + " ex " +exerciseID + " "+ commonExercise);
+    logger.info("audio type " + audioType + " ex " + exerciseID + " " + commonExercise);
     String audioTranscript = getAudioTranscript(audioType, commonExercise);
     AnswerInfo.RecordingInfo recordingInfo =
         new AnswerInfo.RecordingInfo("", "", deviceType, device, audioTranscript, "");
@@ -1101,7 +1102,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         logEvent("audioRecording",
             "writeAudioFile", "" + exerciseID, "Writing audio - got zero duration!", user, device, projectID);
       } else {
-        long then=System.currentTimeMillis();
+        long then = System.currentTimeMillis();
         String path = audioAnswer.getPath();
         String actualPath = ensureAudioHelper.ensureCompressedAudio(
             user,
@@ -1117,9 +1118,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           // logger.info("Now " + actualPath);
         }
         audioAnswer.setPath(actualPath);
-        long now=System.currentTimeMillis();
+        long now = System.currentTimeMillis();
 
-        logger.info("getAudioAnswer wrote compressed version " + actualPath + " in " +(now-then));
+        logger.info("getAudioAnswer wrote compressed version " + actualPath + " in " + (now - then));
       }
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -1197,7 +1198,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     boolean isContext = audioType == AudioType.CONTEXT_REGULAR || audioType == AudioType.CONTEXT_SLOW;
 
     logger.info("addToAudioTable isContext " + isContext + " audio type " + audioType + " exercise1 " + exercise1 +
-        " is comtext " + exercise1.isContext() + "is pre " +exercise1.isPredefined()  );
+        " is comtext " + exercise1.isContext() + "is pre " + exercise1.isPredefined());
 
     String context = noExistingExercise ? "" : isContext ? getEnglish(exercise1) : exercise1.getEnglish();
 

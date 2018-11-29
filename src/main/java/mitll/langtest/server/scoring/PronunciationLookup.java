@@ -6,13 +6,12 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.LTS;
-import org.apache.commons.lang.StringUtils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.List;
 
 public class PronunciationLookup implements IPronunciationLookup {
   private static final Logger logger = LogManager.getLogger(PronunciationLookup.class);
@@ -273,8 +272,10 @@ public class PronunciationLookup implements IPronunciationLookup {
               lts + " for " + word1 + " in " + transcript);
         }
 
+        consTokens(translitTokens);
+
         String[][] translitprocess = (numTokens == 1) ?
-            lts.process(StringUtils.join(translitTokens, "")) :
+            lts.process(consTokens(translitTokens)) :
             lts.process(translitTokens[index]);
 
         if (ltsOutputOk(translitprocess)) {
@@ -329,6 +330,12 @@ public class PronunciationLookup implements IPronunciationLookup {
     }
   }
 
+  private String consTokens(String[] translitTokens) {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < translitTokens.length; i++) builder.append(translitTokens[i]);
+    return builder.toString();
+  }
+
   private int n = 0;
 
   private void addUnkPron(String transcript, StringBuilder dict, List<WordAndProns> candidates, String word) {
@@ -336,7 +343,7 @@ public class PronunciationLookup implements IPronunciationLookup {
     n++;
     if (n < 100 || n % 100 == 0) {
       logger.warn("getPronunciationsFromDictOrLTS (" + n +
-          ") using unk phone for '" + word + "' in '" + transcript +"'"+ s);
+          ") using unk phone for '" + word + "' in '" + transcript + "'" + s);
     }
     dict.append(getUnkPron(word));
     candidates.add(new WordAndProns(word, UNK));
@@ -420,7 +427,7 @@ public class PronunciationLookup implements IPronunciationLookup {
         }
       }
     } else {
-     // logger.info("hasParts for '" + token + "' split " + split.length);
+      // logger.info("hasParts for '" + token + "' split " + split.length);
       match = false;
     }
     return match ? candidates : Collections.emptyList();
@@ -620,7 +627,11 @@ public class PronunciationLookup implements IPronunciationLookup {
             process.length == 0 ||
             process[0].length == 0 ||
             process[0][0].length() == 0 ||
-            (StringUtils.join(process[0], "-")).contains(POUND));
+            (getCons(process[0])).contains(POUND));
+  }
+
+  private String getCons(String[] tokens) {
+    return String.join("-", tokens);
   }
 
   private LTS getLTS() {

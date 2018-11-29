@@ -1,5 +1,6 @@
 package mitll.langtest.server.database.custom;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -7,7 +8,7 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.user.User;
-import net.sf.json.JSONObject;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.BeforeClass;
@@ -64,7 +65,7 @@ public class ReportTest {
     //database.doReportForYear(new PathHelper("war"), "", 2016);
    // database.doReportForYear(new PathHelper("war"));
 
-    JSONObject jsonObject = new JSONObject();
+    JsonObject jsonObject = new JsonObject();
     database.getReport(-1, jsonObject);
     logger.info("got " +jsonObject);
   }

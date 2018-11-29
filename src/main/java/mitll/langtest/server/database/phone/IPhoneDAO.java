@@ -1,12 +1,12 @@
 package mitll.langtest.server.database.phone;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.analysis.PhoneBigrams;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.PhoneSummary;
 import mitll.langtest.shared.analysis.UserInfo;
-import net.sf.json.JSONObject;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +25,7 @@ public interface IPhoneDAO<T> extends IDAO {
    * @return
    * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport
    */
-  JSONObject getWorstPhonesJson(int userid, Collection<Integer> exids, String language, Project project);
+  JsonObject getWorstPhonesJson(int userid, Collection<Integer> exids, String language, Project project);
 
   /**
    * @param userid

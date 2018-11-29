@@ -32,6 +32,7 @@
 
 package mitll.langtest.server;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DAOContainer;
@@ -46,7 +47,6 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.user.User;
-import net.sf.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -193,10 +193,10 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private final Map<Integer, JSONObject> projectToNestedChaptersEverything = new HashMap<>();
+  private final Map<Integer, JsonObject> projectToNestedChaptersEverything = new HashMap<>();
   private final Map<Integer, Long> projectToWhenCachedEverything = new HashMap<>();
 
-  private final Map<Integer, JSONObject> projectToNestedChapters = new HashMap<>();
+  private final Map<Integer, JsonObject> projectToNestedChapters = new HashMap<>();
   private final Map<Integer, Long> projectToWhenCached = new HashMap<>();
 
   private JsonScoring jsonScoring;
@@ -234,13 +234,13 @@ public class ScoreServlet extends DatabaseServlet {
         return;
       } else if (realRequest == GetRequest.HASUSER) {
         logger.info("doGet got hasUser " + queryString);
-        JSONObject toReturn = new JSONObject();
+        JsonObject toReturn = new JsonObject();
         checkUserAndLogin(request, toReturn);
         reply(response, toReturn);
         return;
       }
 
-      JSONObject toReturn = new JSONObject();
+      JsonObject toReturn = new JsonObject();
 
       // fix for https://gh.ll.mit.edu/DLI-LTEA/iOSNetProF/issues/28
       if (userManagement.doGet(
@@ -298,7 +298,7 @@ public class ScoreServlet extends DatabaseServlet {
             boolean dontRemove = removeExercisesWithMissingAudio.equals("false");
             if (shouldRemoveExercisesWithNoAudio || dontRemove) {
               if (dontRemove) {
-                JSONObject nestedChaptersEverything = projectToNestedChaptersEverything.get(projid);
+                JsonObject nestedChaptersEverything = projectToNestedChaptersEverything.get(projid);
                 Long whenCachedEverything = projectToWhenCachedEverything.get(projid);
                 if (nestedChaptersEverything == null ||
                     (System.currentTimeMillis() - whenCachedEverything > REFRESH_CONTENT_INTERVAL_THREE)) {
@@ -311,10 +311,10 @@ public class ScoreServlet extends DatabaseServlet {
                 toReturn = getJsonNestedChapters(true, projid);
               }
             } else {
-              toReturn.put(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
+              toReturn.addProperty(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
             }
           } else {
-            JSONObject nestedChapters = projectToNestedChapters.get(projid);
+            JsonObject nestedChapters = projectToNestedChapters.get(projid);
             Long whenCached = projectToWhenCached.get(projid);
 
             if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
@@ -331,12 +331,12 @@ public class ScoreServlet extends DatabaseServlet {
           queryString = removePrefix(queryString, PHONE_REPORT);
           String[] split1 = queryString.split("&");
           if (split1.length < 2) {
-            toReturn.put(ERROR, "expecting at least two query parameters");
+            toReturn.addProperty(ERROR, "expecting at least two query parameters");
           } else {
             toReturn = getPhoneReport(toReturn, split1, projid, userID);
           }
         } else {
-          toReturn.put(ERROR, "unknown req " + queryString);
+          toReturn.addProperty(ERROR, "unknown req " + queryString);
         }
       } catch (Exception e) {
         logger.error(getLanguage(projid) + " : doing query " + queryString + " got " + e, e);
@@ -354,7 +354,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private void reply(HttpServletResponse response, String language, long then, JSONObject toReturn) {
+  private void reply(HttpServletResponse response, String language, long then, JsonObject toReturn) {
     long now = System.currentTimeMillis();
     long l = now - then;
     if (l > 10) {
@@ -459,7 +459,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject getPhoneReport(JSONObject toReturn, String[] split1, int projid, int userid) {
+  private JsonObject getPhoneReport(JsonObject toReturn, String[] split1, int projid, int userid) {
     Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
 
     logger.info("getPhoneSummary : user " + userid + " selection " + selection + " proj " + projid);
@@ -477,7 +477,7 @@ public class ScoreServlet extends DatabaseServlet {
             "\n\ttook      " + (now - then) + " millis");
       }
     } catch (NumberFormatException e) {
-      toReturn.put(ERROR, "User id should be a number");
+      toReturn.addProperty(ERROR, "User id should be a number");
     }
     return toReturn;
   }
@@ -499,11 +499,11 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JSONObject getChapterHistory(String queryString, JSONObject toReturn, int projectid, int userID) {
+  private JsonObject getChapterHistory(String queryString, JsonObject toReturn, int projectid, int userID) {
     logger.info("getChapterHistory for project " + projectid);
     String[] split1 = queryString.split("&");
     if (split1.length < 2) {
-      toReturn.put(ERROR, "expecting at least two query parameters");
+      toReturn.addProperty(ERROR, "expecting at least two query parameters");
     } else {
       UserAndSelection userAndSelection = new UserAndSelection(split1).invoke();
       Map<String, Collection<String>> selection = userAndSelection.getSelection();
@@ -512,7 +512,7 @@ public class ScoreServlet extends DatabaseServlet {
       try {
         toReturn = db.getJsonScoreHistory(userID, selection, getExerciseSorter(projectid), projectid);
       } catch (NumberFormatException e) {
-        toReturn.put(ERROR, "User id should be a number");
+        toReturn.addProperty(ERROR, "User id should be a number");
       }
     }
     return toReturn;
@@ -540,15 +540,15 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * @param response
-   * @param jsonObject
+   * @param JsonObject
    * @see #(HttpServletRequest, HttpServletResponse)
    */
-  private void writeJsonToOutput(HttpServletResponse response, JSONObject jsonObject) {
-    reply(response, jsonObject.toString());
+  private void writeJsonToOutput(HttpServletResponse response, JsonObject JsonObject) {
+    reply(response, JsonObject.toString());
   }
 
-  private void reply(HttpServletResponse response, JSONObject jsonObject) {
-    reply(response, jsonObject.toString());
+  private void reply(HttpServletResponse response, JsonObject JsonObject) {
+    reply(response, JsonObject.toString());
   }
 
   private void reply(HttpServletResponse response, String x) {
@@ -591,7 +591,7 @@ public class ScoreServlet extends DatabaseServlet {
     String deviceType = getOrUnk(request, DEVICE_TYPE);
     String device = getOrUnk(request, DEVICE);
 
-    JSONObject jsonObject = new JSONObject();
+    JsonObject JsonObject = new JsonObject();
     if (requestType != null) {
       PostRequest realRequest = getPostRequest(requestType);
       if (realRequest != PostRequest.EVENT) {
@@ -602,47 +602,47 @@ public class ScoreServlet extends DatabaseServlet {
 
       switch (realRequest) {
         case HASUSER:  // when ?
-          checkUserAndLogin(request, jsonObject);
+          checkUserAndLogin(request, JsonObject);
           break;
         case ADDUSER:
-          userManagement.addUser(request, requestType, deviceType, device, jsonObject);
+          userManagement.addUser(request, requestType, deviceType, device, JsonObject);
           break;
         case SETPROJECT:  // client needs to set the current user's project
-          setProjectForUser(request, jsonObject);
+          setProjectForUser(request, JsonObject);
           break;
         case ALIGN:
         case DECODE:
         case RECORD:
           try {
-            jsonObject = getJsonForAudio(request, realRequest, deviceType, device);
+            JsonObject = getJsonForAudio(request, realRequest, deviceType, device);
           } catch (IOException e) {
             logger.error("doPost got " + e, e);
-            jsonObject.put(ERROR, "got except " + e.getMessage());
+            JsonObject.addProperty(ERROR, "got except " + e.getMessage());
           }
           break;
         case STREAM:
 
         case EVENT:
-          gotLogEvent(request, device, jsonObject);
+          gotLogEvent(request, device, JsonObject);
           break;
         case ROUNDTRIP:
-          addRT(request, jsonObject);
+          addRT(request, JsonObject);
           break;
         default:
-          gotUnknown(requestType, deviceType, device, jsonObject);
+          gotUnknown(requestType, deviceType, device, JsonObject);
           break;
       }
     } else {
       logger.info("doPost request type is null - assume align.");
       try {
-        jsonObject = getJsonForAudio(request, PostRequest.ALIGN, deviceType, device);
+        JsonObject = getJsonForAudio(request, PostRequest.ALIGN, deviceType, device);
       } catch (Exception e) {
         logger.error("doPost got " + e, e);
-        jsonObject.put(ERROR, "got except " + e.getMessage());
+        JsonObject.addProperty(ERROR, "got except " + e.getMessage());
       }
     }
 
-    writeJsonToOutput(response, jsonObject);
+    writeJsonToOutput(response, JsonObject);
 
     long now = System.currentTimeMillis();
     logger.info("doPost request " + requestType + " took " + (now - then) + " millis");
@@ -657,15 +657,15 @@ public class ScoreServlet extends DatabaseServlet {
 
   /**
    * @param request
-   * @param jsonObject
+   * @param JsonObject
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    * @see #doPost(HttpServletRequest, HttpServletResponse)
    */
-  private void checkUserAndLogin(HttpServletRequest request, JSONObject jsonObject) {
+  private void checkUserAndLogin(HttpServletRequest request, JsonObject JsonObject) {
     reportOnHeaders(request);
 
     userManagement.tryToLogin(
-        jsonObject,
+        JsonObject,
         request,
         securityManager,
 
@@ -675,26 +675,26 @@ public class ScoreServlet extends DatabaseServlet {
         false);
   }
 
-  private void setProjectForUser(HttpServletRequest request, JSONObject jsonObject) {
+  private void setProjectForUser(HttpServletRequest request, JsonObject JsonObject) {
     try {
       int userID = checkSession(request);
 
       if (userID == -1) {  // how can this happen?
-        jsonObject.put(MESSAGE, "no user id");
+        JsonObject.addProperty(MESSAGE, "no user id");
       } else {
         reportOnHeaders(request);
 
         int projID = getProjID(request);
 
         if (projID > 0) {
-          userManagement.setProjectForUser(jsonObject, userID, projID);
+          userManagement.setProjectForUser(JsonObject, userID, projID);
         } else {
-          jsonObject.put(MESSAGE, "no project id");
+          JsonObject.addProperty(MESSAGE, "no project id");
         }
       }
     } catch (DominoSessionException dse) {
       logger.info("got " + dse);
-      jsonObject.put(MESSAGE, NO_SESSION);
+      JsonObject.addProperty(MESSAGE, NO_SESSION);
     }
   }
 
@@ -702,22 +702,22 @@ public class ScoreServlet extends DatabaseServlet {
    * @param requestType
    * @param deviceType
    * @param device
-   * @param jsonObject
+   * @param JsonObject
    * @see #doPost(HttpServletRequest, HttpServletResponse)
    */
-  private void gotUnknown(String requestType, String deviceType, String device, JSONObject jsonObject) {
-    jsonObject.put(ERROR, "unknown req " + requestType);
+  private void gotUnknown(String requestType, String deviceType, String device, JsonObject JsonObject) {
+    JsonObject.addProperty(ERROR, "unknown req " + requestType);
     logger.warn("doPost unknown request " + requestType + " device " + deviceType + "/" + device);
   }
 
-  private void addRT(HttpServletRequest request, JSONObject jsonObject) {
+  private void addRT(HttpServletRequest request, JsonObject JsonObject) {
     String resultID = getHeader(request, HeaderValue.RESULT_ID);
     String roundTripMillis = getHeader(request, HeaderValue.ROUND_TRIP1);
 
     try {
-      addRT(Integer.parseInt(resultID), Integer.parseInt(roundTripMillis), jsonObject);
+      addRT(Integer.parseInt(resultID), Integer.parseInt(roundTripMillis), JsonObject);
     } catch (NumberFormatException e) {
-      jsonObject.put(ERROR, "bad param format " + e.getMessage());
+      JsonObject.addProperty(ERROR, "bad param format " + e.getMessage());
     }
   }
 
@@ -753,12 +753,12 @@ public class ScoreServlet extends DatabaseServlet {
     return matched;
   }
 
-  private void gotLogEvent(HttpServletRequest request, String device, JSONObject jsonObject) {
+  private void gotLogEvent(HttpServletRequest request, String device, JsonObject JsonObject) {
     String user = getUser(request);
 
     int userid = user == null ? -1 : userManagement.getUserFromParamWarnIfBad(user);
     if (getUser(userid) == null) {
-      jsonObject.put(ERROR, "unknown user " + userid);
+      JsonObject.addProperty(ERROR, "unknown user " + userid);
     } else {
       String context = request.getHeader(CONTEXT);
       String exid = request.getHeader(EXID);
@@ -782,12 +782,12 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * @param resultID
    * @param roundTripMillis
-   * @param jsonObject
+   * @param JsonObject
    * @see #doPost(HttpServletRequest, HttpServletResponse)
    */
-  private void addRT(int resultID, int roundTripMillis, JSONObject jsonObject) {
+  private void addRT(int resultID, int roundTripMillis, JsonObject JsonObject) {
     getDAOContainer().getAnswerDAO().addRoundTrip(resultID, roundTripMillis);
-    jsonObject.put("OK", "OK");
+    JsonObject.addProperty("OK", "OK");
   }
 
   /**
@@ -821,7 +821,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return json for content
    * @see #doGet
    */
-  private JSONObject getJsonNestedChapters(boolean removeExercisesWithMissingAudio, int projectid) {
+  private JsonObject getJsonNestedChapters(boolean removeExercisesWithMissingAudio, int projectid) {
 
     if (projectid == -1) {
       logger.error("getJsonNestedChapters project id is not defined : " + projectid);
@@ -838,17 +838,17 @@ public class ScoreServlet extends DatabaseServlet {
     }
     then = now;
 
-    JSONObject jsonObject = new JSONObject();
+    JsonObject JsonObject = new JsonObject();
     {
-      jsonObject.put(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
+      JsonObject.add(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
       now = System.currentTimeMillis();
       if (now - then > 1000) {
         String language = getLanguage(projectid);
         logger.warn("getJsonNestedChapters " + language + " getContentAsJson took " + (now - then) + " millis");
       }
-      addVersion(jsonObject, projectid);
+      addVersion(JsonObject, projectid);
     }
-    return jsonObject;
+    return JsonObject;
   }
 
   private String getLanguage(int projectid) {
@@ -874,7 +874,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @throws IOException
    * @see #doPost
    */
-  private JSONObject getJsonForAudio(HttpServletRequest request,
+  private JsonObject getJsonForAudio(HttpServletRequest request,
                                      PostRequest requestType,
                                      String deviceType,
                                      String device) throws IOException {
@@ -884,9 +884,9 @@ public class ScoreServlet extends DatabaseServlet {
       checkSession(request);
     } catch (DominoSessionException dse) {
       logger.info("getJsonForAudio got " + dse);
-      JSONObject jsonObject = new JSONObject();
-      jsonObject.put(MESSAGE, NO_SESSION);
-      return jsonObject;
+      JsonObject JsonObject = new JsonObject();
+      JsonObject.addProperty(MESSAGE, NO_SESSION);
+      return JsonObject;
     }
 
     int realExID = getRealExID(request);
@@ -1184,10 +1184,10 @@ public class ScoreServlet extends DatabaseServlet {
   }*/
 
 
-  private void addVersion(JSONObject jsonObject, int projid) {
-    jsonObject.put(VERSION, VERSION_NOW);
-    jsonObject.put(HAS_MODEL, getProject(projid).hasModel());
-    jsonObject.put("Date", new Date().toString());
+  private void addVersion(JsonObject JsonObject, int projid) {
+    JsonObject.addProperty(VERSION, VERSION_NOW);
+    JsonObject.addProperty(HAS_MODEL, getProject(projid).hasModel());
+    JsonObject.addProperty("Date", new Date().toString());
   }
 
   private Project getProject(int projid) {

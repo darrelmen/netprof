@@ -118,7 +118,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     if (DEBUG) logger.info("getCurrentView currentView " + currentView);
     VIEWS currentStoredView;
     try {
-      currentStoredView = (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
+      currentStoredView = currentView == null ? VIEWS.NONE : // Not sure how this can ever happen but saw exceptions.
+          (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
     } catch (IllegalArgumentException e) {
       currentStoredView = VIEWS.NONE;
     }

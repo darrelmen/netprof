@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.client.user.UserPassLogin;
 import mitll.langtest.server.*;
@@ -104,7 +105,7 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
-import net.sf.json.JSONObject;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -1178,7 +1179,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @paramx collator
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public JSONObject getJsonScoreHistory(int userid,
+  public JsonObject getJsonScoreHistory(int userid,
                                         Map<String, Collection<String>> typeToSection,
                                         ExerciseSorter sorter,
                                         int projid) {
@@ -1187,11 +1188,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
       projid = projectForUser(userid);
     }
     if (projid == -1) {
-      return new JSONObject();
+      return new JsonObject();
     } else {
       JsonSupport jsonSupportForProject = getJsonSupportForProject(projid);
       // TODO :  maybe if the project is retired...?  how to handle this on iOS???
-      return jsonSupportForProject == null ? new JSONObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, sorter);
+      return jsonSupportForProject == null ? new JsonObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, sorter);
     }
   }
 
@@ -1222,7 +1223,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
-  public JSONObject getJsonPhoneReport(int userid, int projid, Map<String, Collection<String>> typeToValues) {
+  public JsonObject getJsonPhoneReport(int userid, int projid, Map<String, Collection<String>> typeToValues) {
     if (projid == -1) {
       projid = projectForUser(userid);
     }
@@ -1886,7 +1887,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see mitll.langtest.server.ScoreServlet#doGet(HttpServletRequest, HttpServletResponse)
    */
   @Override
-  public String getReport(int year, JSONObject jsonObject) {
+  public String getReport(int year, JsonObject jsonObject) {
     return getReport().getAllReports(getProjectDAO().getAll(), jsonObject, year, new ArrayList<>());
   }
 
@@ -1906,7 +1907,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    * @deprecated
    */
-  public List<JSONObject> doReportAllYears() {
+  public List<JsonObject> doReportAllYears() {
     return doReportForYear(-1);
   }
 
@@ -1915,8 +1916,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @deprecated JUST FOR TESTING
    */
-  public List<JSONObject> doReportForYear(int year) {
-    List<JSONObject> jsons = new ArrayList<>();
+  public List<JsonObject> doReportForYear(int year) {
+    List<JsonObject> jsons = new ArrayList<>();
     IReport report = getReport();
 
     List<ReportStats> allReports = new ArrayList<>();

@@ -1,7 +1,8 @@
 package mitll.langtest.server.database;
 
+import com.google.gson.JsonObject;
 import mitll.npdata.dao.SlickProject;
-import net.sf.json.JSONObject;
+
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -12,7 +13,7 @@ public class ReportStats {
   private final String language;
   private final String name;
   private int year;
-  private final JSONObject jsonObject;
+  private final JsonObject jsonObject;
   private String html;
 
   public enum INFO {
@@ -97,18 +98,18 @@ public class ReportStats {
   }
 
   ReportStats(SlickProject project, int year) {
-    this(project.id(), project.language(), project.name(), year, new JSONObject());
+    this(project.id(), project.language(), project.name(), year, new JsonObject());
   }
 
-  ReportStats(SlickProject project, int year, JSONObject jsonObject) {
+  ReportStats(SlickProject project, int year, JsonObject jsonObject) {
     this(project.id(), project.language(), project.name(), year, jsonObject);
   }
 
   ReportStats(int projid, String language, String name, int year) {
-    this(projid, language, name, year, new JSONObject());
+    this(projid, language, name, year, new JsonObject());
   }
 
-  private ReportStats(int projid, String language, String name, int year, JSONObject jsonObject) {
+  private ReportStats(int projid, String language, String name, int year, JsonObject jsonObject) {
     this.projid = projid;
     this.language = language;
     this.name = name;
@@ -142,7 +143,7 @@ public class ReportStats {
   }
 */
 
-  public JSONObject getJsonObject() {
+  public JsonObject getJsonObject() {
     return jsonObject;
   }
 

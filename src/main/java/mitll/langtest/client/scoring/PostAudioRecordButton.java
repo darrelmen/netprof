@@ -321,6 +321,13 @@ public abstract class PostAudioRecordButton extends RecordButton
 
     validAudio = (result.getValidity() == Validity.OK || doQuietAudioCheck(result));
 
+    if (result.getAudioAttribute() != null) {
+      if (result.getAudioAttribute().getAudioType() == null) {
+        result.getAudioAttribute().setAudioType(getAudioType());
+
+        logger.info("Audio type now " + result.getAudioAttribute().getAudioType());
+      }
+    }
     if (validAudio) {
       useResult(result);
       addRT(result.getResultID(), (int) roundtrip);

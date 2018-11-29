@@ -32,11 +32,13 @@
 
 package mitll.langtest.server.autocrt;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
-import net.sf.json.JSONObject;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -106,9 +108,9 @@ public class MiraClassifier {
 
   public Info getMiraScore(int questionID, String answer, String miraFlavor, String url, String id,
                            String question, Collection<String> alternateAnswers, Collection<String> additionalCorrect) {
-    JSONObject object = new JSONObject();
-    object.put(LANGUAGE, miraFlavor);
-    object.put(QUESTION, question);
+    JsonObject object = new JsonObject();
+    object.addProperty(LANGUAGE, miraFlavor);
+    object.addProperty(QUESTION, question);
 
     Set<String> answers = new HashSet<>();
 
@@ -123,8 +125,8 @@ public class MiraClassifier {
 
     if (!value.isEmpty()) value = value.substring(0, value.length() - 1);
 
-    object.put(ANSKEY, value);
-    object.put(RESPONSE, answer);
+    object.addProperty(ANSKEY, value);
+    object.addProperty(RESPONSE, answer);
 
     double grade = 0;
     double regressed = 0;
@@ -142,15 +144,17 @@ public class MiraClassifier {
         scoreInfo = new HTTPClient(ServerProperties.MIRA_DEVEL_HOST, true).sendAndReceiveAndClose(object.toString());
       }
 
-      JSONObject scoreJSON = JSONObject.fromObject(scoreInfo);
+      JsonParser parser = new JsonParser();
+
+      JsonObject scoreJSON = parser.parse(scoreInfo).getAsJsonObject();
 
       //logger.debug("got " + scoreJSON);
 
       if (scoreJSON.get("error") != null) {
         logger.error("Got error " + scoreJSON.get("error") + " language was '" + miraFlavor + "'");
       } else {
-        grade = scoreJSON.getDouble("grade");
-        regressed = scoreJSON.getDouble("regressed");
+        grade = scoreJSON.get("grade").getAsDouble();
+        regressed = scoreJSON.get("regressed").getAsDouble();
 
         logger.debug("mira score " + id + "/" + questionID + " : '" + answer + "' against " + answers.size() + " answers in answer key" +
             (after - before > 0 ?

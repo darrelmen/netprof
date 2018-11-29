@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.rest;
 
+import com.google.gson.JsonObject;
 import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
@@ -42,7 +43,7 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.*;
-import net.sf.json.JSONObject;
+ 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -141,27 +142,27 @@ public class RestUserManagement {
    * @return
    * @see mitll.langtest.server.ScoreServlet#doGet(HttpServletRequest, HttpServletResponse)
    */
-  public boolean doGet(HttpServletRequest request, String queryString, JSONObject toReturn) {
+  public boolean doGet(HttpServletRequest request, String queryString, JsonObject toReturn) {
     if (queryString.startsWith(FORGOT_USERNAME)) {
       String[] split1 = getParams(queryString);
       if (split1.length != 1) {
-        toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
+        toReturn.addProperty(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
       } else {
         String first = split1[0];
-        toReturn.put(VALID, forgotUsername(getArg(first)));
+        toReturn.addProperty(VALID, forgotUsername(getArg(first)));
       }
       return true;
     } else if (queryString.startsWith(RESET_PASS)) {
       logger.warn(" - calling reset " + queryString);
       String[] split1 = getParams(queryString);
       if (split1.length != 2) {
-        toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
+        toReturn.addProperty(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
         String user = getFirst(split1[0]);
         //  String second = split1[1];
         //  String emailFromDevice = getArg(second);//second.split("=")[1];
         String token = resetPassword(user, request);//emailFromDevice, request.getRequestURL().toString());
-        toReturn.put(TOKEN, token);
+        toReturn.addProperty(TOKEN, token);
       }
       return true;
     }
@@ -186,11 +187,11 @@ public class RestUserManagement {
     else if (queryString.startsWith(SET_PASSWORD)) {
       String[] split1 = getParams(queryString);
       if (split1.length != 2) {
-        toReturn.put(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
+        toReturn.addProperty(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
         String token = getFirst(split1[0]);
         String passwordH = getArg(split1[1]);
-        toReturn.put(VALID, changePFor(token, passwordH, getBaseURL(request)));
+        toReturn.addProperty(VALID, changePFor(token, passwordH, getBaseURL(request)));
       }
       return true;
     }
@@ -220,7 +221,7 @@ public class RestUserManagement {
    * @param strictValidity
    * @see ScoreServlet#checkUserAndLogin
    */
-  public void tryToLogin(JSONObject toReturn,
+  public void tryToLogin(JsonObject toReturn,
                          HttpServletRequest request,
                          IUserSecurityManager securityManager,
                          int projid,
@@ -232,32 +233,32 @@ public class RestUserManagement {
     logger.debug("tryToLogin user " + user);// + "' pass '" + passwordH.length() + "' -> " + userFound);
 
     if (userFound == null) {
-      toReturn.put(USERID, -1);
-      toReturn.put(EMAIL_H, -1);
-      toReturn.put(EMAIL, -1);
-      toReturn.put(KIND, -1);
-      toReturn.put(HAS_RESET, -1);
-      toReturn.put(TOKEN, "");
-      toReturn.put(PASSWORD_CORRECT, FALSE);
+      toReturn.addProperty(USERID, -1);
+      toReturn.addProperty(EMAIL_H, -1);
+      toReturn.addProperty(EMAIL, -1);
+      toReturn.addProperty(KIND, -1);
+      toReturn.addProperty(HAS_RESET, -1);
+      toReturn.addProperty(TOKEN, "");
+      toReturn.addProperty(PASSWORD_CORRECT, FALSE);
     } else {
       int userid = userFound.getID();
-      toReturn.put(USERID, userid);
+      toReturn.addProperty(USERID, userid);
       // TODO : do we need to do something else here?
-      toReturn.put(EMAIL_H, "");
-      toReturn.put(EMAIL, userFound.getEmail());
-      toReturn.put(KIND, userFound.getUserKind().toString());
-      toReturn.put(HAS_RESET, userFound.hasResetKey());
-      toReturn.put(TOKEN, userFound.getResetKey());
+      toReturn.addProperty(EMAIL_H, "");
+      toReturn.addProperty(EMAIL, userFound.getEmail());
+      toReturn.addProperty(KIND, userFound.getUserKind().toString());
+      toReturn.addProperty(HAS_RESET, userFound.hasResetKey());
+      toReturn.addProperty(TOKEN, userFound.getResetKey());
 
       // so we can tell if we need to collect more info, etc.
       LoginResult loginResult = loginUser(user, freeTextPassword, request, securityManager, strictValidity);
-      toReturn.put(LOGIN_RESULT, loginResult.getResultType().name());
+      toReturn.addProperty(LOGIN_RESULT, loginResult.getResultType().name());
 
       if (loginResult.getResultType() == Success && projid > 0) {
         db.rememberUsersCurrentProject(userid, projid);
       }
 
-      toReturn.put(PASSWORD_CORRECT, (loginResult.getResultType() == Success) ? TRUE : FALSE);
+      toReturn.addProperty(PASSWORD_CORRECT, (loginResult.getResultType() == Success) ? TRUE : FALSE);
     }
   }
 
@@ -268,10 +269,10 @@ public class RestUserManagement {
    * @param userID
    * @param projid
    */
-  public void setProjectForUser(JSONObject toReturn, int userID, int projid) {
+  public void setProjectForUser(JsonObject toReturn, int userID, int projid) {
     logger.debug("setProjectForUser user " + userID);
     db.getUserProjectDAO().setCurrentProjectForUser(userID, projid);
-    toReturn.put(SUCCESS, TRUE);
+    toReturn.addProperty(SUCCESS, TRUE);
   }
 
   private LoginResult loginUser(String userId,
@@ -324,7 +325,7 @@ public class RestUserManagement {
    * @param user
    * @param request
    * @return
-   * @see #doGet(HttpServletRequest, String, JSONObject)
+   * @see #doGet(HttpServletRequest, String, JsonObject)
    */
   private String resetPassword(String user, HttpServletRequest request) {
     if (user.length() == 4) user = user + "_";
@@ -396,7 +397,7 @@ public class RestUserManagement {
                       String requestType,
                       String deviceType,
                       String device,
-                      JSONObject jsonObject) {
+                      JsonObject jsonObject) {
     String user = request.getHeader(USER);
 
     User existingUser = db.getUserDAO().getUserByID(user);
@@ -449,21 +450,21 @@ public class RestUserManagement {
           user1 = getUserManagement().addUser(user2);
         } catch (NumberFormatException e) {
           logger.warn("couldn't parse age " + age);
-          jsonObject.put(ERROR, "bad age");
+          jsonObject.addProperty(ERROR, "bad age");
         }
       } else {
         try {
           user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
         } catch (Exception e) {
-          jsonObject.put(ERROR, "got " + e.getMessage());
+          jsonObject.addProperty(ERROR, "got " + e.getMessage());
           logger.error("Got " + e, e);
         }
       }
 
       if (user1 == null) { // how could this happen?
-        jsonObject.put(EXISTING_USER_NAME, "");
+        jsonObject.addProperty(EXISTING_USER_NAME, "");
       } else {
-        jsonObject.put(USERID, user1.getID());
+        jsonObject.addProperty(USERID, user1.getID());
       }
 
     } else {
@@ -472,12 +473,12 @@ public class RestUserManagement {
           " -> " + existingUser);
 
 /*      if (existingUser.hasResetKey()) {
-        jsonObject.put(ERROR, "password was reset");
+        jsonObject.addProperty(ERROR, "password was reset");
       } else {
-        jsonObject.put(USERID, existingUser.getID());
+        jsonObject.addProperty(USERID, existingUser.getID());
       }*/
 
-      jsonObject.put(EXISTING_USER_NAME, "");
+      jsonObject.addProperty(EXISTING_USER_NAME, "");
 
     }
   }
