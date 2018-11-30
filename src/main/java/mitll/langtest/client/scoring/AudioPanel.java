@@ -75,7 +75,7 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
   private static final String RECORD = "Record";
   private static final int TRANSCRIPT_IMAGE_HEIGHT = 22;
 
-   static final int LEFT_COLUMN_WIDTH = SimplePagingContainer.MAX_WIDTH;
+  static final int LEFT_COLUMN_WIDTH = SimplePagingContainer.MAX_WIDTH;
 
   static final int MIN_WIDTH = 256;
   private static final float WAVEFORM_HEIGHT = 60F;//70F;//80f;//96;
@@ -87,7 +87,7 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
 
   private static final boolean WARN_ABOUT_MISSING_AUDIO = false;
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
-   static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
+  static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
 
   protected String audioPath;
   private final Map<String, Integer> reqs = new HashMap<>();
@@ -137,7 +137,7 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
     this(controller, showSpectrogram, rightMargin, exercise, exerciseID);
     this.audioPath = path;
 
-    logger.info("\n\n\nbutton title is " +RECORD);
+    logger.info("\n\n\nbutton title is " + RECORD);
     addWidgets(playButtonSuffix, RECORD);
     if (playAudio != null) {
       if (exercise == null) {
@@ -178,7 +178,7 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
     getElement().setId("AudioPanel_exercise_" + id);
 
     int width = getImageWidth();
-  //  logger.info("AudioPanel " + getElement().getId() + " width " + width);
+    //  logger.info("AudioPanel " + getElement().getId() + " width " + width);
     setWidth(width + "px");
   }
 
@@ -191,7 +191,7 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
         if (lastWidthOuter == 0 || diff > WINDOW_SIZE_CHANGE_THRESHOLD) {
           lastWidthOuter = Window.getClientWidth();
 
-        //  logger.info("width is " + images);
+          //  logger.info("width is " + images);
           setWidth(images + "px");
         }
       }
@@ -225,9 +225,9 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
     //  imageContainer.setWidth(getImageWidth()+"px");
 
     Panel hp = new DivWidget();
-   // hp.setVerticalAlignment(ALIGN_MIDDLE);
+    // hp.setVerticalAlignment(ALIGN_MIDDLE);
     hp.getElement().setId("AudioPanel_hp");
-hp.addStyleName("floatLeft");
+    hp.addStyleName("floatLeft");
     // add widgets to left of play button
     Widget toTheRightWidget = getAfterPlayWidget();
     audioPositionPopup = new AudioPositionPopup(imageContainer);
@@ -470,7 +470,7 @@ hp.addStyleName("floatLeft");
       int leftColumnWidth = LEFT_COLUMN_WIDTH + IMAGE_WIDTH_SLOP;
       int widthForWaveform = getWidthForWaveform(LEFT_COLUMN_WIDTH, leftColumnWidth);
 
-    //  logger.info("left " + leftColumnWidth + " width " + widthForWaveform);
+      //  logger.info("left " + leftColumnWidth + " width " + widthForWaveform);
 
       return Math.min(770, widthForWaveform);//, rightSide);
     } catch (Exception e) {
@@ -509,14 +509,13 @@ hp.addStyleName("floatLeft");
    * @see #getImages()
    */
   void getEachImage(int width) {
-   // logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
+    // logger.info("AudioPanel.getEachImage : " + getElement().getId()+ " path " + audioPath + " width " +width);
     if (audioPath == null || audioPath.isEmpty()) {
-      logger.warning("getEachImage audio path is " +audioPath);
+      logger.warning("getEachImage audio path is " + audioPath);
 
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
 //      logger.info("logException stack " + exceptionAsString);
-    }
-    else {
+    } else {
       getImageURLForAudio(audioPath, WAVEFORM, width, getWaveform());
       if (showSpectrogram) {
         getImageURLForAudio(audioPath, SPECTROGRAM, width, getSpectrogram());

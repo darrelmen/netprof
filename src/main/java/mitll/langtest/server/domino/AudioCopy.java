@@ -27,7 +27,6 @@ public class AudioCopy {
   private final IProjectManagement projectManagement;
 
   /**
-   *
    * @param projectServices
    * @param projectManagement
    * @param daoContainer
@@ -46,8 +45,7 @@ public class AudioCopy {
    * @param dominoToExID
    * @see ProjectSync#addPending
    */
-  public <T extends ClientExercise> void copyAudio(int projectid,
-                                                   Collection<T> newEx,
+  public <T extends ClientExercise> void copyAudio(int projectid, Collection<T> newEx,
                                                    Map<Integer, Integer> dominoToExID) {
     try {
       List<Project> sourceProjects = getProjectsForSameLanguage(projectid);

@@ -166,7 +166,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @see #getTableWithPager
    */
   protected CellTable<T> makeCellTable(boolean sortEnglish) {
-    //  logger.info("simplePaging : makeCellTable -------- ");
+   logger.info("simplePaging : makeCellTable -------- " + sortEnglish);
     CellTable.Resources o = chooseResources();
     this.table = makeCellTable(o);
 

@@ -166,7 +166,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    */
   @Override
   public void useResult(AudioAnswer result) {
-  //  logger.info("useResult -- " + result);
+    logger.info("useResult -- " + result);
     recordAudioPanel.getImagesForPath(result.getPath());
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordCompleted(recordAudioPanel);
@@ -175,7 +175,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   @Override
-  protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+  public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
     super.useInvalidResult(exid, validity, dynamicRange);
     //   logger.info("WaveformPostAudioRecordButton : got invalid result " + result);
     hideWaveform();
@@ -191,7 +191,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     getWaveform().setVisible(false);
   }
 
-  private void setPlayEnabled(boolean val) {
+  protected void setPlayEnabled(boolean val) {
     //logger.info("setPlayEnabled -- " + getElement().getExID() + " : valid audio ? " + hasValidAudio() + " enable " + val);
     playAudioPanel.setEnabled(val && hasValidAudio());
   }

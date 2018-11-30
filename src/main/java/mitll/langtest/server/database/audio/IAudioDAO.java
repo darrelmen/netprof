@@ -111,6 +111,8 @@ public interface IAudioDAO extends IDAO {
 
   boolean hasAudio(int exid);
 
+  AudioAttribute getTranscriptMatch(int projID, String transcript);
+
   void addOrUpdateUser(int userid, int projid, AudioAttribute attr);
 
   int markDefect(AudioAttribute attribute);

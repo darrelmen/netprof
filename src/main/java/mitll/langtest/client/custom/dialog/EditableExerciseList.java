@@ -57,7 +57,8 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
         new ListOptions()
             .setInstance(instanceName)
             .setShowTypeAhead(false)
-            .setSort(false), 12);
+            .setSort(false)
+        , 12);
     setUserListID(list.getID());
     this.list = list;
 
@@ -311,6 +312,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
 
   /**
    * Wrap around!
+   *
    * @see #loadNextExercise
    */
   @Override

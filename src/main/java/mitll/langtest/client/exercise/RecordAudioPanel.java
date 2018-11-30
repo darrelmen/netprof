@@ -116,19 +116,24 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
     this.index = index;
     this.exercise = exercise;
     this.audioType = audioType;
-    AudioAttribute attribute = getAudioAttribute();
 
+    AudioAttribute attribute = getAudioAttribute();
     logger.info("RecordAudioPanel for " + exercise.getID() +
         "\n\taudio type " + audioType +
         "\n\tfirst ref  " + exercise.getRefAudio() +
         "\n\tpath       " + attribute);
 
-    if (attribute != null) {
-      this.audioPath = attribute.getAudioRef();
-    }
+    setAudioPathFromAttribute(attribute);
 
     addWidgets("", getRecordButtonTitle());
     //getElement().setId("RecordAudioPanel_" + exercise.getID() + "_" + index + "_" + audioType);
+  }
+
+  public AudioAttribute setAudioPathFromAttribute(AudioAttribute attribute) {
+    if (attribute != null) {
+      this.audioPath = attribute.getAudioRef();
+    }
+    return attribute;
   }
 
   /**
@@ -374,7 +379,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
     }
 
     @Override
-    protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+    public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
       super.useInvalidResult(exid, validity, dynamicRange);
       showDynamicRange(dynamicRange);
     }

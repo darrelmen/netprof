@@ -38,6 +38,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -192,13 +194,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     {
       //final String id1 = "" + listID;
-     // foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
+      // foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
       // focusOn(formField); // Bad idea since steals the focus after search
       makeTranslitRow(upper);
-     // translit.box.getElement().setId("NewUserExercise_Transliteration_entry_for_list_" + id1);
+      // translit.box.getElement().setId("NewUserExercise_Transliteration_entry_for_list_" + id1);
 
       makeEnglishRow(upper);
-     // english.box.getElement().setId("NewUserExercise_English_entry_for_list_" + id1);
+      // english.box.getElement().setId("NewUserExercise_English_entry_for_list_" + id1);
     }
 
     makeOptionalRows(upper);
@@ -257,6 +259,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       boolean hasText = !context.box.getText().trim().isEmpty();
       //  logger.info("Got key up " + hasText);
       rapContext.setEnabled(hasText);
+
     });
   }
 
@@ -440,9 +443,45 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     box.setText(newUserExercise.getContext());
     markPlaceholder(box, newUserExercise.getContext(), "Context Sentence (optional)");
     addOnBlur(box, CONTEXT_BOX);
+    box.addBlurHandler(new BlurHandler() {
+      @Override
+      public void onBlur(BlurEvent blurEvent) {
+        gotContextBlur(box.getText());
+      }
+    });
 
     useAnnotation(newUserExercise, CONTEXT, contextAnno);
     return formField;
+  }
+
+  private void gotContextBlur(String text) {
+    logger.info("gotContextBlur " + text);
+    controller.getAudioService().getTranscriptMatch(controller.getProjectStartupInfo().getProjectid(),
+        text, new AsyncCallback<AudioAttribute>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+
+          }
+
+          @Override
+          public void onSuccess(AudioAttribute audioAttribute) {
+            if (audioAttribute != null) {
+              AudioAnswer audioAnswer = new AudioAnswer();
+              audioAnswer.setAudioAttribute(audioAttribute);
+              String actualPath = audioAttribute.getAudioRef();
+              logger.info("\n\n\n\ngot existing actualPath: " + actualPath);
+
+              audioAnswer.setPath(actualPath);
+              rapContext.getPostAudioButton().useResult(audioAnswer);
+              logger.info("\n\n\n\ngot existing audio attribute : " + audioAttribute);
+              //useAudioAttribute2(audioAttribute);
+            } else {
+              logger.info("got NO existing audio attribute : ");
+              rapContext.getPostAudioButton().useInvalidResult(newUserExercise.getID(), Validity.OK, 0D);
+              //clearContext();
+            }
+          }
+        });
   }
 
   private void markPlaceholder(TextBoxBase box, String content, String hint) {
@@ -583,6 +622,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             contextChanged() ||
             contextTransChanged() ||
             refAudioChanged() ||
+            contextAudioChanged() ||
             slowRefAudioChanged();
   }
 
@@ -619,15 +659,22 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   private boolean refAudioChanged() {
-    String refAudio = newUserExercise.getRefAudio();
-    return (refAudio == null && originalRefAudio != null) || (refAudio != null && !refAudio.equals(originalRefAudio));
+    return compareRefs(newUserExercise.getRefAudio(), this.originalRefAudio);
   }
 
   private boolean slowRefAudioChanged() {
-    String slowAudioRef = newUserExercise.getSlowAudioRef();
+    return compareRefs(newUserExercise.getSlowAudioRef(), this.originalSlowRefAudio);
+  }
+
+  private boolean contextAudioChanged() {
+    return compareRefs(newUserExercise.getRefAudio(), this.originalRefAudio);
+  }
+
+  private boolean compareRefs(String refAudio, String originalRefAudio) {
     return
-        (slowAudioRef == null && originalSlowRefAudio != null) ||
-            (slowAudioRef != null && !slowAudioRef.equals(originalSlowRefAudio));
+        (refAudio == null && originalRefAudio != null) ||
+            (refAudio != null && originalRefAudio == null) ||
+            (refAudio != null && !refAudio.equals(originalRefAudio));
   }
 
 
@@ -964,26 +1011,15 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
               AudioAttribute audioAttribute = result.getAudioAttribute();
 
               if (audioAttribute != null) {
-                logger.info("useAudioAttribute audio type " + audioAttribute.getAudioType());
-
-
-//                if (recordRegularSpeed) {
-//                  audioAttribute.markRegular();
-//                } else {
-//                  audioAttribute.markSlow();
-//                }
-                if (getAudioType() == AudioType.CONTEXT_REGULAR) {
-                  addToContext(audioAttribute);
-                } else {
-                  newUserExercise.getMutableAudio().addAudio(audioAttribute);
-                }
+//                logger.info("useAudioAttribute audio type " + audioAttribute.getAudioType());
+                useAudioAttribute2(audioAttribute);
               } else {
                 logger.warning("useAudioAttribute no valid audio on " + result);
               }
             }
 
             @Override
-            protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+            public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
               super.useInvalidResult(exid, validity, dynamicRange);
 
               MutableAudioExercise mutableAudio = newUserExercise.getMutableAudio();
@@ -1000,15 +1036,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       return postAudioButton;
     }
 
-    private void addToContext(AudioAttribute audioAttribute) {
-      List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
-      if (directlyRelated.isEmpty()) {
-        logger.warning("no context sentence?");
-      } else {
-        ClientExercise clientExercise = directlyRelated.get(0);
-        clientExercise.getMutableAudio().addAudio(audioAttribute);
-      }
-    }
 
     void setOtherRAPs(List<RecordAudioPanel> otherRAPs) {
       this.otherRAPs = otherRAPs;
@@ -1016,6 +1043,38 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     WaveformPostAudioRecordButton getPostAudioButton() {
       return postAudioButton;
+    }
+  }
+
+  void useAudioAttribute2(AudioAttribute audioAttribute) {
+    if (audioAttribute.getAudioType() == AudioType.CONTEXT_REGULAR) {
+      addToContext(audioAttribute);
+
+      rapContext.setAudioPathFromAttribute(audioAttribute);
+    } else {
+      newUserExercise.getMutableAudio().addAudio(audioAttribute);
+    }
+  }
+
+  private void addToContext(AudioAttribute audioAttribute) {
+    List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+    if (directlyRelated.isEmpty()) {
+      logger.warning("no context sentence?");
+    } else {
+      ClientExercise clientExercise = directlyRelated.get(0);
+      clientExercise.getMutableAudio().addAudio(audioAttribute);
+    }
+  }
+
+  private void clearContext() {
+    List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+    if (directlyRelated.isEmpty()) {
+      logger.info("no context sentence?");
+    } else {
+      ClientExercise clientExercise = directlyRelated.get(0);
+      if (!clientExercise.getMutableAudio().clearRefAudio()) {
+        logger.info("Didn't clear context ref audio?");
+      }
     }
   }
 

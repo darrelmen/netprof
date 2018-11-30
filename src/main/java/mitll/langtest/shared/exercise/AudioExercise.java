@@ -141,9 +141,13 @@ public class AudioExercise extends ExerciseShell {
   /**
    * CLIENT ONLY
    */
-  public synchronized void clearRefAudio() {
+  public synchronized boolean clearRefAudio() {
     AudioAttribute audio = getRegularSpeed();
-    if (audio != null) audioAttributes.remove(audio.getKey());
+    if (audio != null) {
+      return audioAttributes.remove(audio.getKey()) != null;
+    } else {
+      return false;
+    }
   }
 
   /**

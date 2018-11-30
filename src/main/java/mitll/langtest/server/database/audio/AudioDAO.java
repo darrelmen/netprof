@@ -76,6 +76,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   }
 
+  @Override
+  public AudioAttribute getTranscriptMatch(int projID, String transcript) {
+    return null;
+  }
+
   /**
    * @param database
    * @param userDAO

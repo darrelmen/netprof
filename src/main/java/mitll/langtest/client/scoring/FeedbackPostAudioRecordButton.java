@@ -94,8 +94,8 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    * @see RecordingListener#stopRecording(long, boolean)
    */
   @Override
-  protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
-    logger.info("useInvalidResult " + validity);
+  public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+   // logger.info("useInvalidResult " + validity);
     super.useInvalidResult(exid, validity, dynamicRange);
     simpleRecordAudioPanel.useInvalidResult(exid, validity == Validity.OK);
   }

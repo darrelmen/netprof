@@ -43,7 +43,7 @@ public interface MutableAudioExercise {
 
   boolean removeAudio(AudioAttribute audioAttribute);
 
-  void clearRefAudio();
+  boolean clearRefAudio();
 
   void clearSlowRefAudio();
 }

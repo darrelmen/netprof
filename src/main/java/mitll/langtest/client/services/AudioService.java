@@ -39,6 +39,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.ProjectInfo;
@@ -54,14 +55,13 @@ import mitll.langtest.shared.scoring.RecalcRefResponse;
 @RemoteServiceRelativePath("audio-manager")
 public interface AudioService extends RemoteService {
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
-   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, String)
    * @param base64EncodedString encoded audio bytes
    * @param audioContext
    * @param deviceType
    * @param device
-
    * @return
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
+   * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, String)
    */
   AudioAnswer writeAudioFile(String base64EncodedString,
                              AudioContext audioContext,
@@ -71,13 +71,14 @@ public interface AudioService extends RemoteService {
 
   /**
    * TODO : why exerciseID a String
-   * @see LangTest#getImage
+   *
    * @param reqid
    * @param audioFile
    * @param imageType
    * @param imageOptions
    * @param exerciseID
    * @return
+   * @see LangTest#getImage
    */
   ImageResponse getImageForAudioFile(int reqid,
                                      String audioFile, String imageType, ImageOptions imageOptions,
@@ -85,16 +86,18 @@ public interface AudioService extends RemoteService {
                                      String language) throws DominoSessionException;
 
   /**
-   * @see mitll.langtest.client.project.ProjectEditForm#getCheckAudio(ProjectInfo)
    * @param projectid
+   * @see mitll.langtest.client.project.ProjectEditForm#getCheckAudio(ProjectInfo)
    */
   void checkAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
+
   RecalcRefResponse recalcRefAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
 
-  void logMessage(String subject,String message, boolean sendEmail);
+  void logMessage(String subject, String message, boolean sendEmail);
+
+  AudioAttribute getTranscriptMatch(int projID, String transcript) throws DominoSessionException;
 
   /**
-   *
    * @return
    */
   StartupInfo getStartupInfo();

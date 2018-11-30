@@ -34,6 +34,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.StartupInfo;
@@ -102,4 +103,5 @@ public interface AudioServiceAsync {
    */
   void editItem(ClientExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
 
+  void getTranscriptMatch(int projID, String transcript, AsyncCallback<AudioAttribute> async);
 }

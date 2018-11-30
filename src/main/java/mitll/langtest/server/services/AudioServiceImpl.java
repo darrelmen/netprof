@@ -69,6 +69,7 @@ import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
+import mitll.npdata.dao.SlickAudio;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -84,7 +85,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -1241,6 +1241,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   /**
    * Has hack if somehow we get a context exercise in here that is not marked as such.
+   *
    * @param exercise1
    * @return
    */
@@ -1417,6 +1418,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (sendEmail) {
       sendEmail("TEST : " + subject, getInfo(prefixedMessage));
     }
+  }
+
+  @Override
+  public AudioAttribute getTranscriptMatch(int projID, String transcript) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    return getDatabase().getAudioDAO().getTranscriptMatch(projID, transcript);
   }
 
   @Override

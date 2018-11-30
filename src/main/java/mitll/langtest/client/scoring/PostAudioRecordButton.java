@@ -358,7 +358,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @param dynamicRange
    * @see PostAudioRecordButton#onPostSuccess
    */
-  protected void useInvalidResult(int exid, Validity validity, double dynamicRange) {
+  public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
     controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + validity);
     logger.info("useInvalidResult platform is " + getPlatform() + " validity " + validity);
     if (!checkAndShowTooLoud(validity)) {

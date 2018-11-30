@@ -258,6 +258,26 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
+   * TODO : FIX the path -? add bestAudio/spanish prefix
+   * @param projID
+   * @param transcript
+   * @return
+   */
+  public AudioAttribute getTranscriptMatch(int projID, String transcript) {
+    List<SlickAudio> transcriptMatch = dao.getTranscriptMatch(projID, transcript);
+    if (!transcriptMatch.isEmpty()) {
+      if (transcriptMatch.size() > 1)
+        logger.info("found " + transcriptMatch.size() + " matches -- choosing the first one.");
+
+      AudioAttribute audioAttribute = getAudioAttribute(transcriptMatch.get(0), new HashMap<>(), false);
+
+      logger.info("getTranscriptMatch Match! '" + transcript + "' = " + audioAttribute);
+
+      return audioAttribute;
+    } else return null;
+  }
+
+  /**
    * @param projID
    * @param exids
    * @return
@@ -373,7 +393,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
     return new HashSet<>();
   }*/
-
   @Override
   int markDefect(int userid, int exerciseID, AudioType audioType) {
     return dao.markDefect(userid, exerciseID, audioType.toString());
