@@ -29,6 +29,8 @@ import java.util.logging.Logger;
 class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> implements FeedbackExerciseList {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
 
+  public static final String SAFE_TEXT_REPLACEMENT = "&#39;";
+
   /**
    * @see #onClickAdd
    */
@@ -102,7 +104,6 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
 
     {
       Button add = getAddButton();
-
       addW.add(getTypeahead(add));
       {
 
@@ -334,7 +335,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   }
 
   private String getSafeText(TextBox box) {
-    return sanitize(box.getText()).replaceAll("&#39;", "'");
+    return sanitize(box.getText()).replaceAll(SAFE_TEXT_REPLACEMENT, "'");
   }
 
   private String sanitize(String text) {

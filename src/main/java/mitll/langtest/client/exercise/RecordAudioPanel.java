@@ -106,8 +106,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
                           int index,
                           boolean showSpectrogram,
                           AudioType audioType) {
-    super(
-        controller, showSpectrogram,
+    super(controller, showSpectrogram,
         0,
         exercise,
         exercise.getID()
@@ -119,10 +118,10 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
     this.audioType = audioType;
     AudioAttribute attribute = getAudioAttribute();
 
-/*    logger.info("RecordAudioPanel for " + exercise.getID() +
+    logger.info("RecordAudioPanel for " + exercise.getID() +
         "\n\taudio type " + audioType +
-        "\n\tref        " + exercise.getRefAudio() +
-        "\n\tpath       " + attribute);*/
+        "\n\tfirst ref  " + exercise.getRefAudio() +
+        "\n\tpath       " + attribute);
 
     if (attribute != null) {
       this.audioPath = attribute.getAudioRef();
@@ -169,14 +168,8 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
    * @return
    */
   public AudioAttribute getAudioAttribute() {
-    long user = controller.getUserState().getUser();
-    AudioAttribute audioAttribute =
-        audioType.equals(AudioType.REGULAR) ?
-            exercise.getRecordingsBy(controller.getUser(), true) :
-            audioType.equals(AudioType.SLOW) ?
-                exercise.getRecordingsBy(controller.getUser(), false) : null;
-
     if (audioType.isContext()) {
+      long user = controller.getUserState().getUser();
       for (AudioAttribute audioAttribute1 : exercise.getContextAudio()) {
         if (audioAttribute1.getUserid() == user) {
           return audioAttribute1;
@@ -184,7 +177,11 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
       }
       return null;
     } else {
-      return audioAttribute;
+      return
+          audioType.equals(AudioType.REGULAR) ?
+              exercise.getRecordingsBy(controller.getUser(), true) :
+              audioType.equals(AudioType.SLOW) ?
+                  exercise.getRecordingsBy(controller.getUser(), false) : null;
     }
   }
 
@@ -242,6 +239,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   protected void showStop() {
     recordImage1.setVisible(false);
   }
+
   protected void showStart() {
     recordImage1.setVisible(true);
   }
@@ -350,7 +348,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
     @Override
     public boolean stopRecording(long duration, boolean abort) {
       now = System.currentTimeMillis();
-     // logger.info("stopRecording " + now + " diff " + (now - then) + " millis");
+      // logger.info("stopRecording " + now + " diff " + (now - then) + " millis");
       boolean b = super.stopRecording(duration, abort);
       showStop();
       return b;

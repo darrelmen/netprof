@@ -420,6 +420,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }*/
   }
 
+  /**
+   * Really a student - sometimes can be student with additional permissions!
+   * @param userIDFromSessionOrDB
+   * @return
+   */
   @Override
   public boolean isStudent(int userIDFromSessionOrDB) {
     User user = getByID(userIDFromSessionOrDB);

@@ -129,6 +129,11 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
+  public List<Integer> getByProjectExactMatch(int projid, int creator, String fl) {
+    return null;
+  }
+
+  @Override
   public ExerciseDAOWrapper getDao() {
     return null;
   }

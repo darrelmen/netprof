@@ -36,6 +36,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.npdata.dao.SlickExercisePhone;
@@ -69,6 +70,9 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
                        IAudioDAO audioDAO,
                        int projid,
                        Database database, boolean isMyProject);
+
+  List<CommonExercise> getExactMatch(String fl, int userIDFromSession);
+
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp);
 
   /**

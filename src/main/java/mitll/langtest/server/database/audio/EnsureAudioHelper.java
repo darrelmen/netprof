@@ -334,11 +334,12 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
 
     String s = ensureWAV(audioFile);
 
+    /*
     logger.info("getWavAudioFile" +
         "\n\treqFile      " + reqFile +
         "\n\taudio before " + audioFile +
         "\n\tafter        " + s
-    );
+    );*/
 
     return s;
   }

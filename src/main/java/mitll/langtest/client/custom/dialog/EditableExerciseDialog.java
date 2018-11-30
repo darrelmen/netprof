@@ -46,9 +46,12 @@ import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.custom.dialog.EditableExerciseList.SAFE_TEXT_REPLACEMENT;
 
 /**
  * Creates a dialog that lets you edit an item
@@ -115,7 +118,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    */
   @Override
   protected ControlGroup makeRegularAudioPanel(Panel row) {
-   // logger.info("makeRegularAudioPanel new user is " + newUserExercise);
+    // logger.info("makeRegularAudioPanel new user is " + newUserExercise);
     rap = makeRecordAudioPanel(newUserExercise, row, AudioType.REGULAR);
     fastAnno.addStyleName("topFiveMargin");
     return addControlGroupEntrySimple(row, "", rap, fastAnno);
@@ -278,8 +281,13 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   }
 
   private void setFL(U newUserExercise) {
-    foreignLang.box.setText(originalForeign = newUserExercise.getForeignLanguage().trim());
+    foreignLang.box.setText(originalForeign = normalize(newUserExercise.getForeignLanguage()));
     useAnnotation(newUserExercise, FOREIGN_LANGUAGE, foreignAnno);
+  }
+
+  @NotNull
+  private String normalize(String foreignLanguage) {
+    return foreignLanguage.trim().replaceAll(SAFE_TEXT_REPLACEMENT, "'");
   }
 
   /**
@@ -292,7 +300,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
 
     String text = context.box.getText();
     boolean val = !text.isEmpty();
-   // logger.info("Set context '" + text + "' = " + val);
+    // logger.info("Set context '" + text + "' = " + val);
     rapContext.setEnabled(val);
 
     if (!useAnnotation(newUserExercise, CONTEXT, contextAnno)) {
@@ -317,15 +325,16 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   }
 
   private void setEnglish(U newUserExercise) {
-    String english = isEnglish() ? getMeaning(newUserExercise) : newUserExercise.getEnglish();
+    String english = normalize(isEnglish() ? getMeaning(newUserExercise) : newUserExercise.getEnglish());
+
     this.originalEnglish = english;
     this.english.box.setText(english);
     ((TextBox) this.english.box).setVisibleLength(english.length() + 4);
-    if (english.length() > 20) {
-      this.english.box.setWidth("500px");
-    }
-    String field = isEnglish() ? MEANING : ENGLISH;
-    useAnnotation(newUserExercise, field, englishAnno);
+//    if (english.length() > 20) {
+//      this.english.box.setWidth("500px");
+//    }
+
+    useAnnotation(newUserExercise, isEnglish() ? MEANING : ENGLISH, englishAnno);
   }
 
   /**

@@ -230,7 +230,7 @@ class DialogReader {
       rawEntries.forEach(rawEntry -> {
         String entry = rawEntry.trim();
 
-        CommonExercise exerciseBySearch = project.getExerciseBySearch(entry);
+        CommonExercise exerciseBySearch = project.getExerciseByExactMatch(entry);
 
         if (exerciseBySearch != null) {
           remember(coreExercises, entry, exerciseBySearch);
@@ -239,7 +239,7 @@ class DialogReader {
 
           // remove things in parens
           entry = entry.replaceAll("\\([^()]*\\)", "");
-          exerciseBySearch = project.getExerciseBySearch(entry);
+          exerciseBySearch = project.getExerciseByExactMatch(entry);
 
           if (exerciseBySearch == null) {
             logger.warn("getCVs 1 can't find token '" + entry + "'");
@@ -247,12 +247,12 @@ class DialogReader {
             String[] split1 = entry.split("\\/");
             if (split1.length > 1) {
               entry = split1[0].trim();
-              exerciseBySearch = project.getExerciseBySearch(entry);
+              exerciseBySearch = project.getExerciseByExactMatch(entry);
               if (exerciseBySearch == null) {
                 logger.warn("getCVs 2 can't find token '" + entry + "'");
 
                 entry = entry.replaceAll("~", "").trim();
-                exerciseBySearch = project.getExerciseBySearch(entry);
+                exerciseBySearch = project.getExerciseByExactMatch(entry);
                 if (exerciseBySearch == null) {
                   logger.warn("getCVs 3 can't find token '" + entry + "'");
                 } else {
@@ -342,7 +342,7 @@ class DialogReader {
     String[] tokens = exercise.getForeignLanguage().split(" ");
     Set<String> uniq = new HashSet<>(Arrays.asList(tokens));
     uniq.forEach(token -> {
-      CommonExercise exerciseBySearch = project.getExerciseBySearch(token);
+      CommonExercise exerciseBySearch = project.getExerciseByExactMatch(token);
       if (exerciseBySearch != null) {
         coreExercises.add(exerciseBySearch);
       }

@@ -95,10 +95,10 @@ public interface IUserListManager {
   UserList getUserListNoExercises(int userListID);
 
   /**
+   * Really put the exercise in the database.
    * @see ListServiceImpl#newExercise
-   * @paramx userListID
-   * @paramx userExercise
-   * @paramx mediaDir
+   * @param userListID
+   * @param userExercise
    */
    void newExercise(int userListID, CommonExercise userExercise);
 

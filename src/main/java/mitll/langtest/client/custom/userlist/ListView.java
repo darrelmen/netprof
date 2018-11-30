@@ -44,6 +44,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
@@ -70,11 +71,14 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
-  private static final String PRACTICE_THE_LIST = "Practice the list.";
-  public static final int MAX_HEIGHT = 710;
-  public static final String IMPORT = "Import";
-  public static final int MIN_WIDTH = 599;
+  public static final String MAKE_A_NEW_LIST = "Make a new list.";
+  public static final String CAN_T_IMPORT_INTO_FAVORITES = "Can't import into favorites...";
   private final Logger logger = Logger.getLogger("ListView");
+
+  private static final String PRACTICE_THE_LIST = "Practice the list.";
+  private static final int MAX_HEIGHT = 710;
+  private static final String IMPORT = "Import";
+  private static final int MIN_WIDTH = 599;
 
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
   private static final String MY_LISTS = "myLists";
@@ -405,8 +409,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void doImport() {
     UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
-    boolean favorite = currentSelection.isFavorite();
-    doImport(currentSelection, favorite);
+    doImport(currentSelection, currentSelection.isFavorite());
   }
 
   private void doImport(UserList<CommonShell> currentSelection, boolean favorite) {
@@ -427,12 +430,10 @@ public class ListView implements ContentView, CreateListComplete {
           @Override
           public boolean gotYes() {
             if (favorite) {
-              Window.alert("Can't import into favorites...");
+              Window.alert(CAN_T_IMPORT_INTO_FAVORITES);
               return false;
             } else {
               importBulk.doBulk(controller, currentSelection, myLists);
-
-
               return true;
             }
           }
@@ -579,7 +580,7 @@ public class ListView implements ContentView, CreateListComplete {
     final Button add = new Button("", IconType.PLUS);
     add.addClickHandler(event -> dialogHelper = doAdd());
     add.setType(ButtonType.SUCCESS);
-    addTooltip(add, "Make a new list.");
+    addTooltip(add, MAKE_A_NEW_LIST);
     return add;
   }
 
@@ -639,7 +640,7 @@ public class ListView implements ContentView, CreateListComplete {
     }
   }
 
-  private void doDelete(Button delete, UserList<CommonShell> currentSelection) {
+  private void doDelete(UIObject delete, UserList<CommonShell> currentSelection) {
     final int uniqueID = currentSelection.getID();
     controller.logEvent(delete, "Button", currentSelection.getName(), "Delete");
 
@@ -656,7 +657,7 @@ public class ListView implements ContentView, CreateListComplete {
         @Override
         public void onSuccess(Boolean result) {
           if (result) {
-            removeFromLists(delete, myLists, currentSelection);
+            removeFromLists(myLists, currentSelection);
           } else {
             logger.warning("deleteList ---> did not do deleteList " + uniqueID);
           }
@@ -692,10 +693,9 @@ public class ListView implements ContentView, CreateListComplete {
   private void gotDeleteVisitor(Button delete, UserList<CommonShell> currentSelection, ListContainer container) {
     if (currentSelection == null) return;
 
-    final int uniqueID = currentSelection.getID();
-
     delete.setEnabled(false);
-    controller.getListService().removeVisitor(uniqueID, controller.getUser(), new AsyncCallback<Void>() {
+
+    controller.getListService().removeVisitor(currentSelection.getID(), controller.getUser(), new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         delete.setEnabled(true);
@@ -705,12 +705,12 @@ public class ListView implements ContentView, CreateListComplete {
       @Override
       public void onSuccess(Void result) {
         delete.setEnabled(true);
-        removeFromLists(delete, container, currentSelection);
+        removeFromLists(container, currentSelection);
       }
     });
   }
 
-  private void removeFromLists(Button delete, ListContainer listContainer, UserList<CommonShell> currentSelection) {
+  private void removeFromLists(ListContainer listContainer, UserList<CommonShell> currentSelection) {
     if (listContainer == myLists) {
       String name = currentSelection.getName();
       names.remove(name);

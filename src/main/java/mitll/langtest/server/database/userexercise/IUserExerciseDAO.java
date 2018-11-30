@@ -124,10 +124,9 @@ public interface IUserExerciseDAO extends IDAO {
   void addBulk(List<SlickExercise> bulk);
 
   /**
-   * @paramx userExercise
-   * @paramx isOverride
-   * @paramx isContext
-   * @paramx typeOrder
+   * @param userExercise
+   * @param isContext
+   * @param typeOrder
    * @return
    * @seex IUserListManager#newExercise(int, CommonExercise, String)
    */
@@ -185,6 +184,8 @@ public interface IUserExerciseDAO extends IDAO {
       Project theProject,
       Map<Integer, ExerciseAttribute> allByProject,
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs, boolean isPredef);
+
+  List<Integer> getByProjectExactMatch(int projid, int creator, String fl);
 
   /**
    *

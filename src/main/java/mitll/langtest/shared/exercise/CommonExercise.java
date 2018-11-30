@@ -59,13 +59,6 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
   List<String> getFirstPron();
 
   /**
-   * Sorta deprecated - can't make an exercise anymore.
-   * SERVER Only
-   * @return
-   */
-//  boolean isPredefined();
-
-  /**
    * SERVER Only
    * @return
    */

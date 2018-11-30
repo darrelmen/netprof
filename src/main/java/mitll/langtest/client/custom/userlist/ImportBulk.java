@@ -102,14 +102,14 @@ class ImportBulk {
 
             int numItems = ulid.getNumItems();
             ulid.setExercises(newExercises);
-            int after=ulid.getNumItems();
-            if (after==numItems) new ModalInfoDialog("No changes","No items were imported, check the format and try again.");
+            int after = ulid.getNumItems();
+            if (after == numItems)
+              new ModalInfoDialog("No changes", "No items were imported, check the format and try again.");
 //            int numItems = currentSelection.getNumItems();
 //            logger.info("editList : on " + currentSelection.getName() + " now " + numItems);
 
             myLists.flush();
             myLists.redraw();
-
           }
         });
   }

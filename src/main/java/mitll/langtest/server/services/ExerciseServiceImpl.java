@@ -760,7 +760,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private void addAnnotationsAndAudio(int userID, CommonExercise firstExercise, boolean isQC, int projID) {
     long then = System.currentTimeMillis();
 
-    logger.info("addAnnotationsAndAudio adding anno to " + firstExercise.getID() + " with " + firstExercise.getDirectlyRelated().size() + " context exercises");
+    logger.info("addAnnotationsAndAudio adding anno to " + firstExercise.getID() +
+        "\n\twith " + firstExercise.getDirectlyRelated().size() + " context exercises");
     addAnnotations(firstExercise); // todo do this in a better way
 
     long now = System.currentTimeMillis();
@@ -771,10 +772,11 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       logger.debug("addAnnotationsAndAudio : (" + language + ") took " + (now - then) + " millis to add annotations to exercise " + oldID);
     }
     then = now;
-    int i = attachAudio(firstExercise);
+    // int i = attachAudio(firstExercise);
+    db.getAudioDAO().attachAudioToExercises(Collections.singleton(firstExercise), db.getLanguageEnum(projID), projID);
 
     if (DEBUG) {
-      logger.info("attached " + i + " audio cuts to " + firstExercise.getID());
+      // logger.info("attached " + i + " audio cuts to " + firstExercise.getID());
       for (AudioAttribute audioAttribute : firstExercise.getAudioAttributes())
         logger.debug("\t addAnnotationsAndAudio ex " + oldID + " audio " + audioAttribute);
     }
@@ -829,9 +831,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param firstExercise
    * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, int)
    */
-  private int attachAudio(CommonExercise firstExercise) {
-    return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguageEnum(firstExercise), new HashMap<>());
-  }
+//  private int attachAudio(CommonExercise firstExercise) {
+//    return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguageEnum(firstExercise), new HashMap<>());
+//  }
 
   /**
    * Only add the played markings if doing QC.
@@ -1319,7 +1321,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 //    logger.info("getCommonExercisesWithoutAudio " + ids);
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
-      logger.info("getCommonExercisesWithoutAudio Got " + byID + " " + byID.getDirectlyRelated());
+      logger.info("getCommonExercisesWithoutAudio Got " + byID + " : " + byID.getDirectlyRelated());
       addAnnotations(byID); // todo do this in a better way
       //if (true || byID.getAudioAttributes().isEmpty()) {
       toAddAudioTo.add(byID);

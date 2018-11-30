@@ -111,13 +111,12 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
     this.numContext = numContext;
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
-   */
-//  public CommonShell getShell() {
-//    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, isContext);
-//  }
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof ExerciseShell &&
+        (getID() == ((ExerciseShell) other).getID());
+  }
+
   public String getEnglish() {
     return english;
   }
@@ -138,12 +137,6 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
 
   public void setForeignLanguage(String foreignLanguage) {
     this.foreignLanguage = foreignLanguage;
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    return other instanceof ExerciseShell &&
-        (getID() == ((ExerciseShell) other).getID());
   }
 
   @Override

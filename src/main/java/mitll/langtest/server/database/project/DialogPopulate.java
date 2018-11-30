@@ -76,8 +76,8 @@ public class DialogPopulate {
   }
 
   /**
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyDialog
    * @param project
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyDialog
    */
   public boolean populateDatabase(Project project) {
     int projid = project.getID();
@@ -85,16 +85,14 @@ public class DialogPopulate {
     if (!dialogDAO.getDialogs(projid).isEmpty()) {
       return false;
     } else {
-
-      for (int i = 0; i< 20;i++) {
+      for (int i = 0; i < 20; i++) {
         if (project.getFullTrie() == null) {
           try {
             Thread.sleep(1000);
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
-        }
-        else break;
+        } else break;
       }
 
       Map<ClientExercise, String> exToAudio = new HashMap<>();
@@ -171,13 +169,10 @@ public class DialogPopulate {
           // add the audio
         });
 
-
         addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
 
-        {
-          AudioCopy audioCopy = new AudioCopy(db, db.getProjectManagement(), db);
-          audioCopy.copyAudio(projid, allImportExToID.keySet(), new HashMap<>());
-        }
+        new AudioCopy(db, db.getProjectManagement(), db)
+            .copyAudio(projid, allImportExToID.keySet(), new HashMap<>());
       }
 
       return true;
@@ -267,13 +262,13 @@ public class DialogPopulate {
   }
 
   /**
-   * @see #populateDatabase
    * @param dialogDAO
    * @param defaultUser
    * @param modified
    * @param attrToInt
    * @param dialog
    * @param dialogID
+   * @see #populateDatabase
    */
   private void addDialogAttributes(IDialogDAO dialogDAO, int defaultUser, Timestamp modified,
                                    Map<ExerciseAttribute, Integer> attrToInt,

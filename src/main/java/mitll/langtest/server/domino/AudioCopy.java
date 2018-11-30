@@ -7,10 +7,12 @@ import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.SlickAudio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -24,8 +26,13 @@ public class AudioCopy {
   private final ProjectServices projectServices;
   private final IProjectManagement projectManagement;
 
-  public AudioCopy(ProjectServices projectServices,
-                   IProjectManagement projectManagement, DAOContainer daoContainer) {
+  /**
+   *
+   * @param projectServices
+   * @param projectManagement
+   * @param daoContainer
+   */
+  public AudioCopy(ProjectServices projectServices, IProjectManagement projectManagement, DAOContainer daoContainer) {
     this.projectServices = projectServices;
     this.projectManagement = projectManagement;
     this.daoContainer = daoContainer;
@@ -37,10 +44,11 @@ public class AudioCopy {
    * @param projectid
    * @param newEx
    * @param dominoToExID
-   * @paramx exToInt
    * @see ProjectSync#addPending
    */
-  public <T extends ClientExercise> void copyAudio(int projectid, Collection<T> newEx, Map<Integer, Integer> dominoToExID) {
+  public <T extends ClientExercise> void copyAudio(int projectid,
+                                                   Collection<T> newEx,
+                                                   Map<Integer, Integer> dominoToExID) {
     try {
       List<Project> sourceProjects = getProjectsForSameLanguage(projectid);
 
@@ -70,22 +78,30 @@ public class AudioCopy {
       }
 
       if (!sourceProjects.isEmpty()) {
-        List<SlickAudio> copies = getSlickAudios(copyAudioForEx, copyAudioForContext);
-        if (copies.isEmpty()) {
-          logger.info("copyAudio - no audio copies for " + newEx.size() + " exercises...");
-        } else {
-          logger.info("copyAudio :" +
-              "\n\tcopying      " + copyAudioForEx + "/" + copyAudioForContext +
-              "\n\taudio        " + copies.size() +
-              "\n\tfrom         " + newEx.size() +
-              "\n\tfrom sources " + nSourceProjects +
-              " projects, e.g.  " + sourceProjects.iterator().next().getProject().name());
-
-          daoContainer.getAudioDAO().addBulk(copies);
-        }
+        addCopiesToDatabase(newEx, sourceProjects, nSourceProjects, copyAudioForEx, copyAudioForContext);
       }
     } catch (Exception e) {
       logger.info("Got " + e, e);
+    }
+  }
+
+  private <T extends ClientExercise> void addCopiesToDatabase(Collection<T> newEx,
+                                                              List<Project> sourceProjects,
+                                                              int nSourceProjects,
+                                                              Collection<AudioMatches> copyAudioForEx,
+                                                              Collection<AudioMatches> copyAudioForContext) {
+    List<SlickAudio> copies = getSlickAudios(copyAudioForEx, copyAudioForContext);
+    if (copies.isEmpty()) {
+      logger.info("copyAudio - no audio copies for " + newEx.size() + " exercises...");
+    } else {
+      logger.info("copyAudio :" +
+          "\n\tcopying      " + copyAudioForEx + "/" + copyAudioForContext +
+          "\n\taudio        " + copies.size() +
+          "\n\tfrom         " + newEx.size() +
+          "\n\tfrom sources " + nSourceProjects +
+          " projects, e.g.  " + sourceProjects.iterator().next().getProject().name());
+
+      daoContainer.getAudioDAO().addBulk(copies);
     }
   }
 
@@ -112,24 +128,26 @@ public class AudioCopy {
     return transcriptToAudio;
   }
 
-
   /**
-   * OK to look for source audio from your own project...
-   * Could be a copied entry...
+   * OK to look for source audio from your own project if your own project is in the state of PRODUCTION.
+   *
+   * TODO : Revisit this assumption???
+   *
+   * Could be a copied entry from something already in the same project.
    *
    * @param projectid
-   * @return
+   * @return list of production projects of that language
    * @see #copyAudio
    */
   private List<Project> getProjectsForSameLanguage(int projectid) {
-    String language = projectServices.getProject(projectid).getLanguage();
+    Language language = projectServices.getProject(projectid).getLanguageEnum();
 
     // logger.info("getProjectsForSameLanguage look for " + language + " for " + projectid);
 
     return projectManagement
         .getProductionProjects()
         .stream()
-        .filter(project -> project.getLanguage().equals(language))
+        .filter(project -> project.getLanguageEnum() == language)
         .collect(Collectors.toList());
   }
 
@@ -139,6 +157,7 @@ public class AudioCopy {
    * @param copyAudioForEx
    * @param copyAudioForContext
    * @return
+   * @see #copyAudio
    */
   @NotNull
   private List<SlickAudio> getSlickAudios(Collection<AudioMatches> copyAudioForEx,
@@ -156,17 +175,16 @@ public class AudioCopy {
    * @param transcriptToAudio
    * @param transcriptToMatches        - output
    * @param transcriptToContextMatches
-   * @paramx xoldIDToExID
    * @see #copyAudio
    */
   @NotNull
   private <T extends ClientExercise> void getSlickAudios(int projectid,
-                              Collection<T> newEx,
-                              Map<Integer, Integer> dominoToExID,
-                              Map<String, List<SlickAudio>> transcriptToAudio,
+                                                         Collection<T> newEx,
+                                                         Map<Integer, Integer> dominoToExID,
+                                                         Map<String, List<SlickAudio>> transcriptToAudio,
 
-                              Collection<AudioMatches> transcriptToMatches,
-                              Collection<AudioMatches> transcriptToContextMatches) {
+                                                         Collection<AudioMatches> transcriptToMatches,
+                                                         Collection<AudioMatches> transcriptToContextMatches) {
     logger.info("getSlickAudios" +
         "\n\tnewEx                      " + newEx.size() +
         "\n\ttranscriptToAudio          " + transcriptToAudio.size()
@@ -175,37 +193,13 @@ public class AudioCopy {
     MatchInfo vocab = new MatchInfo(0, 0);
     MatchInfo contextCounts = new MatchInfo(0, 0);
 
+    boolean hasDominoMap = !dominoToExID.isEmpty();
+
     for (T ex : newEx) {
       Integer exid = ex.getID();
 
-      if (exid == -1) {
-        int dominoID = ex.getDominoID();
-        exid = dominoToExID.get(dominoID);
-
-        String oldID = ex.getOldID();
-        if (exid == null && !oldID.equalsIgnoreCase(UNKNOWN)) {
-          //  String oldID = oldID1;
-          //   exid = oldIDToExID.get(oldID);
-          logger.info("getSlickAudios exercise old " + oldID + " -> " + exid +
-              "\n\teng " + ex.getEnglish() +
-              "\n\tfl  " + ex.getForeignLanguage());
-        } else {
-          logger.info("getSlickAudios exercise dominoID " + dominoID + " -> ex id " + exid +
-              "\n\teng " + ex.getEnglish() +
-              "\n\tfl  " + ex.getForeignLanguage());
-        }
-
-        if (exid == null) {
-
-          String message = "getSlickAudios : huh? can't find domino ID " + dominoID + " in " + dominoToExID.size();
-          if (dominoID == -1) {
-            logger.warn(message);
-          }
-          else {
-            logger.error(message);
-          }
-          // logger.error("getSlickAudios : huh? can't find old    ID " + oldID + " in " + oldIDToExID.size());
-        }
+      if (exid == -1 && hasDominoMap) {
+        exid = getExerciseForDominoID(dominoToExID, ex);
       }
 
       if (exid == null || exid == -1) {
@@ -217,11 +211,43 @@ public class AudioCopy {
         } else {
           vocab.add(addAudioForVocab(projectid, transcriptToAudio, transcriptToMatches, ex, exid));
         }
-        contextCounts.add(addAudioForContext(projectid, //oldIDToExID,
+        contextCounts.add(addAudioForContext(projectid,
             transcriptToAudio, transcriptToContextMatches, ex.getDirectlyRelated()));
       }
     }
+
     logger.info("getSlickAudio  : vocab " + vocab + " contextCounts " + contextCounts);
+  }
+
+  @Nullable
+  private <T extends ClientExercise> Integer getExerciseForDominoID(Map<Integer, Integer> dominoToExID, T ex) {
+    Integer exid;
+    int dominoID = ex.getDominoID();
+    exid = dominoToExID.get(dominoID);
+
+    String oldID = ex.getOldID();
+    if (exid == null && !oldID.equalsIgnoreCase(UNKNOWN)) {
+      //  String oldID = oldID1;
+      //   exid = oldIDToExID.get(oldID);
+      logger.info("getSlickAudios exercise old " + oldID + " -> " + exid +
+          "\n\teng " + ex.getEnglish() +
+          "\n\tfl  " + ex.getForeignLanguage());
+    } else {
+      logger.info("getSlickAudios exercise dominoID " + dominoID + " -> ex id " + exid +
+          "\n\teng " + ex.getEnglish() +
+          "\n\tfl  " + ex.getForeignLanguage());
+    }
+
+    if (exid == null) {
+      String message = "getSlickAudios : huh? can't find domino ID " + dominoID + " in " + dominoToExID.size();
+      if (dominoID == -1) {
+        logger.warn(message);
+      } else {
+        logger.error(message);
+      }
+      // logger.error("getSlickAudios : huh? can't find old    ID " + oldID + " in " + oldIDToExID.size());
+    }
+    return exid;
   }
 
 
@@ -321,7 +347,7 @@ public class AudioCopy {
    *
    * @param projectid
    * @param exid
-   * @param audioAttributes
+   * @param slickAudios
    * @param isContext
    * @return SlickAudio collection of new SlickAudios to add to database.
    * @see #addAudioForVocab
@@ -329,56 +355,67 @@ public class AudioCopy {
    */
   private AudioMatches copyMatchingAudio(int projectid,
                                          int exid,
-                                         List<SlickAudio> audioAttributes,
+                                         List<SlickAudio> slickAudios,
                                          boolean isContext) {
     AudioMatches audioMatches = new AudioMatches();
 
-    if (exid == -1)
-      logger.error("copyMatchingAudio huh? exid -1 for project " + projectid + " " + audioAttributes.size());
+    if (exid == -1) {
+      logger.error("copyMatchingAudio huh? exid -1 for project " + projectid + " " + slickAudios.size());
+    }
+
     Timestamp modified = new Timestamp(System.currentTimeMillis());
-    List<SlickAudio> audioToUse = audioAttributes;
+    List<SlickAudio> audioToUse = slickAudios;
 
     // if the audio match is from a vocab item, don't take slow speed audio, and then convert the type to context.
     if (isContext) {
       audioToUse = audioToUse
           .stream()
-          .filter(slickAudio -> (
-              slickAudio.audiotype().equalsIgnoreCase(AudioType.CONTEXT_REGULAR.toString()) ||
-                  isRegular(slickAudio)
-          ))
+          .filter(slickAudio ->
+              {
+                String audiotype = slickAudio.audiotype();
+                return audiotype.equalsIgnoreCase(AudioType.CONTEXT_REGULAR.toString()) || isRegular(audiotype);
+              }
+          )
           .collect(Collectors.toList());
     }
-    audioToUse.forEach(audio -> {
-      String audiotype = audio.audiotype();
-      if (isContext && isRegular(audio)) {
-        audiotype = AudioType.CONTEXT_REGULAR.toString().toLowerCase();
-      }
-      SlickAudio audio1 = new SlickAudio(
-          -1,
-          audio.userid(),
-          exid,
-          modified,
-          audio.audioref(),
-          audiotype,
-          audio.duration(),
-          audio.defect(),
-          audio.transcript(),
-          projectid,
-          audio.exists(),
-          audio.lastcheck(),
-          audio.actualpath(),
-          audio.dnr(),
-          audio.resultid(),
-          audio.gender()
-      );
-      audioMatches.add(audio1);
-    });
+
+    audioToUse.forEach(audio ->
+        audioMatches.add(new SlickAudio(
+            -1,
+            audio.userid(),
+            exid,
+            modified,
+            audio.audioref(),
+            getAudioType(isContext, audio),
+            audio.duration(),
+            audio.defect(),
+            audio.transcript(),
+            projectid,
+            audio.exists(),
+            audio.lastcheck(),
+            audio.actualpath(),
+            audio.dnr(),
+            audio.resultid(),
+            audio.gender()
+        )));
 
     return audioMatches;
   }
 
-  private boolean isRegular(SlickAudio slickAudio) {
-    return slickAudio.audiotype().equalsIgnoreCase(AudioType.REGULAR.toString());
+  private String getAudioType(boolean isContext, SlickAudio audio) {
+    String audiotype = audio.audiotype();
+    if (isContext && isRegular(audiotype)) {
+      audiotype = AudioType.CONTEXT_REGULAR.toString().toLowerCase();
+    }
+    return audiotype;
+  }
+
+//  private boolean isRegular(SlickAudio slickAudio) {
+//    return isRegular(slickAudio.audiotype());
+//  }
+
+  private boolean isRegular(String audiotype) {
+    return audiotype.equalsIgnoreCase(AudioType.REGULAR.toString());
   }
 
   static class AudioMatches {

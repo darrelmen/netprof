@@ -1002,13 +1002,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     }
   }
 
-/*
-  @Override
-  public Map<Integer, String> getIDToFL(int projid) {
-    return null;
-  }
-*/
-
   @Override
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp) {
   }
@@ -1016,5 +1009,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   @Override
   public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
 
+  }
+
+  @Override
+  public List<CommonExercise> getExactMatch(String fl, int userIDFromSession) {
+    return null;
   }
 }

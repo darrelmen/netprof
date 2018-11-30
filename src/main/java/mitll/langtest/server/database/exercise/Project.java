@@ -509,8 +509,8 @@ public class Project implements IPronunciationLookup {
    * @seex mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
    * @see mitll.langtest.server.ScoreServlet#getExerciseIDFromText
    */
-  public CommonExercise getExerciseBySearch(String prefix) {
-    return getMatchEither(prefix, fullTrie.getExercises(prefix));
+  public CommonExercise getExerciseByExactMatch(String prefix) {
+    return getMatchEitherFLOrEnglish(prefix, fullTrie.getExercises(prefix));
   }
 
   public CommonExercise getExerciseBySearchBoth(String english, String fl) {
@@ -563,7 +563,7 @@ public class Project implements IPronunciationLookup {
       }
 
       if (exercise == null) {
-        exercise = getMatchEither(english, fl, exercisesInVocab);
+        exercise = getMatchEitherFLOrEnglish(english, fl, exercisesInVocab);
         logger.info("\tgetExerciseBySearchBoth looking for '" + english + " and " + fl +
             " found " + exercise);
       }
@@ -571,7 +571,7 @@ public class Project implements IPronunciationLookup {
       if (exercise == null && !fl.isEmpty()) {
         List<CommonExercise> fullContextTrieExercises = fullContextTrie.getExercises(fl);
         logger.info("\tinitially context num = " + fullContextTrieExercises.size());
-        exercise = getMatchEither(english, fl, fullContextTrieExercises);
+        exercise = getMatchEitherFLOrEnglish(english, fl, fullContextTrieExercises);
         if (exercise != null && !exercise.getDirectlyRelated().isEmpty()) {
           exercise = getFirstContext(exercise);
         }
@@ -604,7 +604,14 @@ public class Project implements IPronunciationLookup {
     return first.orElse(null);
   }
 
-  private CommonExercise getMatchEither(String prefix, List<CommonExercise> exercises1) {
+  /**
+   * Case insensitive.
+   *
+   * @param prefix
+   * @param exercises1
+   * @return
+   */
+  private CommonExercise getMatchEitherFLOrEnglish(String prefix, List<CommonExercise> exercises1) {
     Optional<CommonExercise> first = exercises1
         .stream()
         .filter(p ->
@@ -614,7 +621,7 @@ public class Project implements IPronunciationLookup {
     return first.orElse(null);
   }
 
-  private CommonExercise getMatchEither(String prefix, String fl, List<CommonExercise> exercises1) {
+  private CommonExercise getMatchEitherFLOrEnglish(String prefix, String fl, List<CommonExercise> exercises1) {
     Optional<CommonExercise> first = exercises1
         .stream()
         .filter(p ->

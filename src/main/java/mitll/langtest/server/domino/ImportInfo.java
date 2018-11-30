@@ -117,7 +117,7 @@ public class ImportInfo {
    * @see ProjectSync#doDelete
    * @return
    */
-  public Set<String> getDeletedNPIDs() {
+  Set<String> getDeletedNPIDs() {
     return deletedNPIDs;
   }
 
@@ -137,7 +137,6 @@ public class ImportInfo {
         //"\n\tnp->domino " + getNpToDomino().size()
         ;
   }
-
 /*
   public Map<String, Integer> getNpToDomino() {
     return npToDomino;

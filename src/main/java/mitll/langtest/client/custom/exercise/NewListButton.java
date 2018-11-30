@@ -1,5 +1,6 @@
 package mitll.langtest.client.custom.exercise;
 
+import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
@@ -30,6 +31,9 @@ public class NewListButton {
   private final ExerciseController controller;
   private final Widget dropdown;
 
+  private final PopupContainerFactory popupContainerFactory = new PopupContainerFactory();
+  private PopupContainerFactory.HidePopupTextBox textBox;
+
   /**
    * @param exid
    * @param controller
@@ -45,9 +49,10 @@ public class NewListButton {
     this.dropdown = dropdown;
   }
 
-  private final PopupContainerFactory popupContainerFactory = new PopupContainerFactory();
-  private PopupContainerFactory.HidePopupTextBox textBox;
-
+  /**
+   * @see UserListSupport#addNewListChoice
+   * @return
+   */
   public DecoratedPopupPanel getNewListButton2() {
     final PopupContainerFactory.HidePopupTextBox textBox = getTextBoxForNewList();
     this.textBox = textBox;
@@ -73,6 +78,11 @@ public class NewListButton {
     return textBox;
   }
 
+  /**
+   * @see #getNewListButton2()
+   * @see #getTextBoxForNewList
+   * @param textEntry
+   */
   private void makeANewList(TextBox textEntry) {
     String newListName = textEntry.getValue().trim();
     if (!newListName.isEmpty()) {

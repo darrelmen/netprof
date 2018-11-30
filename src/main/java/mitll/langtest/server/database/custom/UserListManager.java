@@ -708,7 +708,6 @@ public class UserListManager implements IUserListManager {
 //    exercisePhoneInfo = getExercisePhoneInfo(lookup, foreignlanguage, transliteration);
 //    int n2 = getNumPhones(lookup, exercisePhoneInfo, foreignlanguage, transliteration);
 
-
     int newExerciseID = userExerciseDAO.add(userExercise, false, typeOrder);
 
     setNumPhones(userExercise, project, newExerciseID);

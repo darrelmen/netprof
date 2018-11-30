@@ -72,21 +72,18 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> extends BasicDialog {
-  private static final String CONTEXT_BOX = "ContextBox = ";
-  public static final String CLICK_HERE_TO_GO_TO_DOMINO = "Click here to go to domino.";
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
-//  private static final String OPTIONAL = "optional";
-//  private static final String WIDGET_ID = "NewUserExercise_WaveformPostAudioRecordButton_";
+  private static final int MARGIN_BOTTOM = 4;
+
+  private static final String CONTEXT_BOX = "ContextBox = ";
+  private static final String CLICK_HERE_TO_GO_TO_DOMINO = "Click here to go to domino.";
 
   public static final String CONTEXT = "context";
   static final String CONTEXT_TRANSLATION = "context translation";
 
-
-  private static final int TEXT_FIELD_WIDTH = 500;
   private static final int WIDE_TEXT_FIELD_WIDTH = 750;
   private static final int LABEL_WIDTH = 105;
-
 
   private static final String ENGLISH_LABEL = "English";
   private static final String ENGLISH_LABEL_2 = "Meaning";
@@ -129,11 +126,14 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * @see #makeRegularAudioPanel
    */
-  CreateFirstRecordAudioPanel rap, rapSlow, rapContext;
+  CreateFirstRecordAudioPanel rap, rapSlow;
+  /**
+   * @see
+   */
+  CreateFirstRecordAudioPanel rapContext;
 
   ControlGroup normalSpeedRecording = null;
   ControlGroup slowSpeedRecording = null;
-  private ControlGroup contextRecording = null;
 
   private final int listID;
   private Panel toAddTo;
@@ -170,6 +170,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     DivWidget upper = new DivWidget();
     upper.getElement().setId("addNewFieldContainer");
     upper.addStyleName("buttonGroupInset4");
+    upper.getElement().getStyle().setPaddingBottom(1, Style.Unit.PX);
 
     {
       container.getElement().setId("NewUserExercise_container");
@@ -190,15 +191,14 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     makeForeignLangRow(upper);
 
     {
-      final String id1 = "" + listID;
-
-      foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
+      //final String id1 = "" + listID;
+     // foreignLang.box.getElement().setId("NewUserExercise_ForeignLang_entry_for_list_" + id1);
       // focusOn(formField); // Bad idea since steals the focus after search
       makeTranslitRow(upper);
-      translit.box.getElement().setId("NewUserExercise_Transliteration_entry_for_list_" + id1);
+     // translit.box.getElement().setId("NewUserExercise_Transliteration_entry_for_list_" + id1);
 
       makeEnglishRow(upper);
-      english.box.getElement().setId("NewUserExercise_English_entry_for_list_" + id1);
+     // english.box.getElement().setId("NewUserExercise_English_entry_for_list_" + id1);
     }
 
     makeOptionalRows(upper);
@@ -236,8 +236,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   /**
-   * @see #addFields
    * @param upper
+   * @see #addFields
    */
   private void makeOptionalRows(DivWidget upper) {
     makeContextRow(upper);
@@ -246,6 +246,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   /**
    * Tie to the context audio record box
+   *
    * @param container
    */
   private void makeContextRow(Panel container) {
@@ -254,7 +255,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     context = addContext(container, newUserExercise);
     context.box.addKeyUpHandler(keyUpEvent -> {
       boolean hasText = !context.box.getText().trim().isEmpty();
-    //  logger.info("Got key up " + hasText);
+      //  logger.info("Got key up " + hasText);
       rapContext.setEnabled(hasText);
     });
   }
@@ -294,7 +295,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     slowSpeedRecording = makeSlowAudioPanel(row);
     slowSpeedRecording.addStyleName("buttonGroupInset5");
 
-    contextRecording = makeContextAudioPanel(row);
+    ControlGroup contextRecording = makeContextAudioPanel(row);
     contextRecording.addStyleName("buttonGroupInset5");
 
     List<RecordAudioPanel> raps = new ArrayList<>();
@@ -346,14 +347,16 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   /**
    * TODO: do this without the cast!
+   *
    * @param row
    * @return
    */
   ControlGroup makeContextAudioPanel(Panel row) {
     U next = (U) newUserExercise.getDirectlyRelated().iterator().next();
+    logger.info("makeContextAudioPanel make context from " + next.getID());
     rapContext = makeRecordAudioPanel(next, row, AudioType.CONTEXT_REGULAR);
 
-  //  logger.info("set enabled false!");
+    //  logger.info("set enabled false!");
     rapContext.setEnabled(false);
     return addControlGroupEntrySimple(row, "", rapContext);
   }
@@ -407,7 +410,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   protected void setMarginBottom(FormField foreignLang) {
-    foreignLang.box.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    foreignLang.box.getElement().getStyle().setMarginBottom(MARGIN_BOTTOM, Style.Unit.PX);
   }
 
   private void makeTranslitRow(Panel container) {
@@ -803,7 +806,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       mutableContext.setEnglish(contextTrans.getSafeText());
     }
 
-  //  logger.info("context now " + contextSentenceExercise.getID() + " " + contextSentenceExercise.getEnglish() + " " + contextSentenceExercise.getForeignLanguage());
+    //  logger.info("context now " + contextSentenceExercise.getID() + " " + contextSentenceExercise.getEnglish() + " " + contextSentenceExercise.getForeignLanguage());
     //  Collection<U> directlyRelated1 = mutableExercise.getDirectlyRelated();
     //  logger.info("grabInfoFromFormAndStuffInfoExercise context now " + directlyRelated1.iterator().next().getForeignLanguage());
     //  }
@@ -822,7 +825,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   private FormField makeBoxAndAnno(Panel row, String subtext, HTML annoBox) {
     FormField formField = addControlFormFieldHorizontal(row, "", subtext,
         false, 1, annoBox,
-        LABEL_WIDTH, TEXT_FIELD_WIDTH);
+        LABEL_WIDTH, WIDE_TEXT_FIELD_WIDTH);
     styleBox(annoBox, formField);
     return formField;
   }
@@ -874,9 +877,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
      * @see #makeRecordAudioPanel
      */
     CreateFirstRecordAudioPanel(U newExercise, Panel row, AudioType audioType) {
-      super(newExercise, NewUserExercise.this.controller, row, 0, false,
-          audioType);
-     // logger.info("reg speed " + audioType);
+      super(newExercise, NewUserExercise.this.controller, row, 0, false, audioType);
+      // logger.info("reg speed " + audioType);
       this.audioType = audioType;
       setExercise(newExercise);
 
@@ -896,14 +898,14 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 //      getPostAudioButton().getElement().setId(WIDGET_ID + speed);
 //      getPlayButton().getElement().setId(WIDGET_ID + "Play_" + speed);
       User current = controller.getUserManager().getCurrent();
-    //  logger.info("kind = " +current.getUserKind());
+      //  logger.info("kind = " +current.getUserKind());
       boolean teacher = !current.isStudent() || !current.getPermissions().isEmpty();
       setEnabled(teacher);
       controller.register(getPlayButton(), newExercise.getID());
     }
 
     private void disableOthers(boolean b) {
-  //    logger.info("disable others " +b);
+      //    logger.info("disable others " +b);
       otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(b));
     }
 
@@ -952,7 +954,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             public void useResult(AudioAnswer result) {
               super.useResult(result);
 
-               logger.info("useResult got back " + result.getAudioAttribute() + " for " + newUserExercise);
+              logger.info("useResult got back " + result.getAudioAttribute() +
+                  "\n\tfor " + newUserExercise);
               useAudioAttribute(result);
               audioPosted();
             }
@@ -969,7 +972,11 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 //                } else {
 //                  audioAttribute.markSlow();
 //                }
-                newUserExercise.getMutableAudio().addAudio(audioAttribute);
+                if (getAudioType() == AudioType.CONTEXT_REGULAR) {
+                  addToContext(audioAttribute);
+                } else {
+                  newUserExercise.getMutableAudio().addAudio(audioAttribute);
+                }
               } else {
                 logger.warning("useAudioAttribute no valid audio on " + result);
               }
@@ -991,6 +998,16 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
           };
       //postAudioButton.getElement().setId(WIDGET_ID + (recordRegularSpeed ? "Regular" : "Slow") + "_speed");
       return postAudioButton;
+    }
+
+    private void addToContext(AudioAttribute audioAttribute) {
+      List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+      if (directlyRelated.isEmpty()) {
+        logger.warning("no context sentence?");
+      } else {
+        ClientExercise clientExercise = directlyRelated.get(0);
+        clientExercise.getMutableAudio().addAudio(audioAttribute);
+      }
     }
 
     void setOtherRAPs(List<RecordAudioPanel> otherRAPs) {

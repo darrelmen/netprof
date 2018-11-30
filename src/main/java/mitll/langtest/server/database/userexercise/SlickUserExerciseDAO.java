@@ -1013,6 +1013,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         true);
   }
 
+  public List<Integer> getByProjectExactMatch(int projid, int creator, String fl) {
+   return dao.getAllUserDefinedByProjectExactMatch(projid, creator, fl);
+  }
+
   /**
    * @param typeOrder
    * @param sectionHelper

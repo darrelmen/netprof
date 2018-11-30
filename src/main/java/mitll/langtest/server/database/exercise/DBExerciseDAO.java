@@ -58,8 +58,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private final SlickProject project;
   private final Project fullProject;
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_USER_CREATED = false;
   private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
-  final Map<Integer, CommonExercise> idToUserExercise = new HashMap<>();
+  private final Map<Integer, CommonExercise> idToUserExercise = new HashMap<>();
 
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
@@ -121,6 +122,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
   }
 
+  @Override
+  public List<CommonExercise> getExactMatch(String fl, int userIDFromSession) {
+    List<Integer> byProjectExactMatch = userExerciseDAO.getByProjectExactMatch(project.id(), userIDFromSession, fl);
+    List<CommonExercise> matches=new ArrayList<>(byProjectExactMatch.size());
+    byProjectExactMatch
+        .forEach(id->matches.add(getExercise(id)));
+    return matches;
+  }
 
   /**
    * Make sure the parent is set on the context exercises.
@@ -244,20 +253,24 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
             Collections.emptyMap(),
             Collections.emptyMap(),
             false);
-    logger.info("readExercises project " + project + " allNonContextExercises " + allNonContextExercises.size());
+    if (DEBUG_USER_CREATED) {
+      logger.info("getUserCreatedExercises project " + project + " allNonContextExercises " + allNonContextExercises.size());
+    }
 
     List<CommonExercise> contextByProject = userExerciseDAO.getContextByProject(
         typeOrder,
         getSectionHelper(),
         fullProject, Collections.emptyMap(), Collections.emptyMap(),
         false);
-    logger.info("getUserCreatedExercises got " + contextByProject.size() + " context");
-
+    if (DEBUG_USER_CREATED) {
+      logger.info("getUserCreatedExercises got " + contextByProject.size() + " context");
+    }
     // contextByProject.forEach(c->logger.info(c.getID() + " " + c.getEnglish() + " " + c.getForeignLanguage()));
 
     Map<Integer, CommonExercise> idToContext = getIDToExercise(contextByProject);
-    logger.info("readExercises project " + project + " idToContext " + idToContext.size());
-
+    if (DEBUG_USER_CREATED) {
+      logger.info("getUserCreatedExercises project " + project + " idToContext " + idToContext.size());
+    }
 //    int c = 0;
 //    String prefix = "Project " + project.name();
 
@@ -279,7 +292,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         CommonExercise context = idToContext.get(childID);
         if (context != null) {
           parent.getMutable().addContextExercise(context);
-          logger.info("\tadd " + context.getID() + " to " + parent.getID());
+          if (DEBUG_USER_CREATED) {
+            logger.info("\tadd " + context.getID() + " to " + parent.getID());
+          }
         }
       }
     });
