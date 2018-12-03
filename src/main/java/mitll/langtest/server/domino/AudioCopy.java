@@ -44,8 +44,10 @@ public class AudioCopy {
    * @param newEx
    * @param dominoToExID
    * @see ProjectSync#addPending
+   * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItems
    */
-  public <T extends ClientExercise> void copyAudio(int projectid, Collection<T> newEx,
+  public <T extends ClientExercise> void copyAudio(int projectid,
+                                                   Collection<T> newEx,
                                                    Map<Integer, Integer> dominoToExID) {
     try {
       List<Project> sourceProjects = getProjectsForSameLanguage(projectid);
@@ -378,26 +380,35 @@ public class AudioCopy {
     }
 
     audioToUse.forEach(audio ->
-        audioMatches.add(new SlickAudio(
-            -1,
-            audio.userid(),
-            exid,
-            modified,
-            audio.audioref(),
-            getAudioType(isContext, audio),
-            audio.duration(),
-            audio.defect(),
-            audio.transcript(),
-            projectid,
-            audio.exists(),
-            audio.lastcheck(),
-            audio.actualpath(),
-            audio.dnr(),
-            audio.resultid(),
-            audio.gender()
-        )));
+        audioMatches.add(getCopiedAudio(projectid, exid, isContext, modified, audio)));
 
     return audioMatches;
+  }
+
+  public SlickAudio getCopiedAudio(int exid, boolean isContext, SlickAudio audio) {
+    return getCopiedAudio(audio.projid(), exid, isContext, new Timestamp(System.currentTimeMillis()), audio);
+  }
+
+  @NotNull
+  private SlickAudio getCopiedAudio(int projectid, int exid, boolean isContext, Timestamp modified, SlickAudio audio) {
+    return new SlickAudio(
+        -1,
+        audio.userid(),
+        exid,
+        modified,
+        audio.audioref(),
+        getAudioType(isContext, audio),
+        audio.duration(),
+        audio.defect(),
+        audio.transcript(),
+        projectid,
+        audio.exists(),
+        audio.lastcheck(),
+        audio.actualpath(),
+        audio.dnr(),
+        audio.resultid(),
+        audio.gender()
+    );
   }
 
   private String getAudioType(boolean isContext, SlickAudio audio) {
@@ -407,10 +418,6 @@ public class AudioCopy {
     }
     return audiotype;
   }
-
-//  private boolean isRegular(SlickAudio slickAudio) {
-//    return isRegular(slickAudio.audiotype());
-//  }
 
   private boolean isRegular(String audiotype) {
     return audiotype.equalsIgnoreCase(AudioType.REGULAR.toString());

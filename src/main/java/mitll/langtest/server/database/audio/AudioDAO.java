@@ -38,6 +38,7 @@ import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -77,7 +78,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public AudioAttribute getTranscriptMatch(int projID, String transcript) {
+  public AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript, AudioCopy audioCopy) {
     return null;
   }
 
@@ -1102,5 +1103,15 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
       user = BaseUserDAO.DEFAULT_FEMALE;
     }
     return user;
+  }
+
+  @Override
+  public int markDefect(int id) {
+    return 0;
+  }
+
+  @Override
+  public void copyOne(AudioCopy audioCopy, int audioID, int exid, boolean isContext) {
+
   }
 }

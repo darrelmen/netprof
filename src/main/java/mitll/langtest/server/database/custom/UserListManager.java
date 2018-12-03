@@ -44,6 +44,7 @@ import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
+import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.DBConnection;
@@ -790,14 +791,17 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void editItem(CommonExercise userExercise, Collection<String> typeOrder) {
-    //fixAudioPaths(userExercise, true, mediaDir);
     boolean update = userExerciseDAO.update(userExercise, userExercise.isContext(), typeOrder);
     if (update) {
       databaseServices.getProject(userExercise.getProjectID()).getExerciseDAO().addUserExercise(userExercise);
-
       setNumPhones(userExercise, databaseServices.getProject(userExercise.getProjectID()), userExercise.getID());
+    } else {
+      logger.warn("editItem : did not update item  " + userExercise);
+    }
+  }
 
-    } else logger.warn("editItem : did not update item  " + userExercise);
+  public void clearAudio(int audioID) {
+    databaseServices.getAudioDAO().markDefect(audioID);
   }
 
 

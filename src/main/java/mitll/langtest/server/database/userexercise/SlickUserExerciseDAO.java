@@ -34,6 +34,7 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
@@ -794,8 +795,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     }
 
     if (addTypesToSection) {
-      logger.info("getExercises type order " + typeOrder);
-
+//      logger.info("getExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
     }
     //  logger.info("getExercises created " + copy.size() + " exercises");
@@ -1084,7 +1084,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param isContext
    * @param typeOrder
    * @see mitll.langtest.server.domino.ProjectSync#doUpdate
-   * @see IUserListManager#editItem
+   * @see UserListManager#editItem
    */
   @Override
   public boolean update(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder) {

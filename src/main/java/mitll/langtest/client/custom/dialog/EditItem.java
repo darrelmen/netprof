@@ -69,8 +69,9 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem {
+   private final Logger logger = Logger.getLogger("EditItem");
+
   public static final String DONE = "OK";
-  private final Logger logger = Logger.getLogger("EditItem");
   private final ExerciseController controller;
   private PagingExerciseList<CommonShell, ClientExercise> exerciseList;
 
@@ -117,7 +118,7 @@ public class EditItem {
    * @see #editItem
    */
   private PagingExerciseList<CommonShell, ClientExercise> makeExerciseList(Panel right, UserList<CommonShell> originalList) {
-    //logger.info("EditItem.makeExerciseList - ul = " + ul + " " + includeAddItem);
+     logger.info("EditItem.makeExerciseList - ul = " + originalList);// + " " + includeAddItem);
     userListID = originalList.getID();
     userListName = originalList.getName();
     EditableExerciseList exerciseList = new EditableExerciseList(controller, right, INavigation.VIEWS.LISTS, originalList);

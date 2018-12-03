@@ -36,6 +36,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -258,24 +259,68 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
-   * TODO : FIX the path -? add bestAudio/spanish prefix
+   * So if there is no audio associated with the exercise, look for an existing audio cut with the same transcript.
+   * If there is one, go ahead and associate it with the exercise.
+   * If the transcript changes, remove the old audio and replace it
+   * if the transcript is the same as the current audio, just return the current audio attribute.
+   * if there is no transcript, remove any current audio
+   *
+   *
+   *
    * @param projID
+   * @param exid
+   * @param audioID
+   * @param isContext
    * @param transcript
+   * @param audioCopy
    * @return
+   * @see mitll.langtest.server.services.AudioServiceImpl#getTranscriptMatch
    */
-  public AudioAttribute getTranscriptMatch(int projID, String transcript) {
-    List<SlickAudio> transcriptMatch = dao.getTranscriptMatch(projID, transcript);
-    if (!transcriptMatch.isEmpty()) {
-      if (transcriptMatch.size() > 1)
-        logger.info("found " + transcriptMatch.size() + " matches -- choosing the first one.");
+  public AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext,
+                                           String transcript, AudioCopy audioCopy) {
 
-      AudioAttribute audioAttribute = getAudioAttribute(transcriptMatch.get(0), new HashMap<>(), false);
+    logger.info("getTranscriptMatch projID " + projID + "\n\texid " + exid + "\n\taudio " + audioID + "\n\tcontext " + isContext);
 
-      logger.info("getTranscriptMatch Match! '" + transcript + "' = " + audioAttribute);
+    SlickAudio first = audioID > 0 ? getFirst(audioID) : null;
+    if (first != null && first.transcript().equals(transcript)) {
+      logger.info("no change - match to transcript");
+      return getAudioAttribute(first, new HashMap<>(), false);
+    } else {
+      if (audioID > 0) {  // no matter whether there is a match or not, invalidate any current audio.
+        markDefect(audioID);
+      }
 
-      return audioAttribute;
-    } else return null;
+      List<SlickAudio> transcriptMatch = dao.getTranscriptMatch(projID, transcript);
+      if (!transcriptMatch.isEmpty()) {
+        if (transcriptMatch.size() > 1)
+          logger.info("getTranscriptMatch found " + transcriptMatch.size() + " matches -- choosing the first one.");
+
+        AudioAttribute audioAttribute = getAudioAttribute(transcriptMatch.get(0), new HashMap<>(), false);
+
+        logger.info("getTranscriptMatch Match! '" + transcript + "' = " +
+            "\n\tattr" + audioAttribute);
+
+        copyOne(audioCopy, audioAttribute.getUniqueID(), exid, isContext);
+
+        // required!
+        fixAudioRef(null, mediaDir, audioAttribute, database.getProject(projID).getLanguageEnum());
+
+        String audioRef = audioAttribute.getAudioRef();
+        if (audioRef.endsWith(".wav")) {
+          audioAttribute.setAudioRef(audioRef.replaceAll(".wav", ".mp3"));
+        }
+
+
+        logger.info("\tgetTranscriptMatch after = " + audioAttribute.getAudioRef());
+
+        return audioAttribute;
+      } else {
+
+        return null;
+      }
+    }
   }
+
 
   /**
    * @param projID
@@ -328,7 +373,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
                          Map<Integer, String> exToTranscript,
                          Set<Integer> idsOfRecordedExercisesForMales,
                          Set<Integer> idsOfRecordedExercisesForFemales) {
-    String speed = audioSpeed.toString();
 
 /*    List<Integer> max = new ArrayList<>();
 
@@ -343,6 +387,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         dao.getCountForGender(audioSpeed.toString(), uniqueIDs, exToTranscript, true, projid);
 
     if (DEBUG) {
+      String speed = audioSpeed.toString();
       logger.info("getCountForGender" +
           "\n\tfor       '" + speed + "'" +
           "\n\tgiven ids " + uniqueIDs.size() +
@@ -366,36 +411,22 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
 
     if (DEBUG) {
+      String speed = audioSpeed.toString();
       logger.info("getCountForGender " +
           "\n\tfor     '" + speed + "'" +
           "\n\tmales   " + idsOfRecordedExercisesForMales.size() +
           "\n\tfemales " + idsOfRecordedExercisesForFemales.size());
     }
   }
-/*
-  @Override
-  Set<Integer> getValidAudioOfType(int userid, AudioType audioType) {
-    return dao.getExerciseIDsOfValidAudioOfType(userid, audioType.toString());
-  }*/
 
-  /**
-   * Items that are recorded must have both regular and slow speed audio.
-   *
-   * @param userid
-   * @return
-   * @seex mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
-   */
-/*  public Collection<Integer> getRecordedExForUser(int userid) {
-    try {
-      return dao.getRecordedForUser(userid);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new HashSet<>();
-  }*/
   @Override
   int markDefect(int userid, int exerciseID, AudioType audioType) {
     return dao.markDefect(userid, exerciseID, audioType.toString());
+  }
+
+  @Override
+  public int markDefect(int id) {
+    return dao.markDefect(id);
   }
 
   /**
@@ -883,8 +914,23 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   public AudioAttribute getByID(int audioID, boolean hasProjectSpecificAudio) {
-    Collection<SlickAudio> byID = dao.getByID(audioID);
+    Collection<SlickAudio> byID = getSlickAudios(audioID);
     return byID.isEmpty() ? null : toAudioAttribute(byID, hasProjectSpecificAudio).iterator().next();
+  }
+
+  private Collection<SlickAudio> getSlickAudios(int audioID) {
+    return dao.getByID(audioID);
+  }
+
+  @Override
+  public void copyOne(AudioCopy audioCopy, int audioID, int exid, boolean isContext) {
+    SlickAudio next = getFirst(audioID);
+    addBulk(Collections.singletonList(audioCopy.getCopiedAudio(exid, isContext, next)));
+  }
+
+  private SlickAudio getFirst(int audioID) {
+    Collection<SlickAudio> slickAudios = getSlickAudios(audioID);
+    return slickAudios.isEmpty() ? null : slickAudios.iterator().next();
   }
 
   @Override

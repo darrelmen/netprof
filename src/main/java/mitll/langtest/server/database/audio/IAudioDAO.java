@@ -36,6 +36,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
@@ -111,8 +112,15 @@ public interface IAudioDAO extends IDAO {
 
   boolean hasAudio(int exid);
 
-  AudioAttribute getTranscriptMatch(int projID, String transcript);
+  AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript, AudioCopy audioCopy);
 
+  /**
+   * @deprecated
+   * @see mitll.langtest.server.services.QCServiceImpl#markGender
+   * @param userid
+   * @param projid
+   * @param attr
+   */
   void addOrUpdateUser(int userid, int projid, AudioAttribute attr);
 
   int markDefect(AudioAttribute attribute);
@@ -149,11 +157,19 @@ public interface IAudioDAO extends IDAO {
    */
   AudioAttribute getByID(int audioID, boolean hasProjectSpecificAudio);
 
+  int markDefect(int id);
+
+  /**
+   * @see mitll.langtest.server.domino.AudioCopy#addCopiesToDatabase
+   * @param copies
+   */
   void addBulk(List<SlickAudio> copies);
 
   Collection<UserTimeBase> getAudioForReport(int projid);
 
   Map<String, Float> getMaleFemaleProgress(int projectid, Collection<CommonExercise> exercises);
+
+  void copyOne(AudioCopy audioCopy, int audioID, int exid, boolean isContext);
 
   void deleteForProject(int projID);
 }

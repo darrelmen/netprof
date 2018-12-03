@@ -24,10 +24,7 @@ public class ListOptions {
     this.instance = instance;
   }
 
-  public ListOptions setSort(boolean val) {
-    this.sort = val;
-    return this;
-  }
+
 
   public ListOptions setShowTypeAhead(boolean val) {
     this.showTypeAhead = val;
@@ -62,8 +59,12 @@ public class ListOptions {
     this.activityType = activityType;
     return this;
   }
-
+  public ListOptions setSort(boolean val) {
+    this.sort = val;
+    return this;
+  }
   /**
+   * @see mitll.langtest.client.exercise.SimplePagingContainer#getTableWithPager
    * @return
    */
   public boolean isSort() {

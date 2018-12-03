@@ -103,5 +103,5 @@ public interface AudioServiceAsync {
    */
   void editItem(ClientExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
 
-  void getTranscriptMatch(int projID, String transcript, AsyncCallback<AudioAttribute> async);
+  void getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript, AsyncCallback<AudioAttribute> async);
 }

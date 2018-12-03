@@ -338,6 +338,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         }
       } else if (c++ < SPEW_THRESH || c % 100 == 0) {
         CommonExercise next = allNonContextExercises.isEmpty() ? null : allNonContextExercises.iterator().next();
+
         logger.warn("attachContextExercises " + prefix + " exid " + relatedExercise.exid() + " context id " + relatedExercise.contextexid() +
             // " didn't attach " + relatedExercise + "" +
             " for, e.g. " + next);

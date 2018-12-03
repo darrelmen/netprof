@@ -95,7 +95,7 @@ public interface AudioService extends RemoteService {
 
   void logMessage(String subject, String message, boolean sendEmail);
 
-  AudioAttribute getTranscriptMatch(int projID, String transcript) throws DominoSessionException;
+  AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript) throws DominoSessionException;
 
   /**
    * @return

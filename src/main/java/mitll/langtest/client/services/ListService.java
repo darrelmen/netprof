@@ -134,4 +134,6 @@ public interface ListService extends RemoteService {
   QuizSpec getQuizInfo(int userListID);
 
   List<CommonShell> reallyCreateNewItems(int userListID, String userExerciseText) throws DominoSessionException;
+
+  void clearAudio(int audioID) throws DominoSessionException;
 }

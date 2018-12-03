@@ -1093,10 +1093,10 @@ public class EasyReportTest extends BaseTest {
   public void testFind() {
     DatabaseImpl andPopulate = getAndPopulate();
     Project project = andPopulate.getProject(3);
-    CommonExercise vit = project.getExerciseBySearch("vit");
+    CommonExercise vit = project.getExerciseByExactMatch("vit");
     logger.info(vit);
-    logger.info(project.getExerciseBySearch("Vit"));
-    logger.info(project.getExerciseBySearch("gourd"));
+    logger.info(project.getExerciseByExactMatch("Vit"));
+    logger.info(project.getExerciseByExactMatch("gourd"));
     //andPopulate.doReportForYear(-1);
     andPopulate.close();
   }

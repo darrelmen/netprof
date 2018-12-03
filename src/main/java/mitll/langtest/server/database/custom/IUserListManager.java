@@ -105,6 +105,7 @@ public interface IUserListManager {
   void addItemToList(int userListID, int exid);
 
   void editItem(CommonExercise userExercise, Collection<String> typeOrder);
+  void clearAudio(int audioID);
 
   UserList addVisitor(int userListID, int user);
 

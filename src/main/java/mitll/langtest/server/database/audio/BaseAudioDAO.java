@@ -92,7 +92,7 @@ public abstract class BaseAudioDAO extends DAO {
   private static final boolean DEBUG_ATTACH = false;
   private static final boolean DEBUG_ATTACH_PATH = false;
 
-  private final String mediaDir;
+  protected final String mediaDir;
 
   /**
    * @param database
@@ -447,17 +447,16 @@ public abstract class BaseAudioDAO extends DAO {
     String exerciseText = isContext && !directlyRelated.isEmpty() ?
         directlyRelated.iterator().next().getForeignLanguage() :
         firstExercise.getForeignLanguage();
-    String transcript = attr.getTranscript();
-
     boolean forgiving = language != Language.LEVANTINE;
 
-    boolean isMatch = forgiving ? isMatchExToAudioArabic(attr, exerciseText) : matchTranscriptAttr(exerciseText, transcript);
+    boolean isMatch = forgiving ? isMatchExToAudioArabic(attr, exerciseText) : matchTranscriptAttr(exerciseText, attr.getTranscript());
     if (isMatch) {
       // add to both if context???
       if (DEBUG_ATTACH) {
+
         logger.info("attachAudioAndFixPath \n\tforgiving " + forgiving +
             "\n\texercise text '" + exerciseText + "'" +
-            "\n\ttranscript    '" + transcript + "'" +
+            "\n\ttranscript    '" + attr.getTranscript() + "'" +
             "\n\tpath           " + attr.getAudioRef() +
             "\n\tmodified       " + new Date(attr.getTimestamp()) +
             "\n\tuserid         " + attr.getUserid() +
@@ -511,7 +510,14 @@ public abstract class BaseAudioDAO extends DAO {
     );
   }
 
-  private void fixAudioRef(ClientExercise firstExercise, String mediaDir, AudioAttribute attr, Language language) {
+  /**
+   * @param firstExercise
+   * @param mediaDir
+   * @param attr
+   * @param language
+   * @see #attachAudioAndFixPath
+   */
+  void fixAudioRef(ClientExercise firstExercise, String mediaDir, AudioAttribute attr, Language language) {
     String audioRef = attr.getAudioRef();
     if (audioRef == null)
       logger.error("attachAudioAndFixPath huh? no audio ref for " + attr + " under " + firstExercise);
@@ -915,6 +921,7 @@ public abstract class BaseAudioDAO extends DAO {
   abstract void addOrUpdateUser(AudioInfo info);
 
   abstract int markDefect(int userid, int exerciseID, AudioType audioType);
+
 
   boolean isBadUser(int userid) {
     return userid < BaseUserDAO.DEFAULT_FEMALE_ID;

@@ -93,4 +93,6 @@ public interface ListServiceAsync {
   void getQuizInfo(int userListID, AsyncCallback<QuizSpec> async);
 
   void reallyCreateNewItems(int userListID, String userExerciseText, AsyncCallback<List<CommonShell>> async);
+
+  void clearAudio(int audioID, AsyncCallback<Void> async);
 }

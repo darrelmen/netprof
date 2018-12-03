@@ -387,6 +387,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return userListByID.getExercises();
   }
 
+  @Override
+  public void clearAudio(int audioID) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    db.getAudioDAO().markDefect(audioID);
+  }
+
   /**
    * Assemble the set of known and new exercises to add to the user list.
    *

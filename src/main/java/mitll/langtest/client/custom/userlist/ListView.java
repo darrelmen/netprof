@@ -127,7 +127,7 @@ public class ListView implements ContentView, CreateListComplete {
   private static final int VISITED_PAGE_SIZE = 5;
   private static final int VISITED_SHORT_SIZE = 5;
 
-  private static final int BROWSE_PAGE_SIZE = 7;
+  private static final int BROWSE_PAGE_SIZE = 6;// 7;
   private static final int BROWSE_SHORT_PAGE_SIZE = 6;
 
   private static final String CREATE_NEW_LIST = "Create New List";

@@ -77,15 +77,15 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
     Column<T, SafeHtml> flColumn = addFLColumn();
 
     Column<T, SafeHtml> englishCol = getEnglishColumn();
-    //  if (sortEnglish) {
-    //   logger.warning("addColumnsToTable sorting " + this);
-    englishCol.setSortable(true);
-    // }
+    if (sortEnglish) {
+      //   logger.warning("addColumnsToTable sorting " + this);
+      englishCol.setSortable(true);
+    }
     addColumn(englishCol, new TextHeader(ENGLISH));
 
     List<T> dataList = getList();
 
-    table.addColumnSortHandler(getEnglishSorter(englishCol, dataList));
+ //   table.addColumnSortHandler(getEnglishSorter(englishCol, dataList));
     table.addColumnSortHandler(getFLSorter(flColumn, dataList));
 
     // We know that the data is sorted alphabetically by default.

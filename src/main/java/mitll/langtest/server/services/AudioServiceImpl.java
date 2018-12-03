@@ -53,6 +53,7 @@ import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectHelper;
+import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -69,7 +70,6 @@ import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 
-import mitll.npdata.dao.SlickAudio;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -1032,7 +1032,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                      String device,
                                      DecoderOptions decoderOptions,
                                      File fileInstead,
-                                     int projectID) throws DominoSessionException {
+                                     int projectID) {
     Project project = db.getProject(projectID);
     boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
     AudioFileHelper audioFileHelper = getAudioFileHelper(project);
@@ -1313,6 +1313,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     SimpleImageWriter imageWriter = new SimpleImageWriter();
 
+    logger.info("getImageForAudioFile audioFile '" + audioFile + "'");
+
     String wavAudioFile = ensureAudioHelper.getWavAudioFile(audioFile, language);
     File testFile = new File(wavAudioFile);
     if (!testFile.exists() || testFile.length() == 0) {
@@ -1421,9 +1423,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   @Override
-  public AudioAttribute getTranscriptMatch(int projID, String transcript) throws DominoSessionException {
+  public AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-    return getDatabase().getAudioDAO().getTranscriptMatch(projID, transcript);
+
+    AudioCopy audioCopy = new AudioCopy(db, db.getProjectManagement(), db);
+    return getDatabase().getAudioDAO().getTranscriptMatch(projID, exid, audioID, isContext, transcript, audioCopy);
   }
 
   @Override
