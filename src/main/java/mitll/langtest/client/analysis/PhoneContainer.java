@@ -128,7 +128,7 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
             }
 
             if (result.getReqid() + 1 != reqid) {
-              logger.info("skip stale req");
+              if (DEBUG) logger.info("skip stale req");
             } else {
               gotNewPhoneSummary(result);
             }

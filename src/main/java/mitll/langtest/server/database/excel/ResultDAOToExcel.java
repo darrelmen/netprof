@@ -94,7 +94,7 @@ public class ResultDAOToExcel {
         ResultDAO.CORRECT,
         ResultDAO.PRON_SCORE,
         "Device",
-        "w/Flash",
+      //  "w/Flash",
         "Process",
         "RoundTrip"
     );

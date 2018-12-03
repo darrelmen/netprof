@@ -170,7 +170,7 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
   }
 
   private int compareInts(String o1, String o2) {
-    int first = Integer.parseInt(dropGreater(o1));
+    int first  = Integer.parseInt(dropGreater(o1));
     int second = Integer.parseInt(dropGreater(o2));
     return Integer.compare(first, second);
   }
@@ -207,12 +207,17 @@ public class ItemSorter implements Comparator<String>, IsSerializable {
   }
 
   private boolean checkIsInt(String o1) {
-    boolean isInt = true;
-    for (int i = 0; i < o1.length() && isInt; i++) {
-      if (!Character.isDigit(o1.charAt(i))) {
-        isInt = false;
-      }
+    if (o1.isEmpty()) {
+      return false;
     }
-    return isInt;
+    else {
+      boolean isInt = true;
+      for (int i = 0; i < o1.length() && isInt; i++) {
+        if (!Character.isDigit(o1.charAt(i))) {
+          isInt = false;
+        }
+      }
+      return isInt;
+    }
   }
 }

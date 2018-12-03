@@ -37,10 +37,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.common.MessageHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
@@ -89,7 +89,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private static final String MONTH = "Month";
   private static final String YEAR = "Year";
 
-  //private static final int STUDENT_WIDTH = 1050;
   /**
    * @see #configureChart
    */
@@ -303,17 +302,18 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
     while (i >= 0) {
       PhoneSession session = phoneSessions.get(i);
-      String sessionWindow = getDate(session.getStart()) + " - " + getDate(session.getEnd());
-      String window = getDate(start) + " - " + getDate(last);
 
       if (session.doesOverlap(start, last)) {
 
         if (DEBUG) {
+          String sessionWindow = getDate(session.getStart()) + " - " + getDate(session.getEnd());
+          String window = getDate(start) + " - " + getDate(last);
           logger.info("getPeriods" +
               "\n\tsession " + sessionWindow +
               "\n\tvs      " + window +
               " at " + i);
         }
+
         months2.add(start);
         start -= granularity;
         last -= granularity;
@@ -395,7 +395,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     //showSeriesByVisible();
 
     if (useSessionTimeHorizon) {
-      logger.info("session time horizon");
+      //logger.info("session time horizon");
       setTimeHorizon(AnalysisTab.TIME_HORIZON.SESSION);
     } else {
       // logger.info("ALL time horizon");
@@ -719,8 +719,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
           return true;
         });
 
-    int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
-    chart.setHeight(chartHeight + "px");
+    {
+      int chartHeight = isShort() ? CHART_HEIGHT_SHORT : CHART_HEIGHT;
+      chart.setHeight(chartHeight + "px");
+    }
     //  chart.setWidth(600);
   }
 
@@ -735,37 +737,61 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @see #configureChart
    */
   private void gotExtremes(AxisSetExtremesEvent axisSetExtremesEvent) {
-    detailSeries.forEach(series -> series.setVisible(false, false));
+    if (axisSetExtremesEvent.getMin() == null &&
+        axisSetExtremesEvent.getMax() == null) {
+      TimeRange currentLastTimeRange = getCurrentLastTimeRange();
 
-    try {
-      Number min = axisSetExtremesEvent.getMin();
-      Number max = axisSetExtremesEvent.getMax();
+      logger.info("ok, convert event");
+      Scheduler.get().scheduleDeferred((Command) () -> {
+        chart.getXAxis().setExtremes(
+            currentLastTimeRange.getStart(),
+            currentLastTimeRange.getEnd());  // triggers time changed event
+      });
 
-      if (DEBUG_EXTREMES) {
-        logger.info("gotExtremes got" +
-            "\n\tmin " + min + " " + (min == null ? "" : new Date(min.longValue())) +
-            "\n\tmax " + max + " " + (max == null ? "" : new Date(max.longValue())
-        ));
+
+    } else {
+
+      detailSeries.forEach(series -> series.setVisible(false, false));
+
+      try {
+        Number min = axisSetExtremesEvent.getMin();
+        Number max = axisSetExtremesEvent.getMax();
+
+        if (DEBUG_EXTREMES) {
+          logger.info("gotExtremes got" +
+              "\n\tmin " + min + " " + (min == null ? "" : new Date(min.longValue())) +
+              "\n\tmax " + max + " " + (max == null ? "" : new Date(max.longValue())
+          ));
 
 //        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got Extremes"));
 //        logger.info("gotExtremes stack " + exceptionAsString);
+        }
+
+        if (min != null && min.longValue() > 0) {
+          long start = min.longValue();
+          long end = max.longValue();
+
+          long l = end - start;
+          if (l < 61) {
+            // logger.info("time window is empty?");
+            start -= 60 * 1000;
+          }
+
+          if (DEBUG_EXTREMES) {
+            logger.info("gotExtremes 1 now min " + new Date(start) + " max " + new Date(end));
+          }
+          setVisibility(start, end);
+          timeChanged(start, end);
+        } else {
+          setVisibility(goToLast(timeHorizon), lastTime);
+        }
+        showSeriesByVisible();
+
+
+      } catch (Exception e) {
+        logger.warning("gotExtremes : got " + e);
+        exceptionSupport.logException(e);
       }
-
-      if (min != null && min.longValue() > 0) {
-        long start = min.longValue();
-        long end = max.longValue();
-        if (DEBUG_EXTREMES) logger.info("gotExtremes 1 now min " + new Date(start) + " max " + new Date(end));
-        setVisibility(start, end);
-        timeChanged(start, end);
-      } else {
-        setVisibility(firstTime, lastTime);
-      }
-      showSeriesByVisible();
-
-
-    } catch (Exception e) {
-      logger.warning("gotExtremes : got " + e);
-      exceptionSupport.logException(e);
     }
   }
 
@@ -794,7 +820,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private void setTimeRange(List<TimeAndScore> rawBestScores) {
     this.firstTime = rawBestScores.get(0).getTimestamp();
     this.lastTime = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
-
 //    logger.info("setTimeRange " + new Date(firstTime) + " - " + new Date(lastTime));
   }
 
@@ -818,35 +843,36 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @see #setTimeHorizon(AnalysisTab.TIME_HORIZON)
    * @see #gotExtremes
    */
-  private void goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
-    logger.info("goToLast " +
-        timeHorizon +
-        " : set time from " + new Date(firstTime) + " to " + new Date(lastTime));
+  private long goToLast(AnalysisTab.TIME_HORIZON timeHorizon) {
+    if (DEBUG_TIMECHANGE) {
+      logger.info("goToLast " +
+          timeHorizon +
+          " : set time from " + new Date(firstTime) + " to " + new Date(lastTime));
+    }
+
     XAxis xAxis;
     try {
       xAxis = chart.getXAxis();
     } catch (Exception e) {
       // somehow this is happening
-      return;
+      return firstTime;
     }
 
     long lastPlusSlack = lastTime + TIME_SLACK;
     switch (timeHorizon) {
       case SESSION:
         Long lastSessionStart = sessions.get(sessions.size() - 1);
-        showLastTimePeriod(xAxis, this.sessions, lastSessionStart, lastPlusSlack);
-        return;
+        return showLastTimePeriod(xAxis, this.sessions, lastSessionStart, lastPlusSlack);
       case DAY:
-        showLastDay(xAxis, lastPlusSlack);
-        return;
+        return showLastDay(xAxis, lastPlusSlack);
       case WEEK:
-        showLastWeek(xAxis, lastPlusSlack);
-        return;
+        return showLastWeek(xAxis, lastPlusSlack);
       case MONTH:
-        showLastMonth(xAxis, lastPlusSlack);
-        return;
+        return showLastMonth(xAxis, lastPlusSlack);
       case ALL:
-        showAll(xAxis, lastPlusSlack);
+        return showAll(xAxis, lastPlusSlack);
+      default: // never happen
+        return firstTime;
     }
   }
 
@@ -858,6 +884,12 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     return showLastPeriod(xAxis, lastPlusSlack, TIME_HORIZON.WEEK.getDuration(), this.weeks);
   }
 
+  /**
+   * @param xAxis
+   * @param lastPlusSlack
+   * @return
+   * @see #goToLast
+   */
   @NotNull
   private Long showLastMonth(XAxis xAxis, long lastPlusSlack) {
     return showLastPeriod(xAxis, lastPlusSlack, TIME_HORIZON.MONTH.getDuration(), this.months);
@@ -866,15 +898,44 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   @NotNull
   private Long showLastPeriod(XAxis xAxis, long lastPlusSlack, long duration, List<Long> timePeriods) {
     //  logger.info("last " + new Date(lastPlusSlack));
+    TimeRange timeRange = getTimeRange(lastPlusSlack, duration);
+    return showLastTimePeriod(xAxis, timePeriods, timeRange.getStart(), timeRange.getEnd());
+  }
+
+  private TimeRange getCurrentLastTimeRange() {
+    long lastPlusSlack = lastTime + TIME_SLACK;
+    return getTimeRange(lastPlusSlack, timeHorizon.getDuration());
+  }
+
+  @NotNull
+  private TimeRange getTimeRange(long lastPlusSlack, long duration) {
     long startOfPrevPeriod = getRoundedTo(lastPlusSlack, duration);
 
     //logger.info("startOfPrevPeriod " + new Date(startOfPrevPeriod));
     long endOfPeriod = startOfPrevPeriod + duration;
     //logger.info("endOfPeriod " + new Date(endOfPeriod));
 
-    return showLastTimePeriod(xAxis, timePeriods, startOfPrevPeriod, endOfPeriod);
+    return new TimeRange(startOfPrevPeriod, endOfPeriod);
   }
 
+  private static class TimeRange {
+    private long start;
+    private long end;
+
+    public TimeRange(long start, long end) {
+      this.start = start;
+      this.end = end;
+
+    }
+
+    public long getStart() {
+      return start;
+    }
+
+    public long getEnd() {
+      return end;
+    }
+  }
 
   /**
    * TODO : worry about making a time period that puts the latest points to close to right side of plot
@@ -895,12 +956,11 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
     xAxis.setExtremes(startOfPrevPeriod, lastPlusSlack);  // triggers time changed event
 
-    int numPeriods = timePeriods.size();
-    int lastPeriodIndex = numPeriods - 1;
-//    Long lastPeriod = timePeriods.get(lastPeriodIndex);
-    this.index = lastPeriodIndex;
-
-    timeWidgets.getPrevButton().setEnabled(numPeriods > 1);
+    {
+      int numPeriods = timePeriods.size();
+      this.index = numPeriods - 1;
+      timeWidgets.getPrevButton().setEnabled(numPeriods > 1);
+    }
     disableNext();
 
     //  setTimeDisplay(getShortDate(lastPeriod, shouldShowHour(duration)));
@@ -915,12 +975,15 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @param xAxis
    * @param lastPlusSlack
    * @return
+   * @see #goToLast
    */
   @NotNull
-  private void showAll(XAxis xAxis, long lastPlusSlack) {
+  private long showAll(XAxis xAxis, long lastPlusSlack) {
     long[] adjusted = getAdjusted(firstTime, lastPlusSlack);
-    xAxis.setExtremes(adjusted[0], adjusted[1]);
-    setTimeWindowControlsToAll(adjusted[0]);
+    long min = adjusted[0];
+    xAxis.setExtremes(min, adjusted[1]);
+    setTimeWindowControlsToAll();
+    return min;
   }
 
   private long[] getAdjusted(long firstW, long lastPlusSlack) {
@@ -940,8 +1003,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   /**
    * Problem #1 - loose time steps when reset zoom
    * Problem #2 - weird thing with the title not being consistent with number of dots
+   *
+   * @see #showAll
    */
-  private void setTimeWindowControlsToAll(long firstW) {
+  private void setTimeWindowControlsToAll() {
     timeWidgets.getPrevButton().setEnabled(false);
     disableNext();
     setTitleScore(-1, -1, index);
@@ -949,6 +1014,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   }
 
   private void setTimeDisplay(String shortDate) {
+    //   logger.info("setTimeDisplay " + shortDate);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
 //    logger.info("setTimeDisplay stack " + exceptionAsString);
     timeWidgets.setDisplay(shortDate);
@@ -1034,7 +1100,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     long end = periodStart + offset;
 
 /*    logger.info("showTimePeriod From      " + format.format(new Date(periodStart)));
-    logger.info("showTimePeriod to        " + format.format(new Date(end)));
+     logger.info("showTimePeriod to        " + format.format(new Date(end)));
     logger.info("showTimePeriod" +
         // "\n\tdur     " + offset +
         "\n\t offset " + offset);*/

@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  * @see ExercisePanelFactory#getExercisePanel
  */
 class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extends BootstrapExercisePanel<L, T> {
-  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  private final Logger logger = Logger.getLogger("StatsPracticePanel");
 
   /**
    *
@@ -201,7 +201,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
       rememberCurrentExercise();
     }
 
-    logger.info("onSetComplete - show charts!");
+//    logger.info("onSetComplete - show charts!");
     showFeedbackCharts();
   }
 

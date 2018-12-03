@@ -22,12 +22,12 @@ import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.MySoundFeedback;
-import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.client.scoring.ScoreFeedbackDiv;
-import mitll.langtest.client.sound.*;
+import mitll.langtest.client.sound.CompressedAudio;
+import mitll.langtest.client.sound.HeadlessPlayAudio;
+import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.analysis.WordScore;
-import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -340,8 +340,11 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
           boolean didScroll = scrollToVisible(0);
 
           T visibleItem = table.getVisibleItem(0);
-          setSelectedAndShowReco(visibleItem, true);
-
+          if (visibleItem == null) {
+            logger.info("gotClickOnReview no visible item at 0?");
+          } else {
+            setSelectedAndShowReco(visibleItem, true);
+          }
         } else {
           if (DEBUG) logger.info("gotClickOnReview loadAndPlayOrPlayAudio " + selected);
           playAudio(selected, true);
@@ -407,7 +410,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
       WordScore lastVisible = table.getVisibleItem(visibleItemCount - 1);
       boolean b = lastVisible.getExid() == lastPlayed;
-      if (b) logger.info("onLastVisible ON LAST : visible # " + visibleItemCount);
+     // if (b) logger.info("onLastVisible ON LAST : visible # " + visibleItemCount);
       return b;
     }
   }
@@ -452,24 +455,28 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   }
 
   private void showRecoOutputLater(T toSelect, boolean playAfterLoad) {
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    if (projectStartupInfo != null) {
-      controller.getScoringService().getStudentAlignment(projectStartupInfo.getProjectid(),
-          (int) toSelect.getResultID(), new AsyncCallback<AlignmentAndScore>() {
-            @Override
-            public void onFailure(Throwable caught) {
+    if (toSelect == null) {
+      logger.warning("toSelect is null?");
+    } else {
+      ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+      if (projectStartupInfo != null) {
+        controller.getScoringService().getStudentAlignment(projectStartupInfo.getProjectid(),
+            (int) toSelect.getResultID(), new AsyncCallback<AlignmentAndScore>() {
+              @Override
+              public void onFailure(Throwable caught) {
 
-            }
-
-            @Override
-            public void onSuccess(AlignmentAndScore result) {
-              if (result == null) {
-                logger.warning("no result for " + toSelect.getResultID());
-              } else {
-                showRecoOutput(result, toSelect.getExid(), toSelect.getAnswerAudio(), playAfterLoad);
               }
-            }
-          });
+
+              @Override
+              public void onSuccess(AlignmentAndScore result) {
+                if (result == null) {
+                  logger.warning("no result for " + toSelect.getResultID());
+                } else {
+                  showRecoOutput(result, toSelect.getExid(), toSelect.getAnswerAudio(), playAfterLoad);
+                }
+              }
+            });
+      }
     }
   }
 

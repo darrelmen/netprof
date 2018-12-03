@@ -91,7 +91,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   }
 
   public Map<Integer, T> getIdToExercise() {
-  //  Map<Integer, T> idToExercise = pagingContainer.getIdToExercise();
+    //  Map<Integer, T> idToExercise = pagingContainer.getIdToExercise();
     // logger.info("getIdToExercise - idToExercise "+idToExercise.size()   );
     return pagingContainer.getIdToExercise();
   }
@@ -231,14 +231,13 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
         @Override
         public void gotTypeAheadEntry(String text) {
 //          gotTypeAheadEvent(text, false);
-    //      logger.info("gotTypeAheadEntry " + text);
+          //      logger.info("gotTypeAheadEntry " + text);
           pushNewItem(text, -1, -1);
           controller.logEvent(getTypeAheadBox(), "TypeAhead", "UserList_" + userListID, "User search ='" + text + "'");
         }
       };
-    }
-    else {
-      logger.info("not adding type ahead to " +getElement().getId());
+    } else {
+      if (DEBUG) logger.info("not adding type ahead to " + getElement().getId());
     }
   }
 
@@ -288,7 +287,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
       if (typeAhead != null) {
         typeAhead.setText(t);
       } else {
-        logger.info("setTypeAheadText: huh? no type ahead box for '" +t +"'");
+        logger.info("setTypeAheadText: huh? no type ahead box for '" + t + "'");
       }
     }
   }

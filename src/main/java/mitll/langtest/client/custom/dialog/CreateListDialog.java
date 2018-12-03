@@ -364,9 +364,21 @@ public class CreateListDialog extends BasicDialog {
     return grid;
   }
 
+  /**
+   * @param projectStartupInfo
+   * @param listBox
+   * @see #getQuizChoices(boolean)
+   */
   private void addSorted(ProjectStartupInfo projectStartupInfo, ListBox listBox) {
     List<String> items = new ArrayList<>();
-    projectStartupInfo.getSectionNodes().forEach(sectionNode -> items.add(sectionNode.getName()));
+    projectStartupInfo.getSectionNodes().forEach(sectionNode -> {
+      String name = sectionNode.getName();
+      if (name.isEmpty()) {
+        logger.warning("huh? section node name is empty for " + sectionNode);
+      } else {
+        items.add(name);
+      }
+    });
     new ItemSorter().getSortedItems(items).forEach(listBox::addItem);
   }
 

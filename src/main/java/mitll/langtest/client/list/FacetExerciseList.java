@@ -510,7 +510,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     }
 
     INavigation.VIEWS instance = selectionState.getView();
-    if (instance != getInstance()) {
+    if (instance != INavigation.VIEWS.NONE && instance != getInstance()) {
       logger.info("addWidgets selection '" + instance + "' != " + getInstance());// + " so removing " + remove);
     }
 

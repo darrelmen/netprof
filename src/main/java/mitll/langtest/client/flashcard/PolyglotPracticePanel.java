@@ -259,7 +259,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
 
   @Override
   AnalysisTab getScoreHistory() {
-    logger.info("getScoreHistory - ");
+ //   logger.info("getScoreHistory - ");
     AnalysisTab widgets = new AnalysisTab(controller, true, -1, () -> 0, INavigation.VIEWS.LEARN);
     widgets.getElement().getStyle().setMarginTop(-25, Style.Unit.PX);
     return widgets;

@@ -445,7 +445,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       @Override
       public SafeHtml getValue(WordScore shell) {
         if (shell == null) {
-          logger.warning("huh? shell is null for item column?");
+          //logger.warning("huh? shell is null for item column?");
           return getSafeHtml("");
         } else {
           Map<NetPronImageType, List<SlimSegment>> transcript = shell.getTranscript();

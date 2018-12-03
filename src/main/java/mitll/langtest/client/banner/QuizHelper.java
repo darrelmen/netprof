@@ -177,18 +177,17 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
     protected void loadFirstExercise(String searchIfAny) {
       SelectionState selectionState = new SelectionState(History.getToken(), false);
       Collection<String> lists = selectionState.getTypeToSection().get(LISTS);
-      logger.info("loadFirstExercise chosen = " + chosenList);
+      //   logger.info("loadFirstExercise chosen = " + chosenList);
 
-      if (//chosenList == -1 &&
-          (lists == null || lists.isEmpty())) {
-        logger.info("skip load first exercise - no list");
+      if ((lists == null || lists.isEmpty())) {
+//        logger.info("skip load first exercise - no list");
         showQuizIntro();
       } else {
         if (chosenList == -1) {
           String next = lists.iterator().next();
           try {
             chosenList = Integer.parseInt(next);
-            logger.info("chosen list now " + chosenList);
+           // logger.info("chosen list now " + chosenList);
           } catch (NumberFormatException e) {
             logger.warning("couldn't parse " + next);
           }
