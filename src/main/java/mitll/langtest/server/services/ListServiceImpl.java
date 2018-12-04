@@ -411,18 +411,21 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     IUserListManager userListManager = getUserListManager();
     for (CommonExercise candidate : candidates) {
-      String foreignLanguage = candidate.getForeignLanguage();
-      int id = candidate.getID();
+      if (candidate == null) logger.warn("\n\n\nhuh? candidate is null???");
+      else {
+        String foreignLanguage = candidate.getForeignLanguage();
+        int id = candidate.getID();
 
-      if (knownAlready.contains(candidate)) {
-        userListManager.addItemToList(userListID, id);
-        actualItems.add(candidate);
-      } else if (isValidForeignPhrase(project, foreignLanguage)) {
-        userListManager.newExercise(userListID, candidate);
-        actualItems.add(candidate);
-        reallyNewItems.add(candidate);
-      } else {
-        logger.info("item #" + id + " '" + foreignLanguage + "' is invalid");
+        if (knownAlready.contains(candidate)) {
+          userListManager.addItemToList(userListID, id);
+          actualItems.add(candidate);
+        } else if (isValidForeignPhrase(project, foreignLanguage)) {
+          userListManager.newExercise(userListID, candidate);
+          actualItems.add(candidate);
+          reallyNewItems.add(candidate);
+        } else {
+          logger.info("item #" + id + " '" + foreignLanguage + "' is invalid");
+        }
       }
     }
 
@@ -453,7 +456,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       String[] parts = line.split("\\t");
 //      logger.info("\tgot " + parts.length + " parts");
       if (parts.length > 1) {
-        String fl = parts[0];
+        String fl = parts[0].trim();
         String english = parts[1].trim();
 
         if (onFirst && english.equalsIgnoreCase(project.getLanguage())) {
@@ -465,9 +468,12 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
           } else {
             if (!currentKnownFL.contains(fl)) {
               CommonExercise known = makeOrFindExercise(newItems, firstColIsEnglish, userIDFromSession, fl, english, project);
-              logger.info("convertTextToExercises made or found " + fl + "=" + english);
+              logger.info("convertTextToExercises made or found " + known.getID() +
+                  "  '" + fl + "' = '" + english + "'");
 
-              if (known != null) knownAlready.add(known);
+              if (known.getID() > 0) {
+                knownAlready.add(known);
+              }
             } else {
               logger.info("convertTextToExercises skipping " + fl + " that's already on the list.");
             }
@@ -483,7 +489,9 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   @NotNull
   private Set<String> getCurrentOnList(UserList<CommonShell> userListByID) {
     Set<String> currentKnownFL = new HashSet<>();
-    for (CommonShell shell : userListByID.getExercises()) currentKnownFL.add(shell.getForeignLanguage());
+    for (CommonShell shell : userListByID.getExercises()) {
+      currentKnownFL.add(shell.getForeignLanguage());
+    }
     return currentKnownFL;
   }
 
@@ -522,8 +530,9 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
       List<CommonExercise> exactMatch = db.getExerciseDAO(projectID).getExactMatch(fl, userIDFromSession);
 
       if (!exactMatch.isEmpty()) {
-        if (exactMatch.size() > 1) logger.info("found " + exactMatch.size() + " exact matches for " + fl);
-        newItems.add(exercise);
+        if (exactMatch.size() > 1)
+          logger.info("makeOrFindExercise : found " + exactMatch.size() + " exact matches for " + fl);
+        newItems.add(exactMatch.iterator().next());
       }
     }
 

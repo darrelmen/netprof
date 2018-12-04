@@ -829,7 +829,14 @@ public class UserListManager implements IUserListManager {
       logger.error("getUserListByID : huh? asking for id " + id);
       return null;
     }
-    return userListDAO.getWithExercises(id);
+    UserList<CommonShell> where = userListDAO.getWhere(id, true);
+
+    if (where != null) {
+      Collection<Integer> exidsForList = userListExerciseJoinDAO.getExidsForList(id);
+      logger.info("getUserListByID found " + exidsForList.size() + " exids for " + id);
+      exidsForList.forEach(exid -> where.addExercise(databaseServices.getExercise(where.getProjid(), exid)));
+    }
+    return where;//userListDAO.getWithExercises(id);
   }
 
   @Override

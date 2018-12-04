@@ -137,6 +137,12 @@ public interface IUserExerciseDAO extends IDAO {
 
   List<CommonShell> getOnList(int listID, boolean shouldSwap);
 
+  /**
+   *
+   * @param listID
+   * @param shouldSwap
+   * @return
+   */
   List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap);
 
   /**

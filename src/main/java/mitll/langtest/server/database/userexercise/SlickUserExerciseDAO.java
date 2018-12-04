@@ -890,6 +890,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
   public List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap) {
     // long then = System.currentTimeMillis();
+
+
     List<SlickExercise> onList = dao.getOnList(listID);
     // long now = System.currentTimeMillis();
 //    logger.info("getCommonExercises took "+ (now-then) + " to get " + onList.size() + " for list #" + listID );

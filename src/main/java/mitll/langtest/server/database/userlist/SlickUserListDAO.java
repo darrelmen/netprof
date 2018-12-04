@@ -285,6 +285,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @see #getWithExercises(int)
    */
   private void populateList(UserList<CommonShell> where, boolean shouldSwap) {
+
+
+
     //   List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
     where.setExercises(userExerciseDAO.getOnList(where.getID(), shouldSwap));
     // for (CommonShell shell : onList) logger.info("for " + where.getOldID() + " found " + shell);
@@ -334,6 +337,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     dao.markNotDeleted((int) unique);
   }
 
+  /**
+   *
+   * @param unique
+   * @return
+   */
   @Override
   public UserList<CommonShell> getWithExercises(int unique) {
     UserList<CommonShell> where = getWhere(unique, true);
