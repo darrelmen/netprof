@@ -15,6 +15,7 @@ import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.project.ThumbnailChoices;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
@@ -214,7 +215,7 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   private boolean isTitle(ExerciseAttribute attr) {
-    return attr.getProperty().equals(IDialog.METADATA.FLTITLE.toString().toLowerCase());
+    return attr.getProperty().equals(DialogMetadata.FLTITLE.toString().toLowerCase());
   }
 
   @NotNull

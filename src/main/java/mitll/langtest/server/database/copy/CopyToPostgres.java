@@ -1726,6 +1726,12 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
+  /**
+   * @see #main
+   * @see DIALOG command
+   * @param to
+   * @param propertiesFile
+   */
   private static void copyDialog(int to, String propertiesFile) {
     database = getDatabase(propertiesFile);
     if (to == -1) logger.error("remember to set the project id");

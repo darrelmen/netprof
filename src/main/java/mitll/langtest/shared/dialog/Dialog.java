@@ -1,5 +1,6 @@
 package mitll.langtest.shared.dialog;
 
+import mitll.langtest.server.database.dialog.IDialogReader;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +10,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * @see
+ * @see mitll.langtest.server.database.dialog.DialogDAO#getDialogs
+ * @see mitll.langtest.server.database.dialog.DialogReader#addDialogPair
  */
 public class Dialog implements IDialog, MutableShell {
   private final transient Logger logger = Logger.getLogger("Dialog");
@@ -63,7 +65,7 @@ public class Dialog implements IDialog, MutableShell {
    * @param exercises
    * @param coreExercises
    * @see mitll.langtest.server.database.dialog.DialogDAO#makeDialog
-   * @see mitll.langtest.server.database.dialog.KPDialogs#getDialogs
+   * @see IDialogReader#getDialogs
    */
   public Dialog(int id,
                 int userid,
@@ -120,7 +122,7 @@ public class Dialog implements IDialog, MutableShell {
    * @return empty if no attribute of that type
    */
   @Override
-  public String getAttributeValue(IDialog.METADATA metadata) {
+  public String getAttributeValue(DialogMetadata metadata) {
     List<ExerciseAttribute> collect1 = getAttributes().stream().filter(
         exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(metadata.toString())
     ).collect(Collectors.toList());

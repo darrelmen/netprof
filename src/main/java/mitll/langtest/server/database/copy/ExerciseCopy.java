@@ -29,7 +29,7 @@ public class ExerciseCopy {
   public static final String UNIT = "Unit";
   public static final String LESSON = "Lesson";
   public static final String CUSTOM = "Custom";
-  public static final int DEFAULT_DIALOG_ID = 1;
+  private static final int DEFAULT_DIALOG_ID = 1;
 
   /**
    * TODO :  How to make sure we don't add duplicates?

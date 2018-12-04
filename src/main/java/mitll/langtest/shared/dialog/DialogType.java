@@ -38,6 +38,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  */
 public enum DialogType implements IsSerializable {
   DIALOG(true),
+  INTERPRETER(true),
   DEFAULT(false);
 
   private boolean show;
