@@ -78,6 +78,9 @@ public class ListView implements ContentView, CreateListComplete {
 
   private static final String PRACTICE_THE_LIST = "Practice the list.";
   private static final int MAX_HEIGHT = 710;
+  /**
+   * @see #getImport
+   */
   private static final String IMPORT = "Import";
   private static final int MIN_WIDTH = 599;
 

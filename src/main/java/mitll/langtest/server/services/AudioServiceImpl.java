@@ -1443,6 +1443,16 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#gotContextBlur
+   * @param projID
+   * @param exid
+   * @param audioID
+   * @param isContext
+   * @param transcript
+   * @return
+   * @throws DominoSessionException
+   */
   @Override
   public AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript) throws DominoSessionException {
     getUserIDFromSessionOrDB();

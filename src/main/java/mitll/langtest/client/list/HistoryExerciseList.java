@@ -171,7 +171,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    */
   void pushFirstSelection(int exerciseID, String searchIfAny) {
     String token = getHistoryToken();
-    logger.info("pushFirstSelection : (" + getInstance() + ") current token " + token);
+    if (DEBUG) logger.info("pushFirstSelection : (" + getInstance() + ") current token " + token);
     SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
 
 /*    if (DEBUG) logger.info("ExerciseList.pushFirstSelection : current token '" + token + "' id from token '" + idFromToken +
@@ -428,7 +428,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       restoreUIState(selectionState);
 
       try {
-        if (didChange || isEmpty() ) {
+        if (didChange || isEmpty()) {
           loadFromSelectionState(selectionState, selectionState);
         }
       } catch (Exception e) {
@@ -455,9 +455,9 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   }
 
   /**
-   * @see #restoreUIAndLoadExercises
    * @param selectionState
    * @return true if we're just clicking on a different item in the list and don't need to reload the exercise list
+   * @see #restoreUIAndLoadExercises
    */
   void restoreUIState(SelectionState selectionState) {
     restoreListBoxState(selectionState);

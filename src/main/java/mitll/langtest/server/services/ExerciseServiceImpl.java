@@ -34,10 +34,7 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.exercise.Search;
-import mitll.langtest.server.database.exercise.SectionHelper;
-import mitll.langtest.server.database.exercise.TripleExercises;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -137,9 +134,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
         ExerciseListWrapper<T> exerciseWhenNoUnitChapter = getExerciseWhenNoUnitChapter(request, projectID, userListByID);
 
         long diff = System.currentTimeMillis() - then;
-        if (diff >20)
-        logger.info("getExerciseIds : 1 req  " + request + " took " + diff +
-            " millis to get " + exerciseWhenNoUnitChapter.getSize());
+        if (diff > 20)
+          logger.info("getExerciseIds : 1 req  " + request + " took " + diff +
+              " millis to get " + exerciseWhenNoUnitChapter.getSize());
 
         return exerciseWhenNoUnitChapter;
       } else { // sort by unit-chapter selection
@@ -1028,6 +1025,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
   /**
    * So on netprof1-dev, we need to tell it the exercise has changed.
+   *
    * @param projID
    * @param exid
    * @throws DominoSessionException
@@ -1036,6 +1034,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   public void refreshExercise(int projID, int exid) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     getDatabase().getProject(projID).getExerciseDAO().refresh(exid);
+  }
+
+  @Override
+  public void refreshExercises(int projID, Set<Integer> exids) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    ExerciseDAO<CommonExercise> exerciseDAO = getDatabase().getProject(projID).getExerciseDAO();
+    exids.forEach(exerciseDAO::refresh);
   }
 
   public int getExerciseIDOrParent(int exid) throws DominoSessionException {

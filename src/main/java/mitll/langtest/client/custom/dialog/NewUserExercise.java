@@ -332,6 +332,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   private void gotBlur() {
+    //  logger.info("gotBlur");
     gotBlur(rap, normalSpeedRecording, toAddTo);
   }
 
@@ -489,13 +490,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
               audioAnswer.setPath(audioAttribute.getAudioRef());
 
               rapContext.getPostAudioButton().useResult(audioAnswer);
-//              logger.info("got existing audio attribute : " + audioAttribute);
+              if (DEBUG) logger.info("gotContextBlur got existing audio attribute : " + audioAttribute);
               addToContext(audioAttribute);
             } else {
-              if (DEBUG) logger.info("got NO existing audio attribute for " + text);
+              if (DEBUG) logger.info("gotContextBlur got NO existing audio attribute for " + text);
               rapContext.getPostAudioButton().useInvalidResult(newUserExercise.getID(), Validity.OK, 0D);
               clearContext();
-
             }
           }
         });
@@ -507,8 +507,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     }
   }
 
-  private FormField addContextTranslation(Panel container,
-                                          U newUserExercise) {
+  private FormField addContextTranslation(Panel container, U newUserExercise) {
     FormField formField = makeBoxAndAnnoArea(container, "", contextTransAnno);
 
     TextBoxBase box1 = formField.box;
@@ -582,7 +581,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
           @Override
           public void onSuccess(Void result) {
-            logger.info("OK, updated exercise " + newUserExercise.getID());
+//            logger.info("OK, updated exercise " + newUserExercise.getID());
           }
         });
   }
@@ -759,14 +758,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
                         ControlGroup normalSpeedRecording,
                         Panel toAddTo,
                         boolean onClick) {
-    if (validateForm(rap, normalSpeedRecording)) {
+    //if (validateForm(rap, normalSpeedRecording)) {
 //   logger.info("NewUserExercise.validateThenPost : form is valid");
-      isValidForeignPhrase(toAddTo, onClick);
-      //isValidForeignPhrase(pagingContainer, toAddTo, onClick);
-    } else {
-      formInvalid();
-      logger.info("NewUserExercise.validateThenPost : form not valid");
-    }
+    isValidForeignPhrase(toAddTo, onClick);
+//    } else {
+//      formInvalid();
+//      logger.info("NewUserExercise.validateThenPost : form not valid");
+//    }
   }
 
   protected boolean isEnglish() {
@@ -785,10 +783,16 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #validateThenPost
    */
   private void isValidForeignPhrase(final Panel toAddTo, final boolean onClick) {
-    //  logger.info("isValidForeignPhrase : checking phrase " + foreignLang.getSafeText() + " before adding/changing " + newUserExercise);
+    if (DEBUG) {
+      logger.info("isValidForeignPhrase : checking " +
+          "\n\tphrase " + foreignLang.getSafeText() + " before adding/changing " + newUserExercise);
+    }
+
     final FormField foreignLang = this.foreignLang;
 
-    controller.getScoringService().isValidForeignPhrase(foreignLang.getSafeText(), "", new AsyncCallback<Boolean>() {
+    String safeText = foreignLang.getSafeText().trim();
+
+    controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("is valid exercise", caught);
@@ -796,31 +800,32 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
       @Override
       public void onSuccess(Boolean result) {
-        if (result) {
-          if (!context.getSafeText().trim().isEmpty()) {
-            controller.getScoringService().isValidForeignPhrase(context.getSafeText(), "", new AsyncCallback<Boolean>() {
-              @Override
-              public void onFailure(Throwable caught) {
-                controller.handleNonFatalError("is valid exercise", caught);
-              }
+        if (result || safeText.isEmpty()) {
+          String safeText1 = context.getSafeText().trim();
+          controller.getScoringService().isValidForeignPhrase(safeText1, "", new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("is valid exercise", caught);
+            }
 
-              @Override
-              public void onSuccess(Boolean result) {
-                if (result) {
-                  afterValidForeignPhrase(toAddTo, onClick);
-                } else {
-                  markError(context, "The " + controller.getLanguage() +
-                      " text is not in our " + getLanguage() + " dictionary. Please edit.", Placement.BOTTOM);
-                }
+            @Override
+            public void onSuccess(Boolean result) {
+              if (result || safeText1.isEmpty()) {
+                afterValidForeignPhrase(toAddTo, onClick);
+              } else {
+                markWarn(context, "The " + controller.getLanguage() +
+                    " text is not in our " + getLanguage() + " dictionary. Please edit.", Placement.BOTTOM);
               }
-            });
-          }
+            }
+          });
+
         } else {
-          markError(foreignLang, "The " + controller.getLanguage() +
+          markWarn(foreignLang, "The " + controller.getLanguage() +
               " text is not in our " + getLanguage() + " dictionary. Please edit.", Placement.BOTTOM);
         }
       }
     });
+
   }
 
 

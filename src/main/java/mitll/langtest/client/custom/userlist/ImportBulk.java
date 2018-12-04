@@ -44,12 +44,18 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 7/7/17.
  */
 class ImportBulk {
+  private final Logger logger = Logger.getLogger("ImportBulk");
+
+
   private static final int IMPORT_WIDTH = 500;
   private static final int VISIBLE_LINES = 20;
   private static final int CHARACTER_WIDTH = 150;
@@ -110,6 +116,20 @@ class ImportBulk {
 
             myLists.flush();
             myLists.redraw();
+            Set<Integer> exids = new HashSet<>();
+            newExercises.forEach(ex -> exids.add(ex.getID()));
+            controller.getExerciseService().refreshExercises(controller.getProjectStartupInfo().getProjectid(), exids,
+                new AsyncCallback<Void>() {
+                  @Override
+                  public void onFailure(Throwable throwable) {
+
+                  }
+
+                  @Override
+                  public void onSuccess(Void aVoid) {
+                    logger.info("updated " + exids.size() + " items on netprof");
+                  }
+                });
           }
         });
   }

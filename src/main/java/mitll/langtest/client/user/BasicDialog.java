@@ -191,7 +191,7 @@ public class BasicDialog {
     hp.addStyleName("leftFiveMargin");
 
     if (!label.isEmpty()) {
-     // Heading labelHeading = getLabel(label, labelWidth, subtext);
+      // Heading labelHeading = getLabel(label, labelWidth, subtext);
       hp.add(getLabel(label, labelWidth, subtext));
     }
     hp.add(widget);
@@ -364,11 +364,20 @@ public class BasicDialog {
     setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message, placement, true);
   }
 
-  void markWarn(FormField signUpEmail, String header, String message) {
-    markWarn(signUpEmail.group, signUpEmail.box, header, message, TOP);
+
+  public void markWarn(FormField signUpEmail, String header, String message) {
+    markWarn(signUpEmail, header, message, TOP);
   }
 
-   void markWarn(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
+  public void markWarn(FormField signUpEmail, String message, Placement placement) {
+    markWarn(signUpEmail.group, signUpEmail.box, TRY_AGAIN, message, placement);
+  }
+
+  public void markWarn(FormField signUpEmail, String header, String message, Placement placement) {
+    markWarn(signUpEmail.group, signUpEmail.box, header, message, placement);
+  }
+
+  void markWarn(ControlGroup dialectGroup, FocusWidget dialect, String header, String message, Placement placement) {
     markError(dialectGroup, dialect, header, message, placement, false, true, false);
   }
 

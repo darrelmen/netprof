@@ -265,8 +265,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * if the transcript is the same as the current audio, just return the current audio attribute.
    * if there is no transcript, remove any current audio
    *
-   *
-   *
    * @param projID
    * @param exid
    * @param audioID
@@ -279,16 +277,22 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   public AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext,
                                            String transcript, AudioCopy audioCopy) {
 
-    logger.info("getTranscriptMatch projID " + projID + "\n\texid " + exid + "\n\taudio " + audioID + "\n\tcontext " + isContext);
+    logger.info("getTranscriptMatch projID " + projID +
+        "\n\texid    " + exid +
+        "\n\taudio   " + audioID +
+        "\n\tcontext " + isContext +
+        "\n\ttext    '" + transcript +"'"
+    );
 
-    SlickAudio first = audioID > 0 ? getFirst(audioID) : null;
+    // cheesy thing where we might have an audio cut with an empty transcript...
+    SlickAudio first = audioID > 0 && !transcript.isEmpty() ? getFirst(audioID) : null;
     if (first != null && first.transcript().equals(transcript)) {
-      logger.info("getTranscriptMatch no change - match to transcript");
+      logger.info("getTranscriptMatch no change - match to transcript '" + first.transcript() +
+          "'");
       AudioAttribute audioAttribute = getAudioAttribute(first, new HashMap<>(), false);
       fixAudioRef(projID, audioAttribute);
       return audioAttribute;
     } else {
-
       List<SlickAudio> transcriptMatch = dao.getTranscriptMatch(projID, transcript);
       if (!transcriptMatch.isEmpty()) {
         if (transcriptMatch.size() > 1)
@@ -308,7 +312,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
         return audioAttribute;
       } else {
-
+        logger.info("getTranscriptMatch no match for " + transcript);
         /*   if (audioID > 0) {  // no matter whether there is a match or not, invalidate any current audio.
           logger.info("getTranscriptMatch MARK DEFECT projID " + projID + "\n\texid " + exid + "\n\taudio " + audioID +
               "\n\tcontext " + isContext);
