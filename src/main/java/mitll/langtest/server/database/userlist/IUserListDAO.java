@@ -85,6 +85,12 @@ public interface IUserListDAO extends IDAO {
    */
   int getCount();
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser
+   * @param userid
+   * @param projectID
+   * @return
+   */
   List<UserList<CommonShell>> getAllByUser(int userid, int projectID);
 
   boolean hasByName(long userid, String name, int projid);
