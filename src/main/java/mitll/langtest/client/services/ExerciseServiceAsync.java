@@ -40,16 +40,16 @@ import java.util.Collection;
 
 public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
   /**
-   * @see ExerciseList#getExercises
    * @param request
    * @param async
+   * @see ExerciseList#getExercises
    */
   void getExerciseIds(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<T>> async);
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    * @param exid
    * @param async
+   * @see mitll.langtest.client.list.ExerciseList#askServerForExercise
    */
   void getExercise(int exid, AsyncCallback<T> async);
 
@@ -59,13 +59,15 @@ public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
                         AsyncCallback<ExerciseListWrapper<ClientExercise>> async);
 
   /**
-   * @see mitll.langtest.client.analysis.PlayAudio#playLast
    * @param userID
    * @param exid
    * @param nearTime
    * @param async
+   * @see mitll.langtest.client.analysis.PlayAudio#playLast
    */
   void getLatestScoreAudioPath(int userID, int exid, long nearTime, AsyncCallback<Pair> async);
 
   void getExerciseIDOrParent(int exid, AsyncCallback<Integer> async);
+
+  void refreshExercise(int projid, int exid, AsyncCallback<Void> async);
 }

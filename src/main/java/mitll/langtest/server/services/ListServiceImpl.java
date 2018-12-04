@@ -36,6 +36,7 @@ import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
 //import mitll.langtest.client.custom.userlist.ImportBulk;
+import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;

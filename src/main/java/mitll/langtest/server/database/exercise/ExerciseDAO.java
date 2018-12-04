@@ -93,4 +93,6 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   int getExIDForDominoID(int projID, int dominoID);
 
   int getParentFor(int exid);
+
+  void refresh(int exid);
 }

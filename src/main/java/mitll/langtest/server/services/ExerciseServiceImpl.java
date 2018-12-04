@@ -1026,6 +1026,18 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return (T) getAnnotatedExercise(getUserIDFromSessionOrDB(), getProjectIDFromUser(), exid);
   }
 
+  /**
+   * So on netprof1-dev, we need to tell it the exercise has changed.
+   * @param projID
+   * @param exid
+   * @throws DominoSessionException
+   */
+  @Override
+  public void refreshExercise(int projID, int exid) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    getDatabase().getProject(projID).getExerciseDAO().refresh(exid);
+  }
+
   public int getExerciseIDOrParent(int exid) throws DominoSessionException {
     int projectIDFromUser = getProjectIDFromUser();
     CommonExercise exerciseByID = getProject(projectIDFromUser).getExerciseByID(exid);

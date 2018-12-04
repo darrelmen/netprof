@@ -35,6 +35,7 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.*;
@@ -234,10 +235,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       Collection<SlickRelatedExercise> allRelated = userExerciseDAO.getRelatedExercise().getAllRelated(projid);
       attachContextExercises(allNonContextExercises, allRelated, idToContext);
 
-      List<CommonExercise> userCreatedExercises = getUserCreatedExercises(typeOrder, allRelated);
-      userCreatedExercises.forEach(c -> idToUserExercise.put(c.getID(), c));
-      userCreatedExercises.forEach(c -> c.getDirectlyRelated().forEach(d -> idToUserExercise.put(d.getID(), d.asCommon())));
-      logger.info("added " + userCreatedExercises.size() + " vs " + idToUserExercise.size());
+      {
+        List<CommonExercise> userCreatedExercises = getUserCreatedExercises(typeOrder, allRelated);
+        userCreatedExercises.forEach(c -> idToUserExercise.put(c.getID(), c));
+        userCreatedExercises.forEach(c -> c.getDirectlyRelated().forEach(d -> idToUserExercise.put(d.getID(), d.asCommon())));
+        logger.info("added " + userCreatedExercises.size() + " vs " + idToUserExercise.size());
+      }
       return allNonContextExercises;
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -520,6 +523,29 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   public int getParentFor(int exid) {
     return userExerciseDAO.getRelatedExercise().getParentForContextID(exid);
+  }
+
+  public void refresh(int exid) {
+    CommonExercise commonExercise = idToUserExercise.get(exid);
+    if (commonExercise == null) {
+      logger.info("refresh no ex with " + exid);
+    } else {
+      logger.info("refresh found " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage() + " \n\t: " + commonExercise);
+      ClientExercise next = commonExercise.getDirectlyRelated().iterator().next();
+      logger.info("found context " + next.getEnglish() + " " + next.getForeignLanguage() + " \n\t: " + next);
+    }
+
+
+    CommonExercise byExID = userExerciseDAO.getByExID(exid, false);
+    idToUserExercise.put(exid, byExID);
+    ClientExercise next = byExID.getDirectlyRelated().iterator().next();
+    idToUserExercise.put(next.getID(), next.asCommon());
+
+    logger.info("refresh after " + byExID.getEnglish() +
+        " " + byExID.getForeignLanguage() + " \n\t: " + byExID);
+
+    logger.info("refresh after context " + next.getEnglish() +
+        " " + next.getForeignLanguage() + " \n\t: " + next);
   }
 
   private ExerciseDAOWrapper getDao() {

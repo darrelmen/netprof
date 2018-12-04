@@ -50,6 +50,7 @@ import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
+import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
@@ -259,8 +260,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     context.box.addKeyUpHandler(keyUpEvent -> {
       boolean hasText = !context.box.getText().trim().isEmpty();
       //  logger.info("Got key up " + hasText);
-      rapContext.setEnabled(hasText);
-
+      rapContext.setEnabled(hasText && hasRecordPermission());
     });
   }
 
@@ -474,7 +474,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       }
     }
 
-    controller.getAudioService().getTranscriptMatch(controller.getProjectStartupInfo().getProjectid(),
+    getAudioService().getTranscriptMatch(controller.getProjectStartupInfo().getProjectid(),
         exid, audioID, true, text, new AsyncCallback<AudioAttribute>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -549,7 +549,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #reallyChange
    */
   private void editItem(final boolean buttonClicked, boolean keepAudio) {
-    controller.getAudioService().editItem(newUserExercise, keepAudio, new AsyncCallback<Void>() {
+    getAudioService().editItem(newUserExercise, keepAudio, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("changin an exercise", caught);
@@ -566,8 +566,29 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
         //  if (DEBUG) logger.info("postEditItem : onSuccess ");// + newUserExercise.getTooltip());
         doAfterEditComplete(buttonClicked);
+
+        //refreshEx();
       }
     });
+  }
+
+  private void refreshEx() {
+    controller.getExerciseService().refreshExercise(controller.getProjectStartupInfo().getProjectid(),
+        newUserExercise.getID(), new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            logger.info("OK, updated exercise " + newUserExercise.getID());
+          }
+        });
+  }
+
+  private AudioServiceAsync getAudioService() {
+    return controller.getAudioService();
   }
 
   /**
@@ -821,7 +842,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
           "\n\teng " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage());
     }
 
-    controller.getAudioService().editItem(clientExercise, keepAudio, new AsyncCallback<Void>() {
+    getAudioService().editItem(clientExercise, keepAudio, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("changing the context exercise", caught);
@@ -831,6 +852,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       public void onSuccess(Void newExercise) {
         originalContext = clientExercise.getForeignLanguage();
         originalContextTrans = clientExercise.getEnglish();
+
+        refreshEx();
       }
     });
 
@@ -985,12 +1008,11 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 //      String speed = (audioType ? "Regular" : "Slow") + "_speed";
 //      getPostAudioButton().getElement().setId(WIDGET_ID + speed);
 //      getPlayButton().getElement().setId(WIDGET_ID + "Play_" + speed);
-      User current = controller.getUserManager().getCurrent();
-      //  logger.info("kind = " +current.getUserKind());
-      boolean teacher = !current.isStudent() || !current.getPermissions().isEmpty();
-      setEnabled(teacher);
+
+      setEnabled(hasRecordPermission());
       controller.register(getPlayButton(), newExercise.getID());
     }
+
 
     private void disableOthers(boolean b) {
       //    logger.info("disable others " +b);
@@ -1164,4 +1186,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 /*  private boolean validRecordingCheck() {
     return newUserExercise == null;
   }*/
+
+  private boolean hasRecordPermission() {
+    User current = controller.getUserManager().getCurrent();
+    //  logger.info("kind = " +current.getUserKind());
+    return !current.isStudent() || !current.getPermissions().isEmpty();
+  }
 }

@@ -449,6 +449,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.legacyid(),
         shouldSwap);
 
+    userExercise.setPredef(slick.ispredef());
+
+
 /*    logger.info("fromSlick " +
         "\n\tfrom    " + slick+
         "\n\tcreated " + userExercise+

@@ -101,6 +101,11 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return 0;
   }
 
+  @Override
+  public void refresh(int exid) {
+
+  }
+
   private static final String BOOK = "book";
 
   private static final String CHAPTER = "chapter";
