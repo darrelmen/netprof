@@ -249,6 +249,18 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return 0;
   }
 
+  private void log() {
+    int MB = (1024 * 1024);
+    Runtime rt = Runtime.getRuntime();
+    long free = rt.freeMemory();
+    long used = rt.totalMemory() - free;
+    long max = rt.maxMemory();
+
+    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+    logger.debug(serverProps.getLanguage() + " current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
+        " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
+  }
+
   /**
    * @param file
    * @return
@@ -264,18 +276,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
       logger.error(language + " : looking for " + file.getAbsolutePath() + " got " + e, e);
     }
     return new ArrayList<>();
-  }
-
-  private void log() {
-    int MB = (1024 * 1024);
-    Runtime rt = Runtime.getRuntime();
-    long free = rt.freeMemory();
-    long used = rt.totalMemory() - free;
-    long max = rt.maxMemory();
-
-    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
-    logger.debug(serverProps.getLanguage() + " current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
-        " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
   /**
