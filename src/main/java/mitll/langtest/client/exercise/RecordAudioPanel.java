@@ -91,6 +91,9 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   protected T exercise;
   protected AudioType audioType;
 
+
+  private static final boolean DEBUG = false;
+
   /**
    * @param exercise
    * @param controller
@@ -118,10 +121,13 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
     this.audioType = audioType;
 
     AudioAttribute attribute = getAudioAttribute();
-    logger.info("RecordAudioPanel for " + exercise.getID() +
-        "\n\taudio type " + audioType +
-        "\n\tfirst ref  " + exercise.getRefAudio() +
-        "\n\tpath       " + attribute);
+
+    if (DEBUG) {
+      logger.info("RecordAudioPanel for " + exercise.getID() +
+          "\n\taudio type " + audioType +
+          "\n\tfirst ref  " + exercise.getRefAudio() +
+          "\n\tpath       " + attribute);
+    }
 
     setAudioPathFromAttribute(attribute);
 

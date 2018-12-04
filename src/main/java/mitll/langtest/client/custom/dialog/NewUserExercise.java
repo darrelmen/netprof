@@ -40,6 +40,8 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -139,11 +141,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   private final int listID;
   private Panel toAddTo;
-  private boolean clickedCreate = false;
 
   private ListInterface<T, U> listInterface;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
 
   /**
@@ -345,6 +346,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   ControlGroup makeRegularAudioPanel(Panel row) {
     rap = makeRecordAudioPanel(newUserExercise, row, AudioType.REGULAR);
+    rap.getButton().addClickHandler(clickEvent -> postChangeIfDirty(false));
     return addControlGroupEntrySimple(row, "", rap);
   }
 
@@ -356,10 +358,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   ControlGroup makeContextAudioPanel(Panel row) {
     U next = (U) newUserExercise.getDirectlyRelated().iterator().next();
-    logger.info("makeContextAudioPanel make context from " + next.getID());
+    //   logger.info("makeContextAudioPanel make context from " + next.getID());
     rapContext = makeRecordAudioPanel(next, row, AudioType.CONTEXT_REGULAR);
+    rapContext.getButton().addClickHandler(clickEvent -> postChangeIfDirty(false));
 
-    //  logger.info("set enabled false!");
     rapContext.setEnabled(false);
     return addControlGroupEntrySimple(row, "", rapContext);
   }
@@ -435,6 +437,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   private FormField addContext(Panel container, U newUserExercise) {
     FormField formField = makeBoxAndAnnoArea(container, "", contextAnno);
+    formField.box.getElement().getStyle().setLineHeight(28, Style.Unit.PX);
     setFontSize(formField);
 
     TextBoxBase box = formField.box;
@@ -443,12 +446,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     box.setText(newUserExercise.getContext());
     markPlaceholder(box, newUserExercise.getContext(), "Context Sentence (optional)");
     addOnBlur(box, CONTEXT_BOX);
-    box.addBlurHandler(new BlurHandler() {
-      @Override
-      public void onBlur(BlurEvent blurEvent) {
-        gotContextBlur(box.getText());
-      }
-    });
+    box.addBlurHandler(blurEvent -> gotContextBlur(box.getText()));
 
     useAnnotation(newUserExercise, CONTEXT, contextAnno);
     return formField;
@@ -463,7 +461,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see IAudioDAO#getTranscriptMatch
    */
   private void gotContextBlur(String text) {
-    logger.info("gotContextBlur '" + text + "'");
+    if (DEBUG) logger.info("gotContextBlur '" + text + "'");
 
     int exid = -1;
     int audioID = -1;
@@ -494,7 +492,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 //              logger.info("got existing audio attribute : " + audioAttribute);
               addToContext(audioAttribute);
             } else {
-              logger.info("got NO existing audio attribute : ");
+              if (DEBUG) logger.info("got NO existing audio attribute for " + text);
               rapContext.getPostAudioButton().useInvalidResult(newUserExercise.getID(), Validity.OK, 0D);
               clearContext();
 
@@ -695,8 +693,11 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         return false;
       } else {
         String audioRef = first.getAudioRef();
-        logger.info("contextAudioChanged : Current context " + audioRef + " vs " + originalContextAudio);
-        return compareRefs(audioRef, this.originalContextAudio);
+        boolean b = compareRefs(audioRef, this.originalContextAudio);
+        if (b) {
+          logger.info("contextAudioChanged : Current context " + audioRef + " vs " + originalContextAudio);
+        }
+        return b;
       }
     } else {
       return false;
@@ -815,7 +816,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     ClientExercise clientExercise = grabInfoFromFormAndStuffInfoExercise(newUserExercise);
     editItem(markFixedClicked, keepAudio);
 
-    logger.info("edit item " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage());
+    if (DEBUG) {
+      logger.info("reallyChange : edit item " + clientExercise.getID() +
+          "\n\teng " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage());
+    }
 
     controller.getAudioService().editItem(clientExercise, keepAudio, new AsyncCallback<Void>() {
       @Override
@@ -1038,8 +1042,11 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             public void useResult(AudioAnswer result) {
               super.useResult(result);
 
-              logger.info("useResult got back " + result.getAudioAttribute() +
-                  "\n\tfor " + newUserExercise);
+              if (DEBUG) {
+                logger.info("useResult got back " + result.getAudioAttribute() +
+                    "\n\tfor " + newUserExercise);
+              }
+
               useAudioAttribute(result);
               audioPosted();
             }
@@ -1084,6 +1091,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   private void useAudioAttribute2(AudioAttribute audioAttribute) {
+    if (DEBUG) {
+      logger.info("useAudioAttribute2 " +
+          "\n\taudio id " + audioAttribute.getUniqueID() +
+          "\n\tex       " + audioAttribute.getExid() +
+          "\n\ttrans    " + audioAttribute.getTranscript());
+    }
+
     if (audioAttribute.getAudioType() == AudioType.CONTEXT_REGULAR) {
       addToContext(audioAttribute);
 
@@ -1102,7 +1116,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       MutableAudioExercise mutableAudio = clientExercise.getMutableAudio();
       if (clientExercise.hasRefAudio()) {
         if (!mutableAudio.clearRefAudio()) {
-          logger.warning("addToContext didn't clear audio?");
+          logger.info("addToContext didn't clear audio? " + clientExercise.getAudioAttributes());
         }
       }
       mutableAudio.addAudio(audioAttribute);
@@ -1125,10 +1139,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   void audioPosted() {
-    if (clickedCreate) {
-      clickedCreate = false;
-      validateThenPost(rap, normalSpeedRecording, toAddTo, false);
-    }
+//    if (clickedCreate) {
+//      clickedCreate = false;
+    validateThenPost(rap, normalSpeedRecording, toAddTo, false);
+//    }
 
     gotBlur();
   }
@@ -1144,19 +1158,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   private boolean validateForm(final RecordAudioPanel rap,
                                final ControlGroup normalSpeedRecording) {
-  /*  if (validRecordingCheck()) {
-      logger.info("validateForm : new user ex " + newUserExercise);
 
-      if (foreignChanged && rap != null) {
-        Button recordButton = rap.getButton();
-        markError(normalSpeedRecording, recordButton, recordButton, "",
-            RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE);
-        recordButton.addMouseOverHandler(event -> normalSpeedRecording.setType(ControlGroupType.NONE));
-        return false;
-      } else {
-        return true;
-      }
-    }*/
     return true;
   }
 /*  private boolean validRecordingCheck() {

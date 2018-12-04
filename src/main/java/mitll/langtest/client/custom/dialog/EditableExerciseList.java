@@ -222,7 +222,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   private void onClickAdd(Button add) {
     add.setEnabled(false);
 
-    logger.info("click add " + add);
+    // logger.info("click add " + add);
 
     final CommonShell currentExercise = searchTypeahead.getCurrentExercise();
     if (currentExercise != null) {
@@ -231,6 +231,9 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
         enableButton(add);
       } else {   // not on the list
         message.setText("");
+
+   //     logger.info("onClickAdd value after add is " + quickAddText.getText());
+
         controller.getListService().addItemToUserList(list.getID(), currentExercise.getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -242,7 +245,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
           public void onSuccess(Void result) {
             enableButton(add);
             showNewItem(currentExercise);
-            quickAddText.setValue("", false);
+            clearTextBoxField();
             searchTypeahead.clearCurrentExercise();
           }
         });
@@ -257,6 +260,10 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
         checkIsValidPhrase(add, safeText);
       }
     }
+  }
+
+  private void clearTextBoxField() {
+    quickAddText.setValue("", false);
   }
 
   /**
@@ -287,6 +294,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
             } else {
               logger.info("checkIsValidPhrase got " + newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
               showNewItem(newExercise);
+              clearTextBoxField();
             }
           }
         });
@@ -329,7 +337,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
     int before = getSize();
     addExercise(currentExercise);
     int after = getSize();
-    logger.info("before " + before + " after " + after);
+  //  logger.info("before " + before + " after " + after);
     enableRemove(true);
 
     gotClickOnItem(currentExercise);

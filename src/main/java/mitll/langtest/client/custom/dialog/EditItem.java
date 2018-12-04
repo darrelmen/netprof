@@ -118,7 +118,8 @@ public class EditItem {
    * @see #editItem
    */
   private PagingExerciseList<CommonShell, ClientExercise> makeExerciseList(Panel right, UserList<CommonShell> originalList) {
-     logger.info("EditItem.makeExerciseList - ul = " + originalList);// + " " + includeAddItem);
+    // logger.info("EditItem.makeExerciseList - ul = " + originalList);// + " " + includeAddItem);
+
     userListID = originalList.getID();
     userListName = originalList.getName();
     EditableExerciseList exerciseList = new EditableExerciseList(controller, right, INavigation.VIEWS.LISTS, originalList);
@@ -199,10 +200,10 @@ public class EditItem {
     ListEditableDialog(ExerciseController controller, ClientExercise exercise) {
       super(controller, exercise, EditItem.this.userListID, INavigation.VIEWS.LISTS);
     }
-
-    @Override
-    protected void addItemsAtTop(Panel container) {
-    }
+//
+//    @Override
+//    protected void addItemsAtTop(Panel container) {
+//    }
 
     @NotNull
     @Override
@@ -218,20 +219,24 @@ public class EditItem {
 
     @Override
     protected Panel getCreateButton(Panel toAddTo, ControlGroup normalSpeedRecording) {
-      Panel row = new DivWidget();
-      row.addStyleName("marginBottomTen");
-      configureButtonRow(row);
-      Button done;
-      row.add(done = makeDone());
-      done.addClickHandler(event -> exerciseList.loadNext());
-      return row;
+
+      return null;
+//      Panel row = new DivWidget();
+//      row.addStyleName("marginBottomTen");
+//      configureButtonRow(row);
+
+//      Button done;
+//      row.add(done = makeDone());
+//      done.addClickHandler(event -> exerciseList.loadNext());
+
+//      return row;
     }
 
     /**
      * @return
      * @see NewUserExercise#getCreateButton(Panel, ControlGroup)
      */
-    private Button makeDone() {
+  /*  private Button makeDone() {
       Button fixed = new Button(DONE);
       fixed.setType(ButtonType.PRIMARY);
 
@@ -242,7 +247,7 @@ public class EditItem {
       // fixed.addMouseOverHandler(event -> checkForForeignChange());
       addTooltip(fixed, "When done entering item.");
       return fixed;
-    }
+    }*/
 
   }
 }

@@ -108,6 +108,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
                     "\n\tuser      " + idToUserExercise.size() + " user exercises"
                 );
               }
+            } else {
+//              logger.info("getExercise user ex for " + id + " = " + commonExercise.getEnglish() + " = " + commonExercise.getForeignLanguage());
             }
           } else {
             //  logger.info("getExercise found context " + commonExercise.getID());
@@ -125,9 +127,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   public List<CommonExercise> getExactMatch(String fl, int userIDFromSession) {
     List<Integer> byProjectExactMatch = userExerciseDAO.getByProjectExactMatch(project.id(), userIDFromSession, fl);
-    List<CommonExercise> matches=new ArrayList<>(byProjectExactMatch.size());
+    List<CommonExercise> matches = new ArrayList<>(byProjectExactMatch.size());
     byProjectExactMatch
-        .forEach(id->matches.add(getExercise(id)));
+        .forEach(id -> matches.add(getExercise(id)));
     return matches;
   }
 
@@ -350,7 +352,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   public void addUserExercise(CommonExercise commonExercise) {
     CommonExercise put = idToUserExercise.put(commonExercise.getID(), commonExercise);
-    if (put != null) logger.info("  already user ex with " + commonExercise.getID());
+    if (put != null) {
+      logger.info("addUserExercise : already user ex with " + commonExercise.getID() + " : " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage());
+      CommonExercise exercise = getExercise(commonExercise.getID());
+      logger.info("addUserExercise :after " + exercise.getID() + " : " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+    }
   }
 
   /**

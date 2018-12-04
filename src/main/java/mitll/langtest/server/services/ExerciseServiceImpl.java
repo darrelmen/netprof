@@ -76,7 +76,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
   private static final boolean DEBUG_SEARCH = false;
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_ID_LOOKUP = true;
+  private static final boolean DEBUG_ID_LOOKUP = false;
 
   /**
    * @param request
@@ -136,7 +136,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
         // get initial exercise set, either from a user list or predefined
         ExerciseListWrapper<T> exerciseWhenNoUnitChapter = getExerciseWhenNoUnitChapter(request, projectID, userListByID);
 
-        logger.info("getExerciseIds : 1 req  " + request + " took " + (System.currentTimeMillis() - then) +
+        long diff = System.currentTimeMillis() - then;
+        if (diff >20)
+        logger.info("getExerciseIds : 1 req  " + request + " took " + diff +
             " millis to get " + exerciseWhenNoUnitChapter.getSize());
 
         return exerciseWhenNoUnitChapter;

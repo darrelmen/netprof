@@ -301,7 +301,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     }
   }
 
-  private static boolean DEBUG_PATH = true;
+  private static boolean DEBUG_PATH = false;
 
   /**
    * Here we assume the audioFile path is like
@@ -310,6 +310,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * OR answers/spanish/answers/123/regular_xxx.mp3
    *
    * Only works with .mp3 and .ogg (why???)
+   *
    * @param audioFile
    * @return
    */
@@ -320,7 +321,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
         audioFile.endsWith(MP3)
     ) {
       String wavFile = removeSuffix(audioFile) + WAV;
-      logger.info("getWavAudioFile " + audioFile);
+      if (DEBUG_PATH) logger.info("getWavAudioFile " + audioFile);
       if (new File(wavFile).exists()) {
         return wavFile;
       } else {
@@ -332,19 +333,20 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
             logger.warn("getWavAudioFile NOPE at " + test.getAbsolutePath());
           }
         }
-        logger.info("getWavAudioFile test " + test.getAbsolutePath());
+        if (DEBUG_PATH) logger.info("getWavAudioFile test " + test.getAbsolutePath());
         audioFile = test.exists() ? test.getAbsolutePath() : "FILE_MISSING.wav";
       }
     }
 
     String s = ensureWAV(audioFile);
 
-
-    logger.info("getWavAudioFile" +
-        "\n\treqFile      " + reqFile +
-        "\n\taudio before " + audioFile +
-        "\n\tafter        " + s
-    );
+    if (DEBUG_PATH) {
+      logger.info("getWavAudioFile" +
+          "\n\treqFile      " + reqFile +
+          "\n\taudio before " + audioFile +
+          "\n\tafter        " + s
+      );
+    }
 
     return s;
   }

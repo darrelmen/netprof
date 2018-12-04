@@ -94,14 +94,14 @@ public class SearchTypeahead {
   private Typeahead getTypeahead(TextBox textBox, Typeahead typeahead) {
     typeahead.setDisplayItemCount(DISPLAY_ITEMS);
     typeahead.setMatcherCallback((query, item) -> {
-  logger.info("getTypeahead Got " + query);
+      //  logger.info("getTypeahead Got " + query);
       add.setEnabled(hasText(textBox));
       return true;
     });
- //   logger.info("getTypeahead ");
+    //   logger.info("getTypeahead ");
     typeahead.setUpdaterCallback(selectedSuggestion -> {
       currentExercise = ((ExerciseSuggestion) selectedSuggestion).getShell();
-     // logger.info("getTypeahead Got " + selectedSuggestion.getDisplayString());
+      // logger.info("getTypeahead Got " + selectedSuggestion.getDisplayString());
 //      add.setEnabled(!selectedSuggestion.getDisplayString().isEmpty());
 
       return selectedSuggestion.getReplacementString();

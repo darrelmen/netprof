@@ -392,10 +392,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       int numToUse = exercisePhoneInfo.getNumPhones();
       if (numToUse == 0) {
         numToUse = exercisePhoneInfo.getNumPhones2();
-        if (numToUse < 1) {
-          logger.warn("addExerciseToSectionHelper can't count phones for " + slick.id() + " " + slick.english() + " " + slick.foreignlanguage());
-        } else {
-          logger.info("addExerciseToSectionHelper using back off phone childCount " + slick.id() + " = " + numToUse);
+        boolean empty = slick.foreignlanguage().isEmpty();
+        if (!empty) {
+          if (numToUse < 1 && empty) {
+            logger.warn("addExerciseToSectionHelper can't count phones for " + slick.id() + " " + slick.english() + " " + slick.foreignlanguage());
+          } else {
+            logger.info("addExerciseToSectionHelper using back off phone childCount " + slick.id() + " = " + numToUse);
+          }
         }
       }
       exercise.setNumPhones(numToUse);
@@ -923,6 +926,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     if (templateExercise == null) {
       templateExercise = getByExOldID(NEW_USER_EXERCISE, projID);
     }
+    logger.warn("getTemplateExercise getting template ex for " + projID);
     return templateExercise;
   }
 

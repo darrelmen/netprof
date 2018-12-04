@@ -41,6 +41,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
+import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -92,6 +93,10 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     slowAnno.addStyleName("editComment");
   }
 
+  @Override protected void addItemsAtTop(Panel container) {
+   // new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
+  }
+
   boolean shouldDisableNext() {
     return true;
   }
@@ -120,6 +125,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   protected ControlGroup makeRegularAudioPanel(Panel row) {
     // logger.info("makeRegularAudioPanel new user is " + newUserExercise);
     rap = makeRecordAudioPanel(newUserExercise, row, AudioType.REGULAR);
+    rap.getButton().addClickHandler(clickEvent -> postChangeIfDirty(false));
     fastAnno.addStyleName("topFiveMargin");
     return addControlGroupEntrySimple(row, "", rap, fastAnno);
   }
@@ -130,6 +136,8 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
   @Override
   protected ControlGroup makeSlowAudioPanel(Panel row) {
     rapSlow = makeRecordAudioPanel(newUserExercise, row, AudioType.SLOW);
+    rapSlow.getButton().addClickHandler(clickEvent -> postChangeIfDirty(false));
+
     slowAnno.addStyleName("topFiveMargin");
     return addControlGroupEntrySimple(row, "", rapSlow, slowAnno);
   }

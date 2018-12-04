@@ -71,9 +71,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
-  public static final String MAKE_A_NEW_LIST = "Make a new list.";
-  public static final String CAN_T_IMPORT_INTO_FAVORITES = "Can't import into favorites...";
   private final Logger logger = Logger.getLogger("ListView");
+
+  private static final String MAKE_A_NEW_LIST = "Make a new list.";
+  private static final String CAN_T_IMPORT_INTO_FAVORITES = "Can't import into favorites...";
 
   private static final String PRACTICE_THE_LIST = "Practice the list.";
   private static final int MAX_HEIGHT = 710;
@@ -477,7 +478,7 @@ public class ListView implements ContentView, CreateListComplete {
           @Override
           public boolean gotYes() {
             int numItems = currentSelectionFromMyLists.getNumItems();
-            logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
+         //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
             myLists.flush();
             myLists.redraw();
             return true;
@@ -954,7 +955,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     @Override
     protected void gotDoubleClickOn(UserList<CommonShell> selected) {
-      logger.info("gotDoubleClickOn got double click on " + selected);
+  //    logger.info("gotDoubleClickOn got double click on " + selected);
       if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
         showQuiz(this);
       } else {

@@ -360,7 +360,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    */
   public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
     controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + validity);
-    logger.info("useInvalidResult platform is " + getPlatform() + " validity " + validity);
+   // logger.info("useInvalidResult platform is " + getPlatform() + " validity " + validity);
     if (!checkAndShowTooLoud(validity)) {
       showPopup(validity.getPrompt());
     }
@@ -443,7 +443,7 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   private void showPopupLater(String toShow) {
-    logger.info("showPopup " + toShow + " on " + getExerciseID());
+  //  logger.info("showPopup " + toShow + " on " + getExerciseID());
     new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 5000);
   }
 
@@ -452,7 +452,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @return
    */
   Widget getPopupTargetWidget() {
-    logger.info("getPopupTargetWidget target is " + this.getElement().getId());
+  //  logger.info("getPopupTargetWidget target is " + this.getElement().getId());
     return this;
   }
 }

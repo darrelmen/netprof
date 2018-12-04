@@ -283,12 +283,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
     SlickAudio first = audioID > 0 ? getFirst(audioID) : null;
     if (first != null && first.transcript().equals(transcript)) {
-      logger.info("no change - match to transcript");
-      return getAudioAttribute(first, new HashMap<>(), false);
+      logger.info("getTranscriptMatch no change - match to transcript");
+      AudioAttribute audioAttribute = getAudioAttribute(first, new HashMap<>(), false);
+      fixAudioRef(projID, audioAttribute);
+      return audioAttribute;
     } else {
-      if (audioID > 0) {  // no matter whether there is a match or not, invalidate any current audio.
-        markDefect(audioID);
-      }
 
       List<SlickAudio> transcriptMatch = dao.getTranscriptMatch(projID, transcript);
       if (!transcriptMatch.isEmpty()) {
@@ -303,21 +302,30 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         copyOne(audioCopy, audioAttribute.getUniqueID(), exid, isContext);
 
         // required!
-        fixAudioRef(null, mediaDir, audioAttribute, database.getProject(projID).getLanguageEnum());
-
-        String audioRef = audioAttribute.getAudioRef();
-        if (audioRef.endsWith(".wav")) {
-          audioAttribute.setAudioRef(audioRef.replaceAll(".wav", ".mp3"));
-        }
-
+        fixAudioRef(projID, audioAttribute);
 
         logger.info("\tgetTranscriptMatch after = " + audioAttribute.getAudioRef());
 
         return audioAttribute;
       } else {
 
+        /*   if (audioID > 0) {  // no matter whether there is a match or not, invalidate any current audio.
+          logger.info("getTranscriptMatch MARK DEFECT projID " + projID + "\n\texid " + exid + "\n\taudio " + audioID +
+              "\n\tcontext " + isContext);
+          markDefect(audioID);
+        }*/
+
         return null;
       }
+    }
+  }
+
+  private void fixAudioRef(int projID, AudioAttribute audioAttribute) {
+    fixAudioRef(null, mediaDir, audioAttribute, database.getProject(projID).getLanguageEnum());
+
+    String audioRef = audioAttribute.getAudioRef();
+    if (audioRef.endsWith(".wav")) {
+      audioAttribute.setAudioRef(audioRef.replaceAll(".wav", ".mp3"));
     }
   }
 

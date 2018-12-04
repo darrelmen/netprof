@@ -1067,6 +1067,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     AudioType audioType = audioContext.getAudioType();
     logger.info("getAudioAnswer audio type " + audioType + " ex " + exerciseID + " " + commonExercise);
     String audioTranscript = getAudioTranscript(audioType, commonExercise);
+    if (audioTranscript.isEmpty()) {
+      logger.warn("\n\n\n\nhuh? no transcript for audio " + audioTranscript + " and " + commonExercise);
+    }
+    logger.info("getAudioAnswer audioTranscript '" + audioTranscript +"'");
+
     AnswerInfo.RecordingInfo recordingInfo =
         new AnswerInfo.RecordingInfo("", "", deviceType, device, audioTranscript, "");
 
@@ -1078,7 +1083,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             commonExercise,
             audioContext,
 
-            recordingInfo, decoderOptions);
+            recordingInfo,
+            decoderOptions);
 
 //    logger.info("writeAudioFile recording audioAnswer transcript '" + audioAnswer.getTranscript() + "'");
     int user = audioContext.getUserid();
@@ -1249,9 +1255,24 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return exercise1.isContext() || exercise1.getDirectlyRelated().isEmpty() ? exercise1.getEnglish() : exercise1.getDirectlyRelated().iterator().next().getEnglish();
   }
 
-  private String getAudioTranscript(AudioType audioType, CommonExercise exercise1) {
-    return exercise1 == null ? "" :
-        audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) ? exercise1.getContext() : exercise1.getForeignLanguage();
+  private String getAudioTranscript(AudioType audioType, CommonExercise exercise) {
+    if (exercise == null) {
+      return "";
+    } else if (exercise.isContext()) {
+      String foreignLanguage = exercise.getForeignLanguage();
+      if (foreignLanguage.isEmpty()) logger.warn("getAudioTranscript no fl for " + exercise.getID());
+      return foreignLanguage;
+    } else {  // must be regular exercise
+      if (audioType == AudioType.CONTEXT_REGULAR) {
+        String context = exercise.getContext();
+        if (context.isEmpty()) context=exercise.getForeignLanguage();
+        return context;
+      } else {
+        return exercise.getForeignLanguage();
+      }
+    }
+//    return exercise1 == null ? "" :
+//        audioType.equals(AudioAttribute.CONTEXT_AUDIO_TYPE) ? exercise1.getContext() : exercise1.getForeignLanguage();
   }
 
   private String getPermanentName(int user, AudioType audioType) {

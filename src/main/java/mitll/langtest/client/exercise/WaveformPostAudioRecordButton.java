@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
-  private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
+  //private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
 
   private static final String RECORD_BUTTON = "RecordButton";
   private static final String ANIMATED_PROGRESS_GIF = "animated_progress.gif";
@@ -166,7 +166,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    */
   @Override
   public void useResult(AudioAnswer result) {
-    logger.info("useResult -- " + result);
+   // logger.info("useResult -- " + result);
     recordAudioPanel.getImagesForPath(result.getPath());
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordCompleted(recordAudioPanel);
@@ -191,7 +191,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     getWaveform().setVisible(false);
   }
 
-  protected void setPlayEnabled(boolean val) {
+  private void setPlayEnabled(boolean val) {
     //logger.info("setPlayEnabled -- " + getElement().getExID() + " : valid audio ? " + hasValidAudio() + " enable " + val);
     playAudioPanel.setEnabled(val && hasValidAudio());
   }

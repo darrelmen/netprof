@@ -91,8 +91,7 @@ public class BrowserRecording {
 
   private static void stopWebRTCRecordingLater(boolean abort) {
   //  final long then = System.currentTimeMillis();
-     logger.info("stopWebRTCRecordingLater -  after " + DELAY_MILLIS);
-
+  //   logger.info("stopWebRTCRecordingLater -  after " + DELAY_MILLIS);
     Timer t = new Timer() {
       @Override
       public void run() {
