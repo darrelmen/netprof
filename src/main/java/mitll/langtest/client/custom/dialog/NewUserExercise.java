@@ -37,11 +37,13 @@ import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -566,7 +568,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         //  if (DEBUG) logger.info("postEditItem : onSuccess ");// + newUserExercise.getTooltip());
         doAfterEditComplete(buttonClicked);
 
-        //refreshEx();
+        Scheduler.get().scheduleDeferred((Command) () -> refreshEx());
       }
     });
   }
@@ -658,8 +660,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         foreignChanged() ||
             translitChanged() ||
             englishChanged() ||
+
             contextChanged() ||
             contextTransChanged() ||
+
             refAudioChanged() ||
             contextAudioChanged() ||
             slowRefAudioChanged();
@@ -847,20 +851,26 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
           "\n\teng " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage());
     }
 
-    getAudioService().editItem(clientExercise, keepAudio, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("changing the context exercise", caught);
-      }
+    if (contextChanged() || contextTransChanged()) {
 
-      @Override
-      public void onSuccess(Void newExercise) {
-        originalContext = clientExercise.getForeignLanguage();
-        originalContextTrans = clientExercise.getEnglish();
+      getAudioService().editItem(clientExercise, keepAudio, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("changing the context exercise", caught);
+        }
 
-        refreshEx();
-      }
-    });
+        @Override
+        public void onSuccess(Void newExercise) {
+          originalContext = clientExercise.getForeignLanguage();
+          originalContextTrans = clientExercise.getEnglish();
+
+          Scheduler.get().scheduleDeferred((Command) () -> refreshEx());
+        }
+      });
+    }
+    else {
+
+    }
 
   }
 

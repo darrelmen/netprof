@@ -281,18 +281,19 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         "\n\texid    " + exid +
         "\n\taudio   " + audioID +
         "\n\tcontext " + isContext +
-        "\n\ttext    '" + transcript +"'"
+        "\n\ttext    '" + transcript + "'"
     );
 
     // cheesy thing where we might have an audio cut with an empty transcript...
-    SlickAudio first = audioID > 0 && !transcript.isEmpty() ? getFirst(audioID) : null;
+    boolean hasText = !transcript.isEmpty();
+    SlickAudio first = audioID > 0 && hasText ? getFirst(audioID) : null;
     if (first != null && first.transcript().equals(transcript)) {
       logger.info("getTranscriptMatch no change - match to transcript '" + first.transcript() +
           "'");
       AudioAttribute audioAttribute = getAudioAttribute(first, new HashMap<>(), false);
       fixAudioRef(projID, audioAttribute);
       return audioAttribute;
-    } else {
+    } else if (hasText) {
       List<SlickAudio> transcriptMatch = dao.getTranscriptMatch(projID, transcript);
       if (!transcriptMatch.isEmpty()) {
         if (transcriptMatch.size() > 1)
@@ -321,6 +322,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
         return null;
       }
+    } else { // can't match empty
+      return null;
     }
   }
 
