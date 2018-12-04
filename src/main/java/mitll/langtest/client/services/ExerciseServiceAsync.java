@@ -71,5 +71,4 @@ public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
   void getExerciseIDOrParent(int exid, AsyncCallback<Integer> async);
 
   void refreshExercise(int projid, int exid, AsyncCallback<Void> async);
-  void refreshExercises(int projid, Set<Integer> exids, AsyncCallback<Void> async);
 }

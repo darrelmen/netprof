@@ -59,7 +59,6 @@ public interface ExerciseService<T extends CommonShell & ScoredExercise> extends
   T getExercise(int exid) throws DominoSessionException;
 
   void refreshExercise(int projid, int exid) throws DominoSessionException;
-  void refreshExercises(int projid, Set<Integer> exids) throws DominoSessionException;
 
   int getExerciseIDOrParent(int exid) throws DominoSessionException;
 

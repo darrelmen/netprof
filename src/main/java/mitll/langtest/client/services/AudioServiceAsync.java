@@ -43,6 +43,8 @@ import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 
+import java.util.Set;
+
 public interface AudioServiceAsync {
   /**
    * @param base64EncodedString
@@ -102,6 +104,8 @@ public interface AudioServiceAsync {
    * @param async
    */
   void editItem(ClientExercise userExercise, boolean keepAudio, AsyncCallback<Void> async);
+
+  void refreshExercises(int projid, Set<Integer> exids, AsyncCallback<Void> async);
 
   void getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript, AsyncCallback<AudioAttribute> async);
 }

@@ -1035,13 +1035,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     getUserIDFromSessionOrDB();
     getDatabase().getProject(projID).getExerciseDAO().refresh(exid);
   }
-
+/*
   @Override
   public void refreshExercises(int projID, Set<Integer> exids) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     ExerciseDAO<CommonExercise> exerciseDAO = getDatabase().getProject(projID).getExerciseDAO();
     exids.forEach(exerciseDAO::refresh);
-  }
+  }*/
 
   public int getExerciseIDOrParent(int exid) throws DominoSessionException {
     int projectIDFromUser = getProjectIDFromUser();

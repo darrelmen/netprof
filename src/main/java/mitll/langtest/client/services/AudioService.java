@@ -49,6 +49,8 @@ import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 
+import java.util.Set;
+
 /**
  * Might actually live on hydra1 or hydra2 - chosen in the client.
  */
@@ -107,4 +109,7 @@ public interface AudioService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#editItem
    */
   void editItem(ClientExercise userExercise, boolean keepAudio) throws DominoSessionException, RestrictedOperationException;
+
+  void refreshExercises(int projid, Set<Integer> exids) throws DominoSessionException;
+
 }

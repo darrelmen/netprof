@@ -118,7 +118,9 @@ class ImportBulk {
             myLists.redraw();
             Set<Integer> exids = new HashSet<>();
             newExercises.forEach(ex -> exids.add(ex.getID()));
-            controller.getExerciseService().refreshExercises(controller.getProjectStartupInfo().getProjectid(), exids,
+
+            
+            controller.getAudioService().refreshExercises(controller.getProjectStartupInfo().getProjectid(), exids,
                 new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable throwable) {

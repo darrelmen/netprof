@@ -51,6 +51,7 @@ import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectHelper;
 import mitll.langtest.server.domino.AudioCopy;
@@ -1475,5 +1476,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   public void editItem(ClientExercise userExercise, boolean keepAudio) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     db.editItem(userExercise, keepAudio);
+  }
+
+
+  @Override
+  public void refreshExercises(int projID, Set<Integer> exids) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    ExerciseDAO<CommonExercise> exerciseDAO = getDatabase().getProject(projID).getExerciseDAO();
+    exids.forEach(exerciseDAO::refresh);
   }
 }

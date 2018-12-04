@@ -682,7 +682,7 @@ public class AudioFileHelper implements AlignDecode {
     String transcript = attribute.getTranscript();
 
     if (!transcript.equalsIgnoreCase(exercise.getForeignLanguage())) {
-      logger.warn("hmm, the audio transscript " + transcript + " doesn't match the exercise " + exercise.getForeignLanguage());
+      logger.warn("hmm, the audio transcript " + transcript + " doesn't match the exercise " + exercise.getForeignLanguage());
     }
 
     try {
