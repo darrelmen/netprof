@@ -68,8 +68,7 @@ public class SearchTypeahead {
         ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
             .setPrefix(textBox.getText())
             .setLimit(DISPLAY_ITEMS)
-            .setAddFirst(false)/*
-            .setOnlyPlainVocab(true)*/;
+            .setAddFirst(false);
 
         controller.getExerciseService().getExerciseIds(exerciseListRequest, new AsyncCallback<ExerciseListWrapper<T>>() {
               @Override
@@ -103,28 +102,14 @@ public class SearchTypeahead {
       currentExercise = ((ExerciseSuggestion) selectedSuggestion).getShell();
       // logger.info("getTypeahead Got " + selectedSuggestion.getDisplayString());
 //      add.setEnabled(!selectedSuggestion.getDisplayString().isEmpty());
-
       return selectedSuggestion.getReplacementString();
     });
 
-//    textBox.addChangeHandler(new ChangeHandler() {
-//      @Override
-//      public void onChange(ChangeEvent changeEvent) {
-//        boolean enabled = hasText(textBox);
-//        logger.info("getTypeahead Got ChangeHandler = " +enabled);
-//        add.setEnabled(enabled);
-//      }
-//    });
-
-    textBox.addKeyUpHandler(new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent keyUpEvent) {
-        add.setEnabled(hasText(textBox));
-
-      }
+    textBox.addKeyUpHandler(keyUpEvent -> {
+      add.setEnabled(hasText(textBox));
     });
 
-    textBox.getElement().setId("TextBox_exercise");
+//    textBox.getElement().setId("TextBox_exercise");
     typeahead.setWidget(textBox);
 
     textBox.setDirectionEstimator(true);   // automatically detect whether text is RTL
@@ -184,7 +169,6 @@ public class SearchTypeahead {
   private Collection<SuggestOracle.Suggestion> getSuggestions(String query, List<? extends CommonShell> exercises) {
     Collection<SuggestOracle.Suggestion> suggestions = new ArrayList<>();
 
-//    feedbackExerciseList.clearMessage();
     String[] searchWords = normalizeSearch(query).split(WHITESPACE_STRING);
 
     exercises.forEach(resp -> suggestions.add(getSuggestion(searchWords, resp)));

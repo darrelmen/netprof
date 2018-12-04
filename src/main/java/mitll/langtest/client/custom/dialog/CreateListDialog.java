@@ -182,12 +182,11 @@ public class CreateListDialog extends BasicDialog {
   }
 
   public boolean isOKToCreate() {
-    boolean okToCreate = isOKToCreate(names);
-    if (okToCreate) {
+    if (isOKToCreate(names)) {
       doCreate();
       return true;
     } else {
-      logger.info("doAdd dialog not valid ");
+      //logger.info("doAdd dialog not valid ");
       return false;
     }
   }

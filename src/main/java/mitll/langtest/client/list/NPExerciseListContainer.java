@@ -46,7 +46,6 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
   NPExerciseListContainer(NPExerciseList<T, U> exerciseList) {
     super(exerciseList.controller);
     this.exerciseList = exerciseList;
-    // this.outer = outer;
 
     ProjectStartupInfo startupInfo = controller.getProjectStartupInfo();
     if (startupInfo == null) {

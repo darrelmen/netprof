@@ -67,6 +67,10 @@ public class DialogHelper {
     void gotHidden();
   }
 
+  public interface  ShownCloseListener extends CloseListener {
+    void gotShown();
+  }
+
   public DialogHelper(boolean doYesAndNo) {
     this.doYesAndNo = doYesAndNo;
   }
@@ -182,6 +186,9 @@ public class DialogHelper {
 
     if (listener != null) {
       dialogBox.addHiddenHandler(hiddenEvent -> listener.gotHidden());
+      if (listener instanceof  ShownCloseListener) {
+        dialogBox.addShownHandler(shownEvent -> ((ShownCloseListener)listener).gotShown());
+      }
     }
     dialogBox.add(container);
     dialogBox.show();
