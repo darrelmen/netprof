@@ -71,6 +71,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
+  public static final String DO_QUIZ = "Do quiz";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String MAKE_A_NEW_LIST = "Make a new list.";
@@ -90,16 +91,19 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
   private static final String MY_LISTS = "myLists";
 
+  /**
+   * @see #getEdit
+   */
   private static final String EDIT_THE_LIST = "Edit the list, make it public.";
+  /**
+   *
+   */
   private static final String EDIT_THE_LIST_OR_QUIZ = "Edit the list, make it public, or make it a quiz.";
   private static final String SHARE = "Share";
   private static final String SHARE_THE_LIST = "Share the list with someone.";
   private static final String VISITED = "Visited";
   private static final String SAVE = "Save";
 
-//  private static final String CLICK_HERE_TO_SHARE = "Click here to share ";
-//  private static final String SHARE_QUIZ = "Share Quiz";
-//  private static final String SHARE_LIST = "Share List";
 
   /**
    * @see #getAddItems
@@ -580,12 +584,10 @@ public class ListView implements ContentView, CreateListComplete {
     drill.setType(ButtonType.INFO);
 
     drill.addClickHandler(event -> showQuiz(getCurrentSelection(container)));
-    addTooltip(drill, "Do quiz");
+    addTooltip(drill, DO_QUIZ);
     container.addButton(drill);
 
-    UserList<CommonShell> currentSelection = getCurrentSelection(container);
-    drill.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
-
+    enableQuizButton(drill);
     return drill;
   }
 
@@ -853,6 +855,7 @@ public class ListView implements ContentView, CreateListComplete {
 
               myLists.flush();
               myLists.redraw();
+              enableQuizButton(quizButton);
             }
             return okToCreate;
           }
@@ -907,6 +910,11 @@ public class ListView implements ContentView, CreateListComplete {
     editDialog.doEdit(myLists.getCurrentSelection(), myLists);
   }
 
+  private void enableQuizButton(Button quizButton) {
+    UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
+    quizButton.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
+  }
+
   private class MyListContainer extends ListContainer {
     MyListContainer() {
       super(ListView.this.controller, 18, true, MY_LISTS, 15, true, false);
@@ -916,9 +924,9 @@ public class ListView implements ContentView, CreateListComplete {
     public void gotClickOnItem(final UserList<CommonShell> user) {
       super.gotClickOnItem(user);
       setShareHREF(user);
-      UserList<CommonShell> currentSelection = getCurrentSelection();
-      quizButton.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
+      enableQuizButton(quizButton);
     }
+
 
     @Override
     protected boolean hasDoubleClick() {

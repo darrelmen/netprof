@@ -282,7 +282,7 @@ public class SignInForm extends UserDialog implements SignIn {
       public void onSuccess(LoginResult result) {
         // logger.info("checkLegacyUserWithSpaces  " + testUserID + " = " + result);
         if (result.getResultType() == LoginResult.ResultType.Success) {
-          //    logger.info("try again with " + testUserID);
+          //    logger.info("tryLoginWithUserID " + testUserID);
           tryLoginWithUserID(testUserID);
         } else {
           //     logger.info("nobody with " + testUserID);
