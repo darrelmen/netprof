@@ -19,12 +19,13 @@ import java.util.logging.Logger;
  * @see FacetExerciseList#getPagerAndSort(ExerciseController)
  */
 public class DisplayMenu {
+  private static final int OPTIONS_WIDTH = 161;//85
   private final Logger logger = Logger.getLogger("DisplayMenu");
 
   private static final String SHOW_CM_SIMPLIFIED = "Show CM Simplified";
   private static final String SHOW_CM_TRADITIONAL = "Show CM Traditional";
 
-  private static final String SHOW1 = "Options";
+  private static final String SHOW1 = "Show and Download";//"Options";
   private static final String DOWNLOAD = "Download Content";
   private static final String SHOW_ALTERNATE_TEXT = "Show Alternate text";
   private static final String SHOW_PRIMARY_TEXT = "Show Primary text";
@@ -57,6 +58,7 @@ public class DisplayMenu {
   }
 
   /**
+   * Only show primary vs alt choices for Mandarin, which is only one we have for now.?
    * @return
    * @see FacetExerciseList#getPagerAndSort
    */
@@ -67,14 +69,16 @@ public class DisplayMenu {
     view.getTriggerWidget().getElement().getStyle().setColor("black");
     view.addStyleName("rightFiveMargin");
     view.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
-    view.setWidth(85 + "px");
+    view.setWidth(OPTIONS_WIDTH + "px");
 
     view.add(getShowSounds());
     String toUse = isMandarin ? getPrimaryMandarinChoice() : SHOW_PRIMARY_TEXT;
-    NavLink primary = new NavLink(toUse);
-    view.add(primary);
 
-    view.add(flTextChoices(primary));
+    if (isMandarin) {
+      NavLink primary = new NavLink(toUse);
+      view.add(primary);
+      view.add(flTextChoices(primary));
+    }
     view.add(getDownload());
 
     return view;
@@ -115,7 +119,6 @@ public class DisplayMenu {
     altflChoice.setIcon(choicesALT1 ? IconType.CHECK : null);
 
     if (!choicesFL1 && !choicesALT1) {
-      // ?
       storeShowChoicesFL(true);
       primary.setIcon(IconType.CHECK);
     }
@@ -134,8 +137,6 @@ public class DisplayMenu {
 
       altflChoice.setIcon(choicesALT ? null : CHECK);
     });
-
-//    showChoices.add(altflChoice);
 
     primary.addClickHandler(event -> {
       boolean choicesFL = getChoicesFL();

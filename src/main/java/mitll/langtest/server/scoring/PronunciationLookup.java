@@ -118,39 +118,48 @@ public class PronunciationLookup implements IPronunciationLookup {
     String[] transcriptTokens = transcript.split(" ");
     //  boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
 
+    if (transcript.isEmpty()) {
+      logger.warn("getNumPhonesFromDictionaryOrLTS huh? empty transcript?");
+      return 0;
+    }
+
     int total = 0;
     for (String word : transcriptTokens) {
-      boolean easyMatch;
-      if ((easyMatch = htkDictionary.contains(word)) || (htkDictionary.contains(word.toLowerCase()))) {
-        scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
+      if (word.isEmpty()) {
+        logger.warn("found empty token in " + transcript);
+      } else {
+        boolean easyMatch;
+        if ((easyMatch = htkDictionary.contains(word)) || (htkDictionary.contains(word.toLowerCase()))) {
+          scala.collection.immutable.List<String[]> prons = htkDictionary.apply(easyMatch ? word : word.toLowerCase());
 
-        int numForThisWord = 0;
-        for (int i = 0; i < prons.size(); i++) {
-          String[] apply = prons.apply(i);
-          numForThisWord = Math.max(numForThisWord, apply.length);
+          int numForThisWord = 0;
+          for (int i = 0; i < prons.size(); i++) {
+            String[] apply = prons.apply(i);
+            numForThisWord = Math.max(numForThisWord, apply.length);
 /*
           StringBuilder builder = new StringBuilder();
           for (String s:apply) builder.append(s).append("-");
           logger.info("\t" +word + " = " + builder);
 */
-        }
-        total += numForThisWord;
+          }
+          total += numForThisWord;
 
 //        logger.info(transcript + " token "+ word + " num " + numForThisWord + " total " + total);
-      } else {
-        String word1 = word.toLowerCase();
-        String[][] process = getLTS().process(word1);
+        } else {
+          String word1 = word.toLowerCase();
+          String[][] process = getLTS().process(word1);
 
-        if (ltsOutputOk(process)) {
-          int max = 0;
-          for (String[] pc : process) {
+          if (ltsOutputOk(process)) {
+            int max = 0;
+            for (String[] pc : process) {
 //            int c = 0;
 //            for (String p : pc) {
 //              if (!p.contains("#")) c++;
 //            }
-            max = Math.max(max, pc.length);
+              max = Math.max(max, pc.length);
+            }
+            total += max;
           }
-          total += max;
         }
       }
     }

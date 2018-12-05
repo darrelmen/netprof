@@ -658,7 +658,7 @@ public class Project implements IPronunciationLookup {
 
   @Override
   public int getNumPhonesFromDictionary(String transcript, String transliteration) {
-    return hasModel() ? audioFileHelper.getNumPhonesFromDictionary(transcript, transliteration) : 0;
+    return transcript.isEmpty() ? 0 : hasModel() ? audioFileHelper.getNumPhonesFromDictionary(transcript, transliteration) : 0;
   }
 
   @Override

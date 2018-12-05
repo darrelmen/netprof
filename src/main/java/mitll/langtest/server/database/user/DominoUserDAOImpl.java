@@ -94,6 +94,7 @@ import static com.mongodb.client.model.Projections.include;
 import static mitll.hlt.domino.server.ServerInitializationManager.*;
 import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
 import static mitll.hlt.domino.server.util.ServerProperties.CACHE_ENABLED_PROP;
+import static mitll.hlt.domino.server.util.ServerProperties.EVT_URL_BASE_MAP_PROP;
 import static mitll.langtest.server.database.exercise.Project.MANDARIN;
 import static mitll.langtest.shared.user.Kind.*;
 
@@ -315,6 +316,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   private void noServletContextSetup(Database database, Properties props) {
+    props.setProperty(EVT_URL_BASE_MAP_PROP,"a,b");
     pool = Mongo.createPool(new DBProperties(props));
     serializer = Mongo.makeSerializer();
     logger.info("connectToMongo : OK made serializer " + serializer);
