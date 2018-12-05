@@ -190,14 +190,15 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.list.FacetExerciseList#populateListChoices
    */
   @Override
-  public Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited, UserList.LIST_TYPE list_type) throws DominoSessionException {
+  public Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited,
+                                                     UserList.LIST_TYPE list_type) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
     IUserListManager userListManager = getUserListManager();
 
-    Collection<IUserList> listsForUser = list_type == UserList.LIST_TYPE.NORMAL ? userListManager
-        .getSimpleListsForUser(userIDFromSessionOrDB, projectIDFromUser, onlyCreated, visited) :
+    Collection<IUserList> listsForUser = list_type == UserList.LIST_TYPE.NORMAL ?
+        userListManager.getSimpleListsForUser(userIDFromSessionOrDB, projectIDFromUser, onlyCreated, visited) :
         userListManager.getAllQuizUserList(projectIDFromUser, userIDFromSessionOrDB);
 
     long now = System.currentTimeMillis();

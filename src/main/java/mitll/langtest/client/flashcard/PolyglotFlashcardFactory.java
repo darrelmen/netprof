@@ -334,19 +334,28 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
         listChoice = lists == null || lists.isEmpty() ? "" : LISTS + "=" + lists.iterator().next();
       }
       //logger.info("lists " + lists);
-      String historyToken = SelectionState.INSTANCE + "=" + selectionState.getView() +
-          SelectionState.SECTION_SEPARATOR +
-          SelectionState.PROJECT + "=" + selectionState.getProject() +//  controller.getProjectStartupInfo().getProjectid()
-          SelectionState.SECTION_SEPARATOR +
-          listChoice;
+      String historyToken = getBaseHistoryToken(selectionState) + listChoice;
 
       if (currrentToken.equalsIgnoreCase(historyToken)) {
         logger.info("removeItemFromHistory no push since no change to " + historyToken);
       } else {
         logger.info("removeItemFromHistory push new token with no item " + historyToken);
-        History.newItem(historyToken);
       }
+
+      History.newItem(historyToken);
     }
+  }
+
+  public void removeListFromHistory() {
+    History.newItem(getBaseHistoryToken(new SelectionState()));
+  }
+
+  @NotNull
+  public String getBaseHistoryToken(SelectionState selectionState) {
+    return SelectionState.INSTANCE + "=" + selectionState.getView() +
+        SelectionState.SECTION_SEPARATOR +
+        SelectionState.PROJECT + "=" + selectionState.getProject() +//  controller.getProjectStartupInfo().getProjectid()
+        SelectionState.SECTION_SEPARATOR;
   }
 
   private boolean hasListSelection() {

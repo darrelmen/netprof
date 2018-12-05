@@ -33,9 +33,6 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
@@ -45,15 +42,16 @@ import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.flashcard.HidePolyglotFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
-import mitll.langtest.client.flashcard.QuizIntro;
-import mitll.langtest.client.list.*;
+import mitll.langtest.client.list.ListFacetExerciseList;
+import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLOT;
@@ -64,29 +62,30 @@ import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLO
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/4/16.
  */
-public class QuizHelper<T extends CommonShell & ScoredExercise, U extends ClientExercise> extends PracticeHelper<T, U> {
+public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends ClientExercise> extends PracticeHelper<T, U> {
   private final Logger logger = Logger.getLogger("QuizHelper");
 
-  private final INavigation navigation;
-  private int chosenList = -1;
+  // private final INavigation navigation;
+  // private int chosenList = -1;
+  private QuizChoiceHelper quizChoiceHelper;
+
   private static final boolean DEBUG = true;
 
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  QuizHelper(ExerciseController controller, INavigation navigation) {
+  NewQuizHelper(ExerciseController controller, QuizChoiceHelper quizChoiceHelper) {
     super(controller, INavigation.VIEWS.QUIZ);
-    this.navigation = navigation;
+    this.quizChoiceHelper = quizChoiceHelper;
   }
 
   /**
    *
    */
-  public interface QuizChoiceListener {
+ /* public interface QuizChoiceListener {
     void gotChoice(int listid);
-  }
-
+  }*/
   @Override
   protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
     polyglotFlashcardFactory = new HidePolyglotFactory<T, U>(controller, exerciseList, INavigation.VIEWS.QUIZ) {
@@ -101,11 +100,12 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
        */
       @Override
       public void showQuiz() {
-        super.showQuiz();
-        if (DEBUG) logger.info("HidePolyglotFactory.showQuiz");
+        //   super.showQuizIntro();
+        if (DEBUG) logger.info("HidePolyglotFactory.showQuizIntro");
         //clearListSelection();
-        ((QuizPracticeFacetExerciseList) this.getExerciseList()).showQuizIntro();
+        // ((QuizPracticeFacetExerciseList) this.getExerciseList()).showQuizIntro();
         //  Scheduler.get().scheduleDeferred((Command) this::removeListFromHistory);
+        quizChoiceHelper.showQuizIntro();
       }
     };
 
@@ -142,34 +142,42 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
       }
     };
   }
+
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS views) {
     super.showContent(listContent, views);
     rememberedTopRow.getParent().setVisible(false);
   }
 
+/*
   void showQuizIntro() {
     //Scheduler.get().scheduleDeferred(this::clearListSelection);
-    if (DEBUG || true ) logger.info("showQuizIntro");
+    if (DEBUG || true) logger.info("showQuizIntro");
     clearListSelection();
   }
+*/
 
   /**
    * @see #getFactory
    */
-  private void clearListSelection() {
+  void clearListSelection() {
     if (DEBUG) logger.info("clearListSelection");
-    ((ListFacetExerciseList) getPolyglotFlashcardFactory().getExerciseList()).clearListSelection();
+    if (getPolyglotFlashcardFactory() != null) {
+      ListFacetExerciseList exerciseList = (ListFacetExerciseList) getPolyglotFlashcardFactory().getExerciseList();
+      if (exerciseList != null) {
+        exerciseList.clearListSelection();
+      }
+    }
   }
 
   private class QuizPracticeFacetExerciseList extends PracticeFacetExerciseList<T, U> {
     QuizPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, DivWidget listHeader) {
-      super(topRow, currentExercisePanel, QuizHelper.this.controller,
+      super(topRow, currentExercisePanel, NewQuizHelper.this.controller,
           new ListOptions().setInstance(INavigation.VIEWS.QUIZ).setShowPager(false),
-          listHeader, INavigation.VIEWS.QUIZ, QuizHelper.this
+          listHeader, INavigation.VIEWS.QUIZ, NewQuizHelper.this
       );
     }
-
+/*
     @Override
     protected void loadFirstExercise(String searchIfAny) {
       Collection<String> lists = new SelectionState(History.getToken(), false).getTypeToSection().get(LISTS);
@@ -193,24 +201,35 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
 
         super.loadFirstExercise(searchIfAny);
       }
-    }
+    }*/
 
     /**
      * @see #getFactory
      */
-    void showQuizIntro() {
+  /*  void showQuizIntro() {
       createdPanel = getQuizIntro();
       innerContainer.setWidget(createdPanel);
     }
-
+*/
+/*
     @NotNull
     private QuizIntro getQuizIntro() {
       if (DEBUG) logger.info("getQuizIntro ");
 
       return new QuizIntro(
           getIdToList(),
-          QuizHelper.this::gotQuizChoice,
+          NewQuizHelper.this::gotQuizChoice,
           controller.getUserManager().getUserID());
+    }
+*/
+    @Override
+    protected void restoreUIAndLoadExercises(String value, boolean didChange) {
+      int listid = new SelectionState().getList();
+      if (listid == -1) {
+        quizChoiceHelper.showQuizIntro();
+      } else {
+        super.restoreUIAndLoadExercises(value, didChange);
+      }
     }
 
     @Override
@@ -226,12 +245,14 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
     }
   }
 
-  private void gotQuizChoice(int listid) {
+  public void gotQuizChoice(int listid) {
     if (DEBUG) logger.info("getQuizIntro : got choice " + listid);
     polyglotFlashcardFactory.cancelRoundTimer();
-    chosenList = listid;
-    polyglotFlashcardFactory.removeItemFromHistory(chosenList);
-    showQuizForReal();
+//    chosenList = listid;
+    polyglotFlashcardFactory.removeItemFromHistory(listid);
+//    showQuizForReal();
+    hideList();
+
     polyglotFlashcardFactory.startQuiz();
   }
 
@@ -239,9 +260,9 @@ public class QuizHelper<T extends CommonShell & ScoredExercise, U extends Client
    * @see QuizPracticeFacetExerciseList#getQuizIntro
    * @see #gotQuizChoice
    */
-  private void showQuizForReal() {
-    setMode(POLYGLOT);
-    setNavigation(navigation);
-    hideList();
-  }
+//  private void showQuizForReal() {
+//    setMode(POLYGLOT);
+//    //  setNavigation(navigation);
+//    hideList();
+//  }
 }

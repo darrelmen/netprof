@@ -122,6 +122,10 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
     };
   }
 
+  /**
+   * @deprecated get rid of this
+   * @param mode
+   */
   void setMode(PolyglotDialog.MODE_CHOICE mode) {
     this.mode = mode;
     if (polyglotFlashcardFactory != null) {
@@ -131,10 +135,6 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
 
   public void setVisible(boolean visible) {
     flexListLayout.setVisible(visible);
-  }
-
-  public void setNavigation(INavigation navigation) {
-    this.navigation = navigation;
   }
 
   StatsFlashcardFactory<T, U> getStatsFlashcardFactory() {
@@ -147,6 +147,10 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
 
   public PolyglotDialog.MODE_CHOICE getMode() {
     return mode;
+  }
+
+  public void setNavigation(INavigation navigation) {
+    this.navigation = navigation;
   }
 
   public INavigation getNavigation() {

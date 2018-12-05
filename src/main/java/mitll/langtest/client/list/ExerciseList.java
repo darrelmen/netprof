@@ -102,7 +102,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   ExercisePanelFactory<T, U> factory;
   protected final ExerciseController controller;
 
-  protected Panel createdPanel;
+  protected Panel createdPanel = null;
   /**
    *
    */
@@ -304,9 +304,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       this.exerciseID = exerciseID;
       this.request = request;
 
-//      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
-//       String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
-//       logger.info("logException stack " + exceptionAsString);
+      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
+      logger.info("logException stack " + exceptionAsString);
     }
 
     public void onFailure(Throwable caught) {

@@ -228,7 +228,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     // TODO : don't do it - will keep around reference to dead components.
     // so for instance if in TwoColumnExercisePanel there's an addList, removeList, newList
-    LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost()));
+    LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost(), this));
+  }
+
+  public String getListName(int userListID) {
+    return "";
   }
 
   @NotNull
@@ -661,9 +665,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return exerciseListRequest;
   }
 
-//  private int numEx;
-//  private int numContext;
-
   /**
    * @param result
    * @see ExerciseList.SetExercisesCallback#onSuccess
@@ -671,20 +672,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   @Override
   protected void setScores(ExerciseListWrapper<T> result) {
     Map<Integer, Float> idToScore = result.getIdToScore();
-//    numEx = 0;
-//    numContext = 0;
     for (T ex : result.getExercises()) {
       int id = ex.getID();
       if (idToScore.containsKey(id)) {
         ex.getMutableShell().setScore(idToScore.get(id));
       }
-
-//      if (ex.isContext()) {
-//        numContext++;
-//      } else {
-//        numEx++;
-//        numContext += ex.getNumContext();
-//      }
     }
   }
 
@@ -1116,7 +1108,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #addRemoveClickHandler
    */
   void setHistory(Map<String, String> candidate) {
-   //   logger.info("setHistory "+candidate);
+    logger.info("setHistory " + candidate);
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
 
@@ -1255,7 +1247,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    * @param selectionState
    * @see HistoryExerciseList#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
-   *
    * @see #restoreUIState
    */
   @Override
@@ -1386,7 +1377,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     StringBuilder builder = new StringBuilder();
 //        logger.info("getHistoryToken t->sel " + typeToSelection);
     for (Map.Entry<String, String> pair : typeToSelection.entrySet()) {
-      builder.append(pair.getKey()).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
+      String key = pair.getKey();
+      //  logger.info("getHistoryToken key " + key);
+//      if (!key.equals(SelectionState.LIST)) {
+      builder.append(key).append("=").append(pair.getValue()).append(SECTION_SEPARATOR);
+      //}
     }
     builder.append(getProjectParam());
 
@@ -1418,54 +1413,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     controller.reallySetTheProject(project);
   }
 
-  /*
-  private int getUserListID(Map<String, String> newTypeToSelection) {
-    int userListID = -1;
-    try {
-      userListID = newTypeToSelection.containsKey(getDynamicFacet()) ? Integer.parseInt(newTypeToSelection.get(getDynamicFacet())) : -1;
-    } catch (NumberFormatException e) {
-      logger.warning("getUserListID can't parse " + newTypeToSelection.get(getDynamicFacet()));
-    }
-    return userListID;
-  }*/
-
   int getCurrentProject() {
     return getStartupInfo().getProjectid();
   }
 
-  /**
-   * From the selection state in the URL.
-   *
-   * @return
-   * @paramx selectionState
-   * @paramx typeOrder
-   * @see #getSectionWidgetContainer
-   */
- /* @NotNull
-  private Map<String, String> getNewTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
-    typeOrder = new ArrayList<>(typeOrder);
-    typeOrder.add(getDynamicFacet());
-    typeOrder.add(CONTENT);
-
-    return getTypeToSelection(selectionState, typeOrder);
-  }*/
-/*
-
-  @NotNull
-  protected Map<String, String> getTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
-    Map<String, String> newTypeToSelection = new HashMap<>();
-    for (String type : typeOrder) {
-      Collection<String> selections = selectionState.getTypeToSection().get(type);
-      if (selections != null && !selections.isEmpty()) {
-        newTypeToSelection.put(type, selections.iterator().next());
-      }
-    }
-
-    // logger.info("getTypeToSelection " + newTypeToSelection);
-
-    return newTypeToSelection;
-  }
-*/
   protected void pushFirstSelection(int exerciseID, String searchIfAny) {
     updateDownloadLinks();
     askServerForExercise(exerciseID);
@@ -2158,7 +2109,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
   @Override
   public void gotShow() {
-   // logger.warning("gotShow");
+    // logger.warning("gotShow");
     askServerForExercise(-1);
   }
 
@@ -2167,28 +2118,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     simpleLoadExercises(getHistoryToken(), getPrefix(), exerciseID);
   }
 
-
   protected Map<String, String> getTypeToSelection() {
     return typeToSelection;
   }
-
-  /**
-   * @see QuizHelper#clearListSelection
-   */
-/*  public void clearListSelection() {
-    //logger.info("in list ---> clearListSelection ");
-    Map<String, String> candidate = new HashMap<>(getTypeToSelection());
-    candidate.remove(getDynamicFacet());
-    setHistory(candidate);
-  }*/
-
-/*  @NotNull
-  protected String getDynamicFacet() {
-    return LISTS;
-  }
-
-  @NotNull
-  protected boolean isDynamicFacetInteger() {
-    return true;
-  }*/
 }

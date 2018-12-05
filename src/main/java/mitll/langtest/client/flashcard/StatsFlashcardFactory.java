@@ -50,6 +50,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -64,7 +65,7 @@ import java.util.Map;
 public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExercise>
     extends ExercisePanelFactory<L, T>
     implements FlashcardContainer {
-  //private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   final ControlState controlState;
   private List<L> allExercises;
@@ -85,6 +86,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   protected final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
   //  private static final boolean DEBUG = false;
   final INavigation.VIEWS instance;
+
   /**
    * @param controller
    * @param exerciseList
@@ -215,7 +217,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   public void startOver() {
     int lastID = allExercises.isEmpty() ? -1 : allExercises.get(allExercises.size() - 1).getID();
     int currentExerciseID = getCurrentExerciseID();
-//logger.info("startOver : current " + currentExerciseID + " = " + statsFlashcardFactory.mode);
+ logger.info("startOver : current " + currentExerciseID + ", last ID " + lastID);
     if (currentExerciseID != -1 && currentExerciseID != lastID) {
       exerciseList.loadExercise(currentExerciseID);
     } else {

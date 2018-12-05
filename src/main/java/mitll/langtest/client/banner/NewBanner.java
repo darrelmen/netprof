@@ -403,11 +403,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private void gotClickOnChoice(String instanceName, NavLink learn, boolean fromClick) {
    // logger.info("gotClickOn " + instanceName + " " + learn + " from click " + fromClick);
-    showSection(instanceName, fromClick);
+    showSectionAfterClick(instanceName, fromClick);
     showActive(learn);  // how can this be null?
   }
 
-  private void showSection(String instance1, boolean fromClick) {
+  private void showSectionAfterClick(String instance1, boolean fromClick) {
     navigation.showView(getViews(instance1), false, fromClick);
   }
 
@@ -423,7 +423,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       //    logger.info("name " + name);
       choices = VIEWS.valueOf(name);
     } catch (IllegalArgumentException e) {
-      logger.warning("showSection can't parse " + instance1);
+      logger.warning("showSectionAfterClick can't parse " + instance1);
     }
     return choices;
   }

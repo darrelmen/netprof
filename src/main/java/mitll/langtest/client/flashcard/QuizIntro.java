@@ -16,11 +16,12 @@ import java.util.Map;
 
 public class QuizIntro extends DivWidget {
   private static final int HSIZE = 4;
+
   /**
-   *
+   * @see #QuizIntro
    */
   private static final String START = "Start!";
-  public static final String DRY_RUN = "Dry Run";
+  private static final String DRY_RUN = "Dry Run";
   private static final String FLASHCARDS = "quiz";
   private static final String WELCOME_USER_ = "Welcome ";
 
@@ -134,7 +135,8 @@ public class QuizIntro extends DivWidget {
   private int listID = -1;
   private final List<IUserList> choicesAdded = new ArrayList<>();
 
-  private Widget addModeChoices(Heading modeDep, Heading modeDep2, Map<Integer, IUserList> idToList) {
+  private Widget addModeChoices(Heading modeDep,
+                                Heading modeDep2, Map<Integer, IUserList> idToList) {
     DivWidget choiceDiv = new DivWidget();
     choiceDiv.setWidth("100%");
 
