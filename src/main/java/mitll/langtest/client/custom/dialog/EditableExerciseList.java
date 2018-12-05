@@ -94,7 +94,6 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
 
   @Override
   public void clearMessage() {
-    //  logger.info("clear message");
     message.setText("");
   }
 
@@ -148,6 +147,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
       if (currentSelection != null) {
         deleteItem(currentSelection.getID(), widgets, widgets, delete);
       }
+      clearMessage();
     });
     return delete;
   }
@@ -324,7 +324,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
               // logger.info("onSuccess not in dict!");
               message.setText("This is not in our " + controller.getLanguage() + " dictionary. Please edit.");
             } else {
-              logger.info("checkIsValidPhrase got " + newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
+             // logger.info("checkIsValidPhrase got " + newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
               showNewItem(newExercise);
               clearTextBoxField();
             }

@@ -1459,7 +1459,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     getUserIDFromSessionOrDB();
 
     AudioCopy audioCopy = new AudioCopy(db, db.getProjectManagement(), db);
-    return getDatabase().getAudioDAO().getTranscriptMatch(projID, exid, audioID, isContext, transcript, audioCopy);
+    return getDatabase().getAudioDAO().getTranscriptMatch(projID, exid, audioID, isContext, transcript.trim(), audioCopy);
   }
 
   @Override

@@ -135,7 +135,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   CreateFirstRecordAudioPanel rap, rapSlow;
   /**
-   * @see
+   * @see #makeContextAudioPanel
    */
   CreateFirstRecordAudioPanel rapContext;
 
@@ -370,7 +370,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       next = (U) directlyRelated.iterator().next();
     }
 
-    //   logger.info("makeContextAudioPanel make context from " + next.getID());
+    if (DEBUG) logger.info("makeContextAudioPanel make context from " + next.getID() + " " + next.getEnglish() + " " +next.getForeignLanguage());
 
     rapContext = makeRecordAudioPanel(next, row, AudioType.CONTEXT_REGULAR);
     rapContext.getButton().addClickHandler(clickEvent -> postChangeIfDirty(false));
@@ -990,7 +990,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
      */
     CreateFirstRecordAudioPanel(U newExercise, Panel row, AudioType audioType) {
       super(newExercise, NewUserExercise.this.controller, row, 0, false, audioType);
-      // logger.info("reg speed " + audioType);
+
       this.audioType = audioType;
       setExercise(newExercise);
 

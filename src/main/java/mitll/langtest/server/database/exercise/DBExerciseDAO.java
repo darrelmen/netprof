@@ -530,9 +530,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     if (commonExercise == null) {
       logger.info("refresh no ex with " + exid);
     } else {
-      logger.info("refresh found " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage() + " \n\t: " + commonExercise);
+      logger.info("refresh found " + commonExercise.getID() + " " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage());
       ClientExercise next = commonExercise.getDirectlyRelated().iterator().next();
-      logger.info("found context " + next.getEnglish() + " " + next.getForeignLanguage() + " \n\t: " + next);
+      logger.info("found context " + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage());
     }
 
 
@@ -541,11 +541,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     ClientExercise next = byExID.getDirectlyRelated().iterator().next();
     idToUserExercise.put(next.getID(), next.asCommon());
 
-    logger.info("refresh after " + byExID.getEnglish() +
-        " " + byExID.getForeignLanguage() + " \n\t: " + byExID);
-
-    logger.info("refresh after context " + next.getEnglish() +
-        " " + next.getForeignLanguage() + " \n\t: " + next);
+    logger.info(
+        "refresh after " + byExID.getEnglish() + " " + byExID.getForeignLanguage() +
+            "\n\trefresh after context " + next.getEnglish() + " " + next.getForeignLanguage());
   }
 
   private ExerciseDAOWrapper getDao() {
