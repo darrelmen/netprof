@@ -86,6 +86,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
   private static final String UNIT = "unit";
 
+  private ExcelUtil excelUtil = new ExcelUtil();
+
   @Override
   public int updateDominoBulk(List<SlickUpdateDominoPair> pairs) {
     return 0;
@@ -193,7 +195,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     logger.info("readExercises from " + file.getAbsolutePath());
 
     lastModified = file.lastModified();
-    long excelLastModified = getExcelLastModified(file);
+    long excelLastModified = excelUtil.getExcelLastModified(file);
     lastModified = excelLastModified == 0 ? lastModified : excelLastModified;
 
     List<CommonExercise> exercises = readExercises(file);
@@ -209,56 +211,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     getSectionHelper().report();
 
     return exercises;
-  }
-
-  /**
-   * Ask the excel file for when it was modified
-   *
-   * @param file
-   * @return
-   * @see #readExercises
-   */
-  private long getExcelLastModified(File file) {
-    if (!file.exists()) return 0;
-/*    try {
-      BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-      logger.info("creationTime:     " + attr.creationTime());
-//      logger.info("lastAccessTime:   " + attr.lastAccessTime());
-      logger.info("lastModifiedTime: " + attr.lastModifiedTime());
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-    }*/
-
-    try {
-      OPCPackage pkg = OPCPackage.open(file);
-      POIXMLProperties props = new POIXMLProperties(pkg);
-      PackagePropertiesPart ppropsPart = props.getCoreProperties().getUnderlyingProperties();
-
-      Date created = ppropsPart.getCreatedProperty().getValue();
-      logger.info("creationTime:     " + created);
-      Date modified = ppropsPart.getModifiedProperty().getValue();
-      logger.info("lastModifiedTime: " + modified);
-      String lastModifiedBy = ppropsPart.getLastModifiedByProperty().getValue();
-      logger.info("lastModifiedBy:   " + lastModifiedBy);
-      logger.info("readExercises Reading from " + file.getAbsolutePath() + " modified " + modified);
-
-      return modified == null ? System.currentTimeMillis() : modified.getTime();
-    } catch (IOException | OpenXML4JException | XmlException e) {
-      logger.error("got " + e, e);
-    }
-    return 0;
-  }
-
-  private void log() {
-    int MB = (1024 * 1024);
-    Runtime rt = Runtime.getRuntime();
-    long free = rt.freeMemory();
-    long used = rt.totalMemory() - free;
-    long max = rt.maxMemory();
-
-    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
-    logger.debug(serverProps.getLanguage() + " current thread group " + threadGroup.getName() + " = " + threadGroup.activeCount() +
-        " : # cores = " + Runtime.getRuntime().availableProcessors() + " heap info free " + free / MB + "M used " + used / MB + "M max " + max / MB + "M");
   }
 
   /**
@@ -284,9 +236,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
    * @seex mitll.langtest.server.SiteDeployer#readExercises(mitll.langtest.shared.Site, org.apache.commons.fileupload.FileItem)
    */
   public List<CommonExercise> readExercises(InputStream inp) {
-    log();
-    List<CommonExercise> exercises = new ArrayList<>();
     String language = serverProps.getLanguage();
+    excelUtil.log(language);
+    List<CommonExercise> exercises = new ArrayList<>();
     try {
       long then = System.currentTimeMillis();
       // logger.debug("starting to read spreadsheet for " + language + " on " + Thread.currentThread() + " at " + System.currentTimeMillis());
@@ -381,7 +333,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     logger.info("readFromSheet initial type order First '" + first + "' second '" + second + "'");
     try {
       Iterator<Row> iter = sheet.rowIterator();
-      Map<Integer, CellRangeAddress> rowToRange = getRowToRange(sheet);
+      Map<Integer, CellRangeAddress> rowToRange = excelUtil.getRowToRange(sheet);
       boolean gotUCW = unitIndex != -1;
       List<String> columns;
 
@@ -396,7 +348,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
 
         if (!gotHeader) {
-          columns = getHeader(next); // could be several junk rows at the top of the spreadsheet
+          columns = excelUtil.getHeader(next); // could be several junk rows at the top of the spreadsheet
 
           List<String> predefinedTypeOrder = new ArrayList<>();
           for (String col : columns) {
@@ -480,11 +432,11 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
           int colIndex = colIndexOffset;
           boolean isDelete = isDeletedRow(sheet, next, colIndex);
 
-          String english = getCell(next, colIndex++).trim();
+          String english = excelUtil.getCell(next, colIndex++).trim();
           // remove starting or ending tics
-          String foreignLanguagePhrase = cleanTics(getCell(next, colIndex).trim());
-          String translit = getCell(next, transliterationIndex);
-          String altfl = getCell(next, altIndex);
+          String foreignLanguagePhrase = excelUtil.cleanTics(getCell(colIndex, next).trim());
+          String translit = getCell(transliterationIndex, next);
+          String altfl = getCell(altIndex, next);
 
           //logger.info("for row " + next.getRowNum() + " english = " + english + " in merged " + inMergedRow + " last row " + lastRowValues.size());
 
@@ -516,11 +468,11 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                 }
               }
 
-              String meaning = getCell(next, meaningIndex);
-              String givenIndex = getCell(next, idIndex);
-              String context = getCell(next, contextIndex);
-              String altcontext = getCell(next, altcontextIndex);
-              String contextTranslation = getCell(next, contextTranslationIndex);
+              String meaning = excelUtil.getCell(next, meaningIndex);
+              String givenIndex = excelUtil.getCell(next, idIndex);
+              String context = excelUtil.getCell(next, contextIndex);
+              String altcontext = excelUtil.getCell(next, altcontextIndex);
+              String contextTranslation = excelUtil.getCell(next, contextTranslationIndex);
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
@@ -588,6 +540,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return exercises;
   }
 
+  private String getCell(int transliterationIndex, Row next) {
+    return excelUtil.getCell(next, transliterationIndex);
+  }
+
   private boolean isMatchForEnglish(String colNormalized) {
     return colNormalized.startsWith(WORD) || colNormalized.equalsIgnoreCase(ENGLISH);
   }
@@ -635,7 +591,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     List<ExerciseAttribute> toAdd = new ArrayList<>();
     for (Map.Entry<Integer, String> pair : colToHeader.entrySet()) {
       Integer colIndex = pair.getKey();
-      String value = getCell(next, colIndex);
+      String value = excelUtil.getCell(next, colIndex);
       if (!value.isEmpty()) {
         String property = pair.getValue();
 
@@ -663,16 +619,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return exerciseAttributes;
   }
 
-  private List<String> getHeader(Row next) {
-    List<String> columns = new ArrayList<>();
-
-    Iterator<Cell> cellIterator = next.cellIterator();
-    while (cellIterator.hasNext()) {
-      columns.add(cellIterator.next().toString().trim());
-    }
-
-    return columns;
-  }
 
   private boolean contextTransMatch(String colNormalized) {
     return
@@ -716,7 +662,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         Row next = iter.next();
 
         if (!gotHeader) {
-          columns = getHeader(next); // could be several junk rows at the top of the spreadsheet
+          columns = excelUtil.getHeader(next); // could be several junk rows at the top of the spreadsheet
 
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
@@ -774,19 +720,19 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
         } else {
           int colIndex = colIndexOffset;
           boolean isDelete = isDeletedRow(sheet, next, colIndex);
-          String english = getCell(next, colIndex++).trim();
+          String english = excelUtil.getCell(next, colIndex++).trim();
           // remove starting or ending tics
-          String foreignLanguagePhrase = cleanTics(getCell(next, colIndex).trim());
-          String altfl = getCell(next, altIndex);
-          String translit = getCell(next, transliterationIndex);
+          String foreignLanguagePhrase = excelUtil.cleanTics(excelUtil.getCell(next, colIndex).trim());
+          String altfl = excelUtil.getCell(next, altIndex);
+          String translit = excelUtil.getCell(next, transliterationIndex);
 
           if (gotHeader && english.length() > 0) {
             if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
-              String meaning = getCell(next, meaningIndex);
-              String givenIndex = getCell(next, idIndex);
-              String context = getCell(next, contextIndex);
-              String altcontext = getCell(next, altcontextIndex);
-              String contextTranslation = getCell(next, contextTranslationIndex);
+              String meaning = excelUtil.getCell(next, meaningIndex);
+              String givenIndex = excelUtil.getCell(next, idIndex);
+              String context = excelUtil.getCell(next, contextIndex);
+              String altcontext = excelUtil.getCell(next, altcontextIndex);
+              String contextTranslation = excelUtil.getCell(next, contextTranslationIndex);
 
               boolean expectFastAndSlow = idIndex == -1;
               String idToUse = expectFastAndSlow ? "" + id++ : givenIndex;
@@ -868,19 +814,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     return total == 0 ? "0 %" : (100f * skipped / total) + "%";
   }
 
-  private Map<Integer, CellRangeAddress> getRowToRange(Sheet sheet) {
-    Map<Integer, CellRangeAddress> rowToRange = new HashMap<>();
-    for (int r = 0; r < sheet.getNumMergedRegions(); r++) {
-      CellRangeAddress mergedRegion = sheet.getMergedRegion(r);
-      for (int rr = mergedRegion.getFirstRow(); rr <= mergedRegion.getLastRow(); rr++) {
-        rowToRange.put(rr, mergedRegion);
-      }
-/*      logger.debug("for " + sheet.getSheetName() + " region  " + mergedRegion + " " +
-          mergedRegion.getFirstRow() + " " + mergedRegion.getFirstColumn());*/
-    }
-    return rowToRange;
-  }
-
   /**
    * @param exercises
    * @param imported
@@ -891,14 +824,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     exercises.add(imported);
   }
 
-  private String cleanTics(String foreignLanguagePhrase) {
-    if (foreignLanguagePhrase.startsWith("\'")) {
-      foreignLanguagePhrase = foreignLanguagePhrase.substring(1);
-    }
-    if (foreignLanguagePhrase.endsWith("\'"))
-      foreignLanguagePhrase = foreignLanguagePhrase.substring(0, foreignLanguagePhrase.length() - 1);
-    return foreignLanguagePhrase;
-  }
+
 
   /**
    * Don't do an overlay if it's older than the file creation date.
@@ -944,9 +870,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   private void recordUnitChapterWeek(int unitIndex, int chapterIndex, int weekIndex,
                                      Row next,
                                      CommonExercise imported, String unitName, String chapterName, String weekName) {
-    String unit = getCell(next, unitIndex);
-    String chapter = getCell(next, chapterIndex);
-    String week = getCell(next, weekIndex);
+    String unit = excelUtil.getCell(next, unitIndex);
+    String chapter = excelUtil.getCell(next, chapterIndex);
+    String week = excelUtil.getCell(next, weekIndex);
 
     if (unit.isEmpty() && chapter.isEmpty() && week.isEmpty()) {
       unit = OTHER;
@@ -990,22 +916,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 //    logger.info("recordUnitChapterWeek now  " + imported.getID() + " = " + imported.getUnitToValue());
   }
 
-  private String getCell(Row next, int col) {
-    if (col == -1) return "";
-    Cell cell = next.getCell(col);
-    if (cell == null) return "";
-    if (cell.getCellTypeEnum() == CellType.NUMERIC) {
-      double numericCellValue = cell.getNumericCellValue();
-      if ((new Double(numericCellValue).intValue()) < numericCellValue)
-        return "" + numericCellValue;
-      else
-        return "" + new Double(numericCellValue).intValue();
-    } else if (cell.getCellTypeEnum() == CellType.STRING) {
-      return cell.getStringCellValue().trim();
-    } else {
-      return cell.toString().trim();
-    }
-  }
 
   @Override
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp) {

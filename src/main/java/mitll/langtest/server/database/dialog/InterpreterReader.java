@@ -1,22 +1,25 @@
 package mitll.langtest.server.database.dialog;
 
+import mitll.langtest.server.database.exercise.ExcelUtil;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.SlickDialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Read the excel spreadsheet that we're using (for now) to define the interpreter turns.
@@ -24,6 +27,7 @@ import java.util.Map;
 public class InterpreterReader extends BaseDialogReader implements IDialogReader {
   private static final Logger logger = LogManager.getLogger(InterpreterReader.class);
   private final boolean DEBUG = true;
+  private ExcelUtil excelUtil = new ExcelUtil();
 
   @Override
   public Map<Dialog, SlickDialog> getDialogs(int defaultUser,
@@ -90,6 +94,49 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   }
 
   private void readFromSheet(Sheet sheet) {
+    try {
+      Iterator<Row> iter = sheet.rowIterator();
+      Map<Integer, CellRangeAddress> rowToRange = excelUtil.getRowToRange(sheet);
 
+      List<String> columns;
+
+      Map<Integer, String> colToHeader = new HashMap<>();
+      Map<String, ExerciseAttribute> pairToAttr = new HashMap<>();
+      Map<String, List<ExerciseAttribute>> attrToItself = new HashMap<>();
+      int rows = 0;
+      int colIndexOffset = -1;
+
+      boolean gotHeader = false;
+
+      for (; iter.hasNext(); ) {
+        Row next = iter.next();
+        rows++;
+
+        boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
+
+        if (!gotHeader) {
+          columns = excelUtil.getHeader(next); // could be several junk rows at the top of the spreadsheet
+
+          List<String> predefinedTypeOrder = new ArrayList<>();
+          for (String col : columns) {
+            String colNormalized = col.toLowerCase();
+            int i = columns.indexOf(col);
+
+
+          }
+
+
+        } else {
+          int colIndex = colIndexOffset;
+          boolean isDelete = excelUtil.isDeletedRow(sheet, next, colIndex);
+
+        }
+      }
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+    }
   }
+
+
+
 }
