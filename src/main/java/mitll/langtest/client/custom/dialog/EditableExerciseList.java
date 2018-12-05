@@ -6,8 +6,14 @@ import com.github.gwtbootstrap.client.ui.Typeahead;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -29,7 +35,7 @@ import java.util.logging.Logger;
 class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> implements FeedbackExerciseList {
   private final Logger logger = Logger.getLogger("EditableExerciseList");
 
-  public static final String SAFE_TEXT_REPLACEMENT = "&#39;";
+  static final String SAFE_TEXT_REPLACEMENT = "&#39;";
 
   /**
    * @see #onClickAdd
@@ -88,7 +94,6 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
 
   @Override
   public void clearMessage() {
-    logger.info("clear message");
     message.setText("");
   }
 
@@ -142,6 +147,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
       if (currentSelection != null) {
         deleteItem(currentSelection.getID(), widgets, widgets, delete);
       }
+      clearMessage();
     });
     return delete;
   }
@@ -180,10 +186,36 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
       //  logger.info("getTypeahead got key up "+ quickAddText.getText());
       searchTypeahead.clearCurrentExercise();
       message.setText("");
+      checkForKeyUpDown(event);
+
     });
 
     this.searchTypeahead = new SearchTypeahead(controller, add);
+
+/*
+    quickAddText.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent focusEvent) {
+        logger.info("Got " + focusEvent);
+      }
+    });*/
+
     return searchTypeahead.getTypeaheadUsing(quickAddText);
+  }
+
+  private void checkForKeyUpDown(KeyUpEvent event) {
+    // arrow up down Paul suggestion.
+    int keyCode = event.getNativeEvent().getKeyCode();
+
+    if (keyCode == 40) {  // down
+      loadNext();
+    } else if (keyCode == 38) loadPrev();
+  }
+
+  public void grabFocus() {
+    Scheduler.get().scheduleDeferred((Command) () -> {
+      quickAddText.setFocus(true);
+    });
   }
 
   private TextBox getEntryTextBox() {
@@ -232,7 +264,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
       } else {   // not on the list
         message.setText("");
 
-   //     logger.info("onClickAdd value after add is " + quickAddText.getText());
+        //     logger.info("onClickAdd value after add is " + quickAddText.getText());
 
         controller.getListService().addItemToUserList(list.getID(), currentExercise.getID(), new AsyncCallback<Void>() {
           @Override
@@ -292,7 +324,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
               // logger.info("onSuccess not in dict!");
               message.setText("This is not in our " + controller.getLanguage() + " dictionary. Please edit.");
             } else {
-              logger.info("checkIsValidPhrase got " + newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
+             // logger.info("checkIsValidPhrase got " + newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
               showNewItem(newExercise);
               clearTextBoxField();
             }
@@ -337,7 +369,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
     int before = getSize();
     addExercise(currentExercise);
     int after = getSize();
-  //  logger.info("before " + before + " after " + after);
+    //  logger.info("before " + before + " after " + after);
     enableRemove(true);
 
     gotClickOnItem(currentExercise);

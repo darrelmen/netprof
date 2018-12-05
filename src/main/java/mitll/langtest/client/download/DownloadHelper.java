@@ -64,12 +64,16 @@ public class DownloadHelper implements IShowStatus {
   public static final String COMMA = "___COMMA___";
 
   private static final String VOCABULARY = "Vocabulary";
-  private static final String DOWNLOAD_AUDIO_AND_SPREADSHEET = "Download Audio and Spreadsheet";
+  private static final String DOWNLOAD_AUDIO_AND_SPREADSHEET = "Download Content Spreadsheet (and Audio)";
   private static final String SPEED = "Speed";
   private static final String CONTENT = "Content";
   private static final String CONTEXT_SENTENCES = "Context Sentences";
   private static final List<String> CONTENT_CHOICES = Arrays.asList(VOCABULARY, CONTEXT_SENTENCES);
   private static final String GENDER = "Gender";
+
+  /**
+   *
+   */
   private static final String DOWNLOAD = "Download";
   private static final String CANCEL = "Cancel";
   private static final int TOP_TO_USE = 10;
@@ -104,6 +108,7 @@ public class DownloadHelper implements IShowStatus {
   private final Heading status1 = new Heading(4, "");
   private final Heading status2 = new Heading(4, "");
   private final Heading status3 = new Heading(4, "");
+  DivWidget outer;
 
   /**
    * @param host
@@ -137,10 +142,14 @@ public class DownloadHelper implements IShowStatus {
 
     container.add(getIncludeAudio());
 
-    container.add(getContentRow());
-    container.add(getGenderRow());
-    container.add(getSpeedRow());
-    container.add(getStatusArea());
+    outer = new DivWidget();
+
+    outer.add(getContentRow());
+    outer.add(getGenderRow());
+    outer.add(getSpeedRow());
+    outer.add(getStatusArea());
+
+    container.add(outer);
 
     closeButton = new DialogHelper(true).show(
         DOWNLOAD_AUDIO_AND_SPREADSHEET,
@@ -169,7 +178,10 @@ public class DownloadHelper implements IShowStatus {
           }
         }, 550);
     closeButton.setType(ButtonType.SUCCESS);
-    closeButton.setEnabled(false);
+    // closeButton.setEnabled(false);
+
+    closeButton.setEnabled(!includeAudio);
+
   }
 
   private void styleStatus(Heading status1) {
@@ -199,10 +211,22 @@ public class DownloadHelper implements IShowStatus {
     FluidRow row = new FluidRow();
     CheckBox w = new CheckBox(INCLUDE_AUDIO);
     w.setValue(includeAudio);
-    w.addClickHandler(event -> includeAudio = w.getValue());
+    w.addClickHandler(event -> {
+      includeAudio = w.getValue();
+      gotIncludeAudio(includeAudio);
+    });
     row.add(w);
     row.addStyleName("bottomFiveMargin");
     return row;
+  }
+
+  private void gotIncludeAudio(boolean includeAudio) {
+    outer.setVisible(includeAudio);
+    if (!includeAudio) {
+      closeButton.setEnabled(true);
+    } else {
+      closeButton.setEnabled(isMaleSet && isContextSet && speedChoices.isThereASpeedChoice());
+    }
   }
 
   private Widget getSpeedRow() {
@@ -239,7 +263,7 @@ public class DownloadHelper implements IShowStatus {
     status1.setText(isContextSet ? isContext ? "Context Sentences " : "Vocabulary Items " : "");
     status2.setText(isMaleSet ? isMale ? "Male Audio " : "Female Audio " : "");
     boolean thereASpeedChoice = speedChoices.isThereASpeedChoice();
-   // logger.info("speed choice made = " + thereASpeedChoice);
+    // logger.info("speed choice made = " + thereASpeedChoice);
     status3.setText(thereASpeedChoice ? speedChoices.getStatus() : "");
     if (closeButton != null) {
       closeButton.setEnabled(isMaleSet && isContextSet && thereASpeedChoice);

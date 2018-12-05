@@ -491,8 +491,9 @@ public class UserListManager implements IUserListManager {
         long then = System.currentTimeMillis();
         Collection<SlickUserExerciseList> visitedBy = userListDAO.getVisitedBy(userid, projid);
         long now = System.currentTimeMillis();
-        if (now - then > 10) {
-          logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid + " took " + (now - then));
+        long diff = now - then;
+        if (diff > 20) {
+          logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid + " took " + diff);
         }
         //logger.info("getRawLists found " + visitedBy.size() + " visited lists for " + userid + " and " + projid);
         lists.addAll(visitedBy);

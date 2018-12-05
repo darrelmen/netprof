@@ -69,7 +69,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem {
-   private final Logger logger = Logger.getLogger("EditItem");
+  private final Logger logger = Logger.getLogger("EditItem");
 
   public static final String DONE = "OK";
   private final ExerciseController controller;
@@ -132,6 +132,10 @@ public class EditItem {
     return this.exerciseList;
   }
 
+  public void grabFocus() {
+    ((EditableExerciseList) exerciseList).grabFocus();
+  }
+
   public void onResize() {
     if (exerciseList != null) {
       exerciseList.onResize();
@@ -178,8 +182,8 @@ public class EditItem {
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
           return widgets;
         } else {
-         // logger.info("getExercisePanel got " + exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " + exercise.isPredefined());
-         // List<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
+          // logger.info("getExercisePanel got " + exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " + exercise.isPredefined());
+          // List<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
           // logger.info("getExercisePanel got #" + directlyRelated.size());
           // directlyRelated.forEach(clientExercise -> logger.info("Got " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
 
@@ -200,10 +204,6 @@ public class EditItem {
     ListEditableDialog(ExerciseController controller, ClientExercise exercise) {
       super(controller, exercise, EditItem.this.userListID, INavigation.VIEWS.LISTS);
     }
-//
-//    @Override
-//    protected void addItemsAtTop(Panel container) {
-//    }
 
     @NotNull
     @Override
@@ -219,35 +219,7 @@ public class EditItem {
 
     @Override
     protected Panel getCreateButton(Panel toAddTo, ControlGroup normalSpeedRecording) {
-
       return null;
-//      Panel row = new DivWidget();
-//      row.addStyleName("marginBottomTen");
-//      configureButtonRow(row);
-
-//      Button done;
-//      row.add(done = makeDone());
-//      done.addClickHandler(event -> exerciseList.loadNext());
-
-//      return row;
     }
-
-    /**
-     * @return
-     * @see NewUserExercise#getCreateButton(Panel, ControlGroup)
-     */
-  /*  private Button makeDone() {
-      Button fixed = new Button(DONE);
-      fixed.setType(ButtonType.PRIMARY);
-
-      fixed.addStyleName("leftTenMargin");
-      fixed.addStyleName("floatRight");
-      fixed.addStyleName("marginRight");
-
-      // fixed.addMouseOverHandler(event -> checkForForeignChange());
-      addTooltip(fixed, "When done entering item.");
-      return fixed;
-    }*/
-
   }
 }

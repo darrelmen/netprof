@@ -575,9 +575,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     ExercisePhoneInfo exercisePhoneInfo;
 
     int numphones = slick.numphones();
-    if (numphones < 1) {
+    String foreignlanguage = slick.foreignlanguage();
+    if (numphones < 1 && !foreignlanguage.isEmpty()) {
 //      logger.info("getExercisePhoneInfoFromDict num phones " + numphones + " for exercise " + slick.id());
-      String foreignlanguage = slick.foreignlanguage();
       String transliteration = slick.transliteration();
 
       exercisePhoneInfo = getExercisePhoneInfo(lookup, foreignlanguage, transliteration);
@@ -587,9 +587,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       if (n2 < 1) {
         cantcalc++;
         if (cantcalc < 100 || cantcalc % 1000 == 0) {
-          String english = slick.english();
           logger.info("getExercisePhoneInfo can't calc num phones for " + cantcalc +
-              " exercises, e.g. " + id + " " + foreignlanguage + "/" + english);
+              " exercises, e.g. " + id + " " + foreignlanguage + "/" + slick.english());
         }
       } else {
         if (hasMediaDir) {
@@ -1049,7 +1048,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         dao.getAllContextByProject(projectid) :
         dao.getAllUserDefinedContextByProject(projectid);
 
-    logger.info("getContextByProject For " + projectid + " got " + allContextPredefByProject.size() + " context predef ");
+    logger.info("getContextByProject For " + projectid +
+        "\n\tgot " + allContextPredefByProject.size() + " context predef" +
+        "\n\tisPredef = " +isPredef);
 
     return getExercises(allContextPredefByProject, typeOrder, sectionHelper,
         lookup, allByProject, exToAttrs, /*attributeTypes,*/ false);

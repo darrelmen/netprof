@@ -334,7 +334,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
 
       if (isStaleResponse(result)) {
         if (DEBUG_STALE) {
-          logger.warning("SetExercisesCallback.onSuccess ignoring" +
+          logger.info("SetExercisesCallback.onSuccess ignoring" +
               "\n\tresult " + result.getReqID() + " b/c before" +
               "\n\tlatest " + lastReqID);
         }

@@ -135,7 +135,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   CreateFirstRecordAudioPanel rap, rapSlow;
   /**
-   * @see
+   * @see #makeContextAudioPanel
    */
   CreateFirstRecordAudioPanel rapContext;
 
@@ -358,10 +358,20 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    *
    * @param row
    * @return
+   * @see #makeAudioRow
    */
   ControlGroup makeContextAudioPanel(Panel row) {
-    U next = (U) newUserExercise.getDirectlyRelated().iterator().next();
-    //   logger.info("makeContextAudioPanel make context from " + next.getID());
+    List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+
+    U next;
+    if (directlyRelated.isEmpty()) {   // this should not happen...
+      next = newUserExercise;
+    } else {
+      next = (U) directlyRelated.iterator().next();
+    }
+
+    if (DEBUG) logger.info("makeContextAudioPanel make context from " + next.getID() + " " + next.getEnglish() + " " +next.getForeignLanguage());
+
     rapContext = makeRecordAudioPanel(next, row, AudioType.CONTEXT_REGULAR);
     rapContext.getButton().addClickHandler(clickEvent -> postChangeIfDirty(false));
 
@@ -867,8 +877,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
           Scheduler.get().scheduleDeferred((Command) () -> refreshEx());
         }
       });
-    }
-    else {
+    } else {
 
     }
 
@@ -884,7 +893,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     String text = english.getSafeText();
 
     MutableShell mutableShell = clientExercise.getMutableShell();
-
     //   logger.info("so english  field is " + text + " fl " + foreignLang.getSafeText());
     //   logger.info("so translit field is " + translit.getSafeText());
     if (isEnglish()) {
@@ -893,22 +901,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       mutableShell.setEnglish(text);
     }
     mutableShell.setForeignLanguage(foreignLang.getSafeText());
-
-    // TODO : put back in!
-
-    //  mutableShell.setTransliteration(translit.getSafeText());
-
-//    Collection<U> directlyRelated = mutableExercise.getDirectlyRelated();
-
-//    if (directlyRelated.isEmpty()) {
-//      if (!context.getSafeText().isEmpty() ||
-//          !contextTrans.getSafeText().isEmpty()
-//          ) {
-//        logger.info("grabInfoFromFormAndStuffInfoExercise no context sentence on " + mutableExercise.getID());
-//        addContext(controller.getUser(), mutableExercise, projectID);
-//      }
-//    }
-
     return updateContextExercise(clientExercise);
   }
 
@@ -920,7 +912,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   private ClientExercise updateContextExercise(ClientExercise clientExercise) {
     List<ClientExercise> directlyRelated = clientExercise.getDirectlyRelated();
 
-    // if (!directlyRelated.isEmpty()) {
     ClientExercise contextSentenceExercise = directlyRelated.iterator().next();
     MutableShell mutableContext = contextSentenceExercise.getMutableShell();
 
@@ -931,11 +922,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     } else {
       mutableContext.setEnglish(contextTrans.getSafeText());
     }
-
-    //  logger.info("context now " + contextSentenceExercise.getID() + " " + contextSentenceExercise.getEnglish() + " " + contextSentenceExercise.getForeignLanguage());
-    //  Collection<U> directlyRelated1 = mutableExercise.getDirectlyRelated();
-    //  logger.info("grabInfoFromFormAndStuffInfoExercise context now " + directlyRelated1.iterator().next().getForeignLanguage());
-    //  }
 
     return contextSentenceExercise;
   }
@@ -1004,7 +990,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
      */
     CreateFirstRecordAudioPanel(U newExercise, Panel row, AudioType audioType) {
       super(newExercise, NewUserExercise.this.controller, row, 0, false, audioType);
-      // logger.info("reg speed " + audioType);
+
       this.audioType = audioType;
       setExercise(newExercise);
 
@@ -1019,10 +1005,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
           disableOthers(true);
         }
       });
-
-//      String speed = (audioType ? "Regular" : "Slow") + "_speed";
-//      getPostAudioButton().getElement().setId(WIDGET_ID + speed);
-//      getPlayButton().getElement().setId(WIDGET_ID + "Play_" + speed);
 
       setEnabled(hasRecordPermission());
       controller.register(getPlayButton(), newExercise.getID());

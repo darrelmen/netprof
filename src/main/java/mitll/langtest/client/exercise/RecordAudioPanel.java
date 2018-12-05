@@ -180,13 +180,12 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
    */
   public AudioAttribute getAudioAttribute() {
     if (audioType.isContext()) {
-      long user = controller.getUserState().getUser();
-      for (AudioAttribute audioAttribute1 : exercise.getContextAudio()) {
-        if (audioAttribute1.getUserid() == user) {
-          return audioAttribute1;
-        }
+      if (exercise.getContextAudio().isEmpty()) {
+        //  logger.info("about to return null for audio attribute, num context = " + exercise.getContextAudio().size());
+        return null;
+      } else {
+        return exercise.getContextAudio().iterator().next();
       }
-      return null;
     } else {
       return
           audioType.equals(AudioType.REGULAR) ?

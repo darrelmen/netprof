@@ -55,6 +55,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private static final Logger logger = LogManager.getLogger(DBExerciseDAO.class);
 
   private static final int SPEW_THRESH = 5;
+  private static final boolean DEBUG_CONTEXT = false;
   private final IUserExerciseDAO userExerciseDAO;
   private final SlickProject project;
   private final Project fullProject;
@@ -224,13 +225,20 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           // "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\tgot        " + allNonContextExercises.size() + " predef exercises");
 
+      List<CommonExercise> contextByProject = userExerciseDAO.getContextByProject(
+          typeOrder,
+          getSectionHelper(),
+          fullProject, allAttributesByProject, exToAttrs,
+          true);
+
       Map<Integer, CommonExercise> idToContext =
-          getIDToExercise(userExerciseDAO.getContextByProject(
-              typeOrder,
-              getSectionHelper(),
-              fullProject, allAttributesByProject, exToAttrs,
-              true));
-//      logger.info("readExercises project " + project + " idToContext " + idToContext.size());
+          getIDToExercise(contextByProject);
+
+      if (DEBUG_CONTEXT) {
+        logger.info("readExercises project " + project +
+            "\n\tnum context " + contextByProject.size() +
+            "\n\tidToContext " + idToContext.size());
+      }
 
       Collection<SlickRelatedExercise> allRelated = userExerciseDAO.getRelatedExercise().getAllRelated(projid);
       attachContextExercises(allNonContextExercises, allRelated, idToContext);
@@ -530,9 +538,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     if (commonExercise == null) {
       logger.info("refresh no ex with " + exid);
     } else {
-      logger.info("refresh found " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage() + " \n\t: " + commonExercise);
+      logger.info("refresh found " + commonExercise.getID() + " " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage());
       ClientExercise next = commonExercise.getDirectlyRelated().iterator().next();
-      logger.info("found context " + next.getEnglish() + " " + next.getForeignLanguage() + " \n\t: " + next);
+      logger.info("found context " + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage());
     }
 
 
@@ -541,11 +549,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     ClientExercise next = byExID.getDirectlyRelated().iterator().next();
     idToUserExercise.put(next.getID(), next.asCommon());
 
-    logger.info("refresh after " + byExID.getEnglish() +
-        " " + byExID.getForeignLanguage() + " \n\t: " + byExID);
-
-    logger.info("refresh after context " + next.getEnglish() +
-        " " + next.getForeignLanguage() + " \n\t: " + next);
+    logger.info(
+        "refresh after " + byExID.getEnglish() + " " + byExID.getForeignLanguage() +
+            "\n\trefresh after context " + next.getEnglish() + " " + next.getForeignLanguage());
   }
 
   private ExerciseDAOWrapper getDao() {

@@ -1706,6 +1706,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Language language = getLanguageEnum(projectid);
     if (listid == -1) return language + "_Unknown";
 
+   // logger.info("writeUserList " + listid + " in " + projectid);
+
     UserList<CommonShell> userListByID = getUserListManager().getSimpleUserListByID(listid);
 
     if (userListByID == null) {
@@ -1717,7 +1719,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
       List<CommonExercise> copyAsExercises = new ArrayList<>();
 
       for (CommonShell ex : userListByID.getExercises()) {
-        copyAsExercises.add(getCustomOrPredefExercise(projectid, ex.getID()));
+        CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projectid, ex.getID());
+        if (customOrPredefExercise != null) {
+          copyAsExercises.add(customOrPredefExercise);
+        }
+        else logger.warn("writeUserListAudio no exercise found = " + ex.getID());
       }
       Map<Integer, MiniUser> idToMini = new HashMap<>();
       for (CommonExercise ex : copyAsExercises) {

@@ -82,7 +82,10 @@ public class ListView implements ContentView, CreateListComplete {
    * @see #getImport
    */
   private static final String IMPORT = "Import";
-  private static final int MIN_WIDTH = 599;
+  /**
+   * With quiz button
+   */
+  private static final int MIN_WIDTH = 659;//599;
 
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
   private static final String MY_LISTS = "myLists";
@@ -137,6 +140,10 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String CREATE_NEW_LIST = "Create New List";
   private static final String EDIT1 = "Edit";
   private static final String EDIT = EDIT1;
+
+  /**
+   *
+   */
   private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
   private static final int MY_LIST_HEIGHT = 560;//530;//560;
@@ -148,6 +155,7 @@ public class ListView implements ContentView, CreateListComplete {
   private final ExerciseController controller;
   private ListContainer myLists;
   private final Set<String> names = new HashSet<>();
+  private Button quizButton;
 
   /**
    * @param controller
@@ -373,7 +381,9 @@ public class ListView implements ContentView, CreateListComplete {
     buttons.add(getImport());
     buttons.add(share = getShare());
     addDrillAndLearn(buttons, container);
-
+    if (canMakeQuiz()) {
+      buttons.add(quizButton=getQuizButton(myLists));
+    }
     return buttons;
   }
 
@@ -457,6 +467,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   /**
    * @return
+   * @see #getButtons
    */
   private IsWidget getAddItems() {
     Button successButton = getSuccessButton(ITEMS);
@@ -477,11 +488,11 @@ public class ListView implements ContentView, CreateListComplete {
         editItem.editItem(currentSelectionFromMyLists),
         "Done",
         null,
-        new DialogHelper.CloseListener() {
+        new DialogHelper.ShownCloseListener() {
           @Override
           public boolean gotYes() {
             int numItems = currentSelectionFromMyLists.getNumItems();
-         //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
+            //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
             myLists.flush();
             myLists.redraw();
             return true;
@@ -493,6 +504,12 @@ public class ListView implements ContentView, CreateListComplete {
 
           @Override
           public void gotNo() {
+          }
+
+          @Override
+          public void gotShown() {
+          //  logger.info("editList : edit view shown!");
+            editItem.grabFocus();
           }
         }, MAX_HEIGHT, -1, true);
 
@@ -553,6 +570,21 @@ public class ListView implements ContentView, CreateListComplete {
     drill.addClickHandler(event -> controller.showListIn(getListID(container), INavigation.VIEWS.PRACTICE));
     addTooltip(drill, PRACTICE_THE_LIST);
     container.addButton(drill);
+
+    return drill;
+  }
+
+  @NotNull
+  private Button getQuizButton(ListContainer container) {
+    Button drill = getSuccessButton("Quiz");
+    drill.setType(ButtonType.INFO);
+
+    drill.addClickHandler(event -> showQuiz(getCurrentSelection(container)));
+    addTooltip(drill, "Do quiz");
+    container.addButton(drill);
+
+    UserList<CommonShell> currentSelection = getCurrentSelection(container);
+    drill.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
 
     return drill;
   }
@@ -747,25 +779,6 @@ public class ListView implements ContentView, CreateListComplete {
     CreateListDialog createListDialog = new CreateListDialog(this, controller, names);
     createListDialog.doCreate(contents);
 
-/*    {
-      KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
-        @Override
-        public String getName() {
-          logger.info("getName ");
-          return null;
-        }
-
-        @Override
-        public void gotPress(NativeEvent ne, boolean isKeyDown) {
-          logger.info("gotPress " + isKeyDown);
-
-          closeButton.click();
-          controller.removeKeyListener(myListener);
-        }
-      };
-      this.myListener = listener;
-      controller.addKeyListener(listener);
-    }*/
 
     return getNewListButton(contents, createListDialog, CREATE_NEW_LIST);
   }
@@ -780,25 +793,6 @@ public class ListView implements ContentView, CreateListComplete {
     CreateListDialog createListDialog = new CreateListDialog(this, controller, names).setIsQuiz(true);
     createListDialog.doCreate(contents);
 
-/*    {
-      KeyPressHelper.KeyListener listener = new KeyPressHelper.KeyListener() {
-        @Override
-        public String getName() {
-          logger.info("getName ");
-          return null;
-        }
-
-        @Override
-        public void gotPress(NativeEvent ne, boolean isKeyDown) {
-          logger.info("gotPress " + isKeyDown);
-
-          closeButton.click();
-          controller.removeKeyListener(myListener);
-        }
-      };
-      this.myListener = listener;
-      controller.addKeyListener(listener);
-    }*/
 
     return getNewListButton(contents, createListDialog, "Create New Quiz");
   }
@@ -835,8 +829,6 @@ public class ListView implements ContentView, CreateListComplete {
     return dialogHelper;
   }
 
-  // TODO :  text box has focus... - need to be a little smarter
-  // private KeyPressHelper.KeyListener myListener;
   private CreateListDialog editDialog;
 
   private void doEdit() {
@@ -873,37 +865,12 @@ public class ListView implements ContentView, CreateListComplete {
           public void gotHidden() {
 
           }
+
+
         }, 550);
 
     closeButton.setType(ButtonType.SUCCESS);
   }
-
-/*  private void doShare() {
-    UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
-    boolean isQuiz = currentSelection.getListType() == UserList.LIST_TYPE.QUIZ;
-    String mailToList = getMailTo();
-
-    DivWidget contents = new DivWidget();
-    String name = currentSelection.getName();
-//    logger.info("name " + name);
-    NavLink w = new NavLink(CLICK_HERE_TO_SHARE + name + ".", mailToList);
-    w.getElement().getStyle().setListStyleType(Style.ListStyleType.NONE);
-
-    contents.add(w);
-
-    DialogHelper dialogHelper = new DialogHelper(false);
-    String share_list = isQuiz ? SHARE_QUIZ : SHARE_LIST;
-    Button closeButton = dialogHelper.show(
-        share_list,
-        Collections.emptyList(),
-        contents,
-        "OK",
-        CANCEL,
-        null
-        , 250);
-
-    closeButton.setType(ButtonType.SUCCESS);
-  }*/
 
   @NotNull
   private String getMailTo() {
@@ -949,6 +916,8 @@ public class ListView implements ContentView, CreateListComplete {
     public void gotClickOnItem(final UserList<CommonShell> user) {
       super.gotClickOnItem(user);
       setShareHREF(user);
+      UserList<CommonShell> currentSelection = getCurrentSelection();
+      quizButton.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
     }
 
     @Override
@@ -958,19 +927,26 @@ public class ListView implements ContentView, CreateListComplete {
 
     @Override
     protected void gotDoubleClickOn(UserList<CommonShell> selected) {
-  //    logger.info("gotDoubleClickOn got double click on " + selected);
-      if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
-        showQuiz(this);
-      } else {
-        showLearnList(this);
-      }
+      //    logger.info("gotDoubleClickOn got double click on " + selected);
+      //showLearnOrQuiz(selected);
+      editList();
     }
+
   }
 
   private void setShareHREF(UserList<CommonShell> user) {
     if (user != null) {
       setShareButtonHREF();
       // share.setEnabled(!user.isFavorite());
+    }
+  }
+
+
+  private void showQuiz(UserList<CommonShell> selected) {
+    if (selected != null) {
+      if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
+        showQuiz(myLists);
+      }
     }
   }
 
