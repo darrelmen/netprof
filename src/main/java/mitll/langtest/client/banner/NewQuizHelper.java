@@ -63,13 +63,11 @@ import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLO
  * @since 2/4/16.
  */
 public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends ClientExercise> extends PracticeHelper<T, U> {
-  private final Logger logger = Logger.getLogger("QuizHelper");
+  private final Logger logger = Logger.getLogger("NewQuizHelper");
 
-  // private final INavigation navigation;
-  // private int chosenList = -1;
   private QuizChoiceHelper quizChoiceHelper;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -80,12 +78,6 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends Cli
     this.quizChoiceHelper = quizChoiceHelper;
   }
 
-  /**
-   *
-   */
- /* public interface QuizChoiceListener {
-    void gotChoice(int listid);
-  }*/
   @Override
   protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
     polyglotFlashcardFactory = new HidePolyglotFactory<T, U>(controller, exerciseList, INavigation.VIEWS.QUIZ) {
@@ -100,11 +92,7 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends Cli
        */
       @Override
       public void showQuiz() {
-        //   super.showQuizIntro();
         if (DEBUG) logger.info("HidePolyglotFactory.showQuizIntro");
-        //clearListSelection();
-        // ((QuizPracticeFacetExerciseList) this.getExerciseList()).showQuizIntro();
-        //  Scheduler.get().scheduleDeferred((Command) this::removeListFromHistory);
         quizChoiceHelper.showQuizIntro();
       }
     };
@@ -149,14 +137,6 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends Cli
     rememberedTopRow.getParent().setVisible(false);
   }
 
-/*
-  void showQuizIntro() {
-    //Scheduler.get().scheduleDeferred(this::clearListSelection);
-    if (DEBUG || true) logger.info("showQuizIntro");
-    clearListSelection();
-  }
-*/
-
   /**
    * @see #getFactory
    */
@@ -177,51 +157,7 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends Cli
           listHeader, INavigation.VIEWS.QUIZ, NewQuizHelper.this
       );
     }
-/*
-    @Override
-    protected void loadFirstExercise(String searchIfAny) {
-      Collection<String> lists = new SelectionState(History.getToken(), false).getTypeToSection().get(LISTS);
-      //   logger.info("loadFirstExercise chosen = " + chosenList);
 
-      if ((lists == null || lists.isEmpty())) {
-        // so if we reload the page, we get here...
-        if (DEBUG) logger.info("loadFirstExercise skip load first exercise - no list");
-        showQuizIntro();
-      } else {
-        if (chosenList == -1) {
-          String next = lists.iterator().next();
-          try {
-            chosenList = Integer.parseInt(next);
-            // logger.info("chosen list now " + chosenList);
-          } catch (NumberFormatException e) {
-            logger.warning("couldn't parse " + next);
-          }
-        }
-        if (DEBUG) logger.info("loadFirstExercise chosenList " + chosenList);
-
-        super.loadFirstExercise(searchIfAny);
-      }
-    }*/
-
-    /**
-     * @see #getFactory
-     */
-  /*  void showQuizIntro() {
-      createdPanel = getQuizIntro();
-      innerContainer.setWidget(createdPanel);
-    }
-*/
-/*
-    @NotNull
-    private QuizIntro getQuizIntro() {
-      if (DEBUG) logger.info("getQuizIntro ");
-
-      return new QuizIntro(
-          getIdToList(),
-          NewQuizHelper.this::gotQuizChoice,
-          controller.getUserManager().getUserID());
-    }
-*/
     @Override
     protected void restoreUIAndLoadExercises(String value, boolean didChange) {
       int listid = new SelectionState().getList();
@@ -245,24 +181,18 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends Cli
     }
   }
 
-  public void gotQuizChoice(int listid) {
-    if (DEBUG) logger.info("getQuizIntro : got choice " + listid);
+  /**
+   * @see QuizChoiceHelper
+   * @param listid
+   */
+   void gotQuizChoice(int listid, boolean shouldRemoveOldList) {
+    if (DEBUG) logger.info("gotQuizChoice : got choice " + listid);
     polyglotFlashcardFactory.cancelRoundTimer();
-//    chosenList = listid;
-    polyglotFlashcardFactory.removeItemFromHistory(listid);
-//    showQuizForReal();
+    if (shouldRemoveOldList) {
+      polyglotFlashcardFactory.removeItemFromHistory(listid);
+    }
     hideList();
 
     polyglotFlashcardFactory.startQuiz();
   }
-
-  /**
-   * @see QuizPracticeFacetExerciseList#getQuizIntro
-   * @see #gotQuizChoice
-   */
-//  private void showQuizForReal() {
-//    setMode(POLYGLOT);
-//    //  setNavigation(navigation);
-//    hideList();
-//  }
 }

@@ -1108,7 +1108,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #addRemoveClickHandler
    */
   void setHistory(Map<String, String> candidate) {
-    logger.info("setHistory " + candidate);
+    if (DEBUG) logger.info("setHistory " + candidate);
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
 

@@ -309,7 +309,9 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     String text = context.box.getText();
     boolean val = !text.isEmpty();
     // logger.info("Set context '" + text + "' = " + val);
-    rapContext.setEnabled(val);
+    if (rapContext != null) {
+      rapContext.setEnabled(val);
+    }
 
     if (!useAnnotation(newUserExercise, CONTEXT, contextAnno)) {
       List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();

@@ -304,9 +304,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       this.exerciseID = exerciseID;
       this.request = request;
 
-      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
-      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
-      logger.info("logException stack " + exceptionAsString);
+      if (DEBUG) logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
+
+/*      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
+      logger.info("logException stack " + exceptionAsString);*/
     }
 
     public void onFailure(Throwable caught) {

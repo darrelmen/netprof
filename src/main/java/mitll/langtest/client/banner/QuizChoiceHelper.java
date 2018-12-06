@@ -25,25 +25,21 @@ public class QuizChoiceHelper implements ContentView {
   private final Logger logger = Logger.getLogger("QuizChoiceHelper");
   private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   ExerciseController controller;
-//  private final INavigation navigation;
 
-  NewQuizHelper newQuizHelper;
+  private NewQuizHelper newQuizHelper;
+  private Panel listContent;
 
   QuizChoiceHelper(ExerciseController controller, INavigation navigation) {
     this.controller = controller;
-    //  this.navigation = navigation;
     this.newQuizHelper = new NewQuizHelper(controller, this);
   }
-
-  private Panel listContent;
 
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS ignored) {
     this.listContent = listContent;
     showQuizIntro();
-//    getQuizIntro(controller, listContent);
   }
 
   /**
@@ -68,43 +64,41 @@ public class QuizChoiceHelper implements ContentView {
 
           @Override
           public void onSuccess(Collection<IUserList> result) {
-            //long l = System.currentTimeMillis();
-            final Map<Integer, IUserList> idToList = new LinkedHashMap<>();
-            result.forEach(ul -> idToList.put(ul.getID(), ul));
-
             QuizIntro widgets = new QuizIntro(
-                idToList,
+                getIdToUserListMap(result),
                 QuizChoiceHelper.this::gotQuizChoice,
                 controller.getUserManager().getUserID());
-
             toAddTo.add(widgets);
           }
         });
-
-//    return new QuizIntro(
-//        getIdToList(),
-//        QuizHelper.this::gotQuizChoice,
-//        controller.getUserManager().getUserID());
   }
 
-  public void showChosenQuiz(DivWidget listContent) {
+  @NotNull
+  private Map<Integer, IUserList> getIdToUserListMap(Collection<IUserList> result) {
+    final Map<Integer, IUserList> idToList = new LinkedHashMap<>();
+    result.forEach(ul -> idToList.put(ul.getID(), ul));
+    return idToList;
+  }
+
+  /**
+   * @param listContent
+   * @see NewContentChooser#showQuizForReal
+   */
+  void showChosenQuiz(DivWidget listContent) {
+    if (DEBUG) logger.info("showChosenQuiz");
     this.listContent = listContent;
     listContent.clear();
-    gotQuizChoice(new SelectionState().getList());
+    gotQuizChoice(new SelectionState().getList(), false);
   }
-
 
   void gotQuizChoice(int listid) {
-    if (DEBUG) logger.info("getQuizIntro : got choice " + listid);
-    listContent.clear();
-    newQuizHelper.showContent(listContent, INavigation.VIEWS.QUIZ);
-    newQuizHelper.gotQuizChoice(listid);
-
-//    polyglotFlashcardFactory.cancelRoundTimer();
-//    chosenList = listid;
-//    polyglotFlashcardFactory.removeItemFromHistory(chosenList);
-//    showQuizForReal();
-//    polyglotFlashcardFactory.startQuiz();
+    gotQuizChoice(listid, true);
   }
 
+  private void gotQuizChoice(int listid, boolean removeCurrent) {
+    if (DEBUG) logger.info("gotQuizChoice : got choice " + listid);
+    listContent.clear();
+    newQuizHelper.showContent(listContent, INavigation.VIEWS.QUIZ);
+    newQuizHelper.gotQuizChoice(listid, removeCurrent);
+  }
 }

@@ -321,6 +321,11 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     roundTimeLeftMillis += roundTripMillis;
   }
 
+  /**
+   * @see mitll.langtest.client.banner.NewQuizHelper#gotQuizChoice
+   *
+   * @param listOverride
+   */
   public void removeItemFromHistory(int listOverride) {
     String currrentToken = History.getToken();
     SelectionState selectionState = new SelectionState(currrentToken, false);

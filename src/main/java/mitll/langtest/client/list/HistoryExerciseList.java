@@ -72,9 +72,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   private HandlerRegistration handlerRegistration;
   private final FacetContainer sectionWidgetContainer;
 
-  private static final boolean DEBUG_ON_VALUE_CHANGE = true;
+  private static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PUSH = false;
+  private static final boolean DEBUG_HISTORY = false;
 
   /**
    * @param currentExerciseVPanel
@@ -298,7 +299,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   void setHistoryItem(String historyToken) {
     // String token = History.getToken();
     //logger.info("before " + token);
-    if (DEBUG_PUSH || true) {
+    if (DEBUG_HISTORY) {
       logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
 
 /*
