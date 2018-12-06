@@ -350,10 +350,10 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
       History.newItem(historyToken);
     }
   }
-
-  public void removeListFromHistory() {
-    History.newItem(getBaseHistoryToken(new SelectionState()));
-  }
+//
+//  public void removeListFromHistory() {
+//    History.newItem(getBaseHistoryToken(new SelectionState()));
+//  }
 
   @NotNull
   public String getBaseHistoryToken(SelectionState selectionState) {

@@ -532,7 +532,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 //   logger.info("logException stack " + exceptionAsString);
     boolean context = views.isContext();
 
-    if (context) logger.warning("getExerciseListRequest view " + views);
+    // if (context) logger.warning("getExerciseListRequest view " + views);
     return super.getExerciseListRequest(prefix)
         .setAddFirst(false)
         .setOnlyExamples(context);
@@ -1109,7 +1109,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   void setHistory(Map<String, String> candidate) {
     if (DEBUG) logger.info("setHistory " + candidate);
-    setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
+    String s = getHistoryToken(candidate) + keepSearchItem();
+    if (!s.contains(SelectionState.INSTANCE)) {
+      s += getInstanceParam();
+    }
+    setHistoryItem(s);
   }
 
   private int reqid = 0;

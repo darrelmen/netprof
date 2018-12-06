@@ -44,6 +44,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -116,7 +117,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
 
     boolean hasItemID = id != -1;
     String instanceSuffix =
-        getInstance() == INavigation.VIEWS.NONE ? "" : SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();
+        getInstance() == INavigation.VIEWS.NONE ? "" : getInstanceParam();
 
     String s = (hasItemID ?
         super.getHistoryTokenFromUIState(search, id, listID) :
@@ -131,6 +132,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     if (DEBUG_PUSH) logger.info("getHistoryTokenFromUIState '" + s + "'");
 
     return s;
+  }
+
+  @NotNull
+  protected String getInstanceParam() {
+    return SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();
   }
 
   private void addHistoryListener() {
@@ -302,10 +308,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     if (DEBUG_HISTORY) {
       logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
 
-/*
+
       String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception(historyToken));
       logger.info("setHistoryItem logException stack " + exceptionAsString);
-*/
+
     }
     History.newItem(historyToken);
   }

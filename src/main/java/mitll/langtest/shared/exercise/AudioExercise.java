@@ -532,9 +532,9 @@ public class AudioExercise extends ExerciseShell {
       ret = new ArrayList<>();
       if (latestReg != null) {
         ret.add(latestReg);
-        if (latestReg.getExid() == 9444) {
-          logger.info("\t latest reg  " + latestReg);
-        }
+//        if (latestReg.getExid() == 9444) {
+//          logger.info("\t latest reg  " + latestReg);
+//        }
       }
       // else logger.warning("getMostRecentAudioEasy no reg  speed audio for " + getID());
       if (latestSlow != null) {

@@ -332,6 +332,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   private void pushClearHistory() {
+    logger.info("pushClearHistory -");
     History.newItem("");
   }
 

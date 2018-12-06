@@ -331,7 +331,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen, boolean doPushItem, boolean keepList) {
     clear();
 
-    logger.info("clearAndPush isFirst " + isFirstTime + " current " + currentStoredView + " now " + listen + " push " + doPushItem);
+    if (DEBUG) logger.info("clearAndPush isFirst " + isFirstTime + " current " + currentStoredView + " now " + listen + " push " + doPushItem);
+
     if (doPushItem) {
       if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
       setInstanceHistory(listen, true, keepList);
@@ -714,7 +715,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    * @param url
    */
   private void pushItem(String url) {
-    //logger.info("pushItem - " + url);
+   if (DEBUG) logger.info("pushItem - " + url);
     //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //     logger.info("logException stack " + exceptionAsString);
     History.newItem(url);
