@@ -68,7 +68,12 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends Cli
   private QuizChoiceHelper quizChoiceHelper;
 
   private static final boolean DEBUG = false;
-
+  /**
+   *
+   */
+  public interface QuizChoiceListener {
+    void gotChoice(int listid);
+  }
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)

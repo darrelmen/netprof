@@ -287,7 +287,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
       if (typeAhead != null) {
         typeAhead.setText(t);
       } else {
-        logger.info("setTypeAheadText: huh? no type ahead box for '" + t + "'");
+        if (DEBUG) logger.info("setTypeAheadText: huh? no type ahead box for '" + t + "'");
       }
     }
   }

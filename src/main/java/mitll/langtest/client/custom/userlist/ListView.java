@@ -72,6 +72,7 @@ import java.util.logging.Logger;
  */
 public class ListView implements ContentView, CreateListComplete {
   public static final String DO_QUIZ = "Do quiz";
+  public static final String DELETE_LIST = "Delete list.";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String MAKE_A_NEW_LIST = "Make a new list.";
@@ -159,7 +160,7 @@ public class ListView implements ContentView, CreateListComplete {
   private final ExerciseController controller;
   private ListContainer myLists;
   private final Set<String> names = new HashSet<>();
-  private Button quizButton;
+  private Button quizButton, editButton,removeButton;
 
   /**
    * @param controller
@@ -378,15 +379,15 @@ public class ListView implements ContentView, CreateListComplete {
       buttons.add(getAddQuizButton());
     }
 
-    buttons.add(getRemoveButton());
+    buttons.add(removeButton=getRemoveButton());
 
-    buttons.add(getEdit());
+    buttons.add(editButton = getEdit());
     buttons.add(getAddItems());
     buttons.add(getImport());
     buttons.add(share = getShare());
     addDrillAndLearn(buttons, container);
     if (canMakeQuiz()) {
-      buttons.add(quizButton=getQuizButton(myLists));
+      buttons.add(quizButton = getQuizButton(myLists));
     }
     return buttons;
   }
@@ -512,7 +513,7 @@ public class ListView implements ContentView, CreateListComplete {
 
           @Override
           public void gotShown() {
-          //  logger.info("editList : edit view shown!");
+            //  logger.info("editList : edit view shown!");
             editItem.grabFocus();
           }
         }, MAX_HEIGHT, -1, true);
@@ -638,7 +639,7 @@ public class ListView implements ContentView, CreateListComplete {
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDelete(add, getCurrentSelectionFromMyLists()));
     add.setType(ButtonType.DANGER);
-    addTooltip(add, "Delete list.");
+    addTooltip(add, DELETE_LIST);
     // add.setEnabled(!myLists.isEmpty());
     myLists.addButton(add);
     return add;
@@ -913,6 +914,12 @@ public class ListView implements ContentView, CreateListComplete {
   private void enableQuizButton(Button quizButton) {
     UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
     quizButton.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
+
+    if (currentSelection != null && editButton != null) {
+      boolean favorite = currentSelection.isFavorite();
+      editButton.setEnabled(!favorite);
+      removeButton.setEnabled(!favorite);
+    }
   }
 
   private class MyListContainer extends ListContainer {
@@ -925,6 +932,7 @@ public class ListView implements ContentView, CreateListComplete {
       super.gotClickOnItem(user);
       setShareHREF(user);
       enableQuizButton(quizButton);
+
     }
 
 

@@ -118,8 +118,8 @@ public class CreateProject {
     String secondType = iterator.hasNext() ? iterator.next() : "";
     String language = getLanguage(db);
 
-    if (language.equalsIgnoreCase("Mandaring")) language = Language.MANDARIN.toString();
-    Language language1 = Language.valueOf(language);
+    if (language.equalsIgnoreCase("Mandarin")) language = Language.MANDARIN.toString();
+    Language language1 = Language.valueOf(language.toUpperCase());
 
     int beforeLoginUser = db.getUserDAO().getBeforeLoginUser();
     int projectID =

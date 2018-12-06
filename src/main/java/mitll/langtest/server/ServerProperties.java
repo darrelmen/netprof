@@ -956,7 +956,7 @@ public class ServerProperties {
   }
 
   public Set<Language> getHydra2Languages() {
-    String property = props.getProperty(HYDRA_2_LANGUAGES, HYDRA_2_LANGUAGES_DEFAULT);
+    String property = props.getProperty(HYDRA_2_LANGUAGES, HYDRA_2_LANGUAGES_DEFAULT).toUpperCase();
     Set<String> strings = new HashSet<>(Arrays.asList(property.split(",")));
     return strings.stream().map(Language::valueOf).collect(Collectors.toSet());
   }

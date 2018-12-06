@@ -209,7 +209,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       // logger.info("\tcheckAndAskOrFirst " + exerciseID);
       checkAndAskServer(toUse);
     } else {
-      logger.warning("checkAndAskOrFirst no exercise " + exerciseID);
+      logger.info("checkAndAskOrFirst no exercise " + exerciseID);
     }
   }
 
@@ -346,7 +346,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   }
 
   public void loadExercise(int itemID) {
-    logger.info("loadExercise " + itemID);
+   // logger.info("loadExercise " + itemID);
     pushNewItem(getTypeAheadText(), itemID, new SelectionState().getList());
   }
 

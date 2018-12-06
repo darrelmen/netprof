@@ -121,7 +121,13 @@ public class ReportStats {
     return projid;
   }
 
+  /**
+   * Little hack to deal with mandarin renaming...
+   * @return
+   */
   public String getLanguage() {
+    String language = this.language;
+    if (language.equalsIgnoreCase("Mandarin")) language="Chinese";
     return language;
   }
 
@@ -133,40 +139,13 @@ public class ReportStats {
     return year;
   }
 
-/*
-  public int getRecordings() {
-    return recordings;
-  }
-
-  public void setRecordings(int recordings) {
-    this.recordings = recordings;
-  }
-*/
-
   public JsonObject getJsonObject() {
     return jsonObject;
   }
 
-/*
-  public void setJsonObject(JSONObject jsonObject) {
-    this.jsonObject = jsonObject;
-  }
-*/
-
-  /*
-    public void put(INFO key, String value) {
-      keyToValue.put(key, value);
-    }
-
-  */
   void putInt(INFO key, Integer value) {
     intKeyToValue.put(key, value);
   }
-
-/*  void putIntMulti(INFO key, String key2, Integer value) {
-    Map<String, Integer> weekToValue = intMultiKeyToValue.computeIfAbsent(key, k -> new TreeMap<>());
-    weekToValue.put(key2, value);
-  }*/
 
   /**
    * @param key

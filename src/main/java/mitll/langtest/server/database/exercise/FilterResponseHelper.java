@@ -30,7 +30,6 @@ public class FilterResponseHelper {
     logger.info("getTypeToValues " + request);
 
 
-
     request.prune();
 
     //logger.info("getTypeToValues 2 " + request);
@@ -50,11 +49,11 @@ public class FilterResponseHelper {
         logger.info("\n\n\ngetTypeToValues isExampleRequest " + request);
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyExamples(true));
       } else {
-       // logger.info("getTypeToValues normal req " + request);
+        // logger.info("getTypeToValues normal req " + request);
         FilterResponse response = sectionHelper.getTypeToValues(request, false);
         maybeAddUserListFacet(request.getUserListID(), response);
         maybeAddContent(request, response, projid);
-      //  logger.info("getTypeToValues normal response " + response);
+        //  logger.info("getTypeToValues normal response " + response);
 
         return response;
       }
@@ -83,7 +82,7 @@ public class FilterResponseHelper {
   private ExerciseListRequest getExerciseListRequest(FilterRequest request, int userID) {
     boolean exampleRequest = request.isExampleRequest();
 
-    logger.info("\n\n\ngetExerciseListRequest isExampleRequest " + request + " : " + exampleRequest);
+    logger.info("getExerciseListRequest isExampleRequest " + request + " : " + exampleRequest);
 
     return new ExerciseListRequest()
         .setOnlyExamples(exampleRequest)
@@ -150,6 +149,7 @@ public class FilterResponseHelper {
                         ISection<CommonExercise> sectionHelper,
                         List<String> typeOrder) {
     Map<Integer, ExerciseAttribute> allAttributesByProject = databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
+    logger.info("populate - " + allAttributesByProject.size() + " attributes");
     populate(all, typeOrder, sectionHelper, databaseServices.getProject(projid), allAttributesByProject);
   }
 
@@ -169,7 +169,6 @@ public class FilterResponseHelper {
                         Project lookup,
                         Map<Integer, ExerciseAttribute> allByProject) {
     List<List<Pair>> allAttributes = new ArrayList<>();
-    List<String> baseTypeOrder = lookup.getBaseTypeOrder();
 
     long then = System.currentTimeMillis();
     {
@@ -180,20 +179,24 @@ public class FilterResponseHelper {
           .map(Pair::getProperty)
           .collect(Collectors.toCollection(HashSet::new));
 
-      for (CommonExercise exercise : all) {
-        List<Pair> e = getPairs(exercise, baseTypeOrder, sectionHelper, allFacetTypes);
-        allAttributes.add(e);
-      }
+      List<String> baseTypeOrder = lookup.getBaseTypeOrder();
+
+      logger.info("type order      " + typeOrder);
+      logger.info("base type order " + baseTypeOrder);
+      logger.info("allFacetTypes   " + allFacetTypes.size());
+      logger.info("# ex            " + all.size());
+
+      all.forEach(exercise -> allAttributes.add(getPairs(exercise, baseTypeOrder, sectionHelper, allFacetTypes)));
     }
 
     long now = System.currentTimeMillis();
 
-    if (now - then > 50) {
-      logger.info("getExercises took " + (now - then) + " to attach attributes to " + all.size() + " exercises.");
+    if (now - then > 0) {
+      logger.info("getExercises took " + (now - then) + " to attach " + allAttributes.size() +
+          " attributes to " + all.size() + " exercises.");
     }
 
     sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
-
   }
 
   private List<Pair> getPairs(CommonExercise exercise,
@@ -208,13 +211,15 @@ public class FilterResponseHelper {
   private List<Pair> getUnitToValue(CommonExercise slick, Collection<String> typeOrder, ISection<CommonExercise> sectionHelper) {
     int id = slick.getID();
     Iterator<String> iterator = typeOrder.iterator();
-    String unit = slick.getUnitToValue().get(iterator.next());
+    String unit   = slick.getUnitToValue().get(iterator.next());
     String lesson = iterator.hasNext() ? slick.getUnitToValue().get(iterator.next()) : "";
     if (lesson == null) {
       logger.warn("hmm no lesson value on " + slick.getUnitToValue() + " for " + slick.getID() + " " + slick.getEnglish());
       lesson = "";
     }
     boolean ispredef = slick.isPredefined();
+
+    logger.info("getUnitToValue #id " + id + " : '" + unit + "' - '" + lesson + "' predef " +ispredef);
 
     return sectionHelper.getPairs(typeOrder, id, unit, lesson, ispredef);
   }
@@ -239,11 +244,13 @@ public class FilterResponseHelper {
   private SectionHelper<CommonExercise> getSectionHelperFromFiltered(int projectID, ExerciseListRequest request) {
     List<CommonExercise> filtered = filterExercises(request, getExercises(projectID), projectID);
 
-    logger.info("getFilterResponse build section helper from " + filtered.size());
+    logger.info("getSectionHelperFromFiltered build section helper from " + filtered.size());
 
     ISection<CommonExercise> sectionHelper = getSectionHelper(projectID);
     SectionHelper<CommonExercise> unrecordedSectionHelper = new SectionHelper<>();
-    populate(projectID, filtered, unrecordedSectionHelper, sectionHelper.getTypeOrder());
+    List<String> typeOrder = sectionHelper.getTypeOrder();
+    logger.info("getSectionHelperFromFiltered type order is " + typeOrder);
+    populate(projectID, filtered, unrecordedSectionHelper, typeOrder);
     return unrecordedSectionHelper;
   }
 
@@ -299,7 +306,7 @@ public class FilterResponseHelper {
         logger.info("filterExercises OK doing examples");
         exercises = getContextExercises(exercises);
       }
-      logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded");
+      logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to user #" + request.getUserID() + " only recorded");
       exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, onlyExamples);
 
     } else if (request.isOnlyWithAnno()) {
@@ -453,7 +460,7 @@ public class FilterResponseHelper {
 
     logger.info("getRecordFilterExercisesMatchingGender after removing recorded exercises " + unrecordedIDs.size());
 
-    List<CommonExercise> unrecordedExercises = getUnrecordedForIDs(exercises,/* onlyExamples,*/ unrecordedIDs);
+    List<CommonExercise> unrecordedExercises = getUnrecordedForIDs(exercises, unrecordedIDs);
 
     logger.info("getRecordFilterExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
 

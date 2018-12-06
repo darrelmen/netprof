@@ -732,21 +732,21 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
-  public List<Project> getProjectByLangauge(Language name) {
-    return idToProject
-        .values()
-        .stream()
-        .filter(project -> project.getLanguageEnum() == name)
-        .collect(Collectors.toList());
-  }
-
-  @Override
   public List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly) {
     List<Project> projectByLangauge = getProjectByLangauge(languageMatchingGroup);
     return projectByLangauge.stream()
         .filter(project ->
             (!isPoly || isPolyglot(project)) &&
                 isProduction(project))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Project> getProjectByLangauge(Language name) {
+    return idToProject
+        .values()
+        .stream()
+        .filter(project -> project.getLanguageEnum() == name)
         .collect(Collectors.toList());
   }
 
