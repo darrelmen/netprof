@@ -682,7 +682,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @see #addPhoneInfo
    */
   private List<Pair> getUnitToValue(SlickExercise slick, Collection<String> typeOrder, ISection<CommonExercise> sectionHelper) {
-    return sectionHelper.getPairs(typeOrder, slick.id(), slick.unit(), slick.lesson(), slick.ispredef());
+    return sectionHelper.getPairs(typeOrder, slick.id(), slick.unit(), slick.lesson());
   }
 
   /**

@@ -186,8 +186,11 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
    */
   @Override
   protected String getDeviceValue() {
-    String s = "" + polyglotFlashcardContainer.getSessionStartMillis();
-    logger.info("getDeviceValue  " + s);
+    long sessionStartMillis = polyglotFlashcardContainer.getSessionStartMillis();
+    if (sessionStartMillis == 0L) logger.warning("session start is 0?");
+
+    String s = "" + sessionStartMillis;
+   // logger.info("getDeviceValue  " + s);
     return s;
   }
 
@@ -195,10 +198,16 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
     return "" + polyglotFlashcardContainer.getNumExercises();
   }
 
+  /**
+   * @see BootstrapExercisePanel#getAnswerWidget
+   */
   @Override
   protected void recordingStarted() {
     if (polyglotFlashcardContainer.getMode() != PolyglotDialog.MODE_CHOICE.NOT_YET) {
       polyglotFlashcardContainer.startTimedRun();
+    }
+    else {
+      logger.info("recordingStarted : ignore start time run ? mode " + polyglotFlashcardContainer.getMode());
     }
     super.recordingStarted();
   }

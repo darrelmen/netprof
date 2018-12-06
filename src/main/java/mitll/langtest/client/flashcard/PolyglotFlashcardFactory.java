@@ -111,11 +111,12 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
   @Override
   public void startTimedRun() {
     if (!isRoundTimerRunning()) {
-      //inLightningRound = true;
-      // logger.info("startTimedRun ->");
+     // logger.info("startTimedRun ->");
       reset();
       startRoundTimer(getIsDry());
-      sticky.storeSession(System.currentTimeMillis());
+      sticky.storeSession();
+    } else {
+//      logger.warning("startTimedRun timer is not running!");
     }
   }
 
@@ -142,7 +143,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     //  logger.info("stopTimedRun");
     currentFlashcard.stopRecording();
     setBannerVisible(true);
-    //inLightningRound = false;
     cancelRoundTimer();
   }
 
@@ -184,7 +184,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     int timeRemainingMillis = Long.valueOf(sticky.getTimeRemainingMillis()).intValue();
     //logger.info("doSessionStart timeRemainingMillis " + timeRemainingMillis);
     roundTimeLeftMillis = timeRemainingMillis > 0 ? timeRemainingMillis : delayMillis;
-    // sessionStartMillis = System.currentTimeMillis();
   }
 
   /**
@@ -211,10 +210,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     }*/
     if (l < 0) sessionComplete();
   }
-
-/*  private boolean isRoundTimerNotRunning() {
-    return (recurringTimer == null) || !recurringTimer.isRunning();
-  }*/
 
   private boolean isRoundTimerRunning() {
     return (recurringTimer != null) && recurringTimer.isRunning();
@@ -299,7 +294,6 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     // if (roundTimer != null) roundTimer.cancel();
     cancelTimer();
     clearTimeRemaining();
-    //removeItemFromHistory(-1);
   }
 
   private void clearTimeRemaining() {
@@ -322,9 +316,8 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
   }
 
   /**
-   * @see mitll.langtest.client.banner.NewQuizHelper#gotQuizChoice
-   *
    * @param listOverride
+   * @see mitll.langtest.client.banner.NewQuizHelper#gotQuizChoice
    */
   public void removeItemFromHistory(int listOverride) {
     String currrentToken = History.getToken();
@@ -356,7 +349,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
 //  }
 
   @NotNull
-  public String getBaseHistoryToken(SelectionState selectionState) {
+  private String getBaseHistoryToken(SelectionState selectionState) {
     return SelectionState.INSTANCE + "=" + selectionState.getView() +
         SelectionState.SECTION_SEPARATOR +
         SelectionState.PROJECT + "=" + selectionState.getProject() +//  controller.getProjectStartupInfo().getProjectid()

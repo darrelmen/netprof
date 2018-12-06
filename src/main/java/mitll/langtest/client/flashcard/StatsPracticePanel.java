@@ -202,9 +202,8 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
       rememberCurrentExercise();
     }
 
-    logger.info("onSetComplete - show charts!");
+  //  logger.info("onSetComplete - show charts!");
     showFeedbackCharts();
-
   }
 
   @Override
@@ -323,7 +322,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
    * @see #doStartOver
    */
   private void startOver() {
-    logger.info("startOver!");
+   // logger.info("startOver!");
     makeFlashcardButtonsVisible();
     statsFlashcardFactory.startOver();
   }

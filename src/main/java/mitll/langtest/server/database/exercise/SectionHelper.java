@@ -69,7 +69,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
   public static final String ANY = "any";
-   /**
+  /**
    * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
   private static final String ALL = "all";
@@ -77,7 +77,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private static final String RECORDED = "Recorded";
   public static final String CONTENT = "Content";
   private List<String> predefinedTypeOrder = new ArrayList<>();
-  private static final String UNIT = "Unit";
+  public static final String UNIT = "Unit";
   /**
    *
    */
@@ -99,7 +99,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private Set<String> rootTypes = new HashSet<>();
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_TYPE_ORDER = false;
   private static final boolean DEBUG_OR_MERGE = false;
 
@@ -512,7 +512,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     String name = child.getName();
     MatchInfo matchInfo = matches.get(name);
 
-    if (DEBUG_OR_MERGE) logger.info("addOrMerge '" + name + "' in " +matches.size()+
+    if (DEBUG_OR_MERGE) logger.info("addOrMerge '" + name + "' in " + matches.size() +
         " match info " + matchInfo);
     if (matchInfo == null) {
       matches.put(name, new MatchInfo(child));
@@ -622,7 +622,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
         } else {
           currentList.retainAll(exercisesForSection);
         }
-      } else if (!isDynamicFacet(type)){
+      } else if (!isDynamicFacet(type)) {
         logger.warn("getExercisesForSelectionState huh? typeToSelection type " + type + " is not in " + typeToUnitToLesson.keySet());
       }
     }
@@ -705,43 +705,51 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
   private int c = 0;
 
-  public List<Pair> getPairs(Collection<String> typeOrder, int id, String unit, String lesson, boolean ispredef) {
-    boolean firstEmpty = unit.isEmpty();
-
-    List<Pair> pairs = new ArrayList<>();
+  public List<Pair> getPairs(Collection<String> typeOrder, int id, String unit, String lesson) {
     Iterator<String> iterator = typeOrder.iterator();
 
     String first = iterator.hasNext() ? iterator.next() : UNIT;
     String second = iterator.hasNext() ? iterator.next() : "";
 
+    return getPairs(first, second, id, unit, lesson);
+  }
 
-    if (firstEmpty && ispredef) {
+  public List<Pair> getPairs(String first, String second, int id, String unit, String lesson) {
+    boolean firstEmpty = unit.isEmpty();
+
+    List<Pair> pairs = new ArrayList<>();
+    if (firstEmpty) {
       pairs.add(getPair(first, DEFAULT_FOR_EMPTY));
 //      unitToValue.put(first, "1");
-      if (c++ < 100 || c % 100 == 0) logger.warn("getUnitToValue (" + c +
-          ") got empty " + first + " for " + id + " type order " + typeOrder);
-
+      if (c++ < 100 || c % 100 == 0) {
+        logger.warn("getUnitToValue (" + c + ") got empty " + first + " for " + id + " type order " + first + ", " + second);
+      }
     } else {
       pairs.add(getPair(first, unit));
     }
 
     if (!second.isEmpty()) {
-      if (ispredef) {
-        boolean empty = lesson.trim().isEmpty();
 
-        if (empty) {
-          pairs.add(getPair(second, DEFAULT_FOR_EMPTY));
-        } else {
-          pairs.add(getPair(second, lesson));
+      boolean empty = lesson.trim().isEmpty();
+
+      if (empty) {
+        pairs.add(getPair(second, DEFAULT_FOR_EMPTY));
+        if (c++ < 100 || c % 100 == 0) {
+          logger.warn("getUnitToValue (" + c + ") got empty second " + second + " for " + id + " type order " + first + ", " + second);
         }
-        if (empty) {
-          if (c++ < 100) {
-            logger.warn("getUnitToValue got empty " + second + " for " + id);
-          }
+
+      } else {
+        pairs.add(getPair(second, lesson));
+      }
+      if (empty) {
+        if (c++ < 100) {
+          logger.warn("getUnitToValue got empty " + second + " for " + id);
         }
       }
+
     }
     return pairs;
+
   }
 
 
@@ -1231,6 +1239,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
   /**
    * Remove blanks
+   *
    * @param typeToMatches
    * @return
    */

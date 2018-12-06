@@ -91,7 +91,7 @@ public class QuizChoiceHelper implements ContentView {
     gotQuizChoice(new SelectionState().getList(), false);
   }
 
-  void gotQuizChoice(int listid) {
+  private void gotQuizChoice(int listid) {
     gotQuizChoice(listid, true);
   }
 

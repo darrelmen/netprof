@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static mitll.langtest.server.database.exercise.SectionHelper.ANY;
 
@@ -19,6 +18,7 @@ public class FilterResponseHelper {
   private static final String CONTENT = "Content";
   public static final String SENTENCES = "Sentences";
   private static final String SENTENCES_ONLY = "Sentences Only";
+  private static final String RECORDED1 = "Recorded";
 
   private final DatabaseServices databaseServices;
 
@@ -149,7 +149,7 @@ public class FilterResponseHelper {
                         ISection<CommonExercise> sectionHelper,
                         List<String> typeOrder) {
     Map<Integer, ExerciseAttribute> allAttributesByProject = databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
-    logger.info("populate - " + allAttributesByProject.size() + " attributes");
+//    logger.info("populate - " + allAttributesByProject.size() + " attributes");
     populate(all, typeOrder, sectionHelper, databaseServices.getProject(projid), allAttributesByProject);
   }
 
@@ -181,22 +181,34 @@ public class FilterResponseHelper {
 
       List<String> baseTypeOrder = lookup.getBaseTypeOrder();
 
+/*
       logger.info("type order      " + typeOrder);
       logger.info("base type order " + baseTypeOrder);
       logger.info("allFacetTypes   " + allFacetTypes.size());
       logger.info("# ex            " + all.size());
+*/
+
+/*
+
+      Iterator<String> iterator = typeOrder.iterator();
+
+      String first = iterator.hasNext() ? iterator.next() : SectionHelper.UNIT;
+      String second = iterator.hasNext() ? iterator.next() : "";
+*/
 
       all.forEach(exercise -> allAttributes.add(getPairs(exercise, baseTypeOrder, sectionHelper, allFacetTypes)));
     }
 
     long now = System.currentTimeMillis();
 
-    if (now - then > 0) {
+    if (now - then > 50) {
       logger.info("getExercises took " + (now - then) + " to attach " + allAttributes.size() +
           " attributes to " + all.size() + " exercises.");
     }
 
     sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
+
+  //  sectionHelper.report();
   }
 
   private List<Pair> getPairs(CommonExercise exercise,
@@ -217,13 +229,14 @@ public class FilterResponseHelper {
       logger.warn("hmm no lesson value on " + slick.getUnitToValue() + " for " + slick.getID() + " " + slick.getEnglish());
       lesson = "";
     }
-    boolean ispredef = slick.isPredefined();
+//    boolean ispredef = slick.isPredefined();
+//    logger.info("getUnitToValue #id " + id + " : '" + unit + "' - '" + lesson + "' predef " +ispredef);
 
-    logger.info("getUnitToValue #id " + id + " : '" + unit + "' - '" + lesson + "' predef " +ispredef);
+    List<Pair> pairs = sectionHelper.getPairs(typeOrder, id, unit, lesson);
 
-    return sectionHelper.getPairs(typeOrder, id, unit, lesson, ispredef);
+//    pairs.forEach(pair -> logger.info("\tpair " + pair));
+    return pairs;
   }
-
 
   /**
    * First make an exercise list of just what you're looking for, then build a type hierarchy on the fly from it.
@@ -236,7 +249,7 @@ public class FilterResponseHelper {
   private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest exerciseListRequest) {
     SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelperFromFiltered(projectID, exerciseListRequest);
     FilterResponse typeToValues = unrecordedSectionHelper.getTypeToValues(request, false);
-    logger.info("getFilterResponse resp " + typeToValues);
+//    logger.info("getFilterResponse resp " + typeToValues);
     return typeToValues;
   }
 
@@ -244,12 +257,12 @@ public class FilterResponseHelper {
   private SectionHelper<CommonExercise> getSectionHelperFromFiltered(int projectID, ExerciseListRequest request) {
     List<CommonExercise> filtered = filterExercises(request, getExercises(projectID), projectID);
 
-    logger.info("getSectionHelperFromFiltered build section helper from " + filtered.size());
+ //   logger.info("getSectionHelperFromFiltered build section helper from " + filtered.size());
 
     ISection<CommonExercise> sectionHelper = getSectionHelper(projectID);
     SectionHelper<CommonExercise> unrecordedSectionHelper = new SectionHelper<>();
     List<String> typeOrder = sectionHelper.getTypeOrder();
-    logger.info("getSectionHelperFromFiltered type order is " + typeOrder);
+//    logger.info("getSectionHelperFromFiltered type order is " + typeOrder);
     populate(projectID, filtered, unrecordedSectionHelper, typeOrder);
     return unrecordedSectionHelper;
   }
@@ -303,7 +316,7 @@ public class FilterResponseHelper {
 
     if (request.isOnlyUnrecordedByMe()) {
       if (onlyExamples) {
-        logger.info("filterExercises OK doing examples");
+//        logger.info("filterExercises OK doing examples");
         exercises = getContextExercises(exercises);
       }
       logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to user #" + request.getUserID() + " only recorded");
@@ -312,7 +325,7 @@ public class FilterResponseHelper {
     } else if (request.isOnlyWithAnno()) {
       boolean isContext = onlyExamples || request.shouldAddContext();
       if (isContext) {
-        logger.info("filterExercises OK doing examples 2");
+  //      logger.info("filterExercises OK doing examples 2");
         exercises = getContextExercises(exercises);
       }
 
@@ -334,16 +347,6 @@ public class FilterResponseHelper {
     logger.info("filterExercises" +
         "\n\tfilter req " + request +
         "\n\treturn     " + exercises.size());
-
-/*    Set<Integer> seen = new HashSet<>();
-    for (CommonExercise exercise : exercises) {
-      int id = exercise.getID();
-      if (seen.add(id)) {
-
-      } else {
-        logger.info("WARN : dup! " + id + " ex " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
-      }
-    }*/
 
     return exercises;
   }
@@ -549,7 +552,6 @@ public class FilterResponseHelper {
     return filterExercises(request, copy, projid);
   }
 
-  private static final String RECORDED1 = "Recorded";
 
   /**
    * Ask section helper for matching item to type -> value
