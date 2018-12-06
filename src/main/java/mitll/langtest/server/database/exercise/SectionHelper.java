@@ -76,6 +76,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private static final String LISTS = "Lists";
   private static final String RECORDED = "Recorded";
   public static final String CONTENT = "Content";
+  public static final int WARN_THRESH = 10;
   private List<String> predefinedTypeOrder = new ArrayList<>();
   public static final String UNIT = "Unit";
   /**
@@ -721,7 +722,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     if (firstEmpty) {
       pairs.add(getPair(first, DEFAULT_FOR_EMPTY));
 //      unitToValue.put(first, "1");
-      if (c++ < 100 || c % 100 == 0) {
+      if (c++ < WARN_THRESH || c % 100 == 0) {
         logger.warn("getUnitToValue (" + c + ") got empty " + first + " for " + id + " type order " + first + ", " + second);
       }
     } else {
@@ -734,7 +735,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       if (empty) {
         pairs.add(getPair(second, DEFAULT_FOR_EMPTY));
-        if (c++ < 100 || c % 100 == 0) {
+        if (c++ < WARN_THRESH || c % 100 == 0) {
           logger.warn("getUnitToValue (" + c + ") got empty second " + second + " for " + id + " type order " + first + ", " + second);
         }
 
@@ -742,7 +743,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
         pairs.add(getPair(second, lesson));
       }
       if (empty) {
-        if (c++ < 100) {
+        if (c++ < WARN_THRESH) {
           logger.warn("getUnitToValue got empty " + second + " for " + id);
         }
       }

@@ -93,9 +93,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     slowAnno.addStyleName("editComment");
   }
 
-  @Override protected void addItemsAtTop(Panel container) {
-   // new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
-  }
+  @Override protected void addItemsAtTop(Panel container) {}
 
   boolean shouldDisableNext() {
     return true;

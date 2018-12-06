@@ -155,7 +155,7 @@ public class ExcelExport {
 
       for (String type : typeOrder) {
         String value = exercise.getUnitToValue().get(type);
-        if (value.equalsIgnoreCase(BLANK)) value = "";
+        if (value == null || value.equalsIgnoreCase(BLANK)) value = "";
         row.createCell(j++).setCellValue(value);
       }
       Collection<ClientExercise> directlyRelated = exercise.getDirectlyRelated();

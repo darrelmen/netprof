@@ -145,10 +145,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     }
   }
 
-  private void removeHistoryListener() {
+  public void removeHistoryListener() {
     if (handlerRegistration != null) {
+      logger.info("removeHistoryListener " + getInstance());
       handlerRegistration.removeHandler();
       handlerRegistration = null;
+    }
+    else {
+      logger.info("didn't remove listener???");
     }
   }
 
@@ -190,7 +194,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
             "\n\tcurrent token " + token + " same as new " + exerciseID);
       checkAndAskOrFirst(exerciseID);
     } else {
-      if (DEBUG)
+      if (DEBUG || true)
         logger.info("pushFirstSelection : (" + getInstance() + ") " +
             "\n\tpushNewItem " + exerciseID + " vs " + selectionState.getItem());
       pushNewItem(searchIfAny, getValidExerciseID(exerciseID), selectionState.getList());
@@ -243,13 +247,20 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
 //    if (DEBUG)
 //      logger.info("HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' vs new id '" + exerciseID + "'");
     if (currentToken != null && (historyToken.equals(currentToken) || trimmedToken.equals(currentToken))) {
-      if (DEBUG_PUSH)
+      if (DEBUG_PUSH || true)
         logger.info(getInstance() + " HistoryExerciseList.pushNewItem : current currentToken '" + currentToken + "' same as new " + historyToken);
       checkAndAskOrFirst(exerciseID);
     } else {
-      if (DEBUG_PUSH) {
+      if (DEBUG_PUSH || true) {
         logger.info(getInstance() + " HistoryExerciseList.pushNewItem : current" +
-            "\n\t currentToken '" + currentToken + "' different menu state '" + historyToken + "' from new " + exerciseID);
+            "\n\tcurrentToken         '" + currentToken + "' " +
+            "\n\tdifferent menu state '" + historyToken + "' from new " +
+            "\n\texid                 " + exerciseID);
+
+
+        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushNewItem " +
+            "search " +search + " list " +listID  + " ex " + exerciseID));
+        logger.info(getClass() + " : logException stack " + exceptionAsString);
       }
       setHistoryItem(historyToken);
     }
@@ -313,6 +324,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       logger.info("setHistoryItem logException stack " + exceptionAsString);
 
     }
+    logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' ");
+
     History.newItem(historyToken);
   }
 
@@ -384,7 +397,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    if (DEBUG_ON_VALUE_CHANGE) logger.info("onValueChange : ------ start ---- " + getInstance());
+    if (DEBUG_ON_VALUE_CHANGE || true) logger.info("onValueChange : ------ start ---- " + getInstance());
     if (controller.getProjectStartupInfo() == null) {
       logger.warning("onValueChange skipping change event since no project");
       return;

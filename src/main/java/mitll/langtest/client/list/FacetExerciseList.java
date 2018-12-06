@@ -1094,10 +1094,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return key;
   }
 
-  boolean isListType(String type) {
-    return false;
-  }
-
   /**
    * Remember to keep the search term, if there is any.
    *
@@ -1112,6 +1108,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       s += getInstanceParam();
     }
     setHistoryItem(s);
+  }
+
+  boolean isListType(String type) {
+    return false;
   }
 
   private int reqid = 0;

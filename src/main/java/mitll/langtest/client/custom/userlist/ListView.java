@@ -40,6 +40,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -71,9 +72,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView implements ContentView, CreateListComplete {
-  public static final String DO_QUIZ = "Do quiz";
-  public static final String DELETE_LIST = "Delete list.";
   private final Logger logger = Logger.getLogger("ListView");
+
+  private static final String DO_QUIZ = "Do quiz";
+  private static final String DELETE_LIST = "Delete list.";
 
   private static final String MAKE_A_NEW_LIST = "Make a new list.";
   private static final String CAN_T_IMPORT_INTO_FAVORITES = "Can't import into favorites...";
@@ -160,7 +162,7 @@ public class ListView implements ContentView, CreateListComplete {
   private final ExerciseController controller;
   private ListContainer myLists;
   private final Set<String> names = new HashSet<>();
-  private Button quizButton, editButton,removeButton;
+  private Button quizButton, editButton, removeButton;
 
   /**
    * @param controller
@@ -379,7 +381,7 @@ public class ListView implements ContentView, CreateListComplete {
       buttons.add(getAddQuizButton());
     }
 
-    buttons.add(removeButton=getRemoveButton());
+    buttons.add(removeButton = getRemoveButton());
 
     buttons.add(editButton = getEdit());
     buttons.add(getAddItems());
@@ -484,43 +486,20 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void editList() {
-    EditItem editItem = new EditItem(controller);
-
     UserList<CommonShell> currentSelectionFromMyLists = getCurrentSelectionFromMyLists();
-    Button closeButton = new DialogHelper(true).show(
+    EditItem editItem = new EditItem(controller);
+    //Button closeButton =
+        new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + getListName(),
         Collections.emptyList(),
         editItem.editItem(currentSelectionFromMyLists),
         "Done",
         null,
-        new DialogHelper.ShownCloseListener() {
-          @Override
-          public boolean gotYes() {
-            int numItems = currentSelectionFromMyLists.getNumItems();
-            //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
-            myLists.flush();
-            myLists.redraw();
-            return true;
-          }
+        new MyShownCloseListener(editItem), MAX_HEIGHT, -1, true);
 
-          @Override
-          public void gotHidden() {
-          }
+   /// closeButton.setType(ButtonType.SUCCESS);
 
-          @Override
-          public void gotNo() {
-          }
-
-          @Override
-          public void gotShown() {
-            //  logger.info("editList : edit view shown!");
-            editItem.grabFocus();
-          }
-        }, MAX_HEIGHT, -1, true);
-
-    closeButton.setType(ButtonType.SUCCESS);
-
-    Scheduler.get().scheduleDeferred(editItem::reload);
+    // Scheduler.get().scheduleDeferred(editItem::reload);
   }
 
   @NotNull
@@ -968,5 +947,46 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void setShareButtonHREF() {
     share.setHref(getMailTo());
+  }
+
+  private class MyShownCloseListener implements DialogHelper.ShownCloseListener {
+    EditItem editItem;
+
+    MyShownCloseListener(EditItem editItem) {
+      this.editItem = editItem;
+    }
+
+    @Override
+    public boolean gotYes() {
+//            int numItems = currentSelectionFromMyLists.getNumItems();
+      //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
+      myLists.flush();
+      myLists.redraw();
+
+      return true;
+    }
+
+    /**
+     * CRITICAL TO REMOVE LISTENER!
+     */
+    @Override
+    public void gotHidden() {
+      logger.info("Got hidden ");
+      editItem.removeHistoryListener();
+
+      History.newItem("");
+    }
+
+    @Override
+    public void gotNo() {
+    }
+
+    @Override
+    public void gotShown() {
+     // logger.info("editList : edit view shown!");
+
+      editItem.reload();
+      editItem.grabFocus();
+    }
   }
 }

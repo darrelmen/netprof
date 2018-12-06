@@ -35,7 +35,7 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
   private static final int JAPANESE_LENGTH = 9;
   private static final String TRUNCATED = "...";
 
-  private final IExerciseComparator sorter;
+//  private final IExerciseComparator sorter;
   private static final String ENGLISH = "English";
   private final boolean english;
   private int FLLength = MAX_LENGTH_ID;
@@ -53,7 +53,7 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
     if (startupInfo == null) {
       logger.warning("PagingContainer huh? no startup info?");
     }
-    sorter = getSorter();
+  //  sorter = getSorter();
 
     language = startupInfo == null ? Language.UNKNOWN : startupInfo.getLanguageInfo();
 

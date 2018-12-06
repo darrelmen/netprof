@@ -56,7 +56,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final QuizChoiceHelper quizHelper;
   private final ExerciseController controller;
   private final IBanner banner;
-  private final ListView listView;
+  //private final ListView listView;
 
   private VIEWS currentSection = VIEWS.NONE;
   private HandlerRegistration handlerRegistration;
@@ -83,7 +83,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
 
     this.controller = controller;
-    this.listView = new ListView(controller);
+   // this.listView = new ListView(controller);
     this.banner = banner;
     //  divWidget.setId("NewContentChooser");
 
@@ -221,7 +221,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case LISTS:
           clear();
           setInstanceHistory(LISTS);
-          listView.showContent(divWidget, LISTS);
+          new ListView(controller).showContent(divWidget, LISTS);
           break;
         case DIALOG:
           clearAndPush(isFirstTime, currentStoredView, DIALOG, true, keepList);
