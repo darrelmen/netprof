@@ -77,6 +77,7 @@ public class EasyReportTest extends BaseTest {
   private static final String KANGNU = "강루";
 
   public static final String SENTENCES_ONLY = "Sentences Only";
+  public static final int PROJECTID = 3;
 
   private final String longer = "대폭강화하기로";
 
@@ -123,12 +124,23 @@ public class EasyReportTest extends BaseTest {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+
+    List<CommonExercise> rawExercises = project.getRawExercises();
+
+    logger.info("for " + project + " got " + rawExercises.size());
+
+/*    rawExercises.forEach(ex->{
+      if (!ex.getDirectlyRelated().isEmpty()) {
+        logger.info("ex " + ex.getID() + " has " + ex.getDirectlyRelated().size());
+      }
+    });*/
+
     UserList<CommonExercise> userListByIDExercises = english.getUserListByIDExercises(6528, projectid);
     logger.info("list " +userListByIDExercises);
 
     userListByIDExercises.getExercises().forEach(ex->logger.info("Got " + ex.getID() + " " + ex.getDirectlyRelated()));
 
-    CommonExercise exerciseByID = project.getExerciseByID(108637);
+    CommonExercise exerciseByID = project.getExerciseByID(3747);
     exerciseByID.getDirectlyRelated().forEach(clientExercise -> logger.info("\t" + clientExercise.getID() + " " +clientExercise));
   }
 
@@ -158,6 +170,21 @@ public class EasyReportTest extends BaseTest {
     Project project = english.getProject(4);
 
     FilterResponse typeToValues = english.getTypeToValues(new FilterRequest().setRecordRequest(true), 4, 6);
+    logger.info("Got " + typeToValues);
+//    english.getUserListManager().getCommentedList(4, false);
+    // english.getUserListManager().getCommentedList(4, true);
+  }
+
+
+  @Test
+  public void testSpanish() {
+    DatabaseImpl english = getDatabase();
+    Project project = english.getProject(PROJECTID);
+
+    FilterResponse typeToValues = english.getTypeToValues(new FilterRequest()
+        .setRecordRequest(true)
+        .setExampleRequest(true)
+        , PROJECTID, 6);
     logger.info("Got " + typeToValues);
 //    english.getUserListManager().getCommentedList(4, false);
     // english.getUserListManager().getCommentedList(4, true);
