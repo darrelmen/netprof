@@ -304,9 +304,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       this.exerciseID = exerciseID;
       this.request = request;
 
-//      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
-//       String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " ));
-//       logger.info("logException stack " + exceptionAsString);
+      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
+
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance "));
+      logger.info("logException stack " + exceptionAsString);
     }
 
     public void onFailure(Throwable caught) {
@@ -342,16 +343,21 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       } else {
         lastSuccessfulRequest = request;
         if (DEBUG) logger.info("onSuccess last req now " + lastSuccessfulRequest);
-        checkForEmptyExerciseList(result.getExercises().isEmpty());
-        int idToUse = exerciseID == -1 ? result.getFirstExercise() == null ? -1 : result.getFirstExercise().getID() : exerciseID;
-
         setScores(result);
-
-        // TODO : check the current list of exercise ids - if it's not different than the result set, don't blink the UI.
-
-        rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
+        gotExercisesResponse(exerciseID, selectionID, searchIfAny, result.getExercises(), result.getFirstExercise());
       }
     }
+  }
+
+  protected void gotExercisesResponse(int exerciseID, String selectionID, String searchIfAny,
+                                    List<T> exercises, ClientExercise firstExercise) {
+    checkForEmptyExerciseList(exercises.isEmpty());
+    int idToUse = exerciseID == -1 ? firstExercise == null ? -1 : firstExercise.getID() : exerciseID;
+
+
+    // TODO : check the current list of exercise ids - if it's not different than the result set, don't blink the UI.
+
+    rememberAndLoadFirst(exercises, selectionID, searchIfAny, idToUse);
   }
 
   /**
@@ -453,7 +459,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   /**
    * @see #reloadWith
    */
-  private void checkForEmptyExerciseList(boolean isEmpty) {
+  protected void checkForEmptyExerciseList(boolean isEmpty) {
     // if (DEBUG) logger.info("ExerciseList.gotExercises result = " + result);
     if (isEmpty) {
       gotEmptyExerciseList();

@@ -72,7 +72,7 @@ public class DialogPopulate {
 
     List<IDialog> dialogs1 = dialogDAO.getDialogs(projid);
     if (dialogs1.isEmpty()) {
-      logger.warn("addDialogInfo no dialog info yet loaded for " + project);
+      logger.info("addDialogInfo no dialog info yet loaded for " + project);
       return true;
     } else {
       project.setDialogs(dialogs1);
@@ -122,7 +122,7 @@ public class DialogPopulate {
       Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader().getDialogs(defaultUser, exToAudio, project);
 
       logger.info("maybeDoInterpreterImport read " + dialogToSlick.size());
-      addDialogs(project, dialogDAO, exToAudio, defaultUser, dialogToSlick);
+      addDialogs(project, dialogDAO, exToAudio, defaultUser, DialogType.INTERPRETER, dialogToSlick);
     }
   }
 
@@ -133,7 +133,7 @@ public class DialogPopulate {
 
     if (shouldTryToReadDialogInfo(languageEnum)) {
       Map<Dialog, SlickDialog> dialogToSlick = getDialogReader(languageEnum).getDialogs(defaultUser, exToAudio, project);
-      addDialogs(project, dialogDAO, exToAudio, defaultUser, dialogToSlick);
+      addDialogs(project, dialogDAO, exToAudio, defaultUser, DialogType.DIALOG, dialogToSlick);
     }
   }
 
@@ -141,6 +141,7 @@ public class DialogPopulate {
                           IDialogDAO dialogDAO,
                           Map<ClientExercise, String> exToAudio,
                           int defaultUser,
+                          DialogType dialogType,
 
                           Map<Dialog, SlickDialog> dialogToSlick) {
     Set<Dialog> dialogs = dialogToSlick.keySet();
@@ -165,7 +166,7 @@ public class DialogPopulate {
       // add the dialog to the database
       int dialogID = dialogDAO.add(defaultUser, projid, 1, imageID, now, now,
           dialog.getUnit(), dialog.getChapter(),
-          DialogType.DIALOG, DialogStatus.DEFAULT,
+          dialogType, DialogStatus.DEFAULT,
           dialog.getEnglish(), dialog.getOrientation());
 
       // add dialog attributes
@@ -184,6 +185,16 @@ public class DialogPopulate {
         .copyAudio(projid, allImportExToID.keySet(), new HashMap<>());
   }
 
+  /**
+   * @param projid
+   * @param defaultUser
+   * @param modified
+   * @param allImportExToID
+   * @param typeOrder
+   * @param dialog
+   * @param dialogID
+   * @see #addDialogs
+   */
   private void addExercises(int projid,
                             int defaultUser,
                             Timestamp modified,
@@ -200,7 +211,8 @@ public class DialogPopulate {
         getCommonExercisesFromDialog(dialog),
         typeOrder,
         new HashMap<>(),
-        new HashMap<>(), true);
+        new HashMap<>(),
+        true);
 
     allImportExToID.putAll(importExToID);
 
@@ -366,7 +378,7 @@ public class DialogPopulate {
 
       attrToInt
           .put(exerciseAttribute, db.getUserExerciseDAO().getExerciseAttribute()
-              .addAttribute(projid,
+              .findOrAddAttribute(projid,
                   now, defaultUser, exerciseAttribute, true));
     });
     int after = attrToInt.size();

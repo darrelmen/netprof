@@ -102,7 +102,8 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private Map<Integer, CorrectAndScore> scoreHistoryPerExercise;
 
   @Override
-  protected void getFullExercises(Collection<Integer> visibleIDs, int currentReq, Collection<Integer> requested, List<IDialog> alreadyFetched) {
+  protected void getFullExercises(Collection<Integer> visibleIDs, int currentReq,
+                                  Collection<Integer> requested, List<IDialog> alreadyFetched) {
     //  logger.info("getFullExercises " + visibleIDs);
     controller.getDialogService().getDialogs(new ExerciseListRequest(),
         new AsyncCallback<ExerciseListWrapper<IDialog>>() {
@@ -116,7 +117,6 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
             List<IDialog> toShow = result.getExercises().stream().filter(iDialog -> visibleIDs.contains(iDialog.getID())).collect(Collectors.toList());
             scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
 
-        //    toShow.forEach(iDialog -> iDialog.ge);
             sortDialogs(toShow, visibleIDs);
             showExercisesForCurrentReq(toShow, incrReq());
           }

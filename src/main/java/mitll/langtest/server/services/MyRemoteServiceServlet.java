@@ -454,7 +454,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return getSectionHelper(getProjectIDFromUser());
   }
 
-  protected ISection<CommonExercise> getSectionHelper(int projectID) {
+  private ISection<CommonExercise> getSectionHelper(int projectID) {
     return db.getSectionHelper(projectID);
   }
 
@@ -462,7 +462,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return getDialogSectionHelper(getProjectIDFromUser());
   }
 
-  ISection<IDialog> getDialogSectionHelper(int projectID) {
+  private ISection<IDialog> getDialogSectionHelper(int projectID) {
     return db.getDialogSectionHelper(projectID);
   }
 
@@ -593,8 +593,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
 
   private IDialog getOneDialog(int id) throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    return getOneDialog(userIDFromSessionOrDB, id);
+    return getOneDialog(getUserIDFromSessionOrDB(), id);
   }
 
   /**
@@ -607,7 +606,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @return the first dialog if the id is -1 or bogus...
    */
   @Nullable
-  protected IDialog getOneDialog(int userIDFromSessionOrDB, int dialogID) {
+  private IDialog getOneDialog(int userIDFromSessionOrDB, int dialogID) {
     List<IDialog> iDialogs = getDialogs(userIDFromSessionOrDB);
     if (dialogID == -1) {
       return iDialogs.isEmpty() ? null : iDialogs.get(0);
@@ -621,7 +620,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return getDialogsForProject(getProjectIDFromUser(userIDFromSessionOrDB));
   }
 
-  protected List<IDialog> getDialogsForProject(int projectIDFromUser) {
+   List<IDialog> getDialogsForProject(int projectIDFromUser) {
     List<IDialog> dialogList = new ArrayList<>();
     {
       if (projectIDFromUser != -1) {

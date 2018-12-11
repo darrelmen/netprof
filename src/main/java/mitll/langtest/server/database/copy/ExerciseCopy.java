@@ -209,7 +209,7 @@ public class ExerciseCopy {
    * @param typeOrder
    * @param idToCandidateOverride
    * @param dominoToExID
-   * @param checkExists
+   * @param checkExists if true, don't add redundant exercise attributes
    * @return
    * @see #addExercises(int, int, Map, IUserExerciseDAO, Collection, Collection, Map, Map, int)
    * @see #addPredefExercises
@@ -220,16 +220,19 @@ public class ExerciseCopy {
                                                                 Collection<CommonExercise> exercises,
                                                                 Collection<String> typeOrder,
                                                                 Map<String, List<Exercise>> idToCandidateOverride,
-                                                                Map<Integer, Integer> dominoToExID, boolean checkExists) {
+                                                                Map<Integer, Integer> dominoToExID,
+                                                                boolean checkExists) {
     Map<CommonExercise, Integer> exToInt = new HashMap<>();
-    logger.info("add " + typeOrder);
+
+    logger.info("addExercisesAndAttributes typeOrder : " + typeOrder);
+
     Map<Integer, List<Integer>> exToJoins =
         addPredefExercises(projectid, slickUEDAO, importUser, exercises, typeOrder, idToCandidateOverride, exToInt, checkExists);
     exToInt.forEach((commonExercise, exid) -> dominoToExID.put(commonExercise.getDominoID(), exid));
 
     List<SlickExerciseAttributeJoin> joins = getSlickExerciseAttributeJoins(importUser, exToJoins);
 
-    logger.info("copyUserAndPredefExercises adding " + joins.size() + " attribute joins");
+    logger.info("addExercisesAndAttributes adding " + joins.size() + " attribute joins");
     slickUEDAO.getExerciseAttributeJoin().addBulkAttributeJoins(joins);
     return exToInt;
   }
@@ -385,6 +388,7 @@ public class ExerciseCopy {
    * @param typeOrder
    * @param idToCandidateOverride
    * @param exToInt
+   * @param checkExists if true, don't add an attribute if it's already in there
    * @see #addExercisesAndAttributes(int, int, IUserExerciseDAO, Collection, Collection, Map, Map, boolean)
    */
   private Map<Integer, List<Integer>> addPredefExercises(int projectid,
@@ -477,6 +481,8 @@ public class ExerciseCopy {
    * @param attrToID   map of attribute to db id
    * @param exToJoins  map of old ex id to new attribute db id
    * @param newID      - at this point we don't have exercise db ids - could be done differently...
+   * @param attributes
+   * @param checkExists
    * @see #addPredefExercises
    */
   private void addAttributesAndRememberIDs(IUserExerciseDAO slickUEDAO,
@@ -488,7 +494,8 @@ public class ExerciseCopy {
 
 
                                            int newID,
-                                           List<ExerciseAttribute> attributes, boolean checkExists) {
+                                           List<ExerciseAttribute> attributes,
+                                           boolean checkExists) {
     if (attributes != null && !attributes.isEmpty()) {
       List<Integer> joins = new ArrayList<>();
       exToJoins.put(newID, joins);
@@ -498,7 +505,8 @@ public class ExerciseCopy {
           attributes,
           now,
           attrToID,
-          joins, checkExists);
+          joins,
+          checkExists);
     }
   }
 
@@ -525,7 +533,7 @@ public class ExerciseCopy {
       if (attrToID.containsKey(attribute)) {
         id = attrToID.get(attribute);
       } else {
-        id = slickUEDAO.getExerciseAttribute().addAttribute(projectid, now, importUser, attribute, checkExists);
+        id = slickUEDAO.getExerciseAttribute().findOrAddAttribute(projectid, now, importUser, attribute, checkExists);
         attrToID.put(attribute, id);
 
         logger.info("addPredef " + attribute + " = " + id);

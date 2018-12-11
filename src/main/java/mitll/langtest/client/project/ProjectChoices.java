@@ -339,20 +339,14 @@ public class ProjectChoices extends ThumbnailChoices {
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
-    List<SlimProject> dialogProjects = getDialogProjects(result);
 
-    //  logger.info("getHeader " + result.size() + " nest  " + nest);
-
-    String text = dialogProjects.size() == result.size() ? PLEASE_SELECT_A_MODE : (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
-
-    if (result.isEmpty()) {
-      text = NO_LANGUAGES_LOADED_YET;
-    }
 
     {
       DivWidget left = new DivWidget();
       left.addStyleName("floatLeftAndClear");
-      Heading child = new Heading(3, text);
+
+      String promptText = (result.isEmpty()) ? NO_LANGUAGES_LOADED_YET : getPromptText(result, nest);
+      Heading child = new Heading(3, promptText);
       child.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
       left.add(child);
       header.add(left);
@@ -379,6 +373,15 @@ public class ProjectChoices extends ThumbnailChoices {
     }
 
     return header;
+  }
+
+  @NotNull
+  private String getPromptText(List<SlimProject> result, int nest) {
+    List<SlimProject> dialogProjects = getDialogProjects(result);
+    //  logger.info("getHeader " + result.size() + " nest  " + nest);
+
+    return dialogProjects.size() == result.size() ?
+        PLEASE_SELECT_A_MODE : (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
   }
 
   private List<SlimProject> getDialogProjects(List<SlimProject> projects) {
@@ -580,7 +583,7 @@ public class ProjectChoices extends ThumbnailChoices {
       boolean isQC = isQC();
       {
         String countryCode = projectForLang.getCountryCode();
-    //    logger.info("for " + name +" cc " + countryCode);
+        //    logger.info("for " + name +" cc " + countryCode);
         PushButton button = new PushButton(getFlag(countryCode));
         final int projid = projectForLang.getID();
         button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));

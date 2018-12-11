@@ -3,6 +3,7 @@ package mitll.langtest.server.database.dialog;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogMetadata;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
@@ -154,7 +155,8 @@ class DialogReader extends BaseDialogReader {
           exercises, coreExercises,
 
           orientation, title, fltitle,
-          dialogToSlick);
+          dialogToSlick,
+          DialogType.INTERPRETER);
       // logger.info("read " + dialog);
       //    dialog.getExercises().forEach(logger::info);
       //logger.info("\tex   " + dialog.getExercises());

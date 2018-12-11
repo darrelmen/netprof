@@ -40,6 +40,14 @@ public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends C
     super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, INavigation.VIEWS.STUDY);
   }
 
+/*  @Override
+  protected void gotExercisesResponse(int exerciseID, String selectionID, String searchIfAny,
+                                      List<T> exercises, ClientExercise firstExercise) {
+    exercises.stream().filter(ex->
+        ex.getA)
+    super.gotExercisesResponse(exerciseID, selectionID, searchIfAny, exercises, firstExercise);
+  }*/
+
   @Override
   protected List<Integer> getPageSizeChoiceValues() {
     if (logger == null) logger = Logger.getLogger("StudyExerciseList");

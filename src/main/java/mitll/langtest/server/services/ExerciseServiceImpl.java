@@ -167,6 +167,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     }
   }
 
+  /**
+   * @see #getExerciseIds
+   * @param request
+   * @param projectID
+   * @return
+   * @throws DominoSessionException
+   */
   private ExerciseListWrapper<T> getDialogResponse(ExerciseListRequest request, int projectID) throws DominoSessionException {
     int dialogID = request.getDialogID();
     List<CommonExercise> collect = getCommonExercises(getDialog(dialogID).getCoreVocabulary());

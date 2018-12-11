@@ -61,6 +61,8 @@ import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
+import mitll.langtest.shared.dialog.DialogType;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.*;
@@ -97,11 +99,19 @@ public class ProjectManagement implements IProjectManagement {
    * @see #addOtherProps
    */
   private static final String DOMINO_NAME = "Domino Project";
+  /**
+   * @see #addModeChoices
+   */
   private static final String VOCABULARY = "Vocabulary";
+  /**
+   * @see #addModeChoices
+   */
   private static final String DIALOG = "Dialog";
   private static final String VOCAB = "vocab";
   private static final String DIALOG1 = "dialog";
   private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
+  public static final String INTERPRETER = "Interpreter";
+  public static final String INTERPRETER1 = "interpreter";
   /**
    * JUST FOR TESTING
    */
@@ -410,12 +420,7 @@ public class ProjectManagement implements IProjectManagement {
       // side effect is to cache the users.
       new Thread(() -> rememberUsers(projectID), "rememberUsers_" + projectID).start();
 
-      if (project.getLanguageEnum() == Language.KOREAN) {
-        addDialogInfo(project);
-      }
-      if (project.getLanguageEnum() == Language.ENGLISH) {
-        addDialogInfo(project);
-      }
+      addDialogInfo(project);
       return rawExercises.size();
     } else {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);
@@ -424,9 +429,8 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private void addDialogInfo(Project project) {
-    if (project.getKind() == ProjectType.DIALOG || true) {
-      if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
-      }
+    if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
+      logger.info("add dialog info to " + project.getID() + " " + project.getName());
     }
   }
 
@@ -462,7 +466,6 @@ public class ProjectManagement implements IProjectManagement {
         return userID;
       }
     }
-
 //    logger.info("getUserForFile couldn't find recorder of " + requestURI);
 
     return -1;
@@ -852,7 +855,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
-    logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
+//    logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
       clearStartupInfo(userWhere);
@@ -998,20 +1001,43 @@ public class ProjectManagement implements IProjectManagement {
    * @param projectInfo
    */
   private void addModeChoices(Project project, SlimProject projectInfo) {
+    logger.info("addModeChoices for " + project.getID() + " " + project.getName() + " " + project.getKind());
     if (project.getKind() == ProjectType.DIALOG) {
-      SlimProject vocab = getProjectInfo(project);
-      projectInfo.addChild(vocab);
-      vocab.setName(VOCABULARY);
-      vocab.setProjectType(ProjectType.DIALOG);
-      vocab.setMode(ProjectMode.VOCABULARY);
-      vocab.setCountryCode(VOCAB);
+      {
+        SlimProject vocab = getProjectInfo(project);
+        projectInfo.addChild(vocab);
 
-      SlimProject dialog = getProjectInfo(project);
-      projectInfo.addChild(dialog);
-      dialog.setName(DIALOG);
-      dialog.setProjectType(ProjectType.DIALOG);
-      dialog.setMode(ProjectMode.DIALOG);
-      dialog.setCountryCode(DIALOG1);
+        vocab.setName(VOCABULARY);
+        vocab.setProjectType(ProjectType.DIALOG);
+        vocab.setMode(ProjectMode.VOCABULARY);
+        vocab.setCountryCode(VOCAB);
+      }
+
+      {
+        SlimProject dialog = getProjectInfo(project);
+
+        List<IDialog> dialogs = project.getDialogs();
+        String name = DIALOG;
+        String cc = DIALOG1;
+
+        if (dialogs.isEmpty()) logger.warn("addModeChoices no dialogs in " + project);
+        else {
+          IDialog iDialog = dialogs.get(0);
+          if (iDialog.getKind() == DialogType.INTERPRETER) {
+            name = INTERPRETER;
+            cc = INTERPRETER1;
+            logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
+          }
+        }
+        dialog.setName(name);
+
+        dialog.setProjectType(ProjectType.DIALOG);
+        dialog.setMode(ProjectMode.DIALOG);
+
+        dialog.setCountryCode(cc);
+
+        projectInfo.addChild(dialog);
+      }
     }
   }
 
@@ -1038,14 +1064,11 @@ public class ProjectManagement implements IProjectManagement {
    * @see #getNestedProjectInfo
    */
   private SlimProject getProjectInfo(Project pproject) {
-    Map<String, String> info = new LinkedHashMap<>();
-
     SlickProject project = pproject.getProject();
-    {
-      User creator = db.getUserDAO().getByID(project.userid());
-      String userInfo = creator == null ? "" : " : " + creator.getUserID();
-      info.put(CREATED_BY, project.userid() + userInfo);
-    }
+    int userid = project.userid();
+
+    Map<String, String> info = new LinkedHashMap<>();
+    addCreatedBy(info, userid);
 
     info.put(ProjectProperty.MODEL_TYPE.toString(), pproject.getModelType().toString());
 
@@ -1081,7 +1104,13 @@ public class ProjectManagement implements IProjectManagement {
         pproject.isOnIOS(),
         project.dominoid(),
         info,
-        project.userid());
+        userid);
+  }
+
+  private void addCreatedBy(Map<String, String> info, int userid) {
+    User creator = db.getUserDAO().getByID(userid);
+    String userInfo = creator == null ? "" : " : " + creator.getUserID();
+    info.put(CREATED_BY, userid + userInfo);
   }
 
 

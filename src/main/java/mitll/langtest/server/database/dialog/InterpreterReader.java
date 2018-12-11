@@ -4,6 +4,7 @@ import mitll.langtest.server.database.exercise.ExcelUtil;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogMetadata;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -13,7 +14,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
@@ -35,27 +35,19 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   private static final String DEFAULT_UNIT = "1";
   private static final String DEFAULT_CHAPTER = "1";
   private static final boolean DEBUG = false;
-//  private final boolean DEBUG = true;
+  //  private final boolean DEBUG = true;
   private ExcelUtil excelUtil = new ExcelUtil();
 
+  /**
+   * @param defaultUser
+   * @param exToAudio
+   * @param project
+   * @return
+   */
   @Override
   public Map<Dialog, SlickDialog> getDialogs(int defaultUser,
                                              Map<ClientExercise, String> exToAudio,
                                              Project project) {
-
-//    int projID = project.getID();
-//    String[] docs = dialogProps.docIDS.split("\n");
-//    String[] titles = dialogProps.title.split("\n");
-//    String[] ktitles = dialogProps.fltitle.split("\n");
-//
-//    String[] units = dialogProps.unit.split("\n");
-//    String[] chapters = dialogProps.chapter.split("\n");
-//    String[] pages = dialogProps.page.split("\n");
-//    String[] topics = dialogProps.pres.split("\n");
-//    String[] dirs = dialogProps.dir.split("\n");
-
-    //  Timestamp modified = new Timestamp(System.currentTimeMillis());
-
     Map<Dialog, SlickDialog> dialogToSlick = new HashMap<>();
     String dialogDataDir = getDialogDataDir(project);
     String projectLanguage = project.getLanguage().toLowerCase();
@@ -82,17 +74,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
         if (physicalNumberOfRows > 0) {
           dialogToSlick = readFromSheet(defaultUser, sheet, project);
-
-//          logger.info("getDialogs sheet " + sheet.getSheetName() + " had " + exercises1.size() + " items.");
-//          if (DEBUG) {
-//            if (!exercises1.isEmpty()) {
-//              CommonExercise first = exercises1.iterator().next();
-//              logger.debug("e.g. " + first);// + " content  " + first.getContent());
-//            }
-//          }
         }
       }
-
 
       inp.close();
     } catch (IOException e) {
@@ -114,19 +97,12 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
       List<String> columns;
 
-//      Map<Integer, String> colToHeader = new HashMap<>();
-//      Map<String, ExerciseAttribute> pairToAttr = new HashMap<>();
-//      Map<String, List<ExerciseAttribute>> attrToItself = new HashMap<>();
-
-
       List<String> typeOrder = project.getTypeOrder();
       List<ClientExercise> exercises = new ArrayList<>();
-      Set<ClientExercise> coreExercises = new TreeSet<>();
+
       Set<String> speakers = new LinkedHashSet<>();
 
-
       int rows = 0;
-    //  int colIndexOffset = -1;
 
       int audioFileIndex = -1;
       int textIndex = -1;
@@ -179,21 +155,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
               realID = Integer.parseInt(id);
 
               if (lastDialogID != realID && lastDialogID != -1) {
-
-                logger.info("new dialog " + orientation + " with " + exercises.size() + " exercises");
-                addDialogPair(defaultUser,
-                    project.getID(),
-                    modified,
-                    "UNKNOWN",
-                    DEFAULT_UNIT, DEFAULT_CHAPTER,
-                    new ArrayList<>(),
-                    exercises,
-                    coreExercises,
-                    orientation,
-                    orientation,
-                    orientation,
-                    dialogToSlick
-                );
+                addDialogPair(defaultUser, project, dialogToSlick, modified, exercises, speakers, orientation);
 
                 // start new set of speakers...
                 speakers = new LinkedHashSet<>();
@@ -226,7 +188,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
           }
         }
       }
-      String orientation = "Interpreter Dialog #" + realID;
+/*      String orientation = "Interpreter Dialog #" + realID;
 
       logger.info("new dialog " + orientation + " with " + exercises.size() + " exercises");
       addDialogPair(defaultUser,
@@ -240,12 +202,40 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
           orientation,
           orientation,
           orientation,
-          dialogToSlick
-      );
+          dialogToSlick,
+          DialogType.INTERPRETER);*/
+
+      addDialogPair(defaultUser, project, dialogToSlick, modified, exercises, speakers, "Interpreter Dialog #" + realID);
+
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
     return dialogToSlick;
+  }
+
+  private void addDialogPair(int defaultUser, Project project, Map<Dialog, SlickDialog> dialogToSlick,
+                             Timestamp modified,
+                             List<ClientExercise> exercises,
+
+                             Set<String> speakers,
+                             String orientation) {
+    logger.info("new dialog " + orientation + " with " + exercises.size() + " exercises");
+    List<ExerciseAttribute> attributes = new ArrayList<>();
+    addSpeakerAttrbutes(attributes, speakers);
+
+    addDialogPair(defaultUser,
+        project.getID(),
+        modified,
+        "UNKNOWN",
+        DEFAULT_UNIT, DEFAULT_CHAPTER,
+        attributes,
+        exercises,
+        Collections.emptySet(),
+        orientation,
+        orientation,
+        orientation,
+        dialogToSlick,
+        DialogType.INTERPRETER);
   }
 
   /**

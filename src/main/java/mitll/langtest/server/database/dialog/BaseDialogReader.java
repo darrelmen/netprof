@@ -37,6 +37,7 @@ public class BaseDialogReader {
    * @param title
    * @param fltitle
    * @param outputDialogToSlick
+   * @param dialogType
    * @see DialogReader#getDialogsByProp
    */
   protected void addDialogPair(int defaultUser,
@@ -51,7 +52,7 @@ public class BaseDialogReader {
 
                                String orientation, String title, String fltitle,
 
-                               Map<Dialog, SlickDialog> outputDialogToSlick) {
+                               Map<Dialog, SlickDialog> outputDialogToSlick, DialogType dialogType) {
     List<ExerciseAttribute> dialogAttr = new ArrayList<>(attributes);
     dialogAttr.add(new ExerciseAttribute(FLTITLE.toString().toLowerCase(), fltitle, false));
 
@@ -63,7 +64,7 @@ public class BaseDialogReader {
         modified,
         modified,
         unit, chapter,
-        DialogType.DIALOG.toString(),
+        dialogType.toString(),
         DialogStatus.DEFAULT.toString(),
         title,
         orientation
@@ -78,17 +79,17 @@ public class BaseDialogReader {
 
         dialogAttr,
         exercises,
-        new ArrayList<>(coreExercises));
+        new ArrayList<>(coreExercises), dialogType);
 
     outputDialogToSlick.put(dialog, slickDialog);
   }
 
   @NotNull
-  protected String getDialogDataDir(Project project) {
+  String getDialogDataDir(Project project) {
     return OPT_NETPROF_DIALOG + project.getLanguage().toLowerCase() + File.separator;
   }
 
-  protected void addSpeakerAttrbutes(List<ExerciseAttribute> attributes, Set<String> speakers) {
+  void addSpeakerAttrbutes(List<ExerciseAttribute> attributes, Set<String> speakers) {
     List<String> speakersList = new ArrayList<>(speakers);
     speakersList
         .forEach(s -> {

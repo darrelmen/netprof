@@ -50,6 +50,7 @@ import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
 import mitll.npdata.dao.dialog.DialogDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -62,6 +63,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   private static final long HOUR = 60 * MIN;
   private static final long DAY = 24 * HOUR;
   public static final long YEAR = 365 * DAY;
+  public static final String FLTITLE = "fltitle";
 
   private final DialogDAOWrapper dao;
 
@@ -167,6 +169,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
     // add dialog attributes
     Map<Integer, ExerciseAttribute> idToPair = databaseImpl.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
 
+    logger.info("getDialogs got " + idToPair.size() + " attributes for " + projid);
+
     Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated =
         databaseImpl.getUserExerciseDAO().getRelatedExercise().getDialogIDToRelated(projid);
 
@@ -182,7 +186,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
       addAttributes(idToPair, slickDialogAttributeJoins, dialog);
 
       {
-        List<ExerciseAttribute> fltitle = dialog.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase("fltitle")).collect(Collectors.toList());
+        List<ExerciseAttribute> fltitle =
+            dialog.getAttributes()
+                .stream()
+                .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(FLTITLE)).collect(Collectors.toList());
         if (!fltitle.isEmpty()) dialog.getMutableShell().setForeignLanguage(fltitle.iterator().next().getValue());
       }
 
@@ -233,7 +240,20 @@ public class DialogDAO extends DAO implements IDialogDAO {
         slickDialog.entitle(),
         new ArrayList<>(),
         new ArrayList<>(),
-        new ArrayList<>());
+        new ArrayList<>(),
+        getDialogType(slickDialog));
+  }
+
+  @Nullable
+  private DialogType getDialogType(SlickDialog slickDialog) {
+    String kind = slickDialog.kind();
+    DialogType dialogType = null;
+    try {
+      dialogType = DialogType.valueOf(kind);
+    } catch (IllegalArgumentException e) {
+      logger.warn("got unknown type " + kind);
+    }
+    return dialogType;
   }
 
   /**
@@ -396,8 +416,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }*/
 
   /**
-   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
    * @param id
+   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
    */
   @Override
   public void removeForProject(int id) {
@@ -414,7 +434,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   /**
-   *
    * @param userid
    * @param dominoID
    * @param modified

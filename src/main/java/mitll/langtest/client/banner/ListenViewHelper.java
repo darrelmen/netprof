@@ -124,7 +124,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     getRefAudio(new ArrayList<RefAudioGetter>(bothTurns).iterator());
   }
 
-
   /**
    * Main method for showing the three sections
    *
@@ -148,11 +147,15 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     DivWidget rowOne = new DivWidget();
     styleControlRow(rowOne);
 
-    leftSpeakerBox = addLeftSpeaker(rowOne, dialog.getSpeakers().get(0));
+    String label = dialog.getSpeakers().get(0);
+    if (label == null) label = "A";
+    leftSpeakerBox = addLeftSpeaker(rowOne, label);
 
     rowOne.add(getControls());
 
-    rightSpeakerBox = addRightSpeaker(rowOne, dialog.getSpeakers().get(1));
+    String label1 = dialog.getSpeakers().get(1);
+    if (label1 == null) label1 = "B";
+    rightSpeakerBox = addRightSpeaker(rowOne, label1);
 
     return rowOne;
   }
@@ -704,7 +707,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @see #playStopped
    */
   void currentTurnPlayEnded(boolean wasRecording) {
-    if (DEBUG||true) logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
+    if (DEBUG || true)
+      logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
     if (gotTurnClick) {
       gotTurnClick = false;
     } else {

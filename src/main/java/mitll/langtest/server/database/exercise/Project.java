@@ -113,6 +113,9 @@ public class Project implements IPronunciationLookup {
   private final Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
 
   private Map<String, Integer> fileToRecorder = new HashMap<>();
+  /**
+   * @see #setDialogs
+   */
   private List<IDialog> dialogs = new ArrayList<>();
   private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
 
@@ -769,6 +772,9 @@ public class Project implements IPronunciationLookup {
     return project.name();
   }
 
+  /**
+   * @return
+   */
   public List<IDialog> getDialogs() {
     return dialogs;
   }
@@ -820,6 +826,11 @@ public class Project implements IPronunciationLookup {
     });
 
     dialogSectionHelper.rememberTypesInOrder(typeOrder, seen);
+
+    if (true) {
+      logger.info("report on dialog types");
+      dialogSectionHelper.report();
+    }
   }
 
   public String toString() {

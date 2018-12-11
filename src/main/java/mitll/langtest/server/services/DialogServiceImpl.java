@@ -73,7 +73,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
     } else {
-      return sectionHelper.getTypeToValues(request, false);
+      FilterResponse typeToValues = sectionHelper.getTypeToValues(request, false);
+      logger.info("getTypeToValues for " + request + " got " + typeToValues);
+      return typeToValues;
     }
   }
 

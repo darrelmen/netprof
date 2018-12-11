@@ -187,17 +187,6 @@ public class AudioFileHelper implements AlignDecode {
     return getASRScoring().getPronunciationLookup();
   }
 
-//
-//  public String getLM(String fl, boolean removeAllAccents) {
-//    return asrScoring.getLM(fl, removeAllAccents);
-//  }
-
-/*
-  public String getHydraTranscript(String fl) {
-    return asrScoring.getHydraTranscriptTest(fl);
-  }
-*/
-
   /**
    * @return
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getCollator

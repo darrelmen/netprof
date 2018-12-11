@@ -36,6 +36,9 @@ public class Dialog implements IDialog, MutableShell {
   private String unit;
   private String chapter;
 
+  /**
+   *
+   */
   private DialogType kind = DialogType.DIALOG;
   private String orientation;
   private String imageRef;
@@ -64,8 +67,9 @@ public class Dialog implements IDialog, MutableShell {
    * @param attributes
    * @param exercises
    * @param coreExercises
+   * @param type
    * @see mitll.langtest.server.database.dialog.DialogDAO#makeDialog
-   * @see IDialogReader#getDialogs
+   * @see BasicDialogReader#addDialogPair
    */
   public Dialog(int id,
                 int userid,
@@ -81,7 +85,8 @@ public class Dialog implements IDialog, MutableShell {
                 String entitle,
                 List<ExerciseAttribute> attributes,
                 List<ClientExercise> exercises,
-                List<ClientExercise> coreExercises) {
+                List<ClientExercise> coreExercises,
+                DialogType type) {
     this.id = id;
     this.userid = userid;
     this.projid = projid;
@@ -150,6 +155,10 @@ public class Dialog implements IDialog, MutableShell {
     return modified;
   }
 
+  /**
+   *
+   * @return
+   */
   @Override
   public DialogType getKind() {
     return kind;
@@ -212,8 +221,6 @@ public class Dialog implements IDialog, MutableShell {
 
   @Override
   public List<String> getSpeakers() {
-    //   List<String> speakers = new ArrayList<>();
-    //Set<ExerciseAttribute> speakerAttr = new TreeSet<>();
     List<ExerciseAttribute> speakers = attributes
         .stream()
         .filter(exerciseAttribute -> (exerciseAttribute.getProperty().toLowerCase().startsWith(SPEAKER)))
@@ -222,8 +229,6 @@ public class Dialog implements IDialog, MutableShell {
 
     return speakers.stream().map(Pair::getValue)
         .collect(Collectors.toList());
-
-    // return speakers;
   }
 
   @Override

@@ -326,25 +326,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     History.newItem(historyToken);
   }
 
-  /**
-   * @param selectionState
-   * @param newState
-   */
-  private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
-    if (DEBUG) logger.info("loadFromSelectionState" +
-        "\n\told state " + selectionState.getInfo() +
-        "\n\tnew state " + newState.getInfo());
-
-    loadExercisesUsingPrefix(
-        newState.getTypeToSection(),
-        selectionState.getSearch(),
-        selectionState.getItem(),
-
-        newState.isOnlyWithAudioDefects(),
-        newState.isOnlyDefault(),
-        newState.isOnlyUninspected());
-  }
-
 
   /**
    * @param e
@@ -496,6 +477,25 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   }
 
   /**
+   * @param selectionState
+   * @param newState
+   */
+  private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
+    if (DEBUG) logger.info("loadFromSelectionState" +
+        "\n\told state " + selectionState.getInfo() +
+        "\n\tnew state " + newState.getInfo());
+
+    loadExercisesUsingPrefix(
+        newState.getTypeToSection(),
+        selectionState.getSearch(),
+        selectionState.getItem(),
+
+        newState.isOnlyWithAudioDefects(),
+        newState.isOnlyDefault(),
+        newState.isOnlyUninspected());
+  }
+
+  /**
    * TODO : gah - why so complicated??? replace with request
    *
    * @param typeToSection
@@ -514,8 +514,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
                                           boolean onlyWithAudioAnno,
                                           boolean onlyDefaultUser,
                                           boolean onlyUninspected) {
-    ExerciseListRequest request =
-        getExerciseListRequest(typeToSection, prefix, onlyUninspected);
+    ExerciseListRequest request = getExerciseListRequest(typeToSection, prefix, onlyUninspected);
 
     if (DEBUG) {
       logger.info("loadExercisesUsingPrefix got" +
