@@ -19,8 +19,6 @@ import java.util.Arrays;
  */
 class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
   //  private final Logger logger = Logger.getLogger("LearnHelper");
-
-  //private static final String DIALOG_PRACTICE_STEPS = "Dialog Practice Steps";
   private static final String WELCOME_TO_DIALOG_PRACTICE = "Welcome to Dialog Practice!";
   private static final String CHOOSE_A_DIALOG_AND_THEN = "Choose a dialog and then:";
   private static final String STUDY = "Study";
@@ -39,7 +37,6 @@ class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS views) {
     super.showContent(listContent, views);
-
     doIntroMaybe();
   }
 

@@ -97,6 +97,7 @@ public class DialogPopulate {
     int projid = project.getID();
     IDialogDAO dialogDAO = db.getDialogDAO();
     if (!dialogDAO.getDialogs(projid).isEmpty()) {
+      logger.info("Project #" + projid + " already has dialog data so not adding any.");
       return false;
     } else {
       waitUntilTrieReady(project);
@@ -114,9 +115,13 @@ public class DialogPopulate {
     Language languageEnum = project.getLanguageEnum();
 
     if (languageEnum == Language.MANDARIN) {
+      logger.info("maybeDoInterpreterImport found interpreter candidate " + project);
+
       Map<ClientExercise, String> exToAudio = new HashMap<>();
 
       Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader().getDialogs(defaultUser, exToAudio, project);
+
+      logger.info("maybeDoInterpreterImport read " + dialogToSlick.size());
       addDialogs(project, dialogDAO, exToAudio, defaultUser, dialogToSlick);
     }
   }
@@ -445,12 +450,26 @@ public class DialogPopulate {
    * @return
    */
   public boolean cleanDialog(Project project) {
-    List<IDialog> dialogs = db.getDialogDAO().getDialogs(project.getID());
+    {
+      Collection<Integer> toDelete = new HashSet<>();
+      Collection<Integer> toRemove = new HashSet<>();
+      db.getDialogDAO().getDialogs(project.getID())
+          .forEach(iDialog -> {
 
-    Collection<Integer> toDelete = new HashSet<>();
-    dialogs.forEach(iDialog -> iDialog.getExercises().forEach(clientExercise -> toDelete.add(clientExercise.getID())));
+            toRemove.add(iDialog.getID());
 
-    db.getUserExerciseDAO().deleteByExID(toDelete);
+            iDialog.getExercises()
+                .forEach(clientExercise -> {
+                  toDelete.add(clientExercise.getID());
+                });
+          });
+
+      logger.info("deleting " + toDelete.size() + " exercises");
+      db.getUserExerciseDAO().deleteByExID(toDelete);
+
+      logger.info("removing " + toRemove.size() + " context exercise relations for these dialogs");
+      toRemove.forEach(dir -> db.getUserExerciseDAO().getRelatedExercise().deleteRelatedForDialog(dir));
+    }
 
     db.getDialogDAO().removeForProject(project.getID());
     return true;

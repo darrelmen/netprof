@@ -61,6 +61,11 @@ public class RelatedExerciseHelper implements IRelatedExercise {
     return daoWrapper.deleteRelated(related);
   }
 
+  @Override
+  public int deleteRelatedForDialog(int dialog) {
+    return daoWrapper.deleteRelatedForDialog(dialog);
+  }
+
   /**
    * @see mitll.langtest.server.database.dialog.DialogDAO#getDialogs
    * @param projid

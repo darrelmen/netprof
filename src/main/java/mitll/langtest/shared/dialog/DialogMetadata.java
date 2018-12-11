@@ -12,6 +12,7 @@ public enum DialogMetadata implements IsSerializable {
   PRESENTATION,
   FLPRESENTATION,
   SPEAKER,
+  LANGUAGE,
   FLTITLE;
 
   public String getLC() {

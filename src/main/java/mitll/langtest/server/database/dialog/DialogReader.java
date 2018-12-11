@@ -31,8 +31,6 @@ class DialogReader extends BaseDialogReader {
   private static final String JPG = ".jpg";
   private static final String DIALOG = "dialog";
 
-  private static final  List<String> SPEAKER_LABELS = Arrays.asList("A", "B", "C", "D", "E", "F");
-
   /**
    * @param defaultUser
    * @param exToAudio
@@ -325,15 +323,6 @@ class DialogReader extends BaseDialogReader {
     }
   }
 
-  private void addSpeakerAttrbutes(List<ExerciseAttribute> attributes, Set<String> speakers) {
-    List<String> speakersList = new ArrayList<>(speakers);
-    speakersList
-        .forEach(s -> attributes
-            .add(new ExerciseAttribute(
-                DialogMetadata.SPEAKER.getCap() +
-                    " " + SPEAKER_LABELS.get(speakersList.indexOf(s)), s, false)));
-  }
-
   /**
    * @param project
    * @param coreExercises set - only unique exercises...
@@ -374,7 +363,7 @@ class DialogReader extends BaseDialogReader {
    * @param chapter
    * @param typeOrder
    * @return
-   * @seex #getDialogs
+   * @see #getDialogsByProp
    */
   @NotNull
   private Exercise getExercise(List<ExerciseAttribute> attributes,

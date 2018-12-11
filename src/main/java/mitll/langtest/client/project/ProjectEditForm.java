@@ -231,7 +231,7 @@ public class ProjectEditForm extends UserDialog {
   void updateProject() {
     info.setLanguage(getLanguage());
     String selectedValue = modelTypeBox.getSelectedValue();
-    logger.info("value is " + selectedValue);
+  //  logger.info("value is " + selectedValue);
     info.setModelType(ModelType.valueOf(selectedValue));
 
     //  logger.info("updateProject get model type " + info.getModelType());
@@ -278,7 +278,9 @@ public class ProjectEditForm extends UserDialog {
 
   @NotNull
   private Language getLanguage(String selectedValue) {
-    return Language.valueOf(selectedValue.toUpperCase());
+    String name = selectedValue.toUpperCase();
+    if (name.equalsIgnoreCase("Chinese")) name = Language.MANDARIN.name();
+    return Language.valueOf(name);
   }
 
   private void setPort() {
@@ -530,10 +532,10 @@ public class ProjectEditForm extends UserDialog {
   private ListBox getTypeBox() {
     ListBox affBox = new ListBox();
     affBox.addStyleName("leftTenMargin");
- //   logger.info("getTypeBox type " + affBox.getItemCount());
+    //   logger.info("getTypeBox type " + affBox.getItemCount());
 
     getVisibleProjectTypes().forEach(projectType -> affBox.addItem(projectType.name()));
-   // logger.info("getTypeBox after type " + affBox.getItemCount());
+    // logger.info("getTypeBox after type " + affBox.getItemCount());
 
     return affBox;
   }
@@ -542,7 +544,7 @@ public class ProjectEditForm extends UserDialog {
     int i = 0;
     boolean found = false;
 
- //   logger.info("project type " + projectType);
+    //   logger.info("project type " + projectType);
 
     for (ProjectType projectType1 : getVisibleProjectTypes()) {
       if (projectType1 == projectType) {
@@ -879,9 +881,9 @@ public class ProjectEditForm extends UserDialog {
   }
 
   /**
-   * @see Project#recalcRefAudio
    * @param info
    * @param w
+   * @see Project#recalcRefAudio
    */
   private void recalcRefAudio(ProjectInfo info, Button w) {
     services.getAudioServiceAsyncForHost(info.getHost())
