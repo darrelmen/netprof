@@ -201,7 +201,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     Language languageInfo = projectStartupInfo.getLanguageInfo();
     if (isEngAttr()) languageInfo = Language.ENGLISH;
     clickableWords = new ClickableWords(listContainer, exercise.getID(),
-        languageInfo, languageInfo.getFontSize(), BLUE);
+        languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft());
+  }
+
+  protected boolean shouldAddFloatLeft() {
+    return true;
   }
 
   /**
@@ -371,7 +375,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     if (alignmentOutput == null) {
       logger.warning("matchSegmentToWidgetForAudio no alignment for " + audioID);
       segmentToWord.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0, "all", 0),
-          new AllHighlight(flclickables));
+          getAllHighlight(flclickables));
     } else {
       if (DEBUG_MATCH)
         logger.info("matchSegmentToWidgetForAudio " + audioID + " got clickables " + flclickables.size());
@@ -459,6 +463,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     if (DEBUG_MATCH)
       logger.info("matchSegmentToWidgetForAudio typeToTranscriptToHighlight is " + typeToTranscriptToHighlight);
     return typeToTranscriptToHighlight;
+  }
+
+  @NotNull
+  protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
+    return new AllHighlight(flclickables, true);
   }
 
   /**
@@ -618,11 +627,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     while (clickablesIterator.hasNext()) {
       IHighlightSegment next = clickablesIterator.next();
       if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio adding left over " + next);
-      Widget w = next.asWidget();
-      if (!isRTL) w.addStyleName("floatLeft");
-      clickableRow.add(w);
+      {
+        Widget w = next.asWidget();
+        if (!isRTL) addFloatLeft(w);
+        clickableRow.add(w);
+      }
     }
   }
+
 
   @NotNull
   private TranscriptSegment getCombinedTranscriptSegment(List<TranscriptSegment> wordSegmentsForClickable) {
@@ -665,8 +677,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return removePunct(current.getContent().toLowerCase());
   }
 
-  private void addFloatLeft(IHighlightSegment current) {
-    current.asWidget().addStyleName("floatLeft");
+  protected void addFloatLeft(IHighlightSegment current) {
+    addFloatLeft(current.asWidget());
+  }
+
+  protected void addFloatLeft(Widget w) {
+    w.addStyleName("floatLeft");
   }
 
   /**
@@ -795,7 +811,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       if (bulk.isEmpty()) {
         return null;
       } else { // all clickables match this segment
-        AllHighlight allHighlight = new AllHighlight(bulk);
+        AllHighlight allHighlight = getAllHighlight(bulk);
         if (showPhones) {
           DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
           addSouthClickable(clickablePhones, allHighlight, phoneDivBelowWord);

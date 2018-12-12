@@ -222,7 +222,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     int fontSize = controller.getProjectStartupInfo().getLanguageInfo().getFontSize();
 
     ClickableWords commonExerciseClickableWords =
-        new ClickableWords(null, exercise.getID(), controller.getLanguageInfo(), fontSize, BLUE);
+        new ClickableWords(null, exercise.getID(), controller.getLanguageInfo(), fontSize, BLUE, true);
 
     String flToShow = next.getFLToShow();
     String flToShow1 = exercise.getFLToShow();

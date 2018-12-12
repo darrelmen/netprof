@@ -72,7 +72,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private T currentTurn;
 
   private CheckBox leftSpeakerBox = null;
-  private CheckBox interpreterBox = null;
+ // private CheckBox interpreterBox = null;
   private CheckBox rightSpeakerBox = null;
 
   CheckBox speakerBoxes;
@@ -233,7 +233,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
         middle.add(w);
         styleLabel(w);
         w.getElement().getStyle().setMarginLeft(43, PX);
-        //   w.getElement().getStyle().setPaddingTop(12,PX);
+
         middle.getElement().getStyle().setBackgroundColor(MIDDLE_COLOR);
         rowOne.add(middle);
       } else {
@@ -435,7 +435,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   private void addTurn(DivWidget rowOne, COLUMNS columns, ClientExercise clientExercise) {
-    // boolean isRight = rightTurns != null && rightTurns.contains(clientExercise);
     T turn = getTurnPanel(clientExercise, columns);
 
     if (columns == COLUMNS.RIGHT) rightTurnPanels.add(turn);

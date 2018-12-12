@@ -11,6 +11,8 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/26/17.
  */
 public class AllHighlight extends DivWidget implements IHighlightSegment {
+  public static final String FLOAT_LEFT = "floatLeft";
+  public static final String INLINE_BLOCK_STYLE_ONLY = "inlineBlockStyleOnly";
   protected final Logger logger = Logger.getLogger("AllHighlight");
 
   private final Collection<IHighlightSegment> set;
@@ -20,19 +22,29 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
 
   /**
    * @param bulk
+   * @param addFloatLeft
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchEventSegmentToClickable
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#matchSegmentToWidgetForAudio
    */
-  public AllHighlight(Collection<IHighlightSegment> bulk) {
+  public AllHighlight(Collection<IHighlightSegment> bulk, boolean addFloatLeft) {
     //logger.info("making all highlight for " + bulk);
     getElement().setId("AllHighlight_" + bulk.size());
-    addStyleName("floatLeft");
+    if (addFloatLeft) {
+      addStyleName(FLOAT_LEFT);
+    } else {
+      addStyleName(INLINE_BLOCK_STYLE_ONLY);
+    }
     getElement().getStyle().setMarginRight(3, Style.Unit.PX);
 
     this.set = bulk;
 
     add(north = new DivWidget());
-    north.addStyleName("floatLeft");
+    if (addFloatLeft) {
+      north.addStyleName(FLOAT_LEFT);
+      //logger.info("add float left to " + getElement().getId());
+    } else {
+      addStyleName(INLINE_BLOCK_STYLE_ONLY);
+    }
     north.getElement().setId("all_highlight_north_bulk_" + bulk.size());
 
     set.forEach(iHighlightSegment -> {
@@ -43,7 +55,11 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
 
     add(south = new DivWidget());
     south.getElement().setId("all_highlight_south_bulk_" + bulk.size());
-    south.addStyleName("floatLeft");
+    if (addFloatLeft) {
+      south.addStyleName(FLOAT_LEFT);
+    } else {
+      addStyleName(INLINE_BLOCK_STYLE_ONLY);
+    }
     south.getElement().getStyle().setClear(Style.Clear.BOTH);
   }
 

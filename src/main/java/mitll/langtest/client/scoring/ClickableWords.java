@@ -16,7 +16,6 @@ import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -51,6 +50,7 @@ public class ClickableWords {
 
   private static final boolean DEBUG = false;
   private String highlightColor;
+  private boolean addFloatLeft = true;
 
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
@@ -64,10 +64,11 @@ public class ClickableWords {
    * @param language
    * @param fontSize
    * @param highlightColor
+   * @param addFloatLeft
    * @see RefAudioGetter#addWidgets
    * @see DialogExercisePanel#makeClickableWords
    */
-  public ClickableWords(ListInterface listContainer, int exercise, Language language, int fontSize, String highlightColor) {
+  public ClickableWords(ListInterface listContainer, int exercise, Language language, int fontSize, String highlightColor, boolean addFloatLeft) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     this.highlightColor = highlightColor;
@@ -79,6 +80,7 @@ public class ClickableWords {
             //  language.equalsIgnoreCase(Language.KOREAN.name()) ||
             isJapanese;
     this.fontSize = fontSize;
+    this.addFloatLeft = addFloatLeft;
   }
 
   /**
@@ -457,16 +459,6 @@ public class ClickableWords {
     return tokens;
   }
 
-/*
-  public boolean isRTL(String fl) {
-    return isRTLContent(fl);
-  }
-
-  private boolean isRTLContent(String content) {
-    return WordCountDirectionEstimator.get().estimateDirection(content) == HasDirection.Direction.RTL;
-  }
-*/
-
   /**
    * @param dir               text direction
    * @param html              a token that can be clicked on to search on it
@@ -490,7 +482,7 @@ public class ClickableWords {
     final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir,
         false,
         false,
-        highlightColor);
+        highlightColor, addFloatLeft);
 
     HTML highlightSegment = highlightSegmentDiv.getClickable();
     if (fieldType == FieldType.FL) {

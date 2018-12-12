@@ -21,6 +21,9 @@ import java.util.logging.Logger;
 public class HighlightSegment extends DivWidget implements IHighlightSegment {
   protected final Logger logger = Logger.getLogger("HighlightSegment");
 
+  private static final String FLOAT_LEFT = "floatLeft";
+  private static final String INLINE_BLOCK_STYLE_ONLY = "inlineBlockStyleOnly";
+
   private static final String UNDERLINE = "underline";
 
   private String highlightColor;
@@ -40,7 +43,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @see mitll.langtest.client.scoring.WordTable#getWordLabel
    */
   public HighlightSegment(int id, String content) {
-    this(id, content, HasDirection.Direction.LTR, true, true, DEFAULT_HIGHLIGHT);
+    this(id, content, HasDirection.Direction.LTR, true, true, DEFAULT_HIGHLIGHT, true);
   }
 
   /**
@@ -50,10 +53,11 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @param addSouth
    * @param showPhones
    * @param highlightColor
+   * @param addFloatLeft
    * @see mitll.langtest.client.scoring.ClickableWords#makeClickableText
    */
   public HighlightSegment(int id, @IsSafeHtml String html, HasDirection.Direction dir, boolean addSouth,
-                          boolean showPhones, String highlightColor) {
+                          boolean showPhones, String highlightColor, boolean addFloatLeft) {
     this.highlightColor = highlightColor;
     DivWidget north;
     add(north = new DivWidget());
@@ -66,7 +70,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     this.content = html;
     boolean isLTR = dir == HasDirection.Direction.LTR;
 
-    configureNorth(id, north, isLTR, span);
+    configureNorth(id, north, isLTR, span, addFloatLeft);
     this.north = north;
 
     south = new DivWidget();
@@ -76,7 +80,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
 
     if (addSouth) {
       add(south);
-      configureSouth(id, south, isLTR, showPhones);
+      configureSouth(id, south, isLTR, showPhones, addFloatLeft);
     }
 
     length = html.length();
@@ -125,20 +129,25 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
    * @param north
    * @param isLTR
    * @param span
-   * @see #HighlightSegment(int, String, HasDirection.Direction, boolean, boolean, String)
+   * @param addFloatLeft
+   * @see #HighlightSegment(int, String, HasDirection.Direction, boolean, boolean, String, boolean)
    */
-  private void configureNorth(int id, DivWidget north, boolean isLTR, Widget span) {
+  private void configureNorth(int id, DivWidget north, boolean isLTR, Widget span, boolean addFloatLeft) {
     north.add(span);
     north.getElement().setId("Highlight_North_" + id);
 
-    String floatDir = isLTR ? "floatLeft" : "floatRight";
-    north.addStyleName(floatDir);
+    String floatDir = isLTR ? FLOAT_LEFT : "floatRight";
+    if (isLTR && addFloatLeft) {
+      north.addStyleName(floatDir);
+    } else {
+      north.addStyleName(INLINE_BLOCK_STYLE_ONLY);
+    }
     north.addStyleName(isLTR ? "wordSpacerRight" : "wordSpacerLeft");
   }
 
-  private void configureSouth(int id, Widget south, boolean isLTR, boolean ensureHeight) {
-    if (isLTR) {
-      south.addStyleName("floatLeft");
+  private void configureSouth(int id, Widget south, boolean isLTR, boolean ensureHeight, boolean addFloatLeft) {
+    if (isLTR && addFloatLeft) {
+      south.addStyleName(FLOAT_LEFT);
     }
     Element element = south.getElement();
     Style style = element.getStyle();
@@ -171,8 +180,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.RecordDialogExercisePanel#showWordScore
    * @param highlightColor
+   * @see mitll.langtest.client.scoring.RecordDialogExercisePanel#showWordScore
    */
   @Override
   public void setHighlightColor(String highlightColor) {
@@ -250,7 +259,6 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   public DivWidget getNorth() {
     return north;
   }
-
 
 
   public String toString() {
