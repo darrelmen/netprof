@@ -596,11 +596,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    */
   @NotNull
   @Override
-  protected T reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
+  protected T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     // logger.info("making record dialog ex panel for " + clientExercise.getID());
     T turnPanel =
         (T) new RecordDialogExercisePanel<ClientExercise>(clientExercise, controller,
-            null, alignments, this, this, isRight);
+            null, alignments, this, this, columns);
 
     exToTurn.put(clientExercise.getID(), turnPanel);
     return turnPanel;
@@ -699,7 +699,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
     exToStudentDur.clear();
     exToRefDur.clear();
 
-    bothTurns.forEach(IRecordDialogTurn::clearScoreInfo);
+    allTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
   }
 
@@ -766,7 +766,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
 
       boolean isCurrentPrompt = seq.contains(currentTurn);
 
-      int i2 = bothTurns.indexOf(currentTurn);
+      int i2 = allTurns.indexOf(currentTurn);
       int nextOtherSide = i2 + 1;
 
       if (DEBUG) {
@@ -774,7 +774,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
             //"\n\t seq  " + seq.size() +
             //"\n\tleft  " + isLeftSpeakerSet() +
             // "\n\tright " + isRightSpeakerSet() +
-            // "\n\tboth  " + bothTurns.size() +
+            // "\n\tboth  " + allTurns.size() +
             "\n\t is current playing " + isCurrentPrompt +
             "\n\ti2    " + i2 + " = " + currentTurn
         );
@@ -787,8 +787,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
         // logger.info("currentTurnPlayEnded NOT DOING showScoreInfo on " + currentTurn);
       }
 
-      if (nextOtherSide < bothTurns.size()) {
-        T nextTurn = bothTurns.get(nextOtherSide);
+      if (nextOtherSide < allTurns.size()) {
+        T nextTurn = allTurns.get(nextOtherSide);
 
         if (DEBUG) logger.info("currentTurnPlayEnded next is " + nextTurn.getId() + "  at " + nextOtherSide);
         removeMarkCurrent();
@@ -990,7 +990,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    */
   @Override
   public void stopRecording() {
-    if (getCurrentTurn() == bothTurns.get(bothTurns.size() - 1) && !exToScore.isEmpty()) {
+    if (getCurrentTurn() == allTurns.get(allTurns.size() - 1) && !exToScore.isEmpty()) {
       waitCursor.setVisible(true);
     }
   }

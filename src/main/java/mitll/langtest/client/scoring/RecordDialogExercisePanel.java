@@ -3,10 +3,7 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.Emoticon;
-import mitll.langtest.client.banner.IRehearseView;
-import mitll.langtest.client.banner.RehearseViewHelper;
-import mitll.langtest.client.banner.SessionManager;
+import mitll.langtest.client.banner.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
@@ -79,8 +76,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
                                    Map<Integer, AlignmentOutput> alignments,
                                    IRehearseView listenView,
                                    SessionManager sessionManager,
-                                   boolean isRight) {
-    super(commonExercise, controller, listContainer, alignments, listenView, isRight);
+                                   ListenViewHelper.COLUMNS columns) {
+    super(commonExercise, controller, listContainer, alignments, listenView, columns);
     this.rehearseView = listenView;
 
     setMinExpectedDur(commonExercise);
@@ -377,9 +374,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     recordPanel.addWidgets();
 
     DivWidget flContainer = getHorizDiv();
-    if (isRight) {
+    if (columns == ListenViewHelper.COLUMNS.RIGHT) {
       addStyleName("floatRight");
-    } else {
+    } else if (columns == ListenViewHelper.COLUMNS.LEFT){
       flContainer.addStyleName("floatLeft");
     }
 
