@@ -102,6 +102,7 @@ public class Dialog implements IDialog, MutableShell {
     this.attributes = attributes;
     this.exercises = exercises;
     this.coreVocabulary = coreExercises;
+    this.kind = type;
   }
 
   @Override
@@ -156,7 +157,6 @@ public class Dialog implements IDialog, MutableShell {
   }
 
   /**
-   *
    * @return
    */
   @Override

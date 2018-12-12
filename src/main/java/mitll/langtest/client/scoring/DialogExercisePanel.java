@@ -11,6 +11,7 @@ import mitll.langtest.client.sound.*;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -28,6 +29,8 @@ import java.util.stream.Collectors;
 public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     implements AudioChangeListener, RefAudioGetter, IPlayAudioControl {
   private final Logger logger = Logger.getLogger("DialogExercisePanel");
+
+  private static final String LANGUAGE = "LANGUAGE";
   private static final int WORD_SPACER = 7;
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
@@ -117,6 +120,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       makeClickableWords(projectStartupInfo, null);
 
       this.isRTL = projectStartupInfo.getLanguageInfo().isRTL();
+      if (isRTL && isEngAttr()) {
+        isRTL = false;
+      }
 
       {
         DivWidget wrapper = new DivWidget();
@@ -127,6 +133,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
       makePlayAudio(exercise, null);
     }
+  }
+
+  private boolean isEngAttr() {
+    List<ExerciseAttribute> language =
+        exercise.getAttributes()
+            .stream()
+            .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(LANGUAGE)).collect(Collectors.toList());
+    return !language.isEmpty() && language.get(0).getValue().equalsIgnoreCase(Language.ENGLISH.toString());
   }
 
   void styleMe(DivWidget widget) {
@@ -183,10 +197,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return candidate == null ? e.getFirst() : candidate;
   }
 
-
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
+    Language languageInfo = projectStartupInfo.getLanguageInfo();
+    if (isEngAttr()) languageInfo = Language.ENGLISH;
     clickableWords = new ClickableWords(listContainer, exercise.getID(),
-        controller.getLanguage(), projectStartupInfo.getLanguageInfo().getFontSize(), BLUE);
+        languageInfo, languageInfo.getFontSize(), BLUE);
   }
 
   /**

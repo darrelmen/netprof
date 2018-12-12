@@ -15,6 +15,8 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -63,16 +65,17 @@ public class ClickableWords {
    * @param fontSize
    * @param highlightColor
    * @see RefAudioGetter#addWidgets
+   * @see DialogExercisePanel#makeClickableWords
    */
-  public ClickableWords(ListInterface listContainer, int exercise, String language, int fontSize, String highlightColor) {
+  public ClickableWords(ListInterface listContainer, int exercise, Language language, int fontSize, String highlightColor) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     this.highlightColor = highlightColor;
 
-    isJapanese = language.equalsIgnoreCase(JAPANESE);
-    isUrdu = language.equalsIgnoreCase("Urdu");
+    isJapanese = language == Language.JAPANESE;
+    isUrdu = language == Language.URDU;
     this.hasClickableAsian =
-        language.equalsIgnoreCase(MANDARIN) ||
+        language == Language.MANDARIN ||
             //  language.equalsIgnoreCase(Language.KOREAN.name()) ||
             isJapanese;
     this.fontSize = fontSize;
@@ -237,10 +240,10 @@ public class ClickableWords {
    * @return
    * @see TwoColumnExercisePanel#getContext
    */
- public DivWidget getClickableWordsHighlight(String contextSentence,
-                                       String highlight,
-                                       FieldType fieldType,
-                                       List<IHighlightSegment> clickables, boolean addClickableProps) {
+  public DivWidget getClickableWordsHighlight(String contextSentence,
+                                              String highlight,
+                                              FieldType fieldType,
+                                              List<IHighlightSegment> clickables, boolean addClickableProps) {
     DivWidget horizontal = new DivWidget();
 
     horizontal.getElement().setId("clickableWordsHighlightRow");
@@ -465,12 +468,12 @@ public class ClickableWords {
 */
 
   /**
-   * @param dir            text direction
-   * @param html           a token that can be clicked on to search on it
+   * @param dir               text direction
+   * @param html              a token that can be clicked on to search on it
    * @param searchToken
    * @param isContextMatch
-   * @param id             to label highlight segment
-   * @param fieldType      if meaning, use english font, if FL, choose the font
+   * @param id                to label highlight segment
+   * @param fieldType         if meaning, use english font, if FL, choose the font
    * @param addClickableProps
    * @return
    * @see #getClickableWords
@@ -525,6 +528,7 @@ public class ClickableWords {
 
   /**
    * Use bigflfont for RTL.
+   *
    * @param dir
    * @param highlightSegment
    */
@@ -537,7 +541,7 @@ public class ClickableWords {
       if (fontSize != 24) {
         Style style = highlightSegment.getElement().getStyle();
         style.setFontSize(fontSize, Style.Unit.PX);
-        style.setLineHeight(fontSize+8, Style.Unit.PX);
+        style.setLineHeight(fontSize + 8, Style.Unit.PX);
       }
     }
   }

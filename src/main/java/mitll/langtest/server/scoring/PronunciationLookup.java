@@ -315,7 +315,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       }
     } else { // it's ok -use it
       if (process.length > 50) {
-        logger.info("getPronunciationsFromDictOrLTS prons length " + process.length + " for " + word + " in '" + transcript + "'");
+        logger.info("getPronunciationsFromDictOrLTS prons length " + process.length + " for " + word + " in '" + transcript + "'", new Exception());
       }
       int max = MAX_FROM_ANY_TOKEN;
       List<String> prons = new ArrayList<>();

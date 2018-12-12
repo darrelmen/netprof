@@ -1001,7 +1001,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param projectInfo
    */
   private void addModeChoices(Project project, SlimProject projectInfo) {
-    logger.info("addModeChoices for " + project.getID() + " " + project.getName() + " " + project.getKind());
+    //   logger.info("addModeChoices for " + project.getID() + " " + project.getName() + " " + project.getKind());
     if (project.getKind() == ProjectType.DIALOG) {
       {
         SlimProject vocab = getProjectInfo(project);
@@ -1023,10 +1023,13 @@ public class ProjectManagement implements IProjectManagement {
         if (dialogs.isEmpty()) logger.warn("addModeChoices no dialogs in " + project);
         else {
           IDialog iDialog = dialogs.get(0);
-          if (iDialog.getKind() == DialogType.INTERPRETER) {
+          DialogType kind = iDialog.getKind();
+          if (kind == DialogType.INTERPRETER) {
             name = INTERPRETER;
             cc = INTERPRETER1;
             logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
+          } else {
+            logger.info("dialog kind is " + kind);
           }
         }
         dialog.setName(name);

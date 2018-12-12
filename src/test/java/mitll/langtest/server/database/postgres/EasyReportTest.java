@@ -61,6 +61,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -113,6 +117,134 @@ public class EasyReportTest extends BaseTest {
   }
 
   @Test
+  public void testOverlap() {
+    String toFindFile = "msaFiles2.csv";
+    String goldFile = "msaAnswerAudioSorted.txt";
+
+    String language = "MSA";
+
+
+    compareAudio(toFindFile, goldFile, language, false);
+  }
+
+  @Test
+  public void testOverlap2() {
+//    String toFindFile = "msaFiles2.csv";
+//    String goldFile = "msaAnswerAudioSorted.txt";
+
+
+    //  List<String> langs = Arrays.asList("Egyptian");//, "Korean", "Levantine", "CM", "Pashto", "Russian", "Spanish");
+    List<String> langs = Arrays.asList("Egyptian", "Korean", "Levantine", "CM", "Pashto", "Russian", "Spanish");
+
+    langs.forEach(lang -> {
+
+      String s = lang.toLowerCase();
+
+      if (s.equalsIgnoreCase("cm")) s = "mandarin_simplified";
+
+      String toFind = "for_crowdflower_annotation-all_recs-" + s + ".tsv";
+      String goldFile = "Audio" + lang + ".txt";
+
+      compareAudio(toFind, goldFile, lang, true);
+
+
+    });
+  }
+
+  private void compareAudio(String toFindFile, String goldFile, String language, boolean split) {
+    File toFind = new File("/Users/go22670/Desktop/lists_for_gordon/" +
+        toFindFile
+        // "msaFiles.csv"
+    );
+    File goldList = new File("/Users/go22670/Desktop/lists_for_gordon/" +
+        goldFile
+        //    "msaAnswerFilesSorted.txt"
+    );
+
+    if (!toFind.exists()) {
+      logger.warn("no file " + toFind.getAbsolutePath());
+      return;
+    }
+
+    if (!goldList.exists()) {
+      logger.warn("no file " + goldList.getAbsolutePath());
+      return;
+    }
+
+    Set<String> expectedMP3s = getLines(toFind);
+    Set<String> knownMP3s = getLines(goldList);
+
+    Set<String> found = new TreeSet<>();
+    Set<String> missing = new TreeSet<>();
+
+    logger.info(language + " expectedMP3s " + expectedMP3s.size());
+    logger.info(language + " knownMP3s    " + knownMP3s.size());
+
+    expectedMP3s.forEach(expected ->
+    {
+
+      String search = expected;
+      if (split) {
+        String[] split1 = expected.split("\t");
+        String url = split1[6];
+
+        // https://np.ll.mit.edu/crowdflowerMandarin_simplified
+        //   logger.info(language + " url " + url);
+        String suffix = language;
+        if (language.equalsIgnoreCase("CM")) {
+          suffix = "Mandarin_simplified";
+        }
+        String prefix = "https://np.ll.mit.edu/crowdflower" +
+            suffix +
+            "/";
+        if (!url.startsWith(prefix)) {
+          logger.warn("expecting " + prefix + " on " + url);
+        } else {
+          search = "./" + url.substring(prefix.length());
+        }
+      }
+
+      if (knownMP3s.contains(search)) {
+        found.add(search);
+      } else {
+//        if (missing.size()<10) logger.warn(language + " missing " +search);
+        missing.add(search);
+      }
+    });
+
+    logger.info(language + " found   " + found.size());
+    logger.info(language + " missing " + missing.size());
+
+    if (missing.size() < 400) {
+      missing.forEach(miss -> {
+        if (!miss.startsWith(".//opt/netprof"))
+          logger.info(language + " missing " + miss);
+      });
+    }
+  }
+
+  private Set<String> getLines(File toFind) {
+    try {
+      FileReader fileReader = new FileReader(toFind);
+      BufferedReader reader = new BufferedReader(fileReader);
+
+      /*line =*/
+      reader.readLine(); // skip header
+
+      String line;
+      Set<String> expected = new HashSet<>();
+      while ((line = reader.readLine()) != null) {
+        expected.add(line.trim());
+      }
+      reader.close();
+      return expected;
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return new HashSet<>();
+  }
+
+  @Test
   public void testLists() {
     DatabaseImpl english = getDatabase();
     int projectid = 3;
@@ -124,12 +256,12 @@ public class EasyReportTest extends BaseTest {
       e.printStackTrace();
     }
     UserList<CommonExercise> userListByIDExercises = english.getUserListByIDExercises(6528, projectid);
-    logger.info("list " +userListByIDExercises);
+    logger.info("list " + userListByIDExercises);
 
-    userListByIDExercises.getExercises().forEach(ex->logger.info("Got " + ex.getID() + " " + ex.getDirectlyRelated()));
+    userListByIDExercises.getExercises().forEach(ex -> logger.info("Got " + ex.getID() + " " + ex.getDirectlyRelated()));
 
     CommonExercise exerciseByID = project.getExerciseByID(108637);
-    exerciseByID.getDirectlyRelated().forEach(clientExercise -> logger.info("\t" + clientExercise.getID() + " " +clientExercise));
+    exerciseByID.getDirectlyRelated().forEach(clientExercise -> logger.info("\t" + clientExercise.getID() + " " + clientExercise));
   }
 
   @Test

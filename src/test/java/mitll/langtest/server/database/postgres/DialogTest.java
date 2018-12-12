@@ -32,10 +32,12 @@
 
 package mitll.langtest.server.database.postgres;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.DialogPopulate;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
@@ -63,10 +65,34 @@ public class DialogTest extends BaseTest {
 
   @Test
   public void testDict() {
-    DatabaseImpl andPopulate = getDatabase().setInstallPath("");
+    String korean = KOREAN;
+    testDialogPopulate(korean);
+  }
 
-    Project project = andPopulate.getProjectByName(KOREAN);
+  @Test
+  public void testInterpreter() {
+    testDialogPopulate("Chinese");
+  }
+  @Test
+  public void testInterpreterStored() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(12);
+    report(andPopulate, project);
+  }
 
+  private void testDialogPopulate(String korean) {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(12);
+//    Project project = andPopulate.getProjectByName(korean);
+
+    if (!new DialogPopulate(andPopulate, getPathHelper(andPopulate)).populateDatabase(project)) {
+      logger.info("testDialogPopulate project " + project + " already has dialog data.");
+    }
+
+    report(andPopulate, project);
+  }
+
+  private void report(DatabaseImpl andPopulate, Project project) {
     List<IDialog> dialogs = andPopulate.getDialogDAO().getDialogs(project.getID());
     dialogs.forEach(iDialog -> {
       logger.info("dialog " + iDialog);
@@ -90,6 +116,13 @@ public class DialogTest extends BaseTest {
       });
     });
   }
+
+
+  @NotNull
+  private static PathHelper getPathHelper(DatabaseImpl database) {
+    return new PathHelper("war", database.getServerProps());
+  }
+
 
   @Test
   public void testEx() {
