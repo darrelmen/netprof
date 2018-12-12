@@ -30,7 +30,6 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
   private final Logger logger = Logger.getLogger("ListFacetExerciseList");
 
   private static final String CONTENT = "Content";
-  // private static final String SENTENCES_ONLY = "Sentences Only";
   private static final String ADDING_VISITOR = "adding visitor";
 
   private final ListFacetHelper listFacetHelper;
@@ -170,22 +169,6 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
     return getTypeToSelection(selectionState, typeOrder);
   }
 
-
-/*  @NotNull
-  protected Map<String, String> getTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
-    Map<String, String> newTypeToSelection = new HashMap<>();
-    for (String type : typeOrder) {
-      Collection<String> selections = selectionState.getTypeToSection().get(type);
-      if (selections != null && !selections.isEmpty()) {
-        newTypeToSelection.put(type, selections.iterator().next());
-      }
-    }
-
-    // logger.info("getTypeToSelection " + newTypeToSelection);
-
-    return newTypeToSelection;
-  }*/
-
   /**
    * @see QuizHelper#clearListSelection
    */
@@ -205,14 +188,11 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
   protected void addDynamicFacets(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
     listFacetHelper.reallyAddListFacet(typeToValues, allTypesContainer, getTypeToSelection().containsKey(getDynamicFacet()));
 
-
     Set<MatchInfo> matchInfos = typeToValues.get(CONTENT);
-
     //  logger.info("addDynamicFacets match infos " + matchInfos);
 
     if (matchInfos != null && !matchInfos.isEmpty()) {
-      ListItem contentFacet = addContentFacet(allTypesContainer);
-      addExerciseChoices(CONTENT, contentFacet, matchInfos.iterator().next());
+      addExerciseChoices(CONTENT, addContentFacet(allTypesContainer), matchInfos);//.iterator().next());
     }
   }
 
@@ -231,17 +211,6 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
 
   private ListItem addContentFacet() {
     return getTypeContainer(CONTENT, getTypeToSelection().containsKey(CONTENT));
-  }
-
-  private void addExerciseChoices(String dynamicFacet, ListItem liForDimensionForType, MatchInfo e) {
-    Set<MatchInfo> value = new HashSet<>();
-    value.add(e);
-
-    Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
-    typeToValues.put(dynamicFacet, value);
-
-    //logger.info("addExerciseChoices --- for " + value);
-    liForDimensionForType.add(addChoices(typeToValues, dynamicFacet, false));
   }
 
   /**

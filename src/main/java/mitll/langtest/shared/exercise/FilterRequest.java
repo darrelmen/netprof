@@ -69,7 +69,6 @@ public class FilterRequest implements IsSerializable {
   }
 
   public void addPair(Pair pair) {
-
     Optional<Pair> first = typeToSelection.stream().filter(pair1 -> pair1.property.equalsIgnoreCase(pair.getProperty())).findFirst();
 
     first.ifPresent(pair1 -> typeToSelection.remove(pair1));

@@ -753,16 +753,25 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
   private int spew;
 
+  /**
+   * @see FilterResponseHelper#getPairs
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
+   * @param t
+   * @param exercise
+   * @param attrTypes
+   * @param pairs
+   * @param onlyIncludeFacetAttributes
+   */
   public void addPairs(T t,
                        CommonExercise exercise,
                        Collection<String> attrTypes,
-                       List<Pair> pairs) {
+                       List<Pair> pairs, boolean onlyIncludeFacetAttributes) {
     if (exercise.getAttributes() == null) {
       if (spew++ < 10) {
         logger.warn("addPhoneInfo : no exercise attributes for " + exercise.getID());
       }
     } else {
-      addBlanksForMissingInfo(exercise, attrTypes, pairs);
+      addBlanksForMissingInfo(exercise, attrTypes, pairs, onlyIncludeFacetAttributes);
     }
 
     // logger.info("pairs for " + exercise.getID() + " " + exercise.getOldID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " : " + pairs);
@@ -771,12 +780,12 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
   /**
    * SectionHelper gets confused if we don't have a complete tree - same number of nodes on path to root
-   *
-   * @param exercise
+   *  @param exercise
    * @param attrTypes
    * @param pairs
+   * @param onlyIncludeFacetAttributes
    */
-  private void addBlanksForMissingInfo(ClientExercise exercise, Collection<String> attrTypes, List<Pair> pairs) {
+  private void addBlanksForMissingInfo(ClientExercise exercise, Collection<String> attrTypes, List<Pair> pairs, boolean onlyIncludeFacetAttributes) {
     Map<String, ExerciseAttribute> typeToAtrr = new HashMap<>();
     exercise.getAttributes().forEach(attribute -> typeToAtrr.put(attribute.getProperty(), attribute));
 
@@ -786,10 +795,10 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
         // missing info for this type, so map it to BLANK
         pairs.add(new ExerciseAttribute(attrType, BLANK));
       } else {
-        if (attribute.isFacet()) {
+        if (attribute.isFacet() || !onlyIncludeFacetAttributes) {
           pairs.add(attribute);
         } else {
-          logger.info("Skip attribute not a facet " + attribute);
+          logger.info("addBlanksForMissingInfo : skip attribute not a facet " + attribute);
         }
       }
     }

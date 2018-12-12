@@ -1,10 +1,13 @@
 package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.ListItem;
+import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -120,5 +123,35 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
 //    logger.info("getExerciseListRequest req     " + request);
     request.setOnlyExamples(isContext);
     return request;
+  }
+
+  @Override
+  protected void addDynamicFacets(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
+    String name = DialogMetadata.LANGUAGE.name();
+    Set<MatchInfo> matchInfos = typeToValues.get(name);
+
+    logger.info("addDynamicFacets match infos  " + matchInfos);
+    logger.info("addDynamicFacets typeToValues " + typeToValues);
+
+    if (matchInfos != null && !matchInfos.isEmpty()) {
+      addExerciseChoices(name, addContentFacet(allTypesContainer), matchInfos);//.iterator().next());
+    }
+  }
+  /**
+   * Only for practice view
+   *
+   * @param allTypesContainer
+   */
+  private ListItem addContentFacet(UnorderedList allTypesContainer) {
+    ListItem widgets = addContentFacet();
+    if (widgets != null) {
+      allTypesContainer.add(widgets);
+    }
+    return widgets;
+  }
+
+  private ListItem addContentFacet() {
+    String name = DialogMetadata.LANGUAGE.name();
+    return getTypeContainer(name, getTypeToSelection().containsKey(name));
   }
 }

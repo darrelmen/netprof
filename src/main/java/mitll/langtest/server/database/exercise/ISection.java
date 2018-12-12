@@ -57,7 +57,7 @@ public interface ISection<T extends HasID & HasUnitChapter> {
   void addPairs(T t,
                 CommonExercise exercise,
                 Collection<String> attrTypes,
-                List<Pair> pairs);
+                List<Pair> pairs, boolean onlyIncludeFacetAttributes);
 
   boolean removeExercise(T exercise);
 

@@ -664,7 +664,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     List<Pair> pairs = getUnitToValue(slick, baseTypeOrder, sectionHelper);
 
     if (slick.ispredef() && !slick.iscontext()) {
-      sectionHelper.addPairs(exercise, exercise, attrTypes, pairs);
+      sectionHelper.addPairs(exercise, exercise, attrTypes, pairs, true);
     } else {
       exercise.setPairs(pairs);
     }

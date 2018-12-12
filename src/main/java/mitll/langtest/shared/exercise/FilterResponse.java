@@ -84,9 +84,7 @@ public class FilterResponse implements IsSerializable {
    * @see mitll.langtest.client.list.FacetExerciseList#gotFilterResponse
    * @return
    */
-  public Set<String> getTypesToInclude() {
-    return typesToInclude;
-  }
+  public Set<String> getTypesToInclude() {    return typesToInclude;  }
 
   public void addTypeToInclude(String type) {typesToInclude.add(type);}
   public int getReqid() {

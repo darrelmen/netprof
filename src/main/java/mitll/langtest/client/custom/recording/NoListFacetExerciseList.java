@@ -23,7 +23,6 @@ import java.util.*;
  * @param <T>
  */
 public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise>
-    // extends PracticeFacetExerciseList<T, ClientExercise> {
     extends ClientExerciseFacetExerciseList<T> {
 
   private static final String ALL_INSPECTED_OR_VISITED = "All inspected or visited";
@@ -102,8 +101,7 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise>
     setProgressVisible(false);
   }
 
-  //@Override
-  protected void showOnlyOneExercise(Collection<ClientExercise> result) {
+  private void showOnlyOneExercise(Collection<ClientExercise> result) {
     ClientExercise next = result.iterator().next();
     markCurrentExercise(next.getID());
     addExerciseWidget(next);

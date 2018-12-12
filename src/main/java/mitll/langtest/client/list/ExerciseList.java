@@ -306,8 +306,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
 
       logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
 
-      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance "));
-      logger.info("logException stack " + exceptionAsString);
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance "));
+//      logger.info("logException stack " + exceptionAsString);
     }
 
     public void onFailure(Throwable caught) {

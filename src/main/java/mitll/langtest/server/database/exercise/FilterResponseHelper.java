@@ -2,6 +2,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static mitll.langtest.server.database.exercise.SectionHelper.ANY;
 
@@ -19,8 +19,10 @@ public class FilterResponseHelper {
   private static final String CONTENT = "Content";
   public static final String SENTENCES = "Sentences";
   private static final String SENTENCES_ONLY = "Sentences Only";
+  public static final String LANGUAGE_META_DATA = DialogMetadata.LANGUAGE.name();
 
   private final DatabaseServices databaseServices;
+  private List<CommonExercise> unrecordedExercises;
 
   public FilterResponseHelper(DatabaseServices databaseServices) {
     this.databaseServices = databaseServices;
@@ -28,8 +30,6 @@ public class FilterResponseHelper {
 
   public FilterResponse getTypeToValues(FilterRequest request, int projid, int userID) {
     logger.info("getTypeToValues " + request);
-
-
 
     request.prune();
 
@@ -50,11 +50,11 @@ public class FilterResponseHelper {
         logger.info("\n\n\ngetTypeToValues isExampleRequest " + request);
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyExamples(true));
       } else {
-       // logger.info("getTypeToValues normal req " + request);
+        // logger.info("getTypeToValues normal req " + request);
         FilterResponse response = sectionHelper.getTypeToValues(request, false);
         maybeAddUserListFacet(request.getUserListID(), response);
         maybeAddContent(request, response, projid);
-      //  logger.info("getTypeToValues normal response " + response);
+        //  logger.info("getTypeToValues normal response " + response);
 
         return response;
       }
@@ -72,8 +72,12 @@ public class FilterResponseHelper {
    * @paramx response
    */
   private FilterResponse getFilterResponseForRecording(FilterRequest request, int projectID, int userFromSessionID) {
-    return getFilterResponse(request, projectID,
+    boolean includeLanguage = !databaseServices.getProject(projectID).getDialogs().isEmpty();
+
+    FilterResponse filterResponse = getFilterResponse(request, projectID,
         getExerciseListRequest(request, userFromSessionID).setOnlyUnrecordedByMe(true));
+    if (includeLanguage) filterResponse.addTypeToInclude(LANGUAGE_META_DATA);
+    return filterResponse;
   }
 
   private ExerciseListRequest getRequestForUninspected(FilterRequest request, int userID) {
@@ -95,15 +99,13 @@ public class FilterResponseHelper {
 
     if (next != null) {  // echo it back
       //logger.info("\tgetTypeToValues " + request + " include list " + next);
-      String type = LISTS;
-
-      typeToValues.addTypeToInclude(type);
+      typeToValues.addTypeToInclude(LISTS);
 
       Set<MatchInfo> value = new HashSet<>();
 
       value.add(new MatchInfo(next.getName(), next.getNumItems(), userListID, false, ""));
 
-      typeToValues.getTypeToValues().put(type, value);
+      typeToValues.getTypeToValues().put(LISTS, value);
     }
   }
 
@@ -143,14 +145,17 @@ public class FilterResponseHelper {
    * @param all
    * @param sectionHelper
    * @param typeOrder
+   * @param onlyUnrecordedByMe
    * @see #getSectionHelperFromFiltered(int, ExerciseListRequest)
    */
   private void populate(int projid,
                         Collection<CommonExercise> all,
                         ISection<CommonExercise> sectionHelper,
-                        List<String> typeOrder) {
-    Map<Integer, ExerciseAttribute> allAttributesByProject = databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
-    populate(all, typeOrder, sectionHelper, databaseServices.getProject(projid), allAttributesByProject);
+                        List<String> typeOrder, boolean onlyUnrecordedByMe) {
+    //Map<Integer, ExerciseAttribute> allAttributesByProject = databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
+    populate(all, typeOrder, sectionHelper, databaseServices.getProject(projid),
+        databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid),
+        onlyUnrecordedByMe);
   }
 
   /**
@@ -162,12 +167,13 @@ public class FilterResponseHelper {
    * @paramx addTypesToSection
    * @seex #getByProject
    * @seex #getContextByProject
+   * @see #populate(int, Collection, ISection, List)
    */
   private void populate(Collection<CommonExercise> all,
                         List<String> typeOrder,
                         ISection<CommonExercise> sectionHelper,
                         Project lookup,
-                        Map<Integer, ExerciseAttribute> allByProject) {
+                        Map<Integer, ExerciseAttribute> allByProject, boolean onlyUnrecordedByMe) {
     List<List<Pair>> allAttributes = new ArrayList<>();
     List<String> baseTypeOrder = lookup.getBaseTypeOrder();
 
@@ -180,10 +186,16 @@ public class FilterResponseHelper {
           .map(Pair::getProperty)
           .collect(Collectors.toCollection(HashSet::new));
 
-      for (CommonExercise exercise : all) {
-        List<Pair> e = getPairs(exercise, baseTypeOrder, sectionHelper, allFacetTypes);
-        allAttributes.add(e);
+      boolean includeLanguage = onlyUnrecordedByMe && !lookup.getDialogs().isEmpty();
+      if (includeLanguage) {
+        allFacetTypes.add(LANGUAGE_META_DATA);
       }
+
+      all.forEach(commonExercise -> allAttributes.add(getPairs(commonExercise, baseTypeOrder, sectionHelper,
+          allFacetTypes, !includeLanguage)));
+//      for (CommonExercise exercise : all) {
+//        allAttributes.add(getPairs(exercise, baseTypeOrder, sectionHelper, allFacetTypes));
+//      }
     }
 
     long now = System.currentTimeMillis();
@@ -193,15 +205,14 @@ public class FilterResponseHelper {
     }
 
     sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
-
   }
 
   private List<Pair> getPairs(CommonExercise exercise,
                               Collection<String> baseTypeOrder,
                               ISection<CommonExercise> sectionHelper,
-                              Collection<String> attrTypes) {
+                              Collection<String> attrTypes, boolean onlyIncludeFacetAttributes) {
     List<Pair> pairs = getUnitToValue(exercise, baseTypeOrder, sectionHelper);
-    sectionHelper.addPairs(exercise, exercise, attrTypes, pairs);
+    sectionHelper.addPairs(exercise, exercise, attrTypes, pairs, onlyIncludeFacetAttributes);
     return pairs;
   }
 
@@ -227,6 +238,8 @@ public class FilterResponseHelper {
    * @param projectID
    * @param exerciseListRequest
    * @return
+   * @see #getTypeToValues
+   * @see #getFilterResponseForRecording(FilterRequest, int, int)
    */
   private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest exerciseListRequest) {
     SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelperFromFiltered(projectID, exerciseListRequest);
@@ -243,7 +256,7 @@ public class FilterResponseHelper {
 
     ISection<CommonExercise> sectionHelper = getSectionHelper(projectID);
     SectionHelper<CommonExercise> unrecordedSectionHelper = new SectionHelper<>();
-    populate(projectID, filtered, unrecordedSectionHelper, sectionHelper.getTypeOrder());
+    populate(projectID, filtered, unrecordedSectionHelper, sectionHelper.getTypeOrder(), request.isOnlyUnrecordedByMe());
     return unrecordedSectionHelper;
   }
 
@@ -299,8 +312,10 @@ public class FilterResponseHelper {
         logger.info("filterExercises OK doing examples");
         exercises = getContextExercises(exercises);
       }
-      logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded");
-      exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, onlyExamples);
+      logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded" +
+          "\n\ttype->selection " + request.getTypeToSelection().keySet());
+      exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, onlyExamples,
+          request.getTypeToSelection().get(LANGUAGE_META_DATA));
 
     } else if (request.isOnlyWithAnno()) {
       boolean isContext = onlyExamples || request.shouldAddContext();
@@ -402,6 +417,7 @@ public class FilterResponseHelper {
    * @param exercises
    * @param projid
    * @param onlyExamples
+   * @param languageFilter
    * @return
    * @paramx onlyRecorded
    * @see #filterExercises
@@ -409,28 +425,17 @@ public class FilterResponseHelper {
   @NotNull
   private List<CommonExercise> getRecordFilterExercisesMatchingGender(int userID,
                                                                       Collection<CommonExercise> exercises,
-                                                                      int projid
-      ,
-                                                                      boolean onlyExamples
-      /*,
-                                                                      boolean onlyRecorded*/) {
-
+                                                                      int projid,
+                                                                      boolean onlyExamples,
+                                                                      Collection<String> languageFilter) {
     Set<Integer> unrecordedIDs = new HashSet<>(exercises.size());
 
     Map<Integer, String> exToTranscript = new HashMap<>();
 
     for (CommonExercise exercise : exercises) {
-    /*  if (onlyExamples) {
-        exercise.getDirectlyRelated().forEach(dir -> {
-          int id = dir.getID();
-          unrecordedIDs.add(id);
-          exToTranscript.put(id, dir.getForeignLanguage());
-        });
-      } else {*/
       int id = exercise.getID();
       unrecordedIDs.add(id);
       exToTranscript.put(id, exercise.getForeignLanguage());
-      //}
     }
 
     logger.info("getRecordFilterExercisesMatchingGender # exToTranscript " + exToTranscript.size());
@@ -455,6 +460,23 @@ public class FilterResponseHelper {
 
     List<CommonExercise> unrecordedExercises = getUnrecordedForIDs(exercises,/* onlyExamples,*/ unrecordedIDs);
 
+    boolean useLangFilter = languageFilter != null && !languageFilter.isEmpty();
+
+    if (useLangFilter) {
+      logger.info("before " + unrecordedExercises.size());
+      unrecordedExercises = unrecordedExercises
+          .stream()
+          .filter(ex ->
+              !ex.getAttributes()
+                  .stream()
+                  .filter(attr ->
+                      attr.getProperty().equalsIgnoreCase(LANGUAGE_META_DATA) &&
+                          languageFilter.contains(attr.getValue()))
+                  .collect(Collectors.toSet()).isEmpty()
+          )
+          .collect(Collectors.toList());
+      logger.info("after  " + unrecordedExercises.size());
+    }
     logger.info("getRecordFilterExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
 
     return unrecordedExercises;
@@ -555,9 +577,10 @@ public class FilterResponseHelper {
     Map<String, Collection<String>> copy = new HashMap<>(typeToSelection);
     copy.remove(RECORDED1);
     copy.remove(CONTENT);
+    copy.remove(LANGUAGE_META_DATA);
 
     boolean empty = copy.isEmpty();
-//    logger.info("getExercises " + empty + " : " + copy);
+    logger.info("getExercisesForSelection " + empty + " : " + copy);
     return empty ?
         getExercises(projid) :
         getSectionHelper(projid).getExercisesForSelectionState(copy);

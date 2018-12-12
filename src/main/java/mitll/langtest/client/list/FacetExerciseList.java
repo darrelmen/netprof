@@ -597,7 +597,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #gotFilterResponse
    */
   private void addFacetsForReal(Map<String, Set<MatchInfo>> typeToValues, Panel nav) {
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("addFacetsForReal" +
           "\n\t# root nodes = " + rootNodesInOrder.size() + " " + rootNodesInOrder +
           "\n\ttype->distinct " + typeToValues.keySet() +
@@ -640,7 +640,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     addDynamicFacets(typeToValues, allTypesContainer);
   }
 
-  void addDynamicFacets(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
+  protected void addDynamicFacets(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
   }
 
 
@@ -784,6 +784,17 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       }
     }
     return choices;
+  }
+
+  protected void addExerciseChoices(String dynamicFacet, ListItem liForDimensionForType, Set<MatchInfo> value) {
+//    Set<MatchInfo> value = new HashSet<>();
+//    value.add(e);
+
+    Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
+    typeToValues.put(dynamicFacet, value);
+
+    //logger.info("addExerciseChoices --- for " + value);
+    liForDimensionForType.add(addChoices(typeToValues, dynamicFacet, false));
   }
 
   /**
@@ -1116,7 +1127,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #addRemoveClickHandler
    */
   void setHistory(Map<String, String> candidate) {
-   //   logger.info("setHistory "+candidate);
+    //   logger.info("setHistory "+candidate);
     setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
   }
 
@@ -1202,10 +1213,12 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
           "\n\ttype to selection " + typeToSelection +
-          "\n\ttype to values    " + response.getTypeToValues().size()
+          "\n\ttype to include   " + response.getTypesToInclude() +
+          "\n\t#type to values   " + response.getTypeToValues().size() +
+          "\n\ttype to values    " + response.getTypeToValues()
       );
     }
 
@@ -1255,7 +1268,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    * @param selectionState
    * @see HistoryExerciseList#onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
-   *
    * @see #restoreUIState
    */
   @Override
@@ -2158,7 +2170,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
   @Override
   public void gotShow() {
-   // logger.warning("gotShow");
+    // logger.warning("gotShow");
     askServerForExercise(-1);
   }
 
