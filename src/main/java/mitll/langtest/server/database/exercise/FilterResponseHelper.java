@@ -4,6 +4,7 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -72,12 +73,16 @@ public class FilterResponseHelper {
    * @paramx response
    */
   private FilterResponse getFilterResponseForRecording(FilterRequest request, int projectID, int userFromSessionID) {
-    boolean includeLanguage = !databaseServices.getProject(projectID).getDialogs().isEmpty();
+    boolean includeLanguage = hasDialogs(projectID);
 
     FilterResponse filterResponse = getFilterResponse(request, projectID,
         getExerciseListRequest(request, userFromSessionID).setOnlyUnrecordedByMe(true));
     if (includeLanguage) filterResponse.addTypeToInclude(LANGUAGE_META_DATA);
     return filterResponse;
+  }
+
+  private boolean hasDialogs(int projectID) {
+    return !databaseServices.getProject(projectID).getDialogs().isEmpty();
   }
 
   private ExerciseListRequest getRequestForUninspected(FilterRequest request, int userID) {
@@ -332,26 +337,34 @@ public class FilterResponseHelper {
 
     } else if (request.isOnlyUninspected()) {
       exercises = filterByUninspected(exercises);
-
     } else if (onlyExamples) {
       logger.info("filterExercises OK doing examples 3");
       exercises = getContextExercises(exercises);
+    } else {
+      boolean includeLanguage = hasDialogs(projid);
+      if (includeLanguage) {
+        logger.info("filterExercises remove english - before " + exercises.size());
 
+        exercises = exercises
+            .stream()
+            .filter(ex ->
+                ex.getAttributes()
+                    .stream()
+                    .filter(attr ->
+                        attr.getProperty().equalsIgnoreCase(LANGUAGE_META_DATA) &&
+                            attr.getValue().equalsIgnoreCase(Language.ENGLISH.name()))
+                    .collect(Collectors.toList())
+                    .isEmpty())
+            .collect(Collectors.toList());
+
+        logger.info("filterExercises remove english - after  " + exercises.size());
+      }
     }
 
     logger.info("filterExercises" +
         "\n\tfilter req " + request +
         "\n\treturn     " + exercises.size());
 
-/*    Set<Integer> seen = new HashSet<>();
-    for (CommonExercise exercise : exercises) {
-      int id = exercise.getID();
-      if (seen.add(id)) {
-
-      } else {
-        logger.info("WARN : dup! " + id + " ex " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
-      }
-    }*/
 
     return exercises;
   }

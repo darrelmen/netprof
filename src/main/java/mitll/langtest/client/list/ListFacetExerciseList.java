@@ -60,6 +60,11 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
     return isListType(type) ? "" + newUserListID : key;
   }
 
+  /**
+   * TODO : do something better here - super class shouldn't know about list type
+   * @param type
+   * @return
+   */
   @Override
   protected boolean isListType(String type) {
     return type.equalsIgnoreCase(getDynamicFacet());
@@ -79,11 +84,11 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
     //logger.info("Type->sel " + typeToSection);
     String dynamicFacet = getDynamicFacet();
     if (typeToSection.containsKey(dynamicFacet)) {
-      Collection<String> strings = typeToSection.get(dynamicFacet);
+      Collection<String> sections = typeToSection.get(dynamicFacet);
 
       if (isDynamicFacetInteger()) {
         //only one user list can be selected, and they don't nest
-        String next = strings.iterator().next();
+        String next = sections.iterator().next();
         try {
           exerciseListRequest.setUserListID(Integer.parseInt(next));
           //   logger.info("getExerciseListRequest userlist = " + userListID);
@@ -107,19 +112,15 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
     List<Pair> pairs = super.getPairs(typeToSelection);
 
     addPairForTypeSelection(typeToSelection, pairs, getDynamicFacet());
-
-    {
-      String s = typeToSelection.get(CONTENT);
-      pairs.add(new Pair(CONTENT, s == null ? ANY : s));
-    }
+    addContentPair(typeToSelection, pairs);
 
     return pairs;
+   // return addDynamicFacetToPairs(typeToSelection, LANGUAGE_META_DATA, super.getPairs(typeToSelection));
   }
 
-  private void addPairForTypeSelection(Map<String, String> typeToSelection, List<Pair> pairs, String dynamicFacet) {
-    if (typeToSelection.containsKey(dynamicFacet)) {
-      pairs.add(new Pair(dynamicFacet, typeToSelection.get(dynamicFacet)));
-    }
+  private void addContentPair(Map<String, String> typeToSelection, List<Pair> pairs) {
+    String s = typeToSelection.get(CONTENT);
+    pairs.add(new Pair(CONTENT, s == null ? ANY : s));
   }
 
   @Override
@@ -151,7 +152,6 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
     return userListID;
   }
 
-
   /**
    * From the selection state in the URL.
    *
@@ -173,7 +173,7 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
    * @see QuizHelper#clearListSelection
    */
   public void clearListSelection() {
-  logger.info("in list ---> clearListSelection ");
+    logger.info("in list ---> clearListSelection ");
     Map<String, String> candidate = new HashMap<>(getTypeToSelection());
     candidate.remove(getDynamicFacet());
     setHistory(candidate);
@@ -203,9 +203,7 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
    */
   private ListItem addContentFacet(UnorderedList allTypesContainer) {
     ListItem widgets = addContentFacet();
-    if (widgets != null) {
-      allTypesContainer.add(widgets);
-    }
+    allTypesContainer.add(widgets);
     return widgets;
   }
 

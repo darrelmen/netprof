@@ -74,7 +74,6 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise>
 
   @Override
   protected void hidePrevNext() {
-    // hidePrevNextWidgets();
     setProgressVisible(true);
   }
 

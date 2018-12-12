@@ -79,9 +79,10 @@ public class SelectionState {
   private boolean isJump;
   private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault, onlyUninspected;
 
-  private static final boolean DEBUG = false;
   private int project = -1;
   private int dialog = -1;
+
+  private static final boolean DEBUG = false;
 
   public SelectionState() {
     this(History.getToken(), false);

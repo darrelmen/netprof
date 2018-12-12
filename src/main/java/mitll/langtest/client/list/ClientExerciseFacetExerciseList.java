@@ -7,6 +7,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.exercise.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -179,6 +180,18 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
               }
             }
           });
+    }
+  }
+
+  @NotNull
+  protected void addDynamicFacetToPairs(Map<String, String> typeToSelection, String languageMetaData, List<Pair> pairs) {
+    addPairForTypeSelection(typeToSelection, pairs, languageMetaData);
+   // return pairs;
+  }
+
+  void addPairForTypeSelection(Map<String, String> typeToSelection, List<Pair> pairs, String dynamicFacet) {
+    if (typeToSelection.containsKey(dynamicFacet)) {
+      pairs.add(new Pair(dynamicFacet, typeToSelection.get(dynamicFacet)));
     }
   }
 }
