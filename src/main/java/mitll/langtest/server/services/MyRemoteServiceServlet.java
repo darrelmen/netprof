@@ -572,7 +572,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   public IDialog getDialog(int id) throws DominoSessionException {
     IDialog iDialog = getOneDialog(id);
 
-    logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
+  //  logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
 
     if (iDialog != null) {
       int projid = iDialog.getProjid();

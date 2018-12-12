@@ -76,6 +76,7 @@ public class ExerciseListRequest implements IsSerializable {
   private boolean QC = false;
   private boolean addContext = false;
   private boolean plainVocab = false;
+  private boolean isOnlyFL = false;
   private int dialogID = -1;
 
   public ExerciseListRequest() {
@@ -322,6 +323,24 @@ public class ExerciseListRequest implements IsSerializable {
    */
   public boolean isPlainVocab() {
     return plainVocab;
+  }
+
+
+  /**
+   * @return
+   */
+  public boolean isOnlyFL() {
+    return isOnlyFL;
+  }
+
+  /**
+   * @param onlyExamples
+   * @return
+   * @see HistoryExerciseList#getExerciseListRequest
+   */
+  public ExerciseListRequest setOnlyFL(boolean isOnlyFL) {
+    this.isOnlyFL = isOnlyFL;
+    return this;
   }
 
   public ExerciseListRequest setUserID(int userID) {

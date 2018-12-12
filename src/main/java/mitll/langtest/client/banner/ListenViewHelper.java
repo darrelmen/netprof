@@ -1,8 +1,6 @@
 package mitll.langtest.client.banner;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.Icon;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -11,6 +9,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.http.client.Header;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -24,6 +23,7 @@ import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.TurnPanel;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -63,7 +63,12 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private final List<T> rightTurnPanels = new ArrayList<>();
 
   private T currentTurn;
-  CheckBox leftSpeakerBox, rightSpeakerBox;
+
+  private CheckBox leftSpeakerBox = null;
+  private CheckBox interpreterBox = null;
+  private CheckBox rightSpeakerBox = null;
+
+  CheckBox speakerBoxes;
   private ComplexWidget slider;
   private Button playButton;
   private DivWidget dialogHeader;
@@ -137,7 +142,14 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
       child.add(new HTML("hmmm can't find dialog #" + dialogID + " in database"));
     } else {
       child.add(dialogHeader = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog));
-      child.add(getSpeakerRow(dialog));
+
+      DivWidget controlAndSpeakers = new DivWidget();
+      styleControlRow(controlAndSpeakers);
+      child.add(controlAndSpeakers);
+
+      controlAndSpeakers.add(getControls());
+      controlAndSpeakers.add(getSpeakerRow(dialog));
+
       child.add(getTurns(dialog));
     }
   }
@@ -145,17 +157,81 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   @NotNull
   private DivWidget getSpeakerRow(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
-    styleControlRow(rowOne);
+    rowOne.getElement().setId("speakerRow");
+    rowOne.getElement().getStyle().setMarginTop(5,PX);
 
-    String label = dialog.getSpeakers().get(0);
-    if (label == null) label = "A";
-    leftSpeakerBox = addLeftSpeaker(rowOne, label);
+    boolean isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
+    {
+      String label = dialog.getSpeakers().get(0);
+      if (label == null) label = "A";
 
-    rowOne.add(getControls());
+      if (isInterpreter) {
+        Heading w = new Heading(4, label);
 
-    String label1 = dialog.getSpeakers().get(1);
-    if (label1 == null) label1 = "B";
-    rightSpeakerBox = addRightSpeaker(rowOne, label1);
+        DivWidget left = new DivWidget();
+        left.add(w);
+        left.setWidth("100px");
+
+        styleLeftSpeaker(w);
+
+        left.addStyleName("floatLeft");
+        left.addStyleName("bubble");
+        left.addStyleName("leftbubble");
+        //left.addStyleName("leftFiveMargin");
+        left.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+
+        rowOne.add(left);
+      } else {
+        leftSpeakerBox = addLeftSpeaker(rowOne, label);
+      }
+    }
+
+    {
+      if (isInterpreter) {
+        String label2 = dialog.getSpeakers().get(2);
+        if (label2 == null) label2 = "B";
+
+        Heading w = new Heading(4, label2);
+
+        DivWidget right = new DivWidget();
+        right.setWidth("100px");
+        right.add(w);
+        right.addStyleName("bubble");
+        right.addStyleName("rightbubble");
+        right.addStyleName("floatRight");
+        //left.addStyleName("leftFiveMargin");
+        right.getElement().getStyle().setBackgroundColor(RIGHT_BKG_COLOR);
+        styleRightSpeaker(w);
+        rowOne.add(right);
+      }
+    }
+
+    {
+      String label1 = dialog.getSpeakers().get(1);
+      if (label1 == null) label1 = "Interpreter";
+
+      if (isInterpreter) {
+        Heading w = new Heading(4, "Interpreter");
+
+        DivWidget middle = new DivWidget();
+        middle.addStyleName("bubble");
+        middle.setWidth(240 + "px");
+        middle.setHeight("44px");
+        middle.getElement().getStyle().setMarginTop(0, PX);
+        middle.getElement().getStyle().setMarginBottom(0, PX);
+        middle.getElement().getStyle().setProperty("marginLeft", "auto");
+        middle.getElement().getStyle().setProperty("marginRight", "auto");
+        middle.add(w);
+        styleLabel(w);
+        w.getElement().getStyle().setMarginLeft(43,PX);
+     //   w.getElement().getStyle().setPaddingTop(12,PX);
+        middle.getElement().getStyle().setBackgroundColor("#00800059");
+        rowOne.add(middle);
+      } else {
+        rightSpeakerBox = addRightSpeaker(rowOne, label1);
+      }
+    }
+
 
     return rowOne;
   }
@@ -179,21 +255,30 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   private int getControlRowHeight() {
-    return 40;
+    return 105;
   }
 
   private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
     CheckBox checkBox = new CheckBox(label, true);
     setLeftTurnSpeakerInitial(checkBox);
-    checkBox.addStyleName("floatLeft");
-    checkBox.addStyleName("leftFiveMargin");
-    checkBox.addStyleName("leftSpeaker");
-    checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+    styleLeftSpeaker(checkBox);
 
     checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
 
     rowOne.add(getLeftSpeakerDiv(checkBox));
     return checkBox;
+  }
+
+  private void styleLeftSpeaker(UIObject checkBox) {
+//    checkBox.addStyleName("floatLeft");
+//    checkBox.addStyleName("leftFiveMargin");
+//    checkBox.addStyleName("leftSpeaker");
+//
+//    checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+//    checkBox.getElement().getStyle().setMarginLeft(43,PX);
+//    checkBox.getElement().getStyle().setFontSize(32,PX);
+
+    styleLabel(checkBox);
   }
 
   @NotNull
@@ -207,18 +292,28 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     CheckBox checkBox = new CheckBox(label, true);
 
     setRightTurnInitialValue(checkBox);
-    Style style = checkBox.getElement().getStyle();
-    style.setBackgroundColor(RIGHT_BKG_COLOR);
-
-    checkBox.addStyleName("rightSpeaker");
-    checkBox.addStyleName("rightAlign");
-    checkBox.addStyleName("floatRight");
-    checkBox.addStyleName("rightFiveMargin");
+    styleRightSpeaker(checkBox);
 
     checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
 
     rowOne.add(getRightSpeakerDiv(checkBox));
     return checkBox;
+  }
+
+  private void styleRightSpeaker(UIObject checkBox) {
+    // Style style = checkBox.getElement().getStyle();
+    //  style.setBackgroundColor(RIGHT_BKG_COLOR);
+
+//    checkBox.addStyleName("rightSpeaker");
+//    checkBox.addStyleName("rightAlign");
+//    checkBox.addStyleName("floatRight");
+//    checkBox.addStyleName("rightFiveMargin");
+    styleLabel(checkBox);
+  }
+
+  private void styleLabel(UIObject checkBox) {
+    checkBox.getElement().getStyle().setMarginLeft(43, PX);
+    checkBox.getElement().getStyle().setFontSize(32, PX);
   }
 
   @NotNull
@@ -237,17 +332,39 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   void speakerOneCheck(Boolean value) {
-    if (!value && !rightSpeakerBox.getValue()) {
-      rightSpeakerBox.setValue(true);
+    if (!value && !isRightSpeakerSelected()) {
+      setRightSpeaker();
+    }
+  }
+
+  private void setRightSpeaker() {
+    setRightSpeaker(true);
+  }
+
+  protected void setRightSpeaker(boolean value) {
+    if (rightSpeakerBox != null) {
+      rightSpeakerBox.setValue(value);
     }
   }
 
   void speakerTwoCheck(Boolean value) {
-    if (!value && !leftSpeakerBox.getValue()) {
-      leftSpeakerBox.setValue(true);
+    if (!value && !isLeftSpeakerSelected()) {
+      selectLeftSpeaker();
     }
   }
 
+  private void selectLeftSpeaker() {
+    setLeftSpeaker(true);
+  }
+
+  protected void setLeftSpeaker(boolean val) {
+    if (leftSpeakerBox != null)
+      leftSpeakerBox.setValue(val);
+  }
+
+  private Boolean isLeftSpeakerSelected() {
+    return leftSpeakerBox == null ? true : leftSpeakerBox.getValue();
+  }
 
   /**
    * @param dialog
@@ -642,10 +759,14 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   Boolean isLeftSpeakerSet() {
-    return leftSpeakerBox.getValue();
+    return isLeftSpeakerSelected();
   }
 
   Boolean isRightSpeakerSet() {
+    return isRightSpeakerSelected();
+  }
+
+  private Boolean isRightSpeakerSelected() {
     return rightSpeakerBox.getValue();
   }
 

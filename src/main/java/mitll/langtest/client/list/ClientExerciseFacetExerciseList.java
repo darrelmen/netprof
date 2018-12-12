@@ -63,7 +63,11 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
           "\n\talready   " + getIDs(alreadyFetched));
     }
 
-    service.getFullExercises(getExerciseListRequest("").setReqID(currentReq),
+    ExerciseListRequest exerciseListRequest = getExerciseListRequest("");
+
+    logger.info("getFullExercises " + exerciseListRequest);
+
+    service.getFullExercises(exerciseListRequest.setReqID(currentReq),
         requested,
         new AsyncCallback<ExerciseListWrapper<ClientExercise>>() {
           @Override

@@ -125,6 +125,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   @Override
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
     ExerciseListRequest request = super.getExerciseListRequest(prefix);
+    logger.info("getExerciseListRequest " + isContext);
     request.setOnlyExamples(isContext);
     return request;
   }

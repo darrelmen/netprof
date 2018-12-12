@@ -527,7 +527,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    * @see #addLeftSpeaker
    */
   protected void speakerOneCheck(Boolean value) {
-    rightSpeakerBox.setValue(!value);
+    setRightSpeaker(!value);
     gotSpeakerChoice();
   }
 
@@ -537,7 +537,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
    * @param value
    */
   protected void speakerTwoCheck(Boolean value) {
-    leftSpeakerBox.setValue(!value);
+    setLeftSpeaker(!value);
     gotSpeakerChoice();
   }
 

@@ -157,7 +157,6 @@ public class FilterResponseHelper {
                         Collection<CommonExercise> all,
                         ISection<CommonExercise> sectionHelper,
                         List<String> typeOrder, boolean onlyUnrecordedByMe) {
-    //Map<Integer, ExerciseAttribute> allAttributesByProject = databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
     populate(all, typeOrder, sectionHelper, databaseServices.getProject(projid),
         databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid),
         onlyUnrecordedByMe);
@@ -345,17 +344,7 @@ public class FilterResponseHelper {
       if (includeLanguage) {
         logger.info("filterExercises remove english - before " + exercises.size());
 
-        exercises = exercises
-            .stream()
-            .filter(ex ->
-                ex.getAttributes()
-                    .stream()
-                    .filter(attr ->
-                        attr.getProperty().equalsIgnoreCase(LANGUAGE_META_DATA) &&
-                            attr.getValue().equalsIgnoreCase(Language.ENGLISH.name()))
-                    .collect(Collectors.toList())
-                    .isEmpty())
-            .collect(Collectors.toList());
+        exercises = getCommonExercisesWithoutEnglish(exercises);
 
         logger.info("filterExercises remove english - after  " + exercises.size());
       }
@@ -366,6 +355,22 @@ public class FilterResponseHelper {
         "\n\treturn     " + exercises.size());
 
 
+    return exercises;
+  }
+
+  @NotNull
+  public List<CommonExercise> getCommonExercisesWithoutEnglish(List<CommonExercise> exercises) {
+    exercises = exercises
+        .stream()
+        .filter(ex ->
+            ex.getAttributes()
+                .stream()
+                .filter(attr ->
+                    attr.getProperty().equalsIgnoreCase(LANGUAGE_META_DATA) &&
+                        attr.getValue().equalsIgnoreCase(Language.ENGLISH.name()))
+                .collect(Collectors.toList())
+                .isEmpty())
+        .collect(Collectors.toList());
     return exercises;
   }
 
@@ -593,7 +598,7 @@ public class FilterResponseHelper {
     copy.remove(LANGUAGE_META_DATA);
 
     boolean empty = copy.isEmpty();
-    logger.info("getExercisesForSelection " + empty + " : " + copy);
+//    logger.info("getExercisesForSelection " + empty + " : " + copy);
     return empty ?
         getExercises(projid) :
         getSectionHelper(projid).getExercisesForSelectionState(copy);

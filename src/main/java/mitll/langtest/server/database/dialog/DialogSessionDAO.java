@@ -51,10 +51,7 @@ import java.util.stream.Collectors;
 public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
   private static final Logger logger = LogManager.getLogger(DialogSessionDAO.class);
 
-
   private final DialogSessionDAOWrapper dao;
-
-  // private final DatabaseImpl databaseImpl;
 
   /**
    * @param database
@@ -235,7 +232,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
    */
   @Override
   public int add(DialogSession ds) {
-    logger.info("Add session " + ds);
+//    logger.info("Add session " + ds);
 
     long modified = ds.getModified();
     if (modified == 0) modified = System.currentTimeMillis();
@@ -256,7 +253,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
         ds.getSpeakingRate()
     ));
 
-    logger.info("add " + ds + " id " + insert);
+  //  logger.info("add " + ds + " id " + insert);
     return insert;
   }
 

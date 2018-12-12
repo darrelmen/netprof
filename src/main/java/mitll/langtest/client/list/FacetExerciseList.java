@@ -103,10 +103,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    *
    */
   static final boolean DEBUG_STALE = true;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_CHOICES = false;
   private static final boolean DEBUGSCORE = false;
-  public static final boolean DEBUG_SET_HISTORY = true;
+  private static final boolean DEBUG_SET_HISTORY = false;
 
   private static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
 
@@ -529,7 +529,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 //   logger.info("logException stack " + exceptionAsString);
     boolean context = views.isContext();
 
-    if (context) logger.warning("getExerciseListRequest view " + views);
+    if (context) logger.warning("\n\n\ngetExerciseListRequest view " + views);
     return super.getExerciseListRequest(prefix)
         .setAddFirst(false)
         .setOnlyExamples(context);

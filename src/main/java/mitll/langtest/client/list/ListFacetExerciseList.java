@@ -81,6 +81,8 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
                                                        boolean onlyUninspected) {
     ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyUninspected);
 
+    logger.info("getExerciseListRequest " + exerciseListRequest);
+
     //logger.info("Type->sel " + typeToSection);
     String dynamicFacet = getDynamicFacet();
     if (typeToSection.containsKey(dynamicFacet)) {
