@@ -403,7 +403,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
     dialog.getExercises().forEach(clientExercise -> {
       COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
-  //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
+      //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
 
       addTurn(rowOne, columnForEx, clientExercise);
     });
@@ -779,12 +779,13 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @return
    */
   List<T> getPromptSeq() {
-    if (isInterpreter) return allTurns;
-    else {
+    if (isInterpreter) {
+      return allTurns;
+    } else {
       boolean leftSpeaker = isLeftSpeakerSet();
       boolean rightSpeaker = isRightSpeakerSet();
       List<T> ts = (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : allTurns;
-     // logger.info("getPromptSeq " + ts.size());
+      // logger.info("getPromptSeq " + ts.size());
       report(ts);
       return ts;
     }

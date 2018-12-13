@@ -658,7 +658,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel<ClientExerci
           }
         }
 
+        // TODO for interpreter, only do recording with interpreter turn
         if (getPromptSeq().contains(currentTurn)) {  // is the current turn a prompt? if so play the prompt
+
           playCurrentTurn();  // could do play/pause!
         } else { // the current turn is a response, start recording it
           startRecordingTurn(getCurrentTurn()); // advance automatically
