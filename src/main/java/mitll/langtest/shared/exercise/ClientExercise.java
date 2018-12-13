@@ -49,4 +49,6 @@ public interface ClientExercise extends CommonShell, MutableAnnotationExercise, 
    * @return
    */
   List<ExerciseAttribute> getAttributes();
+
+  boolean hasEnglishAttr();
 }

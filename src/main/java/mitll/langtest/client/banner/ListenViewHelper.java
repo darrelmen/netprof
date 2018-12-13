@@ -800,7 +800,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   private Boolean isRightSpeakerSelected() {
-    return rightSpeakerBox.getValue();
+    return rightSpeakerBox != null && rightSpeakerBox.getValue();
   }
 
   /**

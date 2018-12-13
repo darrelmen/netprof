@@ -47,6 +47,7 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
@@ -68,6 +69,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.Collator;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.ScoreServlet.GetRequest.HASUSER;
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
@@ -428,7 +430,7 @@ public class AudioFileHelper implements AlignDecode {
 
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo(recordingInfoInitial, path);
 
-  //  logger.info("writeAudioFile recordingInfo " + recordingInfo);
+    //  logger.info("writeAudioFile recordingInfo " + recordingInfo);
 
     return getAudioAnswerDecoding(exercise1,
         audioContext,
@@ -468,7 +470,8 @@ public class AudioFileHelper implements AlignDecode {
     String actualPath =
         ensureAudioHelper.ensureCompressedAudio(audioContext.getUserid(), exercise1, wavPath,
             audioContext.getAudioType(), language, new HashMap<>(), true);
-    logger.info("ensureCompressed wav path " + wavPath + " compressed actual " + actualPath);
+
+    if (DEBUG) logger.info("ensureCompressed wav path " + wavPath + " compressed actual " + actualPath);
   }
 
 /*
@@ -675,13 +678,17 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     try {
+      boolean b = exercise.hasEnglishAttr();
+      if (b)
+        logger.info("exercise " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " has english lang attr");
+      Language language = b ? Language.ENGLISH : this.language;
       precalcScores = checkForWebservice(
           exercise.getID(),
           exercise.getEnglish(),
           transcript,
           exercise.getProjectID(),
           userID,
-          absoluteFile);
+          absoluteFile, language);
     } catch (Exception e) {
       logger.error("Got " + e, e);
       logger.warn(
@@ -734,6 +741,15 @@ public class AudioFileHelper implements AlignDecode {
     return alignmentScore;
   }
 
+  /* private boolean hasEnglishAttr(CommonExercise exercise) {
+     return !exercise.getAttributes()
+             .stream()
+             .filter(attr ->
+                 attr.getProperty().equalsIgnoreCase(DialogMetadata.LANGUAGE.name()) &&
+                     attr.getValue().equalsIgnoreCase(Language.ENGLISH.name()))
+             .collect(Collectors.toSet()).isEmpty();
+   }
+ */
   private PretestScore getPretestScoreMaybeUseCache(int reqid, String testAudioFile, String sentence,
                                                     String transliteration, ImageOptions imageOptions, int exerciseID,
                                                     PrecalcScores precalcScores,
@@ -1156,6 +1172,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param projid
    * @param userid
    * @param theFile
+   * @param language
    * @return scores for the file
    * @see mitll.langtest.server.services.ScoringServiceImpl#getASRScoreForAudio
    */
@@ -1164,7 +1181,7 @@ public class AudioFileHelper implements AlignDecode {
                                           String foreignLanguage,
                                           int projid,
                                           int userid,
-                                          File theFile) {
+                                          File theFile, Language language) {
     boolean available = isHydraAvailable();
     String hydraHost = serverProps.getHydraHost();
     if (!available && !noted) {
@@ -1176,6 +1193,7 @@ public class AudioFileHelper implements AlignDecode {
           "\n\tenglish " + english +
           "\n\titem    " + foreignLanguage +
           "\n\tuser    " + userid +
+          "\n\tlanguage " + language +
           "\n\thost    " + hydraHost
       );
       if (theFile.getName().endsWith("mp3")) logger.warn("don't send mp3!");
@@ -1188,7 +1206,7 @@ public class AudioFileHelper implements AlignDecode {
       logger.info("checkForWebservice exists  " + theFile.exists());
       */
       if (theFile.exists()) {
-        PrecalcScores precalcScores = getProxyScore(english, foreignLanguage, userid, theFile, hydraHost);
+        PrecalcScores precalcScores = getProxyScore(english, foreignLanguage, userid, theFile, hydraHost, language);
         return (precalcScores != null && precalcScores.isDidRunNormally()) ? precalcScores : null;
       } else {
 //        logger.info("checkForWebservice no file at " + theFile.getAbsolutePath());
@@ -1209,19 +1227,21 @@ public class AudioFileHelper implements AlignDecode {
    * @param userid
    * @param theFile
    * @param hydraHost
+   * @param language
    * @return
-   * @see #checkForWebservice(int, String, String, int, int, File)
+   * @see #checkForWebservice(int, String, String, int, int, File, Language)
    */
   @Nullable
   private PrecalcScores getProxyScore(String english,
                                       String foreignLanguage,
                                       int userid,
                                       File theFile,
-                                      String hydraHost) {
+                                      String hydraHost,
+                                      Language language) {
     if (session == null || session.isEmpty()) {
       session = getSession(hydraHost, project.getID());
     }
-    HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, ScoreServlet.PostRequest.ALIGN);
+    HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, ScoreServlet.PostRequest.ALIGN, language);
 
     if (session != null) {
 //      logger.info("getProxyScore adding session '" + session + "'");
@@ -1231,9 +1251,10 @@ public class AudioFileHelper implements AlignDecode {
     try {
       logger.info("getProxyScore asking remote netprof (" + hydraHost + ") to " +
           ScoreServlet.PostRequest.ALIGN +
-          "\n\teng     '" + english + "'" +
-          "\n\tsession '" + session + "'" +
-          "\n\tfl      '" + foreignLanguage + "'" +
+          "\n\teng      '" + english + "'" +
+          "\n\tsession  '" + session + "'" +
+          "\n\tlanguage " + language +
+          "\n\tfl       '" + foreignLanguage + "'" +
           (language == Language.JAPANESE ? "\n\tsegmented '" + getSegmented(foreignLanguage) + "'" : "")
       );
    /*   {
@@ -1263,14 +1284,16 @@ public class AudioFileHelper implements AlignDecode {
                                                    String foreignLanguage,
                                                    int userid,
                                                    String hydraHost,
-                                                   ScoreServlet.PostRequest requestToServer) {
+                                                   ScoreServlet.PostRequest requestToServer,
+                                                   Language language) {
     boolean isDefault = project.getWebserviceHost().equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
 
     HTTPClient httpClient = getHttpClient(hydraHost, isDefault ? "" : project.getWebserviceHost());
     httpClient.addRequestProperty(REQUEST.toString(), requestToServer.toString());
     httpClient.addRequestProperty(ENGLISH.toString(), english);
     httpClient.addRequestProperty(EXERCISE_TEXT.toString(), new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
-    httpClient.addRequestProperty(LANGUAGE.toString(), getLanguage());
+
+    httpClient.addRequestProperty(LANGUAGE.toString(), language.name().toLowerCase());
     httpClient.addRequestProperty(USER.toString(), "" + userid);
     httpClient.addRequestProperty(FULL.toString(), FULL.toString());  // full json returned
     return httpClient;
@@ -1569,6 +1592,10 @@ public class AudioFileHelper implements AlignDecode {
                                      DecoderOptions decoderOptions,
                                      int userID) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.getDurationInMillis(), exercise.getID());
+    boolean b = exercise.asCommon().hasEnglishAttr();
+    logger.info("getAudioAnswer Ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " = " + b);
+
+    Language language = b ? Language.ENGLISH : this.language;
     if (decoderOptions.shouldDoAlignment()) {
       PrecalcScores precalcScores =
           checkForWebservice(
@@ -1577,7 +1604,8 @@ public class AudioFileHelper implements AlignDecode {
               exercise.getForeignLanguage(),
               project.getID(),
               userID,
-              file);
+              file,
+              language);
 
       String phraseToDecode = getChecker().getPhraseToDecode(exercise.getForeignLanguage(), language);
       PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
@@ -1604,7 +1632,8 @@ public class AudioFileHelper implements AlignDecode {
               exercise.getForeignLanguage(),
               project.getID(),
               userID,
-              file);
+              file,
+              language);
 
       PretestScore flashcardAnswer = getChecker().getDecodeScore(
           exercise,

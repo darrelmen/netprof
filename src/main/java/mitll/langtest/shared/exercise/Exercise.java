@@ -39,9 +39,12 @@ import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.dialog.DialogMetadata;
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.SlickExercise;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
 
@@ -370,6 +373,15 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return attributes;
   }
 
+  public boolean hasEnglishAttr() {
+    return !getAttributes()
+        .stream()
+        .filter(attr ->
+            attr.getProperty().equalsIgnoreCase(DialogMetadata.LANGUAGE.name()) &&
+                attr.getValue().equalsIgnoreCase(Language.ENGLISH.name()))
+        .collect(Collectors.toSet()).isEmpty();
+  }
+
   public boolean addAttribute(ExerciseAttribute attribute) {
     return attributes.add(attribute);
   }
@@ -616,7 +628,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return "Exercise #" +
         getID() +
         ", domino # " + getDominoID() +
-        "\n\tcontext " + isContext()+
+        "\n\tcontext " + isContext() +
         "\n\tnp id '" + getOldID() + "'" +
         " context index " + dominoContextIndex +
         " project " + projectid +
