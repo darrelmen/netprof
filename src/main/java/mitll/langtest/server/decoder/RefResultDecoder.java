@@ -704,7 +704,7 @@ public class RefResultDecoder {
     int total = 0;
     int context = 0;
 
-  //  int num = 1;
+    //  int num = 1;
     for (CommonExercise exercise : exercises) {
       if (stopDecode) return new RecalcRefResponse(RecalcResponses.STOPPED);
 
@@ -713,7 +713,7 @@ public class RefResultDecoder {
       context += total1.context;
 
       // HACK FOR STEVE
-   //   if (num-- == 0) stopDecode = true;
+      //   if (num-- == 0) stopDecode = true;
     }
 
     if (consumer == null) {
@@ -1025,8 +1025,15 @@ public class RefResultDecoder {
     return toDecode;
   }
 
+  /**
+   * TODO : seems wrong...
+   * @param audioAttributes
+   * @param title
+   * @param comment
+   * @param language
+   */
   private void doEnsure(Collection<AudioAttribute> audioAttributes, String title, String comment, String language) {
-    int c = 0;
+    //  int c = 0;
     for (AudioAttribute attribute : audioAttributes) {
       String audioRef = attribute.getAudioRef();
       File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
@@ -1035,6 +1042,8 @@ public class RefResultDecoder {
         String author = attribute.getUser().getUserID();
         audioConversion.ensureWriteMP3(pathHelper.getInstallPath(), audioRef, false,
             new TrackInfo(title, author, comment, language), true);
+      } else {
+        logger.info("doEnsure can't find " + absoluteFile.getAbsolutePath());
       }
     }
   }

@@ -47,7 +47,6 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
-import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
@@ -69,7 +68,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.Collator;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.server.ScoreServlet.GetRequest.HASUSER;
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
@@ -158,11 +156,7 @@ public class AudioFileHelper implements AlignDecode {
 
     this.language = project.getLanguageEnum();
     removeAccents = language != Language.FRENCH;
-    //hasModel = project.hasModel();
-    // makeASRScoring(project);
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
-
-    //  makeDecodeCorrectnessChecker();
   }
 
   /**
@@ -362,10 +356,6 @@ public class AudioFileHelper implements AlignDecode {
     return getASRScoring().validLTS(foreignLanguagePhrase, transliteration);
   }
 
-/*  private boolean isInDictOrLTS(ClientExercise exercise) {
-    return getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
-  }*/
-
   public SmallVocabDecoder getSmallVocabDecoder() {
     return getASRScoring().getSmallVocabDecoder();
   }
@@ -473,39 +463,6 @@ public class AudioFileHelper implements AlignDecode {
 
     if (DEBUG) logger.info("ensureCompressed wav path " + wavPath + " compressed actual " + actualPath);
   }
-
-/*
-  @Deprecated
-  public AudioAnswer writeAMASAudioFile(String base64EncodedString,
-                                        AmasExerciseImpl exercise1,
-                                        AudioContext audioContext,
-                                        AnswerInfo.RecordingInfo recordingInfoInitial) {
-    String wavPath = pathHelper.getAbsoluteToAnswer(audioContext);
-    File file = new File(wavPath);
-    //long then = System.currentTimeMillis();
-    AudioCheck.ValidityAndDur validity =
-        audioConversion.convertBase64ToAudioFiles(base64EncodedString, file, false, isQuietAudioOK());
-
-    // logger.debug("writeAudioFile writing to " + file.getAbsolutePath() + " validity " + validity);
-*/
-/*    long now = System.currentTimeMillis();
-    long diff = now - then;
-    if (diff > MIN_WARN_DUR) {
-      logger.debug("writeAudioFile: took " + diff + " millis to write wav file " + validity.durationInMillis +
-          " millis long");
-    }*//*
-
-
-    return getAMASAudioAnswerDecoding(exercise1,
-        audioContext,
-        new AnswerInfo.RecordingInfo(recordingInfoInitial, file.getPath()),
-
-        wavPath, file,
-
-        validity);
-  }
-*/
-
 
   /**
    * Does decoding or alignment on audio file, against the text of the exercise.
@@ -634,7 +591,7 @@ public class AudioFileHelper implements AlignDecode {
    */
   public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, int userID, File absoluteFile) {
     if (getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration())) {
-      decodeAndRemember(exercise, attribute, true, userID, absoluteFile);
+      decodeAndRemember(exercise, attribute, true, userID, absoluteFile, language);
     } else {
       logger.warn("decodeOneAttribute skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
     }
@@ -646,11 +603,13 @@ public class AudioFileHelper implements AlignDecode {
    * @param doDecode
    * @param userID
    * @param absoluteFile
+   * @param projectLanguage could be we're doing english audio inside of chinese project
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper
    */
   public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute,
-                                        boolean doDecode, int userID, File absoluteFile) {
+                                        boolean doDecode, int userID, File absoluteFile,
+                                        Language projectLanguage) {
     String audioRef = attribute.getAudioRef();
 
     if (DEBUG) {
@@ -664,7 +623,8 @@ public class AudioFileHelper implements AlignDecode {
 
     // Do alignment...
     if (absoluteFile == null) {
-      absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, language.getLanguage());
+      // String language = this.language.getLanguage();
+      absoluteFile = pathHelper.getAbsoluteBestAudioFile(audioRef, projectLanguage);
     }
     String absolutePath = absoluteFile.getAbsolutePath();
 
@@ -678,17 +638,15 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     try {
-      boolean b = exercise.hasEnglishAttr();
-      if (b)
-        logger.info("exercise " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " has english lang attr");
-      Language language = b ? Language.ENGLISH : this.language;
+      Language language = getLanguage(exercise);
       precalcScores = checkForWebservice(
           exercise.getID(),
           exercise.getEnglish(),
           transcript,
           exercise.getProjectID(),
           userID,
-          absoluteFile, language);
+          absoluteFile,
+          language);
     } catch (Exception e) {
       logger.error("Got " + e, e);
       logger.warn(
@@ -741,15 +699,13 @@ public class AudioFileHelper implements AlignDecode {
     return alignmentScore;
   }
 
-  /* private boolean hasEnglishAttr(CommonExercise exercise) {
-     return !exercise.getAttributes()
-             .stream()
-             .filter(attr ->
-                 attr.getProperty().equalsIgnoreCase(DialogMetadata.LANGUAGE.name()) &&
-                     attr.getValue().equalsIgnoreCase(Language.ENGLISH.name()))
-             .collect(Collectors.toSet()).isEmpty();
-   }
- */
+  private Language getLanguage(CommonExercise exercise) {
+    boolean b = exercise.hasEnglishAttr();
+/*    if (b)
+      logger.info("exercise " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " has english lang attr");*/
+    return b ? Language.ENGLISH : this.language;
+  }
+
   private PretestScore getPretestScoreMaybeUseCache(int reqid, String testAudioFile, String sentence,
                                                     String transliteration, ImageOptions imageOptions, int exerciseID,
                                                     PrecalcScores precalcScores,
@@ -790,6 +746,7 @@ public class AudioFileHelper implements AlignDecode {
    * @seex RefResultDecoder#recalcStudentAudio
    * @deprecated
    */
+/*
   private boolean recalcOne(Result result, CommonExercise exercise) {
     String audioRef = result.getAnswer();
     File absoluteFile = pathHelper.getAbsoluteFile(audioRef);
@@ -799,21 +756,31 @@ public class AudioFileHelper implements AlignDecode {
     if (result.getAudioType() == AudioType.PRACTICE) {//.equals("flashcard") || result.getAudioType().equals("avp")) {
       long durationInMillis = result.getDurationInMillis();
       AudioAnswer decodeAnswer = getDecodeAnswer(exercise, audioRef, absoluteFile, durationInMillis);
-/*//      db.getPhoneDAO().removePhones(uniqueID);
+*/
+/*
+//      db.getPhoneDAO().removePhones(uniqueID);
 //      db.getWordDAO().removeWords(uniqueID);
       db.rememberScore(uniqueID, decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
-      logger.info("rememberScore for result " + uniqueID + " : decode " *//* +decodeAnswer.getPretestScore()*//*);
+      logger.info("rememberScore for result " + uniqueID + " : decode " *//*
+*/
+/* +decodeAnswer.getPretestScore()*//*
+*/
+/*);
     } else {
       String absolutePath = absoluteFile.getAbsolutePath();
       PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, serverProps.usePhoneToDisplay(), false);
 //      db.getPhoneDAO().removePhones(uniqueID);
 //      db.getWordDAO().removeWords(uniqueID);
       db.rememberScore(uniqueID, alignmentScore, alignmentScore.getHydecScore() > 0.25);
-      logger.info("rememberScore for result " + uniqueID + " : alignment " + alignmentScore);*/
+      logger.info("rememberScore for result " + uniqueID + " : alignment " + alignmentScore);
+      *//*
+
       db.getPhoneDAO().removeForResult(uniqueID);
       db.getWordDAO().removeForResult(uniqueID);
       db.rememberScore(exercise.getProjectID(), uniqueID, decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
-      logger.info("rememberScore for result " + uniqueID + " : decode " /* +decodeAnswer.getPretestScore()*/);
+      logger.info("rememberScore for result " + uniqueID + " : decode " */
+/* +decodeAnswer.getPretestScore()*//*
+);
     } else {
       PretestScore alignmentScore = getEasyAlignment(exercise, absoluteFile.getAbsolutePath());
       db.getPhoneDAO().removeForResult(uniqueID);
@@ -823,6 +790,7 @@ public class AudioFileHelper implements AlignDecode {
     }
     return true;
   }
+*/
 
   private boolean isUsePhoneToDisplay() {
     return serverProps.usePhoneToDisplay(project.getLanguageEnum());
@@ -848,7 +816,7 @@ public class AudioFileHelper implements AlignDecode {
    * @paramx wavPath
    * @paramx numAlignPhones
    * @seex #decodeOneAttribute(CommonExercise, AudioAttribute, int)
-   * @see #decodeAndRemember(CommonExercise, AudioAttribute, boolean, int, File)
+   * @see #decodeAndRemember(CommonExercise, AudioAttribute, boolean, int, File, Language)
    */
   private void getRefAudioAnswerDecoding(CommonExercise exercise1,
                                          int user,

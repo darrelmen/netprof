@@ -79,5 +79,5 @@ public interface IEnsureAudioHelper {
    * @param language
    * @return
    */
-  String getWavAudioFile(String audioFile, String language);
+  String getWavAudioFile(String audioFile, Language language);
 }

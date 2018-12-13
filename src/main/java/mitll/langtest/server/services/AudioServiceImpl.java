@@ -504,17 +504,18 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                    AudioType audioType,
 
                                    List<AudioChunk> audioChunks,
-                                   JsonObject jsonObject) throws IOException, DominoSessionException {
-    AudioChunk combined = isReference ? getCombinedRef(audioChunks) : getCombinedAudioChunk(audioChunks);
+                                   JsonObject jsonObject) throws IOException {
+    //AudioChunk combined = getCombined(isReference, audioChunks);
 
-    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(combined.getWavFile());
+    //ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(combined.getWavFile());
 //      logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
-    String language = getProject(projid).getLanguage();
+    Language language = getProject(projid).getLanguageEnum();
     File saveFile = new FileSaver().writeAudioFile(pathHelper,
-        byteArrayInputStream,
+        new ByteArrayInputStream(getCombined(isReference, audioChunks).getWavFile()),
         realExID,
         userIDFromSession,
-        language, true);
+        language,
+        true);
 
     AudioContext audioContext = new AudioContext(
         reqid,
@@ -557,6 +558,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
 //    logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
     return jsonObject;
+  }
+
+  private AudioChunk getCombined(boolean isReference, List<AudioChunk> audioChunks) {
+    return isReference ? getCombinedRef(audioChunks) : getCombinedAudioChunk(audioChunks);
   }
 
   /**
@@ -1204,17 +1209,23 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     int idToUse = noExistingExercise ? exerciseID : exercise1.getID();
     int projid = noExistingExercise ? -1 : exercise1.getProjectID();
     String audioTranscript = audioAnswer.getTranscript();
-    String language = db.getProject(projid).getLanguage();
+    Language language = db.getProject(projid).getLanguageEnum();
 
-    logger.info("addToAudioTable " +
-        "\n\tuser " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
+    if (DEBUG) {
+      logger.info("addToAudioTable " +
+          "\n\tuser " + user + " ex " + exerciseID + " for " + audioType + " path before " + audioAnswer.getPath());
+    }
 
     File absoluteFile = pathHelper.getAbsoluteAudioFile(audioAnswer.getPath());
     boolean isContext = audioType == AudioType.CONTEXT_REGULAR || audioType == AudioType.CONTEXT_SLOW;
 
-    logger.info("addToAudioTable isContext " + isContext +
-        "\n\taudio type " + audioType + " exercise1 " + exercise1 +
-        " is comtext " + exercise1.isContext() + "is pre " + exercise1.isPredefined());
+    if (exercise1 != null && DEBUG) {
+      logger.info("addToAudioTable isContext " + isContext +
+          "\n\taudio type " + audioType +
+          " exercise1 " + exercise1 +
+          " is context " + exercise1.isContext() +
+          " is pre " + exercise1.isPredefined());
+    }
 
     String context = noExistingExercise ? "" : isContext ? getEnglish(exercise1) : exercise1.getEnglish();
 
@@ -1227,7 +1238,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             language,
             idToUse,
             serverProps,
-            new TrackInfo(audioTranscript, getArtist(user), context, language));
+            new TrackInfo(audioTranscript, getArtist(user), context, language.getLanguage()));
 
     AudioAttribute audioAttribute = null;
     try {
@@ -1240,11 +1251,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       audioAttribute = db.getAudioDAO().addOrUpdate(info);
 
       audioAnswer.setPath(audioAttribute.getAudioRef());
-      logger.debug("addToAudioTable" +
-          "\n\tuser " + user +
-          "\n\tex " + exerciseID + "/" + idToUse +
-          "\n\tfor " + audioType +
-          "\n\taudio answer has " + audioAttribute);
+      if (DEBUG) {
+        logger.debug("addToAudioTable" +
+            "\n\tuser " + user +
+            "\n\tex " + exerciseID + "/" + idToUse +
+            "\n\tfor " + audioType +
+            "\n\taudio answer has " + audioAttribute);
+      }
 
       // what state should we mark recorded audio?
       setExerciseState(idToUse, user, exercise1);
@@ -1293,10 +1306,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return userWhere == null ? "" + user : userWhere.getUserID();
   }
 
-  private File getAbsoluteFile(String path) {
-    return pathHelper.getAbsoluteFile(path);
-  }
-
   /**
    * Only change APPROVED to UNSET.
    *
@@ -1329,6 +1338,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param imageType
    * @param imageOptions
    * @param exerciseID
+   * @param language
    * @return path to an image file
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio
    */
@@ -1337,7 +1347,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                             String imageType,
                                             ImageOptions imageOptions,
                                             String exerciseID,
-                                            String language) {
+                                            Language language) {
     if (audioFile.isEmpty())
       logger.error("getImageForAudioFile huh? audio file is empty for req id " + reqid + " exid " + exerciseID);
 
@@ -1371,17 +1381,20 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     long then = System.currentTimeMillis();
 
-    String imageOutDir = pathHelper.getImageOutDir(language.toLowerCase());
-    File absoluteImageDir = /*new File(language.toLowerCase(), imageOutDir);*/ getAbsoluteFile(imageOutDir);
+    String imageOutDir = pathHelper.getImageOutDir(language.getLanguage());
+    File absoluteImageDir = pathHelper.getAbsoluteFile(imageOutDir);
 
-    logger.info("getImageForAudioFile" +
-        "\n\timageOutDir " + imageOutDir +
-        "\n\tabs         " + absoluteImageDir +
-        "\n\ttype        " + imageType1 +
-        "\n\twavAudioFile " + wavAudioFile +
-        "\n\ttestFile " + testFile +
-        "\n\ttestFile len " + testFile.length()
-    );
+    if (DEBUG) {
+      logger.info("getImageForAudioFile" +
+          "\n\timageOutDir " + imageOutDir +
+          "\n\tabs         " + absoluteImageDir +
+          "\n\ttype        " + imageType1 +
+          "\n\twavAudioFile " + wavAudioFile +
+          "\n\ttestFile     " + testFile +
+          "\n\ttestFile len " + testFile.length()
+      );
+    }
+
     String absolutePathToImage = imageWriter.writeImage(
         wavAudioFile,
         absoluteImageDir.getAbsolutePath(),
@@ -1389,7 +1402,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > WARN_THRESH) {
-      logger.debug("getImageForAudioFile : got images " +
+      logger.info("getImageForAudioFile : got images " +
           // "(" + width + " x " + height + ")" +
           " (" + reqid + ") type " + imageType +
           "\n\tfor wav " + wavAudioFile +
@@ -1415,7 +1428,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.error("huh? " + wavAudioFile + " has zero duration???");
     }
 
-    logger.debug("getImageForAudioFile for" +
+    logger.info("getImageForAudioFile for" +
         "\n\taudio file " + wavAudioFile +
         "\n\ttype       " + imageType +
         "\n\trel path   " + relativeImagePath +
@@ -1485,7 +1498,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     getUserIDFromSessionOrDB();
     db.editItem(userExercise, keepAudio);
   }
-
 
   @Override
   public void refreshExercises(int projID, Set<Integer> exids) throws DominoSessionException {

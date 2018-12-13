@@ -72,7 +72,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private T currentTurn;
 
   private CheckBox leftSpeakerBox = null;
- // private CheckBox interpreterBox = null;
   private CheckBox rightSpeakerBox = null;
 
   CheckBox speakerBoxes;
@@ -86,7 +85,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    *
    */
   protected int dialogID;
-  boolean isInterpreter = false;//dialog.getKind() == DialogType.INTERPRETER;
+  private boolean isInterpreter = false;
 
   /**
    * @param controller
@@ -390,7 +389,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     rowOne.getElement().getStyle().setMarginBottom(10, PX);
 
     List<String> speakers = dialog.getSpeakers();
-    logger.info("speakers " + speakers);
+    //logger.info("speakers " + speakers);
 
     Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
     String middle = speakers.get(1);
@@ -398,13 +397,13 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
     String left = speakers.get(0);
     String right = speakers.get(2);
-    logger.info("for speaker " + left + " got " + speakerToEx.get(left).size());
+/*    logger.info("for speaker " + left + " got " + speakerToEx.get(left).size());
     logger.info("for speaker " + middle + " got " + middleTurns.size());
-    logger.info("for speaker " + right + " got " + speakerToEx.get(right).size());
+    logger.info("for speaker " + right + " got " + speakerToEx.get(right).size());*/
 
     dialog.getExercises().forEach(clientExercise -> {
-      // logger.info("ex " + clientExercise.getID() + " audio " + clientExercise.getAudioAttributes());
       COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
+  //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
 
       addTurn(rowOne, columnForEx, clientExercise);
     });
@@ -434,6 +433,12 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     }
   }
 
+  /**
+   * @param rowOne
+   * @param columns
+   * @param clientExercise
+   * @see
+   */
   private void addTurn(DivWidget rowOne, COLUMNS columns, ClientExercise clientExercise) {
     T turn = getTurnPanel(clientExercise, columns);
 
@@ -518,13 +523,14 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   @NotNull
   T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
-    return (T) new TurnPanel<>(
+    TurnPanel<ClientExercise> widgets = new TurnPanel<>(
         clientExercise,
         controller,
         null,
         alignments,
         this,
         columns);
+    return (T) widgets;
   }
 
   private boolean gotTurnClick = false;
@@ -717,6 +723,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   /**
    * @return true if changed turn to next one
+   * @see #gotPlay
    */
   boolean setTurnToPromptSide() {
     Boolean leftSpeakerSet = isLeftSpeakerSet();
@@ -772,9 +779,21 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @return
    */
   List<T> getPromptSeq() {
-    boolean leftSpeaker = isLeftSpeakerSet();
-    boolean rightSpeaker = isRightSpeakerSet();
-    return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : allTurns;
+    if (isInterpreter) return allTurns;
+    else {
+      boolean leftSpeaker = isLeftSpeakerSet();
+      boolean rightSpeaker = isRightSpeakerSet();
+      List<T> ts = (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : allTurns;
+     // logger.info("getPromptSeq " + ts.size());
+      report(ts);
+      return ts;
+    }
+  }
+
+  private void report(List<T> allTurns) {
+    StringBuilder builder = new StringBuilder();
+    allTurns.forEach(turn -> builder.append(turn.getExID()).append(", "));
+    logger.info("seq " + builder);
   }
 
   /**
@@ -852,7 +871,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
       setPlayButtonToPlay();
       removeMarkCurrent();
       currentTurnPlayEnded(false);
-
+    } else {
+      logger.info("playStopped - no current turn.");
     }
   }
 
@@ -861,12 +881,17 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @see #playStopped
    */
   void currentTurnPlayEnded(boolean wasRecording) {
-    if (DEBUG || true)
+    if (DEBUG) {
       logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
+    }
+
     if (gotTurnClick) {
       gotTurnClick = false;
     } else {
       T next = getNext();
+      if (DEBUG && next != null) {
+        logger.info("next turn " + next.getExID());
+      }
       makeNextVisible();
 
       if (next == null) {
@@ -932,11 +957,14 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     List<T> seq = getPromptSeq();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
+    logger.info("getNext current " + i + " next " + i1);
 
     if (i1 > seq.size() - 1) {
       return null;
     } else {
-      return seq.get(i1);
+      T widgets = seq.get(i1);
+      logger.info("getNext current at " + i1 + " will be ex #" + widgets.getExID());
+      return widgets;
     }
   }
 

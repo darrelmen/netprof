@@ -446,22 +446,27 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
       logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " '" + byID.getTranscript() + "' for exercise #" + byID.getExid() + "...");
 
-      if (customOrPredefExercise != null && customOrPredefExercise.hasEnglishAttr()) {
-        List<Project> matchingProjects = db.getProjectManagement().getMatchingProjects(Language.ENGLISH, false);
-        if (matchingProjects.isEmpty()) {
-          logger.info("no english projects?");
-        } else {
-          Project project = matchingProjects.get(0);
-          audioFileHelper = project.getAudioFileHelper();
-          logger.info("using english project audio file helper " +project.getID() + " " +project.getName());
-        }
+      audioFileHelper = getExerciseDependentAudioFileHelper(audioFileHelper, customOrPredefExercise);
 
-      }
-      return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null);
+      return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null, getProject(projid).getLanguageEnum());
     } else {
       logger.info("recalcRefAudioWithHelper can't find audio id " + audioID);
       return null;
     }
+  }
+
+  private AudioFileHelper getExerciseDependentAudioFileHelper(AudioFileHelper audioFileHelper, CommonExercise customOrPredefExercise) {
+    if (customOrPredefExercise != null && customOrPredefExercise.hasEnglishAttr()) {
+      List<Project> matchingProjects = db.getProjectManagement().getMatchingProjects(Language.ENGLISH, false);
+      if (matchingProjects.isEmpty()) {
+        logger.info("no english projects?");
+      } else {
+        Project project = matchingProjects.get(0);
+        audioFileHelper = project.getAudioFileHelper();
+       // logger.info("using english project audio file helper " +project.getID() + " " +project.getName());
+      }
+    }
+    return audioFileHelper;
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,

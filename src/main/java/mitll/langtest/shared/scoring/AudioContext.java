@@ -34,6 +34,7 @@ package mitll.langtest.shared.scoring;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.project.Language;
 
 /**
  * reqid               request id from the client, so it can potentially throw away out of order responses
@@ -62,7 +63,7 @@ public class AudioContext implements IsSerializable {
    */
   private int projid;
 
-  private String language;
+  private Language language;
   private int exid;
   /**
    * question within the exercise
@@ -85,12 +86,12 @@ public class AudioContext implements IsSerializable {
    * @param exid
    * @param questionID
    * @param audioType
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile(String)
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
    */
   public AudioContext(int reqid,
                       int userid,
                       int projid,
-                      String language,
+                      Language language,
                       int exid,
                       int questionID,
                       AudioType audioType) {
@@ -130,7 +131,7 @@ public class AudioContext implements IsSerializable {
     return projid;
   }
 
-  public String getLanguage() {
+  public Language getLanguage() {
     return language;
   }
 
@@ -160,6 +161,7 @@ public class AudioContext implements IsSerializable {
     return
         "AudioContext" +
             "\n\tuser           " + userid +
+            "\n\tlanguage       " + language +
             "\n\tprojid         " + projid +
             "\n\texid           " + exid +
             "\n\treq            " + reqid +

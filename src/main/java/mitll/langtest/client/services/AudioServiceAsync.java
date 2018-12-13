@@ -37,6 +37,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
@@ -77,7 +78,7 @@ public interface AudioServiceAsync {
    */
   void getImageForAudioFile(int reqid, String audioFile, String imageType, ImageOptions imageOptions,
                             String exerciseID,
-                            String language,
+                            Language language,
                             AsyncCallback<ImageResponse> async);
 
   /**

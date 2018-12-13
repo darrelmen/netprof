@@ -20,7 +20,7 @@ public class TrackInfo {
     return title;
   }
 
-  public String getArtist() {
+  String getArtist() {
     return artist;
   }
 
@@ -28,7 +28,7 @@ public class TrackInfo {
     return comment;
   }
 
-  public String getAlbum() {
+  String getAlbum() {
     return album;
   }
 

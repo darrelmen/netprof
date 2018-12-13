@@ -67,7 +67,10 @@ import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.project.ProjectEditForm;
-import mitll.langtest.client.recorder.*;
+import mitll.langtest.client.recorder.BrowserRecording;
+import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.recorder.WebAudioRecorder;
 import mitll.langtest.client.scoring.AnnotationHelper;
 import mitll.langtest.client.scoring.ClientAudioContext;
 import mitll.langtest.client.scoring.CommentAnnotator;
@@ -580,12 +583,12 @@ public class LangTest implements
     int height = Integer.parseInt(split[3]);
     String exerciseID = split[4];
 
-    getImage(reqid, key, path, type, toUse, height, exerciseID, getLanguage(), client);
+    getImage(reqid, key, path, type, toUse, height, exerciseID, getLanguageInfo(), client);
   }
 
   private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
                         String exerciseID,
-                        String language,
+                        Language language,
                         final AsyncCallback<ImageResponse> client) {
     //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);

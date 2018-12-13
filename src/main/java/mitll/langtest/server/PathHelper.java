@@ -32,6 +32,7 @@
 
 package mitll.langtest.server;
 
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.AudioContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -104,8 +105,8 @@ public class PathHelper {
     return absolute;
   }
 
-  public File getAbsoluteBestAudioFile(String filePath, String language) {
-    return getAbsolute(properties.getMediaDir() + File.separator + language.toLowerCase(), filePath);
+  public File getAbsoluteBestAudioFile(String filePath, Language language) {
+    return getAbsolute(properties.getMediaDir() + File.separator + language.getLanguage(), filePath);
   }
 
   public File getAbsoluteAudioFile(String filePath) {
@@ -165,7 +166,7 @@ public class PathHelper {
    */
   public String getAbsoluteToAnswer(AudioContext audioContext) {
     return getAbsoluteToAnswer(
-        audioContext.getLanguage().toLowerCase(),
+        audioContext.getLanguage(),
         audioContext.getExid(),
         audioContext.getQuestionID(),
         audioContext.getUserid());
@@ -178,25 +179,27 @@ public class PathHelper {
 
   /**
    * Somehow the question index default is 1.
+   *
    * @param language
    * @param exercise
    * @param user
    * @return
    */
-  String getAbsoluteToAnswer(String language, int exercise, int user) {
+  String getAbsoluteToAnswer(Language language, int exercise, int user) {
     return getAbsoluteToAnswer(language, exercise, QUESTION, user);
   }
 
   /**
+   *
    * @param language
    * @param exercise
    * @param question - vestigial
    * @param user
    * @return
    */
-  private String getAbsoluteToAnswer(String language, int exercise, int question, int user) {
+  private String getAbsoluteToAnswer(Language language, int exercise, int question, int user) {
     String planAndTestPath =
-        language.toLowerCase() + File.separator +
+        language.getLanguage() + File.separator +
             exercise + File.separator +
             question + File.separator +
             "subject-" + user;

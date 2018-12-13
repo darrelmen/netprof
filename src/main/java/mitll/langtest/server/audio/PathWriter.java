@@ -33,6 +33,7 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.shared.project.Language;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -89,8 +90,8 @@ public class PathWriter {
    * @param overwrite
    * @param language
    * @param exid
-   * @param trackInfo        mark the mp3 meta data with this title
    * @param serverProperties
+   * @param trackInfo        mark the mp3 meta data with this title
    * @return relative path of file under bestAudio directory
    * @see mitll.langtest.server.database.custom.UserListManager#getRefAudioPath
    * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
@@ -98,7 +99,7 @@ public class PathWriter {
   public String getPermanentAudioPath(File wavFileRef,
                                       String destFileName,
                                       boolean overwrite,
-                                      String language,
+                                      Language language,
                                       int exid,
                                       ServerProperties serverProperties,
                                       TrackInfo trackInfo) {
@@ -106,7 +107,7 @@ public class PathWriter {
     // this path will look like
     // /opt/netprof/bestAudio/LANG/bestAudio/1234
     String commonAudioPrefix = bestDir +
-        File.separator + language.toLowerCase() +
+        File.separator + language.name().toLowerCase() +
         File.separator;
     File bestDirForExercise = new File(
         commonAudioPrefix + ServerProperties.BEST_AUDIO
