@@ -39,13 +39,13 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
+public class ListenViewHelper<T extends TurnPanel>
     extends DialogView implements ContentView, PlayListener, IListenView {
-  public static final String MIDDLE_COLOR = "#00800059";
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
-  public enum COLUMNS {LEFT, MIDDLE, RIGHT, UNK}
+  private static final String MIDDLE_COLOR = "#00800059";
 
+  public enum COLUMNS {LEFT, MIDDLE, RIGHT, UNK}
 
   private static final String VALUE = "value";
   private static final String SLIDER_MAX = "100";
@@ -65,6 +65,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
   final List<T> allTurns = new ArrayList<>();
+  private final List<T> promptTurns = new ArrayList<>();
   final List<T> leftTurnPanels = new ArrayList<>();
   private final List<T> middleTurnPanels = new ArrayList<>();
   private final List<T> rightTurnPanels = new ArrayList<>();
@@ -85,7 +86,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    *
    */
   protected int dialogID;
-  private boolean isInterpreter = false;
+  protected boolean isInterpreter = false;
 
   /**
    * @param controller
@@ -102,6 +103,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
+    promptTurns.clear();
     allTurns.clear();
     leftTurnPanels.clear();
     middleTurnPanels.clear();
@@ -133,7 +135,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
     this.dialogID = dialog.getID();
+    isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
+
     showDialog(dialogID, dialog, child);
+
     getRefAudio(new ArrayList<RefAudioGetter>(allTurns).iterator());
   }
 
@@ -167,7 +172,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     DivWidget rowOne = new DivWidget();
     rowOne.getElement().setId("speakerRow");
     rowOne.getElement().getStyle().setMarginTop(5, PX);
-    isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
 
     {
       String label = dialog.getSpeakers().get(0);
@@ -349,7 +353,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     setRightSpeaker(true);
   }
 
-  protected void setRightSpeaker(boolean value) {
+  void setRightSpeaker(boolean value) {
     if (rightSpeakerBox != null) {
       rightSpeakerBox.setValue(value);
     }
@@ -365,13 +369,17 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     setLeftSpeaker(true);
   }
 
-  protected void setLeftSpeaker(boolean val) {
+  void setLeftSpeaker(boolean val) {
     if (leftSpeakerBox != null)
       leftSpeakerBox.setValue(val);
   }
 
   private Boolean isLeftSpeakerSelected() {
-    return leftSpeakerBox == null ? true : leftSpeakerBox.getValue();
+    return leftSpeakerBox == null || leftSpeakerBox.getValue();
+  }
+
+  private Boolean isRightSpeakerSelected() {
+    return rightSpeakerBox == null || rightSpeakerBox.getValue();
   }
 
   /**
@@ -442,11 +450,18 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   private void addTurn(DivWidget rowOne, COLUMNS columns, ClientExercise clientExercise) {
     T turn = getTurnPanel(clientExercise, columns);
 
-    if (columns == COLUMNS.RIGHT) rightTurnPanels.add(turn);
-    else if (columns == COLUMNS.LEFT) leftTurnPanels.add(turn);
-    else if (columns == COLUMNS.MIDDLE) middleTurnPanels.add(turn);
+    if (columns == COLUMNS.RIGHT) {
+      rightTurnPanels.add(turn);
+      promptTurns.add(turn);
+    } else if (columns == COLUMNS.LEFT) {
+      leftTurnPanels.add(turn);
+      promptTurns.add(turn);
+    } else if (columns == COLUMNS.MIDDLE) {
+      middleTurnPanels.add(turn);
+    }
 
     allTurns.add(turn);
+
     rowOne.add(turn);
   }
 
@@ -523,7 +538,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   @NotNull
   T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
-    TurnPanel<ClientExercise> widgets = new TurnPanel<>(
+    TurnPanel widgets = new TurnPanel(
         clientExercise,
         controller,
         null,
@@ -631,7 +646,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   void gotBackward() {
     setPlayButtonToPlay();
 
-    List<T> seq = getPromptSeq();
+    List<T> seq = getAllTurns();
 
     int i = seq.indexOf(currentTurn);
     int i1 = i - 1;
@@ -662,7 +677,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   void gotForward() {
     setPlayButtonToPlay();
 
-    List<T> seq = getPromptSeq();
+    List<T> seq = getAllTurns();
 
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
@@ -716,11 +731,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     playCurrentTurn();
   }
 
-  private boolean isLast(T currentTurn) {
-    List<T> seq = getPromptSeq();
-    return seq.indexOf(currentTurn) == seq.size();
-  }
-
   /**
    * @return true if changed turn to next one
    * @see #gotPlay
@@ -729,13 +739,13 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     Boolean leftSpeakerSet = isLeftSpeakerSet();
     Boolean rightSpeakerSet = isRightSpeakerSet();
     if (leftSpeakerSet && rightSpeakerSet) {
-      if (DEBUG) logger.info("setTurnToPromptSide both speakers ");
+      if (DEBUG || true) logger.info("setTurnToPromptSide both speakers ");
       return false;
     } else if (
         leftSpeakerSet && !leftTurnPanels.contains(currentTurn) ||  // current turn is not the prompt set
             rightSpeakerSet && !rightTurnPanels.contains(currentTurn)
     ) {
-      if (DEBUG) logger.info("setTurnToPromptSide setNextTurnForSide ");
+      if (DEBUG || true) logger.info("setTurnToPromptSide setNextTurnForSide ");
 
       setNextTurnForSide();
       return true;
@@ -745,11 +755,12 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   /**
+   * TODO : not sure if this is right?
    * Wrap around if on last turn.
    */
   void setNextTurnForSide() {
     removeMarkCurrent();
-    int i = allTurns.indexOf(currentTurn); // must be on right
+    int i = allTurns.indexOf(currentTurn);
 
     if (currentTurn == null) {
       logger.warning("setNextTurnForSide no current turn");
@@ -764,13 +775,18 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     setCurrentTurn(allTurns.get(nextIndex));
   }
 
-  boolean onFirstPromptTurn() {
-    return getPromptSeq().indexOf(currentTurn) == 0;
-  }
 
   boolean onLastTurn() {
-    List<T> seq = allTurns;
+    return isLast(currentTurn);
+  }
+
+  private boolean isLast(T currentTurn) {
+    List<T> seq = getAllTurns();
     return seq.indexOf(currentTurn) == seq.size() - 1;
+  }
+
+  boolean onFirstPromptTurn() {
+    return getPromptSeq().indexOf(currentTurn) == 0;
   }
 
   /**
@@ -780,7 +796,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   List<T> getPromptSeq() {
     if (isInterpreter) {
-      return allTurns;
+      return promptTurns;
     } else {
       boolean leftSpeaker = isLeftSpeakerSet();
       boolean rightSpeaker = isRightSpeakerSet();
@@ -789,6 +805,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
       report(ts);
       return ts;
     }
+  }
+
+  List<T> getAllTurns() {
+    return allTurns;
   }
 
   private void report(List<T> allTurns) {
@@ -819,9 +839,6 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return isRightSpeakerSelected();
   }
 
-  private Boolean isRightSpeakerSelected() {
-    return rightSpeakerBox != null && rightSpeakerBox.getValue();
-  }
 
   /**
    * @see #gotTurnClick
@@ -955,22 +972,22 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @return null if on last turn
    */
   private T getNext() {
-    List<T> seq = getPromptSeq();
+    List<T> seq = getAllTurns();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
-    logger.info("getNext current " + i + " next " + i1);
+    if (DEBUG) logger.info("getNext current " + i + " next " + i1);
 
     if (i1 > seq.size() - 1) {
       return null;
     } else {
       T widgets = seq.get(i1);
-      logger.info("getNext current at " + i1 + " will be ex #" + widgets.getExID());
+      if (DEBUG) logger.info("getNext current at " + i1 + " will be ex #" + widgets.getExID());
       return widgets;
     }
   }
 
   private T getPrev() {
-    List<T> seq = getPromptSeq();
+    List<T> seq = getAllTurns();
     int i = seq.indexOf(currentTurn);
     int i1 = i - 1;
 

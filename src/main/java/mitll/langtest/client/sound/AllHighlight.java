@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -136,6 +137,10 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
     south.add(widget);
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.WordTable#getDivWord
+   * @param widget
+   */
   public void setSouthScore(DivWidget widget) {
     setSouth(widget);
   }

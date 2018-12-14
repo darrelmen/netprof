@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercise>> extends RehearseViewHelper<T> {
+public class PerformViewHelper<T extends RecordDialogExercisePanel> extends RehearseViewHelper<T> {
   // private final Logger logger = Logger.getLogger("PerformViewHelper");
   private Set<String> uniqueCoreVocab;
 
@@ -38,9 +38,6 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
         .stream()
         .map(CommonShell::getForeignLanguage)
         .collect(Collectors.toSet());
-//    logger.info("getTurns uniqueCoreVocabThisUnit " + uniqueCoreVocabThisUnit + " ");
-    //   logger.info("getTurns uniqueCoreVocab " + uniqueCoreVocab + " ");
-
     DivWidget turns = super.getTurns(dialog);
     Scheduler.get().scheduleDeferred(this::obscureRespTurns);
     return turns;
@@ -56,18 +53,6 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
   protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     T turnPanel = super.getTurnPanel(clientExercise, columns);
     turnPanel.maybeSetObscure(uniqueCoreVocab);
-    return turnPanel;
-  }
-
-  @NotNull
-  @Override
-  protected T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
-    // logger.info("making record dialog ex panel for " + clientExercise.getID());
-    T turnPanel =
-        (T) new RecordDialogExercisePanel<ClientExercise>(clientExercise, controller,
-            null, alignments, this, this, columns);
-
-    exToTurn.put(clientExercise.getID(), turnPanel);
     return turnPanel;
   }
 

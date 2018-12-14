@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  * @param <T>
  * @see mitll.langtest.client.banner.ListenViewHelper#reallyGetTurnPanel
  */
-public class TurnPanel<T extends ClientExercise> extends DialogExercisePanel<T> {
+public class TurnPanel extends DialogExercisePanel<ClientExercise> {
   private static final String FLOAT_LEFT = "floatLeft";
   //  private final Logger logger = Logger.getLogger("TurnPanel");
 
@@ -30,7 +30,7 @@ public class TurnPanel<T extends ClientExercise> extends DialogExercisePanel<T> 
   private DivWidget bubble;
   private static final String HIGHLIGHT_COLOR = "green";
 
-  public TurnPanel(final T clientExercise,
+  public TurnPanel(final ClientExercise clientExercise,
                    final ExerciseController controller,
                    final ListInterface<?, ?> listContainer,
                    Map<Integer, AlignmentOutput> alignments,
@@ -38,6 +38,7 @@ public class TurnPanel<T extends ClientExercise> extends DialogExercisePanel<T> 
                    ListenViewHelper.COLUMNS columns) {
     super(clientExercise, controller, listContainer, alignments, listenView);
     this.columns = columns;
+
     Style style = getElement().getStyle();
     style.setOverflow(Style.Overflow.HIDDEN);
     style.setClear(Style.Clear.BOTH);

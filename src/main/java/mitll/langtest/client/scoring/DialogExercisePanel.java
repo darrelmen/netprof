@@ -76,7 +76,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param commonExercise for this exercise
    * @param controller
    * @param alignments
-   * @seex mitll.langtest.client.banner.LearnHelper#getFactory
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
@@ -411,52 +410,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
           clickableRow.clear();
 
-/*          if (wordSegments.size() > c) {
-            Iterator<TranscriptSegment> transcriptWords = wordSegments.iterator();
-
-            TranscriptSegment currentWord = transcriptWords.next();
-
-            Iterator<IHighlightSegment> segments = flclickables.iterator();
-
-            IHighlightSegment currentSegment = segments.next();
-
-            String lcSegment   = getLCSegment(currentWord);
-            String lcClickable = getLCClickable(currentSegment);
-
-            List<TranscriptSegment> phonesInWordAll = new ArrayList<>();
-
-            while (!lcClickable.isEmpty()) {
-              boolean isFragmentInSegment = lcClickable.startsWith(lcSegment) || (
-                  isMandarin && lcClickable.length() <= lcSegment.length()
-              );
-              if (isFragmentInSegment) {
-                // logger.info("doOneToManyMatch OK, match for word segment " + lcSegment + " inside " + lcClickable);
-
-                lcClickable = lcClickable.substring(lcSegment.length());
-                phonesInWordAll.addAll(phonesInWord);
-
-                //  logger.info("\t doOneToManyMatch now clickable segment " + lcClickable + " after removing " + lcSegment + " now " + phonesInWordAll.size() + " phones");
-
-                if (!lcClickable.isEmpty()) {
-                  if (transcriptSegmentListIterator.hasNext()) {
-                    wordSegment = transcriptSegmentListIterator.next();
-                    lcSegment = getLCSegment(wordSegment);
-                    phonesInWord = getSegsWithinWordTimeWindow(phones, wordSegment);
-                  }
-                }
-              } else {
-                if (DEBUG_MATCH) logger.warning("doOneToManyMatch no match for align word '" + lcSegment +
-                    "'  vs '" + lcClickable +
-                    "'");
-                break;
-              }
-            }
-
-
-          } else {*/
           doOneToManyMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments,
               wordSegments, clickableRow, clickablePhones);
-          //        }
         }
       }
     }
@@ -801,7 +756,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     if (lcSegment.equalsIgnoreCase(lcClickable)) {  // easy match -
       if (showPhones) {
         DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-        addSouthClickable(clickablePhones, clickable, phoneDivBelowWord);
+        addSouthClickable(clickablePhones,/* clickable,*/ phoneDivBelowWord);
       }
 
       return clickable;
@@ -814,7 +769,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         AllHighlight allHighlight = getAllHighlight(bulk);
         if (showPhones) {
           DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-          addSouthClickable(clickablePhones, allHighlight, phoneDivBelowWord);
+          addSouthClickable(clickablePhones, /*allHighlight,*/ phoneDivBelowWord);
         }
 
         if (DEBUG || DEBUG_MATCH)
@@ -825,10 +780,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
   }
 
-
-  private void addSouthClickable(DivWidget clickablePhones, IHighlightSegment clickable, DivWidget phoneDivBelowWord) {
+  private void addSouthClickable(DivWidget clickablePhones, /*IHighlightSegment clickable,*/ DivWidget phoneDivBelowWord) {
     clickablePhones.add(phoneDivBelowWord);
-    clickable.setSouth(phoneDivBelowWord);
+   // clickable.setSouth(phoneDivBelowWord);
     phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
   }
 
@@ -838,6 +792,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param audioControl
    * @param phoneMap
    * @return
+   * @see #doOneToManyMatch
    */
   @NotNull
   private DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,

@@ -282,7 +282,6 @@ public class ServerProperties {
   private String configFileFullPath;
 
   public ServerProperties() {
-
     Map<String, String> value = new HashMap<>();
 
     // ā	á	ǎ	à	ē	é	ě	è	ī	í	ǐ	ì	ō	ó	ǒ	ò	ū	ú	ǔ	ù	ǖ	ǘ	ǚ	ǜ
@@ -312,7 +311,7 @@ public class ServerProperties {
     value.put("u3", "ǔ");
     value.put("u4", "ù");
 
-//    langToPhoneToDisplay.put("mandarin", value);
+    langToPhoneToDisplay.put(Language.MANDARIN, value);
 //    logger.info("now " + langToPhoneToDisplay);
   }
 

@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 import static mitll.langtest.client.LangTest.RED_X_URL;
 
-public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
+public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
   private static final boolean DEBUG_PARTIAL = false;
@@ -43,7 +43,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private long start = 0L;
   private long firstVAD = -1L;
 
-  private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
+  private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
   private static final float DELAY_SCALAR = 1.0F;
   /**
    *
@@ -68,9 +68,9 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    * @param listenView
    * @param sessionManager
    * @param isRight
-   * @see RehearseViewHelper#reallyGetTurnPanel(ClientExercise, boolean)
+   * @see RehearseViewHelper#reallyGetTurnPanel
    */
-  public RecordDialogExercisePanel(final T commonExercise,
+  public RecordDialogExercisePanel(final ClientExercise commonExercise,
                                    final ExerciseController controller,
                                    final ListInterface<?, ?> listContainer,
                                    Map<Integer, AlignmentOutput> alignments,
@@ -83,10 +83,10 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     setMinExpectedDur(commonExercise);
 
     this.sessionManager = sessionManager;
-    addStyleName("inlineFlex");
+  //  addStyleName("inlineFlex");
   }
 
-  private void setMinExpectedDur(T commonExercise) {
+  private void setMinExpectedDur(ClientExercise commonExercise) {
     if (commonExercise.hasRefAudio()) {
       minDur = commonExercise.getFirst().getDurationInMillis();
       minDur = (long) (((float) minDur) * DELAY_SCALAR);
@@ -290,7 +290,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
-    NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<T>(exercise, controller, sessionManager) {
+    NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
+        new NoFeedbackRecordAudioPanel<ClientExercise>(exercise, controller, sessionManager) {
       /**
        *
        * SO in an async world, this result may not be for this exercise panel!

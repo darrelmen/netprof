@@ -158,34 +158,6 @@ public class TranscriptSegmentGenerator {
     return displayName;
   }
 
-
-  // so take every pronunciation in the dict and map back into fragment sequence
-  // if two hydra phonemes combine to form one compound, use it and skip ahead two
-  // if multiple fragments are possible, try to chose the one that is expected from the compound character
-  // if it's not there, use the first simple match...
-/*
-  private List<String> getKoreanFragments(String foreignLanguage) {
-    KoreanLTS koreanLTS = new KoreanLTS();
-    String[][] process = koreanLTS.process(foreignLanguage);
-    return getKoreanFragments(foreignLanguage, koreanLTS, process);
-  }
-
-  @NotNull
-  private List<String> getKoreanFragments(String foreignLanguage, KoreanLTS koreanLTS, String[][] process) {
-    List<List<String>> fragmentList = getKoreanFragments(foreignLanguage, koreanLTS);
-
-    // logger.info("for " + foreignLanguage + " expected "+fragmentList);
-    // StringBuilder converted = new StringBuilder();
-    List<String> ret = new ArrayList<>();
-    for (int i = 0; i < process.length; i++) {
-      logger.info("got " + foreignLanguage + " " + i);
-      String[] hydraPhoneSequence = process[i];
-      ret.add(getKoreanFragmentSequence(fragmentList, hydraPhoneSequence));
-    }
-    return ret;
-  }
-*/
-
   @NotNull
   private List<List<String>> getKoreanFragments(String foreignLanguage, KoreanLTS koreanLTS) {
     char[] chars = foreignLanguage.toCharArray();
