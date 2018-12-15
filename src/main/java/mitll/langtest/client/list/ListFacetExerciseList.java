@@ -62,6 +62,7 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
 
   /**
    * TODO : do something better here - super class shouldn't know about list type
+   *
    * @param type
    * @return
    */
@@ -80,25 +81,20 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
                                                        String prefix,
                                                        boolean onlyUninspected) {
     ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyUninspected);
-
-    logger.info("getExerciseListRequest " + exerciseListRequest);
-
+    //  logger.info("getExerciseListRequest " + exerciseListRequest);
     //logger.info("Type->sel " + typeToSection);
     String dynamicFacet = getDynamicFacet();
-    if (typeToSection.containsKey(dynamicFacet)) {
-      Collection<String> sections = typeToSection.get(dynamicFacet);
-
-      if (isDynamicFacetInteger()) {
-        //only one user list can be selected, and they don't nest
-        String next = sections.iterator().next();
-        try {
-          exerciseListRequest.setUserListID(Integer.parseInt(next));
-          //   logger.info("getExerciseListRequest userlist = " + userListID);
-        } catch (NumberFormatException e) {
-          logger.warning("getExerciseListRequest couldn't parse " + next);
-        }
+    if (typeToSection.containsKey(dynamicFacet) && isDynamicFacetInteger()) {
+      //only one user list can be selected, and they don't nest
+      String next = typeToSection.get(dynamicFacet).iterator().next();
+      try {
+        exerciseListRequest.setUserListID(Integer.parseInt(next));
+        //   logger.info("getExerciseListRequest userlist = " + userListID);
+      } catch (NumberFormatException e) {
+        logger.warning("getExerciseListRequest couldn't parse " + next);
       }
     }
+
     return exerciseListRequest;
   }
 
@@ -117,7 +113,7 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
     addContentPair(typeToSelection, pairs);
 
     return pairs;
-   // return addDynamicFacetToPairs(typeToSelection, LANGUAGE_META_DATA, super.getPairs(typeToSelection));
+    // return addDynamicFacetToPairs(typeToSelection, LANGUAGE_META_DATA, super.getPairs(typeToSelection));
   }
 
   private void addContentPair(Map<String, String> typeToSelection, List<Pair> pairs) {
@@ -175,7 +171,7 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
    * @see QuizHelper#clearListSelection
    */
   public void clearListSelection() {
-    logger.info("in list ---> clearListSelection ");
+    // logger.info("in list ---> clearListSelection ");
     Map<String, String> candidate = new HashMap<>(getTypeToSelection());
     candidate.remove(getDynamicFacet());
     setHistory(candidate);
@@ -194,7 +190,7 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
     //  logger.info("addDynamicFacets match infos " + matchInfos);
 
     if (matchInfos != null && !matchInfos.isEmpty()) {
-      addExerciseChoices(CONTENT, addContentFacet(allTypesContainer), matchInfos);//.iterator().next());
+      addExerciseChoices(CONTENT, addContentFacet(allTypesContainer), matchInfos);
     }
   }
 

@@ -58,7 +58,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
-  private static final boolean DEBUG_MATCH = false;
+  private static final boolean DEBUG_MATCH = true;
   private boolean isRTL = false;
 
   final AlignmentFetcher alignmentFetcher;
@@ -373,7 +373,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     if (alignmentOutput == null) {
       logger.warning("matchSegmentToWidgetForAudio no alignment for " + audioID);
-      segmentToWord.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0, "all", 0),
+      segmentToWord.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0, "all"),
           getAllHighlight(flclickables));
     } else {
       if (DEBUG_MATCH)
@@ -522,7 +522,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 //                String event = wordSegment.getEvent();
 //                phonesInWordAll.forEach(ph -> logger.info(event + " " + ph.toString()));
                 DivWidget phoneDivBelowWord = getPhoneDivBelowWord(combinedTranscriptSegment, phonesInWordAll, audioControl, phoneMap);
-                addSouthClickable(clickablePhones, current, phoneDivBelowWord);
+                addSouthClickable(clickablePhones, /*current,*/ phoneDivBelowWord);
               }
 
               if (DEBUG_MATCH) {
@@ -609,7 +609,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
           wordSegmentsForClickable.get(wordSegmentsForClickable.size() - 1).getEnd(),
           combinedEvent,
           totalScore / wordSegmentsForClickable.size(),
-          combinedEvent, 0
+          combinedEvent
       );
     }
   }

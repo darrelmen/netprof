@@ -41,8 +41,8 @@ public class ClickableWords {
   private int exercise;
 
   private boolean hasClickableAsian = false;
-  private static final String MANDARIN = "Mandarin";
-  private static final String JAPANESE = "Japanese";
+//  private static final String MANDARIN = "Mandarin";
+//  private static final String JAPANESE = "Japanese";
 
   private ListInterface listContainer;
   private final WordBoundsFactory factory = new WordBoundsFactory();
@@ -440,8 +440,8 @@ public class ClickableWords {
    * @param value
    * @param isChineseCharacter
    * @return
-   * @seex #getClickableWords(String, TwoColumnExercisePanel.FieldType, List, boolean, boolean)
-   * @seex #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
+   * @see #getClickableWords(String, TwoColumnExercisePanel.FieldType, List, boolean, boolean)
+   * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
    */
   @NotNull
   private List<String> getTokens(String value, boolean isChineseCharacter) {

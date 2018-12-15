@@ -61,6 +61,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import scala.Tuple2;
+import scala.collection.Iterator;
+import scala.collection.immutable.List;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -338,7 +341,7 @@ public class AudioFileHelper implements AlignDecode {
    */
   private <T extends CommonShell & MutableExercise> void countPhones(T exercise) {
     PhoneInfo bagOfPhones = getASRScoring().getBagOfPhones(exercise.getForeignLanguage());
-    List<String> firstPron = bagOfPhones.getFirstPron();
+    java.util.List<String> firstPron = bagOfPhones.getFirstPron();
     exercise.setFirstPron(firstPron);
     for (String phone : firstPron) {
       Integer integer = getPhoneToCount().get(phone);
@@ -762,9 +765,9 @@ public class AudioFileHelper implements AlignDecode {
 //      db.getWordDAO().removeWords(uniqueID);
       db.rememberScore(uniqueID, decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
       logger.info("rememberScore for result " + uniqueID + " : decode " *//*
-*/
-/* +decodeAnswer.getPretestScore()*//*
-*/
+   */
+  /* +decodeAnswer.getPretestScore()*//*
+   */
 /*);
     } else {
       String absolutePath = absoluteFile.getAbsolutePath();
@@ -779,7 +782,7 @@ public class AudioFileHelper implements AlignDecode {
       db.getWordDAO().removeForResult(uniqueID);
       db.rememberScore(exercise.getProjectID(), uniqueID, decodeAnswer.getPretestScore(), decodeAnswer.isCorrect());
       logger.info("rememberScore for result " + uniqueID + " : decode " */
-/* +decodeAnswer.getPretestScore()*//*
+  /* +decodeAnswer.getPretestScore()*//*
 );
     } else {
       PretestScore alignmentScore = getEasyAlignment(exercise, absoluteFile.getAbsolutePath());
@@ -791,6 +794,7 @@ public class AudioFileHelper implements AlignDecode {
     return true;
   }
 */
+
 
   private boolean isUsePhoneToDisplay() {
     return serverProps.usePhoneToDisplay(project.getLanguageEnum());
@@ -986,7 +990,7 @@ public class AudioFileHelper implements AlignDecode {
     // find all the results for this session - group by exid, take the latest one in group
     // then update the num answers, avg score, and maybe speaking rate?
     // would have to find min, max of word scores for each result id...
-    List<SlickPerfResult> latestResultsForDialogSession = db.getResultDAO().getLatestResultsForDialogSession(dialogSessionID);
+    java.util.List<SlickPerfResult> latestResultsForDialogSession = db.getResultDAO().getLatestResultsForDialogSession(dialogSessionID);
     int size = latestResultsForDialogSession.size();
     float num = size;
     float total = 0F;
@@ -1274,7 +1278,7 @@ public class AudioFileHelper implements AlignDecode {
     return new HTTPClient(url);
   }
 
-  private TransNormDict getHydraDict(String foreignLanguage, List<WordAndProns> possibleProns) {
+  private TransNormDict getHydraDict(String foreignLanguage, java.util.List<WordAndProns> possibleProns) {
     String s = getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents);
     String cleaned = getSegmented(s); // segmentation method will filter out the UNK model
     return getASRScoring().getHydraDict(cleaned.trim(), "", possibleProns);
@@ -1656,12 +1660,43 @@ public class AudioFileHelper implements AlignDecode {
     if (asrScoring == null) {
       logger.info("makeASRScoring for " + project.getName());
       String installPath = pathHelper.getInstallPath();
+      HTKDictionary htkDictionary = readDictionary(project);
       asrScoring = new ASRWebserviceScoring(installPath, serverProps, logAndNotify,
-          readDictionary(project),
+          htkDictionary,
           project);
-    }
 
-    //  asrScoring = webserviceScoring;
+      /*Language languageEnum = project.getLanguageEnum();
+      if (languageEnum == Language.MANDARIN) {
+
+        logger.info("do mandarin");
+        Iterator<Tuple2<String, List<String[]>>> iterator = htkDictionary.iterator();
+        while (iterator.hasNext()) {
+          Tuple2<String, List<String[]>> next = iterator.next();
+          String s = next._1;
+          Iterator<String[]> iterator1 = next._2.iterator();
+          while (iterator1.hasNext()) {
+            String[] next1 = iterator1.next();
+            java.util.List<String> strings = Arrays.asList(next1);
+            StringBuilder builder = new StringBuilder();
+            strings.forEach(phone -> builder.append(phone).append("-"));
+
+            StringBuilder builder2 = new StringBuilder();
+
+            for (int i = 0; i < strings.size(); i++) {
+              String phone = strings.get(i).trim();
+              String prev = i == 0 ? null : strings.get(i - 1).trim();
+              String nextPhone = i == strings.size() - 1 ? null : strings.get(i + 1).trim();
+
+              builder2
+                  .append(serverProps.getDisplayPhoneme(languageEnum, phone, prev, nextPhone))
+                  .append("-");
+            }
+
+            logger.info("for " + s + " = " + builder + " = " + builder2);
+          }
+        }
+      }*/
+    }
   }
 
   /**
@@ -1670,7 +1705,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param transcript
    */
   public void runHydra(String transcript) {
-    List<String> lmSentences = new ArrayList<>();
+    java.util.List<String> lmSentences = new ArrayList<>();
     lmSentences.add(transcript);
     getASRScoring().runHydra("", transcript, "", lmSentences, "", true, 1000);
   }

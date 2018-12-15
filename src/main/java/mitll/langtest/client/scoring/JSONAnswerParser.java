@@ -132,8 +132,7 @@ class JSONAnswerParser {
               getFloatField(object, END),
               event,
               getFloatField(object, SCORE),
-              event,
-              i
+              event
           )
       );
     }

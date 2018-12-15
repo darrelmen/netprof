@@ -63,11 +63,10 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
           "\n\talready   " + getIDs(alreadyFetched));
     }
 
-    ExerciseListRequest exerciseListRequest = getExerciseListRequest("");
+  //  ExerciseListRequest exerciseListRequest = getExerciseListRequest("");
+   // logger.info("getFullExercises " + exerciseListRequest);
 
-    logger.info("getFullExercises " + exerciseListRequest);
-
-    service.getFullExercises(exerciseListRequest.setReqID(currentReq),
+    service.getFullExercises(getExerciseListRequest("").setReqID(currentReq),
         requested,
         new AsyncCallback<ExerciseListWrapper<ClientExercise>>() {
           @Override
@@ -110,14 +109,11 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
 //    int size = result.getVisibleExercises().isEmpty() ? 0 : result.getVisibleExercises().size();
     //  logger.info("getFullExercisesSuccess got " + size + " exercises vs " + visibleIDs.size() + " visible.");
     int reqID = result.getReqID();
-
-
     if (DEBUG) logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs.size());
 
     if (isCurrentReq(reqID)) {
-      Map<Integer, ClientExercise> idToEx = rememberFetched(result, alreadyFetched);
-
-      gotFullExercises(reqID, getVisibleExercises(visibleIDs, idToEx));
+     // Map<Integer, ClientExercise> idToEx = rememberFetched(result, alreadyFetched);
+      gotFullExercises(reqID, getVisibleExercises(visibleIDs, rememberFetched(result, alreadyFetched)));
     } else {
       if (DEBUG_STALE)
         logger.info("getFullExercisesSuccess : ignoring req " + reqID + " vs current " + getCurrentExerciseReq());
@@ -130,7 +126,7 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
    * @return
    * @see #getFullExercises(Collection, int, Collection, List)
    */
-  List<ClientExercise> getVisibleExercises(Collection<Integer> visibleIDs, Map<Integer, ClientExercise> idToEx) {
+  private List<ClientExercise> getVisibleExercises(Collection<Integer> visibleIDs, Map<Integer, ClientExercise> idToEx) {
     List<ClientExercise> toShow = new ArrayList<>();
     for (int id : visibleIDs) {
       ClientExercise e = idToEx.get(id);
@@ -143,7 +139,6 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
     }
     return toShow;
   }
-
 
   private int nextPageReq = 0;
 
@@ -190,7 +185,6 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
   @NotNull
   protected void addDynamicFacetToPairs(Map<String, String> typeToSelection, String languageMetaData, List<Pair> pairs) {
     addPairForTypeSelection(typeToSelection, pairs, languageMetaData);
-   // return pairs;
   }
 
   void addPairForTypeSelection(Map<String, String> typeToSelection, List<Pair> pairs, String dynamicFacet) {

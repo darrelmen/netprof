@@ -106,7 +106,7 @@ public abstract class Scoring {
   private LTSFactory ltsFactory;
   final String language;
   final Language languageEnum;
-  private Map<String, String> phoneToDisplay;
+//  private Map<String, String> phoneToDisplay;
 
   /**
    * @param deployPath
@@ -125,7 +125,7 @@ public abstract class Scoring {
     this.languageEnum = project.getLanguageEnum();
     removeAllAccents = !language.equalsIgnoreCase("french");
     isAsianLanguage = isAsianLanguage(language);
-    phoneToDisplay = props.getPhoneToDisplay(languageEnum);
+ //   phoneToDisplay = props.getPhoneToDisplay(languageEnum);
 
 //    logger.info("isAsian " + isAsianLanguage + " lang " + language);
 //    if (isAsianLanguage) {
@@ -197,9 +197,9 @@ public abstract class Scoring {
 
       return new TranscriptWriter().writeTranscripts(pathname,
           deployPath + File.separator + imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix,
-          usePhone, phoneToDisplay);
+          usePhone, Collections.emptyMap());
     } else { //  skip image generation
-      return new EventAndFileInfo(Collections.emptyMap(), new TranscriptWriter().getImageTypeMapMap(typeToFile, usePhone, phoneToDisplay));
+      return new EventAndFileInfo(Collections.emptyMap(), new TranscriptWriter().getImageTypeMapMap(typeToFile, usePhone, Collections.emptyMap()));
     }
   }
 

@@ -151,7 +151,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     this.project = project;
 
     int port = getWebservicePort();
-    phoneToDisplay = properties.getPhoneToDisplay(languageEnum);
+    phoneToDisplay = Collections.emptyMap();//properties.getPhoneToDisplay(languageEnum);
 //      logger.info("(" + language + ") phone->display " + phoneToDisplay);
 
     this.pronunciationLookup = new PronunciationLookup(htkDictionary, getLTS(), project);
@@ -750,8 +750,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent =
           eventAndFileInfo == null ? Collections.emptyMap() : eventAndFileInfo.getTypeToEvent();
 
-      Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes =
-          generator.getTypeToSegments(typeToEvent, languageEnum);
+      Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = generator.getTypeToSegments(typeToEvent, languageEnum);
 
 /*
       logger.info("getPretestScore sTypeToImage" +
@@ -1153,7 +1152,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         if (!key.equalsIgnoreCase(SIL)) {
           Float value = phoneScorePair.getValue();
           String s = phoneToDisplay.get(key);
-          if (s != null) logger.info(key + " = " + s);
+
+          if (s != null) logger.info("getTokenToScore " + key + " = " + s);
+
           s = s == null ? key : s;
           //   logger.info("getTokenToScore adding '" + key + "' : " + value);
           phoneToScore.put(s, Math.min(1.0f, value));
@@ -1172,6 +1173,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return pronunciationLookup;
   }
 
+  /**
+   * @param netPronImageTypeListMap
+   * @return
+   * @see #isMatch
+   */
   private List<WordAndProns> getRecoPhones(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);

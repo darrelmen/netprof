@@ -43,31 +43,64 @@ public class TranscriptSegmentGenerator {
       Language language) {
     Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = new HashMap<>();
 
-    Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
+//    Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = valueOf(typeToEvents.getKey().toString());
-      boolean isPhone = key == PHONE_TRANSCRIPT;
+     // boolean isPhone = key == PHONE_TRANSCRIPT;
 
       List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
 
-      StringBuilder builder = new StringBuilder();
-      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
-        TranscriptEvent value = event.getValue();
-        String event1 = value.getEvent();
-        String displayName = isPhone ? getDisplayName(event1, phoneToDisplay) : event1;
-        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName, builder.length()));
+   //   StringBuilder builder = new StringBuilder();
 
-        if (!isPhone) {
-          builder.append(event1);
-        }
+      List<TranscriptEvent> events = new ArrayList<>();
+
+      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+        events.add(event.getValue());
       }
+
+      StringBuilder builder = new StringBuilder();
+      StringBuilder builder2 = new StringBuilder();
+      int size = events.size();
+      for (int i = 0; i < size; i++) {
+//      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
+        TranscriptEvent value = events.get(i);
+
+        String prevEvent = i == 0 ? null : events.get(i - 1).getEvent();
+        String nextEvent = i < size - 1 ? events.get(i + 1).getEvent() : null;
+
+        String event1 = value.getEvent();
+        String displayName = serverProps.getDisplayPhoneme(language, event1, prevEvent, nextEvent);
+builder.append(event1);
+        builder2.append(displayName);
+
+//        String displayName = isPhone ? getDisplayName(event1, phoneToDisplay) : event1;
+        endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName));
+
+//        if (!isPhone) {
+//          builder.append(event1);
+//        }
+      }
+
+      if (key == PHONE_TRANSCRIPT)
+      logger.info("getTypeToSegments from " +builder + " -> " +builder2);
     }
+
 
     if (language == Language.KOREAN) {
       doKoreanPhoneTranslation(typeToEndTimes);
     }
     return typeToEndTimes;
   }
+
+/*
+  private void doChinese(Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes) {
+    List<TranscriptSegment> hydraPhoneSegments = typeToEndTimes.get(PHONE_TRANSCRIPT);
+
+    if (hydraPhoneSegments != null) {
+
+    }
+  }
+*/
 
   private void doKoreanPhoneTranslation(Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes) {
     List<TranscriptSegment> hydraPhoneSegments = typeToEndTimes.get(PHONE_TRANSCRIPT);
@@ -325,7 +358,7 @@ public class TranscriptSegmentGenerator {
                                         TranscriptSegment nextSegment, String str) {
     if (DEBUG) logger.info("addCombinedKoreanSegment from " + currentSegment.getEvent() + " to " + str);
     float avg = (currentSegment.getScore() + nextSegment.getScore()) / 2F;
-    koreanPhones.add(new TranscriptSegment(currentSegment.getStart(), nextSegment.getEnd(), str, avg, str, str.length()).setEvent(str));
+    koreanPhones.add(new TranscriptSegment(currentSegment.getStart(), nextSegment.getEnd(), str, avg, str).setEvent(str));
   }
 
   @Nullable
