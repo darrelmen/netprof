@@ -117,6 +117,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
   private static final String TCHR = "TCHR";
+  private static final int CACHE_TIMEOUT = 1;
+  private static final String UNSET = "UNSET";
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
@@ -204,29 +206,36 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private IProjectManagement projectManagement;
   private Group primaryGroup = null;
 
+  /**
+   * @see #lookupUser
+   * @see #refreshCacheFor
+   */
   private final LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
       .maximumSize(10000)
-      .expireAfterWrite(10, TimeUnit.MINUTES)
+      .expireAfterWrite(CACHE_TIMEOUT, TimeUnit.MINUTES)
       .build(
           new CacheLoader<Integer, DBUser>() {
             @Override
             public DBUser load(Integer key) {
-              // logger.info("idToDBUser Load " + key);
+              logger.info("idToDBUser Load " + key);
               DBUser dbUser = delegate.lookupDBUser(key);
               if (dbUser == null) dbUser = delegate.lookupDBUser(getDefaultUser());
               return dbUser;
             }
           });
 
-
+  /**
+   * @see #getByID
+   * @see #refreshCacheFor
+   */
   private final LoadingCache<Integer, User> idToUser = CacheBuilder.newBuilder()
       .maximumSize(10000)
-      .expireAfterWrite(10, TimeUnit.MINUTES)
+      .expireAfterWrite(CACHE_TIMEOUT, TimeUnit.MINUTES)
       .build(
           new CacheLoader<Integer, User>() {
             @Override
             public User load(Integer key) {
-              // logger.info("idToUser Load " + key);
+              logger.info("idToUser Load " + key);
               return getUser(lookupUser(key));
             }
           });
@@ -1273,6 +1282,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param dominoUser
    * @return
    * @see #getByID
+   * @see #getUser(DBUser)
    */
   private User toUser(mitll.hlt.domino.shared.model.user.DBUser dominoUser) {
     // logger.info("toUser " + dominoUser);
@@ -1280,6 +1290,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     String device = "";
 
     AccountDetail acctDetail = dominoUser.getAcctDetail();
+    int documentDBID = dominoUser.getDocumentDBID();
     if (acctDetail != null) {
       device = acctDetail.getDevice().toString();
       if (acctDetail.getCrTime() != null) {
@@ -1288,7 +1299,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         logger.warn("toUser no creation time on " + acctDetail);
       }
     } else {
-      logger.warn("toUser no acct detail for " + dominoUser.getDocumentDBID());
+      logger.warn("toUser no acct detail for " + documentDBID);
     }
     //   logger.debug("toUser : user " + dominoUser.getUserId() + " email " + email);//, new Exception());
 
@@ -1297,14 +1308,23 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     boolean isMale = isMaleHardChoice(dominoUser);
 
     boolean hasAppPermission = isHasAppPermission(dominoUser);
+    Kind userKind = getUserKind(dominoUser, permissionSet);
+    String userId = dominoUser.getUserId();
+
+    if (userKind != STUDENT) {
+      logger.info("toUser : User #" + documentDBID + " " + userId + " is a " + userKind);
+    } else {
+      logger.info("toUser : User #" + documentDBID + " " + userId + " is a " + userKind + " with roles " + dominoUser.getRoleAbbreviations());
+    }
+
     User user = new User(
-        dominoUser.getDocumentDBID(),
-        dominoUser.getUserId(),
+        documentDBID,
+        userId,
         isMale ? 0 : 1,
         isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female,
         dominoUser.isActive(),
         isAdmin(dominoUser),
-        getUserKind(dominoUser, permissionSet),
+        userKind,
         dominoUser.getEmail(),
         device,
         creationTime,
@@ -1507,7 +1527,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     //    logger.warn("getUserKind user " + userId + " has multiple roles - choosing first one... " + roleAbbreviations.size());
     for (String role : roleAbbreviations) {
       Kind kind = getKindForRole(role);
-//      logger.info(" has " + role + " -> " + kind + " ");
+      if (kind != STUDENT) {
+        logger.info("setPermissions : has " + role + " -> " + kind);
+      } else {
+        logger.info("setPermissions : has " + role + " -> " + kind);
+      }
       seen.add(kind);
       Collection<User.Permission> initialPermsForRole = User.getInitialPermsForRole(kind);
       permissionSet.addAll(initialPermsForRole);
@@ -1525,15 +1549,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       try {
         kind = Kind.valueOf(firstRole.toUpperCase());
         // shouldn't need this
-        logger.debug("getUserKind lookup by NetProF user role " + firstRole);
+        logger.info("getKindForRole lookup by NetProF user role " + firstRole);
       } catch (IllegalArgumentException e) {
         Kind kindByName = getKindByName(firstRole);
         if (kindByName == null) {
           if (!firstRole.startsWith(ILR)) {
             if (unknownRoles.contains(firstRole)) {
-
+              logger.warn("getKindForRole no mapping for role " + firstRole + " default to student...");
             } else {
-              logger.warn("getUserKind no user for " + firstRole + " : now seen these unmapped roles " + unknownRoles);
+              logger.warn("getKindForRole no mapping for role " + firstRole +
+                  " : now seen these unmapped roles " + unknownRoles + " default to student...");
               unknownRoles.add(firstRole);
             }
           }
@@ -1862,7 +1887,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public SResult<ClientUserDetail> updateUser(DBUser updateUser) {
     if (updateUser.getFirstName() == null) updateUser.setFirstName("");
     if (updateUser.getLastName() == null) updateUser.setLastName("");
-    if (updateUser.getEmail().isEmpty()) updateUser.setEmail("UNSET");
+    if (updateUser.getEmail().isEmpty()) updateUser.setEmail(UNSET);
 
     if (updateUser.getUserId() == null) logger.error("no user id for " + updateUser);
     if (updateUser.getUserId().isEmpty()) logger.error("empty user id for " + updateUser);
@@ -1886,11 +1911,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   /**
    * @param user
    * @param url
+   * @param optionalEmail
    * @return
    * @see OpenUserServiceImpl#resetPassword
    */
   @Override
-  public boolean forgotPassword(String user, String url) {
+  public boolean forgotPassword(String user, String url, String optionalEmail) {
     logger.info("forgotPassword " + user + " url " + url);
     DBUser next = getDBUser(user);
     logger.info("forgotPassword " + user + " next " + next);
@@ -1915,15 +1941,44 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         }
 
         ClientUserDetail clientUserDetail = getClientUserDetail(next);
-        logger.info("forgotPassword users clientUserDetail " + clientUserDetail);
-        clientUserDetail1 = delegate.forgotPassword(next, clientUserDetail, url);
 
-        logger.info("forgotPassword forgotPassword users for " + user + " : " + clientUserDetail1);
+        maybeFixEmailForReset(user, optionalEmail, clientUserDetail);
+
+        if (!isValidAsEmail(clientUserDetail.getEmail())) {
+          logger.warn("forgotPassword users for " + user + " bad email " + clientUserDetail.getEmail());
+          return false;
+        } else {
+          logger.info("forgotPassword users clientUserDetail " + clientUserDetail);
+          clientUserDetail1 = delegate.forgotPassword(next, clientUserDetail, url);
+
+          logger.info("forgotPassword forgotPassword users for " + user + " : " + clientUserDetail1);
+        }
       } catch (Exception e) {
         logger.error("forgotPassword Got " + e, e);
       }
 
       return clientUserDetail1 != null;
+    }
+  }
+
+  /**
+   * If we don't have old email, use the optional email.
+   *
+   * @param user
+   * @param optionalEmail
+   * @param clientUserDetail
+   */
+  private void maybeFixEmailForReset(String user, String optionalEmail, ClientUserDetail clientUserDetail) {
+    String email = clientUserDetail.getEmail();
+    boolean validAsEmail = isValidAsEmail(optionalEmail);
+    if (email.equalsIgnoreCase(UNSET) || !isValidAsEmail(email)) {
+      if (validAsEmail) {
+        logger.info("using " + optionalEmail + " instead of " + email + " for " + user);
+        clientUserDetail.setEmail(optionalEmail);
+      }
+    } else if (validAsEmail) {
+      logger.info("override - using " + optionalEmail + " instead of " + email + " for " + user);
+      clientUserDetail.setEmail(optionalEmail);
     }
   }
 
