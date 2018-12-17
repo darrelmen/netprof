@@ -382,7 +382,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       List<TranscriptSegment> wordSegments = getWordSegments(alignmentOutput);
 
       if (DEBUG_MATCH) {
-        wordSegments.forEach(transcriptSegment -> logger.info("matchSegmentToWidgetForAudio : ex " + getExID() + " " + transcriptSegment));
+        wordSegments.forEach(transcriptSegment -> logger.info("matchSegmentToWidgetForAudio : (" + wordSegments.size() + ") ex " + getExID() + " " + transcriptSegment));
       }
 
       if (wordSegments == null) {
@@ -782,7 +782,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   private void addSouthClickable(DivWidget clickablePhones, /*IHighlightSegment clickable,*/ DivWidget phoneDivBelowWord) {
     clickablePhones.add(phoneDivBelowWord);
-   // clickable.setSouth(phoneDivBelowWord);
+    // clickable.setSouth(phoneDivBelowWord);
     phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
   }
 
@@ -867,6 +867,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return bulk;
   }
 
+/*
   private boolean transcriptMatchesOneToOne(List<IHighlightSegment> clickables, List<TranscriptSegment> segments) {
 
     int c = getNumClickable(clickables);
@@ -878,6 +879,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     return b;
   }
+*/
 
   private void dumpMatchComparison(List<IHighlightSegment> clickables, List<TranscriptSegment> segments, int c) {
     logger.info("transcriptMatchesOneToOne  clickables " + c + " segments " + segments.size());
@@ -898,11 +900,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   private int getNumClickable(List<IHighlightSegment> clickables) {
     int c = 0;
+    StringBuilder sb = new StringBuilder();
     for (IHighlightSegment clickable : clickables) {
       if (clickable.isClickable()) {
         c++;
+        sb.append(clickable).append(" ");
       }
     }
+    logger.info("found " + c + " clickables " + sb);
     return c;
   }
 
