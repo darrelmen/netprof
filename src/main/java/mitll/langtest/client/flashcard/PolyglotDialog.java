@@ -9,6 +9,9 @@ import mitll.langtest.client.dialog.DialogHelper;
 
 import java.util.Collections;
 
+/**
+ * @deprecated not doing this again
+ */
 public class PolyglotDialog {
   private static final int HSIZE = 4;
   private static final String LIGHTNING_ROUND = "Test your pronunciation!";

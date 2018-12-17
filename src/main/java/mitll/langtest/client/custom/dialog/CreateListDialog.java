@@ -440,9 +440,11 @@ public class CreateListDialog extends BasicDialog {
     w.addStyleName("leftFiveMargin");
     w.addValueChangeHandler(event -> playAudio = w.getValue());
     if (current != null) {
-      logger.info("got " + current.getID() + " " + current.shouldShowAudio());
+      // logger.info("got " + current.getID() + " " + current.shouldShowAudio());
       w.setValue(current.shouldShowAudio());
-    } else logger.warning("getPlayAudioCheck no current list?");
+    } else {
+      logger.warning("getPlayAudioCheck no current list?");
+    }
     return w;
   }
 
@@ -584,7 +586,7 @@ public class CreateListDialog extends BasicDialog {
   private Widget getQuizChoices() {
     FluidRow row = new FluidRow();
 
-    logger.info("getQuizChoices edit = " + isEdit);
+    //   logger.info("getQuizChoices edit = " + isEdit);
     CheckBox checkBox = new CheckBox(isEdit ? SHOW_AS_QUIZ : CREATE_A_NEW_QUIZ);
     checkBox.addValueChangeHandler(event -> {
       isQuiz = checkBox.getValue();

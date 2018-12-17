@@ -24,8 +24,6 @@ public class ListOptions {
     this.instance = instance;
   }
 
-
-
   public ListOptions setShowTypeAhead(boolean val) {
     this.showTypeAhead = val;
     return this;

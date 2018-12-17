@@ -44,7 +44,9 @@ import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.ProjectSync;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.*;
@@ -682,7 +684,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @see #addPhoneInfo
    */
   private List<Pair> getUnitToValue(SlickExercise slick, Collection<String> typeOrder, ISection<CommonExercise> sectionHelper) {
-    return sectionHelper.getPairs(typeOrder, slick.id(), slick.unit(), slick.lesson(), slick.ispredef());
+    return sectionHelper.getPairs(typeOrder, slick.id(), slick.unit(), slick.lesson());
   }
 
   /**
@@ -737,6 +739,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     List<SlickExercisePhone> pairs = new ArrayList<>();
 
     long then = System.currentTimeMillis();
+    boolean addTokens = lookup.getLanguageEnum() == Language.MANDARIN;
     {
       Collection<String> allFacetTypes = allByProject
           .values()
@@ -759,6 +762,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
       for (SlickExercise slickExercise : all) {
         Exercise exercise = makeExercise(slickExercise, shouldSwap, typeOrder);
+        if (addTokens) {
+          exercise.setTokens(lookup.getAudioFileHelper().getASR().getTokens(exercise.getForeignLanguage(), exercise.getTransliteration()));
+        }
 
         // remember to set swap flag so fl becomes alt-fl and vice-versa for chinese
 
@@ -1022,7 +1028,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   }
 
   public List<Integer> getByProjectExactMatch(int projid, int creator, String fl) {
-   return dao.getAllUserDefinedByProjectExactMatch(projid, creator, fl);
+    return dao.getAllUserDefinedByProjectExactMatch(projid, creator, fl);
   }
 
   /**
@@ -1050,7 +1056,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     logger.info("getContextByProject For " + projectid +
         "\n\tgot " + allContextPredefByProject.size() + " context predef" +
-        "\n\tisPredef = " +isPredef);
+        "\n\tisPredef = " + isPredef);
 
     return getExercises(allContextPredefByProject, typeOrder, sectionHelper,
         lookup, allByProject, exToAttrs, /*attributeTypes,*/ false);

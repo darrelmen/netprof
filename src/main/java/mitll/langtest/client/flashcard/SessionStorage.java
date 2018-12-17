@@ -1,5 +1,6 @@
 package mitll.langtest.client.flashcard;
 
+import mitll.langtest.client.banner.RehearseViewHelper;
 import mitll.langtest.client.custom.KeyStorage;
 
 public class SessionStorage {
@@ -19,11 +20,18 @@ public class SessionStorage {
     //  logger.info("clearSession " );
   }
 
+  /**
+   * @see RehearseViewHelper#gotPlay
+   */
   public void storeSession() {
     storeSession(System.currentTimeMillis());
   }
 
-  void storeSession(long millis) {
+  /**
+   * @see PolyglotFlashcardFactory#startTimedRun()
+   * @param millis
+   */
+  private void storeSession(long millis) {
     storage.storeValue(key, "" + millis);
     // logger.info("storeSession " + millis);
   }

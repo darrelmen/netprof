@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.list;
 
-import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -49,7 +48,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.banner.QuizHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadEvent;
@@ -229,7 +227,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     // TODO : don't do it - will keep around reference to dead components.
     // so for instance if in TwoColumnExercisePanel there's an addList, removeList, newList
-    LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost()));
+    LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost(), this));
+  }
+
+  public String getListName(int userListID) {
+    return "";
   }
 
   @NotNull
@@ -662,9 +664,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return exerciseListRequest;
   }
 
-//  private int numEx;
-//  private int numContext;
-
   /**
    * @param result
    * @see ExerciseList.SetExercisesCallback#onSuccess
@@ -672,20 +671,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   @Override
   protected void setScores(ExerciseListWrapper<T> result) {
     Map<Integer, Float> idToScore = result.getIdToScore();
-//    numEx = 0;
-//    numContext = 0;
     for (T ex : result.getExercises()) {
       int id = ex.getID();
       if (idToScore.containsKey(id)) {
         ex.getMutableShell().setScore(idToScore.get(id));
       }
-
-//      if (ex.isContext()) {
-//        numContext++;
-//      } else {
-//        numEx++;
-//        numContext += ex.getNumContext();
-//      }
     }
   }
 
@@ -1117,10 +1107,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return key;
   }
 
-  boolean isListType(String type) {
-    return false;
-  }
-
   /**
    * Remember to keep the search term, if there is any.
    *
@@ -1130,7 +1116,15 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   void setHistory(Map<String, String> candidate) {
     if (DEBUG_SET_HISTORY) logger.info("setHistory " + candidate);
-    setHistoryItem(getHistoryToken(candidate) + keepSearchItem());
+    String s = getHistoryToken(candidate) + keepSearchItem();
+    if (!s.contains(SelectionState.INSTANCE)) {
+      s += getInstanceParam();
+    }
+    setHistoryItem(s);
+  }
+
+  boolean isListType(String type) {
+    return false;
   }
 
   private int reqid = 0;
@@ -2121,28 +2115,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     simpleLoadExercises(getHistoryToken(), getPrefix(), exerciseID);
   }
 
-
   protected Map<String, String> getTypeToSelection() {
     return typeToSelection;
   }
-
-  /**
-   * @see QuizHelper#clearListSelection
-   */
-/*  public void clearListSelection() {
-    //logger.info("in list ---> clearListSelection ");
-    Map<String, String> candidate = new HashMap<>(getTypeToSelection());
-    candidate.remove(getDynamicFacet());
-    setHistory(candidate);
-  }*/
-
-/*  @NotNull
-  protected String getDynamicFacet() {
-    return LISTS;
-  }
-
-  @NotNull
-  protected boolean isDynamicFacetInteger() {
-    return true;
-  }*/
 }

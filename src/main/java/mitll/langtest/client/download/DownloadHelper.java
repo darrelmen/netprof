@@ -46,6 +46,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.SelectionState;
 import org.jetbrains.annotations.NotNull;
 
@@ -81,7 +82,7 @@ public class DownloadHelper implements IShowStatus {
   private SelectionState selectionState = null;
   private Collection<String> typeOrder;
   private final SpeedChoices speedChoices;
-  private boolean includeAudio = true;
+  private boolean includeAudio = false;
 
   public DownloadHelper() {
     this.speedChoices = new SpeedChoices(this, false);
@@ -96,27 +97,22 @@ public class DownloadHelper implements IShowStatus {
     this.typeOrder = typeOrder;
   }
 
-/*
-  public void downloadContext(String host, boolean isMale) {
-    String urlForDownload = toDominoUrl(getDownloadAudio(host)) + getURL(DOWNLOAD_AUDIO, new HashMap<>()) + "&" +
-        ALLCONTEXT + "=true" +
-        "&" +
-        "male=" + isMale;
-    new DownloadIFrame(urlForDownload);
-  }*/
 
   private final Heading status1 = new Heading(4, "");
   private final Heading status2 = new Heading(4, "");
   private final Heading status3 = new Heading(4, "");
-  DivWidget outer;
+  private DivWidget outer;
+  FacetExerciseList<?, ?> facetExerciseList;
 
   /**
    * @param host
+   * @param widgets
    * @see mitll.langtest.client.list.FacetExerciseList#FacetExerciseList
    */
-  public void showDialog(String host) {
+  public void showDialog(String host, FacetExerciseList<?, ?> widgets) {
     isMale = false;
     isContext = false;
+    this.facetExerciseList = widgets;
 
     DivWidget container = new DivWidget();
     isContextSet = false;
@@ -127,23 +123,13 @@ public class DownloadHelper implements IShowStatus {
     styleStatus(status3);
 
     final String search = selectionState.getSearch();
-    {
-      FluidRow row = new FluidRow();
-      String description = selectionState.getDescription(typeOrder, true);
-      includeAudio = !selectionState.isEmpty();
-      if (!search.isEmpty()) {
-        description += " and searching '" + search + "'";
-      }
-      Heading w = new Heading(4, description);
-      //w.addStyleName("blueColor");
-      row.add(w);
-      container.add(row);
-    }
+
+    container.add(getIntroWidget(search));
 
     container.add(getIncludeAudio());
 
     outer = new DivWidget();
-
+    outer.setVisible(includeAudio);
     outer.add(getContentRow());
     outer.add(getGenderRow());
     outer.add(getSpeedRow());
@@ -177,11 +163,33 @@ public class DownloadHelper implements IShowStatus {
 
           }
         }, 550);
+
     closeButton.setType(ButtonType.SUCCESS);
-    // closeButton.setEnabled(false);
-
     closeButton.setEnabled(!includeAudio);
+  }
 
+  @NotNull
+  private FluidRow getIntroWidget(String search) {
+    FluidRow row = new FluidRow();
+    String description = selectionState.getDescription(typeOrder, true);
+    // includeAudio = !selectionState.isEmpty();
+    if (!search.isEmpty()) {
+      description += " and searching '" + search + "'";
+    }
+
+    int list = selectionState.getList();
+    if (list != -1) {
+      String listName = facetExerciseList.getListName(list);
+      if (listName != null) {
+        String description1 = "List " + listName;
+        description = (description.isEmpty()) ? description1 : description + " and " + description1;
+      }
+    }
+
+    Heading w = new Heading(4, description);
+    //w.addStyleName("blueColor");
+    row.add(w);
+    return row;
   }
 
   private void styleStatus(Heading status1) {
@@ -217,6 +225,7 @@ public class DownloadHelper implements IShowStatus {
     });
     row.add(w);
     row.addStyleName("bottomFiveMargin");
+    row.addStyleName("topFiveMargin");
     return row;
   }
 

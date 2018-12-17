@@ -26,14 +26,11 @@ public class ReportHelper {
   private static final boolean SEND_ALL_YEARS = true;
   private static final int REPORT_THIS_PROJECT = 9;
 
-
-  //private final IProjectManagement projectManagement;
   private final DatabaseServices services;
   private final IProjectDAO projectDAO;
   private final IUserDAO userDAO;
   private final PathHelper pathHelper;
   private final MailSupport mailSupport;
-
 
   public ReportHelper(DatabaseServices services,
                       IProjectDAO projectDAO,
@@ -47,59 +44,9 @@ public class ReportHelper {
     this.mailSupport = mailSupport;
   }
 
-/*  private void doReport(DatabaseImpl database, IReport report) {
-    if (serverProps.isFirstHydra()) {
-      if (isTodayAGoodDay()) {
-        sendReports(report);
-      } else {
-        logger.info("doReport : not sending email report since this is not Sunday...");
-      }
-      tryTomorrow(database);
-    } else {
-      logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
-    }
-  }*/
-
   public void sendReports(IReport report) {
     sendReports(report, false, -1);
   }
-
-
-
-  /**
-   * Fire at Saturday night, just before midnight EST (or local)
-   * Smarter would be to figure out how long to wait until sunday...
-   * <p>
-   * fire at 11:59:30 PM Saturday, so the report ends this saturday and not next saturday...
-   * i.e. if it's Sunday 12:01 AM, it rounds up and includes a line for the whole upcoming week
-   *
-   * @paramx database
-   */
-/*
-  public void tryTomorrow(DatabaseImpl database) {
-    ZoneId zone = ZoneId.systemDefault();
-    ZonedDateTime now = ZonedDateTime.now(zone);
-
-    LocalDate tomorrow = now.toLocalDate().plusDays(1);
-    ZonedDateTime tomorrowStart = tomorrow.atStartOfDay(zone);
-    Duration duration = Duration.between(now, tomorrowStart);
-    long candidate = duration.toMillis() - 30 * 1000;
-    long toWait = candidate > 0 ? candidate : candidate + DAY;
-    Thread thread = new Thread(() -> {
-      try {
-        logger.info("tryTomorrow :" +
-            "\n\tWaiting for " + toWait + " or " + toWait / 1000 + " sec or " + toWait / (60 * 1000) + " min or " + toWait / (60 * 60 * 1000) + " hours" +
-            "\n\tto fire at " + tomorrowStart);
-        Thread.sleep(toWait);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      doReport(database, database.getReport()); // try again later
-    });
-    this.thread = thread;
-    thread.start();
-  }
-*/
 
   public boolean isTodayAGoodDay() {
     return Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == DAY_TO_SEND_REPORT;

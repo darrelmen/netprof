@@ -69,7 +69,7 @@ import java.util.logging.Logger;
  * To change this template use File | Settings | File Templates.
  */
 public class EditItem {
-  private final Logger logger = Logger.getLogger("EditItem");
+//  private final Logger logger = Logger.getLogger("EditItem");
 
   public static final String DONE = "OK";
   private final ExerciseController controller;
@@ -127,13 +127,19 @@ public class EditItem {
     setFactory(this.exerciseList);
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());
+/*
     Scheduler.get().scheduleDeferred(() -> this.exerciseList.onResize());
+*/
     //  Scheduler.get().scheduleDeferred(() -> exerciseList.getTypeAheadGrabFocus());
     return this.exerciseList;
   }
 
   public void grabFocus() {
     ((EditableExerciseList) exerciseList).grabFocus();
+  }
+
+  public void removeHistoryListener() {
+    ((EditableExerciseList) exerciseList).removeHistoryListener();
   }
 
   public void onResize() {

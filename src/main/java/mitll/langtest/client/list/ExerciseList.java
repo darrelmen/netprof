@@ -102,7 +102,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   ExercisePanelFactory<T, U> factory;
   protected final ExerciseController controller;
 
-  protected Panel createdPanel;
+  protected Panel createdPanel = null;
   /**
    *
    */
@@ -304,10 +304,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       this.exerciseID = exerciseID;
       this.request = request;
 
-      logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
+      if (DEBUG) logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
 
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance "));
-//      logger.info("logException stack " + exceptionAsString);
+/*      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " +getInstance()));
+      logger.info("logException stack " + exceptionAsString);*/
     }
 
     public void onFailure(Throwable caught) {
@@ -336,8 +336,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       if (isStaleResponse(result)) {
         if (DEBUG_STALE) {
           logger.info("SetExercisesCallback.onSuccess ignoring" +
-              "\n\tresult " + result.getReqID() + " b/c before" +
-              "\n\tlatest " + lastReqID);
+              "\n\tinstance " + getInstance()+
+              "\n\tresult   " + result.getReqID() + " b/c before" +
+              "\n\tlatest   " + lastReqID);
         }
         ignoreStaleRequest(result);
       } else {
@@ -395,8 +396,9 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       showFinishedGettingExercises();
 
       if (DEBUG)
-        logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() + " results, id = " +
-            id);
+        logger.info("\tExerciseList.SetExercisesCallbackWithID Got " + result.getExercises().size() +
+            " results, id = " + id);
+
       if (isStaleResponse(result)) {
         if (DEBUG_STALE)
           logger.info("----> SetExercisesCallbackWithID.onSuccess ignoring result " + result.getReqID() +
@@ -480,7 +482,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
     }
     if (DEBUG) logger.info("ExerciseList.SetExercisesCallbackWithID Got exception '" + message + "' " + caught);
     String exceptionAsString = getExceptionAsString(caught);
-    //  caught.printStackTrace();
+
     controller.logMessageOnServer("got exception " + caught.getMessage() + " : " + exceptionAsString, " RPCerror?", true);
 
     controller.handleNonFatalError(GETTING_EXERCISE, caught);

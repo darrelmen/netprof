@@ -44,6 +44,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -75,6 +76,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   private static final boolean DEBUG_ON_VALUE_CHANGE = false;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PUSH = false;
+  private static final boolean DEBUG_HISTORY = false;
 
   /**
    * @param currentExerciseVPanel
@@ -115,7 +117,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
 
     boolean hasItemID = id != -1;
     String instanceSuffix =
-        getInstance() == INavigation.VIEWS.NONE ? "" : SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();
+        getInstance() == INavigation.VIEWS.NONE ? "" : getInstanceParam();
 
     String s = (hasItemID ?
         super.getHistoryTokenFromUIState(search, id, listID) :
@@ -132,16 +134,25 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     return s;
   }
 
+  @NotNull
+  protected String getInstanceParam() {
+    return SECTION_SEPARATOR + SelectionState.INSTANCE + "=" + getInstance();
+  }
+
   private void addHistoryListener() {
     if (handlerRegistration == null) {
       handlerRegistration = History.addValueChangeHandler(this);
     }
   }
 
-  private void removeHistoryListener() {
+  public void removeHistoryListener() {
     if (handlerRegistration != null) {
+  //    logger.info("removeHistoryListener " + getInstance());
       handlerRegistration.removeHandler();
       handlerRegistration = null;
+    }
+    else {
+      logger.info("didn't remove listener???");
     }
   }
 
@@ -181,37 +192,16 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       if (DEBUG)
         logger.info("pushFirstSelection : (" + getInstance() + ") " +
             "\n\tcurrent token " + token + " same as new " + exerciseID);
+
       checkAndAskOrFirst(exerciseID);
     } else {
       if (DEBUG)
         logger.info("pushFirstSelection : (" + getInstance() + ") " +
             "\n\tpushNewItem " + exerciseID + " vs " + selectionState.getItem());
+
       pushNewItem(searchIfAny, getValidExerciseID(exerciseID), selectionState.getList());
     }
   }
-
-  /**
-   * @param token
-   * @return
-   * @see #onValueChange(com.google.gwt.event.logical.shared.ValueChangeEvent)
-   */
-/*  private int getIDFromToken(String token) {
-    // if (token.startsWith("#item=") || token.startsWith("item=")) {
-    SelectionState selectionState = new SelectionState(token, !allowPlusInURL);
-    if (selectionState.getView() != getInstance()) {
-      if (DEBUG) logger.warning("getIDFromToken got history item for another instance '" + selectionState.getView()
-          + "' vs me '" + getInstance() + "'");
-      //   return -1;
-
-      return selectionState.getItem();
-    } else {
-      int item = selectionState.getItem();
-      // if (DEBUG) logger.info("got history item for instance '" + selectionState.getInstance() + " : '" + item+"'");
-      return item;
-    }
-    // }
-    // return -1;
-  }*/
 
   /**
    * @param exerciseID
@@ -225,7 +215,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       // logger.info("\tcheckAndAskOrFirst " + exerciseID);
       checkAndAskServer(toUse);
     } else {
-      logger.warning("checkAndAskOrFirst no exercise " + exerciseID);
+      logger.info("checkAndAskOrFirst no exercise " + exerciseID);
     }
   }
 
@@ -265,7 +255,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     } else {
       if (DEBUG_PUSH) {
         logger.info(getInstance() + " HistoryExerciseList.pushNewItem : current" +
-            "\n\t currentToken '" + currentToken + "' different menu state '" + historyToken + "' from new " + exerciseID);
+            "\n\tcurrentToken         '" + currentToken + "' " +
+            "\n\tdifferent menu state '" + historyToken + "' from new " +
+            "\n\texid                 " + exerciseID);
+
+/*
+        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushNewItem " +
+            "search " +search + " list " +listID  + " ex " + exerciseID));
+        logger.info(getClass() + " : logException stack " + exceptionAsString);*/
       }
       setHistoryItem(historyToken);
     }
@@ -316,13 +313,19 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   /**
    * @param historyToken
    * @see #pushNewItem
+   * @see FacetExerciseList#setHistory
    */
   void setHistoryItem(String historyToken) {
     // String token = History.getToken();
     //logger.info("before " + token);
-    if (DEBUG_PUSH) {
+    if (DEBUG_HISTORY) {
       logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
+
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception(historyToken));
+      logger.info("setHistoryItem logException stack " + exceptionAsString);
     }
+   // logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' ");
+
     History.newItem(historyToken);
   }
 
@@ -337,6 +340,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   }
 
   public void loadExercise(int itemID) {
+   // logger.info("loadExercise " + itemID);
     pushNewItem(getTypeAheadText(), itemID, new SelectionState().getList());
   }
 
@@ -379,12 +383,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       logger.warning("onValueChange skipping change event since no project");
       return;
     }
-
-    //  String value = event.getValue();
     restoreUIAndLoadExercises(event.getValue(), true);
   }
 
-  void restoreUIAndLoadExercises(String value, boolean didChange) {
+  protected void restoreUIAndLoadExercises(String value, boolean didChange) {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
     if (projectStartupInfo != null) {
@@ -403,7 +405,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
         logger.info("restoreUIAndLoadExercises : " +
             "\n\toriginalValue '" + value + "'" +
             // " token is '" + value + "' " +
-            "for " + selectionState.getView() + " vs my instance " + getInstance());
+            " for " + selectionState.getView() + " vs my instance " + getInstance());
       }
 
       restoreUIState(selectionState);

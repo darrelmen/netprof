@@ -8,6 +8,7 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
@@ -76,7 +77,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
    * @param exerciseListToUse
    * @see StatsFlashcardFactory#getFlashcard
    */
-  public StatsPracticePanel(FlashcardContainer statsFlashcardFactory,
+  StatsPracticePanel(FlashcardContainer statsFlashcardFactory,
                             ControlState controlState,
                             ExerciseController controller,
                             MySoundFeedback soundFeedback,
@@ -201,7 +202,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
       rememberCurrentExercise();
     }
 
-//    logger.info("onSetComplete - show charts!");
+  //  logger.info("onSetComplete - show charts!");
     showFeedbackCharts();
   }
 
@@ -211,10 +212,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
   }
 
   /**
-   * TODO: get last session...
    *
-   * @seex #getButtonsBelowScoreHistory
-   * @seex #showFlashcardDisplay
    * @see #onSetComplete
    */
   private void showFeedbackCharts() {
@@ -236,7 +234,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
           w.add(test);
           test.setHeight("60px");
         }
-        //  w.setHeight("20px");
+
         w.setWidth("100%");
         scoreHistory.add(w);
       }
@@ -324,6 +322,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
    * @see #doStartOver
    */
   private void startOver() {
+   // logger.info("startOver!");
     makeFlashcardButtonsVisible();
     statsFlashcardFactory.startOver();
   }

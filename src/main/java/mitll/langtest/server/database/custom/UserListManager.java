@@ -834,7 +834,7 @@ public class UserListManager implements IUserListManager {
 
     if (where != null) {
       Collection<Integer> exidsForList = userListExerciseJoinDAO.getExidsForList(id);
-      logger.info("getUserListByID found " + exidsForList.size() + " exids for " + id);
+      logger.info("getUserListByID found " + exidsForList.size() + " exids for list #" + id);
       exidsForList.forEach(exid -> where.addExercise(databaseServices.getExercise(where.getProjid(), exid)));
     }
     return where;//userListDAO.getWithExercises(id);

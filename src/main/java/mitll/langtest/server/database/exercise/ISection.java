@@ -52,7 +52,8 @@ public interface ISection<T extends HasID & HasUnitChapter> {
    */
   void addPairs(T exercise, List<Pair> pair);
 
-  List<Pair> getPairs(Collection<String> typeOrder, int id, String unit, String lesson, boolean ispredef);
+  List<Pair> getPairs(Collection<String> typeOrder, int id, String unit, String lesson);
+  List<Pair> getPairs(String first, String second, int id, String unit, String lesson);
 
   void addPairs(T t,
                 CommonExercise exercise,

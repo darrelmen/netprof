@@ -29,14 +29,13 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
   private ControlState controlState;
 
   PracticeFacetExerciseList(Panel topRow,
-                                      Panel currentExercisePanel,
-                                      ExerciseController controller,
-                                      ListOptions listOptions,
-                                      DivWidget listHeader,
-                                      INavigation.VIEWS views,
-                                      PracticeHelper<T, U> practiceHelper) {
-    super(
-        topRow,
+                            Panel currentExercisePanel,
+                            ExerciseController controller,
+                            ListOptions listOptions,
+                            DivWidget listHeader,
+                            INavigation.VIEWS views,
+                            PracticeHelper<T, U> practiceHelper) {
+    super(topRow,
         currentExercisePanel,
         controller,
         listOptions.setShowPager(false).setShowTypeAhead(false),
@@ -82,6 +81,9 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
     }
   }
 
+  /**
+   * @see #loadNextExercise
+   */
   @Override
   protected void onLastItem() {
     if (getStatsFlashcardFactory() != null) {

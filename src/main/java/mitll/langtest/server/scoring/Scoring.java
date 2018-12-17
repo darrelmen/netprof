@@ -39,7 +39,6 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
-import mitll.langtest.server.audio.image.TranscriptReader;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.audio.imagewriter.TranscriptWriter;
 import mitll.langtest.server.database.exercise.Project;
@@ -104,7 +103,6 @@ public abstract class Scoring {
   final boolean removeAllAccents;
 
   private LTSFactory ltsFactory;
-  final String language;
   final Language languageEnum;
 //  private Map<String, String> phoneToDisplay;
 
@@ -120,11 +118,9 @@ public abstract class Scoring {
     this.deployPath = deployPath;
     this.props = props;
     this.logAndNotify = langTestDatabase;
-    String language = project.getLanguage();
-    this.language = language;
     this.languageEnum = project.getLanguageEnum();
-    removeAllAccents = !language.equalsIgnoreCase("french");
-    isAsianLanguage = isAsianLanguage(language);
+    removeAllAccents = languageEnum != Language.FRENCH;
+    isAsianLanguage = isAsianLanguage(languageEnum);
  //   phoneToDisplay = props.getPhoneToDisplay(languageEnum);
 
 //    logger.info("isAsian " + isAsianLanguage + " lang " + language);
@@ -132,7 +128,7 @@ public abstract class Scoring {
 //      logger.warn("using mandarin segmentation.");
 //    }
     setLTSFactory();
-    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.getLanguageEnum(), project.hasModel(), isAsianLanguage);
+    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, project.getLanguageEnum(), project.hasModel(), isAsianLanguage);
   }
 
   private void setLTSFactory() {
@@ -141,13 +137,13 @@ public abstract class Scoring {
       ltsFactory = new LTSFactory(languageEnum);
     } catch (Exception e) {
       ltsFactory = null;
-      logger.error("\n" + this + " : Scoring for " + language + " got " + e);
+      logger.error("\n" + this + " : Scoring for " + languageEnum + " got " + e);
     }
   }
 
-  private boolean isAsianLanguage(String language) {
-    return language.equalsIgnoreCase(MANDARIN) ||
-        language.equalsIgnoreCase(JAPANESE)
+  private boolean isAsianLanguage(Language language) {
+    return language == Language.MANDARIN ||
+        language == Language.JAPANESE
 //        ||
 //        language.equalsIgnoreCase(KOREAN)
         ;

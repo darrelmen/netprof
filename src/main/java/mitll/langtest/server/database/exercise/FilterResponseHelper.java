@@ -21,6 +21,7 @@ public class FilterResponseHelper {
   public static final String SENTENCES = "Sentences";
   private static final String SENTENCES_ONLY = "Sentences Only";
   public static final String LANGUAGE_META_DATA = DialogMetadata.LANGUAGE.name();
+  private static final String RECORDED1 = "Recorded";
 
   private final DatabaseServices databaseServices;
   private List<CommonExercise> unrecordedExercises;
@@ -92,7 +93,7 @@ public class FilterResponseHelper {
   private ExerciseListRequest getExerciseListRequest(FilterRequest request, int userID) {
     boolean exampleRequest = request.isExampleRequest();
 
-    logger.info("\n\n\ngetExerciseListRequest isExampleRequest " + request + " : " + exampleRequest);
+    logger.info("getExerciseListRequest isExampleRequest " + request + " : " + exampleRequest);
 
     return new ExerciseListRequest()
         .setOnlyExamples(exampleRequest)
@@ -150,13 +151,13 @@ public class FilterResponseHelper {
    * @param all
    * @param sectionHelper
    * @param typeOrder
-   * @param onlyUnrecordedByMe
    * @see #getSectionHelperFromFiltered(int, ExerciseListRequest)
    */
   private void populate(int projid,
                         Collection<CommonExercise> all,
                         ISection<CommonExercise> sectionHelper,
-                        List<String> typeOrder, boolean onlyUnrecordedByMe) {
+                        List<String> typeOrder,
+                        boolean onlyUnrecordedByMe) {
     populate(all, typeOrder, sectionHelper, databaseServices.getProject(projid),
         databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid),
         onlyUnrecordedByMe);
@@ -171,7 +172,7 @@ public class FilterResponseHelper {
    * @paramx addTypesToSection
    * @seex #getByProject
    * @seex #getContextByProject
-   * @see #populate(int, Collection, ISection, List)
+   * @see #populate(int, Collection, ISection, List, boolean)
    */
   private void populate(Collection<CommonExercise> all,
                         List<String> typeOrder,
@@ -205,7 +206,8 @@ public class FilterResponseHelper {
     long now = System.currentTimeMillis();
 
     if (now - then > 50) {
-      logger.info("getExercises took " + (now - then) + " to attach attributes to " + all.size() + " exercises.");
+      logger.info("getExercises took " + (now - then) + " to attach " + allAttributes.size() +
+          " attributes to " + all.size() + " exercises.");
     }
 
     sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
@@ -223,17 +225,20 @@ public class FilterResponseHelper {
   private List<Pair> getUnitToValue(CommonExercise slick, Collection<String> typeOrder, ISection<CommonExercise> sectionHelper) {
     int id = slick.getID();
     Iterator<String> iterator = typeOrder.iterator();
-    String unit = slick.getUnitToValue().get(iterator.next());
+    String unit   = slick.getUnitToValue().get(iterator.next());
     String lesson = iterator.hasNext() ? slick.getUnitToValue().get(iterator.next()) : "";
     if (lesson == null) {
       logger.warn("hmm no lesson value on " + slick.getUnitToValue() + " for " + slick.getID() + " " + slick.getEnglish());
       lesson = "";
     }
-    boolean ispredef = slick.isPredefined();
+//    boolean ispredef = slick.isPredefined();
+//    logger.info("getUnitToValue #id " + id + " : '" + unit + "' - '" + lesson + "' predef " +ispredef);
 
-    return sectionHelper.getPairs(typeOrder, id, unit, lesson, ispredef);
+    List<Pair> pairs = sectionHelper.getPairs(typeOrder, id, unit, lesson);
+
+//    pairs.forEach(pair -> logger.info("\tpair " + pair));
+    return pairs;
   }
-
 
   /**
    * First make an exercise list of just what you're looking for, then build a type hierarchy on the fly from it.
@@ -248,7 +253,7 @@ public class FilterResponseHelper {
   private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest exerciseListRequest) {
     SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelperFromFiltered(projectID, exerciseListRequest);
     FilterResponse typeToValues = unrecordedSectionHelper.getTypeToValues(request, false);
-    logger.info("getFilterResponse resp " + typeToValues);
+//    logger.info("getFilterResponse resp " + typeToValues);
     return typeToValues;
   }
 
@@ -256,7 +261,7 @@ public class FilterResponseHelper {
   private SectionHelper<CommonExercise> getSectionHelperFromFiltered(int projectID, ExerciseListRequest request) {
     List<CommonExercise> filtered = filterExercises(request, getExercises(projectID), projectID);
 
-    logger.info("getFilterResponse build section helper from " + filtered.size());
+ //   logger.info("getSectionHelperFromFiltered build section helper from " + filtered.size());
 
     ISection<CommonExercise> sectionHelper = getSectionHelper(projectID);
     SectionHelper<CommonExercise> unrecordedSectionHelper = new SectionHelper<>();
@@ -313,7 +318,7 @@ public class FilterResponseHelper {
 
     if (request.isOnlyUnrecordedByMe()) {
       if (onlyExamples) {
-        logger.info("filterExercises OK doing examples");
+//        logger.info("filterExercises OK doing examples");
         exercises = getContextExercises(exercises);
       }
       logger.info("filterByUnrecordedOrGetContext : Filter for matching gender to " + request.getUserID() + " only recorded" +
@@ -324,7 +329,7 @@ public class FilterResponseHelper {
     } else if (request.isOnlyWithAnno()) {
       boolean isContext = onlyExamples || request.shouldAddContext();
       if (isContext) {
-        logger.info("filterExercises OK doing examples 2");
+  //      logger.info("filterExercises OK doing examples 2");
         exercises = getContextExercises(exercises);
       }
 
@@ -353,7 +358,6 @@ public class FilterResponseHelper {
     logger.info("filterExercises" +
         "\n\tfilter req " + request +
         "\n\treturn     " + exercises.size());
-
 
     return exercises;
   }
@@ -476,7 +480,7 @@ public class FilterResponseHelper {
 
     logger.info("getRecordFilterExercisesMatchingGender after removing recorded exercises " + unrecordedIDs.size());
 
-    List<CommonExercise> unrecordedExercises = getUnrecordedForIDs(exercises,/* onlyExamples,*/ unrecordedIDs);
+    List<CommonExercise> unrecordedExercises = getUnrecordedForIDs(exercises, unrecordedIDs);
 
     boolean useLangFilter = languageFilter != null && !languageFilter.isEmpty();
 
@@ -582,7 +586,6 @@ public class FilterResponseHelper {
     return filterExercises(request, copy, projid);
   }
 
-  private static final String RECORDED1 = "Recorded";
 
   /**
    * Ask section helper for matching item to type -> value

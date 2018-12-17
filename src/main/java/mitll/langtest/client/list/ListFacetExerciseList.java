@@ -6,10 +6,11 @@ import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.banner.QuizHelper;
+import mitll.langtest.client.banner.NewQuizHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.ListChangedEvent;
+import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -168,7 +169,7 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
   }
 
   /**
-   * @see QuizHelper#clearListSelection
+   * @see NewQuizHelper#clearListSelection
    */
   public void clearListSelection() {
     // logger.info("in list ---> clearListSelection ");
@@ -222,7 +223,7 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
       boolean dynamicFacetInteger = isDynamicFacetInteger();
       if (dynamicFacetInteger) {
         int userListID = Integer.parseInt(selectionForType);
-        listName = listFacetHelper.getListName(userListID);
+        listName = getListName(userListID);
       }
 
       if (listName != null) {
@@ -248,10 +249,15 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
     }
   }
 
+  @Override
+  public String getListName(int userListID) {
+    return listFacetHelper.getListName(userListID);
+  }
+
 
   private void addVisitor(String type, Panel choices, int userListID) {
     //logger.info("addVisitor " + type + " : " + userListID);
-    controller.getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<UserList>() {
+    getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<UserList>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError(ADDING_VISITOR, caught);
@@ -270,6 +276,10 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
         }
       }
     });
+  }
+
+  private ListServiceAsync getListService() {
+    return controller.getListService();
   }
 
   protected Map<Integer, IUserList> getIdToList() {

@@ -67,6 +67,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private transient Collection<String> refSentences = new ArrayList<String>();
 
   private transient List<String> firstPron = new ArrayList<>();
+  private List<String> tokens;
   private long updateTime = 0;
 
   private List<ClientExercise> directlyRelated = new ArrayList<>();
@@ -262,7 +263,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.updateTime = modifiedTimestamp;
     this.safeToDecode = candecode;
     this.numPhones = numPhones;
-    //  this.tokens = tokens;
   }
 
   /**
@@ -274,7 +274,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public <T extends CommonExercise> Exercise(T exercise) {
     super(exercise.getID(), exercise.getProjectID(), exercise.isContext());
     this.isPredef = exercise.isPredefined();
-//    this.isContext = exercise.isContext();
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
     this.transliteration = exercise.getTransliteration();
@@ -284,9 +283,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
-    //   setState(exercise.getState());
-    //setSecondState(exercise.getSecondState());
-
     setAttributes(exercise.getAttributes());
 
     exercise.getDirectlyRelated().forEach(this::addContextExercise);
@@ -423,6 +419,15 @@ public class Exercise extends AudioExercise implements CommonExercise,
   @Override
   public List<String> getFirstPron() {
     return firstPron;
+  }
+
+  @Override
+  public List<String> getTokens() {
+    return tokens;
+  }
+
+  public void setTokens(List<String> tokens) {
+    this.tokens=tokens;
   }
 
   /**

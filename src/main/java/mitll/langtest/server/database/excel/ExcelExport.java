@@ -53,13 +53,14 @@ public class ExcelExport {
   private static final Logger logger = LogManager.getLogger(ExcelExport.class);
 
   private static final String ID = "ID";
-  private static final String WORD_EXPRESSION = "Word/Expression";
+  public static final String WORD_EXPRESSION = "Word/Expression";
   private static final String TRANSLITERATION = "Transliteration";
   private static final String MEANING = "Meaning";
 
   private static final String CONTEXT_SENTENCE = "Context Sentence";
   private static final String CONTEXT_TRANSLATION = "Context Translation";
-  public static final String BLANK = "Blank";
+  private static final String BLANK = "Blank";
+
   private final ServerProperties props;
 
   public ExcelExport(ServerProperties props) {
@@ -154,7 +155,7 @@ public class ExcelExport {
 
       for (String type : typeOrder) {
         String value = exercise.getUnitToValue().get(type);
-        if (value.equalsIgnoreCase(BLANK)) value = "";
+        if (value == null || value.equalsIgnoreCase(BLANK)) value = "";
         row.createCell(j++).setCellValue(value);
       }
       Collection<ClientExercise> directlyRelated = exercise.getDirectlyRelated();

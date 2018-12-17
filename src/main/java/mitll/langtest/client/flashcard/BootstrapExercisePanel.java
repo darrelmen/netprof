@@ -398,9 +398,10 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
           @Override
           protected void start() {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Start_Recording");
+            recordingStarted();
+
             super.start();
             setAutoPlay(false);
-            recordingStarted();
           }
 
           @Override

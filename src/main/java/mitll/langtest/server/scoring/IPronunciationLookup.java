@@ -13,6 +13,8 @@ public interface IPronunciationLookup {
    */
   TransNormDict createHydraDict(String transcript, String transliteration, List<WordAndProns> possibleProns);
 
+  InDictStat getTokenStats(String transcript);
+
   TransNormDict getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones, boolean makeCandidates, List<WordAndProns> possible);
 
   int getNumPhonesFromDictionaryOrLTS(String transcript, String transliteration);
@@ -24,4 +26,22 @@ public interface IPronunciationLookup {
   String getUsedTokens(Collection<String> lmSentences, List<String> background);
 
   SmallVocabDecoder getSmallVocabDecoder();
+
+  public static class InDictStat {
+    private int numTokens;
+    private int numInDict;
+
+    public InDictStat(int numInDict, int numTokens) {
+      this.numInDict = numInDict;
+      this.numTokens = numTokens;
+    }
+
+    public int getNumTokens() {
+      return numTokens;
+    }
+
+    public int getNumInDict() {
+      return numInDict;
+    }
+  }
 }

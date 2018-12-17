@@ -40,6 +40,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -73,6 +74,9 @@ import java.util.logging.Logger;
 public class ListView implements ContentView, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListView");
 
+  private static final String DO_QUIZ = "Do quiz";
+  private static final String DELETE_LIST = "Delete list.";
+
   private static final String MAKE_A_NEW_LIST = "Make a new list.";
   private static final String CAN_T_IMPORT_INTO_FAVORITES = "Can't import into favorites...";
 
@@ -90,16 +94,19 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
   private static final String MY_LISTS = "myLists";
 
+  /**
+   * @see #getEdit
+   */
   private static final String EDIT_THE_LIST = "Edit the list, make it public.";
+  /**
+   *
+   */
   private static final String EDIT_THE_LIST_OR_QUIZ = "Edit the list, make it public, or make it a quiz.";
   private static final String SHARE = "Share";
   private static final String SHARE_THE_LIST = "Share the list with someone.";
   private static final String VISITED = "Visited";
   private static final String SAVE = "Save";
 
-//  private static final String CLICK_HERE_TO_SHARE = "Click here to share ";
-//  private static final String SHARE_QUIZ = "Share Quiz";
-//  private static final String SHARE_LIST = "Share List";
 
   /**
    * @see #getAddItems
@@ -155,7 +162,7 @@ public class ListView implements ContentView, CreateListComplete {
   private final ExerciseController controller;
   private ListContainer myLists;
   private final Set<String> names = new HashSet<>();
-  private Button quizButton;
+  private Button quizButton, editButton, removeButton;
 
   /**
    * @param controller
@@ -374,15 +381,15 @@ public class ListView implements ContentView, CreateListComplete {
       buttons.add(getAddQuizButton());
     }
 
-    buttons.add(getRemoveButton());
+    buttons.add(removeButton = getRemoveButton());
 
-    buttons.add(getEdit());
+    buttons.add(editButton = getEdit());
     buttons.add(getAddItems());
     buttons.add(getImport());
     buttons.add(share = getShare());
     addDrillAndLearn(buttons, container);
     if (canMakeQuiz()) {
-      buttons.add(quizButton=getQuizButton(myLists));
+      buttons.add(quizButton = getQuizButton(myLists));
     }
     return buttons;
   }
@@ -479,43 +486,20 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void editList() {
-    EditItem editItem = new EditItem(controller);
-
     UserList<CommonShell> currentSelectionFromMyLists = getCurrentSelectionFromMyLists();
-    Button closeButton = new DialogHelper(true).show(
+    EditItem editItem = new EditItem(controller);
+    //Button closeButton =
+        new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + getListName(),
         Collections.emptyList(),
         editItem.editItem(currentSelectionFromMyLists),
         "Done",
         null,
-        new DialogHelper.ShownCloseListener() {
-          @Override
-          public boolean gotYes() {
-            int numItems = currentSelectionFromMyLists.getNumItems();
-            //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
-            myLists.flush();
-            myLists.redraw();
-            return true;
-          }
+        new MyShownCloseListener(editItem), MAX_HEIGHT, -1, true);
 
-          @Override
-          public void gotHidden() {
-          }
+   /// closeButton.setType(ButtonType.SUCCESS);
 
-          @Override
-          public void gotNo() {
-          }
-
-          @Override
-          public void gotShown() {
-          //  logger.info("editList : edit view shown!");
-            editItem.grabFocus();
-          }
-        }, MAX_HEIGHT, -1, true);
-
-    closeButton.setType(ButtonType.SUCCESS);
-
-    Scheduler.get().scheduleDeferred(editItem::reload);
+    // Scheduler.get().scheduleDeferred(editItem::reload);
   }
 
   @NotNull
@@ -580,12 +564,10 @@ public class ListView implements ContentView, CreateListComplete {
     drill.setType(ButtonType.INFO);
 
     drill.addClickHandler(event -> showQuiz(getCurrentSelection(container)));
-    addTooltip(drill, "Do quiz");
+    addTooltip(drill, DO_QUIZ);
     container.addButton(drill);
 
-    UserList<CommonShell> currentSelection = getCurrentSelection(container);
-    drill.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
-
+    enableQuizButton(drill);
     return drill;
   }
 
@@ -636,7 +618,7 @@ public class ListView implements ContentView, CreateListComplete {
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDelete(add, getCurrentSelectionFromMyLists()));
     add.setType(ButtonType.DANGER);
-    addTooltip(add, "Delete list.");
+    addTooltip(add, DELETE_LIST);
     // add.setEnabled(!myLists.isEmpty());
     myLists.addButton(add);
     return add;
@@ -853,6 +835,7 @@ public class ListView implements ContentView, CreateListComplete {
 
               myLists.flush();
               myLists.redraw();
+              enableQuizButton(quizButton);
             }
             return okToCreate;
           }
@@ -907,6 +890,17 @@ public class ListView implements ContentView, CreateListComplete {
     editDialog.doEdit(myLists.getCurrentSelection(), myLists);
   }
 
+  private void enableQuizButton(Button quizButton) {
+    UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
+    quizButton.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
+
+    if (currentSelection != null && editButton != null) {
+      boolean favorite = currentSelection.isFavorite();
+      editButton.setEnabled(!favorite);
+      removeButton.setEnabled(!favorite);
+    }
+  }
+
   private class MyListContainer extends ListContainer {
     MyListContainer() {
       super(ListView.this.controller, 18, true, MY_LISTS, 15, true, false);
@@ -916,9 +910,10 @@ public class ListView implements ContentView, CreateListComplete {
     public void gotClickOnItem(final UserList<CommonShell> user) {
       super.gotClickOnItem(user);
       setShareHREF(user);
-      UserList<CommonShell> currentSelection = getCurrentSelection();
-      quizButton.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
+      enableQuizButton(quizButton);
+
     }
+
 
     @Override
     protected boolean hasDoubleClick() {
@@ -952,5 +947,46 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void setShareButtonHREF() {
     share.setHref(getMailTo());
+  }
+
+  private class MyShownCloseListener implements DialogHelper.ShownCloseListener {
+    EditItem editItem;
+
+    MyShownCloseListener(EditItem editItem) {
+      this.editItem = editItem;
+    }
+
+    @Override
+    public boolean gotYes() {
+//            int numItems = currentSelectionFromMyLists.getNumItems();
+      //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
+      myLists.flush();
+      myLists.redraw();
+
+      return true;
+    }
+
+    /**
+     * CRITICAL TO REMOVE LISTENER!
+     */
+    @Override
+    public void gotHidden() {
+      logger.info("Got hidden ");
+      editItem.removeHistoryListener();
+
+      History.newItem("");
+    }
+
+    @Override
+    public void gotNo() {
+    }
+
+    @Override
+    public void gotShown() {
+     // logger.info("editList : edit view shown!");
+
+      editItem.reload();
+      editItem.grabFocus();
+    }
   }
 }

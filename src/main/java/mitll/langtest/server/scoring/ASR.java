@@ -43,7 +43,7 @@ import java.util.Set;
 
 /**
  * Defines interface to audio file helper.
- *
+ * <p>
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
@@ -94,8 +94,8 @@ public interface ASR {
   void setAvailable();
 
   /**
-   * @see AudioFileHelper#isHydraAvailable
    * @return
+   * @see AudioFileHelper#isHydraAvailable
    */
   boolean isAvailable();
 
@@ -108,7 +108,6 @@ public interface ASR {
                        int end);
 
   /**
-   *
    * @param cleaned
    * @param transliteration
    * @param possibleProns
@@ -116,6 +115,8 @@ public interface ASR {
    * @see AudioFileHelper#getHydraDict
    */
   TransNormDict getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns);
+
+  List<String> getTokens(String transcript, String transliteration);
 
   String getSegmented(String input);
 

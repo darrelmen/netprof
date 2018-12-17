@@ -17,6 +17,7 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.sorter.IExerciseComparator;
 import mitll.langtest.shared.sorter.SimpleExerciseComparator;
@@ -34,10 +35,11 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
   private static final int JAPANESE_LENGTH = 9;
   private static final String TRUNCATED = "...";
 
-  private final IExerciseComparator sorter;
+//  private final IExerciseComparator sorter;
   private static final String ENGLISH = "English";
   private final boolean english;
   private int FLLength = MAX_LENGTH_ID;
+  private Language language;
 
   /**
    * @param exerciseList
@@ -51,11 +53,12 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
     if (startupInfo == null) {
       logger.warning("PagingContainer huh? no startup info?");
     }
-    sorter = getSorter();
+  //  sorter = getSorter();
 
-    boolean japanese = controller.getLanguage().equalsIgnoreCase("Japanese");
-    if (japanese) FLLength = JAPANESE_LENGTH;
-    english = controller.getLanguage().equals(ENGLISH);
+    language = startupInfo == null ? Language.UNKNOWN : startupInfo.getLanguageInfo();
+
+    if (language == Language.JAPANESE) FLLength = JAPANESE_LENGTH;
+    english = language == Language.ENGLISH;
   }
 
   @Override
@@ -84,7 +87,7 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
 
     List<T> dataList = getList();
 
- //   table.addColumnSortHandler(getEnglishSorter(englishCol, dataList));
+    //   table.addColumnSortHandler(getEnglishSorter(englishCol, dataList));
     table.addColumnSortHandler(getFLSorter(flColumn, dataList));
 
     // We know that the data is sorted alphabetically by default.
@@ -108,8 +111,8 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
     Column<T, SafeHtml> flColumn = getFLColumn();
     flColumn.setSortable(true);
 
-    String language = controller.getLanguage();
-    String headerForFL = language.equals(ENGLISH) ? "Meaning" : language;
+    String headerForFL = language == Language.ENGLISH ? "Meaning" : language.toDisplay();
+
     addColumn(flColumn, new TextHeader(headerForFL));
     return flColumn;
   }
@@ -132,7 +135,7 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
     return columnSortHandler2;
   }
 
-  private ColumnSortEvent.ListHandler<T> getEnglishSorter(Column<T, SafeHtml> englishCol, List<T> dataList) {
+/*  private ColumnSortEvent.ListHandler<T> getEnglishSorter(Column<T, SafeHtml> englishCol, List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     final boolean isEnglish = controller.getLanguage().equalsIgnoreCase("english");
     columnSortHandler.setComparator(englishCol,
@@ -149,7 +152,7 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
           return -1;
         });
     return columnSortHandler;
-  }
+  }*/
 
 
   /**

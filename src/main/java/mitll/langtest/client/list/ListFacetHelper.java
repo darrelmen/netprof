@@ -3,6 +3,7 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.IUserList;
@@ -32,7 +33,7 @@ public class ListFacetHelper {
   private final ChoicesContainer choicesContainer;
   private final boolean active;
 
-  public ListFacetHelper(ExerciseController controller,
+  ListFacetHelper(ExerciseController controller,
                          String dynamicFacet,
                          UserList.LIST_TYPE list_type,
                          ChoicesContainer choicesContainer,
@@ -48,6 +49,11 @@ public class ListFacetHelper {
     return idToList;
   }
 
+  /**
+   * @see ListFacetExerciseList#addListChoice
+   * @param id
+   * @return
+   */
   String getListName(int id) {
     return idToListName.get(id);
   }

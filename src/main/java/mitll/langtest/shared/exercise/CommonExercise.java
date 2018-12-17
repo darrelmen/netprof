@@ -57,6 +57,7 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    * @see mitll.langtest.server.sorter.ExerciseSorter#phoneCompFirst(CommonExercise, CommonExercise, Map)
    */
   List<String> getFirstPron();
+  List<String> getTokens();
 
   /**
    * SERVER Only
@@ -107,7 +108,6 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    * @param exerciseAttributes
    */
   void setAttributes(List<ExerciseAttribute> exerciseAttributes);
-
 
   /**
    *

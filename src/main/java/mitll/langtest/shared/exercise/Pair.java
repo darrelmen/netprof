@@ -20,8 +20,15 @@ public class Pair implements IsSerializable {
   public String getProperty() {
     return property;
   }
+
   public String getValue() {
     return value;
+  }
+
+  public void swap() {
+    String tmp = property;
+    property = value;
+    value = tmp;
   }
 
   public String toString() {

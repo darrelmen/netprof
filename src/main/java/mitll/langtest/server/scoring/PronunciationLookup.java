@@ -166,6 +166,22 @@ public class PronunciationLookup implements IPronunciationLookup {
     return total;
   }
 
+  @Override
+  public InDictStat getTokenStats(String transcript) {
+    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct);
+    int total = transcriptTokens.size();
+    int inDict = 0;
+    for (String word : transcriptTokens) {
+      String trim = word.trim();
+      if ((htkDictionary.contains(trim)) ||
+          (htkDictionary.contains(trim.toLowerCase())) ||
+          (russian && (htkDictionary.contains(getSmallVocabDecoder().removeAccents(trim))))) {
+        inDict++;
+      }
+    }
+    return new InDictStat(inDict, total);
+  }
+
   /**
    * Don't strip accents from tokens used in dictionary lookup - like for French precisement.
    * <p>

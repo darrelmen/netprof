@@ -46,8 +46,9 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 7/8/14.
  */
-public class StickyState extends SessionStorage {
+class StickyState extends SessionStorage {
   //private final Logger logger = Logger.getLogger("StickyState");
+
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
 

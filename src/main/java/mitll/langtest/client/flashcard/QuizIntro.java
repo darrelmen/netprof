@@ -5,7 +5,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.QuizHelper;
+import mitll.langtest.client.banner.NewQuizHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.shared.custom.IUserList;
 import org.jetbrains.annotations.NotNull;
@@ -16,11 +16,12 @@ import java.util.Map;
 
 public class QuizIntro extends DivWidget {
   private static final int HSIZE = 4;
+
   /**
-   *
+   * @see #QuizIntro
    */
   private static final String START = "Start!";
-  public static final String DRY_RUN = "Dry Run";
+  private static final String DRY_RUN = "Dry Run";
   private static final String FLASHCARDS = "quiz";
   private static final String WELCOME_USER_ = "Welcome ";
 
@@ -30,13 +31,13 @@ public class QuizIntro extends DivWidget {
   private final Button closeButton;
 
   /**
-   * @see QuizHelper.MyPracticeFacetExerciseList
    * @param idToList
    * @param closeListener
    * @param userID
+   * @see QuizHelper.MyPracticeFacetExerciseList
    */
   public QuizIntro(Map<Integer, IUserList> idToList,
-                   QuizHelper.QuizChoiceListener closeListener,
+                   NewQuizHelper.QuizChoiceListener closeListener,
                    String userID) {
     add(getContentRow(idToList, userID));
 
@@ -104,7 +105,7 @@ public class QuizIntro extends DivWidget {
 
     // row.add(new Heading(HSIZE, "Scores above " + minScore + " advance automatically."));
     row.add(new Heading(HSIZE, "Press arrow keys to go to next or previous item. "));// (if you want to repeat an item)."));
-      row.add(new Heading(HSIZE, "Click on a dot in the graph below to repeat to an item."));
+    row.add(new Heading(HSIZE, "Click on a dot in the graph below to repeat to an item."));
     //  row.add(new Heading(HSIZE, YOU_ARE_NOT_REQUIRED));//, but your final score rewards completion."));
 
     container.add(new Heading(HSIZE, "Please choose a quiz : "));
@@ -134,7 +135,8 @@ public class QuizIntro extends DivWidget {
   private int listID = -1;
   private final List<IUserList> choicesAdded = new ArrayList<>();
 
-  private Widget addModeChoices(Heading modeDep, Heading modeDep2, Map<Integer, IUserList> idToList) {
+  private Widget addModeChoices(Heading modeDep,
+                                Heading modeDep2, Map<Integer, IUserList> idToList) {
     DivWidget choiceDiv = new DivWidget();
     choiceDiv.setWidth("100%");
 

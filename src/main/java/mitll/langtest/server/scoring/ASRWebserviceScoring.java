@@ -46,6 +46,7 @@ import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -65,6 +66,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES;
@@ -373,7 +375,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Path tempDir = null;
       String rawAudioPath = getUniqueRawAudioPath(filePath);
       try {
-        tempDir = Files.createTempDirectory("scoreRepeatExercise_" + language);
+        tempDir = Files.createTempDirectory("scoreRepeatExercise_" + languageEnum.getLanguage());
 
         File tempFile = tempDir.toFile();
 
@@ -880,7 +882,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               int end) {
     // reference trans
     String cleaned = getTranscriptToPost(transcript, decode);
-    boolean removeAllPunct = !language.equalsIgnoreCase("french");
+    boolean removeAllPunct = languageEnum != Language.FRENCH;
 
     List<WordAndProns> possibleProns = new ArrayList<>();
 
@@ -943,7 +945,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       String[] split = results[0].split(SEMI);
       Scores scores = new Scores(split);
 
-      logger.info("runHydra " + language +
+      logger.info("runHydra " + languageEnum +
           "\n\ttook      " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
           "\n\ton        " + audioPath +
           "\n\tscore     " + split[0] /*+
@@ -973,7 +975,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     if (isAsianLanguage) {
       cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
 
-      logger.info("runHydra now for asian language (" + language + "): " +
+      logger.info("runHydra now for asian language (" + languageEnum + "): " +
           "\n\tdecode     " + decode +
           "\n\ttranscript " + transcript +
           "\n\tcleaned    " + cleaned
@@ -1033,6 +1035,16 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   @Override
   public TransNormDict getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns) {
     return pronunciationLookup.createHydraDict(cleaned, transliteration, possibleProns);
+  }
+
+  public List<String> getTokens(String transcript, String transliteration) {
+    String cleaned = getTranscriptToPost(transcript, false);
+
+    List<WordAndProns> possibleProns = new ArrayList<>();
+
+    // generate dictionary
+    TransNormDict transNormDict = getHydraDict(cleaned, transliteration, possibleProns);
+    return possibleProns.stream().map(WordAndProns::getWord).collect(Collectors.toList());
   }
 
   /**
