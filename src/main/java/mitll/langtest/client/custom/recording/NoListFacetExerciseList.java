@@ -2,12 +2,9 @@ package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.banner.PracticeFacetExerciseList;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ClientExerciseFacetExerciseList;
-import mitll.langtest.client.list.FacetExerciseList;
-import mitll.langtest.client.list.ListFacetHelper;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.ClientExercise;

@@ -5,7 +5,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.NewQuizHelper;
+import mitll.langtest.client.quiz.NewQuizHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.shared.custom.IUserList;
 import org.jetbrains.annotations.NotNull;

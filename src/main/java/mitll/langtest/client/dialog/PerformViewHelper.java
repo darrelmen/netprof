@@ -1,8 +1,9 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.shared.dialog.IDialog;
@@ -17,7 +18,7 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   // private final Logger logger = Logger.getLogger("PerformViewHelper");
   private Set<String> uniqueCoreVocab;
 
-  PerformViewHelper(ExerciseController controller) {
+  public PerformViewHelper(ExerciseController controller) {
     super(controller);
   }
 

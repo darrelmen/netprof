@@ -37,7 +37,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
-import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;

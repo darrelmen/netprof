@@ -3,8 +3,8 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.IListenView;
-import mitll.langtest.client.banner.ListenViewHelper;
+import mitll.langtest.client.dialog.IListenView;
+import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.*;
@@ -79,7 +79,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
-   * @see mitll.langtest.client.banner.ListenViewHelper#getTurnPanel
+   * @see ListenViewHelper#getTurnPanel
    */
   DialogExercisePanel(final T commonExercise,
                       final ExerciseController controller,

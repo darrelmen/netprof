@@ -1,4 +1,4 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.banner.*;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.SessionStorage;
@@ -93,7 +94,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  RehearseViewHelper(ExerciseController controller) {
+  public RehearseViewHelper(ExerciseController controller) {
     super(controller);
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
   }

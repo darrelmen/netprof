@@ -6,7 +6,7 @@ import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.banner.NewQuizHelper;
+import mitll.langtest.client.quiz.NewQuizHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.ListChangedEvent;

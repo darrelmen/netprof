@@ -6,7 +6,7 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;

@@ -677,14 +677,16 @@ Where should this font live? under src?
     font-family: 'MyUrduWebFont', sans-serif;
 }
 
+/*
 .urduflfont {
     font-size: 24px;
-    word-wrap: normal; /* Internet Explorer 5.5+ */
+    word-wrap: normal; !* Internet Explorer 5.5+ *!
     word-break: keep-all;
     white-space: normal;
     font-family: 'MyUrduWebFont', sans-serif;
     line-height: 100%;
 }
+*/
 
 .urdubigflfont {
     font-size: 36px;

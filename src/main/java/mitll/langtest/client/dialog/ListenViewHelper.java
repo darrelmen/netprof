@@ -1,4 +1,4 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
@@ -13,6 +13,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
+import mitll.langtest.client.banner.IBanner;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -86,13 +88,13 @@ public class ListenViewHelper<T extends TurnPanel>
    *
    */
   protected int dialogID;
-  protected boolean isInterpreter = false;
+   boolean isInterpreter = false;
 
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  ListenViewHelper(ExerciseController controller) {
+  public ListenViewHelper(ExerciseController controller) {
     this.controller = controller;
   }
 

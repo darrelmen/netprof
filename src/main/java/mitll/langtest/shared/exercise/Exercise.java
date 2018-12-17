@@ -34,6 +34,7 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.dialog.EditItem;
+import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
@@ -362,7 +363,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @return
-   * @see mitll.langtest.client.banner.ListenViewHelper#getTurns
+   * @see ListenViewHelper#getTurns
    */
   @Override
   public List<ExerciseAttribute> getAttributes() {

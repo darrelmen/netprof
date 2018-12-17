@@ -32,7 +32,7 @@
 
 package mitll.langtest.server.services;
 
-import mitll.langtest.client.banner.RehearseViewHelper;
+import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.shared.common.DominoSessionException;

@@ -5,9 +5,9 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.list.ClientExerciseFacetExerciseList;
 import mitll.langtest.client.list.ListFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Created by go22670 on 4/5/17.
  */
-class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise>
+public class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise>
     implements IListenView {
   //  private final Logger logger = Logger.getLogger("LearnHelper");
 
@@ -31,7 +31,7 @@ class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterN
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  LearnHelper(ExerciseController controller) {
+  protected LearnHelper(ExerciseController controller) {
     super(controller);
   }
 

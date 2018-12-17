@@ -1,4 +1,4 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
-class DialogHeader {
+public class DialogHeader {
   //private final Logger logger = Logger.getLogger("DialogHeader");
   // private static final int HEADER_HEIGHT = 120;
   private static final String HEIGHT = 100 + "px";
@@ -32,7 +32,7 @@ class DialogHeader {
    * @param prev
    * @param next
    */
-  DialogHeader(ExerciseController controller, INavigation.VIEWS prev, INavigation.VIEWS next) {
+  public DialogHeader(ExerciseController controller, INavigation.VIEWS prev, INavigation.VIEWS next) {
     this.controller = controller;
     this.prev = prev;
     this.next = next;
@@ -45,7 +45,6 @@ class DialogHeader {
     {
       DivWidget row = new DivWidget();
       row.addStyleName("cardBorderShadow");
-
       //  row.setHeight(HEADER_HEIGHT + "px");
 
       row.setWidth(ROW_WIDTH + "%");
@@ -160,7 +159,10 @@ class DialogHeader {
     return prev;
   }
 
-  @NotNull
+  /**
+   *
+   * @return null if nothing comes next
+   */
   private INavigation.VIEWS getNextView() {
     return next;
   }

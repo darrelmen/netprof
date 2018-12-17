@@ -4,6 +4,10 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.*;
+import mitll.langtest.client.dialog.IRehearseView;
+import mitll.langtest.client.dialog.ListenViewHelper;
+import mitll.langtest.client.dialog.PerformViewHelper;
+import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
@@ -185,7 +189,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * 3) if you have a choice, don't obscure first token? ?
    *
    * @param coreVocab
-   * @see mitll.langtest.client.banner.PerformViewHelper#getTurnPanel
+   * @see PerformViewHelper#getTurnPanel
    * Or should we use exact match?
    */
   public void maybeSetObscure(Collection<String> coreVocab) {

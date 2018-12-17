@@ -56,10 +56,7 @@ import mitll.langtest.client.analysis.WordContainerAsync;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
-import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
-import mitll.langtest.client.dialog.KeyPressHelper;
-import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.dialog.*;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.*;
@@ -1203,7 +1200,7 @@ public class LangTest implements
   /**
    * Recording interface
    *
-   * @see mitll.langtest.client.banner.RehearseViewHelper#RehearseViewHelper
+   * @see RehearseViewHelper#RehearseViewHelper
    */
   public void registerStopDetected(WavEndCallback wavEndCallback) {
     this.wavEndCallback = wavEndCallback;

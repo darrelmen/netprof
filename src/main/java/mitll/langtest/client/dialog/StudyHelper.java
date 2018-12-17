@@ -1,9 +1,12 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.banner.IBanner;
+import mitll.langtest.client.banner.LearnHelper;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
@@ -22,14 +25,14 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by go22670 on 4/5/17.
  */
-class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T> {
+public class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T> {
   private int dialogSessionID = -1;
 
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  StudyHelper(ExerciseController controller) {
+  public StudyHelper(ExerciseController controller) {
     super(controller);
   }
 

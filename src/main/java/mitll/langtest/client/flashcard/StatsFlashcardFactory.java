@@ -34,7 +34,6 @@ package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.PracticeFacetExerciseList;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -43,7 +42,6 @@ import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

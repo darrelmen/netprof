@@ -3,8 +3,8 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.IListenView;
-import mitll.langtest.client.banner.ListenViewHelper;
+import mitll.langtest.client.dialog.IListenView;
+import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.AllHighlight;
@@ -15,12 +15,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Does left, right, or middle justify
  * @param <T>
- * @see mitll.langtest.client.banner.ListenViewHelper#reallyGetTurnPanel
+ * @see ListenViewHelper#reallyGetTurnPanel
  */
 public class TurnPanel extends DialogExercisePanel<ClientExercise> {
   private static final String FLOAT_LEFT = "floatLeft";

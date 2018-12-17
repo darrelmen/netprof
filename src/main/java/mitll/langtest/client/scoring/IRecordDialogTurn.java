@@ -1,6 +1,6 @@
 package mitll.langtest.client.scoring;
 
-import mitll.langtest.client.banner.RehearseViewHelper;
+import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.shared.answer.AudioAnswer;
 
 public interface IRecordDialogTurn {

@@ -36,13 +36,12 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
+import mitll.langtest.client.qc.MarkDefectsChapterNPFHelper;
 import mitll.langtest.client.custom.dialog.SearchTypeahead;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.services.ExerciseServiceImpl;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.custom.UserList;
 
 import java.util.Collection;
 import java.util.HashMap;

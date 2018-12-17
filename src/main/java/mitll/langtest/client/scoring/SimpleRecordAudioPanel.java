@@ -2,7 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
@@ -12,7 +12,6 @@ import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.SimpleAudioAnswer;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;

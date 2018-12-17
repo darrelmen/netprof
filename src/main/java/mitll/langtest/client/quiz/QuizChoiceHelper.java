@@ -1,8 +1,9 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.quiz;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -31,7 +32,7 @@ public class QuizChoiceHelper implements ContentView {
   private NewQuizHelper newQuizHelper;
   private Panel listContent;
 
-  QuizChoiceHelper(ExerciseController controller, INavigation navigation) {
+  public QuizChoiceHelper(ExerciseController controller, INavigation navigation) {
     this.controller = controller;
     this.newQuizHelper = new NewQuizHelper(controller, this);
   }
@@ -84,7 +85,7 @@ public class QuizChoiceHelper implements ContentView {
    * @param listContent
    * @see NewContentChooser#showQuizForReal
    */
-  void showChosenQuiz(DivWidget listContent) {
+  public void showChosenQuiz(DivWidget listContent) {
     if (DEBUG) logger.info("showChosenQuiz");
     this.listContent = listContent;
     listContent.clear();

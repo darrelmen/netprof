@@ -30,18 +30,17 @@
  *
  */
 
-package mitll.langtest.client.banner;
+package mitll.langtest.client.quiz;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.banner.*;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.flashcard.HidePolyglotFactory;
-import mitll.langtest.client.flashcard.PolyglotDialog;
-import mitll.langtest.client.flashcard.PolyglotPracticePanel;
+import mitll.langtest.client.flashcard.*;
 import mitll.langtest.client.list.ListFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -62,18 +61,20 @@ import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLO
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 2/4/16.
  */
-public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends ClientExercise> extends PracticeHelper<T, U> {
+public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends PracticeHelper<T> {
   private final Logger logger = Logger.getLogger("NewQuizHelper");
 
   private QuizChoiceHelper quizChoiceHelper;
 
   private static final boolean DEBUG = false;
+
   /**
    *
    */
   public interface QuizChoiceListener {
     void gotChoice(int listid);
   }
+
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
@@ -84,8 +85,8 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends Cli
   }
 
   @Override
-  protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
-    polyglotFlashcardFactory = new HidePolyglotFactory<T, U>(controller, exerciseList, INavigation.VIEWS.QUIZ) {
+  protected ExercisePanelFactory<T, ClientExercise> getFactory(PagingExerciseList<T, ClientExercise> exerciseList) {
+    polyglotFlashcardFactory = new HidePolyglotFactory<T, ClientExercise>(controller, exerciseList, INavigation.VIEWS.QUIZ) {
 
       @Override
       public PolyglotDialog.MODE_CHOICE getMode() {
@@ -118,14 +119,14 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends Cli
    * @return
    */
   @Override
-  protected FlexListLayout<T, U> getMyListLayout(SimpleChapterNPFHelper<T, U> outer) {
-    return new MyFlexListLayout<T, U>(controller, outer) {
+  protected FlexListLayout<T, ClientExercise> getMyListLayout(SimpleChapterNPFHelper<T, ClientExercise> outer) {
+    return new MyFlexListLayout<T, ClientExercise>(controller, outer) {
       @Override
-      protected PagingExerciseList<T, U> makeExerciseList(Panel topRow,
-                                                          Panel currentExercisePanel,
-                                                          INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
+      protected PagingExerciseList<T, ClientExercise> makeExerciseList(Panel topRow,
+                                                                       Panel currentExercisePanel,
+                                                                       INavigation.VIEWS instanceName, DivWidget listHeader, DivWidget footer) {
         rememberedTopRow = topRow;
-        return (PagingExerciseList<T, U>) new QuizPracticeFacetExerciseList(topRow, currentExercisePanel, listHeader);
+        return new QuizPracticeFacetExerciseList(topRow, currentExercisePanel, listHeader);
       }
 
       @Override
@@ -155,7 +156,7 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends Cli
     }
   }
 
-  private class QuizPracticeFacetExerciseList extends PracticeFacetExerciseList<T, U> {
+  private class QuizPracticeFacetExerciseList extends PracticeFacetExerciseList<T, ClientExercise> {
     QuizPracticeFacetExerciseList(Panel topRow, Panel currentExercisePanel, DivWidget listHeader) {
       super(topRow, currentExercisePanel, NewQuizHelper.this.controller,
           new ListOptions().setInstance(INavigation.VIEWS.QUIZ).setShowPager(false),
@@ -187,11 +188,12 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise, U extends Cli
   }
 
   /**
-   * @see QuizChoiceHelper
    * @param listid
+   * @see QuizChoiceHelper
    */
-   void gotQuizChoice(int listid, boolean shouldRemoveOldList) {
+  void gotQuizChoice(int listid, boolean shouldRemoveOldList) {
     if (DEBUG) logger.info("gotQuizChoice : got choice " + listid);
+    PolyglotFlashcardFactory<T, ClientExercise> polyglotFlashcardFactory = getPolyglotFlashcardFactory();
     polyglotFlashcardFactory.cancelRoundTimer();
     if (shouldRemoveOldList) {
       polyglotFlashcardFactory.removeItemFromHistory(listid);
