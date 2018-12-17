@@ -74,7 +74,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     this.fullProject = fullProject;
   }
 
-  int spew = 0;
+  private int spew = 0;
 
   /**
    * so first look in the main id->ex map and then in the context->exercise map

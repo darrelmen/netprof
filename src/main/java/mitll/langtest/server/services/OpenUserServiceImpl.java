@@ -236,7 +236,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
    * @see mitll.langtest.client.user.SendResetPassword#onChangePassword
    */
   public boolean resetPassword(String user) {
-    return db.getUserDAO().forgotPassword(user, getBaseURL());
+    return db.getUserDAO().forgotPassword(user, getBaseURL(), "");
   }
 
   /**
