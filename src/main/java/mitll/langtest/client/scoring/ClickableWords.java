@@ -41,8 +41,6 @@ public class ClickableWords {
   private int exercise;
 
   private boolean hasClickableAsian = false;
-//  private static final String MANDARIN = "Mandarin";
-//  private static final String JAPANESE = "Japanese";
 
   private ListInterface listContainer;
   private final WordBoundsFactory factory = new WordBoundsFactory();
@@ -87,23 +85,25 @@ public class ClickableWords {
    * Split the value into tokens, and make each one clickable - so we can search on it.
    *
    * @param value
-   * @param fieldType  fl, meaning, english, etc.
+   * @param fieldType         fl, meaning, english, etc.
    * @param clickables
    * @param isRTL
+   * @param tokensForMandarin
    * @see DialogExercisePanel#getFLEntry(ClientExercise)
    * @see TwoColumnExercisePanel#getFLEntry
    */
   DivWidget getClickableWords(String value,
                               FieldType fieldType,
                               List<IHighlightSegment> clickables,
-                              boolean isRTL) {
+                              boolean isRTL, List<String> tokensForMandarin) {
     boolean flLine = fieldType == FieldType.FL || (isJapanese && fieldType == FieldType.TRANSLIT);
     boolean isChineseCharacter = flLine && hasClickableAsian;
     HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL :
         WordCountDirectionEstimator.get().estimateDirection(value);
 
     return getClickableDiv(
-        getTokens(value, isChineseCharacter),
+        isChineseCharacter ? tokensForMandarin :
+            getTokens(value, isChineseCharacter),
         getSearchTokens(isChineseCharacter), dir, clickables, fieldType);
   }
 
@@ -239,13 +239,17 @@ public class ClickableWords {
    * @param contextSentence
    * @param highlight
    * @param clickables
+   * @param tokens
    * @return
    * @see TwoColumnExercisePanel#getContext
    */
   public DivWidget getClickableWordsHighlight(String contextSentence,
                                               String highlight,
                                               FieldType fieldType,
-                                              List<IHighlightSegment> clickables, boolean addClickableProps) {
+                                              List<IHighlightSegment> clickables,
+                                              boolean addClickableProps,
+                                              List<String> contextTokensOpt,
+                                              List<String> highlightTokensOpt) {
     DivWidget horizontal = new DivWidget();
 
     horizontal.getElement().setId("clickableWordsHighlightRow");
@@ -255,7 +259,7 @@ public class ClickableWords {
     boolean flLine = isFL || (isJapanese && fieldType == FieldType.TRANSLIT);
     boolean isChineseCharacter = flLine && hasClickableAsian;
 
-    List<String> tokens = getTokens(contextSentence, isChineseCharacter);
+    List<String> tokens = isChineseCharacter ? contextTokensOpt : getTokens(contextSentence, isChineseCharacter);
 
     if (DEBUG) {
       logger.info("getClickableWordsHighlight " +
@@ -266,7 +270,7 @@ public class ClickableWords {
 
     // if the highlight token is not in the display, skip over it -
 
-    List<String> highlightTokens = getTokens(highlight, isChineseCharacter);
+    List<String> highlightTokens = isChineseCharacter ? highlightTokensOpt : getTokens(highlight, isChineseCharacter);
     int highlightStartIndex = getMatchingHighlightAll(tokens, highlightTokens);
 
     Iterator<String> highlightIterator = highlightTokens.iterator();
@@ -438,10 +442,9 @@ public class ClickableWords {
 
   /**
    * @param value
-   * @param isChineseCharacter
    * @return
-   * @see #getClickableWords(String, TwoColumnExercisePanel.FieldType, List, boolean, boolean)
-   * @see #getClickableWordsHighlight(String, String, TwoColumnExercisePanel.FieldType, List, boolean)
+   * @see #getClickableWords(String, FieldType, List, boolean, List)
+   * @see #getClickableWordsHighlight(String, String, FieldType, List, boolean, List)
    */
   @NotNull
   private List<String> getTokens(String value, boolean isChineseCharacter) {

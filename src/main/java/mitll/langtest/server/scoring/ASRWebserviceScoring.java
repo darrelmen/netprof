@@ -98,7 +98,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String SIL = "sil";
 
   static final int MAX_FROM_ANY_TOKEN = 10;
+
   private static final boolean DEBUG = false;
+
   private static final String WAV1 = ".wav";
   private static final String WAV = WAV1;
   private static final String SCORE = "score";
@@ -973,12 +975,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String cleaned = getLCTranscript(transcript);
 
     if (isAsianLanguage) {
-      cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
+      cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript).trim(); // segmentation method will filter out the UNK model
 
-      logger.info("runHydra now for asian language (" + languageEnum + "): " +
-          "\n\tdecode     " + decode +
-          "\n\ttranscript " + transcript +
-          "\n\tcleaned    " + cleaned
+      if (DEBUG) logger.info("getTranscriptToPost for asian language (" + languageEnum + "): " +
+          (decode ? "\n\tdecode     " + decode : "") +
+          "\n\ttranscript '" + transcript + "'" +
+          "\n\tcleaned    '" + cleaned +"'"
       );
     }
 /*    else {
@@ -1038,13 +1040,16 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   public List<String> getTokens(String transcript, String transliteration) {
+   // logger.info("getTokens for " +transcript);
     String cleaned = getTranscriptToPost(transcript, false);
 
     List<WordAndProns> possibleProns = new ArrayList<>();
 
     // generate dictionary
-    TransNormDict transNormDict = getHydraDict(cleaned, transliteration, possibleProns);
-    return possibleProns.stream().map(WordAndProns::getWord).collect(Collectors.toList());
+    getHydraDict(cleaned, transliteration, possibleProns);
+    List<String> collect = possibleProns.stream().map(WordAndProns::getWord).collect(Collectors.toList());
+   // logger.info("getTokens for " +transcript + " = " +collect);
+    return collect;
   }
 
   /**

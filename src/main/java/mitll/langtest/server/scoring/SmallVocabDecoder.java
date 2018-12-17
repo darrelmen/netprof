@@ -185,16 +185,25 @@ public class SmallVocabDecoder {
 
   public String getSegmented(String longPhrase, boolean removeAllAccents) {
     Collection<String> tokens = getTokens(longPhrase, removeAllAccents);
-    boolean debug = longPhrase.startsWith("sel");
-    if (debug) {
-      tokens.forEach(token -> logger.info("getSegmented " + token));
-    }
+//    boolean debug = longPhrase.startsWith("sel");
+//    if (debug) {
+//      tokens.forEach(token -> logger.info("getSegmented " + token));
+//    }
     StringBuilder builder = new StringBuilder();
     tokens.forEach(token -> {
-      String segmentation = segmentation(token.trim());
-      if (debug) {
-        logger.info("getSegmented segmentation " + segmentation);
+
+      String trim = token.trim();
+      char c = trim.charAt(0);
+      String segmentation = trim;
+
+      if (c >= 'A' && c <= 'ž') { // so skip it. it's pinyin
+        logger.info("getSegmented token is not chinese '" + trim + "'");
+      } else {
+        segmentation = segmentation(trim);
       }
+//      if (debug) {
+//        logger.info("getSegmented segmentation " + segmentation);
+//      }
       builder.append(segmentation).append(" ");
     });
     return builder.toString();
@@ -297,6 +306,7 @@ public class SmallVocabDecoder {
 
   /**
    * For the moment we replace the Turkish Cap I with I
+   *
    * @param sentence
    * @return
    * @see PronunciationLookup#getPronStringForWord(String, Collection, boolean)
@@ -305,7 +315,7 @@ public class SmallVocabDecoder {
     String trim = sentence
         .replaceAll(FRENCH_PUNCT, "")
         .replaceAll(REPLACE_ME_OE, OE)
-        .replaceAll(TURKISH_CAP_I,"I")
+        .replaceAll(TURKISH_CAP_I, "I")
         .replaceAll("\\p{P}", " ")
         //.replaceAll("\\s+", " ")
         .trim();
@@ -314,9 +324,9 @@ public class SmallVocabDecoder {
   }
 
   /**
-   * @see PronunciationLookup#addDictMatch
    * @param text
    * @return
+   * @see PronunciationLookup#addDictMatch
    */
   String removeAccents(String text) {
     return text == null ? null :
@@ -325,10 +335,10 @@ public class SmallVocabDecoder {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#getHydraDict
    * @param token
    * @param removeAllPunct
    * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#getHydraDict
    */
   public String lcToken(String token, boolean removeAllPunct) {
     return removeAllPunct ?

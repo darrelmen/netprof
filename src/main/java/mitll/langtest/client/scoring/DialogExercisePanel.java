@@ -976,12 +976,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param e
    * @return
    * @see #addWidgets(boolean, boolean, PhonesChoices)
-   * @see TwoColumnExercisePanel#makeFirstRow(ClientExercise, DivWidget, boolean)
+   * @see TwoColumnExercisePanel#makeFirstRow
    */
   @NotNull
   DivWidget getFLEntry(T e) {
     flclickables = new ArrayList<>();
-    flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL);
+    flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL, e.getTokens());
     return flClickableRow;
   }
 

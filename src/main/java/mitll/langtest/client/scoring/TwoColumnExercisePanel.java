@@ -136,8 +136,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     if (projectStartupInfo != null) {
       makeClickableWords(projectStartupInfo, listContainer);
       this.isRTL = projectStartupInfo.getLanguageInfo().isRTL();
-       //   clickableWords.isRTL(exercise.getForeignLanguage());
-
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
       add(getItemContent(exercise));
     } else {
@@ -364,12 +362,12 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   protected void makePlayAudio(T e, DivWidget flContainer) {
-    if (hasAudio(e) || true) {
+    //if (/*hasAudio(e) || */true) {
       flContainer.add(playAudio = getPlayAudioPanel());
       alignmentFetcher.setPlayAudio(playAudio);
-    } else {
-       logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
-    }
+    //} else {
+    //   logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
+   // }
   }
 
   private void stylePhoneRow(UIObject phoneRow) {
@@ -387,7 +385,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     DivWidget contentWidget = clickableWords.getClickableWords(getFL(e),
         FieldType.FL,
-        flclickables, isRTL);
+        flclickables, isRTL, e.getTokens());
 
     flClickableRow = contentWidget;
     if (isRTL) flClickableRow.addStyleName("rightTenMargin");
@@ -456,7 +454,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     AnnotationHelper annotationHelper = new AnnotationHelper(controller, controller.getMessageHelper());
     SimpleRecordAudioPanel<ClientExercise> recordPanel =
         new SimpleRecordAudioPanel<>(controller, contextEx, listContainer, addPlayer, listenView);
-    Panel context = getContext(contextEx, foreignLanguage, altFL, annotationHelper, getRecordButtonContainer(recordPanel));
+    Panel context = getContext(contextEx, foreignLanguage, altFL, annotationHelper, getRecordButtonContainer(recordPanel),
+        exercise.getTokens());
     if (context != null) {
       rowWidget.add(context);
       context.setWidth("100%");
@@ -485,9 +484,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return (context != null) ? recordPanel : null;
   }
 
-  private Widget getAltContext(String flToHighlight, String altFL, AnnotationHelper annotationHelper, int exid) {
+  private Widget getAltContext(String flToHighlight, String altFL, AnnotationHelper annotationHelper, int exid,
+                               List<String> contextTokens,List<String> highlightTokens) {
     Panel contentWidget = clickableWords.getClickableWordsHighlight(altFL, flToHighlight,
-        FieldType.FL, new ArrayList<>(), true);
+        FieldType.FL, new ArrayList<>(), true, contextTokens, highlightTokens);
 
     CommentBox commentBox = getCommentBox(annotationHelper, exid);
     return commentBox
@@ -566,7 +566,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     if (!altFL.isEmpty() && !altFL.equals(N_A) && !getFL(e).trim().equals(altFL)) {
       altflClickables = new ArrayList<>();
 
-      DivWidget contentWidget = clickableWords.getClickableWords(altFL, FieldType.FL, altflClickables, isRTL);
+      DivWidget contentWidget = clickableWords.getClickableWords(altFL, FieldType.FL, altflClickables, isRTL, null);
 
       altFLClickableRow = contentWidget;
 
@@ -610,6 +610,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   /**
    * @param contextExercise
+   * @param highlightTokens
    * @return
    * @see #addContextFields(DivWidget, String, String, ClientExercise)
    */
@@ -617,7 +618,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                            String itemText,
                            String altFL,
                            AnnotationHelper annotationHelper,
-                           Widget recordWidget) {
+                           Widget recordWidget,
+                           List<String> highlightTokens) {
     String context = getFL(contextExercise);
 
     if (!context.isEmpty()) {
@@ -634,7 +636,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       hp.add(contextPlay);
 
       DivWidget contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
-          FieldType.FL, contextClickables = new ArrayList<>(), true);
+          FieldType.FL, contextClickables = new ArrayList<>(), true,
+          contextExercise.getTokens(),
+          highlightTokens);
 
       contextClickableRow = contentWidget;
       contextClickableRowPhones = clickableWords.getClickableDiv(isRTL);
@@ -662,7 +666,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
       if (showALTFL) {
         if (!altFL1.isEmpty() && !context.equals(altFL1)) {
-          Widget altContext = getAltContext(altFL, altFL1, annotationHelper, contextExercise.getID());
+          // TODO : what to do with alt context tokens
+          Widget altContext = getAltContext(altFL, altFL1, annotationHelper, contextExercise.getID(),
+              contextExercise.getTokens(),
+              highlightTokens);
           if (showFL && showALTFL) altContext.addStyleName("topFiveMargin");
           col.add(altContext);
         }
@@ -829,7 +836,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                              CommentAnnotator annotationHelper,
                              boolean isRTL, int exid) {
     DivWidget contentWidget = clickableWords.getClickableWords(value, fieldType, clickables,
-        isRTL);
+        isRTL, null);
     // logger.info("value " + value + " translit " + isTranslit + " is fl " + isFL);
     return getCommentEntry(field, annotation, fieldType == FieldType.TRANSLIT, showInitially,
         annotationHelper, isRTL, contentWidget, exid);
