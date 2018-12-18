@@ -14,6 +14,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
@@ -192,6 +193,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     String english = isEnglish() && isMeaningValid(e) ? e.getMeaning() : e.getEnglish();
 
+    logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
     SimpleRecordAudioPanel<T> recordPanel =
         new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView);
 
@@ -259,7 +261,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   private boolean isEnglish() {
-    return controller.getLanguage().equalsIgnoreCase("english");
+    return controller.getLanguageInfo() == Language.ENGLISH;
   }
 
 

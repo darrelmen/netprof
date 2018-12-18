@@ -205,6 +205,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private IProjectManagement projectManagement;
   private Group primaryGroup = null;
+  private static final boolean DEBUG_USER_CACHE = false;
 
   /**
    * @see #lookupUser
@@ -217,7 +218,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           new CacheLoader<Integer, DBUser>() {
             @Override
             public DBUser load(Integer key) {
-              logger.info("idToDBUser Load " + key);
+            if (DEBUG_USER_CACHE)  logger.info("idToDBUser Load " + key);
               DBUser dbUser = delegate.lookupDBUser(key);
               if (dbUser == null) dbUser = delegate.lookupDBUser(getDefaultUser());
               return dbUser;
@@ -235,7 +236,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           new CacheLoader<Integer, User>() {
             @Override
             public User load(Integer key) {
-              logger.info("idToUser Load " + key);
+          //    logger.info("idToUser Load " + key);
               return getUser(lookupUser(key));
             }
           });
@@ -325,7 +326,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   private void noServletContextSetup(Database database, Properties props) {
-    props.setProperty(EVT_URL_BASE_MAP_PROP,"a,b");
+    props.setProperty(EVT_URL_BASE_MAP_PROP, "a,b");
     pool = Mongo.createPool(new DBProperties(props));
     serializer = Mongo.makeSerializer();
     logger.info("connectToMongo : OK made serializer " + serializer);
@@ -433,6 +434,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   /**
    * Really a student - sometimes can be student with additional permissions!
+   *
    * @param userIDFromSessionOrDB
    * @return
    */
@@ -846,7 +848,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   private List<DBUser> getDbUsers(Set<FilterDetail<UserColumn>> filterDetails) {
     List<DBUser> users = delegate.getUsers(-1, new FindOptions<>(filterDetails));
- //   logger.info("getDbUsers " + filterDetails + " = " + users);
+    //   logger.info("getDbUsers " + filterDetails + " = " + users);
     return users;
   }
 
@@ -1527,14 +1529,19 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     //    logger.warn("getUserKind user " + userId + " has multiple roles - choosing first one... " + roleAbbreviations.size());
     for (String role : roleAbbreviations) {
       Kind kind = getKindForRole(role);
+/*
       if (kind != STUDENT) {
         logger.info("setPermissions : has " + role + " -> " + kind);
-      } else {
-        logger.info("setPermissions : has " + role + " -> " + kind);
       }
+*/
+
+//      else {
+//        logger.info("setPermissions : has " + role + " -> " + kind);
+//      }
+
       seen.add(kind);
-      Collection<User.Permission> initialPermsForRole = User.getInitialPermsForRole(kind);
-      permissionSet.addAll(initialPermsForRole);
+
+      permissionSet.addAll(User.getInitialPermsForRole(kind));
     }
     return seen;
   }

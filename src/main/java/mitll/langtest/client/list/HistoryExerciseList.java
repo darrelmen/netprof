@@ -152,7 +152,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       handlerRegistration = null;
     }
     else {
-      logger.info("didn't remove listener???");
+     // logger.info("didn't remove listener???");
     }
   }
 

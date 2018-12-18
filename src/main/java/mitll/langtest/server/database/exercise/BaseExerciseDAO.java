@@ -520,15 +520,16 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         } else {
           int id1 = where.getID();
           if (isKnownExercise(oldid)) {
-            logger.debug("addNewExercises SKIPPING new user exercise " + id1 + " since already added from spreadsheet : " + where);
+            logger.info("addNewExercises SKIPPING new user exercise " + id1 + " since already added from spreadsheet : " + where);
           } else {
-            logger.debug("addNewExercises adding new user exercise " + id1 + " : " + where);
+            logger.info("addNewExercises adding new user exercise " + id1 + " : " + where);
             add(where);
             getSectionHelper().addExercise(where);
           }
         }
       }
     }
+    else logger.info("no add remove dao...");
   }
 
   private boolean isKnownExercise(int id) {

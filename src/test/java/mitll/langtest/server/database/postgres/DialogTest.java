@@ -122,7 +122,7 @@ public class DialogTest extends BaseTest {
       List<CommonExercise> exercisesForSelectionState =
           andPopulate.getFilterResponseHelper().getExercisesForSelectionState(request1, projectid);
 
-      exercisesForSelectionState.forEach(ex -> logger.info("CHINESE got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage()));
+      exercisesForSelectionState.forEach(ex -> logger.info("CHINESE got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage() + " " + ex.getTokens()));
     }
     typeToSelection.remove(UNIT1);
 
@@ -130,7 +130,7 @@ public class DialogTest extends BaseTest {
       List<CommonExercise> exercisesForSelectionState =
           andPopulate.getFilterResponseHelper().getExercisesForSelectionState(request1, projectid);
 
-      exercisesForSelectionState.forEach(ex -> logger.info("CHINESE got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage()));
+      exercisesForSelectionState.forEach(ex -> logger.info("CHINESE got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage() + " " + ex.getTokens()));
     }
     //  report(andPopulate, project);
   }
@@ -155,13 +155,13 @@ public class DialogTest extends BaseTest {
       logger.info("sp    " + iDialog.getSpeakers());
       logger.info("attr  " + iDialog.getAttributes());
       // logger.info("by sp " + iDialog.groupBySpeaker());
-      logger.info("core  " + iDialog.getCoreVocabulary().size());
+   //   logger.info("core  " + iDialog.getCoreVocabulary().size());
       iDialog.getCoreVocabulary().forEach(clientExercise -> {
-        String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
-
-        logger.info("core " + clientExercise.getForeignLanguage() + " -> " + pronunciationsFromDictOrLTS);
+        List<String> tokens = project.getAudioFileHelper().getASR().getTokens(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+//        String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+        logger.info("core " + clientExercise.getForeignLanguage() + " -> " + tokens);
       });
-      logger.info("\n\n\n");
+     // logger.info("\n\n\n");
 
 //      iDialog.getExercises().forEach(clientExercise -> clientExercise.getAttributes().forEach(exerciseAttribute -> logger.info("\t" + exerciseAttribute)));
       iDialog.getExercises().forEach(clientExercise -> {
@@ -169,8 +169,17 @@ public class DialogTest extends BaseTest {
         if (!collect.isEmpty()) {
           boolean isEnglish = collect.get(0).getValue().equalsIgnoreCase(Language.ENGLISH.name());
           if (!isEnglish) {
-            String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
-            logger.info(clientExercise.getForeignLanguage() + " -> " + pronunciationsFromDictOrLTS);
+//            String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+//            logger.info(clientExercise.getForeignLanguage() + " -> " + pronunciationsFromDictOrLTS);
+
+           // List<String> tokens = project.getAudioFileHelper().getASR().getTokens(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+
+            List<String> tokens = clientExercise.getTokens();
+            if (tokens == null) {
+              logger.error("ex #"+ clientExercise.getID() + " " +clientExercise.getForeignLanguage() + " -> " + tokens);
+            }
+            logger.info("ex #"+ clientExercise.getID() + " " +clientExercise.getForeignLanguage() + " -> " + tokens);
+
           }
         }
 

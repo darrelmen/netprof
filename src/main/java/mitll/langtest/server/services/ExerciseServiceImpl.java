@@ -34,7 +34,10 @@ package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.Search;
+import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.exercise.TripleExercises;
 import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
@@ -42,6 +45,7 @@ import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
@@ -168,6 +172,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   /**
+   * Maybe dialog id on request is bogus?
+   *
    * @param request
    * @param projectID
    * @return
@@ -175,9 +181,20 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see #getExerciseIds
    */
   private ExerciseListWrapper<T> getDialogResponse(ExerciseListRequest request, int projectID) throws DominoSessionException {
-    int dialogID = request.getDialogID();
-    List<CommonExercise> collect = getCommonExercises(getDialog(dialogID).getCoreVocabulary());
-    List<CommonExercise> commonExercises = getCommonExercises(getDialog(dialogID).getExercises());
+    IDialog dialog = getDialog(request.getDialogID());
+    List<CommonExercise> commonExercises = Collections.emptyList();
+    if (dialog != null) {
+      commonExercises = getCommonExercises(dialog.getCoreVocabulary());
+      commonExercises.addAll(getCommonExercises(dialog.getExercises()));
+
+      // logger.info("request " + request.getPrefix());
+      {
+        String prefix = request.getPrefix();
+        if (!prefix.isEmpty()) {
+          commonExercises = new ArrayList<>(getSearchMatches(commonExercises, prefix, projectID));
+        }
+      }
+    }
 
     if (request.isOnlyFL()) {
       logger.info("before " + commonExercises.size());
@@ -185,14 +202,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       logger.info("after  " + commonExercises.size());
     }
 
-    collect.addAll(commonExercises);
-
-    // logger.info("request " + request.getPrefix());
-    if (!request.getPrefix().isEmpty()) {
-      collect = new ArrayList<>(getSearchMatches(collect, request.getPrefix(), projectID));
-    }
     //logger.info("getDialogResponse returning exercises for " + request.getDialogID() + " " + collect.size());
-    ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, collect, projectID);
+    ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises, projectID);
     return exerciseListWrapper;
   }
 
@@ -278,7 +289,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return exerciseListWrapper;
   }
 
-  private TripleExercises<CommonExercise> getSearchResult(ExerciseListRequest request, int projectID, List<CommonExercise> exercises, boolean predefExercises, String prefix) {
+  private TripleExercises<CommonExercise> getSearchResult(ExerciseListRequest request, int projectID, List<
+      CommonExercise> exercises, boolean predefExercises, String prefix) {
     TripleExercises<CommonExercise> exercisesForSearch;
     exercisesForSearch = getExercisesForSearch(prefix, exercises, predefExercises, projectID, request.getUserID(),
         !request.isPlainVocab());
@@ -362,13 +374,15 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   @NotNull
-  private List<CommonExercise> getSortedContext(TripleExercises<CommonExercise> tripleExercises, boolean sortByFL, String searchTerm) {
+  private List<CommonExercise> getSortedContext(TripleExercises<CommonExercise> tripleExercises,
+                                                boolean sortByFL, String searchTerm) {
     List<CommonExercise> byContext = tripleExercises.getByContext();
     return getSortedExercises(sortByFL, searchTerm, byContext);
   }
 
   @NotNull
-  private List<CommonExercise> getSortedExercises(boolean sortByFL, String searchTerm, List<CommonExercise> byContext) {
+  private List<CommonExercise> getSortedExercises(boolean sortByFL, String
+      searchTerm, List<CommonExercise> byContext) {
     boolean hasSearch = !searchTerm.isEmpty();
 
     List<CommonExercise> contextExercises = new ArrayList<>(byContext);
@@ -393,7 +407,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @return
    */
   @NotNull
-  private List<CommonExercise> getFirstFew(String prefix, ExerciseListRequest request, List<CommonExercise> exercises,
+  private List<CommonExercise> getFirstFew(String prefix, ExerciseListRequest
+      request, List<CommonExercise> exercises,
                                            int projid) {
     //logger.info("getFirstFew only taking " + request.getLimit() + " from " + exercises.size() + " that match " + prefix);
     Collator collator = getAudioFileHelper(projid).getCollator();
@@ -915,7 +930,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return exercisesForSearch;
   }
 
-  private void getSpecialExerciseByID(int projectID, int userID, TripleExercises<CommonExercise> exercisesForSearch, int exid) {
+  private void getSpecialExerciseByID(int projectID, int userID, TripleExercises<
+      CommonExercise> exercisesForSearch, int exid) {
     if (DEBUG_ID_LOOKUP) logger.info("getExercisesForSearch looking for exercise in " + projectID + " = " + exid);
     CommonExercise exercise = getAnnotatedExercise(userID, projectID, exid);
 
@@ -1044,19 +1060,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param projID
    * @param exid
    * @throws DominoSessionException
+   * @see NewUserExercise#refreshEx
    */
   @Override
   public void refreshExercise(int projID, int exid) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     getDatabase().getProject(projID).getExerciseDAO().refresh(exid);
   }
-/*
-  @Override
-  public void refreshExercises(int projID, Set<Integer> exids) throws DominoSessionException {
-    getUserIDFromSessionOrDB();
-    ExerciseDAO<CommonExercise> exerciseDAO = getDatabase().getProject(projID).getExerciseDAO();
-    exids.forEach(exerciseDAO::refresh);
-  }*/
 
   public int getExerciseIDOrParent(int exid) throws DominoSessionException {
     int projectIDFromUser = getProjectIDFromUser();
@@ -1162,7 +1172,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see mitll.langtest.client.list.FacetExerciseList#getExercises
    */
   @Override
-  public ExerciseListWrapper<ClientExercise> getFullExercises(ExerciseListRequest request, Collection<Integer> ids) throws DominoSessionException {
+  public ExerciseListWrapper<ClientExercise> getFullExercises(ExerciseListRequest
+                                                                  request, Collection<Integer> ids) throws DominoSessionException {
     List<ClientExercise> exercises = new ArrayList<>();
 
     int userID = getUserIDFromSessionOrDB();
@@ -1355,6 +1366,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 //    logger.info("getCommonExercisesWithoutAudio " + ids);
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
+
+      logger.info("ex " + byID.getID() + " eng " + byID.getEnglish() + " fl " + byID.getForeignLanguage() + " " + byID.getMeaning());
       addAnnotations(byID); // todo do this in a better way
       //if (true || byID.getAudioAttributes().isEmpty()) {
       toAddAudioTo.add(byID);

@@ -80,6 +80,9 @@ import java.util.logging.Logger;
 abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> extends BasicDialog {
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
+  public static final int LINE_HEIGHT = 22;
+  private static final int LINES = 3;
+
   private static final int MARGIN_BOTTOM = 4;
 
   private static final String CONTEXT_BOX = "ContextBox = ";
@@ -261,9 +264,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     context = addContext(container, newUserExercise);
     context.box.addKeyUpHandler(keyUpEvent -> {
       boolean hasText = !context.box.getText().trim().isEmpty();
-      //  logger.info("Got key up " + hasText);
-      rapContext.setEnabled(hasText && hasRecordPermission());
+      //   logger.info("makeContextRow Got key up " + hasText);
+      maybeEnableContext(hasText);
     });
+  }
+
+  void maybeEnableContext(boolean hasText) {
+    rapContext.setEnabled(hasText && hasRecordPermission());
   }
 
   private void makeContextTransRow(Panel container) {
@@ -370,12 +377,15 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       next = (U) directlyRelated.iterator().next();
     }
 
-    if (DEBUG) logger.info("makeContextAudioPanel make context from " + next.getID() + " " + next.getEnglish() + " " +next.getForeignLanguage());
+    if (DEBUG)
+      logger.info("makeContextAudioPanel make context from " + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage());
 
     rapContext = makeRecordAudioPanel(next, row, AudioType.CONTEXT_REGULAR);
     rapContext.getButton().addClickHandler(clickEvent -> postChangeIfDirty(false));
 
     rapContext.setEnabled(false);
+
+//    logger.info("rap context " + rapContext.getPlayButton().isVisible());
     return addControlGroupEntrySimple(row, "", rapContext);
   }
 
@@ -420,7 +430,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   private void setFontSize(FormField foreignLang) {
-    foreignLang.box.getElement().getStyle().setFontSize(24, Style.Unit.PX);
+    foreignLang.box.getElement().getStyle().setFontSize(18, Style.Unit.PX);
   }
 
   private String getLanguage() {
@@ -450,7 +460,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   private FormField addContext(Panel container, U newUserExercise) {
     FormField formField = makeBoxAndAnnoArea(container, "", contextAnno);
-    formField.box.getElement().getStyle().setLineHeight(28, Style.Unit.PX);
+    formField.box.getElement().getStyle().setLineHeight(LINE_HEIGHT, Style.Unit.PX);
     setFontSize(formField);
 
     TextBoxBase box = formField.box;
@@ -944,7 +954,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   private FormField makeBoxAndAnnoArea(Panel row, String subtext, HTML annoBox) {
     TextArea textBox = new TextArea();
-    textBox.setVisibleLines(2);
+    textBox.setVisibleLines(LINES);
     FormField formField = getFormField(
         row,
         "",
@@ -1010,10 +1020,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       controller.register(getPlayButton(), newExercise.getID());
     }
 
-
     private void disableOthers(boolean b) {
-      //    logger.info("disable others " +b);
-      otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(b));
+//     logger.info("disable others " +b);
+      final boolean enabled = b &= hasRecordPermission();
+      otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(enabled));
     }
 
     /**
@@ -1150,7 +1160,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     } else {
       ClientExercise clientExercise = directlyRelated.get(0);
       if (!clientExercise.getMutableAudio().clearRefAudio()) {
-        logger.info("Didn't clear context ref audio?");
+        logger.info("clearContext Didn't clear context ref audio?");
       } else {
         originalContextAudio = "";
       }
@@ -1175,15 +1185,14 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @return
    * @see #validateThenPost
    */
-  private boolean validateForm(final RecordAudioPanel rap,
+/*  private boolean validateForm(final RecordAudioPanel rap,
                                final ControlGroup normalSpeedRecording) {
 
     return true;
-  }
+  }*/
 /*  private boolean validRecordingCheck() {
     return newUserExercise == null;
   }*/
-
   private boolean hasRecordPermission() {
     User current = controller.getUserManager().getCurrent();
     //  logger.info("kind = " +current.getUserKind());

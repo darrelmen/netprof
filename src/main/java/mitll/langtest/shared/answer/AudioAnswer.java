@@ -33,6 +33,7 @@
 package mitll.langtest.shared.answer;
 
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
+import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -227,6 +228,10 @@ public class AudioAnswer extends SimpleAudioAnswer {
     this.transcript = transcript;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#rememberAnswer
+   * @param timestamp
+   */
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
   }

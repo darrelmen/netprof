@@ -439,6 +439,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         foreignlanguage,
         StringUtils.stripAccents(foreignlanguage),
         altfl,
+        slick.meaning(),
         slick.transliteration(),
         slick.isoverride(),
         unitToValue,
@@ -795,6 +796,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
           }
         }
 
+        if (sectionHelper != null) {
+          allAttributes.add(addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, lookup, exercise,
+              allFacetTypes, pairs));
+        }
+
         copy.add(exercise);
       }
 
@@ -813,7 +819,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       logger.info("getExercises took " + (now - then) + " to attach attributes to " + all.size() + " exercises.");
     }
 
-    if (addTypesToSection) {
+    if (addTypesToSection && sectionHelper != null) {
 //      logger.info("getExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
     }

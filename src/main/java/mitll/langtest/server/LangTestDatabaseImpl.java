@@ -189,7 +189,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       startupMessage = NO_POSTGRES + "<br/>Using : " + serverProps.getDBConfig();
     }
     long now = System.currentTimeMillis();
-    if (now - then > 10L) {
+    if (now - then > 1000L) {
       logger.info("getStartupInfo took " + (now - then) + " millis to get startup info.");
     }
 

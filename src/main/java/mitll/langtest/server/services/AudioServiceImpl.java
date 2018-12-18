@@ -1138,7 +1138,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         audioAnswer.setPath(actualPath);
         long now = System.currentTimeMillis();
 
-        if (now - then > 20) {
+        if (now - then > 30) {
           logger.info("getAudioAnswer wrote compressed version " + actualPath + " in " + (now - then));
         }
       }

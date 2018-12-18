@@ -34,8 +34,6 @@ package mitll.langtest.shared.flashcard;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.util.Collection;
-
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
  *
@@ -43,11 +41,11 @@ import java.util.Collection;
  * @since 5/22/15.
  */
 public class QuizCorrectAndScore implements IsSerializable {
-  private boolean complete;
+/*  private boolean complete;
   private int total;
   private Collection<CorrectAndScore> correctAndScoreCollection;
 
-  public QuizCorrectAndScore() {}
+  public QuizCorrectAndScore() {}*/
 
   /**
    * @see mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
@@ -55,13 +53,15 @@ public class QuizCorrectAndScore implements IsSerializable {
    * @param total
    * @param correctAndScoreCollection
    */
+/*
   public QuizCorrectAndScore(boolean complete, int total, Collection<CorrectAndScore> correctAndScoreCollection) {
     this.complete = complete;
     this.total = total;
     this.correctAndScoreCollection = correctAndScoreCollection;
   }
+*/
 
-  public boolean isComplete() {
+/*  public boolean isComplete() {
     return complete;
   }
 
@@ -69,5 +69,5 @@ public class QuizCorrectAndScore implements IsSerializable {
 
   public Collection<CorrectAndScore> getCorrectAndScoreCollection() {
     return correctAndScoreCollection;
-  }
+  }*/
 }

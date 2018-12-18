@@ -33,10 +33,10 @@
 package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextArea;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -44,7 +44,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -144,7 +143,7 @@ public class CreateListDialog extends BasicDialog {
 
   private Heading modeDep;
   private boolean isQuiz = false;
-  Set<String> names;
+  private final Set<String> names;
 
   /**
    * @param listView
@@ -279,7 +278,7 @@ public class CreateListDialog extends BasicDialog {
   private void addQuizOptions(Panel child) {
     child.add(getQuizChoices());
 
-    createQuizOptions = new DivWidget();
+    DivWidget createQuizOptions = new DivWidget();
     styleQuizOptions(createQuizOptions);
     checkQuizOptionsVisible();
     child.add(createQuizOptions);
@@ -535,27 +534,6 @@ public class CreateListDialog extends BasicDialog {
 
   private void gotListSelection(String value) {
     quizSize = Integer.parseInt(value);
-
-/*    if (!madeSelection && false) {
-      duration = Math.max(1, quizSize / 10);
-
-      Scheduler.get().scheduleDeferred(() ->
-          {
-            durationList.setSelectedValue("" + duration);
-            durationList.setVisible(false);
-            //  logger.info("2 duration sel " + durationList.getSelectedIndex());
-            //   durationList.setVisible(true);
-          }
-      );
-      Scheduler.get().scheduleDeferred(() ->
-          {
-            // logger.info("3 duration sel " + durationList.getSelectedIndex());
-            durationList.setVisible(true);
-          }
-      );
-//      logger.info("1 duration sel " + durationList.getSelectedIndex());
-    }*/
-    //   logger.info("got " + quizSize);
   }
 
   private void gotDurationSelection(String value) {
@@ -566,7 +544,7 @@ public class CreateListDialog extends BasicDialog {
     minScore = Integer.parseInt(value);
   }
 
-  private DivWidget createQuizOptions, editQuizOptions;
+  private DivWidget editQuizOptions;
 
   private void addWarningField(Panel child) {
     FluidRow row;
@@ -643,7 +621,7 @@ public class CreateListDialog extends BasicDialog {
   }
 
   private boolean getDefaultPrivacy() {
-    boolean isPrivate = controller.getUserState().getCurrent().isStudent();
+    boolean isPrivate = true;
     if (isEditing()) isPrivate = current.isPrivate();
     return isPrivate;
   }
@@ -663,7 +641,7 @@ public class CreateListDialog extends BasicDialog {
   /**
    * @see ListView#doAdd
    */
-  public void doCreate() {
+  private void doCreate() {
     gotCreate(enterKeyButtonHelper, theDescription, classBox, publicChoice);
   }
 
@@ -703,7 +681,7 @@ public class CreateListDialog extends BasicDialog {
    * @return
    * @see ListView#doAdd
    */
-  public boolean isOKToCreate(Set<String> names) {
+  private boolean isOKToCreate(Set<String> names) {
     boolean ret = true;
 
     if (!isValidName()) {

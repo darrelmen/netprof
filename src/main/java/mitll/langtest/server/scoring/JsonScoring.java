@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.Date;
 
 /**
  * Created by go22670 on 3/7/17.
@@ -180,8 +181,12 @@ public class JsonScoring {
         if (jsonForScore.get("pretest") == null) {
           jsonForScore.add("pretest", new JsonObject());
         }
-        jsonForScore.addProperty("timestamp", answer.getTimestamp());
-      } else logger.warn("not adding stream info");
+        long timestamp = answer.getTimestamp();
+        logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
+        jsonForScore.addProperty("timestamp", timestamp);
+      } else {
+        logger.warn("not adding stream info");
+      }
     }
 
     addValidity(exerciseID, jsonForScore,

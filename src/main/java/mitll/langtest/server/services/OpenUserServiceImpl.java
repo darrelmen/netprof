@@ -389,10 +389,11 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
           long then = System.currentTimeMillis();
           int before = db.getUserProjectDAO().setCurrentProjectForUser(sessionUserID, projid);
           long now = System.currentTimeMillis();
-          if (now - then > 10 || projid != before) {
+          if (now - then > 20 || projid != before) {
             logger.info("setCurrentProjectForUser : took " + (now - then) + " to set current session user " + sessionUserID +
                 " and set project to " + projid + " from " + before);
           }
+
      /*   if (!b) {
           if (hasSession) {
             logger.info("setCurrentProjectForUser : no most recent project for " + sessionUserID + ", tried " + projid);

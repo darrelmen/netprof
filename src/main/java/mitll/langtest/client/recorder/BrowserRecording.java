@@ -71,9 +71,9 @@ public class BrowserRecording {
 
   public static boolean gotPermission() {
     boolean b = usingWebRTC();
-    if (!b) {
-      logger.info("gotPermission permission FALSE usingWebRTC " + usingWebRTC());
-    }
+//    if (!b) {
+//      logger.info("gotPermission permission FALSE usingWebRTC " + usingWebRTC());
+//    }
     return b;
   }
 

@@ -701,6 +701,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         rs.getString("english"),
         foreignLanguage,
         foreignLanguage, "",
+        "",
         rs.getString(TRANSLITERATION),
         rs.getBoolean(OVERRIDE),
         unitToValue,

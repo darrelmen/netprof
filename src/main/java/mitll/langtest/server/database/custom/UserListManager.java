@@ -44,7 +44,6 @@ import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
-import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.DBConnection;
@@ -410,7 +409,8 @@ public class UserListManager implements IUserListManager {
               numItems,
               l.duration(),
               l.minscore(),
-              l.showaudio()));
+              l.showaudio(),
+              l.isprivate()));
     });
     return names;
   }
@@ -460,7 +460,9 @@ public class UserListManager implements IUserListManager {
               l.userid(),
               name,
               new ArrayList<>(exids),
-              l.duration()));
+              l.duration(),
+              l.isprivate())
+      );
     });
     return names;
   }
@@ -693,11 +695,11 @@ public class UserListManager implements IUserListManager {
    * Really create a new exercise and associated context exercise in database.
    * Add newly created exercise to the user list.
    *
-   * @paramx userListID
-   * @paramx userExercise notional until now!
-   * @paramx mediaDir
-   * @seex mitll.langtest.server.services.AudioServiceImpl#newExercise
-   * @seex mitll.langtest.server.services.ListServiceImpl#newExercise
+   * @param userListID
+   * @param userExercise notional until now!
+
+   * @see mitll.langtest.server.services.ListServiceImpl#newExercise
+   * @see mitll.langtest.server.services.ListServiceImpl#addItemsToList
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override
