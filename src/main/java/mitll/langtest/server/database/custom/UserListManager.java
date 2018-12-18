@@ -695,11 +695,11 @@ public class UserListManager implements IUserListManager {
    * Really create a new exercise and associated context exercise in database.
    * Add newly created exercise to the user list.
    *
-   * @paramx userListID
-   * @paramx userExercise notional until now!
-   * @paramx mediaDir
-   * @seex mitll.langtest.server.services.AudioServiceImpl#newExercise
-   * @seex mitll.langtest.server.services.ListServiceImpl#newExercise
+   * @param userListID
+   * @param userExercise notional until now!
+
+   * @see mitll.langtest.server.services.ListServiceImpl#newExercise
+   * @see mitll.langtest.server.services.ListServiceImpl#addItemsToList
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override

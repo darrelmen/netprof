@@ -617,8 +617,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return "Exercise #" +
         getID() +
         ", domino # " + getDominoID() +
-        "\n\tcontext " + isContext() +
-        "\n\tnp id '" + getOldID() + "'" +
+        (isContext() ? "\n\tcontext " + isContext() : "") +
+        (getOldID().isEmpty() ? "" : "\n\tnp id '" + getOldID() + "'") +
         " context index " + dominoContextIndex +
         " project " + projectid +
         (shouldSwap() ? "\n\tshouldSwap = " + shouldSwap() : "") +

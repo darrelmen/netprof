@@ -269,7 +269,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     });
   }
 
-   void maybeEnableContext(boolean hasText) {
+  void maybeEnableContext(boolean hasText) {
     rapContext.setEnabled(hasText && hasRecordPermission());
   }
 
@@ -377,7 +377,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       next = (U) directlyRelated.iterator().next();
     }
 
-    if (DEBUG) logger.info("makeContextAudioPanel make context from " + next.getID() + " " + next.getEnglish() + " " +next.getForeignLanguage());
+    if (DEBUG)
+      logger.info("makeContextAudioPanel make context from " + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage());
 
     rapContext = makeRecordAudioPanel(next, row, AudioType.CONTEXT_REGULAR);
     rapContext.getButton().addClickHandler(clickEvent -> postChangeIfDirty(false));
@@ -1019,10 +1020,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       controller.register(getPlayButton(), newExercise.getID());
     }
 
-
     private void disableOthers(boolean b) {
 //     logger.info("disable others " +b);
-      otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(b));
+      final boolean enabled = b &= hasRecordPermission();
+      otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(enabled));
     }
 
     /**
@@ -1192,7 +1193,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 /*  private boolean validRecordingCheck() {
     return newUserExercise == null;
   }*/
-
   private boolean hasRecordPermission() {
     User current = controller.getUserManager().getCurrent();
     //  logger.info("kind = " +current.getUserKind());

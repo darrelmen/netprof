@@ -119,12 +119,11 @@ class ImportBulk {
             Set<Integer> exids = new HashSet<>();
             newExercises.forEach(ex -> exids.add(ex.getID()));
 
-
             controller.getAudioService().refreshExercises(controller.getProjectStartupInfo().getProjectid(), exids,
                 new AsyncCallback<Void>() {
                   @Override
                   public void onFailure(Throwable throwable) {
-
+                    controller.handleNonFatalError("doing list import", throwable);
                   }
 
                   @Override
