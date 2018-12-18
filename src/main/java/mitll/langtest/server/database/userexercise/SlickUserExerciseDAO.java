@@ -772,16 +772,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
         addAttributeToExercise(allByProject, exToAttrs, exercise);
 //      logger.info("Attr for " + exercise.getID() + " " + exercise.getAttributes());
-        List<Pair> e = addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, lookup, exercise,
-            allFacetTypes, pairs);
-
- /*       e.forEach(pair -> {
-          if (pair.getProperty().startsWith("Speaker")) {
-            logger.info("got speaker attr " + pair);
-          }
-        });*/
-
-        allAttributes.add(e);
+        if (sectionHelper != null) {
+          List<Pair> e = addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, lookup, exercise,
+              allFacetTypes, pairs);
+          allAttributes.add(e);
+        }
         copy.add(exercise);
       }
 
@@ -800,7 +795,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       logger.info("getExercises took " + (now - then) + " to attach attributes to " + all.size() + " exercises.");
     }
 
-    if (addTypesToSection) {
+    if (addTypesToSection && sectionHelper != null) {
 //      logger.info("getExercises type order " + typeOrder);
       sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
     }

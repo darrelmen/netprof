@@ -260,7 +260,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     List<CommonExercise> allNonContextExercises =
         userExerciseDAO.getByProject(
             typeOrder,
-            getSectionHelper(),
+            null,
             fullProject,
 
             Collections.emptyMap(),
@@ -272,7 +272,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
     List<CommonExercise> contextByProject = userExerciseDAO.getContextByProject(
         typeOrder,
-        getSectionHelper(),
+        null,
         fullProject, Collections.emptyMap(), Collections.emptyMap(),
         false);
     if (DEBUG_USER_CREATED) {
@@ -352,7 +352,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       } else if (c++ < SPEW_THRESH || c % 100 == 0) {
         CommonExercise next = allNonContextExercises.isEmpty() ? null : allNonContextExercises.iterator().next();
 
-        logger.warn("attachContextExercises " + prefix + " exid " + relatedExercise.exid() + " context id " + relatedExercise.contextexid() +
+        logger.warn("attachContextExercises (" + c + ") " + prefix + " exid " + relatedExercise.exid() + " context id " + relatedExercise.contextexid() +
             // " didn't attach " + relatedExercise + "" +
             " for, e.g. " + next);
       }
