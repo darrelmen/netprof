@@ -114,6 +114,14 @@ public class EasyReportTest extends BaseTest {
   }
 
   @Test
+  public void testSectionHelper() {
+    DatabaseImpl english = getDatabase();
+    int projectid = 15;
+    Project project = english.getProject(projectid);
+    project.getSectionHelper().report();
+  }
+
+  @Test
   public void testLists() {
     DatabaseImpl english = getDatabase();
     int projectid = 3;
