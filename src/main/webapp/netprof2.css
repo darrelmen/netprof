@@ -2080,6 +2080,16 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #EEF3E2;
 }
 
+.simplePhoneContainer {
+    margin-bottom: 3px;
+    padding-bottom: 3px;
+    display: inline-block;
+}
+
+.simplePhoneContainer .phoneColor {
+    background-color: #EEF3E2;
+}
+
 .phoneColor {
     background-color: #EEF3E2;
 }
