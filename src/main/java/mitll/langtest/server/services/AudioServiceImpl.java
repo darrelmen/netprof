@@ -539,7 +539,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         saveFile,
         projid);
 
-    logger.info("path is " + audioAnswer.getPath());
+    if (DEBUG) logger.info("path is " + audioAnswer.getPath());
 
     jsonObject = new JsonScoring(getDatabase())
         .getJsonObject(
@@ -1071,7 +1071,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (audioTranscript.isEmpty()) {
       logger.warn("\n\n\n\nhuh? no transcript for audio " + audioTranscript + " and " + commonExercise);
     }
-    logger.info("getAudioAnswer audioTranscript '" + audioTranscript +"'");
+    logger.info("getAudioAnswer audioTranscript '" + audioTranscript + "'");
 
     AnswerInfo.RecordingInfo recordingInfo =
         new AnswerInfo.RecordingInfo("", "", deviceType, device, audioTranscript, "");
@@ -1127,7 +1127,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         audioAnswer.setPath(actualPath);
         long now = System.currentTimeMillis();
 
-        logger.info("getAudioAnswer wrote compressed version " + actualPath + " in " + (now - then));
+        if (now - then > 30) {
+          logger.info("getAudioAnswer wrote compressed version " + actualPath + " in " + (now - then));
+        }
       }
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -1266,7 +1268,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     } else {  // must be regular exercise
       if (audioType == AudioType.CONTEXT_REGULAR) {
         String context = exercise.getContext();
-        if (context.isEmpty()) context=exercise.getForeignLanguage();
+        if (context.isEmpty()) context = exercise.getForeignLanguage();
         return context;
       } else {
         return exercise.getForeignLanguage();
@@ -1445,7 +1447,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.NewUserExercise#gotContextBlur
    * @param projID
    * @param exid
    * @param audioID
@@ -1453,6 +1454,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @param transcript
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#gotContextBlur
    */
   @Override
   public AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript) throws DominoSessionException {

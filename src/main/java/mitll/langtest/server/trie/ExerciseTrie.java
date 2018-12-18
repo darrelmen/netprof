@@ -253,6 +253,8 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private void addSuffixes(T exercise, String trimmed) {
     Collection<String> tokens = smallVocabDecoder.getTokens(trimmed, false);
 
+    trimmed = trimmed.toLowerCase();
+
     if (tokens.size() > 1) {
       for (String token : tokens) {
         if (token.length() > trimmed.length()) {
@@ -261,12 +263,12 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
         } else {
           String substring = trimmed.substring(token.length());
 
-          String trimmed1 = smallVocabDecoder.getTrimmed(substring.toLowerCase());
+          String trimmed1 = smallVocabDecoder.getTrimmed(substring );
           if (trimmed1.isEmpty()) {
             //logger.error("is empty ");
           } else {
             if (debug) logger.info("addSuffixes '" + trimmed1 + "'");
-            addEntry(exercise, trimmed1);
+            addEntryNoLC(exercise, trimmed1);
           }
           trimmed = trimmed1;
         }
@@ -317,6 +319,10 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }*/
   private void addEntry(T exercise, String token) {
     addEntryToTrie(new ExerciseWrapper<>(token.toLowerCase(), exercise));
+  }
+
+  private void addEntryNoLC(T exercise, String token) {
+    addEntryToTrie(new ExerciseWrapper<>(token, exercise));
   }
 
   /**

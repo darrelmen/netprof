@@ -41,6 +41,7 @@ import java.text.CharacterIterator;
 import java.text.Normalizer;
 import java.text.StringCharacterIterator;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Creates the LM for a small vocab decoder from foreground and background sentences.
@@ -79,8 +80,10 @@ public class SmallVocabDecoder {
    * @see #getTrimmedLeaveAccents
    */
   private static final String FRENCH_PUNCT = "[,.?!]";
-  public static final boolean DEBUG = false;
-  public static final String TURKISH_CAP_I = "İ";
+  private static final boolean DEBUG = false;
+  private static final String TURKISH_CAP_I = "İ";
+  private static final String P_P = "\\p{P}";
+  private static final String ONE_SPACE = " ";
 
   private HTKDictionary htkDictionary;
   private boolean isAsianLanguage;
@@ -90,8 +93,17 @@ public class SmallVocabDecoder {
   // private static final boolean DEBUG = false;
   private static final boolean DEBUG_PREFIX = false;
   private static final boolean DEBUG_SEGMENT = false;
+  private final Pattern pattern;
+  private final Pattern spacepattern;
+  private final Pattern oepattern;
 
+  /**
+   * Compiles some handy patterns.
+   */
   public SmallVocabDecoder() {
+    pattern = Pattern.compile(REMOVE_ME + "|" + P_P);
+    spacepattern = Pattern.compile(P_Z);
+    oepattern = Pattern.compile(REPLACE_ME_OE);
   }
 
   /**
@@ -100,6 +112,7 @@ public class SmallVocabDecoder {
    * @see PronunciationLookup#makeDecoder
    */
   public SmallVocabDecoder(HTKDictionary htkDictionary, boolean isAsianLanguage) {
+    this();
     this.htkDictionary = htkDictionary;
     this.isAsianLanguage = isAsianLanguage;
 //    logger.info("SmallVocabDecoder dict now " + ((htkDictionary != null) ? htkDictionary.size() : " null dict") + " asian " + isAsianLanguage);
@@ -195,7 +208,7 @@ public class SmallVocabDecoder {
       if (debug) {
         logger.info("getSegmented segmentation " + segmentation);
       }
-      builder.append(segmentation).append(" ");
+      builder.append(segmentation).append(ONE_SPACE);
     });
     return builder.toString();
   }
@@ -297,6 +310,7 @@ public class SmallVocabDecoder {
 
   /**
    * For the moment we replace the Turkish Cap I with I
+   *
    * @param sentence
    * @return
    * @see PronunciationLookup#getPronStringForWord(String, Collection, boolean)
@@ -305,8 +319,8 @@ public class SmallVocabDecoder {
     String trim = sentence
         .replaceAll(FRENCH_PUNCT, "")
         .replaceAll(REPLACE_ME_OE, OE)
-        .replaceAll(TURKISH_CAP_I,"I")
-        .replaceAll("\\p{P}", " ")
+        .replaceAll(TURKISH_CAP_I, "I")
+        .replaceAll(P_P, ONE_SPACE)
         //.replaceAll("\\s+", " ")
         .trim();
     //logger.warn("getTrimmedLeaveAccents before " + sentence + " after "+ trim);
@@ -314,9 +328,9 @@ public class SmallVocabDecoder {
   }
 
   /**
-   * @see PronunciationLookup#addDictMatch
    * @param text
    * @return
+   * @see PronunciationLookup#addDictMatch
    */
   String removeAccents(String text) {
     return text == null ? null :
@@ -325,10 +339,10 @@ public class SmallVocabDecoder {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#getHydraDict
    * @param token
    * @param removeAllPunct
    * @return
+   * @see mitll.langtest.server.audio.AudioFileHelper#getHydraDict
    */
   public String lcToken(String token, boolean removeAllPunct) {
     return removeAllPunct ?
@@ -358,10 +372,10 @@ public class SmallVocabDecoder {
    * @see mitll.langtest.server.trie.ExerciseTrie#getTrimmed
    */
   public String getTrimmedLeaveLastSpace(String sentence) {
-    String s = sentence
-        .replaceAll(REMOVE_ME, " ")
+/*    String s = sentence
+        .replaceAll(REMOVE_ME, ONE_SPACE)
         //   .replaceAll("", " ")
-        .replaceAll(P_Z, " ")  // normalize all whitespace
+        .replaceAll(P_Z, ONE_SPACE)  // normalize all whitespace
 
         // .replaceAll(";", " ")
         // .replaceAll("~", " ")
@@ -369,9 +383,18 @@ public class SmallVocabDecoder {
         // .replaceAll("\\u2193", " ")
         // .replaceAll("/", " ")
         // .replaceAll("'", "")
-        .replaceAll("\\p{P}", " ")
-        .replaceAll(REPLACE_ME_OE, OE);
-    return s;//StringUtils.stripAccents(s);
+        .replaceAll(P_P, ONE_SPACE)
+        .replaceAll(REPLACE_ME_OE, OE);*/
+
+    String alt = pattern.matcher(sentence).replaceAll(ONE_SPACE);
+    alt = oepattern.matcher(alt).replaceAll(OE);
+    alt = spacepattern.matcher(alt).replaceAll(ONE_SPACE);
+    //  s = s.trim();
+    alt = alt.trim();
+//    if (!s.equals(alt)) {
+//      logger.warn("bug '" + sentence + "' old '" + s + "' vs new '" + alt + "'");
+//    }
+    return alt;
   }
 
   /**
@@ -416,7 +439,7 @@ public class SmallVocabDecoder {
           String trigram = String.valueOf(first) + second + third;
           if (inDict(trigram)) {
             if (DEBUG_SEGMENT) logger.info("segmentation match trigram " + trigram);
-            builder.append(trigram).append(" ");
+            builder.append(trigram).append(ONE_SPACE);
             i++;
             i++;
             found = true;
@@ -428,13 +451,13 @@ public class SmallVocabDecoder {
             String bigram = String.valueOf(first) + second;
             if (inDict(bigram)) {
               if (DEBUG_SEGMENT) logger.info("segmentation match bigram " + bigram);
-              builder.append(bigram).append(" ");
+              builder.append(bigram).append(ONE_SPACE);
               i++;
             } else {
-              builder.append(first).append(" ");
+              builder.append(first).append(ONE_SPACE);
             }
           } else {
-            builder.append(first).append(" ");
+            builder.append(first).append(ONE_SPACE);
           }
         }
       }
@@ -475,13 +498,14 @@ public class SmallVocabDecoder {
       if (memo == null) {
         memo = longest_prefix(substring, 0, phraseToPrefix);
         phraseToPrefix.put(substring, memo);
-      } else {
-//        logger.info("found " + substring + " = " + memo);
       }
+      //else {
+//        logger.info("found " + substring + " = " + memo);
+     // }
       String rest = memo;
 
       if (!rest.isEmpty()) {
-        String s = prefix + " " + rest;
+        String s = prefix + ONE_SPACE + rest;
         if (DEBUG_PREFIX) {
           logger.debug("longest_prefix : found '" + rest + "' in '" + phrase + "' returning " + s);
         }
