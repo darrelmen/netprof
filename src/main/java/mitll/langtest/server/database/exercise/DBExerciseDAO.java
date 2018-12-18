@@ -247,7 +247,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         List<CommonExercise> userCreatedExercises = getUserCreatedExercises(typeOrder, allRelated);
         userCreatedExercises.forEach(c -> idToUserExercise.put(c.getID(), c));
         userCreatedExercises.forEach(c -> c.getDirectlyRelated().forEach(d -> idToUserExercise.put(d.getID(), d.asCommon())));
-     //   logger.info("added " + userCreatedExercises.size() + " vs " + idToUserExercise.size());
+        //   logger.info("added " + userCreatedExercises.size() + " vs " + idToUserExercise.size());
       }
       return allNonContextExercises;
     } catch (Exception e) {
@@ -364,9 +364,17 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   public void addUserExercise(CommonExercise commonExercise) {
     CommonExercise put = idToUserExercise.put(commonExercise.getID(), commonExercise);
     if (put != null) {
-      logger.info("addUserExercise : already user ex with " + commonExercise.getID() + " : " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage());
-      CommonExercise exercise = getExercise(commonExercise.getID());
-      logger.info("addUserExercise :after " + exercise.getID() + " : " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+      logger.info("addUserExercise : already user ex #" + commonExercise.getID() +
+          " eng '" + commonExercise.getEnglish() +
+          "' fl '" + commonExercise.getForeignLanguage() + "' meaning '" + commonExercise.getMeaning() +
+          "'");
+      {
+        CommonExercise exercise = getExercise(commonExercise.getID());
+        logger.info("addUserExercise :after #" + exercise.getID() +
+            " eng '" + exercise.getEnglish() +
+            "' fl '" + exercise.getForeignLanguage() + "' meaning '" + exercise.getMeaning() +
+            "'");
+      }
     }
   }
 

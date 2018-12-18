@@ -9,10 +9,14 @@ import org.jetbrains.annotations.NotNull;
 import org.moxieapps.gwt.highcharts.client.*;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class PolyglotChart<T extends CommonShell> extends BasicTimeSeriesPlot<T> {
-  //private final Logger logger = Logger.getLogger("PolyglotChart");
+  public static final String CLICK_TO_RE_RECORD = "Click to re-record.";
+  private final Logger logger = Logger.getLogger("PolyglotChart");
+
   private static final String RECORDINGS = "Recordings";
   private static final String AVG_SCORE = "Avg. Score";
   private static final int HEIGHT = 100;
@@ -41,8 +45,18 @@ public class PolyglotChart<T extends CommonShell> extends BasicTimeSeriesPlot<T>
 
     chart = getChart();
 
+    long first = setData(answers);
+    if (first > 0) {
+      setExtremes(first, duration);
+    }
+    add(chart);
+  }
+
+  public long setData(Collection<AudioAnswer> answers) {
     int size = answers.size();
-//    logger.info("addChart : plotting " + size + " items.");
+
+   // logger.info("addChart : plotting " + size + " items.");
+
     Number[][] data = new Number[size][2];
     Number[][] data2 = new Number[size][2];
     int i = 0;
@@ -51,6 +65,8 @@ public class PolyglotChart<T extends CommonShell> extends BasicTimeSeriesPlot<T>
     float count = 0;
     for (AudioAnswer ts : answers) {
       long timestamp = ts.getTimestamp();
+   //   logger.info("addChart : timestamp " + timestamp + " : " + new Date(timestamp));
+
       if (first == -1) first = timestamp;
 
       double score = ts.getScore();
@@ -70,18 +86,19 @@ public class PolyglotChart<T extends CommonShell> extends BasicTimeSeriesPlot<T>
       i++;
     }
 
+    chart.removeAllSeries();
     chart.addSeries(getScatterSeries(chart, RECORDINGS, data2));
     chart.addSeries(getSplineSeries(chart, AVG_SCORE, data));
-    if (first > 0)
-      setExtremes(first, duration);
-    add(chart);
+
+    return first;
   }
 
   private void setExtremes(long time, long duration) {
     long start = time - 1;
     long end = time + duration + (60);//(10 * 60 * 1000);
     chart.getXAxis().setExtremes(start, end, true, false);
-    //  logger.info("xAxis from " + new Date(start) + " - " + new Date(end) + " duration  " + duration);
+
+ //   logger.info("setExtremes xAxis from " + new Date(start) + " - " + new Date(end) + " duration  " + duration);
   }
 
   private Chart getChart() {
@@ -119,16 +136,12 @@ public class PolyglotChart<T extends CommonShell> extends BasicTimeSeriesPlot<T>
     return true;
   }
 
-//  boolean showDate() {
-//    return false;
-//  }
-
   protected boolean gotClickAt(long nearestXAsLong) {
     AudioAnswer audioAnswer = timeToAnswer.get(nearestXAsLong);
     if (audioAnswer != null) {
       gotClickOnExercise(audioAnswer.getExid(), nearestXAsLong);
     } else {
-      // logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
+      //logger.info("getSeriesClickEventHandler no point at " + nearestXAsLong);
     }
     return true;
   }
@@ -161,6 +174,6 @@ public class PolyglotChart<T extends CommonShell> extends BasicTimeSeriesPlot<T>
   @Override
   @NotNull
   String getTooltipHint() {
-    return "<br/><b>Click to re-record.</b>";
+    return "<br/><b>" + CLICK_TO_RE_RECORD + "</b>";
   }
 }

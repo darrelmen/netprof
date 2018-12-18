@@ -1340,6 +1340,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 //    logger.info("getCommonExercisesWithoutAudio " + ids);
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
+
+      logger.info("ex " + byID.getID() + " eng "+ byID.getEnglish() + " fl " + byID.getForeignLanguage() + " " +byID.getMeaning());
       addAnnotations(byID); // todo do this in a better way
       //if (true || byID.getAudioAttributes().isEmpty()) {
       toAddAudioTo.add(byID);

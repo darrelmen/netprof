@@ -68,11 +68,15 @@ import static mitll.langtest.server.services.MyRemoteServiceServlet.X_FORWARDED_
 public class NPUserSecurityManager implements IUserSecurityManager {
   private static final Logger log = LogManager.getLogger(NPUserSecurityManager.class);
 
+  private static final String COULD_NOT_LOOK_UP_USER = "Could not look up user!";
+
   private final IUserDAO userDAO;
   private final IUserSessionDAO userSessionDAO;
   private IProjectManagement projectManagement;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_SET_SESSION = true;
+  private static final boolean DEBUG_FAILURE = true;
 
   /**
    * Only made once but shared with servlets.
@@ -219,30 +223,33 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    * @see #setSessionUser(HttpSession, User, boolean)
    */
   private void setSessionUserAndRemember(HttpSession session, int id1) {
-    //  log.info("setSessionUserAndRemember : set session user to " + id1);
     session.setAttribute(USER_SESSION_ATT, id1);
 
     Timestamp modified = new Timestamp(System.currentTimeMillis());
+    String id = session.getId();
+
+  //  log.info("setSessionUserAndRemember : set session " + id + " user " + id1);
+
     userSessionDAO.add(
         new SlickUserSession(-1,
             id1,
-            session.getId(),
+            id,
             "",
             "",
             modified, modified));
 
-    if (DEBUG) {
-      logSetSession(session, session.getId());
+    if (DEBUG_SET_SESSION) {
+      logSetSession(session, id);
     }
   }
 
-  private void logSetSession(HttpSession session1, String sessionID) {
+  private void logSetSession(HttpSession session, String sessionID) {
     log.info("setSessionUser : Adding user to " +
         "\nsession        " + sessionID +
-        "\nlookup user    " + getUserIDFromSession(session1) +
-        "\nsession.isNew= " + session1.isNew() +
-        "\ncreated        " + session1.getCreationTime() + " or " + (new Date(session1.getCreationTime())) +
-        "\nattributes     " + getAttributesFromSession(session1));
+        "\nlookup user    " + getUserIDFromSession(session) +
+        "\nsession.isNew= " + session.isNew() +
+        "\ncreated        " + session.getCreationTime() + " or " + (new Date(session.getCreationTime())) +
+        "\nattributes     " + getAttributesFromSession(session));
   }
 
 
@@ -377,7 +384,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
           setSessionUser(session, sessUser, madeNewSession);
         }
       } else {
-        if (DEBUG)
+        if (DEBUG_FAILURE)
           log.info("lookupUserFromSessionOrDB no user for session - " + getCurrentSession(request) + " logged out?");
       }
 
@@ -392,7 +399,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
           request.getRequestedSessionId()
           //, new Throwable()
       );*/
-      throw new DominoSessionException("Could not look up user!");
+      throw new DominoSessionException(COULD_NOT_LOOK_UP_USER);
     }
     return sessUser;
   }
@@ -422,13 +429,15 @@ public class NPUserSecurityManager implements IUserSecurityManager {
         }
 
       } else {
-        if (DEBUG) {
-          log.info("lookupUserFromSessionOrDB no user for session - " + getCurrentSession(request) + " logged out?");
+        if (DEBUG_FAILURE) {
+          log.info("lookupUserFromSessionOrDB no user for " +
+              "\n\tsid        " + sid +
+              "\n\tor session " + getCurrentSession(request) + " logged out?");
         }
       }
 
     } else {
-      if (DEBUG) {
+      if (DEBUG_FAILURE) {
         log.info("lookupUserFromSessionOrDB User found in HTTP session. User: {}. SID: {}", sessUserID, request.getRequestedSessionId());
       }
     }
@@ -439,7 +448,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
           request.getRequestedSessionId()
           //, new Throwable()
       );
-      throw new DominoSessionException("Could not look up user!");
+      throw new DominoSessionException(COULD_NOT_LOOK_UP_USER);
     }
     return sessUserID;
   }
@@ -764,6 +773,11 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     long then = System.currentTimeMillis();
     User sessUser = userDAO.getByID(id);
     long now = System.currentTimeMillis();
+
+    if (sessUser != null) {
+      log.info("getUserForID " + id + " is a " + sessUser.getUserKind() + " teacher? " +sessUser.isTeacher());
+    }
+
     if (now - then > 20) {
       log.warn("getUserForID took " + (now - then) + " millis to get user " + id);
     }

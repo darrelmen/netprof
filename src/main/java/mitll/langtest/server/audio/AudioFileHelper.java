@@ -990,6 +990,7 @@ public class AudioFileHelper implements AlignDecode {
 
     if (now - timestamp > 10) logger.info("rememberAnswer took " + (now - timestamp));
     answer.setResultID(answerID);
+    logger.info("rememberAnswer " + new Date(timestamp) + " " + timestamp);
     answer.setTimestamp(timestamp);
 
     if (dialogSessionID > 0) {

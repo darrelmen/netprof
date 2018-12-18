@@ -437,6 +437,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         foreignlanguage,
         StringUtils.stripAccents(foreignlanguage),
         altfl,
+        slick.meaning(),
         slick.transliteration(),
         slick.isoverride(),
         unitToValue,

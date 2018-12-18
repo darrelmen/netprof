@@ -92,9 +92,11 @@ public class RestUserManagement {
   private static final String EMAIL_H = "emailH";
   private static final String EMAIL = "email";
   /**
+   *
    */
   private static final String USERID = "userid";
   /**
+   *
    */
   private static final String PASSWORD_CORRECT = "passwordCorrect";
 
@@ -153,15 +155,16 @@ public class RestUserManagement {
       }
       return true;
     } else if (queryString.startsWith(RESET_PASS)) {
-      logger.warn(" - calling reset " + queryString);
+      logger.info(" - calling reset " + queryString);
       String[] split1 = getParams(queryString);
       if (split1.length != 2) {
         toReturn.addProperty(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
         String user = getFirst(split1[0]);
-        //  String second = split1[1];
-        //  String emailFromDevice = getArg(second);//second.split("=")[1];
-        String token = resetPassword(user, request);//emailFromDevice, request.getRequestURL().toString());
+        String second = split1[1];
+        String optionalEmail = getArg(second);//second.split("=")[1];
+
+        String token = resetPassword(user, request, optionalEmail);//emailFromDevice, request.getRequestURL().toString());
         toReturn.addProperty(TOKEN, token);
       }
       return true;
@@ -215,7 +218,7 @@ public class RestUserManagement {
    * @param toReturn
    * @param request
    * @param securityManager
-   * @param projid if > 0 then we remember the project for this user
+   * @param projid           if > 0 then we remember the project for this user
    * @param user
    * @param freeTextPassword
    * @param strictValidity
@@ -324,10 +327,11 @@ public class RestUserManagement {
   /**
    * @param user
    * @param request
+   * @param optionalEmail
    * @return
    * @see #doGet(HttpServletRequest, String, JsonObject)
    */
-  private String resetPassword(String user, HttpServletRequest request) {
+  private String resetPassword(String user, HttpServletRequest request, String optionalEmail) {
     if (user.length() == 4) user = user + "_";
     else if (user.length() == 3) user = user + "__";
 
@@ -335,7 +339,7 @@ public class RestUserManagement {
 
     boolean knownUser = db.getUserDAO().isKnownUser(user);
     if (knownUser) {
-      db.getUserDAO().forgotPassword(user, getBaseURL(request));
+      db.getUserDAO().forgotPassword(user, getBaseURL(request), optionalEmail);
       return PASSWORD_EMAIL_SENT;
     } else {
       return NOT_VALID;

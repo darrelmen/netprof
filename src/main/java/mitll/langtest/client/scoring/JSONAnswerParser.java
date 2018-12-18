@@ -55,7 +55,9 @@ class JSONAnswerParser {
 
     converted.setDynamicRange(getFloatField(jsonObject, "dynamicRange"));
     //useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
-    converted.setTimestamp(getLongField(jsonObject, "timestamp"));
+    long timestamp = getLongField(jsonObject, "timestamp");
+    logger.info("getAudioAnswer json timestamp " + timestamp + " " + new Date(timestamp));
+    converted.setTimestamp(timestamp);
 
     if (validity == Validity.OK /*|| validity == Validity.CUT_OFF*/) {
       // logger.info("Got validity " + validity);
@@ -160,27 +162,22 @@ class JSONAnswerParser {
   }
 
   private long getLongField(JSONObject jsonObject, String reqid) {
-//    JSONValue jsonValue = jsonObject.get(reqid);
-//    return (long) (jsonValue == null ? 0L : jsonValue.isNumber().doubleValue());
-//
-//
-//
     JSONValue jsonValue = jsonObject.get(reqid);
     if (jsonValue == null) return 0;
     else if (jsonValue.isNumber() == null) {
-//      if (!reqid.equalsIgnoreCase(REQID)) {
-//        logger.warning("huh? " + reqid + " is not a number? " + jsonValue.getClass());
-//      }
-      JSONString string = jsonObject.get(reqid).isString();
-      String s = string.stringValue();
+      //   logger.info("getLongField obj "  +jsonValue + " is not a number?");
+      String s = jsonValue.isString().stringValue();
       try {
+        logger.info("getLongField parse obj " + jsonValue + " : " + s);
         return Long.parseLong(s);
       } catch (NumberFormatException e) {
         logger.warning("can't parse " + s);
         return 0;
       }
-    } else
-      return (int) jsonValue.isNumber().doubleValue();
+
+    } else {
+      return (long) jsonValue.isNumber().doubleValue();
+    }
   }
 
   private float getFloatField(JSONObject jsonObject, String reqid) {

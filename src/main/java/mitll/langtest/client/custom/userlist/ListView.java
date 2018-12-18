@@ -892,7 +892,9 @@ public class ListView implements ContentView, CreateListComplete {
 
   private void enableQuizButton(Button quizButton) {
     UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
-    quizButton.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
+    if (quizButton != null) {
+      quizButton.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
+    }
 
     if (currentSelection != null && editButton != null) {
       boolean favorite = currentSelection.isFavorite();
@@ -971,9 +973,8 @@ public class ListView implements ContentView, CreateListComplete {
      */
     @Override
     public void gotHidden() {
-      logger.info("Got hidden ");
+     // logger.info("Got hidden ");
       editItem.removeHistoryListener();
-
       History.newItem("");
     }
 

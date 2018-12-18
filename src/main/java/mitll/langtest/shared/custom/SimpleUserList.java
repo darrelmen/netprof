@@ -7,6 +7,7 @@ public class SimpleUserList extends UserListLight implements IUserList {
   private int duration, minScore;
   private String userChosenID;
   private boolean showAudio;
+  private boolean isPrivate;
 
   public SimpleUserList() {
   }
@@ -18,9 +19,11 @@ public class SimpleUserList extends UserListLight implements IUserList {
    * @param userid
    * @param userChosenID
    * @param duration
+   * @param isPrivate
    * @see mitll.langtest.server.database.custom.UserListManager#getSimpleListsForUser
    */
-  public SimpleUserList(int id, String name, int projid, int userid, String userChosenID, int numItems, int duration, int minScore, boolean showAudio) {
+  public SimpleUserList(int id, String name, int projid, int userid, String userChosenID,
+                        int numItems, int duration, int minScore, boolean showAudio, boolean isPrivate) {
     super(id, name);
     this.projid = projid;
     this.userid = userid;
@@ -29,6 +32,7 @@ public class SimpleUserList extends UserListLight implements IUserList {
     this.duration = duration;
     this.minScore = minScore;
     this.showAudio = showAudio;
+    this.isPrivate=isPrivate;
   }
 
   @Override
@@ -68,5 +72,10 @@ public class SimpleUserList extends UserListLight implements IUserList {
    */
   public int getRoundTimeMinutes() {
     return duration;
+  }
+
+  @Override
+  public boolean isPrivate() {
+    return isPrivate;
   }
 }

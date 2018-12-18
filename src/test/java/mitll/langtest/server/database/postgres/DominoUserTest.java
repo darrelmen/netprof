@@ -83,7 +83,7 @@ public class DominoUserTest extends BaseTest {
     User demo = userDAO.getUserByID("demo");
     logger.info("Got " + demo);
 
-    userDAO.forgotPassword("demo", "");//, "gordon.vidaver@ll.mit.edu");
+    userDAO.forgotPassword("demo", "", "");//, "gordon.vidaver@ll.mit.edu");
   }
 
 /*

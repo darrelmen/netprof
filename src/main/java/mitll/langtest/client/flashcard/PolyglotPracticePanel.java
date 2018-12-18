@@ -34,6 +34,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
 
   private static final String ALL_DONE = "All done!";
+
+  /**
+   * @see #onSetComplete
+   */
   private static final List<String> messages = Arrays.asList(
       "You've recorded all the items. ",
       "Click on a dot in the chart to jump back and re-record.",
@@ -141,13 +145,16 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
     super.addRecordingAndFeedbackWidgets(exerciseID, controller, toAddTo);
     AudioAnswer answer = sticky.getLastAnswer(exerciseID);
     if (answer != null) {
-      double score = answer.getScore();
-
-      showRecoFeedback(score, answer.getPretestScore(), isCorrect(answer.isCorrect(), score));
+      {
+        double score = answer.getScore();
+        showRecoFeedback(score, answer.getPretestScore(), isCorrect(answer.isCorrect(), score));
+      }
 
       playAudioPanel.startSong(CompressedAudio.getPath(answer.getPath()), DO_AUTOLOAD);
     }
   }
+
+  private PolyglotChart<L> chart;
 
   /**
    * @param toAddTo
@@ -155,13 +162,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
    */
   @Override
   protected void addRowBelowPrevNext(DivWidget toAddTo) {
-    toAddTo.add(getChart(quizSpec.getRoundMinutes() * MINUTE));
+    chart = getChart(quizSpec.getRoundMinutes() * MINUTE);
+    toAddTo.add(chart);
     super.addRowBelowPrevNext(toAddTo);
   }
-
-//  private int getRoundTime() {
-//    return polyglotFlashcardContainer.getRoundTimeMinutes(polyglotFlashcardContainer.getIsDry()) * MINUTE;
-//  }
 
   @Override
   protected void showEnglishOrForeign() {
@@ -190,7 +194,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
     if (sessionStartMillis == 0L) logger.warning("session start is 0?");
 
     String s = "" + sessionStartMillis;
-   // logger.info("getDeviceValue  " + s);
+    // logger.info("getDeviceValue  " + s);
     return s;
   }
 
@@ -205,8 +209,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   protected void recordingStarted() {
     if (polyglotFlashcardContainer.getMode() != PolyglotDialog.MODE_CHOICE.NOT_YET) {
       polyglotFlashcardContainer.startTimedRun();
-    }
-    else {
+    } else {
       logger.info("recordingStarted : ignore start time run ? mode " + polyglotFlashcardContainer.getMode());
     }
     super.recordingStarted();
@@ -268,7 +271,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
 
   @Override
   AnalysisTab getScoreHistory() {
- //   logger.info("getScoreHistory - ");
+    //   logger.info("getScoreHistory - ");
     AnalysisTab widgets = new AnalysisTab(controller, true, -1, () -> 0, INavigation.VIEWS.LEARN);
     widgets.getElement().getStyle().setMarginTop(-25, Style.Unit.PX);
     return widgets;
@@ -296,6 +299,11 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
     showTimeRemaining(polyglotFlashcardContainer.getRoundTimeLeftMillis());
   }
 
+  /**
+   * @param duration
+   * @return
+   * @see #addRowBelowPrevNext
+   */
   @NotNull
   private PolyglotChart<L> getChart(long duration) {
     PolyglotChart<L> pChart = new PolyglotChart<L>(controller, controller.getMessageHelper(), exerciseList);
@@ -363,6 +371,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
     controller.setBannerVisible(true);
     if (roundTimeLeftMillis > 0 && polyglotFlashcardContainer.isComplete()) {
       new ModalInfoDialog(ALL_DONE, messages);
+      chart.setData(sticky.getAnswers());
+
     } else {
       super.onSetComplete();
     }

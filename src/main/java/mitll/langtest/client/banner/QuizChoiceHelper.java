@@ -73,10 +73,20 @@ public class QuizChoiceHelper implements ContentView {
         });
   }
 
+  /**
+   * Only show public lists or ones that are mine!
+   * @param result
+   * @return
+   */
   @NotNull
   private Map<Integer, IUserList> getIdToUserListMap(Collection<IUserList> result) {
     final Map<Integer, IUserList> idToList = new LinkedHashMap<>();
-    result.forEach(ul -> idToList.put(ul.getID(), ul));
+    int me = controller.getUser();
+    result.forEach(ul -> {
+      if (!ul.isPrivate() || ul.getUserID() == me) {
+        idToList.put(ul.getID(), ul);
+      }
+    });
     return idToList;
   }
 

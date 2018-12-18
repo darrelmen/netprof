@@ -87,7 +87,19 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   @Override
   public Collection<UserInfo> getUsersWithRecordings() throws DominoSessionException, RestrictedOperationException {
     long then = System.currentTimeMillis();
-    if (hasTeacherPerm()) {
+    boolean hasTeacherPerm = hasTeacherPerm();
+    if (!hasTeacherPerm) {
+
+      User userFromSession = getUserFromSession();
+      if (userFromSession != null) {
+        logger.info("getUsersWithRecordings for  : " + userFromSession.getID() + " " + userFromSession.getUserID() + " " + userFromSession.getUserKind() + " = " + hasTeacherPerm);
+        db.getUserDAO().refreshCacheFor(userFromSession.getID());
+      }
+      hasTeacherPerm = hasTeacherPerm();
+      logger.info("getUsersWithRecordings after refresh : " + hasTeacherPerm);
+    }
+
+    if (hasTeacherPerm) {
       int projectIDFromUser = getProjectIDFromUser();
       logger.info("getUsersWithRecordings for project # " + projectIDFromUser);
       List<UserInfo> userInfo = db

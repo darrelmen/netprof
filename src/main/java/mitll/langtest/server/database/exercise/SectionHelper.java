@@ -185,7 +185,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       for (SectionNode child : node.getChildren()) {
         if (!child.getType().equals(childType)) {
-          logger.error("child " + child + " doesn't match " + childType);
+          logger.warn("recurseAndCount child '" + child + "' doesn't match child type " + childType);
         }
         members.add(child.getName());
         recurseAndCount(child, typeToCount);

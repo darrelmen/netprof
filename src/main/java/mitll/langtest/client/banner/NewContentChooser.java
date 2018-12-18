@@ -505,11 +505,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       quizHelper.showContent(divWidget, QUIZ);
     } else {
       if (list == -1) {
-        logger.info("showQuizForReal no list but not from click");
+       // logger.info("showQuizForReal no list but not from click");
 
         quizHelper.showContent(divWidget, QUIZ);
       } else {
-        logger.info("showQuizForReal NOT from a click, maybe from jump or reload for " + list);
+      //  logger.info("showQuizForReal NOT from a click, maybe from jump or reload for " + list);
         quizHelper.showChosenQuiz(divWidget);
       }
     }
@@ -682,7 +682,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   @Override
   public void showListIn(int listid, VIEWS view) {
-    logger.info("showListIn - " + listid + " " + view);
+  //  logger.info("showListIn - " + listid + " " + view);
     setHistoryWithList(listid, view);
     banner.show(view, false);
   }

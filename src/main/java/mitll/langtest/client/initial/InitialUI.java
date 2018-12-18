@@ -332,7 +332,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   private void pushClearHistory() {
-    logger.info("pushClearHistory -");
+  //  logger.info("pushClearHistory -");
     History.newItem("");
   }
 
@@ -344,7 +344,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     clearStartupInfo();
     contentRow.clear();
 //    contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
-
 //    contentRow.add(lifecycleSupport.getFlashRecordPanel()); // put back record panel
   }
 

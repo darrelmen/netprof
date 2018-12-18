@@ -223,6 +223,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param foreignLanguage
    * @param noAccentFL
    * @param altFL
+   * @param meaning
    * @param transliteration
    * @param isOverride
    * @param modifiedTimestamp
@@ -241,6 +242,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String foreignLanguage,
                   String noAccentFL,
                   String altFL,
+                  String meaning,
                   String transliteration,
                   boolean isOverride,
                   Map<String, String> unitToValue,
@@ -252,14 +254,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int numPhones,
                   int dominoID,
                   boolean shouldSwap) {
-    this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, "", transliteration,
+    this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, meaning, transliteration,
         projectid, candecode, lastChecked, isContext, numPhones, dominoID, shouldSwap);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
     this.safeToDecode = candecode;
     this.numPhones = numPhones;
-    //  this.tokens = tokens;
   }
 
   /**
@@ -616,7 +617,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return "Exercise #" +
         getID() +
         ", domino # " + getDominoID() +
-        "\n\tcontext " + isContext()+
+        "\n\tcontext " + isContext() +
         "\n\tnp id '" + getOldID() + "'" +
         " context index " + dominoContextIndex +
         " project " + projectid +

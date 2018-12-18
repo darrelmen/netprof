@@ -44,7 +44,6 @@ import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
-import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.DBConnection;
@@ -410,7 +409,8 @@ public class UserListManager implements IUserListManager {
               numItems,
               l.duration(),
               l.minscore(),
-              l.showaudio()));
+              l.showaudio(),
+              l.isprivate()));
     });
     return names;
   }
@@ -460,7 +460,9 @@ public class UserListManager implements IUserListManager {
               l.userid(),
               name,
               new ArrayList<>(exids),
-              l.duration()));
+              l.duration(),
+              l.isprivate())
+      );
     });
     return names;
   }

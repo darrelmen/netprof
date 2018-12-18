@@ -211,7 +211,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
   SResult<ClientUserDetail> updateUser(DBUser dbUser);
 
-  boolean forgotPassword(String user, String url);
+  boolean forgotPassword(String user, String url, String optionalEmail);
 
 
 
@@ -244,7 +244,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   DBUser getDominoAdminUser();
 
   void setProjectManagement(IProjectManagement projectManagement);
- // List<DBUser> getTeachers();
+
   Set<Integer> getTeacherIDs();
   <T> Map<Integer, T> getJustTeachers(Map<Integer, T> activeSince);
 
