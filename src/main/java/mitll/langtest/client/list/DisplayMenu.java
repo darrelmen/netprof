@@ -31,7 +31,7 @@ public class DisplayMenu {
   private static final String SHOW_PRIMARY_TEXT = "Show Primary text";
 
   /**
-   *
+   * @see #getShowSounds
    */
   private static final String SHOW_SOUNDS = "Show Sounds";
 

@@ -2,6 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ListenViewHelper;
@@ -43,6 +44,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   final ExerciseController controller;
   DivWidget flClickableRow;
   ClickableWords clickableWords;
+  /**
+   * @see #showAlignment
+   */
+  DivWidget flClickableRowPhones;
 
   /**
    * @see #getFLEntry
@@ -126,12 +131,20 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       {
         DivWidget wrapper = new DivWidget();
         wrapper.add(getFLEntry(exercise));
+        wrapper.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
+        stylePhoneRow(flClickableRowPhones);
+
         styleMe(wrapper);
         add(wrapper);
       }
 
       makePlayAudio(exercise, null);
     }
+  }
+
+  protected void stylePhoneRow(UIObject phoneRow) {
+    if (isRTL) phoneRow.addStyleName("floatRight");
+    phoneRow.addStyleName("topFiveMargin");
   }
 
   private boolean isEngAttr() {
@@ -286,7 +299,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         if (DEBUG) {
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         }
-        return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, new DivWidget());
+        return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickableRowPhones);
       } else {
         if (DEBUG) {
           logger.info("showAlignment SKIP for ex " + exercise.getID() + " audio id " + id + " vs " + currentAudioDisplayed);
@@ -308,7 +321,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param playAudio
    * @param clickableRow
    * @param clickablePhones
-   * @see #audioChanged
+   * @see #showAlignment
    * @see #contextAudioChanged
    */
   TreeMap<TranscriptSegment, IHighlightSegment> matchSegmentsToClickables(int id,
@@ -759,7 +772,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     if (lcSegment.equalsIgnoreCase(lcClickable)) {  // easy match -
       if (showPhones) {
         DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-        addSouthClickable(clickablePhones,/* clickable,*/ phoneDivBelowWord);
+        addSouthClickable(clickablePhones, phoneDivBelowWord);
       }
 
       return clickable;
@@ -772,7 +785,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         AllHighlight allHighlight = getAllHighlight(bulk);
         if (showPhones) {
           DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-          addSouthClickable(clickablePhones, /*allHighlight,*/ phoneDivBelowWord);
+          addSouthClickable(clickablePhones, phoneDivBelowWord);
         }
 
         if (DEBUG || DEBUG_MATCH)
@@ -783,9 +796,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
   }
 
-  private void addSouthClickable(DivWidget clickablePhones, /*IHighlightSegment clickable,*/ DivWidget phoneDivBelowWord) {
+  private void addSouthClickable(DivWidget clickablePhones, DivWidget phoneDivBelowWord) {
     clickablePhones.add(phoneDivBelowWord);
-    // clickable.setSouth(phoneDivBelowWord);
     phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
   }
 
@@ -798,11 +810,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see #doOneToManyMatch
    */
   @NotNull
-  private DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
+  protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
                                          List<TranscriptSegment> phonesInWord,
                                          AudioControl audioControl,
                                          TreeMap<TranscriptSegment, IHighlightSegment> phoneMap) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment);
+    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, true);
   }
 
   /**
@@ -991,7 +1003,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     flclickables = new ArrayList<>();
 
     List<String> tokens = e.getTokens();
-    if (tokens == null) {
+    if (tokens == null && !e.hasEnglishAttr()) {
       logger.warning("no tokens for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage());
     }
     flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL, tokens);

@@ -402,7 +402,7 @@ public class WordTable {
 
     new TooltipHelper().addTooltip(header, CLICK_TO_HEAR_WORD);
 
-    DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, phonesForWord, false, null /*isRTL*/);
+    DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, phonesForWord, false, null, /*isRTL*/true);
     phones.addStyleName("inlineFlex");
 
     header.setSouthScore(phones);
@@ -439,6 +439,7 @@ public class WordTable {
    * @param phoneSegments
    * @param simpleLayout
    * @param wordSegment
+   * @param doFloatLeft
    * @return
    * @paramz isRTL
    * @see TwoColumnExercisePanel#getPhoneDivBelowWord
@@ -448,10 +449,15 @@ public class WordTable {
                                  TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                  List<TranscriptSegment> phoneSegments,
                                  boolean simpleLayout,
-                                 TranscriptSegment wordSegment
-  ) {
+                                 TranscriptSegment wordSegment,
+                                 boolean doFloatLeft) {
     DivWidget phones = new DivWidget();
-    phones.addStyleName("phoneContainer");
+    if (doFloatLeft) {
+      phones.addStyleName("phoneContainer");
+    } else {
+      phones.addStyleName("simplePhoneContainer");
+    }
+
     addPhonesBelowWord2(phoneSegments, phones, audioControl, phoneMap, simpleLayout, wordSegment);
     return phones;
   }

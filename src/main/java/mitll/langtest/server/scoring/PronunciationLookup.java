@@ -333,7 +333,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       if (process.length > 50) {
         logger.info("getPronunciationsFromDictOrLTS prons length " + process.length +
             "\n\tfor " + word +
-            "\n\tin '" + transcript + "'", new Exception());
+            "\n\tin '" + transcript + "'");
       }
       int max = MAX_FROM_ANY_TOKEN;
       List<String> prons = new ArrayList<>();

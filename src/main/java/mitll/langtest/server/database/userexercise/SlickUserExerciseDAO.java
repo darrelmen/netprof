@@ -776,16 +776,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
         addAttributeToExercise(allByProject, exToAttrs, exercise);
 //      logger.info("Attr for " + exercise.getID() + " " + exercise.getAttributes());
-        List<Pair> e = addExerciseToSectionHelper(slickExercise, baseTypeOrder, sectionHelper, lookup, exercise,
-            allFacetTypes, pairs);
-
- /*       e.forEach(pair -> {
-          if (pair.getProperty().startsWith("Speaker")) {
-            logger.info("got speaker attr " + pair);
-          }
-        });*/
-
-        allAttributes.add(e);
 
         if (addTokens) {
           if (!exercise.hasEnglishAttr()) {

@@ -6,8 +6,8 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.custom.exercise.CommentBox;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
@@ -61,9 +61,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private DivWidget contextClickableRow;
 
   /**
-   *
+   * @see #makeFirstRow
    */
-  private DivWidget flClickableRowPhones, altFLClickableRowPhones;
+  private DivWidget altFLClickableRowPhones;
   /**
    * @see #contextAudioChanged
    * @see #getContext
@@ -372,7 +372,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    // }
   }
 
-  private void stylePhoneRow(UIObject phoneRow) {
+  protected void stylePhoneRow(UIObject phoneRow) {
     if (isRTL) phoneRow.addStyleName("floatRight");
   }
 
@@ -761,6 +761,11 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     //}
   }
 
+  /**
+   * @see #doOneToManyMatch
+   * @see #matchEventSegmentToClickable
+   * @return
+   */
   @Override
   protected boolean shouldShowPhones() {
     return phonesChoices == SHOW;
