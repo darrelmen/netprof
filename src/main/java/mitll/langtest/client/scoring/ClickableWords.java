@@ -95,11 +95,18 @@ public class ClickableWords {
   DivWidget getClickableWords(String value,
                               FieldType fieldType,
                               List<IHighlightSegment> clickables,
-                              boolean isRTL, List<String> tokensForMandarin) {
+                              boolean isRTL,
+                              List<String> tokensForMandarin) {
     boolean flLine = fieldType == FieldType.FL || (isJapanese && fieldType == FieldType.TRANSLIT);
     boolean isChineseCharacter = flLine && hasClickableAsian;
     HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL :
         WordCountDirectionEstimator.get().estimateDirection(value);
+
+  /*  logger.info("getClickableWords " +
+        "\n\tvalue  " +value +
+        "\n\tfor    " +fieldType +
+        "\n\ttokens " +tokensForMandarin +
+        "\n\tis chinese " +isChineseCharacter);*/
 
     return getClickableDiv(
         isChineseCharacter ? tokensForMandarin :

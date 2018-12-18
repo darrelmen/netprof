@@ -58,7 +58,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
-  private static final boolean DEBUG_MATCH = true;
+  private static final boolean DEBUG_MATCH = false;
   private boolean isRTL = false;
 
   final AlignmentFetcher alignmentFetcher;
@@ -198,7 +198,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
     Language languageInfo = projectStartupInfo.getLanguageInfo();
-    if (isEngAttr()) languageInfo = Language.ENGLISH;
+    if (isEngAttr()) {
+      languageInfo = Language.ENGLISH;
+//      logger.info("lang for " +exercise.getID() + " " +exercise.getEnglish() + " " + exercise.getForeignLanguage() + " " +languageInfo);
+    }
     clickableWords = new ClickableWords(listContainer, exercise.getID(),
         languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft());
   }
@@ -907,7 +910,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         sb.append(clickable).append(" ");
       }
     }
-    logger.info("found " + c + " clickables " + sb);
+    //logger.info("found " + c + " clickables " + sb);
     return c;
   }
 
@@ -986,7 +989,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   @NotNull
   DivWidget getFLEntry(T e) {
     flclickables = new ArrayList<>();
-    flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL, e.getTokens());
+
+    List<String> tokens = e.getTokens();
+    if (tokens == null) {
+      logger.warning("no tokens for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage());
+    }
+    flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL, tokens);
     return flClickableRow;
   }
 

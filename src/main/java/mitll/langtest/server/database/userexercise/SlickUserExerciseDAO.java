@@ -762,9 +762,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
       for (SlickExercise slickExercise : all) {
         Exercise exercise = makeExercise(slickExercise, shouldSwap, typeOrder);
-        if (addTokens) {
-          exercise.setTokens(lookup.getAudioFileHelper().getASR().getTokens(exercise.getForeignLanguage(), exercise.getTransliteration()));
-        }
+
 
         // remember to set swap flag so fl becomes alt-fl and vice-versa for chinese
 
@@ -787,6 +785,16 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         });*/
 
         allAttributes.add(e);
+
+        if (addTokens) {
+          if (!exercise.hasEnglishAttr()) {
+            List<String> tokens = lookup.getAudioFileHelper().getASR().getTokens(exercise.getForeignLanguage(), exercise.getTransliteration());
+            exercise.setTokens(tokens);
+            if (exercise.getID() > 130442)
+              logger.info("getExercises ex " + exercise.getID() + " has " + tokens.size() + " tokens");
+          }
+        }
+
         copy.add(exercise);
       }
 

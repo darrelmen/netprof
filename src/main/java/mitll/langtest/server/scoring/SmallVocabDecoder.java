@@ -81,6 +81,7 @@ public class SmallVocabDecoder {
   private static final String FRENCH_PUNCT = "[,.?!]";
   public static final boolean DEBUG = false;
   public static final String TURKISH_CAP_I = "İ";
+  public static final boolean WARN_ABOUT_BAD_CHINESE = false;
 
   private HTKDictionary htkDictionary;
   private boolean isAsianLanguage;
@@ -197,7 +198,7 @@ public class SmallVocabDecoder {
       String segmentation = trim;
 
       if (c >= 'A' && c <= 'ž') { // so skip it. it's pinyin
-        logger.info("getSegmented token is not chinese '" + trim + "'");
+        if (WARN_ABOUT_BAD_CHINESE) logger.info("getSegmented token is not chinese '" + trim + "'");
       } else {
         segmentation = segmentation(trim);
       }

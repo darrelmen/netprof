@@ -72,7 +72,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @param listenView
    * @param sessionManager
    * @param isRight
-   * @see RehearseViewHelper#reallyGetTurnPanel
+   * @see RehearseViewHelper#getRecordingTurnPanel
    */
   public RecordDialogExercisePanel(final ClientExercise commonExercise,
                                    final ExerciseController controller,

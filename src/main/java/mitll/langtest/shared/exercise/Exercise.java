@@ -38,6 +38,7 @@ import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.DialogMetadata;
@@ -281,6 +282,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.meaning = exercise.getMeaning();
     this.dominoID = exercise.getDominoID();
     this.oldid = exercise.getOldID();
+    this.tokens = exercise.getTokens();
 
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
@@ -427,8 +429,12 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return tokens;
   }
 
+  /**
+   * @param tokens
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
+   */
   public void setTokens(List<String> tokens) {
-    this.tokens=tokens;
+    this.tokens = tokens;
   }
 
   /**

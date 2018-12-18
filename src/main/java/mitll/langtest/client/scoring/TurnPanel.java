@@ -29,6 +29,15 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
   private DivWidget bubble;
   private static final String HIGHLIGHT_COLOR = "green";
 
+  /**
+   * @see ListenViewHelper#reallyGetTurnPanel
+   * @param clientExercise
+   * @param controller
+   * @param listContainer
+   * @param alignments
+   * @param listenView
+   * @param columns
+   */
   public TurnPanel(final ClientExercise clientExercise,
                    final ExerciseController controller,
                    final ListInterface<?, ?> listContainer,

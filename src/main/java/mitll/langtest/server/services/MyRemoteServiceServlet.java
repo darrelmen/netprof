@@ -572,7 +572,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   public IDialog getDialog(int id) throws DominoSessionException {
     IDialog iDialog = getOneDialog(id);
 
-  //  logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
+    logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
 
     if (iDialog != null) {
       int projid = iDialog.getProjid();
@@ -582,6 +582,10 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
         Language language = project.getLanguageEnum();
         iDialog.getExercises().forEach(clientExercise ->
             db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>())
+        );
+
+        iDialog.getExercises().forEach(exercise ->
+            logger.info("lang for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " " + language)
         );
       }
 
@@ -620,7 +624,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return getDialogsForProject(getProjectIDFromUser(userIDFromSessionOrDB));
   }
 
-   List<IDialog> getDialogsForProject(int projectIDFromUser) {
+  List<IDialog> getDialogsForProject(int projectIDFromUser) {
     List<IDialog> dialogList = new ArrayList<>();
     {
       if (projectIDFromUser != -1) {

@@ -540,6 +540,7 @@ public class ListenViewHelper<T extends TurnPanel>
 
   @NotNull
   T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+
     TurnPanel widgets = new TurnPanel(
         clientExercise,
         controller,
