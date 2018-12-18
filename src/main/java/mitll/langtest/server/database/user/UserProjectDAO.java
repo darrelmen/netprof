@@ -145,9 +145,8 @@ public class UserProjectDAO implements IUserProjectDAO {
    */
   @Override
   public int getCurrentProjectForUser(int user) {
-    Integer project = null;//userToProjectCache.get(user);
-
-    if (project == null) {
+    //Integer project = null;//userToProjectCache.get(user);
+    if (true) {
       long then = System.currentTimeMillis();
       List<Integer> slickUserProjects = dao.mostRecentByUser(user);
       long now = System.currentTimeMillis();
@@ -162,7 +161,7 @@ public class UserProjectDAO implements IUserProjectDAO {
 
       return i;
     } else {
-      return project;
+      return -1;
     }
   }
 
