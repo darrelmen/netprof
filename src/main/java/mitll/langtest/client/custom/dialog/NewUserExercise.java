@@ -261,9 +261,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     context = addContext(container, newUserExercise);
     context.box.addKeyUpHandler(keyUpEvent -> {
       boolean hasText = !context.box.getText().trim().isEmpty();
-      //  logger.info("Got key up " + hasText);
-      rapContext.setEnabled(hasText && hasRecordPermission());
+      //   logger.info("makeContextRow Got key up " + hasText);
+      maybeEnableContext(hasText);
     });
+  }
+
+  protected void maybeEnableContext(boolean hasText) {
+    rapContext.setEnabled(hasText && hasRecordPermission());
   }
 
   private void makeContextTransRow(Panel container) {
@@ -376,6 +380,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     rapContext.getButton().addClickHandler(clickEvent -> postChangeIfDirty(false));
 
     rapContext.setEnabled(false);
+
+//    logger.info("rap context " + rapContext.getPlayButton().isVisible());
     return addControlGroupEntrySimple(row, "", rapContext);
   }
 
@@ -1012,7 +1018,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
 
     private void disableOthers(boolean b) {
-      //    logger.info("disable others " +b);
+//     logger.info("disable others " +b);
       otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(b));
     }
 
@@ -1150,7 +1156,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     } else {
       ClientExercise clientExercise = directlyRelated.get(0);
       if (!clientExercise.getMutableAudio().clearRefAudio()) {
-        logger.info("Didn't clear context ref audio?");
+        logger.info("clearContext Didn't clear context ref audio?");
       } else {
         originalContextAudio = "";
       }
@@ -1175,11 +1181,11 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @return
    * @see #validateThenPost
    */
-  private boolean validateForm(final RecordAudioPanel rap,
+/*  private boolean validateForm(final RecordAudioPanel rap,
                                final ControlGroup normalSpeedRecording) {
 
     return true;
-  }
+  }*/
 /*  private boolean validRecordingCheck() {
     return newUserExercise == null;
   }*/

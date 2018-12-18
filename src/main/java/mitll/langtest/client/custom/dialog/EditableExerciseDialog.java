@@ -305,10 +305,11 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     context.box.setText(originalContext = newUserExercise.getContext().trim());
 
     String text = context.box.getText();
-    boolean val = !text.isEmpty();
-    // logger.info("Set context '" + text + "' = " + val);
+   // boolean val = !text.trim().isEmpty();
     if (rapContext != null) {
-      rapContext.setEnabled(val);
+      boolean val = !text.trim().isEmpty();
+    //  logger.info("Set context '" + text + "' = " + val);
+      maybeEnableContext(val);
     }
 
     if (!useAnnotation(newUserExercise, CONTEXT, contextAnno)) {
