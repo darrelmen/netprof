@@ -28,8 +28,7 @@ import java.util.stream.Stream;
 class DialogReader extends BaseDialogReader {
   private static final Logger logger = LogManager.getLogger(DialogReader.class);
 
-  private static final String IMAGES = "images/";
-  private static final String JPG = ".jpg";
+
   private static final String DIALOG = "dialog";
 
   /**
@@ -64,7 +63,7 @@ class DialogReader extends BaseDialogReader {
     Map<Dialog, SlickDialog> dialogToSlick = new HashMap<>();
     String dialogDataDir = getDialogDataDir(project);
     String projectLanguage = project.getLanguage().toLowerCase();
-    String imageBaseDir = IMAGES + projectLanguage + File.separator;
+    String imageBaseDir = getImageBaseDir(project);
 
     List<CVMatch> cvs = getCVs(coreVocabs, project);
     for (int i = 0; i < docs.length; i++) {
@@ -72,7 +71,7 @@ class DialogReader extends BaseDialogReader {
 
       CVMatch cvMatch = i < cvs.size() ? cvs.get(i) : null;
       //  logger.info("Dir " + dir);
-      String imageRef = imageBaseDir + dir + File.separator + dir + JPG;
+      String imageRef = getImageRef(imageBaseDir, dir);
       String unit = units[i];
       String chapter = chapters[i];
       List<ExerciseAttribute> attributes = getExerciseAttributes(pages[i], topics[i]);

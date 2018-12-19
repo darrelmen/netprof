@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -85,6 +86,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     return dialogToSlick;
   }
 
+  private Set<Character> splitChar = new HashSet<>(Arrays.asList('。', '.', '?', '？'));
+
   private Map<Dialog, SlickDialog> readFromSheet(int defaultUser,
                                                  Sheet sheet,
                                                  Project project) {
@@ -110,6 +113,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
       int lastDialogID = -1;
       int realID = -1;
+
+      String imageBaseDir = getImageBaseDir(project);
       for (; iter.hasNext(); ) {
         Row next = iter.next();
         rows++;
@@ -150,12 +155,12 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
             String id = dialogID.substring(1);
             try {
-              String orientation = "Interpreter Dialog #" + realID;
-
               realID = Integer.parseInt(id);
 
               if (lastDialogID != realID && lastDialogID != -1) {
-                addDialogPair(defaultUser, project, dialogToSlick, modified, exercises, speakers, orientation);
+                String title = getTitle(lastDialogID);
+                logger.info("adding dialog " + title);
+                addDialogPair(defaultUser, project, dialogToSlick, modified, exercises, speakers, getOrientation(lastDialogID), title, getImageRef(imageBaseDir, ""+lastDialogID));
 
                 // start new set of speakers...
                 speakers = new LinkedHashSet<>();
@@ -165,19 +170,24 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
               lastDialogID = realID;
 
               try {
-                int realTurnID = Integer.parseInt(turnID.substring(1));
-
+                //int realTurnID = Integer.parseInt(turnID.substring(1));
                 Language lang = Language.UNKNOWN;
                 if (language.equalsIgnoreCase(ENG)) lang = Language.ENGLISH;
                 else if (language.equalsIgnoreCase(CHN)) lang = Language.MANDARIN;
                 else logger.warn("unknown language " + language);
 
                 if (gender.equalsIgnoreCase(M_2_M)) {
-                  Exercise exercise = getExercise(typeOrder, text, speakerID, lang, turnID, speakers);
-                  exercises.add(exercise);
+                  List<String> sentences = Collections.singletonList(text);
+                  if (speakerID.equals("I")) {
+                    sentences = getSentences(text);
+                  }
+
+                  for (String s : sentences) {
+                    exercises.add(getExercise(typeOrder, s, speakerID, lang, turnID, speakers));
+                  }
+
                   logger.info("# exercises for " + id + " is " + exercises.size());
                 }
-
 
               } catch (NumberFormatException e) {
                 logger.warn("can't parse turn " + turnID);
@@ -188,24 +198,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
           }
         }
       }
-/*      String orientation = "Interpreter Dialog #" + realID;
 
-      logger.info("new dialog " + orientation + " with " + exercises.size() + " exercises");
-      addDialogPair(defaultUser,
-          project.getID(),
-          modified,
-          "UNKNOWN",
-          DEFAULT_UNIT, DEFAULT_CHAPTER,
-          new ArrayList<>(),
-          exercises,
-          coreExercises,
-          orientation,
-          orientation,
-          orientation,
-          dialogToSlick,
-          DialogType.INTERPRETER);*/
 
-      addDialogPair(defaultUser, project, dialogToSlick, modified, exercises, speakers, "Interpreter Dialog #" + realID);
+      String title = getTitle(realID);
+      logger.info("finally, adding dialog " + title);
+      addDialogPair(defaultUser, project, dialogToSlick, modified, exercises, speakers, getOrientation(realID), title, getImageRef(imageBaseDir, "" + realID));
 
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -213,25 +210,75 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     return dialogToSlick;
   }
 
+  private List<String> getSentences(String text) {
+    List<String> sentences = new ArrayList<>();
+    String s = "";
+    for (int j = 0; j < text.length(); j++) {
+      Character character = text.charAt(j);
+      s += character;
+      if (splitChar.contains(character)) {
+        sentences.add(s.trim());
+        s = "";
+      }
+    }
+    if (!s.isEmpty()) sentences.add(s.trim());
+
+    if (DEBUG) {
+      if (sentences.size() > 1) {
+        logger.info("getSentences " + sentences.size() +
+            "\n\tfrom " + text);
+        sentences.forEach(logger::info);
+      }
+    }
+    return sentences;
+  }
+
+  @NotNull
+  private String getOrientation(int realID) {
+    switch (realID) {
+      case 1:
+        return "Can I borrow your cellphone?";
+      case 2:
+        return "How do you use Wechat?";
+      case 3:
+        return "How do you become a US Citizen?";
+      case 4:
+        return "Traffic Stop";
+      case 5:
+        return "Acupuncture";
+      case 6:
+        return "Book train tickets";
+      default:
+        return getTitle(realID);
+    }
+  }
+
+  @NotNull
+  private String getTitle(int realID) {
+    return "Interpreter Dialog #" + realID;
+  }
+
   private void addDialogPair(int defaultUser, Project project, Map<Dialog, SlickDialog> dialogToSlick,
                              Timestamp modified,
                              List<ClientExercise> exercises,
 
                              Set<String> speakers,
-                             String orientation) {
+                             String orientation, String title,
+                             String imageRef) {
     logger.info("new dialog " + orientation + " with " + exercises.size() + " exercises");
     List<ExerciseAttribute> attributes = new ArrayList<>();
     addSpeakerAttrbutes(attributes, speakers);
 
+
     addDialogPair(defaultUser,
         project.getID(),
         modified,
-        "UNKNOWN",
+        imageRef,
         DEFAULT_UNIT, DEFAULT_CHAPTER,
         attributes,
         exercises,
         Collections.emptySet(),
-        orientation,
+        title,
         orientation,
         orientation,
         dialogToSlick,

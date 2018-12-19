@@ -332,17 +332,15 @@ public class DialogDAO extends DAO implements IDialogDAO {
       Map<Integer, CommonExercise> idToEx = new HashMap<>();
 
       slickRelatedExercises.forEach(slickRelatedExercise -> {
-        logger.info("addExercises relation " + slickRelatedExercise);
-
+//        logger.info("addExercises relation " + slickRelatedExercise);
         int exid = slickRelatedExercise.exid();
         CommonExercise exercise = idToEx.get(exid);
 
         if (exercise == null) {
           exercise = databaseImpl.getExercise(projid, exid);
 
-
           if (exercise != null) {
-            logger.info("addExercises ex #"+ exercise.getID() + " " +exercise.getForeignLanguage() + " -> " + exercise.getTokens());
+            logger.info("addExercises ex #"+ exercise.getID() + " " +exercise.getForeignLanguage() + " -> tokens : " + exercise.getTokens());
             idToEx.put(exid, exercise = new Exercise(exercise));
           }
         }

@@ -293,6 +293,11 @@ public class AudioFileHelper implements AlignDecode {
       }
     } else {
       logger.info("writeOOV oov is empty for " + project);
+
+      Set<String> oov1 = getPronunciationLookup().getOOV();
+      if (!oov1.isEmpty()) {
+        writeOOV(oov1);
+      }
     }
   }
 

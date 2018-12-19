@@ -102,6 +102,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   private final Set<String> seen = new HashSet<>();
+  private final Set<String> oov = new HashSet<>();
 
   /**
    * TODO : Why this method here too? Duplicate?
@@ -327,6 +328,7 @@ public class PronunciationLookup implements IPronunciationLookup {
               "\n\tin  '" + transcript + "'");
         }
         seen.add(key);
+        oov.add(word1);
         addUnkPron(transcript, dict, candidates, word);
       }
     } else { // it's ok -use it
@@ -357,9 +359,14 @@ public class PronunciationLookup implements IPronunciationLookup {
     }
   }
 
+
+  public Set<String> getOOV() {
+    return oov;
+  }
+
   private String consTokens(String[] translitTokens) {
     StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < translitTokens.length; i++) builder.append(translitTokens[i]);
+    for (String translitToken : translitTokens) builder.append(translitToken);
     return builder.toString();
   }
 

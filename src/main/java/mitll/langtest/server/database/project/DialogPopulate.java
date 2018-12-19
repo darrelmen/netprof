@@ -132,8 +132,8 @@ public class DialogPopulate {
     Language languageEnum = project.getLanguageEnum();
 
     if (shouldTryToReadDialogInfo(languageEnum)) {
-      Map<Dialog, SlickDialog> dialogToSlick = getDialogReader(languageEnum).getDialogs(defaultUser, exToAudio, project);
-      addDialogs(project, dialogDAO, exToAudio, defaultUser, DialogType.DIALOG, dialogToSlick);
+      addDialogs(project, dialogDAO, exToAudio, defaultUser, DialogType.DIALOG,
+          getDialogReader(languageEnum).getDialogs(defaultUser, exToAudio, project));
     }
   }
 

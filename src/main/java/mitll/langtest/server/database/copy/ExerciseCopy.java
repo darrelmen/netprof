@@ -67,7 +67,7 @@ public class ExerciseCopy {
     logger.info("importing " + toImport.size() + " customExercises with " + converted.size());
 
     Map<Integer, Integer> dominoToExID = new HashMap<>();
-    IUserExerciseDAO slickUEDAO =  db.getUserExerciseDAO();
+    IUserExerciseDAO slickUEDAO = db.getUserExerciseDAO();
     parentToChild.putAll(addExercises(
         db.getUserDAO().getImportUser(),
         projectid,
@@ -209,7 +209,7 @@ public class ExerciseCopy {
    * @param typeOrder
    * @param idToCandidateOverride
    * @param dominoToExID
-   * @param checkExists if true, don't add redundant exercise attributes
+   * @param checkExists           if true, don't add redundant exercise attributes
    * @return
    * @see #addExercises(int, int, Map, IUserExerciseDAO, Collection, Collection, Map, Map, int)
    * @see #addPredefExercises
@@ -224,7 +224,7 @@ public class ExerciseCopy {
                                                                 boolean checkExists) {
     Map<CommonExercise, Integer> exToInt = new HashMap<>();
 
-    logger.info("addExercisesAndAttributes typeOrder : " + typeOrder);
+//    logger.info("addExercisesAndAttributes typeOrder : " + typeOrder);
 
     Map<Integer, List<Integer>> exToJoins =
         addPredefExercises(projectid, slickUEDAO, importUser, exercises, typeOrder, idToCandidateOverride, exToInt, checkExists);
@@ -232,7 +232,7 @@ public class ExerciseCopy {
 
     List<SlickExerciseAttributeJoin> joins = getSlickExerciseAttributeJoins(importUser, exToJoins);
 
-    logger.info("addExercisesAndAttributes adding " + joins.size() + " attribute joins");
+    //  logger.info("addExercisesAndAttributes adding " + joins.size() + " attribute joins");
     slickUEDAO.getExerciseAttributeJoin().addBulkAttributeJoins(joins);
     return exToInt;
   }
@@ -388,7 +388,7 @@ public class ExerciseCopy {
    * @param typeOrder
    * @param idToCandidateOverride
    * @param exToInt
-   * @param checkExists if true, don't add an attribute if it's already in there
+   * @param checkExists           if true, don't add an attribute if it's already in there
    * @see #addExercisesAndAttributes(int, int, IUserExerciseDAO, Collection, Collection, Map, Map, boolean)
    */
   private Map<Integer, List<Integer>> addPredefExercises(int projectid,
@@ -431,7 +431,7 @@ public class ExerciseCopy {
           if (candidate.getUpdateTime() > ex.getUpdateTime() &&
               !candidate.getEnglish().equals(ex.getEnglish()) &&
               !candidate.getForeignLanguage().equals(ex.getForeignLanguage())
-              ) {
+          ) {
             logger.info("addPredefExercises" +
                 "\n\tfor old id " + oldID +
                 " replacing" +
@@ -468,7 +468,9 @@ public class ExerciseCopy {
 
 //    logger.info("addPredefExercises add   bulk  " + bulk.size() + " exercises");
     // slickUEDAO.addBulk(bulk);
-    logger.info("addPredefExercises " + replacements + " replaced, " + converted + " converted");
+    if (replacements > 0 || converted > 0) {
+      logger.info("addPredefExercises " + replacements + " replaced, " + converted + " converted");
+    }
     logger.info("addPredefExercises will add    " + exToJoins.size() + " attributes");
     return exToJoins;
   }
@@ -478,9 +480,9 @@ public class ExerciseCopy {
    * @param projectid
    * @param importUser
    * @param now
-   * @param attrToID   map of attribute to db id
-   * @param exToJoins  map of old ex id to new attribute db id
-   * @param newID      - at this point we don't have exercise db ids - could be done differently...
+   * @param attrToID    map of attribute to db id
+   * @param exToJoins   map of old ex id to new attribute db id
+   * @param newID       - at this point we don't have exercise db ids - could be done differently...
    * @param attributes
    * @param checkExists
    * @see #addPredefExercises
@@ -535,8 +537,7 @@ public class ExerciseCopy {
       } else {
         id = slickUEDAO.getExerciseAttribute().findOrAddAttribute(projectid, now, importUser, attribute, checkExists);
         attrToID.put(attribute, id);
-
-        logger.info("addPredef " + attribute + " = " + id);
+//        logger.info("addPredef " + attribute + " = " + id);
       }
       joins.add(id);
     }
