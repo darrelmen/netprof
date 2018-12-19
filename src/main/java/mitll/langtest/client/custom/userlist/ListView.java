@@ -488,18 +488,13 @@ public class ListView implements ContentView, CreateListComplete {
   private void editList() {
     UserList<CommonShell> currentSelectionFromMyLists = getCurrentSelectionFromMyLists();
     EditItem editItem = new EditItem(controller);
-    //Button closeButton =
-        new DialogHelper(true).show(
+    new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + getListName(),
         Collections.emptyList(),
         editItem.editItem(currentSelectionFromMyLists),
         "Done",
         null,
         new MyShownCloseListener(editItem), MAX_HEIGHT, -1, true);
-
-   /// closeButton.setType(ButtonType.SUCCESS);
-
-    // Scheduler.get().scheduleDeferred(editItem::reload);
   }
 
   @NotNull
@@ -973,7 +968,7 @@ public class ListView implements ContentView, CreateListComplete {
      */
     @Override
     public void gotHidden() {
-     // logger.info("Got hidden ");
+      // logger.info("Got hidden ");
       editItem.removeHistoryListener();
       History.newItem("");
     }
@@ -984,7 +979,7 @@ public class ListView implements ContentView, CreateListComplete {
 
     @Override
     public void gotShown() {
-     // logger.info("editList : edit view shown!");
+      // logger.info("editList : edit view shown!");
 
       editItem.reload();
       editItem.grabFocus();

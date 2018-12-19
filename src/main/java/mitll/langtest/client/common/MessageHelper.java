@@ -127,9 +127,9 @@ public class MessageHelper {
     }
   }
 
-  public Modal handleFatalError(String msg, Throwable throwable) {
+/*  public Modal handleFatalError(String msg, Throwable throwable) {
     return handleError(msg, throwable, DDialogType.FatalError);
-  }
+  }*/
 
   public void handleNonFatalError(String msg, Throwable throwable) {
     handleError(msg, throwable, DDialogType.NonFatalError);

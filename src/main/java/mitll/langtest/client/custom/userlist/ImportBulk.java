@@ -92,6 +92,7 @@ class ImportBulk {
         new AsyncCallback<List<CommonShell>>() {
           @Override
           public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("doing bulk import", caught);
           }
 
           @Override
