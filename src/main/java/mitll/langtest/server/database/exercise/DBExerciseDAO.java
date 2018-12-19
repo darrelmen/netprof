@@ -47,7 +47,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparing;
 import static mitll.langtest.server.database.exercise.Facet.SEMESTER;
 import static mitll.langtest.server.database.exercise.SectionHelper.SUBTOPIC_LC;
 
@@ -542,12 +541,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   /**
+   * @param exid
    * @see mitll.langtest.server.services.AudioServiceImpl#refreshExercises
    * @see mitll.langtest.server.services.ExerciseServiceImpl#refreshExercise
-   * @param exid
    */
   public void refresh(int exid) {
-
     if (DEBUG) {
       CommonExercise commonExercise = idToUserExercise.get(exid);
       if (commonExercise == null) {
@@ -560,14 +558,19 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
 
     CommonExercise byExID = userExerciseDAO.getByExID(exid, false);
-    idToUserExercise.put(exid, byExID);
-    ClientExercise next = byExID.getDirectlyRelated().iterator().next();
-    idToUserExercise.put(next.getID(), next.asCommon());
+    if (byExID == null) logger.error("huh? no known exid " + exid);
+    else idToUserExercise.put(exid, byExID);
+
+    ClientExercise next = byExID != null && byExID.hasContext() ? byExID.getDirectlyRelated().iterator().next() : null;
+
+    if (next != null) {
+      idToUserExercise.put(next.getID(), next.asCommon());
+    }
 
     if (DEBUG) {
-      logger.info(
-          "refresh after " + byExID.getEnglish() + " " + byExID.getForeignLanguage() +
-              "\n\trefresh after context " + next.getEnglish() + " " + next.getForeignLanguage());
+      String s1 = byExID == null ? "" : "refresh after " + byExID.getEnglish() + " " + byExID.getForeignLanguage();
+      String s = next == null ? "" : "\n\trefresh after context " + next.getEnglish() + " " + next.getForeignLanguage();
+      logger.info(s1 + s);
     }
   }
 
