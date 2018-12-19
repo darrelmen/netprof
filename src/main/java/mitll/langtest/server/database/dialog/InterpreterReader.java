@@ -278,9 +278,9 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
         attributes,
         exercises,
         Collections.emptySet(),
+        orientation,
+        orientation,
         title,
-        orientation,
-        orientation,
         dialogToSlick,
         DialogType.INTERPRETER);
   }

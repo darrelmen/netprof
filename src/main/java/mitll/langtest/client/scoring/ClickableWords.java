@@ -520,7 +520,7 @@ public class ClickableWords {
 
           if (!prodToken.isEmpty() && dd == 0) {
             tokens.add(prodToken);
-            logger.info("start over, addToken " + prodToken);
+            if (DEBUG_CHINESE) logger.info("start over, addToken " + prodToken);
             prodToken = "";
           }
           prodToken += character;
@@ -574,7 +574,7 @@ public class ClickableWords {
     if (!prodToken.isEmpty())
       tokens.add(prodToken);
 
-    logger.info("getChinese " + value + " vs " + dictTokens + " = " + tokens);
+    logger.info("getChineseMatches " + value + " vs " + dictTokens + " = " + tokens);
     return tokens;
   }
 

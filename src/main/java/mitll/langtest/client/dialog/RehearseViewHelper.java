@@ -631,8 +631,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         }
     }
     else {*/
-      turnPanel = getRecordingTurnPanel(clientExercise, columns);
-  //  }
+    turnPanel = getRecordingTurnPanel(clientExercise, columns);
+    //  }
 
     exToTurn.put(clientExercise.getID(), turnPanel);
     return turnPanel;
@@ -642,8 +642,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     T widgets = (T) new RecordDialogExercisePanel(clientExercise, controller,
         null, alignments, this, this, columns);
     //if (!isInterpreter)
+
+    if (columns == COLUMNS.MIDDLE) {
       widgets.addStyleName("inlineFlex");
-      widgets.setWidth("100%");
+    }
+
+    widgets.setWidth("100%");
     return widgets;
   }
 
@@ -717,6 +721,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private boolean isCurrentTurnARecordingTurn() {
     return !isCurrentTurnAPrompt();
   }
+
   private boolean isCurrentTurnAPrompt() {
     return !getRespSeq().contains(getCurrentTurn());
   }
@@ -786,7 +791,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
       @Override
       public void onSuccess(Integer result) {
-        logger.info("startSession : made new session = " + result);
+        //  logger.info("startSession : made new session = " + result);
         dialogSession.setID(result);
       }
     });

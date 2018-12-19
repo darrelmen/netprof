@@ -53,7 +53,13 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   @Override
   protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     T turnPanel = super.getTurnPanel(clientExercise, columns);
-    turnPanel.maybeSetObscure(uniqueCoreVocab);
+    if (columns != COLUMNS.MIDDLE) {
+      turnPanel.reallyObscure();
+    }
+    else {
+//      turnPanel.maybeSetObscure(uniqueCoreVocab);
+
+    }
     return turnPanel;
   }
 

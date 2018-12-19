@@ -179,13 +179,13 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see TwoColumnExercisePanel#makeFirstRow
    */
   void makePlayAudio(T e, DivWidget flContainer) {
-    if (hasAudio(e)) {
+    //if (hasAudio(e)) {
       playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
       alignmentFetcher.setPlayAudio(playAudio);
       rememberAudio(getRegularSpeedIfAvailable(e));
-    } else {
-      logger.warning("makePlayAudio no audio in audio attributes " + e.getAudioAttributes() + " for exercise " + e.getID());
-    }
+//    } else {
+//      logger.warning("makePlayAudio no audio in audio attributes " + e.getAudioAttributes() + " for exercise " + e.getID());
+//    }
   }
 
   void rememberAudio(AudioAttribute next) {
@@ -198,7 +198,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param next
    */
   private void maybeShowAlignment(AudioAttribute next) {
-    if (next.getAlignmentOutput() != null) {
+    if (next != null && next.getAlignmentOutput() != null) {
       //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
       showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
     }

@@ -88,7 +88,7 @@ public class ListenViewHelper<T extends TurnPanel>
    *
    */
   protected int dialogID;
-   boolean isInterpreter = false;
+  boolean isInterpreter = false;
 
   /**
    * @param controller
@@ -424,24 +424,39 @@ public class ListenViewHelper<T extends TurnPanel>
   }
 
   private COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
-    List<ExerciseAttribute> collect = clientExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.name())).collect(Collectors.toList());
+    List<ExerciseAttribute> collect = getSpeakerAttributes(clientExercise);
     if (collect.isEmpty()) {
       logger.warning("no speaker " + clientExercise);
       return COLUMNS.UNK;
     } else {
-      ExerciseAttribute exerciseAttribute = collect.get(0);
-      String speaker = exerciseAttribute.getValue();
-      COLUMNS columns;
-      if (speaker.equalsIgnoreCase(left)) {
-        columns = COLUMNS.LEFT;
-      } else if (speaker.equalsIgnoreCase(right)) {
-        columns = COLUMNS.RIGHT;
-      } else {
-        columns = COLUMNS.MIDDLE;
-      }
-      return columns;
+      return getColumnForSpeaker(left, right, collect);
     }
   }
+
+  @NotNull
+  private COLUMNS getColumnForSpeaker(String left, String right, List<ExerciseAttribute> collect) {
+    String speaker = getSpeaker(collect);
+    COLUMNS columns;
+    if (speaker.equalsIgnoreCase(left)) {
+      columns = COLUMNS.LEFT;
+    } else if (speaker.equalsIgnoreCase(right)) {
+      columns = COLUMNS.RIGHT;
+    } else {
+      columns = COLUMNS.MIDDLE;
+    }
+    return columns;
+  }
+
+  private String getSpeaker(List<ExerciseAttribute> collect) {
+    ExerciseAttribute exerciseAttribute = collect.get(0);
+    return exerciseAttribute.getValue();
+  }
+
+  @NotNull
+  private List<ExerciseAttribute> getSpeakerAttributes(ClientExercise clientExercise) {
+    return clientExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.name())).collect(Collectors.toList());
+  }
+
 
   /**
    * @param rowOne
@@ -548,6 +563,10 @@ public class ListenViewHelper<T extends TurnPanel>
         alignments,
         this,
         columns);
+    if (columns == COLUMNS.MIDDLE) {
+      widgets.addStyleName("inlineFlex");
+      widgets.setWidth("100%");
+    }
     return (T) widgets;
   }
 

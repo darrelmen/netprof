@@ -5,16 +5,16 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 4/26/17.
  */
 public class AllHighlight extends DivWidget implements IHighlightSegment {
+  protected final Logger logger = Logger.getLogger("AllHighlight");
+
   public static final String FLOAT_LEFT = "floatLeft";
   public static final String INLINE_BLOCK_STYLE_ONLY = "inlineBlockStyleOnly";
-  protected final Logger logger = Logger.getLogger("AllHighlight");
 
   private final Collection<IHighlightSegment> set;
 
@@ -161,8 +161,12 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   }
 
   @Override
-  public void obscureText() {
-    set.forEach(IHighlightSegment::obscureText);
+  public boolean obscureText() {
+    boolean didIt=true;
+    for (IHighlightSegment segment:set) {
+      didIt &= segment.obscureText();
+    }
+    return didIt;
   }
 
   @Override

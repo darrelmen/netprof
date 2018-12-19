@@ -233,7 +233,16 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     return candidate;
   }
 
+  public void reallyObscure() {
+    logger.info("reallyObscure For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
+    flclickables.forEach(iHighlightSegment -> {
+      iHighlightSegment.setObscurable();
+      iHighlightSegment.obscureText();
+    });
+  }
+
   public void obscureText() {
+    logger.info("obscureText For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
     flclickables.forEach(IHighlightSegment::obscureText);
   }
 

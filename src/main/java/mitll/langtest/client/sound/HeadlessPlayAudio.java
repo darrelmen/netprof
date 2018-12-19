@@ -263,7 +263,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    */
   public void rememberAudio(AudioAttribute audioAttribute) {
     this.currentAudioAttr = audioAttribute;
-    rememberAudio(currentAudioAttr.getAudioRef());
+    if (currentAudioAttr != null) {
+      rememberAudio(currentAudioAttr.getAudioRef());
+    }
   }
 
   public AudioAttribute getCurrentAudioAttr() {

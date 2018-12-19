@@ -95,13 +95,14 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   }
 
   @Override
-  public void obscureText() {
+  public boolean obscureText() {
     if (shouldObscure) {
       Style style = this.span.getElement().getStyle();
       style.setColor("gray");
       style.setBackgroundColor("gray");
       didObscure = true;
     }
+    return didObscure;
   }
 
   @Override
