@@ -109,7 +109,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    */
   @Override
   protected TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
-    TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = super.showAlignment(id, duration, alignmentOutput);
+    TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap =
+        super.showAlignment(id, duration, alignmentOutput);
     this.refSpeechDur = getSpeechDur(id, alignmentOutput);
     return transcriptSegmentIHighlightSegmentTreeMap;
   }
@@ -157,8 +158,10 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     emoticon.setVisible(true);
 
     if (transcriptToHighlight == null) {
+      AlignmentOutput alignmentOutput = studentAudioAttribute.getAlignmentOutput();
+      alignmentOutput.setShowPhoneScores(true);
       transcriptToHighlight =
-          showAlignment(0, studentAudioAttribute.getDurationInMillis(), studentAudioAttribute.getAlignmentOutput());
+          showAlignment(0, studentAudioAttribute.getDurationInMillis(), alignmentOutput);
     }
 
     revealScore();
@@ -458,10 +461,15 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     return w;
   }
 
+  /**
+   * @see #addWidgets(boolean, boolean, PhonesChoices)
+   * @return
+   */
   @NotNull
   private DivWidget getHorizDiv() {
     DivWidget flContainer = new DivWidget();
     flContainer.addStyleName("inlineFlex");
+    flContainer.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
     flContainer.getElement().setId("RecordDialogExercisePanel_horiz");
     return flContainer;
   }

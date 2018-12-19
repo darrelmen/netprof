@@ -413,12 +413,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 //        logger.info("phones " +phones.size());
 //        phones.forEach(p->logger.info(p.toString()));
 
-
         int c = getNumClickable(flclickables);
         boolean sameNumSegments = c == wordSegments.size();
+        boolean simpleLayout = !alignmentOutput.isShowPhoneScores();
 
         if (sameNumSegments) {
-          doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments, wordSegments, clickablePhones);
+          doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments, wordSegments, clickablePhones, simpleLayout);
         } else {
           if (DEBUG_MATCH) logger.warning("matchSegmentToWidgetForAudio no match for" +
               "\n\tsegments " + wordSegments +
@@ -427,7 +427,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
           clickableRow.clear();
 
           doOneToManyMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments,
-              wordSegments, clickableRow, clickablePhones);
+              wordSegments, clickableRow, clickablePhones, simpleLayout);
         }
       }
     }
@@ -450,6 +450,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param wordSegments
    * @param clickableRow
    * @param clickablePhones
+   * @param simpleLayout
    * @see #matchSegmentToWidgetForAudio
    */
   private void doOneToManyMatch(List<TranscriptSegment> phones,
@@ -459,7 +460,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                 ListIterator<IHighlightSegment> clickablesIterator,
                                 List<TranscriptSegment> wordSegments,
                                 DivWidget clickableRow,
-                                DivWidget clickablePhones) {
+                                DivWidget clickablePhones, boolean simpleLayout) {
     clickablePhones.clear();
     ListIterator<TranscriptSegment> transcriptSegmentListIterator = wordSegments.listIterator();
     while (transcriptSegmentListIterator.hasNext()) {
@@ -474,7 +475,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         List<IHighlightSegment> unclickable = new ArrayList<>();
         IHighlightSegment highlightSegment =
             matchEventSegmentToClickable(clickablesIterator, wordSegment, phonesInWord, audioControl, phoneMap,
-                clickablePhones, unclickable);
+                clickablePhones, unclickable, simpleLayout);
 
         if (highlightSegment == null) {
           if (DEBUG_MATCH) logger.info("doOneToManyMatch can't find match for wordSegment " + wordSegment);
@@ -537,8 +538,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                 }
 //                String event = wordSegment.getEvent();
 //                phonesInWordAll.forEach(ph -> logger.info(event + " " + ph.toString()));
-                DivWidget phoneDivBelowWord = getPhoneDivBelowWord(combinedTranscriptSegment, phonesInWordAll, audioControl, phoneMap);
-                addSouthClickable(clickablePhones, /*current,*/ phoneDivBelowWord);
+                showPhones(combinedTranscriptSegment, phonesInWordAll, audioControl, phoneMap, clickablePhones, simpleLayout);
               }
 
               if (DEBUG_MATCH) {
@@ -666,6 +666,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param highlightSegmentIterator
    * @param wordSegments
    * @param clickablePhones
+   * @param simpleLayout
    * @see #matchSegmentToWidgetForAudio(Integer, long, AlignmentOutput, List, AudioControl, DivWidget, DivWidget)
    */
   private void doOneToOneMatch(List<TranscriptSegment> phones,
@@ -674,7 +675,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord,
                                Iterator<IHighlightSegment> highlightSegmentIterator,
                                List<TranscriptSegment> wordSegments,
-                               DivWidget clickablePhones) {
+                               DivWidget clickablePhones, boolean simpleLayout) {
     clickablePhones.clear();
     for (TranscriptSegment wordSegment : wordSegments) {
       if (highlightSegmentIterator.hasNext()) {
@@ -685,7 +686,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
         IHighlightSegment highlightSegment =
             matchEventSegmentToClickable(highlightSegmentIterator, wordSegment, phonesInWord, audioControl,
-                phoneMap, clickablePhones, new ArrayList<>());
+                phoneMap, clickablePhones, new ArrayList<>(), simpleLayout);
 
         if (highlightSegment == null) {
           if (DEBUG_MATCH) logger.warning("doOneToOneMatch can't find match for wordSegment " + wordSegment);
@@ -740,8 +741,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param audioControl
    * @param phoneMap
    * @param clickablePhones
+   * @param simpleLayout
    * @return
-   * @see #doOneToManyMatch(List, AudioControl, TreeMap, TreeMap, ListIterator, List, DivWidget, DivWidget)
+   * @see #doOneToManyMatch(List, AudioControl, TreeMap, TreeMap, ListIterator, List, DivWidget, DivWidget, boolean)
    */
   private IHighlightSegment matchEventSegmentToClickable(Iterator<IHighlightSegment> clickables,
                                                          TranscriptSegment wordSegment,
@@ -749,7 +751,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                                          AudioControl audioControl,
                                                          TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                                          DivWidget clickablePhones,
-                                                         List<IHighlightSegment> unclickable) {
+                                                         List<IHighlightSegment> unclickable,
+                                                         boolean simpleLayout) {
     IHighlightSegment clickable = clickables.next();
     clickable = skipUnclickable(clickables, clickable, unclickable);
 
@@ -771,8 +774,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     if (lcSegment.equalsIgnoreCase(lcClickable)) {  // easy match -
       if (showPhones) {
-        DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-        addSouthClickable(clickablePhones, phoneDivBelowWord);
+        showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout);
       }
 
       return clickable;
@@ -784,8 +786,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       } else { // all clickables match this segment
         AllHighlight allHighlight = getAllHighlight(bulk);
         if (showPhones) {
-          DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-          addSouthClickable(clickablePhones, phoneDivBelowWord);
+          showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout);
         }
 
         if (DEBUG || DEBUG_MATCH)
@@ -794,6 +795,15 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         return allHighlight;
       }
     }
+  }
+
+  private void showPhones(TranscriptSegment wordSegment,
+                          List<TranscriptSegment> phonesInWord,
+                          AudioControl audioControl,
+                          TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                          DivWidget clickablePhones, boolean simpleLayout) {
+    DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap, simpleLayout);
+    addSouthClickable(clickablePhones, phoneDivBelowWord);
   }
 
   private void addSouthClickable(DivWidget clickablePhones, DivWidget phoneDivBelowWord) {
@@ -806,15 +816,16 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param phonesInWord
    * @param audioControl
    * @param phoneMap
+   * @param simpleLayout
    * @return
    * @see #doOneToManyMatch
    */
   @NotNull
   protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
-                                         List<TranscriptSegment> phonesInWord,
-                                         AudioControl audioControl,
-                                         TreeMap<TranscriptSegment, IHighlightSegment> phoneMap) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, true);
+                                           List<TranscriptSegment> phonesInWord,
+                                           AudioControl audioControl,
+                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap, boolean simpleLayout) {
+    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, true);
   }
 
   /**

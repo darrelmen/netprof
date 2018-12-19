@@ -528,6 +528,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     if (!overallSmiley.isVisible()) {
       showOverallDialogScore();
       recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
+      setPlayButtonToPlay();
+      setCurrentTurn(getPromptSeq().get(0));
     }
   }
 
@@ -639,7 +641,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private T getRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     T widgets = (T) new RecordDialogExercisePanel(clientExercise, controller,
         null, alignments, this, this, columns);
-    if (!isInterpreter) widgets.addStyleName("inlineFlex");
+    //if (!isInterpreter)
+      widgets.addStyleName("inlineFlex");
+      widgets.setWidth("100%");
     return widgets;
   }
 
@@ -682,7 +686,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     // TODO : way too confusing
     if (currentTurn == null || !currentTurn.isPlaying()) {
       setTurnToPromptSide();
-      // currentTurn = getCurrentTurn();
     }
 
     if (currentTurn == null) {
@@ -714,7 +717,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private boolean isCurrentTurnARecordingTurn() {
     return !isCurrentTurnAPrompt();
   }
-
   private boolean isCurrentTurnAPrompt() {
     return !getRespSeq().contains(getCurrentTurn());
   }
