@@ -193,7 +193,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     String english = isEnglish() && isMeaningValid(e) ? e.getMeaning() : e.getEnglish();
 
-    logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
+  //  logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
     SimpleRecordAudioPanel<T> recordPanel =
         new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView);
 
@@ -407,11 +407,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return flEntry;
   }
 
-
   private String getFL(CommonShell e) {
     return e.getFLToShow();
   }
-
   private String getAltFL(ClientExercise exercise) {
     return exercise.getAltFLToShow();
   }
@@ -530,9 +528,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     englishWidget.addStyleName("rightsidecolor");
     englishWidget.getElement().setId("englishWidget");
     englishWidget.addStyleName("floatLeft");
-
-    // englishWidget.addStyleName("leftFiveMargin");
-    // englishWidget.setWidth("90%");
     return englishWidget;
   }
 
@@ -628,11 +623,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       Panel hp = new DivWidget();
       {
         hp.addStyleName("inlineFlex");
-//        hp.addStyleName("leftFiveMargin");
         hp.getElement().setId("contentContainer");
-
         hp.add(recordWidget);
-        //hp.add(getSpacer());
       }
       ChoicePlayAudioPanel contextPlay = getContextPlay(contextExercise);
       hp.add(contextPlay);

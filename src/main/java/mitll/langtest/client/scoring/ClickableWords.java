@@ -18,6 +18,8 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -25,6 +27,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 3/23/17.
  */
 public class ClickableWords {
+  public static final boolean DEBUG_CHINESE = false;
   private final Logger logger = Logger.getLogger("ClickableWords");
   private static final String SEARCHMATCH = "searchmatch";
 
@@ -34,6 +37,9 @@ public class ClickableWords {
   private static final String STRONG = "strong";
   private static final String END_STRONG = "</" + STRONG + ">";
   private static final String START_STRONG = "<" + STRONG + ">";
+
+  private static final char FULL_WIDTH_ZERO = '\uFF10';
+  private static final char ZERO = '0';
 
   private boolean isJapanese = false;
   private boolean isUrdu = false;
@@ -109,14 +115,20 @@ public class ClickableWords {
         "\n\tis chinese " +isChineseCharacter);*/
 
     return getClickableDiv(
-        isChineseCharacter ? tokensForMandarin :
-            getTokens(value, isChineseCharacter),
+        // isChineseCharacter ? tokensForMandarin :
+        getTokens(value, isChineseCharacter, tokensForMandarin),
         getSearchTokens(isChineseCharacter), dir, clickables, fieldType);
   }
 
+  /**
+   * TODO: consider getting tokens for search string
+   *
+   * @param isChineseCharacter
+   * @return
+   */
   @NotNull
   private List<String> getSearchTokens(boolean isChineseCharacter) {
-    return listContainer == null ? Collections.emptyList() : getTokens(listContainer.getTypeAheadText().toLowerCase(), isChineseCharacter);
+    return listContainer == null ? Collections.emptyList() : getTokens(listContainer.getTypeAheadText().toLowerCase(), isChineseCharacter, null);
   }
 
   /**
@@ -266,7 +278,7 @@ public class ClickableWords {
     boolean flLine = isFL || (isJapanese && fieldType == FieldType.TRANSLIT);
     boolean isChineseCharacter = flLine && hasClickableAsian;
 
-    List<String> tokens = isChineseCharacter ? contextTokensOpt : getTokens(contextSentence, isChineseCharacter);
+    List<String> tokens = getTokens(contextSentence, isChineseCharacter, contextTokensOpt);
 
     if (DEBUG) {
       logger.info("getClickableWordsHighlight " +
@@ -277,7 +289,7 @@ public class ClickableWords {
 
     // if the highlight token is not in the display, skip over it -
 
-    List<String> highlightTokens = isChineseCharacter ? highlightTokensOpt : getTokens(highlight, isChineseCharacter);
+    List<String> highlightTokens = getTokens(highlight, isChineseCharacter, highlightTokensOpt);
     int highlightStartIndex = getMatchingHighlightAll(tokens, highlightTokens);
 
     Iterator<String> highlightIterator = highlightTokens.iterator();
@@ -449,24 +461,145 @@ public class ClickableWords {
 
   /**
    * @param value
+   * @param dictTokens
    * @return
    * @see #getClickableWords(String, FieldType, List, boolean, List)
    * @see #getClickableWordsHighlight(String, String, FieldType, List, boolean, List)
    */
   @NotNull
-  private List<String> getTokens(String value, boolean isChineseCharacter) {
+  private List<String> getTokens(String value, boolean isChineseCharacter, List<String> dictTokens) {
     List<String> tokens = new ArrayList<>();
     if (isChineseCharacter) {
-      for (int i = 0, n = value.length(); i < n; i++) {
-        Character character = value.charAt(i);
-        tokens.add(character.toString());
+      if (dictTokens == null) {
+        for (int i = 0, n = value.length(); i < n; i++) {
+          Character character = value.charAt(i);
+          tokens.add(character.toString());
+        }
+      } else {
+        tokens = getChineseMatches(value, dictTokens);
       }
     } else {
       value = value.replaceAll("/", " / ");  // so X/Y becomes X / Y
-      tokens = new ArrayList<>(Arrays.asList(value.split(GoodwaveExercisePanel.SPACE_REGEX)));
+      tokens = getTokensOnSpace(value);
     }
 
     return tokens;
+  }
+
+  private static final String P_Z = "\\p{Z}+";
+
+  /**
+   * xy? ab?
+   * xy|ab
+   * <p>
+   * efgh
+   * ef|gh
+   *
+   * @param value
+   * @param dictTokens
+   * @return
+   */
+  private List<String> getChineseMatches(String value, List<String> dictTokens) {
+    List<String> tokens = new ArrayList<>();
+    int d = 0;
+    int dd = 0;
+    String prodToken = "";
+    if (DEBUG_CHINESE) logger.info("getChineseMatches " + value + " vs " + dictTokens);
+    for (int i = 0, n = value.length(); i < n; i++) {
+      Character character = value.charAt(i);
+      if (DEBUG_CHINESE) logger.info("getChineseMatches " + character + " at " + i + "/" + n);
+
+      String dict = d < dictTokens.size() ? dictTokens.get(d) : null;
+      if (dict != null) {
+        Character dc = dict.charAt(dd);
+
+        int length = dict.length();
+        if (isMatch(character, dc)) {
+
+          if (DEBUG_CHINESE) logger.info("match " + character + " = " + dc);
+
+          if (!prodToken.isEmpty() && dd == 0) {
+            tokens.add(prodToken);
+            logger.info("start over, addToken " + prodToken);
+            prodToken = "";
+          }
+          prodToken += character;
+          dd++;
+
+          if (dd == length) {  // end of the dict token
+            d++;
+            dd = 0;
+            dict = d < dictTokens.size() ? dictTokens.get(d) : null;
+            if (DEBUG_CHINESE) logger.info("dict token now " + dict);
+
+            if (dict != null) {
+              dc = dict.charAt(dd);
+              Character next = i + 1 < n ? value.charAt(i + 1) : null;
+              if (DEBUG_CHINESE) logger.info("2 compare " + next + " vs " + dc);
+              if (next != null && isMatch(next, dc)) {  // match on next token
+                tokens.add(prodToken);
+                if (DEBUG_CHINESE) logger.info("addToken " + prodToken);
+                prodToken = "";
+              }
+            }
+//            tokens.add(prodToken);
+//            prodToken = "";
+//
+//            d++;
+//            dd = 0;
+          }
+        } else {  // e.g. ? vs chinese character
+          if (DEBUG_CHINESE) logger.info("no match " + character + " != " + dc);
+
+          String test = "" + character;
+          if (test.replaceAll(P_Z, "").isEmpty()) {
+            tokens.add(prodToken);
+            if (DEBUG_CHINESE) logger.info("got space, add token " + prodToken);
+
+            prodToken = "";
+//          } else if (removePunct(test).isEmpty()) { // it's a punct!
+//            prodToken += character;
+          } else {// it's a punct!
+            prodToken += character;
+            if (DEBUG_CHINESE) logger.info("prodToken now " + prodToken);
+
+          }
+        }
+      } else {
+        prodToken += character;
+      }
+
+      //tokens.add(character.toString());
+    }
+    if (!prodToken.isEmpty())
+      tokens.add(prodToken);
+
+    logger.info("getChinese " + value + " vs " + dictTokens + " = " + tokens);
+    return tokens;
+  }
+
+  private boolean isMatch(Character character, Character dc) {
+    boolean equals = character.equals(dc);
+    if (!equals && isNumber(character)) {
+      equals = getFullCharacter(character).equals(dc);
+      if (DEBUG_CHINESE) logger.info("isMatch " + character + " vs " + dc + " = " + equals);
+    }
+    return equals;
+  }
+
+  private Character getFullCharacter(char c) {
+    int offset = c - ZERO;
+    int full = FULL_WIDTH_ZERO + offset;
+    return Character.valueOf((char) full);
+  }
+
+  private boolean isNumber(char c) {
+    return c >= ZERO && c <= '9';
+  }
+
+  @NotNull
+  private List<String> getTokensOnSpace(String value) {
+    return Arrays.asList(value.split(GoodwaveExercisePanel.SPACE_REGEX));
   }
 
   /**
