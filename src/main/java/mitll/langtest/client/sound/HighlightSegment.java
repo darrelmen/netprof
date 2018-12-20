@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 public class HighlightSegment extends DivWidget implements IHighlightSegment {
   protected final Logger logger = Logger.getLogger("HighlightSegment");
 
+  public static final String RGB_51_51_51 = "rgb(51, 51, 51)";
   private static final String FLOAT_LEFT = "floatLeft";
   private static final String INLINE_BLOCK_STYLE_ONLY = "inlineBlockStyleOnly";
 
@@ -101,7 +102,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
       style.setColor("gray");
       style.setBackgroundColor("gray");
 
-      logger.info("obscureText did obscure on " +this);
+     // logger.info("obscureText did obscure on " +this);
       didObscure = true;
     }
     return didObscure;
@@ -110,14 +111,15 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   @Override
   public void restoreText() {
     if (shouldObscure && didObscure) {
-      logger.info("restoreText on " +this);
+    //  logger.info("restoreText on " +this);
       Style style = this.span.getElement().getStyle();
-      style.setColor("rgb(51, 51, 51)");
+      style.setColor(RGB_51_51_51);
       style.clearBackgroundColor();
       didObscure = false;
-    } else {
-//      logger.warning("no restore color?");
     }
+    //else {
+//      logger.warning("no restore color?");
+   // }
   }
 
   private HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
@@ -181,6 +183,9 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   public void showHighlight() {
     highlighted = true;
     getSpanStyle().setBackgroundColor(highlightColor);
+    if (didObscure) {
+      getSpanStyle().setColor(highlightColor);
+    }
   }
 
   /**

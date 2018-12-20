@@ -45,6 +45,8 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   }
 
   /**
+   * OK, let's go - hide everything!
+   *
    * @param clientExercise
    * @param isRight
    * @return
@@ -53,12 +55,12 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   @Override
   protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     T turnPanel = super.getTurnPanel(clientExercise, columns);
-    if (columns != COLUMNS.MIDDLE) {
-       turnPanel.reallyObscure();
-    }
-    else {
+    // if (columns != COLUMNS.MIDDLE) {
+    turnPanel.reallyObscure();
+    //   }
+    //   else {
 //      turnPanel.maybeSetObscure(uniqueCoreVocab);
-    }
+    // }
     return turnPanel;
   }
 
@@ -90,7 +92,8 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   }
 
   private void obscureRespTurns() {
-    getPromptSeq().forEach(RecordDialogExercisePanel::obscureText);
-    getRespSeq().forEach(RecordDialogExercisePanel::restoreText);
+//    getPromptSeq().forEach(RecordDialogExercisePanel::obscureText);
+//    getRespSeq().forEach(RecordDialogExercisePanel::restoreText);
+    allTurns.forEach(RecordDialogExercisePanel::obscureText);
   }
 }

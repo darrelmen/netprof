@@ -237,15 +237,17 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       boolean b = iHighlightSegment.obscureText();
       if (!b) logger.info("huh? didn't obscure");
     });
+    flClickableRowPhones.setVisible(false);
   }
 
   public void obscureText() {
-    logger.info("obscureText For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
+//    logger.info("obscureText For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
     flclickables.forEach(IHighlightSegment::obscureText);
   }
 
   public void restoreText() {
     flclickables.forEach(IHighlightSegment::restoreText);
+    flClickableRowPhones.setVisible(true);
   }
 
   /**
@@ -374,7 +376,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
            */
           @Override
           public void stopRecording() {
-            logger.info("stopRecording for " +exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+            logger.info("stopRecording for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
             super.stopRecording();
             rehearseView.stopRecording();
           }
@@ -544,9 +546,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   public boolean isRecording() {
     return recordAudioPanel.getPostAudioRecordButton().isRecording();
   }
+
   public float getRefSpeechDur() {
     return refSpeechDur;
   }
+
   public float getStudentSpeechDur() {
     return studentSpeechDur;
   }

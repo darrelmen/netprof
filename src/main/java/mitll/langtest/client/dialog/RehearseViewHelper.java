@@ -1014,7 +1014,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     double percent = total * 100;
     double round = percent;// Math.max(percent, 30);
     if (percent == 0d) round = 100d;
-    scoreProgress.setPercent(num == 0 ? 100 : percent);
+    double percent1 = num == 0 ? 100 : percent;
+    percent1 = Math.max(percent1, 30);
+    scoreProgress.setPercent(percent1);
     scoreProgress.setVisible(true);
 
     scoreProgress.setText("Score " + Math.round(percent) + "%");
@@ -1122,10 +1124,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private void maybeMoveOnToNextTurn() {
     T currentTurn = getCurrentTurn();
 
-    logger.info("Current turn is " +currentTurn);
-    logger.info("Current turn is playing  " +currentTurn.isPlaying());
+   // logger.info("Current turn is " + currentTurn);
+  //  logger.info("Current turn is playing  " + currentTurn.isPlaying());
     boolean turnAPrompt = isTurnAPrompt(currentTurn);
-    logger.info("Current turn is a prompt " + turnAPrompt);
+  //  logger.info("Current turn is a prompt " + turnAPrompt);
 
     if (!turnAPrompt) {
       moveOnAfterRecordingStopped();

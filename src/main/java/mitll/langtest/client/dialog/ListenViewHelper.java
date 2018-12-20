@@ -729,7 +729,7 @@ public class ListenViewHelper<T extends TurnPanel>
    * @see #gotBackward()
    */
   private void clearHighlightAndRemoveMark() {
-    // logger.info("clearHighlight on " + currentTurn);
+    logger.info("clearHighlight on " + currentTurn);
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();
