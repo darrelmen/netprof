@@ -15,7 +15,6 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 
 public class DialogHeader {
   //private final Logger logger = Logger.getLogger("DialogHeader");
-  // private static final int HEADER_HEIGHT = 120;
   private static final String HEIGHT = 100 + "px";
 
   /**
@@ -45,7 +44,6 @@ public class DialogHeader {
     {
       DivWidget row = new DivWidget();
       row.addStyleName("cardBorderShadow");
-      //  row.setHeight(HEADER_HEIGHT + "px");
 
       row.setWidth(ROW_WIDTH + "%");
       row.addStyleName("inlineFlex");

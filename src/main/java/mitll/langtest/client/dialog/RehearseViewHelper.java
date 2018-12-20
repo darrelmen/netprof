@@ -46,6 +46,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private static final int PROGRESS_BAR_WIDTH = 49;
 
   private static final String REHEARSE = "Rehearse";
+  /**
+   *
+   */
   private static final String HEAR_YOURSELF = "Hear yourself";
   private static final int VALUE = -98;
 
@@ -131,10 +134,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     super.showDialogGetRef(dialogID, dialog, child);
     child.add(overallFeedback = getOverallFeedback());
     startSession();
-  }
-
-  @Override
-  protected void setControlRowHeight(DivWidget rowOne) {
   }
 
   @NotNull
@@ -490,7 +489,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    */
   private void recordingHasStopped() {
     if (isNextTurnAPrompt(getCurrentTurn())) {
-     // logger.info("recordingHasStopped OK, next turn is a prompt!");
+      // logger.info("recordingHasStopped OK, next turn is a prompt!");
       moveOnAfterRecordingStopped();
     } else {
       logger.info("recordingHasStopped next turn not a prompt so not advancing...");
@@ -701,7 +700,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       if (doRehearse) {
         rehearseTurn();
       } else {
-        super.gotPlay();
+        ifOnLastJumpBackToFirst();
+        playCurrentTurn();
       }
     }
   }
@@ -1074,7 +1074,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     if (getCurrentTurn() == allTurns.get(allTurns.size() - 1) && !exToScore.isEmpty()) {
       waitCursor.setVisible(true);
     }
-   // logger.info("stopRecording received!");
+    // logger.info("stopRecording received!");
     recordingHasStopped();
   }
 

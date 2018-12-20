@@ -13,6 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
@@ -162,7 +163,24 @@ public class ListenViewHelper<T extends TurnPanel>
       styleControlRow(controlAndSpeakers);
       child.add(controlAndSpeakers);
 
-      controlAndSpeakers.add(getControls());
+      DivWidget outer = new DivWidget();
+      outer.addStyleName("inlineFlex");
+      outer.setWidth("100%");
+
+      Image w = new Image(LangTest.LANGTEST_IMAGES + "englishSpeaker.png");
+      w.addStyleName("floatLeft");
+      outer.add(w);
+
+      DivWidget controls = getControls();
+      controls.setWidth("100%");
+      controls.getElement().getStyle().setMarginTop(50, PX);
+      outer.add(controls);
+
+      Image w1 = new Image(LangTest.LANGTEST_IMAGES + "chineseSpeaker.png");
+      w1.addStyleName("floatRight");
+      outer.add(w1);
+
+      controlAndSpeakers.add(outer);
       controlAndSpeakers.add(getSpeakerRow(dialog));
 
       child.add(getTurns(dialog));
@@ -256,7 +274,7 @@ public class ListenViewHelper<T extends TurnPanel>
     style.setProperty("position", "sticky");
     style.setTop(0, PX);
 
-    setControlRowHeight(rowOne);
+//    setControlRowHeight(rowOne);
 
 //    rowOne.setWidth(97 + "%");
     style.setMarginTop(10, PX);
@@ -264,6 +282,7 @@ public class ListenViewHelper<T extends TurnPanel>
     style.setZIndex(1000);
   }
 
+/*
   void setControlRowHeight(DivWidget rowOne) {
     rowOne.setHeight(getControlRowHeight() + "px");
   }
@@ -271,6 +290,7 @@ public class ListenViewHelper<T extends TurnPanel>
   private int getControlRowHeight() {
     return 105;
   }
+*/
 
   private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
     CheckBox checkBox = new CheckBox(label, true);
@@ -588,6 +608,8 @@ public class ListenViewHelper<T extends TurnPanel>
    */
   @NotNull
   DivWidget getControls() {
+
+
     DivWidget rowOne = new DivWidget();
     rowOne.getElement().setId("controls");
     rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
@@ -740,17 +762,20 @@ public class ListenViewHelper<T extends TurnPanel>
    */
   void gotPlay() {
     //   logger.info("got click on play ");
-
     if (!setTurnToPromptSide()) {
-      T currentTurn = getCurrentTurn();
-      boolean last = isLast(currentTurn);
-      if (last) logger.info("OK, on last - let's consider going back to start");
-      if (currentTurn != null && !currentTurn.hasCurrentMark()) {
-        markFirstTurn();
-      }
+      ifOnLastJumpBackToFirst();
     }
 
     playCurrentTurn();
+  }
+
+  protected void ifOnLastJumpBackToFirst() {
+    T currentTurn = getCurrentTurn();
+    boolean last = isLast(currentTurn);
+    if (last) logger.info("OK, on last - let's consider going back to start");
+    if (currentTurn != null && !currentTurn.hasCurrentMark()) {
+      markFirstTurn();
+    }
   }
 
   /**
@@ -761,13 +786,13 @@ public class ListenViewHelper<T extends TurnPanel>
     Boolean leftSpeakerSet = isLeftSpeakerSet();
     Boolean rightSpeakerSet = isRightSpeakerSet();
     if (leftSpeakerSet && rightSpeakerSet) {
-      if (DEBUG || true) logger.info("setTurnToPromptSide both speakers ");
+      if (DEBUG) logger.info("setTurnToPromptSide both speakers ");
       return false;
     } else if (
         leftSpeakerSet && !leftTurnPanels.contains(currentTurn) ||  // current turn is not the prompt set
             rightSpeakerSet && !rightTurnPanels.contains(currentTurn)
     ) {
-      if (DEBUG || true) logger.info("setTurnToPromptSide setNextTurnForSide ");
+      if (DEBUG) logger.info("setTurnToPromptSide setNextTurnForSide ");
 
       setNextTurnForSide();
       return true;

@@ -20,7 +20,7 @@ import java.util.Arrays;
  */
 public class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
   //  private final Logger logger = Logger.getLogger("LearnHelper");
-  private static final String WELCOME_TO_DIALOG_PRACTICE = "Welcome to Dialog Practice!";
+  private static final String WELCOME_TO_DIALOG_PRACTICE = "Welcome to Interpreter Practice!";
   private static final String CHOOSE_A_DIALOG_AND_THEN = "Choose a dialog and then:";
   private static final String STUDY = "Study";
   private static final String LISTEN = "Listen";
@@ -48,10 +48,10 @@ public class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
 
       new ModalInfoDialog(WELCOME_TO_DIALOG_PRACTICE, Arrays.asList(
           getLarger(CHOOSE_A_DIALOG_AND_THEN),
-          getLarger("* " + getLarge(STUDY) + " the new vocabulary and turns by recording yourself speaking each item."),
-          getLarger("* " + getLarge(LISTEN) + " to the dialog."),
-          getLarger("* " + getLarge(REHEARSE) + " by speaking after hearing each prompt."),
-          getLarger("* " + getLarge(PERFORM) + " by speaking and filling in the the obscured vocabulary.")
+          getLarger("* " + getLarge(STUDY) + " the sentences in each dialog."),
+          getLarger("* " + getLarge(LISTEN) + " to the whole dialog."),
+          getLarger("* " + getLarge(REHEARSE) + " speaking in your role as interpreter."),
+          getLarger("* " + getLarge(PERFORM) + " as an interpreter by listening and responding with the scripted phrases.")
       ), 240, false);
     }
   }
