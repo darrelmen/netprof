@@ -505,9 +505,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
                                    List<AudioChunk> audioChunks,
                                    JsonObject jsonObject) throws IOException {
-    //AudioChunk combined = getCombined(isReference, audioChunks);
-
-    //ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(combined.getWavFile());
 //      logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
     Language language = getProject(projid).getLanguageEnum();
     File saveFile = new FileSaver().writeAudioFile(pathHelper,

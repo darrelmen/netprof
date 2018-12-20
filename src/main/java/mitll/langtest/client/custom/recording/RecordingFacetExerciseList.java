@@ -90,7 +90,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   protected List<Pair> getPairs(Map<String, String> typeToSelection) {
     List<Pair> pairs = super.getPairs(typeToSelection);
     addDynamicFacetToPairs(typeToSelection, LANGUAGE_META_DATA, pairs);
-    logger.info("pairs now " + pairs);
+  //  logger.info("pairs now " + pairs);
     return pairs;
   }
 
@@ -125,7 +125,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   @Override
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
     ExerciseListRequest request = super.getExerciseListRequest(prefix);
-    logger.info("getExerciseListRequest " + isContext);
+ //   logger.info("getExerciseListRequest " + isContext);
     request.setOnlyExamples(isContext);
     return request;
   }
@@ -152,7 +152,6 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     Set<MatchInfo> matchInfos = typeToValues.get(LANGUAGE_META_DATA);
 //    logger.info("addDynamicFacets match infos  " + matchInfos);
 //    logger.info("addDynamicFacets typeToValues " + typeToValues);
-
     if (matchInfos != null && !matchInfos.isEmpty()) {
       addExerciseChoices(LANGUAGE_META_DATA, addContentFacet(allTypesContainer), matchInfos);
     }

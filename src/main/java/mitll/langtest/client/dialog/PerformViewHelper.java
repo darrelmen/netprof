@@ -54,11 +54,10 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     T turnPanel = super.getTurnPanel(clientExercise, columns);
     if (columns != COLUMNS.MIDDLE) {
-      turnPanel.reallyObscure();
+       turnPanel.reallyObscure();
     }
     else {
 //      turnPanel.maybeSetObscure(uniqueCoreVocab);
-
     }
     return turnPanel;
   }
@@ -91,7 +90,7 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   }
 
   private void obscureRespTurns() {
-    getPromptSeq().forEach(RecordDialogExercisePanel::restoreText);
-    getRespSeq().forEach(RecordDialogExercisePanel::obscureText);
+    getPromptSeq().forEach(RecordDialogExercisePanel::obscureText);
+    getRespSeq().forEach(RecordDialogExercisePanel::restoreText);
   }
 }

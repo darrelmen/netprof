@@ -27,8 +27,10 @@ import java.util.logging.Logger;
  * Created by go22670 on 3/23/17.
  */
 public class ClickableWords {
-  public static final boolean DEBUG_CHINESE = false;
   private final Logger logger = Logger.getLogger("ClickableWords");
+
+  public static final boolean DEBUG_CHINESE = false;
+  public static final boolean DEBUG_CHINESE2 = false;
   private static final String SEARCHMATCH = "searchmatch";
 
   private static final String CLICKABLE_ROW = "clickableRow";
@@ -574,7 +576,7 @@ public class ClickableWords {
     if (!prodToken.isEmpty())
       tokens.add(prodToken);
 
-    logger.info("getChineseMatches " + value + " vs " + dictTokens + " = " + tokens);
+    if (DEBUG_CHINESE2) logger.info("getChineseMatches " + value + " vs " + dictTokens + " = " + tokens);
     return tokens;
   }
 

@@ -100,6 +100,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
       Style style = this.span.getElement().getStyle();
       style.setColor("gray");
       style.setBackgroundColor("gray");
+
+      logger.info("obscureText did obscure on " +this);
       didObscure = true;
     }
     return didObscure;
@@ -108,6 +110,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   @Override
   public void restoreText() {
     if (shouldObscure && didObscure) {
+      logger.info("restoreText on " +this);
       Style style = this.span.getElement().getStyle();
       style.setColor("rgb(51, 51, 51)");
       style.clearBackgroundColor();

@@ -46,11 +46,10 @@ public class TranscriptSegmentGenerator {
 //    Map<String, String> phoneToDisplay = serverProps.getPhoneToDisplay(language);
     for (Map.Entry<ImageType, Map<Float, TranscriptEvent>> typeToEvents : typeToEvent.entrySet()) {
       NetPronImageType key = valueOf(typeToEvents.getKey().toString());
-     // boolean isPhone = key == PHONE_TRANSCRIPT;
+      // boolean isPhone = key == PHONE_TRANSCRIPT;
 
       List<TranscriptSegment> endTimes = typeToEndTimes.computeIfAbsent(key, k -> new ArrayList<>());
-
-   //   StringBuilder builder = new StringBuilder();
+      //   StringBuilder builder = new StringBuilder();
 
       List<TranscriptEvent> events = new ArrayList<>();
 
@@ -58,8 +57,8 @@ public class TranscriptSegmentGenerator {
         events.add(event.getValue());
       }
 
-      StringBuilder builder = new StringBuilder();
-      StringBuilder builder2 = new StringBuilder();
+//      StringBuilder builder = new StringBuilder();
+//      StringBuilder builder2 = new StringBuilder();
       int size = events.size();
       for (int i = 0; i < size; i++) {
 //      for (Map.Entry<Float, TranscriptEvent> event : typeToEvents.getValue().entrySet()) {
@@ -70,19 +69,18 @@ public class TranscriptSegmentGenerator {
 
         String event1 = value.getEvent();
         String displayName = serverProps.getDisplayPhoneme(language, event1, prevEvent, nextEvent);
-builder.append(event1);
-        builder2.append(displayName);
+//        builder.append(event1);
+//        builder2.append(displayName);
 
 //        String displayName = isPhone ? getDisplayName(event1, phoneToDisplay) : event1;
         endTimes.add(new TranscriptSegment(value.getStart(), value.getEnd(), event1, value.getScore(), displayName));
-
 //        if (!isPhone) {
 //          builder.append(event1);
 //        }
       }
 
-      if (key == PHONE_TRANSCRIPT)
-      logger.info("getTypeToSegments from " +builder + " -> " +builder2);
+ /*     if (key == PHONE_TRANSCRIPT)
+        logger.info("getTypeToSegments from " + builder + " -> " + builder2);*/
     }
 
 

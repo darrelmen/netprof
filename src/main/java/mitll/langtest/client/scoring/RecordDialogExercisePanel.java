@@ -83,11 +83,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
                                    ListenViewHelper.COLUMNS columns) {
     super(commonExercise, controller, listContainer, alignments, listenView, columns);
     this.rehearseView = listenView;
-
     setMinExpectedDur(commonExercise);
-
     this.sessionManager = sessionManager;
-  //  addStyleName("inlineFlex");
   }
 
   private void setMinExpectedDur(ClientExercise commonExercise) {
@@ -237,7 +234,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     logger.info("reallyObscure For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
     flclickables.forEach(iHighlightSegment -> {
       iHighlightSegment.setObscurable();
-      iHighlightSegment.obscureText();
+      boolean b = iHighlightSegment.obscureText();
+      if (!b) logger.info("huh? didn't obscure");
     });
   }
 
@@ -308,83 +306,83 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
     NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
         new NoFeedbackRecordAudioPanel<ClientExercise>(exercise, controller, sessionManager) {
-      /**
-       *
-       * SO in an async world, this result may not be for this exercise panel!
-       *
-       * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
-       * @see FeedbackPostAudioRecordButton#useResult
-       * @param result
-       */
-      @Override
-      public void useResult(AudioAnswer result) {
-        super.useResult(result);
-        rehearseView.useResult(result);
+          /**
+           *
+           * SO in an async world, this result may not be for this exercise panel!
+           *
+           * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
+           * @see FeedbackPostAudioRecordButton#useResult
+           * @param result
+           */
+          @Override
+          public void useResult(AudioAnswer result) {
+            super.useResult(result);
+            rehearseView.useResult(result);
 
-        if (false) {
-          logger.info("useResult got for ex " + result.getExid() + " vs local " + getExID() +
-              " = " + result.getValidity() + " " + result.getPretestScore());
-        }
-        // logger.info("useResult got words " + result.getPretestScore().getWordScores());
-      }
+            if (false) {
+              logger.info("useResult got for ex " + result.getExid() + " vs local " + getExID() +
+                  " = " + result.getValidity() + " " + result.getPretestScore());
+            }
+            // logger.info("useResult got words " + result.getPretestScore().getWordScores());
+          }
 
-      @Override
-      Widget getPopupTargetWidget() {
-        return myGetPopupTargetWidget();
-      }
+          @Override
+          Widget getPopupTargetWidget() {
+            return myGetPopupTargetWidget();
+          }
 
-      /**
-       * @see PostAudioRecordButton#usePartial
-       * @param response
-       */
-      @Override
-      public void usePartial(StreamResponse response) {
-        RecordDialogExercisePanel.this.usePartial(response);
-      }
+          /**
+           * @see PostAudioRecordButton#usePartial
+           * @param response
+           */
+          @Override
+          public void usePartial(StreamResponse response) {
+            RecordDialogExercisePanel.this.usePartial(response);
+          }
 
-      @Override
-      public void gotAbort() {
-        logger.info("OK got abort!");
-      }
+          @Override
+          public void gotAbort() {
+            logger.info("OK got abort!");
+          }
 
-      /**
-       *
-       */
-      @Override
-      public void onPostFailure() {
-        logger.info("onPostFailure exid " + getExID());
-        stopRecording();
-      }
+          /**
+           *
+           */
+          @Override
+          public void onPostFailure() {
+            logger.info("onPostFailure exid " + getExID());
+            stopRecording();
+          }
 
-      /**
-       * TODO : do something smarter here on invalid state????
-       *
-       * @param exid
-       * @param isValid
-       * @see PostAudioRecordButton#useInvalidResult
-       */
-      @Override
-      public void useInvalidResult(int exid, boolean isValid) {
-        super.useInvalidResult(exid, isValid);
-        rehearseView.useInvalidResult(exid);
+          /**
+           * TODO : do something smarter here on invalid state????
+           *
+           * @param exid
+           * @param isValid
+           * @see PostAudioRecordButton#useInvalidResult
+           */
+          @Override
+          public void useInvalidResult(int exid, boolean isValid) {
+            super.useInvalidResult(exid, isValid);
+            rehearseView.useInvalidResult(exid);
 
-        logger.warning("useInvalidResult got valid = " + isValid);
-      }
+            logger.warning("useInvalidResult got valid = " + isValid);
+          }
 
-      /**
-       * @see RecordButton.RecordingListener#stopRecording(long, boolean)
-       */
-      @Override
-      public void stopRecording() {
-        super.stopRecording();
-        rehearseView.stopRecording();
-      }
+          /**
+           * @see RecordButton.RecordingListener#stopRecording(long, boolean)
+           */
+          @Override
+          public void stopRecording() {
+            super.stopRecording();
+            rehearseView.stopRecording();
+          }
 
-      @Override
-      public int getDialogSessionID() {
-        return rehearseView.getDialogSessionID();
-      }
-    };
+          @Override
+          public int getDialogSessionID() {
+            return rehearseView.getDialogSessionID();
+          }
+        };
 
     this.recordAudioPanel = recordPanel;
 
@@ -393,7 +391,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     DivWidget flContainer = getHorizDiv();
     if (columns == ListenViewHelper.COLUMNS.RIGHT) {
       addStyleName("floatRight");
-    } else if (columns == ListenViewHelper.COLUMNS.LEFT){
+    } else if (columns == ListenViewHelper.COLUMNS.LEFT) {
       flContainer.addStyleName("floatLeft");
     }
 
@@ -471,8 +469,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   }
 
   /**
-   * @see #addWidgets(boolean, boolean, PhonesChoices)
    * @return
+   * @see #addWidgets(boolean, boolean, PhonesChoices)
    */
   @NotNull
   private DivWidget getHorizDiv() {
@@ -548,6 +546,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   public float getRefSpeechDur() {
     return refSpeechDur;
   }
+
   public float getStudentSpeechDur() {
     return studentSpeechDur;
   }

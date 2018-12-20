@@ -96,8 +96,7 @@ public class SlickReviewedDAO extends DAO implements IReviewedDAO {
    */
   @Override
   public void setState(int exerciseID, STATE state, long creatorID) {
-    logger.info("setState " + exerciseID + " state " + state + " by " + creatorID);
-
+ //   logger.info("setState " + exerciseID + " state " + state + " by " + creatorID);
     dao.insert(toSlick(exerciseID, state, (int) creatorID));
   }
 

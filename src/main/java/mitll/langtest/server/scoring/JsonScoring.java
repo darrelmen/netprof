@@ -55,6 +55,7 @@ public class JsonScoring {
   private static final float MIN_HYDRA_ALIGN = 0.3F;
   private static final String BAD_EXERCISE_ID = "bad_exercise_id";
   private static final String DYNAMIC_RANGE = "dynamicRange";
+  public static final String PRETEST = "pretest";
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
 
@@ -178,11 +179,12 @@ public class JsonScoring {
         jsonForScore.addProperty("path", path);
         jsonForScore.addProperty("resultID", answer.getResultID());
 
-        if (jsonForScore.get("pretest") == null) {
-          jsonForScore.add("pretest", new JsonObject());
+        if (jsonForScore.get(PRETEST) == null) {
+          jsonForScore.add(PRETEST, new JsonObject());
         }
+
         long timestamp = answer.getTimestamp();
-        logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
+    //    logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
         jsonForScore.addProperty("timestamp", timestamp);
       } else {
         logger.warn("not adding stream info");
