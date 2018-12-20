@@ -253,7 +253,7 @@ public class RecordButton extends Button {
     started = System.currentTimeMillis();
 
     cancelAfterStopTimer();
-    logger.info("startRecordingWithTimer started = " + started);
+  //  logger.info("startRecordingWithTimer started = " + started);
     start();
     addRecordingMaxLengthTimeout();
   }

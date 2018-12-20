@@ -155,10 +155,15 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     emoticon.setVisible(true);
 
     if (transcriptToHighlight == null) {
-      AlignmentOutput alignmentOutput = studentAudioAttribute.getAlignmentOutput();
-      alignmentOutput.setShowPhoneScores(true);
-      transcriptToHighlight =
-          showAlignment(0, studentAudioAttribute.getDurationInMillis(), alignmentOutput);
+      if (studentAudioAttribute != null) {
+        AlignmentOutput alignmentOutput = studentAudioAttribute.getAlignmentOutput();
+        alignmentOutput.setShowPhoneScores(true);
+        transcriptToHighlight =
+            showAlignment(0, studentAudioAttribute.getDurationInMillis(), alignmentOutput);
+      }
+      else {
+        logger.warning("showScoreInfo no student audio for " +this);
+      }
     }
 
     revealScore();
@@ -231,7 +236,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   }
 
   public void reallyObscure() {
-    logger.info("reallyObscure For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
+  //  logger.info("reallyObscure For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
     flclickables.forEach(iHighlightSegment -> {
       iHighlightSegment.setObscurable();
       boolean b = iHighlightSegment.obscureText();

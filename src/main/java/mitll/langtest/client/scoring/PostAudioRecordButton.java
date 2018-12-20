@@ -145,7 +145,7 @@ public abstract class PostAudioRecordButton extends RecordButton
         getDialogSessionID(),
         getDevice()  // device = session id in quiz
     );
-    if (DEBUG || true) logger.info("startRecording : " + clientAudioContext);
+    if (DEBUG) logger.info("startRecording : " + clientAudioContext);
 
     controller.startStream(clientAudioContext, this::gotPacketResponse);
   }
@@ -161,12 +161,12 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see RecordButton#stop
    */
   public boolean stopRecording(long duration, boolean abort) {
-    logger.info("stopRecording " + duration);
+    if (DEBUG) logger.info("stopRecording " + duration);
     stopRecordingReqTimestamp = System.currentTimeMillis();
     controller.stopRecording(USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {
-      logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
+      if (DEBUG)  logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
       return true;
     } else {
       hideWaveform();

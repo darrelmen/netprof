@@ -489,9 +489,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * recording to finish completely - we have to send an END and get back a response.
    */
   private void recordingHasStopped() {
-    if (isNextTurnAPrompt()) {
+    if (isNextTurnAPrompt(getCurrentTurn())) {
       logger.info("OK, next turn is a prompt!");
       moveOnAfterRecordingStopped();
+    }
+    else {
+      logger.info("next turn not a prompt so not advancing...");
     }
   }
 
@@ -500,12 +503,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     currentTurnPlayEnded(true);
   }
 
-  private boolean isNextTurnAResp() {
-    return !isNextTurnAPrompt();
+  private boolean isNextTurnAResp(T currentTurn) {
+    return !isNextTurnAPrompt(currentTurn);
   }
 
-  private boolean isNextTurnAPrompt() {
-    int i2 = allTurns.indexOf(getCurrentTurn());
+  private boolean isNextTurnAPrompt(T currentTurn) {
+    int i2 = allTurns.indexOf(currentTurn);
     int nextOtherSide = i2 + 1;
     if (nextOtherSide < allTurns.size()) {
       T nextTurn = allTurns.get(nextOtherSide);
@@ -908,7 +911,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     return getPromptSeq().contains(currentTurn);
   }
 
-
   private boolean doWeHaveTheLastResponseScore() {
     List<T> respSeq = getRespSeq();
     T lastRespTurn = respSeq.get(respSeq.size() - 1);
@@ -1124,12 +1126,17 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private void maybeMoveOnToNextTurn() {
     T currentTurn = getCurrentTurn();
 
-   // logger.info("Current turn is " + currentTurn);
-  //  logger.info("Current turn is playing  " + currentTurn.isPlaying());
-    boolean turnAPrompt = isTurnAPrompt(currentTurn);
-  //  logger.info("Current turn is a prompt " + turnAPrompt);
+    boolean nextTurnAResp = isNextTurnAResp(currentTurn);
 
-    if (!turnAPrompt) {
+    boolean turnAPrompt = isTurnAPrompt(currentTurn);
+    logger.info("Current turn is " + currentTurn +
+        "\n\tis playing " + currentTurn.isPlaying() +
+        "\n\tprompt     " + turnAPrompt+
+        "\n\tnextTurnAResp " + nextTurnAResp
+    );
+    //  logger.info("Current turn is a prompt " + turnAPrompt);
+
+    if (!turnAPrompt && nextTurnAResp) {
       moveOnAfterRecordingStopped();
     }
   }
