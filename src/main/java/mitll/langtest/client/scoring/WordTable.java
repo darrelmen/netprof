@@ -587,12 +587,18 @@ public class WordTable {
     Iterator<TranscriptSegment> iterator = phoneSegments.iterator();
     boolean hasAudioControl = audioControl != null;
 
+//   if (simpleLayout) logger.info("addPhonesBelowWord2 simple layout for " +wordSegment + " and " + phoneSegments);
     while (iterator.hasNext()) {
       TranscriptSegment phoneSegment = iterator.next();
       String phoneLabel = getPhoneEvent(phoneSegment);
       if (!shouldSkipPhone(phoneLabel)) {
         boolean b = iterator.hasNext();
-        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel + (b ? NBSP : ""), BLUE);
+        String phoneLabel1 = phoneLabel;
+        String displayEvent = phoneSegment.getDisplayEvent();
+        if (!phoneLabel1.equals(displayEvent)) {
+          phoneLabel1 = displayEvent;
+        }
+        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel1 + (b ? NBSP : ""), BLUE);
 
         //  logger.info("\taddPhonesBelowWord2 word " + wordSegment + " phone " + phoneLabel + " : " + h.getContent());
 

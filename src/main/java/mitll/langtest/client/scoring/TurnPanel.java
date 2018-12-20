@@ -89,8 +89,9 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
   protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
                                            List<TranscriptSegment> phonesInWord,
                                            AudioControl audioControl,
-                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap, boolean simpleLayout) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment, false);
+                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                                           boolean simpleLayout) {
+    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, false);
   }
 
 

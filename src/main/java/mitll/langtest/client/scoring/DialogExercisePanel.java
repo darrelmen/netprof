@@ -60,7 +60,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   HeadlessPlayAudio playAudio;
 
 
-  private static final boolean DEBUG = false;
+  static final boolean DEBUG = false;
   private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
@@ -299,6 +299,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         if (DEBUG) {
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         }
+
         return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickableRowPhones);
       } else {
         if (DEBUG) {
@@ -332,6 +333,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                                                           DivWidget clickableRow,
                                                                           DivWidget clickablePhones) {
     if (DEBUG) logger.info("matchSegmentsToClickables match seg to clicable " + id + " : " + alignmentOutput);
+
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget =
         matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio, clickableRow, clickablePhones);
     setPlayListener(id, duration, typeToSegmentToWidget, playAudio);
@@ -460,7 +462,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                 ListIterator<IHighlightSegment> clickablesIterator,
                                 List<TranscriptSegment> wordSegments,
                                 DivWidget clickableRow,
-                                DivWidget clickablePhones, boolean simpleLayout) {
+                                DivWidget clickablePhones,
+                                boolean simpleLayout) {
     clickablePhones.clear();
     ListIterator<TranscriptSegment> transcriptSegmentListIterator = wordSegments.listIterator();
     while (transcriptSegmentListIterator.hasNext()) {
@@ -675,7 +678,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord,
                                Iterator<IHighlightSegment> highlightSegmentIterator,
                                List<TranscriptSegment> wordSegments,
-                               DivWidget clickablePhones, boolean simpleLayout) {
+                               DivWidget clickablePhones,
+
+                               boolean simpleLayout) {
     clickablePhones.clear();
     for (TranscriptSegment wordSegment : wordSegments) {
       if (highlightSegmentIterator.hasNext()) {
@@ -801,9 +806,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                           List<TranscriptSegment> phonesInWord,
                           AudioControl audioControl,
                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                          DivWidget clickablePhones, boolean simpleLayout) {
-    DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap, simpleLayout);
-    addSouthClickable(clickablePhones, phoneDivBelowWord);
+                          DivWidget clickablePhones,
+                          boolean simpleLayout) {
+    addSouthClickable(clickablePhones, getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap, simpleLayout));
   }
 
   private void addSouthClickable(DivWidget clickablePhones, DivWidget phoneDivBelowWord) {

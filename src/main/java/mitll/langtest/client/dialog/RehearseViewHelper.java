@@ -490,11 +490,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    */
   private void recordingHasStopped() {
     if (isNextTurnAPrompt(getCurrentTurn())) {
-      logger.info("OK, next turn is a prompt!");
+     // logger.info("recordingHasStopped OK, next turn is a prompt!");
       moveOnAfterRecordingStopped();
-    }
-    else {
-      logger.info("next turn not a prompt so not advancing...");
+    } else {
+      logger.info("recordingHasStopped next turn not a prompt so not advancing...");
     }
   }
 
@@ -534,10 +533,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     exToScore.put(exid, score);
     recordDialogTurns.add(recordDialogTurn);
 
-    logger.info("addScore exid " + exid +
-        " score " + score +
-        "\n\tnow ex->score (" + exToScore.keySet().size() + ") : " + exToScore.keySet() +
-        "\n\tvs expected   (" + getRespSeq().size() + ") : " + getRespSeq());
+    if (DEBUG) {
+      logger.info("addScore exid " + exid +
+          " score " + score +
+          "\n\tnow ex->score (" + exToScore.keySet().size() + ") : " + exToScore.keySet() +
+          "\n\tvs expected   (" + getRespSeq().size() + ") : " + getRespSeq());
+    }
 
     checkAtEnd();
   }
@@ -830,6 +831,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     return INavigation.VIEWS.REHEARSE;
   }
 
+  private static final boolean DEBUG_PLAY_ENDED = false;
+
   /**
    * @param wasRecording
    * @see #playStopped()
@@ -841,14 +844,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       markCurrent();
     } else {
       T currentTurn = getCurrentTurn();
-      if (DEBUG || true) logger.info("currentTurnPlayEnded (rehearse) - turn " + currentTurn);
+      if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded (rehearse) - turn " + currentTurn);
 
       boolean isCurrentPrompt = isTurnAPrompt(currentTurn);
 
       int i2 = allTurns.indexOf(currentTurn);
       int nextOtherSide = i2 + 1;
 
-      if (DEBUG || true) {
+      if (DEBUG_PLAY_ENDED) {
         logger.info("currentTurnPlayEnded" +
             //"\n\t seq  " + seq.size() +
             //"\n\tleft  " + isLeftSpeakerSet() +
@@ -877,10 +880,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         makeCurrentTurnVisible();
 
         if (isTurnAPrompt(nextTurn)) {
-          if (DEBUG || true) logger.info("currentTurnPlayEnded - play next " + nextTurn);
+          if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded - play next " + nextTurn);
           playCurrentTurn();
         } else {
-          if (DEBUG || true) logger.info("currentTurnPlayEnded - startRecording " + nextTurn);
+          if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded - startRecording " + nextTurn);
           startRecordingTurn(nextTurn); // advance automatically
         }
       } else {  // on the last turn!
@@ -1071,7 +1074,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     if (getCurrentTurn() == allTurns.get(allTurns.size() - 1) && !exToScore.isEmpty()) {
       waitCursor.setVisible(true);
     }
-    logger.info("stopRecording received!");
+   // logger.info("stopRecording received!");
     recordingHasStopped();
   }
 
@@ -1129,9 +1132,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     boolean nextTurnAResp = isNextTurnAResp(currentTurn);
 
     boolean turnAPrompt = isTurnAPrompt(currentTurn);
+
     logger.info("Current turn is " + currentTurn +
         "\n\tis playing " + currentTurn.isPlaying() +
-        "\n\tprompt     " + turnAPrompt+
+        "\n\tprompt     " + turnAPrompt +
         "\n\tnextTurnAResp " + nextTurnAResp
     );
     //  logger.info("Current turn is a prompt " + turnAPrompt);

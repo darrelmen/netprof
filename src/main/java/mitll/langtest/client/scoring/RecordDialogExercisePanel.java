@@ -158,8 +158,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       if (studentAudioAttribute != null) {
         AlignmentOutput alignmentOutput = studentAudioAttribute.getAlignmentOutput();
         alignmentOutput.setShowPhoneScores(true);
-        transcriptToHighlight =
-            showAlignment(0, studentAudioAttribute.getDurationInMillis(), alignmentOutput);
+
+        transcriptToHighlight = showAlignment(0, studentAudioAttribute.getDurationInMillis(), alignmentOutput);
       }
       else {
         logger.warning("showScoreInfo no student audio for " +this);
@@ -326,7 +326,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
             super.useResult(result);
             rehearseView.useResult(result);
 
-            if (true) {
+            if (DEBUG) {
               logger.info("useResult got for ex " + result.getExid() + " vs local " + getExID() +
                   " = " + result.getValidity() + " " + result.getPretestScore());
             }
@@ -381,7 +381,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
            */
           @Override
           public void stopRecording() {
-            logger.info("stopRecording for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+           // logger.info("stopRecording for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
             super.stopRecording();
             rehearseView.stopRecording();
           }
@@ -444,7 +444,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       }
 
       if (response.isStreamStop()) {
-        logger.info("usePartial stopStream");
+       // logger.info("usePartial stopStream");
         gotStreamStop = true;
       }
     } else {

@@ -301,8 +301,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     AudioCheck.ValidityAndDur validityAndDur = newChunk.getValidityAndDur();
 
     if (validity != Validity.OK || DEBUG_DETAIL) {
-      logger.info("getJSONForStream : (" + state + "), \tsession (" + session +
-          ") chunk for exid " + realExID + " " + newChunk + " is " + validity + " : " + validityAndDur);
+      if (!state.equals(STREAM) || DEBUG_DETAIL) {
+        logger.info("getJSONForStream : (" + state + "), \tsession (" + session +
+            ") chunk for exid " + realExID + " " + newChunk + " is " + validity + " : " + validityAndDur);
+      }
     }
 
 /*
