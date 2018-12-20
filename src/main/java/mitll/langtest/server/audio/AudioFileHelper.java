@@ -63,7 +63,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import scala.Tuple2;
 import scala.collection.Iterator;
-import scala.collection.immutable.List;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -799,8 +798,6 @@ public class AudioFileHelper implements AlignDecode {
     return true;
   }
 */
-
-
   private boolean isUsePhoneToDisplay() {
     return serverProps.usePhoneToDisplay(project.getLanguageEnum());
   }
@@ -1572,9 +1569,9 @@ public class AudioFileHelper implements AlignDecode {
                                      int userID) {
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.getDurationInMillis(), exercise.getID());
     boolean b = exercise.asCommon().hasEnglishAttr();
-    logger.info("getAudioAnswer Ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " = " + b);
 
     Language language = b ? Language.ENGLISH : this.language;
+    logger.info("getAudioAnswer Ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " language " + language);
     if (decoderOptions.shouldDoAlignment()) {
       PrecalcScores precalcScores =
           checkForWebservice(
@@ -1587,7 +1584,10 @@ public class AudioFileHelper implements AlignDecode {
               language);
 
       String phraseToDecode = getChecker().getPhraseToDecode(exercise.getForeignLanguage(), language);
-      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
+
+      AudioFileHelper toUse = language == Language.ENGLISH ? getEnglishAudioFileHelper(language) : this;
+
+      PretestScore asrScoreForAudio = toUse.getASRScoreForAudio(reqid,
           file,
           Collections.singleton(phraseToDecode),
           "",
@@ -1629,6 +1629,11 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     return audioAnswer;
+  }
+
+  private AudioFileHelper getEnglishAudioFileHelper(Language language) {
+    List<Project> matchingProjects = db.getProjectManagement().getMatchingProjects(language, false);
+    return matchingProjects.isEmpty() ? this : matchingProjects.get(0).getAudioFileHelper();
   }
 
   /**

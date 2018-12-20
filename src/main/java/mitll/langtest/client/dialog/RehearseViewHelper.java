@@ -769,8 +769,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    */
   private void startSession() {
     if (dialogID == -1) {
-      logger.warning("huh? dialog id is  " + dialogID +
-          "???\n\n\n\n");
+      logger.warning("huh? dialog id is  " + dialogID + "???\n\n\n\n");
     } else {
       setSession();
     }
@@ -989,7 +988,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     ProgressBar scoreProgress = this.scoreProgress;
 
     total /= (float) num;
-    //  logger.info("showOverallDialogScore total   " + total);
+    logger.info("showOverallDialogScore total   " + total + " vs " +num);
 
     double percent = total * 100;
     double round = percent;// Math.max(percent, 30);

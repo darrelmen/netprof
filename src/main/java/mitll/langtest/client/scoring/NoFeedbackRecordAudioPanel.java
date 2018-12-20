@@ -77,7 +77,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
        */
       @Override
       protected String getDevice() {
-        logger.info("no feedback device");
+       // logger.info("no feedback device");
         return getDeviceValue();
       }
 

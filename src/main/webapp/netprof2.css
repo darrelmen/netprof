@@ -2279,11 +2279,13 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
 .leftbubble {
     margin-right: 5px;
     background-color: rgb(231, 230, 236);
+    float: left;
 }
 
 .rightbubble {
     margin-right: 5px;
     background-color: rgba(74, 168, 238, 0.69);
+    float: right;
 }
 
 .middlebubble {

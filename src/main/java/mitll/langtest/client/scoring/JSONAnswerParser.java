@@ -167,7 +167,7 @@ class JSONAnswerParser {
       //   logger.info("getLongField obj "  +jsonValue + " is not a number?");
       String s = jsonValue.isString().stringValue();
       try {
-        logger.info("getLongField parse obj " + jsonValue + " : " + s);
+     //   logger.info("getLongField parse obj " + jsonValue + " : " + s);
         return Long.parseLong(s);
       } catch (NumberFormatException e) {
         logger.warning("can't parse " + s);
