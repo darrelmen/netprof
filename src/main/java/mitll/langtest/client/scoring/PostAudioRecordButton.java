@@ -161,12 +161,12 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see RecordButton#stop
    */
   public boolean stopRecording(long duration, boolean abort) {
-    //logger.warning("stopRecording ");
+    logger.info("stopRecording " + duration);
     stopRecordingReqTimestamp = System.currentTimeMillis();
     controller.stopRecording(USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {
-      // logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
+      logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
       return true;
     } else {
       hideWaveform();
@@ -409,8 +409,6 @@ public abstract class PostAudioRecordButton extends RecordButton
   abstract protected AudioType getAudioType();
 
   abstract protected int getDialogSessionID();
-
-
 
   private void logRoundtripTime(long durationInMillis, long roundtrip) {
     //  long durationInMillis = result.getDurationInMillis();

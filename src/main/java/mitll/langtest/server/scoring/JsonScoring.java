@@ -184,11 +184,15 @@ public class JsonScoring {
         }
 
         long timestamp = answer.getTimestamp();
-    //    logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
+        //    logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
         jsonForScore.addProperty("timestamp", timestamp);
       } else {
         logger.warn("not adding stream info");
       }
+    } else if (answer != null) {
+      logger.warn("hmm - validity is " + answer.getValidity() +
+          "\n\tduration " + answer.getDurationInMillis() +
+          "\n\tfor      " + answer);
     }
 
     addValidity(exerciseID, jsonForScore,

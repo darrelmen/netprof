@@ -1182,6 +1182,7 @@ public class LangTest implements
   /**
    * Recording interface
    *
+   * @see PostAudioRecordButton#stopRecording(long, boolean)
    * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
   public void stopRecording(boolean useDelay, boolean abort) {

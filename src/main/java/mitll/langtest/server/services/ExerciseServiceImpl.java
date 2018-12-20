@@ -197,9 +197,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     }
 
     if (request.isOnlyFL()) {
-      logger.info("before " + commonExercises.size());
+//      logger.info("before " + commonExercises.size());
       commonExercises = db.getFilterResponseHelper().getCommonExercisesWithoutEnglish(commonExercises);
-      logger.info("after  " + commonExercises.size());
+  //    logger.info("after  " + commonExercises.size());
     }
 
     //logger.info("getDialogResponse returning exercises for " + request.getDialogID() + " " + collect.size());
@@ -1366,8 +1366,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 //    logger.info("getCommonExercisesWithoutAudio " + ids);
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
-
-      logger.info("ex " + byID.getID() + " eng " + byID.getEnglish() + " fl " + byID.getForeignLanguage() + " " + byID.getMeaning());
+//      logger.info("ex " + byID.getID() + " eng " + byID.getEnglish() + " fl " + byID.getForeignLanguage() + " " + byID.getMeaning());
       addAnnotations(byID); // todo do this in a better way
       //if (true || byID.getAudioAttributes().isEmpty()) {
       toAddAudioTo.add(byID);

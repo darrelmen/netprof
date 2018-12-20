@@ -47,6 +47,7 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
@@ -498,7 +499,9 @@ public class AudioFileHelper implements AlignDecode {
       DecoderOptions options,
       PretestScore pretestScore) {
     AudioCheck.ValidityAndDur validity = audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
-
+    if (validity.getValidity() == Validity.MIC_DISCONNECTED) {
+      logger.warn("getAnswer : got mic disconnected for " + wavPath + " with dur " + validity.getDurationInMillis() + " range " + validity.getDynamicRange());
+    }
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, "", "");
 
     return options.shouldDoDecoding() ?
@@ -996,7 +999,7 @@ public class AudioFileHelper implements AlignDecode {
     // would have to find min, max of word scores for each result id...
     java.util.List<SlickPerfResult> latestResultsForDialogSession = db.getResultDAO().getLatestResultsForDialogSession(dialogSessionID);
     int size = latestResultsForDialogSession.size();
-    float num = size;
+    float num = (float) size;
     float total = 0F;
     for (SlickPerfResult perfResult : latestResultsForDialogSession) {
       total += perfResult.pronscore();
@@ -1007,7 +1010,10 @@ public class AudioFileHelper implements AlignDecode {
     if (slickDialogSession == null) {
       logger.warn("\n\n\nrememberAnswer nothing with " + dialogSessionID);
     } else {
-      logger.info("now " + dialogSessionID + " num " + size + " score " + total);
+      if (DEBUG) {
+        logger.info("updateDialogSessionWithAnswer : now " + dialogSessionID + " num " + size + " score " + total);
+      }
+
       dialogSessionDAO
           .update(new SlickDialogSession(
               slickDialogSession.id(),

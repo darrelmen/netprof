@@ -351,7 +351,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         } else {
           logger.info("audio chunks not complete, so waiting for others to arrive for " + session);
         }
-
       }
     }
 
@@ -658,8 +657,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     if (DEBUG_REF_TRIM) {
       logger.info("getCombinedRef - " +
-          "\n\tstart " + combined +
-          "\n\tto    " + endChunk);
+          "\n\tstart    " + startChunk +
+          "\n\tcombined " + combined +
+          "\n\tto       " + endChunk);
     }
 
     int startIndex = audioChunks.indexOf(combined) + 1;
@@ -1074,12 +1074,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.warn("getAudioAnswer for " + project.getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
     AudioType audioType = audioContext.getAudioType();
-    logger.info("getAudioAnswer audio type " + audioType + " ex " + exerciseID + " " + commonExercise);
+
+    if (DEBUG) logger.info("getAudioAnswer audio type " + audioType + " ex " + exerciseID + " " + commonExercise);
     String audioTranscript = getAudioTranscript(audioType, commonExercise);
     if (audioTranscript.isEmpty()) {
       logger.warn("\n\n\n\nhuh? no transcript for audio " + audioTranscript + " and " + commonExercise);
     }
-    logger.info("getAudioAnswer audioTranscript '" + audioTranscript + "'");
+    if (DEBUG) logger.info("getAudioAnswer audioTranscript '" + audioTranscript + "'");
 
     AnswerInfo.RecordingInfo recordingInfo =
         new AnswerInfo.RecordingInfo("", "", deviceType, device, audioTranscript, "");

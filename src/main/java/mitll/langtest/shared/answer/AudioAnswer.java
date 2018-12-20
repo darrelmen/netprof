@@ -178,12 +178,6 @@ public class AudioAnswer extends SimpleAudioAnswer {
     return validity;
   }
 
-/*
-  public void setValidity(Validity validity) {
-    this.validity = validity;
-  }
-*/
-
   public String getDecodeOutput() {
     return decodeOutput;
   }

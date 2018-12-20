@@ -319,7 +319,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
             super.useResult(result);
             rehearseView.useResult(result);
 
-            if (false) {
+            if (true) {
               logger.info("useResult got for ex " + result.getExid() + " vs local " + getExID() +
                   " = " + result.getValidity() + " " + result.getPretestScore());
             }
@@ -374,6 +374,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
            */
           @Override
           public void stopRecording() {
+            logger.info("stopRecording for " +exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
             super.stopRecording();
             rehearseView.stopRecording();
           }
@@ -436,6 +437,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       }
 
       if (response.isStreamStop()) {
+        logger.info("usePartial stopStream");
         gotStreamStop = true;
       }
     } else {
@@ -542,11 +544,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   public boolean isRecording() {
     return recordAudioPanel.getPostAudioRecordButton().isRecording();
   }
-
   public float getRefSpeechDur() {
     return refSpeechDur;
   }
-
   public float getStudentSpeechDur() {
     return studentSpeechDur;
   }

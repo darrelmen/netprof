@@ -56,7 +56,7 @@ class JSONAnswerParser {
     converted.setDynamicRange(getFloatField(jsonObject, "dynamicRange"));
     //useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
     long timestamp = getLongField(jsonObject, "timestamp");
-    logger.info("getAudioAnswer json timestamp " + timestamp + " " + new Date(timestamp));
+  //  logger.info("getAudioAnswer json timestamp " + timestamp + " " + new Date(timestamp));
     converted.setTimestamp(timestamp);
 
     if (validity == Validity.OK /*|| validity == Validity.CUT_OFF*/) {

@@ -53,8 +53,8 @@ import java.util.*;
 public abstract class BaseResultDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseResultDAO.class);
 
-  private static final int MINUTE = 60 * 1000;
-  private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
+ // private static final int MINUTE = 60 * 1000;
+  //private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
   private final boolean DEBUG = false;
   List<MonitorResult> cachedMonitorResultsForQuery = null;
 
