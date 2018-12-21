@@ -75,6 +75,7 @@ import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.xpath.operations.Bool;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletException;
@@ -122,6 +123,17 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private AudioCheck audioCheck;
   private final static boolean DEBUG_REF_TRIM = false;
   private final static boolean DEBUG_DETAIL = false;
+
+  private final LoadingCache<Long, List<Boolean>> sessionToComplete = CacheBuilder.newBuilder()
+      .maximumSize(10000)
+      .expireAfterWrite(1, TimeUnit.MINUTES)
+      .build(
+          new CacheLoader<Long, List<Boolean>>() {
+            @Override
+            public List<Boolean> load(Long key) {
+              return new ArrayList<>();
+            }
+          });
 
   /**
    * @see #getJSONForStream
@@ -323,6 +335,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     boolean isFinished = sessionInfo.isFinished();
 
     synchronized (audioChunks) {
+      List<Boolean> completeList = sessionToComplete.get(session);
+      if (!completeList.isEmpty()) {
+        logger.warn("getJSONForStream huh? session " +session + " is already complete with " +audioChunks.size() +
+            " chunks");
+      }
       audioChunks.add(newChunk);
     }
 
@@ -339,14 +356,23 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
       if (sessionInfo.sawStartAndEnd()) {  // if we've seen both start and end, check to see if we have all the packets
         boolean completeSet;
+        AudioChunk combined = null;
+
         synchronized (audioChunks) {
           completeSet = isCompleteSet(audioChunks);
+          if (completeSet) {
+            logger.info("getJSONForStream session " +session + " is complete with " +audioChunks.size() + " chunks.");
+            sessionToComplete.get(session).add(Boolean.TRUE);
+            combined = getCombined(isRef, audioChunks);
+          }
         }
+
         if (completeSet) {
           long then2 = System.currentTimeMillis();
           jsonObject = getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid, dialogSessionID,
               isRef, audioType,
-              audioChunks, jsonObject);
+              jsonObject,
+              combined);
 
           long now2 = System.currentTimeMillis();
           logger.info("getJSONForStream END chunk took " + (now2 - then2) + " for ex " + realExID + " req " + reqid + " # chunks " + audioChunks.size());
@@ -493,6 +519,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @throws IOException
    * @throws DominoSessionException
    */
+/*
   private JsonObject getJsonObject(String deviceType,
                                    String device,
                                    int userIDFromSession,
@@ -507,9 +534,19 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                    List<AudioChunk> audioChunks,
                                    JsonObject jsonObject) throws IOException {
 //      logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
+
+    AudioChunk combined = getCombined(isReference, audioChunks);
+
+    return getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid, dialogSessionID, isReference, audioType, jsonObject, combined);
+  }
+*/
+  private JsonObject getJsonObject(String deviceType, String device,
+                                   int userIDFromSession, int realExID, int reqid, int projid,
+                                   int dialogSessionID, boolean isReference,
+                                   AudioType audioType, JsonObject jsonObject, AudioChunk combined) throws IOException {
     Language language = getProject(projid).getLanguageEnum();
     File saveFile = new FileSaver().writeAudioFile(pathHelper,
-        new ByteArrayInputStream(getCombined(isReference, audioChunks).getWavFile()),
+        new ByteArrayInputStream(combined.getWavFile()),
         realExID,
         userIDFromSession,
         language,
@@ -558,6 +595,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return jsonObject;
   }
 
+  /**
+   * @param isReference
+   * @param audioChunks
+   * @return
+   * @see #getJsonObject
+   */
   private AudioChunk getCombined(boolean isReference, List<AudioChunk> audioChunks) {
     return isReference ? getCombinedRef(audioChunks) : getCombinedAudioChunk(audioChunks);
   }
