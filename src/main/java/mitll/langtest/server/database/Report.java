@@ -183,6 +183,7 @@ public class Report implements IReport {
   private final Map<Integer, String> idToUserID = new HashMap<>();
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_TEACHERS = false;
 
   /**
    * @param resultDAO
@@ -1541,14 +1542,15 @@ public class Report implements IReport {
 
                 boolean add = skipped.add(userid);
                 if (add) {
+                  String userInfo = getUserInfo(userid);
                   if (DEBUG) {
                     logger.info(language + " " + w +
                         " skipping not a student " +
-                        getUserInfo(userid) + "\n\tresult id " + result.getUniqueID() + " on " + new Date(result.getTimestamp()));
+                        userInfo + "\n\tresult id " + result.getUniqueID() + " on " + new Date(result.getTimestamp()));
                   }
 
-                  if (!allTeachers.contains(userid) && !lincoln.contains(userid)) {
-                    logger.warn("getResultsForSet hmm " + getUserInfo(userid) + " is not a teacher?");
+                  if (DEBUG_TEACHERS && !allTeachers.contains(userid) && !lincoln.contains(userInfo)) {
+                    logger.info("getResultsForSet hmm " + userInfo + " is not a teacher?");
                   }
                 }
 
