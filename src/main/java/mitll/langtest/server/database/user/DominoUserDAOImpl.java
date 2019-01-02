@@ -688,6 +688,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @NotNull
   public Group getGroup() {
     if (primaryGroup == null) {
+      logger.info("getGroup : Search groups for " +NETPROF1);
+
       List<Group> groups = delegate.getGroupDAO().searchGroups(NETPROF1);
       if (groups.isEmpty()) {
         logger.warn("getGroup no groups for " + NETPROF1 + "?");
@@ -751,6 +753,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private Group getGroupOrMake(String name) {
     Group group = nameToGroup.get(name);
     if (group == null) {
+      logger.info("getGroupOrMake : Search groups for " +name);
       List<Group> groups = delegate.getGroupDAO().searchGroups(name);
       group = groups.isEmpty() ? null : groups.iterator().next();
 

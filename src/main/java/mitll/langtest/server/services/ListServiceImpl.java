@@ -269,7 +269,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    */
   @Override
   public CommonExercise newExercise(int userListID, String initialText) throws DominoSessionException {
-    if (isValidForeignPhrase(initialText)) {
+    if (isValidForeignPhrase(initialText).isEmpty()) {
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
       int projectIDFromUser = getProjectIDFromUser();
 //    if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
@@ -292,11 +292,15 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     }
   }
 
-  private boolean isValidForeignPhrase(String foreign) throws DominoSessionException {
+  private Collection<String> isValidForeignPhrase(String foreign) throws DominoSessionException {
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "");
   }
 
-  private boolean isValidForeignPhrase(Project project, String foreign) {
+  private boolean isValid(Project project, String foreign) {
+    return isValidForeignPhrase(project, foreign).isEmpty();
+  }
+
+  private Collection<String> isValidForeignPhrase(Project project, String foreign) {
     return project.getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "");
   }
 
@@ -436,7 +440,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
           if (DEBUG) logger.info("addItemsToList item #" + id + " '" + foreignLanguage + "' is known already...");
           userListManager.addItemToList(userListID, id);
           actualItems.add(candidate);
-        } else if (isValidForeignPhrase(project, foreignLanguage)) {
+        } else if (isValidForeignPhrase(project, foreignLanguage).isEmpty()) {
           if (DEBUG) logger.info("addItemsToList new item #" + id + " '" + foreignLanguage + "' is  valid");
           userListManager.newExercise(userListID, candidate);
           actualItems.add(candidate);
@@ -664,7 +668,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     english = english.replaceAll("&#39;", "").trim();
 
     int projectID = project.getID();
-    if (firstColIsEnglish || (isValidForeignPhrase(project, english) && !isValidForeignPhrase(project, fl))) {
+    if (firstColIsEnglish || (isValid(project, english) && !isValid(project, fl))) {
       String temp = english;
       english = fl;
       fl = temp;

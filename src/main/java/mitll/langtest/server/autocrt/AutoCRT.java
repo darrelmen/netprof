@@ -285,7 +285,7 @@ public class AutoCRT {
   private PretestScore getScoreForAudio(AmasExerciseImpl exercise, String exerciseID, int questionID, File audioFile, boolean useCache) {
     Collection<String> exportedAnswersOrig = getPredefAnswers(exercise, questionID - 1);
     if (exportedAnswersOrig == null) logger.warn("getScoreForAudio : can't find " + exerciseID + "/" + questionID);
-    Collection<String> exportedAnswers = inDictFilter.getValidPhrases(exportedAnswersOrig);   // remove phrases that break hydec
+    Collection<String> exportedAnswers = Collections.emptyList();//inDictFilter.getValidPhrases(exportedAnswersOrig);   // remove phrases that break hydec
     if (exportedAnswers == null)
       logger.warn("getScoreForAudio : can't find valid phrases for  " + exerciseID + "/" + questionID);
 

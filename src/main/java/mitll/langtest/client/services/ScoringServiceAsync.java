@@ -37,6 +37,7 @@ import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,9 +77,10 @@ public interface ScoringServiceAsync {
 
   /**
    * @param foreign
+   * @param async
    * @return
    * @seex mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
 
-  void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Boolean> async);
+  void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Collection<String>> async);
 }

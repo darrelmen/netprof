@@ -225,14 +225,13 @@ class CheckLTS {
             }
 
             if (!translitOk && !legitLTS) {
-
               if (!isEmptyLTS) {
                 logger.warn(getDebugInfo(lts, foreignLanguagePhrase, i, token) + " translitOk " + translitOk + " legitLTS " + legitLTS);
               } else if (DEBUG) {
                 logger.info(getDebugInfo(lts, foreignLanguagePhrase, i, token));
               }
-              oov.add(trim);
 
+              oov.add(trim);
             } else if (!isEmptyLTS && legitLTS) {
               if (DEBUG && process != null) {
                 logger.info("checkLTS for " + token + " got " + (process.length));

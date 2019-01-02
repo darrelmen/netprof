@@ -66,9 +66,11 @@ public class InDictFilter {
    * @return
    * @see mitll.langtest.server.autocrt.AutoCRT#getScoreForAudio(AmasExerciseImpl, String, int, File, boolean)
    */
+/*
   public Collection<String> getValidPhrases(Collection<String> phrases) {
     return getValidSentences(phrases);
   }
+*/
 
   /**
    * ONLY FOR AMAS
@@ -76,7 +78,7 @@ public class InDictFilter {
    * @return lc of sentence...?
    * @see #getValidPhrases(java.util.Collection)
    */
-  private Collection<String> getValidSentences(Collection<String> sentences) {
+/*  private Collection<String> getValidSentences(Collection<String> sentences) {
     // logger.info("getValidSentences checking " + sentences.size() + " sentences");
     Set<String> filtered = new TreeSet<String>();
     Set<String> skipped = new TreeSet<String>();
@@ -103,7 +105,7 @@ public class InDictFilter {
     }
 
     return filtered;
-  }
+  }*/
 
   /**
    * ONLY FOR AMAS
@@ -111,13 +113,13 @@ public class InDictFilter {
    * @param sentence
    * @return
    */
-  private boolean allValid(String sentence) {
+/*  private boolean allValid(String sentence) {
     Collection<String> tokens = audioFileHelper.getSmallVocabDecoder().getTokens(sentence, false);
     if (tokens.isEmpty() && !sentence.isEmpty()) logger.error("huh? no tokens from " + sentence);
 
     return allTokensValid(tokens);
-  }
-
+  }*/
+/*
   private boolean allTokensValid(Collection<String> tokens) {
     boolean valid = true;
     for (String token : tokens) {
@@ -129,23 +131,27 @@ public class InDictFilter {
       }
     }
     return valid;
-  }
+  }*/
 
   /**
    * @param token
    * @return
    * @see #getValidSentences(java.util.Collection)
    */
+/*
   private boolean isValid(String token) {
-    return /*checkToken(token) &&*/ isPhraseInDict(token);
+    return */
+/*checkToken(token) &&*//*
+ isPhraseInDict(token);
   }
+*/
 
   /**
    * @param phrase
    * @return
    * @see #isValid
    */
-  private boolean isPhraseInDict(String phrase) {
+/*  private boolean isPhraseInDict(String phrase) {
     return audioFileHelper.checkLTSOnForeignPhrase(phrase, "");
-  }
+  }*/
 }

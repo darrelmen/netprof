@@ -367,14 +367,9 @@ public class AudioFileHelper implements AlignDecode {
    * @seex mitll.langtest.server.services.ScoringServiceImpl#isValidForeignPhrase
    * @see InDictFilter#isPhraseInDict
    */
-  public boolean checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration) {
-    return getASRScoring().validLTS(foreignLanguagePhrase, transliteration);
+  public Collection<String> checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration) {
+    return getASRScoring().getOOV(foreignLanguagePhrase, transliteration);
   }
-
-/*  private boolean isInDictOrLTS(ClientExercise exercise) {
-    return getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
-  }*/
-
   public SmallVocabDecoder getSmallVocabDecoder() {
     return getASRScoring().getSmallVocabDecoder();
   }

@@ -39,10 +39,6 @@ import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -65,6 +61,7 @@ import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -346,7 +343,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   private void gotBlur(RecordAudioPanel rap, ControlGroup normalSpeedRecording, Panel toAddTo) {
-    validateThenPost(rap, normalSpeedRecording, toAddTo, false);
+    validateThenPost(toAddTo, false);
   }
 
   /**
@@ -647,7 +644,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   /**
    * @param toAddTo
    * @param onClick
-   * @see #validateThenPost(RecordAudioPanel, ControlGroup, Panel, boolean)
+   * @see #validateThenPost(Panel, boolean)
    */
   void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {
     postChangeIfDirty(onClick);
@@ -771,24 +768,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   abstract Panel getCreateButton(Panel toAddTo, ControlGroup normalSpeedRecording);
 
   /**
-   * @param rap
-   * @param normalSpeedRecording
    * @param toAddTo
    * @param onClick
    * @seex #makeCreateButton
    * @see #audioPosted
    */
-  void validateThenPost(RecordAudioPanel rap,
-                        ControlGroup normalSpeedRecording,
-                        Panel toAddTo,
-                        boolean onClick) {
-    //if (validateForm(rap, normalSpeedRecording)) {
-//   logger.info("NewUserExercise.validateThenPost : form is valid");
+  void validateThenPost(Panel toAddTo, boolean onClick) {
     isValidForeignPhrase(toAddTo, onClick);
-//    } else {
-//      formInvalid();
-//      logger.info("NewUserExercise.validateThenPost : form not valid");
-//    }
   }
 
   protected boolean isEnglish() {
@@ -816,40 +802,68 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     String safeText = foreignLang.getSafeText().trim();
 
-    controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Boolean>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("is valid exercise", caught);
-      }
-
-      @Override
-      public void onSuccess(Boolean result) {
-        if (result || safeText.isEmpty()) {
-          String safeText1 = context.getSafeText().trim();
-          controller.getScoringService().isValidForeignPhrase(safeText1, "", new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              controller.handleNonFatalError("is valid exercise", caught);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-              if (result || safeText1.isEmpty()) {
-                afterValidForeignPhrase(toAddTo, onClick);
-              } else {
-                markWarn(context, "The " + controller.getLanguage() +
-                    " text is not in our " + getLanguage() + " dictionary. Please edit.", Placement.BOTTOM);
-              }
-            }
-          });
-
-        } else {
-          markWarn(foreignLang, "The " + controller.getLanguage() +
-              " text is not in our " + getLanguage() + " dictionary. Please edit.", Placement.BOTTOM);
+    if (safeText.isEmpty()) {
+      checkContext(toAddTo, onClick);
+    } else {
+      controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Collection<String>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("is valid exercise", caught);
         }
-      }
-    });
 
+        @Override
+        public void onSuccess(Collection<String> result) {
+          if (result.isEmpty()) {
+            checkContext(toAddTo, onClick);
+          } else {
+            markWarn(foreignLang, getOOVMessage(result), Placement.BOTTOM);
+          }
+        }
+      });
+    }
+  }
+
+  @NotNull
+  private String getOOVMessage(Collection<String> result) {
+    boolean isOne = result.size() == 1;
+    String are = isOne ? " is " : " are ";
+    String words = isOne ? " word " : " words ";
+    String oovs;
+    if (isOne) {
+      oovs = result.iterator().next();
+    } else {
+      StringBuilder builder = new StringBuilder();
+      result.forEach(oov -> builder.append(oov).append(", "));
+      oovs = builder.toString();
+      oovs = oovs.substring(0, oovs.length() - 2);
+    }
+
+    return "The" +
+        words + oovs + are +
+        "not in our " + getLanguage() + " dictionary. Please edit.";
+  }
+
+  private void checkContext(Panel toAddTo, boolean onClick) {
+    String safeText1 = context.getSafeText().trim();
+    if (safeText1.isEmpty()) {
+      afterValidForeignPhrase(toAddTo, onClick);
+    } else {
+      controller.getScoringService().isValidForeignPhrase(safeText1, "", new AsyncCallback<Collection<String>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("is valid exercise", caught);
+        }
+
+        @Override
+        public void onSuccess(Collection<String> result) {
+          if (result.isEmpty()) {
+            afterValidForeignPhrase(toAddTo, onClick);
+          } else {
+            markWarn(context, getOOVMessage(result), Placement.BOTTOM);
+          }
+        }
+      });
+    }
   }
 
 
@@ -1170,7 +1184,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   void audioPosted() {
 //    if (clickedCreate) {
 //      clickedCreate = false;
-    validateThenPost(rap, normalSpeedRecording, toAddTo, false);
+    validateThenPost(toAddTo, false);
 //    }
 
     gotBlur();
