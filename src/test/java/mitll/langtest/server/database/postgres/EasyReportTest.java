@@ -34,6 +34,7 @@ package mitll.langtest.server.database.postgres;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -67,6 +68,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.*;
 
 import static java.lang.Thread.sleep;
@@ -92,6 +95,41 @@ public class EasyReportTest extends BaseTest {
     getDNS("dliflc.com");
     getDNS("gmail.com");
     getDNS("gmaiil.com");
+  }
+
+  @Test
+  public void testPinyin() {
+    ServerProperties serverProperties = new ServerProperties();
+
+    List<String> words = new ArrayList<>(Arrays.asList("yī èr sān sì yǒu wǔ liù qī bā jiǔ".split(" ")));
+    Map<String, String> numberToPron = new HashMap<>();
+    for (int i = 1; i < words.size()+1; i++) {
+      numberToPron.put("" + i, words.get(i-1));
+    }
+
+    numberToPron.forEach((k, v) -> System.out.println(toFull(k) + "\t" + serverProperties.toDict(v)));
+    //  serverProperties.toDict();
+  }
+
+
+  private static final char FULL_WIDTH_ZERO = '\uFF10';
+  private static final char ZERO = '0';
+  private static final String P_Z = "\\p{Z}+";
+
+  private String toFull(String s) {
+    StringBuilder builder = new StringBuilder();
+
+    final CharacterIterator it = new StringCharacterIterator(s);
+    for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+      if (c >= ZERO && c <= '9') {
+        int offset = c - ZERO;
+        int full = FULL_WIDTH_ZERO + offset;
+        builder.append(Character.valueOf((char) full).toString());
+      } else {
+        builder.append(c);
+      }
+    }
+    return builder.toString();
   }
 
   private void getDNS(String host) {

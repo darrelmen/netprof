@@ -290,9 +290,8 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     final CharacterIterator it = new StringCharacterIterator(fl);
 
     for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
-      Character character = c;
       if (!Character.isSpaceChar(c)) {
-        addEntry(exercise, character.toString());
+        addEntry(exercise, Character.toString(c));
       }
     }
   }

@@ -55,6 +55,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.jar.Attributes;
 import java.util.stream.Collectors;
@@ -330,6 +332,24 @@ public class ServerProperties {
     langToPhoneToDisplay.put(Language.MANDARIN, value);
     //logger.info("\n\n\nServerProperties now " + langToPhoneToDisplay);
   }
+
+  public String toDict(String pinyin) {
+    Map<String, String> reverse = new HashMap<>();
+    langToPhoneToDisplay.get(Language.MANDARIN).forEach((k, v) -> {
+      reverse.put(v, k);
+    });
+
+    StringBuilder builder = new StringBuilder();
+    final CharacterIterator it = new StringCharacterIterator(pinyin);
+
+    for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+      String key =  Character.toString(c);
+      String s = reverse.get(key);
+      builder.append(s == null ? key : s);
+    }
+    return builder.toString();
+  }
+
 
   /**
    * @param props
