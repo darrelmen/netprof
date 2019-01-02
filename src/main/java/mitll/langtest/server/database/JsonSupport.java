@@ -239,43 +239,11 @@ public class JsonSupport {
    */
   JsonObject getJsonPhoneReport(int userid, Map<String, Collection<String>> typeToValues, String language) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
-
     logger.info("getJsonPhoneReport : for user "+userid + " and" +
         "\n\tsel " +
         typeToValues+
         "\n\tgot " + exercisesForState.size() + " exercises");
- //   long then = System.currentTimeMillis();
-   // int projid = project.getID();
-//    Map<Integer, List<AudioAttribute>> exToAudio = audioDAO.getExToAudio(projid);
-   // long now = System.currentTimeMillis();
-
-   // if (now - then > 500) logger.warn("took " + (now - then) + " millis to get ex->audio map");
-
     List<Integer> ids = exercisesForState.stream().map(HasID::getID).collect(Collectors.toList());
-
-/*
-    List<Integer> ids = new ArrayList<>();
-   // Map<Integer, String> exidToRefAudio = new HashMap<>();
-    for (CommonExercise exercise : exercisesForState) {
-*/
-/*      List<AudioAttribute> audioAttributes = exToAudio.get(exercise.getID());
-      if (audioAttributes != null) {
-        audioDAO.attachAudio(exercise, *//*
-*/
-/*installPath, configDir, *//*
-*/
-/*audioAttributes, language);
-      }*//*
-
-      int id = exercise.getID();
-      ids.add(id);
-     // exidToRefAudio.put(id, exercise.getRefAudio());
-    }
-
-    now = System.currentTimeMillis();
-    if (now - then > 100) logger.warn("getJsonPhoneReport : took " + (now - then) + " millis to attach audio again!");
-*/
-
     return phoneDAO.getWorstPhonesJson(userid, ids, language, project);
   }
 }

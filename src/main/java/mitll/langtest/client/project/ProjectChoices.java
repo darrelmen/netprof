@@ -61,7 +61,7 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
 
-  private static final int DIALOG_HEIGHT = 590;
+  private static final int DIALOG_HEIGHT = 595;
   private static final String COURSE1 = " course";
   /**
    * @see #getLabel
