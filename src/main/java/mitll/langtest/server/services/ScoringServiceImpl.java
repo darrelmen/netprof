@@ -776,8 +776,8 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @paramx foreign
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
-  @Override
-  public boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
+   @Override
+  public Collection<String> isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
   }
 

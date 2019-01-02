@@ -1133,14 +1133,6 @@ public class EasyReportTest extends BaseTest {
     andPopulate.close();
   }*/
 
-
-  @Test
-  public void test() {
-    DatabaseImpl andPopulate = getAndPopulate();
-    //  andPopulate.sendReport(-1);
-    andPopulate.close();
-  }
-
   @Test
   public void test2() {
     List<String> strings = Arrays.asList("au-dessus", "au -dessus", "abandonnée", "Appelez-moi.");
@@ -1201,7 +1193,7 @@ public class EasyReportTest extends BaseTest {
 
     Project project = andPopulate.getProject(28);
 
-    String temp = "１";
+//    String temp = "１";
     String sentence = "きのうの午後５時から７時まで黒い車が止まっていました";
     logger.info("\n\ntestSegment for " + sentence);
 
@@ -1247,6 +1239,8 @@ public class EasyReportTest extends BaseTest {
   public void testSendReport() {
     DatabaseImpl andPopulate = getAndPopulate();
     andPopulate.sendReport(-1);
+    Project spanish = andPopulate.getProjectByName("spanish");
+    logger.info("Got " + spanish);
     andPopulate.close();
   }
 

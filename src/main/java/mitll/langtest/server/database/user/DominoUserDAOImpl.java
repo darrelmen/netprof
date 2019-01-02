@@ -120,6 +120,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final int CACHE_TIMEOUT = 1;
   private static final String UNSET = "UNSET";
 
+  private static final boolean DEBUG_STUDENTS = false;
+  private static final boolean DEBUG_TEACHERS = false;
+
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
   private static final List<String> DOMAINS =
@@ -168,7 +171,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
-  //private static final boolean SKIP_SIGNUP_EMAIL = false;
 
   /**
    * If false, don't use email to set the initial user password via email.
@@ -218,7 +220,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           new CacheLoader<Integer, DBUser>() {
             @Override
             public DBUser load(Integer key) {
-            if (DEBUG_USER_CACHE)  logger.info("idToDBUser Load " + key);
+              if (DEBUG_USER_CACHE) logger.info("idToDBUser Load " + key);
               DBUser dbUser = delegate.lookupDBUser(key);
               if (dbUser == null) dbUser = delegate.lookupDBUser(getDefaultUser());
               return dbUser;
@@ -236,7 +238,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           new CacheLoader<Integer, User>() {
             @Override
             public User load(Integer key) {
-          //    logger.info("idToUser Load " + key);
+              //    logger.info("idToUser Load " + key);
               return getUser(lookupUser(key));
             }
           });
@@ -686,6 +688,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @NotNull
   public Group getGroup() {
     if (primaryGroup == null) {
+      logger.info("getGroup : Search groups for " +NETPROF1);
+
       List<Group> groups = delegate.getGroupDAO().searchGroups(NETPROF1);
       if (groups.isEmpty()) {
         logger.warn("getGroup no groups for " + NETPROF1 + "?");
@@ -749,6 +753,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private Group getGroupOrMake(String name) {
     Group group = nameToGroup.get(name);
     if (group == null) {
+      logger.info("getGroupOrMake : Search groups for " +name);
       List<Group> groups = delegate.getGroupDAO().searchGroups(name);
       group = groups.isEmpty() ? null : groups.iterator().next();
 
@@ -1314,8 +1319,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     String userId = dominoUser.getUserId();
 
     if (userKind != STUDENT) {
-      logger.info("toUser : User #" + documentDBID + " " + userId + " is a " + userKind);
-    } else {
+      if (DEBUG_TEACHERS) {
+        logger.info("toUser : User #" + documentDBID + " " + userId + " is a " + userKind);
+      }
+    } else if (DEBUG_STUDENTS){
       logger.info("toUser : User #" + documentDBID + " " + userId + " is a " + userKind + " with roles " + dominoUser.getRoleAbbreviations());
     }
 
@@ -1661,7 +1668,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     long then = System.currentTimeMillis();
     logger.info("getAll calling get all users");
     FindOptions<UserColumn> opts = getUserColumnFindOptions();
-    List<DBUser> users = delegate.getUsers(-1, opts);
+    List<DBUser> users = Collections.emptyList();
+
+    if (delegate == null) {
+      logger.warn("getAll delegate is null?");
+    }
+
+    users = delegate.getUsers(-1, opts);
     long now = System.currentTimeMillis();
     if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
     return users;

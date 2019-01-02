@@ -612,15 +612,15 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
   private Button getFixedButton(final Panel toAddTo, final ControlGroup normalSpeedRecording) {
     final Button fixed = makeFixedButton();
-    fixed.addClickHandler(event -> validateThenPost(rap, normalSpeedRecording, toAddTo, true));
+    fixed.addClickHandler(event -> validateThenPost(toAddTo, true));
     return fixed;
   }
 
   /**
    * @param toAddTo
    * @param onClick
-   * @seex mitll.langtest.client.qc.MarkDefectsChapterNPFHelper#addEventHandler
-   * @see NewUserExercise#validateThenPost(RecordAudioPanel, ControlGroup, Panel, boolean)
+   * @seex mitll.langtest.client.custom.MarkDefectsChapterNPFHelper#addEventHandler
+   * @see NewUserExercise#validateThenPost(Panel, boolean)
    */
   @Override
   void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {

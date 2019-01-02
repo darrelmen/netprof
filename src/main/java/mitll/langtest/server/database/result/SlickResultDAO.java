@@ -55,6 +55,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import scala.Tuple2;
+import scala.collection.Seq;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -244,7 +245,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   @Override
   public long getFirstTime(int projid) {
-    return dao.getFirst(projid).modified().getTime();
+    Seq<SlickResult> first = dao.getFirst(projid);
+    return first.isEmpty() ? -1 : first.iterator().next().modified().getTime();
   }
 
   public void addBulk(List<SlickResult> bulk) {

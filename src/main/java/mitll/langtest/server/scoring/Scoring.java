@@ -76,7 +76,7 @@ public abstract class Scoring {
   private static final String SCORING = "scoring";
   private static final String MANDARIN = "mandarin";
   private static final String PHONES_LAB = ".phones.lab";
- // private static final String WORDS_LAB = ".words.lab";
+  // private static final String WORDS_LAB = ".words.lab";
 
   private static final String START_SIL = "<s>";
   private static final String END_SIL = "</s>";
@@ -333,14 +333,33 @@ public abstract class Scoring {
     if (fl.isEmpty()) {
       return false;
     } else {
-      Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
-
-      //if (oov.addAll(oovForFL)) {
-      // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
-      //}
-
+      Collection<String> oovForFL = getOOV(fl, transliteration);
       return oovForFL.isEmpty();
     }
+  }
+
+  @NotNull
+  public Collection<String> getOOV(String fl, String transliteration) {
+    Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
+
+    List<String> inOrder = new ArrayList<>(oovForFL);
+
+    //if (oov.addAll(oovForFL)) {
+    // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
+    //}
+
+    Iterator<String> iterator = inOrder.iterator();
+
+    while (iterator.hasNext()) {
+      String oov = iterator.next();
+      try {
+        Integer.parseInt(oov);
+        iterator.remove();
+      } catch (NumberFormatException e) {
+        // ok not an int
+      }
+    }
+    return inOrder;
   }
 
   /**

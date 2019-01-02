@@ -39,6 +39,7 @@ public class ReportToExcel {
   private static final String PROJECTS = PROJECT + "s";
 
   public static final boolean DEBUG = false;
+  private static final boolean WARN_MISSING_STATS_FOR_YEAR = false;
 
   protected final LogAndNotify logAndNotify;
 
@@ -93,7 +94,6 @@ public class ReportToExcel {
       Map<String, Map<Integer, ReportStats>> nameToYearToStats = getLangToYearToStats(copy, byLanguage);
       writeYTDAndHistorical(copy, wb, nameToYearToStats, !byLanguage, deviceRecordings);
     }
-
   }
 
   private void writeYTDAndHistorical(List<ReportStats> stats,
@@ -182,6 +182,7 @@ public class ReportToExcel {
     XSSFCellStyle cellStyle = getCellStyle(workbook);
     int maxCol = 0;
     for (String lang : sortedLang) {
+      String toCap = toCap(lang);
       Row row = sheet.createRow(rownum++);
 
       int col = 0;
@@ -189,7 +190,7 @@ public class ReportToExcel {
       {
         Cell langCell = row.createCell(col++);
         langCell.setCellStyle(lightGreenStyle);
-        langCell.setCellValue(lang);
+        langCell.setCellValue(toCap);
       }
 
       for (Integer year : yearsFromStats) {
@@ -205,7 +206,7 @@ public class ReportToExcel {
       {
         Cell cell = row.createCell(col++);
         cell.setCellStyle(lightGreenStyle);
-        cell.setCellValue(lang);
+        cell.setCellValue(toCap);
       }
     }
 
@@ -319,24 +320,26 @@ public class ReportToExcel {
     return perProject ? PROJECT : LANGUAGE;
   }
 
-  private int writeHeaderRow2(Sheet sheet, int rownum, Set<String> years, XSSFCellStyle lightGreenStyle) {
+  private int writeHeaderRow(Sheet sheet, int rownum, Set<String> languages, XSSFCellStyle lightGreenStyle) {
     Row headerRow = sheet.createRow(rownum++);
-    // headerRow.getRowStyle().setFillBackgroundColor(IndexedColors.YELLOW.getIndex());
     int col = 0;
-    Cell headerCell = headerRow.createCell(col++);
-    //makeYellow(yellow, headerCell);
-    headerCell.setCellValue("");
-    headerCell.setCellStyle(lightGreenStyle);
-    for (String year : years) {
+    {
+      Cell headerCell = headerRow.createCell(col++);
+      headerCell.setCellValue("");
+      headerCell.setCellStyle(lightGreenStyle);
+    }
+    col = addLanguageHeaders(languages, lightGreenStyle, headerRow, col);
+    addTotalCell(lightGreenStyle, headerRow, col);
+    return rownum;
+  }
+
+  private int addLanguageHeaders(Set<String> languages, XSSFCellStyle lightGreenStyle, Row headerRow, int col) {
+    for (String lang : languages) {
       Cell cell = headerRow.createCell(col++);
-      cell.setCellValue(year);
+      cell.setCellValue(toCap(lang));
       cell.setCellStyle(lightGreenStyle);
     }
-    Cell cell = headerRow.createCell(col++);
-    cell.setCellValue("TOTAL");
-    cell.setCellStyle(lightGreenStyle);
-    //makeYellow(yellow, cell);
-    return rownum;
+    return col;
   }
 
   private Set<Integer> getYearsFromStats(List<ReportStats> stats) {
@@ -374,7 +377,7 @@ public class ReportToExcel {
 
     Set<String> sortedLang = new TreeSet<>(langToYearToStats.keySet());
 
-    rownum = writeHeaderRow2(sheet, rownum, sortedLang, getLightGreenStyle(workbook));
+    rownum = writeHeaderRow(sheet, rownum, sortedLang, getLightGreenStyle(workbook));
 
     if (langToYearToStats.isEmpty()) {
       logger.error("huh? no data in " + langToYearToStats);
@@ -420,13 +423,17 @@ public class ReportToExcel {
         Map<Integer, ReportStats> yearToStats = langToYearToStats.get(lang);
 
         if (yearToStats == null) {
-          logger.warn("writeWeeklySheetForYear : no stats for " + lang);
+          if (WARN_MISSING_STATS_FOR_YEAR) {
+            logger.warn("writeWeeklySheetForYear : no stats for " + lang);
+          }
           col = addCellAtCol(cellStyle, row, col, 0);
         } else {
           ReportStats reportStats = yearToStats.get(yearToReport);
 
           if (reportStats == null) {
-            logger.warn("writeWeeklySheetForYear : no stats for " + lang + " and year " + yearToReport);
+            if (WARN_MISSING_STATS_FOR_YEAR) {
+              logger.warn("writeWeeklySheetForYear : no stats for " + lang + " and year " + yearToReport);
+            }
             col = addCellAtCol(cellStyle, row, col, 0);
           } else {
             //  if (debug) logger.info("writeWeeklySheet lang " + lang + " week " + week + " stats " + reportStats);
@@ -517,16 +524,20 @@ public class ReportToExcel {
 
 
     XSSFCellStyle lightGreenStyle = getLightGreenStyle(workbook);
-    for (String lang : sortedLang) {
-      Cell cell2 = row.createCell(col++);
-      cell2.setCellValue(lang);
-      cell2.setCellStyle(lightGreenStyle);
-    }
+    col = addLanguageHeaders(sortedLang, lightGreenStyle, row, col);
 
+    addTotalCell(greenStyle, row, col);
+    return rownum;
+  }
+
+  private void addTotalCell(XSSFCellStyle greenStyle, Row row, int col) {
     Cell cell2 = row.createCell(col++);
     cell2.setCellValue("TOTAL");
     cell2.setCellStyle(greenStyle);
-    return rownum;
+  }
+
+  public String toCap(String lang) {
+    return lang.substring(0, 1).toUpperCase() + lang.substring(1).toLowerCase();
   }
 
   private void doIncreaseRow(XSSFWorkbook workbook,
@@ -548,11 +559,12 @@ public class ReportToExcel {
     for (String lang : sortedLang) {
       Integer value = langToLastWeek.get(lang);
       if (value == null) {
-        logger.error("doIncreaseRow no value for " + lang);
+        logger.info("doIncreaseRow no value for " + lang);
         value = 0;
-      } else {
-        // logger.info("doIncreaseRow Got " + lang + " = " + value);
       }
+      //else {
+      // logger.info("doIncreaseRow Got " + lang + " = " + value);
+      //}
 
       {
         Cell cell1 = row.createCell(col++);
@@ -560,9 +572,11 @@ public class ReportToExcel {
         cell1.setCellStyle(value == 0 ? yellowStyle : brightGreenStyle);
       }
     }
-    Cell cell = row.createCell(col++);
-    cell.setCellValue(marginalDiff);
-    cell.setCellStyle(getBlueStyle(workbook));
+    {
+      Cell cell = row.createCell(col++);
+      cell.setCellValue(marginalDiff);
+      cell.setCellStyle(getBlueStyle(workbook));
+    }
   }
 
   @NotNull

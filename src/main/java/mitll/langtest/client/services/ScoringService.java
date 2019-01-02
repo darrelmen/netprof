@@ -41,6 +41,7 @@ import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -93,8 +94,7 @@ public interface ScoringService extends RemoteService {
    * @return
    * @seex mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
-
-  boolean isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException;
+  Collection<String> isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException;
 
 
   /**

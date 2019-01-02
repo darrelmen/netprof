@@ -345,6 +345,7 @@ public class JsonExport {
     //  if (addMeaning) ex.addProperty(MN, exercise.getMeaning());
 
     if (exercise.getDirectlyRelated().isEmpty()) {
+      ex.addProperty(CTID,  "");
       ex.addProperty(CT, "");
       ex.addProperty(CTR, "");
     } else {
