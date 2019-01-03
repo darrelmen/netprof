@@ -149,7 +149,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           // NOTE : actively avoid doing this -
           //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
           //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
-          asrScoreForAudio = getAudioFileHelper().getASRScoreForAudio(
+          AudioFileHelper audioFileHelper = getAudioFileHelper();
+
+          asrScoreForAudio = audioFileHelper == null ? new PretestScore() : audioFileHelper.getASRScoreForAudio(
               1,
               audioFilePath,
               sentence,
@@ -299,7 +301,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       }
     }
 
-  //  logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
+    //  logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
     Map<Integer, AlignmentAndScore> audioIDToAlignment = recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
     return audioIDToAlignment;
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
@@ -485,7 +487,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
                                           int exerciseID,
                                           boolean usePhonemeMap) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    File absoluteAudioFile = pathHelper.getAbsoluteAudioFile(testAudioFile.replaceAll(".ogg", ".wav").replaceAll(".mp3",".wav"));
+    File absoluteAudioFile = pathHelper.getAbsoluteAudioFile(testAudioFile.replaceAll(".ogg", ".wav").replaceAll(".mp3", ".wav"));
 
     int projectID = getProjectIDFromUser(userIDFromSessionOrDB);
     CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projectID, exerciseID);
@@ -745,11 +747,11 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * <p>
    * Can't check if it's valid if we don't have a model.
    *
-   * @paramx foreign
    * @return
+   * @paramx foreign
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
-   @Override
+  @Override
   public Collection<String> isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
   }

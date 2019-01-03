@@ -887,13 +887,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     ClientExercise clientExercise = grabInfoFromFormAndStuffInfoExercise(newUserExercise);
     editItem(markFixedClicked, keepAudio);
 
-    if (DEBUG) {
+    if (DEBUG && clientExercise != null) {
       logger.info("reallyChange : edit item " + clientExercise.getID() +
           "\n\teng " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage());
     }
 
-    if (contextChanged() || contextTransChanged()) {
-
+    if ((contextChanged() || contextTransChanged()) && clientExercise != null) {
       getAudioService().editItem(clientExercise, keepAudio, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -904,14 +903,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         public void onSuccess(Void newExercise) {
           originalContext = clientExercise.getForeignLanguage();
           originalContextTrans = clientExercise.getEnglish();
-
           Scheduler.get().scheduleDeferred((Command) () -> refreshEx());
         }
       });
-    } else {
-
     }
-
   }
 
   /**
@@ -943,18 +938,22 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   private ClientExercise updateContextExercise(ClientExercise clientExercise) {
     List<ClientExercise> directlyRelated = clientExercise.getDirectlyRelated();
 
-    ClientExercise contextSentenceExercise = directlyRelated.iterator().next();
-    MutableShell mutableContext = contextSentenceExercise.getMutableShell();
-
-    mutableContext.setForeignLanguage(context.getSafeText());
-
-    if (isEnglish()) {
-      mutableContext.setMeaning(contextTrans.getSafeText());
+    if (directlyRelated.isEmpty()) {
+      return null;
     } else {
-      mutableContext.setEnglish(contextTrans.getSafeText());
-    }
+      ClientExercise contextSentenceExercise = directlyRelated.iterator().next();
+      MutableShell mutableContext = contextSentenceExercise.getMutableShell();
 
-    return contextSentenceExercise;
+      mutableContext.setForeignLanguage(context.getSafeText());
+
+      if (isEnglish()) {
+        mutableContext.setMeaning(contextTrans.getSafeText());
+      } else {
+        mutableContext.setEnglish(contextTrans.getSafeText());
+      }
+
+      return contextSentenceExercise;
+    }
   }
 
   /**
@@ -1010,10 +1009,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       public void setEnabled(boolean val) {
         if (audioType == AudioType.CONTEXT_REGULAR) {
           boolean b = hasTextInContextField();
-         // logger.info("CreateFirstRecordAudioPanel setEnabled " + val + " has text " + b);
+          // logger.info("CreateFirstRecordAudioPanel setEnabled " + val + " has text " + b);
           super.setEnabled(val && b);
         } else {
-       //   logger.info("CreateFirstRecordAudioPanel setEnabled " + val);
+          logger.info("CreateFirstRecordAudioPanel setEnabled " + val);
           super.setEnabled(val);
         }
       }
@@ -1060,7 +1059,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     }
 
     private void disableOthers(boolean b) {
-  //    logger.info("disableOthers disable others " + b);
+      logger.info("disableOthers disable others " + b);
+
+
       boolean enabled = b &= hasRecordPermission();
 
       if (enabled) {
@@ -1090,6 +1091,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
               audioType) {
             @Override
             public boolean stopRecording(long duration, boolean abort) {
+              logger.info("stop recording");
               disableOthers(true);
               showStop();
               return super.stopRecording(duration, abort);

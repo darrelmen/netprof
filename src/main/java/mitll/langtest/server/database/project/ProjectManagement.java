@@ -69,6 +69,7 @@ import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
 import java.sql.Timestamp;
@@ -80,6 +81,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
@@ -102,6 +105,8 @@ public class ProjectManagement implements IProjectManagement {
   private static final String VOCAB = "vocab";
   private static final String DIALOG1 = "dialog";
   private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
+  //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
+  private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   /**
    * JUST FOR TESTING
    */
@@ -397,7 +402,7 @@ public class ProjectManagement implements IProjectManagement {
       //for (CommonExercise exercise : rawExercises) exids.add(exercise.getID());
       project.setRTL(isRTL(rawExercises));
 
-      project.setFileToRecorder(db.getResultDAO().getStudentAnswers(projectID));
+      //   project.setFileToRecorder(db.getResultDAO().getStudentAnswers(projectID));
 //      List<SlickRefResultJson> jsonResults = db.getRefResultDAO().getJsonResults();
 //      Map<Integer, ExercisePhoneInfo> exToPhonePerProject = new ExerciseToPhone().getExToPhonePerProject(exids, jsonResults);
 //      project.setExToPhone(exToPhonePerProject);
@@ -453,18 +458,60 @@ public class ProjectManagement implements IProjectManagement {
     }, "ProjectManagement.rememberUsers_" + projectID).start();
   }
 
+  /**
+   * answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
+   * /opt/netprof/answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
+   *
+   * Search through every project?
+   * I guess when we get an answer file, we don't really know where to look for it...?
+   *
+   * @param requestURI
+   * @return
+   */
   @Override
   public int getUserForFile(String requestURI) {
-    for (Project project : getProjects()) {
+    Pattern pattern = Pattern.compile(ANSWERS1);
+    Matcher matcher = pattern.matcher(requestURI);
+
+    if (matcher.find()) {
+      String group = matcher.group(1);
+     // logger.info("getUserForFile lang " + group);
+      List<Integer> byLanguage = projectDAO.getByLanguage(group);
+      List<Project> matches = byLanguage.stream().map(id -> getProject(id, true)).collect(Collectors.toList());
+
+      if (matches.isEmpty()) {
+      //  logger.info("getUserForFile lang " + group + " matches " + matches.size());
+        int userID = getUserIDFromAll(requestURI);
+        if (userID != -1) {
+          return userID;
+        }
+      } else {
+       // logger.info("getUserForFile lang " + group + " matches " + matches.size());
+        return getUserIDFrom(requestURI, matches);
+      }
+    } else {
+      return getUserIDFromAll(requestURI);
+    }
+    //}
+//    logger.info("getUserForFile couldn't find recorder of " + requestURI);
+    return -1;
+  }
+
+  @Nullable
+  private int getUserIDFromAll(String requestURI) {
+    List<Project> loadableProjects = getLoadableProjects(getProjects());
+    return getUserIDFrom(requestURI, loadableProjects);
+  }
+
+  @Nullable
+  private int getUserIDFrom(String requestURI, List<Project> loadableProjects) {
+    for (Project project : loadableProjects) {
       Integer userID = project.getUserForFile(requestURI);
       if (userID != null) {
-//        logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
+        logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
         return userID;
       }
     }
-
-//    logger.info("getUserForFile couldn't find recorder of " + requestURI);
-
     return -1;
   }
 
@@ -831,6 +878,13 @@ public class ProjectManagement implements IProjectManagement {
     return toFilter
         .stream()
         .filter(this::isProduction)
+        .collect(Collectors.toList());
+  }
+
+  private List<Project> getLoadableProjects(Collection<Project> toFilter) {
+    return toFilter
+        .stream()
+        .filter(p -> p.getStatus() != ProjectStatus.DELETED)
         .collect(Collectors.toList());
   }
 

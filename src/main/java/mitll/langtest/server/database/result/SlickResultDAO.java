@@ -613,6 +613,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return dao.perf(projid, minScore);
   }
 
+  public int getStudentForPath(int projid, String path) {
+    List<Integer> integers = dao.studentForPath(projid, path);
+    return integers.isEmpty() ? -1 : integers.get(0);
+  }
+
+/*
   @Override
   public Map<String, Integer> getStudentAnswers(int projid) {
     List<Tuple2<String, Integer>> tuple2s = dao.studentAnswers(projid);
@@ -620,6 +626,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     tuple2s.forEach(stringIntegerTuple2 -> pathToUser.put(stringIntegerTuple2._1, stringIntegerTuple2._2));
     return pathToUser;
   }
+*/
 
   /**
    * @param userid

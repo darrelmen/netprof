@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
@@ -278,6 +279,11 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   }
 
   public void setEnabled(boolean val) {
+//    logger.info("setEnabled " + val + " " + audioType);
+//
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
+//    logger.info("logException stack " + exceptionAsString);
+
     postAudioRecordButton.setEnabled(val);
     if (postAudioRecordButton.hasValidAudio()) {
       playAudioPanel.setEnabled(val);
@@ -300,11 +306,9 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
             public void playStarted() {
               checkAndSetBusy(panel, true);
             }
-
             public void playStopped() {
               checkAndSetBusy(panel, false);
             }
-
           }, suffix, toTheRightWidget, controller, exercise.getID(), true);
 
       add(recordImage1);

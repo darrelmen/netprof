@@ -552,7 +552,11 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   @Override
-  public int getByLanguage(String language) {
-    return dao.byLanguage(language);
+  public int getByLanguageProductionOnly(String language) {
+    return dao.byLanguageProductionOnly(language);
+  }
+  @Override
+  public List<Integer> getByLanguage (String language) {
+    return dao.byLanguage (language);
   }
 }
