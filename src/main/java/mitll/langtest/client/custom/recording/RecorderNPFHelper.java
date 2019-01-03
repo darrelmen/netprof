@@ -39,6 +39,7 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
@@ -109,7 +110,16 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
                                                                        DivWidget listHeader,
                                                                        DivWidget footer) {
         return new RecordingFacetExerciseList<T>(controller,
-            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.RECORD_SENTENCES);
+            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.RECORD_SENTENCES) {
+          @Override
+          protected Panel getMessagePanel(String message) {
+            DivWidget divWidget = new DivWidget();
+            divWidget.add(super.getMessagePanel(message));
+            divWidget.add(flex);
+            getProgressInfoLater();
+            return divWidget;
+          }
+        };
       }
     };
   }
@@ -142,7 +152,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
    * @see #getFactory(PagingExerciseList)
    */
   private class RecordRefAudioPanel extends WaveformExercisePanel<T, ClientExercise> implements CommentAnnotator {
-    private  Logger logger = Logger.getLogger("RecordRefAudioPanel");
+    private Logger logger = Logger.getLogger("RecordRefAudioPanel");
 
     private boolean addedComment = false;
 
@@ -155,7 +165,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
      */
     RecordRefAudioPanel(ClientExercise e, ExerciseController controller1, ListInterface<T, ClientExercise> exerciseList1, String instance) {
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance, false);
-    //  logger.info("RecordRefAudioPanel : Do normal recording " + doNormalRecording);
+      //  logger.info("RecordRefAudioPanel : Do normal recording " + doNormalRecording);
     }
 
     @Override
@@ -215,7 +225,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
       Widget entry = getEntry(e, QCNPFExercise.FOREIGN_LANGUAGE, contentWidget, rtlContent);
 
       if (logger == null) logger = Logger.getLogger("RecordRefAudioPanel");
-     // logger.info("getQuestionContent rtl " + rtlContent + " for " + content);
+      // logger.info("getQuestionContent rtl " + rtlContent + " for " + content);
 
       entry.addStyleName(rtlContent ? "floatRight" : "floatLeftAndClear");
 
@@ -302,8 +312,14 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
 
     @Override
     public Panel getExercisePanel(ClientExercise e) {
-      Scheduler.get().scheduleDeferred(RecorderNPFHelper.this::getProgressInfo);
+      getProgressInfoLater();
       return new RecordRefAudioPanel(e, controller, exerciseList, myView.toString());
     }
   }
+
+  private void getProgressInfoLater() {
+    Scheduler.get().scheduleDeferred(RecorderNPFHelper.this::getProgressInfo);
+  }
+
+
 }
