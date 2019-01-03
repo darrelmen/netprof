@@ -55,6 +55,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.scoring.RecalcResponses;
+import mitll.npdata.dao.lts.MandarinLTS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,6 +68,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
+import static mitll.langtest.shared.project.Language.MANDARIN;
 
 /**
  * Created by go22670 on 1/17/17.
@@ -230,10 +232,12 @@ public class ProjectEditForm extends UserDialog {
    */
   void updateProject() {
     info.setLanguage(getLanguage());
-    String selectedValue = modelTypeBox.getSelectedValue();
-    logger.info("value is " + selectedValue);
-    info.setModelType(ModelType.valueOf(selectedValue));
 
+    {
+      String selectedValue = modelTypeBox.getSelectedValue();
+      //  logger.info("value is " + selectedValue);
+      info.setModelType(ModelType.valueOf(selectedValue));
+    }
     //  logger.info("updateProject get model type " + info.getModelType());
     DominoProject id = dominoToProject.get(dominoProjectsListBox.getSelectedValue());
 
@@ -241,7 +245,7 @@ public class ProjectEditForm extends UserDialog {
       info.setDominoID(id.getDominoID());
       //logger.info(" project domino id now " + id.getDominoID());
     } else {
-      logger.info("no project for " + dominoProjectsListBox.getSelectedValue());
+//      logger.info("updateProject no domino project for " + dominoProjectsListBox.getSelectedValue());
     }
 
     setCommonFields();
@@ -278,7 +282,10 @@ public class ProjectEditForm extends UserDialog {
 
   @NotNull
   private Language getLanguage(String selectedValue) {
-    return Language.valueOf(selectedValue.toUpperCase());
+    String s = MANDARIN.toDisplay().toUpperCase();
+    String s1 = selectedValue.toUpperCase();
+    boolean b = s1.equalsIgnoreCase(s);
+    return Language.valueOf(b ? MANDARIN.name() : s1);
   }
 
   private void setPort() {
@@ -530,10 +537,10 @@ public class ProjectEditForm extends UserDialog {
   private ListBox getTypeBox() {
     ListBox affBox = new ListBox();
     affBox.addStyleName("leftTenMargin");
- //   logger.info("getTypeBox type " + affBox.getItemCount());
+    //   logger.info("getTypeBox type " + affBox.getItemCount());
 
     getVisibleProjectTypes().forEach(projectType -> affBox.addItem(projectType.name()));
-   // logger.info("getTypeBox after type " + affBox.getItemCount());
+    // logger.info("getTypeBox after type " + affBox.getItemCount());
 
     return affBox;
   }
@@ -542,7 +549,7 @@ public class ProjectEditForm extends UserDialog {
     int i = 0;
     boolean found = false;
 
- //   logger.info("project type " + projectType);
+    //   logger.info("project type " + projectType);
 
     for (ProjectType projectType1 : getVisibleProjectTypes()) {
       if (projectType1 == projectType) {
@@ -879,9 +886,9 @@ public class ProjectEditForm extends UserDialog {
   }
 
   /**
-   * @see Project#recalcRefAudio
    * @param info
    * @param w
+   * @see Project#recalcRefAudio
    */
   private void recalcRefAudio(ProjectInfo info, Button w) {
     services.getAudioServiceAsyncForHost(info.getHost())

@@ -119,9 +119,12 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @param child
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
-    this.dialogID = dialog.getID();
-    showDialog(dialogID, dialog, child);
-    getRefAudio(new ArrayList<RefAudioGetter>(bothTurns).iterator());
+    if (dialog == null) {
+    } else {
+      this.dialogID = dialog.getID();
+      showDialog(dialogID, dialog, child);
+      getRefAudio(new ArrayList<RefAudioGetter>(bothTurns).iterator());
+    }
   }
 
 
@@ -704,7 +707,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @see #playStopped
    */
   void currentTurnPlayEnded(boolean wasRecording) {
-    if (DEBUG||true) logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
+    if (DEBUG || true)
+      logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
     if (gotTurnClick) {
       gotTurnClick = false;
     } else {

@@ -195,7 +195,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     String english = isEnglish() && isMeaningValid(e) ? e.getMeaning() : e.getEnglish();
 
-    logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
+  //  logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
     SimpleRecordAudioPanel<T> recordPanel =
         new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView);
 
