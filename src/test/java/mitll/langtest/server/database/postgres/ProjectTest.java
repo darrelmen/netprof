@@ -47,15 +47,11 @@ import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
-import mitll.langtest.server.trie.SearchHelper;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.ProjectStatus;
-import mitll.langtest.shared.project.ProjectType;
-import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -598,9 +594,9 @@ public class ProjectTest extends BaseTest {
   private void doDrop(String croatian) {
     DatabaseImpl andPopulate = getAndPopulate();
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
-    int byLanguage = projectDAO.getByLanguage(croatian);
+    int byLanguage = projectDAO.getByLanguageProductionOnly(croatian);
     projectDAO.delete(byLanguage);
-    // projectDAO.delete(projectDAO.getByLanguage("sorani"));
+    // projectDAO.delete(projectDAO.getByLanguageProductionOnly("sorani"));
     andPopulate.close();
   }
 

@@ -64,6 +64,8 @@ import org.junit.Test;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.Thread.sleep;
 
@@ -80,6 +82,40 @@ public class EasyReportTest extends BaseTest {
   public static final int PROJECTID = 3;
 
   private final String longer = "대폭강화하기로";
+
+  @Test
+  public void testRG() {
+    /**
+     * answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
+     * /opt/netprof/answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
+     *
+     * Search through every project?
+     * I guess when we get an answer file, we don't really know where to look for it...?
+     *
+     * @param requestURI
+     * @return
+     */
+
+    String requestURI = "answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav";
+    //  if (requestURI.startsWith(ANSWERS)) {
+    doMatch(requestURI);
+    String s = "answers/spanish/4228/1/subject-6/answer_1546551284741.wav";
+    doMatch("/opt/netprof/answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav");
+    doMatch(s);
+  }
+
+  private void doMatch(String requestURI) {
+    //Pattern pattern = Pattern.compile("^.*answers\\/(.+)\\/answers\\/.+");
+//    Pattern pattern = Pattern.compile("^.*answers\\/(.+)\\/.+");
+   // String s = ".*answers\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
+    String s2="answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
+    Pattern pattern = Pattern.compile(s2);
+    Matcher matcher = pattern.matcher(requestURI);
+    if (matcher.find()) {
+      String group2 = matcher.group(1);
+      logger.info("getUserForFile group " + group2);
+    }
+  }
 
   @Test
   public void testDNS() {
@@ -144,12 +180,12 @@ public class EasyReportTest extends BaseTest {
     });*/
 
     UserList<CommonExercise> userListByIDExercises = english.getUserListByIDExercises(6528, projectid);
-    logger.info("list " +userListByIDExercises);
+    logger.info("list " + userListByIDExercises);
 
-    userListByIDExercises.getExercises().forEach(ex->logger.info("Got " + ex.getID() + " " + ex.getDirectlyRelated()));
+    userListByIDExercises.getExercises().forEach(ex -> logger.info("Got " + ex.getID() + " " + ex.getDirectlyRelated()));
 
     CommonExercise exerciseByID = project.getExerciseByID(3747);
-    exerciseByID.getDirectlyRelated().forEach(clientExercise -> logger.info("\t" + clientExercise.getID() + " " +clientExercise));
+    exerciseByID.getDirectlyRelated().forEach(clientExercise -> logger.info("\t" + clientExercise.getID() + " " + clientExercise));
   }
 
   @Test
@@ -190,8 +226,8 @@ public class EasyReportTest extends BaseTest {
     Project project = english.getProject(PROJECTID);
 
     FilterResponse typeToValues = english.getTypeToValues(new FilterRequest()
-        .setRecordRequest(true)
-        .setExampleRequest(true)
+            .setRecordRequest(true)
+            .setExampleRequest(true)
         , PROJECTID, 6);
     logger.info("Got " + typeToValues);
 //    english.getUserListManager().getCommentedList(4, false);

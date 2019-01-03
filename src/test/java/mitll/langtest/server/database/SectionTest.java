@@ -511,7 +511,7 @@ public class SectionTest extends BaseTest {
   public void testSectionP() {
     DatabaseImpl andPopulate = getAndPopulate();
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
-    int byLanguage = projectDAO.getByLanguage("portuguese");
+    int byLanguage = projectDAO.getByLanguageProductionOnly("portuguese");
     Project project = andPopulate.getProject(byLanguage);
 
     ISection<CommonExercise> sectionHelper = project.getSectionHelper();
@@ -573,7 +573,7 @@ public class SectionTest extends BaseTest {
   public void testSection2() {
     DatabaseImpl andPopulate = getAndPopulate();
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
-    int byLanguage = projectDAO.getByLanguage("spanish");
+    int byLanguage = projectDAO.getByLanguageProductionOnly("spanish");
     Project project = andPopulate.getProject(byLanguage);
 
     ISection<CommonExercise> sectionHelper = project.getSectionHelper();
@@ -602,7 +602,7 @@ public class SectionTest extends BaseTest {
   private void doReport(String croatian) {
     DatabaseImpl andPopulate = getAndPopulate();
     IProjectDAO projectDAO = andPopulate.getProjectDAO();
-    int byLanguage = projectDAO.getByLanguage(croatian);
+    int byLanguage = projectDAO.getByLanguageProductionOnly(croatian);
     Project project = andPopulate.getProject(byLanguage);
     if (project == null) {
       logger.error("no project " + byLanguage);
