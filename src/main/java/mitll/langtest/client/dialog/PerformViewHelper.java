@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
 
 public class PerformViewHelper<T extends RecordDialogExercisePanel> extends RehearseViewHelper<T> {
   // private final Logger logger = Logger.getLogger("PerformViewHelper");
-  private Set<String> uniqueCoreVocab;
+  //private Set<String> uniqueCoreVocab;
 
   public PerformViewHelper(ExerciseController controller) {
     super(controller);
   }
 
-  protected INavigation.VIEWS getView() {
+  public INavigation.VIEWS getView() {
     return INavigation.VIEWS.PERFORM;
   }
 
@@ -35,10 +35,10 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   @NotNull
   @Override
   protected DivWidget getTurns(IDialog dialog) {
-    uniqueCoreVocab = dialog.getCoreVocabulary()
-        .stream()
-        .map(CommonShell::getForeignLanguage)
-        .collect(Collectors.toSet());
+//    uniqueCoreVocab = dialog.getCoreVocabulary()
+//        .stream()
+//        .map(CommonShell::getForeignLanguage)
+//        .collect(Collectors.toSet());
     DivWidget turns = super.getTurns(dialog);
     Scheduler.get().scheduleDeferred(this::obscureRespTurns);
     return turns;

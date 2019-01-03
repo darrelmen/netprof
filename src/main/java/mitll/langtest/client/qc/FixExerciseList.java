@@ -8,7 +8,6 @@ import mitll.langtest.client.custom.recording.NoListFacetExerciseList;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.HistoryExerciseList;
-import mitll.langtest.client.qc.FixNPFHelper;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,25 +15,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
-import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
-
 /**
  * A list for items to fix (review).
+ *
  * @param <T>
  */
 class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
- // private final Logger logger = Logger.getLogger("FixExerciseList");
+  // private final Logger logger = Logger.getLogger("FixExerciseList");
   private final boolean isContext;
 
   /**
-   * @see FixNPFHelper#getMyListLayout(SimpleChapterNPFHelper)
    * @param controller
    * @param topRow
    * @param currentExercisePanel
    * @param instanceName
    * @param listHeader
    * @param isContext
+   * @see FixNPFHelper#getMyListLayout(SimpleChapterNPFHelper)
    */
   FixExerciseList(ExerciseController controller,
                   Panel topRow,
@@ -69,7 +66,7 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
         .setOnlyWithAnno(true)
         .setQC(true)
         .setAddContext(isContext);
-   // logger.info("getExerciseListRequest req " + exerciseListRequest);
+    // logger.info("getExerciseListRequest req " + exerciseListRequest);
 
     return exerciseListRequest;
   }
@@ -80,7 +77,7 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
             .setOnlyWithAnno(true)
             .setQC(true)
             .setAddContext(isContext);
-   // logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
+    // logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
 //    logger.info("logException stack " + exceptionAsString);
 
@@ -106,7 +103,8 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
     new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> showEmptySelection());
   }
 
-  @Override protected String getEmptySearchMessage() {
+  @Override
+  protected String getEmptySearchMessage() {
     return "<b>You've completed fixing defects for this selection.</b>" +
         "<p>Please clear one of your selections and select a different unit or chapter.</p>";
   }

@@ -44,7 +44,6 @@ import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -58,8 +57,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
-import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
 import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 
 /**
@@ -75,6 +72,8 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 public abstract class ExerciseList<T extends CommonShell, U extends HasID> extends DivWidget
     implements ListInterface<T, U>, ProvidesResize {
   private final Logger logger = Logger.getLogger("ExerciseList");
+  public static final String LIST_COMPLETE = "List complete!";
+  public static final String COMPLETE = "Complete";
 
   private static final boolean DEBUG_STALE = true;
   private static final boolean DEBUG = false;

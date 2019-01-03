@@ -15,16 +15,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
-import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
-
 /**
  * For recording items.
  *
  * @see RecorderNPFHelper#getMyListLayout
  */
 class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
-  private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
+ // private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
 
   private static final String NONE_RECORDED_YET = "None Recorded Yet";
   private static final String ALL_RECORDED = "All Recorded.";

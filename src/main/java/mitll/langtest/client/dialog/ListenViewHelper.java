@@ -423,7 +423,7 @@ public class ListenViewHelper<T extends TurnPanel>
 
     Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
     String middle = speakers.get(1);
-    List<ClientExercise> middleTurns = speakerToEx.get(middle);
+   // List<ClientExercise> middleTurns = speakerToEx.get(middle);
 
     String left = speakers.get(0);
     String right = speakers.get(2);
@@ -467,10 +467,7 @@ public class ListenViewHelper<T extends TurnPanel>
     return columns;
   }
 
-  private String getSpeaker(List<ExerciseAttribute> collect) {
-    ExerciseAttribute exerciseAttribute = collect.get(0);
-    return exerciseAttribute.getValue();
-  }
+  private String getSpeaker(List<ExerciseAttribute> collect) {    return collect.get(0).getValue();  }
 
   @NotNull
   private List<ExerciseAttribute> getSpeakerAttributes(ClientExercise clientExercise) {
@@ -751,7 +748,7 @@ public class ListenViewHelper<T extends TurnPanel>
    * @see #gotBackward()
    */
   private void clearHighlightAndRemoveMark() {
-    logger.info("clearHighlight on " + currentTurn);
+   // logger.info("clearHighlight on " + currentTurn);
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();
@@ -769,7 +766,7 @@ public class ListenViewHelper<T extends TurnPanel>
     playCurrentTurn();
   }
 
-  protected void ifOnLastJumpBackToFirst() {
+  void ifOnLastJumpBackToFirst() {
     T currentTurn = getCurrentTurn();
     boolean last = isLast(currentTurn);
     if (last) logger.info("OK, on last - let's consider going back to start");

@@ -11,7 +11,7 @@ public interface IRehearseView extends IListenView {
 
   void useInvalidResult(int exid);
 
-  int getDialogSessionID();
+  //int getDialogSessionID();
 
   void addPacketValidity(Validity validity);
 

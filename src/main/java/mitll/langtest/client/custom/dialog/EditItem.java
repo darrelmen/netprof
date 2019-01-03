@@ -179,7 +179,7 @@ public class EditItem {
               return -1;
             }
           },
-              false);
+              false, () -> "");
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
           return widgets;
         } else {

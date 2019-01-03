@@ -827,7 +827,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     });
   }
 
-  protected INavigation.VIEWS getView() {
+  public INavigation.VIEWS getView() {
     return INavigation.VIEWS.REHEARSE;
   }
 

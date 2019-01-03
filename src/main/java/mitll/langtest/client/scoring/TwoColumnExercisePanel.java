@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.custom.exercise.CommentBox;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -83,6 +84,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private final ItemMenu itemMenu;
   private final boolean addPlayer;
   private final boolean isContext;
+  SessionManager sessionManager;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -95,6 +97,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @param addPlayer
    * @param listenView
    * @param isContext
+   * @param sessionManager
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.banner.LearnHelper#getFactory
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
@@ -106,13 +109,15 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                                 Map<Integer, AlignmentOutput> alignments,
                                 boolean addPlayer,
                                 IListenView listenView,
-                                boolean isContext) {
+                                boolean isContext,
+                                SessionManager sessionManager) {
     super(commonExercise, controller, listContainer, alignments, listenView);
 
+    this.sessionManager = sessionManager;
     this.listContainer = listContainer;
     this.isContext = isContext;
     this.addPlayer = addPlayer;
-   // logger.info("Adding isContext " +isContext + " ex " +commonExercise.getID()+ " " + commonExercise.getEnglish() + " " +commonExercise.getForeignLanguage());
+    // logger.info("Adding isContext " +isContext + " ex " +commonExercise.getID()+ " " + commonExercise.getEnglish() + " " +commonExercise.getForeignLanguage());
 
     addStyleName("twoColumnStyle");
     annotationHelper = controller.getCommentAnnotator();
@@ -193,9 +198,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     String english = isEnglish() && isMeaningValid(e) ? e.getMeaning() : e.getEnglish();
 
-  //  logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
+    //  logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
     SimpleRecordAudioPanel<T> recordPanel =
-        new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView);
+        new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView, sessionManager);
 
     // add the first row
     {
@@ -365,11 +370,11 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   protected void makePlayAudio(T e, DivWidget flContainer) {
     //if (/*hasAudio(e) || */true) {
-      flContainer.add(playAudio = getPlayAudioPanel());
-      alignmentFetcher.setPlayAudio(playAudio);
+    flContainer.add(playAudio = getPlayAudioPanel());
+    alignmentFetcher.setPlayAudio(playAudio);
     //} else {
     //   logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
-   // }
+    // }
   }
 
   protected void stylePhoneRow(UIObject phoneRow) {
@@ -410,6 +415,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private String getFL(CommonShell e) {
     return e.getFLToShow();
   }
+
   private String getAltFL(ClientExercise exercise) {
     return exercise.getAltFLToShow();
   }
@@ -427,13 +433,12 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       DivWidget rowWidget = getRowWidget();
       card.add(rowWidget);
 
-     // logger.info("Add context " +contextEx.getID() + " " + contextEx);
+      // logger.info("Add context " +contextEx.getID() + " " + contextEx);
       SimpleRecordAudioPanel<ClientExercise> recordPanel = addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
       if (recordPanel != null) {
         card.add(getScoringRow(recordPanel));
-      }
-      else {
-       // logger.warning("can't add record panel?");
+      } else {
+        // logger.warning("can't add record panel?");
       }
     }
   }
@@ -453,7 +458,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                                                                   ClientExercise contextEx) {
     AnnotationHelper annotationHelper = new AnnotationHelper(controller, controller.getMessageHelper());
     SimpleRecordAudioPanel<ClientExercise> recordPanel =
-        new SimpleRecordAudioPanel<>(controller, contextEx, listContainer, addPlayer, listenView);
+        new SimpleRecordAudioPanel<>(controller, contextEx, listContainer, addPlayer, listenView, sessionManager);
     Panel context = getContext(contextEx, foreignLanguage, altFL, annotationHelper, getRecordButtonContainer(recordPanel),
         exercise.getTokens());
     if (context != null) {
@@ -485,7 +490,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   private Widget getAltContext(String flToHighlight, String altFL, AnnotationHelper annotationHelper, int exid,
-                               List<String> contextTokens,List<String> highlightTokens) {
+                               List<String> contextTokens, List<String> highlightTokens) {
     Panel contentWidget = clickableWords.getClickableWordsHighlight(altFL, flToHighlight,
         FieldType.FL, new ArrayList<>(), true, contextTokens, highlightTokens);
 
@@ -678,7 +683,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
       return hp;
     } else {
-    //  logger.info("note that the context fl is empty");
+      //  logger.info("note that the context fl is empty");
       return null;
     }
   }
@@ -754,9 +759,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   /**
+   * @return
    * @see #doOneToManyMatch
    * @see #matchEventSegmentToClickable
-   * @return
    */
   @Override
   protected boolean shouldShowPhones() {

@@ -25,6 +25,9 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   RecorderPlayAudioPanel playAudioPanel;
   DivWidget recordFeedback;
   DivWidget scoreFeedback;
+  /**
+   * @see #getDeviceValue
+   */
   private final SessionManager sessionManager;
 
   /**
@@ -91,7 +94,6 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
     playAudioPanel = new RecorderPlayAudioPanel(postAudioRecordButton, controller, exercise);
 
-    // TODO : JUST FOR NOW
     playAudioPanel.hidePlayButton();
 
 //    long now = System.currentTimeMillis();

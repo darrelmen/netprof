@@ -31,7 +31,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  */
 public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends NoFeedbackRecordAudioPanel<T>
     implements SessionManager {
-  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+//  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
   private static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
@@ -50,6 +50,9 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
   private ScoreFeedbackDiv scoreFeedbackDiv;
   private final boolean addPlayer;
   private Widget scoreHistory;
+  /**
+   * @see #getDialogSessionID
+   */
   private final IListenView listenView;
 
   /**
@@ -58,6 +61,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    * @param listContainer
    * @param addPlayer
    * @param listenView
+   * @param sessionManager
    * @see TwoColumnExercisePanel#getItemContent
    * @see TwoColumnExercisePanel#addContextFields
    */
@@ -65,8 +69,9 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
                          T exercise,
                          ListInterface<?, ?> listContainer,
                          boolean addPlayer,
-                         IListenView listenView) {
-    super(exercise, controller, () -> null);
+                         IListenView listenView,
+                         SessionManager sessionManager) {
+    super(exercise, controller, sessionManager);
     this.listenView = listenView;
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;
