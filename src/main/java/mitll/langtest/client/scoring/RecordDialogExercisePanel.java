@@ -65,6 +65,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   private AudioAttribute studentAudioAttribute;
   private boolean gotStreamStop;
+  private TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight = null;
 
   /**
    * @param commonExercise
@@ -143,8 +144,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     rememberAudio(getRegularSpeedIfAvailable(exercise));
   }
 
-  private TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight = null;
-
   /**
    * TODOx : do this better - should
    *
@@ -180,7 +179,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   private void showWordScore(SlimSegment withScore, IHighlightSegment v) {
     v.restoreText();
-
     v.setHighlightColor(SimpleColumnChart.getColor(withScore.getScore()));
     v.showHighlight();
   }
@@ -323,10 +321,13 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
     // add hidden button
     {
-      PostAudioRecordButton postAudioRecordButton = recordPanel.getPostAudioRecordButton();
-      postAudioRecordButton.setVisible(columns == MIDDLE);
-      postAudioRecordButton.setEnabled(false);
-      flContainer.add(postAudioRecordButton);
+      PostAudioRecordButton postAudioRecordButton = getPostAudioRecordButton(recordPanel);
+      postAudioRecordButton.setVisible(false);
+      DivWidget buttonContainer = new DivWidget();
+      buttonContainer.setId("recordButtonContainer_" + getExID());
+      buttonContainer.add(postAudioRecordButton);
+      //   postAudioRecordButton.setEnabled(false);
+      flContainer.add(buttonContainer);
     }
 
     flContainer.add(recordPanel.getScoreFeedback());
@@ -338,6 +339,10 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
     add(flContainer);
     super.addWidgets(showFL, showALTFL, phonesChoices);
+  }
+
+  private PostAudioRecordButton getPostAudioRecordButton(NoFeedbackRecordAudioPanel<ClientExercise> recordPanel) {
+    return recordPanel.getPostAudioRecordButton();
   }
 
   public void usePartial(StreamResponse response) {
@@ -377,6 +382,36 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   public Widget myGetPopupTargetWidget() {
     return this;
+  }
+
+/*  @Override
+  public void setCurrent(boolean val) {
+    if (val) {
+      if (columns == MIDDLE)
+        getRecordButton().setVisible(true);
+    } else {
+      if (getRecordButton().isRecording()) {
+        cancelRecording();
+      }
+    }
+  }*/
+
+  @Override
+  public void markCurrent() {
+    super.markCurrent();
+
+    if (columns == MIDDLE) {
+      getRecordButton().setVisible(true);
+    }
+  }
+
+  @Override
+  public void removeMarkCurrent() {
+    super.removeMarkCurrent();
+
+    if (getRecordButton().isRecording()) {
+      cancelRecording();
+    }
   }
 
   /**
@@ -421,10 +456,14 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     logger.info("startRecording for " + getExID() + " at " + start + " or " + new Date(start));
     firstVAD = -1;
     if (columns == MIDDLE) {
-      recordAudioPanel.getPostAudioRecordButton().setEnabled(true);
+      getRecordButton().setVisible(true);
     } else {
-      recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
+      getRecordButton().startOrStopRecording();
     }
+  }
+
+  private PostAudioRecordButton getRecordButton() {
+    return getPostAudioRecordButton(recordAudioPanel);
   }
 
   /**
@@ -432,7 +471,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * Check against expected duration to see when to end.
    *
    * @see #startRecording
-   * @see RehearseViewHelper#mySilenceDetected()
+   * @see RehearseViewHelper#stopRecordingTurn()
    */
   public boolean stopRecording() {
     long now = System.currentTimeMillis();
@@ -445,7 +484,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     boolean vadCheck = clientVAD && gotStreamStop;
 
 
-    if (vadCheck || diff > minDurPlusMoveOn) {
+    if (vadCheck || diff > minDurPlusMoveOn || true) {
       logger.info("stopRecording " + this +
           "\n\tvadCheck  " + vadCheck +
           "\n\tgotStreamStop " + gotStreamStop +
@@ -456,7 +495,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
           "\n\tminDur+move on " + minDurPlusMoveOn +
           "\n\tdiff      " + diff
       );
-      recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
+      getRecordButton().startOrStopRecording();
       return true;
     } else {
 /*
@@ -472,7 +511,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @see RehearseViewHelper#mySilenceDetected()
    */
   public boolean isRecording() {
-    return recordAudioPanel.getPostAudioRecordButton().isRecording();
+    return getRecordButton().isRecording();
   }
 
   public float getRefSpeechDur() {
@@ -506,6 +545,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     @Override
     public void useResult(AudioAnswer result) {
       super.useResult(result);
+      getPostAudioRecordButton().setVisible(false);
       rehearseView.useResult(result);
 
       if (DEBUG) {
@@ -554,6 +594,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     public void useInvalidResult(int exid, boolean isValid) {
       super.useInvalidResult(exid, isValid);
       rehearseView.useInvalidResult(exid);
+      getPostAudioRecordButton().setVisible(false);
 
       logger.warning("useInvalidResult got valid = " + isValid);
     }

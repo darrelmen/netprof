@@ -9,6 +9,10 @@ import mitll.langtest.shared.answer.Validity;
 public interface IRehearseView extends IListenView {
   void useResult(AudioAnswer audioAnswer);
 
+  /**
+   * @see
+   * @param exid
+   */
   void useInvalidResult(int exid);
 
   //int getDialogSessionID();

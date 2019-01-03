@@ -423,7 +423,7 @@ public class ListenViewHelper<T extends TurnPanel>
 
     Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
     String middle = speakers.get(1);
-   // List<ClientExercise> middleTurns = speakerToEx.get(middle);
+    // List<ClientExercise> middleTurns = speakerToEx.get(middle);
 
     String left = speakers.get(0);
     String right = speakers.get(2);
@@ -467,7 +467,9 @@ public class ListenViewHelper<T extends TurnPanel>
     return columns;
   }
 
-  private String getSpeaker(List<ExerciseAttribute> collect) {    return collect.get(0).getValue();  }
+  private String getSpeaker(List<ExerciseAttribute> collect) {
+    return collect.get(0).getValue();
+  }
 
   @NotNull
   private List<ExerciseAttribute> getSpeakerAttributes(ClientExercise clientExercise) {
@@ -526,34 +528,34 @@ public class ListenViewHelper<T extends TurnPanel>
 
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {
-      RefAudioGetter next = iterator.next();
+      // RefAudioGetter next = iterator.next();
       //logger.info("getRefAudio asking next panel...");
 
-      if (false) {
-        logger.info("getRefAudio : skip stale req for panel...");
-      } else {
-        next.getRefAudio(() -> {
-          if (iterator.hasNext()) {
-            //     logger.info("\tgetRefAudio panel complete...");
-            //   final int reqid = next.getReq();
-            if (true) {
-
-              if (Scheduler.get() != null) {
-                Scheduler.get().scheduleDeferred(() -> {
-                  if (true) {
-                    getRefAudio(iterator);
-                  } else {
+//      if (false) {
+//        logger.info("getRefAudio : skip stale req for panel...");
+//      } else {
+      iterator.next().getRefAudio(() -> {
+        if (iterator.hasNext()) {
+          //     logger.info("\tgetRefAudio panel complete...");
+          //   final int reqid = next.getReq();
+          if (true) {
+            if (Scheduler.get() != null) {
+              Scheduler.get().scheduleDeferred(() -> {
+               // if (true) {
+                  getRefAudio(iterator);
+               // }
+                //else {
 //              /
-                  }
-                });
-              }
+               // }
+              });
             }
-          } else {
-            //   logger.info("\tgetRefAudio all panels complete...");
           }
-        });
-      }
+        } else {
+          //   logger.info("\tgetRefAudio all panels complete...");
+        }
+      });
     }
+    // }
   }
 
   /**
@@ -748,7 +750,7 @@ public class ListenViewHelper<T extends TurnPanel>
    * @see #gotBackward()
    */
   private void clearHighlightAndRemoveMark() {
-   // logger.info("clearHighlight on " + currentTurn);
+    // logger.info("clearHighlight on " + currentTurn);
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();

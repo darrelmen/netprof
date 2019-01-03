@@ -4,10 +4,12 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -55,9 +57,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private static final String THEY_SPEAK = "Listen to : ";
   private static final String YOU_SPEAK = "Speak : ";
 
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_SILENCE = false;
   private static final int TOP_TO_USE = 10;
+
+  private static final boolean DEBUG = true;
+  private static final boolean DEBUG_SILENCE = false;
+  private static final boolean DEBUG_PLAY_ENDED = true;
+
 
   /**
    * @see #showScoreFeedback
@@ -525,7 +530,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * @param score
    * @param recordDialogTurn
    * @see RecordDialogExercisePanel#addWidgets
-   * @see #useResult(AudioAnswer)
+   * @see #useResult
    */
 
   private void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
@@ -755,7 +760,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   private boolean isTurnAPrompt() {
-    return !getRespSeq().contains(getCurrentTurn());
+    return !isRecordingTurn(getCurrentTurn());
+  }
+
+  private boolean isRecordingTurn(T currentTurn) {
+    return getRespSeq().contains(currentTurn);
   }
 
   @Override
@@ -831,7 +840,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     return INavigation.VIEWS.REHEARSE;
   }
 
-  private static final boolean DEBUG_PLAY_ENDED = false;
 
   /**
    * @param wasRecording
@@ -853,12 +861,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
       if (DEBUG_PLAY_ENDED) {
         logger.info("currentTurnPlayEnded" +
-            //"\n\t seq  " + seq.size() +
-            //"\n\tleft  " + isLeftSpeakerSet() +
-            // "\n\tright " + isRightSpeakerSet() +
-            // "\n\tboth  " + allTurns.size() +
             "\n\tcurrent a prompt? " + isCurrentPrompt +
-            "\n\tcurrent index " + i2 + " = " + currentTurn
+            "\n\tcurrent index     " + i2 + " = " + currentTurn
         );
       }
 
@@ -881,6 +885,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
         if (isTurnAPrompt(nextTurn)) {
           if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded - play next " + nextTurn);
+
           playCurrentTurn();
         } else {
           if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded - startRecording " + nextTurn);
@@ -950,7 +955,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   private void setCurrentRecordingTurn(T toStart) {
     //  logger.info("\n\n\nsetCurrentRecordingTurn BEFORE : " + toStart);
+
+//    if (currentRecordingTurn != null) {
+//      currentRecordingTurn.setCurrent(false);
+//    }
+
     currentRecordingTurn = toStart;
+
     if (DEBUG) logger.info("setCurrentRecordingTurn : " + currentRecordingTurn);
   }
 
@@ -1067,7 +1078,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   /**
-   * @see RecordDialogExercisePanel#addWidgets
+   * @see RecordDialogExercisePanel.ContinuousDialogRecordAudioPanel#stopRecording()
    */
   @Override
   public void stopRecording() {
@@ -1114,12 +1125,21 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
 
     maybeMoveOnToNextTurn();
+
+    if (isRecordingTurn(matchingTurn) && shouldShowScoreNow()) {
+      Scheduler.get().scheduleDeferred((Command) () -> matchingTurn.showScoreInfo());
+    }
     //maybeMoveOnIfNextTurnARecordingTurn();
+  }
+
+  protected boolean shouldShowScoreNow() {
+    return true;
   }
 
   @Override
   public void useInvalidResult(int exid) {
     T matchingTurn = getTurnForID(exid);
+
     addScore(exid, 0F, matchingTurn);
     matchingTurn.useInvalidResult();
 

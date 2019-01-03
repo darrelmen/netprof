@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * @see ListenViewHelper#reallyGetTurnPanel
  */
 public class TurnPanel extends DialogExercisePanel<ClientExercise> {
-  private final Logger logger = Logger.getLogger("TurnPanel");
+ // private final Logger logger = Logger.getLogger("TurnPanel");
 
   private static final String FLOAT_LEFT = "floatLeft";
 
@@ -131,10 +131,16 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
     return new AllHighlight(flclickables, columns != ListenViewHelper.COLUMNS.MIDDLE);
   }
 
+  /**
+   * @see ListenViewHelper#removeMarkCurrent
+   */
   public void removeMarkCurrent() {
     setBorderColor("white");
   }
 
+  /**
+   * @see ListenViewHelper#markCurrent
+   */
   public void markCurrent() {
     setBorderColor(HIGHLIGHT_COLOR);
   }

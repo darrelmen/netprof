@@ -643,7 +643,7 @@ public class WordTable {
     if (audioControl != null) {
       if (false) logger.info("addClickHandler add handler for " + segmentToPlay + " when click on " + header.getText());
       header.addClickHandler(event -> {
-        logger.info("addClickHandler click on " + segmentToPlay + " header " + header.getText());
+      //  logger.info("addClickHandler click on " + segmentToPlay + " header " + header.getText());
         audioControl.loadAndPlaySegment(segmentToPlay.getStart(), segmentToPlay.getEnd());
       });
     }

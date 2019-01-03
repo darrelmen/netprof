@@ -44,6 +44,11 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
     return turns;
   }
 
+  @Override
+  protected boolean shouldShowScoreNow() {
+    return false;
+  }
+
   /**
    * OK, let's go - hide everything!
    *

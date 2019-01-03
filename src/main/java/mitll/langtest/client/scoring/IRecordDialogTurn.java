@@ -26,4 +26,6 @@ public interface IRecordDialogTurn {
 
   void usePartial(StreamResponse response);
   Widget myGetPopupTargetWidget();
+
+  //void setCurrent(boolean val);
 }

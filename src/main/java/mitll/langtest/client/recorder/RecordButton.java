@@ -230,8 +230,9 @@ public class RecordButton extends Button {
    * Wait after the user releases the button, since it seems to get cut off...
    *
    * @see #doClick
+   * @return true if started, false if stopped
    */
-  public void startOrStopRecording() {
+  public boolean startOrStopRecording() {
     //long enter = System.currentTimeMillis();
 //    if (last  > 0) {
 //      logger.info("startOrStopRecording at " + enter + " millis after dur " +  (enter-last));
@@ -243,8 +244,10 @@ public class RecordButton extends Button {
 
     if (isRecording()) {
       stopRecording();
+      return false;
     } else {
       startRecordingWithTimer();
+      return true;
     }
   }
 
@@ -258,10 +261,10 @@ public class RecordButton extends Button {
     addRecordingMaxLengthTimeout();
   }
 
-  public boolean stopRecordingSafe() {
+  public void stopRecordingSafe() {
     if (isRecording()) {
       stopRecording();
-      return true;
+     // return true;
     } else {
 /*      boolean running = afterStopTimer != null && afterStopTimer.isRunning();
       boolean running1 = recordTimer != null && recordTimer.isRunning();
@@ -270,11 +273,14 @@ public class RecordButton extends Button {
           "\n\trecord timer       = " + running1
       );*/
 
-      return false;
+      //return false;
     }
   }
 
-  protected void stopRecording() {
+  /**
+   * @see #startOrStopRecording
+   */
+  private void stopRecording() {
     long now = System.currentTimeMillis();
     stopRecordingFirstStep();
     long duration = now - started;
