@@ -43,7 +43,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
@@ -56,6 +55,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.HasID;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
@@ -91,7 +91,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   private final Image recordImage1 = new Image(UriUtils.fromSafeConstant(LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png"));
   protected T exercise;
   protected AudioType audioType;
-
+  private boolean showCurrentRecording;
 
   private static final boolean DEBUG = false;
 
@@ -101,6 +101,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
    * @param index
    * @param showSpectrogram
    * @param audioType
+   * @param showCurrentRecording
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#CreateFirstRecordAudioPanel
    * @see ExercisePanel#getAnswerWidget
    */
@@ -109,7 +110,8 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
                           Panel widgets,
                           int index,
                           boolean showSpectrogram,
-                          AudioType audioType) {
+                          AudioType audioType,
+                          boolean showCurrentRecording) {
     super(controller, showSpectrogram,
         0,
         exercise,
@@ -120,6 +122,8 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
     this.index = index;
     this.exercise = exercise;
     this.audioType = audioType;
+
+    this.showCurrentRecording = showCurrentRecording;
 
     AudioAttribute attribute = getAudioAttribute();
 
@@ -180,19 +184,33 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
    * @return
    */
   public AudioAttribute getAudioAttribute() {
+    int user = controller.getUser();
     if (audioType.isContext()) {
       if (exercise.getContextAudio().isEmpty()) {
         //  logger.info("about to return null for audio attribute, num context = " + exercise.getContextAudio().size());
         return null;
       } else {
-        return exercise.getContextAudio().iterator().next();
+        if (showCurrentRecording) {
+          return exercise.getContextAudio().iterator().next();
+        } else {
+          for (AudioAttribute audioAttribute1 : exercise.getAudioAttributes()) {
+            Map<String, String> attributes = audioAttribute1.getAttributes();
+            if (attributes.containsKey("context") && audioAttribute1.getUserid() == user) {
+              return audioAttribute1;
+            }
+          }
+          return null;
+        }
       }
     } else {
-      return
-          audioType.equals(AudioType.REGULAR) ?
-              exercise.getRecordingsBy(controller.getUser(), true) :
-              audioType.equals(AudioType.SLOW) ?
-                  exercise.getRecordingsBy(controller.getUser(), false) : null;
+      AudioAttribute audioAttribute = audioType.equals(AudioType.REGULAR) ?
+          exercise.getRecordingsBy(user, true) :
+          audioType.equals(AudioType.SLOW) ?
+              exercise.getRecordingsBy(user, false) : null;
+
+     // logger.info("getAudioAttribute by " + user + " type " + audioType + " = " + audioAttribute);
+
+      return audioAttribute;
     }
   }
 
@@ -275,9 +293,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
    * A play button that controls the state of the record button.
    */
   private class MyPlayAudioPanel extends PlayAudioPanel {
-    MyPlayAudioPanel(Image recordImage1,
-                     //Image recordImage2,
-                     final Panel panel,
+    MyPlayAudioPanel(Image recordImage1, final Panel panel,
                      String suffix, Widget toTheRightWidget, ExerciseController controller, HasID exercise) {
       super(
           new PlayListener() {
@@ -293,10 +309,6 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
 
       add(recordImage1);
       recordImage1.setVisible(false);
-
-/*      add(recordImage2);
-      recordImage2.setVisible(false);*/
-
 //      getElement().setId("MyPlayAudioPanel");
       postAudioRecordButton.addStyleName("leftFiveMargin");
       postAudioRecordButton.addStyleName("floatLeft");

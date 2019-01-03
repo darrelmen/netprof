@@ -308,7 +308,7 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    // boolean val = !text.trim().isEmpty();
     if (rapContext != null) {
       boolean val = !text.trim().isEmpty();
-    //  logger.info("Set context '" + text + "' = " + val);
+   //   logger.info("setContext Set context '" + text + "' = " + val);
       maybeEnableContext(val);
     }
 

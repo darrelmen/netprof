@@ -89,7 +89,7 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
   private static final int WINDOW_SIZE_CHANGE_THRESHOLD = 50;
   static final int IMAGE_WIDTH_SLOP = 70 + WINDOW_SIZE_CHANGE_THRESHOLD / 2;
 
-  protected String audioPath;
+  protected String audioPath = null;
   private final Map<String, Integer> reqs = new HashMap<>();
   private int reqid;
 

@@ -559,6 +559,7 @@ public class FilterResponseHelper {
    * @param projid
    * @param typeToSelection
    * @return
+   * @see SectionHelper#getExercisesForSelectionState(Map)
    */
   private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
     Map<String, Collection<String>> copy = new HashMap<>(typeToSelection);
@@ -566,7 +567,7 @@ public class FilterResponseHelper {
     copy.remove(CONTENT);
 
     boolean empty = copy.isEmpty();
-//    logger.info("getExercises " + empty + " : " + copy);
+//    logger.info("getExercisesForSelection " + empty + " : " + copy);
     return empty ?
         getExercises(projid) :
         getSectionHelper(projid).getExercisesForSelectionState(copy);

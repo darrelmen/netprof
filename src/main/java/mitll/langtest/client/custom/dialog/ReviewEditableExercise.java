@@ -856,7 +856,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     MyRecordAudioPanel(ClientExercise exercise,
                        DivWidget widget, AudioType audioType) {
       super(exercise, ReviewEditableExercise.this.controller, widget,
-          0, false, audioType);
+          0, false, audioType, false);  // only show exact match audio to this user
       this.audioType = audioType;
       this.exercise = exercise;
     }

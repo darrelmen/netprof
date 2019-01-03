@@ -136,6 +136,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   CreateFirstRecordAudioPanel rap, rapSlow;
   /**
    * @see #makeContextAudioPanel
+   * @see EditableExerciseDialog#setContext
    */
   CreateFirstRecordAudioPanel rapContext;
 
@@ -260,13 +261,18 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     container.add(row);
     context = addContext(container, newUserExercise);
     context.box.addKeyUpHandler(keyUpEvent -> {
-      boolean hasText = !context.box.getText().trim().isEmpty();
+      boolean hasText = hasTextInContextField();
       //   logger.info("makeContextRow Got key up " + hasText);
       maybeEnableContext(hasText);
     });
   }
 
+  private boolean hasTextInContextField() {
+    return !context.box.getText().trim().isEmpty();
+  }
+
   void maybeEnableContext(boolean hasText) {
+//    logger.info("maybeEnable " + hasText);
     rapContext.setEnabled(hasText && hasRecordPermission());
   }
 
@@ -503,17 +509,18 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
           @Override
           public void onSuccess(AudioAttribute audioAttribute) {
+            WaveformPostAudioRecordButton postAudioButton = rapContext.getPostAudioButton();
             if (audioAttribute != null) {
               AudioAnswer audioAnswer = new AudioAnswer();
               audioAnswer.setAudioAttribute(audioAttribute);
               audioAnswer.setPath(audioAttribute.getAudioRef());
 
-              rapContext.getPostAudioButton().useResult(audioAnswer);
+              postAudioButton.useResult(audioAnswer);
               if (DEBUG) logger.info("gotContextBlur got existing audio attribute : " + audioAttribute);
               addToContext(audioAttribute);
             } else {
               if (DEBUG) logger.info("gotContextBlur got NO existing audio attribute for " + text);
-              rapContext.getPostAudioButton().useInvalidResult(newUserExercise.getID(), Validity.OK, 0D);
+              postAudioButton.useInvalidResult(newUserExercise.getID(), Validity.OK, 0D);
               clearContext();
             }
           }
@@ -998,7 +1005,20 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #makeSlowAudioPanel
    */
   CreateFirstRecordAudioPanel makeRecordAudioPanel(U theExercise, Panel row, AudioType audioType) {
-    return new CreateFirstRecordAudioPanel(theExercise, row, audioType);
+    return new CreateFirstRecordAudioPanel(theExercise, row, audioType) {
+      @Override
+      public void setEnabled(boolean val) {
+        if (audioType == AudioType.CONTEXT_REGULAR) {
+          boolean b = hasTextInContextField();
+         // logger.info("CreateFirstRecordAudioPanel setEnabled " + val + " has text " + b);
+          super.setEnabled(val && b);
+        } else {
+       //   logger.info("CreateFirstRecordAudioPanel setEnabled " + val);
+          super.setEnabled(val);
+        }
+      }
+    };
+
   }
 
   class CreateFirstRecordAudioPanel extends RecordAudioPanel<U> {
@@ -1013,7 +1033,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
      * @see #makeRecordAudioPanel
      */
     CreateFirstRecordAudioPanel(U newExercise, Panel row, AudioType audioType) {
-      super(newExercise, NewUserExercise.this.controller, row, 0, false, audioType);
+      super(newExercise, NewUserExercise.this.controller, row, 0, false, audioType, true);
 
       this.audioType = audioType;
       setExercise(newExercise);
@@ -1030,14 +1050,24 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         }
       });
 
-      setEnabled(hasRecordPermission());
+      setEnabled(isOKToEnable(audioType));
       controller.register(getPlayButton(), newExercise.getID());
     }
 
+    private boolean isOKToEnable(AudioType audioType) {
+      boolean b = hasRecordPermission();
+      return audioType != AudioType.CONTEXT_REGULAR ? b && hasTextInContextField() : b;
+    }
+
     private void disableOthers(boolean b) {
-//     logger.info("disable others " +b);
-      final boolean enabled = b &= hasRecordPermission();
-      otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(enabled));
+  //    logger.info("disableOthers disable others " + b);
+      boolean enabled = b &= hasRecordPermission();
+
+      if (enabled) {
+        enabled = isOKToEnable(audioType);
+      }
+      final boolean val = enabled;
+      otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(val));
     }
 
     /**

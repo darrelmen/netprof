@@ -151,7 +151,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
     HorizontalPanel hp = new HorizontalPanel();
     hp.getElement().setId("QuestionContentRTL");
     hp.setWidth("100%");
-    hp.getElement().getStyle().setProperty("minHeight","114px");
+    hp.getElement().getStyle().setProperty("minHeight", "114px");
     boolean isRTL = isRTL(e);
     if (isRTL) {
       setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
@@ -166,6 +166,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
   /**
    * Next button always enabled.
    * Fix for <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/274'>Add comment bubble to recording views</a>
+   *
    * @param controller
    * @return
    */
@@ -204,7 +205,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
    * @return
    * @see #getAnswerWidget
    */
-   boolean isNormalRecord() {
+  boolean isNormalRecord() {
     return doNormalRecording;
   }
 
@@ -322,8 +323,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
   @Override
   public abstract void postAnswers(final ExerciseController controller, final HasID completedExercise);
 
-  Widget getAnswerWidget(final T exercise,
-                         ExerciseController controller, final int index) {
+  Widget getAnswerWidget(final T exercise, ExerciseController controller, final int index) {
     return null;
   }
 

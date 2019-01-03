@@ -68,7 +68,8 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
     new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> showEmptySelection());
   }
 
-  @Override protected String getEmptySearchMessage() {
+  @Override
+  protected String getEmptySearchMessage() {
     return "<b>You've completed recording for this selection.</b>" +
         "<p>Please clear one of your selections and select a different unit or chapter.</p>";
   }
@@ -79,11 +80,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
                                                        boolean onlyUninspected) {
     ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyUninspected);
     exerciseListRequest.setOnlyUnrecordedByMe(true);
-
- //   logger.info("getExerciseListRequest req " + exerciseListRequest);
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest"));
-//    logger.info("logException stack " + exceptionAsString);
-
+    //   logger.info("getExerciseListRequest req " + exerciseListRequest);
     return exerciseListRequest;
   }
 

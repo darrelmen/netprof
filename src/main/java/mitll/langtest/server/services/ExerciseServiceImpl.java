@@ -78,6 +78,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final boolean DEBUG_SEARCH = false;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_ID_LOOKUP = false;
+  private static final boolean DEBUG_FULL = false;
 
   /**
    * @param request
@@ -138,7 +139,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
         ExerciseListWrapper<T> exerciseWhenNoUnitChapter = getExerciseWhenNoUnitChapter(request, projectID, userListByID);
 
         long diff = System.currentTimeMillis() - then;
-        if (diff > 20)
+        if (diff > 20 || true)
           logger.info("getExerciseIds : 1 req  " + request + " took " + diff +
               " millis to get " + exerciseWhenNoUnitChapter.getSize());
 
@@ -1170,7 +1171,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     Set<ClientExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
     long now = System.currentTimeMillis();
 
-    if (now - then > 10)
+    if (now - then > 10 || DEBUG_FULL)
       logger.info("getFullExercises took " + (now - then) + " to get " + exercises.size() + " exercises" +
           "\n\tfor req = " + ids);
 
@@ -1187,13 +1188,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language, projectID);
     now = System.currentTimeMillis();
 
-    if (now - then > 10)
+    if (now - then > 10  || DEBUG_FULL)
       logger.info("getFullExercises took " + (now - then) + " to attach audio to " + toAddAudioTo.size() + " exercises");
 
     then = System.currentTimeMillis();
     new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projectID, getProject(projectID), toAddAudioTo);
     now = System.currentTimeMillis();
-    if (now - then > 20)
+    if (now - then > 20 || DEBUG_FULL)
       logger.info("getFullExercises took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
 
 //    } else {
@@ -1203,7 +1204,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     then = System.currentTimeMillis();
 
     now = System.currentTimeMillis();
-    if (now - then > 50)
+    if (now - then > 50 || DEBUG_FULL)
       logger.info("getFullExercises took " + (now - then) + " to add scores to " + exercises.size() + " exercises");
 
     Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryPerExercise(ids, exercises, userID, language);
@@ -1345,11 +1346,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
                                                              List<ClientExercise> exercises,
                                                              int projectID) {
     Set<ClientExercise> toAddAudioTo = new HashSet<>();
-//    logger.info("getCommonExercisesWithoutAudio " + ids);
+    logger.info("getCommonExercisesWithoutAudio " + ids);
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
-
-      logger.info("ex " + byID.getID() + " eng " + byID.getEnglish() + " fl " + byID.getForeignLanguage() + " " + byID.getMeaning());
+//      logger.info("ex " + byID.getID() + " eng " + byID.getEnglish() + " fl " + byID.getForeignLanguage() + " " + byID.getMeaning());
       addAnnotations(byID); // todo do this in a better way
       //if (true || byID.getAudioAttributes().isEmpty()) {
       toAddAudioTo.add(byID);
