@@ -295,7 +295,7 @@ public class ProjectChoices extends ThumbnailChoices {
     current.getElement().getStyle().setMarginBottom(70, Style.Unit.PX);
     getSorted(result, nest)
         .forEach(project -> {
-          Panel langIcon = getLangIcon(project.getLanguage().toDisplay(), project, nest);
+          Panel langIcon = getLangIcon(getDisplayLang(project), project, nest);
           if (langIcon != null) {
             current.add(langIcon);
           }
@@ -316,15 +316,24 @@ public class ProjectChoices extends ThumbnailChoices {
     return language.equalsIgnoreCase("msa") ? "MSA" : language.substring(0, 1).toUpperCase() + language.substring(1);
   }
 
+  /**
+   * Sort by display name not enum name.
+   * @param nest
+   * @param languages
+   */
   private void sortLanguages(final int nest, List<SlimProject> languages) {
     languages.sort((o1, o2) -> {
       if (nest == 0) {
-        return o1.getLanguage().toString().toLowerCase().compareTo(o2.getLanguage().toString().toLowerCase());
+        return getDisplayLang(o1).compareTo(getDisplayLang(o2));
       } else {
         int i = Integer.compare(o1.getDisplayOrder(), o2.getDisplayOrder());
         return i == 0 ? o1.getName().compareTo(o2.getName()) : i;
       }
     });
+  }
+
+  private String getDisplayLang(SlimProject project) {
+    return project.getLanguage().toDisplay();
   }
 
   /**

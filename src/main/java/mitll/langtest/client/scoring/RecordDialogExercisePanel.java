@@ -384,18 +384,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     return this;
   }
 
-/*  @Override
-  public void setCurrent(boolean val) {
-    if (val) {
-      if (columns == MIDDLE)
-        getRecordButton().setVisible(true);
-    } else {
-      if (getRecordButton().isRecording()) {
-        cancelRecording();
-      }
-    }
-  }*/
-
   @Override
   public void markCurrent() {
     super.markCurrent();

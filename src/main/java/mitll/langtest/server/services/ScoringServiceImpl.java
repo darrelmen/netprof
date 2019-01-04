@@ -152,7 +152,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           // NOTE : actively avoid doing this -
           //ensureMP3(audioFilePath, sentence, "" + result.getUserid());
           //logger.info("resultID " +resultID+ " temp dir " + tempDir.getAbsolutePath());
-          asrScoreForAudio = getAudioFileHelper().getASRScoreForAudio(
+          AudioFileHelper audioFileHelper = getAudioFileHelper();
+
+          asrScoreForAudio = audioFileHelper == null ? new PretestScore() : audioFileHelper.getASRScoreForAudio(
               1,
               audioFilePath,
               sentence,
@@ -776,7 +778,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @paramx foreign
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
-   @Override
+  @Override
   public Collection<String> isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
   }

@@ -88,7 +88,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
   public WaveformExercisePanel(T e,
                                ExerciseController controller, ListInterface<L, T> exerciseList,
                                boolean doNormalRecording,
-                               String instance, boolean enableNextOnlyWhenBothCompleted) {
+                               String instance,
+                               boolean enableNextOnlyWhenBothCompleted) {
     super(e, controller, exerciseList, instance, doNormalRecording, enableNextOnlyWhenBothCompleted);
   }
 
@@ -206,13 +207,20 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
 
     {
       AudioType regular = normalRecord ? AudioType.REGULAR : AudioType.CONTEXT_REGULAR;
-      addRecordAudioPanelNoCaption(exercise, controller, index, vp, regular);
+
+//      logger.info("getAnswerWidget audio type " + regular + " user " + controller.getUser() +
+//          " \n\tcurrent" + controller.getUserManager().getCurrent());
+      addRecordAudioPanelNoCaption(exercise, controller, index, vp, regular, false);
     }
     // add slow speed recording widget
 
     if (!exercise.isContext() && !hasLanguageAttr(exercise)) {
       AudioType slow = normalRecord ? AudioType.SLOW : AudioType.CONTEXT_SLOW;
-      UIObject widgets = addRecordAudioPanelNoCaption(exercise, controller, index + 1, vp, slow);
+
+//      logger.info("getAnswerWidget audio type " + slow + " user " + controller.getUser() +
+//          " \n\tcurrent" + controller.getUserManager().getCurrent());
+
+      UIObject widgets = addRecordAudioPanelNoCaption(exercise, controller, index + 1, vp, slow, false);
       widgets.addStyleName("topFiveMargin");
     }
 
@@ -238,12 +246,17 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    * @param index
    * @param vp
    * @param audioType
+   * @param showCurrentRecording
    * @return
    * @see ExercisePanel#getAnswerWidget(CommonShell, ExerciseController, int)
    */
   private DivWidget addRecordAudioPanelNoCaption(T exercise,
-                                                 ExerciseController controller, int index, Panel vp, AudioType audioType) {
-    RecordAudioPanel fast = new RecordAudioPanel<>(exercise, controller, this, index, false, audioType);
+                                                 ExerciseController controller,
+                                                 int index,
+                                                 Panel vp,
+                                                 AudioType audioType,
+                                                 boolean showCurrentRecording) {
+    RecordAudioPanel fast = new RecordAudioPanel<>(exercise, controller, this, index, false, audioType, showCurrentRecording);
     audioPanels.add(fast);
     vp.add(fast);
 

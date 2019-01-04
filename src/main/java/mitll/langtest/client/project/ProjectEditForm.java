@@ -55,6 +55,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.scoring.RecalcResponses;
+import mitll.npdata.dao.lts.MandarinLTS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,6 +68,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
+import static mitll.langtest.shared.project.Language.MANDARIN;
 
 /**
  * Created by go22670 on 1/17/17.
@@ -230,10 +232,12 @@ public class ProjectEditForm extends UserDialog {
    */
   void updateProject() {
     info.setLanguage(getLanguage());
-    String selectedValue = modelTypeBox.getSelectedValue();
-  //  logger.info("value is " + selectedValue);
-    info.setModelType(ModelType.valueOf(selectedValue));
 
+    {
+      String selectedValue = modelTypeBox.getSelectedValue();
+      //  logger.info("value is " + selectedValue);
+      info.setModelType(ModelType.valueOf(selectedValue));
+    }
     //  logger.info("updateProject get model type " + info.getModelType());
     DominoProject id = dominoToProject.get(dominoProjectsListBox.getSelectedValue());
 
@@ -241,7 +245,7 @@ public class ProjectEditForm extends UserDialog {
       info.setDominoID(id.getDominoID());
       //logger.info(" project domino id now " + id.getDominoID());
     } else {
-      logger.info("no project for " + dominoProjectsListBox.getSelectedValue());
+//      logger.info("updateProject no domino project for " + dominoProjectsListBox.getSelectedValue());
     }
 
     setCommonFields();
@@ -278,9 +282,10 @@ public class ProjectEditForm extends UserDialog {
 
   @NotNull
   private Language getLanguage(String selectedValue) {
-    String name = selectedValue.toUpperCase();
-    if (name.equalsIgnoreCase("Chinese")) name = Language.MANDARIN.name();
-    return Language.valueOf(name);
+    String s = MANDARIN.toDisplay().toUpperCase();
+    String s1 = selectedValue.toUpperCase();
+    boolean b = s1.equalsIgnoreCase(s);
+    return Language.valueOf(b ? MANDARIN.name() : s1);
   }
 
   private void setPort() {

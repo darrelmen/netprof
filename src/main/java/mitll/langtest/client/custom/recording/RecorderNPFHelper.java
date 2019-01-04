@@ -39,6 +39,7 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
@@ -109,7 +110,16 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
                                                                        DivWidget listHeader,
                                                                        DivWidget footer) {
         return new RecordingFacetExerciseList<T>(controller,
-            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.RECORD_SENTENCES);
+            topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.RECORD_SENTENCES) {
+          @Override
+          protected Panel getMessagePanel(String message) {
+            DivWidget divWidget = new DivWidget();
+            divWidget.add(super.getMessagePanel(message));
+            divWidget.add(flex);
+            getProgressInfoLater();
+            return divWidget;
+          }
+        };
       }
     };
   }
@@ -298,8 +308,14 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
 
     @Override
     public Panel getExercisePanel(ClientExercise e) {
-      Scheduler.get().scheduleDeferred(RecorderNPFHelper.this::getProgressInfo);
+      getProgressInfoLater();
       return new RecordRefAudioPanel(e, controller, exerciseList, myView.toString());
     }
   }
+
+  private void getProgressInfoLater() {
+    Scheduler.get().scheduleDeferred(RecorderNPFHelper.this::getProgressInfo);
+  }
+
+
 }

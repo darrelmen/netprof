@@ -137,9 +137,10 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    */
   @Override
   public boolean stopRecording(long duration, boolean abort) {
-/*    if (parentPanel instanceof BusyPanel) {
+    if (parentPanel instanceof BusyPanel) {
       ((BusyPanel) parentPanel).setBusy(false);
-    } else {
+    }
+    /*else {
       logger.info("stopRecording parent is not a busy panel - " + parentPanel.getElement().getId() + " " + parentPanel.getClass());
     }*/
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (System.currentTimeMillis() - then) + " millis");

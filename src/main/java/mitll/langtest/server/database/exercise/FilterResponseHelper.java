@@ -593,6 +593,7 @@ public class FilterResponseHelper {
    * @param projid
    * @param typeToSelection
    * @return
+   * @see SectionHelper#getExercisesForSelectionState(Map)
    */
   private Collection<CommonExercise> getExercisesForSelection(int projid, Map<String, Collection<String>> typeToSelection) {
     Map<String, Collection<String>> copy = new HashMap<>(typeToSelection);

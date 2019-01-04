@@ -93,12 +93,9 @@ public class ExerciseListRequest implements IsSerializable {
         prefix.isEmpty() &&
         !isFilterActivity(activityType) &&
         !onlyUnrecordedByMe &&
-        //   !onlyRecordedByMatchingGender &&
         !onlyExamples &&
         !incorrectFirstOrder &&
         !onlyWithAnno &&
-        //!onlyWithAudioAnno &&
-      //  !onlyDefaultAudio &&
         !onlyUninspected &&
         !onlyForUser;
   }
@@ -121,8 +118,8 @@ public class ExerciseListRequest implements IsSerializable {
         onlyExamples == other.onlyExamples &&
         incorrectFirstOrder == other.incorrectFirstOrder &&
         onlyWithAnno == other.onlyWithAnno &&
-  //      onlyWithAudioAnno == other.onlyWithAudioAnno &&
-     //   onlyDefaultAudio == other.onlyDefaultAudio &&
+        //      onlyWithAudioAnno == other.onlyWithAudioAnno &&
+        //   onlyDefaultAudio == other.onlyDefaultAudio &&
         onlyUninspected == other.onlyUninspected &&
         userListID == other.userListID;
   }
@@ -251,6 +248,7 @@ public class ExerciseListRequest implements IsSerializable {
     this.onlyUninspected = onlyDefaultAudio;
     return this;
   }
+
   /**
    * @return
    * @see ExerciseServiceImpl#getFirstFew
@@ -317,8 +315,8 @@ public class ExerciseListRequest implements IsSerializable {
   }
 
   /**
-   * @see ExerciseServiceImpl#getExerciseWhenNoUnitChapter
    * @return
+   * @see ExerciseServiceImpl#getExerciseWhenNoUnitChapter
    */
   public boolean isPlainVocab() {
     return plainVocab;
@@ -356,6 +354,11 @@ public class ExerciseListRequest implements IsSerializable {
     return dialogID;
   }
 
+  public ExerciseListRequest setReqID(int currentReq) {
+    this.reqID = currentReq;
+    return this;
+  }
+
   /**
    * @return
    */
@@ -371,11 +374,8 @@ public class ExerciseListRequest implements IsSerializable {
             (activityType == ActivityType.UNSET ? "" :
                 "\n\tactivity             " + activityType) +
             (onlyUnrecordedByMe ? "\n\tonly recorded by me" : "") +
-            //  (onlyRecordedByMatchingGender ? "\n\tonly recorded by matching gender" : "") +
             (onlyExamples ? "\n\tonly examples       " : "") +
             (onlyWithAnno ? "\n\tonly with anno " : "") +
-          //  (onlyWithAudioAnno ? "\n\tonly with audio     " : "") +
-       //     (onlyDefaultAudio ? "\n\tonlyDefaultAudio     " : "") +
             (onlyForUser ? "\n\tonlyForUser     " : "") +
             (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
             (onlyUninspected ? "\n\tonly uninspected    " : "") +
@@ -383,10 +383,5 @@ public class ExerciseListRequest implements IsSerializable {
             (addFirst ? "\n\tadd first ex    " : "\n\tdon't add first") +
             (QC ? "\n\tqc request    " : "")
         ;
-  }
-
-  public ExerciseListRequest setReqID(int currentReq) {
-    this.reqID=currentReq;
-    return this;
   }
 }

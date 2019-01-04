@@ -52,6 +52,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -834,10 +835,15 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
    * @param message
    */
   private void showEmptyExercise(String message) {
-    createdPanel = new SimplePanel(new Heading(3, message));
+    createdPanel = getMessagePanel(message);
     createdPanel.addStyleName("leftFiveMargin");
     createdPanel.getElement().setId(EMPTY_PANEL);
     innerContainer.setWidget(createdPanel);
+  }
+
+  @NotNull
+  protected Panel getMessagePanel(String message) {
+    return new SimplePanel(new Heading(3, message));
   }
 
   protected String getEmptySearchMessage() {

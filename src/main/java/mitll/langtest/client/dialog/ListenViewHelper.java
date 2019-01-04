@@ -137,12 +137,14 @@ public class ListenViewHelper<T extends TurnPanel>
    * @param child
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
-    this.dialogID = dialog.getID();
-    isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
+    if (dialog != null) {
+      this.dialogID = dialog.getID();
+      isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
 
-    showDialog(dialogID, dialog, child);
+      showDialog(dialogID, dialog, child);
 
-    getRefAudio(new ArrayList<RefAudioGetter>(allTurns).iterator());
+      getRefAudio(new ArrayList<RefAudioGetter>(allTurns).iterator());
+    }
   }
 
   /**
@@ -541,12 +543,12 @@ public class ListenViewHelper<T extends TurnPanel>
           if (true) {
             if (Scheduler.get() != null) {
               Scheduler.get().scheduleDeferred(() -> {
-               // if (true) {
-                  getRefAudio(iterator);
-               // }
+                // if (true) {
+                getRefAudio(iterator);
+                // }
                 //else {
 //              /
-               // }
+                // }
               });
             }
           }
@@ -945,10 +947,17 @@ public class ListenViewHelper<T extends TurnPanel>
    * @see #playStopped
    */
   void currentTurnPlayEnded(boolean wasRecording) {
+<<<<<<<HEAD:
+    src / main / java / mitll / langtest / client / dialog / ListenViewHelper.java
     if (DEBUG) {
       logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
     }
 
+=======
+    if (DEBUG || true)
+      logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
+>>>>>>>development:
+    src / main / java / mitll / langtest / client / banner / ListenViewHelper.java
     if (gotTurnClick) {
       gotTurnClick = false;
     } else {

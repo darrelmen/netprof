@@ -327,8 +327,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
   @Override
   public abstract void postAnswers(final ExerciseController controller, final HasID completedExercise);
 
-  Widget getAnswerWidget(final T exercise,
-                         ExerciseController controller, final int index) {
+  Widget getAnswerWidget(final T exercise, ExerciseController controller, final int index) {
     return null;
   }
 

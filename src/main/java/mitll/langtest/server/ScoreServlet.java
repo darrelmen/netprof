@@ -419,7 +419,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    */
   private int getProjectID(String language) {
-    return getDAOContainer().getProjectDAO().getByLanguage(language);
+    return getDAOContainer().getProjectDAO().getByLanguageProductionOnly(language);
   }
 
   private DAOContainer getDAOContainer() {

@@ -464,8 +464,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public Map<String, Integer> getStudentAnswers(int projid) {
-    return null;
+  public int getStudentForPath(int projid, String path) {
+    return 0;
   }
 
   @Override

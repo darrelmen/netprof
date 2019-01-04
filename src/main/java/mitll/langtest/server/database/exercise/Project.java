@@ -55,9 +55,11 @@ import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.project.ProjectManagement.logMemory;
@@ -112,7 +114,9 @@ public class Project implements IPronunciationLookup {
   private boolean isRTL;
   private final Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
 
-  private Map<String, Integer> fileToRecorder = new HashMap<>();
+  private Map<String, Integer> fileToRecorder = new ConcurrentHashMap<>();
+  private Map<String, Boolean> unknownFiles = new ConcurrentHashMap<>();
+
   /**
    * @see #setDialogs
    */
@@ -735,16 +739,39 @@ public class Project implements IPronunciationLookup {
     return fileToRecorder;
   }
 
+  /**
+   * TODO NO why did you do this?
+   *
+   * @param fileToRecorder
+   */
   public void setFileToRecorder(Map<String, Integer> fileToRecorder) {
     this.fileToRecorder = fileToRecorder;
   }
 
   public Integer getUserForFile(String requestURI) {
-    Integer integer = fileToRecorder.get(requestURI);
+    Integer user = fileToRecorder.get(requestURI);
+
+    if (user == null) {
+      if (unknownFiles.containsKey(requestURI)) {
+      //  logger.warn("getUserForFile (" + getID() + ") OK, already know we can't find the user for " + requestURI);
+      } else {
+        int studentForPath = db.getResultDAO().getStudentForPath(getID(), requestURI);
+        if (studentForPath > 0) {
+          fileToRecorder.put(requestURI, studentForPath);
+    //      logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + studentForPath + " now " + fileToRecorder.size());
+          user = studentForPath;
+        } else {
+          unknownFiles.put(requestURI, false);
+  //        logger.info("getUserForFile (" + getID() + ") can't find user for " + requestURI + " = " + studentForPath + " now " + unknownFiles.size() + " " + unknownFiles.containsKey(requestURI));
+        }
+      }
+    } else {
+//      logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + user + " now " + fileToRecorder.size());
+    }
 //    if (integer == null) {
     //     logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
     //  }
-    return integer;
+    return user;
   }
 
   /**

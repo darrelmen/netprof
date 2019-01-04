@@ -132,7 +132,11 @@ public interface IResultDAO extends IDAO {
 
   int getDefaultResult();
 
+/*
   Map<String, Integer> getStudentAnswers(int projid);
+*/
+
+  int getStudentForPath(int projid, String path);
 
   Collection<Integer> getPracticedByUser(int userid, int projid);
 

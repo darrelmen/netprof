@@ -181,7 +181,7 @@ class JSONAnswerParser {
 
   private float getFloatField(JSONObject jsonObject, String reqid) {
     JSONValue jsonValue = jsonObject.get(reqid);
-  //  if (jsonValue == null) logger.info("getFloatField no field " + reqid);
+   // if (jsonValue == null) logger.info("getFloatField no field " + reqid);
     return (float) (jsonValue == null ? 0F : jsonValue.isNumber().doubleValue());
   }
 
