@@ -475,18 +475,17 @@ public class ProjectManagement implements IProjectManagement {
 
     if (matcher.find()) {
       String group = matcher.group(1);
-     // logger.info("getUserForFile lang " + group);
-      List<Integer> byLanguage = projectDAO.getByLanguage(group);
-      List<Project> matches = byLanguage.stream().map(id -> getProject(id, true)).collect(Collectors.toList());
+      // logger.info("getUserForFile lang " + group);
+      List<Project> matches = getProjectsForLanguage(group);
 
       if (matches.isEmpty()) {
-      //  logger.info("getUserForFile lang " + group + " matches " + matches.size());
+        //  logger.info("getUserForFile lang " + group + " matches " + matches.size());
         int userID = getUserIDFromAll(requestURI);
         if (userID != -1) {
           return userID;
         }
       } else {
-       // logger.info("getUserForFile lang " + group + " matches " + matches.size());
+        // logger.info("getUserForFile lang " + group + " matches " + matches.size());
         return getUserIDFrom(requestURI, matches);
       }
     } else {
@@ -497,20 +496,44 @@ public class ProjectManagement implements IProjectManagement {
     return -1;
   }
 
+  /**
+   * Don't add nulls to list!
+   * @param group
+   * @return
+   */
+  @NotNull
+  private List<Project> getProjectsForLanguage(String group) {
+    List<Integer> byLanguage = projectDAO.getByLanguage(group);
+
+    List<Project> matches = new ArrayList<>();
+    byLanguage.forEach(id -> {
+      Project project = getProject(id, true);
+      if (project != null) {
+        matches.add(project);
+      }
+    });
+    return matches;
+  }
+
   @Nullable
   private int getUserIDFromAll(String requestURI) {
-    List<Project> loadableProjects = getLoadableProjects(getProjects());
-    return getUserIDFrom(requestURI, loadableProjects);
+    return getUserIDFrom(requestURI, getLoadableProjects(getProjects()));
   }
 
   @Nullable
   private int getUserIDFrom(String requestURI, List<Project> loadableProjects) {
-    for (Project project : loadableProjects) {
-      Integer userID = project.getUserForFile(requestURI);
-      if (userID != null) {
-        logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
-        return userID;
+    try {
+      for (Project project : loadableProjects) {
+        if (project != null) {
+          Integer userID = project.getUserForFile(requestURI);
+          if (userID != null) {
+            logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
+            return userID;
+          }
+        }
       }
+    } catch (Exception e) {
+      logger.warn("getUserIDFrom for " + requestURI + " got " + e, e);
     }
     return -1;
   }
