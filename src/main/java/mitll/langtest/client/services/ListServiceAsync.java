@@ -34,7 +34,6 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
@@ -43,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ListServiceAsync {
-  void getLightListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListLight>> async);
+  void getAllQuiz(AsyncCallback<Collection<IUserListLight>> async);
 
   void getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz, AsyncCallback<Collection<UserList<CommonShell>>> async);
 

@@ -40,6 +40,7 @@ import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.shared.custom.IUserListLight;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -61,10 +62,13 @@ import java.util.stream.Collectors;
  */
 public class JsonSupport {
   private static final Logger logger = LogManager.getLogger(JsonSupport.class);
+  public static final String SCORE_JSON = "scoreJson";
+  public static final String NAME = "name";
+  public static final String ID = "id";
 
   private final ISection<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
-//  private final IAudioDAO audioDAO;
+
   private final IPhoneDAO phoneDAO;
 
   private final Language language;
@@ -83,7 +87,7 @@ public class JsonSupport {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
 
-  //  this.audioDAO = audioDAO;
+    //  this.audioDAO = audioDAO;
     this.phoneDAO = phoneDAO;
     this.language = project.getLanguageEnum();
     this.project = project;
@@ -170,7 +174,7 @@ public class JsonSupport {
       exAndScores.addProperty("s", Integer.toString(ex.getAvgScorePercent()));
       exAndScores.add("h", history);
       exAndScores.add("scores", getScoresAsJson(correctAndScoresLimited));
-      exAndScores.addProperty("scoreJson", empty ? "" : correctAndScoresLimited.get(correctAndScoresLimited.size() - 1).getScoreJson());
+      exAndScores.addProperty(SCORE_JSON, empty ? "" : correctAndScoresLimited.get(correctAndScoresLimited.size() - 1).getScoreJson());
       scores.add(exAndScores);
     }
 
@@ -239,9 +243,9 @@ public class JsonSupport {
    */
   JsonObject getJsonPhoneReport(int userid, Map<String, Collection<String>> typeToValues, String language) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
-    logger.info("getJsonPhoneReport : for user "+userid + " and" +
+    logger.info("getJsonPhoneReport : for user " + userid + " and" +
         "\n\tsel " +
-        typeToValues+
+        typeToValues +
         "\n\tgot " + exercisesForState.size() + " exercises");
     List<Integer> ids = exercisesForState.stream().map(HasID::getID).collect(Collectors.toList());
     return phoneDAO.getWorstPhonesJson(userid, ids, language, project);

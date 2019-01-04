@@ -32,6 +32,7 @@
 
 package mitll.langtest.server;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
@@ -44,6 +45,7 @@ import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.custom.IUserListLight;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.user.User;
@@ -104,13 +106,6 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String ALLOW_ALTERNATES = "ALLOW_ALTERNATES";
   private static final String NO_SESSION = "no session";
 
-  // public static final String PASS = "pass";
-//  public static final String PROJID = "projid";
-//  public static final String USERID = "userid";
-//  public static final String ENGLISH = "english";
-  //public static final String LANGUAGE = "language";
-  //public static final String FULL = "full";
-  //private static final String WIDGET_TYPE = "widgetType";
   private static final boolean REPORT_ON_HEADERS = false;
   /**
    * for now we force decode requests into forced alignment... better to do false positive than false negative
@@ -125,17 +120,19 @@ public class ScoreServlet extends DatabaseServlet {
 
   public enum GetRequest {
     HASUSER,
-    ADDUSER,
+    //ADDUSER,
     PROJECTS,
     NESTED_CHAPTERS,
     CHAPTER_HISTORY,
     PHONE_REPORT,
+    LIST,
+    QUIZ,
     UNKNOWN
   }
 
   public enum PostRequest {
     EVENT,
-    HASUSER,
+    HASUSER,  // ??? why here too ???
     ADDUSER,
     SETPROJECT,
     ROUNDTRIP,
@@ -257,22 +254,11 @@ public class ScoreServlet extends DatabaseServlet {
       }
 
       int userID = checkSession(request);
-      int projid = getProjectID(request);
 
-      // language overrides user id mapping...
-      {
-        String language = getLanguage(request);
-        if (language != null) {
-          projid = getProjectID(language);
-          if (projid == -1) projid = getProjectID(request);
-        }
-      }
-
-      // ok can't figure it out from language, check header.
-      if (projid == -1) {
-        projid = getProjID(request);
-        logger.warn("doGet got project id from url header " + projid);
-      }
+      // so, first check header - no race!
+      // if not on header, check language
+      // if no header projid and no language requested, lookup
+      int projid = getTripleProjID(request);
 
       String language = projid == -1 ? "unknownLanguage" : getLanguage(projid);
 
@@ -335,6 +321,10 @@ public class ScoreServlet extends DatabaseServlet {
           } else {
             toReturn = getPhoneReport(toReturn, split1, projid, userID);
           }
+        } else if (realRequest == GetRequest.LIST) {
+          toReturn = db.getUserListManager().getListsJson(userID, projid, false);
+        } else if (realRequest == GetRequest.QUIZ) {
+          toReturn = db.getUserListManager().getListsJson(userID, projid, true);
         } else {
           toReturn.addProperty(ERROR, "unknown req " + queryString);
         }
@@ -354,6 +344,38 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
+  /**
+   * first check header - no race!
+   * if not on header, check language
+   * if no header projid and no language requested, lookup
+   *
+   * @param request
+   * @return
+   */
+  private int getTripleProjID(HttpServletRequest request) {
+    int projid = getProjID(request);
+
+    // language overrides user id mapping...
+    {
+      String language = getLanguage(request);
+      if (language != null) {
+        projid = getProjectID(language);
+      }
+    }
+
+    if (projid == -1) {
+      // not using header
+      projid = getProjectID(request);
+    }
+    return projid;
+  }
+
+  /**
+   * @param response
+   * @param language just for debugging
+   * @param then
+   * @param toReturn
+   */
   private void reply(HttpServletResponse response, String language, long then, JsonObject toReturn) {
     long now = System.currentTimeMillis();
     long l = now - then;
@@ -510,7 +532,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       //logger.debug("chapterHistory " + user + " selection " + selection);
       try {
-        toReturn = db.getJsonScoreHistory(userID, selection, getExerciseSorter(projectid), projectid);
+        toReturn = db.getJsonScoreHistory(userID, projectid, selection, getExerciseSorter(projectid));
       } catch (NumberFormatException e) {
         toReturn.addProperty(ERROR, "User id should be a number");
       }
@@ -893,7 +915,7 @@ public class ScoreServlet extends DatabaseServlet {
     int reqid = getReqID(request);
     int projid = getProjid(request);
 
-    String postedWordOrPhrase = "";
+    String postedWordOrPhrase;
     // language overrides user id mapping...
     {
       ExAndText exerciseIDFromText = getExerciseIDFromText(request, realExID, projid);

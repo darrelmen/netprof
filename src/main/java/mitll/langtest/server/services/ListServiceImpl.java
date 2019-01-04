@@ -59,7 +59,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   private static final Logger logger = LogManager.getLogger(ListServiceImpl.class);
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_IMPORT = false;
+  //private static final boolean DEBUG_IMPORT = false;
   //public static final String WORD_EXPRESSION = "Word/Expression";
 
   /**
@@ -186,13 +186,16 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   /**
    * TODO : consider not doing it separately from other facets.
    *
-   * @param onlyCreated
-   * @param visited
+   * @param onlyCreated only relevant for NORMAL lists
+   * @param visited only relevant for NORMAL lists
+   * @param list_type
    * @return
-   * @see mitll.langtest.client.list.FacetExerciseList#populateListChoices
+   * @see mitll.langtest.client.list.ListFacetHelper#populateListChoices
+   * @see mitll.langtest.client.banner.QuizChoiceHelper#getQuizIntro
    */
   @Override
-  public Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited,
+  public Collection<IUserList> getSimpleListsForUser(boolean onlyCreated,
+                                                     boolean visited,
                                                      UserList.LIST_TYPE list_type) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
@@ -214,23 +217,21 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   /**
-   * @param onlyCreated
-   * @param visited
    * @return
    * @throws DominoSessionException
-   * @see UserContainer#getListBox
+   * @see UserContainer#getQuizListBox
    */
   @Override
-  public Collection<IUserListLight> getLightListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException {
+  public Collection<IUserListLight> getAllQuiz() throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
-    Collection<IUserListLight> listsForUser = getUserListManager()
-        .getNamesForUser(userIDFromSessionOrDB, getProjectIDFromUser(userIDFromSessionOrDB), onlyCreated, visited);
+    Collection<IUserListLight> listsForUser =
+        getUserListManager().getUserListDAO().getAllOrMineLight(getProjectIDFromUser(userIDFromSessionOrDB), -1, true);
 
     long now = System.currentTimeMillis();
 
     if (now - then > 30) {
-      logger.info("took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
+      logger.info("getAllQuiz took " + (now - then) + " to get " + listsForUser.size() + " lists for user " + userIDFromSessionOrDB);
     }
 
     return listsForUser;

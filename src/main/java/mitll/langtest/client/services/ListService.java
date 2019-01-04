@@ -112,7 +112,7 @@ public interface ListService extends RemoteService {
 
   Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited, UserList.LIST_TYPE list_type) throws DominoSessionException;
 
-  Collection<IUserListLight> getLightListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
+  Collection<IUserListLight> getAllQuiz() throws DominoSessionException;
 
   Collection<IUserListWithIDs> getListsWithIDsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
 

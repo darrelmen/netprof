@@ -1173,6 +1173,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
   }
 
+  public String lookupUserId(int id) {
+    return delegate.lookupUserId(id);
+  }
+
   public void refreshCacheFor(int userid) {
     idToDBUser.refresh(userid);
     idToUser.refresh(userid);

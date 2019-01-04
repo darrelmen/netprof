@@ -43,7 +43,7 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.*;
- 
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -119,6 +119,9 @@ public class RestUserManagement {
   private static final String LOGIN_RESULT = "loginResult";
   private static final String TRUE = "TRUE";
   private static final String SUCCESS = "success";
+  public static final String AFFILIATION = "affiliation";
+  public static final String FIRST1 = "first";
+  public static final String LAST1 = "last";
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
@@ -407,55 +410,29 @@ public class RestUserManagement {
     User existingUser = db.getUserDAO().getUserByID(user);
 
     logger.info("addUser user " + user + " match " + existingUser);
-    int projid = -1;
-    try {
-      String project = request.getHeader("projid");
-      if (project != null) {
-        projid = Integer.parseInt(project); // TODO : figure out which project a user is in right now
-      }
-
-      logger.info("Got " + projid + " projid");
-
-    } catch (NumberFormatException e) {
-      logger.error("Got " + e, e);
-    }
+    //getProjID(request);
     if (existingUser == null) { // OK, nobody with matching user and password
       String age = request.getHeader(AGE);
       String gender = request.getHeader(GENDER);
       String dialect = request.getHeader(DIALECT);
       String emailH = request.getHeader(EMAIL_H);
       String email = request.getHeader(EMAIL);
+      String affiliation1 = request.getHeader(AFFILIATION);
+      if (affiliation1 == null) affiliation1 = "OTHER";
       if (email == null) email = "";
 
-      logger.warn("addUser : Request " + requestType + " for " + deviceType + "\n\tuser " + user +
-          " adding " + gender +
+      logger.info("addUser : Request " + requestType +
+          "\n\tfor    " + deviceType +
+          "\n\tdevice " + device +
+          "\n\tuser " + user +
+          "\n\tadding " + gender +
           " age " + age + " dialect " + dialect);
 
       User user1 = null;
-      //String appURL = serverProps.getAppURL();
+
       if (age != null && gender != null && dialect != null) {
-        try {
-          int age1 = Integer.parseInt(age);
-          boolean male = gender.equalsIgnoreCase(MALE);
-
-          SignUpUser user2 = new SignUpUser(user,
-              emailH,
-              email,
-              Kind.CONTENT_DEVELOPER,
-              male,
-              male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
-              age1,
-              deviceType,
-              device,
-              "",
-              "",
-              "OTHER");
-
-          user1 = getUserManagement().addUser(user2);
-        } catch (NumberFormatException e) {
-          logger.warn("couldn't parse age " + age);
-          jsonObject.addProperty(ERROR, "bad age");
-        }
+        // not really supported anymore
+        user1 = doDataCollectSignUp(deviceType, device, jsonObject, user, age, gender, emailH, email, affiliation1, user1);
       } else {
         try {
           user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
@@ -472,21 +449,64 @@ public class RestUserManagement {
       }
 
     } else {
-      logger.warn("addUser - found existing user for " + user +
-          //" pass " + passwordH +
-          " -> " + existingUser);
-
-/*      if (existingUser.hasResetKey()) {
-        jsonObject.addProperty(ERROR, "password was reset");
-      } else {
-        jsonObject.addProperty(USERID, existingUser.getID());
-      }*/
+      logger.info("addUser - found existing user for " + user + " -> " + existingUser);
 
       jsonObject.addProperty(EXISTING_USER_NAME, "");
-
     }
   }
 
+/*
+  private void getProjID(HttpServletRequest request) {
+    int projid = -1;
+    try {
+      String project = request.getHeader("projid");
+      if (project != null) {
+        projid = Integer.parseInt(project); // TODO : figure out which project a user is in right now
+      }
+      logger.info("Got " + projid + " projid");
+
+    } catch (NumberFormatException e) {
+      logger.error("Got " + e, e);
+    }
+  }
+*/
+
+  private User doDataCollectSignUp(String deviceType, String device, JsonObject jsonObject, String user, String age, String gender, String emailH, String email, String affiliation1, User user1) {
+    try {
+      int age1 = Integer.parseInt(age);
+      boolean male = gender.equalsIgnoreCase(MALE);
+
+      SignUpUser user2 = new SignUpUser(user,
+          emailH,
+          email,
+          Kind.CONTENT_DEVELOPER,
+          male,
+          male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
+          age1,
+          deviceType,
+          device,
+          "",
+          "",
+          affiliation1);
+
+      user1 = getUserManagement().addUser(user2);
+    } catch (NumberFormatException e) {
+      logger.warn("couldn't parse age " + age);
+      jsonObject.addProperty(ERROR, "bad age");
+    }
+    return user1;
+  }
+
+  /**
+   * @param request
+   * @param deviceType
+   * @param device
+   * @param user
+   * @param gender
+   * @param emailH
+   * @param email
+   * @return
+   */
   private User addUserFromIPAD(HttpServletRequest request,
                                String deviceType,
                                String device,
@@ -494,15 +514,14 @@ public class RestUserManagement {
                                String gender,
                                String emailH,
                                String email) {
-    User user1;
     String appURL = request.getRequestURL().toString().replaceAll(request.getServletPath(), "");
 
     logger.info("addUserFromIPAD AppURL " + appURL + " user " + user + " email '" + email + "' emailH " + emailH);
-    String first = request.getHeader("first");
+    String first = request.getHeader(FIRST1);
     if (first == null) first = FIRST;
-    String last = request.getHeader("last");
+    String last = request.getHeader(LAST1);
     if (last == null) last = LAST;
-    String affiliation = request.getHeader("affiliation");
+    String affiliation = request.getHeader(AFFILIATION);
     if (affiliation == null) {
       affiliation = DLIFLC;
     }
@@ -515,8 +534,8 @@ public class RestUserManagement {
         Kind.STUDENT,
         isMale,
         isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, deviceType, device, first, last, affiliation);
-    user1 = getUserManagement().addUser(user2);
-    return user1;
+
+    return getUserManagement().addUser(user2);
   }
 
   private UserManagement getUserManagement() {

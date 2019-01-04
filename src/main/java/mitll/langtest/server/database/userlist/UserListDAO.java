@@ -43,6 +43,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickLightList;
 import mitll.npdata.dao.SlickUserExerciseList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,7 +61,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
 
   private static final String NAME = "name";
 
-   static final String USER_EXERCISE_LIST = "userexerciselist";
+  static final String USER_EXERCISE_LIST = "userexerciselist";
   private static final String ISPRIVATE = "isprivate";
   private final IUserDAO userDAO;
   private IUserExerciseDAO userExerciseDAO;
@@ -88,7 +89,8 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public void removeVisitor(int listid, int userid) {}
+  public void removeVisitor(int listid, int userid) {
+  }
 
   private void createUserListTable(Database database) throws SQLException {
 //    logger.debug("createUserListTable --- ");
@@ -190,26 +192,6 @@ public class UserListDAO extends DAO implements IUserListDAO {
       logger.error("got " + e, e);
     }
   }
-/*
-  @Override
-  public void updateContext(long uniqueID, String context) {
-
-  }
-
-  @Override
-  public void updateRichText(long uniqueID, String richText) {
-
-  }
-
-  @Override
-  public void updateName(long id, String name) {
-
-  }*/
-
-  @Override
-  public int getCount() {
-    return getCount(USER_EXERCISE_LIST);
-  }
 
   /**
    * @param userid
@@ -239,16 +221,6 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public boolean hasByName(long userid, String name, int projid) {
-    try {
-      return !getByName(userid, name, projid).isEmpty();
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return false;
-  }
-
-  @Override
   public List<UserList<CommonShell>> getByName(long userid, String name, int projid) {
     try {
       String sql = "SELECT * from " + USER_EXERCISE_LIST + " where " +
@@ -271,11 +243,6 @@ public class UserListDAO extends DAO implements IUserListDAO {
     return remove(USER_EXERCISE_LIST, "uniqueid", unique);
   }
 
-  @Override
-  public void bringBack(long unique) {
-
-  }
-
   /**
    * TODO don't want to always get all the exercises!
    *
@@ -294,10 +261,6 @@ public class UserListDAO extends DAO implements IUserListDAO {
     return where;
   }
 
-  @Override
-  public UserList<CommonExercise> getWithExercisesEx(int unique) {
-    return null;
-  }
 
   @Override
   public UserList<CommonExercise> getList(int unique) {
@@ -332,9 +295,9 @@ public class UserListDAO extends DAO implements IUserListDAO {
   /**
    * @param userid
    * @param projid
+   * @return
    * @paraxm start
-   *@paramx length
-   *  @return
+   * @paramx length
    * @see IUserListManager#getListsForUser
    */
 /*  @Override
@@ -353,24 +316,18 @@ public class UserListDAO extends DAO implements IUserListDAO {
 //    });
     return userLists;
   }*/
-
   @Override
   public Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid) {
     return null;
   }
 
   @Override
-  public Collection<IUserListLight> getAllQuizLight(int projid) {
+  public List<IUserListLight> getAllOrMineLight(int projid, int userid, boolean isQuiz) {
     return null;
   }
 
   @Override
   public Collection<UserList<CommonShell>> getAllQuiz(int projid) {
-    return null;
-  }
-
-  @Override
-  public Collection<SlickUserExerciseList> getSlickAllQuiz(int projid, int userID) {
     return null;
   }
 
@@ -445,7 +402,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
           rs.getString("classmarker"),
           rs.getBoolean(ISPRIVATE),
           rs.getTimestamp("modified").getTime(), "", "", -1,
-          UserList.LIST_TYPE.NORMAL, System.currentTimeMillis(),  System.currentTimeMillis(), 10, 30, false)
+          UserList.LIST_TYPE.NORMAL, System.currentTimeMillis(), System.currentTimeMillis(), 10, 30, false)
       );
     }
     //logger.debug("getWhere : got " + lists);
@@ -470,39 +427,8 @@ public class UserListDAO extends DAO implements IUserListDAO {
     this.userExerciseDAO = userExerciseDAO;
   }
 
-/*  @Override
-  public int getNumMineAndPublic(int userid, int projid) {
-    return 0;
-  }*/
-
-  @Override
-  public void setPublicOnList(long userListID, boolean isPublic) {
-    try {
-      Connection connection = database.getConnection(this.getClass().toString());
-      String sql = "UPDATE " + USER_EXERCISE_LIST + " " +
-          "SET " + ISPRIVATE + "=? " +
-          "WHERE uniqueid=?";
-
-      PreparedStatement statement = connection.prepareStatement(sql);
-      statement.setBoolean(1, !isPublic);
-      statement.setLong(2, userListID);
-      int i = statement.executeUpdate();
-
-      if (i == 0) {
-        logger.error("huh? didn't update the userList for " + userListID + " sql " + sql);
-      } else {
-        logger.debug("updated " + userListID + " public " + isPublic + " sql " + sql);
-      }
-
-      finish(connection, statement);
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-  }
-
   @Override
   public void update(UserList<?> userList) {
-
   }
 
   public IUserExerciseListVisitorDAO getUserListVisitorJoinDAO() {
@@ -516,5 +442,15 @@ public class UserListDAO extends DAO implements IUserListDAO {
       e.printStackTrace();
       return Collections.emptyList();
     }
+  }
+
+  @Override
+  public Collection<SlickLightList> getSlickAllOrMineLight(int projid, int userID, boolean isQuiz) {
+    return null;
+  }
+
+  @Override
+  public Collection<SlickUserExerciseList> getSlickAllQuiz(int projid, int userID) {
+    return null;
   }
 }

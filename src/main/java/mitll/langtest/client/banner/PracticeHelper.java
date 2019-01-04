@@ -40,7 +40,6 @@ import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.flashcard.HidePolyglotFactory;
 import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
@@ -85,7 +84,7 @@ class PracticeHelper<T extends CommonShell, U extends ClientExercise> extends Si
   protected ExercisePanelFactory<T, U> getFactory(PagingExerciseList<T, U> exerciseList) {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     if (projectStartupInfo != null && projectStartupInfo.getProjectType() == ProjectType.POLYGLOT) {
-      polyglotFlashcardFactory = new HidePolyglotFactory<>(controller, exerciseList, instance);
+      polyglotFlashcardFactory = new PolyglotFlashcardFactory<>(controller, exerciseList, instance);
       statsFlashcardFactory = polyglotFlashcardFactory;
     } else {
       statsFlashcardFactory = new StatsFlashcardFactory<>(controller, exerciseList, instance);

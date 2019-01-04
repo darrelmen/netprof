@@ -42,7 +42,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
    * @param exerciseList
    * @see HidePolyglotFactory
    */
-  PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, INavigation.VIEWS instance) {
+  public PolyglotFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, INavigation.VIEWS instance) {
     super(controller, exerciseList, instance);
 
     controller.getListService().getQuizInfo(new SelectionState().getList(), new AsyncCallback<QuizSpec>() {
@@ -70,13 +70,15 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
    */
   @NotNull
   protected PolyglotPracticePanel<L, T> getFlashcard(T e) {
-    return new PolyglotPracticePanel<L, T>(this,
+    return new HidePolyglotPanel<L,T>(this,
         controlState,
         controller,
         soundFeedback,
         e,
         sticky,
-        exerciseList, instance);
+        exerciseList,
+        instance
+    );
   }
 
   @NotNull

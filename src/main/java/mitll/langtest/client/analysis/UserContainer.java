@@ -341,7 +341,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     DivWidget c = new DivWidget();
     c.addStyleName("leftFiveMargin");
     c.addStyleName("floatRight");
-    c.add(getListBox());
+    c.add(getQuizListBox());
     filterContainer.add(c);
   }
 
@@ -418,14 +418,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }
 */
   @NotNull
-  private ListBox getListBox() {
+  private ListBox getQuizListBox() {
     ListBox listBox = new ListBox();
 
     listBox.setWidth(LIST_BOX_WIDTH + "px");
     listBox.addStyleName("floatLeft");
     listBox.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
 
-    controller.getListService().getLightListsForUser(true, false, new AsyncCallback<Collection<IUserListLight>>() {
+    controller.getListService().getAllQuiz(new AsyncCallback<Collection<IUserListLight>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting my lists", caught);
@@ -442,26 +442,31 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private List<Integer> rememberedLists;
   private int listid = -1;
 
-  private void useLists(Collection<IUserListLight> result, ListBox listBox) {
+  private void useLists(Collection<IUserListLight> result, ListBox quizListBox) {
     this.rememberedLists = new ArrayList<>();
+
     result.forEach(ul -> rememberedLists.add(ul.getID()));
 
     // logger.info("There are " + result.size() + " lists");
-    listBox.addItem(NO_LIST);
-    result.forEach(ul -> listBox.addItem(ul.getName()));
-    listBox.addChangeHandler(event -> {
-      int selectedIndex = listBox.getSelectedIndex();
+    quizListBox.addItem(NO_LIST);
+    result.forEach(ul -> quizListBox.addItem(ul.getName()));
 
-      if (selectedIndex == 0) {
-        listid = -1;
-      } else {
-        Integer listID = rememberedLists.get(selectedIndex - 1);
-        //    logger.info("selected index " + selectedIndex + " " + listID);
-        listid = listID;
-      }
-
+    quizListBox.addChangeHandler(event -> {
+      rememberSelectedQuiz(quizListBox);
       changeSelectedUser(getSelected());
     });
+  }
+
+  private void rememberSelectedQuiz(ListBox listBox) {
+    int selectedIndex = listBox.getSelectedIndex();
+
+    if (selectedIndex == 0) {
+      listid = -1;
+    } else {
+      Integer listID = rememberedLists.get(selectedIndex - 1);
+      //    logger.info("selected index " + selectedIndex + " " + listID);
+      listid = listID;
+    }
   }
 
   /**

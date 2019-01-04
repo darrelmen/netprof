@@ -32,6 +32,7 @@
 
 package mitll.langtest.shared.custom;
 
+import com.github.gwtbootstrap.client.ui.Heading;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
@@ -53,14 +54,6 @@ import java.util.List;
 public class UserList<T extends HasID> extends BaseExercise implements IUserListWithIDs {
   public static final String MY_LIST = "Favorites";
 
-  public long getStart() {
-    return start;
-  }
-
-  public long getEnd() {
-    return end;
-  }
-
   public enum LIST_TYPE {NORMAL, QUIZ}
 
   private int projid;
@@ -75,15 +68,20 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   private boolean isPrivate;
 
-  private boolean isReview;
+  //private boolean isReview;
 
   private long modified;
+
   private long start;
   private long end;
   private int duration;
   private int minScore;
   private boolean showAudio;
+
   private boolean teacher;
+  /**
+   * Notional
+   */
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
@@ -241,9 +239,11 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return getName().equals(MY_LIST);
   }
 
+/*
   public void setReview(boolean isReview) {
     this.isReview = isReview;
   }
+*/
 
   public long getModified() {
     return modified;
@@ -296,6 +296,10 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return duration;
   }
 
+  /**
+   * @see mitll.langtest.client.flashcard.QuizIntro#onQuizChoice
+   * @return
+   */
   @Override
   public int getMinScore() {
     return minScore;
@@ -322,6 +326,10 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.duration = duration;
   }
 
+  /**
+   * So we can show which lists are owned by a teacher.
+   * @return
+   */
   public boolean isTeacher() {
     return teacher;
   }
@@ -331,11 +339,23 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return this;
   }
 
+  /**
+   * Notional idea of when a list or quiz is visible - additional dimension on top of private/public
+   * @return
+   */
+  public long getStart() {
+    return start;
+  }
+
+  public long getEnd() {
+    return end;
+  }
+
   @Override
   public String toString() {
     return "UserList #" + getID() + " '" + name + "' by " + getUserID() +
         "\n\tshow audio " +shouldShowAudio()+
-        "\n\t : " + (isReview ? " REVIEW " : "") +
+      //  "\n\t : " + (isReview ? " REVIEW " : "") +
         " : with " + getNumItems() + " exercises.";
   }
 }

@@ -67,7 +67,7 @@ public class SimpleUserList extends UserListLight implements IUserList {
 
   /**
    * TODOx: allow teacher to choose.
-   *
+   * @see mitll.langtest.server.services.ListServiceImpl#getQuizInfo
    * @return
    */
   public int getRoundTimeMinutes() {

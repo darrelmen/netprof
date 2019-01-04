@@ -32,6 +32,8 @@
 
 package mitll.langtest.server.database.custom;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
@@ -352,20 +354,14 @@ public class UserListManager implements IUserListManager {
   }
 
   /**
-   * @param userid
    * @param projid
-   * @param listsICreated
-   * @param visitedLists
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#getLightListsForUser(boolean, boolean)
    */
-  @Override
-  public Collection<IUserListLight> getNamesForUser(int userid,
-                                                    int projid,
-                                                    boolean listsICreated,
-                                                    boolean visitedLists) {
-    return getUserListDAO().getAllQuizLight(projid);
-  }
+//  @Override
+//  public Collection<IUserListLight> getAllOrMineLight(int projid) {
+//    return getUserListDAO().getAllOrMineLight(projid);
+//  }
 
   @Override
   public Collection<IUserList> getSimpleListsForUser(int userid,
@@ -385,8 +381,8 @@ public class UserListManager implements IUserListManager {
   @NotNull
   private Collection<IUserList> getSimpleLists(Collection<SlickUserExerciseList> lists) {
 //    lists.forEach(slickUserExerciseList -> logger.info("\t" + slickUserExerciseList.id() + " " + slickUserExerciseList.name()));
-    Set<Integer> listIDs = getListIDs(lists);
-    Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listIDs);
+    //Set<Integer> listIDs = getListIDs(lists);
+    Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(getListIDs(lists));
     //  logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);
 
     List<IUserList> names = new ArrayList<>(lists.size());
@@ -633,8 +629,7 @@ public class UserListManager implements IUserListManager {
 
     boolean isAdmin = userDAO.isAdmin(userid);
     if (isAdmin && includeQuiz) {
-      Collection<UserList<CommonShell>> allQuiz = userListDAO.getAllQuiz(projid);
-      addIfNotThere(listsForUser, ids, allQuiz);
+      addIfNotThere(listsForUser, ids, userListDAO.getAllQuiz(projid));
     }
 
     // put favorite at front
@@ -1106,5 +1101,23 @@ public class UserListManager implements IUserListManager {
   @Override
   public boolean updateProject(int oldid, int newid) {
     return userListDAO.updateProject(oldid, newid);
+  }
+
+  public JsonObject getListsJson(int userID, int projid, boolean isQuiz) {
+    return getLists(getUserListDAO().getAllOrMineLight(projid, userID, isQuiz));
+  }
+
+  private JsonObject getLists(Collection<IUserListLight> lights) {
+    JsonArray lists = new JsonArray();
+    JsonObject container = new JsonObject();
+    for (IUserListLight light : lights) {
+      JsonObject idAndName = new JsonObject();
+      idAndName.addProperty("id", light.getID());
+      idAndName.addProperty("name", light.getName());
+      lists.add(idAndName);
+    }
+    container.add("lists", lists);
+
+    return container;
   }
 }

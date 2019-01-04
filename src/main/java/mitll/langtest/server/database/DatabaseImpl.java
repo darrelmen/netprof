@@ -1173,16 +1173,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * @param userid
-   * @param typeToSection
    * @param projid
+   * @param typeToSection
    * @return
    * @paramx collator
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   public JsonObject getJsonScoreHistory(int userid,
+                                        int projid,
                                         Map<String, Collection<String>> typeToSection,
-                                        ExerciseSorter sorter,
-                                        int projid) {
+                                        ExerciseSorter sorter) {
 
     if (projid == -1) {
       projid = projectForUser(userid);

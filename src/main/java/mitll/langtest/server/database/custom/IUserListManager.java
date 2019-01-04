@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.database.custom;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
@@ -60,10 +61,7 @@ public interface IUserListManager {
   UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
                    int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter);
 
-  Collection<IUserListLight> getNamesForUser(int userid,
-                                             int projid,
-                                             boolean listsICreated,
-                                             boolean visitedLists);
+//  Collection<IUserListLight> getAllOrMineLight(int projid);
 
   Collection<IUserList> getSimpleListsForUser(int userid,
                                               int projid,
@@ -139,4 +137,6 @@ public interface IUserListManager {
   void update(UserList userList);
 
   boolean updateProject(int oldID, int newprojid);
+
+  JsonObject getListsJson(int userID, int projid, boolean isQuiz);
 }
