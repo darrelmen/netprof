@@ -423,8 +423,8 @@ public class ListenViewHelper<T extends TurnPanel>
     List<String> speakers = dialog.getSpeakers();
     //logger.info("speakers " + speakers);
 
-    Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
-    String middle = speakers.get(1);
+//    Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
+//    String middle = speakers.get(1);
     // List<ClientExercise> middleTurns = speakerToEx.get(middle);
 
     String left = speakers.get(0);
@@ -947,17 +947,10 @@ public class ListenViewHelper<T extends TurnPanel>
    * @see #playStopped
    */
   void currentTurnPlayEnded(boolean wasRecording) {
-<<<<<<<HEAD:
-    src / main / java / mitll / langtest / client / dialog / ListenViewHelper.java
     if (DEBUG) {
       logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
     }
 
-=======
-    if (DEBUG || true)
-      logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
->>>>>>>development:
-    src / main / java / mitll / langtest / client / banner / ListenViewHelper.java
     if (gotTurnClick) {
       gotTurnClick = false;
     } else {
