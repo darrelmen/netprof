@@ -39,7 +39,6 @@ import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.services.ListServiceImpl;
 import mitll.langtest.shared.custom.IUserList;
-import mitll.langtest.shared.custom.IUserListLight;
 import mitll.langtest.shared.custom.IUserListWithIDs;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -87,6 +86,7 @@ public interface IUserListManager {
 
 
   UserList<CommonShell> getUserListByID(int id);
+  List<CommonExercise> getCommonExercisesOnList(int projid, int id);
 
   UserList<CommonShell> getSimpleUserListByID(int id);
 

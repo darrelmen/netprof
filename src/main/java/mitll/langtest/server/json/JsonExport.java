@@ -110,19 +110,12 @@ public class JsonExport {
     JsonArray jsonArray = new JsonArray();
     Map<String, Collection<String>> typeToValues = new HashMap<>();
 
-    Collection<SectionNode> sectionNodesForTypes = sectionHelper.getSectionNodesForTypes();
+    // Collection<SectionNode> sectionNodesForTypes = sectionHelper.getSectionNodesForTypes();
 
     //logger.info("getContentAsJson : section nodes " + sectionNodesForTypes);
-    List<String> typeOrder = sectionHelper.getTypeOrder();
-    boolean semester = typeOrder.iterator().next().startsWith("Semester");
-    if (semester) {
-      logger.info("getContentAsJson first is semester - pashto???");
-    }
+    List<String> minimalTypeOrder = getMinimalTypeOrder();
 
-    int maxDepthToUse = semester ? MAX_DEPTH + 1 : MAX_DEPTH;
-    List<String> minimalTypeOrder = typeOrder.size() > maxDepthToUse ? typeOrder.subList(0, maxDepthToUse) : typeOrder;
-
-    for (SectionNode node : sectionNodesForTypes) {
+    for (SectionNode node : sectionHelper.getSectionNodesForTypes()) {
       String type = node.getType();
       //logger.info("\tgetContentAsJson type " + type + " : " + node.getName());
       typeToValues.put(type, Collections.singletonList(node.getName()));
@@ -132,6 +125,24 @@ public class JsonExport {
       jsonArray.add(jsonForNode);
     }
     return jsonArray;
+  }
+
+  public JsonArray getContentAsJsonFor(boolean removeMissingAudio, List<CommonExercise> exercises) {
+    return getJsonExerciseArray(
+        getFilteredExercises(removeMissingAudio, true, exercises),
+        getMinimalTypeOrder());
+  }
+
+  @NotNull
+  private List<String> getMinimalTypeOrder() {
+    List<String> typeOrder = sectionHelper.getTypeOrder();
+    boolean semester = typeOrder.iterator().next().startsWith("Semester");
+    if (semester) {
+      logger.info("getContentAsJson first is semester - pashto???");
+    }
+
+    int maxDepthToUse = semester ? MAX_DEPTH + 1 : MAX_DEPTH;
+    return typeOrder.size() > maxDepthToUse ? typeOrder.subList(0, maxDepthToUse) : typeOrder;
   }
 
   /**
@@ -186,7 +197,7 @@ public class JsonExport {
       boolean removeExercisesWithMissingAudio,
       boolean removeCantDecode,
       Collection<String> firstTypes) {
-    return getJsonArray(getFilteredExercises(typeToValues, removeExercisesWithMissingAudio, removeCantDecode), firstTypes);
+    return getJsonExerciseArray(getFilteredExercises(typeToValues, removeExercisesWithMissingAudio, removeCantDecode), firstTypes);
   }
 
   /**
@@ -196,22 +207,29 @@ public class JsonExport {
    * @return
    */
   @NotNull
-  private List<CommonExercise> getFilteredExercises(Map<String, Collection<String>> typeToValues, boolean removeExercisesWithMissingAudio, boolean removeCantDecode) {
+  private List<CommonExercise> getFilteredExercises(Map<String, Collection<String>> typeToValues,
+                                                    boolean removeExercisesWithMissingAudio, boolean removeCantDecode) {
     Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
 
     if (exercisesForState.isEmpty()) {
       logger.warn("getJsonForSelection: no exercises for selection " + typeToValues);
     }
 
+    return getFilteredExercises(removeExercisesWithMissingAudio, removeCantDecode, exercisesForState);
+  }
+
+  @NotNull
+  private List<CommonExercise> getFilteredExercises(boolean removeExercisesWithMissingAudio, boolean removeCantDecode,
+                                                    Collection<CommonExercise> exercisesForState) {
     List<CommonExercise> copy = new ArrayList<>(exercisesForState);
 
-    if (removeExercisesWithMissingAudio) {
-      Iterator<CommonExercise> iterator = copy.iterator();
-      for (; iterator.hasNext(); ) {
-        if (!iterator.next().hasRefAudio()) iterator.remove();
-      }
-    }
+    removeMissingAudio(removeExercisesWithMissingAudio, copy);
+    removeCantDecode(removeCantDecode, copy);
+    getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);
+    return copy;
+  }
 
+  private void removeCantDecode(boolean removeCantDecode, List<CommonExercise> copy) {
     if (removeCantDecode) {
 //      logger.info("getJsonForSelection before had " + exercisesForState.size());
       Iterator<CommonExercise> iterator = copy.iterator();
@@ -221,8 +239,15 @@ public class JsonExport {
       }
       //    logger.info("getJsonForSelection after  had " + exercisesForState.size());
     }
-    getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);
-    return copy;
+  }
+
+  private void removeMissingAudio(boolean removeExercisesWithMissingAudio, List<CommonExercise> copy) {
+    if (removeExercisesWithMissingAudio) {
+      Iterator<CommonExercise> iterator = copy.iterator();
+      for (; iterator.hasNext(); ) {
+        if (!iterator.next().hasRefAudio()) iterator.remove();
+      }
+    }
   }
 
   private ExerciseSorter getExerciseSorter() {
@@ -242,7 +267,7 @@ public class JsonExport {
    * @return
    * @see #getJsonForSelection
    */
-  private JsonArray getJsonArray(Collection<CommonExercise> copy, Collection<String> firstTypes) {
+  private JsonArray getJsonExerciseArray(Collection<CommonExercise> copy, Collection<String> firstTypes) {
     JsonArray exercises = new JsonArray();
     copy.forEach(commonExercise -> exercises.add(getJsonForExercise(commonExercise, firstTypes)));
     return exercises;
@@ -256,7 +281,7 @@ public class JsonExport {
    * @param exercise
    * @param firstTypes
    * @return
-   * @see #getJsonArray(Collection, Collection)
+   * @see #getJsonExerciseArray(Collection, Collection)
    */
   private <T extends CommonExercise> JsonObject getJsonForExercise(T exercise, Collection<String> firstTypes) {
     JsonObject ex = getJsonForCommonExercise(exercise, firstTypes);
@@ -345,13 +370,13 @@ public class JsonExport {
     //  if (addMeaning) ex.addProperty(MN, exercise.getMeaning());
 
     if (exercise.getDirectlyRelated().isEmpty()) {
-      ex.addProperty(CTID,  "");
+      ex.addProperty(CTID, "");
       ex.addProperty(CT, "");
       ex.addProperty(CTR, "");
     } else {
       ClientExercise next = exercise.getDirectlyRelated().iterator().next();
-      ex.addProperty(CTID,  next.getID());
-      ex.addProperty(CT,  next.getFLToShow());
+      ex.addProperty(CTID, next.getID());
+      ex.addProperty(CT, next.getFLToShow());
       ex.addProperty(CTR, next.getEnglish());
     }
 

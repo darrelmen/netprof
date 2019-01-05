@@ -1761,8 +1761,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     getAudioDAO().attachAudioToExercises(exercises, project.getLanguageEnum(), project.getID());
 
     {
-      String name = project.getName();
-      logger.info("attachAllAudio " + name + "/" + language +
+      logger.info("attachAllAudio " + project.getName() + "/" + language +
           " took " + (System.currentTimeMillis() - then) +
           " millis to attachAllAudio to " + exercises.size() + " exercises");
     }

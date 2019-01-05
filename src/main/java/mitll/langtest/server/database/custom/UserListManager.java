@@ -362,7 +362,6 @@ public class UserListManager implements IUserListManager {
 //  public Collection<IUserListLight> getAllOrMineLight(int projid) {
 //    return getUserListDAO().getAllOrMineLight(projid);
 //  }
-
   @Override
   public Collection<IUserList> getSimpleListsForUser(int userid,
                                                      int projid,
@@ -692,7 +691,6 @@ public class UserListManager implements IUserListManager {
    *
    * @param userListID
    * @param userExercise notional until now!
-
    * @see mitll.langtest.server.services.ListServiceImpl#newExercise
    * @see mitll.langtest.server.services.ListServiceImpl#addItemsToList
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
@@ -830,11 +828,20 @@ public class UserListManager implements IUserListManager {
     UserList<CommonShell> where = userListDAO.getWhere(id, true);
 
     if (where != null) {
-      Collection<Integer> exidsForList = userListExerciseJoinDAO.getExidsForList(id);
-      logger.info("getUserListByID found " + exidsForList.size() + " exids for list #" + id);
-      exidsForList.forEach(exid -> where.addExercise(databaseServices.getExercise(where.getProjid(), exid)));
+      final int projid = where.getProjid();
+      getCommonExercisesOnList(projid, id).forEach(where::addExercise);
     }
-    return where;//userListDAO.getWithExercises(id);
+    return where;
+  }
+
+  @NotNull
+  public List<CommonExercise> getCommonExercisesOnList(int projid, int id) {
+    Collection<Integer> exidsForList = userListExerciseJoinDAO.getExidsForList(id);
+    logger.info("getCommonExercisesOnList found " + exidsForList.size() + " exids for list #" + id);
+
+    List<CommonExercise> exercises = new ArrayList<>(exidsForList.size());
+    exidsForList.forEach(exid -> exercises.add(databaseServices.getExercise(projid, exid)));
+    return exercises;
   }
 
   @Override

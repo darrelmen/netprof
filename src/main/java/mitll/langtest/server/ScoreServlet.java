@@ -113,6 +113,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final boolean CONVERT_DECODE_TO_ALIGN = true;
   private static final String MESSAGE = "message";
   private static final String UTF_8 = "UTF-8";
+  public static final String LIST = "list";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -127,6 +128,7 @@ public class ScoreServlet extends DatabaseServlet {
     PHONE_REPORT,
     LIST,
     QUIZ,
+    CONTENT,
     UNKNOWN
   }
 
@@ -325,6 +327,10 @@ public class ScoreServlet extends DatabaseServlet {
           toReturn = db.getUserListManager().getListsJson(userID, projid, false);
         } else if (realRequest == GetRequest.QUIZ) {
           toReturn = db.getUserListManager().getListsJson(userID, projid, true);
+        } else if (realRequest == GetRequest.CONTENT) {
+          int listid = getListParam(queryString);
+          logger.info("list id " +listid);
+          toReturn =  getJsonForListContent(true, projid, listid);
         } else {
           toReturn.addProperty(ERROR, "unknown req " + queryString);
         }
@@ -342,6 +348,26 @@ public class ScoreServlet extends DatabaseServlet {
       db.logAndNotify(e);
       throw new IOException("doGet couldn't process request.", e);
     }
+  }
+
+  private int getListParam(String queryString) {
+    String[] split1 = queryString.split("&");
+    int listid=-1;
+    for (String arg:split1) {
+      String[] split = arg.split("=");
+      if (split.length == 2) {
+        String key = split[0];
+        if (key.equals(LIST)) {
+          String value = split[1];
+          try {
+            listid =Integer.parseInt(value);
+          } catch (NumberFormatException e) {
+            logger.warn("can't parse " + value);
+          }
+        }
+      }
+    }
+    return listid;
   }
 
   /**
@@ -844,7 +870,42 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet
    */
   private JsonObject getJsonNestedChapters(boolean removeExercisesWithMissingAudio, int projectid) {
+    JsonExport jsonExport = getJsonExport(removeExercisesWithMissingAudio, projectid);
 
+    long then2 = System.currentTimeMillis();
+
+    JsonObject JsonObject = new JsonObject();
+    {
+      JsonObject.add(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
+      long now2 = System.currentTimeMillis();
+      if (now2 - then2 > 1000) {
+        String language = getLanguage(projectid);
+        logger.warn("getJsonNestedChapters " + language + " getContentAsJson took " + (now2 - then2) + " millis");
+      }
+      addVersion(JsonObject, projectid);
+    }
+    return JsonObject;
+  }
+
+  private JsonObject getJsonForListContent(boolean removeExercisesWithMissingAudio, int projectid, int listid) {
+    JsonExport jsonExport = getJsonExport(removeExercisesWithMissingAudio, projectid);
+    long then = System.currentTimeMillis();
+
+    JsonObject JsonObject = new JsonObject();
+    {
+      List<CommonExercise> exercisesForList = db.getUserListManager().getCommonExercisesOnList(projectid, listid);
+      JsonObject.add(CONTENT, jsonExport.getContentAsJsonFor(removeExercisesWithMissingAudio, exercisesForList));
+      long now = System.currentTimeMillis();
+      if (now - then > 1000) {
+        String language = getLanguage(projectid);
+        logger.warn("getJsonNestedChapters " + language + " getContentAsJson took " + (now - then) + " millis");
+      }
+      addVersion(JsonObject, projectid);
+    }
+    return JsonObject;
+  }
+
+  private JsonExport getJsonExport(boolean removeExercisesWithMissingAudio, int projectid) {
     if (projectid == -1) {
       logger.error("getJsonNestedChapters project id is not defined : " + projectid);
     } else {
@@ -858,19 +919,7 @@ public class ScoreServlet extends DatabaseServlet {
       String language = getLanguage(projectid);
       logger.warn("getJsonNestedChapters " + language + " getJSONExport took " + (now - then) + " millis");
     }
-    then = now;
-
-    JsonObject JsonObject = new JsonObject();
-    {
-      JsonObject.add(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
-      now = System.currentTimeMillis();
-      if (now - then > 1000) {
-        String language = getLanguage(projectid);
-        logger.warn("getJsonNestedChapters " + language + " getContentAsJson took " + (now - then) + " millis");
-      }
-      addVersion(JsonObject, projectid);
-    }
-    return JsonObject;
+    return jsonExport;
   }
 
   private String getLanguage(int projectid) {
