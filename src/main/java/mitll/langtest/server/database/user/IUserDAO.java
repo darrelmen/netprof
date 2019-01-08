@@ -195,6 +195,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @param baseURL
    * @return
    * @see UserServiceImpl#changePasswordWithCurrent(String, String)
+   * @see ChangePasswordView#changePassword
    */
   boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword, String baseURL);
 

@@ -801,7 +801,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param newHashedPassword
    * @param baseURL
    * @return
-   * @see IUserDAO#changePassword
+   * @see #changePassword
+   * @see #changePasswordWithCurrent
    */
   private DBUser savePasswordAndGetUser(int id, String currentPassword, String newHashedPassword, String baseURL) {
     DBUser dbUser = lookupUser(id);
@@ -1860,6 +1861,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param baseURL
    * @return
    * @see mitll.langtest.server.services.UserServiceImpl#changePasswordWithCurrent
+   * @see ChangePasswordView#changePassword
    */
   public boolean changePasswordWithCurrent(int user, String currentHashPass, String newHashPass, String baseURL) {
     return savePasswordAndGetUser(user, currentHashPass, newHashPass, baseURL) != null;
