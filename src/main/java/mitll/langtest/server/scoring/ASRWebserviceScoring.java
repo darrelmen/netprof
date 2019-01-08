@@ -46,6 +46,7 @@ import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -849,13 +850,29 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return match;
   }
 
+  /**
+   * English dict is upper case for some reason.
+   *
+   * @param transcript
+   * @param transliteration
+   * @return
+   */
   private String getTokensForKaldi(String transcript, String transliteration) {
-    String cleaned = getTranscriptToPost(transcript, false);
+    String wordsFromPossibleProns = getTokensFromTranscript(transcript, transliteration);
+    return (languageEnum == Language.ENGLISH) ? wordsFromPossibleProns.toUpperCase() : wordsFromPossibleProns;
+  }
 
+  @NotNull
+  private String getTokensFromTranscript(String transcript, String transliteration) {
     List<WordAndProns> possibleProns = new ArrayList<>();
 
     // generate dictionary
-    getHydraDict(cleaned, transliteration, possibleProns);
+    getHydraDict(getTranscriptToPost(transcript, false), transliteration, possibleProns);
+    return getWordsFromPossibleProns(possibleProns);
+  }
+
+  @NotNull
+  private String getWordsFromPossibleProns(List<WordAndProns> possibleProns) {
     StringBuilder builder = new StringBuilder();
     possibleProns.forEach(wordAndProns -> builder.append(wordAndProns.getWord()).append(" "));
     return builder.toString().trim();
